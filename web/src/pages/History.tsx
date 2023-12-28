@@ -22,6 +22,9 @@ import HistoryCardView from "@/views/history/HistoryCardView";
 import HistoryTimelineView from "@/views/history/HistoryTimelineView";
 import { Button } from "@/components/ui/button";
 import { IoMdArrowBack } from "react-icons/io";
+import useOverlayState from "@/hooks/use-overlay-state";
+import { useNavigate } from "react-router-dom";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 const API_LIMIT = 200;
 
@@ -81,10 +84,24 @@ function History() {
     { revalidateOnFocus: false }
   );
 
+  const navigate = useNavigate();
   const [playback, setPlayback] = useState<TimelinePlayback | undefined>();
+  const [viewingPlayback, setViewingPlayback] = useOverlayState("timeline");
+  const setPlaybackState = useCallback(
+    (playback: TimelinePlayback | undefined) => {
+      if (playback == undefined) {
+        setPlayback(undefined);
+        navigate(-1);
+      } else {
+        setPlayback(playback);
+        setViewingPlayback(true);
+      }
+    },
+    [navigate]
+  );
 
-  const shouldAutoPlay = useMemo(() => {
-    return playback == undefined && window.innerWidth < 480;
+  const isMobile = useMemo(() => {
+    return window.innerWidth < 768;
   }, [playback]);
 
   const timelineCards: CardsData | never[] = useMemo(() => {
@@ -142,12 +159,13 @@ function History() {
   return (
     <>
       <div className="flex justify-between">
-        <div className="flex">
-          {playback != undefined && (
+        <div className="flex justify-start">
+          {viewingPlayback && (
             <Button
-              size="sm"
+              className="mt-2"
+              size="xs"
               variant="ghost"
-              onClick={() => setPlayback(undefined)}
+              onClick={() => setPlaybackState(undefined)}
             >
               <IoMdArrowBack className="w-6 h-6" />
             </Button>
@@ -186,26 +204,50 @@ function History() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <>
-        {playback == undefined && (
-          <HistoryCardView
-            timelineCards={timelineCards}
-            allPreviews={allPreviews}
-            isMobileView={shouldAutoPlay}
-            isValidating={isValidating}
-            isDone={isDone}
-            onNextPage={() => {
-              setSize(size + 1);
-            }}
-            onDelete={onDelete}
-            onItemSelected={(item) => setPlayback(item)}
-          />
-        )}
-        {playback != undefined && (
-          <HistoryTimelineView playback={playback} isMobile={shouldAutoPlay} />
-        )}
-      </>
+      <HistoryCardView
+        timelineCards={timelineCards}
+        allPreviews={allPreviews}
+        isMobile={isMobile}
+        isValidating={isValidating}
+        isDone={isDone}
+        onNextPage={() => {
+          setSize(size + 1);
+        }}
+        onDelete={onDelete}
+        onItemSelected={(item) => setPlaybackState(item)}
+      />
+      <TimelineViewer
+        playback={viewingPlayback ? playback : undefined}
+        isMobile={isMobile}
+        onClose={() => setPlaybackState(undefined)}
+      />
     </>
+  );
+}
+
+type TimelineViewerProps = {
+  playback: TimelinePlayback | undefined;
+  isMobile: boolean;
+  onClose: () => void;
+};
+
+function TimelineViewer({ playback, isMobile, onClose }: TimelineViewerProps) {
+  if (isMobile) {
+    return playback != undefined ? (
+      <div className="w-screen absolute left-0 top-20 bottom-0 bg-background z-50">
+        <HistoryTimelineView playback={playback} isMobile={isMobile} />
+      </div>
+    ) : null;
+  }
+
+  return (
+    <Dialog open={playback != undefined} onOpenChange={(_) => onClose()}>
+      <DialogContent className="w-3/5 max-w-full">
+        {playback && (
+          <HistoryTimelineView playback={playback} isMobile={isMobile} />
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 

@@ -92,8 +92,6 @@ export default function PreviewThumbnailPlayer({
             {
               threshold: 1.0,
               root: document.getElementById("pageRoot"),
-              // iOS has bug where poster is empty frame until video starts playing so playback needs to begin earlier
-              rootMargin: isSafari ? "10% 0px 25% 0px" : "0px",
             }
           );
           if (node) autoPlayObserver.current.observe(node);
@@ -132,7 +130,7 @@ export default function PreviewThumbnailPlayer({
           <VideoPlayer
             options={{
               preload: "auto",
-              autoplay: false,
+              autoplay: true,
               controls: false,
               muted: true,
               loadingSpinner: false,
@@ -146,6 +144,7 @@ export default function PreviewThumbnailPlayer({
             seekOptions={{}}
             onReady={(player) => {
               playerRef.current = player;
+              player.pause(); // autoplay + pause is required for iOS
               player.playbackRate(isSafari ? 2 : 8);
               player.currentTime(startTs - relevantPreview.start);
             }}

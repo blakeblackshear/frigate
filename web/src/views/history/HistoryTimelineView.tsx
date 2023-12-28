@@ -11,7 +11,7 @@ import {
   getTimelineIcon,
 } from "@/utils/timelineUtil";
 import { renderToStaticMarkup } from "react-dom/server";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 import Player from "video.js/dist/types/player";
 
@@ -41,6 +41,8 @@ export default function HistoryTimelineView({
   const [focusedItem, setFocusedItem] = useState<Timeline | undefined>(
     undefined
   );
+
+  const [seeking, setSeeking] = useState(false);
   const [timeToSeek, setTimeToSeek] = useState<number | undefined>(undefined);
 
   const annotationOffset = useMemo(() => {
@@ -66,7 +68,10 @@ export default function HistoryTimelineView({
     const startTime = date.getTime() / 1000;
     date.setHours(date.getHours() + 1);
     const endTime = date.getTime() / 1000;
-    return { start: startTime.toFixed(1), end: endTime.toFixed(1) };
+    return {
+      start: parseInt(startTime.toFixed(1)),
+      end: parseInt(endTime.toFixed(1)),
+    };
   }, [timelineTime]);
 
   const recordingParams = useMemo(() => {
@@ -85,7 +90,7 @@ export default function HistoryTimelineView({
       return "";
     }
 
-    const date = new Date(parseInt(playbackTimes.start) * 1000);
+    const date = new Date(playbackTimes.start * 1000);
     return `${apiHost}vod/${date.getFullYear()}-${
       date.getMonth() + 1
     }/${date.getDate()}/${date.getHours()}/${
@@ -129,41 +134,53 @@ export default function HistoryTimelineView({
     [annotationOffset, recordings, playerRef]
   );
 
-  const onScrubTime = (data: { time: Date }) => {
-    if (!hasRelevantPreview) {
+  const onScrubTime = useCallback(
+    (data: { time: Date }) => {
+      if (!hasRelevantPreview) {
+        return;
+      }
+
+      if (playerRef.current?.paused() == false) {
+        setScrubbing(true);
+        playerRef.current?.pause();
+      }
+
+      const seekTimestamp = data.time.getTime() / 1000;
+      const seekTime = seekTimestamp - playback.relevantPreview!!.start;
+      setTimeToSeek(Math.round(seekTime));
+    },
+    [scrubbing, playerRef]
+  );
+
+  const onStopScrubbing = useCallback(
+    (data: { time: Date }) => {
+      const playbackTime = data.time.getTime() / 1000;
+      playerRef.current?.currentTime(playbackTime - playbackTimes.start);
+      setScrubbing(false);
+      playerRef.current?.play();
+    },
+    [playerRef]
+  );
+
+  // handle seeking to next frame when seek is finished
+  useEffect(() => {
+    if (seeking) {
       return;
     }
 
-    if (!scrubbing) {
-      playerRef.current?.pause();
-      setScrubbing(true);
+    if (timeToSeek && timeToSeek != previewRef.current?.currentTime()) {
+      setSeeking(true);
+      previewRef.current?.currentTime(timeToSeek);
     }
-
-    const seekTimestamp = data.time.getTime() / 1000;
-    const seekTime = seekTimestamp - playback.relevantPreview!!.start;
-    if (timeToSeek != undefined) {
-      setTimeToSeek(seekTime);
-    } else {
-      setTimeToSeek(seekTime);
-      previewRef.current?.currentTime(seekTime);
-    }
-  };
-
-  const onSeeked = () => {
-    if (timeToSeek && playerRef.current?.currentTime() != timeToSeek) {
-      playerRef.current?.currentTime(timeToSeek);
-    }
-
-    setTimeToSeek(undefined);
-  };
+  }, [timeToSeek, seeking]);
 
   if (!config || !recordings) {
     return <ActivityIndicator />;
   }
 
   return (
-    <>
-      <div>
+    <div className="w-full">
+      <>
         <div
           className={`relative ${
             hasRelevantPreview && scrubbing ? "hidden" : "visible"
@@ -183,7 +200,7 @@ export default function HistoryTimelineView({
             seekOptions={{ forward: 10, backward: 5 }}
             onReady={(player) => {
               playerRef.current = player;
-              player.currentTime(timelineTime - parseInt(playbackTimes.start));
+              player.currentTime(timelineTime - playbackTimes.start);
               player.on("playing", () => {
                 setFocusedItem(undefined);
               });
@@ -219,7 +236,7 @@ export default function HistoryTimelineView({
               seekOptions={{}}
               onReady={(player) => {
                 previewRef.current = player;
-                player.on("seeked", onSeeked);
+                player.on("seeked", () => setSeeking(false));
               }}
               onDispose={() => {
                 previewRef.current = undefined;
@@ -227,36 +244,37 @@ export default function HistoryTimelineView({
             />
           </div>
         )}
-      </div>
+      </>
       <div className="m-1">
         {playback != undefined && (
           <ActivityScrubber
             items={timelineItemsToScrubber(playback.timelineItems)}
-            timeBars={[{ time: new Date(timelineTime * 1000), id: "playback" }]}
+            timeBars={
+              hasRelevantPreview
+                ? [{ time: new Date(timelineTime * 1000), id: "playback" }]
+                : []
+            }
             options={{
               ...(isMobile && {
-                start: new Date((timelineTime - 300) * 1000),
-                end: new Date((timelineTime + 300) * 1000),
+                start: new Date(
+                  Math.max(playbackTimes.start, timelineTime - 300) * 1000
+                ),
+                end: new Date(
+                  Math.min(playbackTimes.end, timelineTime + 300) * 1000
+                ),
               }),
               snap: null,
-              min: new Date(parseInt(playbackTimes.start) * 1000),
-              max: new Date(parseInt(playbackTimes.end) * 1000),
-              timeAxis: isMobile ? { scale: "minute" } : {},
+              min: new Date(playbackTimes.start * 1000),
+              max: new Date(playbackTimes.end * 1000),
+              timeAxis: isMobile ? { scale: "minute", step: 5 } : {},
             }}
             timechangeHandler={onScrubTime}
-            timechangedHandler={(data) => {
-              const playbackTime = data.time.getTime() / 1000;
-              playerRef.current?.currentTime(
-                playbackTime - parseInt(playbackTimes.start)
-              );
-              setScrubbing(false);
-              playerRef.current?.play();
-            }}
+            timechangedHandler={onStopScrubbing}
             selectHandler={onSelectItem}
           />
         )}
       </div>
-    </>
+    </div>
   );
 }
 

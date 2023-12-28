@@ -72,10 +72,10 @@ export default function HistoryCard({
           {timeline.camera.replaceAll("_", " ")}
         </div>
         <div className="my-2 text-sm font-medium">Activity:</div>
-        {Object.entries(timeline.entries).map(([_, entry]) => {
+        {Object.entries(timeline.entries).map(([_, entry], idx) => {
           return (
             <div
-              key={entry.timestamp}
+              key={idx}
               className="flex text-xs capitalize my-1 items-center"
             >
               {getTimelineIcon(entry)}

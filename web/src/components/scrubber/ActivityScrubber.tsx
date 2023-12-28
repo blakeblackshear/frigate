@@ -74,6 +74,7 @@ const domEvents: TimelineEventsWithMissing[] = [
 ];
 
 type ActivityScrubberProps = {
+  className?: string;
   items?: TimelineItem[];
   timeBars?: { time: DateType; id?: IdType | undefined }[];
   groups?: TimelineGroup[];
@@ -81,6 +82,7 @@ type ActivityScrubberProps = {
 } & TimelineEventsHandlers;
 
 function ActivityScrubber({
+  className,
   items,
   timeBars,
   groups,
@@ -159,7 +161,7 @@ function ActivityScrubber({
     return () => {
       timelineInstance.destroy();
     };
-  }, []);
+  }, [containerRef]);
 
   useEffect(() => {
     if (!timelineRef.current.timeline) {
@@ -184,7 +186,11 @@ function ActivityScrubber({
     if (items) timelineRef.current.timeline.setItems(items);
   }, [items, groups, options, currentTime, eventHandlers]);
 
-  return <div ref={containerRef} />;
+  return (
+    <div className={className || ""}>
+      <div ref={containerRef} />
+    </div>
+  );
 }
 
 export default ActivityScrubber;
