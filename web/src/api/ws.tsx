@@ -194,3 +194,24 @@ export function useRestart() {
   } = useWs("restart", "restart");
   return { payload, send };
 }
+
+export function useFrigateEvents() {
+  const {
+    value: { payload },
+  } = useWs(`events`, "");
+  return { payload };
+}
+
+export function useMotionActivity(camera: string) {
+  const {
+    value: { payload },
+  } = useWs(`${camera}/motion`, "");
+  return { payload };
+}
+
+export function useAudioActivity(camera: string) {
+  const {
+    value: { payload },
+  } = useWs(`${camera}/audio/rms`, "");
+  return { payload };
+}
