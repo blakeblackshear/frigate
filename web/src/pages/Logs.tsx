@@ -20,9 +20,11 @@ function Logs() {
   const [logService, setLogService] = useState<LogType>("frigate");
   const [logs, setLogs] = useState("frigate");
 
-  const { data: frigateLogs } = useSWR("logs/frigate");
-  const { data: go2rtcLogs } = useSWR("logs/go2rtc");
-  const { data: nginxLogs } = useSWR("logs/nginx");
+  const { data: frigateLogs } = useSWR("logs/frigate", {
+    refreshInterval: 1000,
+  });
+  const { data: go2rtcLogs } = useSWR("logs/go2rtc", { refreshInterval: 1000 });
+  const { data: nginxLogs } = useSWR("logs/nginx", { refreshInterval: 1000 });
 
   const handleCopyLogs = useCallback(() => {
     copy(logs);
