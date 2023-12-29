@@ -10,8 +10,6 @@ import useSWR from "swr";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import Heading from "@/components/ui/heading";
 import { Card } from "@/components/ui/card";
-import CameraImage from "@/components/camera/CameraImage";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
 import { AiOutlinePicture } from "react-icons/ai";
 import { FaWalking } from "react-icons/fa";
@@ -20,6 +18,7 @@ import { TbMovie } from "react-icons/tb";
 import MiniEventCard from "@/components/card/MiniEventCard";
 import { Event as FrigateEvent } from "@/types/event";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import DynamicCameraImage from "@/components/camera/DynamicCameraImage";
 
 export function Dashboard() {
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -96,12 +95,7 @@ function Camera({ camera }: { camera: CameraConfig }) {
     <>
       <Card>
         <a href={`/live/${camera.name}`}>
-          <AspectRatio
-            ratio={16 / 9}
-            className="bg-black flex justify-center items-center"
-          >
-            <CameraImage camera={camera.name} fitAspect={16 / 9} />
-          </AspectRatio>
+          <DynamicCameraImage aspect={16 / 9} camera={camera} />
           <div className="flex justify-between items-center">
             <div className="text-lg capitalize p-2">
               {camera.name.replaceAll("_", " ")}

@@ -10,18 +10,19 @@ import {
 import { produce, Draft } from "immer";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { FrigateConfig } from "@/types/frigateConfig";
+import { FrigateEvent } from "@/types/ws";
 
 type ReducerState = {
   [topic: string]: {
     lastUpdate: number;
-    payload: string;
+    payload: any;
     retain: boolean;
   };
 };
 
 type ReducerAction = {
   topic: string;
-  payload: string;
+  payload: any;
   retain: boolean;
 };
 
@@ -132,7 +133,7 @@ export function useWs(watchTopic: string, publishTopic: string) {
   const value = state[watchTopic] || { payload: null };
 
   const send = useCallback(
-    (payload: string, retain = false) => {
+    (payload: any, retain = false) => {
       if (readyState === ReadyState.OPEN) {
         sendJsonMessage({
           topic: publishTopic || watchTopic,
@@ -147,7 +148,10 @@ export function useWs(watchTopic: string, publishTopic: string) {
   return { value, send };
 }
 
-export function useDetectState(camera: string) {
+export function useDetectState(camera: string): {
+  payload: string;
+  send: (payload: string, retain?: boolean) => void;
+} {
   const {
     value: { payload },
     send,
@@ -155,7 +159,10 @@ export function useDetectState(camera: string) {
   return { payload, send };
 }
 
-export function useRecordingsState(camera: string) {
+export function useRecordingsState(camera: string): {
+  payload: string;
+  send: (payload: string, retain?: boolean) => void;
+} {
   const {
     value: { payload },
     send,
@@ -163,7 +170,10 @@ export function useRecordingsState(camera: string) {
   return { payload, send };
 }
 
-export function useSnapshotsState(camera: string) {
+export function useSnapshotsState(camera: string): {
+  payload: string;
+  send: (payload: string, retain?: boolean) => void;
+} {
   const {
     value: { payload },
     send,
@@ -171,7 +181,10 @@ export function useSnapshotsState(camera: string) {
   return { payload, send };
 }
 
-export function useAudioState(camera: string) {
+export function useAudioState(camera: string): {
+  payload: string;
+  send: (payload: string, retain?: boolean) => void;
+} {
   const {
     value: { payload },
     send,
@@ -179,7 +192,10 @@ export function useAudioState(camera: string) {
   return { payload, send };
 }
 
-export function usePtzCommand(camera: string) {
+export function usePtzCommand(camera: string): {
+  payload: string;
+  send: (payload: string, retain?: boolean) => void;
+} {
   const {
     value: { payload },
     send,
@@ -187,10 +203,34 @@ export function usePtzCommand(camera: string) {
   return { payload, send };
 }
 
-export function useRestart() {
+export function useRestart(): {
+  payload: string;
+  send: (payload: string, retain?: boolean) => void;
+} {
   const {
     value: { payload },
     send,
   } = useWs("restart", "restart");
   return { payload, send };
+}
+
+export function useFrigateEvents(): { payload: FrigateEvent } {
+  const {
+    value: { payload },
+  } = useWs(`events`, "");
+  return { payload };
+}
+
+export function useMotionActivity(camera: string): { payload: string } {
+  const {
+    value: { payload },
+  } = useWs(`${camera}/motion`, "");
+  return { payload };
+}
+
+export function useAudioActivity(camera: string): { payload: string } {
+  const {
+    value: { payload },
+  } = useWs(`${camera}/audio/rms`, "");
+  return { payload };
 }
