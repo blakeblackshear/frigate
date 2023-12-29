@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Heading from "@/components/ui/heading";
 import copy from "copy-to-clipboard";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import useSWR from "swr";
 
 const logTypes = ["frigate", "go2rtc", "nginx"] as const;
@@ -18,31 +18,27 @@ type LogType = (typeof logTypes)[number];
 
 function Logs() {
   const [logService, setLogService] = useState<LogType>("frigate");
-  const [logs, setLogs] = useState("frigate");
 
   const { data: frigateLogs } = useSWR("logs/frigate", {
     refreshInterval: 1000,
   });
   const { data: go2rtcLogs } = useSWR("logs/go2rtc", { refreshInterval: 1000 });
   const { data: nginxLogs } = useSWR("logs/nginx", { refreshInterval: 1000 });
+  const logs = useMemo(() => {
+    if (logService == "frigate") {
+      return frigateLogs;
+    } else if (logService == "go2rtc") {
+      return go2rtcLogs;
+    } else if (logService == "nginx") {
+      return nginxLogs;
+    } else {
+      return "unknown logs";
+    }
+  }, [logService, frigateLogs, go2rtcLogs, nginxLogs]);
 
   const handleCopyLogs = useCallback(() => {
     copy(logs);
   }, [logs]);
-
-  useEffect(() => {
-    switch (logService) {
-      case "frigate":
-        setLogs(frigateLogs);
-        break;
-      case "go2rtc":
-        setLogs(go2rtcLogs);
-        break;
-      case "nginx":
-        setLogs(nginxLogs);
-        break;
-    }
-  }, [frigateLogs, go2rtcLogs, nginxLogs, logService, setLogs]);
 
   return (
     <>
