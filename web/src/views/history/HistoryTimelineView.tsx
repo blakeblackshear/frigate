@@ -20,6 +20,7 @@ import React, {
 } from "react";
 import useSWR from "swr";
 import Player from "video.js/dist/types/player";
+import TimelineItemCard from "@/components/card/TimelineItemCard";
 
 type HistoryTimelineViewProps = {
   playback: TimelinePlayback;
@@ -262,71 +263,86 @@ function DesktopView({
 }: DesktopViewProps) {
   return (
     <div className="w-full">
-      <>
-        <div
-          className={`relative ${
-            hasRelevantPreview && scrubbing ? "hidden" : "visible"
-          }`}
-        >
-          <VideoPlayer
-            options={{
-              preload: "auto",
-              autoplay: true,
-              sources: [
-                {
-                  src: playbackUri,
-                  type: "application/vnd.apple.mpegurl",
-                },
-              ],
-            }}
-            seekOptions={{ forward: 10, backward: 5 }}
-            onReady={(player) => {
-              playerRef.current = player;
-              player.currentTime(timelineTime - playbackTimes.start);
-              player.on("playing", () => {
-                setFocusedItem(undefined);
-              });
-            }}
-            onDispose={() => {
-              playerRef.current = undefined;
-            }}
+      <div className="flex">
+        <>
+          <div
+            className={`relative ${
+              hasRelevantPreview && scrubbing ? "hidden" : "visible"
+            }`}
           >
-            {config && focusedItem ? (
-              <TimelineEventOverlay
-                timeline={focusedItem}
-                cameraConfig={config.cameras[playback.camera]}
-              />
-            ) : undefined}
-          </VideoPlayer>
-        </div>
-        {hasRelevantPreview && (
-          <div className={`${scrubbing ? "visible" : "hidden"}`}>
             <VideoPlayer
               options={{
                 preload: "auto",
-                autoplay: false,
-                controls: false,
-                muted: true,
-                loadingSpinner: false,
+                autoplay: true,
+                fluid: false,
+                height: "320",
                 sources: [
                   {
-                    src: `${playback.relevantPreview?.src}`,
-                    type: "video/mp4",
+                    src: playbackUri,
+                    type: "application/vnd.apple.mpegurl",
                   },
                 ],
               }}
-              seekOptions={{}}
+              seekOptions={{ forward: 10, backward: 5 }}
               onReady={(player) => {
-                previewRef.current = player;
-                player.on("seeked", () => setSeeking(false));
+                playerRef.current = player;
+                player.currentTime(timelineTime - playbackTimes.start);
+                player.on("playing", () => {
+                  setFocusedItem(undefined);
+                });
               }}
               onDispose={() => {
-                previewRef.current = undefined;
+                playerRef.current = undefined;
               }}
-            />
+            >
+              {config && focusedItem ? (
+                <TimelineEventOverlay
+                  timeline={focusedItem}
+                  cameraConfig={config.cameras[playback.camera]}
+                />
+              ) : undefined}
+            </VideoPlayer>
           </div>
-        )}
-      </>
+          {hasRelevantPreview && (
+            <div className={`${scrubbing ? "visible" : "hidden"}`}>
+              <VideoPlayer
+                options={{
+                  preload: "auto",
+                  autoplay: false,
+                  controls: false,
+                  muted: true,
+                  loadingSpinner: false,
+                  sources: [
+                    {
+                      src: `${playback.relevantPreview?.src}`,
+                      type: "video/mp4",
+                    },
+                  ],
+                }}
+                seekOptions={{}}
+                onReady={(player) => {
+                  previewRef.current = player;
+                  player.on("seeked", () => setSeeking(false));
+                }}
+                onDispose={() => {
+                  previewRef.current = undefined;
+                }}
+              />
+            </div>
+          )}
+        </>
+        <div className="px-2 w-full h-80 overflow-auto">
+          {playback.timelineItems.map((timeline) => {
+            return (
+              <TimelineItemCard
+                key={timeline.timestamp}
+                timeline={timeline}
+                relevantPreview={playback.relevantPreview}
+              />
+            );
+          })}
+        </div>
+      </div>
       <div className="m-1">
         {playback != undefined && (
           <ActivityScrubber
