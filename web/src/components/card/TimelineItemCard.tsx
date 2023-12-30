@@ -1,6 +1,9 @@
-import PreviewThumbnailPlayer from "../player/PreviewThumbnailPlayer";
-import { AspectRatio } from "../ui/aspect-ratio";
-import { Card, CardContent } from "../ui/card";
+import { getTimelineItemDescription } from "@/utils/timelineUtil";
+import { Button } from "../ui/button";
+import Logo from "../Logo";
+import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
+import useSWR from "swr";
+import { FrigateConfig } from "@/types/frigateConfig";
 
 type TimelineItemCardProps = {
   timeline: Timeline;
@@ -10,23 +13,34 @@ export default function TimelineItemCard({
   timeline,
   relevantPreview,
 }: TimelineItemCardProps) {
+  const { data: config } = useSWR<FrigateConfig>("config");
+
   return (
-    <Card className="bg-red-500">
-      <div className="flex justify-between h-24">
-        <div className="w-1/2">
-          <PreviewThumbnailPlayer
-            camera={timeline.camera}
-            relevantPreview={relevantPreview}
-            startTs={timeline.timestamp}
-            eventId={timeline.source_id}
-            isMobile={false}
-          />
+    <div className="relative m-2 flex h-24">
+      <div className="w-1/2 bg-black"></div>
+      <div className="px-1 w-1/2">
+        <div className="capitalize font-semibold text-sm">
+          {getTimelineItemDescription(timeline)}
         </div>
-        <div>
-          <div>{timeline.camera}</div>
-          <div>{timeline.data.label}</div>
+        <div className="text-sm">
+          {formatUnixTimestampToDateTime(timeline.timestamp, {
+            strftime_fmt:
+              config?.ui.time_format == "24hour" ? "%H:%M:%S" : "%I:%M:%S %p",
+            time_style: "medium",
+            date_style: "medium",
+          })}
         </div>
+        <Button
+          className="absolute bottom-0 right-0"
+          size="sm"
+          variant="secondary"
+        >
+          <div className="w-8 h-8">
+            <Logo />
+          </div>
+          +
+        </Button>
       </div>
-    </Card>
+    </div>
   );
 }
