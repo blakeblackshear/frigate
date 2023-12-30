@@ -11,7 +11,13 @@ import {
   getTimelineIcon,
 } from "@/utils/timelineUtil";
 import { renderToStaticMarkup } from "react-dom/server";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import useSWR from "swr";
 import Player from "video.js/dist/types/player";
 
@@ -177,6 +183,83 @@ export default function HistoryTimelineView({
     return <ActivityIndicator />;
   }
 
+  if (isMobile) {
+    return (
+      <MobileView
+        config={config}
+        playerRef={playerRef}
+        previewRef={previewRef}
+        playback={playback}
+        playbackUri={playbackUri}
+        playbackTimes={playbackTimes}
+        timelineTime={timelineTime}
+        hasRelevantPreview={hasRelevantPreview}
+        scrubbing={scrubbing}
+        focusedItem={focusedItem}
+        setFocusedItem={setFocusedItem}
+        setSeeking={setSeeking}
+        onSelectItem={onSelectItem}
+        onScrubTime={onScrubTime}
+        onStopScrubbing={onStopScrubbing}
+      />
+    );
+  }
+
+  return (
+    <DesktopView
+      config={config}
+      playerRef={playerRef}
+      previewRef={previewRef}
+      playback={playback}
+      playbackUri={playbackUri}
+      playbackTimes={playbackTimes}
+      timelineTime={timelineTime}
+      hasRelevantPreview={hasRelevantPreview}
+      scrubbing={scrubbing}
+      focusedItem={focusedItem}
+      setFocusedItem={setFocusedItem}
+      setSeeking={setSeeking}
+      onSelectItem={onSelectItem}
+      onScrubTime={onScrubTime}
+      onStopScrubbing={onStopScrubbing}
+    />
+  );
+}
+
+type DesktopViewProps = {
+  config: FrigateConfig;
+  playerRef: React.MutableRefObject<Player | undefined>;
+  previewRef: React.MutableRefObject<Player | undefined>;
+  playback: TimelinePlayback;
+  playbackUri: string;
+  playbackTimes: { start: number; end: number };
+  timelineTime: number;
+  hasRelevantPreview: boolean;
+  scrubbing: boolean;
+  focusedItem: Timeline | undefined;
+  setFocusedItem: (item: Timeline | undefined) => void;
+  setSeeking: (seeking: boolean) => void;
+  onSelectItem: ({ items }: { items: number[] }) => void;
+  onScrubTime: ({ time }: { time: Date }) => void;
+  onStopScrubbing: ({ time }: { time: Date }) => void;
+};
+function DesktopView({
+  config,
+  playerRef,
+  previewRef,
+  playback,
+  playbackUri,
+  playbackTimes,
+  timelineTime,
+  hasRelevantPreview,
+  scrubbing,
+  focusedItem,
+  setFocusedItem,
+  setSeeking,
+  onSelectItem,
+  onScrubTime,
+  onStopScrubbing,
+}: DesktopViewProps) {
   return (
     <div className="w-full">
       <>
@@ -254,18 +337,141 @@ export default function HistoryTimelineView({
                 : []
             }
             options={{
-              ...(isMobile && {
-                start: new Date(
-                  Math.max(playbackTimes.start, timelineTime - 300) * 1000
-                ),
-                end: new Date(
-                  Math.min(playbackTimes.end, timelineTime + 300) * 1000
-                ),
-              }),
               snap: null,
               min: new Date(playbackTimes.start * 1000),
               max: new Date(playbackTimes.end * 1000),
-              timeAxis: isMobile ? { scale: "minute", step: 5 } : {},
+            }}
+            timechangeHandler={onScrubTime}
+            timechangedHandler={onStopScrubbing}
+            selectHandler={onSelectItem}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+type MobileViewProps = {
+  config: FrigateConfig;
+  playerRef: React.MutableRefObject<Player | undefined>;
+  previewRef: React.MutableRefObject<Player | undefined>;
+  playback: TimelinePlayback;
+  playbackUri: string;
+  playbackTimes: { start: number; end: number };
+  timelineTime: number;
+  hasRelevantPreview: boolean;
+  scrubbing: boolean;
+  focusedItem: Timeline | undefined;
+  setFocusedItem: (item: Timeline | undefined) => void;
+  setSeeking: (seeking: boolean) => void;
+  onSelectItem: ({ items }: { items: number[] }) => void;
+  onScrubTime: ({ time }: { time: Date }) => void;
+  onStopScrubbing: ({ time }: { time: Date }) => void;
+};
+function MobileView({
+  config,
+  playerRef,
+  previewRef,
+  playback,
+  playbackUri,
+  playbackTimes,
+  timelineTime,
+  hasRelevantPreview,
+  scrubbing,
+  focusedItem,
+  setFocusedItem,
+  setSeeking,
+  onSelectItem,
+  onScrubTime,
+  onStopScrubbing,
+}: MobileViewProps) {
+  return (
+    <div className="w-full">
+      <>
+        <div
+          className={`relative ${
+            hasRelevantPreview && scrubbing ? "hidden" : "visible"
+          }`}
+        >
+          <VideoPlayer
+            options={{
+              preload: "auto",
+              autoplay: true,
+              sources: [
+                {
+                  src: playbackUri,
+                  type: "application/vnd.apple.mpegurl",
+                },
+              ],
+            }}
+            seekOptions={{ forward: 10, backward: 5 }}
+            onReady={(player) => {
+              playerRef.current = player;
+              player.currentTime(timelineTime - playbackTimes.start);
+              player.on("playing", () => {
+                setFocusedItem(undefined);
+              });
+            }}
+            onDispose={() => {
+              playerRef.current = undefined;
+            }}
+          >
+            {config && focusedItem ? (
+              <TimelineEventOverlay
+                timeline={focusedItem}
+                cameraConfig={config.cameras[playback.camera]}
+              />
+            ) : undefined}
+          </VideoPlayer>
+        </div>
+        {hasRelevantPreview && (
+          <div className={`${scrubbing ? "visible" : "hidden"}`}>
+            <VideoPlayer
+              options={{
+                preload: "auto",
+                autoplay: false,
+                controls: false,
+                muted: true,
+                loadingSpinner: false,
+                sources: [
+                  {
+                    src: `${playback.relevantPreview?.src}`,
+                    type: "video/mp4",
+                  },
+                ],
+              }}
+              seekOptions={{}}
+              onReady={(player) => {
+                previewRef.current = player;
+                player.on("seeked", () => setSeeking(false));
+              }}
+              onDispose={() => {
+                previewRef.current = undefined;
+              }}
+            />
+          </div>
+        )}
+      </>
+      <div className="m-1">
+        {playback != undefined && (
+          <ActivityScrubber
+            items={timelineItemsToScrubber(playback.timelineItems)}
+            timeBars={
+              hasRelevantPreview
+                ? [{ time: new Date(timelineTime * 1000), id: "playback" }]
+                : []
+            }
+            options={{
+              start: new Date(
+                Math.max(playbackTimes.start, timelineTime - 300) * 1000
+              ),
+              end: new Date(
+                Math.min(playbackTimes.end, timelineTime + 300) * 1000
+              ),
+              snap: null,
+              min: new Date(playbackTimes.start * 1000),
+              max: new Date(playbackTimes.end * 1000),
+              timeAxis: { scale: "minute", step: 5 },
             }}
             timechangeHandler={onScrubTime}
             timechangedHandler={onStopScrubbing}
