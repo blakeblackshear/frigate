@@ -214,10 +214,11 @@ function PreviewContent({
   } else {
     return (
       <>
-        <div className={`${getPreviewWidth(camera, config)}`}>
+        <div className="w-full">
           <VideoPlayer
             options={{
               preload: "auto",
+              aspectRatio: "16:9",
               autoplay: true,
               controls: false,
               muted: true,
@@ -263,12 +264,12 @@ function isCurrentHour(timestamp: number) {
 function getPreviewWidth(camera: string, config: FrigateConfig) {
   const detect = config.cameras[camera].detect;
 
-  if (detect.width / detect.height < 1.0) {
-    return "w-[120px]";
+  if (detect.width / detect.height < 1) {
+    return "w-1/2";
   }
 
-  if (detect.width / detect.height < 1.4) {
-    return "w-[208px]";
+  if (detect.width / detect.height < 16 / 9) {
+    return "w-2/3";
   }
 
   return "w-full";
