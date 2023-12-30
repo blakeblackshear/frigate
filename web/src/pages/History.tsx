@@ -242,7 +242,7 @@ function TimelineViewer({ playback, isMobile, onClose }: TimelineViewerProps) {
 
   return (
     <Dialog open={playback != undefined} onOpenChange={(_) => onClose()}>
-      <DialogContent className="w-3/5 max-w-full">
+      <DialogContent className="w-screen 2xl:w-4/5 max-w-full">
         {playback && (
           <HistoryTimelineView playback={playback} isMobile={isMobile} />
         )}
