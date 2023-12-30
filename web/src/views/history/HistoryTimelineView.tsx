@@ -106,14 +106,10 @@ export default function HistoryTimelineView({
   }, [playbackTimes]);
 
   const onSelectItem = useCallback(
-    (data: { items: number[] }) => {
-      if (data.items.length > 0) {
-        const selected = data.items[0];
-        setFocusedItem(
-          playback.timelineItems.find(
-            (timeline) => timeline.timestamp == selected
-          )
-        );
+    (timeline: Timeline | undefined) => {
+      if (timeline) {
+        setFocusedItem(timeline);
+        const selected = timeline.timestamp;
         playerRef.current?.pause();
 
         let seekSeconds = 0;
@@ -135,6 +131,8 @@ export default function HistoryTimelineView({
           return true;
         });
         playerRef.current?.currentTime(seekSeconds);
+      } else {
+        setFocusedItem(undefined);
       }
     },
     [annotationOffset, recordings, playerRef]
@@ -197,7 +195,6 @@ export default function HistoryTimelineView({
         hasRelevantPreview={hasRelevantPreview}
         scrubbing={scrubbing}
         focusedItem={focusedItem}
-        setFocusedItem={setFocusedItem}
         setSeeking={setSeeking}
         onSelectItem={onSelectItem}
         onScrubTime={onScrubTime}
@@ -218,7 +215,6 @@ export default function HistoryTimelineView({
       hasRelevantPreview={hasRelevantPreview}
       scrubbing={scrubbing}
       focusedItem={focusedItem}
-      setFocusedItem={setFocusedItem}
       setSeeking={setSeeking}
       onSelectItem={onSelectItem}
       onScrubTime={onScrubTime}
@@ -238,9 +234,8 @@ type DesktopViewProps = {
   hasRelevantPreview: boolean;
   scrubbing: boolean;
   focusedItem: Timeline | undefined;
-  setFocusedItem: (item: Timeline | undefined) => void;
   setSeeking: (seeking: boolean) => void;
-  onSelectItem: ({ items }: { items: number[] }) => void;
+  onSelectItem: (timeline: Timeline | undefined) => void;
   onScrubTime: ({ time }: { time: Date }) => void;
   onStopScrubbing: ({ time }: { time: Date }) => void;
 };
@@ -255,7 +250,6 @@ function DesktopView({
   hasRelevantPreview,
   scrubbing,
   focusedItem,
-  setFocusedItem,
   setSeeking,
   onSelectItem,
   onScrubTime,
@@ -275,7 +269,8 @@ function DesktopView({
                 preload: "auto",
                 autoplay: true,
                 fluid: false,
-                height: "320",
+                height: "608",
+                width: "1080",
                 sources: [
                   {
                     src: playbackUri,
@@ -288,7 +283,7 @@ function DesktopView({
                 playerRef.current = player;
                 player.currentTime(timelineTime - playbackTimes.start);
                 player.on("playing", () => {
-                  setFocusedItem(undefined);
+                  onSelectItem(undefined);
                 });
               }}
               onDispose={() => {
@@ -331,13 +326,14 @@ function DesktopView({
             </div>
           )}
         </>
-        <div className="px-2 w-full h-80 overflow-auto">
+        <div className="px-2 w-full h-[608px] overflow-auto">
           {playback.timelineItems.map((timeline) => {
             return (
               <TimelineItemCard
                 key={timeline.timestamp}
                 timeline={timeline}
                 relevantPreview={playback.relevantPreview}
+                onSelect={() => onSelectItem(timeline)}
               />
             );
           })}
@@ -346,7 +342,7 @@ function DesktopView({
       <div className="m-1">
         {playback != undefined && (
           <ActivityScrubber
-            items={timelineItemsToScrubber(playback.timelineItems)}
+            items={[]}
             timeBars={
               hasRelevantPreview
                 ? [{ time: new Date(timelineTime * 1000), id: "playback" }]
@@ -359,7 +355,16 @@ function DesktopView({
             }}
             timechangeHandler={onScrubTime}
             timechangedHandler={onStopScrubbing}
-            selectHandler={onSelectItem}
+            selectHandler={(data) => {
+              if (data.items.length > 0) {
+                const selected = data.items[0];
+                onSelectItem(
+                  playback.timelineItems.find(
+                    (timeline) => timeline.timestamp == selected
+                  )
+                );
+              }
+            }}
           />
         )}
       </div>
@@ -378,9 +383,8 @@ type MobileViewProps = {
   hasRelevantPreview: boolean;
   scrubbing: boolean;
   focusedItem: Timeline | undefined;
-  setFocusedItem: (item: Timeline | undefined) => void;
   setSeeking: (seeking: boolean) => void;
-  onSelectItem: ({ items }: { items: number[] }) => void;
+  onSelectItem: (timeline: Timeline | undefined) => void;
   onScrubTime: ({ time }: { time: Date }) => void;
   onStopScrubbing: ({ time }: { time: Date }) => void;
 };
@@ -395,7 +399,6 @@ function MobileView({
   hasRelevantPreview,
   scrubbing,
   focusedItem,
-  setFocusedItem,
   setSeeking,
   onSelectItem,
   onScrubTime,
@@ -425,7 +428,7 @@ function MobileView({
               playerRef.current = player;
               player.currentTime(timelineTime - playbackTimes.start);
               player.on("playing", () => {
-                setFocusedItem(undefined);
+                onSelectItem(undefined);
               });
             }}
             onDispose={() => {
@@ -491,7 +494,16 @@ function MobileView({
             }}
             timechangeHandler={onScrubTime}
             timechangedHandler={onStopScrubbing}
-            selectHandler={onSelectItem}
+            selectHandler={(data) => {
+              if (data.items.length > 0) {
+                const selected = data.items[0];
+                onSelectItem(
+                  playback.timelineItems.find(
+                    (timeline) => timeline.timestamp == selected
+                  )
+                );
+              }
+            }}
           />
         )}
       </div>

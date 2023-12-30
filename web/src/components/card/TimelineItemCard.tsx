@@ -4,21 +4,51 @@ import Logo from "../Logo";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
+import VideoPlayer from "../player/VideoPlayer";
+import { Card } from "../ui/card";
 
 type TimelineItemCardProps = {
   timeline: Timeline;
   relevantPreview: Preview | undefined;
+  onSelect: () => void;
 };
 export default function TimelineItemCard({
   timeline,
   relevantPreview,
+  onSelect,
 }: TimelineItemCardProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
   return (
-    <div className="relative m-2 flex h-24">
-      <div className="w-1/2 bg-black"></div>
-      <div className="px-1 w-1/2">
+    <Card className="relative m-2 flex h-32 cursor-pointer" onClick={onSelect}>
+      <div className="w-1/2 p-2">
+        {relevantPreview && (
+          <VideoPlayer
+            options={{
+              preload: "auto",
+              height: "114",
+              width: "202",
+              autoplay: true,
+              controls: false,
+              fluid: false,
+              muted: true,
+              loadingSpinner: false,
+              sources: [
+                {
+                  src: `${relevantPreview.src}`,
+                  type: "video/mp4",
+                },
+              ],
+            }}
+            seekOptions={{}}
+            onReady={(player) => {
+              player.pause(); // autoplay + pause is required for iOS
+              player.currentTime(timeline.timestamp - relevantPreview.start);
+            }}
+          />
+        )}
+      </div>
+      <div className="px-2 py-1 w-1/2">
         <div className="capitalize font-semibold text-sm">
           {getTimelineItemDescription(timeline)}
         </div>
@@ -31,7 +61,7 @@ export default function TimelineItemCard({
           })}
         </div>
         <Button
-          className="absolute bottom-0 right-0"
+          className="absolute bottom-1 right-1"
           size="sm"
           variant="secondary"
         >
@@ -41,6 +71,6 @@ export default function TimelineItemCard({
           +
         </Button>
       </div>
-    </div>
+    </Card>
   );
 }
