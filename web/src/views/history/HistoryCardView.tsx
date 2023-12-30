@@ -112,7 +112,7 @@ export default function HistoryCardView({
                               <HistoryCard
                                 key={key}
                                 timeline={timeline}
-                                shouldAutoPlay={isMobile}
+                                isMobile={isMobile}
                                 relevantPreview={relevantPreview}
                                 onClick={() => {
                                   onItemSelected({

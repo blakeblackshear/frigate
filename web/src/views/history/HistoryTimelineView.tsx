@@ -110,7 +110,6 @@ export default function HistoryTimelineView({
         playerRef.current?.pause();
 
         let seekSeconds = 0;
-        console.log("recordings are " + recordings?.length);
         (recordings || []).every((segment) => {
           // if the next segment is past the desired time, stop calculating
           if (segment.start_time > selected) {

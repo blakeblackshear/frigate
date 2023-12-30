@@ -1,21 +1,25 @@
 import {
+  LuCamera,
+  LuCar,
+  LuCat,
   LuCircle,
   LuCircleDot,
   LuDog,
   LuEar,
-  LuFocus,
   LuPackage,
   LuPersonStanding,
   LuPlay,
   LuPlayCircle,
   LuTruck,
 } from "react-icons/lu";
+import { GiDeer } from "react-icons/gi";
 import { IoMdExit } from "react-icons/io";
 import {
   MdFaceUnlock,
   MdOutlineLocationOn,
   MdOutlinePictureInPictureAlt,
 } from "react-icons/md";
+import { FaBicycle } from "react-icons/fa";
 
 export function getTimelineIcon(timelineItem: Timeline) {
   switch (timelineItem.class_type) {
@@ -61,14 +65,22 @@ export function getTimelineIcon(timelineItem: Timeline) {
  */
 export function getTimelineDetectionIcon(timelineItem: Timeline) {
   switch (timelineItem.data.label) {
-    case "person":
-      return <LuPersonStanding className="w-4 mr-1" />;
+    case "bicycle":
+      return <FaBicycle className="w-4 mr-1" />;
+    case "car":
+      return <LuCar className="w-4 mr-1" />;
+    case "cat":
+      return <LuCat className="w-4 mr-1" />;
+    case "deer":
+      return <GiDeer className="w-4 mr-1" />;
     case "dog":
       return <LuDog className="w-4 mr-1" />;
     case "package":
       return <LuPackage className="w-4 mr-1" />;
+    case "person":
+      return <LuPersonStanding className="w-4 mr-1" />;
     default:
-      return <LuFocus className="w-4 mr-1" />;
+      return <LuCamera className="w-4 mr-1" />;
   }
 }
 

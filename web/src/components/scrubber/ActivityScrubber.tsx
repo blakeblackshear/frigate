@@ -129,11 +129,16 @@ function ActivityScrubber({
       return;
     }
 
+    const timelineOptions: TimelineOptions = {
+      ...defaultOptions,
+      ...options,
+    };
+
     const timelineInstance = new VisTimeline(
       divElement,
       items as DataItem[],
       groups as DataGroup[],
-      options
+      timelineOptions
     );
 
     if (timeBars) {
@@ -151,40 +156,10 @@ function ActivityScrubber({
 
     timelineRef.current.timeline = timelineInstance;
 
-    const timelineOptions: TimelineOptions = {
-      ...defaultOptions,
-      ...options,
-    };
-
-    timelineInstance.setOptions(timelineOptions);
-
     return () => {
       timelineInstance.destroy();
     };
   }, [containerRef]);
-
-  useEffect(() => {
-    if (!timelineRef.current.timeline) {
-      return;
-    }
-
-    // If the currentTime updates, adjust the scrubber's end date and max
-    // May not be applicable to all scrubbers, might want to just pass this in
-    // for any scrubbers that we want to dynamically move based on time
-    // const updatedTimeOptions: TimelineOptions = {
-    //   end: currentTime,
-    //   max: currentTime,
-    // };
-
-    const timelineOptions: TimelineOptions = {
-      ...defaultOptions,
-      // ...updatedTimeOptions,
-      ...options,
-    };
-
-    timelineRef.current.timeline.setOptions(timelineOptions);
-    if (items) timelineRef.current.timeline.setItems(items);
-  }, [items, groups, options, currentTime, eventHandlers]);
 
   return (
     <div className={className || ""}>
