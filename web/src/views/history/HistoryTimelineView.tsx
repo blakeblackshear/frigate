@@ -259,47 +259,45 @@ function DesktopView({
     <div className="w-full">
       <div className="flex">
         <>
-          <div
-            className={`relative ${
-              hasRelevantPreview && scrubbing ? "hidden" : "visible"
-            }`}
-          >
-            <VideoPlayer
-              options={{
-                preload: "auto",
-                autoplay: true,
-                fluid: false,
-                height: "608",
-                width: "1080",
-                sources: [
-                  {
-                    src: playbackUri,
-                    type: "application/vnd.apple.mpegurl",
-                  },
-                ],
-              }}
-              seekOptions={{ forward: 10, backward: 5 }}
-              onReady={(player) => {
-                playerRef.current = player;
-                player.currentTime(timelineTime - playbackTimes.start);
-                player.on("playing", () => {
-                  onSelectItem(undefined);
-                });
-              }}
-              onDispose={() => {
-                playerRef.current = undefined;
-              }}
+          <div className="w-2/3 bg-black flex justify-center items-center">
+            <div
+              className={`w-full relative ${
+                hasRelevantPreview && scrubbing ? "hidden" : "visible"
+              }`}
             >
-              {config && focusedItem ? (
-                <TimelineEventOverlay
-                  timeline={focusedItem}
-                  cameraConfig={config.cameras[playback.camera]}
-                />
-              ) : undefined}
-            </VideoPlayer>
-          </div>
-          {hasRelevantPreview && (
-            <div className={`${scrubbing ? "visible" : "hidden"}`}>
+              <VideoPlayer
+                options={{
+                  preload: "auto",
+                  autoplay: true,
+                  sources: [
+                    {
+                      src: playbackUri,
+                      type: "application/vnd.apple.mpegurl",
+                    },
+                  ],
+                }}
+                seekOptions={{ forward: 10, backward: 5 }}
+                onReady={(player) => {
+                  playerRef.current = player;
+                  player.currentTime(timelineTime - playbackTimes.start);
+                  player.on("playing", () => {
+                    onSelectItem(undefined);
+                  });
+                }}
+                onDispose={() => {
+                  playerRef.current = undefined;
+                }}
+              >
+                {config && focusedItem ? (
+                  <TimelineEventOverlay
+                    timeline={focusedItem}
+                    cameraConfig={config.cameras[playback.camera]}
+                  />
+                ) : undefined}
+              </VideoPlayer>
+            </div>
+            {hasRelevantPreview && (
+            <div className={`w-full ${scrubbing ? "visible" : "hidden"}`}>
               <VideoPlayer
                 options={{
                   preload: "auto",
@@ -325,8 +323,9 @@ function DesktopView({
               />
             </div>
           )}
+          </div>
         </>
-        <div className="px-2 w-full h-[608px] overflow-auto">
+        <div className="px-2 h-[608px] overflow-auto">
           {playback.timelineItems.map((timeline) => {
             return (
               <TimelineItemCard
