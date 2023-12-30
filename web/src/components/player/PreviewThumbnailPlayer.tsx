@@ -45,10 +45,16 @@ export default function PreviewThumbnailPlayer({
   }, []);
 
   const [visible, setVisible] = useState(false);
+  const [isInitiallyVisible, setIsInitiallyVisible] = useState(false);
 
   const onPlayback = useCallback(
     (isHovered: Boolean) => {
-      if (!relevantPreview || !playerRef.current) {
+      if (!relevantPreview) {
+        return;
+      }
+
+      if (!playerRef.current) {
+        setIsInitiallyVisible(true);
         return;
       }
 
@@ -121,7 +127,8 @@ export default function PreviewThumbnailPlayer({
       <PreviewContent
         playerRef={playerRef}
         relevantPreview={relevantPreview}
-        visible={visible}
+        isVisible={visible}
+        isInitiallyVisible={isInitiallyVisible}
         startTs={startTs}
         camera={camera}
         config={config}
@@ -140,7 +147,8 @@ type PreviewContentProps = {
   camera: string;
   relevantPreview: Preview | undefined;
   eventId: string;
-  visible: boolean;
+  isVisible: boolean;
+  isInitiallyVisible: boolean;
   startTs: number;
   isMobile: boolean;
   isSafari: boolean;
@@ -152,7 +160,8 @@ function PreviewContent({
   camera,
   relevantPreview,
   eventId,
-  visible,
+  isVisible,
+  isInitiallyVisible,
   startTs,
   isMobile,
   isSafari,
@@ -184,7 +193,7 @@ function PreviewContent({
     });
   }, [playerRef, touchStart]);
 
-  if (relevantPreview && !visible) {
+  if (relevantPreview && !isVisible) {
     return <div />;
   } else if (!relevantPreview) {
     if (isCurrentHour(startTs)) {
@@ -223,7 +232,11 @@ function PreviewContent({
             seekOptions={{}}
             onReady={(player) => {
               playerRef.current = player;
-              player.pause(); // autoplay + pause is required for iOS
+
+              if (!isInitiallyVisible) {
+                player.pause(); // autoplay + pause is required for iOS
+              }
+
               player.playbackRate(isSafari ? 2 : 8);
               player.currentTime(startTs - relevantPreview.start);
               if (isMobile && onClick) {
