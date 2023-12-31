@@ -19,7 +19,6 @@ import {
 import HistoryFilterPopover from "@/components/filter/HistoryFilterPopover";
 import useApiFilter from "@/hooks/use-api-filter";
 import HistoryCardView from "@/views/history/HistoryCardView";
-import HistoryTimelineView from "@/views/history/HistoryTimelineView";
 import { Button } from "@/components/ui/button";
 import { IoMdArrowBack } from "react-icons/io";
 import useOverlayState from "@/hooks/use-overlay-state";
@@ -78,10 +77,25 @@ function History() {
     setSize,
     isValidating,
   } = useSWRInfinite<HourlyTimeline>(getKey, timelineFetcher);
+
+  const previewTimes = useMemo(() => {
+    if (!timelinePages) {
+      return undefined;
+    }
+
+    const startDate = new Date();
+    startDate.setMinutes(0, 0, 0);
+
+    const endDate = new Date(timelinePages.at(-1)!!.end);
+    endDate.setHours(0, 0, 0, 0);
+    return {
+      start: startDate.getTime() / 1000,
+      end: endDate.getTime() / 1000,
+    };
+  }, [timelinePages]);
   const { data: allPreviews } = useSWR<Preview[]>(
-    timelinePages
-      ? `preview/all/start/${timelinePages?.at(0)
-          ?.start}/end/${timelinePages?.at(-1)?.end}`
+    previewTimes
+      ? `preview/all/start/${previewTimes.start}/end/${previewTimes.end}`
       : null,
     { revalidateOnFocus: false }
   );
