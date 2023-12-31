@@ -51,7 +51,6 @@ export default function JSMpegPlayer({
       return;
     }
 
-    console.log("player ref exists and creating video");
     const video = new JSMpeg.VideoElement(
       playerRef.current,
       url,

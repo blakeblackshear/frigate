@@ -9,7 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
 import { usePersistence } from "@/hooks/use-persistence";
+// @ts-expect-error we know this does not have types
+import MSEPlayer from "@/lib/MsePlayer";
 import JSMpegPlayer from "./JSMpegPlayer";
+import { baseUrl } from "@/api/baseUrl";
 
 const emptyObject = Object.freeze({});
 
@@ -33,7 +36,6 @@ export default function LivePlayer({
 
   const handleSetOption = useCallback(
     (id: string, value: boolean) => {
-      console.log("Setting " + id + " to " + value);
       const newOptions = { ...options, [id]: value };
       setOptions(newOptions);
     },
@@ -63,7 +65,29 @@ export default function LivePlayer({
       </div>
     );
   } else if (liveMode == "mse") {
-    return <div className="max-w-5xl">Not yet implemented</div>;
+    if ("MediaSource" in window || "ManagedMediaSource" in window) {
+      return (
+        <div className="max-w-5xl">
+          <MSEPlayer
+            mode="mse"
+            src={
+              new URL(
+                `${baseUrl.replace(/^http/, "ws")}live/webrtc/api/ws?src=${
+                  cameraConfig.live.stream_name
+                }`
+              )
+            }
+          />
+        </div>
+      );
+    } else {
+      return (
+        <div className="w-5xl text-center text-sm">
+          MSE is only supported on iOS 17.1+. You'll need to update if available
+          or use jsmpeg / webRTC streams. See the docs for more info.
+        </div>
+      );
+    }
   } else if (liveMode == "jsmpeg") {
     return (
       <div className={`max-w-[${cameraConfig.detect.width}px]`}>
