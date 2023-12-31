@@ -399,7 +399,9 @@ def auto_detect_hwaccel() -> str:
         logger.info("Automatically detected vaapi hwaccel for video decoding")
         return FFMPEG_HWACCEL_VAAPI
 
-    logger.warning("Did not detect hwaccel, using a GPU for accelerated video decoding is highly recommended")
+    logger.warning(
+        "Did not detect hwaccel, using a GPU for accelerated video decoding is highly recommended"
+    )
     return ""
 
 
