@@ -10,7 +10,7 @@
   "features": {
     "ghcr.io/devcontainers/features/common-utils:1": {}
   },
-  "forwardPorts": [5000, 5001, 5173, 1935, 8554, 8555],
+  "forwardPorts": [5000, 5001, 5173, 8554, 8555],
   "portsAttributes": {
     "5000": {
       "label": "NGINX",
@@ -22,10 +22,6 @@
     },
     "5173": {
       "label": "Vite Server",
-      "onAutoForward": "silent"
-    },
-    "1935": {
-      "label": "RTMP",
       "onAutoForward": "silent"
     },
     "8554": {
