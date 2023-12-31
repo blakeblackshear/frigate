@@ -599,8 +599,8 @@ class FfmpegConfig(FrigateBaseModel):
     global_args: Union[str, List[str]] = Field(
         default=FFMPEG_GLOBAL_ARGS_DEFAULT, title="Global FFmpeg arguments."
     )
-    hwaccel_args: Optional[Union[str, List[str]]] = Field(
-        default=None, title="FFmpeg hardware acceleration arguments."
+    hwaccel_args: Union[str, List[str]] = Field(
+        default="auto", title="FFmpeg hardware acceleration arguments."
     )
     input_args: Union[str, List[str]] = Field(
         default=FFMPEG_INPUT_ARGS_DEFAULT, title="FFmpeg input arguments."
@@ -1098,7 +1098,7 @@ class FrigateConfig(FrigateBaseModel):
                 config.objects.filters[attribute].min_score = 0.7
 
         # auto detect hwaccel args
-        if config.ffmpeg.hwaccel_args is None:
+        if config.ffmpeg.hwaccel_args == "auto":
             config.ffmpeg.hwaccel_args = auto_detect_hwaccel()
 
         # Global config to propagate down to camera level
