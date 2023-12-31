@@ -4,6 +4,8 @@ import {
   TimelineGroup,
   TimelineItem,
   TimelineOptions,
+  DateType,
+  IdType,
 } from "vis-timeline";
 import type { DataGroup, DataItem, TimelineEvents } from "vis-timeline/types";
 import "./scrubber.css";
@@ -72,13 +74,17 @@ const domEvents: TimelineEventsWithMissing[] = [
 ];
 
 type ActivityScrubberProps = {
-  items: TimelineItem[];
+  className?: string;
+  items?: TimelineItem[];
+  timeBars?: { time: DateType; id?: IdType | undefined }[];
   groups?: TimelineGroup[];
   options?: TimelineOptions;
 } & TimelineEventsHandlers;
 
 function ActivityScrubber({
+  className,
   items,
+  timeBars,
   groups,
   options,
   ...eventHandlers
@@ -123,12 +129,23 @@ function ActivityScrubber({
       return;
     }
 
+    const timelineOptions: TimelineOptions = {
+      ...defaultOptions,
+      ...options,
+    };
+
     const timelineInstance = new VisTimeline(
       divElement,
       items as DataItem[],
       groups as DataGroup[],
-      options
+      timelineOptions
     );
+
+    if (timeBars) {
+      timeBars.forEach((bar) => {
+        timelineInstance.addCustomTime(bar.time, bar.id);
+      });
+    }
 
     domEvents.forEach((event) => {
       const eventHandler = eventHandlers[`${event}Handler`];
@@ -139,42 +156,16 @@ function ActivityScrubber({
 
     timelineRef.current.timeline = timelineInstance;
 
-    const timelineOptions: TimelineOptions = {
-      ...defaultOptions,
-      ...options,
-    };
-
-    timelineInstance.setOptions(timelineOptions);
-
     return () => {
       timelineInstance.destroy();
     };
-  }, []);
+  }, [containerRef]);
 
-  useEffect(() => {
-    if (!timelineRef.current.timeline) {
-      return;
-    }
-
-    // If the currentTime updates, adjust the scrubber's end date and max
-    // May not be applicable to all scrubbers, might want to just pass this in
-    // for any scrubbers that we want to dynamically move based on time
-    // const updatedTimeOptions: TimelineOptions = {
-    //   end: currentTime,
-    //   max: currentTime,
-    // };
-
-    const timelineOptions: TimelineOptions = {
-      ...defaultOptions,
-      // ...updatedTimeOptions,
-      ...options,
-    };
-
-    timelineRef.current.timeline.setOptions(timelineOptions);
-    if (items) timelineRef.current.timeline.setItems(items);
-  }, [items, groups, options, currentTime, eventHandlers]);
-
-  return <div ref={containerRef} />;
+  return (
+    <div className={className || ""}>
+      <div ref={containerRef} />
+    </div>
+  );
 }
 
 export default ActivityScrubber;

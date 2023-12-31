@@ -1,7 +1,13 @@
 import { FrigateConfig } from "@/types/frigateConfig";
 import VideoPlayer from "./VideoPlayer";
 import useSWR from "swr";
-import { useCallback, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useApiHost } from "@/api";
 import Player from "video.js/dist/types/player";
 import { AspectRatio } from "../ui/aspect-ratio";
@@ -12,7 +18,8 @@ type PreviewPlayerProps = {
   relevantPreview?: Preview;
   startTs: number;
   eventId: string;
-  shouldAutoPlay: boolean;
+  isMobile: boolean;
+  onClick?: () => void;
 };
 
 type Preview = {
@@ -28,20 +35,26 @@ export default function PreviewThumbnailPlayer({
   relevantPreview,
   startTs,
   eventId,
-  shouldAutoPlay,
+  isMobile,
+  onClick,
 }: PreviewPlayerProps) {
   const { data: config } = useSWR("config");
   const playerRef = useRef<Player | null>(null);
-  const apiHost = useApiHost();
   const isSafari = useMemo(() => {
     return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
   }, []);
 
   const [visible, setVisible] = useState(false);
+  const [isInitiallyVisible, setIsInitiallyVisible] = useState(false);
 
   const onPlayback = useCallback(
     (isHovered: Boolean) => {
-      if (!relevantPreview || !playerRef.current) {
+      if (!relevantPreview) {
+        return;
+      }
+
+      if (!playerRef.current) {
+        setIsInitiallyVisible(true);
         return;
       }
 
@@ -78,7 +91,7 @@ export default function PreviewThumbnailPlayer({
         }
       }
 
-      if (shouldAutoPlay && !autoPlayObserver.current) {
+      if (isMobile && !autoPlayObserver.current) {
         try {
           autoPlayObserver.current = new IntersectionObserver(
             (entries) => {
@@ -92,8 +105,6 @@ export default function PreviewThumbnailPlayer({
             {
               threshold: 1.0,
               root: document.getElementById("pageRoot"),
-              // iOS has bug where poster is empty frame until video starts playing so playback needs to begin earlier
-              rootMargin: isSafari ? "10% 0px 25% 0px" : "0px",
             }
           );
           if (node) autoPlayObserver.current.observe(node);
@@ -105,20 +116,95 @@ export default function PreviewThumbnailPlayer({
     [preloadObserver, autoPlayObserver, onPlayback]
   );
 
-  let content;
+  return (
+    <AspectRatio
+      ref={relevantPreview ? inViewRef : null}
+      ratio={16 / 9}
+      className="bg-black flex justify-center items-center"
+      onMouseEnter={() => onPlayback(true)}
+      onMouseLeave={() => onPlayback(false)}
+    >
+      <PreviewContent
+        playerRef={playerRef}
+        relevantPreview={relevantPreview}
+        isVisible={visible}
+        isInitiallyVisible={isInitiallyVisible}
+        startTs={startTs}
+        camera={camera}
+        config={config}
+        eventId={eventId}
+        isMobile={isMobile}
+        isSafari={isSafari}
+        onClick={onClick}
+      />
+    </AspectRatio>
+  );
+}
 
-  if (relevantPreview && !visible) {
-    content = <div />;
+type PreviewContentProps = {
+  playerRef: React.MutableRefObject<Player | null>;
+  config: FrigateConfig;
+  camera: string;
+  relevantPreview: Preview | undefined;
+  eventId: string;
+  isVisible: boolean;
+  isInitiallyVisible: boolean;
+  startTs: number;
+  isMobile: boolean;
+  isSafari: boolean;
+  onClick?: () => void;
+};
+function PreviewContent({
+  playerRef,
+  config,
+  camera,
+  relevantPreview,
+  eventId,
+  isVisible,
+  isInitiallyVisible,
+  startTs,
+  isMobile,
+  isSafari,
+  onClick,
+}: PreviewContentProps) {
+  const apiHost = useApiHost();
+
+  // handle touchstart -> touchend as click
+  const [touchStart, setTouchStart] = useState(0);
+  const handleTouchStart = useCallback(() => {
+    setTouchStart(new Date().getTime());
+  }, []);
+  useEffect(() => {
+    if (!isMobile || !playerRef.current || !onClick) {
+      return;
+    }
+
+    playerRef.current.on("touchend", () => {
+      if (!onClick) {
+        return;
+      }
+
+      const touchEnd = new Date().getTime();
+
+      // consider tap less than 500 ms
+      if (touchEnd - touchStart < 500) {
+        onClick();
+      }
+    });
+  }, [playerRef, touchStart]);
+
+  if (relevantPreview && !isVisible) {
+    return <div />;
   } else if (!relevantPreview) {
     if (isCurrentHour(startTs)) {
-      content = (
+      return (
         <img
           className={`${getPreviewWidth(camera, config)}`}
           src={`${apiHost}api/preview/${camera}/${startTs}/thumbnail.jpg`}
         />
       );
     } else {
-      content = (
+      return (
         <img
           className="w-[160px]"
           src={`${apiHost}api/events/${eventId}/thumbnail.jpg`}
@@ -126,13 +212,13 @@ export default function PreviewThumbnailPlayer({
       );
     }
   } else {
-    content = (
+    return (
       <>
         <div className={`${getPreviewWidth(camera, config)}`}>
           <VideoPlayer
             options={{
               preload: "auto",
-              autoplay: false,
+              autoplay: true,
               controls: false,
               muted: true,
               loadingSpinner: false,
@@ -146,8 +232,16 @@ export default function PreviewThumbnailPlayer({
             seekOptions={{}}
             onReady={(player) => {
               playerRef.current = player;
+
+              if (!isInitiallyVisible) {
+                player.pause(); // autoplay + pause is required for iOS
+              }
+
               player.playbackRate(isSafari ? 2 : 8);
               player.currentTime(startTs - relevantPreview.start);
+              if (isMobile && onClick) {
+                player.on("touchstart", handleTouchStart);
+              }
             }}
             onDispose={() => {
               playerRef.current = null;
@@ -158,18 +252,6 @@ export default function PreviewThumbnailPlayer({
       </>
     );
   }
-
-  return (
-    <AspectRatio
-      ref={relevantPreview ? inViewRef : null}
-      ratio={16 / 9}
-      className="bg-black flex justify-center items-center"
-      onMouseEnter={() => onPlayback(true)}
-      onMouseLeave={() => onPlayback(false)}
-    >
-      {content}
-    </AspectRatio>
-  );
 }
 
 function isCurrentHour(timestamp: number) {
