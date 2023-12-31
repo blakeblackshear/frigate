@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+
 class VideoRTC extends HTMLElement {
   constructor() {
     super();
@@ -671,8 +673,21 @@ class VideoStream extends VideoRTC {
   }
 }
 
-customElements.define("video-stream", VideoStream);
+if (customElements.get("video-stream") == undefined) {
+  customElements.define("video-stream", VideoStream);
+}
 
-export default function MsePlayer({ src }) {
-  return <video-stream src={src} mode="mse" />;
+export default function MSEPlayer({ src }) {
+  const videoRef = useRef();
+
+  useEffect(() => {
+    if (!videoRef.current) {
+      return;
+    }
+
+    videoRef.current.mode = "mse";
+    videoRef.current.src = src;
+  }, [videoRef]);
+
+  return <video-stream ref={videoRef} />;
 }
