@@ -5,6 +5,7 @@ import {
   LuGithub,
   LuHardDrive,
   LuLifeBuoy,
+  LuList,
   LuMenu,
   LuMoon,
   LuMoreVertical,
@@ -133,6 +134,12 @@ function Header({ onToggleNavbar }: HeaderProps) {
                 <DropdownMenuItem>
                   <LuActivity className="mr-2 h-4 w-4" />
                   <span>System metrics</span>
+                </DropdownMenuItem>
+              </Link>
+              <Link to="/logs">
+                <DropdownMenuItem>
+                  <LuList className="mr-2 h-4 w-4" />
+                  <span>System logs</span>
                 </DropdownMenuItem>
               </Link>
             </DropdownMenuGroup>
