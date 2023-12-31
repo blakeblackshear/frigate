@@ -218,6 +218,7 @@ function History() {
       />
       <TimelineViewer
         timelineData={timelineCards}
+        allPreviews={allPreviews || []}
         playback={viewingPlayback ? playback : undefined}
         isMobile={isMobile}
         onClose={() => setPlaybackState(undefined)}
@@ -228,6 +229,7 @@ function History() {
 
 type TimelineViewerProps = {
   timelineData: CardsData | undefined;
+  allPreviews: Preview[];
   playback: TimelinePlayback | undefined;
   isMobile: boolean;
   onClose: () => void;
@@ -235,6 +237,7 @@ type TimelineViewerProps = {
 
 function TimelineViewer({
   timelineData,
+  allPreviews,
   playback,
   isMobile,
   onClose,
@@ -245,6 +248,7 @@ function TimelineViewer({
         {timelineData && (
           <HistoryTimelineView
             timelineData={timelineData}
+            allPreviews={allPreviews}
             initialPlayback={playback}
             isMobile={isMobile}
           />
@@ -259,6 +263,7 @@ function TimelineViewer({
         {timelineData && playback && (
           <HistoryTimelineView
             timelineData={timelineData}
+            allPreviews={allPreviews}
             initialPlayback={playback}
             isMobile={isMobile}
           />

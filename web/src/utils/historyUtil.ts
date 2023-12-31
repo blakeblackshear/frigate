@@ -105,6 +105,7 @@ export function getHourlyTimelineData(
 export function getTimelineHoursForDay(
   camera: string,
   cards: CardsData,
+  allPreviews: Preview[],
   timestamp: number
 ): TimelinePlayback[] {
   const now = new Date();
@@ -155,11 +156,15 @@ export function getTimelineHoursForDay(
           return [];
         })
       : [];
+    const relevantPreview = Object.values(allPreviews || []).find(
+      (preview) =>
+        preview.camera == camera && preview.start < start && preview.end > start
+    );
     data.push({
       camera,
       range: { start, end },
       timelineItems,
-      relevantPreview: undefined,
+      relevantPreview,
     });
     start = startDay.getTime() / 1000;
   }

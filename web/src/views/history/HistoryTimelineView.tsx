@@ -25,12 +25,14 @@ import { getTimelineHoursForDay } from "@/utils/historyUtil";
 
 type HistoryTimelineViewProps = {
   timelineData: CardsData;
+  allPreviews: Preview[];
   initialPlayback: TimelinePlayback;
   isMobile: boolean;
 };
 
 export default function HistoryTimelineView({
   timelineData,
+  allPreviews,
   initialPlayback,
   isMobile,
 }: HistoryTimelineViewProps) {
@@ -43,10 +45,6 @@ export default function HistoryTimelineView({
   );
 
   const [selectedPlayback, setSelectedPlayback] = useState(initialPlayback);
-  const hasRelevantPreview = useMemo(
-    () => selectedPlayback.relevantPreview != undefined,
-    [selectedPlayback]
-  );
 
   const playerRef = useRef<Player | undefined>(undefined);
   const previewRef = useRef<Player | undefined>(undefined);
@@ -65,10 +63,10 @@ export default function HistoryTimelineView({
     }
 
     return (
-      (config.cameras[selectedPlayback.camera]?.detect?.annotation_offset ||
-        0) / 1000
+      (config.cameras[initialPlayback.camera]?.detect?.annotation_offset || 0) /
+      1000
     );
-  }, [config, selectedPlayback]);
+  }, [config]);
 
   const timelineTime = useMemo(() => {
     if (!selectedPlayback || selectedPlayback.timelineItems.length == 0) {
@@ -139,7 +137,7 @@ export default function HistoryTimelineView({
 
   const onScrubTime = useCallback(
     (data: { time: Date }) => {
-      if (!hasRelevantPreview) {
+      if (!selectedPlayback.relevantPreview) {
         return;
       }
 
@@ -192,7 +190,6 @@ export default function HistoryTimelineView({
         playback={selectedPlayback}
         playbackUri={playbackUri}
         timelineTime={timelineTime}
-        hasRelevantPreview={hasRelevantPreview}
         scrubbing={scrubbing}
         focusedItem={focusedItem}
         setSeeking={setSeeking}
@@ -209,11 +206,11 @@ export default function HistoryTimelineView({
       playerRef={playerRef}
       previewRef={previewRef}
       timelineData={timelineData}
+      allPreviews={allPreviews}
       selectedPlayback={selectedPlayback}
       setSelectedPlayback={setSelectedPlayback}
       playbackUri={playbackUri}
       timelineTime={timelineTime}
-      hasRelevantPreview={hasRelevantPreview}
       scrubbing={scrubbing}
       focusedItem={focusedItem}
       setSeeking={setSeeking}
@@ -229,11 +226,11 @@ type DesktopViewProps = {
   playerRef: React.MutableRefObject<Player | undefined>;
   previewRef: React.MutableRefObject<Player | undefined>;
   timelineData: CardsData;
+  allPreviews: Preview[];
   selectedPlayback: TimelinePlayback;
   setSelectedPlayback: (timeline: TimelinePlayback) => void;
   playbackUri: string;
   timelineTime: number;
-  hasRelevantPreview: boolean;
   scrubbing: boolean;
   focusedItem: Timeline | undefined;
   setSeeking: (seeking: boolean) => void;
@@ -246,11 +243,11 @@ function DesktopView({
   playerRef,
   previewRef,
   timelineData,
+  allPreviews,
   selectedPlayback,
   setSelectedPlayback,
   playbackUri,
   timelineTime,
-  hasRelevantPreview,
   scrubbing,
   focusedItem,
   setSeeking,
@@ -258,14 +255,16 @@ function DesktopView({
   onScrubTime,
   onStopScrubbing,
 }: DesktopViewProps) {
-  const timelineStack =
-    selectedPlayback == undefined
-      ? []
-      : getTimelineHoursForDay(
-          selectedPlayback.camera,
-          timelineData,
-          timelineTime
-        );
+  const timelineStack = useMemo(
+    () =>
+      getTimelineHoursForDay(
+        selectedPlayback.camera,
+        timelineData,
+        allPreviews,
+        timelineTime
+      ),
+    []
+  );
 
   return (
     <div className="w-full">
@@ -274,7 +273,9 @@ function DesktopView({
           <div className="w-2/3 bg-black flex justify-center items-center">
             <div
               className={`w-full relative ${
-                hasRelevantPreview && scrubbing ? "hidden" : "visible"
+                selectedPlayback.relevantPreview != undefined && scrubbing
+                  ? "hidden"
+                  : "visible"
               }`}
             >
               <VideoPlayer
@@ -310,7 +311,7 @@ function DesktopView({
                 ) : undefined}
               </VideoPlayer>
             </div>
-            {hasRelevantPreview && (
+            {selectedPlayback.relevantPreview && (
               <div className={`w-full ${scrubbing ? "visible" : "hidden"}`}>
                 <VideoPlayer
                   options={{
@@ -352,7 +353,7 @@ function DesktopView({
           })}
         </div>
       </div>
-      <div className="m-1 max-h-96 overflow-auto">
+      <div className="m-1 max-h-72 2xl:max-h-80 3xl:max-h-96 overflow-auto">
         {timelineStack.map((timeline) => {
           const isSelected =
             timeline.range.start == selectedPlayback.range.start;
@@ -363,7 +364,7 @@ function DesktopView({
                 key={timeline.range.start}
                 items={[]}
                 timeBars={
-                  hasRelevantPreview
+                  isSelected && selectedPlayback.relevantPreview
                     ? [{ time: new Date(timelineTime * 1000), id: "playback" }]
                     : []
                 }
@@ -375,7 +376,7 @@ function DesktopView({
                 }}
                 timechangeHandler={onScrubTime}
                 timechangedHandler={onStopScrubbing}
-                doubleClickHandler={(data) => {
+                doubleClickHandler={() => {
                   setSelectedPlayback(timeline);
                 }}
                 selectHandler={(data) => {
@@ -404,7 +405,6 @@ type MobileViewProps = {
   playback: TimelinePlayback;
   playbackUri: string;
   timelineTime: number;
-  hasRelevantPreview: boolean;
   scrubbing: boolean;
   focusedItem: Timeline | undefined;
   setSeeking: (seeking: boolean) => void;
@@ -419,7 +419,6 @@ function MobileView({
   playback,
   playbackUri,
   timelineTime,
-  hasRelevantPreview,
   scrubbing,
   focusedItem,
   setSeeking,
@@ -432,7 +431,7 @@ function MobileView({
       <>
         <div
           className={`relative ${
-            hasRelevantPreview && scrubbing ? "hidden" : "visible"
+            playback.relevantPreview && scrubbing ? "hidden" : "visible"
           }`}
         >
           <VideoPlayer
@@ -466,7 +465,7 @@ function MobileView({
             ) : undefined}
           </VideoPlayer>
         </div>
-        {hasRelevantPreview && (
+        {playback.relevantPreview && (
           <div className={`${scrubbing ? "visible" : "hidden"}`}>
             <VideoPlayer
               options={{
@@ -499,7 +498,7 @@ function MobileView({
           <ActivityScrubber
             items={timelineItemsToScrubber(playback.timelineItems)}
             timeBars={
-              hasRelevantPreview
+              playback.relevantPreview
                 ? [{ time: new Date(timelineTime * 1000), id: "playback" }]
                 : []
             }
