@@ -51,13 +51,11 @@ export default function MobileTimelineView({
     );
   }, [config]);
 
-  const timelineTime = useMemo(() => {
-    if (!playback || playback.timelineItems.length == 0) {
-      return 0;
-    }
-
-    return playback.timelineItems.at(0)!!.timestamp;
-  }, [playback]);
+  const [timelineTime, setTimelineTime] = useState(
+    playback.timelineItems.length > 0
+      ? playback.timelineItems[0].timestamp
+      : playback.range.start
+  );
 
   const recordingParams = useMemo(() => {
     return {
@@ -129,14 +127,7 @@ export default function MobileTimelineView({
 
       const seekTimestamp = data.time.getTime() / 1000;
       const seekTime = seekTimestamp - playback.relevantPreview.start;
-      console.log(
-        "seeking to " +
-          seekTime +
-          " comparing " +
-          new Date(seekTimestamp * 1000) +
-          " - " +
-          new Date(playback.relevantPreview.start * 1000)
-      );
+      setTimelineTime(seekTimestamp);
       setTimeToSeek(Math.round(seekTime));
     },
     [scrubbing, playerRef, playback]

@@ -94,7 +94,7 @@ function ActivityScrubber({
     timeline: null,
   });
   const [currentTime, setCurrentTime] = useState(Date.now());
-  const [customTimes, setCustomTimes] = useState<
+  const [_, setCustomTimes] = useState<
     { id: IdType; time: DateType }[]
   >([]);
 

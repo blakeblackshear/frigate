@@ -118,6 +118,24 @@ export default function DesktopTimelineView({
     [annotationOffset, recordings, playerRef]
   );
 
+  const onPlayerProgressUpdate = useCallback(() => {
+    if (!playerRef.current?.currentTime) {
+      return;
+    }
+
+    const playerTime = playerRef.current.currentTime();
+
+    if (!playerTime) {
+      return;
+    }
+
+    const time = timelineTime - selectedPlayback.range.start;
+
+    if (Math.round(playerTime) - time >= 5) {
+      setTimelineTime(selectedPlayback.range.start + playerTime);
+    }
+  }, [selectedPlayback, timelineTime]);
+
   // handle seeking to next frame when seek is finished
   useEffect(() => {
     if (seeking) {
@@ -130,7 +148,7 @@ export default function DesktopTimelineView({
     }
   }, [timeToSeek, seeking]);
 
-  // handle loading main playback when selected hour changes
+  // handle loading main / preview playback when selected hour changes
   useEffect(() => {
     if (!playerRef.current || !previewRef.current) {
       return;
@@ -147,12 +165,10 @@ export default function DesktopTimelineView({
       type: "application/vnd.apple.mpegurl",
     });
 
+    playerRef.current.off("timeupdate", onPlayerProgressUpdate);
+    playerRef.current.on("timeupdate", onPlayerProgressUpdate);
+
     if (selectedPlayback.relevantPreview) {
-      console.log(
-        `found relevant preview with start ${new Date(
-          selectedPlayback.relevantPreview.start * 1000
-        )} for ${new Date(selectedPlayback.range.start * 1000)}`
-      );
       previewRef.current.src({
         src: selectedPlayback.relevantPreview.src,
         type: selectedPlayback.relevantPreview.type,
@@ -197,6 +213,12 @@ export default function DesktopTimelineView({
                       type: "application/vnd.apple.mpegurl",
                     },
                   ],
+                  controlBar: {
+                    remainingTimeDisplay: false,
+                    progressControl: {
+                      seekBar: false,
+                    },
+                  },
                 }}
                 seekOptions={{ forward: 10, backward: 5 }}
                 onReady={(player) => {
@@ -210,9 +232,8 @@ export default function DesktopTimelineView({
                   } else {
                     player.currentTime(0);
                   }
-                  player.on("playing", () => {
-                    onSelectItem(undefined);
-                  });
+                  player.on("playing", () => onSelectItem(undefined));
+                  player.on("timeupdate", onPlayerProgressUpdate);
                 }}
                 onDispose={() => {
                   playerRef.current = undefined;

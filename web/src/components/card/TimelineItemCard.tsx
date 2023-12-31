@@ -20,7 +20,7 @@ export default function TimelineItemCard({
   const { data: config } = useSWR<FrigateConfig>("config");
 
   return (
-    <Card className="relative m-2 flex h-32 cursor-pointer" onClick={onSelect}>
+    <Card className="relative m-2 flex w-full h-32 cursor-pointer" onClick={onSelect}>
       <div className="w-1/2 p-2">
         {relevantPreview && (
           <VideoPlayer

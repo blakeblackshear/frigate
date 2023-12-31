@@ -186,8 +186,8 @@ function PreviewContent({
 
       const touchEnd = new Date().getTime();
 
-      // consider tap less than 500 ms
-      if (touchEnd - touchStart < 500) {
+      // consider tap less than 300 ms
+      if (touchEnd - touchStart < 300) {
         onClick();
       }
     });
