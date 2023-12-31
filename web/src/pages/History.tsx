@@ -25,6 +25,8 @@ import { IoMdArrowBack } from "react-icons/io";
 import useOverlayState from "@/hooks/use-overlay-state";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import MobileTimelineView from "@/views/history/MobileTimelineView";
+import DesktopTimelineView from "@/views/history/DesktopTimelineView";
 
 const API_LIMIT = 200;
 
@@ -245,14 +247,7 @@ function TimelineViewer({
   if (isMobile) {
     return playback != undefined ? (
       <div className="w-screen absolute left-0 top-20 bottom-0 bg-background z-50">
-        {timelineData && (
-          <HistoryTimelineView
-            timelineData={timelineData}
-            allPreviews={allPreviews}
-            initialPlayback={playback}
-            isMobile={isMobile}
-          />
-        )}
+        {timelineData && <MobileTimelineView playback={playback} />}
       </div>
     ) : null;
   }
@@ -261,11 +256,10 @@ function TimelineViewer({
     <Dialog open={playback != undefined} onOpenChange={(_) => onClose()}>
       <DialogContent className="md:max-w-2xl lg:max-w-4xl xl:max-w-6xl 2xl:max-w-7xl 3xl:max-w-[1720px]">
         {timelineData && playback && (
-          <HistoryTimelineView
+          <DesktopTimelineView
             timelineData={timelineData}
             allPreviews={allPreviews}
             initialPlayback={playback}
-            isMobile={isMobile}
           />
         )}
       </DialogContent>
