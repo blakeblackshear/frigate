@@ -137,7 +137,7 @@ cameras:
             - detect
 ```
 
-Now you should be able to start Frigate by running `docker compose up -d` from within the folder containing `docker-compose.yml`. Frigate should now be accessible at `server_ip:5000` and you can finish the configuration using the built-in configuration editor.
+Now you should be able to start Frigate by running `docker-compose up -d` from within the folder containing `docker-compose.yml`. Frigate should now be accessible at `server_ip:5000` and you can finish the configuration using the built-in configuration editor.
 
 ## Configuring Frigate
 
@@ -177,7 +177,7 @@ Now that you have a working camera configuration, you want to setup hardware acc
 
 Here is an example configuration with hardware acceleration configured to work with most Intel processors with an integrated GPU using the [preset](../configuration/ffmpeg_presets.md):
 
-`docker-compose.yml` (after modifying, you will need to run `docker compose up -d` to apply changes)
+`docker-compose.yml` (after modifying, you will need to run `docker-compose up -d` to apply changes)
 
 ```yaml
 version: "3.9"
@@ -206,7 +206,7 @@ cameras:
 
 By default, Frigate will use a single CPU detector. If you have a USB Coral, you will need to add a detectors section to your config.
 
-`docker-compose.yml` (after modifying, you will need to run `docker compose up -d` to apply changes)
+`docker-compose.yml` (after modifying, you will need to run `docker-compose up -d` to apply changes)
 
 ```yaml
 version: "3.9"
