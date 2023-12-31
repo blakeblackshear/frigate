@@ -21,6 +21,7 @@ import React, {
 import useSWR from "swr";
 import Player from "video.js/dist/types/player";
 import TimelineItemCard from "@/components/card/TimelineItemCard";
+import { getTimelineHoursForDay } from "@/utils/historyUtil";
 
 type HistoryTimelineViewProps = {
   playback: TimelinePlayback;
@@ -255,6 +256,9 @@ function DesktopView({
   onScrubTime,
   onStopScrubbing,
 }: DesktopViewProps) {
+  const timelineStack =
+    playback == undefined ? [] : getTimelineHoursForDay(timelineTime);
+
   return (
     <div className="w-full">
       <div className="flex">
@@ -297,32 +301,32 @@ function DesktopView({
               </VideoPlayer>
             </div>
             {hasRelevantPreview && (
-            <div className={`w-full ${scrubbing ? "visible" : "hidden"}`}>
-              <VideoPlayer
-                options={{
-                  preload: "auto",
-                  autoplay: false,
-                  controls: false,
-                  muted: true,
-                  loadingSpinner: false,
-                  sources: [
-                    {
-                      src: `${playback.relevantPreview?.src}`,
-                      type: "video/mp4",
-                    },
-                  ],
-                }}
-                seekOptions={{}}
-                onReady={(player) => {
-                  previewRef.current = player;
-                  player.on("seeked", () => setSeeking(false));
-                }}
-                onDispose={() => {
-                  previewRef.current = undefined;
-                }}
-              />
-            </div>
-          )}
+              <div className={`w-full ${scrubbing ? "visible" : "hidden"}`}>
+                <VideoPlayer
+                  options={{
+                    preload: "auto",
+                    autoplay: false,
+                    controls: false,
+                    muted: true,
+                    loadingSpinner: false,
+                    sources: [
+                      {
+                        src: `${playback.relevantPreview?.src}`,
+                        type: "video/mp4",
+                      },
+                    ],
+                  }}
+                  seekOptions={{}}
+                  onReady={(player) => {
+                    previewRef.current = player;
+                    player.on("seeked", () => setSeeking(false));
+                  }}
+                  onDispose={() => {
+                    previewRef.current = undefined;
+                  }}
+                />
+              </div>
+            )}
           </div>
         </>
         <div className="px-2 h-[608px] overflow-auto">
@@ -338,34 +342,42 @@ function DesktopView({
           })}
         </div>
       </div>
-      <div className="m-1">
-        {playback != undefined && (
-          <ActivityScrubber
-            items={[]}
-            timeBars={
-              hasRelevantPreview
-                ? [{ time: new Date(timelineTime * 1000), id: "playback" }]
-                : []
-            }
-            options={{
-              snap: null,
-              min: new Date(playbackTimes.start * 1000),
-              max: new Date(playbackTimes.end * 1000),
-            }}
-            timechangeHandler={onScrubTime}
-            timechangedHandler={onStopScrubbing}
-            selectHandler={(data) => {
-              if (data.items.length > 0) {
-                const selected = data.items[0];
-                onSelectItem(
-                  playback.timelineItems.find(
-                    (timeline) => timeline.timestamp == selected
-                  )
-                );
+      <div className="m-1 max-h-96 overflow-auto">
+        {timelineStack.map((range) => {
+          const isSelected = timelineTime > range.start && timelineTime < range.end;
+
+          return (
+            <div className={`${isSelected ? "border border-primary" : ""}`}>
+              <ActivityScrubber
+              key={range.start}
+              items={[]}
+              timeBars={
+                hasRelevantPreview
+                  ? [{ time: new Date(timelineTime * 1000), id: "playback" }]
+                  : []
               }
-            }}
-          />
-        )}
+              options={{
+                snap: null,
+                min: new Date(range.start * 1000),
+                max: new Date(range.end * 1000),
+                zoomable: false,
+              }}
+              timechangeHandler={onScrubTime}
+              timechangedHandler={onStopScrubbing}
+              selectHandler={(data) => {
+                if (data.items.length > 0) {
+                  const selected = data.items[0];
+                  onSelectItem(
+                    playback.timelineItems.find(
+                      (timeline) => timeline.timestamp == selected
+                    )
+                  );
+                }
+              }}
+            />
+            </div>
+          );
+        })}
       </div>
     </div>
   );

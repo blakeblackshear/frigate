@@ -101,3 +101,26 @@ export function getHourlyTimelineData(
 
   return cards;
 }
+
+export function getTimelineHoursForDay(timestamp: number) {
+  const now = new Date();
+  const data = [];
+  const startDay = new Date(timestamp * 1000);
+  startDay.setHours(0, 0, 0, 0);
+  let start = startDay.getTime() / 1000;
+  let end = 0;
+
+  for (let i = 0; i < 24; i++) {
+    startDay.setHours(startDay.getHours() + 1);
+
+    if (startDay > now) {
+      break;
+    }
+
+    end = startDay.getTime() / 1000;
+    data.push({ start, end });
+    start = startDay.getTime() / 1000;
+  }
+
+  return data.reverse();
+}
