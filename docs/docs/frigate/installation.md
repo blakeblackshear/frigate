@@ -295,7 +295,6 @@ docker run \
   --network=bridge \
   --privileged \
   --workdir=/opt/frigate \
-  -p 1935:1935 \
   -p 5000:5000 \
   -p 8554:8554 \
   -p 8555:8555 \
