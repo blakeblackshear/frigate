@@ -56,7 +56,7 @@ export default function DesktopTimelineView({
 
   const timelineTime = useMemo(() => {
     if (!selectedPlayback || selectedPlayback.timelineItems.length == 0) {
-      return 0;
+      return selectedPlayback.range.start;
     }
 
     return selectedPlayback.timelineItems.at(0)!!.timestamp;
@@ -134,14 +134,6 @@ export default function DesktopTimelineView({
 
       const seekTimestamp = data.time.getTime() / 1000;
       const seekTime = seekTimestamp - selectedPlayback.relevantPreview.start;
-      console.log(
-        "seeking to " +
-          seekTime +
-          " comparing " +
-          new Date(seekTimestamp * 1000) +
-          " - " +
-          new Date(selectedPlayback.relevantPreview.start * 1000)
-      );
       setTimeToSeek(Math.round(seekTime));
     },
     [scrubbing, playerRef, selectedPlayback]
@@ -214,6 +206,12 @@ export default function DesktopTimelineView({
                 options={{
                   preload: "auto",
                   autoplay: true,
+                  sources: [
+                    {
+                      src: playbackUri,
+                      type: "application/vnd.apple.mpegurl",
+                    },
+                  ],
                 }}
                 seekOptions={{ forward: 10, backward: 5 }}
                 onReady={(player) => {
