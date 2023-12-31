@@ -42,6 +42,11 @@ export default function DesktopTimelineView({
 
   const [seeking, setSeeking] = useState(false);
   const [timeToSeek, setTimeToSeek] = useState<number | undefined>(undefined);
+  const [timelineTime, setTimelineTime] = useState(
+    initialPlayback.timelineItems.length > 0
+      ? initialPlayback.timelineItems[0].timestamp
+      : initialPlayback.range.start
+  );
 
   const annotationOffset = useMemo(() => {
     if (!config) {
@@ -53,14 +58,6 @@ export default function DesktopTimelineView({
       1000
     );
   }, [config]);
-
-  const timelineTime = useMemo(() => {
-    if (!selectedPlayback || selectedPlayback.timelineItems.length == 0) {
-      return selectedPlayback.range.start;
-    }
-
-    return selectedPlayback.timelineItems.at(0)!!.timestamp;
-  }, [selectedPlayback]);
 
   const recordingParams = useMemo(() => {
     return {
@@ -121,36 +118,6 @@ export default function DesktopTimelineView({
     [annotationOffset, recordings, playerRef]
   );
 
-  const onScrubTime = useCallback(
-    (data: { time: Date }) => {
-      if (!selectedPlayback.relevantPreview) {
-        return;
-      }
-
-      if (playerRef.current?.paused() == false) {
-        setScrubbing(true);
-        playerRef.current?.pause();
-      }
-
-      const seekTimestamp = data.time.getTime() / 1000;
-      const seekTime = seekTimestamp - selectedPlayback.relevantPreview.start;
-      setTimeToSeek(Math.round(seekTime));
-    },
-    [scrubbing, playerRef, selectedPlayback]
-  );
-
-  const onStopScrubbing = useCallback(
-    (data: { time: Date }) => {
-      const playbackTime = data.time.getTime() / 1000;
-      playerRef.current?.currentTime(
-        playbackTime - selectedPlayback.range.start
-      );
-      setScrubbing(false);
-      playerRef.current?.play();
-    },
-    [selectedPlayback, playerRef]
-  );
-
   // handle seeking to next frame when seek is finished
   useEffect(() => {
     if (seeking) {
@@ -165,15 +132,33 @@ export default function DesktopTimelineView({
 
   // handle loading main playback when selected hour changes
   useEffect(() => {
-    if (!playerRef.current) {
+    if (!playerRef.current || !previewRef.current) {
       return;
     }
+
+    setTimelineTime(
+      selectedPlayback.timelineItems.length > 0
+        ? selectedPlayback.timelineItems[0].timestamp
+        : selectedPlayback.range.start
+    );
 
     playerRef.current.src({
       src: playbackUri,
       type: "application/vnd.apple.mpegurl",
     });
-  }, [playerRef, selectedPlayback]);
+
+    if (selectedPlayback.relevantPreview) {
+      console.log(
+        `found relevant preview with start ${new Date(
+          selectedPlayback.relevantPreview.start * 1000
+        )} for ${new Date(selectedPlayback.range.start * 1000)}`
+      );
+      previewRef.current.src({
+        src: selectedPlayback.relevantPreview.src,
+        type: selectedPlayback.relevantPreview.type,
+      });
+    }
+  }, [playerRef, previewRef, selectedPlayback]);
 
   const timelineStack = useMemo(
     () =>
@@ -181,7 +166,7 @@ export default function DesktopTimelineView({
         selectedPlayback.camera,
         timelineData,
         allPreviews,
-        timelineTime
+        selectedPlayback.range.start + 60
       ),
     []
   );
@@ -216,9 +201,15 @@ export default function DesktopTimelineView({
                 seekOptions={{ forward: 10, backward: 5 }}
                 onReady={(player) => {
                   playerRef.current = player;
-                  player.currentTime(
-                    timelineTime - selectedPlayback.range.start
-                  );
+
+                  if (selectedPlayback.timelineItems.length > 0) {
+                    player.currentTime(
+                      selectedPlayback.timelineItems[0].timestamp -
+                        selectedPlayback.range.start
+                    );
+                  } else {
+                    player.currentTime(0);
+                  }
                   player.on("playing", () => {
                     onSelectItem(undefined);
                   });
@@ -285,13 +276,18 @@ export default function DesktopTimelineView({
           return (
             <div
               key={timeline.range.start}
-              className={`${isSelected ? "border border-primary" : ""}`}
+              className={`p-1 ${isSelected ? "border border-primary" : ""}`}
             >
               <ActivityScrubber
                 items={[]}
                 timeBars={
                   isSelected && selectedPlayback.relevantPreview
-                    ? [{ time: new Date(timelineTime * 1000), id: "playback" }]
+                    ? [
+                        {
+                          time: new Date(timelineTime * 1000),
+                          id: "playback",
+                        },
+                      ]
                     : []
                 }
                 options={{
@@ -300,8 +296,30 @@ export default function DesktopTimelineView({
                   max: new Date(timeline.range.end * 1000),
                   zoomable: false,
                 }}
-                timechangeHandler={onScrubTime}
-                timechangedHandler={onStopScrubbing}
+                timechangeHandler={(data) => {
+                  if (!timeline.relevantPreview) {
+                    return;
+                  }
+
+                  if (playerRef.current?.paused() == false) {
+                    setScrubbing(true);
+                    playerRef.current?.pause();
+                  }
+
+                  const seekTimestamp = data.time.getTime() / 1000;
+                  const seekTime =
+                    seekTimestamp - timeline.relevantPreview.start;
+                  setTimelineTime(seekTimestamp);
+                  setTimeToSeek(Math.round(seekTime));
+                }}
+                timechangedHandler={(data) => {
+                  const playbackTime = data.time.getTime() / 1000;
+                  playerRef.current?.currentTime(
+                    playbackTime - timeline.range.start
+                  );
+                  setScrubbing(false);
+                  playerRef.current?.play();
+                }}
                 doubleClickHandler={() => {
                   setSelectedPlayback(timeline);
                 }}

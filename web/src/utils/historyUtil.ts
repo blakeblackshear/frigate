@@ -111,9 +111,19 @@ export function getTimelineHoursForDay(
   const now = new Date();
   const data: TimelinePlayback[] = [];
   const startDay = new Date(timestamp * 1000);
+  startDay.setHours(23, 59, 59, 999);
+  const dayEnd = startDay.getTime() / 1000;
   startDay.setHours(0, 0, 0, 0);
   let start = startDay.getTime() / 1000;
   let end = 0;
+
+  const relevantPreviews = allPreviews.filter((preview) => {
+    return (
+      preview.camera == camera &&
+      preview.start >= start &&
+      Math.floor(preview.end - 1) <= dayEnd
+    );
+  });
 
   const dayIdx = Object.keys(cards).find((day) => {
     if (parseInt(day) > start) {
@@ -156,12 +166,9 @@ export function getTimelineHoursForDay(
           return [];
         })
       : [];
-    const previewCheck = start + 30; // preview can start after the hour
-    const relevantPreview = Object.values(allPreviews || []).find(
+    const relevantPreview = relevantPreviews.find(
       (preview) =>
-        preview.camera == camera &&
-        preview.start < previewCheck &&
-        preview.end > previewCheck
+        Math.round(preview.start) >= start && Math.floor(preview.end) <= end
     );
     data.push({
       camera,
