@@ -24,12 +24,14 @@ import TimelineItemCard from "@/components/card/TimelineItemCard";
 import { getTimelineHoursForDay } from "@/utils/historyUtil";
 
 type HistoryTimelineViewProps = {
-  playback: TimelinePlayback;
+  timelineData: CardsData;
+  initialPlayback: TimelinePlayback;
   isMobile: boolean;
 };
 
 export default function HistoryTimelineView({
-  playback,
+  timelineData,
+  initialPlayback,
   isMobile,
 }: HistoryTimelineViewProps) {
   const apiHost = useApiHost();
@@ -40,7 +42,11 @@ export default function HistoryTimelineView({
     [config]
   );
 
-  const hasRelevantPreview = playback.relevantPreview != undefined;
+  const [selectedPlayback, setSelectedPlayback] = useState(initialPlayback);
+  const hasRelevantPreview = useMemo(
+    () => selectedPlayback.relevantPreview != undefined,
+    [selectedPlayback]
+  );
 
   const playerRef = useRef<Player | undefined>(undefined);
   const previewRef = useRef<Player | undefined>(undefined);
@@ -59,52 +65,44 @@ export default function HistoryTimelineView({
     }
 
     return (
-      (config.cameras[playback.camera]?.detect?.annotation_offset || 0) / 1000
+      (config.cameras[selectedPlayback.camera]?.detect?.annotation_offset ||
+        0) / 1000
     );
-  }, [config, playback]);
+  }, [config, selectedPlayback]);
 
   const timelineTime = useMemo(() => {
-    if (!playback) {
+    if (!selectedPlayback || selectedPlayback.timelineItems.length == 0) {
       return 0;
     }
 
-    return playback.timelineItems.at(0)!!.timestamp;
-  }, [playback]);
-  const playbackTimes = useMemo(() => {
-    const date = new Date(timelineTime * 1000);
-    date.setMinutes(0, 0, 0);
-    const startTime = date.getTime() / 1000;
-    date.setHours(date.getHours() + 1);
-    const endTime = date.getTime() / 1000;
-    return {
-      start: parseInt(startTime.toFixed(1)),
-      end: parseInt(endTime.toFixed(1)),
-    };
-  }, [timelineTime]);
+    return selectedPlayback.timelineItems.at(0)!!.timestamp;
+  }, [selectedPlayback]);
 
   const recordingParams = useMemo(() => {
     return {
-      before: playbackTimes.end,
-      after: playbackTimes.start,
+      before: selectedPlayback.range.end,
+      after: selectedPlayback.range.start,
     };
-  }, [playbackTimes]);
+  }, [selectedPlayback]);
   const { data: recordings } = useSWR<Recording[]>(
-    playback ? [`${playback.camera}/recordings`, recordingParams] : null,
+    selectedPlayback
+      ? [`${selectedPlayback.camera}/recordings`, recordingParams]
+      : null,
     { revalidateOnFocus: false }
   );
 
   const playbackUri = useMemo(() => {
-    if (!playback) {
+    if (!selectedPlayback) {
       return "";
     }
 
-    const date = new Date(playbackTimes.start * 1000);
+    const date = new Date(selectedPlayback.range.start * 1000);
     return `${apiHost}vod/${date.getFullYear()}-${
       date.getMonth() + 1
     }/${date.getDate()}/${date.getHours()}/${
-      playback.camera
+      selectedPlayback.camera
     }/${timezone.replaceAll("/", ",")}/master.m3u8`;
-  }, [playbackTimes]);
+  }, [selectedPlayback]);
 
   const onSelectItem = useCallback(
     (timeline: Timeline | undefined) => {
@@ -151,20 +149,22 @@ export default function HistoryTimelineView({
       }
 
       const seekTimestamp = data.time.getTime() / 1000;
-      const seekTime = seekTimestamp - playback.relevantPreview!!.start;
+      const seekTime = seekTimestamp - selectedPlayback.relevantPreview!!.start;
       setTimeToSeek(Math.round(seekTime));
     },
-    [scrubbing, playerRef]
+    [scrubbing, playerRef, selectedPlayback]
   );
 
   const onStopScrubbing = useCallback(
     (data: { time: Date }) => {
       const playbackTime = data.time.getTime() / 1000;
-      playerRef.current?.currentTime(playbackTime - playbackTimes.start);
+      playerRef.current?.currentTime(
+        playbackTime - selectedPlayback.range.start
+      );
       setScrubbing(false);
       playerRef.current?.play();
     },
-    [playerRef]
+    [selectedPlayback, playerRef]
   );
 
   // handle seeking to next frame when seek is finished
@@ -189,9 +189,8 @@ export default function HistoryTimelineView({
         config={config}
         playerRef={playerRef}
         previewRef={previewRef}
-        playback={playback}
+        playback={selectedPlayback}
         playbackUri={playbackUri}
-        playbackTimes={playbackTimes}
         timelineTime={timelineTime}
         hasRelevantPreview={hasRelevantPreview}
         scrubbing={scrubbing}
@@ -209,9 +208,10 @@ export default function HistoryTimelineView({
       config={config}
       playerRef={playerRef}
       previewRef={previewRef}
-      playback={playback}
+      timelineData={timelineData}
+      selectedPlayback={selectedPlayback}
+      setSelectedPlayback={setSelectedPlayback}
       playbackUri={playbackUri}
-      playbackTimes={playbackTimes}
       timelineTime={timelineTime}
       hasRelevantPreview={hasRelevantPreview}
       scrubbing={scrubbing}
@@ -228,9 +228,10 @@ type DesktopViewProps = {
   config: FrigateConfig;
   playerRef: React.MutableRefObject<Player | undefined>;
   previewRef: React.MutableRefObject<Player | undefined>;
-  playback: TimelinePlayback;
+  timelineData: CardsData;
+  selectedPlayback: TimelinePlayback;
+  setSelectedPlayback: (timeline: TimelinePlayback) => void;
   playbackUri: string;
-  playbackTimes: { start: number; end: number };
   timelineTime: number;
   hasRelevantPreview: boolean;
   scrubbing: boolean;
@@ -244,9 +245,10 @@ function DesktopView({
   config,
   playerRef,
   previewRef,
-  playback,
+  timelineData,
+  selectedPlayback,
+  setSelectedPlayback,
   playbackUri,
-  playbackTimes,
   timelineTime,
   hasRelevantPreview,
   scrubbing,
@@ -257,7 +259,13 @@ function DesktopView({
   onStopScrubbing,
 }: DesktopViewProps) {
   const timelineStack =
-    playback == undefined ? [] : getTimelineHoursForDay(timelineTime);
+    selectedPlayback == undefined
+      ? []
+      : getTimelineHoursForDay(
+          selectedPlayback.camera,
+          timelineData,
+          timelineTime
+        );
 
   return (
     <div className="w-full">
@@ -283,7 +291,9 @@ function DesktopView({
                 seekOptions={{ forward: 10, backward: 5 }}
                 onReady={(player) => {
                   playerRef.current = player;
-                  player.currentTime(timelineTime - playbackTimes.start);
+                  player.currentTime(
+                    timelineTime - selectedPlayback.range.start
+                  );
                   player.on("playing", () => {
                     onSelectItem(undefined);
                   });
@@ -295,7 +305,7 @@ function DesktopView({
                 {config && focusedItem ? (
                   <TimelineEventOverlay
                     timeline={focusedItem}
-                    cameraConfig={config.cameras[playback.camera]}
+                    cameraConfig={config.cameras[selectedPlayback.camera]}
                   />
                 ) : undefined}
               </VideoPlayer>
@@ -311,7 +321,7 @@ function DesktopView({
                     loadingSpinner: false,
                     sources: [
                       {
-                        src: `${playback.relevantPreview?.src}`,
+                        src: `${selectedPlayback.relevantPreview?.src}`,
                         type: "video/mp4",
                       },
                     ],
@@ -330,12 +340,12 @@ function DesktopView({
           </div>
         </>
         <div className="px-2 h-[608px] overflow-auto">
-          {playback.timelineItems.map((timeline) => {
+          {selectedPlayback.timelineItems.map((timeline) => {
             return (
               <TimelineItemCard
                 key={timeline.timestamp}
                 timeline={timeline}
-                relevantPreview={playback.relevantPreview}
+                relevantPreview={selectedPlayback.relevantPreview}
                 onSelect={() => onSelectItem(timeline)}
               />
             );
@@ -343,38 +353,42 @@ function DesktopView({
         </div>
       </div>
       <div className="m-1 max-h-96 overflow-auto">
-        {timelineStack.map((range) => {
-          const isSelected = timelineTime > range.start && timelineTime < range.end;
+        {timelineStack.map((timeline) => {
+          const isSelected =
+            timeline.range.start == selectedPlayback.range.start;
 
           return (
             <div className={`${isSelected ? "border border-primary" : ""}`}>
               <ActivityScrubber
-              key={range.start}
-              items={[]}
-              timeBars={
-                hasRelevantPreview
-                  ? [{ time: new Date(timelineTime * 1000), id: "playback" }]
-                  : []
-              }
-              options={{
-                snap: null,
-                min: new Date(range.start * 1000),
-                max: new Date(range.end * 1000),
-                zoomable: false,
-              }}
-              timechangeHandler={onScrubTime}
-              timechangedHandler={onStopScrubbing}
-              selectHandler={(data) => {
-                if (data.items.length > 0) {
-                  const selected = data.items[0];
-                  onSelectItem(
-                    playback.timelineItems.find(
-                      (timeline) => timeline.timestamp == selected
-                    )
-                  );
+                key={timeline.range.start}
+                items={[]}
+                timeBars={
+                  hasRelevantPreview
+                    ? [{ time: new Date(timelineTime * 1000), id: "playback" }]
+                    : []
                 }
-              }}
-            />
+                options={{
+                  snap: null,
+                  min: new Date(timeline.range.start * 1000),
+                  max: new Date(timeline.range.end * 1000),
+                  zoomable: false,
+                }}
+                timechangeHandler={onScrubTime}
+                timechangedHandler={onStopScrubbing}
+                doubleClickHandler={(data) => {
+                  setSelectedPlayback(timeline);
+                }}
+                selectHandler={(data) => {
+                  if (data.items.length > 0) {
+                    const selected = data.items[0];
+                    onSelectItem(
+                      selectedPlayback.timelineItems.find(
+                        (timeline) => timeline.timestamp == selected
+                      )
+                    );
+                  }
+                }}
+              />
             </div>
           );
         })}
@@ -389,7 +403,6 @@ type MobileViewProps = {
   previewRef: React.MutableRefObject<Player | undefined>;
   playback: TimelinePlayback;
   playbackUri: string;
-  playbackTimes: { start: number; end: number };
   timelineTime: number;
   hasRelevantPreview: boolean;
   scrubbing: boolean;
@@ -405,7 +418,6 @@ function MobileView({
   previewRef,
   playback,
   playbackUri,
-  playbackTimes,
   timelineTime,
   hasRelevantPreview,
   scrubbing,
@@ -437,7 +449,7 @@ function MobileView({
             seekOptions={{ forward: 10, backward: 5 }}
             onReady={(player) => {
               playerRef.current = player;
-              player.currentTime(timelineTime - playbackTimes.start);
+              player.currentTime(timelineTime - playback.range.start);
               player.on("playing", () => {
                 onSelectItem(undefined);
               });
@@ -493,14 +505,14 @@ function MobileView({
             }
             options={{
               start: new Date(
-                Math.max(playbackTimes.start, timelineTime - 300) * 1000
+                Math.max(playback.range.start, timelineTime - 300) * 1000
               ),
               end: new Date(
-                Math.min(playbackTimes.end, timelineTime + 300) * 1000
+                Math.min(playback.range.end, timelineTime + 300) * 1000
               ),
               snap: null,
-              min: new Date(playbackTimes.start * 1000),
-              max: new Date(playbackTimes.end * 1000),
+              min: new Date(playback.range.start * 1000),
+              max: new Date(playback.range.end * 1000),
               timeAxis: { scale: "minute", step: 5 },
             }}
             timechangeHandler={onScrubTime}

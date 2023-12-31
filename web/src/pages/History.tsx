@@ -104,9 +104,9 @@ function History() {
     return window.innerWidth < 768;
   }, [playback]);
 
-  const timelineCards: CardsData | never[] = useMemo(() => {
+  const timelineCards: CardsData = useMemo(() => {
     if (!timelinePages) {
-      return [];
+      return {};
     }
 
     return getHourlyTimelineData(
@@ -152,7 +152,7 @@ function History() {
     }
   }, [itemsToDelete, updateHistory]);
 
-  if (!config || !timelineCards || timelineCards.length == 0) {
+  if (!config || !timelineCards) {
     return <ActivityIndicator />;
   }
 
@@ -217,6 +217,7 @@ function History() {
         onItemSelected={(item) => setPlaybackState(item)}
       />
       <TimelineViewer
+        timelineData={timelineCards}
         playback={viewingPlayback ? playback : undefined}
         isMobile={isMobile}
         onClose={() => setPlaybackState(undefined)}
@@ -226,16 +227,28 @@ function History() {
 }
 
 type TimelineViewerProps = {
+  timelineData: CardsData | undefined;
   playback: TimelinePlayback | undefined;
   isMobile: boolean;
   onClose: () => void;
 };
 
-function TimelineViewer({ playback, isMobile, onClose }: TimelineViewerProps) {
+function TimelineViewer({
+  timelineData,
+  playback,
+  isMobile,
+  onClose,
+}: TimelineViewerProps) {
   if (isMobile) {
     return playback != undefined ? (
       <div className="w-screen absolute left-0 top-20 bottom-0 bg-background z-50">
-        <HistoryTimelineView playback={playback} isMobile={isMobile} />
+        {timelineData && (
+          <HistoryTimelineView
+            timelineData={timelineData}
+            initialPlayback={playback}
+            isMobile={isMobile}
+          />
+        )}
       </div>
     ) : null;
   }
@@ -243,8 +256,12 @@ function TimelineViewer({ playback, isMobile, onClose }: TimelineViewerProps) {
   return (
     <Dialog open={playback != undefined} onOpenChange={(_) => onClose()}>
       <DialogContent className="md:max-w-2xl lg:max-w-4xl xl:max-w-6xl 2xl:max-w-7xl 3xl:max-w-[1720px]">
-        {playback && (
-          <HistoryTimelineView playback={playback} isMobile={isMobile} />
+        {timelineData && playback && (
+          <HistoryTimelineView
+            timelineData={timelineData}
+            initialPlayback={playback}
+            isMobile={isMobile}
+          />
         )}
       </DialogContent>
     </Dialog>
