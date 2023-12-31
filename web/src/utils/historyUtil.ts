@@ -156,9 +156,12 @@ export function getTimelineHoursForDay(
           return [];
         })
       : [];
+    const previewCheck = start + 30; // preview can start after the hour
     const relevantPreview = Object.values(allPreviews || []).find(
       (preview) =>
-        preview.camera == camera && preview.start < start && preview.end > start
+        preview.camera == camera &&
+        preview.start < previewCheck &&
+        preview.end > previewCheck
     );
     data.push({
       camera,

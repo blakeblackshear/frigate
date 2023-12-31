@@ -147,7 +147,15 @@ export default function HistoryTimelineView({
       }
 
       const seekTimestamp = data.time.getTime() / 1000;
-      const seekTime = seekTimestamp - selectedPlayback.relevantPreview!!.start;
+      const seekTime = seekTimestamp - selectedPlayback.relevantPreview.start;
+      console.log(
+        "seeking to " +
+          seekTime +
+          " comparing " +
+          new Date(seekTimestamp * 1000) +
+          " - " +
+          new Date(selectedPlayback.relevantPreview.start * 1000)
+      );
       setTimeToSeek(Math.round(seekTime));
     },
     [scrubbing, playerRef, selectedPlayback]
