@@ -76,7 +76,7 @@ const domEvents: TimelineEventsWithMissing[] = [
 type ActivityScrubberProps = {
   className?: string;
   items?: TimelineItem[];
-  timeBars?: { time: DateType; id?: IdType | undefined }[];
+  timeBars?: { time: DateType; id: IdType }[];
   groups?: TimelineGroup[];
   options?: TimelineOptions;
 } & TimelineEventsHandlers;
@@ -94,6 +94,9 @@ function ActivityScrubber({
     timeline: null,
   });
   const [currentTime, setCurrentTime] = useState(Date.now());
+  const [_, setCustomTimes] = useState<
+    { id: IdType; time: DateType }[]
+  >([]);
 
   const defaultOptions: TimelineOptions = {
     width: "100%",
@@ -160,6 +163,41 @@ function ActivityScrubber({
       timelineInstance.destroy();
     };
   }, [containerRef]);
+
+  // need to keep custom times in sync
+  useEffect(() => {
+    if (!timelineRef.current.timeline || timeBars == undefined) {
+      return;
+    }
+
+    setCustomTimes((prevTimes) => {
+      if (prevTimes.length == 0 && timeBars.length == 0) {
+        return [];
+      }
+
+      prevTimes
+        .filter((x) => timeBars.find((y) => x.id == y.id) == undefined)
+        .forEach((time) => {
+          try {
+            timelineRef.current.timeline?.removeCustomTime(time.id);
+          } catch {}
+        });
+
+      timeBars.forEach((time) => {
+        try {
+          const existing = timelineRef.current.timeline?.getCustomTime(time.id);
+
+          if (existing != time.time) {
+            timelineRef.current.timeline?.setCustomTime(time.time, time.id);
+          }
+        } catch {
+          timelineRef.current.timeline?.addCustomTime(time.time, time.id);
+        }
+      });
+
+      return timeBars;
+    });
+  }, [timeBars, timelineRef]);
 
   return (
     <div className={className || ""}>
