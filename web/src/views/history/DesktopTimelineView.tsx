@@ -44,8 +44,8 @@ export default function DesktopTimelineView({
   const [timeToSeek, setTimeToSeek] = useState<number | undefined>(undefined);
   const [timelineTime, setTimelineTime] = useState(
     initialPlayback.timelineItems.length > 0
-      ? initialPlayback.timelineItems[0].timestamp
-      : initialPlayback.range.start
+      ? initialPlayback.timelineItems[0].timestamp - initialPlayback.range.start
+      : 0
   );
 
   const annotationOffset = useMemo(() => {
@@ -118,24 +118,6 @@ export default function DesktopTimelineView({
     [annotationOffset, recordings, playerRef]
   );
 
-  const onPlayerProgressUpdate = useCallback(() => {
-    if (!playerRef.current?.currentTime) {
-      return;
-    }
-
-    const playerTime = playerRef.current.currentTime();
-
-    if (!playerTime) {
-      return;
-    }
-
-    const time = timelineTime - selectedPlayback.range.start;
-
-    if (Math.round(playerTime) - time >= 5) {
-      setTimelineTime(selectedPlayback.range.start + playerTime);
-    }
-  }, [selectedPlayback, timelineTime]);
-
   // handle seeking to next frame when seek is finished
   useEffect(() => {
     if (seeking) {
@@ -164,9 +146,6 @@ export default function DesktopTimelineView({
       src: playbackUri,
       type: "application/vnd.apple.mpegurl",
     });
-
-    playerRef.current.off("timeupdate", onPlayerProgressUpdate);
-    playerRef.current.on("timeupdate", onPlayerProgressUpdate);
 
     if (selectedPlayback.relevantPreview) {
       previewRef.current.src({
@@ -233,7 +212,9 @@ export default function DesktopTimelineView({
                     player.currentTime(0);
                   }
                   player.on("playing", () => onSelectItem(undefined));
-                  player.on("timeupdate", onPlayerProgressUpdate);
+                  player.on("timeupdate", () => {
+                    setTimelineTime(Math.floor(player.currentTime() || 0));
+                  });
                 }}
                 onDispose={() => {
                   playerRef.current = undefined;
@@ -297,7 +278,7 @@ export default function DesktopTimelineView({
           return (
             <div
               key={timeline.range.start}
-              className={`p-1 ${isSelected ? "border border-primary" : ""}`}
+              className={`p-2 ${isSelected ? "bg-secondary bg-opacity-30 rounded-md" : ""}`}
             >
               <ActivityScrubber
                 items={[]}
@@ -305,7 +286,9 @@ export default function DesktopTimelineView({
                   isSelected && selectedPlayback.relevantPreview
                     ? [
                         {
-                          time: new Date(timelineTime * 1000),
+                          time: new Date(
+                            (timeline.range.start + timelineTime) * 1000
+                          ),
                           id: "playback",
                         },
                       ]
@@ -330,7 +313,7 @@ export default function DesktopTimelineView({
                   const seekTimestamp = data.time.getTime() / 1000;
                   const seekTime =
                     seekTimestamp - timeline.relevantPreview.start;
-                  setTimelineTime(seekTimestamp);
+                  setTimelineTime(seekTimestamp - timeline.range.start);
                   setTimeToSeek(Math.round(seekTime));
                 }}
                 timechangedHandler={(data) => {
