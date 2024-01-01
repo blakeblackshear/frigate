@@ -4,7 +4,7 @@ const GROUP_SECONDS = 60;
 export function getHourlyTimelineData(
   timelinePages: HourlyTimeline[],
   detailLevel: string
-) {
+): CardsData {
   const cards: CardsData = {};
   timelinePages.forEach((hourlyTimeline) => {
     Object.keys(hourlyTimeline["hours"])
@@ -100,4 +100,84 @@ export function getHourlyTimelineData(
   });
 
   return cards;
+}
+
+export function getTimelineHoursForDay(
+  camera: string,
+  cards: CardsData,
+  allPreviews: Preview[],
+  timestamp: number
+): TimelinePlayback[] {
+  const now = new Date();
+  const data: TimelinePlayback[] = [];
+  const startDay = new Date(timestamp * 1000);
+  startDay.setHours(23, 59, 59, 999);
+  const dayEnd = startDay.getTime() / 1000;
+  startDay.setHours(0, 0, 0, 0);
+  let start = startDay.getTime() / 1000;
+  let end = 0;
+
+  const relevantPreviews = allPreviews.filter((preview) => {
+    return (
+      preview.camera == camera &&
+      preview.start >= start &&
+      Math.floor(preview.end - 1) <= dayEnd
+    );
+  });
+
+  const dayIdx = Object.keys(cards).find((day) => {
+    if (parseInt(day) > start) {
+      return false;
+    }
+
+    return true;
+  });
+
+  if (dayIdx == undefined) {
+    return [];
+  }
+
+  const day = cards[dayIdx];
+
+  for (let i = 0; i < 24; i++) {
+    startDay.setHours(startDay.getHours() + 1);
+
+    if (startDay > now) {
+      break;
+    }
+
+    end = startDay.getTime() / 1000;
+    const hour = Object.values(day).find((cards) => {
+      if (
+        Object.values(cards)[0].time < start ||
+        Object.values(cards)[0].time > end
+      ) {
+        return false;
+      }
+
+      return true;
+    });
+    const timelineItems: Timeline[] = hour
+      ? Object.values(hour).flatMap((card) => {
+          if (card.camera == camera) {
+            return card.entries;
+          }
+
+          return [];
+        })
+      : [];
+    const relevantPreview = relevantPreviews.find(
+      (preview) =>
+        Math.round(preview.start) >= start && Math.floor(preview.end) <= end
+    );
+    data.push({
+      camera,
+      range: { start, end },
+      timelineItems,
+      relevantPreview,
+    });
+    start = startDay.getTime() / 1000;
+  }
+
+  return data.reverse();
 }
