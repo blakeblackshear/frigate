@@ -9,8 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
 import { usePersistence } from "@/hooks/use-persistence";
-// @ts-expect-error we know this does not have types
-import MSEPlayer from "@/lib/MsePlayer";
+import MSEPlayer from "./MsePlayer";
 import JSMpegPlayer from "./JSMpegPlayer";
 import { baseUrl } from "@/api/baseUrl";
 
@@ -69,7 +68,6 @@ export default function LivePlayer({
       return (
         <div className="max-w-5xl">
           <MSEPlayer
-            mode="mse"
             src={
               new URL(
                 `${baseUrl.replace(/^http/, "ws")}live/webrtc/api/ws?src=${
