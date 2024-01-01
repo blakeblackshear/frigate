@@ -151,9 +151,9 @@ birdseye:
 ffmpeg:
   # Optional: global ffmpeg args (default: shown below)
   global_args: -hide_banner -loglevel warning -threads 2
-  # Optional: global hwaccel args (default: shown below)
+  # Optional: global hwaccel args (default: auto detect)
   # NOTE: See hardware acceleration docs for your specific device
-  hwaccel_args: []
+  hwaccel_args: "auto"
   # Optional: global input args (default: shown below)
   input_args: preset-rtsp-generic
   # Optional: global output args

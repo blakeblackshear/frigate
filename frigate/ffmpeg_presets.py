@@ -5,6 +5,7 @@ import os
 from enum import Enum
 from typing import Any
 
+from frigate.const import FFMPEG_HWACCEL_NVIDIA, FFMPEG_HWACCEL_VAAPI
 from frigate.util.services import vainfo_hwaccel
 from frigate.version import VERSION
 
@@ -62,55 +63,72 @@ _user_agent_args = [
 PRESETS_HW_ACCEL_DECODE = {
     "preset-rpi-64-h264": "-c:v:1 h264_v4l2m2m",
     "preset-rpi-64-h265": "-c:v:1 hevc_v4l2m2m",
-    "preset-vaapi": f"-hwaccel_flags allow_profile_mismatch -hwaccel vaapi -hwaccel_device {_gpu_selector.get_selected_gpu()} -hwaccel_output_format vaapi",
+    FFMPEG_HWACCEL_VAAPI: f"-hwaccel_flags allow_profile_mismatch -hwaccel vaapi -hwaccel_device {_gpu_selector.get_selected_gpu()} -hwaccel_output_format vaapi",
     "preset-intel-qsv-h264": f"-hwaccel qsv -qsv_device {_gpu_selector.get_selected_gpu()} -hwaccel_output_format qsv -c:v h264_qsv",
     "preset-intel-qsv-h265": f"-load_plugin hevc_hw -hwaccel qsv -qsv_device {_gpu_selector.get_selected_gpu()} -hwaccel_output_format qsv -c:v hevc_qsv",
-    "preset-nvidia-h264": "-hwaccel cuda -hwaccel_output_format cuda",
-    "preset-nvidia-h265": "-hwaccel cuda -hwaccel_output_format cuda",
-    "preset-nvidia-mjpeg": "-hwaccel cuda -hwaccel_output_format cuda",
+    FFMPEG_HWACCEL_NVIDIA: "-hwaccel cuda -hwaccel_output_format cuda",
     "preset-jetson-h264": "-c:v h264_nvmpi -resize {1}x{2}",
     "preset-jetson-h265": "-c:v hevc_nvmpi -resize {1}x{2}",
     "preset-rk-h264": "-c:v h264_rkmpp_decoder",
     "preset-rk-h265": "-c:v hevc_rkmpp_decoder",
 }
+PRESETS_HW_ACCEL_DECODE["preset-nvidia-h264"] = PRESETS_HW_ACCEL_DECODE[
+    FFMPEG_HWACCEL_NVIDIA
+]
+PRESETS_HW_ACCEL_DECODE["preset-nvidia-h265"] = PRESETS_HW_ACCEL_DECODE[
+    FFMPEG_HWACCEL_NVIDIA
+]
+PRESETS_HW_ACCEL_DECODE["preset-nvidia-mjpeg"] = PRESETS_HW_ACCEL_DECODE[
+    FFMPEG_HWACCEL_NVIDIA
+]
 
 PRESETS_HW_ACCEL_SCALE = {
     "preset-rpi-64-h264": "-r {0} -vf fps={0},scale={1}:{2}",
     "preset-rpi-64-h265": "-r {0} -vf fps={0},scale={1}:{2}",
-    "preset-vaapi": "-r {0} -vf fps={0},scale_vaapi=w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
+    FFMPEG_HWACCEL_VAAPI: "-r {0} -vf fps={0},scale_vaapi=w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
     "preset-intel-qsv-h264": "-r {0} -vf vpp_qsv=framerate={0}:w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
     "preset-intel-qsv-h265": "-r {0} -vf vpp_qsv=framerate={0}:w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
-    "preset-nvidia-h264": "-r {0} -vf fps={0},scale_cuda=w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
-    "preset-nvidia-h265": "-r {0} -vf fps={0},scale_cuda=w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
+    FFMPEG_HWACCEL_NVIDIA: "-r {0} -vf fps={0},scale_cuda=w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
     "preset-jetson-h264": "-r {0}",  # scaled in decoder
     "preset-jetson-h265": "-r {0}",  # scaled in decoder
     "preset-rk-h264": "-r {0} -vf fps={0},scale={1}:{2}",
     "preset-rk-h265": "-r {0} -vf fps={0},scale={1}:{2}",
     "default": "-r {0} -vf fps={0},scale={1}:{2}",
 }
+PRESETS_HW_ACCEL_SCALE["preset-nvidia-h264"] = PRESETS_HW_ACCEL_SCALE[
+    FFMPEG_HWACCEL_NVIDIA
+]
+PRESETS_HW_ACCEL_SCALE["preset-nvidia-h265"] = PRESETS_HW_ACCEL_SCALE[
+    FFMPEG_HWACCEL_NVIDIA
+]
 
 PRESETS_HW_ACCEL_ENCODE_BIRDSEYE = {
     "preset-rpi-64-h264": "ffmpeg -hide_banner {0} -c:v h264_v4l2m2m {1}",
     "preset-rpi-64-h265": "ffmpeg -hide_banner {0} -c:v hevc_v4l2m2m {1}",
-    "preset-vaapi": "ffmpeg -hide_banner -hwaccel vaapi -hwaccel_output_format vaapi -hwaccel_device {2} {0} -c:v h264_vaapi -g 50 -bf 0 -profile:v high -level:v 4.1 -sei:v 0 -an -vf format=vaapi|nv12,hwupload {1}",
+    FFMPEG_HWACCEL_VAAPI: "ffmpeg -hide_banner -hwaccel vaapi -hwaccel_output_format vaapi -hwaccel_device {2} {0} -c:v h264_vaapi -g 50 -bf 0 -profile:v high -level:v 4.1 -sei:v 0 -an -vf format=vaapi|nv12,hwupload {1}",
     "preset-intel-qsv-h264": "ffmpeg -hide_banner {0} -c:v h264_qsv -g 50 -bf 0 -profile:v high -level:v 4.1 -async_depth:v 1 {1}",
     "preset-intel-qsv-h265": "ffmpeg -hide_banner {0} -c:v h264_qsv -g 50 -bf 0 -profile:v high -level:v 4.1 -async_depth:v 1 {1}",
-    "preset-nvidia-h264": "ffmpeg -hide_banner {0} -c:v h264_nvenc -g 50 -profile:v high -level:v auto -preset:v p2 -tune:v ll {1}",
-    "preset-nvidia-h265": "ffmpeg -hide_banner {0} -c:v h264_nvenc -g 50 -profile:v high -level:v auto -preset:v p2 -tune:v ll {1}",
+    FFMPEG_HWACCEL_NVIDIA: "ffmpeg -hide_banner {0} -c:v h264_nvenc -g 50 -profile:v high -level:v auto -preset:v p2 -tune:v ll {1}",
     "preset-jetson-h264": "ffmpeg -hide_banner {0} -c:v h264_nvmpi -profile high {1}",
     "preset-jetson-h265": "ffmpeg -hide_banner {0} -c:v h264_nvmpi -profile high {1}",
     "preset-rk-h264": "ffmpeg -hide_banner {0} -c:v h264_rkmpp_encoder -profile high {1}",
     "preset-rk-h265": "ffmpeg -hide_banner {0} -c:v hevc_rkmpp_encoder -profile high {1}",
     "default": "ffmpeg -hide_banner {0} -c:v libx264 -g 50 -profile:v high -level:v 4.1 -preset:v superfast -tune:v zerolatency {1}",
 }
+PRESETS_HW_ACCEL_ENCODE_BIRDSEYE[
+    "preset-nvidia-h264"
+] = PRESETS_HW_ACCEL_ENCODE_BIRDSEYE[FFMPEG_HWACCEL_NVIDIA]
+PRESETS_HW_ACCEL_ENCODE_BIRDSEYE[
+    "preset-nvidia-h265"
+] = PRESETS_HW_ACCEL_ENCODE_BIRDSEYE[FFMPEG_HWACCEL_NVIDIA]
 
 PRESETS_HW_ACCEL_ENCODE_TIMELAPSE = {
     "preset-rpi-64-h264": "ffmpeg -hide_banner {0} -c:v h264_v4l2m2m -pix_fmt yuv420p {1}",
     "preset-rpi-64-h265": "ffmpeg -hide_banner {0} -c:v hevc_v4l2m2m -pix_fmt yuv420p {1}",
-    "preset-vaapi": "ffmpeg -hide_banner -hwaccel vaapi -hwaccel_output_format vaapi -hwaccel_device {2} {0} -c:v h264_vaapi {1}",
+    FFMPEG_HWACCEL_VAAPI: "ffmpeg -hide_banner -hwaccel vaapi -hwaccel_output_format vaapi -hwaccel_device {2} {0} -c:v h264_vaapi {1}",
     "preset-intel-qsv-h264": "ffmpeg -hide_banner {0} -c:v h264_qsv -profile:v high -level:v 4.1 -async_depth:v 1 {1}",
     "preset-intel-qsv-h265": "ffmpeg -hide_banner {0} -c:v hevc_qsv -profile:v high -level:v 4.1 -async_depth:v 1 {1}",
-    "preset-nvidia-h264": "ffmpeg -hide_banner -hwaccel cuda -hwaccel_output_format cuda -extra_hw_frames 8 {0} -c:v h264_nvenc {1}",
+    FFMPEG_HWACCEL_NVIDIA: "ffmpeg -hide_banner -hwaccel cuda -hwaccel_output_format cuda -extra_hw_frames 8 {0} -c:v h264_nvenc {1}",
     "preset-nvidia-h265": "ffmpeg -hide_banner -hwaccel cuda -hwaccel_output_format cuda -extra_hw_frames 8 {0} -c:v hevc_nvenc {1}",
     "preset-jetson-h264": "ffmpeg -hide_banner {0} -c:v h264_nvmpi -profile high {1}",
     "preset-jetson-h265": "ffmpeg -hide_banner {0} -c:v hevc_nvmpi -profile high {1}",
@@ -118,6 +136,9 @@ PRESETS_HW_ACCEL_ENCODE_TIMELAPSE = {
     "preset-rk-h265": "ffmpeg -hide_banner {0} -c:v hevc_rkmpp_encoder -profile high {1}",
     "default": "ffmpeg -hide_banner {0} -c:v libx264 -preset:v ultrafast -tune:v zerolatency {1}",
 }
+PRESETS_HW_ACCEL_ENCODE_TIMELAPSE[
+    "preset-nvidia-h264"
+] = PRESETS_HW_ACCEL_ENCODE_TIMELAPSE[FFMPEG_HWACCEL_NVIDIA]
 
 # encoding of previews is only done on CPU due to comparable encode times and better quality from libx264
 PRESETS_HW_ACCEL_ENCODE_PREVIEW = {

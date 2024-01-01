@@ -35,6 +35,11 @@ AUDIO_MAX_BIT_RANGE = 32768.0
 AUDIO_SAMPLE_RATE = 16000
 AUDIO_MIN_CONFIDENCE = 0.5
 
+# Ffmpeg Presets
+
+FFMPEG_HWACCEL_NVIDIA = "preset-nvidia"
+FFMPEG_HWACCEL_VAAPI = "preset-vaapi"
+
 # Regex Consts
 
 REGEX_CAMERA_NAME = r"^[a-zA-Z0-9_-]+$"
