@@ -1,5 +1,5 @@
-import strftime from 'strftime';
-import { fromUnixTime, intervalToDuration, formatDuration } from 'date-fns';
+import strftime from "strftime";
+import { fromUnixTime, intervalToDuration, formatDuration } from "date-fns";
 export const longToDate = (long: number): Date => new Date(long * 1000);
 export const epochToLong = (date: number): number => date / 1000;
 export const dateToLong = (date: Date): number => epochToLong(date.getTime());
@@ -276,3 +276,12 @@ const getUTCOffset = (date: Date, timezone: string): number => {
 
   return (target.getTime() - utcDate.getTime()) / 60 / 1000;
 };
+
+export function getRangeForTimestamp(timestamp: number) {
+  const date = new Date(timestamp * 1000);
+  date.setMinutes(0, 0, 0);
+  const start = date.getTime() / 1000;
+  date.setHours(date.getHours() + 1);
+  const end = date.getTime() / 1000;
+  return { start, end };
+}

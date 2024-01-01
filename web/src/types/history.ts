@@ -1,7 +1,7 @@
 type CardsData = {
-  [key: string]: {
-    [key: string]: {
-      [key: string]: Card;
+  [day: string]: {
+    [hour: string]: {
+      [groupKey: string]: Card;
     };
   };
 };
@@ -58,6 +58,7 @@ interface HistoryFilter extends FilterType {
 
 type TimelinePlayback = {
   camera: string;
+  range: { start: number; end: number };
   timelineItems: Timeline[];
   relevantPreview: Preview | undefined;
 };

@@ -19,12 +19,13 @@ import {
 import HistoryFilterPopover from "@/components/filter/HistoryFilterPopover";
 import useApiFilter from "@/hooks/use-api-filter";
 import HistoryCardView from "@/views/history/HistoryCardView";
-import HistoryTimelineView from "@/views/history/HistoryTimelineView";
 import { Button } from "@/components/ui/button";
 import { IoMdArrowBack } from "react-icons/io";
 import useOverlayState from "@/hooks/use-overlay-state";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import MobileTimelineView from "@/views/history/MobileTimelineView";
+import DesktopTimelineView from "@/views/history/DesktopTimelineView";
 
 const API_LIMIT = 200;
 
@@ -76,10 +77,25 @@ function History() {
     setSize,
     isValidating,
   } = useSWRInfinite<HourlyTimeline>(getKey, timelineFetcher);
+
+  const previewTimes = useMemo(() => {
+    if (!timelinePages) {
+      return undefined;
+    }
+
+    const startDate = new Date();
+    startDate.setMinutes(0, 0, 0);
+
+    const endDate = new Date(timelinePages.at(-1)!!.end);
+    endDate.setHours(0, 0, 0, 0);
+    return {
+      start: startDate.getTime() / 1000,
+      end: endDate.getTime() / 1000,
+    };
+  }, [timelinePages]);
   const { data: allPreviews } = useSWR<Preview[]>(
-    timelinePages
-      ? `preview/all/start/${timelinePages?.at(0)
-          ?.start}/end/${timelinePages?.at(-1)?.end}`
+    previewTimes
+      ? `preview/all/start/${previewTimes.start}/end/${previewTimes.end}`
       : null,
     { revalidateOnFocus: false }
   );
@@ -104,9 +120,9 @@ function History() {
     return window.innerWidth < 768;
   }, [playback]);
 
-  const timelineCards: CardsData | never[] = useMemo(() => {
+  const timelineCards: CardsData = useMemo(() => {
     if (!timelinePages) {
-      return [];
+      return {};
     }
 
     return getHourlyTimelineData(
@@ -152,7 +168,7 @@ function History() {
     }
   }, [itemsToDelete, updateHistory]);
 
-  if (!config || !timelineCards || timelineCards.length == 0) {
+  if (!config || !timelineCards) {
     return <ActivityIndicator />;
   }
 
@@ -217,6 +233,8 @@ function History() {
         onItemSelected={(item) => setPlaybackState(item)}
       />
       <TimelineViewer
+        timelineData={timelineCards}
+        allPreviews={allPreviews || []}
         playback={viewingPlayback ? playback : undefined}
         isMobile={isMobile}
         onClose={() => setPlaybackState(undefined)}
@@ -226,25 +244,37 @@ function History() {
 }
 
 type TimelineViewerProps = {
+  timelineData: CardsData | undefined;
+  allPreviews: Preview[];
   playback: TimelinePlayback | undefined;
   isMobile: boolean;
   onClose: () => void;
 };
 
-function TimelineViewer({ playback, isMobile, onClose }: TimelineViewerProps) {
+function TimelineViewer({
+  timelineData,
+  allPreviews,
+  playback,
+  isMobile,
+  onClose,
+}: TimelineViewerProps) {
   if (isMobile) {
     return playback != undefined ? (
       <div className="w-screen absolute left-0 top-20 bottom-0 bg-background z-50">
-        <HistoryTimelineView playback={playback} isMobile={isMobile} />
+        {timelineData && <MobileTimelineView playback={playback} />}
       </div>
     ) : null;
   }
 
   return (
     <Dialog open={playback != undefined} onOpenChange={(_) => onClose()}>
-      <DialogContent className="w-3/5 max-w-full">
-        {playback && (
-          <HistoryTimelineView playback={playback} isMobile={isMobile} />
+      <DialogContent className="md:max-w-2xl lg:max-w-4xl xl:max-w-6xl 2xl:max-w-7xl 3xl:max-w-[1720px]">
+        {timelineData && playback && (
+          <DesktopTimelineView
+            timelineData={timelineData}
+            allPreviews={allPreviews}
+            initialPlayback={playback}
+          />
         )}
       </DialogContent>
     </Dialog>
