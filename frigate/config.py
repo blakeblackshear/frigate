@@ -39,7 +39,7 @@ from frigate.util.builtin import (
     load_config_with_no_duplicates,
 )
 from frigate.util.image import create_mask
-from frigate.util.services import get_video_properties
+from frigate.util.services import auto_detect_hwaccel, get_video_properties
 
 logger = logging.getLogger(__name__)
 
@@ -600,7 +600,7 @@ class FfmpegConfig(FrigateBaseModel):
         default=FFMPEG_GLOBAL_ARGS_DEFAULT, title="Global FFmpeg arguments."
     )
     hwaccel_args: Union[str, List[str]] = Field(
-        default_factory=list, title="FFmpeg hardware acceleration arguments."
+        default="auto", title="FFmpeg hardware acceleration arguments."
     )
     input_args: Union[str, List[str]] = Field(
         default=FFMPEG_INPUT_ARGS_DEFAULT, title="FFmpeg input arguments."
@@ -1096,6 +1096,10 @@ class FrigateConfig(FrigateBaseModel):
                 config.objects.filters[attribute] = FilterConfig(min_score=0.7)
             elif config.objects.filters[attribute].min_score == 0.5:
                 config.objects.filters[attribute].min_score = 0.7
+
+        # auto detect hwaccel args
+        if config.ffmpeg.hwaccel_args == "auto":
+            config.ffmpeg.hwaccel_args = auto_detect_hwaccel()
 
         # Global config to propagate down to camera level
         global_config = config.dict(
