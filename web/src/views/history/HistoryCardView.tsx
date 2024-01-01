@@ -2,7 +2,10 @@ import HistoryCard from "@/components/card/HistoryCard";
 import ActivityIndicator from "@/components/ui/activity-indicator";
 import Heading from "@/components/ui/heading";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
+import {
+  formatUnixTimestampToDateTime,
+  getRangeForTimestamp,
+} from "@/utils/dateUtil";
 import { useCallback, useRef } from "react";
 import useSWR from "swr";
 
@@ -117,6 +120,7 @@ export default function HistoryCardView({
                                 onClick={() => {
                                   onItemSelected({
                                     camera: timeline.camera,
+                                    range: getRangeForTimestamp(timeline.time),
                                     timelineItems: Object.values(
                                       timelineHour
                                     ).flatMap((card) =>

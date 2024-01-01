@@ -15,15 +15,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 import Player from "video.js/dist/types/player";
 
-type HistoryTimelineViewProps = {
+type MobileTimelineViewProps = {
   playback: TimelinePlayback;
-  isMobile: boolean;
 };
 
-export default function HistoryTimelineView({
+export default function MobileTimelineView({
   playback,
-  isMobile,
-}: HistoryTimelineViewProps) {
+}: MobileTimelineViewProps) {
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
   const timezone = useMemo(
@@ -31,8 +29,6 @@ export default function HistoryTimelineView({
       config?.ui?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
     [config]
   );
-
-  const hasRelevantPreview = playback.relevantPreview != undefined;
 
   const playerRef = useRef<Player | undefined>(undefined);
   const previewRef = useRef<Player | undefined>(undefined);
@@ -53,33 +49,20 @@ export default function HistoryTimelineView({
     return (
       (config.cameras[playback.camera]?.detect?.annotation_offset || 0) / 1000
     );
-  }, [config, playback]);
+  }, [config]);
 
-  const timelineTime = useMemo(() => {
-    if (!playback) {
-      return 0;
-    }
-
-    return playback.timelineItems.at(0)!!.timestamp;
-  }, [playback]);
-  const playbackTimes = useMemo(() => {
-    const date = new Date(timelineTime * 1000);
-    date.setMinutes(0, 0, 0);
-    const startTime = date.getTime() / 1000;
-    date.setHours(date.getHours() + 1);
-    const endTime = date.getTime() / 1000;
-    return {
-      start: parseInt(startTime.toFixed(1)),
-      end: parseInt(endTime.toFixed(1)),
-    };
-  }, [timelineTime]);
+  const [timelineTime, setTimelineTime] = useState(
+    playback.timelineItems.length > 0
+      ? playback.timelineItems[0].timestamp
+      : playback.range.start
+  );
 
   const recordingParams = useMemo(() => {
     return {
-      before: playbackTimes.end,
-      after: playbackTimes.start,
+      before: playback.range.end,
+      after: playback.range.start,
     };
-  }, [playbackTimes]);
+  }, [playback]);
   const { data: recordings } = useSWR<Recording[]>(
     playback ? [`${playback.camera}/recordings`, recordingParams] : null,
     { revalidateOnFocus: false }
@@ -90,23 +73,19 @@ export default function HistoryTimelineView({
       return "";
     }
 
-    const date = new Date(playbackTimes.start * 1000);
+    const date = new Date(playback.range.start * 1000);
     return `${apiHost}vod/${date.getFullYear()}-${
       date.getMonth() + 1
     }/${date.getDate()}/${date.getHours()}/${
       playback.camera
     }/${timezone.replaceAll("/", ",")}/master.m3u8`;
-  }, [playbackTimes]);
+  }, [playback]);
 
   const onSelectItem = useCallback(
-    (data: { items: number[] }) => {
-      if (data.items.length > 0) {
-        const selected = data.items[0];
-        setFocusedItem(
-          playback.timelineItems.find(
-            (timeline) => timeline.timestamp == selected
-          )
-        );
+    (timeline: Timeline | undefined) => {
+      if (timeline) {
+        setFocusedItem(timeline);
+        const selected = timeline.timestamp;
         playerRef.current?.pause();
 
         let seekSeconds = 0;
@@ -128,6 +107,8 @@ export default function HistoryTimelineView({
           return true;
         });
         playerRef.current?.currentTime(seekSeconds);
+      } else {
+        setFocusedItem(undefined);
       }
     },
     [annotationOffset, recordings, playerRef]
@@ -135,7 +116,7 @@ export default function HistoryTimelineView({
 
   const onScrubTime = useCallback(
     (data: { time: Date }) => {
-      if (!hasRelevantPreview) {
+      if (!playback.relevantPreview) {
         return;
       }
 
@@ -145,20 +126,21 @@ export default function HistoryTimelineView({
       }
 
       const seekTimestamp = data.time.getTime() / 1000;
-      const seekTime = seekTimestamp - playback.relevantPreview!!.start;
+      const seekTime = seekTimestamp - playback.relevantPreview.start;
+      setTimelineTime(seekTimestamp);
       setTimeToSeek(Math.round(seekTime));
     },
-    [scrubbing, playerRef]
+    [scrubbing, playerRef, playback]
   );
 
   const onStopScrubbing = useCallback(
     (data: { time: Date }) => {
       const playbackTime = data.time.getTime() / 1000;
-      playerRef.current?.currentTime(playbackTime - playbackTimes.start);
+      playerRef.current?.currentTime(playbackTime - playback.range.start);
       setScrubbing(false);
       playerRef.current?.play();
     },
-    [playerRef]
+    [playback, playerRef]
   );
 
   // handle seeking to next frame when seek is finished
@@ -182,7 +164,7 @@ export default function HistoryTimelineView({
       <>
         <div
           className={`relative ${
-            hasRelevantPreview && scrubbing ? "hidden" : "visible"
+            playback.relevantPreview && scrubbing ? "hidden" : "visible"
           }`}
         >
           <VideoPlayer
@@ -199,9 +181,9 @@ export default function HistoryTimelineView({
             seekOptions={{ forward: 10, backward: 5 }}
             onReady={(player) => {
               playerRef.current = player;
-              player.currentTime(timelineTime - playbackTimes.start);
+              player.currentTime(timelineTime - playback.range.start);
               player.on("playing", () => {
-                setFocusedItem(undefined);
+                onSelectItem(undefined);
               });
             }}
             onDispose={() => {
@@ -216,7 +198,7 @@ export default function HistoryTimelineView({
             ) : undefined}
           </VideoPlayer>
         </div>
-        {hasRelevantPreview && (
+        {playback.relevantPreview && (
           <div className={`${scrubbing ? "visible" : "hidden"}`}>
             <VideoPlayer
               options={{
@@ -249,27 +231,34 @@ export default function HistoryTimelineView({
           <ActivityScrubber
             items={timelineItemsToScrubber(playback.timelineItems)}
             timeBars={
-              hasRelevantPreview
+              playback.relevantPreview
                 ? [{ time: new Date(timelineTime * 1000), id: "playback" }]
                 : []
             }
             options={{
-              ...(isMobile && {
-                start: new Date(
-                  Math.max(playbackTimes.start, timelineTime - 300) * 1000
-                ),
-                end: new Date(
-                  Math.min(playbackTimes.end, timelineTime + 300) * 1000
-                ),
-              }),
+              start: new Date(
+                Math.max(playback.range.start, timelineTime - 300) * 1000
+              ),
+              end: new Date(
+                Math.min(playback.range.end, timelineTime + 300) * 1000
+              ),
               snap: null,
-              min: new Date(playbackTimes.start * 1000),
-              max: new Date(playbackTimes.end * 1000),
-              timeAxis: isMobile ? { scale: "minute", step: 5 } : {},
+              min: new Date(playback.range.start * 1000),
+              max: new Date(playback.range.end * 1000),
+              timeAxis: { scale: "minute", step: 5 },
             }}
             timechangeHandler={onScrubTime}
             timechangedHandler={onStopScrubbing}
-            selectHandler={onSelectItem}
+            selectHandler={(data) => {
+              if (data.items.length > 0) {
+                const selected = data.items[0];
+                onSelectItem(
+                  playback.timelineItems.find(
+                    (timeline) => timeline.timestamp == selected
+                  )
+                );
+              }
+            }}
           />
         )}
       </div>
