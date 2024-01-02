@@ -208,7 +208,12 @@ function MSEPlayer({ src }: MSEPlayerProps) {
   };
 
   useEffect(() => {
-    msRef.current = new MediaSource();
+    // iOS 17.1+ uses ManagedMediaSource
+    const MediaSourceConstructor =
+      "ManagedMediaSource" in window ? window.ManagedMediaSource : MediaSource;
+
+    // @ts-ignore
+    msRef.current = new MediaSourceConstructor();
 
     if ("hidden" in document && visibilityCheck) {
       document.addEventListener("visibilitychange", () => {
