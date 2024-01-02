@@ -724,6 +724,7 @@ def hourly_timeline_activity(camera_name: str):
         .where(Recordings.camera == camera_name)
         .where(Recordings.motion > 0)
         .where((Recordings.start_time > after) & (Recordings.end_time < before))
+        .order_by(Recordings.start_time.asc())
         .iterator()
     )
 
