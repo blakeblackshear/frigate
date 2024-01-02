@@ -436,6 +436,15 @@ rtmp:
 # Uses https://github.com/AlexxIT/go2rtc (v1.8.3)
 go2rtc:
 
+  rtsp:
+    # username can be specified with an environment variables or docker secrets that must begin with 'FRIGATE_'.
+    #       e.g. user: '{FRIGATE_GO2RTC_RTSP_USERNAME}'
+    username: go2rtc_rtsp_username
+    # password can be specified with an environment variables or docker secrets that must begin with 'FRIGATE_'.
+    #       e.g. user: '{FRIGATE_GO2RTC_RTSP_PASSWORD}'
+    password: go2rtc_rtsp_password
+  stream: ...
+
 # Optional: jsmpeg stream configuration for WebUI
 live:
   # Optional: Set the name of the stream that should be used for live view
