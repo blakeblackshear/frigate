@@ -443,8 +443,6 @@ rtmp:
 # Uses https://github.com/AlexxIT/go2rtc (v1.8.3)
 go2rtc:
 
-
-
 # Optional: jsmpeg stream configuration for WebUI
 live:
   # Optional: Set the name of the stream that should be used for live view
