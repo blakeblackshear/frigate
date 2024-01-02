@@ -40,7 +40,7 @@ go2rtc:
 
 ## RTMP (Deprecated)
 
-In previous Frigate versions RTMP was used for re-streaming. RTMP has disadvantages however including being incompatible with H.265, high bitrates, and certain audio codecs. RTMP is deprecated and it is recommended to move to the new restream role.
+In previous Frigate versions RTMP was used for re-streaming. RTMP has disadvantages however including being incompatible with H.265, high bitrates, and certain audio codecs. RTMP is deprecated and it is recommended use the built in go2rtc config for restreaming.
 
 ## Reduce Connections To Camera
 
