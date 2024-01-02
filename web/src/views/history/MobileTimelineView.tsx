@@ -203,7 +203,7 @@ export default function MobileTimelineView({
             <VideoPlayer
               options={{
                 preload: "auto",
-                autoplay: false,
+                autoplay: true,
                 controls: false,
                 muted: true,
                 loadingSpinner: false,
@@ -217,6 +217,7 @@ export default function MobileTimelineView({
               seekOptions={{}}
               onReady={(player) => {
                 previewRef.current = player;
+                player.pause();
                 player.on("seeked", () => setSeeking(false));
               }}
               onDispose={() => {
