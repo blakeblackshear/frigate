@@ -737,10 +737,33 @@ def hourly_timeline_activity(camera_name: str):
     )
     check = (key + timedelta(hours=1)).timestamp()
 
+    # set initial start so data is representative of full hour
+    hours[int(key.timestamp())].append(
+        {
+            "date": key.timestamp(),
+            "count": 0,
+            "type": "motion",
+        }
+    )
+
     for recording in all_recordings:
         if recording.start_time > check:
+            hours[int(key.timestamp())].append(
+                {
+                    "date": (key + timedelta(hours=1)).timestamp(),
+                    "count": 0,
+                    "type": "motion",
+                }
+            )
             key = key + timedelta(hours=1)
             check = (key + timedelta(hours=1)).timestamp()
+            hours[int(key.timestamp())].append(
+                {
+                    "date": key.timestamp(),
+                    "count": 0,
+                    "type": "motion",
+                }
+            )
 
         data_type = "motion" if recording.objects == 0 else "objects"
         hours[int(key.timestamp())].append(
