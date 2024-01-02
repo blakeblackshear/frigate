@@ -22,6 +22,10 @@ module.exports = {
         ring: "hsl(var(--ring))",
         danger: "#ef4444",
         success: "#22c55e",
+        // detection colors
+        motion: "#991b1b",
+        object: "#06b6d4",
+        audio: "#ea580c",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {

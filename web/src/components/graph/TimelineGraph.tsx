@@ -16,16 +16,35 @@ export default function TimelineGraph({ id, data }: TimelineGraphProps) {
       options={{
         chart: {
           id: id,
+          selection: {
+            enabled: false,
+          },
           toolbar: {
             show: false,
+          },
+          zoom: {
+            enabled: false,
           },
         },
         dataLabels: { enabled: false },
         grid: {
           show: false,
         },
+        legend: {
+          show: false,
+          position: "top",
+        },
+        tooltip: {
+          enabled: false,
+        },
         xaxis: {
           type: "datetime",
+          axisBorder: {
+            show: false,
+          },
+          axisTicks: {
+            show: false,
+          },
           labels: {
             show: false,
           },
@@ -37,7 +56,7 @@ export default function TimelineGraph({ id, data }: TimelineGraphProps) {
         },
       }}
       series={data}
-      height={100}
+      height="100%"
     />
   );
 }
