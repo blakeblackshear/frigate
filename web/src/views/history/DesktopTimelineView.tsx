@@ -327,8 +327,7 @@ export default function DesktopTimelineView({
               key={timeline.range.start}
               className={`relative p-2 ${
                 isSelected ? "bg-secondary bg-opacity-30 rounded-md" : ""
-                }`}
-              onClick={() => setSelectedPlayback(timeline)}
+              }`}
             >
               <ActivityScrubber
                 items={[]}
@@ -384,8 +383,9 @@ export default function DesktopTimelineView({
                     );
                   }
                 }}
+                doubleClickHandler={() => setSelectedPlayback(timeline)}
               />
-              {graphData && (
+              {isSelected && graphData && (
                 <div className="w-full absolute left-0 top-0 h-[84px]">
                   <TimelineGraph
                     id={timeline.range.start.toString()}
