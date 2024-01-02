@@ -251,7 +251,8 @@ export default function MobileTimelineView({
             timechangedHandler={onStopScrubbing}
             selectHandler={(data) => {
               if (data.items.length > 0) {
-                const selected = data.items[0];
+                const selected = parseFloat(data.items[0].split("-")[0]);
+
                 onSelectItem(
                   playback.timelineItems.find(
                     (timeline) => timeline.timestamp == selected
