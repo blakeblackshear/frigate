@@ -267,9 +267,9 @@ export default function MobileTimelineView({
 }
 
 function timelineItemsToScrubber(items: Timeline[]): ScrubberItem[] {
-  return items.map((item) => {
+  return items.map((item, idx) => {
     return {
-      id: item.timestamp,
+      id: `${item.timestamp}-${idx}`,
       content: getTimelineContentElement(item),
       start: new Date(item.timestamp * 1000),
       end: new Date(item.timestamp * 1000),
