@@ -751,28 +751,6 @@ def hourly_timeline_activity(camera_name: str):
             }
         )
 
-    # process data to make data counts relative
-    for hour, data in hours.items():
-        motion_values = np.asarray(list(map(lambda m: m["count"], data)))
-        avg = motion_values.mean()
-        std = motion_values.std()
-
-        for idx, motion in enumerate(motion_values):
-            if motion < (avg - (std * 2)):
-                value = 1
-            elif motion < (avg - std):
-                value = 2
-            elif motion < avg:
-                value = 3
-            elif motion < (avg + std):
-                value = 4
-            elif motion < (avg + (std * 2)):
-                value = 5
-            else:
-                value = 6
-
-            hours[hour][idx]["count"] = value
-
     return jsonify(hours)
 
 

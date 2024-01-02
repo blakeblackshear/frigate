@@ -18,3 +18,13 @@ type RecordingSegment = {
   objects: number;
   segment_size: number;
 };
+
+type RecordingActivity = {
+  [hour: number]: RecordingSegmentActivity[];
+};
+
+type RecordingSegmentActivity = {
+  date: number;
+  count: number;
+  type: "motion" | "objects";
+};

@@ -9,6 +9,8 @@ import { Event } from "@/types/event";
 import ActivityIndicator from "@/components/ui/activity-indicator";
 import { useApiHost } from "@/api";
 import TimelineScrubber from "@/components/playground/TimelineScrubber";
+import TimelineGraph from "@/components/graph/TimelineGraph";
+import { GraphDataPoint } from "@/types/graph";
 
 // Color data
 const colors = [
@@ -74,6 +76,36 @@ function UIPlayground() {
     "events",
     { limit: 10, after: recentTimestamp },
   ]);
+  const { data: recordingSegments } = useSWR<RecordingSegment[]>([
+    "front_cam/recordings",
+    { before: 1704211200, after: 1704207600 },
+  ]);
+
+  const graphData = useMemo(() => {
+    if (!recordingSegments) {
+      return { motion: [], objects: [] };
+    }
+
+    const motion: GraphDataPoint[] = [];
+    const objects: GraphDataPoint[] = [];
+
+    recordingSegments
+      .forEach((seg) => {
+        if (seg.objects > 0) {
+          objects.push({
+            x: new Date((seg.start_time + 5) * 1000),
+            y: seg.motion,
+          });
+        } else {
+          motion.push({
+            x: new Date((seg.start_time + 5) * 1000),
+            y: seg.motion,
+          });
+        }
+      });
+
+    return { motion, objects };
+  }, [recordingSegments]);
 
   return (
     <>
@@ -91,12 +123,28 @@ function UIPlayground() {
       {config && (
         <div>
           {events && events.length > 0 && (
-            <>
+            <div className="relative">
               <ActivityScrubber
-                items={eventsToScrubberItems(events)}
+                items={[]}
+                options={{
+                  start: new Date(1704207600000),
+                  end: new Date(1704211200000),
+                }}
                 selectHandler={onSelect}
               />
-            </>
+              <div className="w-full absolute left-0 top-0 h-[84px]">
+                <TimelineGraph
+                  id="test"
+                  data={[
+                    {
+                      name: "Motion",
+                      data: graphData.motion,
+                    },
+                    { name: "Active Objects", data: graphData.objects },
+                  ]}
+                />
+              </div>
+            </div>
           )}
         </div>
       )}

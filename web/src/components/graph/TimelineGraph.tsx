@@ -54,6 +54,8 @@ export default function TimelineGraph({ id, data }: TimelineGraphProps) {
           labels: {
             show: false,
           },
+          logarithmic: true,
+          logBase: 10,
         },
       }}
       series={data}
