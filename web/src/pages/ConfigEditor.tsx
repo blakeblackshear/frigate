@@ -150,9 +150,9 @@ function ConfigEditor() {
         </div>
       </div>
 
-      {success && <div className="max-h-20 text-green-500">{success}</div>}
+      {success && <div className="max-h-20 text-success">{success}</div>}
       {error && (
-        <div className="p-4 overflow-scroll text-red-500 whitespace-pre-wrap">
+        <div className="p-4 overflow-scroll text-danger whitespace-pre-wrap">
           {error}
         </div>
       )}
