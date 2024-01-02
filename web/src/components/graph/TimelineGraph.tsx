@@ -14,6 +14,7 @@ export default function TimelineGraph({ id, data }: TimelineGraphProps) {
     <Chart
       type="bar"
       options={{
+        colors: ["#991b1b", "#06b6d4", "#ea580c"],
         chart: {
           id: id,
           selection: {
