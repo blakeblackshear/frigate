@@ -107,13 +107,14 @@ export function getTimelineHoursForDay(
   cards: CardsData,
   allPreviews: Preview[],
   timestamp: number
-): TimelinePlayback[] {
+): HistoryTimeline {
   const now = new Date();
   const data: TimelinePlayback[] = [];
   const startDay = new Date(timestamp * 1000);
   startDay.setHours(23, 59, 59, 999);
   const dayEnd = startDay.getTime() / 1000;
   startDay.setHours(0, 0, 0, 0);
+  const startTimestamp = startDay.getTime() / 1000;
   let start = startDay.getTime() / 1000;
   let end = 0;
 
@@ -134,7 +135,7 @@ export function getTimelineHoursForDay(
   });
 
   if (dayIdx == undefined) {
-    return [];
+    return { start: 0, end: 0, playbackItems: [] };
   }
 
   const day = cards[dayIdx];
@@ -179,5 +180,5 @@ export function getTimelineHoursForDay(
     start = startDay.getTime() / 1000;
   }
 
-  return data.reverse();
+  return { start: startTimestamp, end, playbackItems: data.reverse() };
 }
