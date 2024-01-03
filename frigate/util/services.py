@@ -14,7 +14,7 @@ import cv2
 import psutil
 import py3nvml.py3nvml as nvml
 
-from frigate.util.builtin import escape_special_characters
+from frigate.util.builtin import clean_camera_user_pass, escape_special_characters
 
 logger = logging.getLogger(__name__)
 
@@ -134,7 +134,7 @@ def get_cpu_stats() -> dict[str, dict]:
                 "cpu": str(cpu_percent),
                 "cpu_average": str(round(cpu_average_usage, 2)),
                 "mem": f"{mem_pct}",
-                "cmdline": " ".join(cmdline),
+                "cmdline": clean_camera_user_pass(" ".join(cmdline)),
             }
         except Exception:
             continue
