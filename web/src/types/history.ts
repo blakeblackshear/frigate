@@ -56,6 +56,12 @@ interface HistoryFilter extends FilterType {
   detailLevel: "normal" | "extra" | "full";
 }
 
+type HistoryTimeline = {
+  start: number;
+  end: number;
+  playbackItems: TimelinePlayback[];
+};
+
 type TimelinePlayback = {
   camera: string;
   range: { start: number; end: number };

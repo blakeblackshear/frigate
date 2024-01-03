@@ -8,6 +8,7 @@ import re
 import subprocess as sp
 import time
 import traceback
+from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from functools import reduce
 from pathlib import Path
@@ -620,7 +621,9 @@ def hourly_timeline():
     after = request.args.get("after", type=float)
     limit = request.args.get("limit", 200)
     tz_name = request.args.get("timezone", default="utc", type=str)
+
     _, minute_modifier, _ = get_tz_modifiers(tz_name)
+    minute_offset = int(minute_modifier.split(" ")[0])
 
     clauses = []
 
@@ -675,7 +678,7 @@ def hourly_timeline():
                 minute=0, second=0, microsecond=0
             )
             + timedelta(
-                minutes=int(minute_modifier.split(" ")[0]),
+                minutes=minute_offset,
             )
         ).timestamp()
         if hour not in hours:
@@ -691,6 +694,87 @@ def hourly_timeline():
             "hours": hours,
         }
     )
+
+
+@bp.route("/<camera_name>/recording/hourly/activity")
+def hourly_timeline_activity(camera_name: str):
+    """Get hourly summary for timeline."""
+    if camera_name not in current_app.frigate_config.cameras:
+        return make_response(
+            jsonify({"success": False, "message": "Camera not found"}),
+            404,
+        )
+
+    before = request.args.get("before", type=float, default=datetime.now())
+    after = request.args.get(
+        "after", type=float, default=datetime.now() - timedelta(hours=1)
+    )
+    tz_name = request.args.get("timezone", default="utc", type=str)
+
+    _, minute_modifier, _ = get_tz_modifiers(tz_name)
+    minute_offset = int(minute_modifier.split(" ")[0])
+
+    all_recordings: list[Recordings] = (
+        Recordings.select(
+            Recordings.start_time,
+            Recordings.duration,
+            Recordings.objects,
+            Recordings.motion,
+        )
+        .where(Recordings.camera == camera_name)
+        .where(Recordings.motion > 0)
+        .where((Recordings.start_time > after) & (Recordings.end_time < before))
+        .order_by(Recordings.start_time.asc())
+        .iterator()
+    )
+
+    # data format is ex:
+    # {timestamp: [{ date: 1, count: 1, type: motion }]}] }}
+    hours: dict[int, list[dict[str, any]]] = defaultdict(list)
+
+    key = datetime.fromtimestamp(after).replace(second=0, microsecond=0) + timedelta(
+        minutes=minute_offset
+    )
+    check = (key + timedelta(hours=1)).timestamp()
+
+    # set initial start so data is representative of full hour
+    hours[int(key.timestamp())].append(
+        {
+            "date": key.timestamp(),
+            "count": 0,
+            "type": "motion",
+        }
+    )
+
+    for recording in all_recordings:
+        if recording.start_time > check:
+            hours[int(key.timestamp())].append(
+                {
+                    "date": (key + timedelta(hours=1)).timestamp(),
+                    "count": 0,
+                    "type": "motion",
+                }
+            )
+            key = key + timedelta(hours=1)
+            check = (key + timedelta(hours=1)).timestamp()
+            hours[int(key.timestamp())].append(
+                {
+                    "date": key.timestamp(),
+                    "count": 0,
+                    "type": "motion",
+                }
+            )
+
+        data_type = "motion" if recording.objects == 0 else "objects"
+        hours[int(key.timestamp())].append(
+            {
+                "date": recording.start_time + (recording.duration / 2),
+                "count": recording.motion,
+                "type": data_type,
+            }
+        )
+
+    return jsonify(hours)
 
 
 @bp.route("/<camera_name>/<label>/best.jpg")
