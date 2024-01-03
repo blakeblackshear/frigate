@@ -203,7 +203,7 @@ export default function MobileTimelineView({
             <VideoPlayer
               options={{
                 preload: "auto",
-                autoplay: false,
+                autoplay: true,
                 controls: false,
                 muted: true,
                 loadingSpinner: false,
@@ -217,6 +217,7 @@ export default function MobileTimelineView({
               seekOptions={{}}
               onReady={(player) => {
                 previewRef.current = player;
+                player.pause();
                 player.on("seeked", () => setSeeking(false));
               }}
               onDispose={() => {
@@ -251,7 +252,8 @@ export default function MobileTimelineView({
             timechangedHandler={onStopScrubbing}
             selectHandler={(data) => {
               if (data.items.length > 0) {
-                const selected = data.items[0];
+                const selected = parseFloat(data.items[0].split("-")[0]);
+
                 onSelectItem(
                   playback.timelineItems.find(
                     (timeline) => timeline.timestamp == selected
@@ -267,9 +269,9 @@ export default function MobileTimelineView({
 }
 
 function timelineItemsToScrubber(items: Timeline[]): ScrubberItem[] {
-  return items.map((item) => {
+  return items.map((item, idx) => {
     return {
-      id: item.timestamp,
+      id: `${item.timestamp}-${idx}`,
       content: getTimelineContentElement(item),
       start: new Date(item.timestamp * 1000),
       end: new Date(item.timestamp * 1000),
