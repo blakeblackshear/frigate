@@ -1,10 +1,11 @@
+import { baseUrl } from "@/api/baseUrl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type MSEPlayerProps = {
-  src: URL;
+  camera: string;
 };
 
-function MSEPlayer({ src }: MSEPlayerProps) {
+function MSEPlayer({ camera }: MSEPlayerProps) {
   let connectTS: number = 0;
 
   const RECONNECT_TIMEOUT: number = 30000;
@@ -33,16 +34,9 @@ function MSEPlayer({ src }: MSEPlayerProps) {
   const msRef = useRef<MediaSource | null>(null);
 
   const wsURL = useMemo(() => {
-    let updatedSrc = src.toString();
-
-    if (updatedSrc.startsWith("http")) {
-      updatedSrc = `ws${updatedSrc.substring(4)}`;
-    } else if (updatedSrc.startsWith("/")) {
-      updatedSrc = `ws${location.origin.substring(4)}${src}`;
-    }
-
-    return updatedSrc;
-  }, [src]);
+    console.log(camera);
+    return `${baseUrl.replace(/^http/, "ws")}live/webrtc/api/ws?src=${camera}`;
+  }, [camera]);
 
   const play = () => {
     const currentVideo = videoRef.current;

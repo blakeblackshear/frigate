@@ -67,15 +67,7 @@ export default function LivePlayer({
     if ("MediaSource" in window || "ManagedMediaSource" in window) {
       return (
         <div className="max-w-5xl">
-          <MSEPlayer
-            src={
-              new URL(
-                `${baseUrl.replace(/^http/, "ws")}live/webrtc/api/ws?src=${
-                  cameraConfig.live.stream_name
-                }`
-              )
-            }
-          />
+          <MSEPlayer camera={cameraConfig.live.stream_name} />
         </div>
       );
     } else {
