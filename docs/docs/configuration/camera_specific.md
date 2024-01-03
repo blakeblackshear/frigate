@@ -105,6 +105,12 @@ If available, recommended settings are:
 
 According to [this discussion](https://github.com/blakeblackshear/frigate/issues/3235#issuecomment-1135876973), the http video streams seem to be the most reliable for Reolink.
 
+:::caution
+
+The below configuration only works for reolink cameras with stream resolution of 5MP or lower, 8MP+ cameras need to use RTSP as http-flv is not supported in this case.
+
+:::
+
 ```yaml
 go2rtc:
   streams:
