@@ -123,7 +123,7 @@ function Camera({ camera }: { camera: CameraConfig }) {
                     ? recordValue == "ON"
                       ? "text-primary"
                       : "text-gray-400"
-                    : "text-red-500"
+                    : "text-danger"
                 }
                 onClick={(e) => {
                   e.stopPropagation();

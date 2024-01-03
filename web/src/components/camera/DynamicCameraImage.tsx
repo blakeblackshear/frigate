@@ -83,19 +83,19 @@ export default function DynamicCameraImage({
       <div className="flex absolute right-0 bottom-0 bg-black bg-opacity-20 rounded p-1">
         <MdLeakAdd
           className={`${
-            detectingMotion == "ON" ? "text-red-500" : "text-gray-600"
+            detectingMotion == "ON" ? "text-motion" : "text-gray-600"
           }`}
         />
         <TbUserScan
           className={`${
-            activeObjects.length > 0 ? "text-cyan-500" : "text-gray-600"
+            activeObjects.length > 0 ? "text-object" : "text-gray-600"
           }`}
         />
         {camera.audio.enabled && (
           <LuEar
             className={`${
               parseInt(audioRms) >= camera.audio.min_volume
-                ? "text-orange-500"
+                ? "text-audio"
                 : "text-gray-600"
             }`}
           />

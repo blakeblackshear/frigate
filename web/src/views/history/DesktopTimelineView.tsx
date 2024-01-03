@@ -10,6 +10,8 @@ import useSWR from "swr";
 import Player from "video.js/dist/types/player";
 import TimelineItemCard from "@/components/card/TimelineItemCard";
 import { getTimelineHoursForDay } from "@/utils/historyUtil";
+import { GraphDataPoint } from "@/types/graph";
+import TimelineGraph from "@/components/graph/TimelineGraph";
 
 type DesktopTimelineViewProps = {
   timelineData: CardsData;
@@ -166,6 +168,50 @@ export default function DesktopTimelineView({
     []
   );
 
+  const { data: activity } = useSWR<RecordingActivity>(
+    [
+      `${initialPlayback.camera}/recording/hourly/activity`,
+      {
+        after: timelineStack.start,
+        before: timelineStack.end,
+        timezone,
+      },
+    ],
+    { revalidateOnFocus: false }
+  );
+  const timelineGraphData = useMemo(() => {
+    if (!activity) {
+      return {};
+    }
+
+    const graphData: {
+      [hour: string]: { objects: GraphDataPoint[]; motion: GraphDataPoint[] };
+    } = {};
+
+    Object.entries(activity).forEach(([hour, data]) => {
+      const objects: GraphDataPoint[] = [];
+      const motion: GraphDataPoint[] = [];
+
+      data.forEach((seg) => {
+        if (seg.type == "objects") {
+          objects.push({
+            x: new Date(seg.date * 1000),
+            y: seg.count,
+          });
+        } else {
+          motion.push({
+            x: new Date(seg.date * 1000),
+            y: seg.count,
+          });
+        }
+      });
+
+      graphData[hour] = { objects, motion };
+    });
+
+    return graphData;
+  }, [activity]);
+
   if (!config) {
     return <ActivityIndicator />;
   }
@@ -271,14 +317,17 @@ export default function DesktopTimelineView({
         </div>
       </div>
       <div className="m-1 max-h-72 2xl:max-h-80 3xl:max-h-96 overflow-auto">
-        {timelineStack.map((timeline) => {
+        {timelineStack.playbackItems.map((timeline) => {
           const isSelected =
             timeline.range.start == selectedPlayback.range.start;
+          const graphData = timelineGraphData[timeline.range.start];
 
           return (
             <div
               key={timeline.range.start}
-              className={`p-2 ${isSelected ? "bg-secondary bg-opacity-30 rounded-md" : ""}`}
+              className={`relative p-2 ${
+                isSelected ? "bg-secondary bg-opacity-30 rounded-md" : ""
+              }`}
             >
               <ActivityScrubber
                 items={[]}
@@ -324,9 +373,6 @@ export default function DesktopTimelineView({
                   setScrubbing(false);
                   playerRef.current?.play();
                 }}
-                doubleClickHandler={() => {
-                  setSelectedPlayback(timeline);
-                }}
                 selectHandler={(data) => {
                   if (data.items.length > 0) {
                     const selected = data.items[0];
@@ -337,7 +383,22 @@ export default function DesktopTimelineView({
                     );
                   }
                 }}
+                doubleClickHandler={() => setSelectedPlayback(timeline)}
               />
+              {isSelected && graphData && (
+                <div className="w-full absolute left-0 top-0 h-[84px]">
+                  <TimelineGraph
+                    id={timeline.range.start.toString()}
+                    data={[
+                      {
+                        name: "Motion",
+                        data: graphData.motion,
+                      },
+                      { name: "Active Objects", data: graphData.objects },
+                    ]}
+                  />
+                </div>
+              )}
             </div>
           );
         })}
