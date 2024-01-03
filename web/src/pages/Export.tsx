@@ -160,7 +160,7 @@ function Export() {
       {message.text && (
         <div
           className={`max-h-20 ${
-            message.error ? "text-red-500" : "text-green-500"
+            message.error ? "text-danger" : "text-success"
           }`}
         >
           {message.text}

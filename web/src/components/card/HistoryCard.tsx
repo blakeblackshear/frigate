@@ -59,7 +59,7 @@ export default function HistoryCard({
           </div>
           <Button className="px-2 py-2" variant="ghost" size="xs">
             <LuTrash
-              className="w-5 h-5 stroke-red-500"
+              className="w-5 h-5 stroke-danger"
               onClick={(e: Event) => {
                 e.stopPropagation();
 

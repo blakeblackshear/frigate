@@ -212,7 +212,7 @@ function History() {
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-red-500"
+              className="bg-danger"
               onClick={() => onDeleteMulti()}
             >
               Delete
