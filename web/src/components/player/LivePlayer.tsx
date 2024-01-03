@@ -11,7 +11,6 @@ import { Label } from "../ui/label";
 import { usePersistence } from "@/hooks/use-persistence";
 import MSEPlayer from "./MsePlayer";
 import JSMpegPlayer from "./JSMpegPlayer";
-import { baseUrl } from "@/api/baseUrl";
 
 const emptyObject = Object.freeze({});
 
