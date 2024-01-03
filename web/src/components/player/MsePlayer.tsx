@@ -34,7 +34,6 @@ function MSEPlayer({ camera }: MSEPlayerProps) {
   const msRef = useRef<MediaSource | null>(null);
 
   const wsURL = useMemo(() => {
-    console.log(camera);
     return `${baseUrl.replace(/^http/, "ws")}live/webrtc/api/ws?src=${camera}`;
   }, [camera]);
 
