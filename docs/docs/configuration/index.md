@@ -47,6 +47,13 @@ onvif:
   password: "{FRIGATE_RTSP_PASSWORD}"
 ```
 
+```yaml
+go2rtc:
+  rtsp:
+    username: "{FRIGATE_GO2RTC_RTSP_USERNAME}"
+    password: "{FRIGATE_GO2RTC_RTSP_PASSWORD}"
+```
+
 ### Full configuration reference:
 
 :::caution
