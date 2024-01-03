@@ -107,7 +107,7 @@ According to [this discussion](https://github.com/blakeblackshear/frigate/issues
 
 :::caution
 
-The below configuration only works for reolink cameras with stream resolution 5MP or lower, 8MP+ cameras need to use RTSP as http-flv is not supported.
+The below configuration only works for reolink cameras with stream resolution of 5MP or lower, 8MP+ cameras need to use RTSP as http-flv is not supported in this case.
 
 :::
 
