@@ -48,7 +48,7 @@
     "eslint-plugin-jest": "^27.2.3",
     "eslint-plugin-prettier": "^5.0.0",
     "eslint-plugin-vitest-globals": "^1.4.0",
-    "fake-indexeddb": "^4.0.1",
+    "fake-indexeddb": "^5.0.2",
     "jest-websocket-mock": "^2.5.0",
     "jsdom": "^22.0.0",
     "msw": "^1.2.1",
