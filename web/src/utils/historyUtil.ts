@@ -149,10 +149,8 @@ export function getTimelineHoursForDay(
 
     end = startDay.getTime() / 1000;
     const hour = Object.values(day).find((cards) => {
-      if (
-        Object.values(cards)[0].time < start ||
-        Object.values(cards)[0].time > end
-      ) {
+      const card = Object.values(cards)[0];
+      if (card == undefined || card.time < start || card.time > end) {
         return false;
       }
 

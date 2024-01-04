@@ -16,6 +16,7 @@ from urllib.parse import unquote
 
 import cv2
 import numpy as np
+import pandas as pd
 import pytz
 import requests
 from flask import (
@@ -739,40 +740,58 @@ def hourly_timeline_activity(camera_name: str):
 
     # set initial start so data is representative of full hour
     hours[int(key.timestamp())].append(
-        {
-            "date": key.timestamp(),
-            "count": 0,
-            "type": "motion",
-        }
+        [
+            key.timestamp(),
+            0,
+            False,
+        ]
     )
 
     for recording in all_recordings:
         if recording.start_time > check:
             hours[int(key.timestamp())].append(
-                {
-                    "date": (key + timedelta(hours=1)).timestamp(),
-                    "count": 0,
-                    "type": "motion",
-                }
+                [
+                    (key + timedelta(minutes=59, seconds=59)).timestamp(),
+                    0,
+                    False,
+                ]
             )
             key = key + timedelta(hours=1)
             check = (key + timedelta(hours=1)).timestamp()
             hours[int(key.timestamp())].append(
-                {
-                    "date": key.timestamp(),
-                    "count": 0,
-                    "type": "motion",
-                }
+                [
+                    key.timestamp(),
+                    0,
+                    False,
+                ]
             )
 
-        data_type = "motion" if recording.objects == 0 else "objects"
+        data_type = recording.objects > 0
         hours[int(key.timestamp())].append(
-            {
-                "date": recording.start_time + (recording.duration / 2),
-                "count": recording.motion,
-                "type": data_type,
-            }
+            [
+                recording.start_time + (recording.duration / 2),
+                recording.motion,
+                data_type,
+            ]
         )
+
+    # resample data using pandas to get activity on minute to minute basis
+    for key, data in hours.items():
+        df = pd.DataFrame(data, columns=["date", "count", "hasObjects"])
+
+        # set date as datetime index
+        df["date"] = pd.to_datetime(df["date"], unit="s")
+        df.set_index(["date"], inplace=True)
+
+        # normalize data
+        df["count"] = np.log10(df["count"], where=df["count"] > 0)
+        df = df.resample("T").mean().fillna(0)
+
+        # change types for output
+        df.index = (df.index.astype(int) // (10 ** 9))
+        df["count"] = df["count"].astype(int)
+        df["hasObjects"] = df["hasObjects"].astype(bool)
+        hours[key] = df.reset_index().to_dict('records')
 
     return jsonify(hours)
 

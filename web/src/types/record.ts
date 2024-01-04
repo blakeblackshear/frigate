@@ -26,5 +26,5 @@ type RecordingActivity = {
 type RecordingSegmentActivity = {
   date: number;
   count: number;
-  type: "motion" | "objects";
+  hasObjects: boolean;
 };

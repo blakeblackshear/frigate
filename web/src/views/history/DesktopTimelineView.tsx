@@ -185,25 +185,22 @@ export default function DesktopTimelineView({
     }
 
     const graphData: {
-      [hour: string]: { objects: GraphDataPoint[]; motion: GraphDataPoint[] };
+      [hour: string]: { objects: number[]; motion: GraphDataPoint[] };
     } = {};
 
     Object.entries(activity).forEach(([hour, data]) => {
-      const objects: GraphDataPoint[] = [];
+      const objects: number[] = [];
       const motion: GraphDataPoint[] = [];
 
-      data.forEach((seg) => {
-        if (seg.type == "objects") {
-          objects.push({
-            x: new Date(seg.date * 1000),
-            y: seg.count,
-          });
-        } else {
-          motion.push({
-            x: new Date(seg.date * 1000),
-            y: seg.count,
-          });
+      data.forEach((seg, idx) => {
+        if (seg.hasObjects) {
+          objects.push(idx);
         }
+
+        motion.push({
+          x: new Date(seg.date * 1000),
+          y: seg.count,
+        });
       });
 
       graphData[hour] = { objects, motion };
@@ -316,7 +313,7 @@ export default function DesktopTimelineView({
           })}
         </div>
       </div>
-      <div className="m-1 max-h-72 2xl:max-h-80 3xl:max-h-96 overflow-auto">
+      <div className="m-1 w-full max-h-72 2xl:max-h-80 3xl:max-h-96 overflow-auto">
         {timelineStack.playbackItems.map((timeline) => {
           const isSelected =
             timeline.range.start == selectedPlayback.range.start;
@@ -386,7 +383,7 @@ export default function DesktopTimelineView({
                 doubleClickHandler={() => setSelectedPlayback(timeline)}
               />
               {isSelected && graphData && (
-                <div className="w-full absolute left-0 top-0 h-[84px]">
+                <div className="absolute left-2 right-2 top-0 h-[84px]">
                   <TimelineGraph
                     id={timeline.range.start.toString()}
                     data={[
@@ -394,8 +391,10 @@ export default function DesktopTimelineView({
                         name: "Motion",
                         data: graphData.motion,
                       },
-                      { name: "Active Objects", data: graphData.objects },
                     ]}
+                    objects={graphData.objects}
+                    start={graphData.motion[0].x.getTime()}
+                    end={graphData.motion.at(-1)!!.x.getTime()}
                   />
                 </div>
               )}
