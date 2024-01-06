@@ -108,20 +108,20 @@ According to [this discussion](https://github.com/blakeblackshear/frigate/issues
 ```yaml
 go2rtc:
   streams:
-    your_reolink_camera: 
+    your-reolink-camera: 
       - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=username&password=password#video=copy#audio=copy#audio=opus"
-    your_reolink_camera_sub: 
+    your-reolink-camera-sub: 
       - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=username&password=password"
 
 cameras:
   reolink:
     ffmpeg:
       inputs:
-        - path: rtsp://127.0.0.1:8554/your_reolink_camera?video=copy&audio=aac
+        - path: rtsp://127.0.0.1:8554/your-reolink-camera?video=copy&audio=aac
           input_args: preset-rtsp-restream
           roles:
             - record
-        - path: rtsp://127.0.0.1:8554/your_reolink_camera_sub?video=copy
+        - path: rtsp://127.0.0.1:8554/your-reolink-camera-sub?video=copy
           input_args: preset-rtsp-restream
           roles:
             - detect
