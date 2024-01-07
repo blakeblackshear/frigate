@@ -1,0 +1,20 @@
+mqtt:
+  host: mqtt.example.com
+  port: 1883
+  username: your_username
+  password: your_password
+  topic_prefix: nvr/
+
+detectors:
+  type: yolov3
+  model_path: /path/to/yolov3/model
+  confidence_threshold: 0.5
+
+database:
+  type: postgresql
+  host: db.example.com
+  port: 5432
+  username: db_user
+  password: db_password
+  database_name: nvr_database
+  table_prefix: nvr_
