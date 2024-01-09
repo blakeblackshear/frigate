@@ -295,7 +295,7 @@ class TrackedObject:
             ret, jpg = cv2.imencode(".jpg", np.zeros((175, 175, 3), np.uint8))
 
         jpg_bytes = self.get_jpg_bytes(
-            timestamp=False, bounding_box=False, crop=True, height=175
+            timestamp=False, bounding_box=False, crop=True, width=400, quality=90
         )
 
         if jpg_bytes:
@@ -326,7 +326,13 @@ class TrackedObject:
             return None
 
     def get_jpg_bytes(
-        self, timestamp=False, bounding_box=False, crop=False, height=None, quality=70
+        self,
+        timestamp=False,
+        bounding_box=False,
+        crop=False,
+        height=None,
+        width=None,
+        quality=70,
     ):
         if self.thumbnail_data is None:
             return None
@@ -389,8 +395,15 @@ class TrackedObject:
             )
             best_frame = best_frame[region[1] : region[3], region[0] : region[2]]
 
-        if height:
-            width = int(height * best_frame.shape[1] / best_frame.shape[0])
+        if width and height:
+            logger.warning(
+                "get_jpg_bytes() expects only width or height to be specified, not both"
+            )
+        if width or height:
+            if height:
+                width = int(height * best_frame.shape[1] / best_frame.shape[0])
+            elif width:
+                height = int(width * best_frame.shape[0] / best_frame.shape[1])
             best_frame = cv2.resize(
                 best_frame, dsize=(width, height), interpolation=cv2.INTER_AREA
             )
