@@ -19,7 +19,7 @@ class InterProcessCommunicator(Communicator):
         )
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REP)
-        self.socket.bind(f"tcp://*:{INTER_PROCESS_COMM_PORT}")
+        self.socket.bind(f"tcp://127.0.0.1:{INTER_PROCESS_COMM_PORT}")
         self.stop_event: MpEvent = mp.Event()
 
     def publish(self, topic: str, payload: str, retain: bool) -> None:
