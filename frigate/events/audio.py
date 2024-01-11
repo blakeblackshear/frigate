@@ -76,17 +76,9 @@ def listen_to_audio(
     stop_event = mp.Event()
     audio_threads: list[threading.Thread] = []
 
-    # create communication for finished previews
-    INTER_PROCESS_COMM_PORT = (
-        os.environ.get("INTER_PROCESS_COMM_PORT") or PORT_INTER_PROCESS_COMM
-    )
-    requestor = InterProcessRequestor(INTER_PROCESS_COMM_PORT)
-
     def exit_process() -> None:
         for thread in audio_threads:
             thread.join()
-
-        requestor.stop()
 
         logger.info("Exiting audio detector...")
 
@@ -109,7 +101,6 @@ def listen_to_audio(
                 camera_metrics,
                 process_info,
                 stop_event,
-                requestor,
             )
             audio_threads.append(audio)
             audio.start()
@@ -183,7 +174,6 @@ class AudioEventMaintainer(threading.Thread):
         camera_metrics: dict[str, CameraMetricsTypes],
         feature_metrics: dict[str, FeatureMetricsTypes],
         stop_event: mp.Event,
-        requestor: InterProcessRequestor,
     ) -> None:
         threading.Thread.__init__(self)
         self.name = f"{camera.name}_audio_event_processor"
@@ -191,7 +181,6 @@ class AudioEventMaintainer(threading.Thread):
         self.recordings_info_queue = recordings_info_queue
         self.camera_metrics = camera_metrics
         self.feature_metrics = feature_metrics
-        self.requestor = requestor
         self.detections: dict[dict[str, any]] = {}
         self.stop_event = stop_event
         self.detector = AudioTfl(stop_event, self.config.audio.num_threads)
@@ -201,6 +190,12 @@ class AudioEventMaintainer(threading.Thread):
         self.ffmpeg_cmd = get_ffmpeg_command(self.config.ffmpeg)
         self.logpipe = LogPipe(f"ffmpeg.{self.config.name}.audio")
         self.audio_listener = None
+
+        # create communication for finished previews
+        INTER_PROCESS_COMM_PORT = (
+            os.environ.get("INTER_PROCESS_COMM_PORT") or PORT_INTER_PROCESS_COMM
+        )
+        self.requestor = InterProcessRequestor(INTER_PROCESS_COMM_PORT)
 
     def detect_audio(self, audio) -> None:
         if not self.feature_metrics[self.config.name]["audio_enabled"].value:
@@ -353,3 +348,4 @@ class AudioEventMaintainer(threading.Thread):
 
         stop_ffmpeg(self.audio_listener, self.logger)
         self.logpipe.close()
+        self.requestor.stop()
