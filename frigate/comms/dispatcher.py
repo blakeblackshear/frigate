@@ -2,7 +2,7 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 
 from frigate.config import BirdseyeModeEnum, FrigateConfig
 from frigate.const import INSERT_MANY_RECORDINGS, INSERT_PREVIEW, REQUEST_REGION_GRID
@@ -70,7 +70,7 @@ class Dispatcher:
         for comm in self.comms:
             comm.subscribe(self._receive)
 
-    def _receive(self, topic: str, payload: str) -> None:
+    def _receive(self, topic: str, payload: str) -> Optional[Any]:
         """Handle receiving of payload from communicators."""
         if topic.endswith("set"):
             try:
@@ -95,13 +95,12 @@ class Dispatcher:
             Recordings.insert_many(payload).execute()
         elif topic == REQUEST_REGION_GRID:
             camera = payload
-            self.camera_metrics[camera]["region_grid_queue"].put(
-                get_camera_regions_grid(
-                    camera,
-                    self.config.cameras[camera].detect,
-                    max(self.config.model.width, self.config.model.height),
-                )
+            grid = get_camera_regions_grid(
+                camera,
+                self.config.cameras[camera].detect,
+                max(self.config.model.width, self.config.model.height),
             )
+            return grid
         elif topic == INSERT_PREVIEW:
             Previews.insert(payload).execute()
         else:

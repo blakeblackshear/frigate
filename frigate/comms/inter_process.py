@@ -1,16 +1,25 @@
+"""Facilitates communication between processes."""
+
 import multiprocessing as mp
-import queue
+import os
 import threading
-from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Callable
 
+import zmq
+
 from frigate.comms.dispatcher import Communicator
+from frigate.const import PORT_INTER_PROCESS_COMM
 
 
 class InterProcessCommunicator(Communicator):
-    def __init__(self, queue: Queue) -> None:
-        self.queue = queue
+    def __init__(self) -> None:
+        INTER_PROCESS_COMM_PORT = (
+            os.environ.get("INTER_PROCESS_COMM_PORT") or PORT_INTER_PROCESS_COMM
+        )
+        self.context = zmq.Context()
+        self.socket = self.context.socket(zmq.REP)
+        self.socket.bind(f"tcp://*:{INTER_PROCESS_COMM_PORT}")
         self.stop_event: MpEvent = mp.Event()
 
     def publish(self, topic: str, payload: str, retain: bool) -> None:
@@ -23,17 +32,39 @@ class InterProcessCommunicator(Communicator):
         self.reader_thread.start()
 
     def read(self) -> None:
-        while not self.stop_event.is_set():
+        while not self.stop_event.wait(1):
             try:
-                (
-                    topic,
-                    value,
-                ) = self.queue.get(True, 1)
-            except queue.Empty:
+                (topic, value) = self.socket.recv_json(flags=zmq.NOBLOCK)
+            except zmq.ZMQError:
                 continue
 
-            self._dispatcher(topic, value)
+            response = self._dispatcher(topic, value)
+
+            if response is not None:
+                self.socket.send_json(response)
+            else:
+                self.socket.send_json([])
 
     def stop(self) -> None:
         self.stop_event.set()
         self.reader_thread.join()
+        self.socket.close()
+        self.context.destroy()
+
+
+class InterProcessRequestor:
+    """Simplifies sending data to InterProcessCommunicator and getting a reply."""
+
+    def __init__(self, port: int) -> None:
+        self.context = zmq.Context()
+        self.socket = self.context.socket(zmq.REQ)
+        self.socket.connect(f"tcp://127.0.0.1:{port}")
+
+    def send_data(self, topic: str, data: any) -> any:
+        """Sends data and then waits for reply."""
+        self.socket.send_json((topic, data))
+        return self.socket.recv_json()
+
+    def stop(self) -> None:
+        self.socket.close()
+        self.context.destroy()

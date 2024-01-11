@@ -30,7 +30,6 @@ logger = logging.getLogger(__name__)
 def output_frames(
     config: FrigateConfig,
     video_output_queue: mp.Queue,
-    inter_process_queue: mp.Queue,
     camera_metrics: dict[str, CameraMetricsTypes],
 ):
     threading.current_thread().name = "output"
@@ -68,7 +67,7 @@ def output_frames(
             continue
 
         jsmpeg_cameras[camera] = JsmpegCamera(cam_config, stop_event, websocket_server)
-        preview_recorders[camera] = PreviewRecorder(cam_config, inter_process_queue)
+        preview_recorders[camera] = PreviewRecorder(cam_config)
 
     if config.birdseye.enabled:
         birdseye = Birdseye(
