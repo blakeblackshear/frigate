@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { AspectRatio } from "../ui/aspect-ratio";
 import CameraImage from "./CameraImage";
 import { LuEar } from "react-icons/lu";
@@ -21,6 +21,10 @@ export default function DynamicCameraImage({
 }: DynamicCameraImageProps) {
   const [key, setKey] = useState(Date.now());
   const [activeObjects, setActiveObjects] = useState<string[]>([]);
+  const hasActiveObjects = useMemo(
+    () => activeObjects.length > 0,
+    [activeObjects]
+  );
 
   const { payload: detectingMotion } = useMotionActivity(camera.name);
   const { payload: event } = useFrigateEvents();
@@ -58,8 +62,9 @@ export default function DynamicCameraImage({
 
   const handleLoad = useCallback(() => {
     const loadTime = Date.now() - key;
-    const loadInterval =
-      activeObjects.length > 0 ? INTERVAL_ACTIVE_MS : INTERVAL_INACTIVE_MS;
+    const loadInterval = hasActiveObjects
+      ? INTERVAL_ACTIVE_MS
+      : INTERVAL_INACTIVE_MS;
 
     setTimeout(
       () => {
@@ -67,7 +72,7 @@ export default function DynamicCameraImage({
       },
       loadTime > loadInterval ? 1 : loadInterval
     );
-  }, [activeObjects, key]);
+  }, [hasActiveObjects, key]);
 
   return (
     <AspectRatio
