@@ -108,7 +108,8 @@ export function getTimelineHoursForDay(
   allPreviews: Preview[],
   timestamp: number
 ): HistoryTimeline {
-  const now = new Date();
+  const endOfThisHour = new Date();
+  endOfThisHour.setHours(endOfThisHour.getHours() + 1, 0, 0, 0);
   const data: TimelinePlayback[] = [];
   const startDay = new Date(timestamp * 1000);
   startDay.setHours(23, 59, 59, 999);
@@ -143,7 +144,7 @@ export function getTimelineHoursForDay(
   for (let i = 0; i < 24; i++) {
     startDay.setHours(startDay.getHours() + 1);
 
-    if (startDay > now) {
+    if (startDay > endOfThisHour) {
       break;
     }
 

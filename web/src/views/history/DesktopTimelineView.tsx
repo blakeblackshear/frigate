@@ -126,6 +126,11 @@ export default function DesktopTimelineView({
       return;
     }
 
+    if (timeToSeek && !scrubbing) {
+      setScrubbing(true);
+      playerRef.current?.pause();
+    }
+
     if (timeToSeek && timeToSeek != previewRef.current?.currentTime()) {
       setSeeking(true);
       previewRef.current?.currentTime(timeToSeek);
@@ -329,7 +334,7 @@ export default function DesktopTimelineView({
               <ActivityScrubber
                 items={[]}
                 timeBars={
-                  isSelected && selectedPlayback.relevantPreview
+                  isSelected
                     ? [
                         {
                           time: new Date(
@@ -349,11 +354,6 @@ export default function DesktopTimelineView({
                 timechangeHandler={(data) => {
                   if (!timeline.relevantPreview) {
                     return;
-                  }
-
-                  if (playerRef.current?.paused() == false) {
-                    setScrubbing(true);
-                    playerRef.current?.pause();
                   }
 
                   const seekTimestamp = data.time.getTime() / 1000;

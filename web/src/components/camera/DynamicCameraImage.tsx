@@ -72,7 +72,7 @@ export default function DynamicCameraImage({
       },
       loadTime > loadInterval ? 1 : loadInterval
     );
-  }, [hasActiveObjects, key]);
+  }, [key]);
 
   return (
     <AspectRatio
