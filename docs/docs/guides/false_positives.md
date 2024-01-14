@@ -7,7 +7,13 @@ Tune your object filters to adjust false positives: `min_area`, `max_area`, `min
 
 The `min_area` and `max_area` values are compared against the area (number of pixels) from a given detected object. If the area is outside this range, the object will be ignored as a false positive. This allows objects that must be too small or too large to be ignored.
 
-Similarly, the `min_ratio` and `max_ratio` values are compared against a given detected object's width/height ratio (in pixels). If the ratio is outside this range, the object will be ignored as a false positive. This allows objects that are proportionally too short-and-wide (higher ratio) or too tall-and-narrow (smaller ratio) to be ignored.
+Similarly, the `min_ratio` and `max_ratio` values are compared against a given detected object's width/height ratio (in pixels). If the ratio is outside this range, the object will be ignored as a false positive. This allows objects that are proportionally too short-and-wide (higher ratio) or too tall-and-narrow (smaller ratio) to be ignored. 
+
+:::info
+
+Conceptually, a ratio of 1 is a square, 0.5 is a "tall skinny" box, and 2 is a "wide flat" box. If `min_ratio` is 1.0, any object that is taller than it is wide will be ignored. Similarly, if `max_ratio` is 1.0, then any object that is wider than it is tall will be ignored.
+
+:::
 
 For object filters in your configuration, any single detection below `min_score` will be ignored as a false positive. `threshold` is based on the median of the history of scores (padded to 3 values) for a tracked object. Consider the following frames when `min_score` is set to 0.6 and threshold is set to 0.85:
 
