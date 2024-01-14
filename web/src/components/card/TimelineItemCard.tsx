@@ -21,7 +21,7 @@ export default function TimelineItemCard({
 
   return (
     <Card className="relative m-2 flex w-full h-32 cursor-pointer" onClick={onSelect}>
-      <div className="w-1/2 p-2">
+      <div className="p-2">
         {relevantPreview && (
           <VideoPlayer
             options={{
@@ -48,7 +48,7 @@ export default function TimelineItemCard({
           />
         )}
       </div>
-      <div className="px-2 py-1 w-1/2">
+      <div className="py-1">
         <div className="capitalize font-semibold text-sm">
           {getTimelineItemDescription(timeline)}
         </div>

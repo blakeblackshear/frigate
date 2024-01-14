@@ -770,7 +770,7 @@ def hourly_timeline_activity(camera_name: str):
         hours[int(key.timestamp())].append(
             [
                 recording.start_time + (recording.duration / 2),
-                recording.motion,
+                max(recording.motion, recording.objects),
                 data_type,
             ]
         )
