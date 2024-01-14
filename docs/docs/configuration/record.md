@@ -15,7 +15,7 @@ As of Frigate 0.12 if there is less than an hour left of storage, the oldest 2 h
 
 ## Configuring Recording Retention
 
-Frigate supports both 24/7 and event based recordings with separate retention modes and retention periods.
+Frigate supports both continuous and event based recordings with separate retention modes and retention periods.
 
 :::tip
 
@@ -23,18 +23,18 @@ Retention configs support decimals meaning they can be configured to retain `0.5
 
 :::
 
-### 24/7 Recording
+### Continuous Recording
 
-The number of days to retain 24/7 recordings can be set via the following config where X is a number, by default 24/7 recording is disabled.
+The number of days to retain continuous recordings can be set via the following config where X is a number, by default continuous recording is disabled.
 
 ```yaml
 record:
   enabled: True
   retain:
-    days: 1 # <- number of days to keep 24/7 recordings
+    days: 1 # <- number of days to keep continuous recordings
 ```
 
-24/7 recording supports different retention modes [which are described below](#what-do-the-different-retain-modes-mean)
+Continuous recording supports different retention modes [which are described below](#what-do-the-different-retain-modes-mean)
 
 ### Event Recording
 
@@ -54,9 +54,9 @@ This configuration will retain recording segments that overlap with events and h
 
 ## What do the different retain modes mean?
 
-Frigate saves from the stream with the `record` role in 10 second segments. These options determine which recording segments are kept for 24/7 recording (but can also affect events).
+Frigate saves from the stream with the `record` role in 10 second segments. These options determine which recording segments are kept for continuous recording (but can also affect events).
 
-Let's say you have Frigate configured so that your doorbell camera would retain the last **2** days of 24/7 recording.
+Let's say you have Frigate configured so that your doorbell camera would retain the last **2** days of continuous recording.
 - With the `all` option all 48 hours of those two days would be kept and viewable.
 - With the `motion` option the only parts of those 48 hours would be segments that Frigate detected motion. This is the middle ground option that won't keep all 48 hours, but will likely keep all segments of interest along with the potential for some extra segments.
 - With the `active_objects` option the only segments that would be kept are those where there was a true positive object that was not considered stationary.
@@ -98,7 +98,7 @@ record:
         car: 7
 ```
 
-## Can I have "24/7" recordings, but only at certain times?
+## Can I have "continuous" recordings, but only at certain times?
 
 Using Frigate UI, HomeAssistant, or MQTT, cameras can be automated to only record in certain situations or at certain times.
 
