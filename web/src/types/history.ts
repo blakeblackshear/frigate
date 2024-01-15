@@ -25,7 +25,13 @@ type Timeline = {
   camera: string;
   timestamp: number;
   data: {
-    [key: string]: any;
+    camera: string;
+    label: string;
+    sub_label: string;
+    box?: [number, number, number, number];
+    region: [number, number, number, number];
+    attribute: string;
+    zones: string[];
   };
   class_type:
     | "visible"
