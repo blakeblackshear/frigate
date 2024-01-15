@@ -14,6 +14,10 @@ export default function TimelineEventOverlay({
   timeline,
   cameraConfig,
 }: TimelineEventOverlayProps) {
+  if (!timeline.data.box) {
+    return null;
+  }
+
   const boxLeftEdge = Math.round(timeline.data.box[0] * 100);
   const boxTopEdge = Math.round(timeline.data.box[1] * 100);
   const boxRightEdge = Math.round(
@@ -25,6 +29,10 @@ export default function TimelineEventOverlay({
 
   const [isHovering, setIsHovering] = useState<boolean>(false);
   const getHoverStyle = () => {
+    if (!timeline.data.box) {
+      return {};
+    }
+
     if (boxLeftEdge < 15) {
       // show object stats on right side
       return {
@@ -40,12 +48,20 @@ export default function TimelineEventOverlay({
   };
 
   const getObjectArea = () => {
+    if (!timeline.data.box) {
+      return 0;
+    }
+
     const width = timeline.data.box[2] * cameraConfig.detect.width;
     const height = timeline.data.box[3] * cameraConfig.detect.height;
     return Math.round(width * height);
   };
 
   const getObjectRatio = () => {
+    if (!timeline.data.box) {
+      return 0.0;
+    }
+
     const width = timeline.data.box[2] * cameraConfig.detect.width;
     const height = timeline.data.box[3] * cameraConfig.detect.height;
     return Math.round(100 * (width / height)) / 100;

@@ -285,3 +285,9 @@ export function getRangeForTimestamp(timestamp: number) {
   const end = date.getTime() / 1000;
   return { start, end };
 }
+
+export function isCurrentHour(timestamp: number) {
+  const now = new Date();
+  now.setMinutes(0, 0, 0);
+  return timestamp > now.getTime() / 1000;
+}

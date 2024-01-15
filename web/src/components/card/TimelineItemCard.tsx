@@ -6,6 +6,7 @@ import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import VideoPlayer from "../player/VideoPlayer";
 import { Card } from "../ui/card";
+import { useApiHost } from "@/api";
 
 type TimelineItemCardProps = {
   timeline: Timeline;
@@ -18,35 +19,44 @@ export default function TimelineItemCard({
   onSelect,
 }: TimelineItemCardProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
+  const apiHost = useApiHost();
 
   return (
-    <Card className="relative m-2 flex w-full h-32 cursor-pointer" onClick={onSelect}>
+    <Card
+      className="relative m-2 flex w-full h-32 cursor-pointer"
+      onClick={onSelect}
+    >
       <div className="p-2">
-        {relevantPreview && (
-          <VideoPlayer
-            options={{
-              preload: "auto",
-              height: "114",
-              width: "202",
-              autoplay: true,
-              controls: false,
-              fluid: false,
-              muted: true,
-              loadingSpinner: false,
-              sources: [
-                {
-                  src: `${relevantPreview.src}`,
-                  type: "video/mp4",
-                },
-              ],
-            }}
-            seekOptions={{}}
-            onReady={(player) => {
+        <VideoPlayer
+          options={{
+            preload: "auto",
+            height: "114",
+            width: "202",
+            autoplay: true,
+            controls: false,
+            fluid: false,
+            muted: true,
+            loadingSpinner: false,
+            poster: relevantPreview
+              ? ""
+              : `${apiHost}api/preview/${timeline.camera}/${timeline.timestamp}/thumbnail.jpg`,
+            sources: relevantPreview
+              ? [
+                  {
+                    src: `${relevantPreview.src}`,
+                    type: "video/mp4",
+                  },
+                ]
+              : [],
+          }}
+          seekOptions={{}}
+          onReady={(player) => {
+            if (relevantPreview) {
               player.pause(); // autoplay + pause is required for iOS
               player.currentTime(timeline.timestamp - relevantPreview.start);
-            }}
-          />
-        )}
+            }
+          }}
+        />
       </div>
       <div className="py-1">
         <div className="capitalize font-semibold text-sm">
