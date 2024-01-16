@@ -16,7 +16,7 @@ export function getHourlyTimelineData(
 
         // build a map of course to the types that are included in this hour
         // which allows us to know what items to keep depending on detail level
-        const source_to_types: { [key: string]: string[] } = {};
+        const sourceToTypes: { [key: string]: string[] } = {};
         let cardTypeStart: { [camera: string]: number } = {};
         Object.values(hourlyTimeline["hours"][hour]).forEach((i) => {
           if (i.timestamp > (cardTypeStart[i.camera] ?? 0) + GROUP_SECONDS) {
@@ -25,10 +25,10 @@ export function getHourlyTimelineData(
 
           const groupKey = `${i.source_id}-${cardTypeStart[i.camera]}`;
 
-          if (groupKey in source_to_types) {
-            source_to_types[groupKey].push(i.class_type);
+          if (groupKey in sourceToTypes) {
+            sourceToTypes[groupKey].push(i.class_type);
           } else {
-            source_to_types[groupKey] = [i.class_type];
+            sourceToTypes[groupKey] = [i.class_type];
           }
         });
 
@@ -61,7 +61,7 @@ export function getHourlyTimelineData(
           let add = true;
           if (detailLevel == "normal") {
             if (
-              source_to_types[sourceKey].length > 1 &&
+              sourceToTypes[sourceKey].length > 1 &&
               ["active", "attribute", "gone", "stationary", "visible"].includes(
                 i.class_type
               )
@@ -70,8 +70,8 @@ export function getHourlyTimelineData(
             }
           } else if (detailLevel == "extra") {
             if (
-              source_to_types[sourceKey].length > 1 &&
-              i.class_type in ["attribute", "gone", "visible"]
+              sourceToTypes[sourceKey].length > 1 &&
+              ["attribute", "gone", "visible"].includes(i.class_type)
             ) {
               add = false;
             }

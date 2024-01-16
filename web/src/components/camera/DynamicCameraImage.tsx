@@ -54,7 +54,6 @@ export default function DynamicCameraImage({
         if (eventIndex == -1) {
           const newActiveObjects = [...activeObjects, event.after.id];
           setActiveObjects(newActiveObjects);
-          setKey(Date.now());
         }
       }
     }
