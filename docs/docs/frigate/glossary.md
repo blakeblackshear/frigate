@@ -19,7 +19,7 @@ A false positive is when an object is detected that is not that object. For exam
 
 ## Mask
 
-There are two types of masks in Frigate.
+There are two types of masks in Frigate. [See the mask docs for more info](/configuration/masks)
 
 ### Motion Mask
 
@@ -35,7 +35,7 @@ The min score is the lowest score that an object can be detected with, any objec
 
 ## Motion
 
-Motion is pixels in a specific camera frame are different from the background frame that has been calculated. A motion box is a box around groups of these areas of motion that have been detected. These are represented by red boxes in the debug live view.
+Motion is pixels in a specific camera frame are different from the background frame that has been calculated. A motion box is a box around groups of these areas of motion that have been detected. These are represented by red boxes in the debug live view. [See the motion detection docs for more info](/configuration/motion_detection)
 
 ## Region
 
@@ -55,4 +55,4 @@ The top score for an object is the highest median score for an object.
 
 ## Zone
 
-Zones are areas of interest, zones can be used for notifications and for limiting the areas where Frigate will create an [event](#event).
+Zones are areas of interest, zones can be used for notifications and for limiting the areas where Frigate will create an [event](#event). [See the zone docs for more info](/configuration/zones)
