@@ -5,7 +5,11 @@ import { LuEar } from "react-icons/lu";
 import { CameraConfig } from "@/types/frigateConfig";
 import { TbUserScan } from "react-icons/tb";
 import { MdLeakAdd } from "react-icons/md";
-import { useFrigateEvents, useMotionActivity } from "@/api/ws";
+import {
+  useAudioActivity,
+  useFrigateEvents,
+  useMotionActivity,
+} from "@/api/ws";
 
 type DynamicCameraImageProps = {
   camera: CameraConfig;
@@ -28,7 +32,7 @@ export default function DynamicCameraImage({
 
   const { payload: detectingMotion } = useMotionActivity(camera.name);
   const { payload: event } = useFrigateEvents();
-  const { payload: audioRms } = useMotionActivity(camera.name);
+  const { payload: audioRms } = useAudioActivity(camera.name);
 
   useEffect(() => {
     if (!event) {
