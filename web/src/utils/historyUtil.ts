@@ -1,5 +1,5 @@
-// group history cards by 60 seconds of activity
-const GROUP_SECONDS = 60;
+// group history cards by 120 seconds of activity
+const GROUP_SECONDS = 120;
 
 export function getHourlyTimelineData(
   timelinePages: HourlyTimeline[],
@@ -59,20 +59,32 @@ export function getHourlyTimelineData(
           // full: return all items
 
           let add = true;
+          const sourceType = sourceToTypes[sourceKey];
+          let hiddenItems: string[] = [];
           if (detailLevel == "normal") {
-            if (
-              sourceToTypes[sourceKey].length > 1 &&
-              ["active", "attribute", "gone", "stationary", "visible"].includes(
-                i.class_type
-              )
-            ) {
-              add = false;
-            }
+            hiddenItems = [
+              "active",
+              "attribute",
+              "gone",
+              "stationary",
+              "visible",
+            ];
           } else if (detailLevel == "extra") {
+            hiddenItems = ["attribute", "gone", "visible"];
+          }
+
+          if (sourceType.length > 1) {
+            // we have multiple timeline items for this card
+
             if (
-              sourceToTypes[sourceKey].length > 1 &&
-              ["attribute", "gone", "visible"].includes(i.class_type)
+              sourceType.find((type) => hiddenItems.includes(type) == false) ==
+              undefined
             ) {
+              // all of the attribute items for this card make it hidden, but we need to show one
+              if (sourceType.indexOf(i.class_type) != 0) {
+                add = false;
+              }
+            } else if (hiddenItems.includes(i.class_type)) {
               add = false;
             }
           }
