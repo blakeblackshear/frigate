@@ -1,16 +1,99 @@
 mqtt:
-  host: mqtt
+enabled: True
+host: a0d7b954-emqx
+user: frigate
+password: xxx
+ffmpeg:
+hwaccel_args: preset-vaapi
+input_args: -tag:v hvc1
+database:
+path: /config/frigate.db
+go2rtc:
+streams:
+username: "admin"
+password: "xxx"
+driveway:
 
+rtsp://admin:xxx@192.168.0.211:554/h265Preview_01_main
+"ffmpeg:driveway#video=h264#hardware" backyard:
+rtsp://admin:xxx@192.168.0.210:554/h265Preview_01_main
+"ffmpeg:backyard#video=h264#hardware"
 cameras:
-  test:
-    ffmpeg:
-      inputs:
-        - path: /media/frigate/car-stopping.mp4
-          input_args: -re -stream_loop -1 -fflags +genpts
-          roles:
-            - detect
-            - rtmp
-    detect:
-      height: 1080
-      width: 1920
-      fps: 5
+
+driveway:
+ffmpeg:
+inputs:
+- path: rtsp://127.0.0.1:8554/driveway
+roles:
+- detect
+- record
+detect:
+width: 4096
+
+height: 1536
+fps: 10
+objects:
+track:
+- person
+- car
+filters:
+person:
+min_ratio: 0.25
+max_ratio: 1.0
+min_area: 768
+max_area: 20000
+zones:
+driveway_area:
+coordinates: 4096,1536,4096,615,2860,530,2056,482,1597,681,130,1536
+
+backyard:
+ffmpeg:
+inputs:
+- path: rtsp://127.0.0.1:8554/backyard
+roles:
+
+- detect
+- record
+detect:
+threshold: 0.9
+objects:
+track:
+- person
+filters:
+person:
+min_ratio: 0.3
+max_ratio: 1.0
+min_area: 1024
+max_area: 15000
+zones:
+backyard_area:
+coordinates: 0,1536,4096,1536,4096,0,0,0
+ motion:
+      mask:
+      - 2035,0,1884,245,1575,454,1738,548,1600,592,1438,625,1195,512,1107,344,1003,264,790,234,705,102,1319,0,1581,0
+
+record:
+ enabled: True
+ retain:
+  days: 7
+  mode: motion
+ events:
+  required_zones:
+    - driveway_area
+    - backyard_area
+  retain:
+   default: 14
+   mode: active_objects
+snapshots:
+  enabled: True
+
+rtmp:
+  enabled: false
+
+birdseye:
+  enabled: True
+  mode: continuous
+  restream: False
+  width: 1920
+  height: 1080
+  quality: 4
