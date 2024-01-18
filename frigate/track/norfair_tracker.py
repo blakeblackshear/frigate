@@ -21,6 +21,10 @@ from frigate.util.image import intersection_over_union
 logger = logging.getLogger(__name__)
 
 
+THRESHOLD_STATIONARY_IOU_AVERAGE = 0.6
+MAX_STATIONARY_IOU_HISTORY = 10
+
+
 # Normalizes distance from estimate relative to object size
 # Other ideas:
 # - if estimates are inaccurate for first N detections, compare with last_detection (may be fine)
@@ -74,6 +78,7 @@ class NorfairTracker(ObjectTracker):
         self.untracked_object_boxes: list[list[int]] = []
         self.disappeared = {}
         self.positions = {}
+        self.stationary_iou: dict[str, list[int]] = {}
         self.camera_config = config
         self.detect_config = config.detect
         self.ptz_metrics = ptz_metrics
@@ -127,6 +132,7 @@ class NorfairTracker(ObjectTracker):
             "xmax": self.detect_config.width,
             "ymax": self.detect_config.height,
         }
+        self.stationary_iou[id] = []
 
     def deregister(self, id, track_id):
         del self.tracked_objects[id]
@@ -138,7 +144,7 @@ class NorfairTracker(ObjectTracker):
 
     # tracks the current position of the object based on the last N bounding boxes
     # returns False if the object has moved outside its previous position
-    def update_position(self, id, box):
+    def update_position(self, id: str, box: [int, int, int, int]):
         position = self.positions[id]
         position_box = (
             position["xmin"],
@@ -151,9 +157,18 @@ class NorfairTracker(ObjectTracker):
 
         iou = intersection_over_union(position_box, box)
 
+        self.stationary_iou[id].append(iou)
+
+        if len(self.stationary_iou[id]) > MAX_STATIONARY_IOU_HISTORY:
+            self.stationary_iou[id] = self.stationary_iou[id][
+                -MAX_STATIONARY_IOU_HISTORY:
+            ]
+
+        avg_iou = np.mean(self.stationary_iou[id])
+
         # if the iou drops below the threshold
         # assume the object has moved to a new position and reset the computed box
-        if iou < 0.6:
+        if avg_iou < THRESHOLD_STATIONARY_IOU_AVERAGE:
             self.positions[id] = {
                 "xmins": [xmin],
                 "ymins": [ymin],
@@ -205,7 +220,9 @@ class NorfairTracker(ObjectTracker):
         id = self.track_id_map[track_id]
         self.disappeared[id] = 0
         # update the motionless count if the object has not moved to a new position
-        if self.update_position(id, obj["box"]):
+        if self.update_position(
+            id, obj["box"], self.tracked_objects[id]["motionless_count"] > 1
+        ):
             self.tracked_objects[id]["motionless_count"] += 1
             if self.is_expired(id):
                 self.deregister(id, track_id)
@@ -220,6 +237,7 @@ class NorfairTracker(ObjectTracker):
             ):
                 self.tracked_objects[id]["position_changes"] += 1
             self.tracked_objects[id]["motionless_count"] = 0
+            self.stationary_iou[id] = []
 
         self.tracked_objects[id].update(obj)
 
