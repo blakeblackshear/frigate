@@ -220,9 +220,7 @@ class NorfairTracker(ObjectTracker):
         id = self.track_id_map[track_id]
         self.disappeared[id] = 0
         # update the motionless count if the object has not moved to a new position
-        if self.update_position(
-            id, obj["box"], self.tracked_objects[id]["motionless_count"] > 1
-        ):
+        if self.update_position(id, obj["box"]):
             self.tracked_objects[id]["motionless_count"] += 1
             if self.is_expired(id):
                 self.deregister(id, track_id)

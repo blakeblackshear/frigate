@@ -489,8 +489,12 @@ class CameraState:
             # draw the bounding boxes on the frame
             for obj in tracked_objects.values():
                 if obj["frame_time"] == frame_time:
-                    thickness = 2
-                    color = self.config.model.colormap[obj["label"]]
+                    if obj["stationary"]:
+                        color = (220, 220, 220)
+                        thickness = 1
+                    else:
+                        thickness = 2
+                        color = self.config.model.colormap[obj["label"]]
                 else:
                     thickness = 1
                     color = (255, 0, 0)
