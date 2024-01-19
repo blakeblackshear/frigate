@@ -1859,6 +1859,7 @@ def recordings(camera_name):
             Recordings.segment_size,
             Recordings.motion,
             Recordings.objects,
+            Recordings.duration,
         )
         .where(
             Recordings.camera == camera_name,
