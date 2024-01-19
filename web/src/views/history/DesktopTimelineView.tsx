@@ -147,7 +147,7 @@ export default function DesktopTimelineView({
 
   // handle loading main / preview playback when selected hour changes
   useEffect(() => {
-    if (!playerRef.current || !previewRef.current) {
+    if (!playerRef.current) {
       return;
     }
 
@@ -162,13 +162,13 @@ export default function DesktopTimelineView({
       type: "application/vnd.apple.mpegurl",
     });
 
-    if (selectedPlayback.relevantPreview) {
+    if (selectedPlayback.relevantPreview && previewRef.current) {
       previewRef.current.src({
         src: selectedPlayback.relevantPreview.src,
         type: selectedPlayback.relevantPreview.type,
       });
     }
-  }, [playerRef, previewRef, selectedPlayback]);
+  }, [playerRef, previewRef, playbackUri]);
 
   const timelineStack = useMemo(
     () =>
