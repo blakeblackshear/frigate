@@ -105,6 +105,9 @@ If available, recommended settings are:
 
 According to [this discussion](https://github.com/blakeblackshear/frigate/issues/3235#issuecomment-1135876973), the http video streams seem to be the most reliable for Reolink.
 
+Cameras connected via a Reolink NVR can be connected with the http stream, use `channel[0..15]` in the stream url for the additional channels. 
+The setup of main stream can be also done via RTSP.
+
 ```yaml
 go2rtc:
   streams:
@@ -112,7 +115,11 @@ go2rtc:
       - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=username&password=password#video=copy#audio=copy#audio=opus"
     your_reolink_camera_sub: 
       - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=username&password=password"
-
+    your_reolink_camera_via_nvr:
+      - "ffmpeg:rtsp://username:password@reolink_nvr_ip:554/h264Preview_04_main" # channel numbers are 1-16
+      - "ffmpeg:your_reolink_camera_via_nvr#audio=aac"
+    your_reolink_camera_via_nvr_sub:
+      - "ffmpeg:http://reolink_nvr_ip/flv?port=1935&app=bcs&stream=channel3_ext.bcs&user=username&password=password" # channel numbers are 0-15
 cameras:
   reolink:
     ffmpeg:
@@ -125,6 +132,18 @@ cameras:
           input_args: preset-rtsp-restream
           roles:
             - detect
+  reolink_via_nvr:
+    ffmpeg:
+      inputs:
+        - path: rtsp://127.0.0.1:8554/your_reolink_camera_via_nvr?video=copy&audio=aac
+          input_args: preset-rtsp-restream
+          roles:
+            - record
+        - path: rtsp://127.0.0.1:8554/your_reolink_camera_via_nvr_sub?video=copy
+          input_args: preset-rtsp-restream
+          roles:
+            - detect   
+            
 ```
 
 ### Unifi Protect Cameras
