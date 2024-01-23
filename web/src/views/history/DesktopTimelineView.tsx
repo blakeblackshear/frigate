@@ -12,6 +12,7 @@ import TimelineItemCard from "@/components/card/TimelineItemCard";
 import { getTimelineHoursForDay } from "@/utils/historyUtil";
 import { GraphDataPoint } from "@/types/graph";
 import TimelineGraph from "@/components/graph/TimelineGraph";
+import TimelineBar from "@/components/bar/TimelineBar";
 
 type DesktopTimelineViewProps = {
   timelineData: CardsData;
@@ -361,76 +362,83 @@ export default function DesktopTimelineView({
             <div
               ref={isInitiallySelected ? initialScrollRef : null}
               key={timeline.range.start}
-              className={`relative p-2 ${
-                isSelected ? "bg-secondary bg-opacity-30 rounded-md" : ""
-              }`}
             >
-              <ActivityScrubber
-                items={[]}
-                timeBars={
-                  isSelected
-                    ? [
-                        {
-                          time: new Date(timelineTime * 1000),
-                          id: "playback",
-                        },
-                      ]
-                    : []
-                }
-                options={{
-                  snap: null,
-                  min: new Date(timeline.range.start * 1000),
-                  max: new Date(timeline.range.end * 1000),
-                  zoomable: false,
-                }}
-                timechangeHandler={(data) => {
-                  if (!timeline.relevantPreview) {
-                    return;
-                  }
+              {isSelected ? (
+                <div className="p-2 relative bg-secondary bg-opacity-30 rounded-md">
+                  <ActivityScrubber
+                    items={[]}
+                    timeBars={
+                      isSelected
+                        ? [
+                            {
+                              time: new Date(timelineTime * 1000),
+                              id: "playback",
+                            },
+                          ]
+                        : []
+                    }
+                    options={{
+                      snap: null,
+                      min: new Date(timeline.range.start * 1000),
+                      max: new Date(timeline.range.end * 1000),
+                      zoomable: false,
+                    }}
+                    timechangeHandler={(data) => {
+                      if (!timeline.relevantPreview) {
+                        playerRef.current?.pause();
+                        return;
+                      }
 
-                  const seekTimestamp = data.time.getTime() / 1000;
-                  const seekTime =
-                    seekTimestamp - timeline.relevantPreview.start;
-                  setPlayerTime(seekTimestamp - timeline.range.start);
-                  setTimeToSeek(Math.round(seekTime));
-                }}
-                timechangedHandler={(data) => {
-                  setScrubbing(false);
-                  const playbackTime =
-                    data.time.getTime() / 1000 - timeline.range.start;
-                  playerRef.current?.currentTime(playbackTime);
-                  playerRef.current?.play();
-                }}
-                selectHandler={(data) => {
-                  if (data.items.length > 0) {
-                    const selected = data.items[0];
-                    onSelectItem(
-                      selectedPlayback.timelineItems.find(
-                        (timeline) => timeline.timestamp == selected
-                      )
-                    );
-                  }
-                }}
-                doubleClickHandler={() => {
-                  setScrubbing(false);
-                  setSelectedPlayback(timeline);
-                }}
-              />
-              {isSelected && graphData && (
-                <div className="absolute left-2 right-2 top-0 h-[84px]">
-                  <TimelineGraph
-                    id={timeline.range.start.toString()}
-                    data={[
-                      {
-                        name: "Motion",
-                        data: graphData.motion,
-                      },
-                    ]}
-                    objects={graphData.objects}
-                    start={graphData.motion[0].x.getTime()}
-                    end={graphData.motion.at(-1)!!.x.getTime()}
+                      const seekTimestamp = data.time.getTime() / 1000;
+                      const seekTime =
+                        seekTimestamp - timeline.relevantPreview.start;
+                      setPlayerTime(seekTimestamp - timeline.range.start);
+                      setTimeToSeek(Math.round(seekTime));
+                    }}
+                    timechangedHandler={(data) => {
+                      setScrubbing(false);
+                      const playbackTime =
+                        data.time.getTime() / 1000 - timeline.range.start;
+                      playerRef.current?.currentTime(playbackTime);
+                      playerRef.current?.play();
+                    }}
+                    selectHandler={(data) => {
+                      if (data.items.length > 0) {
+                        const selected = data.items[0];
+                        onSelectItem(
+                          selectedPlayback.timelineItems.find(
+                            (timeline) => timeline.timestamp == selected
+                          )
+                        );
+                      }
+                    }}
                   />
+                  {isSelected && graphData && (
+                    <div className="absolute left-2 right-2 top-0 h-[84px]">
+                      <TimelineGraph
+                        id={timeline.range.start.toString()}
+                        data={[
+                          {
+                            name: "Motion",
+                            data: graphData.motion,
+                          },
+                        ]}
+                        objects={graphData.objects}
+                        start={graphData.motion[0].x.getTime()}
+                        end={graphData.motion.at(-1)!!.x.getTime()}
+                      />
+                    </div>
+                  )}
                 </div>
+              ) : (
+                <TimelineBar
+                  startTime={timeline.range.start}
+                  graphData={graphData}
+                  onClick={() => {
+                    setScrubbing(false);
+                    setSelectedPlayback(timeline);
+                  }}
+                />
               )}
             </div>
           );

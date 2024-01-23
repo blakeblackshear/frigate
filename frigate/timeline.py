@@ -7,7 +7,6 @@ from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
 
 from frigate.config import FrigateConfig
-from frigate.const import ALL_ATTRIBUTE_LABELS
 from frigate.events.maintainer import EventTypeEnum
 from frigate.models import Timeline
 from frigate.util.builtin import to_relative_box
@@ -108,22 +107,6 @@ class TimelineProcessor(threading.Thread):
                 "attribute": "",
             },
         }
-
-        # make sure all timeline items have a sub label
-        if prev_event_data != None and prev_event_data.get(
-            "sub_label"
-        ) != event_data.get("sub_label"):
-            # update existing timeline items to have sub label
-            sub_label = event_data["sub_label"]
-
-            if sub_label[0] not in ALL_ATTRIBUTE_LABELS:
-                if event_id in self.pre_event_cache.keys():
-                    for e in self.pre_event_cache[event_id]:
-                        e[Timeline.data]["sub_label"] = sub_label
-                else:
-                    Timeline.update(
-                        data=Timeline.data.update({"sub_label": sub_label})
-                    ).where(Timeline.source_id == event_id).execute()
 
         if event_type == "start":
             timeline_entry[Timeline.class_type] = "visible"

@@ -391,6 +391,17 @@ def set_sub_label(id):
     new_sub_label = json.get("subLabel")
     new_score = json.get("subLabelScore")
 
+    if new_sub_label is None:
+        return make_response(
+            jsonify(
+                {
+                    "success": False,
+                    "message": "A sub label must be supplied",
+                }
+            ),
+            400,
+        )
+
     if new_sub_label and len(new_sub_label) > 100:
         return make_response(
             jsonify(
@@ -416,6 +427,7 @@ def set_sub_label(id):
         )
 
     if not event.end_time:
+        # update tracked object
         tracked_obj: TrackedObject = (
             current_app.detected_frames_processor.camera_states[
                 event.camera
@@ -424,6 +436,11 @@ def set_sub_label(id):
 
         if tracked_obj:
             tracked_obj.obj_data["sub_label"] = (new_sub_label, new_score)
+
+        # update timeline items
+        Timeline.update(
+            data=Timeline.data.update({"sub_label": (new_sub_label, new_score)})
+        ).where(Timeline.source_id == id).execute()
 
     event.sub_label = new_sub_label
 
