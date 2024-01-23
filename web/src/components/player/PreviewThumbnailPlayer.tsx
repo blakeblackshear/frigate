@@ -52,7 +52,10 @@ export default function PreviewThumbnailPlayer({
       }
 
       if (!playerRef.current) {
-        setIsInitiallyVisible(true);
+        if (isHovered) {
+          setIsInitiallyVisible(true);
+        }
+
         return;
       }
 
@@ -103,7 +106,7 @@ export default function PreviewThumbnailPlayer({
             {
               threshold: 1.0,
               root: document.getElementById("pageRoot"),
-              rootMargin: "-15% 0px -15% 0px",
+              rootMargin: "-10% 0px -25% 0px",
             }
           );
           if (node) autoPlayObserver.current.observe(node);

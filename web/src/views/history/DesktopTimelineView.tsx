@@ -123,7 +123,7 @@ export default function DesktopTimelineView({
 
   const timelineTime = useMemo(() => {
     if (scrubbing) {
-      return playerTime;
+      return selectedPlayback.range.start + playerTime;
     } else {
       // take a player time in seconds and convert to timestamp in timeline
       let timestamp = 0;
@@ -395,11 +395,10 @@ export default function DesktopTimelineView({
                   setTimeToSeek(Math.round(seekTime));
                 }}
                 timechangedHandler={(data) => {
-                  const playbackTime = data.time.getTime() / 1000;
-                  playerRef.current?.currentTime(
-                    playbackTime - timeline.range.start
-                  );
                   setScrubbing(false);
+                  const playbackTime =
+                    data.time.getTime() / 1000 - timeline.range.start;
+                  playerRef.current?.currentTime(playbackTime);
                   playerRef.current?.play();
                 }}
                 selectHandler={(data) => {

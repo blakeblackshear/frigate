@@ -36,7 +36,6 @@ type Timeline = {
   class_type:
     | "visible"
     | "gone"
-    | "sub_label"
     | "entered_zone"
     | "attribute"
     | "active"
