@@ -11,7 +11,7 @@ function System() {
   });
 
   // stats data pieces
-  const inferenceTimeSeries = useMemo(() => {
+  const detInferenceTimeSeries = useMemo(() => {
     if (!statsHistory) {
       return [];
     }
@@ -33,7 +33,7 @@ function System() {
     });
     return Object.values(series);
   }, [statsHistory]);
-  const cpuMemSeries = useMemo(() => {
+  const detCpuSeries = useMemo(() => {
     if (!statsHistory) {
       return [];
     }
@@ -45,22 +45,40 @@ function System() {
     statsHistory.forEach((stats) => {
       const statTime = new Date(stats.service.last_updated * 1000);
 
-      Object.entries(stats.detectors).forEach(([key, detectorStats]) => {
-        const cpuKey = `${key}-cpu`;
-        const memKey = `${key}-mem`;
-
-        if (!(cpuKey in series)) {
-          series[cpuKey] = { name: `${key} Cpu`, data: [] };
+      Object.entries(stats.detectors).forEach(([key, detStats]) => {
+        if (!(key in series)) {
+          series[key] = { name: key, data: [] };
         }
 
-        if (!(memKey in series)) {
-          series[memKey] = { name: `${key} Memory`, data: [] };
+        series[key].data.push({
+          x: statTime,
+          y: stats.cpu_usages[detStats.pid.toString()].cpu,
+        });
+      });
+    });
+    return Object.values(series);
+  }, [statsHistory]);
+  const detMemSeries = useMemo(() => {
+    if (!statsHistory) {
+      return [];
+    }
+
+    const series: {
+      [key: string]: { name: string; data: { x: any; y: any }[] };
+    } = {};
+
+    statsHistory.forEach((stats) => {
+      const statTime = new Date(stats.service.last_updated * 1000);
+
+      Object.entries(stats.detectors).forEach(([key, detStats]) => {
+        if (!(key in series)) {
+          series[key] = { name: key, data: [] };
         }
 
-        const detUsages = stats.cpu_usages[detectorStats.pid.toString()];
-
-        series[cpuKey].data.push({ x: statTime, y: detUsages.cpu });
-        series[memKey].data.push({ x: statTime, y: detUsages.mem });
+        series[key].data.push({
+          x: statTime,
+          y: stats.cpu_usages[detStats.pid.toString()].mem,
+        });
       });
     });
     return Object.values(series);
@@ -169,24 +187,30 @@ function System() {
       <Heading as="h2">System</Heading>
 
       <Heading as="h4">Detectors</Heading>
-      <div className="grid grid-cols-1 md:grid-cols-2">
+      <div className="grid grid-cols-1 sm:grid-cols-3">
         <SystemGraph
           graphId="detector-inference"
           title="Inference Speed"
           unit="ms"
-          data={inferenceTimeSeries}
+          data={detInferenceTimeSeries}
         />
         <SystemGraph
           graphId="detector-usages"
-          title="CPU / Memory"
+          title="CPU"
           unit="%"
-          data={cpuMemSeries}
+          data={detCpuSeries}
+        />
+        <SystemGraph
+          graphId="detector-usages"
+          title="Memory"
+          unit="%"
+          data={detMemSeries}
         />
       </div>
       {gpuSeries.length > 0 && (
         <>
           <Heading as="h4">GPUs</Heading>
-          <div className="grid grid-cols-1 md:grid-cols-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2">
             <SystemGraph
               graphId="detector-inference"
               title="GPU Usage"
@@ -203,7 +227,7 @@ function System() {
         </>
       )}
       <Heading as="h4">Other Processes</Heading>
-      <div className="grid grid-cols-1 md:grid-cols-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2">
         <SystemGraph
           graphId="process-cpu"
           title="CPU"
