@@ -3,19 +3,19 @@ id: glossary
 title: Glossary
 ---
 
-The glossary explains terms commonly used in Frigate documentation.
+The glossary explains terms commonly used in Frigate's documentation.
 
 ## Bounding Box
 
-A bounding box is a box that represents an object that is being tracked, this is the part of the camera frame that the object detector detected as that object. These have multiple colors depending on object type in the debug live view.
+A box returned from the object detection model that outlines an object in the frame. These have multiple colors depending on object type in the debug live view.
 
 ## Event
 
-An event is a particular tracked object is considered a [true positive](#threshold) and meets the requirements for a snapshot or recording to be saved.
+The time period starting when a tracked object entered the frame and ending when it left the frame, including any time that the object remained still. Events are saved when it is considered a [true positive](#threshold) and meets the requirements for a snapshot or recording to be saved.
 
 ## False Positive
 
-A false positive is when an object is detected that is not that object. For example a dog being detected as a person, a chair being detected as a dog, etc.
+An incorrect detection of an object type. For example a dog being detected as a person, a chair being detected as a dog, etc. A person being detected in an area you want to ignore is not a false positive.
 
 ## Mask
 
@@ -23,23 +23,23 @@ There are two types of masks in Frigate. [See the mask docs for more info](/conf
 
 ### Motion Mask
 
-A motion mask is meant to mask out areas of an image that commonly have [motion](#motion) but do not have objects. For example: camera timestamps, skies, the tops of trees, etc.
+Motion masks prevent detection of [motion](#motion) in masked areas from triggering Frigate to run object detection, but do not prevent objects from being detected if object detection runs due to motion in nearby areas. For example: camera timestamps, skies, the tops of trees, etc.
 
 ### Object Mask
 
-An object mask is meant to mask out [false positive](#false_positive) objects so that they are ignored.
+Object filter masks drop any bounding boxes where the bottom center (overlap doesn't matter) is in the masked area. It forces them to be considered a [false positive](#false_positive) so that they are ignored.
 
 ## Min Score
 
-The min score is the lowest score that an object can be detected with, any object detected with a lower score will be thrown out
+The lowest score that an object can be detected with during tracking, any detection with a lower score will be assumed to be a false positive
 
 ## Motion
 
-Motion is pixels in a specific camera frame are different from the background frame that has been calculated. A motion box is a box around groups of these areas of motion that have been detected. These are represented by red boxes in the debug live view. [See the motion detection docs for more info](/configuration/motion_detection)
+When pixels in the current camera frame are different than previous frames. When many nearby pixels are different in the current frame they grouped together and indicated with a red motion box in the live debug view. [See the motion detection docs for more info](/configuration/motion_detection)
 
 ## Region
 
-A region is a portion of the camera frame that is sent to object detection, regions can be sent due to motion, active objects, or occasionally for stationary objects. These are represented by green boxes in the debug live view.
+A portion of the camera frame that is sent to object detection, regions can be sent due to motion, active objects, or occasionally for stationary objects. These are represented by green boxes in the debug live view.
 
 ## Snapshot Score
 
