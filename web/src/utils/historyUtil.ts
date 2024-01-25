@@ -125,7 +125,6 @@ export function getTimelineHoursForDay(
   const data: TimelinePlayback[] = [];
   const startDay = new Date(timestamp * 1000);
   startDay.setHours(23, 59, 59, 999);
-  const dayEnd = startDay.getTime() / 1000;
   startDay.setHours(0, 0, 0, 0);
   const startTimestamp = startDay.getTime() / 1000;
   let start = startDay.getTime() / 1000;

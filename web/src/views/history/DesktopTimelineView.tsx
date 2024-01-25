@@ -30,12 +30,11 @@ export default function DesktopTimelineView({
       config?.ui?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
     [config]
   );
+
   const controllerRef = useRef<DynamicVideoController | undefined>(undefined);
-
-  const [selectedPlayback, setSelectedPlayback] = useState(initialPlayback);
-
   const initialScrollRef = useRef<HTMLDivElement | null>(null);
 
+  const [selectedPlayback, setSelectedPlayback] = useState(initialPlayback);
   const [timelineTime, setTimelineTime] = useState(0);
 
   // handle scrolling to initial timeline item
@@ -73,6 +72,7 @@ export default function DesktopTimelineView({
     ],
     { revalidateOnFocus: false }
   );
+  
   const timelineGraphData = useMemo(() => {
     if (!activity) {
       return {};
