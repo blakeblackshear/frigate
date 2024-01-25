@@ -117,7 +117,7 @@ export function getHourlyTimelineData(
 export function getTimelineHoursForDay(
   camera: string,
   cards: CardsData,
-  allPreviews: Preview[],
+  cameraPreviews: Preview[],
   timestamp: number
 ): HistoryTimeline {
   const endOfThisHour = new Date();
@@ -130,14 +130,6 @@ export function getTimelineHoursForDay(
   const startTimestamp = startDay.getTime() / 1000;
   let start = startDay.getTime() / 1000;
   let end = 0;
-
-  const relevantPreviews = allPreviews.filter((preview) => {
-    return (
-      preview.camera == camera &&
-      preview.start >= start &&
-      Math.floor(preview.end - 1) <= dayEnd
-    );
-  });
 
   const dayIdx = Object.keys(cards).find((day) => {
     if (parseInt(day) > start) {
@@ -178,7 +170,7 @@ export function getTimelineHoursForDay(
           return [];
         })
       : [];
-    const relevantPreview = relevantPreviews.find(
+    const relevantPreview = cameraPreviews.find(
       (preview) =>
         Math.round(preview.start) >= start && Math.floor(preview.end) <= end
     );
