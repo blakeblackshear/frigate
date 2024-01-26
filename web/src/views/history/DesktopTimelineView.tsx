@@ -131,7 +131,7 @@ export default function DesktopTimelineView({
             }}
           />
         </>
-        <div className="px-2 h-[608px] w-1/3 overflow-auto">
+        <div className="px-2 h-[608px] w-1/3 overflow-y-auto overflow-x-hidden">
           {selectedPlayback.timelineItems.map((timeline) => {
             return (
               <TimelineItemCard
