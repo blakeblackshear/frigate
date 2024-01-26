@@ -5,6 +5,8 @@ import { useWs } from '../api/ws';
 import useSWR from 'swr';
 import { Table, Tbody, Thead, Tr, Th, Td } from '../components/Table';
 import Link from '../components/Link';
+import Button from '../components/Button';
+import { About } from '../icons/About';
 
 const emptyObject = Object.freeze({});
 
@@ -24,9 +26,10 @@ export default function Storage() {
 
   const getUnitSize = (MB) => {
     if (isNaN(MB) || MB < 0) return 'Invalid number';
-    if (MB < 1024) return `${MB} MB`;
+    if (MB < 1024) return `${MB} MiB`;
+    if (MB < 1048576) return `${(MB / 1024).toFixed(2)} GiB`;
 
-    return `${(MB / 1024).toFixed(2)} GB`;
+    return `${(MB / 1048576).toFixed(2)} TiB`;
   };
 
   let storage_usage;
@@ -66,9 +69,19 @@ export default function Storage() {
 
       <Fragment>
         <Heading size="lg">Overview</Heading>
-        <div data-testid="detectors" className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div data-testid="overview-types" className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow">
-            <div className="text-lg flex justify-between p-4">Data</div>
+            <div className="flex justify-start">
+              <div className="text-lg flex justify-between p-4">Data</div>
+              <Button
+                className="rounded-full"
+                type="text"
+                color="gray"
+                aria-label="Overview of total used storage and total capacity of the drives that hold the recordings and snapshots directories."
+              >
+                <About className="w-5" />
+              </Button>
+            </div>
             <div className="p-2">
               <Table className="w-full">
                 <Thead>
@@ -83,7 +96,17 @@ export default function Storage() {
             </div>
           </div>
           <div className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow">
-            <div className="text-lg flex justify-between p-4">Memory</div>
+            <div className="flex justify-start">
+              <div className="text-lg flex justify-between p-4">Memory</div>
+              <Button
+                className="rounded-full"
+                type="text"
+                color="gray"
+                aria-label="Overview of used and total memory in frigate process."
+              >
+                <About className="w-5" />
+              </Button>
+            </div>
             <div className="p-2">
               <Table className="w-full">
                 <Thead>
@@ -110,7 +133,17 @@ export default function Storage() {
           </div>
         </div>
 
-        <Heading size="lg">Cameras</Heading>
+        <div className="flex justify-start">
+          <Heading size="lg">Cameras</Heading>
+          <Button
+            className="rounded-full"
+            type="text"
+            color="gray"
+            aria-label="Overview of per-camera storage usage and bandwidth."
+          >
+            <About className="w-5" />
+          </Button>
+        </div>
         <div data-testid="detectors" className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4">
           {Object.entries(storage).map(([name, camera]) => (
             <div key={name} className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow">

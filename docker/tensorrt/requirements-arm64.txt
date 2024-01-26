@@ -1,0 +1,1 @@
+cuda-python == 11.7; platform_machine == 'aarch64'

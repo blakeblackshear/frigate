@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import { useCallback, useState } from 'preact/hooks';
 
-export default function Switch({ checked, id, onChange, label, labelPosition = 'before' }) {
+export default function Switch({ className, checked, id, onChange, label, labelPosition = 'before' }) {
   const [isFocused, setFocused] = useState(false);
 
   const handleChange = useCallback(() => {
@@ -21,7 +21,7 @@ export default function Switch({ checked, id, onChange, label, labelPosition = '
   return (
     <label
       htmlFor={id}
-      className={`flex items-center space-x-4 w-full ${onChange ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+      className={`${className ? className : ''} flex items-center space-x-4 w-full ${onChange ? 'cursor-pointer' : 'cursor-not-allowed'}`}
     >
       {label && labelPosition === 'before' ? (
         <div data-testid={`${id}-label`} className="inline-flex flex-grow">

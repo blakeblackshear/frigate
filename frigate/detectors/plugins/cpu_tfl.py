@@ -1,10 +1,11 @@
 import logging
+
 import numpy as np
+from pydantic import Field
+from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
-from typing import Literal
-from pydantic import Extra, Field
 
 try:
     from tflite_runtime.interpreter import Interpreter
@@ -27,7 +28,7 @@ class CpuTfl(DetectionApi):
 
     def __init__(self, detector_config: CpuDetectorConfig):
         self.interpreter = Interpreter(
-            model_path=detector_config.model.path or "/cpu_model.tflite",
+            model_path=detector_config.model.path,
             num_threads=detector_config.num_threads or 3,
         )
 

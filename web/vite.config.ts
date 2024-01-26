@@ -9,6 +9,28 @@ export default defineConfig({
   define: {
     'import.meta.vitest': 'undefined',
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000'
+      },
+      '/vod': {
+        target: 'http://localhost:5000'
+      },
+      '/exports': {
+        target: 'http://localhost:5000'
+      },
+      '/ws': {
+        target: 'ws://localhost:5000',
+        ws: true,
+      },
+      '/live': {
+        target: 'ws://localhost:5000',
+        changeOrigin: true,
+        ws: true,
+      },
+    }
+  },
   plugins: [
     preact(),
     monacoEditorPlugin.default({

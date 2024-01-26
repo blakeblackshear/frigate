@@ -1,6 +1,7 @@
 name: CI
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - dev
@@ -15,53 +16,154 @@ env:
   PYTHON_VERSION: 3.9
 
 jobs:
-  multi_arch_build:
+  amd64_build:
     runs-on: ubuntu-latest
-    name: Image Build
+    name: AMD64 Build
     steps:
-      - name: Remove unnecessary files
-        run: |
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /opt/ghc
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Set up QEMU and Buildx
+        id: setup
+        uses: ./.github/actions/setup
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push amd64 standard build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/main/Dockerfile
+          push: true
+          platforms: linux/amd64
+          target: frigate
+          tags: ${{ steps.setup.outputs.image-name }}-amd64
+          cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
+      - name: Build and push TensorRT (x86 GPU)
+        uses: docker/bake-action@v4
+        with:
+          push: true
+          targets: tensorrt
+          files: docker/tensorrt/trt.hcl
+          set: |
+            tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt
+            *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
+            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64,mode=max
+  arm64_build:
+    runs-on: ubuntu-latest
+    name: ARM Build
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Set up QEMU and Buildx
+        id: setup
+        uses: ./.github/actions/setup
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push arm64 standard build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/main/Dockerfile
+          push: true
+          platforms: linux/arm64
+          target: frigate
+          tags: |
+            ${{ steps.setup.outputs.image-name }}-standard-arm64
+          cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64
+      - name: Build and push RPi build
+        uses: docker/bake-action@v4
+        with:
+          push: true
+          targets: rpi
+          files: docker/rpi/rpi.hcl
+          set: |
+            rpi.tags=${{ steps.setup.outputs.image-name }}-rpi
+            *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64
+            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64,mode=max
+      - name: Build and push RockChip build
+        uses: docker/bake-action@v3
+        with:
+          push: true
+          targets: rk
+          files: docker/rockchip/rk.hcl
+          set: |
+            rk.tags=${{ steps.setup.outputs.image-name }}-rk
+            *.cache-from=type=gha
+  jetson_jp4_build:
+    runs-on: ubuntu-latest
+    name: Jetson Jetpack 4
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Set up QEMU and Buildx
+        id: setup
+        uses: ./.github/actions/setup
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push TensorRT (Jetson, Jetpack 4)
+        env:
+          ARCH: arm64
+          BASE_IMAGE: timongentzsch/l4t-ubuntu20-opencv:latest
+          SLIM_BASE: timongentzsch/l4t-ubuntu20-opencv:latest
+          TRT_BASE: timongentzsch/l4t-ubuntu20-opencv:latest
+        uses: docker/bake-action@v4
+        with:
+          push: true
+          targets: tensorrt
+          files: docker/tensorrt/trt.hcl
+          set: |
+            tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt-jp4
+            *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp4
+            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp4,mode=max
+  jetson_jp5_build:
+    runs-on: ubuntu-latest
+    name: Jetson Jetpack 5
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Set up QEMU and Buildx
+        id: setup
+        uses: ./.github/actions/setup
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push TensorRT (Jetson, Jetpack 5)
+        env:
+          ARCH: arm64
+          BASE_IMAGE: nvcr.io/nvidia/l4t-tensorrt:r8.5.2-runtime
+          SLIM_BASE: nvcr.io/nvidia/l4t-tensorrt:r8.5.2-runtime
+          TRT_BASE: nvcr.io/nvidia/l4t-tensorrt:r8.5.2-runtime
+        uses: docker/bake-action@v4
+        with:
+          push: true
+          targets: tensorrt
+          files: docker/tensorrt/trt.hcl
+          set: |
+            tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt-jp5
+            *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp5
+            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp5,mode=max
+  # The majority of users running arm64 are rpi users, so the rpi
+  # build should be the primary arm64 image
+  assemble_default_build:
+    runs-on: ubuntu-latest
+    name: Assemble and push default build
+    needs:
+      - amd64_build
+      - arm64_build
+    steps:
       - id: lowercaseRepo
-        uses: ASzc/change-string-case-action@v5
+        uses: ASzc/change-string-case-action@v6
         with:
           string: ${{ github.repository }}
-      - name: Check out code
-        uses: actions/checkout@v3
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
       - name: Log in to the Container registry
-        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Create version file
-        run: make version
       - name: Create short sha
         run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
-      - name: Build and push
-        uses: docker/build-push-action@v3
+      - uses: int128/docker-manifest-create-action@v1
         with:
-          context: .
-          push: true
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
-          target: frigate
-          tags: |
-            ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-      - name: Build and push TensorRT
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          push: true
-          platforms: linux/amd64
-          target: frigate-tensorrt
-          tags: |
-            ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}-tensorrt
-          cache-from: type=gha
+          tags: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}
+          suffixes: |
+            -amd64
+            -rpi

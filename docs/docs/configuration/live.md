@@ -9,11 +9,11 @@ Frigate has different live view options, some of which require the bundled `go2r
 
 Live view options can be selected while viewing the live stream. The options are:
 
-| Source | Latency | Frame Rate                            | Resolution     | Audio                        | Requires go2rtc | Other Limitations                            |
-| ------ | ------- | ------------------------------------- | -------------- | ---------------------------- | --------------- | -------------------------------------------- |
-| jsmpeg | low     | same as `detect -> fps`, capped at 10 | same as detect | no                           | no              | none                                         |
-| mse    | low     | native                                | native         | yes (depends on audio codec) | yes             | not supported on iOS, Firefox is h.264 only  |
-| webrtc | lowest  | native                                | native         | yes (depends on audio codec) | yes             | requires extra config, doesn't support h.265 |
+| Source | Latency | Frame Rate                            | Resolution     | Audio                        | Requires go2rtc | Other Limitations                                |
+| ------ | ------- | ------------------------------------- | -------------- | ---------------------------- | --------------- | ------------------------------------------------ |
+| jsmpeg | low     | same as `detect -> fps`, capped at 10 | same as detect | no                           | no              | none                                             |
+| mse    | low     | native                                | native         | yes (depends on audio codec) | yes             | iPhone requires iOS 17.1+, Firefox is h.264 only |
+| webrtc | lowest  | native                                | native         | yes (depends on audio codec) | yes             | requires extra config, doesn't support h.265     |
 
 ### Audio Support
 
@@ -37,12 +37,12 @@ There may be some cameras that you would prefer to use the sub stream for live v
 ```yaml
 go2rtc:
   streams:
-    rtsp_cam:
+    test_cam:
       - rtsp://192.168.1.5:554/live0 # <- stream which supports video & aac audio.
-      - "ffmpeg:rtsp_cam#audio=opus" # <- copy of the stream which transcodes audio to opus
-    rtsp_cam_sub:
+      - "ffmpeg:test_cam#audio=opus" # <- copy of the stream which transcodes audio to opus for webrtc
+    test_cam_sub:
       - rtsp://192.168.1.5:554/substream # <- stream which supports video & aac audio.
-      - "ffmpeg:rtsp_cam_sub#audio=opus" # <- copy of the stream which transcodes audio to opus
+      - "ffmpeg:test_cam_sub#audio=opus" # <- copy of the stream which transcodes audio to opus for webrtc
 
 cameras:
   test_cam:
@@ -59,7 +59,7 @@ cameras:
           roles:
             - detect
     live:
-      stream_name: rtsp_cam_sub
+      stream_name: test_cam_sub
 ```
 
 ### WebRTC extra configuration:
@@ -78,7 +78,7 @@ WebRTC works by creating a TCP or UDP connection on port `8555`. However, it req
         - 192.168.1.10:8555
         - stun:8555
   ```
-  
+
 - For access through Tailscale, the Frigate system's Tailscale IP must be added as a WebRTC candidate. Tailscale IPs all start with `100.`, and are reserved within the `100.0.0.0/8` CIDR block.
 
 :::tip
@@ -104,6 +104,7 @@ If you are having difficulties getting WebRTC to work and you are running Frigat
 If not running in host mode, port 8555 will need to be mapped for the container:
 
 docker-compose.yml
+
 ```yaml
 services:
   frigate:
@@ -115,4 +116,4 @@ services:
 
 :::
 
-See [go2rtc WebRTC docs](https://github.com/AlexxIT/go2rtc/tree/v1.2.0#module-webrtc) for more information about this.
+See [go2rtc WebRTC docs](https://github.com/AlexxIT/go2rtc/tree/v1.8.3#module-webrtc) for more information about this.

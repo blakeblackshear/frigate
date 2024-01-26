@@ -1,6 +1,6 @@
+import ctypes
 import logging
 
-import ctypes
 import numpy as np
 
 try:
@@ -8,13 +8,14 @@ try:
     from cuda import cuda
 
     TRT_SUPPORT = True
-except ModuleNotFoundError as e:
+except ModuleNotFoundError:
     TRT_SUPPORT = False
+
+from pydantic import Field
+from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
-from typing import Literal
-from pydantic import Field
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +78,7 @@ class TensorRtDetector(DetectionApi):
         try:
             trt.init_libnvinfer_plugins(self.trt_logger, "")
 
-            ctypes.cdll.LoadLibrary("/trt-models/libyolo_layer.so")
+            ctypes.cdll.LoadLibrary("/usr/local/lib/libyolo_layer.so")
         except OSError as e:
             logger.error(
                 "ERROR: failed to load libraries. %s",
@@ -172,7 +173,7 @@ class TensorRtDetector(DetectionApi):
         if not self.context.execute_async_v2(
             bindings=self.bindings, stream_handle=self.stream
         ):
-            logger.warn(f"Execute returned false")
+            logger.warn("Execute returned false")
 
         # Transfer predictions back from the GPU.
         [
@@ -302,6 +303,7 @@ class TensorRtDetector(DetectionApi):
         ordered[:, 3] = np.clip(ordered[:, 3] + ordered[:, 1], 0, 1)
         # put result into the correct order and limit to top 20
         detections = ordered[:, [5, 4, 1, 0, 3, 2]][:20]
+
         # pad to 20x6 shape
         append_cnt = 20 - len(detections)
         if append_cnt > 0:

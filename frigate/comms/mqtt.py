@@ -1,13 +1,11 @@
 import logging
 import threading
-
 from typing import Any, Callable
 
 import paho.mqtt.client as mqtt
 
 from frigate.comms.dispatcher import Communicator
 from frigate.config import FrigateConfig
-
 
 logger = logging.getLogger(__name__)
 
@@ -43,12 +41,17 @@ class MqttClient(Communicator):  # type: ignore[misc]
         for camera_name, camera in self.config.cameras.items():
             self.publish(
                 f"{camera_name}/recordings/state",
-                "ON" if camera.record.enabled else "OFF",
+                "ON" if camera.record.enabled_in_config else "OFF",
                 retain=True,
             )
             self.publish(
                 f"{camera_name}/snapshots/state",
                 "ON" if camera.snapshots.enabled else "OFF",
+                retain=True,
+            )
+            self.publish(
+                f"{camera_name}/audio/state",
+                "ON" if camera.audio.enabled_in_config else "OFF",
                 retain=True,
             )
             self.publish(
@@ -67,6 +70,11 @@ class MqttClient(Communicator):  # type: ignore[misc]
                 retain=True,
             )
             self.publish(
+                f"{camera_name}/ptz_autotracker/state",
+                "ON" if camera.onvif.autotracking.enabled_in_config else "OFF",
+                retain=True,
+            )
+            self.publish(
                 f"{camera_name}/motion_threshold/state",
                 camera.motion.threshold,  # type: ignore[union-attr]
                 retain=True,
@@ -80,6 +88,18 @@ class MqttClient(Communicator):  # type: ignore[misc]
                 f"{camera_name}/motion",
                 "OFF",
                 retain=False,
+            )
+            self.publish(
+                f"{camera_name}/birdseye/state",
+                "ON" if camera.birdseye.enabled else "OFF",
+                retain=True,
+            )
+            self.publish(
+                f"{camera_name}/birdseye_mode/state",
+                camera.birdseye.mode.value.upper()
+                if camera.birdseye.enabled
+                else "OFF",
+                retain=True,
             )
 
         self.publish("available", "online", retain=True)
@@ -146,10 +166,14 @@ class MqttClient(Communicator):  # type: ignore[misc]
             "recordings",
             "snapshots",
             "detect",
+            "audio",
             "motion",
             "improve_contrast",
+            "ptz_autotracker",
             "motion_threshold",
             "motion_contour_area",
+            "birdseye",
+            "birdseye_mode",
         ]
 
         for name in self.config.cameras.keys():
@@ -167,14 +191,20 @@ class MqttClient(Communicator):  # type: ignore[misc]
                     self.on_mqtt_command,
                 )
 
+            if self.config.cameras[name].onvif.host:
+                self.client.message_callback_add(
+                    f"{self.mqtt_config.topic_prefix}/{name}/ptz",
+                    self.on_mqtt_command,
+                )
+
         self.client.message_callback_add(
             f"{self.mqtt_config.topic_prefix}/restart", self.on_mqtt_command
         )
 
-        if not self.mqtt_config.tls_ca_certs is None:
+        if self.mqtt_config.tls_ca_certs is not None:
             if (
-                not self.mqtt_config.tls_client_cert is None
-                and not self.mqtt_config.tls_client_key is None
+                self.mqtt_config.tls_client_cert is not None
+                and self.mqtt_config.tls_client_key is not None
             ):
                 self.client.tls_set(
                     self.mqtt_config.tls_ca_certs,
@@ -183,9 +213,9 @@ class MqttClient(Communicator):  # type: ignore[misc]
                 )
             else:
                 self.client.tls_set(self.mqtt_config.tls_ca_certs)
-        if not self.mqtt_config.tls_insecure is None:
+        if self.mqtt_config.tls_insecure is not None:
             self.client.tls_insecure_set(self.mqtt_config.tls_insecure)
-        if not self.mqtt_config.user is None:
+        if self.mqtt_config.user is not None:
             self.client.username_pw_set(
                 self.mqtt_config.user, password=self.mqtt_config.password
             )

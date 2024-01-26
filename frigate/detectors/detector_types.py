@@ -1,15 +1,15 @@
-import logging
 import importlib
+import logging
 import pkgutil
-from typing import Union
-from typing_extensions import Annotated
 from enum import Enum
+from typing import Union
+
 from pydantic import Field
+from typing_extensions import Annotated
 
 from . import plugins
 from .detection_api import DetectionApi
 from .detector_config import BaseDetectorConfig
-
 
 logger = logging.getLogger(__name__)
 

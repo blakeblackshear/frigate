@@ -11,6 +11,8 @@ import { useState } from 'preact/hooks';
 import Dialog from '../components/Dialog';
 import TimeAgo from '../components/TimeAgo';
 import copy from 'copy-to-clipboard';
+import { About } from '../icons/About';
+import { WebUI } from '../icons/WebUI';
 
 const emptyObject = Object.freeze({});
 
@@ -26,15 +28,20 @@ export default function System() {
   const {
     cpu_usages,
     gpu_usages,
+    bandwidth_usages,
     detectors,
     service = {},
     detection_fps: _,
-    ...cameras
+    processes,
+    cameras,
   } = stats || initialStats || emptyObject;
 
   const detectorNames = Object.keys(detectors || emptyObject);
   const gpuNames = Object.keys(gpu_usages || emptyObject);
   const cameraNames = Object.keys(cameras || emptyObject);
+  const processesNames = Object.keys(processes || emptyObject);
+
+  const { data: go2rtc } = useSWR('go2rtc/api');
 
   const onHandleFfprobe = async (camera, e) => {
     if (e) {
@@ -90,14 +97,17 @@ export default function System() {
           System <span className="text-sm">{service.version}</span>
         </Heading>
         {config && (
-          <Link
-            className="p-1 text-blue-500 hover:underline"
-            target="_blank"
-            rel="noopener noreferrer"
-            href="/live/webrtc/"
-          >
-            go2rtc dashboard
-          </Link>
+          <span class="p-1">
+            go2rtc {go2rtc && `${go2rtc.version} `}
+            <Link
+              className="text-blue-500 hover:underline"
+              target="_blank"
+              rel="noopener noreferrer"
+              href="/api/go2rtc/streams"
+            >
+              streams info
+            </Link>
+          </span>
         )}
       </div>
 
@@ -206,7 +216,19 @@ export default function System() {
         </div>
       ) : (
         <Fragment>
-          <Heading size="lg">Detectors</Heading>
+          <div className="flex justify-start">
+            <Heading className="self-center" size="lg">
+              Detectors
+            </Heading>
+            <Button
+              className="rounded-full"
+              type="text"
+              color="gray"
+              aria-label="Momentary resource usage of each process that is controlling the object detector. CPU % is for a single core."
+            >
+              <About className="w-5" />
+            </Button>
+          </div>
           <div data-testid="detectors" className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4">
             {detectorNames.map((detector) => (
               <div key={detector} className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow">
@@ -219,6 +241,7 @@ export default function System() {
                         <Th>Inference Speed</Th>
                         <Th>CPU %</Th>
                         <Th>Memory %</Th>
+                        {config.telemetry.network_bandwidth && <Th>Network Bandwidth</Th>}
                       </Tr>
                     </Thead>
                     <Tbody>
@@ -227,6 +250,9 @@ export default function System() {
                         <Td>{detectors[detector]['inference_speed']} ms</Td>
                         <Td>{cpu_usages[detectors[detector]['pid']]?.['cpu'] || '- '}%</Td>
                         <Td>{cpu_usages[detectors[detector]['pid']]?.['mem'] || '- '}%</Td>
+                        {config.telemetry.network_bandwidth && (
+                          <Td>{bandwidth_usages[detectors[detector]['pid']]?.['bandwidth'] || '- '}KB/s</Td>
+                        )}
                       </Tr>
                     </Tbody>
                   </Table>
@@ -235,8 +261,20 @@ export default function System() {
             ))}
           </div>
 
-          <div className="text-lg flex justify-between p-4">
-            <Heading size="lg">GPUs</Heading>
+          <div className="text-lg flex justify-between">
+            <div className="flex justify-start">
+              <Heading className="self-center" size="lg">
+                GPUs
+              </Heading>
+              <Button
+                className="rounded-full"
+                type="text"
+                color="gray"
+                aria-label="Momentary resource usage of each GPU. Intel GPUs do not support memory stats."
+              >
+                <About className="w-5" />
+              </Button>
+            </div>
             <Button onClick={(e) => onHandleVainfo(e)}>vainfo</Button>
           </div>
 
@@ -264,12 +302,16 @@ export default function System() {
                           <Tr>
                             <Th>GPU %</Th>
                             <Th>Memory %</Th>
+                            {'dec' in gpu_usages[gpu] && <Th>Decoder %</Th>}
+                            {'enc' in gpu_usages[gpu] && <Th>Encoder %</Th>}
                           </Tr>
                         </Thead>
                         <Tbody>
                           <Tr>
                             <Td>{gpu_usages[gpu]['gpu']}</Td>
                             <Td>{gpu_usages[gpu]['mem']}</Td>
+                            {'dec' in gpu_usages[gpu] && <Td>{gpu_usages[gpu]['dec']}</Td>}
+                            {'enc' in gpu_usages[gpu] && <Td>{gpu_usages[gpu]['enc']}</Td>}
                           </Tr>
                         </Tbody>
                       </Table>
@@ -280,70 +322,162 @@ export default function System() {
             </div>
           )}
 
-          <Heading size="lg">Cameras</Heading>
+          <div className="flex justify-start">
+            <Heading className="self-center" size="lg">
+              Cameras
+            </Heading>
+            <Button
+              className="rounded-full"
+              type="text"
+              color="gray"
+              aria-label="Momentary resource usage of each process interacting with the camera stream. CPU % is for a single core."
+            >
+              <About className="w-5" />
+            </Button>
+          </div>
           {!cameras ? (
             <ActivityIndicator />
           ) : (
             <div data-testid="cameras" className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4">
-              {cameraNames.map((camera) => (
-                <div key={camera} className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow">
-                  <div className="capitalize text-lg flex justify-between p-4">
-                    <Link href={`/cameras/${camera}`}>{camera.replaceAll('_', ' ')}</Link>
-                    <Button onClick={(e) => onHandleFfprobe(camera, e)}>ffprobe</Button>
-                  </div>
-                  <div className="p-2">
-                    <Table className="w-full">
-                      <Thead>
-                        <Tr>
-                          <Th>Process</Th>
-                          <Th>P-ID</Th>
-                          <Th>FPS</Th>
-                          <Th>CPU %</Th>
-                          <Th>Memory %</Th>
-                        </Tr>
-                      </Thead>
-                      <Tbody>
-                        <Tr key="ffmpeg" index="0">
-                          <Td>ffmpeg</Td>
-                          <Td>{cameras[camera]['ffmpeg_pid'] || '- '}</Td>
-                          <Td>{cameras[camera]['camera_fps'] || '- '}</Td>
-                          <Td>{cpu_usages[cameras[camera]['ffmpeg_pid']]?.['cpu'] || '- '}%</Td>
-                          <Td>{cpu_usages[cameras[camera]['ffmpeg_pid']]?.['mem'] || '- '}%</Td>
-                        </Tr>
-                        <Tr key="capture" index="1">
-                          <Td>Capture</Td>
-                          <Td>{cameras[camera]['capture_pid'] || '- '}</Td>
-                          <Td>{cameras[camera]['process_fps'] || '- '}</Td>
-                          <Td>{cpu_usages[cameras[camera]['capture_pid']]?.['cpu'] || '- '}%</Td>
-                          <Td>{cpu_usages[cameras[camera]['capture_pid']]?.['mem'] || '- '}%</Td>
-                        </Tr>
-                        <Tr key="detect" index="2">
-                          <Td>Detect</Td>
-                          <Td>{cameras[camera]['pid'] || '- '}</Td>
+              {cameraNames.map(
+                (camera) =>
+                  config.cameras[camera]['enabled'] && (
+                    <div
+                      key={camera}
+                      className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow"
+                    >
+                      <div className="capitalize text-lg flex justify-between p-4">
+                        <Link href={`/cameras/${camera}`}>{camera.replaceAll('_', ' ')}</Link>
+                        <div className="flex">
+                          {config.cameras[camera]['webui_url'] && (
+                            <Button href={config.cameras[camera]['webui_url']} target="_blank">
+                              Web UI
+                              <WebUI className="ml-1 h-4 w-4" fill="white" stroke="white" />
+                            </Button>
+                          )}
+                          <Button className="ml-2" onClick={(e) => onHandleFfprobe(camera, e)}>
+                            ffprobe
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="p-2">
+                        <Table className="w-full">
+                          <Thead>
+                            <Tr>
+                              <Th>Process</Th>
+                              <Th>P-ID</Th>
+                              <Th>FPS</Th>
+                              <Th>CPU %</Th>
+                              <Th>Memory %</Th>
+                              {config.telemetry.network_bandwidth && <Th>Network Bandwidth</Th>}
+                            </Tr>
+                          </Thead>
+                          <Tbody>
+                            <Tr key="ffmpeg" index="0">
+                              <Td>
+                                ffmpeg
+                                <Button
+                                  className="rounded-full"
+                                  type="text"
+                                  color="gray"
+                                  aria-label={cpu_usages[cameras[camera]['ffmpeg_pid']]?.['cmdline']}
+                                  onClick={() => copy(cpu_usages[cameras[camera]['ffmpeg_pid']]?.['cmdline'])}
+                                >
+                                  <About className="w-3" />
+                                </Button>
+                              </Td>
+                              <Td>{cameras[camera]['ffmpeg_pid'] || '- '}</Td>
+                              <Td>{cameras[camera]['camera_fps'] || '- '}</Td>
+                              <Td>{cpu_usages[cameras[camera]['ffmpeg_pid']]?.['cpu'] || '- '}%</Td>
+                              <Td>{cpu_usages[cameras[camera]['ffmpeg_pid']]?.['mem'] || '- '}%</Td>
+                              {config.telemetry.network_bandwidth && (
+                                <Td>{bandwidth_usages[cameras[camera]['ffmpeg_pid']]?.['bandwidth'] || '- '}KB/s</Td>
+                              )}
+                            </Tr>
+                            <Tr key="capture" index="1">
+                              <Td>Capture</Td>
+                              <Td>{cameras[camera]['capture_pid'] || '- '}</Td>
+                              <Td>{cameras[camera]['process_fps'] || '- '}</Td>
+                              <Td>{cpu_usages[cameras[camera]['capture_pid']]?.['cpu'] || '- '}%</Td>
+                              <Td>{cpu_usages[cameras[camera]['capture_pid']]?.['mem'] || '- '}%</Td>
+                              {config.telemetry.network_bandwidth && <Td>-</Td>}
+                            </Tr>
+                            <Tr key="detect" index="2">
+                              <Td>Detect</Td>
+                              <Td>{cameras[camera]['pid'] || '- '}</Td>
 
-                          {(() => {
-                            if (cameras[camera]['pid'] && cameras[camera]['detection_enabled'] == 1)
-                              return (
-                                <Td>
-                                  {cameras[camera]['detection_fps']} ({cameras[camera]['skipped_fps']} skipped)
-                                </Td>
-                              );
-                            else if (cameras[camera]['pid'] && cameras[camera]['detection_enabled'] == 0)
-                              return <Td>disabled</Td>;
+                              {(() => {
+                                if (cameras[camera]['pid'] && cameras[camera]['detection_enabled'] == 1)
+                                  return (
+                                    <Td>
+                                      {cameras[camera]['detection_fps']} ({cameras[camera]['skipped_fps']} skipped)
+                                    </Td>
+                                  );
+                                else if (cameras[camera]['pid'] && cameras[camera]['detection_enabled'] == 0)
+                                  return <Td>disabled</Td>;
 
-                            return <Td>- </Td>;
-                          })()}
+                                return <Td>- </Td>;
+                              })()}
 
-                          <Td>{cpu_usages[cameras[camera]['pid']]?.['cpu'] || '- '}%</Td>
-                          <Td>{cpu_usages[cameras[camera]['pid']]?.['mem'] || '- '}%</Td>
-                        </Tr>
-                      </Tbody>
-                    </Table>
-                  </div>
-                </div>
-              ))}
+                              <Td>{cpu_usages[cameras[camera]['pid']]?.['cpu'] || '- '}%</Td>
+                              <Td>{cpu_usages[cameras[camera]['pid']]?.['mem'] || '- '}%</Td>
+                              {config.telemetry.network_bandwidth && <Td>-</Td>}
+                            </Tr>
+                          </Tbody>
+                        </Table>
+                      </div>
+                    </div>
+                  )
+              )}
             </div>
           )}
+
+          <div className="flex justify-start">
+            <Heading className="self-center" size="lg">
+              Other Processes
+            </Heading>
+            <Button
+              className="rounded-full"
+              type="text"
+              color="gray"
+              aria-label="Momentary resource usage for other important processes. CPU % is for a single core."
+            >
+              <About className="w-5" />
+            </Button>
+          </div>
+          <div data-testid="cameras" className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4">
+            {processesNames.map((process) => (
+              <div key={process} className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow">
+                <div className="capitalize text-lg flex justify-between p-4">
+                  <div className="text-lg flex justify-between">{process}</div>
+                </div>
+                <div className="p-2">
+                  <Table className="w-full">
+                    <Thead>
+                      <Tr>
+                        <Th>P-ID</Th>
+                        <Th>CPU %</Th>
+                        <Th>Avg CPU %</Th>
+                        <Th>Memory %</Th>
+                        {config.telemetry.network_bandwidth && <Th>Network Bandwidth</Th>}
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      <Tr key="other" index="0">
+                        <Td>{processes[process]['pid'] || '- '}</Td>
+                        <Td>{cpu_usages[processes[process]['pid']]?.['cpu'] || '- '}%</Td>
+                        <Td>{cpu_usages[processes[process]['pid']]?.['cpu_average'] || '- '}%</Td>
+                        <Td>{cpu_usages[processes[process]['pid']]?.['mem'] || '- '}%</Td>
+                        {config.telemetry.network_bandwidth && (
+                          <Td>{bandwidth_usages[processes[process]['pid']]?.['bandwidth'] || '- '}KB/s</Td>
+                        )}
+                      </Tr>
+                    </Tbody>
+                  </Table>
+                </div>
+              </div>
+            ))}
+          </div>
 
           <p>System stats update automatically every {config.mqtt.stats_interval} seconds.</p>
         </Fragment>

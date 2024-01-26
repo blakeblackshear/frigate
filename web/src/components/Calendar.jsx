@@ -5,7 +5,7 @@ import ArrowRightDouble from '../icons/ArrowRightDouble';
 
 const todayTimestamp = new Date().setHours(0, 0, 0, 0).valueOf();
 
-const Calendar = ({ onChange, calendarRef, close, dateRange }) => {
+const Calendar = ({ onChange, calendarRef, close, dateRange, children }) => {
   const keyRef = useRef([]);
 
   const date = new Date();
@@ -121,7 +121,7 @@ const Calendar = ({ onChange, calendarRef, close, dateRange }) => {
     (day) => {
       if (!state.timeRange.after || !state.timeRange.before) return;
 
-      return day.timestamp < state.timeRange.before && day.timestamp >= state.timeRange.after;
+      return day.timestamp < state.timeRange.before && day.timestamp >= new Date(state.timeRange.after).setHours(0);
     },
     [state.timeRange]
   );
@@ -129,14 +129,21 @@ const Calendar = ({ onChange, calendarRef, close, dateRange }) => {
   const isFirstDayInRange = useCallback(
     (day) => {
       if (isCurrentDay(day)) return;
-      return state.timeRange.after === day.timestamp;
+      return new Date(state.timeRange.after).setHours(0) === day.timestamp;
     },
     [state.timeRange.after]
   );
 
   const isLastDayInRange = useCallback(
     (day) => {
-      return state.timeRange.before === new Date(day.timestamp).setHours(24, 0, 0, 0);
+      // if the hour is not above 0, we will use 24 hour.
+      const beforeHour = new Date(state.timeRange.before).getHours() || 24;
+
+      /**
+       * When user selects a day in the calendar, the before will be 00:00.
+       * When user selects a time in timepicker, the day.timestamp hour must be changed to match the selected end () hour.
+       */
+      return state.timeRange.before === new Date(day.timestamp).setHours(beforeHour);
     },
     [state.timeRange.before]
   );
@@ -256,12 +263,12 @@ const Calendar = ({ onChange, calendarRef, close, dateRange }) => {
             onkeydown={(e) => handleKeydown(e, day, idx)}
             ref={(ref) => (keyRef.current[idx] = ref)}
             tabIndex={day.month === 0 ? day.date : null}
-            className={`h-12 w-12 float-left flex flex-shrink justify-center items-center cursor-pointer ${
+            className={`h-12 w-12 float-left flex flex-shrink justify-center items-center cursor-pointer hover:border hover:rounded-md border-gray-600 ${
               day.month !== 0 ? ' opacity-50 bg-gray-700 dark:bg-gray-700 pointer-events-none' : ''
             }
-              ${isFirstDayInRange(day) ? ' rounded-l-xl ' : ''}
-              ${isSelectedRange(day) ? ' bg-blue-600 dark:hover:bg-blue-600' : ''}
-              ${isLastDayInRange(day) ? ' rounded-r-xl ' : ''}
+              ${isFirstDayInRange(day) ? ' rounded-l-xl hover:rounded-l-xl' : ''}
+              ${isSelectedRange(day) ? ' bg-blue-600 hover:rounded-none' : ''}
+              ${isLastDayInRange(day) ? ' rounded-r-xl hover:rounded-r-xl' : ''}
               ${isCurrentDay(day) && !isLastDayInRange(day) ? 'rounded-full bg-gray-100 dark:hover:bg-gray-100 ' : ''}`}
             key={idx}
           >
@@ -287,8 +294,8 @@ const Calendar = ({ onChange, calendarRef, close, dateRange }) => {
   };
 
   return (
-    <div className="select-none w-96 flex flex-shrink" ref={calendarRef}>
-      <div className="py-4 px-6">
+    <div className="select-none w-11/12 flex" ref={calendarRef}>
+      <div className="px-6">
         <div className="flex items-center">
           <div className="w-1/6 relative flex justify-around">
             <div
@@ -329,6 +336,7 @@ const Calendar = ({ onChange, calendarRef, close, dateRange }) => {
         </div>
         <div className="mt-3">{renderCalendar()}</div>
       </div>
+      {children}
     </div>
   );
 };

@@ -4,7 +4,7 @@ import Menu from './Menu';
 import { ArrowDropdown } from '../icons/ArrowDropdown';
 import Heading from './Heading';
 import Button from './Button';
-import CameraIcon from '../icons/Camera';
+import SelectOnlyIcon from '../icons/SelectOnly';
 
 export default function MultiSelect({ className, title, options, selection, onToggle, onShowAll, onSelectSingle }) {
   const popupRef = useRef(null);
@@ -18,7 +18,6 @@ export default function MultiSelect({ className, title, options, selection, onTo
   };
 
   const menuHeight = Math.round(window.innerHeight * 0.55);
-
   return (
     <div className={`${className} p-2`} ref={popupRef}>
       <div className="flex justify-between min-w-[120px]" onClick={() => setState({ showMenu: true })}>
@@ -59,7 +58,7 @@ export default function MultiSelect({ className, title, options, selection, onTo
                   className="max-h-[35px] mx-2"
                   onClick={() => onSelectSingle(item)}
                 >
-                  <CameraIcon />
+                  { ( <SelectOnlyIcon /> ) }
                 </Button>
               </div>
             </div>

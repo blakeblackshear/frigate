@@ -37,42 +37,57 @@
       "onAutoForward": "silent"
     }
   },
-  "extensions": [
-    "ms-python.vscode-pylance",
-    "ms-python.python",
-    "visualstudioexptteam.vscodeintellicode",
-    "mhutchie.git-graph",
-    "ms-azuretools.vscode-docker",
-    "streetsidesoftware.code-spell-checker",
-    "esbenp.prettier-vscode",
-    "dbaeumer.vscode-eslint",
-    "mikestead.dotenv",
-    "csstools.postcss",
-    "blanu.vscode-styled-jsx",
-    "bradlc.vscode-tailwindcss"
-  ],
-  "settings": {
-    "remote.autoForwardPorts": false,
-    "python.linting.pylintEnabled": true,
-    "python.linting.enabled": true,
-    "python.formatting.provider": "black",
-    "python.languageServer": "Pylance",
-    "editor.formatOnPaste": false,
-    "editor.formatOnSave": true,
-    "editor.formatOnType": true,
-    "python.testing.pytestEnabled": false,
-    "python.testing.unittestEnabled": true,
-    "python.testing.unittestArgs": ["-v", "-s", "./frigate/test"],
-    "files.trimTrailingWhitespace": true,
-    "eslint.workingDirectories": ["./web"],
-    "[json][jsonc]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "[jsx][js][tsx][ts]": {
-      "editor.codeActionsOnSave": ["source.addMissingImports", "source.fixAll"],
-      "editor.tabSize": 2
-    },
-    "cSpell.ignoreWords": ["rtmp"],
-    "cSpell.words": ["preact"]
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "visualstudioexptteam.vscodeintellicode",
+        "mhutchie.git-graph",
+        "ms-azuretools.vscode-docker",
+        "streetsidesoftware.code-spell-checker",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "mikestead.dotenv",
+        "csstools.postcss",
+        "blanu.vscode-styled-jsx",
+        "bradlc.vscode-tailwindcss",
+        "charliermarsh.ruff"
+      ],
+      "settings": {
+        "remote.autoForwardPorts": false,
+        "python.formatting.provider": "none",
+        "python.languageServer": "Pylance",
+        "editor.formatOnPaste": false,
+        "editor.formatOnSave": true,
+        "editor.formatOnType": true,
+        "python.testing.pytestEnabled": false,
+        "python.testing.unittestEnabled": true,
+        "python.testing.unittestArgs": ["-v", "-s", "./frigate/test"],
+        "files.trimTrailingWhitespace": true,
+        "eslint.workingDirectories": ["./web"],
+        "isort.args": ["--settings-path=./pyproject.toml"],
+        "[python]": {
+          "editor.defaultFormatter": "charliermarsh.ruff",
+          "editor.formatOnSave": true,
+          "editor.codeActionsOnSave": {
+            "source.fixAll": true,
+            "source.organizeImports": true
+          }
+        },
+        "[json][jsonc]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[jsx][js][tsx][ts]": {
+          "editor.codeActionsOnSave": [
+            "source.addMissingImports",
+            "source.fixAll"
+          ],
+          "editor.tabSize": 2
+        },
+        "cSpell.ignoreWords": ["rtmp"],
+        "cSpell.words": ["preact", "astype", "hwaccel", "mqtt"]
+      }
+    }
   }
 }
