@@ -44,6 +44,7 @@ class EdgeTpuTfl(DetectionApi):
                 model_path=detector_config.model.path,
                 experimental_delegates=[edge_tpu_delegate],
             )
+            self.order = detector_config.model.order
         except ValueError:
             logger.error(
                 "No EdgeTPU was detected. If you do not have a Coral device yet, you must configure CPU detectors."
