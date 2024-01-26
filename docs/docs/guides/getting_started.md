@@ -331,5 +331,5 @@ By default, Frigate will retain snapshots of all events for 10 days. The full se
 
 Now that you have a working install, you can use the following guides for additional features:
 
-1. [Configuring go2rtc](configuring_go2rtc) - Additional live view options and RTSP relay
+1. [Configuring go2rtc](configuring_go2rtc.md) - Additional live view options and RTSP relay
 2. [Home Assistant Integration](../integrations/home-assistant.md) - Integrate with Home Assistant
