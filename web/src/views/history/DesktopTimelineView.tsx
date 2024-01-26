@@ -72,7 +72,7 @@ export default function DesktopTimelineView({
     ],
     { revalidateOnFocus: false }
   );
-  
+
   const timelineGraphData = useMemo(() => {
     if (!activity) {
       return {};
@@ -181,6 +181,14 @@ export default function DesktopTimelineView({
                       min: new Date(timeline.range.start * 1000),
                       max: new Date(timeline.range.end * 1000),
                       zoomable: false,
+                      format: {
+                        majorLabels: {
+                          minute:
+                            config.ui.time_format == "24hour"
+                              ? "MM/DD HH:mm"
+                              : "MM/DD hh:mma",
+                        },
+                      },
                     }}
                     timechangeHandler={(data) => {
                       controllerRef.current?.scrubToTimestamp(

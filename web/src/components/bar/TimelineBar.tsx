@@ -2,6 +2,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { GraphDataPoint } from "@/types/graph";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import useSWR from "swr";
+import ActivityIndicator from "../ui/activity-indicator";
 
 type TimelineBarProps = {
   startTime: number;
@@ -19,6 +20,10 @@ export default function TimelineBar({
   onClick,
 }: TimelineBarProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
+
+  if (!config) {
+    return <ActivityIndicator />;
+  }
 
   return (
     <div
@@ -165,7 +170,8 @@ export default function TimelineBar({
       )}
       <div className="text-gray-500">
         {formatUnixTimestampToDateTime(startTime, {
-          strftime_fmt: "%a %d %B",
+          strftime_fmt:
+            config.ui.time_format == "24hour" ? "%m/%d %H:%M" : "%m/%d %I:%M%P",
           time_style: "medium",
           date_style: "medium",
         })}
