@@ -271,6 +271,7 @@ class FrigateApp:
 
     def init_database(self) -> None:
         def vacuum_db(db: SqliteExtDatabase) -> None:
+            logger.info("Running database vacuum")
             db.execute_sql("VACUUM;")
 
             try:
