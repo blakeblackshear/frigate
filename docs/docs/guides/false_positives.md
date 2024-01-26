@@ -36,7 +36,13 @@ False positives can also be reduced by filtering a detection based on its shape.
 
 ### Object Proportions
 
-`min_ratio` and `max_ratio` filter on the ratio of width / height of an objects bounding box and can be used to reduce false positives. For example if a false positive is detected as very tall for a dog which is often wider, a `min_ratio` filter can be used to filter out these false positives.
+`min_ratio` and `max_ratio` values are compared against a given detected object's width/height ratio (in pixels). If the ratio is outside this range, the object will be ignored as a false positive. This allows objects that are proportionally too short-and-wide (higher ratio) or too tall-and-narrow (smaller ratio) to be ignored. 
+
+:::info
+
+Conceptually, a ratio of 1 is a square, 0.5 is a "tall skinny" box, and 2 is a "wide flat" box. If `min_ratio` is 1.0, any object that is taller than it is wide will be ignored. Similarly, if `max_ratio` is 1.0, then any object that is wider than it is tall will be ignored.
+
+:::
 
 ## Other Tools
 
