@@ -159,7 +159,7 @@ function Camera({ camera }: { camera: CameraConfig }) {
                   onClick={(e) => {
                     e.stopPropagation();
                     e.preventDefault();
-                    sendAudio(detectValue == "ON" ? "OFF" : "ON");
+                    sendAudio(audioValue == "ON" ? "OFF" : "ON");
                   }}
                 >
                   <LuEar />
