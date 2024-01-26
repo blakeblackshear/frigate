@@ -32,6 +32,7 @@ RUN apt-get -y install --no-install-recommends libelf1 libdrm2 libdrm-amdgpu1 li
 RUN apt-get -y install python3
 
 #######################################################################
+# ROCm does not come with migraphx wrappers for python 3.9, so we build it here
 FROM debian-base as debian-build
 
 ARG ROCM
@@ -55,6 +56,7 @@ ARG ROCM
 ARG AMDGPU
 ARG HSA_OVERRIDE_GFX_VERSION
 
+# need this to install libnuma1
 RUN apt-get update
 # no ugprade?!?!
 RUN apt-get -y install libnuma1
@@ -79,10 +81,16 @@ COPY --from=rootfs / /
 ENV HSA_ENABLE_SDMA=0
 ENV HSA_OVERRIDE_GFX_VERSION=$HSA_OVERRIDE_GFX_VERSION
 
+# Could compose them directly from https://github.com/ultralytics/assets/releases/tag/v8.1.0
+# but would need to use a torch image of some sorts
 ADD https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8n_320x320.onnx /
 ADD https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8n_labels.txt /
 ADD https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8s_320x320.onnx /
 ADD https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8s_labels.txt /
 ADD https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8m_320x320.onnx /
 ADD https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8m_labels.txt /
+ADD https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8n-oiv7_320x320.onnx /
+ADD https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8n-oiv7_labels.txt /
+ADD https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8s-oiv7_320x320.onnx /
+ADD https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8s-oiv7_labels.txt /
 
