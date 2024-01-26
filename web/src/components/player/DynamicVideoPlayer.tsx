@@ -32,42 +32,12 @@ export default function DynamicVideoPlayer({
     [config]
   );
 
-  // initial state
-
-  const initialPlaybackSource = useMemo(() => {
-    const date = new Date(timeRange.start * 1000);
-    return {
-      src: `${apiHost}vod/${date.getFullYear()}-${
-        date.getMonth() + 1
-      }/${date.getDate()}/${date.getHours()}/${camera}/${timezone.replaceAll(
-        "/",
-        ","
-      )}/master.m3u8`,
-      type: "application/vnd.apple.mpegurl",
-    };
-  }, []);
-  const initialPreviewSource = useMemo(() => {
-    const source = cameraPreviews.find(
-      (preview) =>
-        Math.round(preview.start) >= timeRange.start &&
-        Math.floor(preview.end) <= timeRange.end
-    )?.src;
-
-    if (source) {
-      return {
-        src: source,
-        type: "video/mp4",
-      };
-    } else {
-      return undefined;
-    }
-  }, []);
-
   // controlling playback
 
   const playerRef = useRef<Player | undefined>(undefined);
   const previewRef = useRef<Player | undefined>(undefined);
   const [isScrubbing, setIsScrubbing] = useState(false);
+  const [hasPreview, setHasPreview] = useState(false);
   const [focusedItem, setFocusedItem] = useState<Timeline | undefined>(
     undefined
   );
@@ -84,6 +54,21 @@ export default function DynamicVideoPlayer({
       setFocusedItem
     );
   }, [config]);
+
+  // initial state
+
+  const initialPlaybackSource = useMemo(() => {
+    const date = new Date(timeRange.start * 1000);
+    return {
+      src: `${apiHost}vod/${date.getFullYear()}-${
+        date.getMonth() + 1
+      }/${date.getDate()}/${date.getHours()}/${camera}/${timezone.replaceAll(
+        "/",
+        ","
+      )}/master.m3u8`,
+      type: "application/vnd.apple.mpegurl",
+    };
+  }, []);
 
   // state of playback player
 
@@ -111,18 +96,19 @@ export default function DynamicVideoPlayer({
       ","
     )}/master.m3u8`;
 
+    const preview = cameraPreviews.find(
+      (preview) =>
+        Math.round(preview.start) >= timeRange.start &&
+        Math.floor(preview.end) <= timeRange.end
+    );
+    setHasPreview(preview != undefined);
+
     controller.newPlayback({
       recordings,
       playbackUri,
-      preview: cameraPreviews.find(
-        (preview) =>
-          Math.round(preview.start) >= timeRange.start &&
-          Math.floor(preview.end) <= timeRange.end
-      ),
+      preview,
     });
   }, [controller, recordings]);
-
-  const hasPreview = true;
 
   if (!controller) {
     return <ActivityIndicator />;
@@ -154,6 +140,10 @@ export default function DynamicVideoPlayer({
             player.on("timeupdate", () => {
               controller.updateProgress(player.currentTime() || 0);
             });
+
+            if (onControllerReady) {
+              onControllerReady(controller);
+            }
           }}
           onDispose={() => {
             playerRef.current = undefined;
@@ -167,7 +157,9 @@ export default function DynamicVideoPlayer({
           )}
         </VideoPlayer>
       </div>
-      <div className={`w-full ${isScrubbing ? "visible" : "hidden"}`}>
+      <div
+        className={`w-full ${hasPreview && isScrubbing ? "visible" : "hidden"}`}
+      >
         <VideoPlayer
           options={{
             preload: "auto",
@@ -175,16 +167,11 @@ export default function DynamicVideoPlayer({
             controls: false,
             muted: true,
             loadingSpinner: false,
-            sources: [initialPreviewSource],
           }}
           seekOptions={{}}
           onReady={(player) => {
             previewRef.current = player;
             player.on("seeked", () => controller.finishedSeeking());
-
-            if (onControllerReady) {
-              onControllerReady(controller);
-            }
           }}
           onDispose={() => {
             previewRef.current = undefined;
