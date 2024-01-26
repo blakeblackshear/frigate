@@ -83,14 +83,14 @@ ENV HSA_OVERRIDE_GFX_VERSION=$HSA_OVERRIDE_GFX_VERSION
 
 # Could compose them directly from https://github.com/ultralytics/assets/releases/tag/v8.1.0
 # but would need to use a torch image of some sorts
-ADD https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8n_320x320.onnx /
-ADD https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8n_labels.txt /
-ADD https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8s_320x320.onnx /
-ADD https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8s_labels.txt /
-ADD https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8m_320x320.onnx /
-ADD https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8m_labels.txt /
-ADD https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8n-oiv7_320x320.onnx /
-ADD https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8n-oiv7_labels.txt /
-ADD https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8s-oiv7_320x320.onnx /
-ADD https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8s-oiv7_labels.txt /
+ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8n_320x320.onnx /
+ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8n_labels.txt /
+ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8s_320x320.onnx /
+ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8s_labels.txt /
+ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8m_320x320.onnx /
+ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8m_labels.txt /
+ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8n-oiv7_320x320.onnx /
+ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8n-oiv7_labels.txt /
+ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8s-oiv7_320x320.onnx /
+ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8s-oiv7_labels.txt /
 
