@@ -1,14 +1,45 @@
 import Heading from "@/components/ui/heading";
 import useSWR from "swr";
 import { FrigateStats } from "@/types/stats";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import SystemGraph from "@/components/graph/SystemGraph";
+import { useFrigateStats } from "@/api/ws";
+import TimeAgo from "@/components/dynamic/TimeAgo";
 
 function System() {
   // stats
-  const { data: statsHistory } = useSWR<FrigateStats[]>("stats/history", {
+  const { data: initialStats } = useSWR<FrigateStats[]>("stats/history", {
     revalidateOnFocus: false,
   });
+  const { payload: updatedStats } = useFrigateStats();
+  const [statsHistory, setStatsHistory] = useState<FrigateStats[]>(
+    initialStats || []
+  );
+
+  const lastUpdated = useMemo(() => {
+    if (updatedStats) {
+      return updatedStats.service.last_updated;
+    }
+
+    if (initialStats) {
+      return initialStats.at(-1)?.service?.last_updated;
+    }
+
+    return undefined;
+  }, [initialStats, updatedStats]);
+
+  useEffect(() => {
+    if (initialStats == undefined) {
+      return;
+    }
+
+    if (statsHistory.length < initialStats.length) {
+      setStatsHistory(initialStats);
+      return;
+    }
+
+    setStatsHistory([...statsHistory, updatedStats]);
+  }, [initialStats, updatedStats]);
 
   // stats data pieces
   const detInferenceTimeSeries = useMemo(() => {
@@ -184,7 +215,17 @@ function System() {
 
   return (
     <>
-      <Heading as="h2">System</Heading>
+      <div className="flex items-center">
+        <Heading as="h2">System</Heading>
+        {initialStats && (
+          <div className="ml-2 text-sm">{initialStats[0].service.version}</div>
+        )}
+      </div>
+      {lastUpdated && (
+        <div className="text-xs mb-2">
+          Last refreshed: <TimeAgo time={lastUpdated * 1000} dense />
+        </div>
+      )}
 
       <Heading as="h4">Detectors</Heading>
       <div className="grid grid-cols-1 sm:grid-cols-3">
