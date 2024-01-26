@@ -19,7 +19,7 @@ $ docker run --device=/dev/kfd --device=/dev/dri --group-add video \
     ...
 ```
 
-When running on iGPU you likely need to specify the proper `HSA_OVERRIDE_GFX_VERSION` environment variable. For chip specific docker images this is done automatically, for others you need to figure out what it is. AMD/ROCm does not officially support the iGPUs. See the [ROCm issue](https://github.com/ROCm/ROCm/issues/1743#issuecomment-1149902796) for context and examples.
+When running on iGPU you likely need to specify the proper `HSA_OVERRIDE_GFX_VERSION` environment variable. For chip specific docker images this is done automatically, for others you need to figure out what it is. AMD/ROCm does not officially support the iGPUs. See the [ROCm issue](https://github.com/ROCm/ROCm/issues/174) for context and examples.
 
 If you have `gfx90c` (can be queried with `/opt/rocm/bin/rocminfo`) then you need to run with the gfx900 driver, so you would modify the docker launch by something like this:
 
