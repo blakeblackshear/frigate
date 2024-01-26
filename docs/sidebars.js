@@ -6,6 +6,7 @@ module.exports = {
       "frigate/installation",
       "frigate/camera_setup",
       "frigate/video_pipeline",
+      "frigate/glossary",
     ],
     Guides: [
       "guides/getting_started",
@@ -61,7 +62,7 @@ module.exports = {
     ],
     "Frigate+": ["plus/index"],
     Troubleshooting: [
-      "troubleshooting/faqs", 
+      "troubleshooting/faqs",
       "troubleshooting/recordings",
       "troubleshooting/edgetpu",
     ],
