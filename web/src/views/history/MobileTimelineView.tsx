@@ -72,11 +72,7 @@ export default function MobileTimelineView({
         {playback != undefined && (
           <ActivityScrubber
             items={timelineItemsToScrubber(playback.timelineItems)}
-            timeBars={
-              playback.relevantPreview
-                ? [{ time: new Date(timelineTime * 1000), id: "playback" }]
-                : []
-            }
+            timeBars={[{ time: new Date(timelineTime * 1000), id: "playback" }]}
             options={{
               start: new Date(
                 Math.max(playback.range.start, timelineTime - 300) * 1000

@@ -69,6 +69,24 @@ export default function DynamicVideoPlayer({
       type: "application/vnd.apple.mpegurl",
     };
   }, []);
+  const initialPreviewSource = useMemo(() => {
+    const preview = cameraPreviews.find(
+      (preview) =>
+        Math.round(preview.start) >= timeRange.start &&
+        Math.floor(preview.end) <= timeRange.end
+    );
+
+    if (preview) {
+      setHasPreview(true);
+      return {
+        src: preview.src,
+        type: preview.type,
+      };
+    } else {
+      setHasPreview(false);
+      return undefined;
+    }
+  }, []);
 
   // state of playback player
 
@@ -163,14 +181,16 @@ export default function DynamicVideoPlayer({
         <VideoPlayer
           options={{
             preload: "auto",
-            autoplay: false,
+            autoplay: true,
             controls: false,
             muted: true,
             loadingSpinner: false,
+            sources: hasPreview ? initialPreviewSource : null,
           }}
           seekOptions={{}}
           onReady={(player) => {
             previewRef.current = player;
+            player.pause();
             player.on("seeked", () => controller.finishedSeeking());
           }}
           onDispose={() => {
