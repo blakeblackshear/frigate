@@ -5,15 +5,18 @@ import { useEffect, useMemo, useState } from "react";
 import SystemGraph from "@/components/graph/SystemGraph";
 import { useFrigateStats } from "@/api/ws";
 import TimeAgo from "@/components/dynamic/TimeAgo";
+import { FrigateConfig } from "@/types/frigateConfig";
 
 function System() {
+  const { data: config } = useSWR<FrigateConfig>("config");
+
   // stats
   const { data: initialStats } = useSWR<FrigateStats[]>("stats/history", {
     revalidateOnFocus: false,
   });
   const { payload: updatedStats } = useFrigateStats();
   const [statsHistory, setStatsHistory] = useState<FrigateStats[]>(
-    initialStats || []
+    initialStats || [],
   );
 
   const lastUpdated = useMemo(() => {
@@ -39,7 +42,7 @@ function System() {
     }
 
     setStatsHistory([...statsHistory, updatedStats]);
-  }, [initialStats, updatedStats]);
+  }, [initialStats, updatedStats, statsHistory]);
 
   // stats data pieces
   const detInferenceTimeSeries = useMemo(() => {
@@ -48,10 +51,14 @@ function System() {
     }
 
     const series: {
-      [key: string]: { name: string; data: { x: any; y: any }[] };
+      [key: string]: { name: string; data: { x: object; y: number }[] };
     } = {};
 
     statsHistory.forEach((stats) => {
+      if (!stats) {
+        return;
+      }
+
       const statTime = new Date(stats.service.last_updated * 1000);
 
       Object.entries(stats.detectors).forEach(([key, stats]) => {
@@ -70,10 +77,14 @@ function System() {
     }
 
     const series: {
-      [key: string]: { name: string; data: { x: any; y: any }[] };
+      [key: string]: { name: string; data: { x: object; y: string }[] };
     } = {};
 
     statsHistory.forEach((stats) => {
+      if (!stats) {
+        return;
+      }
+
       const statTime = new Date(stats.service.last_updated * 1000);
 
       Object.entries(stats.detectors).forEach(([key, detStats]) => {
@@ -95,10 +106,14 @@ function System() {
     }
 
     const series: {
-      [key: string]: { name: string; data: { x: any; y: any }[] };
+      [key: string]: { name: string; data: { x: object; y: string }[] };
     } = {};
 
     statsHistory.forEach((stats) => {
+      if (!stats) {
+        return;
+      }
+
       const statTime = new Date(stats.service.last_updated * 1000);
 
       Object.entries(stats.detectors).forEach(([key, detStats]) => {
@@ -120,10 +135,14 @@ function System() {
     }
 
     const series: {
-      [key: string]: { name: string; data: { x: any; y: any }[] };
+      [key: string]: { name: string; data: { x: object; y: string }[] };
     } = {};
 
     statsHistory.forEach((stats) => {
+      if (!stats) {
+        return;
+      }
+
       const statTime = new Date(stats.service.last_updated * 1000);
 
       Object.entries(stats.gpu_usages || []).forEach(([key, stats]) => {
@@ -142,10 +161,14 @@ function System() {
     }
 
     const series: {
-      [key: string]: { name: string; data: { x: any; y: any }[] };
+      [key: string]: { name: string; data: { x: object; y: string }[] };
     } = {};
 
     statsHistory.forEach((stats) => {
+      if (!stats) {
+        return;
+      }
+
       const statTime = new Date(stats.service.last_updated * 1000);
 
       Object.entries(stats.gpu_usages || {}).forEach(([key, stats]) => {
@@ -158,16 +181,104 @@ function System() {
     });
     return Object.values(series);
   }, [statsHistory]);
+  const cameraCpuSeries = useMemo(() => {
+    if (!statsHistory || statsHistory.length == 0) {
+      return {};
+    }
+
+    const series: {
+      [cam: string]: {
+        [key: string]: { name: string; data: { x: object; y: string }[] };
+      };
+    } = {};
+
+    statsHistory.forEach((stats) => {
+      if (!stats) {
+        return;
+      }
+
+      const statTime = new Date(stats.service.last_updated * 1000);
+
+      Object.entries(stats.cameras).forEach(([key, camStats]) => {
+        if (!(key in series)) {
+          const camName = key.replaceAll("_", " ");
+          series[key] = {};
+          series[key]["ffmpeg"] = { name: `${camName} ffmpeg`, data: [] };
+          series[key]["capture"] = { name: `${camName} capture`, data: [] };
+          series[key]["detect"] = { name: `${camName} detect`, data: [] };
+        }
+
+        series[key]["ffmpeg"].data.push({
+          x: statTime,
+          y: stats.cpu_usages[camStats.ffmpeg_pid.toString()].cpu,
+        });
+        series[key]["capture"].data.push({
+          x: statTime,
+          y: stats.cpu_usages[camStats.capture_pid.toString()].cpu,
+        });
+        series[key]["detect"].data.push({
+          x: statTime,
+          y: stats.cpu_usages[camStats.pid.toString()].cpu,
+        });
+      });
+    });
+    return series;
+  }, [statsHistory]);
+  const cameraFpsSeries = useMemo(() => {
+    if (!statsHistory) {
+      return {};
+    }
+
+    const series: {
+      [cam: string]: {
+        [key: string]: { name: string; data: { x: object; y: number }[] };
+      };
+    } = {};
+
+    statsHistory.forEach((stats) => {
+      if (!stats) {
+        return;
+      }
+
+      const statTime = new Date(stats.service.last_updated * 1000);
+
+      Object.entries(stats.cameras).forEach(([key, camStats]) => {
+        if (!(key in series)) {
+          const camName = key.replaceAll("_", " ");
+          series[key] = {};
+          series[key]["det"] = { name: `${camName} detections`, data: [] };
+          series[key]["skip"] = {
+            name: `${camName} skipped detections`,
+            data: [],
+          };
+        }
+
+        series[key]["det"].data.push({
+          x: statTime,
+          y: camStats.detection_fps,
+        });
+        series[key]["skip"].data.push({
+          x: statTime,
+          y: camStats.skipped_fps,
+        });
+      });
+    });
+    return series;
+  }, [statsHistory]);
   const otherProcessCpuSeries = useMemo(() => {
     if (!statsHistory) {
       return [];
     }
 
     const series: {
-      [key: string]: { name: string; data: { x: any; y: any }[] };
+      [key: string]: { name: string; data: { x: object; y: string }[] };
     } = {};
 
     statsHistory.forEach((stats) => {
+      if (!stats) {
+        return;
+      }
+
       const statTime = new Date(stats.service.last_updated * 1000);
 
       Object.entries(stats.processes).forEach(([key, procStats]) => {
@@ -191,10 +302,14 @@ function System() {
     }
 
     const series: {
-      [key: string]: { name: string; data: { x: any; y: any }[] };
+      [key: string]: { name: string; data: { x: object; y: string }[] };
     } = {};
 
     statsHistory.forEach((stats) => {
+      if (!stats) {
+        return;
+      }
+
       const statTime = new Date(stats.service.last_updated * 1000);
 
       Object.entries(stats.processes).forEach(([key, procStats]) => {
@@ -214,20 +329,61 @@ function System() {
   }, [statsHistory]);
 
   return (
-    <>
-      <div className="flex items-center">
-        <Heading as="h2">System</Heading>
-        {initialStats && (
-          <div className="ml-2 text-sm">{initialStats[0].service.version}</div>
-        )}
-      </div>
-      {lastUpdated && (
-        <div className="text-xs mb-2">
-          Last refreshed: <TimeAgo time={lastUpdated * 1000} dense />
+    <div className="size-full p-2">
+      <div className="w-full h-8 flex justify-between items-center">
+        <div className="h-full flex items-center gap-2">
+          <div className="h-full font-medium content-center">System</div>
+          {initialStats && (
+            <div className="h-full text-muted-foreground text-sm content-center">
+              {initialStats[0].service.version}
+            </div>
+          )}
         </div>
-      )}
+        <div className="h-full flex items-center">
+          {lastUpdated && (
+            <div className="h-full text-muted-foreground text-sm content-center">
+              Last refreshed: <TimeAgo time={lastUpdated * 1000} dense />
+            </div>
+          )}
+        </div>
+      </div>
 
-      <Heading as="h4">Detectors</Heading>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <div className="p-2.5 bg-primary rounded-2xl flex-col">
+          <div>Inference Speed</div>
+          {detInferenceTimeSeries.map((series) => (
+            <SystemGraph
+              graphId="detector-inference"
+              unit="ms"
+              data={[series]}
+            />
+          ))}
+        </div>
+        <div className="bg-primary rounded-2xl flex-col">
+          <SystemGraph
+            graphId="detector-usages"
+            title="CPU"
+            unit="%"
+            data={detCpuSeries}
+          />
+        </div>
+        <div className="bg-primary rounded-2xl flex-col">
+          <SystemGraph
+            graphId="detector-usages"
+            title="Memory"
+            unit="%"
+            data={detMemSeries}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default System;
+
+/**
+ *  <Heading as="h4">Detectors</Heading>
       <div className="grid grid-cols-1 sm:grid-cols-3">
         <SystemGraph
           graphId="detector-inference"
@@ -251,7 +407,7 @@ function System() {
       {gpuSeries.length > 0 && (
         <>
           <Heading as="h4">GPUs</Heading>
-          <div className="grid grid-cols-1 sm:grid-cols-2">
+          <div className="mt-2 grid grid-cols-1 sm:grid-cols-2">
             <SystemGraph
               graphId="detector-inference"
               title="GPU Usage"
@@ -267,6 +423,32 @@ function System() {
           </div>
         </>
       )}
+      <Heading as="h4">Cameras</Heading>
+      <div className="grid grid-cols-1 sm:grid-cols-2">
+        {config &&
+          Object.values(config.cameras).map((camera) => {
+            if (camera.enabled) {
+              return (
+                <div key={camera.name} className="grid grid-cols-2">
+                  <SystemGraph
+                    graphId={`${camera.name}-cpu`}
+                    title={`${camera.name.replaceAll("_", " ")} CPU`}
+                    unit="%"
+                    data={Object.values(cameraCpuSeries[camera.name] || {})}
+                  />
+                  <SystemGraph
+                    graphId={`${camera.name}-fps`}
+                    title={`${camera.name.replaceAll("_", " ")} FPS`}
+                    unit=""
+                    data={Object.values(cameraFpsSeries[camera.name] || {})}
+                  />
+                </div>
+              );
+            }
+
+            return null;
+          })}
+      </div>
       <Heading as="h4">Other Processes</Heading>
       <div className="grid grid-cols-1 sm:grid-cols-2">
         <SystemGraph
@@ -282,8 +464,4 @@ function System() {
           data={otherProcessMemSeries}
         />
       </div>
-    </>
-  );
-}
-
-export default System;
+ */

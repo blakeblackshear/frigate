@@ -2,7 +2,7 @@ import Chart from "react-apexcharts";
 
 type SystemGraphProps = {
   graphId: string;
-  title: string;
+  title?: string;
   unit: string;
   data: ApexAxisChartSeries;
 };
@@ -14,7 +14,7 @@ export default function SystemGraph({
 }: SystemGraphProps) {
   return (
     <Chart
-      type="line"
+      type="bar"
       options={{
         chart: {
           id: graphId,
@@ -32,27 +32,23 @@ export default function SystemGraph({
           show: true,
           showForSingleSeries: true,
           position: "top",
+          horizontalAlign: "left",
           onItemClick: {
             toggleDataSeries: true,
           },
         },
-        title: {
-          text: title,
+        dataLabels: {
+          enabled: false,
         },
         xaxis: {
           type: "datetime",
         },
         yaxis: {
-          tickAmount: 3,
-          labels: {
-            formatter: (value) => {
-              return `${value.toFixed(2)} ${unit}`;
-            },
-          },
+          show: false,
         },
       }}
       series={data}
-      height="100%"
+      height="120"
     />
   );
 }
