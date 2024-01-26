@@ -60,11 +60,11 @@ class EdgeTpuTfl(DetectionApi):
         self.interpreter.set_tensor(self.tensor_input_details[0]["index"], tensor_input)
         self.interpreter.invoke()
 
-        boxes = self.interpreter.tensor(self.tensor_output_details[0]["index"])()[0]
-        class_ids = self.interpreter.tensor(self.tensor_output_details[1]["index"])()[0]
-        scores = self.interpreter.tensor(self.tensor_output_details[2]["index"])()[0]
+        boxes = self.interpreter.tensor(self.tensor_output_details[self.order[0]]["index"])()[0]
+        class_ids = self.interpreter.tensor(self.tensor_output_details[self.order[1]]["index"])()[0]
+        scores = self.interpreter.tensor(self.tensor_output_details[self.order[2]]["index"])()[0]
         count = int(
-            self.interpreter.tensor(self.tensor_output_details[3]["index"])()[0]
+            self.interpreter.tensor(self.tensor_output_details[self.order[3]]["index"])()[0]
         )
 
         detections = np.zeros((20, 6), np.float32)
