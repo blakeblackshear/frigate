@@ -7,6 +7,7 @@ import ctypes
 from pydantic import Field
 from typing_extensions import Literal
 import glob
+import cv2
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
@@ -14,6 +15,25 @@ from frigate.detectors.detector_config import BaseDetectorConfig
 logger = logging.getLogger(__name__)
 
 DETECTOR_KEY = "rocm"
+
+# XXX several detectors run yolov8, this should probably be common code in some utils module
+def postprocess_yolov8(model_input_shape, tensor_output, box_count = 20):
+    model_box_count = tensor_output.shape[2]
+    model_class_count = tensor_output.shape[1] - 4
+    probs = tensor_output[0, 4:, :]
+    all_ids = np.argmax(probs, axis=0)
+    all_confidences = np.take(probs.T, model_class_count*np.arange(0, model_box_count) + all_ids)
+    all_boxes = tensor_output[0, 0:4, :].T
+    mask = (all_confidences > 0.30)
+    class_ids = all_ids[mask]
+    confidences = all_confidences[mask]
+    cx, cy, w, h = all_boxes[mask].T
+    scale_y, scale_x = 1 / model_input_shape[2], 1 / model_input_shape[3]
+    detections = np.stack((class_ids, confidences, scale_y * (cy - h / 2), scale_x * (cx - w / 2), scale_y * (cy + h / 2), scale_x * (cx + w / 2)), axis=1)
+    if detections.shape[0] > box_count:
+        detections = detections[np.argpartition(detections[:,1], -box_count)[-box_count:]]
+    detections.resize((box_count, 6))
+    return detections
 
 class ROCmDetectorConfig(BaseDetectorConfig):
     type: Literal[DETECTOR_KEY]
@@ -23,7 +43,7 @@ class ROCmDetector(DetectionApi):
 
     def __init__(self, detector_config: ROCmDetectorConfig):
         try:
-            sys.path.append('/opt/rocm/lib')
+            sys.path.append("/opt/rocm/lib")
             import migraphx
 
             logger.info(f"AMD/ROCm: loaded migraphx module")
@@ -33,11 +53,19 @@ class ROCmDetector(DetectionApi):
             )
             raise
 
+        assert detector_config.model.model_type == 'yolov8', "AMD/ROCm: detector_config.model.model_type: only yolov8 supported"
+        assert detector_config.model.input_tensor == 'nhwc', "AMD/ROCm: detector_config.model.input_tensor: only nhwc supported"
+        if detector_config.model.input_pixel_format != 'rgb':
+            logger.warn("AMD/ROCm: detector_config.model.input_pixel_format: should be 'rgb' for yolov8, but '{detector_config.model.input_pixel_format}' specified!")
+
         assert detector_config.model.path is not None, "No model.path configured, please configure model.path and model.labelmap_path; some suggestions: " + ', '.join(glob.glob("/*.onnx")) + " and " + ', '.join(glob.glob("/*_labels.txt"))
+
         path = detector_config.model.path
-        os.makedirs("/config/model_cache/rocm", exist_ok=True)
         mxr_path = "/config/model_cache/rocm/" + os.path.basename(os.path.splitext(path)[0] + '.mxr')
-        if os.path.exists(mxr_path):
+        if path.endswith('.mxr'):
+            logger.info(f"AMD/ROCm: loading parsed model from {mxr_path}")
+            self.model = migraphx.load(mxr_path)
+        elif os.path.exists(mxr_path):
             logger.info(f"AMD/ROCm: loading parsed model from {mxr_path}")
             self.model = migraphx.load(mxr_path)
         else:
@@ -45,12 +73,14 @@ class ROCmDetector(DetectionApi):
             if path.endswith('.onnx'):
                 self.model = migraphx.parse_onnx(path)
             elif path.endswith('.tf') or path.endswith('.tf2') or path.endswith('.tflite'):
+                # untested
                 self.model = migraphx.parse_tf(path)
             else:
-                raise Exception(f'AMD/ROCm: unkown model format {path}')
+                raise Exception(f"AMD/ROCm: unkown model format {path}")
             logger.info(f"AMD/ROCm: compiling the model")
             self.model.compile(migraphx.get_target('gpu'), offload_copy=True, fast_math=True)
             logger.info(f"AMD/ROCm: saving parsed model into {mxr_path}")
+            os.makedirs("/config/model_cache/rocm", exist_ok=True)
             migraphx.save(self.model, mxr_path)
         logger.info(f"AMD/ROCm: model loaded")
 
@@ -58,37 +88,12 @@ class ROCmDetector(DetectionApi):
         model_input_name = self.model.get_parameter_names()[0];
         model_input_shape = tuple(self.model.get_parameter_shapes()[model_input_name].lens());
 
-        # adapt to nchw/nhwc shape dynamically
-        if (tensor_input.shape[0], tensor_input.shape[3], tensor_input.shape[1], tensor_input.shape[2]) == model_input_shape:
-            tensor_input = np.transpose(tensor_input, (0, 3, 1, 2))
-
-        assert tensor_input.shape == model_input_shape, f"invalid shapes for input ({tensor_input.shape}) and model ({model_input_shape}):"
-
-        tensor_input = (1 / 255.0) * np.ascontiguousarray(tensor_input, dtype=np.float32)
+        tensor_input = cv2.dnn.blobFromImage(tensor_input[0], 1.0 / 255, (model_input_shape[3], model_input_shape[2]), None, swapRB=False)
 
         detector_result = self.model.run({model_input_name: tensor_input})[0]
 
         addr = ctypes.cast(detector_result.data_ptr(), ctypes.POINTER(ctypes.c_float))
-        npr = np.ctypeslib.as_array(addr, shape=detector_result.get_shape().lens())
+        tensor_output = np.ctypeslib.as_array(addr, shape=detector_result.get_shape().lens())
 
-        model_box_count = npr.shape[2]
-        model_class_count = npr.shape[1] - 4
-
-        probs = npr[0, 4:, :]
-        all_ids = np.argmax(probs, axis=0)
-        all_confidences = np.take(probs.T, model_class_count*np.arange(0, model_box_count) + all_ids)
-        all_boxes = npr[0, 0:4, :].T
-        mask = (all_confidences > 0.25)
-        class_ids = all_ids[mask]
-        confidences = all_confidences[mask]
-        cx, cy, w, h = all_boxes[mask].T
-
-        detections = np.stack((class_ids, confidences, cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2), axis=1)
-        if detections.shape[0] > 20:
-            logger.warn(f'Found {detections.shape[0]} boxes, discarding last {detections.shape[0] - 20} entries to limit to 20')
-            # keep best confidences
-            detections = detections[detections[:,1].argsort()[::-1]]
-        detections.resize((20, 6))
-
-        return detections
+        return postprocess_yolov8(model_input_shape, tensor_output)
 
