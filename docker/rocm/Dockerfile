@@ -50,22 +50,48 @@ COPY docker/rocm/migraphx .
 RUN mkdir build && cd build && cmake .. && make install
 
 #######################################################################
-FROM deps AS rocm-deps
-
-ARG ROCM
-ARG AMDGPU
-ARG HSA_OVERRIDE_GFX_VERSION
+FROM deps AS rocm-prelim
 
 # need this to install libnuma1
 RUN apt-get update
 # no ugprade?!?!
 RUN apt-get -y install libnuma1
 
+WORKDIR /opt/frigate/
+COPY --from=rootfs / /
+
+# Could compose them directly from https://github.com/ultralytics/assets/releases/tag/v8.1.0
+# but would need to use a torch image of some sorts
+ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8n_320x320.onnx /
+ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8n_labels.txt /
+ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8n_labels-frigate.txt /
+ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8s_320x320.onnx /
+ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8s_labels.txt /
+ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8s_labels-frigate.txt /
+ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8m_320x320.onnx /
+ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8m_labels.txt /
+ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8m_labels-frigate.txt /
+ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8n-oiv7_320x320.onnx /
+ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8n-oiv7_labels.txt /
+ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8n-oiv7_labels-frigate.txt /
+ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8s-oiv7_320x320.onnx /
+ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8s-oiv7_labels.txt /
+ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8s-oiv7_labels-frigate.txt /
+
+#######################################################################
+FROM rocm-prelim AS rocm-deps
+
+ARG ROCM
+ARG AMDGPU
+ARG HSA_OVERRIDE_GFX_VERSION
+
+ENV HSA_ENABLE_SDMA=0
+ENV HSA_OVERRIDE_GFX_VERSION=$HSA_OVERRIDE_GFX_VERSION
+
 RUN mkdir -p /opt/rocm-$ROCM
 
 # Docker does not copy symbolic links so have to resort to tar
 RUN --mount=from=rocm,src=/opt/rocm-$ROCM,dst=/opt/rocm-copy cd /opt/rocm-copy && tar cf - lib/libMIOpen*.so* lib/libamd*.so* lib/libhip*.so* lib/libhsa*.so* lib/libmigraphx*.so* lib/librocm*.so* lib/librocblas*.so* | (cd /opt/rocm-$ROCM/ && tar xf -)
-#COPY --from=rocm /opt/rocm-$ROCM/lib/libMIOpen*.so* /opt/rocm-$ROCM/lib/libamd*.so* /opt/rocm-$ROCM/lib/libhip*.so* /opt/rocm-$ROCM/lib/libhsa*.so* /opt/rocm-$ROCM/lib/libmigraphx*.so* /opt/rocm-$ROCM/lib/librocm*.so* /opt/rocm-$ROCM/lib/librocblas*.so* /opt/rocm-$ROCM/lib/
 
 COPY --from=rocm /opt/rocm-$ROCM/bin/rocminfo /opt/rocm-$ROCM/bin/migraphx-driver /opt/rocm-$ROCM/bin/
 COPY --from=rocm /opt/rocm-$ROCM/share/miopen/db/*$AMDGPU* /opt/rocm-$ROCM/share/miopen/db/
@@ -74,23 +100,4 @@ COPY --from=rocm /opt/rocm-$ROCM/lib/rocblas/library/*$AMDGPU* /opt/rocm-$ROCM/l
 COPY --from=debian-build /opt/rocm/lib/migraphx.cpython-39-x86_64-linux-gnu.so /opt/rocm-$ROCM/lib/
 
 RUN ln -s /opt/rocm-$ROCM /opt/rocm
-
-WORKDIR /opt/frigate/
-COPY --from=rootfs / /
-
-ENV HSA_ENABLE_SDMA=0
-ENV HSA_OVERRIDE_GFX_VERSION=$HSA_OVERRIDE_GFX_VERSION
-
-# Could compose them directly from https://github.com/ultralytics/assets/releases/tag/v8.1.0
-# but would need to use a torch image of some sorts
-ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8n_320x320.onnx /
-ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8n_labels.txt /
-ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8s_320x320.onnx /
-ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8s_labels.txt /
-ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8m_320x320.onnx /
-ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8m_labels.txt /
-ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8n-oiv7_320x320.onnx /
-ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8n-oiv7_labels.txt /
-ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8s-oiv7_320x320.onnx /
-ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8s-oiv7_labels.txt /
 
