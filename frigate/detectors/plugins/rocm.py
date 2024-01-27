@@ -12,28 +12,11 @@ import cv2
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
 
+import frigate.detectors.yolo_utils as yolo_utils
+
 logger = logging.getLogger(__name__)
 
 DETECTOR_KEY = "rocm"
-
-# XXX several detectors run yolov8, this should probably be common code in some utils module
-def postprocess_yolov8(model_input_shape, tensor_output, box_count = 20):
-    model_box_count = tensor_output.shape[2]
-    model_class_count = tensor_output.shape[1] - 4
-    probs = tensor_output[0, 4:, :]
-    all_ids = np.argmax(probs, axis=0)
-    all_confidences = np.take(probs.T, model_class_count*np.arange(0, model_box_count) + all_ids)
-    all_boxes = tensor_output[0, 0:4, :].T
-    mask = (all_confidences > 0.30)
-    class_ids = all_ids[mask]
-    confidences = all_confidences[mask]
-    cx, cy, w, h = all_boxes[mask].T
-    scale_y, scale_x = 1 / model_input_shape[2], 1 / model_input_shape[3]
-    detections = np.stack((class_ids, confidences, scale_y * (cy - h / 2), scale_x * (cx - w / 2), scale_y * (cy + h / 2), scale_x * (cx + w / 2)), axis=1)
-    if detections.shape[0] > box_count:
-        detections = detections[np.argpartition(detections[:,1], -box_count)[-box_count:]]
-    detections.resize((box_count, 6))
-    return detections
 
 class ROCmDetectorConfig(BaseDetectorConfig):
     type: Literal[DETECTOR_KEY]
@@ -47,7 +30,7 @@ class ROCmDetector(DetectionApi):
             import migraphx
 
             logger.info(f"AMD/ROCm: loaded migraphx module")
-        except ValueError:
+        except ModuleNotFoundError:
             logger.error(
                 "AMD/ROCm: module loading failed, missing ROCm environment?"
             )
@@ -88,12 +71,12 @@ class ROCmDetector(DetectionApi):
         model_input_name = self.model.get_parameter_names()[0];
         model_input_shape = tuple(self.model.get_parameter_shapes()[model_input_name].lens());
 
-        tensor_input = cv2.dnn.blobFromImage(tensor_input[0], 1.0 / 255, (model_input_shape[3], model_input_shape[2]), None, swapRB=False)
+        tensor_input = yolo_utils.yolov8_preprocess(tensor_input, model_input_shape)
 
         detector_result = self.model.run({model_input_name: tensor_input})[0]
 
         addr = ctypes.cast(detector_result.data_ptr(), ctypes.POINTER(ctypes.c_float))
         tensor_output = np.ctypeslib.as_array(addr, shape=detector_result.get_shape().lens())
 
-        return postprocess_yolov8(model_input_shape, tensor_output)
+        return yolo_utils.yolov8_postprocess(model_input_shape, tensor_output)
 
