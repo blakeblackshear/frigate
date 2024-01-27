@@ -11,7 +11,7 @@ Frigate uses [go2rtc](https://github.com/AlexxIT/go2rtc/tree/v1.8.4) to provide 
 
 :::note
 
-You can access the go2rtc webUI at `http://frigate_ip:5000/live/webrtc` which can be helpful to debug as well as provide useful information about your camera streams.
+You can access the go2rtc stream info at `http://frigate_ip:5000/api/go2rtc/streams` which can be helpful to debug as well as provide useful information about your camera streams.
 
 :::
 
