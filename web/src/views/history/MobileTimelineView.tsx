@@ -74,16 +74,13 @@ export default function MobileTimelineView({
             items={timelineItemsToScrubber(playback.timelineItems)}
             timeBars={[{ time: new Date(timelineTime * 1000), id: "playback" }]}
             options={{
-              start: new Date(
-                Math.max(playback.range.start, timelineTime - 300) * 1000
-              ),
-              end: new Date(
-                Math.min(playback.range.end, timelineTime + 300) * 1000
-              ),
+              start: new Date(playback.range.start * 1000),
+              end: new Date(playback.range.end * 1000),
               snap: null,
               min: new Date(playback.range.start * 1000),
               max: new Date(playback.range.end * 1000),
-              timeAxis: { scale: "minute", step: 5 },
+              timeAxis: { scale: "minute", step: 15 },
+              zoomable: false,
             }}
             timechangeHandler={(data) => {
               controllerRef.current?.scrubToTimestamp(
