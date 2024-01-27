@@ -33,7 +33,7 @@ An example of a working configuration:
 
 ```yaml
 model:
-  path: /yolov8n_320x320.onnx
+  path: /yolov8s_320x320.onnx
   labelmap_path: /yolov8s_labels.txt
   model_type: yolov8
 detectors:
@@ -41,4 +41,26 @@ detectors:
     type: rocm
 ```
 
+Note that the detector will first compile the onnx model into AMD/ROCm format and that can take a minute. The compiled file is cached under the configuration directory in the model cache so will not be done the next startup. When you change the hardware/platform you need to delete the file so it can be redone.
 
+## Other models and running the yolov8 models on CPU
+
+The build is bundling the following [ultralytics](https://github.com/ultralytics/ultralytics) pretrained models into the Docker image:
+
+- `/yolov8n_320x320.onnx`, labels: `/yolov8n_labels.txt` or `/yolov8n_labels-frigate.txt`
+- `/yolov8s_320x320.onnx`, labels: `/yolov8s_labels.txt` or `/yolov8s_labels-frigate.txt`
+- `/yolov8m_320x320.onnx`, labels: `/yolov8m_labels.txt` or `/yolov8m_labels-frigate.txt`
+- `/yolov8n-oiv7_320x320.onnx`, labels: `/yolov8n-oiv7_labels.txt` or `/yolov8n-oiv7_labels-frigate.txt`
+- `/yolov8s-oiv7_320x320.onnx`, labels: `/yolov8s-oiv7_labels.txt` or `/yolov8s-oiv7_labels-frigate.txt`
+
+The `*-frigate.txt` labels are grouped to a few relevant categories one would likely want. The Open Images V7 trained models (`*-oiv7_*`) have over 600 labels so it's easier to use the grouped versions than configuring everything by hand in frigate. The following unique labels are in there: person, car, motorcycle, other_vehicle, cat, dog, animal, bird, other.
+
+I have also implemented a CPU detector based on the ONNX engine. So you can run the models without the GPU, just change the `detector.rocm.type` into `onnx`.
+
+## Performance
+
+On an AMD Ryzen 3 5400U with Radeon Graphics ([ASRock 4X4 BOX-5400U](https://www.asrockind.com/en-gb/4X4%20BOX-5400U)) I'm getting about 140fps detections with yolov8n and 65fps with yolov8s.
+
+I was getting a lot of false positives with the Google Coral based edge tpu default model rendering frigate almost useless (unless very draconian constraints were put into place). Not so with the ultralytics' yolov8s. It seems to be excellent for this job even if it is only pretrained on the coco dataset.
+
+![Sample detectors view at System](detectors.png)
