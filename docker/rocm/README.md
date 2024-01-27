@@ -57,6 +57,8 @@ The `*-frigate.txt` labels are grouped to a few relevant categories one would li
 
 I have also implemented a CPU detector based on the ONNX engine. So you can run the models without the GPU, just change the `detector.rocm.type` into `onnx`.
 
+The models are added into the docker images automatically, they are taken from my [models](https://github.com/harakas/models/tree/main/ultralytics/yolov8.1) repository.
+
 ## Performance
 
 On an AMD Ryzen 3 5400U with Radeon Graphics ([ASRock 4X4 BOX-5400U](https://www.asrockind.com/en-gb/4X4%20BOX-5400U)) I'm getting about 140fps detections with yolov8n and 65fps with yolov8s.
