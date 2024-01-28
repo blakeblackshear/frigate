@@ -60,7 +60,12 @@ module.exports = {
       "integrations/mqtt",
       "integrations/third_party_extensions",
     ],
-    "Frigate+": ["plus/index"],
+    "Frigate+": [
+      "plus/index",
+      "plus/first_model",
+      "plus/improving_model",
+      "plus/faq",
+    ],
     Troubleshooting: [
       "troubleshooting/faqs",
       "troubleshooting/recordings",

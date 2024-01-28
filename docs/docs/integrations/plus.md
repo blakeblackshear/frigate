@@ -37,13 +37,24 @@ Snapshots must be enabled to be able to submit examples to Frigate+
 
 :::
 
-![Send To Plus](/img/send-to-plus.png)
+![Send To Plus](/img/plus/send-to-plus.jpg)
+
+![Submit To Plus](/img/plus/submit-to-plus.jpg)
 
 ### Annotate and verify
 
 You can view all of your submitted images at [https://plus.frigate.video](https://plus.frigate.video). Annotations can be added by clicking an image.
 
 ![Annotate](/img/annotate.png)
+
+It is important to label all objects in the image.
+
+False positives will be shown with a read box and the label will have a strike through.
+![false positive](/img/plus/false-positive.jpg)
+
+Misidentified objects should have a correct label added. For example, if a person was mistakenly detected as a cat, you should submit it as a false positive in Frigate and add a label for the person. The boxes will overlap.
+
+![add image](/img/plus/false-positive-overlap.pjpg)
 
 ## Use Models
 
@@ -56,7 +67,7 @@ model:
 
 Models are downloaded into the `/config/model_cache` folder and only downloaded if needed.
 
-You can override the labelmap for Frigate+ models like this:
+If needed, you can override the labelmap for Frigate+ models. This is not recommended as renaming labels will break the Submit to Frigate+ feature if the labels are not available in Frigate+.
 
 ```yaml
 model:
