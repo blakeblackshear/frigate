@@ -18,7 +18,7 @@ def yolov8_postprocess(model_input_shape, tensor_output, box_count = 20):
     model_class_count = tensor_output.shape[1] - 4
     probs = tensor_output[0, 4:, :]
     all_ids = np.argmax(probs, axis=0)
-    all_confidences = np.take(probs.T, model_class_count*np.arange(0, model_box_count) + all_ids)
+    all_confidences = probs.T[np.arange(model_box_count), all_ids]
     all_boxes = tensor_output[0, 0:4, :].T
     mask = (all_confidences > 0.30)
     class_ids = all_ids[mask]
