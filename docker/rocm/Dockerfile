@@ -5,6 +5,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG ROCM=5.7.3
 ARG AMDGPU=gfx900
 ARG HSA_OVERRIDE_GFX_VERSION
+ARG HSA_OVERRIDE
 
 #######################################################################
 FROM ubuntu:focal as rocm
@@ -50,7 +51,7 @@ COPY docker/rocm/migraphx .
 RUN mkdir build && cd build && cmake .. && make install
 
 #######################################################################
-FROM deps AS rocm-prelim
+FROM deps AS deps-prelim
 
 # need this to install libnuma1
 RUN apt-get update
@@ -79,14 +80,12 @@ ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1
 ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8s-oiv7_labels-frigate.txt /
 
 #######################################################################
-FROM rocm-prelim AS rocm-deps
+FROM deps-prelim AS rocm-prelim-hsa-override0
 
 ARG ROCM
 ARG AMDGPU
-ARG HSA_OVERRIDE_GFX_VERSION
 
 ENV HSA_ENABLE_SDMA=0
-ENV HSA_OVERRIDE_GFX_VERSION=$HSA_OVERRIDE_GFX_VERSION
 
 RUN mkdir -p /opt/rocm-$ROCM
 
@@ -100,4 +99,11 @@ COPY --from=rocm /opt/rocm-$ROCM/lib/rocblas/library/*$AMDGPU* /opt/rocm-$ROCM/l
 COPY --from=debian-build /opt/rocm/lib/migraphx.cpython-39-x86_64-linux-gnu.so /opt/rocm-$ROCM/lib/
 
 RUN ln -s /opt/rocm-$ROCM /opt/rocm
+
+FROM rocm-prelim-hsa-override0 as rocm-prelim-hsa-override1
+
+ARG HSA_OVERRIDE_GFX_VERSION
+ENV HSA_OVERRIDE_GFX_VERSION=$HSA_OVERRIDE_GFX_VERSION
+
+FROM rocm-prelim-hsa-override$HSA_OVERRIDE as rocm-deps
 

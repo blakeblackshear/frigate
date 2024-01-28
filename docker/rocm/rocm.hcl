@@ -7,6 +7,9 @@ variable "ROCM" {
 variable "HSA_OVERRIDE_GFX_VERSION" {
   default = ""
 }
+variable "HSA_OVERRIDE" {
+  default = "1"
+}
 target deps {
   dockerfile = "docker/main/Dockerfile"
   platforms = ["linux/amd64"]
@@ -29,6 +32,7 @@ target rocm {
   args = {
     AMDGPU = AMDGPU,
     ROCM = ROCM,
-    HSA_OVERRIDE_GFX_VERSION = HSA_OVERRIDE_GFX_VERSION
+    HSA_OVERRIDE_GFX_VERSION = HSA_OVERRIDE_GFX_VERSION,
+    HSA_OVERRIDE = HSA_OVERRIDE
   }
 }
