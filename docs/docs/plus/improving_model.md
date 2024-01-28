@@ -22,3 +22,12 @@ For the best results, follow the following guidelines.
 **`amazon`, `ups`, and `fedex` should label the logo**: For a Fedex truck, label the truck as a `car` and make a different bounding box just for the Fedex logo. If there are multiple logos, label each of them.
 
 ![Fedex Logo](/img/plus/fedex-logo.jpg)
+
+## False positive labels
+
+False positives will be shown with a read box and the label will have a strike through.
+![false positive](/img/plus/false-positive.jpg)
+
+Misidentified objects should have a correct label added. For example, if a person was mistakenly detected as a cat, you should submit it as a false positive in Frigate and add a label for the person. The boxes will overlap.
+
+![add image](/img/plus/false-positive-overlap.jpg)

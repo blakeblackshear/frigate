@@ -43,18 +43,9 @@ Snapshots must be enabled to be able to submit examples to Frigate+
 
 ### Annotate and verify
 
-You can view all of your submitted images at [https://plus.frigate.video](https://plus.frigate.video). Annotations can be added by clicking an image.
+You can view all of your submitted images at [https://plus.frigate.video](https://plus.frigate.video). Annotations can be added by clicking an image. For more detailed information about labeling, see the documentation on [improving your model](../plus/improving_model.md).
 
 ![Annotate](/img/annotate.png)
-
-It is important to label all objects in the image.
-
-False positives will be shown with a read box and the label will have a strike through.
-![false positive](/img/plus/false-positive.jpg)
-
-Misidentified objects should have a correct label added. For example, if a person was mistakenly detected as a cat, you should submit it as a false positive in Frigate and add a label for the person. The boxes will overlap.
-
-![add image](/img/plus/false-positive-overlap.pjpg)
 
 ## Use Models
 
