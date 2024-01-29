@@ -327,9 +327,15 @@ cameras:
 
 By default, Frigate will retain snapshots of all events for 10 days. The full set of options for snapshots can be found [here](../configuration/index.md#full-configuration-reference).
 
-### Step 7: Follow up guides
+### Step 7: Complete config
 
-Now that you have a working install, you can use the following guides for additional features:
+At this point you have a complete config with basic functionality. You can see the [full config reference](../configuration/reference.md) for a complete list of configuration options.
+
+### Follow up
+
+Now that you have a working install, you can use the following documentation for additional features:
 
 1. [Configuring go2rtc](configuring_go2rtc.md) - Additional live view options and RTSP relay
 2. [Home Assistant Integration](../integrations/home-assistant.md) - Integrate with Home Assistant
+3. [Masks](../configuration/masks.md)
+4. [Zones](../configuration/zones.md)
