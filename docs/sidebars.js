@@ -20,6 +20,7 @@ module.exports = {
     Configuration: {
       "Configuration Files": [
         "configuration/index",
+        "configuration/reference",
         {
           type: "link",
           label: "Go2RTC Configuration Reference",
@@ -43,9 +44,9 @@ module.exports = {
       ],
       Objects: [
         "configuration/masks",
+        "configuration/zones",
         "configuration/objects",
         "configuration/stationary_objects",
-        "configuration/zones",
       ],
       "Extra Configuration": [
         "configuration/hardware_acceleration",
