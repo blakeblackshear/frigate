@@ -44,7 +44,7 @@ class EdgeTpuTfl(DetectionApi):
                 model_path=detector_config.model.path,
                 experimental_delegates=[edge_tpu_delegate],
             )
-            self.order = detector_config.model.order
+            self.tfl_detector_output_tensor_order = detector_config.model.tfl_detector_output_tensor_order
         except ValueError:
             logger.error(
                 "No EdgeTPU was detected. If you do not have a Coral device yet, you must configure CPU detectors."
@@ -60,11 +60,11 @@ class EdgeTpuTfl(DetectionApi):
         self.interpreter.set_tensor(self.tensor_input_details[0]["index"], tensor_input)
         self.interpreter.invoke()
 
-        boxes = self.interpreter.tensor(self.tensor_output_details[self.order[0]]["index"])()[0]
-        class_ids = self.interpreter.tensor(self.tensor_output_details[self.order[1]]["index"])()[0]
-        scores = self.interpreter.tensor(self.tensor_output_details[self.order[2]]["index"])()[0]
+        boxes = self.interpreter.tensor(self.tensor_output_details[self.tfl_detector_output_tensor_order[0]]["index"])()[0]
+        class_ids = self.interpreter.tensor(self.tensor_output_details[self.tfl_detector_output_tensor_order[1]]["index"])()[0]
+        scores = self.interpreter.tensor(self.tensor_output_details[self.tfl_detector_output_tensor_order[2]]["index"])()[0]
         count = int(
-            self.interpreter.tensor(self.tensor_output_details[self.order[3]]["index"])()[0]
+            self.interpreter.tensor(self.tensor_output_details[self.tfl_detector_output_tensor_order[3]]["index"])()[0]
         )
 
         detections = np.zeros((20, 6), np.float32)
