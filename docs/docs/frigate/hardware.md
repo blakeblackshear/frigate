@@ -21,13 +21,12 @@ I may earn a small commission for my endorsement, recommendation, testimonial, o
 
 ## Server
 
-My current favorite is the Minisforum GK41 because of the dual NICs that allow you to setup a dedicated private network for your cameras where they can be blocked from accessing the internet. There are many used workstation options on eBay that work very well. Anything with an Intel CPU and capable of running Debian should work fine. As a bonus, you may want to look for devices with a M.2 or PCIe express slot that is compatible with the Google Coral. I may earn a small commission for my endorsement, recommendation, testimonial, or link to any products or services from this website.
+My current favorite is the Beelink EQ12 because of the efficient N100 CPU and dual NICs that allow you to setup a dedicated private network for your cameras where they can be blocked from accessing the internet. There are many used workstation options on eBay that work very well. Anything with an Intel CPU and capable of running Debian should work fine. As a bonus, you may want to look for devices with a M.2 or PCIe express slot that is compatible with the Google Coral. I may earn a small commission for my endorsement, recommendation, testimonial, or link to any products or services from this website.
 
-| Name                                                                                                                                                                                                                                                                                                              | Coral Inference Speed | Coral Compatibility | Notes                                                                                                                                   |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| Odyssey X86 Blue J4125 (<a href="https://amzn.to/3oH4BKi" target="_blank" rel="nofollow noopener sponsored">Amazon</a>) (<a href="https://www.seeedstudio.com/Frigate-NVR-with-Odyssey-Blue-and-Coral-USB-Accelerator.html?utm_source=Frigate" target="_blank" rel="nofollow noopener sponsored">SeeedStudio</a>) | 9-10ms                | M.2 B+M, USB        | Dual gigabit NICs for easy isolated camera network. Easily handles several 1080p cameras.                                               |
-| Minisforum GK41 (<a href="https://amzn.to/3ptnb8D" target="_blank" rel="nofollow noopener sponsored">Amazon</a>)                                                                                                                                                                                                  | 9-10ms                | USB                 | Dual gigabit NICs for easy isolated camera network. Easily handles several 1080p cameras.                                               |
-| Intel NUC (<a href="https://amzn.to/3psFlHi" target="_blank" rel="nofollow noopener sponsored">Amazon</a>)                                                                                                                                                                                                        | 8-10ms                | USB                 | Overkill for most, but great performance. Can handle many cameras at 5fps depending on typical amounts of motion. Requires extra parts. |
+| Name                                                                                                          | Coral Inference Speed | Coral Compatibility | Notes                                                                                                                                   |
+| ------------------------------------------------------------------------------------------------------------- | --------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Beelink EQ12 (<a href="https://amzn.to/3OlTMJY" target="_blank" rel="nofollow noopener sponsored">Amazon</a>) | 5-10ms                | USB                 | Dual gigabit NICs for easy isolated camera network. Easily handles several 1080p cameras.                                               |
+| Intel NUC (<a href="https://amzn.to/3psFlHi" target="_blank" rel="nofollow noopener sponsored">Amazon</a>)    | 5-10ms                | USB                 | Overkill for most, but great performance. Can handle many cameras at 5fps depending on typical amounts of motion. Requires extra parts. |
 
 ## Detectors
 
@@ -98,6 +97,7 @@ Inference speed will vary depending on the YOLO model, jetson platform and jetso
 #### Rockchip SoC
 
 Frigate supports SBCs with the following Rockchip SoCs:
+
 - RK3566/RK3568
 - RK3588/RK3588S
 - RV1103/RV1106
