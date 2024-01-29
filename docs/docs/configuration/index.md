@@ -169,3 +169,68 @@ cameras:
       mask:
         - 0,461,3,0,1919,0,1919,843,1699,492,1344,458,1346,336,973,317,869,375,866,432
 ```
+
+### Home Assistant integrated Intel Mini PC with OpenVino
+
+- Single camera with 720p, 5fps stream for detect
+- MQTT connected to same mqtt server as home assistant
+- VAAPI hardware acceleration for decoding video
+- OpenVino detector
+- Save all video with any detectable motion for 7 days regardless of whether any objects were detected or not
+- Continue to keep all video if it was during any event for 30 days
+- Save snapshots for 30 days
+- Motion mask for the camera timestamp
+
+```yaml
+mqtt:
+  host: 192.168.X.X # <---- same mqtt broker that home assistant uses
+  user: mqtt-user
+  password: xxxxxxxxxx
+
+ffmpeg:
+  hwaccel_args: preset-vaapi
+
+detectors:
+  ov:
+    type: openvino
+    device: AUTO
+    model:
+      path: /openvino-model/ssdlite_mobilenet_v2.xml
+
+model:
+  width: 300
+  height: 300
+  input_tensor: nhwc
+  input_pixel_format: bgr
+  labelmap_path: /openvino-model/coco_91cl_bkgr.txt
+
+record:
+  enabled: True
+  retain:
+    days: 7
+    mode: motion
+  events:
+    retain:
+      default: 30
+      mode: motion
+
+snapshots:
+  enabled: True
+  retain:
+    default: 30
+
+cameras:
+  name_of_your_camera:
+    detect:
+      width: 1280
+      height: 720
+      fps: 5
+    ffmpeg:
+      inputs:
+        - path: rtsp://10.0.10.10:554/rtsp
+          roles:
+            - detect
+    motion:
+      mask:
+        - 0,461,3,0,1919,0,1919,843,1699,492,1344,458,1346,336,973,317,869,375,866,432
+```
