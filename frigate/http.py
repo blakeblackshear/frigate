@@ -784,10 +784,11 @@ def hourly_timeline_activity(camera_name: str):
             )
 
         data_type = recording.objects > 0
+        count = recording.motion + recording.objects
         hours[int(key.timestamp())].append(
             [
                 recording.start_time + (recording.duration / 2),
-                max(recording.motion, recording.objects),
+                0 if count == 0 else np.log2(count),
                 data_type,
             ]
         )
@@ -801,7 +802,6 @@ def hourly_timeline_activity(camera_name: str):
         df.set_index(["date"], inplace=True)
 
         # normalize data
-        df["count"] = np.clip(np.log10(df["count"], where=df["count"] > 0), None, 10)
         df = df.resample("T").mean().fillna(0)
 
         # change types for output

@@ -48,7 +48,7 @@ export default function TimelineGraph({
         grid: {
           show: false,
           padding: {
-            bottom: 20,
+            bottom: 2,
             top: -12,
             left: -20,
             right: 0,

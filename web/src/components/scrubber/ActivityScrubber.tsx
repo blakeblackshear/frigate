@@ -143,8 +143,8 @@ function ActivityScrubber({
 
     const timelineInstance = new VisTimeline(
       divElement,
-      items as DataItem[],
-      groups as DataGroup[],
+      (items || []) as DataItem[],
+      (groups || []) as DataGroup[],
       timelineOptions
     );
 

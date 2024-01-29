@@ -108,6 +108,15 @@ class TimelineProcessor(threading.Thread):
             },
         }
 
+        # update sub labels for existing entries that haven't been added yet
+        if (
+            prev_event_data != None
+            and prev_event_data["sub_label"] != event_data["sub_label"]
+            and event_id in self.pre_event_cache.keys()
+        ):
+            for e in self.pre_event_cache[event_id]:
+                e[Timeline.data]["sub_label"] = event_data["sub_label"]
+
         if event_type == "start":
             timeline_entry[Timeline.class_type] = "visible"
             save = True

@@ -162,7 +162,6 @@ export default function DesktopTimelineView({
               {isSelected ? (
                 <div className="p-2 relative bg-secondary bg-opacity-30 rounded-md">
                   <ActivityScrubber
-                    items={[]}
                     timeBars={
                       isSelected
                         ? [
@@ -180,7 +179,10 @@ export default function DesktopTimelineView({
                       snap: null,
                       min: new Date(timeline.range.start * 1000),
                       max: new Date(timeline.range.end * 1000),
+                      start: new Date(timeline.range.start * 1000),
+                      end: new Date(timeline.range.end * 1000),
                       zoomable: false,
+                      height: "120px",
                     }}
                     timechangeHandler={(data) => {
                       controllerRef.current?.scrubToTimestamp(
