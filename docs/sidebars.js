@@ -11,7 +11,6 @@ module.exports = {
     Guides: [
       "guides/getting_started",
       "guides/configuring_go2rtc",
-      "guides/false_positives",
       "guides/ha_notifications",
       "guides/ha_network_storage",
       "guides/stationary_objects",
@@ -43,6 +42,7 @@ module.exports = {
         "configuration/camera_specific",
       ],
       Objects: [
+        "configuration/object_filters",
         "configuration/masks",
         "configuration/zones",
         "configuration/objects",
