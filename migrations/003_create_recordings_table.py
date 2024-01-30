@@ -22,8 +22,6 @@ Some examples (model - class or model name)::
 """
 import peewee as pw
 
-from frigate.models import Recordings
-
 SQL = pw.SQL
 
 

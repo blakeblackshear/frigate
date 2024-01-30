@@ -10,10 +10,11 @@ from abc import ABC, abstractmethod
 import numpy as np
 from setproctitle import setproctitle
 
-from frigate.config import InputTensorEnum
 from frigate.detectors import create_detector
-
-from frigate.util import EventsPerSecond, SharedMemoryFrameManager, listen, load_labels
+from frigate.detectors.detector_config import InputTensorEnum
+from frigate.util.builtin import EventsPerSecond, load_labels
+from frigate.util.image import SharedMemoryFrameManager
+from frigate.util.services import listen
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +58,9 @@ class LocalObjectDetector(ObjectDetector):
         raw_detections = self.detect_raw(tensor_input)
 
         for d in raw_detections:
+            if int(d[0]) < 0 or int(d[0]) >= len(self.labels):
+                logger.warning(f"Raw Detect returned invalid label: {d}")
+                continue
             if d[1] < threshold:
                 break
             detections.append(
@@ -161,7 +165,7 @@ class ObjectDetectProcess:
 
     def start_or_restart(self):
         self.detection_start.value = 0.0
-        if (not self.detect_process is None) and self.detect_process.is_alive():
+        if (self.detect_process is not None) and self.detect_process.is_alive():
             self.stop()
         self.detect_process = mp.Process(
             target=run_detector,

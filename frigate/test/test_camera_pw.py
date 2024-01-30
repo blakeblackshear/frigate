@@ -2,7 +2,7 @@
 
 import unittest
 
-from frigate.util import clean_camera_user_pass, escape_special_characters
+from frigate.util.builtin import clean_camera_user_pass, escape_special_characters
 
 
 class TestUserPassCleanup(unittest.TestCase):

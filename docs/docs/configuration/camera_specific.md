@@ -80,8 +80,8 @@ cameras:
     rtmp:
       enabled: False # <-- RTMP should be disabled if your stream is not H264
     detect:
-      width: # <---- update for your camera's resolution
-      height: # <---- update for your camera's resolution
+      width: # <- optional, by default Frigate tries to automatically detect resolution
+      height: # <- optional, by default Frigate tries to automatically detect resolution
 ```
 
 ### Blue Iris RTSP Cameras
@@ -105,26 +105,65 @@ If available, recommended settings are:
 
 According to [this discussion](https://github.com/blakeblackshear/frigate/issues/3235#issuecomment-1135876973), the http video streams seem to be the most reliable for Reolink.
 
+Cameras connected via a Reolink NVR can be connected with the http stream, use `channel[0..15]` in the stream url for the additional channels. 
+The setup of main stream can be also done via RTSP, but isn't always reliable on all hardware versions. The example configuration is working with the oldest HW version RLN16-410 device with multiple types of cameras.
+
+:::caution
+
+The below configuration only works for reolink cameras with stream resolution of 5MP or lower, 8MP+ cameras need to use RTSP as http-flv is not supported in this case.
+
+:::
+
 ```yaml
 go2rtc:
   streams:
-    your_reolink_camera: 
+    your_reolink_camera:
       - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=username&password=password#video=copy#audio=copy#audio=opus"
-    your_reolink_camera_sub: 
+    your_reolink_camera_sub:
       - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=username&password=password"
+    your_reolink_camera_via_nvr:
+      - "ffmpeg:http://reolink_nvr_ip/flv?port=1935&app=bcs&stream=channel3_main.bcs&user=username&password=password" # channel numbers are 0-15
+      - "ffmpeg:your_reolink_camera_via_nvr#audio=aac"
+    your_reolink_camera_via_nvr_sub:
+      - "ffmpeg:http://reolink_nvr_ip/flv?port=1935&app=bcs&stream=channel3_ext.bcs&user=username&password=password"
 
 cameras:
-  reolink:
+  your_reolink_camera:
     ffmpeg:
       inputs:
-        - path: rtsp://127.0.0.1:8554/your_reolink_camera?video=copy&audio=aac
+        - path: rtsp://127.0.0.1:8554/your_reolink_camera
           input_args: preset-rtsp-restream
           roles:
             - record
-        - path: rtsp://127.0.0.1:8554/your_reolink_camera_sub?video=copy
+        - path: rtsp://127.0.0.1:8554/your_reolink_camera_sub
           input_args: preset-rtsp-restream
           roles:
             - detect
+  reolink_via_nvr:
+    ffmpeg:
+      inputs:
+        - path: rtsp://127.0.0.1:8554/your_reolink_camera_via_nvr?video=copy&audio=aac
+          input_args: preset-rtsp-restream
+          roles:
+            - record
+        - path: rtsp://127.0.0.1:8554/your_reolink_camera_via_nvr_sub?video=copy
+          input_args: preset-rtsp-restream
+          roles:
+            - detect   
+```
+
+#### Reolink Doorbell
+
+The reolink doorbell supports 2-way audio via go2rtc and other applications. It is important that the http-flv stream is still used for stability, a secondary rtsp stream can be added that will be using for the two way audio only.
+
+```yaml
+go2rtc:
+  streams:
+    your_reolink_doorbell:
+      - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=username&password=password#video=copy#audio=copy#audio=opus"
+      - rtsp://reolink_ip/Preview_01_sub
+    your_reolink_doorbell_sub:
+      - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=username&password=password"
 ```
 
 ### Unifi Protect Cameras
@@ -140,7 +179,7 @@ go2rtc:
       - rtspx://192.168.1.1:7441/abcdefghijk
 ```
 
-[See the go2rtc docs for more information](https://github.com/AlexxIT/go2rtc/tree/v1.2.0#source-rtsp)
+[See the go2rtc docs for more information](https://github.com/AlexxIT/go2rtc/tree/v1.8.4#source-rtsp)
 
 In the Unifi 2.0 update Unifi Protect Cameras had a change in audio sample rate which causes issues for ffmpeg. The input rate needs to be set for record and rtmp if used directly with unifi protect.
 
@@ -150,3 +189,7 @@ ffmpeg:
     record: preset-record-ubiquiti
     rtmp: preset-rtmp-ubiquiti # recommend using go2rtc instead
 ```
+
+### TP-Link VIGI Cameras
+
+TP-Link VIGI cameras need some adjustments to the main stream settings on the camera itself to avoid issues. The stream needs to be configured as `H264` with `Smart Coding` set to `off`. Without these settings you may have problems when trying to watch recorded events. For example Firefox will stop playback after a few seconds and show the following error message: `The media playback was aborted due to a corruption problem or because the media used features your browser did not support.`.

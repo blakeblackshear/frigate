@@ -1,8 +1,4 @@
-import sys
-from typing_extensions import runtime
-
-sys.path.append("/lab/frigate")
-
+import csv
 import json
 import logging
 import multiprocessing as mp
@@ -11,21 +7,26 @@ import subprocess as sp
 import sys
 
 import click
-import csv
 import cv2
 import numpy as np
 
-from frigate.config import FrigateConfig
-from frigate.object_detection import LocalObjectDetector
-from frigate.motion import MotionDetector
-from frigate.object_processing import CameraState
-from frigate.objects import ObjectTracker
-from frigate.util import (
+sys.path.append("/workspace/frigate")
+
+from frigate.config import FrigateConfig  # noqa: E402
+from frigate.motion import MotionDetector  # noqa: E402
+from frigate.object_detection import LocalObjectDetector  # noqa: E402
+from frigate.object_processing import CameraState  # noqa: E402
+from frigate.track.centroid_tracker import CentroidTracker  # noqa: E402
+from frigate.util import (  # noqa: E402
     EventsPerSecond,
     SharedMemoryFrameManager,
     draw_box_with_label,
 )
-from frigate.video import capture_frames, process_frames, start_or_restart_ffmpeg
+from frigate.video import (  # noqa: E402
+    capture_frames,
+    process_frames,
+    start_or_restart_ffmpeg,
+)
 
 logging.basicConfig()
 logging.root.setLevel(logging.DEBUG)
@@ -107,7 +108,7 @@ class ProcessClip:
         motion_detector = MotionDetector(self.frame_shape, self.camera_config.motion)
         motion_detector.save_images = False
 
-        object_tracker = ObjectTracker(self.camera_config.detect)
+        object_tracker = CentroidTracker(self.camera_config.detect)
         process_info = {
             "process_fps": mp.Value("d", 0.0),
             "detection_fps": mp.Value("d", 0.0),
@@ -247,7 +248,7 @@ def process(path, label, output, debug_path):
         clips.append(path)
 
     json_config = {
-        "mqtt": {"host": "mqtt"},
+        "mqtt": {"enabled": False},
         "detectors": {"coral": {"type": "edgetpu", "device": "usb"}},
         "cameras": {
             "camera": {
@@ -281,7 +282,7 @@ def process(path, label, output, debug_path):
         json_config["cameras"]["camera"]["ffmpeg"]["inputs"][0]["path"] = c
 
         frigate_config = FrigateConfig(**json_config)
-        runtime_config = frigate_config.runtime_config
+        runtime_config = frigate_config.runtime_config()
         runtime_config.cameras["camera"].create_ffmpeg_cmds()
 
         process_clip = ProcessClip(c, frame_shape, runtime_config)
@@ -310,7 +311,6 @@ def process(path, label, output, debug_path):
 
         for result in results:
             if count == 0:
-
                 # Writing headers of CSV file
                 header = ["file"] + list(result[1].keys())
                 csv_writer.writerow(header)

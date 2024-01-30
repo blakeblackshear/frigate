@@ -21,16 +21,10 @@ Some examples (model - class or model name)::
 
 """
 
-import datetime as dt
 import peewee as pw
-from playhouse.sqlite_ext import *
-from decimal import ROUND_HALF_EVEN
-from frigate.models import Event
+from playhouse.sqlite_ext import JSONField
 
-try:
-    import playhouse.postgres_ext as pw_pext
-except ImportError:
-    pass
+from frigate.models import Event
 
 SQL = pw.SQL
 

@@ -44,6 +44,7 @@ export default function Sidebar() {
       </Match>
       {birdseye?.enabled ? <Destination href="/birdseye" text="Birdseye" /> : null}
       <Destination href="/events" text="Events" />
+      <Destination href="/exports" text="Exports" />
       <Separator />
       <Destination href="/storage" text="Storage" />
       <Destination href="/system" text="System" />
@@ -68,9 +69,11 @@ function CameraSection({ sortedCameras }) {
   return (
     <Fragment>
       <Separator />
-      {sortedCameras.map(([camera]) => (
-        <Destination key={camera} href={`/cameras/${camera}`} text={camera.replaceAll('_', ' ')} />
-      ))}
+      <div className="overflow-auto pr-2">
+        {sortedCameras.map(([camera]) => (
+          <Destination key={camera} href={`/cameras/${camera}`} text={camera.replaceAll('_', ' ')} />
+        ))}   
+      </div>
       <Separator />
     </Fragment>
   );
@@ -81,16 +84,18 @@ function RecordingSection({ sortedCameras }) {
   return (
     <Fragment>
       <Separator />
-      {sortedCameras.map(([camera, _]) => {
-        return (
-          <Destination
-            key={camera}
-            path={`/recording/${camera}/:date?/:hour?/:seconds?`}
-            href={`/recording/${camera}`}
-            text={camera.replaceAll('_', ' ')}
-          />
-        );
-      })}
+      <div className="overflow-auto pr-2">
+        {sortedCameras.map(([camera, _]) => {
+          return (
+            <Destination
+              key={camera}
+              path={`/recording/${camera}/:date?/:hour?/:seconds?`}
+              href={`/recording/${camera}`}
+              text={camera.replaceAll('_', ' ')}
+            />
+          );
+        })}
+      </div>
       <Separator />
     </Fragment>
   );

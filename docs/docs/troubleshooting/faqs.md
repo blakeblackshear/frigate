@@ -11,7 +11,7 @@ This error message is due to a shm-size that is too small. Try updating your shm
 
 By default, Frigate removes audio from recordings to reduce the likelihood of failing for invalid data. If you would like to include audio, you need to set a [FFmpeg preset](/configuration/ffmpeg_presets) that supports audio:
 
-```yaml title="frigate.yml"
+```yaml
 ffmpeg:
   output_args:
     record: preset-record-generic-audio-aac
@@ -22,6 +22,17 @@ ffmpeg:
 Ensure your cameras send h264 encoded video, or [transcode them](/configuration/restream.md).
 
 You can open `chrome://media-internals/` in another tab and then try to playback, the media internals page will give information about why playback is failing.
+
+### What do I do if my cameras sub stream is not good enough?
+
+Frigate generally [recommends cameras with configurable sub streams](/frigate/hardware.md). However, if your camera does not have a sub stream that a suitable resolution, the main stream can be resized.
+
+To do this efficiently the following setup is required:
+1. A GPU or iGPU must be available to do the scaling.
+2. [ffmpeg presets for hwaccel](/configuration/hardware_acceleration.md) must be used
+3. Set the desired detection resolution for `detect -> width` and `detect -> height`.
+
+When this is done correctly, the GPU will do the decoding and scaling which will result in a small increase in CPU usage but with better results.
 
 ### My mjpeg stream or snapshots look green and crazy
 

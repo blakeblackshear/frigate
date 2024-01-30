@@ -15,7 +15,7 @@ jobs:
     env:
       DOCKER_BUILDKIT: "1"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@master
         with:
           node-version: 16.x
@@ -34,7 +34,7 @@ jobs:
     name: Web - Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@master
         with:
           node-version: 16.x
@@ -48,7 +48,7 @@ jobs:
     name: Web - Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@master
         with:
           node-version: 16.x
@@ -63,25 +63,28 @@ jobs:
     name: Python Checks
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python ${{ env.DEFAULT_PYTHON }}
-        uses: actions/setup-python@v4.5.0
+        uses: actions/setup-python@v5.0.0
         with:
           python-version: ${{ env.DEFAULT_PYTHON }}
       - name: Install requirements
         run: |
-          pip install pip
-          pip install -r requirements-dev.txt
-      - name: Lint
+          python3 -m pip install -U pip
+          python3 -m pip install -r docker/main/requirements-dev.txt
+      - name: Check formatting
         run: |
-          python3 -m black frigate --check
+          ruff format --check --diff frigate migrations docker *.py
+      - name: Check lint
+        run: |
+          ruff check frigate migrations docker *.py
 
   python_tests:
     runs-on: ubuntu-latest
     name: Python Tests
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - uses: actions/setup-node@master
         with:
           node-version: 16.x
@@ -91,9 +94,9 @@ jobs:
         run: npm run build
         working-directory: ./web
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
       - name: Build
         run: make
       - name: Run mypy

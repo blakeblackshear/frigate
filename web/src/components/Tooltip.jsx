@@ -4,7 +4,7 @@ import { useLayoutEffect, useRef, useState } from 'preact/hooks';
 
 const TIP_SPACE = 20;
 
-export default function Tooltip({ relativeTo, text }) {
+export default function Tooltip({ relativeTo, text, capitalize }) {
   const [position, setPosition] = useState({ top: -9999, left: -9999 });
   const portalRoot = document.getElementById('tooltips');
   const ref = useRef();
@@ -29,7 +29,7 @@ export default function Tooltip({ relativeTo, text }) {
       let newLeft = left - Math.round(tipWidth / 2);
       // too far right
       if (newLeft + tipWidth + TIP_SPACE > windowWidth - window.scrollX) {
-        newLeft = left - tipWidth - TIP_SPACE;
+        newLeft = Math.max(0, left - tipWidth - TIP_SPACE);
         newTop = top - Math.round(tipHeight / 2);
       }
       // too far left
@@ -50,8 +50,8 @@ export default function Tooltip({ relativeTo, text }) {
     <div
       role="tooltip"
       className={`shadow max-w-lg absolute pointer-events-none bg-gray-900 dark:bg-gray-200 bg-opacity-80 rounded px-2 py-1 transition-transform transition-opacity duration-75 transform scale-90 opacity-0 text-gray-100 dark:text-gray-900 text-sm ${
-        position.top >= 0 ? 'opacity-100 scale-100' : ''
-      }`}
+        capitalize ? 'capitalize' : ''
+      } ${position.top >= 0 ? 'opacity-100 scale-100' : ''}`}
       ref={ref}
       style={position}
     >

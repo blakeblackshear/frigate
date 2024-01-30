@@ -155,18 +155,35 @@ Version info
 
 Events from the database. Accepts the following query string parameters:
 
-| param                | Type | Description                                   |
-| -------------------- | ---- | --------------------------------------------- |
-| `before`             | int  | Epoch time                                    |
-| `after`              | int  | Epoch time                                    |
-| `cameras`            | str  | , separated list of cameras                   |
-| `labels`             | str  | , separated list of labels                    |
-| `zones`              | str  | , separated list of zones                     |
-| `limit`              | int  | Limit the number of events returned           |
-| `has_snapshot`       | int  | Filter to events that have snapshots (0 or 1) |
-| `has_clip`           | int  | Filter to events that have clips (0 or 1)     |
-| `include_thumbnails` | int  | Include thumbnails in the response (0 or 1)   |
-| `in_progress`        | int  | Limit to events in progress (0 or 1)          |
+| param                | Type  | Description                                           |
+| -------------------- | ----- | ----------------------------------------------------- |
+| `before`             | int   | Epoch time                                            |
+| `after`              | int   | Epoch time                                            |
+| `cameras`            | str   | , separated list of cameras                           |
+| `labels`             | str   | , separated list of labels                            |
+| `zones`              | str   | , separated list of zones                             |
+| `limit`              | int   | Limit the number of events returned                   |
+| `has_snapshot`       | int   | Filter to events that have snapshots (0 or 1)         |
+| `has_clip`           | int   | Filter to events that have clips (0 or 1)             |
+| `include_thumbnails` | int   | Include thumbnails in the response (0 or 1)           |
+| `in_progress`        | int   | Limit to events in progress (0 or 1)                  |
+| `time_range`         | str   | Time range in format after,before (00:00,24:00)       |
+| `timezone`           | str   | Timezone to use for time range                        |
+| `min_score`          | float | Minimum score of the event                            |
+| `max_score`          | float | Maximum score of the event                            |
+| `is_submitted`       | int   | Filter events that are submitted to Frigate+ (0 or 1) |
+| `min_length`         | float | Minimum length of the event                           |
+| `max_length`         | float | Maximum length of the event                           |
+
+### `GET /api/timeline`
+
+Timeline of key moments of an event(s) from the database. Accepts the following query string parameters:
+
+| param       | Type | Description                         |
+| ----------- | ---- | ----------------------------------- |
+| `camera`    | str  | Name of camera                      |
+| `source_id` | str  | ID of tracked object                |
+| `limit`     | int  | Limit the number of events returned |
 
 ### `GET /api/events/summary`
 
@@ -188,6 +205,14 @@ Sets retain to true for the event id.
 
 Submits the snapshot of the event to Frigate+ for labeling.
 
+| param                | Type | Description                        |
+| -------------------- | ---- | ---------------------------------- |
+| `include_annotation` | int  | Submit annotation to Frigate+ too. |
+
+### `PUT /api/events/<id>/false_positive`
+
+Submits the snapshot of the event to Frigate+ for labeling and adds the detection as a false positive.
+
 ### `DELETE /api/events/<id>/retain`
 
 Sets retain to false for the event id (event may be deleted quickly after removing).
@@ -195,11 +220,12 @@ Sets retain to false for the event id (event may be deleted quickly after removi
 ### `POST /api/events/<id>/sub_label`
 
 Set a sub label for an event. For example to update `person` -> `person's name` if they were recognized with facial recognition.
-Sub labels must be 20 characters or shorter.
+Sub labels must be 100 characters or shorter.
 
 ```json
 {
-  "subLabel": "some_string"
+  "subLabel": "some_string",
+  "subLabelScore": 0.79,
 }
 ```
 
@@ -233,6 +259,19 @@ Accepts the following query string parameters, but they are only applied when an
 
 Returns the snapshot image from the latest event for the given camera and label combo. Using `any` as the label will return the latest thumbnail regardless of type.
 
+### `GET /api/<camera_name>/recordings/<frame_time>/snapshot.png`
+
+Returns the snapshot image from the specific point in that cameras recordings.
+
+### `GET /api/<camera_name>/grid.jpg`
+
+Returns the latest camera image with the regions grid overlaid.
+
+| param        | Type  | Description                                                                                |
+| ------------ | ----- | ------------------------------------------------------------------------------------------ |
+| `color`      | str   | The color of the grid (red,green,blue,black,white). Defaults to "green".                   |
+| `font_scale` | float | Font scale. Can be used to increase font size on high resolution cameras. Defaults to 0.5. |
+
 ### `GET /clips/<camera>-<id>.jpg`
 
 JPG snapshot for the given camera and event id.
@@ -248,6 +287,28 @@ HTTP Live Streaming Video on Demand URL for the specified event. Can be viewed i
 ### `GET /vod/<camera>/start/<start-timestamp>/end/<end-timestamp>/index.m3u8`
 
 HTTP Live Streaming Video on Demand URL for the camera with the specified time range. Can be viewed in an application like VLC.
+
+### `POST /api/export/<camera>/start/<start-timestamp>/end/<end-timestamp>`
+
+Export recordings from `start-timestamp` to `end-timestamp` for `camera` as a single mp4 file. These recordings will be exported to the `/media/frigate/exports` folder.
+
+It is also possible to export this recording as a timelapse.
+
+**Optional Body:**
+
+```json
+{
+  "playback": "realtime", // playback factor: realtime or timelapse_25x
+}
+```
+
+### `DELETE /api/export/<export_name>`
+
+Delete an export from disk.
+
+### `PATCH /api/export/<export_name_current>/<export_name_new>`
+
+Renames an export.
 
 ### `GET /api/<camera_name>/recordings/summary`
 
@@ -269,3 +330,55 @@ Get ffprobe output for camera feed paths.
 | param   | Type   | Description                        |
 | ------- | ------ | ---------------------------------- |
 | `paths` | string | `,` separated list of camera paths |
+
+### `GET /api/<camera_name>/ptz/info`
+
+Get PTZ info for the camera.
+
+### `POST /api/events/<camera_name>/<label>/create`
+
+Create a manual event with a given `label` (ex: doorbell press) to capture a specific event besides an object being detected.
+
+:::caution
+
+Recording retention config still applies to manual events, if frigate is configured with `mode: motion` then the manual event will only keep recording segments when motion occurred.
+
+:::
+
+**Optional Body:**
+
+```json
+{
+  "sub_label": "some_string", // add sub label to event
+  "duration": 30, // predetermined length of event (default: 30 seconds) or can be to null for indeterminate length event
+  "include_recording": true, // whether the event should save recordings along with the snapshot that is taken
+  "draw": {
+    // optional annotations that will be drawn on the snapshot
+    "boxes": [
+      {
+        "box": [0.5, 0.5, 0.25, 0.25], // box consists of x, y, width, height which are on a scale between 0 - 1
+        "color": [255, 0, 0], // color of the box, default is red
+        "score": 100 // optional score associated with the box
+      }
+    ]
+  }
+}
+```
+
+**Success Response:**
+
+```json
+{
+  "event_id": "1682970645.13116-1ug7ns",
+  "message": "Successfully created event.",
+  "success": true
+}
+```
+
+### `PUT /api/events/<event_id>/end`
+
+End a specific manual event without a predetermined length.
+
+### `POST /api/restart`
+
+Restarts Frigate process.

@@ -1,6 +1,6 @@
 ---
 id: cameras
-title: Cameras
+title: Camera Configuration
 ---
 
 ## Setting Up Camera Inputs
@@ -11,11 +11,12 @@ A camera is enabled by default but can be temporarily disabled by using `enabled
 
 Each role can only be assigned to one input per camera. The options for roles are as follows:
 
-| Role       | Description                                                                              |
-| ---------- | ---------------------------------------------------------------------------------------- |
-| `detect`   | Main feed for object detection                                                           |
-| `record`   | Saves segments of the video feed based on configuration settings. [docs](record.md)      |
-| `rtmp`     | Deprecated: Broadcast as an RTMP feed for other services to consume. [docs](restream.md) |
+| Role     | Description                                                                              |
+| -------- | ---------------------------------------------------------------------------------------- |
+| `detect` | Main feed for object detection. [docs](object_detectors.md)                              |
+| `record` | Saves segments of the video feed based on configuration settings. [docs](record.md)      |
+| `audio`  | Feed for audio based detection. [docs](audio_detectors.md)                               |
+| `rtmp`   | Deprecated: Broadcast as an RTMP feed for other services to consume. [docs](restream.md) |
 
 ```yaml
 mqtt:
@@ -33,8 +34,8 @@ cameras:
           roles:
             - record
     detect:
-      width: 1280
-      height: 720
+      width: 1280 # <- optional, by default Frigate tries to automatically detect resolution
+      height: 720 # <- optional, by default Frigate tries to automatically detect resolution
 ```
 
 Additional cameras are simply added to the config under the `cameras` entry.
@@ -48,3 +49,50 @@ cameras:
 ```
 
 For camera model specific settings check the [camera specific](camera_specific.md) infos.
+
+## Setting up camera PTZ controls
+
+:::caution
+
+Not every PTZ supports ONVIF, which is the standard protocol Frigate uses to communicate with your camera. Check the [official list of ONVIF conformant products](https://www.onvif.org/conformant-products/), your camera documentation, or camera manufacturer's website to ensure your PTZ supports ONVIF. Also, ensure your camera is running the latest firmware.
+
+:::
+
+Add the onvif section to your camera in your configuration file:
+
+```yaml
+cameras:
+  back:
+    ffmpeg: ...
+    onvif:
+      host: 10.0.10.10
+      port: 8000
+      user: admin
+      password: password
+```
+
+If the ONVIF connection is successful, PTZ controls will be available in the camera's WebUI.
+
+An ONVIF-capable camera that supports relative movement within the field of view (FOV) can also be configured to automatically track moving objects and keep them in the center of the frame. For autotracking setup, see the [autotracking](autotracking.md) docs.
+
+## ONVIF PTZ camera recommendations
+
+This list of working and non-working PTZ cameras is based on user feedback.
+
+| Brand or specific camera | PTZ Controls | Autotracking | Notes                                                                                                                                           |
+| ------------------------ | :----------: | :----------: | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Amcrest                  |      ✅      |      ✅      | ⛔️ Generally, Amcrest should work, but some older models (like the common IP2M-841) don't support autotracking                                 |
+| Amcrest ASH21            |      ❌      |      ❌      | No ONVIF support                                                                                                                                |
+| Ctronics PTZ             |      ✅      |      ❌      |                                                                                                                                                 |
+| Dahua                    |      ✅      |      ✅      |                                                                                                                                                 |
+| Foscam R5                |      ✅      |      ❌      |                                                                                                                                                 |
+| Hikvision                |      ✅      |      ❌      | Incomplete ONVIF support (MoveStatus won't update even on latest firmware) - reported with HWP-N4215IH-DE and DS-2DE3304W-DE, but likely others |
+| Reolink 511WA            |      ✅      |      ❌      | Zoom only                                                                                                                                       |
+| Reolink E1 Pro           |      ✅      |      ❌      |                                                                                                                                                 |
+| Reolink E1 Zoom          |      ✅      |      ❌      |                                                                                                                                                 |
+| Reolink RLC-823A 16x     |      ✅      |      ❌      |                                                                                                                                                 |
+| Sunba 405-D20X           |      ✅      |      ❌      |                                                                                                                                                 |
+| Tapo C200                |      ✅      |      ❌      | Incomplete ONVIF support                                                                                                                        |
+| Tapo C210                |      ❌      |      ❌      | Incomplete ONVIF support                                                                                                                        |
+| Uniview IPC672LR-AX4DUPK |      ✅      |      ❌      | Firmware says FOV relative movement is supported, but camera doesn't actually move when sending ONVIF commands                                  |
+| Vikylin PTZ-2804X-I2     |      ❌      |      ❌      | Incomplete ONVIF support                                                                                                                        |

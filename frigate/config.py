@@ -1,31 +1,30 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import os
 from enum import Enum
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
-import yaml
-from pydantic import BaseModel, Extra, Field, validator, parse_obj_as
+from pydantic import BaseModel, Extra, Field, parse_obj_as, validator
 from pydantic.fields import PrivateAttr
 
 from frigate.const import (
-    BASE_DIR,
+    ALL_ATTRIBUTE_LABELS,
+    AUDIO_MIN_CONFIDENCE,
     CACHE_DIR,
+    CACHE_SEGMENT_FORMAT,
+    DEFAULT_DB_PATH,
+    MAX_PRE_CAPTURE,
     REGEX_CAMERA_NAME,
     YAML_EXT,
 )
-from frigate.util import (
-    create_mask,
-    deep_merge,
-    get_ffmpeg_arg_list,
-    escape_special_characters,
-    load_config_with_no_duplicates,
-    load_labels,
-)
+from frigate.detectors import DetectorConfig, ModelConfig
+from frigate.detectors.detector_config import BaseDetectorConfig
 from frigate.ffmpeg_presets import (
     parse_preset_hardware_acceleration_decode,
     parse_preset_hardware_acceleration_scale,
@@ -33,14 +32,15 @@ from frigate.ffmpeg_presets import (
     parse_preset_output_record,
     parse_preset_output_rtmp,
 )
-from frigate.detectors import (
-    PixelFormatEnum,
-    InputTensorEnum,
-    ModelConfig,
-    DetectorConfig,
+from frigate.plus import PlusApi
+from frigate.util.builtin import (
+    deep_merge,
+    escape_special_characters,
+    get_ffmpeg_arg_list,
+    load_config_with_no_duplicates,
 )
-from frigate.version import VERSION
-
+from frigate.util.image import create_mask
+from frigate.util.services import get_video_properties
 
 logger = logging.getLogger(__name__)
 
@@ -50,9 +50,19 @@ DEFAULT_TIME_FORMAT = "%m/%d/%Y %H:%M:%S"
 # DEFAULT_TIME_FORMAT = "%d.%m.%Y %H:%M:%S"
 
 FRIGATE_ENV_VARS = {k: v for k, v in os.environ.items() if k.startswith("FRIGATE_")}
+# read docker secret files as env vars too
+if os.path.isdir("/run/secrets"):
+    for secret_file in os.listdir("/run/secrets"):
+        if secret_file.startswith("FRIGATE_"):
+            FRIGATE_ENV_VARS[secret_file] = Path(
+                os.path.join("/run/secrets", secret_file)
+            ).read_text()
 
 DEFAULT_TRACKED_OBJECTS = ["person"]
+DEFAULT_LISTEN_AUDIO = ["bark", "fire_alarm", "scream", "speech", "yell"]
 DEFAULT_DETECTORS = {"cpu": {"type": "cpu"}}
+DEFAULT_DETECT_DIMENSIONS = {"width": 1280, "height": 720}
+DEFAULT_TIME_LAPSE_FFMPEG_ARGS = "-vf setpts=0.04*PTS -r 30"
 
 
 class FrigateBaseModel(BaseModel):
@@ -99,7 +109,22 @@ class UIConfig(FrigateBaseModel):
     )
 
 
+class StatsConfig(FrigateBaseModel):
+    amd_gpu_stats: bool = Field(default=True, title="Enable AMD GPU stats.")
+    intel_gpu_stats: bool = Field(default=True, title="Enable Intel GPU stats.")
+    network_bandwidth: bool = Field(
+        default=False, title="Enable network bandwidth for ffmpeg processes."
+    )
+
+
 class TelemetryConfig(FrigateBaseModel):
+    network_interfaces: List[str] = Field(
+        default=[],
+        title="Enabled network interfaces for bandwidth calculation.",
+    )
+    stats: StatsConfig = Field(
+        default_factory=StatsConfig, title="System Stats Configuration"
+    )
     version_check: bool = Field(default=True, title="Enable latest version check.")
 
 
@@ -124,6 +149,75 @@ class MqttConfig(FrigateBaseModel):
         return v
 
 
+class ZoomingModeEnum(str, Enum):
+    disabled = "disabled"
+    absolute = "absolute"
+    relative = "relative"
+
+
+class PtzAutotrackConfig(FrigateBaseModel):
+    enabled: bool = Field(default=False, title="Enable PTZ object autotracking.")
+    calibrate_on_startup: bool = Field(
+        default=False, title="Perform a camera calibration when Frigate starts."
+    )
+    zooming: ZoomingModeEnum = Field(
+        default=ZoomingModeEnum.disabled, title="Autotracker zooming mode."
+    )
+    zoom_factor: float = Field(
+        default=0.3,
+        title="Zooming factor (0.1-0.75).",
+        ge=0.1,
+        le=0.75,
+    )
+    track: List[str] = Field(default=DEFAULT_TRACKED_OBJECTS, title="Objects to track.")
+    required_zones: List[str] = Field(
+        default_factory=list,
+        title="List of required zones to be entered in order to begin autotracking.",
+    )
+    return_preset: str = Field(
+        default="home",
+        title="Name of camera preset to return to when object tracking is over.",
+    )
+    timeout: int = Field(
+        default=10, title="Seconds to delay before returning to preset."
+    )
+    movement_weights: Optional[Union[str, List[str]]] = Field(
+        default=[],
+        title="Internal value used for PTZ movements based on the speed of your camera's motor.",
+    )
+    enabled_in_config: Optional[bool] = Field(
+        title="Keep track of original state of autotracking."
+    )
+
+    @validator("movement_weights", pre=True)
+    def validate_weights(cls, v):
+        if v is None:
+            return None
+
+        if isinstance(v, str):
+            weights = list(map(float, v.split(",")))
+        elif isinstance(v, list):
+            weights = [float(val) for val in v]
+        else:
+            raise ValueError("Invalid type for movement_weights")
+
+        if len(weights) != 5:
+            raise ValueError("movement_weights must have exactly 5 floats")
+
+        return weights
+
+
+class OnvifConfig(FrigateBaseModel):
+    host: str = Field(default="", title="Onvif Host")
+    port: int = Field(default=8000, title="Onvif Port")
+    user: Optional[str] = Field(title="Onvif Username")
+    password: Optional[str] = Field(title="Onvif Password")
+    autotracking: PtzAutotrackConfig = Field(
+        default_factory=PtzAutotrackConfig,
+        title="PTZ auto tracking config.",
+    )
+
+
 class RetainModeEnum(str, Enum):
     all = "all"
     motion = "motion"
@@ -139,7 +233,9 @@ class RetainConfig(FrigateBaseModel):
 
 
 class EventsConfig(FrigateBaseModel):
-    pre_capture: int = Field(default=5, title="Seconds to retain before event starts.")
+    pre_capture: int = Field(
+        default=5, title="Seconds to retain before event starts.", le=MAX_PRE_CAPTURE
+    )
     post_capture: int = Field(default=5, title="Seconds to retain after event ends.")
     required_zones: List[str] = Field(
         default_factory=list,
@@ -158,19 +254,29 @@ class RecordRetainConfig(FrigateBaseModel):
     mode: RetainModeEnum = Field(default=RetainModeEnum.all, title="Retain mode.")
 
 
+class RecordExportConfig(FrigateBaseModel):
+    timelapse_args: str = Field(
+        default=DEFAULT_TIME_LAPSE_FFMPEG_ARGS, title="Timelapse Args"
+    )
+
+
 class RecordConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable record on all cameras.")
+    sync_recordings: bool = Field(
+        default=False, title="Sync recordings with disk on startup and once a day."
+    )
     expire_interval: int = Field(
         default=60,
         title="Number of minutes to wait between cleanup runs.",
     )
-    # deprecated - to be removed in a future version
-    retain_days: Optional[float] = Field(title="Recording retention period in days.")
     retain: RecordRetainConfig = Field(
         default_factory=RecordRetainConfig, title="Record retention settings."
     )
     events: EventsConfig = Field(
         default_factory=EventsConfig, title="Event specific settings."
+    )
+    export: RecordExportConfig = Field(
+        default_factory=RecordExportConfig, title="Recording Export Config"
     )
     enabled_in_config: Optional[bool] = Field(
         title="Keep track of original state of recording."
@@ -179,16 +285,19 @@ class RecordConfig(FrigateBaseModel):
 
 class MotionConfig(FrigateBaseModel):
     threshold: int = Field(
-        default=25,
+        default=30,
         title="Motion detection threshold (1-255).",
         ge=1,
         le=255,
     )
-    improve_contrast: bool = Field(default=False, title="Improve Contrast")
-    contour_area: Optional[int] = Field(default=30, title="Contour Area")
+    lightning_threshold: float = Field(
+        default=0.8, title="Lightning detection threshold (0.3-1.0).", ge=0.3, le=1.0
+    )
+    improve_contrast: bool = Field(default=True, title="Improve Contrast")
+    contour_area: Optional[int] = Field(default=10, title="Contour Area")
     delta_alpha: float = Field(default=0.2, title="Delta Alpha")
-    frame_alpha: float = Field(default=0.2, title="Frame Alpha")
-    frame_height: Optional[int] = Field(default=50, title="Frame Height")
+    frame_alpha: float = Field(default=0.01, title="Frame Alpha")
+    frame_height: Optional[int] = Field(default=100, title="Frame Height")
     mask: Union[str, List[str]] = Field(
         default="", title="Coordinates polygon for the motion mask."
     )
@@ -238,9 +347,8 @@ class StationaryMaxFramesConfig(FrigateBaseModel):
 
 class StationaryConfig(FrigateBaseModel):
     interval: Optional[int] = Field(
-        default=0,
         title="Frame interval for checking stationary objects.",
-        ge=0,
+        gt=0,
     )
     threshold: Optional[int] = Field(
         title="Number of frames without a position change for an object to be considered stationary",
@@ -253,18 +361,24 @@ class StationaryConfig(FrigateBaseModel):
 
 
 class DetectConfig(FrigateBaseModel):
-    height: int = Field(default=720, title="Height of the stream for the detect role.")
-    width: int = Field(default=1280, title="Width of the stream for the detect role.")
+    height: Optional[int] = Field(title="Height of the stream for the detect role.")
+    width: Optional[int] = Field(title="Width of the stream for the detect role.")
     fps: int = Field(
         default=5, title="Number of frames per second to process through detection."
     )
     enabled: bool = Field(default=True, title="Detection Enabled.")
+    min_initialized: Optional[int] = Field(
+        title="Minimum number of consecutive hits for an object to be initialized by the tracker."
+    )
     max_disappeared: Optional[int] = Field(
         title="Maximum number of frames the object can dissapear before detection ends."
     )
     stationary: StationaryConfig = Field(
         default_factory=StationaryConfig,
         title="Stationary objects config.",
+    )
+    annotation_offset: int = Field(
+        default=0, title="Milliseconds to offset detect annotations by."
     )
 
 
@@ -292,6 +406,15 @@ class FilterConfig(FrigateBaseModel):
     )
     mask: Optional[Union[str, List[str]]] = Field(
         title="Detection area polygon mask for this filter configuration.",
+    )
+
+
+class AudioFilterConfig(FrigateBaseModel):
+    threshold: float = Field(
+        default=0.8,
+        ge=AUDIO_MIN_CONFIDENCE,
+        lt=1.0,
+        title="Minimum detection confidence threshold for audio to be counted.",
     )
 
 
@@ -327,6 +450,11 @@ class ZoneConfig(BaseModel):
     )
     coordinates: Union[str, List[str]] = Field(
         title="Coordinates polygon for the defined zone."
+    )
+    inertia: int = Field(
+        default=3,
+        title="Number of consecutive frames required for object to be considered present in the zone.",
+        gt=0,
     )
     objects: List[str] = Field(
         default_factory=list,
@@ -364,14 +492,40 @@ class ZoneConfig(BaseModel):
 
 class ObjectConfig(FrigateBaseModel):
     track: List[str] = Field(default=DEFAULT_TRACKED_OBJECTS, title="Objects to track.")
-    filters: Optional[Dict[str, FilterConfig]] = Field(title="Object filters.")
+    filters: Dict[str, FilterConfig] = Field(default={}, title="Object filters.")
     mask: Union[str, List[str]] = Field(default="", title="Object mask.")
+
+
+class AudioConfig(FrigateBaseModel):
+    enabled: bool = Field(default=False, title="Enable audio events.")
+    max_not_heard: int = Field(
+        default=30, title="Seconds of not hearing the type of audio to end the event."
+    )
+    min_volume: int = Field(
+        default=500, title="Min volume required to run audio detection."
+    )
+    listen: List[str] = Field(
+        default=DEFAULT_LISTEN_AUDIO, title="Audio to listen for."
+    )
+    filters: Optional[Dict[str, AudioFilterConfig]] = Field(title="Audio filters.")
+    enabled_in_config: Optional[bool] = Field(
+        title="Keep track of original state of audio detection."
+    )
+    num_threads: int = Field(default=2, title="Number of detection threads", ge=1)
 
 
 class BirdseyeModeEnum(str, Enum):
     objects = "objects"
     motion = "motion"
     continuous = "continuous"
+
+    @classmethod
+    def get_index(cls, type):
+        return list(cls).index(type)
+
+    @classmethod
+    def get(cls, index):
+        return list(cls)[index]
 
 
 class BirdseyeConfig(FrigateBaseModel):
@@ -393,6 +547,7 @@ class BirdseyeConfig(FrigateBaseModel):
 # uses BaseModel because some global attributes are not available at the camera level
 class BirdseyeCameraConfig(BaseModel):
     enabled: bool = Field(default=True, title="Enable birdseye view for camera.")
+    order: int = Field(default=0, title="Position of the camera in the birdseye view.")
     mode: BirdseyeModeEnum = Field(
         default=BirdseyeModeEnum.objects, title="Tracking mode for camera."
     )
@@ -443,9 +598,14 @@ class FfmpegConfig(FrigateBaseModel):
         default_factory=FfmpegOutputArgsConfig,
         title="FFmpeg output arguments per role.",
     )
+    retry_interval: float = Field(
+        default=10.0,
+        title="Time in seconds to wait before FFmpeg retries connecting to the camera.",
+    )
 
 
 class CameraRoleEnum(str, Enum):
+    audio = "audio"
     record = "record"
     rtmp = "rtmp"
     detect = "detect"
@@ -476,7 +636,7 @@ class CameraFfmpegConfig(FfmpegConfig):
         if len(roles) > len(roles_set):
             raise ValueError("Each input role may only be used once.")
 
-        if not "detect" in roles:
+        if "detect" not in roles:
             raise ValueError("The detect role is required.")
 
         return v
@@ -586,6 +746,9 @@ class CameraConfig(FrigateBaseModel):
         default=60,
         title="How long to wait for the image with the highest confidence score.",
     )
+    webui_url: Optional[str] = Field(
+        title="URL to visit the camera directly from system page",
+    )
     zones: Dict[str, ZoneConfig] = Field(
         default_factory=dict, title="Zone configuration."
     )
@@ -607,9 +770,15 @@ class CameraConfig(FrigateBaseModel):
     objects: ObjectConfig = Field(
         default_factory=ObjectConfig, title="Object configuration."
     )
+    audio: AudioConfig = Field(
+        default_factory=AudioConfig, title="Audio events configuration."
+    )
     motion: Optional[MotionConfig] = Field(title="Motion detection configuration.")
     detect: DetectConfig = Field(
         default_factory=DetectConfig, title="Object detection configuration."
+    )
+    onvif: OnvifConfig = Field(
+        default_factory=OnvifConfig, title="Camera Onvif Configuration."
     )
     ui: CameraUiConfig = Field(
         default_factory=CameraUiConfig, title="Camera UI Modifications."
@@ -634,11 +803,15 @@ class CameraConfig(FrigateBaseModel):
         # add roles to the input if there is only one
         if len(config["ffmpeg"]["inputs"]) == 1:
             has_rtmp = "rtmp" in config["ffmpeg"]["inputs"][0].get("roles", [])
+            has_audio = "audio" in config["ffmpeg"]["inputs"][0].get("roles", [])
 
             config["ffmpeg"]["inputs"][0]["roles"] = [
                 "record",
                 "detect",
             ]
+
+            if has_audio:
+                config["ffmpeg"]["inputs"][0]["roles"].append("audio")
 
             if has_rtmp:
                 config["ffmpeg"]["inputs"][0]["roles"].append("rtmp")
@@ -699,7 +872,7 @@ class CameraConfig(FrigateBaseModel):
 
             ffmpeg_output_args = (
                 record_args
-                + [f"{os.path.join(CACHE_DIR, self.name)}-%Y%m%d%H%M%S.mp4"]
+                + [f"{os.path.join(CACHE_DIR, self.name)}@{CACHE_SEGMENT_FORMAT}.mp4"]
                 + ffmpeg_output_args
             )
 
@@ -711,9 +884,19 @@ class CameraConfig(FrigateBaseModel):
             ffmpeg_input.global_args or self.ffmpeg.global_args
         )
         hwaccel_args = get_ffmpeg_arg_list(
-            parse_preset_hardware_acceleration_decode(ffmpeg_input.hwaccel_args)
+            parse_preset_hardware_acceleration_decode(
+                ffmpeg_input.hwaccel_args,
+                self.detect.fps,
+                self.detect.width,
+                self.detect.height,
+            )
             or ffmpeg_input.hwaccel_args
-            or parse_preset_hardware_acceleration_decode(self.ffmpeg.hwaccel_args)
+            or parse_preset_hardware_acceleration_decode(
+                self.ffmpeg.hwaccel_args,
+                self.detect.fps,
+                self.detect.width,
+                self.detect.height,
+            )
             or self.ffmpeg.hwaccel_args
         )
         input_args = get_ffmpeg_arg_list(
@@ -736,9 +919,7 @@ class CameraConfig(FrigateBaseModel):
 
 
 class DatabaseConfig(FrigateBaseModel):
-    path: str = Field(
-        default=os.path.join(BASE_DIR, "frigate.db"), title="Database path."
-    )
+    path: str = Field(default=DEFAULT_DB_PATH, title="Database path.")
 
 
 class LogLevelEnum(str, Enum):
@@ -764,20 +945,25 @@ def verify_config_roles(camera_config: CameraConfig) -> None:
         set([r for i in camera_config.ffmpeg.inputs for r in i.roles])
     )
 
-    if camera_config.record.enabled and not "record" in assigned_roles:
+    if camera_config.record.enabled and "record" not in assigned_roles:
         raise ValueError(
             f"Camera {camera_config.name} has record enabled, but record is not assigned to an input."
         )
 
-    if camera_config.rtmp.enabled and not "rtmp" in assigned_roles:
+    if camera_config.rtmp.enabled and "rtmp" not in assigned_roles:
         raise ValueError(
             f"Camera {camera_config.name} has rtmp enabled, but rtmp is not assigned to an input."
+        )
+
+    if camera_config.audio.enabled and "audio" not in assigned_roles:
+        raise ValueError(
+            f"Camera {camera_config.name} has audio events enabled, but audio is not assigned to an input."
         )
 
 
 def verify_valid_live_stream_name(
     frigate_config: FrigateConfig, camera_config: CameraConfig
-) -> None:
+) -> ValueError | None:
     """Verify that a restream exists to use for live view."""
     if (
         camera_config.live.stream_name
@@ -786,16 +972,6 @@ def verify_valid_live_stream_name(
         return ValueError(
             f"No restream with name {camera_config.live.stream_name} exists for camera {camera_config.name}."
         )
-
-
-def verify_old_retain_config(camera_config: CameraConfig) -> None:
-    """Leave log if old retain_days is used."""
-    if not camera_config.record.retain_days is None:
-        logger.warning(
-            "The 'retain_days' config option has been DEPRECATED and will be removed in a future version. Please use the 'days' setting under 'retain'"
-        )
-        if camera_config.record.retain.days == 0:
-            camera_config.record.retain.days = camera_config.record.retain_days
 
 
 def verify_recording_retention(camera_config: CameraConfig) -> None:
@@ -850,6 +1026,17 @@ def verify_zone_objects_are_tracked(camera_config: CameraConfig) -> None:
                 )
 
 
+def verify_autotrack_zones(camera_config: CameraConfig) -> ValueError | None:
+    """Verify that required_zones are specified when autotracking is enabled."""
+    if (
+        camera_config.onvif.autotracking.enabled
+        and not camera_config.onvif.autotracking.required_zones
+    ):
+        raise ValueError(
+            f"Camera {camera_config.name} has autotracking enabled, required_zones must be set to at least one of the camera's zones."
+        )
+
+
 class FrigateConfig(FrigateBaseModel):
     mqtt: MqttConfig = Field(title="MQTT Configuration.")
     database: DatabaseConfig = Field(
@@ -865,7 +1052,7 @@ class FrigateConfig(FrigateBaseModel):
     model: ModelConfig = Field(
         default_factory=ModelConfig, title="Detection model configuration."
     )
-    detectors: Dict[str, DetectorConfig] = Field(
+    detectors: Dict[str, BaseDetectorConfig] = Field(
         default=DEFAULT_DETECTORS,
         title="Detector hardware configuration.",
     )
@@ -896,6 +1083,9 @@ class FrigateConfig(FrigateBaseModel):
     objects: ObjectConfig = Field(
         default_factory=ObjectConfig, title="Global object configuration."
     )
+    audio: AudioConfig = Field(
+        default_factory=AudioConfig, title="Global Audio events configuration."
+    )
     motion: Optional[MotionConfig] = Field(
         title="Global motion detection configuration."
     )
@@ -908,8 +1098,7 @@ class FrigateConfig(FrigateBaseModel):
         title="Global timestamp style configuration.",
     )
 
-    @property
-    def runtime_config(self) -> FrigateConfig:
+    def runtime_config(self, plus_api: PlusApi = None) -> FrigateConfig:
         """Merge camera config with globals."""
         config = self.copy(deep=True)
 
@@ -918,9 +1107,17 @@ class FrigateConfig(FrigateBaseModel):
             config.mqtt.user = config.mqtt.user.format(**FRIGATE_ENV_VARS)
             config.mqtt.password = config.mqtt.password.format(**FRIGATE_ENV_VARS)
 
+        # set default min_score for object attributes
+        for attribute in ALL_ATTRIBUTE_LABELS:
+            if not config.objects.filters.get(attribute):
+                config.objects.filters[attribute] = FilterConfig(min_score=0.7)
+            elif config.objects.filters[attribute].min_score == 0.5:
+                config.objects.filters[attribute].min_score = 0.7
+
         # Global config to propagate down to camera level
         global_config = config.dict(
             include={
+                "audio": ...,
                 "birdseye": ...,
                 "record": ...,
                 "snapshots": ...,
@@ -941,6 +1138,37 @@ class FrigateConfig(FrigateBaseModel):
                 {"name": name, **merged_config}
             )
 
+            if (
+                camera_config.detect.height is None
+                or camera_config.detect.width is None
+            ):
+                for input in camera_config.ffmpeg.inputs:
+                    if "detect" in input.roles:
+                        stream_info = {"width": 0, "height": 0}
+                        try:
+                            stream_info = asyncio.run(get_video_properties(input.path))
+                        except Exception:
+                            logger.warn(
+                                f"Error detecting stream resolution automatically for {input.path} Applying default values."
+                            )
+                            stream_info = {"width": 0, "height": 0}
+
+                        camera_config.detect.width = (
+                            stream_info["width"]
+                            if stream_info.get("width")
+                            else DEFAULT_DETECT_DIMENSIONS["width"]
+                        )
+                        camera_config.detect.height = (
+                            stream_info["height"]
+                            if stream_info.get("height")
+                            else DEFAULT_DETECT_DIMENSIONS["height"]
+                        )
+
+            # Default min_initialized configuration
+            min_initialized = camera_config.detect.fps / 2
+            if camera_config.detect.min_initialized is None:
+                camera_config.detect.min_initialized = min_initialized
+
             # Default max_disappeared configuration
             max_disappeared = camera_config.detect.fps * 5
             if camera_config.detect.max_disappeared is None:
@@ -950,13 +1178,28 @@ class FrigateConfig(FrigateBaseModel):
             stationary_threshold = camera_config.detect.fps * 10
             if camera_config.detect.stationary.threshold is None:
                 camera_config.detect.stationary.threshold = stationary_threshold
+            # default to the stationary_threshold if not defined
+            if camera_config.detect.stationary.interval is None:
+                camera_config.detect.stationary.interval = stationary_threshold
 
             # FFMPEG input substitution
             for input in camera_config.ffmpeg.inputs:
                 input.path = input.path.format(**FRIGATE_ENV_VARS)
 
-            # set config recording value
+            # ONVIF substitution
+            if camera_config.onvif.user or camera_config.onvif.password:
+                camera_config.onvif.user = camera_config.onvif.user.format(
+                    **FRIGATE_ENV_VARS
+                )
+                camera_config.onvif.password = camera_config.onvif.password.format(
+                    **FRIGATE_ENV_VARS
+                )
+            # set config pre-value
             camera_config.record.enabled_in_config = camera_config.record.enabled
+            camera_config.audio.enabled_in_config = camera_config.audio.enabled
+            camera_config.onvif.autotracking.enabled_in_config = (
+                camera_config.onvif.autotracking.enabled
+            )
 
             # Add default filters
             object_keys = camera_config.objects.track
@@ -1007,10 +1250,10 @@ class FrigateConfig(FrigateBaseModel):
 
             verify_config_roles(camera_config)
             verify_valid_live_stream_name(config, camera_config)
-            verify_old_retain_config(camera_config)
             verify_recording_retention(camera_config)
             verify_recording_segments_setup_with_reasonable_time(camera_config)
             verify_zone_objects_are_tracked(camera_config)
+            verify_autotrack_zones(camera_config)
 
             if camera_config.rtmp.enabled:
                 logger.warning(
@@ -1028,6 +1271,7 @@ class FrigateConfig(FrigateBaseModel):
             enabled_labels.update(camera.objects.track)
 
         config.model.create_colormap(sorted(enabled_labels))
+        config.model.check_and_load_plus_model(plus_api)
 
         for key, detector in config.detectors.items():
             detector_config: DetectorConfig = parse_obj_as(DetectorConfig, detector)
@@ -1052,7 +1296,18 @@ class FrigateConfig(FrigateBaseModel):
                 detector_config.model.dict(exclude_unset=True),
                 config.model.dict(exclude_unset=True),
             )
+
+            if "path" not in merged_model:
+                if detector_config.type == "cpu":
+                    merged_model["path"] = "/cpu_model.tflite"
+                elif detector_config.type == "edgetpu":
+                    merged_model["path"] = "/edgetpu_model.tflite"
+
             detector_config.model = ModelConfig.parse_obj(merged_model)
+            detector_config.model.check_and_load_plus_model(
+                plus_api, detector_config.type
+            )
+            detector_config.model.compute_model_hash()
             config.detectors[key] = detector_config
 
         return config

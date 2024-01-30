@@ -30,7 +30,7 @@ export default function Recording({ camera, date, hour = '00', minute = '00', se
   // calculates the seek seconds by adding up all the seconds in the segments prior to the playback time
   const seekSeconds = useMemo(() => {
     if (!recordings) {
-      return 0;
+      return undefined;
     }
     const currentUnix = getUnixTime(currentDate);
 
@@ -103,6 +103,9 @@ export default function Recording({ camera, date, hour = '00', minute = '00', se
   }, [playlistIndex]);
 
   useEffect(() => {
+    if (seekSeconds === undefined) {
+      return;
+    }
     if (this.player) {
       // if the playlist has moved on to the next item, then reset
       if (this.player.playlist.currentItem() !== playlistIndex) {
@@ -114,7 +117,7 @@ export default function Recording({ camera, date, hour = '00', minute = '00', se
     }
   }, [seekSeconds, playlistIndex]);
 
-  if (!recordingsSummary || !recordings || !config) {
+  if (!recordingsSummary || !config) {
     return <ActivityIndicator />;
   }
 
@@ -145,7 +148,9 @@ export default function Recording({ camera, date, hour = '00', minute = '00', se
             player.playlist(playlist);
             player.playlist.autoadvance(0);
             player.playlist.currentItem(playlistIndex);
-            player.currentTime(seekSeconds);
+            if (seekSeconds !== undefined)  {
+              player.currentTime(seekSeconds);
+            }
             this.player = player;
           }
         }}
