@@ -145,18 +145,22 @@ export function getTimelineHoursForDay(
   let end = 0;
 
   const dayIdx = Object.keys(cards).find((day) => {
-    if (parseInt(day) > start) {
+    if (parseInt(day) < start) {
       return false;
     }
 
     return true;
   });
 
-  if (dayIdx == undefined) {
-    return { start: 0, end: 0, playbackItems: [] };
-  }
+  let day: {
+    [hour: string]: {
+      [groupKey: string]: Card;
+    };
+  } = {};
 
-  const day = cards[dayIdx];
+  if (dayIdx != undefined) {
+    day = cards[dayIdx];
+  }
 
   for (let i = 0; i < 24; i++) {
     startDay.setHours(startDay.getHours() + 1);
