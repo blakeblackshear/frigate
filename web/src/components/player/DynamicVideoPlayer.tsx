@@ -90,7 +90,7 @@ export default function DynamicVideoPlayer({
             playerRef.current.muted(!playerRef.current.muted());
           }
           break;
-        case " ":                   
+        case " ":
           if (down && playerRef.current) {
             if (playerRef.current.paused()) {
               playerRef.current.play();
