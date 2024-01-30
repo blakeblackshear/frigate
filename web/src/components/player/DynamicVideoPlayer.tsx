@@ -1,4 +1,11 @@
-import { MutableRefObject, useEffect, useMemo, useRef, useState } from "react";
+import {
+  MutableRefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import VideoPlayer from "./VideoPlayer";
 import Player from "video.js/dist/types/player";
 import TimelineEventOverlay from "../overlay/TimelineDataOverlay";
@@ -6,6 +13,7 @@ import { useApiHost } from "@/api";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import ActivityIndicator from "../ui/activity-indicator";
+import useKeyboardListener from "@/hooks/use-keyboard-listener";
 
 /**
  * Dynamically switches between video playback and scrubbing preview player.
@@ -54,6 +62,51 @@ export default function DynamicVideoPlayer({
       setFocusedItem
     );
   }, [config]);
+
+  // keyboard control
+  const onKeyboardShortcut = useCallback(
+    (key: string, down: boolean, repeat: boolean) => {
+      switch (key) {
+        case "ArrowLeft":
+          if (down) {
+            const currentTime = playerRef.current?.currentTime();
+
+            if (currentTime) {
+              playerRef.current?.currentTime(Math.max(0, currentTime - 5));
+            }
+          }
+          break;
+        case "ArrowRight":
+          if (down) {
+            const currentTime = playerRef.current?.currentTime();
+
+            if (currentTime) {
+              playerRef.current?.currentTime(currentTime + 5);
+            }
+          }
+          break;
+        case "m":
+          if (down && !repeat && playerRef.current) {
+            playerRef.current.muted(!playerRef.current.muted());
+          }
+          break;
+        case " ":                   
+          if (down && playerRef.current) {
+            if (playerRef.current.paused()) {
+              playerRef.current.play();
+            } else {
+              playerRef.current.pause();
+            }
+          }
+          break;
+      }
+    },
+    [playerRef]
+  );
+  useKeyboardListener(
+    ["ArrowLeft", "ArrowRight", "m", " "],
+    onKeyboardShortcut
+  );
 
   // initial state
 
