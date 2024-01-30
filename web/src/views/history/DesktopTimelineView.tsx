@@ -108,30 +108,28 @@ export default function DesktopTimelineView({
   }
 
   return (
-    <div className="w-full">
-      <div className="flex">
-        <>
-          <DynamicVideoPlayer
-            className="w-2/3 bg-black flex justify-center items-center"
-            camera={initialPlayback.camera}
-            timeRange={selectedPlayback.range}
-            cameraPreviews={cameraPreviews}
-            onControllerReady={(controller) => {
-              controllerRef.current = controller;
-              controllerRef.current.onPlayerTimeUpdate((timestamp: number) => {
-                setTimelineTime(timestamp);
-              });
+    <div className="w-full xl:h-[586px] 2xl:h-[660px] 3xl:h-[880px] 4xl:h-[1080px]">
+      <div className="flex h-[60%]">
+        <DynamicVideoPlayer
+          className="w-2/3 bg-black flex justify-center items-center"
+          camera={initialPlayback.camera}
+          timeRange={selectedPlayback.range}
+          cameraPreviews={cameraPreviews}
+          onControllerReady={(controller) => {
+            controllerRef.current = controller;
+            controllerRef.current.onPlayerTimeUpdate((timestamp: number) => {
+              setTimelineTime(timestamp);
+            });
 
-              if (initialPlayback.timelineItems.length > 0) {
-                controllerRef.current?.seekToTimestamp(
-                  selectedPlayback.timelineItems[0].timestamp,
-                  true
-                );
-              }
-            }}
-          />
-        </>
-        <div className="px-2 h-[608px] w-1/3 overflow-y-auto overflow-x-hidden">
+            if (initialPlayback.timelineItems.length > 0) {
+              controllerRef.current?.seekToTimestamp(
+                selectedPlayback.timelineItems[0].timestamp,
+                true
+              );
+            }
+          }}
+        />
+        <div className="px-2 h-full w-1/3 overflow-y-auto overflow-x-hidden">
           {selectedPlayback.timelineItems.map((timeline) => {
             return (
               <TimelineItemCard
@@ -146,7 +144,7 @@ export default function DesktopTimelineView({
           })}
         </div>
       </div>
-      <div className="m-1 w-full max-h-72 2xl:max-h-80 3xl:max-h-96 overflow-auto">
+      <div className="mt-4 w-full h-[40%] overflow-scroll">
         {timelineStack.playbackItems.map((timeline) => {
           const isInitiallySelected =
             initialPlayback.range.start == timeline.range.start;

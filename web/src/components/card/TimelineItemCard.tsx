@@ -23,18 +23,16 @@ export default function TimelineItemCard({
 
   return (
     <Card
-      className="relative m-2 flex w-full h-32 cursor-pointer"
+      className="relative m-2 flex w-full h-20 xl:h-24 3xl:h-28 4xl:h-36 cursor-pointer"
       onClick={onSelect}
     >
-      <div className="p-2">
+      <div className="w-32 xl:w-40 3xl:w-[180px] 4xl:w-60 p-2">
         <VideoPlayer
           options={{
             preload: "auto",
-            height: "114",
-            width: "202",
             autoplay: true,
             controls: false,
-            fluid: false,
+            aspectRatio: "16:9",
             muted: true,
             loadingSpinner: false,
             poster: relevantPreview
@@ -71,7 +69,7 @@ export default function TimelineItemCard({
           })}
         </div>
         <Button
-          className="absolute bottom-1 right-1"
+          className="absolute bottom-1 right-1 hidden xl:flex"
           size="sm"
           variant="secondary"
         >
