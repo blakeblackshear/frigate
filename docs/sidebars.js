@@ -11,15 +11,15 @@ module.exports = {
     Guides: [
       "guides/getting_started",
       "guides/configuring_go2rtc",
-      "guides/false_positives",
       "guides/ha_notifications",
       "guides/ha_network_storage",
-      "guides/stationary_objects",
+      "guides/parked_cars",
       "guides/reverse_proxy",
     ],
     Configuration: {
       "Configuration Files": [
         "configuration/index",
+        "configuration/reference",
         {
           type: "link",
           label: "Go2RTC Configuration Reference",
@@ -42,10 +42,11 @@ module.exports = {
         "configuration/camera_specific",
       ],
       Objects: [
+        "configuration/object_filters",
         "configuration/masks",
+        "configuration/zones",
         "configuration/objects",
         "configuration/stationary_objects",
-        "configuration/zones",
       ],
       "Extra Configuration": [
         "configuration/hardware_acceleration",
@@ -60,7 +61,12 @@ module.exports = {
       "integrations/mqtt",
       "integrations/third_party_extensions",
     ],
-    "Frigate+": ["plus/index"],
+    "Frigate+": [
+      "plus/index",
+      "plus/first_model",
+      "plus/improving_model",
+      "plus/faq",
+    ],
     Troubleshooting: [
       "troubleshooting/faqs",
       "troubleshooting/recordings",
