@@ -268,7 +268,7 @@ function TimelineViewer({
 
   return (
     <Dialog open={playback != undefined} onOpenChange={(_) => onClose()}>
-      <DialogContent className="w-[70%] max-w-[1920px]">
+      <DialogContent className="w-[70%] max-w-[1920px] h-[90%]">
         {timelineData && playback && (
           <DesktopTimelineView
             timelineData={timelineData}
