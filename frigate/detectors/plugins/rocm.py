@@ -20,6 +20,7 @@ DETECTOR_KEY = "rocm"
 
 class ROCmDetectorConfig(BaseDetectorConfig):
     type: Literal[DETECTOR_KEY]
+    conserve_cpu: bool = Field(default=True, title="Conserve CPU at the expense of latency (and reduced max throughput)")
 
 class ROCmDetector(DetectionApi):
     type_key = DETECTOR_KEY
@@ -36,6 +37,9 @@ class ROCmDetector(DetectionApi):
             )
             raise
 
+        if detector_config.conserve_cpu:
+            logger.info(f"AMD/ROCm: switching HIP to blocking mode to conserve CPU")
+            ctypes.CDLL('/opt/rocm/lib/libamdhip64.so').hipSetDeviceFlags(4)
         assert detector_config.model.model_type == 'yolov8', "AMD/ROCm: detector_config.model.model_type: only yolov8 supported"
         assert detector_config.model.input_tensor == 'nhwc', "AMD/ROCm: detector_config.model.input_tensor: only nhwc supported"
         if detector_config.model.input_pixel_format != 'rgb':
