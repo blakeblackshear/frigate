@@ -16,7 +16,6 @@ Each role can only be assigned to one input per camera. The options for roles ar
 | `detect` | Main feed for object detection. [docs](object_detectors.md)                              |
 | `record` | Saves segments of the video feed based on configuration settings. [docs](record.md)      |
 | `audio`  | Feed for audio based detection. [docs](audio_detectors.md)                               |
-| `rtmp`   | Deprecated: Broadcast as an RTMP feed for other services to consume. [docs](restream.md) |
 
 ```yaml
 mqtt:
@@ -29,7 +28,6 @@ cameras:
         - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
           roles:
             - detect
-            - rtmp # <- deprecated, recommend using restream instead
         - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/live
           roles:
             - record

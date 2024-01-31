@@ -5,8 +5,8 @@ from abc import ABC, abstractmethod
 from typing import Any, Callable
 
 from frigate.config import BirdseyeModeEnum, FrigateConfig
-from frigate.const import INSERT_MANY_RECORDINGS, REQUEST_REGION_GRID
-from frigate.models import Recordings
+from frigate.const import INSERT_MANY_RECORDINGS, INSERT_PREVIEW, REQUEST_REGION_GRID
+from frigate.models import Previews, Recordings
 from frigate.ptz.onvif import OnvifCommandEnum, OnvifController
 from frigate.types import CameraMetricsTypes, FeatureMetricsTypes, PTZMetricsTypes
 from frigate.util.object import get_camera_regions_grid
@@ -102,6 +102,8 @@ class Dispatcher:
                     max(self.config.model.width, self.config.model.height),
                 )
             )
+        elif topic == INSERT_PREVIEW:
+            Previews.insert(payload).execute()
         else:
             self.publish(topic, payload, retain=False)
 

@@ -8,7 +8,6 @@ config/*
 !config/*.example
 models
 *.mp4
-*.ts
 *.db
 *.csv
 frigate/version.py

@@ -1,15 +1,16 @@
 ---
 id: objects
-title: Objects
+title: Available Objects
 ---
 
 import labels from "../../../labelmap.txt";
 
 Frigate includes the object models listed below from the Google Coral test data.
 
-Please note: 
- - `car` is listed twice because `truck` has been renamed to `car` by default. These object types are frequently confused.
- - `person` is the only tracked object by default. See the [full configuration reference](index.md#full-configuration-reference) for an example of expanding the list of tracked objects.
+Please note:
+
+- `car` is listed twice because `truck` has been renamed to `car` by default. These object types are frequently confused.
+- `person` is the only tracked object by default. See the [full configuration reference](index.md#full-configuration-reference) for an example of expanding the list of tracked objects.
 
 <ul>
   {labels.split("\n").map((label) => (

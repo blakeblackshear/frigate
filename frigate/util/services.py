@@ -13,8 +13,10 @@ from typing import Optional
 import cv2
 import psutil
 import py3nvml.py3nvml as nvml
+import requests
 
-from frigate.util.builtin import escape_special_characters
+from frigate.const import FFMPEG_HWACCEL_NVIDIA, FFMPEG_HWACCEL_VAAPI
+from frigate.util.builtin import clean_camera_user_pass, escape_special_characters
 
 logger = logging.getLogger(__name__)
 
@@ -134,7 +136,7 @@ def get_cpu_stats() -> dict[str, dict]:
                 "cpu": str(cpu_percent),
                 "cpu_average": str(round(cpu_average_usage, 2)),
                 "mem": f"{mem_pct}",
-                "cmdline": " ".join(cmdline),
+                "cmdline": clean_camera_user_pass(" ".join(cmdline)),
             }
         except Exception:
             continue
@@ -371,7 +373,39 @@ def vainfo_hwaccel(device_name: Optional[str] = None) -> sp.CompletedProcess:
     return sp.run(ffprobe_cmd, capture_output=True)
 
 
-async def get_video_properties(url, get_duration=False):
+def auto_detect_hwaccel() -> str:
+    """Detect hwaccel args by default."""
+    try:
+        cuda = False
+        vaapi = False
+        resp = requests.get("http://127.0.0.1:1984/api/ffmpeg/hardware", timeout=3)
+
+        if resp.status_code == 200:
+            data: dict[str, list[dict[str, str]]] = resp.json()
+            for source in data.get("sources", []):
+                if "cuda" in source.get("url", "") and source.get("name") == "OK":
+                    cuda = True
+
+                if "vaapi" in source.get("url", "") and source.get("name") == "OK":
+                    vaapi = True
+    except requests.RequestException:
+        pass
+
+    if cuda:
+        logger.info("Automatically detected nvidia hwaccel for video decoding")
+        return FFMPEG_HWACCEL_NVIDIA
+
+    if vaapi:
+        logger.info("Automatically detected vaapi hwaccel for video decoding")
+        return FFMPEG_HWACCEL_VAAPI
+
+    logger.warning(
+        "Did not detect hwaccel, using a GPU for accelerated video decoding is highly recommended"
+    )
+    return ""
+
+
+async def get_video_properties(url, get_duration=False) -> dict[str, any]:
     async def calculate_duration(video: Optional[any]) -> float:
         duration = None
 
@@ -405,7 +439,10 @@ async def get_video_properties(url, get_duration=False):
                 result = None
 
             if result:
-                duration = float(result.strip())
+                try:
+                    duration = float(result.strip())
+                except ValueError:
+                    duration = -1
             else:
                 duration = -1
 

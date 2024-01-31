@@ -8,6 +8,7 @@ import re
 import subprocess as sp
 import time
 import traceback
+from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from functools import reduce
 from pathlib import Path
@@ -15,6 +16,7 @@ from urllib.parse import unquote
 
 import cv2
 import numpy as np
+import pandas as pd
 import pytz
 import requests
 from flask import (
@@ -43,7 +45,7 @@ from frigate.const import (
     RECORD_DIR,
 )
 from frigate.events.external import ExternalEventProcessor
-from frigate.models import Event, Recordings, Regions, Timeline
+from frigate.models import Event, Previews, Recordings, Regions, Timeline
 from frigate.object_processing import TrackedObject
 from frigate.plus import PlusApi
 from frigate.ptz.onvif import OnvifController
@@ -389,6 +391,17 @@ def set_sub_label(id):
     new_sub_label = json.get("subLabel")
     new_score = json.get("subLabelScore")
 
+    if new_sub_label is None:
+        return make_response(
+            jsonify(
+                {
+                    "success": False,
+                    "message": "A sub label must be supplied",
+                }
+            ),
+            400,
+        )
+
     if new_sub_label and len(new_sub_label) > 100:
         return make_response(
             jsonify(
@@ -414,6 +427,7 @@ def set_sub_label(id):
         )
 
     if not event.end_time:
+        # update tracked object
         tracked_obj: TrackedObject = (
             current_app.detected_frames_processor.camera_states[
                 event.camera
@@ -422,6 +436,11 @@ def set_sub_label(id):
 
         if tracked_obj:
             tracked_obj.obj_data["sub_label"] = (new_sub_label, new_score)
+
+        # update timeline items
+        Timeline.update(
+            data=Timeline.data.update({"sub_label": (new_sub_label, new_score)})
+        ).where(Timeline.source_id == id).execute()
 
     event.sub_label = new_sub_label
 
@@ -609,6 +628,189 @@ def timeline():
     )
 
     return jsonify([t for t in timeline])
+
+
+@bp.route("/timeline/hourly")
+def hourly_timeline():
+    """Get hourly summary for timeline."""
+    cameras = request.args.get("cameras", "all")
+    labels = request.args.get("labels", "all")
+    before = request.args.get("before", type=float)
+    after = request.args.get("after", type=float)
+    limit = request.args.get("limit", 200)
+    tz_name = request.args.get("timezone", default="utc", type=str)
+
+    _, minute_modifier, _ = get_tz_modifiers(tz_name)
+    minute_offset = int(minute_modifier.split(" ")[0])
+
+    clauses = []
+
+    if cameras != "all":
+        camera_list = cameras.split(",")
+        clauses.append((Timeline.camera << camera_list))
+
+    if labels != "all":
+        label_list = labels.split(",")
+        clauses.append((Timeline.data["label"] << label_list))
+
+    if before:
+        clauses.append((Timeline.timestamp < before))
+
+    if after:
+        clauses.append((Timeline.timestamp > after))
+
+    if len(clauses) == 0:
+        clauses.append((True))
+
+    timeline = (
+        Timeline.select(
+            Timeline.camera,
+            Timeline.timestamp,
+            Timeline.data,
+            Timeline.class_type,
+            Timeline.source_id,
+            Timeline.source,
+        )
+        .where(reduce(operator.and_, clauses))
+        .order_by(Timeline.timestamp.desc())
+        .limit(limit)
+        .dicts()
+        .iterator()
+    )
+
+    count = 0
+    start = 0
+    end = 0
+    hours: dict[str, list[dict[str, any]]] = {}
+
+    for t in timeline:
+        if count == 0:
+            start = t["timestamp"]
+        else:
+            end = t["timestamp"]
+
+        count += 1
+
+        hour = (
+            datetime.fromtimestamp(t["timestamp"]).replace(
+                minute=0, second=0, microsecond=0
+            )
+            + timedelta(
+                minutes=minute_offset,
+            )
+        ).timestamp()
+        if hour not in hours:
+            hours[hour] = [t]
+        else:
+            hours[hour].insert(0, t)
+
+    return jsonify(
+        {
+            "start": start,
+            "end": end,
+            "count": count,
+            "hours": hours,
+        }
+    )
+
+
+@bp.route("/<camera_name>/recording/hourly/activity")
+def hourly_timeline_activity(camera_name: str):
+    """Get hourly summary for timeline."""
+    if camera_name not in current_app.frigate_config.cameras:
+        return make_response(
+            jsonify({"success": False, "message": "Camera not found"}),
+            404,
+        )
+
+    before = request.args.get("before", type=float, default=datetime.now())
+    after = request.args.get(
+        "after", type=float, default=datetime.now() - timedelta(hours=1)
+    )
+    tz_name = request.args.get("timezone", default="utc", type=str)
+
+    _, minute_modifier, _ = get_tz_modifiers(tz_name)
+    minute_offset = int(minute_modifier.split(" ")[0])
+
+    all_recordings: list[Recordings] = (
+        Recordings.select(
+            Recordings.start_time,
+            Recordings.duration,
+            Recordings.objects,
+            Recordings.motion,
+        )
+        .where(Recordings.camera == camera_name)
+        .where(Recordings.motion > 0)
+        .where((Recordings.start_time > after) & (Recordings.end_time < before))
+        .order_by(Recordings.start_time.asc())
+        .iterator()
+    )
+
+    # data format is ex:
+    # {timestamp: [{ date: 1, count: 1, type: motion }]}] }}
+    hours: dict[int, list[dict[str, any]]] = defaultdict(list)
+
+    key = datetime.fromtimestamp(after).replace(second=0, microsecond=0) + timedelta(
+        minutes=minute_offset
+    )
+    check = (key + timedelta(hours=1)).timestamp()
+
+    # set initial start so data is representative of full hour
+    hours[int(key.timestamp())].append(
+        [
+            key.timestamp(),
+            0,
+            False,
+        ]
+    )
+
+    for recording in all_recordings:
+        if recording.start_time > check:
+            hours[int(key.timestamp())].append(
+                [
+                    (key + timedelta(minutes=59, seconds=59)).timestamp(),
+                    0,
+                    False,
+                ]
+            )
+            key = key + timedelta(hours=1)
+            check = (key + timedelta(hours=1)).timestamp()
+            hours[int(key.timestamp())].append(
+                [
+                    key.timestamp(),
+                    0,
+                    False,
+                ]
+            )
+
+        data_type = recording.objects > 0
+        count = recording.motion + recording.objects
+        hours[int(key.timestamp())].append(
+            [
+                recording.start_time + (recording.duration / 2),
+                0 if count == 0 else np.log2(count),
+                data_type,
+            ]
+        )
+
+    # resample data using pandas to get activity on minute to minute basis
+    for key, data in hours.items():
+        df = pd.DataFrame(data, columns=["date", "count", "hasObjects"])
+
+        # set date as datetime index
+        df["date"] = pd.to_datetime(df["date"], unit="s")
+        df.set_index(["date"], inplace=True)
+
+        # normalize data
+        df = df.resample("T").mean().fillna(0)
+
+        # change types for output
+        df.index = df.index.astype(int) // (10**9)
+        df["count"] = df["count"].astype(int)
+        df["hasObjects"] = df["hasObjects"].astype(bool)
+        hours[key] = df.reset_index().to_dict("records")
+
+    return jsonify(hours)
 
 
 @bp.route("/<camera_name>/<label>/best.jpg")
@@ -1674,6 +1876,7 @@ def recordings(camera_name):
             Recordings.segment_size,
             Recordings.motion,
             Recordings.objects,
+            Recordings.duration,
         )
         .where(
             Recordings.camera == camera_name,
@@ -1845,7 +2048,6 @@ def vod_hour_no_timezone(year_month, day, hour, camera_name):
     )
 
 
-# TODO make this nicer when vod module is removed
 @bp.route("/vod/<year_month>/<day>/<hour>/<camera_name>/<tz_name>")
 def vod_hour(year_month, day, hour, camera_name, tz_name):
     parts = year_month.split("-")
@@ -1858,6 +2060,110 @@ def vod_hour(year_month, day, hour, camera_name, tz_name):
     end_ts = end_date.timestamp()
 
     return vod_ts(camera_name, start_ts, end_ts)
+
+
+@bp.route("/preview/<camera_name>/start/<int:start_ts>/end/<int:end_ts>")
+@bp.route("/preview/<camera_name>/start/<float:start_ts>/end/<float:end_ts>")
+def preview_ts(camera_name, start_ts, end_ts):
+    """Get all mp4 previews relevant for time period."""
+    if camera_name != "all":
+        camera_clause = Previews.camera == camera_name
+    else:
+        camera_clause = True
+
+    previews = (
+        Previews.select(
+            Previews.camera,
+            Previews.path,
+            Previews.duration,
+            Previews.start_time,
+            Previews.end_time,
+        )
+        .where(
+            Previews.start_time.between(start_ts, end_ts)
+            | Previews.end_time.between(start_ts, end_ts)
+            | ((start_ts > Previews.start_time) & (end_ts < Previews.end_time))
+        )
+        .where(camera_clause)
+        .order_by(Previews.start_time.asc())
+        .dicts()
+        .iterator()
+    )
+
+    clips = []
+
+    preview: Previews
+    for preview in previews:
+        clips.append(
+            {
+                "camera": preview["camera"],
+                "src": preview["path"].replace("/media/frigate", ""),
+                "type": "video/mp4",
+                "start": preview["start_time"],
+                "end": preview["end_time"],
+            }
+        )
+
+    if not clips:
+        return make_response(
+            jsonify(
+                {
+                    "success": False,
+                    "message": "No previews found.",
+                }
+            ),
+            404,
+        )
+
+    return make_response(jsonify(clips), 200)
+
+
+@bp.route("/preview/<year_month>/<day>/<hour>/<camera_name>/<tz_name>")
+def preview_hour(year_month, day, hour, camera_name, tz_name):
+    parts = year_month.split("-")
+    start_date = (
+        datetime(int(parts[0]), int(parts[1]), int(day), int(hour), tzinfo=timezone.utc)
+        - datetime.now(pytz.timezone(tz_name.replace(",", "/"))).utcoffset()
+    )
+    end_date = start_date + timedelta(hours=1) - timedelta(milliseconds=1)
+    start_ts = start_date.timestamp()
+    end_ts = end_date.timestamp()
+
+    return preview_ts(camera_name, start_ts, end_ts)
+
+
+@bp.route("/preview/<camera_name>/<frame_time>/thumbnail.jpg")
+def preview_thumbnail(camera_name, frame_time):
+    """Get a thumbnail from the cached preview jpgs."""
+    preview_dir = os.path.join(CACHE_DIR, "preview_frames")
+    file_start = f"preview_{camera_name}"
+    file_check = f"{file_start}-{frame_time}.jpg"
+    selected_preview = None
+
+    for file in os.listdir(preview_dir):
+        if file.startswith(file_start):
+            if file < file_check:
+                selected_preview = file
+                break
+
+    if selected_preview is None:
+        return make_response(
+            jsonify(
+                {
+                    "success": False,
+                    "message": "Could not find valid preview jpg.",
+                }
+            ),
+            404,
+        )
+
+    with open(os.path.join(preview_dir, selected_preview), "rb") as image_file:
+        jpg_bytes = image_file.read()
+
+    response = make_response(jpg_bytes)
+    response.headers["Content-Type"] = "image/jpeg"
+    response.headers["Cache-Control"] = "private, max-age=31536000"
+    return response
 
 
 @bp.route("/vod/event/<id>")
