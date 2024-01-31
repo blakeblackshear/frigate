@@ -128,9 +128,6 @@ class TrackedObject:
         self.frame = None
         self.previous = self.to_dict()
 
-        # start the score history
-        self.score_history = [self.obj_data["score"]]
-
     def _is_false_positive(self):
         # once a true positive, always a true positive
         if not self.false_positive:
@@ -198,7 +195,7 @@ class TrackedObject:
                     self.zone_presence[name] = zone_score + 1
 
                     # an object is only considered present in a zone if it has a zone inertia of 3+
-                    if zone_score >= zone.inertia:
+                    if self.zone_presence[name] >= zone.inertia:
                         current_zones.append(name)
 
                         if name not in self.entered_zones:

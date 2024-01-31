@@ -125,7 +125,7 @@ This section points to your SSL files, the example below shows locations to a de
 
 ### Setup reverse proxy settings 
 
-Thhe settings below enabled connection upgrade, sets up logging (optional) and proxies everything from the `/` context to the docker host and port specified earlier in the configuration
+The settings below enabled connection upgrade, sets up logging (optional) and proxies everything from the `/` context to the docker host and port specified earlier in the configuration
 
 ```
   proxy_set_header Upgrade $http_upgrade;

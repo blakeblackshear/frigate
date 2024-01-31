@@ -23,8 +23,8 @@ else
 fi
 tar xaf jetson_multimedia_api.tbz2 -C / && rm jetson_multimedia_api.tbz2
 
-wget -q https://github.com/madsciencetist/jetson-ffmpeg/archive/refs/heads/master.zip
-unzip master.zip && rm master.zip && cd jetson-ffmpeg-master
+wget -q https://github.com/AndBobsYourUncle/jetson-ffmpeg/archive/9c17b09.zip -O jetson-ffmpeg.zip
+unzip jetson-ffmpeg.zip && rm jetson-ffmpeg.zip && mv jetson-ffmpeg-* jetson-ffmpeg && cd jetson-ffmpeg
 LD_LIBRARY_PATH=$(pwd)/stubs:$LD_LIBRARY_PATH   # tegra multimedia libs aren't available in image, so use stubs for ffmpeg build
 mkdir build
 cd build
@@ -42,7 +42,7 @@ cd ../ && rm -rf nv-codec-headers-master
 # Build ffmpeg with nvmpi patch
 wget -q https://ffmpeg.org/releases/ffmpeg-6.0.tar.xz
 tar xaf ffmpeg-*.tar.xz && rm ffmpeg-*.tar.xz && cd ffmpeg-*
-patch -p1 < ../jetson-ffmpeg-master/ffmpeg_patches/ffmpeg6.0_nvmpi.patch
+patch -p1 < ../jetson-ffmpeg/ffmpeg_patches/ffmpeg6.0_nvmpi.patch
 export PKG_CONFIG_PATH=$INSTALL_PREFIX/lib/pkgconfig
 # enable Jetson codecs but disable dGPU codecs
 ./configure --cc='ccache gcc' --cxx='ccache g++' \

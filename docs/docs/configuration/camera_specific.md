@@ -105,6 +105,15 @@ If available, recommended settings are:
 
 According to [this discussion](https://github.com/blakeblackshear/frigate/issues/3235#issuecomment-1135876973), the http video streams seem to be the most reliable for Reolink.
 
+Cameras connected via a Reolink NVR can be connected with the http stream, use `channel[0..15]` in the stream url for the additional channels. 
+The setup of main stream can be also done via RTSP, but isn't always reliable on all hardware versions. The example configuration is working with the oldest HW version RLN16-410 device with multiple types of cameras.
+
+:::caution
+
+The below configuration only works for reolink cameras with stream resolution of 5MP or lower, 8MP+ cameras need to use RTSP as http-flv is not supported in this case.
+
+:::
+
 ```yaml
 go2rtc:
   streams:
@@ -112,6 +121,11 @@ go2rtc:
       - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=username&password=password#video=copy#audio=copy#audio=opus"
     your_reolink_camera_sub:
       - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=username&password=password"
+    your_reolink_camera_via_nvr:
+      - "ffmpeg:http://reolink_nvr_ip/flv?port=1935&app=bcs&stream=channel3_main.bcs&user=username&password=password" # channel numbers are 0-15
+      - "ffmpeg:your_reolink_camera_via_nvr#audio=aac"
+    your_reolink_camera_via_nvr_sub:
+      - "ffmpeg:http://reolink_nvr_ip/flv?port=1935&app=bcs&stream=channel3_ext.bcs&user=username&password=password"
 
 cameras:
   your_reolink_camera:
@@ -125,6 +139,31 @@ cameras:
           input_args: preset-rtsp-restream
           roles:
             - detect
+  reolink_via_nvr:
+    ffmpeg:
+      inputs:
+        - path: rtsp://127.0.0.1:8554/your_reolink_camera_via_nvr?video=copy&audio=aac
+          input_args: preset-rtsp-restream
+          roles:
+            - record
+        - path: rtsp://127.0.0.1:8554/your_reolink_camera_via_nvr_sub?video=copy
+          input_args: preset-rtsp-restream
+          roles:
+            - detect   
+```
+
+#### Reolink Doorbell
+
+The reolink doorbell supports 2-way audio via go2rtc and other applications. It is important that the http-flv stream is still used for stability, a secondary rtsp stream can be added that will be using for the two way audio only.
+
+```yaml
+go2rtc:
+  streams:
+    your_reolink_doorbell:
+      - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=username&password=password#video=copy#audio=copy#audio=opus"
+      - rtsp://reolink_ip/Preview_01_sub
+    your_reolink_doorbell_sub:
+      - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=username&password=password"
 ```
 
 ### Unifi Protect Cameras

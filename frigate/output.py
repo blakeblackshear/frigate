@@ -45,6 +45,7 @@ def get_standard_aspect_ratio(width: int, height: int) -> tuple[int, int]:
         (32, 9),  # panoramic cameras
         (12, 9),
         (9, 12),
+        (22, 15),  # Amcrest, NTSC DVT
     ]  # aspects are scaled to have common relative size
     known_aspects_ratios = list(
         map(lambda aspect: aspect[0] / aspect[1], known_aspects)
