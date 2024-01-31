@@ -5,7 +5,7 @@ type TWrapperProps = {
 };
 
 const Wrapper = ({ children }: TWrapperProps) => {
-  return <main className="flex flex-col max-h-screen">{children}</main>;
+  return <main className="flex flex-col h-screen">{children}</main>;
 };
 
 export default Wrapper;

@@ -16,6 +16,7 @@ from urllib.parse import unquote
 
 import cv2
 import numpy as np
+import pandas as pd
 import pytz
 import requests
 from flask import (
@@ -390,6 +391,17 @@ def set_sub_label(id):
     new_sub_label = json.get("subLabel")
     new_score = json.get("subLabelScore")
 
+    if new_sub_label is None:
+        return make_response(
+            jsonify(
+                {
+                    "success": False,
+                    "message": "A sub label must be supplied",
+                }
+            ),
+            400,
+        )
+
     if new_sub_label and len(new_sub_label) > 100:
         return make_response(
             jsonify(
@@ -415,6 +427,7 @@ def set_sub_label(id):
         )
 
     if not event.end_time:
+        # update tracked object
         tracked_obj: TrackedObject = (
             current_app.detected_frames_processor.camera_states[
                 event.camera
@@ -423,6 +436,11 @@ def set_sub_label(id):
 
         if tracked_obj:
             tracked_obj.obj_data["sub_label"] = (new_sub_label, new_score)
+
+        # update timeline items
+        Timeline.update(
+            data=Timeline.data.update({"sub_label": (new_sub_label, new_score)})
+        ).where(Timeline.source_id == id).execute()
 
     event.sub_label = new_sub_label
 
@@ -739,40 +757,58 @@ def hourly_timeline_activity(camera_name: str):
 
     # set initial start so data is representative of full hour
     hours[int(key.timestamp())].append(
-        {
-            "date": key.timestamp(),
-            "count": 0,
-            "type": "motion",
-        }
+        [
+            key.timestamp(),
+            0,
+            False,
+        ]
     )
 
     for recording in all_recordings:
         if recording.start_time > check:
             hours[int(key.timestamp())].append(
-                {
-                    "date": (key + timedelta(hours=1)).timestamp(),
-                    "count": 0,
-                    "type": "motion",
-                }
+                [
+                    (key + timedelta(minutes=59, seconds=59)).timestamp(),
+                    0,
+                    False,
+                ]
             )
             key = key + timedelta(hours=1)
             check = (key + timedelta(hours=1)).timestamp()
             hours[int(key.timestamp())].append(
-                {
-                    "date": key.timestamp(),
-                    "count": 0,
-                    "type": "motion",
-                }
+                [
+                    key.timestamp(),
+                    0,
+                    False,
+                ]
             )
 
-        data_type = "motion" if recording.objects == 0 else "objects"
+        data_type = recording.objects > 0
+        count = recording.motion + recording.objects
         hours[int(key.timestamp())].append(
-            {
-                "date": recording.start_time + (recording.duration / 2),
-                "count": recording.motion,
-                "type": data_type,
-            }
+            [
+                recording.start_time + (recording.duration / 2),
+                0 if count == 0 else np.log2(count),
+                data_type,
+            ]
         )
+
+    # resample data using pandas to get activity on minute to minute basis
+    for key, data in hours.items():
+        df = pd.DataFrame(data, columns=["date", "count", "hasObjects"])
+
+        # set date as datetime index
+        df["date"] = pd.to_datetime(df["date"], unit="s")
+        df.set_index(["date"], inplace=True)
+
+        # normalize data
+        df = df.resample("T").mean().fillna(0)
+
+        # change types for output
+        df.index = df.index.astype(int) // (10**9)
+        df["count"] = df["count"].astype(int)
+        df["hasObjects"] = df["hasObjects"].astype(bool)
+        hours[key] = df.reset_index().to_dict("records")
 
     return jsonify(hours)
 
@@ -1840,6 +1876,7 @@ def recordings(camera_name):
             Recordings.segment_size,
             Recordings.motion,
             Recordings.objects,
+            Recordings.duration,
         )
         .where(
             Recordings.camera == camera_name,
