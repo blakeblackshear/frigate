@@ -76,8 +76,8 @@ Output args presets help make the config more readable and handle use cases for 
 | Preset                           | Usage                             | Other Notes                                   |
 | -------------------------------- | --------------------------------- | --------------------------------------------- |
 | preset-record-generic            | Record WITHOUT audio              | This is the default when nothing is specified |
-| preset-record-generic-audio-aac  | Record WITH aac audio             | Use this to enable audio in recordings        |
 | preset-record-generic-audio-copy | Record WITH original audio        | Use this to enable audio in recordings        |
+| preset-record-generic-audio-aac  | Record WITH transcoded aac audio  | Use this to transcode to aac audio. If your source is already aac, use preset-record-generic-audio-copy instead to avoid re-encoding |
 | preset-record-mjpeg              | Record an mjpeg stream            | Recommend restreaming mjpeg stream instead    |
 | preset-record-jpeg               | Record live jpeg                  | Recommend restreaming live jpeg instead       |
 | preset-record-ubiquiti           | Record ubiquiti stream with audio | Recordings with ubiquiti non-standard audio   |

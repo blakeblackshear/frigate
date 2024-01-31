@@ -14,7 +14,7 @@ import cv2
 import psutil
 import py3nvml.py3nvml as nvml
 
-from frigate.util.builtin import escape_special_characters
+from frigate.util.builtin import clean_camera_user_pass, escape_special_characters
 
 logger = logging.getLogger(__name__)
 
@@ -134,7 +134,7 @@ def get_cpu_stats() -> dict[str, dict]:
                 "cpu": str(cpu_percent),
                 "cpu_average": str(round(cpu_average_usage, 2)),
                 "mem": f"{mem_pct}",
-                "cmdline": " ".join(cmdline),
+                "cmdline": clean_camera_user_pass(" ".join(cmdline)),
             }
         except Exception:
             continue
@@ -371,7 +371,7 @@ def vainfo_hwaccel(device_name: Optional[str] = None) -> sp.CompletedProcess:
     return sp.run(ffprobe_cmd, capture_output=True)
 
 
-async def get_video_properties(url, get_duration=False):
+async def get_video_properties(url, get_duration=False) -> dict[str, any]:
     async def calculate_duration(video: Optional[any]) -> float:
         duration = None
 
@@ -405,7 +405,10 @@ async def get_video_properties(url, get_duration=False):
                 result = None
 
             if result:
-                duration = float(result.strip())
+                try:
+                    duration = float(result.strip())
+                except ValueError:
+                    duration = -1
             else:
                 duration = -1
 

@@ -47,6 +47,12 @@ services:
     ...
 ```
 
+:::caution
+
+Users of the Snapcraft build of Docker cannot use storage locations outside your $HOME folder. 
+
+:::
+
 ### Calculating required shm-size
 
 Frigate utilizes shared memory to store frames during processing. The default `shm-size` provided by Docker is **64MB**.

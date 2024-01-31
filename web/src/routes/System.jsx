@@ -41,7 +41,7 @@ export default function System() {
   const cameraNames = Object.keys(cameras || emptyObject);
   const processesNames = Object.keys(processes || emptyObject);
 
-  const { data: go2rtc } = useSWR('go2rtc');
+  const { data: go2rtc } = useSWR('go2rtc/api');
 
   const onHandleFfprobe = async (camera, e) => {
     if (e) {
@@ -103,9 +103,9 @@ export default function System() {
               className="text-blue-500 hover:underline"
               target="_blank"
               rel="noopener noreferrer"
-              href="/live/webrtc/"
+              href="/api/go2rtc/streams"
             >
-              dashboard
+              streams info
             </Link>
           </span>
         )}
@@ -302,16 +302,16 @@ export default function System() {
                           <Tr>
                             <Th>GPU %</Th>
                             <Th>Memory %</Th>
-                            {'dec' in gpu_usages[gpu] && (<Th>Decoder %</Th>)}
-                            {'enc' in gpu_usages[gpu] && (<Th>Encoder %</Th>)}
+                            {'dec' in gpu_usages[gpu] && <Th>Decoder %</Th>}
+                            {'enc' in gpu_usages[gpu] && <Th>Encoder %</Th>}
                           </Tr>
                         </Thead>
                         <Tbody>
                           <Tr>
                             <Td>{gpu_usages[gpu]['gpu']}</Td>
                             <Td>{gpu_usages[gpu]['mem']}</Td>
-                            {'dec' in gpu_usages[gpu] && (<Td>{gpu_usages[gpu]['dec']}</Td>)}
-                            {'enc' in gpu_usages[gpu] && (<Td>{gpu_usages[gpu]['enc']}</Td>)}
+                            {'dec' in gpu_usages[gpu] && <Td>{gpu_usages[gpu]['dec']}</Td>}
+                            {'enc' in gpu_usages[gpu] && <Td>{gpu_usages[gpu]['enc']}</Td>}
                           </Tr>
                         </Tbody>
                       </Table>
@@ -350,14 +350,14 @@ export default function System() {
                         <Link href={`/cameras/${camera}`}>{camera.replaceAll('_', ' ')}</Link>
                         <div className="flex">
                           {config.cameras[camera]['webui_url'] && (
-                            <Button 
-                              href={config.cameras[camera]['webui_url']}
-                              target="_blank"
-                            >
-                             Web UI<WebUI className="ml-1 h-4 w-4" fill="white" stroke="white" />
+                            <Button href={config.cameras[camera]['webui_url']} target="_blank">
+                              Web UI
+                              <WebUI className="ml-1 h-4 w-4" fill="white" stroke="white" />
                             </Button>
                           )}
-                          <Button className="ml-2" onClick={(e) => onHandleFfprobe(camera, e)}>ffprobe</Button>
+                          <Button className="ml-2" onClick={(e) => onHandleFfprobe(camera, e)}>
+                            ffprobe
+                          </Button>
                         </div>
                       </div>
                       <div className="p-2">
