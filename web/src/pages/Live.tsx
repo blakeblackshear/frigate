@@ -48,7 +48,7 @@ function Live() {
   const defaultLiveMode = useMemo(() => {
     if (cameraConfig) {
       if (restreamEnabled) {
-        return cameraConfig.ui.live_mode;
+        return cameraConfig.ui.live_mode || config?.ui.live_mode;
       }
 
       return "jsmpeg";
@@ -65,55 +65,75 @@ function Live() {
     <div className=" w-full">
       <div className="flex justify-between">
         <Heading as="h2">Live</Heading>
-        <div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button className="capitalize" variant="outline">
-                {camera?.replaceAll("_", " ") || "Select A Camera"}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuLabel>Select A Camera</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuRadioGroup value={camera} onValueChange={setCamera}>
-                {sortedCameras.map((item) => (
-                  <DropdownMenuRadioItem
-                    className="capitalize"
-                    key={item.name}
-                    value={item.name}
-                  >
-                    {item.name.replaceAll("_", " ")}
+        <div className="flex">
+          <div className="mx-1">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="capitalize" variant="outline">
+                  {camera?.replaceAll("_", " ") || "Select A Camera"}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuLabel>Select A Camera</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuRadioGroup
+                  value={camera}
+                  onValueChange={setCamera}
+                >
+                  {config?.birdseye.enabled && (
+                    <DropdownMenuRadioItem value="birdseye">
+                      Birdseye
+                    </DropdownMenuRadioItem>
+                  )}
+                  {sortedCameras.map((item) => (
+                    <DropdownMenuRadioItem
+                      className="capitalize"
+                      key={item.name}
+                      value={item.name}
+                    >
+                      {item.name.replaceAll("_", " ")}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          <div className="mx-1">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="capitalize" variant="outline">
+                  {viewSource || defaultLiveMode || "Select A Live Mode"}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuLabel>Select A Live Mode</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuRadioGroup
+                  value={`${viewSource}`}
+                  onValueChange={setViewSource}
+                >
+                  {restreamEnabled && (
+                    <DropdownMenuRadioItem value="webrtc">
+                      Webrtc
+                    </DropdownMenuRadioItem>
+                  )}
+                  {restreamEnabled && (
+                    <DropdownMenuRadioItem value="mse">
+                      MSE
+                    </DropdownMenuRadioItem>
+                  )}
+                  <DropdownMenuRadioItem value="jsmpeg">
+                    Jsmpeg
                   </DropdownMenuRadioItem>
-                ))}
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button className="capitalize" variant="outline">
-                {viewSource || defaultLiveMode || "Select A Live Mode"}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuLabel>Select A Live Mode</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuRadioGroup
-                value={`${viewSource}`}
-                onValueChange={setViewSource}
-              >
-                <DropdownMenuRadioItem value="webrtc">
-                  Webrtc
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="mse">MSE</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="jsmpeg">
-                  Jsmpeg
-                </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="debug">
-                  Debug
-                </DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                  {camera != "birdseye" && (
+                    <DropdownMenuRadioItem value="debug">
+                      Debug
+                    </DropdownMenuRadioItem>
+                  )}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
       {config && camera == "birdseye" && sourceIsLoaded && (

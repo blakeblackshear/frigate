@@ -42,15 +42,6 @@ export function getTimelineIcon(timelineItem: Timeline) {
         default:
           return <LuTruck className="w-4 mr-1" />;
       }
-    case "sub_label":
-      switch (timelineItem.data.label) {
-        case "person":
-          return <MdFaceUnlock className="w-4 mr-1" />;
-        case "car":
-          return <MdOutlinePictureInPictureAlt className="w-4 mr-1" />;
-        default:
-          return <LuCircleDot className="w-4 mr-1" />;
-      }
     case "heard":
       return <LuEar className="w-4 mr-1" />;
     case "external":
@@ -119,8 +110,6 @@ export function getTimelineItemDescription(timelineItem: Timeline) {
       }
       return title;
     }
-    case "sub_label":
-      return `${timelineItem.data.label} recognized as ${timelineItem.data.sub_label}`;
     case "gone":
       return `${label} left`;
     case "heard":
