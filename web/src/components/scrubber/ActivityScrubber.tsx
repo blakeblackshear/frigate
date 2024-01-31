@@ -9,6 +9,8 @@ import {
 } from "vis-timeline";
 import type { DataGroup, DataItem, TimelineEvents } from "vis-timeline/types";
 import "./scrubber.css";
+import useSWR from "swr";
+import { FrigateConfig } from "@/types/frigateConfig";
 
 export type TimelineEventsWithMissing =
   | TimelineEvents
@@ -89,14 +91,13 @@ function ActivityScrubber({
   options,
   ...eventHandlers
 }: ActivityScrubberProps) {
+  const { data: config } = useSWR<FrigateConfig>("config");
   const containerRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<{ timeline: VisTimeline | null }>({
     timeline: null,
   });
   const [currentTime, setCurrentTime] = useState(Date.now());
-  const [_, setCustomTimes] = useState<
-    { id: IdType; time: DateType }[]
-  >([]);
+  const [_, setCustomTimes] = useState<{ id: IdType; time: DateType }[]>([]);
 
   const defaultOptions: TimelineOptions = {
     width: "100%",
@@ -110,8 +111,11 @@ function ActivityScrubber({
     max: currentTime,
     format: {
       minorLabels: {
-        minute: "h:mma",
-        hour: "ha",
+        minute: config?.ui.time_format == "24hour" ? "HH:mm" : "hh:mma",
+      },
+      majorLabels: {
+        minute:
+          config?.ui.time_format == "24hour" ? "MM/DD HH:mm" : "MM/DD hh:mma",
       },
     },
   };
@@ -139,8 +143,8 @@ function ActivityScrubber({
 
     const timelineInstance = new VisTimeline(
       divElement,
-      items as DataItem[],
-      groups as DataGroup[],
+      (items || []) as DataItem[],
+      (groups || []) as DataGroup[],
       timelineOptions
     );
 

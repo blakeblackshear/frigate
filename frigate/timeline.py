@@ -7,7 +7,6 @@ from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
 
 from frigate.config import FrigateConfig
-from frigate.const import ALL_ATTRIBUTE_LABELS
 from frigate.events.maintainer import EventTypeEnum
 from frigate.models import Timeline
 from frigate.util.builtin import to_relative_box
@@ -85,12 +84,13 @@ class TimelineProcessor(threading.Thread):
         """Handle object detection."""
         save = False
         camera_config = self.config.cameras[camera]
+        event_id = event_data["id"]
 
         timeline_entry = {
             Timeline.timestamp: event_data["frame_time"],
             Timeline.camera: camera,
             Timeline.source: "tracked_object",
-            Timeline.source_id: event_data["id"],
+            Timeline.source_id: event_id,
             Timeline.data: {
                 "box": to_relative_box(
                     camera_config.detect.width,
@@ -107,6 +107,16 @@ class TimelineProcessor(threading.Thread):
                 "attribute": "",
             },
         }
+
+        # update sub labels for existing entries that haven't been added yet
+        if (
+            prev_event_data != None
+            and prev_event_data["sub_label"] != event_data["sub_label"]
+            and event_id in self.pre_event_cache.keys()
+        ):
+            for e in self.pre_event_cache[event_id]:
+                e[Timeline.data]["sub_label"] = event_data["sub_label"]
+
         if event_type == "start":
             timeline_entry[Timeline.class_type] = "visible"
             save = True
@@ -129,13 +139,6 @@ class TimelineProcessor(threading.Thread):
                     event_data["attributes"].keys()
                 )[0]
                 save = True
-            elif not prev_event_data.get("sub_label") and event_data.get("sub_label"):
-                sub_label = event_data["sub_label"][0]
-
-                if sub_label not in ALL_ATTRIBUTE_LABELS:
-                    timeline_entry[Timeline.class_type] = "sub_label"
-                    timeline_entry[Timeline.data]["sub_label"] = sub_label
-                    save = True
         elif event_type == "end":
             timeline_entry[Timeline.class_type] = "gone"
             save = True

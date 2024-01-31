@@ -5,6 +5,7 @@ type Recording = {
   end_time: number;
   path: string;
   segment_size: number;
+  duration: number;
   motion: number;
   objects: number;
   dBFS: number;
@@ -17,6 +18,7 @@ type RecordingSegment = {
   motion: number;
   objects: number;
   segment_size: number;
+  duration: number;
 };
 
 type RecordingActivity = {
@@ -26,5 +28,5 @@ type RecordingActivity = {
 type RecordingSegmentActivity = {
   date: number;
   count: number;
-  type: "motion" | "objects";
+  hasObjects: boolean;
 };

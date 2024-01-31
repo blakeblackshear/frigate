@@ -1,6 +1,4 @@
-import { FrigateConfig } from "@/types/frigateConfig";
 import VideoPlayer from "./VideoPlayer";
-import useSWR from "swr";
 import React, {
   useCallback,
   useEffect,
@@ -12,6 +10,7 @@ import { useApiHost } from "@/api";
 import Player from "video.js/dist/types/player";
 import { AspectRatio } from "../ui/aspect-ratio";
 import { LuPlayCircle } from "react-icons/lu";
+import { isCurrentHour } from "@/utils/dateUtil";
 
 type PreviewPlayerProps = {
   camera: string;
@@ -38,7 +37,6 @@ export default function PreviewThumbnailPlayer({
   isMobile,
   onClick,
 }: PreviewPlayerProps) {
-  const { data: config } = useSWR("config");
   const playerRef = useRef<Player | null>(null);
   const isSafari = useMemo(() => {
     return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
@@ -54,7 +52,10 @@ export default function PreviewThumbnailPlayer({
       }
 
       if (!playerRef.current) {
-        setIsInitiallyVisible(true);
+        if (isHovered) {
+          setIsInitiallyVisible(true);
+        }
+
         return;
       }
 
@@ -105,6 +106,7 @@ export default function PreviewThumbnailPlayer({
             {
               threshold: 1.0,
               root: document.getElementById("pageRoot"),
+              rootMargin: "-10% 0px -25% 0px",
             }
           );
           if (node) autoPlayObserver.current.observe(node);
@@ -131,7 +133,6 @@ export default function PreviewThumbnailPlayer({
         isInitiallyVisible={isInitiallyVisible}
         startTs={startTs}
         camera={camera}
-        config={config}
         eventId={eventId}
         isMobile={isMobile}
         isSafari={isSafari}
@@ -143,7 +144,6 @@ export default function PreviewThumbnailPlayer({
 
 type PreviewContentProps = {
   playerRef: React.MutableRefObject<Player | null>;
-  config: FrigateConfig;
   camera: string;
   relevantPreview: Preview | undefined;
   eventId: string;
@@ -156,7 +156,6 @@ type PreviewContentProps = {
 };
 function PreviewContent({
   playerRef,
-  config,
   camera,
   relevantPreview,
   eventId,
@@ -195,22 +194,13 @@ function PreviewContent({
 
   if (relevantPreview && !isVisible) {
     return <div />;
-  } else if (!relevantPreview) {
-    if (isCurrentHour(startTs)) {
-      return (
-        <img
-          className={`${getPreviewWidth(camera, config)}`}
-          src={`${apiHost}api/preview/${camera}/${startTs}/thumbnail.jpg`}
-        />
-      );
-    } else {
-      return (
-        <img
-          className="w-[160px]"
-          src={`${apiHost}api/events/${eventId}/thumbnail.jpg`}
-        />
-      );
-    }
+  } else if (!relevantPreview && !isCurrentHour(startTs)) {
+    return (
+      <img
+        className="w-[160px]"
+        src={`${apiHost}api/events/${eventId}/thumbnail.jpg`}
+      />
+    );
   } else {
     return (
       <>
@@ -223,16 +213,25 @@ function PreviewContent({
               controls: false,
               muted: true,
               loadingSpinner: false,
-              sources: [
-                {
-                  src: `${relevantPreview.src}`,
-                  type: "video/mp4",
-                },
-              ],
+              poster: relevantPreview
+                ? ""
+                : `${apiHost}api/preview/${camera}/${startTs}/thumbnail.jpg`,
+              sources: relevantPreview
+                ? [
+                    {
+                      src: `${relevantPreview.src}`,
+                      type: "video/mp4",
+                    },
+                  ]
+                : [],
             }}
             seekOptions={{}}
             onReady={(player) => {
               playerRef.current = player;
+
+              if (!relevantPreview) {
+                return;
+              }
 
               if (!isInitiallyVisible) {
                 player.pause(); // autoplay + pause is required for iOS
@@ -249,28 +248,10 @@ function PreviewContent({
             }}
           />
         </div>
-        <LuPlayCircle className="absolute z-10 left-1 bottom-1 w-4 h-4 text-white text-opacity-60" />
+        {relevantPreview && (
+          <LuPlayCircle className="absolute z-10 left-1 bottom-1 w-4 h-4 text-white text-opacity-60" />
+        )}
       </>
     );
   }
-}
-
-function isCurrentHour(timestamp: number) {
-  const now = new Date();
-  now.setMinutes(0, 0, 0);
-  return timestamp > now.getTime() / 1000;
-}
-
-function getPreviewWidth(camera: string, config: FrigateConfig) {
-  const detect = config.cameras[camera].detect;
-
-  if (detect.width / detect.height < 1) {
-    return "w-1/2";
-  }
-
-  if (detect.width / detect.height < 16 / 9) {
-    return "w-2/3";
-  }
-
-  return "w-full";
 }

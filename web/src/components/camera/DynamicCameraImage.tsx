@@ -1,11 +1,15 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { AspectRatio } from "../ui/aspect-ratio";
 import CameraImage from "./CameraImage";
 import { LuEar } from "react-icons/lu";
 import { CameraConfig } from "@/types/frigateConfig";
 import { TbUserScan } from "react-icons/tb";
 import { MdLeakAdd } from "react-icons/md";
-import { useFrigateEvents, useMotionActivity } from "@/api/ws";
+import {
+  useAudioActivity,
+  useFrigateEvents,
+  useMotionActivity,
+} from "@/api/ws";
 
 type DynamicCameraImageProps = {
   camera: CameraConfig;
@@ -21,10 +25,14 @@ export default function DynamicCameraImage({
 }: DynamicCameraImageProps) {
   const [key, setKey] = useState(Date.now());
   const [activeObjects, setActiveObjects] = useState<string[]>([]);
+  const hasActiveObjects = useMemo(
+    () => activeObjects.length > 0,
+    [activeObjects]
+  );
 
   const { payload: detectingMotion } = useMotionActivity(camera.name);
   const { payload: event } = useFrigateEvents();
-  const { payload: audioRms } = useMotionActivity(camera.name);
+  const { payload: audioRms } = useAudioActivity(camera.name);
 
   useEffect(() => {
     if (!event) {
@@ -50,7 +58,6 @@ export default function DynamicCameraImage({
         if (eventIndex == -1) {
           const newActiveObjects = [...activeObjects, event.after.id];
           setActiveObjects(newActiveObjects);
-          setKey(Date.now());
         }
       }
     }
@@ -58,8 +65,9 @@ export default function DynamicCameraImage({
 
   const handleLoad = useCallback(() => {
     const loadTime = Date.now() - key;
-    const loadInterval =
-      activeObjects.length > 0 ? INTERVAL_ACTIVE_MS : INTERVAL_INACTIVE_MS;
+    const loadInterval = hasActiveObjects
+      ? INTERVAL_ACTIVE_MS
+      : INTERVAL_INACTIVE_MS;
 
     setTimeout(
       () => {
@@ -67,7 +75,7 @@ export default function DynamicCameraImage({
       },
       loadTime > loadInterval ? 1 : loadInterval
     );
-  }, [activeObjects, key]);
+  }, [key]);
 
   return (
     <AspectRatio
@@ -91,7 +99,7 @@ export default function DynamicCameraImage({
             activeObjects.length > 0 ? "text-object" : "text-gray-600"
           }`}
         />
-        {camera.audio.enabled && (
+        {camera.audio.enabled_in_config && (
           <LuEar
             className={`${
               parseInt(audioRms) >= camera.audio.min_volume
