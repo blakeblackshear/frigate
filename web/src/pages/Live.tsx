@@ -37,8 +37,15 @@ function Live() {
     );
   }, [config]);
   const restreamEnabled = useMemo(() => {
+    if (!config) {
+      return false;
+    }
+
+    if (camera == "birdseye") {
+      return config.birdseye.restream;
+    }
+
     return (
-      config &&
       cameraConfig &&
       Object.keys(config.go2rtc.streams || {}).includes(
         cameraConfig.live.stream_name
