@@ -41,11 +41,13 @@ def get_standard_aspect_ratio(width: int, height: int) -> tuple[int, int]:
         (16, 9),
         (9, 16),
         (20, 10),
+        (16, 3),  # max wide camera
         (16, 6),  # reolink duo 2
         (32, 9),  # panoramic cameras
         (12, 9),
         (9, 12),
         (22, 15),  # Amcrest, NTSC DVT
+        (1, 1),  # fisheye
     ]  # aspects are scaled to have common relative size
     known_aspects_ratios = list(
         map(lambda aspect: aspect[0] / aspect[1], known_aspects)
@@ -431,17 +433,23 @@ class BirdsEyeFrameManager:
                 camera = active_cameras_to_add[0]
                 camera_dims = self.cameras[camera]["dimensions"].copy()
                 scaled_width = int(self.canvas.height * camera_dims[0] / camera_dims[1])
-                coefficient = (
-                    1
-                    if scaled_width <= self.canvas.width
-                    else self.canvas.width / scaled_width
-                )
+
+                # center camera view in canvas and ensure that it fits
+                if scaled_width < self.canvas.width:
+                    coefficient = 1
+                    x_offset = int((self.canvas.width - scaled_width) / 2)
+                else:
+                    coefficient = self.canvas.width / scaled_width
+                    x_offset = int(
+                        (self.canvas.width - (scaled_width * coefficient)) / 2
+                    )
+
                 self.camera_layout = [
                     [
                         (
                             camera,
                             (
-                                0,
+                                x_offset,
                                 0,
                                 int(scaled_width * coefficient),
                                 int(self.canvas.height * coefficient),
@@ -485,7 +493,11 @@ class BirdsEyeFrameManager:
 
         return True
 
-    def calculate_layout(self, cameras_to_add: list[str], coefficient) -> tuple[any]:
+    def calculate_layout(
+        self,
+        cameras_to_add: list[str],
+        coefficient: float,
+    ) -> tuple[any]:
         """Calculate the optimal layout for 2+ cameras."""
 
         def map_layout(camera_layout: list[list[any]], row_height: int):
