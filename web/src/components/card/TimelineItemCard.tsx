@@ -47,7 +47,7 @@ export default function TimelineItemCard({
 
   return (
     <Card
-      className="relative m-2 flex w-full h-20 xl:h-24 3xl:h-28 4xl:h-36 cursor-pointer"
+      className="relative mx-2 mb-2 flex w-full h-20 xl:h-24 3xl:h-28 4xl:h-36 cursor-pointer"
       onClick={onSelect}
     >
       <div className="w-32 xl:w-40 3xl:w-44 4xl:w-60 p-2">

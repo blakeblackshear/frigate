@@ -109,7 +109,7 @@ export default function DesktopTimelineView({
 
   return (
     <div className="w-full flex flex-col">
-      <div className="flex max-h-[60%]">
+      <div className="flex mt-2 max-h-[60%]">
         <DynamicVideoPlayer
           className="w-2/3 bg-black flex justify-center items-center"
           camera={initialPlayback.camera}
@@ -129,22 +129,24 @@ export default function DesktopTimelineView({
             }
           }}
         />
-        <div className="px-2 h-full w-1/3 overflow-y-auto overflow-x-hidden">
-          {selectedPlayback.timelineItems.map((timeline) => {
-            return (
-              <TimelineItemCard
-                key={timeline.timestamp}
-                timeline={timeline}
-                relevantPreview={selectedPlayback.relevantPreview}
-                onSelect={() => {
-                  controllerRef.current?.seekToTimelineItem(timeline);
-                }}
-              />
-            );
-          })}
+        <div className="relative h-full w-1/3">
+          <div className="absolute px-2 left-0 top-0 right-0 bottom-0 overflow-y-auto overflow-x-hidden">
+            {selectedPlayback.timelineItems.map((timeline) => {
+              return (
+                <TimelineItemCard
+                  key={timeline.timestamp}
+                  timeline={timeline}
+                  relevantPreview={selectedPlayback.relevantPreview}
+                  onSelect={() => {
+                    controllerRef.current?.seekToTimelineItem(timeline);
+                  }}
+                />
+              );
+            })}
+          </div>
         </div>
       </div>
-      <div className="mt-4 w-full h-full relative">
+      <div className="relative mt-4 w-full h-full">
         <div className="absolute left-0 top-0 right-0 bottom-0 overflow-auto">
           {timelineStack.playbackItems.map((timeline) => {
             const isInitiallySelected =
