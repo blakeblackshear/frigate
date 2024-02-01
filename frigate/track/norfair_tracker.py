@@ -92,7 +92,7 @@ class NorfairTracker(ObjectTracker):
             # R is the multiplier for the sensor measurement noise matrix, default of 4.0
             # lowering R means that we trust the position of the bounding boxes more
             # testing shows that the prediction was being relied on a bit too much
-            # TODO: could use different kalman filter values along with 
+            # TODO: could use different kalman filter values along with
             #       the different tracker per object class
             filter_factory=OptimizedKalmanFilterFactory(R=3.4),
         )
