@@ -1124,6 +1124,9 @@ class FrigateConfig(FrigateBaseModel):
                 {"name": name, **merged_config}
             )
 
+            if camera_config.ffmpeg.hwaccel_args == "auto":
+                camera_config.ffmpeg.hwaccel_args = config.ffmpeg.hwaccel_args
+
             if (
                 camera_config.detect.height is None
                 or camera_config.detect.width is None
