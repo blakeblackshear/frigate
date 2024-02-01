@@ -40,6 +40,19 @@ export default function DynamicVideoPlayer({
     [config]
   );
 
+  // playback behavior
+  const tallVideo = useMemo(() => {
+    if (!config) {
+      return false;
+    }
+
+    return (
+      config.cameras[camera].detect.width /
+        config.cameras[camera].detect.height <
+      1.7
+    );
+  }, [config]);
+
   // controlling playback
 
   const playerRef = useRef<Player | undefined>(undefined);
@@ -64,6 +77,7 @@ export default function DynamicVideoPlayer({
   }, [config]);
 
   // keyboard control
+
   const onKeyboardShortcut = useCallback(
     (key: string, down: boolean, repeat: boolean) => {
       switch (key) {
@@ -185,6 +199,8 @@ export default function DynamicVideoPlayer({
     return <ActivityIndicator />;
   }
 
+  //console.log(`${config.detect.width / config.detect.height < 1.7 ? "16:9" : undefined}`)
+
   return (
     <div className={className}>
       <div
@@ -197,6 +213,7 @@ export default function DynamicVideoPlayer({
             preload: "auto",
             autoplay: true,
             sources: [initialPlaybackSource],
+            aspectRatio: tallVideo ? "16:9" : undefined,
             controlBar: {
               remainingTimeDisplay: false,
               progressControl: {
@@ -239,6 +256,7 @@ export default function DynamicVideoPlayer({
             muted: true,
             loadingSpinner: false,
             sources: hasPreview ? initialPreviewSource : null,
+            aspectRatio: tallVideo ? "16:9" : undefined,
           }}
           seekOptions={{}}
           onReady={(player) => {
