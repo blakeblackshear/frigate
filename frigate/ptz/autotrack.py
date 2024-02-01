@@ -1154,9 +1154,7 @@ class PtzAutoTracker:
                             "target_box"
                         ] + self._predict_area_after_time(
                             camera, predicted_movement_time
-                        ) / (
-                            camera_width * camera_height
-                        )
+                        ) / (camera_width * camera_height)
                         logger.debug(
                             f"{camera}: Zooming prediction: predicted movement time: {predicted_movement_time}, original box: {self.tracked_object_metrics[camera]['target_box']}, calculated box: {calculated_target_box}"
                         )
