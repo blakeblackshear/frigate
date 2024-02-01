@@ -88,6 +88,12 @@ class NorfairTracker(ObjectTracker):
             distance_threshold=2.5,
             initialization_delay=self.detect_config.min_initialized,
             hit_counter_max=self.detect_config.max_disappeared,
+            # use default filter factory with custom values
+            # R is the multiplier for the sensor measurement noise matrix, default of 4.0
+            # lowering R means that we trust the position of the bounding boxes more
+            # testing shows that the prediction was being relied on a bit too much
+            # TODO: could use different kalman filter values along with 
+            #       the different tracker per object class
             filter_factory=OptimizedKalmanFilterFactory(R=3.4),
         )
         if self.ptz_autotracker_enabled.value:
