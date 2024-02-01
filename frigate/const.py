@@ -1,14 +1,23 @@
-CONFIG_DIR = "/config"
-DEFAULT_DB_PATH = f"{CONFIG_DIR}/frigate.db"
-MODEL_CACHE_DIR = f"{CONFIG_DIR}/model_cache"
-BASE_DIR = "/media/frigate"
-CLIPS_DIR = f"{BASE_DIR}/clips"
-RECORD_DIR = f"{BASE_DIR}/recordings"
-EXPORT_DIR = f"{BASE_DIR}/exports"
-BIRDSEYE_PIPE = "/tmp/cache/birdseye"
-CACHE_DIR = "/tmp/cache"
+from pathlib import Path
+
+CACHE_DIR = Path("/tmp/cache")
+BIRDSEYE_PIPE = CACHE_DIR / "birdseye"
+
+CONFIG_DIR = Path("/config")
+DEFAULT_DB_PATH = CONFIG_DIR / "frigate.db"
+MODEL_CACHE_DIR = CONFIG_DIR / "model_cache"
+
+INSTALL_DIR = Path("/opt/frigate")
+
+MEDIA_DIR = Path("/media/frigate")
+CLIPS_DIR = MEDIA_DIR / "clips"
+RECORD_DIR = MEDIA_DIR / "recordings"
+EXPORT_DIR = MEDIA_DIR / "exports"
+
 YAML_EXT = (".yaml", ".yml")
+
 FRIGATE_LOCALHOST = "http://127.0.0.1:5000"
+
 PLUS_ENV_VAR = "PLUS_API_KEY"
 PLUS_API_HOST = "https://api.frigate.video"
 

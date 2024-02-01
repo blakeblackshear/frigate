@@ -300,7 +300,7 @@ def stats_snapshot(
 
     for path in [RECORD_DIR, CLIPS_DIR, CACHE_DIR, "/dev/shm"]:
         try:
-            storage_stats = shutil.disk_usage(path)
+            storage_stats = shutil.disk_usage(str(path))
         except FileNotFoundError:
             stats["service"]["storage"][path] = {}
             continue
@@ -309,7 +309,7 @@ def stats_snapshot(
             "total": round(storage_stats.total / pow(2, 20), 1),
             "used": round(storage_stats.used / pow(2, 20), 1),
             "free": round(storage_stats.free / pow(2, 20), 1),
-            "mount_type": get_fs_type(path),
+            "mount_type": get_fs_type(str(path)),
         }
 
     stats["processes"] = {}

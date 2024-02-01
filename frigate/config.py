@@ -910,7 +910,7 @@ class CameraConfig(FrigateBaseModel):
 
 
 class DatabaseConfig(FrigateBaseModel):
-    path: str = Field(default=DEFAULT_DB_PATH, title="Database path.")
+    path: str = Field(default=str(DEFAULT_DB_PATH), title="Database path.")
 
 
 class LogLevelEnum(str, Enum):
