@@ -528,6 +528,13 @@ class BirdseyeModeEnum(str, Enum):
         return list(cls)[index]
 
 
+class BirdseyeLayoutConfig(FrigateBaseModel):
+    scaling_factor: float = Field(
+        default=2.0, title="Birdseye Scaling Factor", gt=1.0, le=5.0
+    )
+    max_cameras: Optional[int] = Field(default=None, title="Max cameras")
+
+
 class BirdseyeConfig(FrigateBaseModel):
     enabled: bool = Field(default=True, title="Enable birdseye view.")
     restream: bool = Field(default=False, title="Restream birdseye via RTSP.")
@@ -541,6 +548,9 @@ class BirdseyeConfig(FrigateBaseModel):
     )
     mode: BirdseyeModeEnum = Field(
         default=BirdseyeModeEnum.objects, title="Tracking mode."
+    )
+    layout: BirdseyeLayoutConfig = Field(
+        default_factory=BirdseyeLayoutConfig, title="Birdseye Layout Config"
     )
 
 

@@ -76,7 +76,13 @@ def get_canvas_shape(width: int, height: int) -> tuple[int, int]:
 
 
 class Canvas:
-    def __init__(self, canvas_width: int, canvas_height: int) -> None:
+    def __init__(
+        self,
+        canvas_width: int,
+        canvas_height: int,
+        scaling_factor: int,
+    ) -> None:
+        self.scaling_factor = scaling_factor
         gcd = math.gcd(canvas_width, canvas_height)
         self.aspect = get_standard_aspect_ratio(
             (canvas_width / gcd), (canvas_height / gcd)
@@ -90,7 +96,7 @@ class Canvas:
         return (self.aspect[0] * coefficient, self.aspect[1] * coefficient)
 
     def get_coefficient(self, camera_count: int) -> int:
-        return self.coefficient_cache.get(camera_count, 2)
+        return self.coefficient_cache.get(camera_count, self.scaling_factor)
 
     def set_coefficient(self, camera_count: int, coefficient: int) -> None:
         self.coefficient_cache[camera_count] = coefficient
@@ -278,7 +284,7 @@ class BirdsEyeFrameManager:
         self.frame_shape = (height, width)
         self.yuv_shape = (height * 3 // 2, width)
         self.frame = np.ndarray(self.yuv_shape, dtype=np.uint8)
-        self.canvas = Canvas(width, height)
+        self.canvas = Canvas(width, height, config.birdseye.layout.scaling_factor)
         self.stop_event = stop_event
         self.camera_metrics = camera_metrics
 
