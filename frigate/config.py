@@ -530,7 +530,7 @@ class BirdseyeModeEnum(str, Enum):
 
 class BirdseyeLayoutConfig(FrigateBaseModel):
     scaling_factor: float = Field(
-        default=2.0, title="Birdseye Scaling Factor", gt=1.0, le=5.0
+        default=2.0, title="Birdseye Scaling Factor", ge=1.0, le=5.0
     )
     max_cameras: Optional[int] = Field(default=None, title="Max cameras")
 
