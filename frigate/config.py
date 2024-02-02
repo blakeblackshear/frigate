@@ -546,6 +546,9 @@ class BirdseyeConfig(FrigateBaseModel):
         ge=1,
         le=31,
     )
+    inactivity_threshold: int = Field(
+        default=30, title="Birdseye Inactivity Threshold", gt=0
+    )
     mode: BirdseyeModeEnum = Field(
         default=BirdseyeModeEnum.objects, title="Tracking mode."
     )

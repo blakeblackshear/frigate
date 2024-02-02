@@ -287,6 +287,7 @@ class BirdsEyeFrameManager:
         self.canvas = Canvas(width, height, config.birdseye.layout.scaling_factor)
         self.stop_event = stop_event
         self.camera_metrics = camera_metrics
+        self.inactivity_threshold = config.birdseye.inactivity_threshold
 
         if config.birdseye.layout.max_cameras:
             self.last_refresh_time = 0
@@ -395,13 +396,14 @@ class BirdsEyeFrameManager:
     def update_frame(self):
         """Update to a new frame for birdseye."""
 
-        # determine how many cameras are tracking objects within the last 30 seconds
+        # determine how many cameras are tracking objects within the last inactivity_threshold seconds
         active_cameras: set[str] = set(
             [
                 cam
                 for cam, cam_data in self.cameras.items()
                 if cam_data["last_active_frame"] > 0
-                and cam_data["current_frame"] - cam_data["last_active_frame"] < 30
+                and cam_data["current_frame"] - cam_data["last_active_frame"]
+                < self.inactivity_threshold
             ]
         )
 
