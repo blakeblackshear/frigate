@@ -154,6 +154,10 @@ export default function DesktopTimelineView({
             const isSelected =
               timeline.range.start == selectedPlayback.range.start;
             const graphData = timelineGraphData[timeline.range.start];
+            const start = new Date(timeline.range.start * 1000);
+            const end = new Date(
+              Math.min(timeline.range.end * 1000, new Date().getTime())
+            );
 
             return (
               <div
@@ -178,10 +182,10 @@ export default function DesktopTimelineView({
                       }
                       options={{
                         snap: null,
-                        min: new Date(timeline.range.start * 1000),
-                        max: new Date(timeline.range.end * 1000),
-                        start: new Date(timeline.range.start * 1000),
-                        end: new Date(timeline.range.end * 1000),
+                        min: start,
+                        max: end,
+                        start: start,
+                        end: end,
                         zoomable: false,
                         height: "120px",
                       }}
