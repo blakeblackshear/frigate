@@ -734,11 +734,12 @@ class PtzAutoTracker:
             and frame_time > self.ptz_metrics[camera]["ptz_stop_time"].value
             and not self.move_queue_locks[camera].locked()
         ):
-            # split up any large moves caused by velocity estimated movements
+            # we can split up any large moves caused by velocity estimated movements if necessary
+            # get an excess amount and assign it instead of 0 below
             while pan != 0 or tilt != 0 or zoom != 0:
-                pan, pan_excess = split_value(pan)
-                tilt, tilt_excess = split_value(tilt)
-                zoom, zoom_excess = split_value(zoom, False)
+                pan, _ = split_value(pan)
+                tilt, _ = split_value(tilt)
+                zoom, _ = split_value(zoom, False)
 
                 logger.debug(
                     f"{camera}: Enqueue movement for frame time: {frame_time} pan: {pan}, tilt: {tilt}, zoom: {zoom}"
@@ -746,9 +747,10 @@ class PtzAutoTracker:
                 move_data = (frame_time, pan, tilt, zoom)
                 self.move_queues[camera].put(move_data)
 
-                pan = pan_excess
-                tilt = tilt_excess
-                zoom = zoom_excess
+                # reset values to not split up large movements
+                pan = 0
+                tilt = 0
+                zoom = 0
 
     def _touching_frame_edges(self, camera, box):
         camera_config = self.config.cameras[camera]
