@@ -1,3 +1,5 @@
+import { endOfHourOrCurrentTime } from "./dateUtil";
+
 // group history cards by 120 seconds of activity
 const GROUP_SECONDS = 120;
 
@@ -169,7 +171,7 @@ export function getTimelineHoursForDay(
       break;
     }
 
-    end = startDay.getTime() / 1000;
+    end = endOfHourOrCurrentTime(startDay.getTime() / 1000);
     const hour = Object.values(day).find((cards) => {
       const card = Object.values(cards)[0];
       if (card == undefined || card.time < start || card.time > end) {

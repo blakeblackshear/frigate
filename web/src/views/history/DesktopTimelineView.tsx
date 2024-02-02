@@ -180,9 +180,7 @@ export default function DesktopTimelineView({
               timeline.range.start == selectedPlayback.range.start;
             const graphData = timelineGraphData[timeline.range.start];
             const start = new Date(timeline.range.start * 1000);
-            const end = new Date(
-              Math.min(timeline.range.end * 1000, new Date().getTime())
-            );
+            const end = new Date(timeline.range.end * 1000);
 
             return (
               <div
