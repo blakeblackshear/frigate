@@ -14,9 +14,6 @@ frigate/version.py
 web/build
 web/node_modules
 web/coverage
-web-new/build
-web-new/node_modules
-web-new/coverage
 core
 !/web/**/*.ts
 .idea/*
