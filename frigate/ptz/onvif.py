@@ -187,19 +187,18 @@ class OnvifController:
             ] = preset["token"]
 
         # get list of supported features
-        ptz_config = ptz.GetConfigurationOptions(request)
         supported_features = []
 
-        if ptz_config.Spaces and ptz_config.Spaces.ContinuousPanTiltVelocitySpace:
+        if configs.DefaultContinuousPanTiltVelocitySpace:
             supported_features.append("pt")
 
-        if ptz_config.Spaces and ptz_config.Spaces.ContinuousZoomVelocitySpace:
+        if configs.DefaultContinuousZoomVelocitySpace:
             supported_features.append("zoom")
 
-        if ptz_config.Spaces and ptz_config.Spaces.RelativePanTiltTranslationSpace:
+        if configs.DefaultRelativePanTiltTranslationSpace:
             supported_features.append("pt-r")
 
-        if ptz_config.Spaces and ptz_config.Spaces.RelativeZoomTranslationSpace:
+        if configs.DefaultRelativeZoomTranslationSpace:
             supported_features.append("zoom-r")
             try:
                 # get camera's zoom limits from onvif config
@@ -218,7 +217,7 @@ class OnvifController:
                         f"Disabling autotracking zooming for {camera_name}: Relative zoom not supported"
                     )
 
-        if ptz_config.Spaces and ptz_config.Spaces.AbsoluteZoomPositionSpace:
+        if configs.DefaultAbsoluteZoomPositionSpace:
             supported_features.append("zoom-a")
             try:
                 # get camera's zoom limits from onvif config
@@ -236,7 +235,10 @@ class OnvifController:
                     )
 
         # set relative pan/tilt space for autotracker
-        if fov_space_id is not None:
+        if (
+            fov_space_id is not None
+            and configs.DefaultRelativePanTiltTranslationSpace is not None
+        ):
             supported_features.append("pt-r-fov")
             self.cams[camera_name][
                 "relative_fov_range"
