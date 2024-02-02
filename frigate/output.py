@@ -288,6 +288,9 @@ class BirdsEyeFrameManager:
         self.stop_event = stop_event
         self.camera_metrics = camera_metrics
 
+        if config.birdseye.layout.max_cameras:
+            self.last_refresh_time = 0
+
         # initialize the frame as black and with the Frigate logo
         self.blank_frame = np.zeros(self.yuv_shape, np.uint8)
         self.blank_frame[:] = 128
@@ -393,7 +396,7 @@ class BirdsEyeFrameManager:
         """Update to a new frame for birdseye."""
 
         # determine how many cameras are tracking objects within the last 30 seconds
-        active_cameras = set(
+        active_cameras: set[str] = set(
             [
                 cam
                 for cam, cam_data in self.cameras.items()
@@ -401,6 +404,28 @@ class BirdsEyeFrameManager:
                 and cam_data["current_frame"] - cam_data["last_active_frame"] < 30
             ]
         )
+
+        max_cameras = self.config.birdseye.layout.max_cameras
+        max_camera_refresh = False
+        if max_cameras:
+            now = datetime.datetime.now().timestamp()
+
+            if len(active_cameras) == max_cameras and now - self.last_refresh_time < 10:
+                # don't refresh cameras too often
+                active_cameras = self.active_cameras
+            else:
+                limited_active_cameras = sorted(
+                    active_cameras,
+                    key=lambda active_camera: (
+                        self.cameras[active_camera]["current_frame"]
+                        - self.cameras[active_camera]["last_active_frame"]
+                    ),
+                )
+                active_cameras = limited_active_cameras[
+                    : self.config.birdseye.layout.max_cameras
+                ]
+                max_camera_refresh = True
+                self.last_refresh_time = now
 
         # if there are no active cameras
         if len(active_cameras) == 0:
@@ -415,7 +440,18 @@ class BirdsEyeFrameManager:
                 return True
 
         # check if we need to reset the layout because there is a different number of cameras
-        reset_layout = len(self.active_cameras) - len(active_cameras) != 0
+        if len(self.active_cameras) - len(active_cameras) == 0:
+            if (
+                len(self.active_cameras) == 1
+                and self.active_cameras[0] == active_cameras[0]
+            ):
+                reset_layout = True
+            elif max_camera_refresh:
+                reset_layout = True
+            else:
+                reset_layout = False
+        else:
+            reset_layout = True
 
         # reset the layout if it needs to be different
         if reset_layout:
