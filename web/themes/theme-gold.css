@@ -1,0 +1,61 @@
+.theme-gold.light {
+  --background: 38, 77%, 88%;
+  --foreground: 16, 43%, 34%;
+
+  --muted: 28, 46%, 56%;
+  --muted-foreground: 16, 43%, 34%;
+
+  --popover: 38, 77%, 88%;
+  --popover-foreground: 16, 43%, 34%;
+
+  --border: 28, 46%, 56%;
+  --input: 28, 46%, 56%;
+
+  --card: 38, 77%, 88%;
+  --card-foreground: 16, 43%, 34%;
+
+  --primary: 28, 46%, 56%;
+  --primary-foreground: 60, 70%, 90%;
+
+  --secondary: 39, 100%, 73%;
+  --secondary-foreground: 16, 43%, 34%;
+
+  --accent: 39, 100%, 73%;
+  --accent-foreground: 16, 43%, 34%;
+
+  --destructive: 16, 43%, 34%;
+  --destructive-foreground: 38, 77%, 88%;
+
+  --ring: 28, 46%, 56%;
+}
+
+.theme-gold.dark {
+  --background: 16, 43%, 34%;
+  --foreground: 38, 77%, 88%;
+
+  --muted: 28, 46%, 56%;
+  --muted-foreground: 38, 77%, 88%;
+
+  --popover: 16, 43%, 34%;
+  --popover-foreground: 38, 77%, 88%;
+
+  --border: 28, 46%, 56%;
+  --input: 28, 46%, 56%;
+
+  --card: 16, 43%, 34%;
+  --card-foreground: 38, 77%, 88%;
+
+  --primary: 28, 46%, 56%;
+  --primary-foreground: 60, 70%, 90%;
+
+  --secondary: 39, 100%, 73%;
+  --secondary-foreground: 16, 43%, 34%;
+
+  --accent: 39, 100%, 52%;
+  --accent-foreground: 16, 43%, 34%;
+
+  --destructive: 38, 77%, 88%;
+  --destructive-foreground: 16, 43%, 34%;
+
+  --ring: 28, 46%, 56%;
+}

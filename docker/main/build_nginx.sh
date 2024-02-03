@@ -5,7 +5,6 @@ set -euxo pipefail
 NGINX_VERSION="1.25.3"
 VOD_MODULE_VERSION="1.31"
 SECURE_TOKEN_MODULE_VERSION="1.5"
-RTMP_MODULE_VERSION="1.2.2"
 
 cp /etc/apt/sources.list /etc/apt/sources.list.d/sources-src.list
 sed -i 's|deb http|deb-src http|g' /etc/apt/sources.list.d/sources-src.list
@@ -49,10 +48,6 @@ mkdir /tmp/nginx-secure-token-module
 wget https://github.com/kaltura/nginx-secure-token-module/archive/refs/tags/${SECURE_TOKEN_MODULE_VERSION}.tar.gz
 tar -zxf ${SECURE_TOKEN_MODULE_VERSION}.tar.gz -C /tmp/nginx-secure-token-module --strip-components=1
 rm ${SECURE_TOKEN_MODULE_VERSION}.tar.gz
-mkdir /tmp/nginx-rtmp-module
-wget -nv https://github.com/arut/nginx-rtmp-module/archive/refs/tags/v${RTMP_MODULE_VERSION}.tar.gz
-tar -zxf v${RTMP_MODULE_VERSION}.tar.gz -C /tmp/nginx-rtmp-module --strip-components=1
-rm v${RTMP_MODULE_VERSION}.tar.gz
 
 cd /tmp/nginx
 
@@ -63,7 +58,6 @@ cd /tmp/nginx
     --with-threads \
     --add-module=../nginx-vod-module \
     --add-module=../nginx-secure-token-module \
-    --add-module=../nginx-rtmp-module \
     --with-cc-opt="-O3 -Wno-error=implicit-fallthrough"
 
 make CC="ccache gcc" -j$(nproc) && make install

@@ -37,10 +37,17 @@ from frigate.events.external import ExternalEventProcessor
 from frigate.events.maintainer import EventProcessor
 from frigate.http import create_app
 from frigate.log import log_process, root_configurer
-from frigate.models import Event, Recordings, RecordingsToDelete, Regions, Timeline
+from frigate.models import (
+    Event,
+    Previews,
+    Recordings,
+    RecordingsToDelete,
+    Regions,
+    Timeline,
+)
 from frigate.object_detection import ObjectDetectProcess
 from frigate.object_processing import TrackedObjectProcessor
-from frigate.output import output_frames
+from frigate.output.output import output_frames
 from frigate.plus import PlusApi
 from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.ptz.onvif import OnvifController
@@ -369,7 +376,7 @@ class FrigateApp:
                 60, 10 * len([c for c in self.config.cameras.values() if c.enabled])
             ),
         )
-        models = [Event, Recordings, RecordingsToDelete, Regions, Timeline]
+        models = [Event, Recordings, RecordingsToDelete, Previews, Regions, Timeline]
         self.db.bind(models)
 
     def init_stats(self) -> None:
@@ -488,6 +495,7 @@ class FrigateApp:
             args=(
                 self.config,
                 self.video_output_queue,
+                self.inter_process_queue,
                 self.camera_metrics,
             ),
         )

@@ -534,28 +534,27 @@ class OnvifController:
         except Exception:
             pass  # We're unsupported, that'll be reported in the next check.
 
-        # there doesn't seem to be an onvif standard with this optional parameter
-        # some cameras can report MoveStatus with or without PanTilt or Zoom attributes
-        pan_tilt_status = getattr(status.MoveStatus, "PanTilt", None)
-        zoom_status = getattr(status.MoveStatus, "Zoom", None)
+        try:
+            pan_tilt_status = getattr(status.MoveStatus, "PanTilt", None)
+            zoom_status = getattr(status.MoveStatus, "Zoom", None)
 
-        # if it's not an attribute, see if MoveStatus even exists in the status result
-        if pan_tilt_status is None:
-            pan_tilt_status = getattr(status, "MoveStatus", None)
+            # if it's not an attribute, see if MoveStatus even exists in the status result
+            if pan_tilt_status is None:
+                pan_tilt_status = getattr(status, "MoveStatus", None)
 
-            # we're unsupported
-            if pan_tilt_status is None or pan_tilt_status.lower() not in [
-                "idle",
-                "moving",
-            ]:
-                logger.error(
-                    f"Camera {camera_name} does not support the ONVIF GetStatus method. Autotracking will not function correctly and must be disabled in your config."
-                )
-                return
+                # we're unsupported
+                if pan_tilt_status is None or pan_tilt_status not in [
+                    "IDLE",
+                    "MOVING",
+                ]:
+                    raise Exception
+        except Exception:
+            logger.warning(
+                f"Camera {camera_name} does not support the ONVIF GetStatus method. Autotracking will not function correctly and must be disabled in your config."
+            )
+            return
 
-        if pan_tilt_status.lower() == "idle" and (
-            zoom_status is None or zoom_status.lower() == "idle"
-        ):
+        if pan_tilt_status == "IDLE" and (zoom_status is None or zoom_status == "IDLE"):
             self.cams[camera_name]["active"] = False
             if not self.ptz_metrics[camera_name]["ptz_motor_stopped"].is_set():
                 self.ptz_metrics[camera_name]["ptz_motor_stopped"].set()
