@@ -75,9 +75,9 @@ class OnvifController:
 
         ptz = onvif.create_ptz_service()
 
-        request = ptz.create_type("GetConfigurations")
-        configs = ptz.GetConfigurations(request)[0]
-        logger.debug(f"Onvif configs for {camera_name}: {configs}")
+        # get the PTZ config for the first onvif profile
+        configs = profile.PTZConfiguration
+        logger.debug(f"Onvif ptz config for media profile in {camera_name}: {configs}")
 
         request = ptz.create_type("GetConfigurationOptions")
         request.ConfigurationToken = profile.PTZConfiguration.token
