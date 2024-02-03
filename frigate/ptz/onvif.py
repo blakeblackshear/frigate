@@ -6,6 +6,7 @@ from enum import Enum
 
 import numpy
 from onvif import ONVIFCamera, ONVIFError
+from zeep.exceptions import Fault, TransportError
 
 from frigate.config import FrigateConfig, ZoomingModeEnum
 from frigate.types import PTZMetricsTypes
@@ -68,8 +69,10 @@ class OnvifController:
         media = onvif.create_media_service()
 
         try:
+            capabilities = onvif.get_definition("ptz")
+            logger.debug(f"Onvif capabilities for {camera_name}: {capabilities}")
             profile = media.GetProfiles()[0]
-        except ONVIFError as e:
+        except (ONVIFError, Fault, TransportError) as e:
             logger.error(f"Unable to connect to camera: {camera_name}: {e}")
             return False
 
