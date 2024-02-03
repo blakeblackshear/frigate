@@ -69,6 +69,7 @@ class OnvifController:
         media = onvif.create_media_service()
 
         try:
+            # this will fire an exception if camera is not a ptz
             capabilities = onvif.get_definition("ptz")
             logger.debug(f"Onvif capabilities for {camera_name}: {capabilities}")
             profile = media.GetProfiles()[0]
