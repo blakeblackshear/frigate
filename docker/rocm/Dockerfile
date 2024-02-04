@@ -70,10 +70,10 @@ ARG AMDGPU
 
 ENV HSA_ENABLE_SDMA=0
 
-RUN mkdir -p /opt/rocm-$ROCM
+RUN mkdir -p /opt/rocm-$ROCM/lib
 
 # Docker does not copy symbolic links so have to resort to tar
-RUN --mount=from=rocm,src=/opt/rocm-$ROCM,dst=/opt/rocm-copy cd /opt/rocm-copy && tar cf - lib/libMIOpen*.so* lib/libamd*.so* lib/libhip*.so* lib/libhsa*.so* lib/libmigraphx*.so* lib/librocm*.so* lib/librocblas*.so* | (cd /opt/rocm-$ROCM/ && tar xf -)
+RUN --mount=from=rocm,src=/opt/rocm-$ROCM,dst=/opt/rocm-copy cd /opt/rocm-copy/lib && cp -dpr libMIOpen*.so* libamd*.so* libhip*.so* libhsa*.so* libmigraphx*.so* librocm*.so* librocblas*.so* /opt/rocm-$ROCM/lib/
 
 COPY --from=rocm /opt/rocm-$ROCM/bin/rocminfo /opt/rocm-$ROCM/bin/migraphx-driver /opt/rocm-$ROCM/bin/
 COPY --from=rocm /opt/rocm-$ROCM/share/miopen/db/*$AMDGPU* /opt/rocm-$ROCM/share/miopen/db/
