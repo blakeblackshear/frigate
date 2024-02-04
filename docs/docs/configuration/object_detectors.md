@@ -398,7 +398,15 @@ detectors:
 
 ## AMD/ROCm GPU detector
 
-The `rocm` detector allows one to run [ultralytics](https://github.com/ultralytics/ultralytics) yolov8 models on AMD GPUs and iGPUs. You need special frigate build that contains the AMD/ROCm stack.
+The `rocm` detector allows one to run [ultralytics](https://github.com/ultralytics/ultralytics) yolov8 models on AMD GPUs and iGPUs. You need special frigate build that contains the AMD/ROCm stack:
+
+- `ghcr.io/harakas/frigate:latest-rocm`
+
+As ROCm is quite bloated, there are also smaller versions for specific GPU chipsets:
+
+- `ghcr.io/harakas/frigate:latest-rocm-gfx900`
+- `ghcr.io/harakas/frigate:latest-rocm-gfx1030`
+- `ghcr.io/harakas/frigate:latest-rocm-gfx1100`
 
 ### Model download
 
