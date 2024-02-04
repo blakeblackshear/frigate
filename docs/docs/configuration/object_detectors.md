@@ -395,3 +395,119 @@ detectors:
 ```
 
 :::
+
+## AMD/ROCm GPU detector
+
+The `rocm` detector allows one to run [ultralytics](https://github.com/ultralytics/ultralytics) yolov8 models on AMD GPUs and iGPUs. You need special frigate build that contains the AMD/ROCm stack.
+
+### Model download
+
+The ROCm-specific frigate containers should at startup automatically download yolov8 files from https://github.com/harakas/models/releases/tag/yolov8.1-1.0/ --
+it fetches [yolov8.small.models.tar.gz](https://github.com/harakas/models/releases/download/yolov8.1-1.0/yolov8.small.models.tar.gz)
+and uncompresses it into the `/config/model_cache/yolov8/` directory. After that the model files are compiled for your GPU chipset.
+
+Both the download and compilation can take couple of minutes during which frigate will not be responsive. See docker logs for how it is progressing.
+
+Automatic model download can be configured with the `DOWNLOAD_YOLOV8=1/0` environment variable.
+
+### Docker settings for GPU access
+
+ROCm needs access to `/dev/kfd` and `/dev/dri` devices, also `video` (and possibly `render` and `ssl/_ssl`) group should be added if docker is not run as root:
+
+When running with run command:
+
+```bash
+$ docker run --device=/dev/kfd --device=/dev/dri --group-add video \
+    ...
+```
+
+When using docker compose:
+
+```yaml
+services:
+  frigate:
+...
+    group_add:
+      - video
+    devices:
+      - /dev/dri
+      - /dev/kfd
+...
+```
+
+For reference on running ROCm in docker containers and recommended settings see [running ROCm/pytorch in Docker](https://rocm.docs.amd.com/projects/install-on-linux/en/develop/how-to/3rd-party/pytorch-install.html#using-docker-with-pytorch-pre-installed).
+
+### Docker settings for overriding the GPU chipset
+
+Your GPU or iGPU might work just fine without any special configuration but in many cases they need manual settings. AMD/ROCm software stack comes with a limited set of GPU drivers and for newer models you might have to override the chipset version to an older/generic version to get things working.
+
+Also AMD/ROCm does not "officially" support integrated GPU-s. It still does work with most of them just fine but requires special settings. One has to configure the `HSA_OVERRIDE_GFX_VERSION` configuration variable. See the [ROCm bug report](https://github.com/ROCm/ROCm/issues/1743) for context and examples.
+
+For chipset specific frigate rocm builds this variable is already set automatically.
+
+For the general rocm frigate build there is some automatic detection:
+
+  - gfx90c -> 9.0.0
+  - gfx1031 -> 10.3.0
+  - gfx1103 -> 11.0.0
+
+If you have somethng else you might need to override the `HSA_OVERRIDE_GFX_VERSION` at Docker launch. Suppose the version you want is `9.0.0`, then you should configure it from command line as:
+
+```bash
+$ docker run -e HSA_OVERRIDE_GFX_VERSION=9.0.0 \
+    ...
+```
+
+When using docker compose:
+
+```yaml
+services:
+  frigate:
+...
+    environment:
+      HSA_OVERRIDE_GFX_VERSION: "9.0.0"
+```
+
+Figuring out what version you need
+  - check docker logs to see what gfx version you have or what the error is
+  - google for what might work for that gfx version
+  - override the `HSA_OVERRIDE_GFX_VERSION` with relevant value
+
+#### Figuring out if AMD/ROCm is working and found your GPU
+
+```bash
+$ docker exec -it frigate /opt/rocm.bin/rocminfo
+```
+
+#### Figuring out the AMD GPU chipset version:
+
+We unset the `HSA_OVERRIDE_GFX_VERSION` to prevent the override from messing up the result:
+
+```bash
+$ docker exec -it frigate /bin/bash -c '(unset HSA_OVERRIDE_GFX_VERSION && /opt/rocm/bin/rocminfo |grep gfx)'
+```
+
+### Frigate configuration
+
+You also need to modify the frigate configuration to specify the detector, labels and model file. Here is an example configuration running `yolov8s`:
+
+```yaml
+model:
+  labelmap_path: /config/model_cache/yolov8/labels.txt
+  model_type: yolov8
+detectors:
+  rocm:
+    type: rocm
+    model:
+      path: /config/model_cache/yolov8/yolov8s_320x320.onnx
+```
+
+Other settings available for the rocm detector
+
+- `conserve_cpu: True` -- run ROCm/HIP synchronization in blocking mode saving CPU (at small loss of latency and maximum throughput)
+- `auto_override_gfx: True` -- enable or disable automatic gfx driver detection
+
+### Expected performance
+
+On an AMD Ryzen 3 5400U with integrated GPU one can expect getting about 120fps detections with yolov8n and 60fps with yolov8s (320x320).
+
