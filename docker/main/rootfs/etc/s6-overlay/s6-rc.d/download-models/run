@@ -4,5 +4,31 @@
 
 set -o errexit -o nounset -o pipefail
 
-python3 /opt/frigate/frigate/util/download_models.py
+MODEL_CACHE_DIR=${MODEL_CACHE_DIR:-"/config/model_cache"}
+YOLOV8_DIR="$MODEL_CACHE_DIR/yolov8"
+YOLOV8_URL=https://github.com/harakas/models/releases/download/yolov8.1-1.0/yolov8.small.models.tar.gz
+YOLOV8_DIGEST=3407d38e44163e84f197827d5fc61b31f0e3dd82de90a15838e7faf9a18f6278
+
+if [ "$DOWNLOAD_YOLOV8" = "1" ]; then
+  echo "download-models: DOWNLOAD_YOLOV8=${DOWNLOAD_YOLOV8}, running download"
+  if ! test -f "${YOLOV8_DIR}/model.fetched"; then
+    mkdir -p $YOLOV8_DIR
+    TMP_FILE="${YOLOV8_DIR}/download.tar.gz"
+    curl --no-progress-meter -L --max-filesize 500M --insecure --output $TMP_FILE "${YOLOV8_URL}"
+    digest=$(sha256sum $TMP_FILE | awk '{print $1}')
+    if [ "$digest" = "$YOLOV8_DIGEST" ]; then
+      echo "download-models: Extracting downloaded file"
+      cd $YOLOV8_DIR
+      tar zxf $TMP_FILE
+      rm $TMP_FILE
+      touch model.fetched
+      echo "download-models: Yolov8 download done, files placed into ${YOLOV8_DIR}"
+    else
+      echo "download-models: Downloaded file digest does not match: got $digest, expected $YOLOV8_DIGEST"
+      rm $TMP_FILE
+    fi
+  else
+    echo "download-models: ${YOLOV8_DIR}/model.fetched already present"
+  fi
+fi
 
