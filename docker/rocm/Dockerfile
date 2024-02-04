@@ -61,24 +61,6 @@ RUN apt-get -y install libnuma1
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
 
-# Could compose them directly from https://github.com/ultralytics/assets/releases/tag/v8.1.0
-# but would need to use a torch image of some sorts
-ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8n_320x320.onnx /
-ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8n_labels.txt /
-ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8n_labels-frigate.txt /
-ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8s_320x320.onnx /
-ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8s_labels.txt /
-ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8s_labels-frigate.txt /
-ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8m_320x320.onnx /
-ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8m_labels.txt /
-ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8m_labels-frigate.txt /
-ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8n-oiv7_320x320.onnx /
-ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8n-oiv7_labels.txt /
-ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8n-oiv7_labels-frigate.txt /
-ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8s-oiv7_320x320.onnx /
-ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8s-oiv7_labels.txt /
-ADD --chmod=0644 https://github.com/harakas/models/raw/main/ultralytics/yolov8.1/yolov8s-oiv7_labels-frigate.txt /
-
 #######################################################################
 FROM deps-prelim AS rocm-prelim-hsa-override0
 
@@ -106,4 +88,7 @@ ARG HSA_OVERRIDE_GFX_VERSION
 ENV HSA_OVERRIDE_GFX_VERSION=$HSA_OVERRIDE_GFX_VERSION
 
 FROM rocm-prelim-hsa-override$HSA_OVERRIDE as rocm-deps
+
+# Request yolov8 download at startup
+ENV DOWNLOAD_YOLOV8=1
 

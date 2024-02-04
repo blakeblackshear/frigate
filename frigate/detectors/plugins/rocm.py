@@ -45,10 +45,10 @@ class ROCmDetector(DetectionApi):
         if detector_config.model.input_pixel_format != 'rgb':
             logger.warn("AMD/ROCm: detector_config.model.input_pixel_format: should be 'rgb' for yolov8, but '{detector_config.model.input_pixel_format}' specified!")
 
-        assert detector_config.model.path is not None, "No model.path configured, please configure model.path and model.labelmap_path; some suggestions: " + ', '.join(glob.glob("/*.onnx")) + " and " + ', '.join(glob.glob("/*_labels.txt"))
+        assert detector_config.model.path is not None, "No model.path configured, please configure model.path and model.labelmap_path; some suggestions: " + ', '.join(glob.glob("/config/model_cache/yolov8/*.onnx")) + " and " + ', '.join(glob.glob("/config/model_cache/yolov8/*_labels.txt"))
 
         path = detector_config.model.path
-        mxr_path = "/config/model_cache/rocm/" + os.path.basename(os.path.splitext(path)[0] + '.mxr')
+        mxr_path = os.path.splitext(path)[0] + '.mxr'
         if path.endswith('.mxr'):
             logger.info(f"AMD/ROCm: loading parsed model from {mxr_path}")
             self.model = migraphx.load(mxr_path)
