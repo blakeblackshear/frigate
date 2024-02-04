@@ -60,6 +60,7 @@ RUN apt-get -y install libnuma1
 
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
+COPY docker/rocm/rootfs/ /
 
 #######################################################################
 FROM deps-prelim AS rocm-prelim-hsa-override0
