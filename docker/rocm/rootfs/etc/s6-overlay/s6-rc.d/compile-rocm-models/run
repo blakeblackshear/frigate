@@ -2,6 +2,13 @@
 # shellcheck shell=bash
 # Compile YoloV8 ONNX files into ROCm MIGraphX files
 
+OVERRIDE=$(cd /opt/frigate && python3 -c 'import frigate.detectors.plugins.rocm as rocm; print(rocm.auto_override_gfx_version())')
+
+if ! test -z "$OVERRIDE"; then
+  echo "Using HSA_OVERRIDE_GFX_VERSION=${OVERRIDE}"
+  export HSA_OVERRIDE_GFX_VERSION=$OVERRIDE
+fi
+
 for onnx in /config/model_cache/yolov8/*.onnx
 do
   mxr="${onnx%.onnx}.mxr"
