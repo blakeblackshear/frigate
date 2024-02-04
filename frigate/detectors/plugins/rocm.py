@@ -102,7 +102,7 @@ class ROCmDetector(DetectionApi):
         model_input_name = self.model.get_parameter_names()[0];
         model_input_shape = tuple(self.model.get_parameter_shapes()[model_input_name].lens());
 
-        tensor_input = yolo_utils.yolov8_preprocess(tensor_input, model_input_shape)
+        tensor_input = yolo_utils.preprocess(tensor_input, model_input_shape, np.float32)
 
         detector_result = self.model.run({model_input_name: tensor_input})[0]
 

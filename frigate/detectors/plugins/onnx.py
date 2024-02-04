@@ -51,7 +51,7 @@ class ONNXDetector(DetectionApi):
         model_input_name = self.model.get_inputs()[0].name
         model_input_shape = self.model.get_inputs()[0].shape
 
-        tensor_input = yolo_utils.yolov8_preprocess(tensor_input, model_input_shape)
+        tensor_input = yolo_utils.preprocess(tensor_input, model_input_shape, np.float32)
 
         tensor_output = self.model.run(None, {model_input_name: tensor_input})[0]
 

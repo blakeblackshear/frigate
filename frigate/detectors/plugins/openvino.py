@@ -8,6 +8,8 @@ from typing_extensions import Literal
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
 
+import frigate.detectors.yolo_utils as yolo_utils
+
 logger = logging.getLogger(__name__)
 
 DETECTOR_KEY = "openvino"
@@ -33,7 +35,7 @@ class OvDetector(DetectionApi):
             model=self.ov_model, device_name=detector_config.device
         )
 
-        logger.info(f"Model Input Shape: {self.interpreter.input(0).shape}")
+        logger.info(f"Model Input Shape: {self.interpreter.input(0).shape} {self.interpreter.input(0).element_type.to_dtype()}")
         self.output_indexes = 0
 
         while True:
@@ -80,6 +82,7 @@ class OvDetector(DetectionApi):
         ]
 
     def detect_raw(self, tensor_input):
+        tensor_input = yolo_utils.preprocess(tensor_input, self.interpreter.inputs[0].shape, self.interpreter.inputs[0].element_type.to_dtype())
         infer_request = self.interpreter.create_infer_request()
         infer_request.infer([tensor_input])
 
