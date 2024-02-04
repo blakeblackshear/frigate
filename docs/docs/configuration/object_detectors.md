@@ -441,7 +441,7 @@ For reference on running ROCm in docker containers and recommended settings see 
 
 Your GPU or iGPU might work just fine without any special configuration but in many cases they need manual settings. AMD/ROCm software stack comes with a limited set of GPU drivers and for newer models you might have to override the chipset version to an older/generic version to get things working.
 
-Also AMD/ROCm does not "officially" support integrated GPU-s. It still does work with most of them just fine but requires special settings. One has to configure the `HSA_OVERRIDE_GFX_VERSION` configuration variable. See the [ROCm bug report](https://github.com/ROCm/ROCm/issues/1743) for context and examples.
+Also AMD/ROCm does not "officially" support integrated GPU-s. It still does work with most of them just fine but requires special settings. One has to configure the `HSA_OVERRIDE_GFX_VERSION` environment variable. See the [ROCm bug report](https://github.com/ROCm/ROCm/issues/1743) for context and examples.
 
 For chipset specific frigate rocm builds this variable is already set automatically.
 
@@ -451,7 +451,7 @@ For the general rocm frigate build there is some automatic detection:
   - gfx1031 -> 10.3.0
   - gfx1103 -> 11.0.0
 
-If you have somethng else you might need to override the `HSA_OVERRIDE_GFX_VERSION` at Docker launch. Suppose the version you want is `9.0.0`, then you should configure it from command line as:
+If you have something else you might need to override the `HSA_OVERRIDE_GFX_VERSION` at Docker launch. Suppose the version you want is `9.0.0`, then you should configure it from command line as:
 
 ```bash
 $ docker run -e HSA_OVERRIDE_GFX_VERSION=9.0.0 \
@@ -476,10 +476,10 @@ Figuring out what version you need
 #### Figuring out if AMD/ROCm is working and found your GPU
 
 ```bash
-$ docker exec -it frigate /opt/rocm.bin/rocminfo
+$ docker exec -it frigate /opt/rocm/bin/rocminfo
 ```
 
-#### Figuring out the AMD GPU chipset version:
+#### Figuring out your AMD GPU chipset version:
 
 We unset the `HSA_OVERRIDE_GFX_VERSION` to prevent the override from messing up the result:
 
