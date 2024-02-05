@@ -1,7 +1,6 @@
 """Handle outputting birdseye frames via jsmpeg and go2rtc."""
 
 import datetime
-import glob
 import logging
 import math
 import multiprocessing as mp
@@ -15,7 +14,7 @@ import cv2
 import numpy as np
 
 from frigate.config import BirdseyeModeEnum, FrigateConfig
-from frigate.const import BASE_DIR, BIRDSEYE_PIPE
+from frigate.const import BIRDSEYE_PIPE, INSTALL_DIR, MEDIA_DIR
 from frigate.types import CameraMetricsTypes
 from frigate.util.image import (
     SharedMemoryFrameManager,
@@ -280,16 +279,16 @@ class BirdsEyeFrameManager:
         # find and copy the logo on the blank frame
         birdseye_logo = None
 
-        custom_logo_files = glob.glob(f"{BASE_DIR}/custom.png")
+        custom_logo_file = MEDIA_DIR / "custom.png"
 
-        if len(custom_logo_files) > 0:
-            birdseye_logo = cv2.imread(custom_logo_files[0], cv2.IMREAD_UNCHANGED)
+        if custom_logo_file.is_file():
+            birdseye_logo = cv2.imread(str(custom_logo_file), cv2.IMREAD_UNCHANGED)
 
         if birdseye_logo is None:
-            logo_files = glob.glob("/opt/frigate/frigate/images/birdseye.png")
+            logo_file = INSTALL_DIR / "frigate/images/birdseye.png"
 
-            if len(logo_files) > 0:
-                birdseye_logo = cv2.imread(logo_files[0], cv2.IMREAD_UNCHANGED)
+            if logo_file.is_file():
+                birdseye_logo = cv2.imread(str(logo_file), cv2.IMREAD_UNCHANGED)
 
         if birdseye_logo is not None:
             transparent_layer = birdseye_logo[:, :, 3]

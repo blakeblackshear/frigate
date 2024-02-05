@@ -11,6 +11,7 @@ from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.config import FrigateConfig
+from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
 from frigate.http import create_app
 from frigate.models import Event, Recordings
 from frigate.plus import PlusApi
@@ -76,19 +77,19 @@ class TestHttp(unittest.TestCase):
                         "total": 67.1,
                         "used": 16.6,
                     },
-                    "/media/frigate/clips": {
+                    str(CLIPS_DIR): {
                         "free": 42429.9,
                         "mount_type": "ext4",
                         "total": 244529.7,
                         "used": 189607.0,
                     },
-                    "/media/frigate/recordings": {
+                    str(RECORD_DIR): {
                         "free": 0.2,
                         "mount_type": "ext4",
                         "total": 8.0,
                         "used": 7.8,
                     },
-                    "/tmp/cache": {
+                    str(CACHE_DIR): {
                         "free": 976.8,
                         "mount_type": "tmpfs",
                         "total": 1000.0,

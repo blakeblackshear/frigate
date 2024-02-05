@@ -10,6 +10,7 @@ import requests
 from pydantic import BaseModel, Extra, Field
 from pydantic.fields import PrivateAttr
 
+from frigate.const import MODEL_CACHE_DIR
 from frigate.plus import PlusApi
 from frigate.util.builtin import load_labels
 
@@ -83,7 +84,7 @@ class ModelConfig(BaseModel):
             return
 
         model_id = self.path[7:]
-        self.path = f"/config/model_cache/{model_id}"
+        self.path = str(MODEL_CACHE_DIR / model_id)
         model_info_path = f"{self.path}.json"
 
         # download the model if it doesn't exist

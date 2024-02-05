@@ -109,7 +109,7 @@ class FrigateApp:
         root_configurer(self.log_queue)
 
     def init_config(self) -> None:
-        config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
+        config_file = os.environ.get("CONFIG_FILE", str(CONFIG_DIR / "config.yml"))
 
         # Check if we can use .yaml instead of .yml
         config_file_yaml = config_file.replace(".yml", ".yaml")

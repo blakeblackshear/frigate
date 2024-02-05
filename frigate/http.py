@@ -1,6 +1,5 @@
 import base64
 import copy
-import glob
 import json
 import logging
 import os
@@ -41,7 +40,9 @@ from frigate.const import (
     CLIPS_DIR,
     CONFIG_DIR,
     EXPORT_DIR,
+    INSTALL_DIR,
     MAX_SEGMENT_DURATION,
+    MEDIA_DIR,
     RECORD_DIR,
 )
 from frigate.events.external import ExternalEventProcessor
@@ -1384,7 +1385,7 @@ def config():
 
 @bp.route("/config/raw")
 def config_raw():
-    config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
+    config_file = os.environ.get("CONFIG_FILE", CONFIG_DIR / "config.yml")
 
     # Check if we can use .yaml instead of .yml
     config_file_yaml = config_file.replace(".yml", ".yaml")
@@ -1434,7 +1435,7 @@ def config_save():
 
     # Save the config to file
     try:
-        config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
+        config_file = os.environ.get("CONFIG_FILE", CONFIG_DIR / "config.yml")
 
         # Check if we can use .yaml instead of .yml
         config_file_yaml = config_file.replace(".yml", ".yaml")
@@ -1647,11 +1648,11 @@ def latest_frame(camera_name):
             + retry_interval
         ):
             if current_app.camera_error_image is None:
-                error_image = glob.glob("/opt/frigate/frigate/images/camera-error.jpg")
+                error_image = INSTALL_DIR / "frigate/images/camera-error.jpg"
 
-                if len(error_image) > 0:
+                if error_image.is_file():
                     current_app.camera_error_image = cv2.imread(
-                        error_image[0], cv2.IMREAD_UNCHANGED
+                        str(error_image), cv2.IMREAD_UNCHANGED
                     )
 
             frame = current_app.camera_error_image
@@ -2097,7 +2098,7 @@ def preview_ts(camera_name, start_ts, end_ts):
         clips.append(
             {
                 "camera": preview["camera"],
-                "src": preview["path"].replace("/media/frigate", ""),
+                "src": preview["path"].replace(MEDIA_DIR, ""),
                 "type": "video/mp4",
                 "start": preview["start_time"],
                 "end": preview["end_time"],

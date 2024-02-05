@@ -15,6 +15,7 @@ except:  # noqa: E722
 
 from pydantic import Field
 
+from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
 
@@ -86,12 +87,10 @@ class Rknn(DetectionApi):
             else:
                 model_suffix = yolov8_suffix[self.model_path]
                 self.model_path = (
-                    "/config/model_cache/rknn/yolov8{suffix}-320x320-{soc}.rknn".format(
-                        suffix=model_suffix, soc=soc
-                    )
+                    MODEL_CACHE_DIR / f"rknn/yolov8{model_suffix}-320x320-{soc}.rknn"
                 )
 
-                os.makedirs("/config/model_cache/rknn", exist_ok=True)
+                os.makedirs(MODEL_CACHE_DIR / "rknn", exist_ok=True)
                 if not os.path.isfile(self.model_path):
                     logger.info(
                         "Downloading yolov8{suffix} model.".format(suffix=model_suffix)
