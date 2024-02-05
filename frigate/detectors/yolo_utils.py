@@ -3,7 +3,33 @@ import logging
 import numpy as np
 import cv2
 
+from frigate.util.builtin import load_labels
+
 logger = logging.getLogger(__name__)
+
+def generate_class_aggregation(labels):
+    if isinstance(labels, dict):
+        labels = [labels.get(i, 'unknown') for i in range(0, max(labels.keys()) + 1)]
+    while len(labels) > 0 and labels[-1] in ('unknown', 'other'):
+        labels = labels[:-1]
+    labels = np.array(labels)
+    unique_labels = np.unique(labels)
+    if len(unique_labels) == len(labels):
+        # nothing to aggregate, so there is no mapping
+        return None
+    ret = []
+    for label in unique_labels:
+        if label == 'other' or label == 'unknown':
+            continue
+        index = np.where(labels == label)[0]
+        ret.append(((label, index[0]), index))
+    return ret
+
+def generate_class_aggregation_from_config(config):
+    labelmap_path = config.model.labelmap_path
+    if labelmap_path is None:
+        return None
+    return generate_class_aggregation(load_labels(labelmap_path))
 
 def preprocess(tensor_input, model_input_shape, model_input_element_type):
     model_input_shape = tuple(model_input_shape)
@@ -22,14 +48,21 @@ def preprocess(tensor_input, model_input_shape, model_input_element_type):
     # cv2.dnn.blobFromImage is faster than numpying it
     return cv2.dnn.blobFromImage(tensor_input[0], 1.0 / 255, (model_input_shape[3], model_input_shape[2]), None, swapRB=False)
 
-def yolov8_postprocess(model_input_shape, tensor_output, box_count = 20, score_threshold = 0.3, nms_threshold = 0.5):
+def yolov8_postprocess(model_input_shape, tensor_output, box_count = 20, score_threshold = 0.5, nms_threshold = 0.5, class_aggregation = None):
     model_box_count = tensor_output.shape[2]
-    probs = tensor_output[0, 4:, :]
-    all_ids = np.argmax(probs, axis=0)
-    all_confidences = probs.T[np.arange(model_box_count), all_ids]
+    probs = tensor_output[0, 4:, :].T
+    if class_aggregation is not None:
+        new_probs = np.zeros((probs.shape[0], len(class_aggregation)), dtype=probs.dtype)
+        for index, ((label, class_id), selector) in enumerate(class_aggregation):
+            new_probs[:, index] = np.sum(probs[:, selector], axis=1)
+        probs = new_probs
+    all_ids = np.argmax(probs, axis=1)
+    all_confidences = probs[np.arange(model_box_count), all_ids]
     all_boxes = tensor_output[0, 0:4, :].T
     mask = (all_confidences > score_threshold)
     class_ids = all_ids[mask]
+    if class_aggregation is not None:
+        class_ids = np.array([class_aggregation[index][0][1] for index in class_ids])
     confidences = all_confidences[mask]
     cx, cy, w, h = all_boxes[mask].T
 
