@@ -228,6 +228,7 @@ export default function DynamicVideoPlayer({
             player.on("timeupdate", () => {
               controller.updateProgress(player.currentTime() || 0);
             });
+            player.on("ended", () => controller.fireClipEndEvent());
 
             if (onControllerReady) {
               onControllerReady(controller);
@@ -284,6 +285,7 @@ export class DynamicVideoController {
   // playback
   private recordings: Recording[] = [];
   private onPlaybackTimestamp: ((time: number) => void) | undefined = undefined;
+  private onClipEnded: (() => void) | undefined = undefined;
   private annotationOffset: number;
   private timeToStart: number | undefined = undefined;
 
@@ -391,6 +393,16 @@ export class DynamicVideoController {
 
   onPlayerTimeUpdate(listener: (timestamp: number) => void) {
     this.onPlaybackTimestamp = listener;
+  }
+
+  onClipEndedEvent(listener: () => void) {
+    this.onClipEnded = listener;
+  }
+
+  fireClipEndEvent() {
+    if (this.onClipEnded) {
+      this.onClipEnded();
+    }
   }
 
   scrubToTimestamp(time: number) {

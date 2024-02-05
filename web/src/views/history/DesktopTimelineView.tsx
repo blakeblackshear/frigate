@@ -34,9 +34,6 @@ export default function DesktopTimelineView({
   const controllerRef = useRef<DynamicVideoController | undefined>(undefined);
   const initialScrollRef = useRef<HTMLDivElement | null>(null);
 
-  const [selectedPlayback, setSelectedPlayback] = useState(initialPlayback);
-  const [timelineTime, setTimelineTime] = useState(0);
-
   // handle scrolling to initial timeline item
   useEffect(() => {
     if (initialScrollRef.current != null) {
@@ -50,16 +47,44 @@ export default function DesktopTimelineView({
     });
   }, []);
 
+  const [timelineTime, setTimelineTime] = useState(0);
   const timelineStack = useMemo(
     () =>
       getTimelineHoursForDay(
-        selectedPlayback.camera,
+        initialPlayback.camera,
         timelineData,
         cameraPreviews,
-        selectedPlayback.range.start + 60
+        initialPlayback.range.start + 60
       ),
     []
   );
+
+  const [selectedPlaybackIdx, setSelectedPlaybackIdx] = useState(
+    timelineStack.playbackItems.findIndex((playback) => {
+      return (
+        playback.range.start == initialPlayback.range.start &&
+        playback.range.end == initialPlayback.range.end
+      );
+    })
+  );
+  const selectedPlayback = useMemo(
+    () => timelineStack.playbackItems[selectedPlaybackIdx],
+    [selectedPlaybackIdx]
+  );
+
+  // handle moving to next clip
+  useEffect(() => {
+    if (!controllerRef.current) {
+      return;
+    }
+
+    if (selectedPlaybackIdx > 0) {
+      controllerRef.current.onClipEndedEvent(() => {
+        console.log("setting to " + (selectedPlaybackIdx - 1));
+        setSelectedPlaybackIdx(selectedPlaybackIdx - 1);
+      });
+    }
+  }, [controllerRef, selectedPlaybackIdx]);
 
   const { data: activity } = useSWR<RecordingActivity>(
     [
@@ -148,12 +173,14 @@ export default function DesktopTimelineView({
       </div>
       <div className="relative mt-4 w-full h-full">
         <div className="absolute left-0 top-0 right-0 bottom-0 overflow-auto">
-          {timelineStack.playbackItems.map((timeline) => {
+          {timelineStack.playbackItems.map((timeline, tIdx) => {
             const isInitiallySelected =
               initialPlayback.range.start == timeline.range.start;
             const isSelected =
               timeline.range.start == selectedPlayback.range.start;
             const graphData = timelineGraphData[timeline.range.start];
+            const start = new Date(timeline.range.start * 1000);
+            const end = new Date(timeline.range.end * 1000);
 
             return (
               <div
@@ -178,10 +205,10 @@ export default function DesktopTimelineView({
                       }
                       options={{
                         snap: null,
-                        min: new Date(timeline.range.start * 1000),
-                        max: new Date(timeline.range.end * 1000),
-                        start: new Date(timeline.range.start * 1000),
-                        end: new Date(timeline.range.end * 1000),
+                        min: start,
+                        max: end,
+                        start: start,
+                        end: end,
                         zoomable: false,
                         height: "120px",
                       }}
@@ -220,7 +247,7 @@ export default function DesktopTimelineView({
                     startTime={timeline.range.start}
                     graphData={graphData}
                     onClick={() => {
-                      setSelectedPlayback(timeline);
+                      setSelectedPlaybackIdx(tIdx);
 
                       let startTs;
                       if (timeline.timelineItems.length > 0) {

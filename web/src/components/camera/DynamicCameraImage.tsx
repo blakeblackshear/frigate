@@ -24,6 +24,9 @@ export default function DynamicCameraImage({
   aspect,
 }: DynamicCameraImageProps) {
   const [key, setKey] = useState(Date.now());
+  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | undefined>(
+    undefined
+  );
   const [activeObjects, setActiveObjects] = useState<string[]>([]);
   const hasActiveObjects = useMemo(
     () => activeObjects.length > 0,
@@ -58,6 +61,8 @@ export default function DynamicCameraImage({
         if (eventIndex == -1) {
           const newActiveObjects = [...activeObjects, event.after.id];
           setActiveObjects(newActiveObjects);
+          clearTimeout(timeoutId);
+          setKey(Date.now());
         }
       }
     }
@@ -69,12 +74,13 @@ export default function DynamicCameraImage({
       ? INTERVAL_ACTIVE_MS
       : INTERVAL_INACTIVE_MS;
 
-    setTimeout(
+    const tId = setTimeout(
       () => {
         setKey(Date.now());
       },
       loadTime > loadInterval ? 1 : loadInterval
     );
+    setTimeoutId(tId);
   }, [key]);
 
   return (

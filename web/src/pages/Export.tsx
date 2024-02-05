@@ -34,11 +34,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Toaster } from "@/components/ui/sonner";
 import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
 import { format } from "date-fns";
 import { useCallback, useState } from "react";
 import { DateRange } from "react-day-picker";
+import { toast } from "sonner";
 import useSWR from "swr";
 
 type ExportItem = {
@@ -55,7 +57,6 @@ function Export() {
   // Export States
   const [camera, setCamera] = useState<string | undefined>();
   const [playback, setPlayback] = useState<string | undefined>();
-  const [message, setMessage] = useState({ text: "", error: false });
 
   const currentDate = new Date();
   currentDate.setHours(0, 0, 0, 0);
@@ -70,23 +71,21 @@ function Export() {
   const [deleteClip, setDeleteClip] = useState<string | undefined>();
 
   const onHandleExport = () => {
-    if (camera == "select") {
-      setMessage({ text: "A camera needs to be selected.", error: true });
+    if (!camera) {
+      toast.error("A camera needs to be selected.", { position: "top-center" });
       return;
     }
 
-    if (playback == "select") {
-      setMessage({
-        text: "A playback factor needs to be selected.",
-        error: true,
+    if (!playback) {
+      toast.error("A playback factor needs to be selected.", {
+        position: "top-center",
       });
       return;
     }
 
     if (!date?.from || !startTime || !endTime) {
-      setMessage({
-        text: "A start and end time needs to be selected",
-        error: true,
+      toast.error("A start and end time needs to be selected", {
+        position: "top-center",
       });
       return;
     }
@@ -106,9 +105,8 @@ function Export() {
     const end = endDate.getTime() / 1000;
 
     if (end <= start) {
-      setMessage({
-        text: "The end time must be after the start time.",
-        error: true,
+      toast.error("The end time must be after the start time.", {
+        position: "top-center",
       });
       return;
     }
@@ -117,24 +115,23 @@ function Export() {
       .post(`export/${camera}/start/${start}/end/${end}`, { playback })
       .then((response) => {
         if (response.status == 200) {
-          setMessage({
-            text: "Successfully started export. View the file in the /exports folder.",
-            error: false,
-          });
+          toast.success(
+            "Successfully started export. View the file in the /exports folder.",
+            { position: "top-center" }
+          );
         }
 
         mutate();
       })
       .catch((error) => {
         if (error.response?.data?.message) {
-          setMessage({
-            text: `Failed to start export: ${error.response.data.message}`,
-            error: true,
-          });
+          toast.error(
+            `Failed to start export: ${error.response.data.message}`,
+            { position: "top-center" }
+          );
         } else {
-          setMessage({
-            text: `Failed to start export: ${error.message}`,
-            error: true,
+          toast.error(`Failed to start export: ${error.message}`, {
+            position: "top-center",
           });
         }
       });
@@ -156,16 +153,7 @@ function Export() {
   return (
     <>
       <Heading as="h2">Export</Heading>
-
-      {message.text && (
-        <div
-          className={`max-h-20 ${
-            message.error ? "text-danger" : "text-success"
-          }`}
-        >
-          {message.text}
-        </div>
-      )}
+      <Toaster />
 
       <AlertDialog
         open={deleteClip != undefined}
