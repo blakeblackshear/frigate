@@ -10,7 +10,12 @@ import numpy as np
 from peewee import DoesNotExist
 
 from frigate.config import DetectConfig, ModelConfig
-from frigate.const import LABEL_CONSOLIDATION_DEFAULT, LABEL_CONSOLIDATION_MAP
+from frigate.const import (
+    LABEL_CONSOLIDATION_DEFAULT,
+    LABEL_CONSOLIDATION_MAP,
+    LABEL_NMS_DEFAULT,
+    LABEL_NMS_MAP,
+)
 from frigate.detectors.detector_config import PixelFormatEnum
 from frigate.models import Event, Regions, Timeline
 from frigate.util.image import (
@@ -466,6 +471,7 @@ def reduce_detections(
 
         selected_objects = []
         for group in detected_object_groups.values():
+            label = group[0][0]
             # o[2] is the box of the object: xmin, ymin, xmax, ymax
             # apply max/min to ensure values do not exceed the known frame size
             boxes = [
@@ -483,7 +489,9 @@ def reduce_detections(
             # due to min score requirement of NMSBoxes
             confidences = [0.6 if clipped(o, frame_shape) else o[1] for o in group]
 
-            idxs = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
+            idxs = cv2.dnn.NMSBoxes(
+                boxes, confidences, 0.5, LABEL_NMS_MAP.get(label, LABEL_NMS_DEFAULT)
+            )
 
             # add objects
             for index in idxs:
