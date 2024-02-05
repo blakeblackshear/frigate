@@ -287,6 +287,15 @@ class TestObjectBoundingBoxes(unittest.TestCase):
         consolidated_detections = reduce_detections(frame_shape, detections)
         assert len(consolidated_detections) == len(detections)
 
+    def test_vert_stacked_cars_not_reduced(self):
+        detections = [
+            ("car", 0.8, (954, 312, 1247, 475), 498512, 1.48, (800, 200, 1400, 600)),
+            ("car", 0.85, (970, 380, 1273, 610), 698752, 1.56, (800, 200, 1400, 700)),
+        ]
+        frame_shape = (720, 1280)
+        consolidated_detections = reduce_detections(frame_shape, detections)
+        assert len(consolidated_detections) == len(detections)
+
 
 class TestRegionGrid(unittest.TestCase):
     def setUp(self) -> None:
