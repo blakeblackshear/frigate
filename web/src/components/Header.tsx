@@ -56,6 +56,7 @@ import {
 } from "./ui/sheet";
 import ActivityIndicator from "./ui/activity-indicator";
 import { useRestart } from "@/api/ws";
+import { ENV } from "@/env";
 
 type HeaderProps = {
   onToggleNavbar: () => void;
@@ -111,6 +112,11 @@ function Header({ onToggleNavbar }: HeaderProps) {
             </div>
             <Heading as="h1">Frigate</Heading>
           </div>
+          {ENV == "production" && (
+            <div className="text-red-500 text-sm items-center text-right">
+              0.14 unstable
+            </div>
+          )}
         </Link>
       </div>
       <div className="flex flex-shrink-0 md:gap-2">
