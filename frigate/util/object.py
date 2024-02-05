@@ -414,7 +414,7 @@ def get_cluster_region(frame_shape, min_region, cluster, boxes):
         max_x = max(boxes[b][2], max_x)
         max_y = max(boxes[b][3], max_y)
     return calculate_region(
-        frame_shape, min_x, min_y, max_x, max_y, min_region, multiplier=1.2
+        frame_shape, min_x, min_y, max_x, max_y, min_region, multiplier=1.35
     )
 
 
