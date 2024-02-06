@@ -67,21 +67,51 @@ class OnvifController:
 
         # create init services
         media = onvif.create_media_service()
+        logger.debug(f"Onvif media xaddr for {camera_name}: {media.xaddr}")
 
         try:
             # this will fire an exception if camera is not a ptz
             capabilities = onvif.get_definition("ptz")
             logger.debug(f"Onvif capabilities for {camera_name}: {capabilities}")
-            profile = media.GetProfiles()[0]
         except (ONVIFError, Fault, TransportError) as e:
-            logger.error(f"Unable to connect to camera: {camera_name}: {e}")
+            logger.error(
+                f"Unable to get Onvif capabilities for camera: {camera_name}: {e}"
+            )
             return False
+
+        try:
+            profiles = media.GetProfiles()
+        except (ONVIFError, Fault, TransportError) as e:
+            logger.error(
+                f"Unable to get Onvif media profiles for camera: {camera_name}: {e}"
+            )
+            return False
+
+        for key, onvif_profile in enumerate(profiles):
+            # skip non-H264 profiles
+            if (
+                not onvif_profile.VideoEncoderConfiguration
+                or onvif_profile.VideoEncoderConfiguration.Encoding != "H264"
+            ):
+                continue
+            else:
+                # use the first H264 profile
+                profile = onvif_profile
+                break
 
         ptz = onvif.create_ptz_service()
 
         # get the PTZ config for the first onvif profile
-        configs = profile.PTZConfiguration
-        logger.debug(f"Onvif ptz config for media profile in {camera_name}: {configs}")
+        try:
+            configs = profile.PTZConfiguration
+            logger.debug(
+                f"Onvif ptz config for media profile in {camera_name}: {configs}"
+            )
+        except Exception as e:
+            logger.error(
+                f"Invalid Onvif PTZ configuration for camera: {camera_name}: {e}"
+            )
+            return False
 
         request = ptz.create_type("GetConfigurationOptions")
         request.ConfigurationToken = profile.PTZConfiguration.token
