@@ -70,7 +70,7 @@ export default function LivePlayer({
   if (liveMode == "webrtc") {
     player = (
       <WebRtcPlayer
-        className="rounded-2xl"
+        className="rounded-2xl w-full"
         camera={cameraConfig.live.stream_name}
       />
     );
@@ -78,7 +78,7 @@ export default function LivePlayer({
     if ("MediaSource" in window || "ManagedMediaSource" in window) {
       player = (
         <MSEPlayer
-          className="rounded-2xl"
+          className="rounded-2xl w-full"
           camera={cameraConfig.live.stream_name}
         />
       );

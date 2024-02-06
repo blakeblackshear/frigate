@@ -248,11 +248,9 @@ function MSEPlayer({ camera, className }: MSEPlayerProps) {
     <video
       ref={videoRef}
       className={className}
-      controls
       playsInline
       preload="auto"
       muted
-      style={{ display: "block", width: "100%", height: "100%" }}
     />
   );
 }
