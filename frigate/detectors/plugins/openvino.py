@@ -51,6 +51,8 @@ class OvDetector(DetectionApi):
             logger.info(f"YOLOX model has {self.num_classes} classes")
             self.set_strides_grids()
 
+        self.class_aggregation = yolo_utils.generate_class_aggregation_from_config(detector_config)
+
     def set_strides_grids(self):
         grids = []
         expanded_strides = []
@@ -135,28 +137,8 @@ class OvDetector(DetectionApi):
                 )
             return detections
         elif self.ov_model_type == ModelTypeEnum.yolov8:
-            out_tensor = infer_request.get_output_tensor()
-            results = out_tensor.data[0]
-            output_data = np.transpose(results)
-            scores = np.max(output_data[:, 4:], axis=1)
-            if len(scores) == 0:
-                return np.zeros((20, 6), np.float32)
-            scores = np.expand_dims(scores, axis=1)
-            # add scores to the last column
-            dets = np.concatenate((output_data, scores), axis=1)
-            # filter out lines with scores below threshold
-            dets = dets[dets[:, -1] > 0.5, :]
-            # limit to top 20 scores, descending order
-            ordered = dets[dets[:, -1].argsort()[::-1]][:20]
-            detections = np.zeros((20, 6), np.float32)
-
-            for i, object_detected in enumerate(ordered):
-                detections[i] = self.process_yolo(
-                    np.argmax(object_detected[4:-1]),
-                    object_detected[-1],
-                    object_detected[:4],
-                )
-            return detections
+            out_tensor = infer_request.get_output_tensor().data
+            return yolo_utils.yolov8_postprocess(self.interpreter.inputs[0].shape, out_tensor, class_aggregation = self.class_aggregation)
         elif self.ov_model_type == ModelTypeEnum.yolov5:
             out_tensor = infer_request.get_output_tensor()
             output_data = out_tensor.data[0]
