@@ -94,6 +94,7 @@ class OnvifController:
                 and onvif_profile.VideoEncoderConfiguration.Encoding == "H264"
             ):
                 profile = onvif_profile
+                logger.debug(f"Selected Onvif profile for {camera_name}: {profile}")
                 break
 
         if profile is None:
