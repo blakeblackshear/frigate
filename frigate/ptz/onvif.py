@@ -87,8 +87,6 @@ class OnvifController:
             )
             return False
 
-        ptz = onvif.create_ptz_service()
-
         profile = None
         for key, onvif_profile in enumerate(profiles):
             if (
@@ -115,6 +113,8 @@ class OnvifController:
                 f"Invalid Onvif PTZ configuration for camera: {camera_name}: {e}"
             )
             return False
+
+        ptz = onvif.create_ptz_service()
 
         request = ptz.create_type("GetConfigurationOptions")
         request.ConfigurationToken = profile.PTZConfiguration.token
