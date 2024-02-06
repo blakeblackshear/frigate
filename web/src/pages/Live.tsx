@@ -1,161 +1,80 @@
-import BirdseyeLivePlayer from "@/components/player/BirdseyeLivePlayer";
+import { baseUrl } from "@/api/baseUrl";
 import LivePlayer from "@/components/player/LivePlayer";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import Heading from "@/components/ui/heading";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { usePersistence } from "@/hooks/use-persistence";
-import { FrigateConfig } from "@/types/frigateConfig";
+import { Event as FrigateEvent } from "@/types/event";
+import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import { useMemo, useState } from "react";
+import { LuStar } from "react-icons/lu";
 import { useParams } from "react-router-dom";
 import useSWR from "swr";
 
 function Live() {
   const { data: config } = useSWR<FrigateConfig>("config");
-  const { camera: openedCamera } = useParams();
 
-  const [camera, setCamera] = useState<string>(
-    openedCamera ?? (config?.birdseye.enabled ? "birdseye" : "Select A Camera")
-  );
-  const cameraConfig = useMemo(() => {
-    return camera == "birdseye" ? undefined : config?.cameras[camera];
-  }, [camera, config]);
-  const sortedCameras = useMemo(() => {
+  // recent events
+
+  const now = new Date();
+  now.setHours(now.getHours() - 4, 0, 0, 0);
+  const recentTimestamp = now.getTime() / 1000;
+  const { data: events, mutate: updateEvents } = useSWR<FrigateEvent[]>([
+    "events",
+    { limit: 10, after: recentTimestamp },
+  ]);
+
+  // camera live views
+
+  const enabledCameras = useMemo<CameraConfig[]>(() => {
     if (!config) {
       return [];
     }
 
-    return Object.values(config.cameras).sort(
-      (aConf, bConf) => aConf.ui.order - bConf.ui.order
-    );
+    return Object.values(config.cameras);
   }, [config]);
-  const restreamEnabled = useMemo(() => {
-    if (!config) {
-      return false;
-    }
-
-    if (camera == "birdseye") {
-      return config.birdseye.restream;
-    }
-
-    return (
-      cameraConfig &&
-      Object.keys(config.go2rtc.streams || {}).includes(
-        cameraConfig.live.stream_name
-      )
-    );
-  }, [config, cameraConfig]);
-  const defaultLiveMode = useMemo(() => {
-    if (cameraConfig) {
-      if (restreamEnabled) {
-        return cameraConfig.ui.live_mode || config?.ui.live_mode;
-      }
-
-      return "jsmpeg";
-    }
-
-    return undefined;
-  }, [cameraConfig, restreamEnabled]);
-  const [viewSource, setViewSource, sourceIsLoaded] = usePersistence(
-    `${camera}-source`,
-    camera == "birdseye" ? "jsmpeg" : defaultLiveMode
-  );
 
   return (
-    <div className=" w-full">
-      <div className="flex justify-between">
-        <Heading as="h2">Live</Heading>
-        <div className="flex">
-          <div className="mx-1">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button className="capitalize" variant="outline">
-                  {camera?.replaceAll("_", " ") || "Select A Camera"}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuLabel>Select A Camera</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuRadioGroup
-                  value={camera}
-                  onValueChange={setCamera}
+    <>
+      {events && events.length > 0 && (
+        <ScrollArea>
+          <div className="flex">
+            {events.map((event) => {
+              return (
+                <div
+                  className="relative rounded min-w-[125px] h-[125px] bg-contain bg-no-repeat bg-center mr-4"
+                  style={{
+                    backgroundImage: `url(${baseUrl}api/events/${event.id}/thumbnail.jpg)`,
+                  }}
                 >
-                  {config?.birdseye.enabled && (
-                    <DropdownMenuRadioItem value="birdseye">
-                      Birdseye
-                    </DropdownMenuRadioItem>
+                  <LuStar
+                    className="h-6 w-6 text-yellow-300 absolute top-1 right-1 cursor-pointer"
+                    //onClick={(e: Event) => onSave(e)}
+                    fill={event.retain_indefinitely ? "currentColor" : "none"}
+                  />
+                  {event.end_time ? null : (
+                    <div className="bg-slate-300 dark:bg-slate-700 absolute bottom-0 text-center w-full uppercase text-sm rounded-bl">
+                      In progress
+                    </div>
                   )}
-                  {sortedCameras.map((item) => (
-                    <DropdownMenuRadioItem
-                      className="capitalize"
-                      key={item.name}
-                      value={item.name}
-                    >
-                      {item.name.replaceAll("_", " ")}
-                    </DropdownMenuRadioItem>
-                  ))}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </div>
+              );
+            })}
           </div>
-          <div className="mx-1">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button className="capitalize" variant="outline">
-                  {viewSource || defaultLiveMode || "Select A Live Mode"}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuLabel>Select A Live Mode</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuRadioGroup
-                  value={`${viewSource}`}
-                  onValueChange={setViewSource}
-                >
-                  {restreamEnabled && (
-                    <DropdownMenuRadioItem value="webrtc">
-                      Webrtc
-                    </DropdownMenuRadioItem>
-                  )}
-                  {restreamEnabled && (
-                    <DropdownMenuRadioItem value="mse">
-                      MSE
-                    </DropdownMenuRadioItem>
-                  )}
-                  <DropdownMenuRadioItem value="jsmpeg">
-                    Jsmpeg
-                  </DropdownMenuRadioItem>
-                  {camera != "birdseye" && (
-                    <DropdownMenuRadioItem value="debug">
-                      Debug
-                    </DropdownMenuRadioItem>
-                  )}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+      )}
+
+      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4">
+        {enabledCameras.map((camera) => {
+          return (
+            <LivePlayer
+              className=" rounded-2xl overflow-hidden"
+              cameraConfig={camera}
+            />
+          );
+        })}
       </div>
-      {config && camera == "birdseye" && sourceIsLoaded && (
-        <BirdseyeLivePlayer
-          birdseyeConfig={config?.birdseye}
-          liveMode={`${viewSource ?? defaultLiveMode}`}
-        />
-      )}
-      {cameraConfig && sourceIsLoaded && (
-        <LivePlayer
-          liveMode={`${viewSource ?? defaultLiveMode}`}
-          cameraConfig={cameraConfig}
-        />
-      )}
-    </div>
+    </>
   );
 }
 

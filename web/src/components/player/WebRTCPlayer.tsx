@@ -2,12 +2,14 @@ import { baseUrl } from "@/api/baseUrl";
 import { useCallback, useEffect, useRef } from "react";
 
 type WebRtcPlayerProps = {
+  className?: string;
   camera: string;
   width?: number;
   height?: number;
 };
 
 export default function WebRtcPlayer({
+  className,
   camera,
   width,
   height,
@@ -149,6 +151,7 @@ export default function WebRtcPlayer({
     <div>
       <video
         ref={videoRef}
+        className={className}
         autoPlay
         playsInline
         controls

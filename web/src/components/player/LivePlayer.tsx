@@ -1,5 +1,5 @@
 import WebRtcPlayer from "./WebRTCPlayer";
-import { CameraConfig } from "@/types/frigateConfig";
+import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import AutoUpdatingCameraImage from "../camera/AutoUpdatingCameraImage";
 import ActivityIndicator from "../ui/activity-indicator";
 import { Button } from "../ui/button";
@@ -11,25 +11,56 @@ import { Label } from "../ui/label";
 import { usePersistence } from "@/hooks/use-persistence";
 import MSEPlayer from "./MsePlayer";
 import JSMpegPlayer from "./JSMpegPlayer";
+import useSWR from "swr";
 
 const emptyObject = Object.freeze({});
 
 type LivePlayerProps = {
+  className?: string;
   cameraConfig: CameraConfig;
-  liveMode: string;
 };
 
 type Options = { [key: string]: boolean };
 
 export default function LivePlayer({
+  className,
   cameraConfig,
-  liveMode,
 }: LivePlayerProps) {
+  const { data: config } = useSWR<FrigateConfig>("config");
   const [showSettings, setShowSettings] = useState(false);
 
   const [options, setOptions] = usePersistence(
-    `${cameraConfig.name}-feed`,
+    `${cameraConfig?.name}-feed`,
     emptyObject
+  );
+
+  const restreamEnabled = useMemo(() => {
+    if (!config) {
+      return false;
+    }
+
+    return (
+      cameraConfig &&
+      Object.keys(config.go2rtc.streams || {}).includes(
+        cameraConfig.live.stream_name
+      )
+    );
+  }, [config, cameraConfig]);
+
+  const defaultLiveMode = useMemo(() => {
+    if (cameraConfig) {
+      if (restreamEnabled) {
+        return cameraConfig.ui.live_mode || config?.ui.live_mode;
+      }
+
+      return "jsmpeg";
+    }
+
+    return undefined;
+  }, [cameraConfig, restreamEnabled]);
+  const [liveMode, setLiveMode, sourceIsLoaded] = usePersistence(
+    `${cameraConfig.name}-source`,
+    defaultLiveMode
   );
 
   const handleSetOption = useCallback(
@@ -56,10 +87,17 @@ export default function LivePlayer({
     setShowSettings(!showSettings);
   }, [showSettings, setShowSettings]);
 
+  if (!cameraConfig) {
+    return <ActivityIndicator />;
+  }
+
   if (liveMode == "webrtc") {
     return (
       <div className="max-w-5xl">
-        <WebRtcPlayer camera={cameraConfig.live.stream_name} />
+        <WebRtcPlayer
+          className={className}
+          camera={cameraConfig.live.stream_name}
+        />
       </div>
     );
   } else if (liveMode == "mse") {
