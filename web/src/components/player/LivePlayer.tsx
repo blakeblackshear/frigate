@@ -12,12 +12,15 @@ import { usePersistence } from "@/hooks/use-persistence";
 import MSEPlayer from "./MsePlayer";
 import JSMpegPlayer from "./JSMpegPlayer";
 import useSWR from "swr";
+import { MdCircle } from "react-icons/md";
+import Chip from "../Chip";
 
 const emptyObject = Object.freeze({});
 
 type LivePlayerProps = {
   className?: string;
   cameraConfig: CameraConfig;
+  liveMode?: "webrtc" | "mse" | "jsmpeg" | "debug";
 };
 
 type Options = { [key: string]: boolean };
@@ -25,6 +28,7 @@ type Options = { [key: string]: boolean };
 export default function LivePlayer({
   className,
   cameraConfig,
+  liveMode = "mse",
 }: LivePlayerProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
   const [showSettings, setShowSettings] = useState(false);
@@ -32,35 +36,6 @@ export default function LivePlayer({
   const [options, setOptions] = usePersistence(
     `${cameraConfig?.name}-feed`,
     emptyObject
-  );
-
-  const restreamEnabled = useMemo(() => {
-    if (!config) {
-      return false;
-    }
-
-    return (
-      cameraConfig &&
-      Object.keys(config.go2rtc.streams || {}).includes(
-        cameraConfig.live.stream_name
-      )
-    );
-  }, [config, cameraConfig]);
-
-  const defaultLiveMode = useMemo(() => {
-    if (cameraConfig) {
-      if (restreamEnabled) {
-        return cameraConfig.ui.live_mode || config?.ui.live_mode;
-      }
-
-      return "jsmpeg";
-    }
-
-    return undefined;
-  }, [cameraConfig, restreamEnabled]);
-  const [liveMode, setLiveMode, sourceIsLoaded] = usePersistence(
-    `${cameraConfig.name}-source`,
-    defaultLiveMode
   );
 
   const handleSetOption = useCallback(
@@ -91,24 +66,24 @@ export default function LivePlayer({
     return <ActivityIndicator />;
   }
 
+  let player;
   if (liveMode == "webrtc") {
-    return (
-      <div className="max-w-5xl">
-        <WebRtcPlayer
-          className={className}
-          camera={cameraConfig.live.stream_name}
-        />
-      </div>
+    player = (
+      <WebRtcPlayer
+        className="rounded-2xl"
+        camera={cameraConfig.live.stream_name}
+      />
     );
   } else if (liveMode == "mse") {
     if ("MediaSource" in window || "ManagedMediaSource" in window) {
-      return (
-        <div className="max-w-5xl">
-          <MSEPlayer camera={cameraConfig.live.stream_name} />
-        </div>
+      player = (
+        <MSEPlayer
+          className="rounded-2xl"
+          camera={cameraConfig.live.stream_name}
+        />
       );
     } else {
-      return (
+      player = (
         <div className="w-5xl text-center text-sm">
           MSE is only supported on iOS 17.1+. You'll need to update if available
           or use jsmpeg / webRTC streams. See the docs for more info.
@@ -116,17 +91,15 @@ export default function LivePlayer({
       );
     }
   } else if (liveMode == "jsmpeg") {
-    return (
-      <div className={`max-w-[${cameraConfig.detect.width}px]`}>
-        <JSMpegPlayer
-          camera={cameraConfig.name}
-          width={cameraConfig.detect.width}
-          height={cameraConfig.detect.height}
-        />
-      </div>
+    player = (
+      <JSMpegPlayer
+        camera={cameraConfig.name}
+        width={cameraConfig.detect.width}
+        height={cameraConfig.detect.height}
+      />
     );
   } else if (liveMode == "debug") {
-    return (
+    player = (
       <>
         <AutoUpdatingCameraImage
           camera={cameraConfig.name}
@@ -154,8 +127,20 @@ export default function LivePlayer({
       </>
     );
   } else {
-    <ActivityIndicator />;
+    player = <ActivityIndicator />;
   }
+
+  return (
+    <div className={`relative ${className}`}>
+      {player}
+      <Chip className="absolute right-2 top-2 bg-gray-500 bg-gradient-to-br">
+        <MdCircle className="w-2 h-2 text-danger" />
+        <div className="ml-1 capitalize text-white text-xs">
+          {cameraConfig.name.replaceAll("_", " ")}
+        </div>
+      </Chip>
+    </div>
+  );
 }
 
 type DebugSettingsProps = {

@@ -1,13 +1,11 @@
 import { baseUrl } from "@/api/baseUrl";
 import LivePlayer from "@/components/player/LivePlayer";
-import Heading from "@/components/ui/heading";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { usePersistence } from "@/hooks/use-persistence";
 import { Event as FrigateEvent } from "@/types/event";
-import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
-import { useMemo, useState } from "react";
+import { FrigateConfig } from "@/types/frigateConfig";
+import axios from "axios";
+import { useCallback, useMemo } from "react";
 import { LuStar } from "react-icons/lu";
-import { useParams } from "react-router-dom";
 import useSWR from "swr";
 
 function Live() {
@@ -23,14 +21,32 @@ function Live() {
     { limit: 10, after: recentTimestamp },
   ]);
 
+  const onFavorite = useCallback(
+    async (e: Event, event: FrigateEvent) => {
+      e.stopPropagation();
+      let response;
+      if (!event.retain_indefinitely) {
+        response = await axios.post(`events/${event.id}/retain`);
+      } else {
+        response = await axios.delete(`events/${event.id}/retain`);
+      }
+      if (response.status === 200) {
+        updateEvents();
+      }
+    },
+    [event]
+  );
+
   // camera live views
 
-  const enabledCameras = useMemo<CameraConfig[]>(() => {
+  const cameras = useMemo(() => {
     if (!config) {
       return [];
     }
 
-    return Object.values(config.cameras);
+    return Object.values(config.cameras)
+      .filter((conf) => conf.ui.dashboard && conf.enabled)
+      .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
   }, [config]);
 
   return (
@@ -48,7 +64,7 @@ function Live() {
                 >
                   <LuStar
                     className="h-6 w-6 text-yellow-300 absolute top-1 right-1 cursor-pointer"
-                    //onClick={(e: Event) => onSave(e)}
+                    onClick={(e: Event) => onFavorite(e, event)}
                     fill={event.retain_indefinitely ? "currentColor" : "none"}
                   />
                   {event.end_time ? null : (
@@ -65,13 +81,8 @@ function Live() {
       )}
 
       <div className="mt-4 grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4">
-        {enabledCameras.map((camera) => {
-          return (
-            <LivePlayer
-              className=" rounded-2xl overflow-hidden"
-              cameraConfig={camera}
-            />
-          );
+        {cameras.map((camera) => {
+          return <LivePlayer className=" rounded-2xl" cameraConfig={camera} />;
         })}
       </div>
     </>

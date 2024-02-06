@@ -36,7 +36,7 @@ function App() {
             >
               <Routes>
                 <Route path="/" element={<Dashboard />} />
-                <Route path="/live/:camera?" element={<Live />} />
+                <Route path="/live" element={<Live />} />
                 <Route path="/history" element={<History />} />
                 <Route path="/export" element={<Export />} />
                 <Route path="/storage" element={<Storage />} />

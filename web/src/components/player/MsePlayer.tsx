@@ -3,9 +3,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type MSEPlayerProps = {
   camera: string;
+  className?: string;
 };
 
-function MSEPlayer({ camera }: MSEPlayerProps) {
+function MSEPlayer({ camera, className }: MSEPlayerProps) {
   let connectTS: number = 0;
 
   const RECONNECT_TIMEOUT: number = 30000;
@@ -246,6 +247,7 @@ function MSEPlayer({ camera }: MSEPlayerProps) {
   return (
     <video
       ref={videoRef}
+      className={className}
       controls
       playsInline
       preload="auto"
