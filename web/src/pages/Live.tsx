@@ -4,7 +4,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Event as FrigateEvent } from "@/types/event";
 import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { LuStar } from "react-icons/lu";
 import useSWR from "swr";
 
@@ -13,12 +13,18 @@ function Live() {
 
   // recent events
 
-  const now = new Date();
-  now.setHours(now.getHours() - 4, 0, 0, 0);
-  const recentTimestamp = now.getTime() / 1000;
+  const [recentCutoff, setRecentCutoff] = useState<Date>(new Date());
+  useEffect(() => {
+    const intervalId: NodeJS.Timeout = setInterval(() => {
+      const date = new Date();
+      date.setHours(date.getHours() - 4);
+      setRecentCutoff(date);
+    }, 3600000);
+    return () => clearInterval(intervalId);
+  }, [3600000]);
   const { data: events, mutate: updateEvents } = useSWR<FrigateEvent[]>([
     "events",
-    { limit: 10, after: recentTimestamp },
+    { limit: 10, after: recentCutoff },
   ]);
 
   const onFavorite = useCallback(
@@ -67,11 +73,6 @@ function Live() {
                     onClick={(e: Event) => onFavorite(e, event)}
                     fill={event.retain_indefinitely ? "currentColor" : "none"}
                   />
-                  {event.end_time ? null : (
-                    <div className="bg-slate-300 dark:bg-slate-700 absolute bottom-0 text-center w-full uppercase text-sm rounded-bl">
-                      In progress
-                    </div>
-                  )}
                 </div>
               );
             })}
