@@ -834,6 +834,22 @@ def label_thumbnail(camera_name, label):
         response.headers["Cache-Control"] = "no-store"
         return response
 
+@bp.route("/<camera_name>/<label>/last_clip.mp4")
+def label_last_clip(camera_name, label):
+    label = unquote(label)
+    event_query = Event.select(fn.MAX(Event.id)).where(Event.camera == camera_name, Event.has_clip == True)
+    if label != "any":
+        event_query = event_query.where(Event.label == label)
+
+    try:
+        event = event_query.scalar()
+
+        return event_clip(event)
+    except DoesNotExist:
+        return make_response(
+            jsonify({"success": False, "message": "Event not found"}), 404
+        )
+
 
 @bp.route("/events/<id>/snapshot.jpg")
 def event_snapshot(id):
