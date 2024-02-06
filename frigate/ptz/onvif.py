@@ -87,21 +87,24 @@ class OnvifController:
             )
             return False
 
+        ptz = onvif.create_ptz_service()
+
+        profile = None
         for key, onvif_profile in enumerate(profiles):
-            # skip non-H264 profiles
             if (
-                not onvif_profile.VideoEncoderConfiguration
-                or onvif_profile.VideoEncoderConfiguration.Encoding != "H264"
+                onvif_profile.VideoEncoderConfiguration
+                and onvif_profile.VideoEncoderConfiguration.Encoding == "H264"
             ):
-                continue
-            else:
-                # use the first H264 profile
                 profile = onvif_profile
                 break
 
-        ptz = onvif.create_ptz_service()
+        if profile is None:
+            logger.error(
+                f"No appropriate Onvif profiles found for camera: {camera_name}."
+            )
+            return False
 
-        # get the PTZ config for the first onvif profile
+        # get the PTZ config for the profile
         try:
             configs = profile.PTZConfiguration
             logger.debug(
