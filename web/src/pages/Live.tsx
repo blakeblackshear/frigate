@@ -12,23 +12,21 @@ function Live() {
 
   // recent events
 
-  const [recentCutoff, setRecentCutoff] = useState<number>(0);
-  useEffect(() => {
+  const { data: allEvents, mutate: updateEvents } = useSWR<FrigateEvent[]>(
+    ["events", { limit: 10 }],
+    { revalidateOnFocus: false, refreshInterval: 60000 }
+  );
+
+  const events = useMemo(() => {
+    if (!allEvents) {
+      return [];
+    }
+
     const date = new Date();
     date.setHours(date.getHours() - 4);
-    setRecentCutoff(date.getTime() / 1000);
-
-    const intervalId: NodeJS.Timeout = setInterval(() => {
-      const date = new Date();
-      date.setHours(date.getHours() - 4);
-      setRecentCutoff(date.getTime() / 1000);
-    }, 60000);
-    return () => clearInterval(intervalId);
-  }, [60000]);
-  const { data: events, mutate: updateEvents } = useSWR<FrigateEvent[]>([
-    "events",
-    { limit: 10, after: recentCutoff },
-  ]);
+    const cutoff = date.getTime() / 1000;
+    return allEvents.filter((event) => event.start_time > cutoff);
+  }, [allEvents]);
 
   const onFavorite = useCallback(async (e: Event, event: FrigateEvent) => {
     e.stopPropagation();
