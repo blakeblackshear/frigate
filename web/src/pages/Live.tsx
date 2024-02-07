@@ -13,15 +13,19 @@ function Live() {
 
   // recent events
 
-  const [recentCutoff, setRecentCutoff] = useState<Date>(new Date());
+  const [recentCutoff, setRecentCutoff] = useState<number>(0);
   useEffect(() => {
+    const date = new Date();
+    date.setHours(date.getHours() - 12);
+    setRecentCutoff(date.getTime() / 1000);
+
     const intervalId: NodeJS.Timeout = setInterval(() => {
       const date = new Date();
       date.setHours(date.getHours() - 4);
-      setRecentCutoff(date);
-    }, 3600000);
+      setRecentCutoff(date.getTime() / 1000);
+    }, 30000);
     return () => clearInterval(intervalId);
-  }, [3600000]);
+  }, [30000]);
   const { data: events, mutate: updateEvents } = useSWR<FrigateEvent[]>([
     "events",
     { limit: 10, after: recentCutoff },
@@ -63,7 +67,8 @@ function Live() {
             {events.map((event) => {
               return (
                 <div
-                  className="relative rounded min-w-[125px] h-[125px] bg-contain bg-no-repeat bg-center mr-4"
+                  key={event.id}
+                  className="relative rounded bg-cover w-40 h-24 bg-no-repeat bg-center mr-4"
                   style={{
                     backgroundImage: `url(${baseUrl}api/events/${event.id}/thumbnail.jpg)`,
                   }}
@@ -83,7 +88,13 @@ function Live() {
 
       <div className="mt-4 grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4">
         {cameras.map((camera) => {
-          return <LivePlayer className=" rounded-2xl" cameraConfig={camera} />;
+          return (
+            <LivePlayer
+              key={camera.name}
+              className="rounded-2xl"
+              cameraConfig={camera}
+            />
+          );
         })}
       </div>
     </>
