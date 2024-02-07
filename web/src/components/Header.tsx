@@ -66,26 +66,21 @@ function HeaderNavigation() {
   const navbarLinks = [
     {
       id: 1,
-      title: "Dashboard",
+      title: "Live",
       url: "/",
     },
     {
       id: 2,
-      title: "Live",
-      url: "/live",
-    },
-    {
-      id: 3,
       title: "History",
       url: "/history",
     },
     {
-      id: 4,
+      id: 3,
       title: "Export",
       url: "/export",
     },
     {
-      id: 5,
+      id: 4,
       title: "UI Playground",
       url: "/playground",
       dev: true,

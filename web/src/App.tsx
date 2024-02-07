@@ -4,7 +4,6 @@ import { useState } from "react";
 import Wrapper from "@/components/Wrapper";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
-import Dashboard from "@/pages/Dashboard";
 import Live from "@/pages/Live";
 import History from "@/pages/History";
 import Export from "@/pages/Export";
@@ -32,8 +31,7 @@ function App() {
             <Sidebar sheetOpen={sheetOpen} setSheetOpen={setSheetOpen} />
             <div id="pageRoot" className="overflow-x-hidden px-4 py-2 w-screen">
               <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/live" element={<Live />} />
+                <Route path="/" element={<Live />} />
                 <Route path="/history" element={<History />} />
                 <Route path="/export" element={<Export />} />
                 <Route path="/storage" element={<Storage />} />
