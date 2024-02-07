@@ -237,7 +237,7 @@ Returns a thumbnail for the event id optimized for notifications. Works while th
 
 Returns the thumbnail from the latest event for the given camera and label combo. Using `any` as the label will return the latest thumbnail regardless of type.
 
-### `GET /api/<camera_name>/<label>/last_clip.mp4`
+### `GET /api/<camera_name>/<label>/clip.mp4`
 
 Returns the clip from the latest event for the given camera and label combo. Using `any` as the label will return the latest clip regardless of type.
 
