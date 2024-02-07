@@ -1,11 +1,10 @@
-import { baseUrl } from "@/api/baseUrl";
+import { EventThumbnail } from "@/components/image/EventThumbnail";
 import LivePlayer from "@/components/player/LivePlayer";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Event as FrigateEvent } from "@/types/event";
 import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { LuStar } from "react-icons/lu";
 import useSWR from "swr";
 
 function Live() {
@@ -16,7 +15,7 @@ function Live() {
   const [recentCutoff, setRecentCutoff] = useState<number>(0);
   useEffect(() => {
     const date = new Date();
-    date.setHours(date.getHours() - 12);
+    date.setHours(date.getHours() - 4);
     setRecentCutoff(date.getTime() / 1000);
 
     const intervalId: NodeJS.Timeout = setInterval(() => {
@@ -66,19 +65,11 @@ function Live() {
           <div className="flex">
             {events.map((event) => {
               return (
-                <div
+                <EventThumbnail
                   key={event.id}
-                  className="relative rounded bg-cover w-40 h-24 bg-no-repeat bg-center mr-4"
-                  style={{
-                    backgroundImage: `url(${baseUrl}api/events/${event.id}/thumbnail.jpg)`,
-                  }}
-                >
-                  <LuStar
-                    className="h-6 w-6 text-yellow-300 absolute top-1 right-1 cursor-pointer"
-                    onClick={(e: Event) => onFavorite(e, event)}
-                    fill={event.retain_indefinitely ? "currentColor" : "none"}
-                  />
-                </div>
+                  event={event}
+                  onFavorite={onFavorite}
+                />
               );
             })}
           </div>
@@ -91,7 +82,7 @@ function Live() {
           return (
             <LivePlayer
               key={camera.name}
-              className="rounded-2xl"
+              className="rounded-2xl bg-black h-[428px]"
               cameraConfig={camera}
             />
           );

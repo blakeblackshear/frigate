@@ -78,7 +78,7 @@ export default function LivePlayer({
     if ("MediaSource" in window || "ManagedMediaSource" in window) {
       player = (
         <MSEPlayer
-          className="rounded-2xl w-full"
+          className="rounded-2xl"
           camera={cameraConfig.live.stream_name}
         />
       );
@@ -131,14 +131,10 @@ export default function LivePlayer({
   }
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative flex justify-center ${className}`}>
+
       {player}
-      <Chip className="absolute right-2 top-2 bg-gray-500 bg-gradient-to-br">
-        <MdCircle className="w-2 h-2 text-danger" />
-        <div className="ml-1 capitalize text-white text-xs">
-          {cameraConfig.name.replaceAll("_", " ")}
-        </div>
-      </Chip>
+
     </div>
   );
 }
