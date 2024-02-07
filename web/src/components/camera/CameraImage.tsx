@@ -5,6 +5,7 @@ import ActivityIndicator from "../ui/activity-indicator";
 import { useResizeObserver } from "@/hooks/resize-observer";
 
 type CameraImageProps = {
+  className?: string;
   camera: string;
   onload?: (event: Event) => void;
   searchParams?: {};
@@ -13,6 +14,7 @@ type CameraImageProps = {
 };
 
 export default function CameraImage({
+  className,
   camera,
   onload,
   searchParams = "",
@@ -88,11 +90,12 @@ export default function CameraImage({
     <div
       className={`relative w-full ${
         fitAspect && aspectRatio < fitAspect ? "h-full flex justify-center" : ""
-      }`}
+      } ${className}`}
       ref={containerRef}
     >
       {enabled ? (
         <canvas
+          className="rounded-2xl"
           data-testid="cameraimage-canvas"
           height={scaledHeight}
           ref={canvasRef}

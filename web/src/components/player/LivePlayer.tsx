@@ -4,7 +4,7 @@ import AutoUpdatingCameraImage from "../camera/AutoUpdatingCameraImage";
 import ActivityIndicator from "../ui/activity-indicator";
 import { Button } from "../ui/button";
 import { LuSettings } from "react-icons/lu";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
@@ -15,14 +15,18 @@ import { MdCircle, MdLeakAdd, MdSelectAll } from "react-icons/md";
 import { BsSoundwave } from "react-icons/bs";
 import Chip from "../Chip";
 import useCameraActivity from "@/hooks/use-camera-activity";
+import CameraImage from "../camera/CameraImage";
 
 const emptyObject = Object.freeze({});
+
+type LivePlayerMode = "webrtc" | "mse" | "jsmpeg" | "debug";
 
 type LivePlayerProps = {
   className?: string;
   cameraConfig: CameraConfig;
-  liveMode?: "webrtc" | "mse" | "jsmpeg" | "debug";
+  liveMode?: LivePlayerMode;
   liveChips?: boolean;
+  showStillWithoutActivity?: boolean;
 };
 
 type Options = { [key: string]: boolean };
@@ -32,10 +36,22 @@ export default function LivePlayer({
   cameraConfig,
   liveMode = "mse",
   liveChips = false,
+  showStillWithoutActivity = true,
 }: LivePlayerProps) {
   // camera activity
   const { activeMotion, activeAudio, activeTracking } =
     useCameraActivity(cameraConfig);
+
+  const [liveReady, setLiveReady] = useState(false);
+  useEffect(() => {
+    if (!liveReady) {
+      return;
+    }
+
+    if (!activeMotion && !activeTracking) {
+      setLiveReady(false);
+    }
+  }, [activeMotion, activeTracking, liveReady]);
 
   // debug view settings
 
@@ -80,7 +96,13 @@ export default function LivePlayer({
     );
   } else if (liveMode == "mse") {
     if ("MediaSource" in window || "ManagedMediaSource" in window) {
-      player = <MSEPlayer className="rounded-2xl" camera={cameraConfig.name} />;
+      player = (
+        <MSEPlayer
+          className="rounded-2xl"
+          camera={cameraConfig.name}
+          onPlaying={() => setLiveReady(true)}
+        />
+      );
     } else {
       player = (
         <div className="w-5xl text-center text-sm">
@@ -131,31 +153,57 @@ export default function LivePlayer({
 
   return (
     <div className={`relative flex justify-center ${className}`}>
-      {player}
-      <div className="absolute flex left-2 top-2 gap-2">
-        <Chip className="bg-gray-500 bg-gradient-to-br">
-          <MdLeakAdd
-            className={`w-4 h-4 ${activeMotion ? "text-motion" : "text-white"}`}
+      {(showStillWithoutActivity == false || activeMotion || activeTracking) &&
+        player}
+
+      {showStillWithoutActivity && !liveReady && (
+        <div className="absolute left-0 top-0 right-0 bottom-0">
+          <AutoUpdatingCameraImage
+            className="w-full h-full"
+            camera={cameraConfig.name}
+            showFps={false}
+            reloadInterval={30000}
+            fitAspect={
+              cameraConfig.detect.width / cameraConfig.detect.height > 2 ||
+              cameraConfig.detect.width / cameraConfig.detect.height < 1
+                ? undefined
+                : 16 / 9
+            }
+            searchParams={`cache=${123}`}
           />
-          <div className="ml-1 capitalize text-white text-xs">Motion</div>
-        </Chip>
-        {cameraConfig.audio.enabled_in_config && (
+        </div>
+      )}
+
+      {liveChips && (
+        <div className="absolute flex left-2 top-2 gap-2">
           <Chip className="bg-gray-500 bg-gradient-to-br">
-            <BsSoundwave
-              className={`w-4 h-4 ${activeAudio ? "text-audio" : "text-white"}`}
+            <MdLeakAdd
+              className={`w-4 h-4 ${
+                activeMotion ? "text-motion" : "text-white"
+              }`}
             />
-            <div className="ml-1 capitalize text-white text-xs">Sound</div>
+            <div className="ml-1 capitalize text-white text-xs">Motion</div>
           </Chip>
-        )}
-        <Chip className="bg-gray-500 bg-gradient-to-br">
-          <MdSelectAll
-            className={`w-4 h-4 ${
-              activeTracking ? "text-object" : "text-white"
-            }`}
-          />
-          <div className="ml-1 capitalize text-white text-xs">Tracking</div>
-        </Chip>
-      </div>
+          {cameraConfig.audio.enabled_in_config && (
+            <Chip className="bg-gray-500 bg-gradient-to-br">
+              <BsSoundwave
+                className={`w-4 h-4 ${
+                  activeAudio ? "text-audio" : "text-white"
+                }`}
+              />
+              <div className="ml-1 capitalize text-white text-xs">Sound</div>
+            </Chip>
+          )}
+          <Chip className="bg-gray-500 bg-gradient-to-br">
+            <MdSelectAll
+              className={`w-4 h-4 ${
+                activeTracking ? "text-object" : "text-white"
+              }`}
+            />
+            <div className="ml-1 capitalize text-white text-xs">Tracking</div>
+          </Chip>
+        </div>
+      )}
       <Chip className="absolute right-2 top-2 bg-gray-500 bg-gradient-to-br">
         <MdCircle className="w-2 h-2 text-danger" />
         <div className="ml-1 capitalize text-white text-xs">

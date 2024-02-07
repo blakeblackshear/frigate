@@ -4,9 +4,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 type MSEPlayerProps = {
   camera: string;
   className?: string;
+  onPlaying?: () => void;
 };
 
-function MSEPlayer({ camera, className }: MSEPlayerProps) {
+function MSEPlayer({ camera, className, onPlaying }: MSEPlayerProps) {
   let connectTS: number = 0;
 
   const RECONNECT_TIMEOUT: number = 30000;
@@ -250,6 +251,7 @@ function MSEPlayer({ camera, className }: MSEPlayerProps) {
       className={className}
       playsInline
       preload="auto"
+      onLoadedData={onPlaying}
       muted
     />
   );
