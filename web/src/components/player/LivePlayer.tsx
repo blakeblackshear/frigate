@@ -169,7 +169,6 @@ export default function LivePlayer({
                 ? undefined
                 : 16 / 9
             }
-            searchParams={`cache=${123}`}
           />
         </div>
       )}
