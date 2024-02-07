@@ -22,29 +22,26 @@ function Live() {
       const date = new Date();
       date.setHours(date.getHours() - 4);
       setRecentCutoff(date.getTime() / 1000);
-    }, 30000);
+    }, 60000);
     return () => clearInterval(intervalId);
-  }, [30000]);
+  }, [60000]);
   const { data: events, mutate: updateEvents } = useSWR<FrigateEvent[]>([
     "events",
     { limit: 10, after: recentCutoff },
   ]);
 
-  const onFavorite = useCallback(
-    async (e: Event, event: FrigateEvent) => {
-      e.stopPropagation();
-      let response;
-      if (!event.retain_indefinitely) {
-        response = await axios.post(`events/${event.id}/retain`);
-      } else {
-        response = await axios.delete(`events/${event.id}/retain`);
-      }
-      if (response.status === 200) {
-        updateEvents();
-      }
-    },
-    [event]
-  );
+  const onFavorite = useCallback(async (e: Event, event: FrigateEvent) => {
+    e.stopPropagation();
+    let response;
+    if (!event.retain_indefinitely) {
+      response = await axios.post(`events/${event.id}/retain`);
+    } else {
+      response = await axios.delete(`events/${event.id}/retain`);
+    }
+    if (response.status === 200) {
+      updateEvents();
+    }
+  }, []);
 
   // camera live views
 
