@@ -108,7 +108,7 @@ export default function DynamicCameraImage({
         {camera.audio.enabled_in_config && (
           <LuEar
             className={`${
-              parseInt(audioRms) >= camera.audio.min_volume
+             audioRms >= camera.audio.min_volume
                 ? "text-audio"
                 : "text-gray-600"
             }`}

@@ -11,8 +11,10 @@ import { Label } from "../ui/label";
 import { usePersistence } from "@/hooks/use-persistence";
 import MSEPlayer from "./MsePlayer";
 import JSMpegPlayer from "./JSMpegPlayer";
-import { MdCircle } from "react-icons/md";
+import { MdCircle, MdLeakAdd, MdSelectAll } from "react-icons/md";
+import { BsSoundwave } from "react-icons/bs";
 import Chip from "../Chip";
+import useCameraActivity from "@/hooks/use-camera-activity";
 
 const emptyObject = Object.freeze({});
 
@@ -20,6 +22,7 @@ type LivePlayerProps = {
   className?: string;
   cameraConfig: CameraConfig;
   liveMode?: "webrtc" | "mse" | "jsmpeg" | "debug";
+  liveChips?: boolean;
 };
 
 type Options = { [key: string]: boolean };
@@ -28,14 +31,19 @@ export default function LivePlayer({
   className,
   cameraConfig,
   liveMode = "mse",
+  liveChips = false,
 }: LivePlayerProps) {
-  const [showSettings, setShowSettings] = useState(false);
+  // camera activity
+  const { activeMotion, activeAudio, activeTracking } =
+    useCameraActivity(cameraConfig);
 
+  // debug view settings
+
+  const [showSettings, setShowSettings] = useState(false);
   const [options, setOptions] = usePersistence(
     `${cameraConfig?.name}-feed`,
     emptyObject
   );
-
   const handleSetOption = useCallback(
     (id: string, value: boolean) => {
       const newOptions = { ...options, [id]: value };
@@ -43,7 +51,6 @@ export default function LivePlayer({
     },
     [options, setOptions]
   );
-
   const searchParams = useMemo(
     () =>
       new URLSearchParams(
@@ -55,7 +62,6 @@ export default function LivePlayer({
       ),
     [options]
   );
-
   const handleToggleSettings = useCallback(() => {
     setShowSettings(!showSettings);
   }, [showSettings, setShowSettings]);
@@ -126,6 +132,30 @@ export default function LivePlayer({
   return (
     <div className={`relative flex justify-center ${className}`}>
       {player}
+      <div className="absolute flex left-2 top-2 gap-2">
+        <Chip className="bg-gray-500 bg-gradient-to-br">
+          <MdLeakAdd
+            className={`w-4 h-4 ${activeMotion ? "text-motion" : "text-white"}`}
+          />
+          <div className="ml-1 capitalize text-white text-xs">Motion</div>
+        </Chip>
+        {cameraConfig.audio.enabled_in_config && (
+          <Chip className="bg-gray-500 bg-gradient-to-br">
+            <BsSoundwave
+              className={`w-4 h-4 ${activeAudio ? "text-audio" : "text-white"}`}
+            />
+            <div className="ml-1 capitalize text-white text-xs">Sound</div>
+          </Chip>
+        )}
+        <Chip className="bg-gray-500 bg-gradient-to-br">
+          <MdSelectAll
+            className={`w-4 h-4 ${
+              activeTracking ? "text-object" : "text-white"
+            }`}
+          />
+          <div className="ml-1 capitalize text-white text-xs">Tracking</div>
+        </Chip>
+      </div>
       <Chip className="absolute right-2 top-2 bg-gray-500 bg-gradient-to-br">
         <MdCircle className="w-2 h-2 text-danger" />
         <div className="ml-1 capitalize text-white text-xs">

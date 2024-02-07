@@ -228,7 +228,7 @@ export function useMotionActivity(camera: string): { payload: string } {
   return { payload };
 }
 
-export function useAudioActivity(camera: string): { payload: string } {
+export function useAudioActivity(camera: string): { payload: number } {
   const {
     value: { payload },
   } = useWs(`${camera}/audio/rms`, "");
