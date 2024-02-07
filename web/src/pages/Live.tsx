@@ -77,13 +77,13 @@ function Live() {
         </ScrollArea>
       )}
 
-      <div className="mt-4 grid grid-rows-masonry grid-cols-3 gap-4">
+      <div className="mt-4 grid grid-cols-3 gap-4">
         {cameras.map((camera) => {
           let grow;
           if (camera.detect.width / camera.detect.height > 2) {
-            grow = "h-[424px] col-end-span-2";
-          } else if (camera.name == "front_doorbell_cam") {
-            grow = "h-[840px]";
+            grow = "h-[424px] col-span-2";
+          } else if (camera.detect.width / camera.detect.height < 1) {
+            grow = "h-[840px] row-span-2";
           } else {
             grow = "h-[425px]";
           }

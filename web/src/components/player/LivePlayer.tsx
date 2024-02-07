@@ -74,13 +74,7 @@ export default function LivePlayer({
     );
   } else if (liveMode == "mse") {
     if ("MediaSource" in window || "ManagedMediaSource" in window) {
-      const camera = cameraConfig.name == "front_doorbell_cam" ? "portrait_cam" : cameraConfig.name
-      player = (
-        <MSEPlayer
-          className="rounded-2xl"
-          camera={camera}
-        />
-      );
+      player = <MSEPlayer className="rounded-2xl" camera={cameraConfig.name} />;
     } else {
       player = (
         <div className="w-5xl text-center text-sm">
