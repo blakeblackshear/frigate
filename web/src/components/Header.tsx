@@ -8,7 +8,6 @@ import {
   LuList,
   LuMenu,
   LuMoon,
-  LuMoreVertical,
   LuPenSquare,
   LuRotateCw,
   LuSettings,
@@ -18,7 +17,7 @@ import {
 import { IoColorPalette } from "react-icons/io5";
 import { CgDarkMode } from "react-icons/cg";
 import { Button } from "@/components/ui/button";
-import Heading from "./ui/heading";
+import { VscAccount } from "react-icons/vsc";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -93,24 +92,28 @@ function HeaderNavigation() {
     },
   ];
 
-  return navbarLinks.map((item) => {
-    let shouldRender = item.dev ? ENV !== "production" : true;
-    return (
-      shouldRender && (
-        <NavLink
-          key={item.id}
-          to={item.url}
-          className={({ isActive }) =>
-            `py-4 px-2 flex flex-row items-center text-center rounded-lg gap-2 hover:bg-border ${
-              isActive ? "font-bold bg-popover text-popover-foreground" : ""
-            }`
-          }
-        >
-          <div className="text-sm">{item.title}</div>
-        </NavLink>
-      )
-    );
-  });
+  return (
+    <div className="hidden md:flex">
+      {navbarLinks.map((item) => {
+        let shouldRender = item.dev ? ENV !== "production" : true;
+        return (
+          shouldRender && (
+            <NavLink
+              key={item.id}
+              to={item.url}
+              className={({ isActive }) =>
+                `py-4 px-2 flex flex-row items-center text-center rounded-lg gap-2 hover:bg-border ${
+                  isActive ? "font-bold bg-popover text-popover-foreground" : ""
+                }`
+              }
+            >
+              <div className="text-sm">{item.title}</div>
+            </NavLink>
+          )
+        );
+      })}
+    </div>
+  );
 }
 
 function Header({ onToggleNavbar }: HeaderProps) {
@@ -161,7 +164,6 @@ function Header({ onToggleNavbar }: HeaderProps) {
             <div className="w-10 mr-5">
               <Logo />
             </div>
-            <Heading as="h1">Frigate</Heading>
           </div>
           {ENV == "production" && (
             <div className="text-red-500 text-sm items-center text-right">
@@ -175,7 +177,7 @@ function Header({ onToggleNavbar }: HeaderProps) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button size="icon" variant="ghost">
-              <LuMoreVertical />
+              <LuSettings />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="md:w-72 mr-5">
@@ -309,6 +311,9 @@ function Header({ onToggleNavbar }: HeaderProps) {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        <Button size="icon" variant="ghost">
+          <VscAccount />
+        </Button>
       </div>
       {restartDialogOpen && (
         <AlertDialog

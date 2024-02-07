@@ -69,7 +69,7 @@ function Sidebar({
 
   return (
     <>
-      <div className="hidden md:block">{sidebar}</div>
+      <div className="hidden">{sidebar}</div>
 
       <Sheet
         open={sheetOpen}

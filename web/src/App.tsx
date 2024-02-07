@@ -2,6 +2,7 @@ import Providers from "@/context/providers";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState } from "react";
 import Wrapper from "@/components/Wrapper";
+import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import Dashboard from "@/pages/Dashboard";
 import Live from "@/pages/Live";
@@ -28,6 +29,7 @@ function App() {
         <Wrapper>
           <Header onToggleNavbar={toggleNavbar} />
           <div className="grid grid-cols-[auto,1fr] flex-grow-1 overflow-auto">
+            <Sidebar sheetOpen={sheetOpen} setSheetOpen={setSheetOpen} />
             <div
               id="pageRoot"
               className="overflow-x-hidden px-4 py-2 w-screen md:w-full"
