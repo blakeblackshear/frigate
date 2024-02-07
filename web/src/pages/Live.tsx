@@ -77,7 +77,7 @@ function Live() {
         </ScrollArea>
       )}
 
-      <div className="mt-4 grid xl:grid-cols-2 3xl:grid-cols-3 gap-4">
+      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 gap-4">
         {cameras.map((camera) => {
           let grow;
           if (camera.detect.width / camera.detect.height > 2) {
