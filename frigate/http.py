@@ -835,7 +835,7 @@ def label_thumbnail(camera_name, label):
         return response
 
 @bp.route("/<camera_name>/<label>/last_clip.mp4")
-def label_last_clip(camera_name, label):
+def label_clip(camera_name, label):
     label = unquote(label)
     event_query = Event.select(fn.MAX(Event.id)).where(Event.camera == camera_name, Event.has_clip == True)
     if label != "any":
