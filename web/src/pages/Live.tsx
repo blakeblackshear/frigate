@@ -77,15 +77,15 @@ function Live() {
         </ScrollArea>
       )}
 
-      <div className="mt-4 grid grid-cols-3 gap-4">
+      <div className="mt-4 grid xl:grid-cols-2 3xl:grid-cols-3 gap-4">
         {cameras.map((camera) => {
           let grow;
           if (camera.detect.width / camera.detect.height > 2) {
-            grow = "h-[424px] col-span-2";
+            grow = "md:col-span-2";
           } else if (camera.detect.width / camera.detect.height < 1) {
-            grow = "h-[840px] row-span-2";
+            grow = "md:row-span-2";
           } else {
-            grow = "h-[425px]";
+            grow = "aspect-video";
           }
           return (
             <LivePlayer
