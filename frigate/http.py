@@ -842,7 +842,7 @@ def label_clip(camera_name, label):
         event_query = event_query.where(Event.label == label)
 
     try:
-        event = event_query.scalar()
+        event = event_query.get()
 
         return event_clip(event)
     except DoesNotExist:
