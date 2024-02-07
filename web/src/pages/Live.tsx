@@ -4,7 +4,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Event as FrigateEvent } from "@/types/event";
 import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import useSWR from "swr";
 
 function Live() {
@@ -23,7 +23,7 @@ function Live() {
     }
 
     const date = new Date();
-    date.setHours(date.getHours() - 4);
+    date.setHours(date.getHours() - 1);
     const cutoff = date.getTime() / 1000;
     return allEvents.filter((event) => event.start_time > cutoff);
   }, [allEvents]);
