@@ -15,7 +15,6 @@ import { MdCircle, MdLeakAdd, MdSelectAll } from "react-icons/md";
 import { BsSoundwave } from "react-icons/bs";
 import Chip from "../Chip";
 import useCameraActivity from "@/hooks/use-camera-activity";
-import CameraImage from "../camera/CameraImage";
 
 const emptyObject = Object.freeze({});
 
@@ -90,15 +89,16 @@ export default function LivePlayer({
   if (liveMode == "webrtc") {
     player = (
       <WebRtcPlayer
-        className="rounded-2xl w-full"
+        className={`rounded-2xl h-full ${liveReady ? "" : "hidden"}`}
         camera={cameraConfig.live.stream_name}
+        onPlaying={() => setLiveReady(true)}
       />
     );
   } else if (liveMode == "mse") {
     if ("MediaSource" in window || "ManagedMediaSource" in window) {
       player = (
         <MSEPlayer
-          className="rounded-2xl"
+          className={`rounded-2xl h-full ${liveReady ? "" : "hidden"}`}
           camera={cameraConfig.name}
           onPlaying={() => setLiveReady(true)}
         />
