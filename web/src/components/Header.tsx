@@ -57,10 +57,61 @@ import {
 import ActivityIndicator from "./ui/activity-indicator";
 import { useRestart } from "@/api/ws";
 import { ENV } from "@/env";
+import { NavLink } from "react-router-dom";
 
 type HeaderProps = {
   onToggleNavbar: () => void;
 };
+
+function HeaderNavigation() {
+  const navbarLinks = [
+    {
+      id: 1,
+      title: "Dashboard",
+      url: "/",
+    },
+    {
+      id: 2,
+      title: "Live",
+      url: "/live",
+    },
+    {
+      id: 3,
+      title: "History",
+      url: "/history",
+    },
+    {
+      id: 4,
+      title: "Export",
+      url: "/export",
+    },
+    {
+      id: 5,
+      title: "UI Playground",
+      url: "/playground",
+      dev: true,
+    },
+  ];
+
+  return navbarLinks.map((item) => {
+    let shouldRender = item.dev ? ENV !== "production" : true;
+    return (
+      shouldRender && (
+        <NavLink
+          key={item.id}
+          to={item.url}
+          className={({ isActive }) =>
+            `py-4 px-2 flex flex-row items-center text-center rounded-lg gap-2 hover:bg-border ${
+              isActive ? "font-bold bg-popover text-popover-foreground" : ""
+            }`
+          }
+        >
+          <div className="text-sm">{item.title}</div>
+        </NavLink>
+      )
+    );
+  });
+}
 
 function Header({ onToggleNavbar }: HeaderProps) {
   const { theme, colorScheme, setTheme, setColorScheme } = useTheme();
@@ -118,6 +169,7 @@ function Header({ onToggleNavbar }: HeaderProps) {
             </div>
           )}
         </Link>
+        <HeaderNavigation />
       </div>
       <div className="flex flex-shrink-0 md:gap-2">
         <DropdownMenu>
