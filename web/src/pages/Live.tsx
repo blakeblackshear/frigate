@@ -87,6 +87,7 @@ function Live() {
               key={camera.name}
               className={`rounded-2xl bg-black ${grow}`}
               cameraConfig={camera}
+              liveChips
             />
           );
         })}
