@@ -1,5 +1,5 @@
 import WebRtcPlayer from "./WebRTCPlayer";
-import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
+import { CameraConfig } from "@/types/frigateConfig";
 import AutoUpdatingCameraImage from "../camera/AutoUpdatingCameraImage";
 import ActivityIndicator from "../ui/activity-indicator";
 import { Button } from "../ui/button";
@@ -11,7 +11,6 @@ import { Label } from "../ui/label";
 import { usePersistence } from "@/hooks/use-persistence";
 import MSEPlayer from "./MsePlayer";
 import JSMpegPlayer from "./JSMpegPlayer";
-import useSWR from "swr";
 import { MdCircle } from "react-icons/md";
 import Chip from "../Chip";
 
@@ -30,7 +29,6 @@ export default function LivePlayer({
   cameraConfig,
   liveMode = "mse",
 }: LivePlayerProps) {
-  const { data: config } = useSWR<FrigateConfig>("config");
   const [showSettings, setShowSettings] = useState(false);
 
   const [options, setOptions] = usePersistence(
@@ -76,10 +74,11 @@ export default function LivePlayer({
     );
   } else if (liveMode == "mse") {
     if ("MediaSource" in window || "ManagedMediaSource" in window) {
+      const camera = cameraConfig.name == "front_doorbell_cam" ? "portrait_cam" : cameraConfig.name
       player = (
         <MSEPlayer
           className="rounded-2xl"
-          camera={cameraConfig.live.stream_name}
+          camera={camera}
         />
       );
     } else {
@@ -132,9 +131,13 @@ export default function LivePlayer({
 
   return (
     <div className={`relative flex justify-center ${className}`}>
-
       {player}
-
+      <Chip className="absolute right-2 top-2 bg-gray-500 bg-gradient-to-br">
+        <MdCircle className="w-2 h-2 text-danger" />
+        <div className="ml-1 capitalize text-white text-xs">
+          {cameraConfig.name.replaceAll("_", " ")}
+        </div>
+      </Chip>
     </div>
   );
 }

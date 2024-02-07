@@ -82,6 +82,15 @@ module.exports = {
         "3xl": "1920px",
         "4xl": "2560px",
       },
+      gridTemplateColumns: {
+        '3': 'repeat(3, 1fr)',
+      },
+      gridTemplateRows: {
+        'masonry': 'masonry',
+      },
+      gridColumnEnd: {
+        'span-2': 'span 2',
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

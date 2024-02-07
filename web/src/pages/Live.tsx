@@ -77,12 +77,20 @@ function Live() {
         </ScrollArea>
       )}
 
-      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-4">
+      <div className="mt-4 grid grid-rows-masonry grid-cols-3 gap-4">
         {cameras.map((camera) => {
+          let grow;
+          if (camera.detect.width / camera.detect.height > 2) {
+            grow = "h-[424px] col-end-span-2";
+          } else if (camera.name == "front_doorbell_cam") {
+            grow = "h-[840px]";
+          } else {
+            grow = "h-[425px]";
+          }
           return (
             <LivePlayer
               key={camera.name}
-              className="rounded-2xl bg-black h-[428px]"
+              className={`rounded-2xl bg-black ${grow}`}
               cameraConfig={camera}
             />
           );
