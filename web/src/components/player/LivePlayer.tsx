@@ -175,7 +175,11 @@ export default function LivePlayer({
 
       {liveChips && (
         <div className="absolute flex left-2 top-2 gap-2">
-          <Chip className="bg-gray-500 bg-gradient-to-br">
+          <Chip
+            className={`bg-gray-500 bg-gradient-to-br ${
+              activeMotion ? "visible opacity-100" : "invisible opacity-0"
+            }`}
+          >
             <MdLeakAdd
               className={`w-4 h-4 ${
                 activeMotion ? "text-motion" : "text-white"
@@ -184,7 +188,11 @@ export default function LivePlayer({
             <div className="ml-1 capitalize text-white text-xs">Motion</div>
           </Chip>
           {cameraConfig.audio.enabled_in_config && (
-            <Chip className="bg-gray-500 bg-gradient-to-br">
+            <Chip
+              className={`bg-gray-500 bg-gradient-to-br transition-all ${
+                activeAudio ? "visible opacity-100" : "invisible opacity-0"
+              }`}
+            >
               <BsSoundwave
                 className={`w-4 h-4 ${
                   activeAudio ? "text-audio" : "text-white"
@@ -193,7 +201,11 @@ export default function LivePlayer({
               <div className="ml-1 capitalize text-white text-xs">Sound</div>
             </Chip>
           )}
-          <Chip className="bg-gray-500 bg-gradient-to-br">
+          <Chip
+            className={`bg-gray-500 bg-gradient-to-br transition-all ${
+              activeTracking ? "inline opacity-100" : "invisible opacity-0"
+            }`}
+          >
             <MdSelectAll
               className={`w-4 h-4 ${
                 activeTracking ? "text-object" : "text-white"
