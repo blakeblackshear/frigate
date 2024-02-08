@@ -4,6 +4,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import Logo from "./Logo";
 import { ENV } from "@/env";
 import { navbarLinks } from "@/pages/site-navigation";
+import SettingsDropdownMenu from "./settings/SettingsNavItems";
 
 function Sidebar({
   sheetOpen,
@@ -13,35 +14,34 @@ function Sidebar({
   setSheetOpen: (open: boolean) => void;
 }) {
   const sidebar = (
-    <aside className="sticky top-0 overflow-y-auto scrollbar-hidden py-4 lg:pt-0 flex flex-col ml-1 lg:w-56 gap-0">
-      {navbarLinks.map((item) => (
-        <SidebarItem
-          key={item.id}
-          Icon={item.icon}
-          title={item.title}
-          url={item.url}
-          dev={item.dev}
-          onClick={() => setSheetOpen(false)}
-        />
-      ))}
+    <aside className="w-[52px] h-full sticky top-0 overflow-y-auto scrollbar-hidden py-4 flex flex-col justify-between">
+      <div className="w-full flex flex-col gap-0 items-center">
+        <Logo className="w-8 h-8 mb-6" />
+        {navbarLinks.map((item) => (
+          <SidebarItem
+            key={item.id}
+            Icon={item.icon}
+            title={item.title}
+            url={item.url}
+            dev={item.dev}
+            onClick={() => setSheetOpen(false)}
+          />
+        ))}
+      </div>
+      <SettingsDropdownMenu className="flex flex-col items-center" />
     </aside>
   );
 
   return (
     <>
-      <div className="hidden">{sidebar}</div>
-
+      <div className="hidden md:block">{sidebar}</div>
       <Sheet
         open={sheetOpen}
         modal={false}
         onOpenChange={() => setSheetOpen(false)}
       >
-        <SheetContent side="left" className="w-[120px]">
-          <div className="w-full flex flex-row justify-center">
-            <div className="w-10">
-              <Logo />
-            </div>
-          </div>
+        <SheetContent side="left" className="w-[100px]">
+          <div className="w-full flex flex-row justify-center"></div>
           {sidebar}
         </SheetContent>
       </Sheet>
@@ -66,13 +66,15 @@ function SidebarItem({ Icon, title, url, dev, onClick }: SidebarItemProps) {
         to={url}
         onClick={onClick}
         className={({ isActive }) =>
-          `py-4 px-2 flex flex-col lg:flex-row items-center rounded-lg gap-2 lg:w-full hover:bg-border ${
-            isActive ? "font-bold bg-popover text-popover-foreground" : ""
+          `mx-[10px] mb-6 flex flex-col justify-center items-center rounded-lg ${
+            isActive
+              ? "font-bold text-white bg-blue-400"
+              : "text-muted-foreground bg-secondary"
           }`
         }
       >
-        <Icon className="w-6 h-6 mr-1" />
-        <div className="text-sm text-center">{title}</div>
+        <Icon className="w-5 h-5 m-[6px]" />
+        <div className="hidden">{title}</div>
       </NavLink>
     )
   );
