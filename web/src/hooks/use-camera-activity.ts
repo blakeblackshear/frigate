@@ -34,21 +34,25 @@ export default function useCameraActivity(
       return;
     }
 
-    if (event.type == "end") {
-      const eventIndex = activeObjects.indexOf(event.after.id);
+    const eventIndex = activeObjects.indexOf(event.after.id);
 
+    if (event.type == "end") {
       if (eventIndex != -1) {
         const newActiveObjects = [...activeObjects];
         newActiveObjects.splice(eventIndex, 1);
         setActiveObjects(newActiveObjects);
       }
     } else {
-      if (!event.after.stationary) {
-        const eventIndex = activeObjects.indexOf(event.after.id);
-
-        if (eventIndex == -1) {
+      if (eventIndex == -1) {
+        // add unknown event to list if not stationary
+        if (!event.after.stationary) {
           const newActiveObjects = [...activeObjects, event.after.id];
           setActiveObjects(newActiveObjects);
+        }
+      } else {
+        // remove known event from list if it has become stationary
+        if (event.after.stationary) {
+          activeObjects.splice(eventIndex, 1);
         }
       }
     }

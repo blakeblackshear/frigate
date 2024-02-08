@@ -152,12 +152,12 @@ export default function LivePlayer({
   }
 
   return (
-    <div className={`relative flex justify-center ${className}`}>
+    <div className={`relative flex justify-center w-full ${className}`}>
       {(showStillWithoutActivity == false || activeMotion || activeTracking) &&
         player}
 
       {showStillWithoutActivity && !liveReady && (
-        <div className="absolute left-0 top-0 right-0 bottom-0">
+        <div className="absolute left-0 top-0 right-0 bottom-0 w-full">
           <AutoUpdatingCameraImage
             className="w-full h-full"
             camera={cameraConfig.name}
@@ -166,7 +166,7 @@ export default function LivePlayer({
             fitAspect={
               cameraConfig.detect.width / cameraConfig.detect.height > 2 ||
               cameraConfig.detect.width / cameraConfig.detect.height < 1
-                ? undefined
+                ? cameraConfig.detect.width / cameraConfig.detect.height
                 : 16 / 9
             }
           />
