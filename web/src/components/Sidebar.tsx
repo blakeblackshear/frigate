@@ -14,7 +14,7 @@ function Sidebar({
   setSheetOpen: (open: boolean) => void;
 }) {
   const sidebar = (
-    <aside className="w-[52px] h-full sticky top-0 overflow-y-auto scrollbar-hidden py-4 flex flex-col justify-between">
+    <aside className="w-[52px] h-screen sticky top-0 overflow-y-auto scrollbar-hidden py-4 flex flex-col justify-between">
       <div className="w-full flex flex-col gap-0 items-center">
         <Logo className="w-8 h-8 mb-6" />
         {navbarLinks.map((item) => (
