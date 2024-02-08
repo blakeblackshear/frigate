@@ -77,8 +77,8 @@ function Live() {
           let grow;
           if (camera.detect.width / camera.detect.height > 2) {
             grow = "aspect-wide md:col-span-2";
-          } else if (camera.detect.width / camera.detect.height < 0.7) {
-            grow = "aspect-tall md:row-span-2";
+          } else if (camera.detect.width / camera.detect.height < 1) {
+            grow = "aspect-tall md:aspect-auto md:row-span-2";
           } else {
             grow = "aspect-video";
           }
