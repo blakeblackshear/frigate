@@ -14,8 +14,6 @@ It is recommended to update your configuration to enable hardware accelerated de
 Ensure you increase the allocated RAM for your GPU to at least 128 (`raspi-config` > Performance Options > GPU Memory).  
 If you are using the HA addon, you may need to use the full access variant and turn off `Protection mode` for hardware acceleration.
 
-Use one of these settings in your `frigate.yaml`:
-
 ```yaml
 # if you want to decode a h264 stream
 ffmpeg:
