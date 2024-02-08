@@ -70,7 +70,7 @@ function Live() {
           </div>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
-      )}``
+      )}
 
       <div className="mt-4 md:grid md:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 gap-4">
         {cameras.map((camera) => {
