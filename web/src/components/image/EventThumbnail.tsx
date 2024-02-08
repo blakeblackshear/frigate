@@ -1,6 +1,7 @@
 import { baseUrl } from "@/api/baseUrl";
 import { Event as FrigateEvent } from "@/types/event";
 import { LuStar } from "react-icons/lu";
+import TimeAgo from "../dynamic/TimeAgo";
 
 type EventThumbnailProps = {
   event: FrigateEvent;
@@ -9,16 +10,19 @@ type EventThumbnailProps = {
 export function EventThumbnail({ event, onFavorite }: EventThumbnailProps) {
   return (
     <div
-      className="relative rounded bg-cover w-40 h-24 bg-no-repeat bg-center mr-4"
+      className="relative rounded bg-cover aspect-square h-24 bg-no-repeat bg-center mr-4"
       style={{
         backgroundImage: `url(${baseUrl}api/events/${event.id}/thumbnail.jpg)`,
       }}
     >
       <LuStar
-        className="h-6 w-6 text-yellow-300 absolute top-1 right-1 cursor-pointer"
+        className="absolute h-6 w-6 text-yellow-300 top-1 right-1 cursor-pointer"
         onClick={(e: Event) => (onFavorite ? onFavorite(e, event) : null)}
         fill={event.retain_indefinitely ? "currentColor" : "none"}
       />
+      <div className="absolute left-1 bottom-0 text-sm text-white">
+        <TimeAgo time={event.start_time * 1000} dense />
+      </div>
     </div>
   );
 }
