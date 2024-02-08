@@ -6,7 +6,7 @@ type ChipProps = {
 };
 export default function Chip({ className, children }: ChipProps) {
   return (
-    <div className={`flex p-1 rounded-lg items-center ${className}`}>
+    <div className={`flex px-2 py-1.5 rounded-2xl items-center ${className}`}>
       {children}
     </div>
   );

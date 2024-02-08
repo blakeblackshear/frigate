@@ -1,49 +1,9 @@
 import { IconType } from "react-icons";
-import {
-  LuConstruction,
-  LuFileUp,
-  LuFilm,
-  LuLayoutDashboard,
-  LuVideo,
-} from "react-icons/lu";
 import { NavLink } from "react-router-dom";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import Logo from "./Logo";
 import { ENV } from "@/env";
-
-const navbarLinks = [
-  {
-    id: 1,
-    icon: LuLayoutDashboard,
-    title: "Dashboard",
-    url: "/",
-  },
-  {
-    id: 2,
-    icon: LuVideo,
-    title: "Live",
-    url: "/live",
-  },
-  {
-    id: 3,
-    icon: LuFilm,
-    title: "History",
-    url: "/history",
-  },
-  {
-    id: 4,
-    icon: LuFileUp,
-    title: "Export",
-    url: "/export",
-  },
-  {
-    id: 5,
-    icon: LuConstruction,
-    title: "UI Playground",
-    url: "/playground",
-    dev: true,
-  },
-];
+import { navbarLinks } from "@/pages/site-navigation";
 
 function Sidebar({
   sheetOpen,
