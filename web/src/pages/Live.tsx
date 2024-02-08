@@ -76,9 +76,9 @@ function Live() {
         {cameras.map((camera) => {
           let grow;
           if (camera.detect.width / camera.detect.height > 2) {
-            grow = "h-26 md:h-auto md:col-span-2";
+            grow = "aspect-wide md:col-span-2";
           } else if (camera.detect.width / camera.detect.height < 1) {
-            grow = "md:row-span-2";
+            grow = "aspect-tall md:row-span-2";
           } else {
             grow = "aspect-video";
           }

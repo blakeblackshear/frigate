@@ -29,7 +29,10 @@ function App() {
           <Header onToggleNavbar={toggleNavbar} />
           <div className="grid grid-cols-[auto,1fr] flex-grow-1 overflow-auto">
             <Sidebar sheetOpen={sheetOpen} setSheetOpen={setSheetOpen} />
-            <div id="pageRoot" className="overflow-x-hidden px-4 py-2 w-screen">
+            <div
+              id="pageRoot"
+              className="overflow-x-hidden px-4 py-2 w-screen md:w-full"
+            >
               <Routes>
                 <Route path="/" element={<Live />} />
                 <Route path="/history" element={<History />} />
