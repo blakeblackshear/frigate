@@ -57,36 +57,13 @@ import ActivityIndicator from "./ui/activity-indicator";
 import { useRestart } from "@/api/ws";
 import { ENV } from "@/env";
 import { NavLink } from "react-router-dom";
+import { navbarLinks } from "@/pages/site-navigation";
 
 type HeaderProps = {
   onToggleNavbar: () => void;
 };
 
 function HeaderNavigation() {
-  const navbarLinks = [
-    {
-      id: 1,
-      title: "Live",
-      url: "/",
-    },
-    {
-      id: 2,
-      title: "History",
-      url: "/history",
-    },
-    {
-      id: 3,
-      title: "Export",
-      url: "/export",
-    },
-    {
-      id: 4,
-      title: "UI Playground",
-      url: "/playground",
-      dev: true,
-    },
-  ];
-
   return (
     <div className="hidden md:flex">
       {navbarLinks.map((item) => {
@@ -97,7 +74,7 @@ function HeaderNavigation() {
               key={item.id}
               to={item.url}
               className={({ isActive }) =>
-                `py-4 px-2 flex flex-row items-center text-center rounded-lg gap-2 hover:bg-border ${
+                `my-2 py-3 px-4 text-muted-foreground flex flex-row items-center text-center rounded-lg gap-2 hover:bg-border ${
                   isActive ? "font-bold bg-popover text-popover-foreground" : ""
                 }`
               }
@@ -145,7 +122,7 @@ function Header({ onToggleNavbar }: HeaderProps) {
 
   return (
     <div className="flex gap-10 lg:gap-20 justify-between pt-2 mb-2 border-b-[1px] px-4 items-center">
-      <div className="flex gap-4 items-center flex-shrink-0 m-5">
+      <div className="flex gap-4 items-center flex-shrink-0 m-1">
         <Button
           variant="ghost"
           size="icon"
