@@ -85,7 +85,7 @@ function Live() {
           return (
             <LivePlayer
               key={camera.name}
-              className={`rounded-2xl bg-black ${grow}`}
+              className={`mb-2 md:mb-0 rounded-2xl bg-black ${grow}`}
               cameraConfig={camera}
               liveChips
             />
