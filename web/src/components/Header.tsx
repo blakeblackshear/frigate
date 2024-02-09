@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ENV } from "@/env";
 import { NavLink } from "react-router-dom";
 import { navbarLinks } from "@/pages/site-navigation";
-import SettingsDropdownMenu from "./settings/SettingsNavItems";
+import SettingsNavItems from "./settings/SettingsNavItems";
 
 type HeaderProps = {
   onToggleNavbar: () => void;
@@ -62,7 +62,7 @@ function Header({ onToggleNavbar }: HeaderProps) {
         </Link>
         <HeaderNavigation />
       </div>
-      <SettingsDropdownMenu className="flex flex-shrink-0 md:gap-2" />
+      <SettingsNavItems className="flex flex-shrink-0 md:gap-2" />
     </div>
   );
 }

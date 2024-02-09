@@ -52,6 +52,11 @@ import {
   SheetHeader,
   SheetTitle,
 } from "../ui/sheet";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import ActivityIndicator from "../ui/activity-indicator";
 
 type SettingsNavItemsProps = {
@@ -93,10 +98,17 @@ export default function SettingsNavItems({ className }: SettingsNavItemsProps) {
     <>
       <div className={className}>
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button size="icon" variant="ghost">
-              <LuSettings />
-            </Button>
+          <DropdownMenuTrigger>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="icon" variant="ghost">
+                  <LuSettings />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                <p>Settings</p>
+              </TooltipContent>
+            </Tooltip>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="md:w-72 mr-5">
             <DropdownMenuLabel>System</DropdownMenuLabel>
@@ -229,9 +241,16 @@ export default function SettingsNavItems({ className }: SettingsNavItemsProps) {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <Button size="icon" variant="ghost">
-          <VscAccount />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger>
+            <Button size="icon" variant="ghost">
+              <VscAccount />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right">
+            <p>Account</p>
+          </TooltipContent>
+        </Tooltip>
       </div>
       {restartDialogOpen && (
         <AlertDialog
