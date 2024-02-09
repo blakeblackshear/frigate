@@ -47,8 +47,6 @@ class ONNXDetector(DetectionApi):
         self.model = onnxruntime.InferenceSession(path)
         logger.info(f"ONNX: {path} loaded")
 
-        self.class_aggregation = yolo_utils.generate_class_aggregation_from_config(detector_config)
-
     def detect_raw(self, tensor_input):
         model_input_name = self.model.get_inputs()[0].name
         model_input_shape = self.model.get_inputs()[0].shape
@@ -57,5 +55,5 @@ class ONNXDetector(DetectionApi):
 
         tensor_output = self.model.run(None, {model_input_name: tensor_input})[0]
 
-        return yolo_utils.yolov8_postprocess(model_input_shape, tensor_output, class_aggregation = self.class_aggregation)
+        return yolo_utils.yolov8_postprocess(model_input_shape, tensor_output)
 

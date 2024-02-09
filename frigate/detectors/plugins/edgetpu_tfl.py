@@ -57,8 +57,6 @@ class EdgeTpuTfl(DetectionApi):
         self.tensor_output_details = self.interpreter.get_output_details()
         self.model_type = detector_config.model.model_type
 
-        self.class_aggregation = yolo_utils.generate_class_aggregation_from_config(detector_config)
-
     def detect_raw(self, tensor_input):
         if self.model_type == 'yolov8':
             scale, zero_point = self.tensor_input_details[0]['quantization']
@@ -74,7 +72,7 @@ class EdgeTpuTfl(DetectionApi):
             model_input_shape = self.tensor_input_details[0]['shape']
             tensor_output[:, [0, 2]] *= model_input_shape[2]
             tensor_output[:, [1, 3]] *= model_input_shape[1]
-            return yolo_utils.yolov8_postprocess(model_input_shape, tensor_output, class_aggregation = self.class_aggregation)
+            return yolo_utils.yolov8_postprocess(model_input_shape, tensor_output)
 
         boxes = self.interpreter.tensor(self.tensor_output_details[0]["index"])()[0]
         class_ids = self.interpreter.tensor(self.tensor_output_details[1]["index"])()[0]

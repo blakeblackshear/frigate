@@ -98,8 +98,6 @@ class ROCmDetector(DetectionApi):
             migraphx.save(self.model, mxr_path)
         logger.info(f"AMD/ROCm: model loaded")
 
-        self.class_aggregation = yolo_utils.generate_class_aggregation_from_config(detector_config)
-
     def detect_raw(self, tensor_input):
         model_input_name = self.model.get_parameter_names()[0];
         model_input_shape = tuple(self.model.get_parameter_shapes()[model_input_name].lens());
@@ -111,5 +109,5 @@ class ROCmDetector(DetectionApi):
         addr = ctypes.cast(detector_result.data_ptr(), ctypes.POINTER(ctypes.c_float))
         tensor_output = np.ctypeslib.as_array(addr, shape=detector_result.get_shape().lens())
 
-        return yolo_utils.yolov8_postprocess(model_input_shape, tensor_output, class_aggregation = self.class_aggregation)
+        return yolo_utils.yolov8_postprocess(model_input_shape, tensor_output)
 
