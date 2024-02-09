@@ -515,10 +515,8 @@ services:
 
 Download can be triggered also in regular frigate builds using that environment variable. The following files will be available under `/config/model_cache/yolov8/`:
 
-- `yolov8[ns]_320x320.onnx` -- nano (n) and small (s) sized floating point model files usable by the `rocm`, `onnx` and `openvino` detectors that have been trained using the coco dataset (90 classes)
-- `yolov8[ns]-oiv7_320x320.onnx` -- floating point model files usable by the `rocm`, `onnx` and `openvino` detectors that have been trained using the google open images v7 dataset (601 classes)
-- `yolov8[ns]-320x320_edgetpu.tflite` and `yolov8[ns]-oiv7_320x320_edgetpu.tflite` -- int8 quantized model files usable by the google coral `edgetpu` detector
-- `yolov8[ns]_320x320_i8_openvino.xml` and `yolov8[ns]-oiv7_320x320_i8_openvino.xml` -- int8 quantized model files usable by the `openvino` detector
+- `yolov8[ns]_320x320.onnx` -- nano (n) and small (s) sized floating point model files usable by the `rocm` and `onnx` detectors that have been trained using the coco dataset (90 classes)
+- `yolov8[ns]-oiv7_320x320.onnx` -- floating point model files usable by the `rocm` and `onnx` detectors that have been trained using the google open images v7 dataset (601 classes)
 - `labels.txt` and `labels-frigate.txt` -- full and aggregated labels for the coco dataset models
 - `labels-oiv7.txt` and `labels-oiv7-frigate.txt` -- labels for the oiv7 dataset models
 
@@ -549,30 +547,6 @@ Other settings available for the rocm detector
 
 - `conserve_cpu: True` -- run ROCm/HIP synchronization in blocking mode saving CPU (at small loss of latency and maximum throughput)
 - `auto_override_gfx: True` -- enable or disable automatic gfx driver detection
-
-#### Advanced configuration
-
-One can configure several types of detectors to run in parallel to increase detection capacity. An example configuration running `rocm`, `edgetpu` and `openvino` in parallel:
-
-```yaml
-model:
-  labelmap_path: /config/model_cache/yolov8/labels-oiv7-frigate.txt
-  model_type: yolov8
-detectors:
-  rocm:
-    type: rocm
-    model:
-      path: /config/model_cache/yolov8/yolov8s-oiv7_320x320.onnx
-  coral:
-    type: edgetpu
-    device: usb
-    model:
-      path: /config/model_cache/yolov8/yolov8s-oiv7_320x320_edgetpu.tflite
-  openvino:
-    type: openvino
-    model:
-      path: /config/model_cache/yolov8/yolov8s-oiv7_320x320_i8_openvino.xml
-```
 
 ### Expected performance
 
