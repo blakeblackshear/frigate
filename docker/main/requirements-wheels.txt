@@ -7,6 +7,7 @@ numpy == 1.23.*
 onvif_zeep == 0.2.12
 opencv-python-headless == 4.7.0.*
 paho-mqtt == 1.6.*
+pandas == 2.1.4
 peewee == 3.17.*
 peewee_migrate == 1.12.*
 psutil == 5.9.*

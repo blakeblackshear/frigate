@@ -30,7 +30,6 @@ from frigate.ffmpeg_presets import (
     parse_preset_hardware_acceleration_scale,
     parse_preset_input,
     parse_preset_output_record,
-    parse_preset_output_rtmp,
 )
 from frigate.plus import PlusApi
 from frigate.util.builtin import (
@@ -40,7 +39,7 @@ from frigate.util.builtin import (
     load_config_with_no_duplicates,
 )
 from frigate.util.image import create_mask
-from frigate.util.services import get_video_properties
+from frigate.util.services import auto_detect_hwaccel, get_video_properties
 
 logger = logging.getLogger(__name__)
 
@@ -260,6 +259,20 @@ class RecordExportConfig(FrigateBaseModel):
     )
 
 
+class RecordQualityEnum(str, Enum):
+    very_low = "very_low"
+    low = "low"
+    medium = "medium"
+    high = "high"
+    very_high = "very_high"
+
+
+class RecordPreviewConfig(FrigateBaseModel):
+    quality: RecordQualityEnum = Field(
+        default=RecordQualityEnum.medium, title="Quality of recording preview."
+    )
+
+
 class RecordConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable record on all cameras.")
     sync_recordings: bool = Field(
@@ -277,6 +290,9 @@ class RecordConfig(FrigateBaseModel):
     )
     export: RecordExportConfig = Field(
         default_factory=RecordExportConfig, title="Recording Export Config"
+    )
+    preview: RecordPreviewConfig = Field(
+        default_factory=RecordPreviewConfig, title="Recording Preview Config"
     )
     enabled_in_config: Optional[bool] = Field(
         title="Keep track of original state of recording."
@@ -565,7 +581,6 @@ DETECT_FFMPEG_OUTPUT_ARGS_DEFAULT = [
     "-pix_fmt",
     "yuv420p",
 ]
-RTMP_FFMPEG_OUTPUT_ARGS_DEFAULT = "preset-rtmp-generic"
 RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT = "preset-record-generic"
 
 
@@ -578,10 +593,6 @@ class FfmpegOutputArgsConfig(FrigateBaseModel):
         default=RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT,
         title="Record role FFmpeg output arguments.",
     )
-    rtmp: Union[str, List[str]] = Field(
-        default=RTMP_FFMPEG_OUTPUT_ARGS_DEFAULT,
-        title="RTMP role FFmpeg output arguments.",
-    )
 
 
 class FfmpegConfig(FrigateBaseModel):
@@ -589,7 +600,7 @@ class FfmpegConfig(FrigateBaseModel):
         default=FFMPEG_GLOBAL_ARGS_DEFAULT, title="Global FFmpeg arguments."
     )
     hwaccel_args: Union[str, List[str]] = Field(
-        default_factory=list, title="FFmpeg hardware acceleration arguments."
+        default="auto", title="FFmpeg hardware acceleration arguments."
     )
     input_args: Union[str, List[str]] = Field(
         default=FFMPEG_INPUT_ARGS_DEFAULT, title="FFmpeg input arguments."
@@ -607,7 +618,6 @@ class FfmpegConfig(FrigateBaseModel):
 class CameraRoleEnum(str, Enum):
     audio = "audio"
     record = "record"
-    rtmp = "rtmp"
     detect = "detect"
 
 
@@ -716,10 +726,6 @@ class CameraMqttConfig(FrigateBaseModel):
     )
 
 
-class RtmpConfig(FrigateBaseModel):
-    enabled: bool = Field(default=False, title="RTMP restreaming enabled.")
-
-
 class CameraLiveConfig(FrigateBaseModel):
     stream_name: str = Field(default="", title="Name of restream to use as live view.")
     height: int = Field(default=720, title="Live camera view height")
@@ -754,9 +760,6 @@ class CameraConfig(FrigateBaseModel):
     )
     record: RecordConfig = Field(
         default_factory=RecordConfig, title="Record configuration."
-    )
-    rtmp: RtmpConfig = Field(
-        default_factory=RtmpConfig, title="RTMP restreaming configuration."
     )
     live: CameraLiveConfig = Field(
         default_factory=CameraLiveConfig, title="Live playback settings."
@@ -802,7 +805,6 @@ class CameraConfig(FrigateBaseModel):
 
         # add roles to the input if there is only one
         if len(config["ffmpeg"]["inputs"]) == 1:
-            has_rtmp = "rtmp" in config["ffmpeg"]["inputs"][0].get("roles", [])
             has_audio = "audio" in config["ffmpeg"]["inputs"][0].get("roles", [])
 
             config["ffmpeg"]["inputs"][0]["roles"] = [
@@ -812,9 +814,6 @@ class CameraConfig(FrigateBaseModel):
 
             if has_audio:
                 config["ffmpeg"]["inputs"][0]["roles"].append("audio")
-
-            if has_rtmp:
-                config["ffmpeg"]["inputs"][0]["roles"].append("rtmp")
 
         super().__init__(**config)
 
@@ -855,15 +854,7 @@ class CameraConfig(FrigateBaseModel):
             )
 
             ffmpeg_output_args = scale_detect_args + ffmpeg_output_args + ["pipe:"]
-        if "rtmp" in ffmpeg_input.roles and self.rtmp.enabled:
-            rtmp_args = get_ffmpeg_arg_list(
-                parse_preset_output_rtmp(self.ffmpeg.output_args.rtmp)
-                or self.ffmpeg.output_args.rtmp
-            )
 
-            ffmpeg_output_args = (
-                rtmp_args + [f"rtmp://127.0.0.1/live/{self.name}"] + ffmpeg_output_args
-            )
         if "record" in ffmpeg_input.roles and self.record.enabled:
             record_args = get_ffmpeg_arg_list(
                 parse_preset_output_record(self.ffmpeg.output_args.record)
@@ -948,11 +939,6 @@ def verify_config_roles(camera_config: CameraConfig) -> None:
     if camera_config.record.enabled and "record" not in assigned_roles:
         raise ValueError(
             f"Camera {camera_config.name} has record enabled, but record is not assigned to an input."
-        )
-
-    if camera_config.rtmp.enabled and "rtmp" not in assigned_roles:
-        raise ValueError(
-            f"Camera {camera_config.name} has rtmp enabled, but rtmp is not assigned to an input."
         )
 
     if camera_config.audio.enabled and "audio" not in assigned_roles:
@@ -1065,9 +1051,6 @@ class FrigateConfig(FrigateBaseModel):
     snapshots: SnapshotsConfig = Field(
         default_factory=SnapshotsConfig, title="Global snapshots configuration."
     )
-    rtmp: RtmpConfig = Field(
-        default_factory=RtmpConfig, title="Global RTMP restreaming configuration."
-    )
     live: CameraLiveConfig = Field(
         default_factory=CameraLiveConfig, title="Live playback settings."
     )
@@ -1114,6 +1097,10 @@ class FrigateConfig(FrigateBaseModel):
             elif config.objects.filters[attribute].min_score == 0.5:
                 config.objects.filters[attribute].min_score = 0.7
 
+        # auto detect hwaccel args
+        if config.ffmpeg.hwaccel_args == "auto":
+            config.ffmpeg.hwaccel_args = auto_detect_hwaccel()
+
         # Global config to propagate down to camera level
         global_config = config.dict(
             include={
@@ -1121,7 +1108,6 @@ class FrigateConfig(FrigateBaseModel):
                 "birdseye": ...,
                 "record": ...,
                 "snapshots": ...,
-                "rtmp": ...,
                 "live": ...,
                 "objects": ...,
                 "motion": ...,
@@ -1137,6 +1123,9 @@ class FrigateConfig(FrigateBaseModel):
             camera_config: CameraConfig = CameraConfig.parse_obj(
                 {"name": name, **merged_config}
             )
+
+            if camera_config.ffmpeg.hwaccel_args == "auto":
+                camera_config.ffmpeg.hwaccel_args = config.ffmpeg.hwaccel_args
 
             if (
                 camera_config.detect.height is None
@@ -1254,11 +1243,6 @@ class FrigateConfig(FrigateBaseModel):
             verify_recording_segments_setup_with_reasonable_time(camera_config)
             verify_zone_objects_are_tracked(camera_config)
             verify_autotrack_zones(camera_config)
-
-            if camera_config.rtmp.enabled:
-                logger.warning(
-                    "RTMP restream is deprecated in favor of the restream role, recommend disabling RTMP."
-                )
 
             # generate the ffmpeg commands
             camera_config.create_ffmpeg_cmds()

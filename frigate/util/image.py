@@ -387,6 +387,7 @@ def copy_yuv_to_position(
     destination_shape,
     source_frame=None,
     source_channel_dim=None,
+    interpolation=cv2.INTER_LINEAR,
 ):
     # get the coordinates of the channels for this position in the layout
     y, u1, u2, v1, v2 = get_yuv_crop(
@@ -435,7 +436,6 @@ def copy_yuv_to_position(
         uv_y_offset = y_y_offset // 4
         uv_x_offset = y_x_offset // 2
 
-        interpolation = cv2.INTER_LINEAR
         # resize/copy y channel
         destination_frame[
             y[1] + y_y_offset : y[1] + y_y_offset + y_resize_height,

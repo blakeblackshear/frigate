@@ -18,9 +18,7 @@ See [the hwaccel docs](/configuration/hardware_acceleration.md) for more info on
 | preset-vaapi          | Intel & AMD VAAPI              | Check hwaccel docs to ensure correct driver is chosen |
 | preset-intel-qsv-h264 | Intel QSV with h264 stream     | If issues occur recommend using vaapi preset instead  |
 | preset-intel-qsv-h265 | Intel QSV with h265 stream     | If issues occur recommend using vaapi preset instead  |
-| preset-nvidia-h264    | Nvidia GPU with h264 stream    |                                                       |
-| preset-nvidia-h265    | Nvidia GPU with h265 stream    |                                                       |
-| preset-nvidia-mjpeg   | Nvidia GPU with mjpeg stream   | Recommend restreaming mjpeg and using nvidia-h264     |
+| preset-nvidia         | Nvidia GPU                     |                                                       |
 | preset-jetson-h264    | Nvidia Jetson with h264 stream |                                                       |
 | preset-jetson-h265    | Nvidia Jetson with h265 stream |                                                       |
 | preset-rk-h264        | Rockchip MPP with h264 stream  | Use image with *-rk suffix and privileged mode        |
@@ -76,8 +74,8 @@ Output args presets help make the config more readable and handle use cases for 
 | Preset                           | Usage                             | Other Notes                                   |
 | -------------------------------- | --------------------------------- | --------------------------------------------- |
 | preset-record-generic            | Record WITHOUT audio              | This is the default when nothing is specified |
-| preset-record-generic-audio-aac  | Record WITH aac audio             | Use this to enable audio in recordings        |
 | preset-record-generic-audio-copy | Record WITH original audio        | Use this to enable audio in recordings        |
+| preset-record-generic-audio-aac  | Record WITH transcoded aac audio  | Use this to transcode to aac audio. If your source is already aac, use preset-record-generic-audio-copy instead to avoid re-encoding |
 | preset-record-mjpeg              | Record an mjpeg stream            | Recommend restreaming mjpeg stream instead    |
 | preset-record-jpeg               | Record live jpeg                  | Recommend restreaming live jpeg instead       |
 | preset-record-ubiquiti           | Record ubiquiti stream with audio | Recordings with ubiquiti non-standard audio   |
