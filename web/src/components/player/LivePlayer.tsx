@@ -151,7 +151,6 @@ export default function LivePlayer({
   } else {
     player = <ActivityIndicator />;
   }
-  // box - shadow: 0px 0px 10px 0px rgba(240, 62, 62, 1) inset;
 
   return (
     <div
