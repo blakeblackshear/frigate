@@ -52,6 +52,12 @@ import {
   SheetHeader,
   SheetTitle,
 } from "../ui/sheet";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import ActivityIndicator from "../ui/activity-indicator";
 
 type SettingsNavItemsProps = {
@@ -92,146 +98,164 @@ export default function SettingsNavItems({ className }: SettingsNavItemsProps) {
   return (
     <>
       <div className={className}>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button size="icon" variant="ghost">
-              <LuSettings />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="md:w-72 mr-5">
-            <DropdownMenuLabel>System</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <Link to="/storage">
-                <DropdownMenuItem>
-                  <LuHardDrive className="mr-2 h-4 w-4" />
-                  <span>Storage</span>
-                </DropdownMenuItem>
-              </Link>
-              <Link to="/system">
-                <DropdownMenuItem>
-                  <LuActivity className="mr-2 h-4 w-4" />
-                  <span>System metrics</span>
-                </DropdownMenuItem>
-              </Link>
-              <Link to="/logs">
-                <DropdownMenuItem>
-                  <LuList className="mr-2 h-4 w-4" />
-                  <span>System logs</span>
-                </DropdownMenuItem>
-              </Link>
-            </DropdownMenuGroup>
-            <DropdownMenuLabel className="mt-3">
-              Configuration
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <Link to="/settings">
-                <DropdownMenuItem>
-                  <LuSettings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
-                </DropdownMenuItem>
-              </Link>
-              <Link to="/config">
-                <DropdownMenuItem>
-                  <LuPenSquare className="mr-2 h-4 w-4" />
-                  <span>Configuration editor</span>
-                </DropdownMenuItem>
-              </Link>
-              <DropdownMenuLabel className="mt-3">Appearance</DropdownMenuLabel>
+        <TooltipProvider>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Button size="icon" variant="ghost">
+                    <LuSettings />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  <p>Settings</p>
+                </TooltipContent>
+              </Tooltip>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="md:w-72 mr-5">
+              <DropdownMenuLabel>System</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
-                  <LuSunMoon className="mr-2 h-4 w-4" />
-                  <span>Dark Mode</span>
-                </DropdownMenuSubTrigger>
-                <DropdownMenuPortal>
-                  <DropdownMenuSubContent>
-                    <DropdownMenuItem onClick={() => setTheme("light")}>
-                      {theme === "light" ? (
-                        <>
-                          <LuSun className="mr-2 h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                          Light
-                        </>
-                      ) : (
-                        <span className="mr-2 ml-6">Light</span>
-                      )}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setTheme("dark")}>
-                      {theme === "dark" ? (
-                        <>
-                          <LuMoon className="mr-2 h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                          Dark
-                        </>
-                      ) : (
-                        <span className="mr-2 ml-6">Dark</span>
-                      )}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setTheme("system")}>
-                      {theme === "system" ? (
-                        <>
-                          <CgDarkMode className="mr-2 h-4 w-4 scale-100 transition-all" />
-                          System
-                        </>
-                      ) : (
-                        <span className="mr-2 ml-6">System</span>
-                      )}
-                    </DropdownMenuItem>
-                  </DropdownMenuSubContent>
-                </DropdownMenuPortal>
-              </DropdownMenuSub>
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
-                  <LuSunMoon className="mr-2 h-4 w-4" />
-                  <span>Theme</span>
-                </DropdownMenuSubTrigger>
-                <DropdownMenuPortal>
-                  <DropdownMenuSubContent>
-                    {colorSchemes.map((scheme) => (
-                      <DropdownMenuItem
-                        key={scheme}
-                        onClick={() => setColorScheme(scheme)}
-                      >
-                        {scheme === colorScheme ? (
+              <DropdownMenuGroup>
+                <Link to="/storage">
+                  <DropdownMenuItem>
+                    <LuHardDrive className="mr-2 h-4 w-4" />
+                    <span>Storage</span>
+                  </DropdownMenuItem>
+                </Link>
+                <Link to="/system">
+                  <DropdownMenuItem>
+                    <LuActivity className="mr-2 h-4 w-4" />
+                    <span>System metrics</span>
+                  </DropdownMenuItem>
+                </Link>
+                <Link to="/logs">
+                  <DropdownMenuItem>
+                    <LuList className="mr-2 h-4 w-4" />
+                    <span>System logs</span>
+                  </DropdownMenuItem>
+                </Link>
+              </DropdownMenuGroup>
+              <DropdownMenuLabel className="mt-3">
+                Configuration
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <Link to="/settings">
+                  <DropdownMenuItem>
+                    <LuSettings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </DropdownMenuItem>
+                </Link>
+                <Link to="/config">
+                  <DropdownMenuItem>
+                    <LuPenSquare className="mr-2 h-4 w-4" />
+                    <span>Configuration editor</span>
+                  </DropdownMenuItem>
+                </Link>
+                <DropdownMenuLabel className="mt-3">
+                  Appearance
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
+                    <LuSunMoon className="mr-2 h-4 w-4" />
+                    <span>Dark Mode</span>
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuPortal>
+                    <DropdownMenuSubContent>
+                      <DropdownMenuItem onClick={() => setTheme("light")}>
+                        {theme === "light" ? (
                           <>
-                            <IoColorPalette className="mr-2 h-4 w-4 rotate-0 scale-100 transition-all" />
-                            {friendlyColorSchemeName(scheme)}
+                            <LuSun className="mr-2 h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                            Light
                           </>
                         ) : (
-                          <span className="mr-2 ml-6">
-                            {friendlyColorSchemeName(scheme)}
-                          </span>
+                          <span className="mr-2 ml-6">Light</span>
                         )}
                       </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuSubContent>
-                </DropdownMenuPortal>
-              </DropdownMenuSub>
-            </DropdownMenuGroup>
-            <DropdownMenuLabel className="mt-3">Help</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <a href="https://docs.frigate.video">
-              <DropdownMenuItem>
-                <LuLifeBuoy className="mr-2 h-4 w-4" />
-                <span>Documentation</span>
+                      <DropdownMenuItem onClick={() => setTheme("dark")}>
+                        {theme === "dark" ? (
+                          <>
+                            <LuMoon className="mr-2 h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                            Dark
+                          </>
+                        ) : (
+                          <span className="mr-2 ml-6">Dark</span>
+                        )}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setTheme("system")}>
+                        {theme === "system" ? (
+                          <>
+                            <CgDarkMode className="mr-2 h-4 w-4 scale-100 transition-all" />
+                            System
+                          </>
+                        ) : (
+                          <span className="mr-2 ml-6">System</span>
+                        )}
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuPortal>
+                </DropdownMenuSub>
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
+                    <LuSunMoon className="mr-2 h-4 w-4" />
+                    <span>Theme</span>
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuPortal>
+                    <DropdownMenuSubContent>
+                      {colorSchemes.map((scheme) => (
+                        <DropdownMenuItem
+                          key={scheme}
+                          onClick={() => setColorScheme(scheme)}
+                        >
+                          {scheme === colorScheme ? (
+                            <>
+                              <IoColorPalette className="mr-2 h-4 w-4 rotate-0 scale-100 transition-all" />
+                              {friendlyColorSchemeName(scheme)}
+                            </>
+                          ) : (
+                            <span className="mr-2 ml-6">
+                              {friendlyColorSchemeName(scheme)}
+                            </span>
+                          )}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuPortal>
+                </DropdownMenuSub>
+              </DropdownMenuGroup>
+              <DropdownMenuLabel className="mt-3">Help</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <a href="https://docs.frigate.video">
+                <DropdownMenuItem>
+                  <LuLifeBuoy className="mr-2 h-4 w-4" />
+                  <span>Documentation</span>
+                </DropdownMenuItem>
+              </a>
+              <a href="https://github.com/blakeblackshear/frigate">
+                <DropdownMenuItem>
+                  <LuGithub className="mr-2 h-4 w-4" />
+                  <span>GitHub</span>
+                </DropdownMenuItem>
+              </a>
+              <DropdownMenuSeparator className="mt-3" />
+              <DropdownMenuItem onClick={() => setRestartDialogOpen(true)}>
+                <LuRotateCw className="mr-2 h-4 w-4" />
+                <span>Restart Frigate</span>
               </DropdownMenuItem>
-            </a>
-            <a href="https://github.com/blakeblackshear/frigate">
-              <DropdownMenuItem>
-                <LuGithub className="mr-2 h-4 w-4" />
-                <span>GitHub</span>
-              </DropdownMenuItem>
-            </a>
-            <DropdownMenuSeparator className="mt-3" />
-            <DropdownMenuItem onClick={() => setRestartDialogOpen(true)}>
-              <LuRotateCw className="mr-2 h-4 w-4" />
-              <span>Restart Frigate</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <Button size="icon" variant="ghost">
-          <VscAccount />
-        </Button>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Tooltip>
+            <TooltipTrigger>
+              <Button size="icon" variant="ghost">
+                <VscAccount />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              <p>Account</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
       {restartDialogOpen && (
         <AlertDialog
