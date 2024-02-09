@@ -157,22 +157,18 @@ export default function LivePlayer({
       {(showStillWithoutActivity == false || activeMotion || activeTracking) &&
         player}
 
-      {showStillWithoutActivity && !liveReady && (
-        <div className="absolute left-0 top-0 right-0 bottom-0 w-full">
-          <AutoUpdatingCameraImage
-            className="w-full h-full"
-            camera={cameraConfig.name}
-            showFps={false}
-            reloadInterval={30000}
-            fitAspect={
-              cameraConfig.detect.width / cameraConfig.detect.height > 2 ||
-              cameraConfig.detect.width / cameraConfig.detect.height < 1
-                ? cameraConfig.detect.width / cameraConfig.detect.height
-                : 16 / 9
-            }
-          />
-        </div>
-      )}
+      <div
+        className={`absolute left-0 top-0 right-0 bottom-0 w-full ${
+          showStillWithoutActivity && !liveReady ? "visible" : "invisible"
+        }`}
+      >
+        <AutoUpdatingCameraImage
+          className="w-full h-full"
+          camera={cameraConfig.name}
+          showFps={false}
+          reloadInterval={30000}
+        />
+      </div>
 
       <div className="absolute flex left-2 top-2 gap-2">
         <Chip

@@ -7,7 +7,6 @@ type AutoUpdatingCameraImageProps = {
   showFps?: boolean;
   className?: string;
   reloadInterval?: number;
-  fitAspect?: number;
 };
 
 const MIN_LOAD_TIMEOUT_MS = 200;
