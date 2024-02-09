@@ -14,7 +14,7 @@ function Live() {
 
   const { data: allEvents, mutate: updateEvents } = useSWR<FrigateEvent[]>(
     ["events", { limit: 10 }],
-    { revalidateOnFocus: false, refreshInterval: 60000 }
+    { refreshInterval: 60000 }
   );
 
   const events = useMemo(() => {
