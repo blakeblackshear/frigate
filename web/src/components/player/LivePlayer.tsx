@@ -151,9 +151,16 @@ export default function LivePlayer({
   } else {
     player = <ActivityIndicator />;
   }
+  // box - shadow: 0px 0px 10px 0px rgba(240, 62, 62, 1) inset;
 
   return (
-    <div className={`relative flex justify-center w-full ${className}`}>
+    <div
+      className={`relative flex justify-center w-full outline ${
+        activeTracking
+          ? "outline-destructive outline-1 rounded-2xl shadow-[0_0_6px_1px] shadow-destructive"
+          : "outline-0"
+      } transition-all duration-500 ${className}`}
+    >
       {(showStillWithoutActivity == false || activeMotion || activeTracking) &&
         player}
 
@@ -188,14 +195,6 @@ export default function LivePlayer({
             <div className="ml-1 text-white text-xs">Sound</div>
           </Chip>
         )}
-
-        <Chip
-          in={activeTracking}
-          className={`bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500/90 `}
-        >
-          <MdSelectAll className="w-4 h-4 text-object" />
-          <div className="ml-1 text-white text-xs">Tracking</div>
-        </Chip>
       </div>
 
       <Chip className="absolute right-2 top-2 bg-gradient-to-br from-gray-300/50 to-gray-500/90">

@@ -8,7 +8,6 @@ import SettingsNavItems from "./settings/SettingsNavItems";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
@@ -23,18 +22,16 @@ function Sidebar({
     <aside className="w-[52px] z-10 h-screen sticky top-0 overflow-y-auto scrollbar-hidden py-4 flex flex-col justify-between">
       <div className="w-full flex flex-col gap-0 items-center">
         <Logo className="w-8 h-8 mb-6" />
-        <TooltipProvider>
-          {navbarLinks.map((item) => (
-            <SidebarItem
-              key={item.id}
-              Icon={item.icon}
-              title={item.title}
-              url={item.url}
-              dev={item.dev}
-              onClick={() => setSheetOpen(false)}
-            />
-          ))}
-        </TooltipProvider>
+        {navbarLinks.map((item) => (
+          <SidebarItem
+            key={item.id}
+            Icon={item.icon}
+            title={item.title}
+            url={item.url}
+            dev={item.dev}
+            onClick={() => setSheetOpen(false)}
+          />
+        ))}
       </div>
       <SettingsNavItems className="hidden md:flex flex-col items-center" />
     </aside>
