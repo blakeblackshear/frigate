@@ -649,7 +649,7 @@ class FrigateApp:
         logger.info(f"Starting Frigate ({VERSION})")
 
         if not os.environ.get('I_PROMISE_I_WONT_MAKE_AN_ISSUE_ON_GITHUB'):
-            logger.error("Frigate 0.14 UNSTABLE - not for public use at this time. Please use Frigate stable")
+            print("Frigate 0.14 UNSTABLE - not for public use at this time. Please use Frigate stable")
             sys.exit(1)
 
         try:
