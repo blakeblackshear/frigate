@@ -25,7 +25,6 @@ type LivePlayerProps = {
   className?: string;
   cameraConfig: CameraConfig;
   liveMode?: LivePlayerMode;
-  liveChips?: boolean;
   showStillWithoutActivity?: boolean;
 };
 
@@ -35,7 +34,6 @@ export default function LivePlayer({
   className,
   cameraConfig,
   liveMode = "mse",
-  liveChips = false,
   showStillWithoutActivity = true,
 }: LivePlayerProps) {
   // camera activity
@@ -67,7 +65,7 @@ export default function LivePlayer({
       const newOptions = { ...options, [id]: value };
       setOptions(newOptions);
     },
-    [options, setOptions]
+    [options]
   );
   const searchParams = useMemo(
     () =>
@@ -82,7 +80,7 @@ export default function LivePlayer({
   );
   const handleToggleSettings = useCallback(() => {
     setShowSettings(!showSettings);
-  }, [showSettings, setShowSettings]);
+  }, [showSettings]);
 
   if (!cameraConfig) {
     return <ActivityIndicator />;
@@ -176,50 +174,38 @@ export default function LivePlayer({
         </div>
       )}
 
-      {liveChips && (
-        <div className="absolute flex left-2 top-2 gap-2">
+      <div className="absolute flex left-2 top-2 gap-2">
+        <Chip
+          in={activeMotion}
+          className={`bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500/90`}
+        >
+          <MdLeakAdd className="w-4 h-4 text-motion" />
+          <div className="ml-1 text-white text-xs">Motion</div>
+        </Chip>
+
+        {cameraConfig.audio.enabled_in_config && (
           <Chip
-            className={`bg-gray-500 bg-gradient-to-br ${
-              activeMotion ? "visible opacity-100" : "invisible opacity-0"
-            }`}
+            in={activeAudio}
+            className={`bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500/90`}
           >
-            <MdLeakAdd
-              className={`w-4 h-4 ${
-                activeMotion ? "text-motion" : "text-white"
-              }`}
-            />
-            <div className="ml-1 capitalize text-white text-xs">Motion</div>
+            <BsSoundwave className="w-4 h-4 text-audio" />
+            <div className="ml-1 text-white text-xs">Sound</div>
           </Chip>
-          {cameraConfig.audio.enabled_in_config && (
-            <Chip
-              className={`bg-gray-500 bg-gradient-to-br transition-all ${
-                activeAudio ? "visible opacity-100" : "invisible opacity-0"
-              }`}
-            >
-              <BsSoundwave
-                className={`w-4 h-4 ${
-                  activeAudio ? "text-audio" : "text-white"
-                }`}
-              />
-              <div className="ml-1 capitalize text-white text-xs">Sound</div>
-            </Chip>
-          )}
-          <Chip
-            className={`bg-gray-500 bg-gradient-to-br transition-all ${
-              activeTracking ? "inline opacity-100" : "invisible opacity-0"
-            }`}
-          >
-            <MdSelectAll
-              className={`w-4 h-4 ${
-                activeTracking ? "text-object" : "text-white"
-              }`}
-            />
-            <div className="ml-1 capitalize text-white text-xs">Tracking</div>
-          </Chip>
-        </div>
-      )}
-      <Chip className="absolute right-2 top-2 bg-gray-500 bg-gradient-to-br">
-        {recording == "ON" && <MdCircle className="w-2 h-2 text-danger" />}
+        )}
+
+        <Chip
+          in={activeTracking}
+          className={`bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500/90 `}
+        >
+          <MdSelectAll className="w-4 h-4 text-object" />
+          <div className="ml-1 text-white text-xs">Tracking</div>
+        </Chip>
+      </div>
+
+      <Chip className="absolute right-2 top-2 bg-gradient-to-br from-gray-300/50 to-gray-500/90">
+        {recording == "ON" && (
+          <MdCircle className="w-2 h-2 drop-shadow-md shadow-danger text-danger" />
+        )}
         <div className="ml-1 capitalize text-white text-xs">
           {cameraConfig.name.replaceAll("_", " ")}
         </div>
