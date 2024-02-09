@@ -54,11 +54,6 @@ function Header({ onToggleNavbar }: HeaderProps) {
               <Logo />
             </div>
           </div>
-          {ENV == "production" && (
-            <div className="text-red-500 text-sm items-center text-right">
-              0.14 unstable
-            </div>
-          )}
         </Link>
         <HeaderNavigation />
       </div>
