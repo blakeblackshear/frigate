@@ -550,5 +550,5 @@ Other settings available for the rocm detector
 
 ### Expected performance
 
-On an AMD Ryzen 3 5400U with integrated GPU one can expect getting about 120fps detections with yolov8n and 60fps with yolov8s (320x320).
+On an AMD Ryzen 3 5400U with integrated GPU (gfx90c) the yolov8n runs in around 9ms per image (about 110 detections per second) and 18ms (55 detections per second) for yolov8s (at 320x320 detector resolution).
 
