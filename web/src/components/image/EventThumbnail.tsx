@@ -20,7 +20,7 @@ export function EventThumbnail({ event, onFavorite }: EventThumbnailProps) {
         onClick={(e: Event) => (onFavorite ? onFavorite(e, event) : null)}
         fill={event.retain_indefinitely ? "currentColor" : "none"}
       />
-      <div className="absolute left-1 bottom-0 text-sm text-white">
+      <div className="absolute left-1 bottom-0 text-xs text-white">
         <TimeAgo time={event.start_time * 1000} dense />
       </div>
     </div>
