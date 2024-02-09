@@ -15,6 +15,7 @@ import { MdCircle, MdLeakAdd, MdSelectAll } from "react-icons/md";
 import { BsSoundwave } from "react-icons/bs";
 import Chip from "../Chip";
 import useCameraActivity from "@/hooks/use-camera-activity";
+import { useRecordingsState } from "@/api/ws";
 
 const emptyObject = Object.freeze({});
 
@@ -51,6 +52,8 @@ export default function LivePlayer({
       setLiveReady(false);
     }
   }, [activeMotion, activeTracking, liveReady]);
+
+  const { payload: recording } = useRecordingsState(cameraConfig.name);
 
   // debug view settings
 
@@ -216,9 +219,7 @@ export default function LivePlayer({
         </div>
       )}
       <Chip className="absolute right-2 top-2 bg-gray-500 bg-gradient-to-br">
-        {cameraConfig.record.enabled && (
-          <MdCircle className="w-2 h-2 text-danger" />
-        )}
+        {recording == "ON" && <MdCircle className="w-2 h-2 text-danger" />}
         <div className="ml-1 capitalize text-white text-xs">
           {cameraConfig.name.replaceAll("_", " ")}
         </div>
