@@ -29,7 +29,7 @@ export default function Chip({
     >
       <div
         ref={nodeRef}
-        className={`flex px-2 py-1.5 rounded-2xl items-center ${className}`}
+        className={`flex px-2 py-1.5 rounded-2xl items-center z-10 ${className}`}
       >
         {children}
       </div>

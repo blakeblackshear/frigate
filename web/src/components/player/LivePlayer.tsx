@@ -33,7 +33,7 @@ type Options = { [key: string]: boolean };
 export default function LivePlayer({
   className,
   cameraConfig,
-  liveMode = "mse",
+  liveMode = "jsmpeg",
   showStillWithoutActivity = true,
 }: LivePlayerProps) {
   // camera activity
@@ -43,6 +43,10 @@ export default function LivePlayer({
   const [liveReady, setLiveReady] = useState(false);
   useEffect(() => {
     if (!liveReady) {
+      if (activeMotion && liveMode == "jsmpeg") {
+        setLiveReady(true);
+      }
+
       return;
     }
 
@@ -115,6 +119,7 @@ export default function LivePlayer({
   } else if (liveMode == "jsmpeg") {
     player = (
       <JSMpegPlayer
+        className="w-full flex justify-center"
         camera={cameraConfig.name}
         width={cameraConfig.detect.width}
         height={cameraConfig.detect.height}
