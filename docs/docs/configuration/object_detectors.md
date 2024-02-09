@@ -469,8 +469,8 @@ services:
 Figuring out what version you need can be complicated as you can't tell the chipset name and driver from the AMD brand name.
 
   - first make sure that rocm environment is running properly by running `/opt/rocm/bin/rocminfo` in the frigate container -- it should list both the CPU and the GPU with their properties
-  - find the chipset version (gfxNNN) your systerm as from the output of the `rocminfo` (see below)
-  - use a search engine to query what HSA_OVERRIDE_GFX_VERSION you need for the given gfx name ("gfxNNN ROCm HSA_OVERRIDE_GFX_VERSION")
+  - find the chipset version you have (gfxNNN) from the output of the `rocminfo` (see below)
+  - use a search engine to query what `HSA_OVERRIDE_GFX_VERSION` you need for the given gfx name ("gfxNNN ROCm HSA_OVERRIDE_GFX_VERSION")
   - override the `HSA_OVERRIDE_GFX_VERSION` with relevant value
   - if things are not working check the frigate docker logs
 
@@ -482,7 +482,7 @@ $ docker exec -it frigate /opt/rocm/bin/rocminfo
 
 #### Figuring out your AMD GPU chipset version:
 
-We unset the `HSA_OVERRIDE_GFX_VERSION` to prevent the override from messing up the result:
+We unset the `HSA_OVERRIDE_GFX_VERSION` to prevent an existing override from messing up the result:
 
 ```bash
 $ docker exec -it frigate /bin/bash -c '(unset HSA_OVERRIDE_GFX_VERSION && /opt/rocm/bin/rocminfo |grep gfx)'
