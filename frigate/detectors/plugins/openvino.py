@@ -8,8 +8,6 @@ from typing_extensions import Literal
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
 
-import frigate.detectors.yolo_utils as yolo_utils
-
 logger = logging.getLogger(__name__)
 
 DETECTOR_KEY = "openvino"
@@ -35,7 +33,7 @@ class OvDetector(DetectionApi):
             model=self.ov_model, device_name=detector_config.device
         )
 
-        logger.info(f"Model Input Shape: {self.interpreter.input(0).shape} {self.interpreter.input(0).element_type.to_dtype()}")
+        logger.info(f"Model Input Shape: {self.interpreter.input(0).shape}")
         self.output_indexes = 0
 
         while True:
@@ -82,7 +80,6 @@ class OvDetector(DetectionApi):
         ]
 
     def detect_raw(self, tensor_input):
-        tensor_input = yolo_utils.preprocess(tensor_input, self.interpreter.inputs[0].shape, self.interpreter.inputs[0].element_type.to_dtype())
         infer_request = self.interpreter.create_infer_request()
         infer_request.infer([tensor_input])
 
@@ -135,8 +132,28 @@ class OvDetector(DetectionApi):
                 )
             return detections
         elif self.ov_model_type == ModelTypeEnum.yolov8:
-            out_tensor = infer_request.get_output_tensor().data
-            return yolo_utils.yolov8_postprocess(self.interpreter.inputs[0].shape, out_tensor)
+            out_tensor = infer_request.get_output_tensor()
+            results = out_tensor.data[0]
+            output_data = np.transpose(results)
+            scores = np.max(output_data[:, 4:], axis=1)
+            if len(scores) == 0:
+                return np.zeros((20, 6), np.float32)
+            scores = np.expand_dims(scores, axis=1)
+            # add scores to the last column
+            dets = np.concatenate((output_data, scores), axis=1)
+            # filter out lines with scores below threshold
+            dets = dets[dets[:, -1] > 0.5, :]
+            # limit to top 20 scores, descending order
+            ordered = dets[dets[:, -1].argsort()[::-1]][:20]
+            detections = np.zeros((20, 6), np.float32)
+
+            for i, object_detected in enumerate(ordered):
+                detections[i] = self.process_yolo(
+                    np.argmax(object_detected[4:-1]),
+                    object_detected[-1],
+                    object_detected[:4],
+                )
+            return detections
         elif self.ov_model_type == ModelTypeEnum.yolov5:
             out_tensor = infer_request.get_output_tensor()
             output_data = out_tensor.data[0]
