@@ -1,17 +1,16 @@
-import logging
-
-import sys
-import os
-import numpy as np
 import ctypes
+import glob
+import logging
+import os
+import subprocess
+import sys
+
+import numpy as np
 from pydantic import Field
 from typing_extensions import Literal
-import glob
-import subprocess
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
-
 from frigate.detectors.util import preprocess, yolov8_postprocess
 
 logger = logging.getLogger(__name__)
@@ -71,13 +70,13 @@ class ROCmDetector(DetectionApi):
             sys.path.append("/opt/rocm/lib")
             import migraphx
 
-            logger.info(f"AMD/ROCm: loaded migraphx module")
+            logger.info("AMD/ROCm: loaded migraphx module")
         except ModuleNotFoundError:
             logger.error("AMD/ROCm: module loading failed, missing ROCm environment?")
             raise
 
         if detector_config.conserve_cpu:
-            logger.info(f"AMD/ROCm: switching HIP to blocking mode to conserve CPU")
+            logger.info("AMD/ROCm: switching HIP to blocking mode to conserve CPU")
             ctypes.CDLL("/opt/rocm/lib/libamdhip64.so").hipSetDeviceFlags(4)
         assert (
             detector_config.model.model_type == "yolov8"
@@ -118,14 +117,14 @@ class ROCmDetector(DetectionApi):
                 self.model = migraphx.parse_tf(path)
             else:
                 raise Exception(f"AMD/ROCm: unkown model format {path}")
-            logger.info(f"AMD/ROCm: compiling the model")
+            logger.info("AMD/ROCm: compiling the model")
             self.model.compile(
                 migraphx.get_target("gpu"), offload_copy=True, fast_math=True
             )
             logger.info(f"AMD/ROCm: saving parsed model into {mxr_path}")
             os.makedirs("/config/model_cache/rocm", exist_ok=True)
             migraphx.save(self.model, mxr_path)
-        logger.info(f"AMD/ROCm: model loaded")
+        logger.info("AMD/ROCm: model loaded")
 
     def detect_raw(self, tensor_input):
         model_input_name = self.model.get_parameter_names()[0]

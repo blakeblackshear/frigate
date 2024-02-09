@@ -1,16 +1,11 @@
+import glob
 import logging
 
-import sys
-import os
 import numpy as np
-import ctypes
-from pydantic import Field
 from typing_extensions import Literal
-import glob
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
-
 from frigate.detectors.util import preprocess, yolov8_postprocess
 
 logger = logging.getLogger(__name__)
@@ -29,7 +24,7 @@ class ONNXDetector(DetectionApi):
         try:
             import onnxruntime
 
-            logger.info(f"ONNX: loaded onnxruntime module")
+            logger.info("ONNX: loaded onnxruntime module")
         except ModuleNotFoundError:
             logger.error(
                 "ONNX: module loading failed, need 'pip install onnxruntime'?!?"
