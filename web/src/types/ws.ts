@@ -32,3 +32,5 @@ export interface FrigateEvent {
   before: FrigateObjectState;
   after: FrigateObjectState;
 }
+
+export type ToggleableSetting = "ON" | "OFF"
