@@ -87,6 +87,7 @@ function Live() {
               key={camera.name}
               className={`mb-2 md:mb-0 rounded-2xl bg-black ${grow}`}
               cameraConfig={camera}
+              preferredLiveMode="mse"
             />
           );
         })}

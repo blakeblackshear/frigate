@@ -16,15 +16,15 @@ import { BsSoundwave } from "react-icons/bs";
 import Chip from "../Chip";
 import useCameraActivity from "@/hooks/use-camera-activity";
 import { useRecordingsState } from "@/api/ws";
+import { LivePlayerMode } from "@/types/live";
+import useCameraLiveMode from "@/hooks/use-camera-live-mode";
 
 const emptyObject = Object.freeze({});
-
-type LivePlayerMode = "webrtc" | "mse" | "jsmpeg" | "debug";
 
 type LivePlayerProps = {
   className?: string;
   cameraConfig: CameraConfig;
-  liveMode?: LivePlayerMode;
+  preferredLiveMode?: LivePlayerMode;
   showStillWithoutActivity?: boolean;
 };
 
@@ -33,12 +33,14 @@ type Options = { [key: string]: boolean };
 export default function LivePlayer({
   className,
   cameraConfig,
-  liveMode = "jsmpeg",
+  preferredLiveMode,
   showStillWithoutActivity = true,
 }: LivePlayerProps) {
   // camera activity
   const { activeMotion, activeAudio, activeTracking } =
     useCameraActivity(cameraConfig);
+
+  const liveMode = useCameraLiveMode(cameraConfig, preferredLiveMode);
 
   const [liveReady, setLiveReady] = useState(false);
   useEffect(() => {
