@@ -216,7 +216,9 @@ export default function LivePlayer({
         </div>
       )}
       <Chip className="absolute right-2 top-2 bg-gray-500 bg-gradient-to-br">
-        <MdCircle className="w-2 h-2 text-danger" />
+        {cameraConfig.record.enabled && (
+          <MdCircle className="w-2 h-2 text-danger" />
+        )}
         <div className="ml-1 capitalize text-white text-xs">
           {cameraConfig.name.replaceAll("_", " ")}
         </div>
