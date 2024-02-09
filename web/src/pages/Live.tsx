@@ -1,6 +1,7 @@
 import { EventThumbnail } from "@/components/image/EventThumbnail";
 import LivePlayer from "@/components/player/LivePlayer";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { Event as FrigateEvent } from "@/types/event";
 import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
@@ -57,17 +58,19 @@ function Live() {
     <>
       {events && events.length > 0 && (
         <ScrollArea>
-          <div className="flex">
-            {events.map((event) => {
-              return (
-                <EventThumbnail
-                  key={event.id}
-                  event={event}
-                  onFavorite={onFavorite}
-                />
-              );
-            })}
-          </div>
+          <TooltipProvider>
+            <div className="flex">
+              {events.map((event) => {
+                return (
+                  <EventThumbnail
+                    key={event.id}
+                    event={event}
+                    onFavorite={onFavorite}
+                  />
+                );
+              })}
+            </div>
+          </TooltipProvider>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
       )}
