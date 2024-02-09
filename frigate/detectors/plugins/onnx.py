@@ -7,12 +7,11 @@ import ctypes
 from pydantic import Field
 from typing_extensions import Literal
 import glob
-import cv2
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
 
-import frigate.detectors.yolo_utils as yolo_utils
+from frigate.detectors.util import preprocess, yolov8_postprocess
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +39,7 @@ class ONNXDetector(DetectionApi):
         if detector_config.model.input_pixel_format != 'rgb':
             logger.warn("ONNX: detector_config.model.input_pixel_format: should be 'rgb' for yolov8, but '{detector_config.model.input_pixel_format}' specified!")
 
-        assert detector_config.model.path is not None, "ONNX: no model.path configured, please configure model.path and model.labelmap_path; some suggestions: " + ', '.join(glob.glob("/*.onnx")) + " and " + ', '.join(glob.glob("/*_labels.txt"))
+        assert detector_config.model.path is not None,  "ONNX: No model.path configured, please configure model.path and model.labelmap_path; some suggestions: " + ', '.join(glob.glob("/config/model_cache/yolov8/*.onnx")) + " and " + ', '.join(glob.glob("/config/model_cache/yolov8/*_labels.txt"))
 
         path = detector_config.model.path
         logger.info(f"ONNX: loading {detector_config.model.path}")
@@ -51,9 +50,9 @@ class ONNXDetector(DetectionApi):
         model_input_name = self.model.get_inputs()[0].name
         model_input_shape = self.model.get_inputs()[0].shape
 
-        tensor_input = yolo_utils.preprocess(tensor_input, model_input_shape, np.float32)
+        tensor_input = preprocess(tensor_input, model_input_shape, np.float32)
 
         tensor_output = self.model.run(None, {model_input_name: tensor_input})[0]
 
-        return yolo_utils.yolov8_postprocess(model_input_shape, tensor_output)
+        return yolov8_postprocess(model_input_shape, tensor_output)
 

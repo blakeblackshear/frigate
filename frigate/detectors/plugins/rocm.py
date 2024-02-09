@@ -12,7 +12,7 @@ import subprocess
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
 
-import frigate.detectors.yolo_utils as yolo_utils
+from frigate.detectors.util import preprocess, yolov8_postprocess
 
 logger = logging.getLogger(__name__)
 
@@ -102,12 +102,12 @@ class ROCmDetector(DetectionApi):
         model_input_name = self.model.get_parameter_names()[0];
         model_input_shape = tuple(self.model.get_parameter_shapes()[model_input_name].lens());
 
-        tensor_input = yolo_utils.preprocess(tensor_input, model_input_shape, np.float32)
+        tensor_input = preprocess(tensor_input, model_input_shape, np.float32)
 
         detector_result = self.model.run({model_input_name: tensor_input})[0]
 
         addr = ctypes.cast(detector_result.data_ptr(), ctypes.POINTER(ctypes.c_float))
         tensor_output = np.ctypeslib.as_array(addr, shape=detector_result.get_shape().lens())
 
-        return yolo_utils.yolov8_postprocess(model_input_shape, tensor_output)
+        return yolov8_postprocess(model_input_shape, tensor_output)
 
