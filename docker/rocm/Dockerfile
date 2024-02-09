@@ -10,6 +10,8 @@ ARG HSA_OVERRIDE
 #######################################################################
 FROM ubuntu:focal as rocm
 
+ARG ROCM
+
 RUN apt-get update && apt-get -y upgrade
 RUN apt-get -y install gnupg wget
 
@@ -23,6 +25,13 @@ RUN apt-get update
 
 RUN apt-get -y install --no-install-recommends migraphx
 RUN apt-get -y install --no-install-recommends migraphx-dev
+
+RUN mkdir -p /opt/rocm-dist/opt/rocm-$ROCM/lib
+RUN cd /opt/rocm-$ROCM/lib && cp -dpr libMIOpen*.so* libamd*.so* libhip*.so* libhsa*.so* libmigraphx*.so* librocm*.so* librocblas*.so* /opt/rocm-dist/opt/rocm-$ROCM/lib/
+RUN cd /opt/rocm-dist/opt/ && ln -s rocm-$ROCM rocm
+
+RUN mkdir -p /opt/rocm-dist/etc/ld.so.conf.d/
+RUN echo /opt/rocm/lib|tee /opt/rocm-dist/etc/ld.so.conf.d/rocm.conf
 
 #######################################################################
 FROM --platform=linux/amd64 debian:11 as debian-base
@@ -63,31 +72,32 @@ COPY --from=rootfs / /
 COPY docker/rocm/rootfs/ /
 
 #######################################################################
-FROM deps-prelim AS rocm-prelim-hsa-override0
+FROM scratch AS rocm-dist
 
 ARG ROCM
-ARG AMDGPU
-
-ENV HSA_ENABLE_SDMA=0
-
-RUN mkdir -p /opt/rocm-$ROCM/lib
-
-# Docker does not copy symbolic links so have to resort to tar
-RUN --mount=from=rocm,src=/opt/rocm-$ROCM,dst=/opt/rocm-copy cd /opt/rocm-copy/lib && cp -dpr libMIOpen*.so* libamd*.so* libhip*.so* libhsa*.so* libmigraphx*.so* librocm*.so* librocblas*.so* /opt/rocm-$ROCM/lib/
 
 COPY --from=rocm /opt/rocm-$ROCM/bin/rocminfo /opt/rocm-$ROCM/bin/migraphx-driver /opt/rocm-$ROCM/bin/
 COPY --from=rocm /opt/rocm-$ROCM/share/miopen/db/*$AMDGPU* /opt/rocm-$ROCM/share/miopen/db/
 COPY --from=rocm /opt/rocm-$ROCM/lib/rocblas/library/*$AMDGPU* /opt/rocm-$ROCM/lib/rocblas/library/
-
+COPY --from=rocm /opt/rocm-dist/ /
 COPY --from=debian-build /opt/rocm/lib/migraphx.cpython-39-x86_64-linux-gnu.so /opt/rocm-$ROCM/lib/
 
-RUN ln -s /opt/rocm-$ROCM /opt/rocm
+#######################################################################
+FROM deps-prelim AS rocm-prelim-hsa-override0
 
+ENV HSA_ENABLE_SDMA=0
+
+COPY --from=rocm-dist / /
+
+RUN ldconfig
+
+#######################################################################
 FROM rocm-prelim-hsa-override0 as rocm-prelim-hsa-override1
 
 ARG HSA_OVERRIDE_GFX_VERSION
 ENV HSA_OVERRIDE_GFX_VERSION=$HSA_OVERRIDE_GFX_VERSION
 
+#######################################################################
 FROM rocm-prelim-hsa-override$HSA_OVERRIDE as rocm-deps
 
 # Request yolov8 download at startup
