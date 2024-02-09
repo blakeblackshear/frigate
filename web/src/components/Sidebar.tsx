@@ -4,7 +4,12 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import Logo from "./Logo";
 import { ENV } from "@/env";
 import { navbarLinks } from "@/pages/site-navigation";
-import SettingsDropdownMenu from "./settings/SettingsNavItems";
+import SettingsNavItems from "./settings/SettingsNavItems";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 function Sidebar({
   sheetOpen,
@@ -14,7 +19,7 @@ function Sidebar({
   setSheetOpen: (open: boolean) => void;
 }) {
   const sidebar = (
-    <aside className="w-[52px] h-screen sticky top-0 overflow-y-auto scrollbar-hidden py-4 flex flex-col justify-between">
+    <aside className="w-[52px] z-10 h-screen sticky top-0 overflow-y-auto scrollbar-hidden py-4 flex flex-col justify-between">
       <div className="w-full flex flex-col gap-0 items-center">
         <Logo className="w-8 h-8 mb-6" />
         {navbarLinks.map((item) => (
@@ -28,7 +33,7 @@ function Sidebar({
           />
         ))}
       </div>
-      <SettingsDropdownMenu className="flex flex-col items-center" />
+      <SettingsNavItems className="hidden md:flex flex-col items-center" />
     </aside>
   );
 
@@ -40,7 +45,7 @@ function Sidebar({
         modal={false}
         onOpenChange={() => setSheetOpen(false)}
       >
-        <SheetContent side="left" className="w-[100px]">
+        <SheetContent side="left" className="w-[90px]">
           <div className="w-full flex flex-row justify-center"></div>
           {sidebar}
         </SheetContent>
@@ -62,20 +67,26 @@ function SidebarItem({ Icon, title, url, dev, onClick }: SidebarItemProps) {
 
   return (
     shouldRender && (
-      <NavLink
-        to={url}
-        onClick={onClick}
-        className={({ isActive }) =>
-          `mx-[10px] mb-6 flex flex-col justify-center items-center rounded-lg ${
-            isActive
-              ? "font-bold text-white bg-blue-400"
-              : "text-muted-foreground bg-secondary"
-          }`
-        }
-      >
-        <Icon className="w-5 h-5 m-[6px]" />
-        <div className="hidden">{title}</div>
-      </NavLink>
+      <Tooltip>
+        <NavLink
+          to={url}
+          onClick={onClick}
+          className={({ isActive }) =>
+            `mx-[10px] mb-6 flex flex-col justify-center items-center rounded-lg ${
+              isActive
+                ? "font-bold text-white bg-primary"
+                : "text-muted-foreground bg-secondary"
+            }`
+          }
+        >
+          <TooltipTrigger>
+            <Icon className="w-5 h-5 m-[6px]" />
+          </TooltipTrigger>
+        </NavLink>
+        <TooltipContent side="right">
+          <p>{title}</p>
+        </TooltipContent>
+      </Tooltip>
     )
   );
 }
