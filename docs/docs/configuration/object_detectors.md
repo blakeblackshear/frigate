@@ -398,34 +398,24 @@ detectors:
 
 ## AMD/ROCm GPU detector
 
-The `rocm` detector allows one to run [ultralytics](https://github.com/ultralytics/ultralytics) yolov8 models on AMD GPUs and iGPUs. You need special frigate build that contains the AMD/ROCm stack:
+The `rocm` detector allows one to use [ultralytics](https://github.com/ultralytics/ultralytics) yolov8 models on AMD GPUs and iGPUs. You need the special frigate build that contains the AMD/ROCm software stack:
 
 - `ghcr.io/harakas/frigate:latest-rocm`
 
-As ROCm is quite bloated, there are also smaller versions for specific GPU chipsets:
+As the ROCm software stack is quite bloated, there are also smaller versions for specific GPU chipsets:
 
 - `ghcr.io/harakas/frigate:latest-rocm-gfx900`
 - `ghcr.io/harakas/frigate:latest-rocm-gfx1030`
 - `ghcr.io/harakas/frigate:latest-rocm-gfx1100`
 
-### Model download
-
-The ROCm-specific frigate containers should at startup automatically download yolov8 files from https://github.com/harakas/models/releases/tag/yolov8.1-1.0/ --
-it fetches [yolov8.small.models.tar.gz](https://github.com/harakas/models/releases/download/yolov8.1-1.0/yolov8.small.models.tar.gz)
-and uncompresses it into the `/config/model_cache/yolov8/` directory. After that the model files are compiled for your GPU chipset.
-
-Both the download and compilation can take couple of minutes during which frigate will not be responsive. See docker logs for how it is progressing.
-
-Automatic model download can be configured with the `DOWNLOAD_YOLOV8=1/0` environment variable.
-
 ### Docker settings for GPU access
 
-ROCm needs access to `/dev/kfd` and `/dev/dri` devices, also `video` (and possibly `render` and `ssl/_ssl`) group should be added if docker is not run as root:
+ROCm needs access to the `/dev/kfd` and `/dev/dri` devices. When docker or frigate is not run under root then also `video` (and possibly `render` and `ssl/_ssl`) groups should be added.
 
-When running with run command:
+When running docker directly the following flags should be added for device access:
 
 ```bash
-$ docker run --device=/dev/kfd --device=/dev/dri --group-add video \
+$ docker run --device=/dev/kfd --device=/dev/dri  \
     ...
 ```
 
@@ -435,21 +425,19 @@ When using docker compose:
 services:
   frigate:
 ...
-    group_add:
-      - video
     devices:
       - /dev/dri
       - /dev/kfd
 ...
 ```
 
-For reference on running ROCm in docker containers and recommended settings see [running ROCm/pytorch in Docker](https://rocm.docs.amd.com/projects/install-on-linux/en/develop/how-to/3rd-party/pytorch-install.html#using-docker-with-pytorch-pre-installed).
+For reference on recommended settings see [running ROCm/pytorch in Docker](https://rocm.docs.amd.com/projects/install-on-linux/en/develop/how-to/3rd-party/pytorch-install.html#using-docker-with-pytorch-pre-installed).
 
 ### Docker settings for overriding the GPU chipset
 
-Your GPU or iGPU might work just fine without any special configuration but in many cases they need manual settings. AMD/ROCm software stack comes with a limited set of GPU drivers and for newer models you might have to override the chipset version to an older/generic version to get things working.
+Your GPU or iGPU might work just fine without any special configuration but in many cases they need manual settings. AMD/ROCm software stack comes with a limited set of GPU drivers and for newer or missing models you will have to override the chipset version to an older/generic version to get things working.
 
-Also AMD/ROCm does not "officially" support integrated GPU-s. It still does work with most of them just fine but requires special settings. One has to configure the `HSA_OVERRIDE_GFX_VERSION` environment variable. See the [ROCm bug report](https://github.com/ROCm/ROCm/issues/1743) for context and examples.
+Also AMD/ROCm does not "officially" support integrated GPUs. It still does work with most of them just fine but requires special settings. One has to configure the `HSA_OVERRIDE_GFX_VERSION` environment variable. See the [ROCm bug report](https://github.com/ROCm/ROCm/issues/1743) for context and examples.
 
 For chipset specific frigate rocm builds this variable is already set automatically.
 
@@ -476,10 +464,13 @@ services:
       HSA_OVERRIDE_GFX_VERSION: "9.0.0"
 ```
 
-Figuring out what version you need
-  - check docker logs to see what gfx version you have or what the error is
-  - google for what might work for that gfx version
+Figuring out what version you need can be complicated as you can't tell the chipset name and driver from the AMD brand name.
+
+  - first make sure that rocm environment is running properly by running `/opt/rocm/bin/rocminfo` in the frigate container -- it should list both the CPU and the GPU with their properties
+  - find the chipset version (gfxNNN) your systerm as from the output of the `rocminfo` (see below)
+  - use a search engine to query what HSA_OVERRIDE_GFX_VERSION you need for the given gfx name ("gfxNNN ROCm HSA_OVERRIDE_GFX_VERSION")
   - override the `HSA_OVERRIDE_GFX_VERSION` with relevant value
+  - if things are not working check the frigate docker logs
 
 #### Figuring out if AMD/ROCm is working and found your GPU
 
@@ -494,6 +485,48 @@ We unset the `HSA_OVERRIDE_GFX_VERSION` to prevent the override from messing up 
 ```bash
 $ docker exec -it frigate /bin/bash -c '(unset HSA_OVERRIDE_GFX_VERSION && /opt/rocm/bin/rocminfo |grep gfx)'
 ```
+
+### Yolov8 model download and available files
+
+The ROCm specific frigate docker containers automatically download yolov8 files from https://github.com/harakas/models/releases/tag/yolov8.1-1.0/ at startup --
+they fetch [yolov8.small.models.tar.gz](https://github.com/harakas/models/releases/download/yolov8.1-1.0/yolov8.small.models.tar.gz)
+and uncompresses it into the `/config/model_cache/yolov8/` directory. After that the model files are compiled for your GPU chipset.
+
+Both the download and compilation can take couple of minutes during which frigate will not be responsive. See docker logs for how it is progressing.
+
+Automatic model download can be configured with the `DOWNLOAD_YOLOV8=1/0` environment variable either from the command line
+
+```bash
+$ docker run ... -e DOWNLOAD_YOLOV8=1 \
+    ...
+```
+
+or when using docker compose:
+
+```yaml
+services:
+  frigate:
+...
+    environment:
+      DOWNLOAD_YOLOV8: "1"
+```
+
+Download can be triggered also in regular frigate builds using that environment variable. The following files will be available under `/config/model_cache/yolov8/`:
+
+- `yolov8[ns]_320x320.onnx` -- nano (n) and small (s) sized floating point model files usable by the `rocm`, `onnx` and `openvino` detectors that have been trained using the coco dataset (90 classes)
+- `yolov8[ns]-oiv7_320x320.onnx` -- floating point model files usable by the `rocm`, `onnx` and `openvino` detectors that have been trained using the google open images v7 dataset (601 classes)
+- `yolov8[ns]-320x320_edgetpu.tflite` and `yolov8[ns]-oiv7_320x320_edgetpu.tflite` -- int8 quantized model files usable by the google coral `edgetpu` detector
+- `yolov8[ns]_320x320_i8_openvino.xml` and `yolov8[ns]-oiv7_320x320_i8_openvino.xml` -- int8 quantized model files usable by the `openvino` detector
+- `labels.txt` and `labels-frigate.txt` -- full and aggregated labels for the coco dataset models
+- `labels-oiv7.txt` and `labels-oiv7-frigate.txt` -- labels for the oiv7 dataset models
+
+The aggregated label files contain renamed labels leaving only `person`, `vehicle`, `animal` and `bird` classes. The oiv7 trained models contain 601 classes and so are difficult to configure manually -- using aggregate labels is recommended.
+
+Larger models (of `m` and `l` size and also at `640x640` resolution) can be found at https://github.com/harakas/models/releases/download/yolov8.1-1.0/ but have to be installed manually.
+
+The oiv7 models have been trained using a larger google open images v7 dataset. They also contain a lot more detection classes (over 600) so using aggregate label files is recommended. The large number of classes leads to lower baseline for detection probability values and also for higher resource consumption (they are slower to evaluate).
+
+The `rocm` builds precompile the `onnx` files for your chipset into `mxr` files. If you change your hardware or GPU or have compiled the wrong versions you need to delete the cached `.mxr` files under `/config/model_cache/yolov8/`.
 
 ### Frigate configuration
 
@@ -514,6 +547,30 @@ Other settings available for the rocm detector
 
 - `conserve_cpu: True` -- run ROCm/HIP synchronization in blocking mode saving CPU (at small loss of latency and maximum throughput)
 - `auto_override_gfx: True` -- enable or disable automatic gfx driver detection
+
+#### Advanced configuration
+
+One can configure several types of detectors to run in parallel to increase detection capacity. An example configuration running `rocm`, `edgetpu` and `openvino` in parallel:
+
+```yaml
+model:
+  labelmap_path: /config/model_cache/yolov8/labels-oiv7-frigate.txt
+  model_type: yolov8
+detectors:
+  rocm:
+    type: rocm
+    model:
+      path: /config/model_cache/yolov8/yolov8s-oiv7_320x320.onnx
+  coral:
+    type: edgetpu
+    device: usb
+    model:
+      path: /config/model_cache/yolov8/yolov8s-oiv7_320x320_edgetpu.tflite
+  openvino:
+    type: openvino
+    model:
+      path: /config/model_cache/yolov8/yolov8s-oiv7_320x320_i8_openvino.xml
+```
 
 ### Expected performance
 
