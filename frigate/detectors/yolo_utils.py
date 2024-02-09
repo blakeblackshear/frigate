@@ -22,7 +22,7 @@ def preprocess(tensor_input, model_input_shape, model_input_element_type):
     # cv2.dnn.blobFromImage is faster than numpying it
     return cv2.dnn.blobFromImage(tensor_input[0], 1.0 / 255, (model_input_shape[3], model_input_shape[2]), None, swapRB=False)
 
-def yolov8_postprocess(model_input_shape, tensor_output, box_count = 20, score_threshold = 0.3, nms_threshold = 0.5):
+def yolov8_postprocess(model_input_shape, tensor_output, box_count = 20, score_threshold = 0.5, nms_threshold = 0.5):
     model_box_count = tensor_output.shape[2]
     probs = tensor_output[0, 4:, :]
     all_ids = np.argmax(probs, axis=0)
