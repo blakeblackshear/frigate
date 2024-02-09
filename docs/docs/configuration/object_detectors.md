@@ -402,13 +402,13 @@ detectors:
 
 The `rocm` detector allows one to use [ultralytics](https://github.com/ultralytics/ultralytics) yolov8 models on AMD GPUs and iGPUs. You need the special frigate build that contains the AMD/ROCm software stack:
 
-- `ghcr.io/harakas/frigate:latest-rocm`
+- `ghcr.io/blakeblackshear/frigate:stable-rocm`
 
 As the ROCm software stack is quite bloated, there are also smaller versions for specific GPU chipsets:
 
-- `ghcr.io/harakas/frigate:latest-rocm-gfx900`
-- `ghcr.io/harakas/frigate:latest-rocm-gfx1030`
-- `ghcr.io/harakas/frigate:latest-rocm-gfx1100`
+- `ghcr.io/blakeblackshear/frigate:stable-rocm-gfx900`
+- `ghcr.io/blakeblackshear/frigate:stable-rocm-gfx1030`
+- `ghcr.io/blakeblackshear/frigate:stable-rocm-gfx1100`
 
 ### Docker settings for GPU access
 
