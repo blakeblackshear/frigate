@@ -51,8 +51,6 @@ class OvDetector(DetectionApi):
             logger.info(f"YOLOX model has {self.num_classes} classes")
             self.set_strides_grids()
 
-        self.class_aggregation = yolo_utils.generate_class_aggregation_from_config(detector_config)
-
     def set_strides_grids(self):
         grids = []
         expanded_strides = []
@@ -138,7 +136,7 @@ class OvDetector(DetectionApi):
             return detections
         elif self.ov_model_type == ModelTypeEnum.yolov8:
             out_tensor = infer_request.get_output_tensor().data
-            return yolo_utils.yolov8_postprocess(self.interpreter.inputs[0].shape, out_tensor, class_aggregation = self.class_aggregation)
+            return yolo_utils.yolov8_postprocess(self.interpreter.inputs[0].shape, out_tensor)
         elif self.ov_model_type == ModelTypeEnum.yolov5:
             out_tensor = infer_request.get_output_tensor()
             output_data = out_tensor.data[0]
