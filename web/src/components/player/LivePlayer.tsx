@@ -11,7 +11,7 @@ import { Label } from "../ui/label";
 import { usePersistence } from "@/hooks/use-persistence";
 import MSEPlayer from "./MsePlayer";
 import JSMpegPlayer from "./JSMpegPlayer";
-import { MdCircle, MdLeakAdd, MdSelectAll } from "react-icons/md";
+import { MdCircle, MdLeakAdd } from "react-icons/md";
 import { BsSoundwave } from "react-icons/bs";
 import Chip from "../Chip";
 import useCameraActivity from "@/hooks/use-camera-activity";
