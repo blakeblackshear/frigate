@@ -105,6 +105,12 @@ Frigate supports SBCs with the following Rockchip SoCs:
 
 Using the yolov8n model and an Orange Pi 5 Plus with RK3588 SoC inference speeds vary between 20 - 25 ms.
 
+#### AMD GPUs and iGPUs
+
+With the [rocm](../configuration/object_detectors.md#amdrocm-gpu-detector) detector Frigate can take advantage of many AMD GPUs and iGPUs.
+
+An AMD Ryzen mini PC with AMD Ryzen 3 5400U iGPU takes about 9 ms to evaluate yolov8n.
+
 ## What does Frigate use the CPU for and what does it use a detector for? (ELI5 Version)
 
 This is taken from a [user question on reddit](https://www.reddit.com/r/homeassistant/comments/q8mgau/comment/hgqbxh5/?utm_source=share&utm_medium=web2x&context=3). Modified slightly for clarity.
