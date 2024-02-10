@@ -593,7 +593,7 @@ def event_thumbnail(id, max_cache_age=2592000):
     return response
 
 
-@bp.route("/events/<id>/preview.mp4")
+@bp.route("/events/<id>/preview.gif")
 def event_preview(id: str, max_cache_age=2592000):
     try:
         event = Event.get(Event.id == id)
