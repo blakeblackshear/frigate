@@ -10,7 +10,7 @@ import {
 import { produce, Draft } from "immer";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { FrigateEvent } from "@/types/ws";
+import { FrigateEvent, ToggleableSetting } from "@/types/ws";
 
 type ReducerState = {
   [topic: string]: {
@@ -149,8 +149,8 @@ export function useWs(watchTopic: string, publishTopic: string) {
 }
 
 export function useDetectState(camera: string): {
-  payload: string;
-  send: (payload: string, retain?: boolean) => void;
+  payload: ToggleableSetting;
+  send: (payload: ToggleableSetting, retain?: boolean) => void;
 } {
   const {
     value: { payload },
@@ -160,8 +160,8 @@ export function useDetectState(camera: string): {
 }
 
 export function useRecordingsState(camera: string): {
-  payload: string;
-  send: (payload: string, retain?: boolean) => void;
+  payload: ToggleableSetting;
+  send: (payload: ToggleableSetting, retain?: boolean) => void;
 } {
   const {
     value: { payload },
@@ -171,8 +171,8 @@ export function useRecordingsState(camera: string): {
 }
 
 export function useSnapshotsState(camera: string): {
-  payload: string;
-  send: (payload: string, retain?: boolean) => void;
+  payload: ToggleableSetting;
+  send: (payload: ToggleableSetting, retain?: boolean) => void;
 } {
   const {
     value: { payload },
@@ -182,8 +182,8 @@ export function useSnapshotsState(camera: string): {
 }
 
 export function useAudioState(camera: string): {
-  payload: string;
-  send: (payload: string, retain?: boolean) => void;
+  payload: ToggleableSetting;
+  send: (payload: ToggleableSetting, retain?: boolean) => void;
 } {
   const {
     value: { payload },
@@ -228,7 +228,7 @@ export function useMotionActivity(camera: string): { payload: string } {
   return { payload };
 }
 
-export function useAudioActivity(camera: string): { payload: string } {
+export function useAudioActivity(camera: string): { payload: number } {
   const {
     value: { payload },
   } = useWs(`${camera}/audio/rms`, "");

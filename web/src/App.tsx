@@ -4,7 +4,6 @@ import { useState } from "react";
 import Wrapper from "@/components/Wrapper";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
-import Dashboard from "@/pages/Dashboard";
 import Live from "@/pages/Live";
 import History from "@/pages/History";
 import Export from "@/pages/Export";
@@ -35,8 +34,7 @@ function App() {
               className="overflow-x-hidden px-4 py-2 w-screen md:w-full"
             >
               <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/live/:camera?" element={<Live />} />
+                <Route path="/" element={<Live />} />
                 <Route path="/history" element={<History />} />
                 <Route path="/export" element={<Export />} />
                 <Route path="/storage" element={<Storage />} />

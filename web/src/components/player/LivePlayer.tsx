@@ -4,42 +4,75 @@ import AutoUpdatingCameraImage from "../camera/AutoUpdatingCameraImage";
 import ActivityIndicator from "../ui/activity-indicator";
 import { Button } from "../ui/button";
 import { LuSettings } from "react-icons/lu";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
 import { usePersistence } from "@/hooks/use-persistence";
 import MSEPlayer from "./MsePlayer";
 import JSMpegPlayer from "./JSMpegPlayer";
+import { MdCircle, MdLeakAdd } from "react-icons/md";
+import { BsSoundwave } from "react-icons/bs";
+import Chip from "../Chip";
+import useCameraActivity from "@/hooks/use-camera-activity";
+import { useRecordingsState } from "@/api/ws";
+import { LivePlayerMode } from "@/types/live";
+import useCameraLiveMode from "@/hooks/use-camera-live-mode";
 
 const emptyObject = Object.freeze({});
 
 type LivePlayerProps = {
+  className?: string;
   cameraConfig: CameraConfig;
-  liveMode: string;
+  preferredLiveMode?: LivePlayerMode;
+  showStillWithoutActivity?: boolean;
 };
 
 type Options = { [key: string]: boolean };
 
 export default function LivePlayer({
+  className,
   cameraConfig,
-  liveMode,
+  preferredLiveMode,
+  showStillWithoutActivity = true,
 }: LivePlayerProps) {
-  const [showSettings, setShowSettings] = useState(false);
+  // camera activity
+  const { activeMotion, activeAudio, activeTracking } =
+    useCameraActivity(cameraConfig);
 
+  const liveMode = useCameraLiveMode(cameraConfig, preferredLiveMode);
+
+  const [liveReady, setLiveReady] = useState(false);
+  useEffect(() => {
+    if (!liveReady) {
+      if (activeMotion && liveMode == "jsmpeg") {
+        setLiveReady(true);
+      }
+
+      return;
+    }
+
+    if (!activeMotion && !activeTracking) {
+      setLiveReady(false);
+    }
+  }, [activeMotion, activeTracking, liveReady]);
+
+  const { payload: recording } = useRecordingsState(cameraConfig.name);
+
+  // debug view settings
+
+  const [showSettings, setShowSettings] = useState(false);
   const [options, setOptions] = usePersistence(
-    `${cameraConfig.name}-feed`,
+    `${cameraConfig?.name}-feed`,
     emptyObject
   );
-
   const handleSetOption = useCallback(
     (id: string, value: boolean) => {
       const newOptions = { ...options, [id]: value };
       setOptions(newOptions);
     },
-    [options, setOptions]
+    [options]
   );
-
   const searchParams = useMemo(
     () =>
       new URLSearchParams(
@@ -51,26 +84,34 @@ export default function LivePlayer({
       ),
     [options]
   );
-
   const handleToggleSettings = useCallback(() => {
     setShowSettings(!showSettings);
-  }, [showSettings, setShowSettings]);
+  }, [showSettings]);
 
+  if (!cameraConfig) {
+    return <ActivityIndicator />;
+  }
+
+  let player;
   if (liveMode == "webrtc") {
-    return (
-      <div className="max-w-5xl">
-        <WebRtcPlayer camera={cameraConfig.live.stream_name} />
-      </div>
+    player = (
+      <WebRtcPlayer
+        className={`rounded-2xl h-full ${liveReady ? "" : "hidden"}`}
+        camera={cameraConfig.live.stream_name}
+        onPlaying={() => setLiveReady(true)}
+      />
     );
   } else if (liveMode == "mse") {
     if ("MediaSource" in window || "ManagedMediaSource" in window) {
-      return (
-        <div className="max-w-5xl">
-          <MSEPlayer camera={cameraConfig.live.stream_name} />
-        </div>
+      player = (
+        <MSEPlayer
+          className={`rounded-2xl h-full ${liveReady ? "" : "hidden"}`}
+          camera={cameraConfig.name}
+          onPlaying={() => setLiveReady(true)}
+        />
       );
     } else {
-      return (
+      player = (
         <div className="w-5xl text-center text-sm">
           MSE is only supported on iOS 17.1+. You'll need to update if available
           or use jsmpeg / webRTC streams. See the docs for more info.
@@ -78,17 +119,16 @@ export default function LivePlayer({
       );
     }
   } else if (liveMode == "jsmpeg") {
-    return (
-      <div className={`max-w-[${cameraConfig.detect.width}px]`}>
-        <JSMpegPlayer
-          camera={cameraConfig.name}
-          width={cameraConfig.detect.width}
-          height={cameraConfig.detect.height}
-        />
-      </div>
+    player = (
+      <JSMpegPlayer
+        className="w-full flex justify-center"
+        camera={cameraConfig.name}
+        width={cameraConfig.detect.width}
+        height={cameraConfig.detect.height}
+      />
     );
   } else if (liveMode == "debug") {
-    return (
+    player = (
       <>
         <AutoUpdatingCameraImage
           camera={cameraConfig.name}
@@ -116,8 +156,63 @@ export default function LivePlayer({
       </>
     );
   } else {
-    <ActivityIndicator />;
+    player = <ActivityIndicator />;
   }
+
+  return (
+    <div
+      className={`relative flex justify-center w-full outline ${
+        activeTracking
+          ? "outline-destructive outline-1 rounded-2xl shadow-[0_0_6px_1px] shadow-destructive"
+          : "outline-0"
+      } transition-all duration-500 ${className}`}
+    >
+      {(showStillWithoutActivity == false || activeMotion || activeTracking) &&
+        player}
+
+      <div
+        className={`absolute left-0 top-0 right-0 bottom-0 w-full ${
+          showStillWithoutActivity && !liveReady ? "visible" : "invisible"
+        }`}
+      >
+        <AutoUpdatingCameraImage
+          className="w-full h-full"
+          camera={cameraConfig.name}
+          showFps={false}
+          reloadInterval={30000}
+        />
+      </div>
+
+      <div className="absolute flex left-2 top-2 gap-2">
+        <Chip
+          in={activeMotion}
+          className={`bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500/90`}
+        >
+          <MdLeakAdd className="w-4 h-4 text-motion" />
+          <div className="ml-1 text-white text-xs">Motion</div>
+        </Chip>
+
+        {cameraConfig.audio.enabled_in_config && (
+          <Chip
+            in={activeAudio}
+            className={`bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500/90`}
+          >
+            <BsSoundwave className="w-4 h-4 text-audio" />
+            <div className="ml-1 text-white text-xs">Sound</div>
+          </Chip>
+        )}
+      </div>
+
+      <Chip className="absolute right-2 top-2 bg-gradient-to-br from-gray-300/50 to-gray-500/90">
+        {recording == "ON" && (
+          <MdCircle className="w-2 h-2 drop-shadow-md shadow-danger text-danger" />
+        )}
+        <div className="ml-1 capitalize text-white text-xs">
+          {cameraConfig.name.replaceAll("_", " ")}
+        </div>
+      </Chip>
+    </div>
+  );
 }
 
 type DebugSettingsProps = {

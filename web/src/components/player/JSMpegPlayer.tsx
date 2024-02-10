@@ -5,6 +5,7 @@ import JSMpeg from "@cycjimmy/jsmpeg-player";
 import { useEffect, useMemo, useRef } from "react";
 
 type JSMpegPlayerProps = {
+  className?: string;
   camera: string;
   width: number;
   height: number;
@@ -14,11 +15,13 @@ export default function JSMpegPlayer({
   camera,
   width,
   height,
+  className,
 }: JSMpegPlayerProps) {
   const url = `${baseUrl.replace(/^http/, "ws")}live/jsmpeg/${camera}`;
   const playerRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [{ width: containerWidth }] = useResizeObserver(containerRef);
+  const [{ width: containerWidth, height: containerHeight }] =
+    useResizeObserver(containerRef);
 
   // Add scrollbar width (when visible) to the available observer width to eliminate screen juddering.
   // https://github.com/blakeblackshear/frigate/issues/1657
@@ -34,6 +37,10 @@ export default function JSMpegPlayer({
   const scaledHeight = useMemo(() => {
     const scaledHeight = Math.floor(availableWidth / aspectRatio);
     const finalHeight = Math.min(scaledHeight, height);
+
+    if (containerHeight < finalHeight) {
+      return containerHeight;
+    }
 
     if (finalHeight > 0) {
       return finalHeight;
@@ -79,7 +86,7 @@ export default function JSMpegPlayer({
   }, [url]);
 
   return (
-    <div ref={containerRef}>
+    <div className={className} ref={containerRef}>
       <div
         ref={playerRef}
         className={`jsmpeg`}
