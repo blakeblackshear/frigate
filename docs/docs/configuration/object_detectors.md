@@ -99,6 +99,58 @@ detectors:
     device: pci
 ```
 
+### Yolov8 On Coral
+
+It is possible to use the [ultralytics yolov8](https://github.com/ultralytics/ultralytics) pretrained models with the Google Coral processors.
+
+#### Setup
+
+You need to download yolov8 model files suitable for the EdgeTPU. Frigate can do this automatically with the `DOWNLOAD_YOLOV8={0 | 1}` environment variable either from the command line
+
+```bash
+$ docker run ... -e DOWNLOAD_YOLOV8=1 \
+    ...
+```
+
+or when using docker compose:
+
+```yaml
+services:
+  frigate:
+...
+    environment:
+      DOWNLOAD_YOLOV8: "1"
+```
+
+When this variable is set then frigate will at startup fetch [yolov8.small.models.tar.gz](https://github.com/harakas/models/releases/download/yolov8.1-1.1/yolov8.small.models.tar.gz) and extract it into the `/config/model_cache/yolov8/` directory.
+
+The following files suitable for the EdgeTPU detector will be available under `/config/model_cache/yolov8/`:
+
+- `yolov8[ns]_320x320_edgetpu.tflite` -- nano (n) and small (s) sized models that have been trained using the coco dataset (90 classes)
+- `yolov8[ns]-oiv7_320x320_edgetpu.tflite` -- model files that have been trained using the google open images v7 dataset (601 classes)
+- `labels.txt` and `labels-frigate.txt` -- full and aggregated labels for the coco dataset models
+- `labels-oiv7.txt` and `labels-oiv7-frigate.txt` -- labels for the oiv7 dataset models
+
+The aggregated label files contain renamed labels leaving only `person`, `vehicle`, `animal` and `bird` classes. The oiv7 trained models contain 601 classes and so are difficult to configure manually -- using aggregate labels is recommended.
+
+Larger models (of `m` and `l` size and also at `640x640` resolution) can be found at https://github.com/harakas/models/releases/tag/yolov8.1-1.1/ but have to be installed manually.
+
+The oiv7 models have been trained using a larger google open images v7 dataset. They also contain a lot more detection classes (over 600) so using aggregate label files is recommended. The large number of classes leads to lower baseline for detection probability values and also for higher resource consumption (they are slower to evaluate).
+
+#### Configuration
+
+```yaml
+model:
+  labelmap_path: /config/model_cache/yolov8/labels.txt
+  model_type: yolov8
+detectors:
+  coral:
+    type: edgetpu
+    device: usb
+    model:
+      path: /config/model_cache/yolov8/yolov8n_320x320_edgetpu.tflite
+```
+
 ## OpenVINO Detector
 
 The OpenVINO detector type runs an OpenVINO IR model on Intel CPU, GPU and VPU hardware. To configure an OpenVINO detector, set the `"type"` attribute to `"openvino"`.
