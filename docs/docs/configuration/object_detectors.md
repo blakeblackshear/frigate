@@ -490,8 +490,8 @@ $ docker exec -it frigate /bin/bash -c '(unset HSA_OVERRIDE_GFX_VERSION && /opt/
 
 ### Yolov8 model download and available files
 
-The ROCm specific frigate docker containers automatically download yolov8 files from https://github.com/harakas/models/releases/tag/yolov8.1-1.0/ at startup --
-they fetch [yolov8.small.models.tar.gz](https://github.com/harakas/models/releases/download/yolov8.1-1.0/yolov8.small.models.tar.gz)
+The ROCm specific frigate docker containers automatically download yolov8 files from https://github.com/harakas/models/releases/tag/yolov8.1-1.1/ at startup --
+they fetch [yolov8.small.models.tar.gz](https://github.com/harakas/models/releases/download/yolov8.1-1.1/yolov8.small.models.tar.gz)
 and uncompresses it into the `/config/model_cache/yolov8/` directory. After that the model files are compiled for your GPU chipset.
 
 Both the download and compilation can take couple of minutes during which frigate will not be responsive. See docker logs for how it is progressing.
@@ -522,7 +522,7 @@ Download can be triggered also in regular frigate builds using that environment 
 
 The aggregated label files contain renamed labels leaving only `person`, `vehicle`, `animal` and `bird` classes. The oiv7 trained models contain 601 classes and so are difficult to configure manually -- using aggregate labels is recommended.
 
-Larger models (of `m` and `l` size and also at `640x640` resolution) can be found at https://github.com/harakas/models/releases/download/yolov8.1-1.0/ but have to be installed manually.
+Larger models (of `m` and `l` size and also at `640x640` resolution) can be found at https://github.com/harakas/models/releases/tag/yolov8.1-1.1/ but have to be installed manually.
 
 The oiv7 models have been trained using a larger google open images v7 dataset. They also contain a lot more detection classes (over 600) so using aggregate label files is recommended. The large number of classes leads to lower baseline for detection probability values and also for higher resource consumption (they are slower to evaluate).
 
