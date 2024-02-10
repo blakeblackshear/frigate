@@ -593,6 +593,101 @@ def event_thumbnail(id, max_cache_age=2592000):
     return response
 
 
+@bp.route("/events/<id>/preview.mp4")
+def event_preview(id: str, max_cache_age=2592000):
+    try:
+        event = Event.get(Event.id == id)
+        if event.end_time is not None:
+            event_complete = True
+    except DoesNotExist:
+        return make_response(
+            jsonify({"success": False, "message": "Event not found"}), 404
+        )
+
+    if datetime.fromtimestamp(event.start_time) < datetime.now().replace(
+        minute=0, second=0
+    ):
+        # has preview mp4
+        start_ts = event.start_time
+        end_ts = event.start_time + 10
+        preview = (
+            Previews.select(
+                Previews.camera,
+                Previews.path,
+                Previews.duration,
+                Previews.start_time,
+                Previews.end_time,
+            )
+            .where(
+                Previews.start_time.between(start_ts, end_ts)
+                | Previews.end_time.between(start_ts, end_ts)
+                | ((start_ts > Previews.start_time) & (end_ts < Previews.end_time))
+            )
+            .where(Previews.camera == event.camera)
+            .limit(1)
+            .dicts()
+            .get()
+        )
+
+        if not preview:
+            return make_response(
+                jsonify({"success": False, "message": "Preview not found"}), 404
+            )
+
+        diff = event.start_time - preview.start_time
+        minutes = int(diff / 60)
+        seconds = int(diff % 60)
+        ffmpeg_cmd = [
+            "ffmpeg",
+            "-hide_banner",
+            "-loglevel",
+            "warning",
+            "-ss",
+            f"00:{minutes}:{seconds}",
+            "-t",
+            "20",
+            "-i",
+            preview.path,
+            "r",
+            "8",
+            "-vf",
+            "setpts=0.12*PTS",
+            "-loop",
+            "0",
+            "-c:v",
+            "gif",
+            "-f",
+            "image2pipe",
+            "-",
+        ]
+
+        process = sp.run(
+            ffmpeg_cmd,
+            capture_output=True,
+        )
+        gif_bytes = process.stdout
+    else:
+        # need to generate from existing images
+        preview_dir = os.path.join(CACHE_DIR, "preview_frames")
+        file_start = f"preview_{event.camera}"
+        file_check = f"{file_start}-{event.start_time}.jpg"
+        selected_preview = None
+
+        for file in os.listdir(preview_dir):
+            if file.startswith(file_start):
+                if file < file_check:
+                    selected_preview = file
+                    break
+
+    response = make_response(gif_bytes)
+    response.headers["Content-Type"] = "image/gif"
+    if event_complete:
+        response.headers["Cache-Control"] = f"private, max-age={max_cache_age}"
+    else:
+        response.headers["Cache-Control"] = "no-store"
+    return response
+
+
 @bp.route("/timeline")
 def timeline():
     camera = request.args.get("camera", "all")
@@ -888,9 +983,9 @@ def event_snapshot(id):
     else:
         response.headers["Cache-Control"] = "no-store"
     if download:
-        response.headers[
-            "Content-Disposition"
-        ] = f"attachment; filename=snapshot-{id}.jpg"
+        response.headers["Content-Disposition"] = (
+            f"attachment; filename=snapshot-{id}.jpg"
+        )
     return response
 
 
@@ -1077,9 +1172,9 @@ def event_clip(id):
     if download:
         response.headers["Content-Disposition"] = "attachment; filename=%s" % file_name
     response.headers["Content-Length"] = os.path.getsize(clip_path)
-    response.headers[
-        "X-Accel-Redirect"
-    ] = f"/clips/{file_name}"  # nginx: https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
+    response.headers["X-Accel-Redirect"] = (
+        f"/clips/{file_name}"  # nginx: https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
+    )
 
     return response
 
@@ -1784,9 +1879,9 @@ def get_recordings_storage_usage():
 
     total_mb = recording_stats["total"]
 
-    camera_usages: dict[
-        str, dict
-    ] = current_app.storage_maintainer.calculate_camera_usages()
+    camera_usages: dict[str, dict] = (
+        current_app.storage_maintainer.calculate_camera_usages()
+    )
 
     for camera_name in camera_usages.keys():
         if camera_usages.get(camera_name, {}).get("usage"):
@@ -1974,9 +2069,9 @@ def recording_clip(camera_name, start_ts, end_ts):
     if download:
         response.headers["Content-Disposition"] = "attachment; filename=%s" % file_name
     response.headers["Content-Length"] = os.path.getsize(path)
-    response.headers[
-        "X-Accel-Redirect"
-    ] = f"/cache/{file_name}"  # nginx: https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
+    response.headers["X-Accel-Redirect"] = (
+        f"/cache/{file_name}"  # nginx: https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
+    )
 
     return response
 
@@ -2265,9 +2360,11 @@ def export_recording(camera_name: str, start_time, end_time):
         camera_name,
         int(start_time),
         int(end_time),
-        PlaybackFactorEnum[playback_factor]
-        if playback_factor in PlaybackFactorEnum.__members__.values()
-        else PlaybackFactorEnum.realtime,
+        (
+            PlaybackFactorEnum[playback_factor]
+            if playback_factor in PlaybackFactorEnum.__members__.values()
+            else PlaybackFactorEnum.realtime
+        ),
     )
     exporter.start()
     return make_response(
@@ -2423,12 +2520,16 @@ def ffprobe():
         output.append(
             {
                 "return_code": ffprobe.returncode,
-                "stderr": ffprobe.stderr.decode("unicode_escape").strip()
-                if ffprobe.returncode != 0
-                else "",
-                "stdout": json.loads(ffprobe.stdout.decode("unicode_escape").strip())
-                if ffprobe.returncode == 0
-                else "",
+                "stderr": (
+                    ffprobe.stderr.decode("unicode_escape").strip()
+                    if ffprobe.returncode != 0
+                    else ""
+                ),
+                "stdout": (
+                    json.loads(ffprobe.stdout.decode("unicode_escape").strip())
+                    if ffprobe.returncode == 0
+                    else ""
+                ),
             }
         )
 
@@ -2441,12 +2542,16 @@ def vainfo():
     return jsonify(
         {
             "return_code": vainfo.returncode,
-            "stderr": vainfo.stderr.decode("unicode_escape").strip()
-            if vainfo.returncode != 0
-            else "",
-            "stdout": vainfo.stdout.decode("unicode_escape").strip()
-            if vainfo.returncode == 0
-            else "",
+            "stderr": (
+                vainfo.stderr.decode("unicode_escape").strip()
+                if vainfo.returncode != 0
+                else ""
+            ),
+            "stdout": (
+                vainfo.stdout.decode("unicode_escape").strip()
+                if vainfo.returncode == 0
+                else ""
+            ),
         }
     )
 
