@@ -5,6 +5,7 @@
 set -o errexit -o nounset -o pipefail
 
 MODEL_CACHE_DIR=${MODEL_CACHE_DIR:-"/config/model_cache"}
+DOWNLOAD_YOLOV8=${DOWNLOAD_YOLOV8:-"0"}
 YOLOV8_DIR="$MODEL_CACHE_DIR/yolov8"
 YOLOV8_URL=https://github.com/harakas/models/releases/download/yolov8.1-1.1/yolov8.small.models.tar.gz
 YOLOV8_DIGEST=304186b299560fbacc28eac9b9ea02cc2289fe30eb2c0df30109a2529423695c
