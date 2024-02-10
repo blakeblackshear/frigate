@@ -275,6 +275,13 @@ def send_to_plus(id):
                 box,
                 event.label,
             )
+        except ValueError:
+            message = "Error uploading annotation, unsupported label provided."
+            logger.error(message)
+            return make_response(
+                jsonify({"success": False, "message": message}),
+                400,
+            )
         except Exception as ex:
             logger.exception(ex)
             return make_response(
@@ -345,6 +352,13 @@ def false_positive(id):
             event.model_hash,
             event.model_type,
             event.detector_type,
+        )
+    except ValueError:
+        message = "Error uploading false positive, unsupported label provided."
+        logger.error(message)
+        return make_response(
+            jsonify({"success": False, "message": message}),
+            400,
         )
     except Exception as ex:
         logger.exception(ex)
