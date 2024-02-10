@@ -99,13 +99,13 @@ detectors:
     device: pci
 ```
 
-### Community Provided Yolov8 On Coral
+### Yolov8 On Coral
 
-It is possible to use the yolov8 models with the coral processors.
+It is possible to use the [ultralytics yolov8](https://github.com/ultralytics/ultralytics) pretrained models with the Google Coral processors.
 
-#### Downloading
+#### Setup
 
-Automatic model download can be configured with the `DOWNLOAD_YOLOV8=1/0` environment variable either from the command line
+You need to download yolov8 model files suitable for the EdgeTPU. Frigate can do this automatically with the `DOWNLOAD_YOLOV8=1/0` environment variable either from the command line
 
 ```bash
 $ docker run ... -e DOWNLOAD_YOLOV8=1 \
