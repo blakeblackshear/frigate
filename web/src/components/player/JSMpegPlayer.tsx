@@ -37,7 +37,6 @@ export default function JSMpegPlayer({
   const scaledHeight = useMemo(() => {
     const scaledHeight = Math.floor(availableWidth / aspectRatio);
     const finalHeight = Math.min(scaledHeight, height);
-    console.log(`${containerWidth} / ${aspectRatio} -< ${containerHeight}`);
 
     if (containerHeight < finalHeight) {
       return containerHeight;
