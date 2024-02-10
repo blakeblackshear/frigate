@@ -11,8 +11,8 @@ It is recommended to update your configuration to enable hardware accelerated de
 
 ## Raspberry Pi 3/4
 
-Ensure you increase the allocated RAM for your GPU to at least 128 (raspi-config > Performance Options > GPU Memory).
-**NOTICE**: If you are using the addon, you may need to turn off `Protection mode` for hardware acceleration.
+Ensure you increase the allocated RAM for your GPU to at least 128 (`raspi-config` > Performance Options > GPU Memory).  
+If you are using the HA addon, you may need to use the full access variant and turn off `Protection mode` for hardware acceleration.
 
 ```yaml
 # if you want to decode a h264 stream
@@ -26,15 +26,38 @@ ffmpeg:
 
 :::note
 
-If running Frigate in docker, you either need to run in priviliged mode or be sure to map the /dev/video1x devices to Frigate
+If running Frigate in Docker, you either need to run in privileged mode or
+map the `/dev/video*` devices to Frigate. With Docker compose add:
 
 ```yaml
-docker run -d \
---name frigate \
-...
---device /dev/video10 \
-ghcr.io/blakeblackshear/frigate:stable
+services:
+  frigate:
+    ...
+    devices:
+      - /dev/video11:/dev/video11
 ```
+
+Or with `docker run`:
+
+```bash
+docker run -d \
+  --name frigate \
+  ...
+  --device /dev/video11 \
+  ghcr.io/blakeblackshear/frigate:stable
+```
+
+`/dev/video11` is the correct device (on Raspberry Pi 4B). You can check
+by running the following and looking for `H264`:
+
+```bash
+for d in /dev/video*; do
+  echo -e "---\n$d"
+  v4l2-ctl --list-formats-ext -d $d
+done
+```
+
+Or map in all the `/dev/video*` devices.
 
 :::
 
