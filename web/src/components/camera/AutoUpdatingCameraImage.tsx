@@ -6,6 +6,7 @@ type AutoUpdatingCameraImageProps = {
   searchParams?: {};
   showFps?: boolean;
   className?: string;
+  reloadInterval?: number;
 };
 
 const MIN_LOAD_TIMEOUT_MS = 200;
@@ -15,6 +16,7 @@ export default function AutoUpdatingCameraImage({
   searchParams = "",
   showFps = true,
   className,
+  reloadInterval = MIN_LOAD_TIMEOUT_MS,
 }: AutoUpdatingCameraImageProps) {
   const [key, setKey] = useState(Date.now());
   const [fps, setFps] = useState<string>("0");
@@ -23,14 +25,14 @@ export default function AutoUpdatingCameraImage({
     const loadTime = Date.now() - key;
 
     if (showFps) {
-      setFps((1000 / Math.max(loadTime, MIN_LOAD_TIMEOUT_MS)).toFixed(1));
+      setFps((1000 / Math.max(loadTime, reloadInterval)).toFixed(1));
     }
 
     setTimeout(
       () => {
         setKey(Date.now());
       },
-      loadTime > MIN_LOAD_TIMEOUT_MS ? 1 : MIN_LOAD_TIMEOUT_MS
+      loadTime > reloadInterval ? 1 : reloadInterval
     );
   }, [key, setFps]);
 

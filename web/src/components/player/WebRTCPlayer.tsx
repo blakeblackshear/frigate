@@ -2,15 +2,15 @@ import { baseUrl } from "@/api/baseUrl";
 import { useCallback, useEffect, useRef } from "react";
 
 type WebRtcPlayerProps = {
+  className?: string;
   camera: string;
-  width?: number;
-  height?: number;
+  onPlaying?: () => void;
 };
 
 export default function WebRtcPlayer({
+  className,
   camera,
-  width,
-  height,
+  onPlaying,
 }: WebRtcPlayerProps) {
   const pcRef = useRef<RTCPeerConnection | undefined>();
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -149,12 +149,11 @@ export default function WebRtcPlayer({
     <div>
       <video
         ref={videoRef}
+        className={className}
         autoPlay
         playsInline
-        controls
         muted
-        width={width}
-        height={height}
+        onLoadedData={onPlaying}
       />
     </div>
   );
