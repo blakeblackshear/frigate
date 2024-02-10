@@ -23,6 +23,7 @@ const emptyObject = Object.freeze({});
 
 type LivePlayerProps = {
   className?: string;
+  aspectRatio?: string;
   cameraConfig: CameraConfig;
   preferredLiveMode?: LivePlayerMode;
   showStillWithoutActivity?: boolean;
@@ -32,6 +33,7 @@ type Options = { [key: string]: boolean };
 
 export default function LivePlayer({
   className,
+  aspectRatio,
   cameraConfig,
   preferredLiveMode,
   showStillWithoutActivity = true,
@@ -166,6 +168,7 @@ export default function LivePlayer({
           ? "outline-destructive outline-1 rounded-2xl shadow-[0_0_6px_1px] shadow-destructive"
           : "outline-0"
       } transition-all duration-500 ${className}`}
+      style={{ aspectRatio: aspectRatio }}
     >
       {(showStillWithoutActivity == false || activeMotion || activeTracking) &&
         player}

@@ -78,16 +78,19 @@ function Live() {
       <div className="mt-4 md:grid md:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 gap-4">
         {cameras.map((camera) => {
           let grow;
-          if (camera.detect.width / camera.detect.height > 2) {
-            grow = "aspect-wide md:col-span-2";
-          } else if (camera.detect.width / camera.detect.height < 1) {
-            grow = "aspect-tall md:aspect-auto md:row-span-2";
-          } else {
-            grow = "aspect-video";
+          let aspectRatio = camera.detect.width / camera.detect.height;
+          if (aspectRatio > 2) {
+            grow = "md:col-span-2";
+          } else if (aspectRatio < 1) {
+            grow = `md:row-span-2`;
           }
           return (
             <LivePlayer
               key={camera.name}
+              aspectRatio={getAspectRatio(
+                camera.detect.width,
+                camera.detect.height
+              )}
               className={`mb-2 md:mb-0 rounded-2xl bg-black ${grow}`}
               cameraConfig={camera}
               preferredLiveMode="mse"
@@ -97,6 +100,15 @@ function Live() {
       </div>
     </>
   );
+}
+
+function getAspectRatio(width: number, height: number): string {
+  const gcd = (a: number, b: number): number => {
+    return b === 0 ? a : gcd(b, a % b);
+  };
+
+  const common = gcd(width, height);
+  return `${width / common}/${height / common}`;
 }
 
 export default Live;
