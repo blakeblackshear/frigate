@@ -597,8 +597,6 @@ def event_thumbnail(id, max_cache_age=2592000):
 def event_preview(id: str, max_cache_age=2592000):
     try:
         event: Event = Event.get(Event.id == id)
-        if event.end_time is not None:
-            event_complete = True
     except DoesNotExist:
         return make_response(
             jsonify({"success": False, "message": "Event not found"}), 404
@@ -660,7 +658,6 @@ def event_preview(id: str, max_cache_age=2592000):
             "gif",
             "-",
         ]
-        logger.info(f"running previous gif creation {' '.join(ffmpeg_cmd)}")
 
         process = sp.run(
             ffmpeg_cmd,
@@ -685,8 +682,13 @@ def event_preview(id: str, max_cache_age=2592000):
             if file > end_file:
                 break
 
-            selected_previews.append(f"file '{file}'")
+            selected_previews.append(f"file '/tmp/cache/preview_frames/{file}'")
             selected_previews.append("duration 0.12")
+
+        if not selected_previews:
+            return make_response(
+                jsonify({"success": False, "message": "Preview not found"}), 404
+            )
 
         last_file = selected_previews[-2]
         selected_previews.append(last_file)
@@ -713,24 +715,24 @@ def event_preview(id: str, max_cache_age=2592000):
             "gif",
             "-",
         ]
-        logger.info(
-            f"running current gif creation {' '.join(ffmpeg_cmd)} with files {' '.join(selected_previews)}"
-        )
 
         process = sp.run(
             ffmpeg_cmd,
-            input="\n".join(selected_previews),
-            encoding="ascii",
+            input=str.encode("\n".join(selected_previews)),
             capture_output=True,
         )
+
+        if process.returncode != 0:
+            return make_response(
+                jsonify({"success": False, "message": "Unable to create preview gif"}),
+                500,
+            )
+
         gif_bytes = process.stdout
 
     response = make_response(gif_bytes)
     response.headers["Content-Type"] = "image/gif"
-    if event_complete:
-        response.headers["Cache-Control"] = f"private, max-age={max_cache_age}"
-    else:
-        response.headers["Cache-Control"] = "no-store"
+    response.headers["Cache-Control"] = f"private, max-age={max_cache_age}"
     return response
 
 

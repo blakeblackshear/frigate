@@ -4,18 +4,21 @@ import { LuStar } from "react-icons/lu";
 import TimeAgo from "../dynamic/TimeAgo";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
-type EventThumbnailProps = {
+type AnimatedEventThumbnailProps = {
   event: FrigateEvent;
   onFavorite?: (e: Event, event: FrigateEvent) => void;
 };
-export function EventThumbnail({ event, onFavorite }: EventThumbnailProps) {
+export function AnimatedEventThumbnail({
+  event,
+  onFavorite,
+}: AnimatedEventThumbnailProps) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <div
-          className="relative rounded bg-cover aspect-square h-24 bg-no-repeat bg-center mr-4"
+          className="relative rounded bg-cover aspect-video h-24 bg-no-repeat bg-center mr-4"
           style={{
-            backgroundImage: `url(${baseUrl}api/events/${event.id}/thumbnail.jpg)`,
+            backgroundImage: `url(${baseUrl}api/events/${event.id}/preview.gif)`,
           }}
         >
           <LuStar
@@ -23,7 +26,7 @@ export function EventThumbnail({ event, onFavorite }: EventThumbnailProps) {
             onClick={(e: Event) => (onFavorite ? onFavorite(e, event) : null)}
             fill={event.retain_indefinitely ? "currentColor" : "none"}
           />
-          <div className="absolute bottom-0 w-full h-6 bg-gradient-to-t from-slate-900/50 to-transparent">
+          <div className="absolute bottom-0 w-full h-6 bg-gradient-to-t from-slate-900/50 to-transparent rounded">
             <div className="absolute left-1 bottom-0 text-xs text-white w-full">
               <TimeAgo time={event.start_time * 1000} dense />
             </div>

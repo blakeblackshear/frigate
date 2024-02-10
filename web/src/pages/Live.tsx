@@ -1,4 +1,4 @@
-import { EventThumbnail } from "@/components/image/EventThumbnail";
+import { AnimatedEventThumbnail } from "@/components/image/AnimatedEventThumbnail";
 import LivePlayer from "@/components/player/LivePlayer";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -62,7 +62,7 @@ function Live() {
             <div className="flex">
               {events.map((event) => {
                 return (
-                  <EventThumbnail
+                  <AnimatedEventThumbnail
                     key={event.id}
                     event={event}
                     onFavorite={onFavorite}
