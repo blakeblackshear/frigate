@@ -596,7 +596,7 @@ def event_thumbnail(id, max_cache_age=2592000):
 @bp.route("/events/<id>/preview.gif")
 def event_preview(id: str, max_cache_age=2592000):
     try:
-        event = Event.get(Event.id == id)
+        event: Event = Event.get(Event.id == id)
         if event.end_time is not None:
             event_complete = True
     except DoesNotExist:
@@ -604,13 +604,14 @@ def event_preview(id: str, max_cache_age=2592000):
             jsonify({"success": False, "message": "Event not found"}), 404
         )
 
+    start_ts = event.start_time
+    end_ts = event.start_time + 10
+
     if datetime.fromtimestamp(event.start_time) < datetime.now().replace(
         minute=0, second=0
     ):
         # has preview mp4
-        start_ts = event.start_time
-        end_ts = event.start_time + 10
-        preview = (
+        preview: Previews = (
             Previews.select(
                 Previews.camera,
                 Previews.path,
@@ -625,7 +626,6 @@ def event_preview(id: str, max_cache_age=2592000):
             )
             .where(Previews.camera == event.camera)
             .limit(1)
-            .dicts()
             .get()
         )
 
@@ -648,7 +648,7 @@ def event_preview(id: str, max_cache_age=2592000):
             "20",
             "-i",
             preview.path,
-            "r",
+            "-r",
             "8",
             "-vf",
             "setpts=0.12*PTS",
@@ -657,9 +657,10 @@ def event_preview(id: str, max_cache_age=2592000):
             "-c:v",
             "gif",
             "-f",
-            "image2pipe",
+            "gif",
             "-",
         ]
+        logger.info(f"running previous gif creation {' '.join(ffmpeg_cmd)}")
 
         process = sp.run(
             ffmpeg_cmd,
@@ -670,14 +671,59 @@ def event_preview(id: str, max_cache_age=2592000):
         # need to generate from existing images
         preview_dir = os.path.join(CACHE_DIR, "preview_frames")
         file_start = f"preview_{event.camera}"
-        file_check = f"{file_start}-{event.start_time}.jpg"
-        selected_preview = None
+        start_file = f"{file_start}-{start_ts}.jpg"
+        end_file = f"{file_start}-{end_ts}.jpg"
+        selected_previews = []
 
-        for file in os.listdir(preview_dir):
-            if file.startswith(file_start):
-                if file < file_check:
-                    selected_preview = file
-                    break
+        for file in sorted(os.listdir(preview_dir)):
+            if not file.startswith(file_start):
+                continue
+
+            if file < start_file:
+                continue
+
+            if file > end_file:
+                break
+
+            selected_previews.append(f"file '{file}'")
+            selected_previews.append("duration 0.12")
+
+        last_file = selected_previews[-2]
+        selected_previews.append(last_file)
+
+        ffmpeg_cmd = [
+            "ffmpeg",
+            "-hide_banner",
+            "-loglevel",
+            "warning",
+            "-f",
+            "concat",
+            "-y",
+            "-protocol_whitelist",
+            "pipe,file",
+            "-safe",
+            "0",
+            "-i",
+            "/dev/stdin",
+            "-loop",
+            "0",
+            "-c:v",
+            "gif",
+            "-f",
+            "gif",
+            "-",
+        ]
+        logger.info(
+            f"running current gif creation {' '.join(ffmpeg_cmd)} with files {' '.join(selected_previews)}"
+        )
+
+        process = sp.run(
+            ffmpeg_cmd,
+            input="\n".join(selected_previews),
+            encoding="ascii",
+            capture_output=True,
+        )
+        gif_bytes = process.stdout
 
     response = make_response(gif_bytes)
     response.headers["Content-Type"] = "image/gif"
