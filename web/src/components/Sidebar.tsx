@@ -74,8 +74,8 @@ function SidebarItem({ Icon, title, url, dev, onClick }: SidebarItemProps) {
           className={({ isActive }) =>
             `mx-[10px] mb-6 flex flex-col justify-center items-center rounded-lg ${
               isActive
-                ? "font-bold text-white bg-primary"
-                : "text-muted-foreground bg-secondary"
+                ? "font-bold text-primary-foreground bg-primary"
+                : "text-muted-foreground bg-muted"
             }`
           }
         >
