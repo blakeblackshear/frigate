@@ -25,6 +25,7 @@ norfair == 2.2.*
 setproctitle == 1.3.*
 ws4py == 0.5.*
 unidecode == 1.3.*
+onnxruntime == 1.16.*
 # Openvino Library - Custom built with MYRIAD support
 openvino @ https://github.com/NateMeyer/openvino-wheels/releases/download/multi-arch_2022.3.1/openvino-2022.3.1-1-cp39-cp39-manylinux_2_31_x86_64.whl; platform_machine == 'x86_64'
 openvino @ https://github.com/NateMeyer/openvino-wheels/releases/download/multi-arch_2022.3.1/openvino-2022.3.1-1-cp39-cp39-linux_aarch64.whl; platform_machine == 'aarch64'
