@@ -105,7 +105,7 @@ It is possible to use the [ultralytics yolov8](https://github.com/ultralytics/ul
 
 #### Setup
 
-You need to download yolov8 model files suitable for the EdgeTPU. Frigate can do this automatically with the `DOWNLOAD_YOLOV8=1/0` environment variable either from the command line
+You need to download yolov8 model files suitable for the EdgeTPU. Frigate can do this automatically with the `DOWNLOAD_YOLOV8={0 | 1}` environment variable either from the command line
 
 ```bash
 $ docker run ... -e DOWNLOAD_YOLOV8=1 \
