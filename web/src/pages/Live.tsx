@@ -78,10 +78,11 @@ function Live() {
       <div className="mt-4 md:grid md:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 gap-4">
         {cameras.map((camera) => {
           let grow;
-          if (camera.detect.width / camera.detect.height > 2) {
-            grow = "aspect-wide md:col-span-2";
-          } else if (camera.detect.width / camera.detect.height < 1) {
-            grow = "aspect-tall md:aspect-auto md:row-span-2";
+          let aspectRatio = camera.detect.width / camera.detect.height;
+          if (aspectRatio > 2) {
+            grow = "md:col-span-2 aspect-wide";
+          } else if (aspectRatio < 1) {
+            grow = `md:row-span-2 aspect-[8/9]`;
           } else {
             grow = "aspect-video";
           }
