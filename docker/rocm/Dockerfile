@@ -75,6 +75,7 @@ COPY docker/rocm/rootfs/ /
 FROM scratch AS rocm-dist
 
 ARG ROCM
+ARG AMDGPU
 
 COPY --from=rocm /opt/rocm-$ROCM/bin/rocminfo /opt/rocm-$ROCM/bin/migraphx-driver /opt/rocm-$ROCM/bin/
 COPY --from=rocm /opt/rocm-$ROCM/share/miopen/db/*$AMDGPU* /opt/rocm-$ROCM/share/miopen/db/
