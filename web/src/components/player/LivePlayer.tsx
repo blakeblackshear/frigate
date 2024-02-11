@@ -40,22 +40,23 @@ export default function LivePlayer({
   const { activeMotion, activeAudio, activeTracking } =
     useCameraActivity(cameraConfig);
 
+  const cameraActive = useMemo(() => activeMotion || activeTracking, [activeMotion, activeTracking])
   const liveMode = useCameraLiveMode(cameraConfig, preferredLiveMode);
 
   const [liveReady, setLiveReady] = useState(false);
   useEffect(() => {
     if (!liveReady) {
-      if (activeMotion && liveMode == "jsmpeg") {
+      if (cameraActive && liveMode == "jsmpeg") {
         setLiveReady(true);
       }
 
       return;
     }
 
-    if (!activeMotion && !activeTracking) {
+    if (!cameraActive) {
       setLiveReady(false);
     }
-  }, [activeMotion, activeTracking, liveReady]);
+  }, [cameraActive, liveReady]);
 
   const { payload: recording } = useRecordingsState(cameraConfig.name);
 
@@ -167,7 +168,7 @@ export default function LivePlayer({
           : "outline-0"
       } transition-all duration-500 ${className}`}
     >
-      {(showStillWithoutActivity == false || activeMotion || activeTracking) &&
+      {(showStillWithoutActivity == false || cameraActive) &&
         player}
 
       <div
@@ -179,7 +180,7 @@ export default function LivePlayer({
           className="w-full h-full"
           camera={cameraConfig.name}
           showFps={false}
-          reloadInterval={30000}
+          reloadInterval={(cameraActive && !liveReady) ? 200 : 30000}
         />
       </div>
 

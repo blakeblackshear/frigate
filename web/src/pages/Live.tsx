@@ -1,11 +1,10 @@
-import { EventThumbnail } from "@/components/image/EventThumbnail";
+import { AnimatedEventThumbnail } from "@/components/image/AnimatedEventThumbnail";
 import LivePlayer from "@/components/player/LivePlayer";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Event as FrigateEvent } from "@/types/event";
 import { FrigateConfig } from "@/types/frigateConfig";
-import axios from "axios";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import useSWR from "swr";
 
 function Live() {
@@ -13,7 +12,7 @@ function Live() {
 
   // recent events
 
-  const { data: allEvents, mutate: updateEvents } = useSWR<FrigateEvent[]>(
+  const { data: allEvents } = useSWR<FrigateEvent[]>(
     ["events", { limit: 10 }],
     { refreshInterval: 60000 }
   );
@@ -28,19 +27,6 @@ function Live() {
     const cutoff = date.getTime() / 1000;
     return allEvents.filter((event) => event.start_time > cutoff);
   }, [allEvents]);
-
-  const onFavorite = useCallback(async (e: Event, event: FrigateEvent) => {
-    e.stopPropagation();
-    let response;
-    if (!event.retain_indefinitely) {
-      response = await axios.post(`events/${event.id}/retain`);
-    } else {
-      response = await axios.delete(`events/${event.id}/retain`);
-    }
-    if (response.status === 200) {
-      updateEvents();
-    }
-  }, []);
 
   // camera live views
 
@@ -61,13 +47,7 @@ function Live() {
           <TooltipProvider>
             <div className="flex">
               {events.map((event) => {
-                return (
-                  <EventThumbnail
-                    key={event.id}
-                    event={event}
-                    onFavorite={onFavorite}
-                  />
-                );
+                return <AnimatedEventThumbnail key={event.id} event={event} />;
               })}
             </div>
           </TooltipProvider>
