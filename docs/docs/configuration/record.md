@@ -173,10 +173,10 @@ record:
     timelapse_args: "-vf setpts=PTS/60 -r 25"
 ```
 
-:::warning
+:::tip
 
-When using `ffmpeg.hwaccel_args: preset-vaapi` globally, the resulting file size is typically undesirably large.
-To get a reasonable file size nevertheless, the ffmpeg parameter `-qp n` can be utilized (where `n` stands for the value of the quantisation parameter). Values of around 30 have shown to provide a reasonable tradeoff between quality and file size.
+When using `ffmpeg.hwaccel_args: preset-vaapi` globally, the resulting file size might be undesirably large; depending on the underlying encoder's implementation.
+To get a reasonable file size nevertheless, the ffmpeg parameter `-qp n` can be utilized (where `n` stands for the value of the quantisation parameter). The value can be adjusted to get an acceptable tradeoff between quality and file size for the given scenario.
 
 :::
 
