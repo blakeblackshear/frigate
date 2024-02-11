@@ -1,6 +1,5 @@
 import { baseUrl } from "@/api/baseUrl";
 import { Event as FrigateEvent } from "@/types/event";
-import { LuStar } from "react-icons/lu";
 import TimeAgo from "../dynamic/TimeAgo";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
