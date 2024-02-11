@@ -593,6 +593,149 @@ def event_thumbnail(id, max_cache_age=2592000):
     return response
 
 
+@bp.route("/events/<id>/preview.gif")
+def event_preview(id: str, max_cache_age=2592000):
+    try:
+        event: Event = Event.get(Event.id == id)
+    except DoesNotExist:
+        return make_response(
+            jsonify({"success": False, "message": "Event not found"}), 404
+        )
+
+    start_ts = event.start_time
+    end_ts = min(event.end_time - event.start_time, 20) if event.end_time else 20
+
+    if datetime.fromtimestamp(event.start_time) < datetime.now().replace(
+        minute=0, second=0
+    ):
+        # has preview mp4
+        preview: Previews = (
+            Previews.select(
+                Previews.camera,
+                Previews.path,
+                Previews.duration,
+                Previews.start_time,
+                Previews.end_time,
+            )
+            .where(
+                Previews.start_time.between(start_ts, end_ts)
+                | Previews.end_time.between(start_ts, end_ts)
+                | ((start_ts > Previews.start_time) & (end_ts < Previews.end_time))
+            )
+            .where(Previews.camera == event.camera)
+            .limit(1)
+            .get()
+        )
+
+        if not preview:
+            return make_response(
+                jsonify({"success": False, "message": "Preview not found"}), 404
+            )
+
+        diff = event.start_time - preview.start_time
+        minutes = int(diff / 60)
+        seconds = int(diff % 60)
+        ffmpeg_cmd = [
+            "ffmpeg",
+            "-hide_banner",
+            "-loglevel",
+            "warning",
+            "-ss",
+            f"00:{minutes}:{seconds}",
+            "-t",
+            f"{end_ts - start_ts}",
+            "-i",
+            preview.path,
+            "-r",
+            "8",
+            "-vf",
+            "setpts=0.12*PTS",
+            "-loop",
+            "0",
+            "-c:v",
+            "gif",
+            "-f",
+            "gif",
+            "-",
+        ]
+
+        process = sp.run(
+            ffmpeg_cmd,
+            capture_output=True,
+        )
+        gif_bytes = process.stdout
+    else:
+        # need to generate from existing images
+        preview_dir = os.path.join(CACHE_DIR, "preview_frames")
+        file_start = f"preview_{event.camera}"
+        start_file = f"{file_start}-{start_ts}.jpg"
+        end_file = f"{file_start}-{end_ts}.jpg"
+        selected_previews = []
+
+        for file in sorted(os.listdir(preview_dir)):
+            if not file.startswith(file_start):
+                continue
+
+            if file < start_file:
+                continue
+
+            if file > end_file:
+                break
+
+            selected_previews.append(f"file '/tmp/cache/preview_frames/{file}'")
+            selected_previews.append("duration 0.12")
+
+        if not selected_previews:
+            return make_response(
+                jsonify({"success": False, "message": "Preview not found"}), 404
+            )
+
+        last_file = selected_previews[-2]
+        selected_previews.append(last_file)
+
+        ffmpeg_cmd = [
+            "ffmpeg",
+            "-hide_banner",
+            "-loglevel",
+            "warning",
+            "-f",
+            "concat",
+            "-y",
+            "-protocol_whitelist",
+            "pipe,file",
+            "-safe",
+            "0",
+            "-i",
+            "/dev/stdin",
+            "-loop",
+            "0",
+            "-c:v",
+            "gif",
+            "-f",
+            "gif",
+            "-",
+        ]
+
+        process = sp.run(
+            ffmpeg_cmd,
+            input=str.encode("\n".join(selected_previews)),
+            capture_output=True,
+        )
+
+        if process.returncode != 0:
+            return make_response(
+                jsonify({"success": False, "message": "Unable to create preview gif"}),
+                500,
+            )
+
+        gif_bytes = process.stdout
+
+    response = make_response(gif_bytes)
+    response.headers["Content-Type"] = "image/gif"
+    response.headers["Cache-Control"] = f"private, max-age={max_cache_age}"
+    return response
+
+
 @bp.route("/timeline")
 def timeline():
     camera = request.args.get("camera", "all")
@@ -2265,9 +2408,11 @@ def export_recording(camera_name: str, start_time, end_time):
         camera_name,
         int(start_time),
         int(end_time),
-        PlaybackFactorEnum[playback_factor]
-        if playback_factor in PlaybackFactorEnum.__members__.values()
-        else PlaybackFactorEnum.realtime,
+        (
+            PlaybackFactorEnum[playback_factor]
+            if playback_factor in PlaybackFactorEnum.__members__.values()
+            else PlaybackFactorEnum.realtime
+        ),
     )
     exporter.start()
     return make_response(
@@ -2423,12 +2568,16 @@ def ffprobe():
         output.append(
             {
                 "return_code": ffprobe.returncode,
-                "stderr": ffprobe.stderr.decode("unicode_escape").strip()
-                if ffprobe.returncode != 0
-                else "",
-                "stdout": json.loads(ffprobe.stdout.decode("unicode_escape").strip())
-                if ffprobe.returncode == 0
-                else "",
+                "stderr": (
+                    ffprobe.stderr.decode("unicode_escape").strip()
+                    if ffprobe.returncode != 0
+                    else ""
+                ),
+                "stdout": (
+                    json.loads(ffprobe.stdout.decode("unicode_escape").strip())
+                    if ffprobe.returncode == 0
+                    else ""
+                ),
             }
         )
 
@@ -2441,12 +2590,16 @@ def vainfo():
     return jsonify(
         {
             "return_code": vainfo.returncode,
-            "stderr": vainfo.stderr.decode("unicode_escape").strip()
-            if vainfo.returncode != 0
-            else "",
-            "stdout": vainfo.stdout.decode("unicode_escape").strip()
-            if vainfo.returncode == 0
-            else "",
+            "stderr": (
+                vainfo.stderr.decode("unicode_escape").strip()
+                if vainfo.returncode != 0
+                else ""
+            ),
+            "stdout": (
+                vainfo.stdout.decode("unicode_escape").strip()
+                if vainfo.returncode == 0
+                else ""
+            ),
         }
     )
 
