@@ -603,7 +603,9 @@ def event_preview(id: str, max_cache_age=2592000):
         )
 
     start_ts = event.start_time
-    end_ts = min(event.end_time - event.start_time, 20) if event.end_time else 20
+    end_ts = (
+        start_ts + min(event.end_time - event.start_time, 20) if event.end_time else 20
+    )
 
     if datetime.fromtimestamp(event.start_time) < datetime.now().replace(
         minute=0, second=0
@@ -663,6 +665,14 @@ def event_preview(id: str, max_cache_age=2592000):
             ffmpeg_cmd,
             capture_output=True,
         )
+
+        if process.returncode != 0:
+            logger.error(process.stderr)
+            return make_response(
+                jsonify({"success": False, "message": "Unable to create preview gif"}),
+                500,
+            )
+
         gif_bytes = process.stdout
     else:
         # need to generate from existing images
@@ -723,6 +733,7 @@ def event_preview(id: str, max_cache_age=2592000):
         )
 
         if process.returncode != 0:
+            logger.error(process.stderr)
             return make_response(
                 jsonify({"success": False, "message": "Unable to create preview gif"}),
                 500,
