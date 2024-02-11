@@ -990,7 +990,7 @@ def label_thumbnail(camera_name, label):
 
 
 @bp.route("/events/<id>/snapshot.jpg")
-def event_snapshot(id):
+def event_snapshot(id, max_cache_age=31536000):
     download = request.args.get("download", type=bool)
     event_complete = False
     jpg_bytes = None
@@ -1038,7 +1038,7 @@ def event_snapshot(id):
     response = make_response(jpg_bytes)
     response.headers["Content-Type"] = "image/jpeg"
     if event_complete:
-        response.headers["Cache-Control"] = "private, max-age=31536000"
+        response.headers["Cache-Control"] = f"private, max-age={max_cache_age}"
     else:
         response.headers["Cache-Control"] = "no-store"
     if download:
@@ -1069,7 +1069,7 @@ def label_snapshot(camera_name, label):
 
     try:
         event = event_query.get()
-        return event_snapshot(event.id)
+        return event_snapshot(event.id, 60)
     except DoesNotExist:
         frame = np.zeros((720, 1280, 3), np.uint8)
         ret, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
