@@ -11,7 +11,7 @@ The baseline model isn't directly available after subscribing. This may change i
 
 :::
 
-With a subscription, and at each annual renewal, you will receive 12 model training credits. If you cancel your subscription, you will retain access to any trained models. An active subscription is required to submit model requests or purchase additional training credits.
+With a subscription, 12 model trainings per year are included. If you cancel your subscription, you will retain access to any trained models. An active subscription is required to submit model requests or purchase additional trainings.
 
 Information on how to integrate Frigate+ with Frigate can be found in the [integration docs](../integrations/plus.md).
 
