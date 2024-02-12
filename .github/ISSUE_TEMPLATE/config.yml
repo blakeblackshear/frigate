@@ -1,1 +1,5 @@
 blank_issues_enabled: false
+contact_links:
+  - name: Frigate Support
+    url: https://github.com/blakeblackshear/frigate/discussions/new/choose
+    about: Get support for setting up or troubelshooting Frigate.
