@@ -50,9 +50,7 @@ function Header({ onToggleNavbar }: HeaderProps) {
         </Button>
         <Link to="/">
           <div className="flex flex-row items-center">
-            <div className="w-10 mr-5">
-              <Logo />
-            </div>
+            <Logo className="w-10 mr-5" />
           </div>
         </Link>
         <HeaderNavigation />

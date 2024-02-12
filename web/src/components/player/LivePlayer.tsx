@@ -40,7 +40,10 @@ export default function LivePlayer({
   const { activeMotion, activeAudio, activeTracking } =
     useCameraActivity(cameraConfig);
 
-  const cameraActive = useMemo(() => activeMotion || activeTracking, [activeMotion, activeTracking])
+  const cameraActive = useMemo(
+    () => activeMotion || activeTracking,
+    [activeMotion, activeTracking]
+  );
   const liveMode = useCameraLiveMode(cameraConfig, preferredLiveMode);
 
   const [liveReady, setLiveReady] = useState(false);
@@ -168,8 +171,10 @@ export default function LivePlayer({
           : "outline-0"
       } transition-all duration-500 ${className}`}
     >
-      {(showStillWithoutActivity == false || cameraActive) &&
-        player}
+      <div className="absolute top-0 left-0 right-0 rounded-2xl z-10 w-full h-[30%] bg-gradient-to-b from-black/20 to-transparent pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 right-0 rounded-2xl z-10 w-full h-[10%] bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
+
+      {(showStillWithoutActivity == false || cameraActive) && player}
 
       <div
         className={`absolute left-0 top-0 right-0 bottom-0 w-full ${
@@ -180,14 +185,14 @@ export default function LivePlayer({
           className="w-full h-full"
           camera={cameraConfig.name}
           showFps={false}
-          reloadInterval={(cameraActive && !liveReady) ? 200 : 30000}
+          reloadInterval={cameraActive && !liveReady ? 200 : 30000}
         />
       </div>
 
       <div className="absolute flex left-2 top-2 gap-2">
         <Chip
           in={activeMotion}
-          className={`bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500/90`}
+          className={`bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500`}
         >
           <MdLeakAdd className="w-4 h-4 text-motion" />
           <div className="ml-1 text-white text-xs">Motion</div>
@@ -196,7 +201,7 @@ export default function LivePlayer({
         {cameraConfig.audio.enabled_in_config && (
           <Chip
             in={activeAudio}
-            className={`bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500/90`}
+            className={`bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500`}
           >
             <BsSoundwave className="w-4 h-4 text-audio" />
             <div className="ml-1 text-white text-xs">Sound</div>
@@ -204,7 +209,7 @@ export default function LivePlayer({
         )}
       </div>
 
-      <Chip className="absolute right-2 top-2 bg-gradient-to-br from-gray-300/50 to-gray-500/90">
+      <Chip className="absolute right-2 top-2 bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500">
         {recording == "ON" && (
           <MdCircle className="w-2 h-2 drop-shadow-md shadow-danger text-danger" />
         )}

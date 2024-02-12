@@ -243,6 +243,10 @@ function MSEPlayer({ camera, className, onPlaying }: MSEPlayerProps) {
 
   useEffect(() => {
     onConnect();
+
+    return () => {
+      onDisconnect();
+    };
   }, [wsURL]);
 
   return (
