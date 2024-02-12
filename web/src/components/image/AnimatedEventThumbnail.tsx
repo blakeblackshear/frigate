@@ -15,7 +15,7 @@ export function AnimatedEventThumbnail({ event }: AnimatedEventThumbnailProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const imageUrl = useMemo(() => {
-    if (!event.end_time) {
+    if (Date.now() / 1000 < event.start_time + 20) {
       return `${apiHost}api/preview/${event.camera}/${event.start_time}/thumbnail.jpg`;
     }
 
