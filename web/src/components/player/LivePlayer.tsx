@@ -62,6 +62,10 @@ export default function LivePlayer({
   // camera still state
 
   const stillReloadInterval = useMemo(() => {
+    if (!windowVisible) {
+      return -1;  // no reason to update the image when the window is not visible
+    }
+
     if (liveReady) {
       return 60000;
     }

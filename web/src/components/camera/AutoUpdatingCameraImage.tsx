@@ -23,6 +23,10 @@ export default function AutoUpdatingCameraImage({
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout>();
 
   useEffect(() => {
+    if (reloadInterval == -1) {
+      return;
+    }
+
     setKey(Date.now());
 
     return () => {
@@ -34,6 +38,10 @@ export default function AutoUpdatingCameraImage({
   }, [reloadInterval]);
 
   const handleLoad = useCallback(() => {
+    if (reloadInterval == -1) {
+      return;
+    }
+
     const loadTime = Date.now() - key;
 
     if (showFps) {
