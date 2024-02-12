@@ -5,7 +5,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Event as FrigateEvent } from "@/types/event";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 
 function Live() {
@@ -64,6 +64,19 @@ function Live() {
       .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
   }, [config]);
 
+  const [windowVisible, setWindowVisible] = useState(false);
+  const visibilityListener = useCallback(() => {
+    setWindowVisible(document.visibilityState == "visible");
+  }, []);
+
+  useEffect(() => {
+    addEventListener("visibilitychange", visibilityListener);
+
+    return () => {
+      removeEventListener("visibilitychange", visibilityListener);
+    };
+  }, []);
+
   return (
     <>
       {events && events.length > 0 && (
@@ -94,6 +107,7 @@ function Live() {
             <LivePlayer
               key={camera.name}
               className={`mb-2 md:mb-0 rounded-2xl bg-black ${grow}`}
+              windowVisible={windowVisible}
               cameraConfig={camera}
               preferredLiveMode="mse"
             />

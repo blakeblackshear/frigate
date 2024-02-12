@@ -26,6 +26,7 @@ type LivePlayerProps = {
   cameraConfig: CameraConfig;
   preferredLiveMode?: LivePlayerMode;
   showStillWithoutActivity?: boolean;
+  windowVisible?: boolean;
 };
 
 type Options = { [key: string]: boolean };
@@ -35,14 +36,15 @@ export default function LivePlayer({
   cameraConfig,
   preferredLiveMode,
   showStillWithoutActivity = true,
+  windowVisible = true,
 }: LivePlayerProps) {
   // camera activity
   const { activeMotion, activeAudio, activeTracking } =
     useCameraActivity(cameraConfig);
 
   const cameraActive = useMemo(
-    () => activeMotion || activeTracking,
-    [activeMotion, activeTracking]
+    () => windowVisible && (activeMotion || activeTracking),
+    [activeMotion, activeTracking, windowVisible]
   );
   const liveMode = useCameraLiveMode(cameraConfig, preferredLiveMode);
 
