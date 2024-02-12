@@ -98,17 +98,19 @@ export default function SettingsNavItems({ className }: SettingsNavItemsProps) {
     <>
       <div className={className}>
         <DropdownMenu>
-          <DropdownMenuTrigger>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="icon" variant="ghost">
-                  <LuSettings />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="right">
-                <p>Settings</p>
-              </TooltipContent>
-            </Tooltip>
+          <DropdownMenuTrigger asChild>
+            <a href="#">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="icon" variant="ghost">
+                    <LuSettings />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  <p>Settings</p>
+                </TooltipContent>
+              </Tooltip>
+            </a>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="md:w-72 mr-5">
             <DropdownMenuLabel>System</DropdownMenuLabel>
@@ -242,7 +244,7 @@ export default function SettingsNavItems({ className }: SettingsNavItemsProps) {
           </DropdownMenuContent>
         </DropdownMenu>
         <Tooltip>
-          <TooltipTrigger>
+          <TooltipTrigger asChild>
             <Button size="icon" variant="ghost">
               <VscAccount />
             </Button>
