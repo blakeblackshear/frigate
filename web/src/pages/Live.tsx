@@ -1,21 +1,45 @@
+import { useFrigateEvents } from "@/api/ws";
 import { AnimatedEventThumbnail } from "@/components/image/AnimatedEventThumbnail";
 import LivePlayer from "@/components/player/LivePlayer";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Event as FrigateEvent } from "@/types/event";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import useSWR from "swr";
 
 function Live() {
   const { data: config } = useSWR<FrigateConfig>("config");
 
   // recent events
-
-  const { data: allEvents } = useSWR<FrigateEvent[]>(
+  const { payload: eventUpdate } = useFrigateEvents();
+  const { data: allEvents, mutate: updateEvents } = useSWR<FrigateEvent[]>(
     ["events", { limit: 10 }],
-    { refreshInterval: 60000 }
+    { revalidateOnFocus: false }
   );
+
+  useEffect(() => {
+    if (!eventUpdate) {
+      return;
+    }
+
+    // if event is ended and was saved, update events list
+    if (
+      eventUpdate.type == "end" &&
+      (eventUpdate.after.has_clip || eventUpdate.after.has_snapshot)
+    ) {
+      updateEvents();
+      return;
+    }
+
+    // if event is updated and has become a saved event, update events list
+    if (
+      !(eventUpdate.before.has_clip || eventUpdate.before.has_snapshot) &&
+      (eventUpdate.after.has_clip || eventUpdate.after.has_snapshot)
+    ) {
+      updateEvents();
+    }
+  }, [eventUpdate]);
 
   const events = useMemo(() => {
     if (!allEvents) {
