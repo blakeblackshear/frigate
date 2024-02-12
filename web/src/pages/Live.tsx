@@ -62,7 +62,7 @@ function Live() {
           if (aspectRatio > 2) {
             grow = "md:col-span-2 aspect-wide";
           } else if (aspectRatio < 1) {
-            grow = `md:row-span-2 aspect-[8/9] md:h-full`;
+            grow = `md:row-span-2 aspect-tall md:h-full`;
           } else {
             grow = "aspect-video";
           }

@@ -25,7 +25,7 @@ module.exports = {
       },
       aspectRatio: {
         wide: "32 / 9",
-        tall: "9 / 16",
+        tall: "8 / 9",
       },
       colors: {
         border: "hsl(var(--border))",
