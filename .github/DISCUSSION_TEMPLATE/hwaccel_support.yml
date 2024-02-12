@@ -1,6 +1,6 @@
-name: General Support Request
-description: General support request for Frigate
-title: "[Support]: "
+name: Hardware Acceleration Support Request
+description: Support for setting up GPU hardware acceleration in Frigate
+title: "[HW Accel Support]: "
 labels: ["support", "triage"]
 assignees: []
 body:
@@ -14,13 +14,21 @@ body:
     id: version
     attributes:
       label: Version
-      description: Visible on the Debug page in the Web UI
+      description: Visible on the System page in the Web UI
     validations:
       required: true
   - type: textarea
     id: config
     attributes:
       label: Frigate config file
+      description: This will be automatically formatted into code, so no need for backticks.
+      render: yaml
+    validations:
+      required: true
+  - type: textarea
+    id: docker
+    attributes:
+      label: docker-compose file or Docker CLI command
       description: This will be automatically formatted into code, so no need for backticks.
       render: yaml
     validations:
@@ -41,12 +49,6 @@ body:
       render: shell
     validations:
       required: true
-  - type: textarea
-    id: stats
-    attributes:
-      label: Frigate stats
-      description: Output from frigate's /api/stats endpoint
-      render: json
   - type: dropdown
     id: os
     attributes:
@@ -69,19 +71,6 @@ body:
         - HassOS Addon
         - Docker Compose
         - Docker CLI
-    validations:
-      required: true
-  - type: dropdown
-    id: coral
-    attributes:
-      label: Coral version
-      options:
-        - USB
-        - PCIe
-        - M.2
-        - Dev Board
-        - Other
-        - CPU (no coral)
     validations:
       required: true
   - type: dropdown
