@@ -29,6 +29,7 @@ export default function LivePlayer({
   windowVisible = true,
 }: LivePlayerProps) {
   // camera activity
+
   const { activeMotion, activeAudio, activeTracking } =
     useCameraActivity(cameraConfig);
 
@@ -36,6 +37,9 @@ export default function LivePlayer({
     () => windowVisible && (activeMotion || activeTracking),
     [activeMotion, activeTracking, windowVisible]
   );
+
+  // camera live state
+
   const liveMode = useCameraLiveMode(cameraConfig, preferredLiveMode);
 
   const [liveReady, setLiveReady] = useState(false);
@@ -54,6 +58,20 @@ export default function LivePlayer({
   }, [cameraActive, liveReady]);
 
   const { payload: recording } = useRecordingsState(cameraConfig.name);
+
+  // camera still state
+
+  const stillReloadInterval = useMemo(() => {
+    if (liveReady) {
+      return 60000;
+    }
+
+    if (cameraActive) {
+      return 200;
+    }
+
+    return 30000;
+  }, []);
 
   if (!cameraConfig) {
     return <ActivityIndicator />;
@@ -120,7 +138,7 @@ export default function LivePlayer({
           className="w-full h-full"
           camera={cameraConfig.name}
           showFps={false}
-          reloadInterval={cameraActive && !liveReady ? 200 : 30000}
+          reloadInterval={stillReloadInterval}
         />
       </div>
 
