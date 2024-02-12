@@ -64,7 +64,7 @@ function Live() {
       .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
   }, [config]);
 
-  const [windowVisible, setWindowVisible] = useState(false);
+  const [windowVisible, setWindowVisible] = useState(true);
   const visibilityListener = useCallback(() => {
     setWindowVisible(document.visibilityState == "visible");
   }, []);

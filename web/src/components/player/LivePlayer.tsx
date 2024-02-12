@@ -63,7 +63,7 @@ export default function LivePlayer({
 
   const stillReloadInterval = useMemo(() => {
     if (!windowVisible) {
-      return -1;  // no reason to update the image when the window is not visible
+      return -1; // no reason to update the image when the window is not visible
     }
 
     if (liveReady) {
@@ -96,6 +96,7 @@ export default function LivePlayer({
         <MSEPlayer
           className={`rounded-2xl h-full ${liveReady ? "" : "hidden"}`}
           camera={cameraConfig.name}
+          playbackEnabled={cameraActive}
           onPlaying={() => setLiveReady(true)}
         />
       );
@@ -130,8 +131,7 @@ export default function LivePlayer({
     >
       <div className="absolute top-0 left-0 right-0 rounded-2xl z-10 w-full h-[30%] bg-gradient-to-b from-black/20 to-transparent pointer-events-none"></div>
       <div className="absolute bottom-0 left-0 right-0 rounded-2xl z-10 w-full h-[10%] bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
-
-      {(showStillWithoutActivity == false || cameraActive) && player}
+      {player}
 
       <div
         className={`absolute left-0 top-0 right-0 bottom-0 w-full ${
