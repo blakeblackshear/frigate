@@ -33,7 +33,7 @@ export function AnimatedEventThumbnail({ event }: AnimatedEventThumbnailProps) {
     if (aspect > 2) {
       return "aspect-wide";
     } else if (aspect < 1) {
-      return "aspect-tall";
+      return "aspect-[9/16]";
     } else {
       return "aspect-video";
     }
@@ -43,7 +43,7 @@ export function AnimatedEventThumbnail({ event }: AnimatedEventThumbnailProps) {
     <Tooltip>
       <TooltipTrigger asChild>
         <div
-          className={`relative rounded bg-cover h-24 bg-no-repeat bg-center mr-4 ${aspect}`}
+          className={`relative rounded bg-contain h-24 bg-no-repeat bg-center mr-4 ${aspect}`}
           style={{
             backgroundImage: `url(${imageUrl})`,
           }}
