@@ -4,16 +4,21 @@ import { useCallback, useEffect, useRef } from "react";
 type WebRtcPlayerProps = {
   className?: string;
   camera: string;
+  playbackEnabled?: boolean;
   onPlaying?: () => void;
 };
 
 export default function WebRtcPlayer({
   className,
   camera,
+  playbackEnabled = true,
   onPlaying,
 }: WebRtcPlayerProps) {
+  // camera states
+
   const pcRef = useRef<RTCPeerConnection | undefined>();
   const videoRef = useRef<HTMLVideoElement | null>(null);
+
   const PeerConnection = useCallback(
     async (media: string) => {
       if (!videoRef.current) {
@@ -129,6 +134,10 @@ export default function WebRtcPlayer({
       return;
     }
 
+    if (!playbackEnabled) {
+      return;
+    }
+
     const url = `${baseUrl.replace(
       /^http/,
       "ws"
@@ -143,18 +152,16 @@ export default function WebRtcPlayer({
         pcRef.current = undefined;
       }
     };
-  }, [camera, connect, PeerConnection, pcRef, videoRef]);
+  }, [camera, connect, PeerConnection, pcRef, videoRef, playbackEnabled]);
 
   return (
-    <div>
-      <video
-        ref={videoRef}
-        className={className}
-        autoPlay
-        playsInline
-        muted
-        onLoadedData={onPlaying}
-      />
-    </div>
+    <video
+      ref={videoRef}
+      className={className}
+      autoPlay
+      playsInline
+      muted
+      onLoadedData={onPlaying}
+    />
   );
 }
