@@ -13,8 +13,10 @@ runs:
   steps:
     - name: Show disk info
       run: df -h
+      shell: bash
     - name: Show docker image info
       run: docker image ls --all
+      shell: bash
     - name: Maximize build space
       uses: easimon/maximize-build-space@master
       with:
@@ -27,8 +29,10 @@ runs:
         remove-docker-images: 'true'
     - name: Show disk info
       run: df -h
+      shell: bash
     - name: Show docker image info
       run: docker image ls --all
+      shell: bash
     - id: lowercaseRepo
       uses: ASzc/change-string-case-action@v5
       with:

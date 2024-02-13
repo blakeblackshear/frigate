@@ -23,13 +23,13 @@ jobs:
     steps:
       - name: Show disk info
         run: df -h
-      - name: Check out code
-        uses: actions/checkout@v4
       - name: Set up QEMU and Buildx
         id: setup
         uses: ./.github/actions/setup
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check out code
+        uses: actions/checkout@v4
       - name: Show disk info
         run: df -h
       - name: Build and push amd64 standard build
