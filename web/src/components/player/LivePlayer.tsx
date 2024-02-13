@@ -111,7 +111,7 @@ export default function LivePlayer({
   } else if (liveMode == "jsmpeg") {
     player = (
       <JSMpegPlayer
-        className="w-full flex justify-center"
+        className="w-full flex justify-center rounded-2xl overflow-hidden"
         camera={cameraConfig.name}
         width={cameraConfig.detect.width}
         height={cameraConfig.detect.height}

@@ -37,7 +37,9 @@ export default function CameraImage({
 
   return (
     <div
-      className={`relative w-full h-full flex justify-center ${className}`}
+      className={`relative w-full h-full flex justify-center ${
+        className || ""
+      }`}
       ref={containerRef}
     >
       {enabled ? (
