@@ -23,6 +23,16 @@ jobs:
     steps:
       - name: Show disk info
         run: df -h
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 512
+          swap-size-mb: 1024
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
+          remove-codeql: 'true'
+          remove-docker-images: 'true'
       - name: Check out code
         uses: actions/checkout@v4
       - name: Set up QEMU and Buildx
