@@ -11,12 +11,24 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Remove unnecessary files
-      run: |
-        sudo rm -rf /usr/share/dotnet
-        sudo rm -rf /usr/local/lib/android
-        sudo rm -rf /opt/ghc
-      shell: bash
+    - name: Show disk info
+      run: df -h
+    - name: Show docker image info
+      run: docker image ls --all
+    - name: Maximize build space
+      uses: easimon/maximize-build-space@master
+      with:
+        root-reserve-mb: 512
+        swap-size-mb: 1024
+        remove-dotnet: 'true'
+        remove-android: 'true'
+        remove-haskell: 'true'
+        remove-codeql: 'true'
+        remove-docker-images: 'true'
+    - name: Show disk info
+      run: df -h
+    - name: Show docker image info
+      run: docker image ls --all
     - id: lowercaseRepo
       uses: ASzc/change-string-case-action@v5
       with:

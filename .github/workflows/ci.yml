@@ -21,6 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     name: AMD64 Build
     steps:
+      - name: Show disk info
+        run: df -h
       - name: Check out code
         uses: actions/checkout@v4
       - name: Set up QEMU and Buildx
@@ -28,6 +30,8 @@ jobs:
         uses: ./.github/actions/setup
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Show disk info
+        run: df -h
       - name: Build and push amd64 standard build
         uses: docker/build-push-action@v5
         with:
@@ -38,6 +42,8 @@ jobs:
           target: frigate
           tags: ${{ steps.setup.outputs.image-name }}-amd64
           cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
+      - name: Show disk info
+        run: df -h
       - name: Show docker image info
         run: docker image ls --all
       - name: Build and push TensorRT (x86 GPU)
@@ -50,6 +56,8 @@ jobs:
             tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64,mode=max
+      - name: Show disk info
+        run: df -h
       - name: Show docker image info
         run: docker image ls --all
       - name: AMD/ROCm general build
@@ -64,6 +72,8 @@ jobs:
           set: |
             rocm.tags=${{ steps.setup.outputs.image-name }}-rocm
             *.cache-from=type=gha
+      - name: Show disk info
+        run: df -h
       - name: Show docker image info
         run: docker image ls --all
       - name: AMD/ROCm gfx900
