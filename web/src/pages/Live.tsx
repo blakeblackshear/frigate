@@ -1,21 +1,45 @@
+import { useFrigateEvents } from "@/api/ws";
 import { AnimatedEventThumbnail } from "@/components/image/AnimatedEventThumbnail";
 import LivePlayer from "@/components/player/LivePlayer";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Event as FrigateEvent } from "@/types/event";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 
 function Live() {
   const { data: config } = useSWR<FrigateConfig>("config");
 
   // recent events
-
-  const { data: allEvents } = useSWR<FrigateEvent[]>(
+  const { payload: eventUpdate } = useFrigateEvents();
+  const { data: allEvents, mutate: updateEvents } = useSWR<FrigateEvent[]>(
     ["events", { limit: 10 }],
-    { refreshInterval: 60000 }
+    { revalidateOnFocus: false }
   );
+
+  useEffect(() => {
+    if (!eventUpdate) {
+      return;
+    }
+
+    // if event is ended and was saved, update events list
+    if (
+      eventUpdate.type == "end" &&
+      (eventUpdate.after.has_clip || eventUpdate.after.has_snapshot)
+    ) {
+      updateEvents();
+      return;
+    }
+
+    // if event is updated and has become a saved event, update events list
+    if (
+      !(eventUpdate.before.has_clip || eventUpdate.before.has_snapshot) &&
+      (eventUpdate.after.has_clip || eventUpdate.after.has_snapshot)
+    ) {
+      updateEvents();
+    }
+  }, [eventUpdate]);
 
   const events = useMemo(() => {
     if (!allEvents) {
@@ -40,6 +64,19 @@ function Live() {
       .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
   }, [config]);
 
+  const [windowVisible, setWindowVisible] = useState(true);
+  const visibilityListener = useCallback(() => {
+    setWindowVisible(document.visibilityState == "visible");
+  }, []);
+
+  useEffect(() => {
+    addEventListener("visibilitychange", visibilityListener);
+
+    return () => {
+      removeEventListener("visibilitychange", visibilityListener);
+    };
+  }, []);
+
   return (
     <>
       {events && events.length > 0 && (
@@ -62,7 +99,7 @@ function Live() {
           if (aspectRatio > 2) {
             grow = "md:col-span-2 aspect-wide";
           } else if (aspectRatio < 1) {
-            grow = `md:row-span-2 aspect-[8/9] md:h-full`;
+            grow = `md:row-span-2 aspect-tall md:h-full`;
           } else {
             grow = "aspect-video";
           }
@@ -70,6 +107,7 @@ function Live() {
             <LivePlayer
               key={camera.name}
               className={`mb-2 md:mb-0 rounded-2xl bg-black ${grow}`}
+              windowVisible={windowVisible}
               cameraConfig={camera}
               preferredLiveMode="mse"
             />

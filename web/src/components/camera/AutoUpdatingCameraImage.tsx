@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import CameraImage from "./CameraImage";
 
 type AutoUpdatingCameraImageProps = {
@@ -20,19 +20,41 @@ export default function AutoUpdatingCameraImage({
 }: AutoUpdatingCameraImageProps) {
   const [key, setKey] = useState(Date.now());
   const [fps, setFps] = useState<string>("0");
+  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout>();
+
+  useEffect(() => {
+    if (reloadInterval == -1) {
+      return;
+    }
+
+    setKey(Date.now());
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        setTimeoutId(undefined);
+      }
+    };
+  }, [reloadInterval]);
 
   const handleLoad = useCallback(() => {
+    if (reloadInterval == -1) {
+      return;
+    }
+
     const loadTime = Date.now() - key;
 
     if (showFps) {
       setFps((1000 / Math.max(loadTime, reloadInterval)).toFixed(1));
     }
 
-    setTimeout(
-      () => {
-        setKey(Date.now());
-      },
-      loadTime > reloadInterval ? 1 : reloadInterval
+    setTimeoutId(
+      setTimeout(
+        () => {
+          setKey(Date.now());
+        },
+        loadTime > reloadInterval ? 1 : reloadInterval
+      )
     );
   }, [key, setFps]);
 

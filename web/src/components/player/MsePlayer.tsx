@@ -4,10 +4,16 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 type MSEPlayerProps = {
   camera: string;
   className?: string;
+  playbackEnabled?: boolean;
   onPlaying?: () => void;
 };
 
-function MSEPlayer({ camera, className, onPlaying }: MSEPlayerProps) {
+function MSEPlayer({
+  camera,
+  className,
+  playbackEnabled = true,
+  onPlaying,
+}: MSEPlayerProps) {
   let connectTS: number = 0;
 
   const RECONNECT_TIMEOUT: number = 30000;
@@ -203,6 +209,10 @@ function MSEPlayer({ camera, className, onPlaying }: MSEPlayerProps) {
   };
 
   useEffect(() => {
+    if (!playbackEnabled) {
+      return;
+    }
+
     // iOS 17.1+ uses ManagedMediaSource
     const MediaSourceConstructor =
       "ManagedMediaSource" in window ? window.ManagedMediaSource : MediaSource;
@@ -236,18 +246,12 @@ function MSEPlayer({ camera, className, onPlaying }: MSEPlayerProps) {
       observer.observe(videoRef.current!);
     }
 
-    return () => {
-      onDisconnect();
-    };
-  }, [onDisconnect, onConnect]);
-
-  useEffect(() => {
     onConnect();
 
     return () => {
       onDisconnect();
     };
-  }, [wsURL]);
+  }, [playbackEnabled, onDisconnect, onConnect]);
 
   return (
     <video

@@ -2294,9 +2294,9 @@ def preview_thumbnail(camera_name, frame_time):
     file_check = f"{file_start}-{frame_time}.jpg"
     selected_preview = None
 
-    for file in os.listdir(preview_dir):
+    for file in sorted(os.listdir(preview_dir)):
         if file.startswith(file_start):
-            if file < file_check:
+            if file > file_check:
                 selected_preview = file
                 break
 
