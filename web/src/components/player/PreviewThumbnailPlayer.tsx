@@ -2,7 +2,6 @@ import VideoPlayer from "./VideoPlayer";
 import React, {
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -11,6 +10,7 @@ import Player from "video.js/dist/types/player";
 import { AspectRatio } from "../ui/aspect-ratio";
 import { LuPlayCircle } from "react-icons/lu";
 import { isCurrentHour } from "@/utils/dateUtil";
+import { isSafari } from "@/utils/browserUtil";
 
 type PreviewPlayerProps = {
   camera: string;
@@ -38,9 +38,6 @@ export default function PreviewThumbnailPlayer({
   onClick,
 }: PreviewPlayerProps) {
   const playerRef = useRef<Player | null>(null);
-  const isSafari = useMemo(() => {
-    return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-  }, []);
 
   const [visible, setVisible] = useState(false);
   const [isInitiallyVisible, setIsInitiallyVisible] = useState(false);
@@ -135,7 +132,6 @@ export default function PreviewThumbnailPlayer({
         camera={camera}
         eventId={eventId}
         isMobile={isMobile}
-        isSafari={isSafari}
         onClick={onClick}
       />
     </AspectRatio>
@@ -151,7 +147,6 @@ type PreviewContentProps = {
   isInitiallyVisible: boolean;
   startTs: number;
   isMobile: boolean;
-  isSafari: boolean;
   onClick?: () => void;
 };
 function PreviewContent({
@@ -163,10 +158,10 @@ function PreviewContent({
   isInitiallyVisible,
   startTs,
   isMobile,
-  isSafari,
   onClick,
 }: PreviewContentProps) {
   const apiHost = useApiHost();
+  const slowPlayack = isSafari();
 
   // handle touchstart -> touchend as click
   const [touchStart, setTouchStart] = useState(0);
@@ -237,7 +232,7 @@ function PreviewContent({
                 player.pause(); // autoplay + pause is required for iOS
               }
 
-              player.playbackRate(isSafari ? 2 : 8);
+              player.playbackRate(slowPlayack ? 2 : 8);
               player.currentTime(startTs - relevantPreview.start);
               if (isMobile && onClick) {
                 player.on("touchstart", handleTouchStart);
