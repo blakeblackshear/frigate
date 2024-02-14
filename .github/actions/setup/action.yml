@@ -11,6 +11,23 @@ outputs:
 runs:
   using: "composite"
   steps:
+    # Stop docker so we can mount more space at /var/lib/docker
+    - name: Stop docker
+      run: sudo systemctl stop docker
+      shell: bash
+    # This creates a virtual volume at /var/lib/docker to maximize the size
+    # As of 2/14/2024, this results in 97G for docker images
+    - name: Maximize build space
+      uses: easimon/maximize-build-space@master
+      with:
+        remove-dotnet: 'true'
+        remove-android: 'true'
+        remove-haskell: 'true'
+        remove-codeql: 'true'
+        build-mount-path: '/var/lib/docker'
+    - name: Start docker
+      run: sudo systemctl start docker
+      shell: bash
     - id: lowercaseRepo
       uses: ASzc/change-string-case-action@v5
       with:

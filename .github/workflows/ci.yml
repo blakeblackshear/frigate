@@ -21,22 +21,6 @@ jobs:
     runs-on: ubuntu-latest
     name: AMD64 Build
     steps:
-      - name: Show disk info
-        run: df -h
-      - name: Stop docker
-        run: sudo systemctl stop docker
-      - name: Maximize build space
-        uses: easimon/maximize-build-space@master
-        with:
-          # root-reserve-mb: 512
-          # swap-size-mb: 1024
-          remove-dotnet: 'true'
-          remove-android: 'true'
-          remove-haskell: 'true'
-          remove-codeql: 'true'
-          build-mount-path: '/var/lib/docker'
-      - name: Start docker
-        run: sudo systemctl start docker
       - name: Check out code
         uses: actions/checkout@v4
       - name: Set up QEMU and Buildx
@@ -44,8 +28,6 @@ jobs:
         uses: ./.github/actions/setup
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Show disk info
-        run: df -h
       - name: Build and push amd64 standard build
         uses: docker/build-push-action@v5
         with:
@@ -56,10 +38,6 @@ jobs:
           target: frigate
           tags: ${{ steps.setup.outputs.image-name }}-amd64
           cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
-      - name: Show disk info
-        run: df -h
-      - name: Show docker image info
-        run: docker image ls --all
       - name: Build and push TensorRT (x86 GPU)
         uses: docker/bake-action@v4
         with:
@@ -70,10 +48,6 @@ jobs:
             tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64,mode=max
-      - name: Show disk info
-        run: df -h
-      - name: Show docker image info
-        run: docker image ls --all
       - name: AMD/ROCm general build
         env:
           AMDGPU: gfx
@@ -86,10 +60,6 @@ jobs:
           set: |
             rocm.tags=${{ steps.setup.outputs.image-name }}-rocm
             *.cache-from=type=gha
-      - name: Show disk info
-        run: df -h
-      - name: Show docker image info
-        run: docker image ls --all
       - name: AMD/ROCm gfx900
         env:
           AMDGPU: gfx900
@@ -103,8 +73,6 @@ jobs:
           set: |
             rocm.tags=${{ steps.setup.outputs.image-name }}-rocm-gfx900
             *.cache-from=type=gha
-      - name: Show docker image info
-        run: docker image ls --all
       - name: AMD/ROCm gfx1030
         env:
           AMDGPU: gfx1030
@@ -118,8 +86,6 @@ jobs:
           set: |
             rocm.tags=${{ steps.setup.outputs.image-name }}-rocm-gfx1030
             *.cache-from=type=gha
-      - name: Show docker image info
-        run: docker image ls --all
       - name: AMD/ROCm gfx1100
         env:
           AMDGPU: gfx1100
@@ -133,8 +99,6 @@ jobs:
           set: |
             rocm.tags=${{ steps.setup.outputs.image-name }}-rocm-gfx1100
             *.cache-from=type=gha
-      - name: Show docker image info
-        run: docker image ls --all
   arm64_build:
     runs-on: ubuntu-latest
     name: ARM Build
@@ -157,8 +121,6 @@ jobs:
           tags: |
             ${{ steps.setup.outputs.image-name }}-standard-arm64
           cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64
-      - name: Show docker image info
-        run: docker image ls --all
       - name: Build and push RPi build
         uses: docker/bake-action@v4
         with:
@@ -169,8 +131,6 @@ jobs:
             rpi.tags=${{ steps.setup.outputs.image-name }}-rpi
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64,mode=max
-      - name: Show docker image info
-        run: docker image ls --all
       - name: Build and push RockChip build
         uses: docker/bake-action@v3
         with:
@@ -180,8 +140,6 @@ jobs:
           set: |
             rk.tags=${{ steps.setup.outputs.image-name }}-rk
             *.cache-from=type=gha
-      - name: Show docker image info
-        run: docker image ls --all
   jetson_jp4_build:
     runs-on: ubuntu-latest
     name: Jetson Jetpack 4
@@ -208,8 +166,6 @@ jobs:
             tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt-jp4
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp4
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp4,mode=max
-      - name: Show docker image info
-        run: docker image ls --all
   jetson_jp5_build:
     runs-on: ubuntu-latest
     name: Jetson Jetpack 5
@@ -236,8 +192,6 @@ jobs:
             tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt-jp5
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp5
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp5,mode=max
-      - name: Show docker image info
-        run: docker image ls --all
   # The majority of users running arm64 are rpi users, so the rpi
   # build should be the primary arm64 image
   assemble_default_build:
