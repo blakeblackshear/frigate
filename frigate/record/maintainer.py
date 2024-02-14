@@ -25,7 +25,6 @@ from frigate.const import (
     INSERT_MANY_RECORDINGS,
     MAX_SEGMENT_DURATION,
     MAX_SEGMENTS_IN_CACHE,
-    PORT_INTER_PROCESS_COMM,
     RECORD_DIR,
 )
 from frigate.models import Event, Recordings
@@ -71,10 +70,7 @@ class RecordingMaintainer(threading.Thread):
         self.config = config
 
         # create communication for retained recordings
-        INTER_PROCESS_COMM_PORT = (
-            os.environ.get("INTER_PROCESS_COMM_PORT") or PORT_INTER_PROCESS_COMM
-        )
-        self.requestor = InterProcessRequestor(INTER_PROCESS_COMM_PORT)
+        self.requestor = InterProcessRequestor()
 
         self.object_recordings_info_queue = object_recordings_info_queue
         self.audio_recordings_info_queue = audio_recordings_info_queue

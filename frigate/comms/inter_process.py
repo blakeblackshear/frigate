@@ -56,7 +56,8 @@ class InterProcessCommunicator(Communicator):
 class InterProcessRequestor:
     """Simplifies sending data to InterProcessCommunicator and getting a reply."""
 
-    def __init__(self, port: int) -> None:
+    def __init__(self) -> None:
+        port = os.environ.get("INTER_PROCESS_COMM_PORT") or PORT_INTER_PROCESS_COMM
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REQ)
         self.socket.connect(f"tcp://127.0.0.1:{port}")

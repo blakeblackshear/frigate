@@ -18,7 +18,6 @@ from frigate.const import (
     ATTRIBUTE_LABEL_MAP,
     CACHE_DIR,
     CACHE_SEGMENT_FORMAT,
-    PORT_INTER_PROCESS_COMM,
     REQUEST_REGION_GRID,
 )
 from frigate.log import LogPipe
@@ -433,11 +432,8 @@ def track_camera(
 
     frame_manager = SharedMemoryFrameManager()
 
-    # create communication for finished previews
-    INTER_PROCESS_COMM_PORT = (
-        os.environ.get("INTER_PROCESS_COMM_PORT") or PORT_INTER_PROCESS_COMM
-    )
-    requestor = InterProcessRequestor(INTER_PROCESS_COMM_PORT)
+    # create communication for region grid updates
+    requestor = InterProcessRequestor()
 
     process_frames(
         name,

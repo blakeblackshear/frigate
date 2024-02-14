@@ -13,7 +13,7 @@ import numpy as np
 
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, RecordQualityEnum
-from frigate.const import CACHE_DIR, CLIPS_DIR, INSERT_PREVIEW, PORT_INTER_PROCESS_COMM
+from frigate.const import CACHE_DIR, CLIPS_DIR, INSERT_PREVIEW
 from frigate.ffmpeg_presets import (
     FPS_VFR_PARAM,
     EncodeTypeEnum,
@@ -137,10 +137,7 @@ class PreviewRecorder:
         )
 
         # create communication for finished previews
-        INTER_PROCESS_COMM_PORT = (
-            os.environ.get("INTER_PROCESS_COMM_PORT") or PORT_INTER_PROCESS_COMM
-        )
-        self.requestor = InterProcessRequestor(INTER_PROCESS_COMM_PORT)
+        self.requestor = InterProcessRequestor()
 
         y, u1, u2, v1, v2 = get_yuv_crop(
             self.config.frame_shape_yuv,

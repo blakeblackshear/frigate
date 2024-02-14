@@ -3,7 +3,6 @@
 import datetime
 import logging
 import multiprocessing as mp
-import os
 import signal
 import threading
 import time
@@ -23,7 +22,6 @@ from frigate.const import (
     AUDIO_MIN_CONFIDENCE,
     AUDIO_SAMPLE_RATE,
     FRIGATE_LOCALHOST,
-    PORT_INTER_PROCESS_COMM,
 )
 from frigate.ffmpeg_presets import parse_preset_input
 from frigate.log import LogPipe
@@ -191,11 +189,8 @@ class AudioEventMaintainer(threading.Thread):
         self.logpipe = LogPipe(f"ffmpeg.{self.config.name}.audio")
         self.audio_listener = None
 
-        # create communication for finished previews
-        INTER_PROCESS_COMM_PORT = (
-            os.environ.get("INTER_PROCESS_COMM_PORT") or PORT_INTER_PROCESS_COMM
-        )
-        self.requestor = InterProcessRequestor(INTER_PROCESS_COMM_PORT)
+        # create communication for audio detections
+        self.requestor = InterProcessRequestor()
 
     def detect_audio(self, audio) -> None:
         if not self.feature_metrics[self.config.name]["audio_enabled"].value:
