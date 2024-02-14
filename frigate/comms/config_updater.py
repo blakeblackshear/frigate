@@ -2,7 +2,6 @@
 
 import multiprocessing as mp
 import os
-import threading
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Callable, Optional
 
@@ -30,28 +29,10 @@ class ConfigPublisher(Communicator):
         self.socket.send_pyobj(payload)
 
     def subscribe(self, receiver: Callable) -> None:
-        self._dispatcher = receiver
-        self.reader_thread = threading.Thread(target=self.read)
-        self.reader_thread.start()
-
-    def read(self) -> None:
-        while not self.stop_event.wait(0.5):
-            while True:  # load all messages that are queued
-                try:
-                    (topic, value) = self.socket.recv_pyobj(flags=zmq.NOBLOCK)
-
-                    response = self._dispatcher(topic, value)
-
-                    if response is not None:
-                        self.socket.send_pyobj(response)
-                    else:
-                        self.socket.send_pyobj([])
-                except zmq.ZMQError:
-                    break
+        pass  # this class does not subscribe
 
     def stop(self) -> None:
         self.stop_event.set()
-        self.reader_thread.join()
         self.socket.close()
         self.context.destroy()
 
