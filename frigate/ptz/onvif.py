@@ -151,7 +151,10 @@ class OnvifController:
 
         # autoracking relative panning/tilting needs a relative zoom value set to 0
         # if camera supports relative movement
-        if self.config.cameras[camera_name].onvif.autotracking.zooming:
+        if (
+            self.config.cameras[camera_name].onvif.autotracking.zooming
+            != ZoomingModeEnum.disabled
+        ):
             zoom_space_id = next(
                 (
                     i
@@ -182,12 +185,12 @@ class OnvifController:
         try:
             if (
                 self.config.cameras[camera_name].onvif.autotracking.zooming
-                == ZoomingModeEnum.relative
+                != ZoomingModeEnum.disabled
             ):
                 if zoom_space_id is not None:
                     move_request.Translation.Zoom.space = ptz_config["Spaces"][
                         "RelativeZoomTranslationSpace"
-                    ][0]["URI"]
+                    ][zoom_space_id]["URI"]
         except Exception:
             if (
                 self.config.cameras[camera_name].onvif.autotracking.zooming
