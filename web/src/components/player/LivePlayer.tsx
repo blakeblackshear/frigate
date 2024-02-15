@@ -87,6 +87,7 @@ export default function LivePlayer({
       <WebRtcPlayer
         className={`rounded-2xl h-full ${liveReady ? "" : "hidden"}`}
         camera={cameraConfig.live.stream_name}
+        playbackEnabled={cameraActive}
         onPlaying={() => setLiveReady(true)}
       />
     );

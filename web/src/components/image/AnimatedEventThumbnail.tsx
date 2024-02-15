@@ -22,30 +22,23 @@ export function AnimatedEventThumbnail({ event }: AnimatedEventThumbnailProps) {
     return `${baseUrl}api/events/${event.id}/preview.gif`;
   }, [event]);
 
-  const aspect = useMemo(() => {
+  const aspectRatio = useMemo(() => {
     if (!config) {
-      return "";
+      return 1;
     }
 
     const detect = config.cameras[event.camera].detect;
-    const aspect = detect.width / detect.height;
-
-    if (aspect > 2) {
-      return "aspect-wide";
-    } else if (aspect < 1) {
-      return "aspect-tall";
-    } else {
-      return "aspect-video";
-    }
-  }, [config, event]);
+    return detect.width / detect.height;
+  }, [config]);
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <div
-          className={`relative rounded bg-cover h-24 bg-no-repeat bg-center mr-4 ${aspect}`}
+          className="h-24 relative rounded bg-cover bg-no-repeat bg-center mr-4"
           style={{
             backgroundImage: `url(${imageUrl})`,
+            aspectRatio: aspectRatio,
           }}
         >
           <div className="absolute bottom-0 w-full h-6 bg-gradient-to-t from-slate-900/50 to-transparent rounded">
