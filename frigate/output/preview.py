@@ -2,7 +2,6 @@
 
 import datetime
 import logging
-import multiprocessing as mp
 import os
 import shutil
 import subprocess as sp
@@ -12,6 +11,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
+from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, RecordQualityEnum
 from frigate.const import CACHE_DIR, CLIPS_DIR, INSERT_PREVIEW
 from frigate.ffmpeg_presets import (
@@ -53,13 +53,13 @@ class FFMpegConverter(threading.Thread):
         self,
         config: CameraConfig,
         frame_times: list[float],
-        inter_process_queue: mp.Queue,
+        requestor: InterProcessRequestor,
     ):
         threading.Thread.__init__(self)
         self.name = f"{config.name}_preview_converter"
         self.config = config
         self.frame_times = frame_times
-        self.inter_process_queue = inter_process_queue
+        self.requestor = requestor
         self.path = os.path.join(
             CLIPS_DIR,
             f"previews/{self.config.name}/{self.frame_times[0]}-{self.frame_times[-1]}.mp4",
@@ -105,18 +105,16 @@ class FFMpegConverter(threading.Thread):
 
         if p.returncode == 0:
             logger.debug("successfully saved preview")
-            self.inter_process_queue.put_nowait(
-                (
-                    INSERT_PREVIEW,
-                    {
-                        Previews.id: f"{self.config.name}_{end}",
-                        Previews.camera: self.config.name,
-                        Previews.path: self.path,
-                        Previews.start_time: start,
-                        Previews.end_time: end,
-                        Previews.duration: end - start,
-                    },
-                )
+            self.requestor.send_data(
+                INSERT_PREVIEW,
+                {
+                    Previews.id: f"{self.config.name}_{end}",
+                    Previews.camera: self.config.name,
+                    Previews.path: self.path,
+                    Previews.start_time: start,
+                    Previews.end_time: end,
+                    Previews.duration: end - start,
+                },
             )
         else:
             logger.error(f"Error saving preview for {self.config.name} :: {p.stderr}")
@@ -128,9 +126,8 @@ class FFMpegConverter(threading.Thread):
 
 
 class PreviewRecorder:
-    def __init__(self, config: CameraConfig, inter_process_queue: mp.Queue) -> None:
+    def __init__(self, config: CameraConfig) -> None:
         self.config = config
-        self.inter_process_queue = inter_process_queue
         self.start_time = 0
         self.last_output_time = 0
         self.output_frames = []
@@ -138,6 +135,9 @@ class PreviewRecorder:
         self.out_width = (
             int((config.detect.width / config.detect.height) * self.out_height) // 4 * 4
         )
+
+        # create communication for finished previews
+        self.requestor = InterProcessRequestor()
 
         y, u1, u2, v1, v2 = get_yuv_crop(
             self.config.frame_shape_yuv,
@@ -237,7 +237,7 @@ class PreviewRecorder:
             FFMpegConverter(
                 self.config,
                 self.output_frames,
-                self.inter_process_queue,
+                self.requestor,
             ).start()
 
             # reset frame cache
@@ -262,3 +262,5 @@ class PreviewRecorder:
             shutil.rmtree(os.path.join(CACHE_DIR, FOLDER_PREVIEW_FRAMES))
         except FileNotFoundError:
             pass
+
+        self.requestor.stop()

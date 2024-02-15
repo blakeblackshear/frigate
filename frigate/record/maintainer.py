@@ -17,6 +17,7 @@ from typing import Any, Optional, Tuple
 import numpy as np
 import psutil
 
+from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig, RetainModeEnum
 from frigate.const import (
     CACHE_DIR,
@@ -59,7 +60,6 @@ class RecordingMaintainer(threading.Thread):
     def __init__(
         self,
         config: FrigateConfig,
-        inter_process_queue: mp.Queue,
         object_recordings_info_queue: mp.Queue,
         audio_recordings_info_queue: Optional[mp.Queue],
         process_info: dict[str, FeatureMetricsTypes],
@@ -68,7 +68,10 @@ class RecordingMaintainer(threading.Thread):
         threading.Thread.__init__(self)
         self.name = "recording_maintainer"
         self.config = config
-        self.inter_process_queue = inter_process_queue
+
+        # create communication for retained recordings
+        self.requestor = InterProcessRequestor()
+
         self.object_recordings_info_queue = object_recordings_info_queue
         self.audio_recordings_info_queue = audio_recordings_info_queue
         self.process_info = process_info
@@ -183,8 +186,9 @@ class RecordingMaintainer(threading.Thread):
         recordings_to_insert: list[Optional[Recordings]] = await asyncio.gather(*tasks)
 
         # fire and forget recordings entries
-        self.inter_process_queue.put(
-            (INSERT_MANY_RECORDINGS, [r for r in recordings_to_insert if r is not None])
+        self.requestor.send_data(
+            INSERT_MANY_RECORDINGS,
+            [r for r in recordings_to_insert if r is not None],
         )
 
     async def validate_and_move_segment(
@@ -525,4 +529,5 @@ class RecordingMaintainer(threading.Thread):
             duration = datetime.datetime.now().timestamp() - run_start
             wait_time = max(0, 5 - duration)
 
+        self.requestor.stop()
         logger.info("Exiting recording maintenance...")

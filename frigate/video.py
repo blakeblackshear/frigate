@@ -11,6 +11,7 @@ import time
 import cv2
 from setproctitle import setproctitle
 
+from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, DetectConfig, ModelConfig
 from frigate.const import (
     ALL_ATTRIBUTE_LABELS,
@@ -388,7 +389,6 @@ def track_camera(
     detection_queue,
     result_connection,
     detected_objects_queue,
-    inter_process_queue,
     process_info,
     ptz_metrics,
     region_grid,
@@ -406,7 +406,6 @@ def track_camera(
     listen()
 
     frame_queue = process_info["frame_queue"]
-    region_grid_queue = process_info["region_grid_queue"]
     detection_enabled = process_info["detection_enabled"]
     motion_enabled = process_info["motion_enabled"]
     improve_contrast_enabled = process_info["improve_contrast_enabled"]
@@ -433,11 +432,13 @@ def track_camera(
 
     frame_manager = SharedMemoryFrameManager()
 
+    # create communication for region grid updates
+    requestor = InterProcessRequestor()
+
     process_frames(
         name,
-        inter_process_queue,
+        requestor,
         frame_queue,
-        region_grid_queue,
         frame_shape,
         model_config,
         config.detect,
@@ -505,9 +506,8 @@ def detect(
 
 def process_frames(
     camera_name: str,
-    inter_process_queue: mp.Queue,
+    requestor: InterProcessRequestor,
     frame_queue: mp.Queue,
-    region_grid_queue: mp.Queue,
     frame_shape,
     model_config: ModelConfig,
     detect_config: DetectConfig,
@@ -544,13 +544,7 @@ def process_frames(
             datetime.datetime.now().astimezone(datetime.timezone.utc)
             > next_region_update
         ):
-            inter_process_queue.put((REQUEST_REGION_GRID, camera_name))
-
-            try:
-                region_grid = region_grid_queue.get(True, 10)
-            except queue.Empty:
-                logger.error(f"Unable to get updated region grid for {camera_name}")
-
+            region_grid = requestor.send_data(REQUEST_REGION_GRID, camera_name)
             next_region_update = get_tomorrow_at_time(2)
 
         try:
@@ -826,3 +820,5 @@ def process_frames(
             )
             detection_fps.value = object_detector.fps.eps()
             frame_manager.close(f"{camera_name}{frame_time}")
+
+    requestor.stop()

@@ -175,7 +175,7 @@ def parse_preset_hardware_acceleration_scale(
     if not isinstance(arg, str) or " " in arg:
         scale = PRESETS_HW_ACCEL_SCALE["default"]
     else:
-        scale = PRESETS_HW_ACCEL_SCALE.get(arg, "")
+        scale = PRESETS_HW_ACCEL_SCALE.get(arg, PRESETS_HW_ACCEL_SCALE["default"])
 
     scale = scale.format(fps, width, height).split(" ")
     scale.extend(detect_args)

@@ -13,7 +13,7 @@ import numpy as np
 import requests
 from setproctitle import setproctitle
 
-from frigate.comms.inter_process import InterProcessCommunicator
+from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, CameraInput, FfmpegConfig, FrigateConfig
 from frigate.const import (
     AUDIO_DURATION,
@@ -70,7 +70,6 @@ def listen_to_audio(
     recordings_info_queue: mp.Queue,
     camera_metrics: dict[str, CameraMetricsTypes],
     process_info: dict[str, FeatureMetricsTypes],
-    inter_process_communicator: InterProcessCommunicator,
 ) -> None:
     stop_event = mp.Event()
     audio_threads: list[threading.Thread] = []
@@ -100,7 +99,6 @@ def listen_to_audio(
                 camera_metrics,
                 process_info,
                 stop_event,
-                inter_process_communicator,
             )
             audio_threads.append(audio)
             audio.start()
@@ -174,7 +172,6 @@ class AudioEventMaintainer(threading.Thread):
         camera_metrics: dict[str, CameraMetricsTypes],
         feature_metrics: dict[str, FeatureMetricsTypes],
         stop_event: mp.Event,
-        inter_process_communicator: InterProcessCommunicator,
     ) -> None:
         threading.Thread.__init__(self)
         self.name = f"{camera.name}_audio_event_processor"
@@ -182,7 +179,6 @@ class AudioEventMaintainer(threading.Thread):
         self.recordings_info_queue = recordings_info_queue
         self.camera_metrics = camera_metrics
         self.feature_metrics = feature_metrics
-        self.inter_process_communicator = inter_process_communicator
         self.detections: dict[dict[str, any]] = {}
         self.stop_event = stop_event
         self.detector = AudioTfl(stop_event, self.config.audio.num_threads)
@@ -192,6 +188,9 @@ class AudioEventMaintainer(threading.Thread):
         self.ffmpeg_cmd = get_ffmpeg_command(self.config.ffmpeg)
         self.logpipe = LogPipe(f"ffmpeg.{self.config.name}.audio")
         self.audio_listener = None
+
+        # create communication for audio detections
+        self.requestor = InterProcessRequestor()
 
     def detect_audio(self, audio) -> None:
         if not self.feature_metrics[self.config.name]["audio_enabled"].value:
@@ -245,12 +244,8 @@ class AudioEventMaintainer(threading.Thread):
         else:
             dBFS = 0
 
-        self.inter_process_communicator.queue.put(
-            (f"{self.config.name}/audio/dBFS", float(dBFS))
-        )
-        self.inter_process_communicator.queue.put(
-            (f"{self.config.name}/audio/rms", float(rms))
-        )
+        self.requestor.send_data(f"{self.config.name}/audio/dBFS", float(dBFS))
+        self.requestor.send_data(f"{self.config.name}/audio/rms", float(rms))
 
         return float(rms), float(dBFS)
 
@@ -260,9 +255,7 @@ class AudioEventMaintainer(threading.Thread):
                 "last_detection"
             ] = datetime.datetime.now().timestamp()
         else:
-            self.inter_process_communicator.queue.put(
-                (f"{self.config.name}/audio/{label}", "ON")
-            )
+            self.requestor.send_data(f"{self.config.name}/audio/{label}", "ON")
 
             resp = requests.post(
                 f"{FRIGATE_LOCALHOST}/api/events/{self.config.name}/{label}/create",
@@ -288,8 +281,8 @@ class AudioEventMaintainer(threading.Thread):
                 now - detection.get("last_detection", now)
                 > self.config.audio.max_not_heard
             ):
-                self.inter_process_communicator.queue.put(
-                    (f"{self.config.name}/audio/{detection['label']}", "OFF")
+                self.requestor.send_data(
+                    f"{self.config.name}/audio/{detection['label']}", "OFF"
                 )
 
                 resp = requests.put(
@@ -350,3 +343,4 @@ class AudioEventMaintainer(threading.Thread):
 
         stop_ffmpeg(self.audio_listener, self.logger)
         self.logpipe.close()
+        self.requestor.stop()

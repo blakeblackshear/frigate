@@ -171,7 +171,6 @@ class FrigateApp:
                 # issue https://github.com/python/typeshed/issues/8799
                 # from mypy 0.981 onwards
                 "frame_queue": mp.Queue(maxsize=2),
-                "region_grid_queue": mp.Queue(maxsize=1),
                 "capture_process": None,
                 "process": None,
                 "audio_rms": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
@@ -273,9 +272,6 @@ class FrigateApp:
         # Queue for timeline events
         self.timeline_queue: Queue = mp.Queue()
 
-        # Queue for inter process communication
-        self.inter_process_queue: Queue = mp.Queue()
-
     def init_database(self) -> None:
         def vacuum_db(db: SqliteExtDatabase) -> None:
             logger.info("Running database vacuum")
@@ -350,7 +346,6 @@ class FrigateApp:
             name="recording_manager",
             args=(
                 self.config,
-                self.inter_process_queue,
                 self.object_recordings_info_queue,
                 self.audio_recordings_info_queue,
                 self.feature_metrics,
@@ -390,9 +385,7 @@ class FrigateApp:
         )
 
     def init_inter_process_communicator(self) -> None:
-        self.inter_process_communicator = InterProcessCommunicator(
-            self.inter_process_queue
-        )
+        self.inter_process_communicator = InterProcessCommunicator()
 
     def init_web_server(self) -> None:
         self.flask_app = create_app(
@@ -495,7 +488,6 @@ class FrigateApp:
             args=(
                 self.config,
                 self.video_output_queue,
-                self.inter_process_queue,
                 self.camera_metrics,
             ),
         )
@@ -534,7 +526,6 @@ class FrigateApp:
                     self.detection_queue,
                     self.detection_out_events[name],
                     self.detected_frames_queue,
-                    self.inter_process_queue,
                     self.camera_metrics[name],
                     self.ptz_metrics[name],
                     self.region_grids[name],
@@ -571,7 +562,6 @@ class FrigateApp:
                     self.audio_recordings_info_queue,
                     self.camera_metrics,
                     self.feature_metrics,
-                    self.inter_process_communicator,
                 ),
             )
             audio_process.daemon = True
@@ -777,7 +767,6 @@ class FrigateApp:
             self.object_recordings_info_queue,
             self.audio_recordings_info_queue,
             self.log_queue,
-            self.inter_process_queue,
         ]:
             if queue is not None:
                 while not queue.empty():
