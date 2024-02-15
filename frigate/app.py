@@ -650,7 +650,19 @@ class FrigateApp:
 
         if not os.environ.get("I_PROMISE_I_WONT_MAKE_AN_ISSUE_ON_GITHUB"):
             print(
-                "Frigate 0.14 UNSTABLE - not for public use at this time. Please use Frigate stable"
+                "**********************************************************************************"
+            )
+            print(
+                "**********************************************************************************"
+            )
+            print("Frigate 0.14 UNSTABLE")
+            print("This build is not for public use. Please use Frigate stable.")
+            print("Unstable/experimental builds are not enabled, Frigate is exiting.")
+            print(
+                "**********************************************************************************"
+            )
+            print(
+                "**********************************************************************************"
             )
             sys.exit(1)
 
