@@ -33,11 +33,13 @@ def get_standard_aspect_ratio(width: int, height: int) -> tuple[int, int]:
         (16, 9),
         (9, 16),
         (20, 10),
+        (16, 3),  # max wide camera
         (16, 6),  # reolink duo 2
         (32, 9),  # panoramic cameras
         (12, 9),
         (9, 12),
         (22, 15),  # Amcrest, NTSC DVT
+        (1, 1),  # fisheye
     ]  # aspects are scaled to have common relative size
     known_aspects_ratios = list(
         map(lambda aspect: aspect[0] / aspect[1], known_aspects)
@@ -66,7 +68,13 @@ def get_canvas_shape(width: int, height: int) -> tuple[int, int]:
 
 
 class Canvas:
-    def __init__(self, canvas_width: int, canvas_height: int) -> None:
+    def __init__(
+        self,
+        canvas_width: int,
+        canvas_height: int,
+        scaling_factor: int,
+    ) -> None:
+        self.scaling_factor = scaling_factor
         gcd = math.gcd(canvas_width, canvas_height)
         self.aspect = get_standard_aspect_ratio(
             (canvas_width / gcd), (canvas_height / gcd)
@@ -80,7 +88,7 @@ class Canvas:
         return (self.aspect[0] * coefficient, self.aspect[1] * coefficient)
 
     def get_coefficient(self, camera_count: int) -> int:
-        return self.coefficient_cache.get(camera_count, 2)
+        return self.coefficient_cache.get(camera_count, self.scaling_factor)
 
     def set_coefficient(self, camera_count: int, coefficient: int) -> None:
         self.coefficient_cache[camera_count] = coefficient
@@ -268,9 +276,13 @@ class BirdsEyeFrameManager:
         self.frame_shape = (height, width)
         self.yuv_shape = (height * 3 // 2, width)
         self.frame = np.ndarray(self.yuv_shape, dtype=np.uint8)
-        self.canvas = Canvas(width, height)
+        self.canvas = Canvas(width, height, config.birdseye.layout.scaling_factor)
         self.stop_event = stop_event
         self.camera_metrics = camera_metrics
+        self.inactivity_threshold = config.birdseye.inactivity_threshold
+
+        if config.birdseye.layout.max_cameras:
+            self.last_refresh_time = 0
 
         # initialize the frame as black and with the Frigate logo
         self.blank_frame = np.zeros(self.yuv_shape, np.uint8)
@@ -376,15 +388,38 @@ class BirdsEyeFrameManager:
     def update_frame(self):
         """Update to a new frame for birdseye."""
 
-        # determine how many cameras are tracking objects within the last 30 seconds
-        active_cameras = set(
+        # determine how many cameras are tracking objects within the last inactivity_threshold seconds
+        active_cameras: set[str] = set(
             [
                 cam
                 for cam, cam_data in self.cameras.items()
                 if cam_data["last_active_frame"] > 0
-                and cam_data["current_frame"] - cam_data["last_active_frame"] < 30
+                and cam_data["current_frame"] - cam_data["last_active_frame"]
+                < self.inactivity_threshold
             ]
         )
+
+        max_cameras = self.config.birdseye.layout.max_cameras
+        max_camera_refresh = False
+        if max_cameras:
+            now = datetime.datetime.now().timestamp()
+
+            if len(active_cameras) == max_cameras and now - self.last_refresh_time < 10:
+                # don't refresh cameras too often
+                active_cameras = self.active_cameras
+            else:
+                limited_active_cameras = sorted(
+                    active_cameras,
+                    key=lambda active_camera: (
+                        self.cameras[active_camera]["current_frame"]
+                        - self.cameras[active_camera]["last_active_frame"]
+                    ),
+                )
+                active_cameras = limited_active_cameras[
+                    : self.config.birdseye.layout.max_cameras
+                ]
+                max_camera_refresh = True
+                self.last_refresh_time = now
 
         # if there are no active cameras
         if len(active_cameras) == 0:
@@ -399,7 +434,18 @@ class BirdsEyeFrameManager:
                 return True
 
         # check if we need to reset the layout because there is a different number of cameras
-        reset_layout = len(self.active_cameras) - len(active_cameras) != 0
+        if len(self.active_cameras) - len(active_cameras) == 0:
+            if (
+                len(self.active_cameras) == 1
+                and self.active_cameras[0] == active_cameras[0]
+            ):
+                reset_layout = True
+            elif max_camera_refresh:
+                reset_layout = True
+            else:
+                reset_layout = False
+        else:
+            reset_layout = True
 
         # reset the layout if it needs to be different
         if reset_layout:
@@ -423,17 +469,23 @@ class BirdsEyeFrameManager:
                 camera = active_cameras_to_add[0]
                 camera_dims = self.cameras[camera]["dimensions"].copy()
                 scaled_width = int(self.canvas.height * camera_dims[0] / camera_dims[1])
-                coefficient = (
-                    1
-                    if scaled_width <= self.canvas.width
-                    else self.canvas.width / scaled_width
-                )
+
+                # center camera view in canvas and ensure that it fits
+                if scaled_width < self.canvas.width:
+                    coefficient = 1
+                    x_offset = int((self.canvas.width - scaled_width) / 2)
+                else:
+                    coefficient = self.canvas.width / scaled_width
+                    x_offset = int(
+                        (self.canvas.width - (scaled_width * coefficient)) / 2
+                    )
+
                 self.camera_layout = [
                     [
                         (
                             camera,
                             (
-                                0,
+                                x_offset,
                                 0,
                                 int(scaled_width * coefficient),
                                 int(self.canvas.height * coefficient),
@@ -477,7 +529,11 @@ class BirdsEyeFrameManager:
 
         return True
 
-    def calculate_layout(self, cameras_to_add: list[str], coefficient) -> tuple[any]:
+    def calculate_layout(
+        self,
+        cameras_to_add: list[str],
+        coefficient: float,
+    ) -> tuple[any]:
         """Calculate the optimal layout for 2+ cameras."""
 
         def map_layout(camera_layout: list[list[any]], row_height: int):

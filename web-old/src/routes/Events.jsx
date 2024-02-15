@@ -7,7 +7,7 @@ import Link from '../components/Link';
 import { useApiHost } from '../api';
 import useSWR from 'swr';
 import useSWRInfinite from 'swr/infinite';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { useState, useRef, useCallback, useMemo } from 'preact/hooks';
 import VideoPlayer from '../components/VideoPlayer';
 import { StarRecording } from '../icons/StarRecording';
@@ -79,6 +79,7 @@ export default function Events({ path, ...props }) {
     validBox: null,
   });
   const [uploading, setUploading] = useState([]);
+  const [uploadErrors, setUploadErrors] = useState([]);
   const [viewEvent, setViewEvent] = useState(props.event);
   const [eventOverlay, setEventOverlay] = useState();
   const [eventDetailType, setEventDetailType] = useState('clip');
@@ -328,26 +329,39 @@ export default function Events({ path, ...props }) {
 
     setUploading((prev) => [...prev, id]);
 
-    const response = false_positive
-      ? await axios.put(`events/${id}/false_positive`)
-      : await axios.post(`events/${id}/plus`, validBox ? { include_annotation: 1 } : {});
+    try {
+      const response = false_positive
+        ? await axios.put(`events/${id}/false_positive`)
+        : await axios.post(`events/${id}/plus`, validBox ? { include_annotation: 1 } : {});
 
-    if (response.status === 200) {
-      mutate(
-        (pages) =>
-          pages.map((page) =>
-            page.map((event) => {
-              if (event.id === id) {
-                return { ...event, plus_id: response.data.plus_id };
-              }
-              return event;
-            })
-          ),
-        false
-      );
+      if (response.status === 200) {
+        mutate(
+          (pages) =>
+            pages.map((page) =>
+              page.map((event) => {
+                if (event.id === id) {
+                  return { ...event, plus_id: response.data.plus_id };
+                }
+                return event;
+              })
+            ),
+          false
+        );
+      }
+    } catch (e) {
+      if (
+        e instanceof AxiosError &&
+        (e.response.data.message === 'Error uploading annotation, unsupported label provided.' ||
+          e.response.data.message === 'Error uploading false positive, unsupported label provided.')
+      ) {
+        setUploadErrors((prev) => [...prev, { id, isUnsupported: true }]);
+        return;
+      }
+      setUploadErrors((prev) => [...prev, { id }]);
+      throw e;
+    } finally {
+      setUploading((prev) => prev.filter((i) => i !== id));
     }
-
-    setUploading((prev) => prev.filter((i) => i !== id));
 
     if (state.showDownloadMenu && downloadEvent.id === id) {
       setState({ ...state, showDownloadMenu: false });
@@ -681,6 +695,7 @@ export default function Events({ path, ...props }) {
                     viewEvent={viewEvent}
                     setViewEvent={setViewEvent}
                     uploading={uploading}
+                    uploadErrors={uploadErrors}
                     handleEventDetailTabChange={handleEventDetailTabChange}
                     onEventFrameSelected={onEventFrameSelected}
                     onDelete={onDelete}
@@ -721,6 +736,7 @@ export default function Events({ path, ...props }) {
                   lastEvent={lastEvent}
                   lastEventRef={lastEventRef}
                   uploading={uploading}
+                  uploadErrors={uploadErrors}
                   handleEventDetailTabChange={handleEventDetailTabChange}
                   onEventFrameSelected={onEventFrameSelected}
                   onDelete={onDelete}
@@ -760,6 +776,7 @@ function Event({
   lastEvent,
   lastEventRef,
   uploading,
+  uploadErrors,
   handleEventDetailTabChange,
   onEventFrameSelected,
   onDelete,
@@ -769,6 +786,19 @@ function Event({
   onSave,
   showSubmitToPlus,
 }) {
+  const getUploadButtonState = (eventId) => {
+    const isUploading = uploading.includes(eventId);
+    const hasUploadError = uploadErrors.find((event) => event.id === eventId);
+    if (hasUploadError) {
+      if (hasUploadError.isUnsupported) {
+        return { isDisabled: true, label: 'Unsupported label' };
+      }
+      return { isDisabled: isUploading, label: 'Upload error' };
+    }
+
+    const label = isUploading ? 'Uploading...' : 'Send to Frigate+';
+    return { isDisabled: isUploading, label };
+  };
   const apiHost = useApiHost();
 
   return (
@@ -849,10 +879,10 @@ function Event({
                 ) : (
                   <Button
                     color="gray"
-                    disabled={uploading.includes(event.id)}
+                    disabled={getUploadButtonState(event.id).isDisabled}
                     onClick={(e) => showSubmitToPlus(event.id, event.label, event?.data?.box || event.box, e)}
                   >
-                    {uploading.includes(event.id) ? 'Uploading...' : 'Send to Frigate+'}
+                    {getUploadButtonState(event.id).label}
                   </Button>
                 )}
               </Fragment>

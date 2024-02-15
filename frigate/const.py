@@ -26,6 +26,10 @@ LABEL_CONSOLIDATION_MAP = {
     "face": 0.5,
 }
 LABEL_CONSOLIDATION_DEFAULT = 0.9
+LABEL_NMS_MAP = {
+    "car": 0.6,
+}
+LABEL_NMS_DEFAULT = 0.4
 
 # Audio Consts
 

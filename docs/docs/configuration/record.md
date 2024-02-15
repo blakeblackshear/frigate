@@ -36,7 +36,7 @@ record:
   enabled: True
   retain:
     days: 3
-    mode: all
+    mode: motion
   events:
     retain:
       default: 30
@@ -160,6 +160,25 @@ Using Frigate UI, HomeAssistant, or MQTT, cameras can be automated to only recor
 ## How do I export recordings?
 
 The export page in the Frigate WebUI allows for exporting real time clips with a designated start and stop time as well as exporting a time-lapse for a designated start and stop time. These exports can take a while so it is important to leave the file until it is no longer in progress.
+
+### Time-lapse export
+
+When exporting a time-lapse the default speed-up is 25x with 30 FPS. This means that every 25 seconds of (real-time) recording is condensed into 1 second of time-lapse video (always without audio) with a smoothness of 30 FPS.
+To configure the speed-up factor, the frame rate and further custom settings, the configuration parameter `timelapse_args` can be used. The below configuration example would change the time-lapse speed to 60x (for fitting 1 hour of recording into 1 minute of time-lapse) with 25 FPS:
+
+```yaml
+record:
+  enabled: True
+  export:
+    timelapse_args: "-vf setpts=PTS/60 -r 25"
+```
+
+:::tip
+
+When using `hwaccel_args` globally hardware encoding is used for time lapse generation. The encoder determines its own behavior so the resulting file size may be undesirably large.
+To reduce the output file size the ffmpeg parameter `-qp n` can be utilized (where `n` stands for the value of the quantisation parameter). The value can be adjusted to get an acceptable tradeoff between quality and file size for the given scenario.
+
+:::
 
 ## Syncing Recordings With Disk
 

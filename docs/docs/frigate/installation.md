@@ -98,9 +98,10 @@ services:
     image: ghcr.io/blakeblackshear/frigate:stable
     shm_size: "64mb" # update for your cameras based on calculation above
     devices:
-      - /dev/bus/usb:/dev/bus/usb # passes the USB Coral, needs to be modified for other versions
-      - /dev/apex_0:/dev/apex_0 # passes a PCIe Coral, follow driver instructions here https://coral.ai/docs/m2/get-started/#2a-on-linux
-      - /dev/dri/renderD128 # for intel hwaccel, needs to be updated for your hardware
+      - /dev/bus/usb:/dev/bus/usb  # Passes the USB Coral, needs to be modified for other versions
+      - /dev/apex_0:/dev/apex_0    # Passes a PCIe Coral, follow driver instructions here https://coral.ai/docs/m2/get-started/#2a-on-linux
+      - /dev/video11:/dev/video11  # For Raspberry Pi 4B
+      - /dev/dri/renderD128:/dev/dri/renderD128 # For intel hwaccel, needs to be updated for your hardware
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /path/to/your/config:/config
