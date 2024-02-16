@@ -351,3 +351,4 @@ class AudioEventMaintainer(threading.Thread):
         stop_ffmpeg(self.audio_listener, self.logger)
         self.logpipe.close()
         self.requestor.stop()
+        self.config_subscriber.stop()

@@ -543,4 +543,5 @@ class RecordingMaintainer(threading.Thread):
             wait_time = max(0, 5 - duration)
 
         self.requestor.stop()
+        self.config_subscriber.stop()
         logger.info("Exiting recording maintenance...")

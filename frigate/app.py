@@ -685,6 +685,7 @@ class FrigateApp:
         self.detection_queue.join_thread()
 
         self.dispatcher.stop()
+        self.inter_config_updater.stop()
         self.detected_frames_processor.join()
         self.ptz_autotracker_thread.join()
         self.event_processor.join()
