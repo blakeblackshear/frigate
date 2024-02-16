@@ -24,11 +24,11 @@ from flask import (
     Flask,
     Response,
     current_app,
-    escape,
     jsonify,
     make_response,
     request,
 )
+from markupsafe import escape
 from peewee import DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
 from playhouse.sqliteq import SqliteQueueDatabase
