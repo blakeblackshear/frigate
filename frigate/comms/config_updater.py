@@ -3,7 +3,7 @@
 import multiprocessing as mp
 import os
 from multiprocessing.synchronize import Event as MpEvent
-from typing import Callable, Optional
+from typing import Optional
 
 import zmq
 
@@ -46,9 +46,7 @@ class ConfigSubscriber:
     def check_for_update(self) -> Optional[tuple[str, any]]:
         """Returns updated config or None if no update."""
         try:
-            topic = self.socket.recv_string(
-                flags=zmq.NOBLOCK
-            )
+            topic = self.socket.recv_string(flags=zmq.NOBLOCK)
             return (topic, self.socket.recv_pyobj())
         except zmq.ZMQError:
             return (None, None)

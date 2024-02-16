@@ -22,7 +22,7 @@ from frigate.comms.dispatcher import Communicator, Dispatcher
 from frigate.comms.inter_process import InterProcessCommunicator
 from frigate.comms.mqtt import MqttClient
 from frigate.comms.ws import WebSocketClient
-from frigate.config import BirdseyeModeEnum, FrigateConfig
+from frigate.config import FrigateConfig
 from frigate.const import (
     CACHE_DIR,
     CLIPS_DIR,
@@ -129,35 +129,6 @@ class FrigateApp:
                 # issue https://github.com/python/typeshed/issues/8799
                 # from mypy 0.981 onwards
                 "process_fps": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "detection_enabled": mp.Value(  # type: ignore[typeddict-item]
-                    # issue https://github.com/python/typeshed/issues/8799
-                    # from mypy 0.981 onwards
-                    "i",
-                    self.config.cameras[camera_name].detect.enabled,
-                ),
-                "motion_enabled": mp.Value("i", True),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "improve_contrast_enabled": mp.Value(  # type: ignore[typeddict-item]
-                    # issue https://github.com/python/typeshed/issues/8799
-                    # from mypy 0.981 onwards
-                    "i",
-                    self.config.cameras[camera_name].motion.improve_contrast,
-                ),
-                "motion_threshold": mp.Value(  # type: ignore[typeddict-item]
-                    # issue https://github.com/python/typeshed/issues/8799
-                    # from mypy 0.981 onwards
-                    "i",
-                    self.config.cameras[camera_name].motion.threshold,
-                ),
-                "motion_contour_area": mp.Value(  # type: ignore[typeddict-item]
-                    # issue https://github.com/python/typeshed/issues/8799
-                    # from mypy 0.981 onwards
-                    "i",
-                    self.config.cameras[camera_name].motion.contour_area,
-                ),
                 "detection_fps": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
                 # issue https://github.com/python/typeshed/issues/8799
                 # from mypy 0.981 onwards
@@ -387,7 +358,6 @@ class FrigateApp:
             self.config,
             self.inter_config_updater,
             self.onvif_controller,
-            self.camera_metrics,
             self.ptz_metrics,
             comms,
         )

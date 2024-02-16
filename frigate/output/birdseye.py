@@ -433,10 +433,7 @@ class BirdsEyeFrameManager:
 
         # check if we need to reset the layout because there is a different number of cameras
         if len(self.active_cameras) - len(active_cameras) == 0:
-            if (
-                len(self.active_cameras) == 1
-                and self.active_cameras[0] == active_cameras[0]
-            ):
+            if len(self.active_cameras) == 1 and self.active_cameras != active_cameras:
                 reset_layout = True
             elif max_camera_refresh:
                 reset_layout = True
@@ -758,9 +755,10 @@ class Birdseye:
     ) -> None:
         # check if there is an updated config
         while True:
-            updated_topic, updated_birdseye_config = (
-                self.config_subscriber.check_for_update()
-            )
+            (
+                updated_topic,
+                updated_birdseye_config,
+            ) = self.config_subscriber.check_for_update()
 
             if not updated_topic:
                 break
