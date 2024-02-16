@@ -18,6 +18,7 @@ from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.comms.config_updater import ConfigPublisher
+from frigate.comms.detections_updater import DetectionProxy
 from frigate.comms.dispatcher import Communicator, Dispatcher
 from frigate.comms.inter_process import InterProcessCommunicator
 from frigate.comms.mqtt import MqttClient
@@ -202,16 +203,6 @@ class FrigateApp:
             maxsize=sum(camera.enabled for camera in self.config.cameras.values()) * 2
         )
 
-        # Queue for object recordings info
-        self.object_recordings_info_queue: Queue = mp.Queue()
-
-        # Queue for audio recordings info if enabled
-        self.audio_recordings_info_queue: Optional[Queue] = (
-            mp.Queue()
-            if len([c for c in self.config.cameras.values() if c.audio.enabled]) > 0
-            else None
-        )
-
         # Queue for timeline events
         self.timeline_queue: Queue = mp.Queue()
 
@@ -287,11 +278,7 @@ class FrigateApp:
         recording_process = mp.Process(
             target=manage_recordings,
             name="recording_manager",
-            args=(
-                self.config,
-                self.object_recordings_info_queue,
-                self.audio_recordings_info_queue,
-            ),
+            args=(self.config,),
         )
         recording_process.daemon = True
         self.recording_process = recording_process
@@ -329,6 +316,7 @@ class FrigateApp:
     def init_inter_process_communicator(self) -> None:
         self.inter_process_communicator = InterProcessCommunicator()
         self.inter_config_updater = ConfigPublisher()
+        self.inter_detection_proxy = DetectionProxy()
 
     def init_web_server(self) -> None:
         self.flask_app = create_app(
@@ -417,7 +405,6 @@ class FrigateApp:
             self.event_queue,
             self.event_processed_queue,
             self.video_output_queue,
-            self.object_recordings_info_queue,
             self.ptz_autotracker_thread,
             self.stop_event,
         )
@@ -500,7 +487,6 @@ class FrigateApp:
                 name="audio_capture",
                 args=(
                     self.config,
-                    self.audio_recordings_info_queue,
                     self.camera_metrics,
                 ),
             )
@@ -687,6 +673,7 @@ class FrigateApp:
         # Stop Communicators
         self.inter_process_communicator.stop()
         self.inter_config_updater.stop()
+        self.inter_detection_proxy.stop()
 
         self.dispatcher.stop()
         self.detected_frames_processor.join()
@@ -708,8 +695,6 @@ class FrigateApp:
             self.event_processed_queue,
             self.video_output_queue,
             self.detected_frames_queue,
-            self.object_recordings_info_queue,
-            self.audio_recordings_info_queue,
             self.log_queue,
         ]:
             if queue is not None:

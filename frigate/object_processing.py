@@ -12,6 +12,7 @@ from typing import Callable
 import cv2
 import numpy as np
 
+from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
 from frigate.comms.dispatcher import Dispatcher
 from frigate.config import (
     CameraConfig,
@@ -520,7 +521,9 @@ class CameraState:
                     ):
                         max_target_box = self.ptz_autotracker_thread.ptz_autotracker.tracked_object_metrics[
                             self.name
-                        ]["max_target_box"]
+                        ][
+                            "max_target_box"
+                        ]
                         side_length = max_target_box * (
                             max(
                                 self.camera_config.detect.width,
@@ -814,7 +817,6 @@ class TrackedObjectProcessor(threading.Thread):
         event_queue,
         event_processed_queue,
         video_output_queue,
-        recordings_info_queue,
         ptz_autotracker_thread,
         stop_event,
     ):
@@ -826,12 +828,12 @@ class TrackedObjectProcessor(threading.Thread):
         self.event_queue = event_queue
         self.event_processed_queue = event_processed_queue
         self.video_output_queue = video_output_queue
-        self.recordings_info_queue = recordings_info_queue
         self.stop_event = stop_event
         self.camera_states: dict[str, CameraState] = {}
         self.frame_manager = SharedMemoryFrameManager()
         self.last_motion_detected: dict[str, float] = {}
         self.ptz_autotracker_thread = ptz_autotracker_thread
+        self.detection_publisher = DetectionPublisher(DetectionTypeEnum.video)
 
         def start(camera, obj: TrackedObject, current_frame_time):
             self.event_queue.put(
@@ -1126,8 +1128,8 @@ class TrackedObjectProcessor(threading.Thread):
                 )
             )
 
-            # send info on this frame to the recordings maintainer
-            self.recordings_info_queue.put(
+            # publish info on this frame
+            self.detection_publisher.send_data(
                 (
                     camera,
                     frame_time,

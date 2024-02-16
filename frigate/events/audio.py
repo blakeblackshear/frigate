@@ -14,6 +14,7 @@ import requests
 from setproctitle import setproctitle
 
 from frigate.comms.config_updater import ConfigSubscriber
+from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, CameraInput, FfmpegConfig, FrigateConfig
 from frigate.const import (
@@ -68,7 +69,6 @@ def get_ffmpeg_command(ffmpeg: FfmpegConfig) -> list[str]:
 
 def listen_to_audio(
     config: FrigateConfig,
-    recordings_info_queue: mp.Queue,
     camera_metrics: dict[str, CameraMetricsTypes],
 ) -> None:
     stop_event = mp.Event()
@@ -95,7 +95,6 @@ def listen_to_audio(
         if camera.enabled and camera.audio.enabled_in_config:
             audio = AudioEventMaintainer(
                 camera,
-                recordings_info_queue,
                 camera_metrics,
                 stop_event,
             )
@@ -167,14 +166,12 @@ class AudioEventMaintainer(threading.Thread):
     def __init__(
         self,
         camera: CameraConfig,
-        recordings_info_queue: mp.Queue,
         camera_metrics: dict[str, CameraMetricsTypes],
         stop_event: mp.Event,
     ) -> None:
         threading.Thread.__init__(self)
         self.name = f"{camera.name}_audio_event_processor"
         self.config = camera
-        self.recordings_info_queue = recordings_info_queue
         self.camera_metrics = camera_metrics
         self.detections: dict[dict[str, any]] = {}
         self.stop_event = stop_event
@@ -189,6 +186,7 @@ class AudioEventMaintainer(threading.Thread):
         # create communication for audio detections
         self.requestor = InterProcessRequestor()
         self.config_subscriber = ConfigSubscriber(f"config/audio/{camera.name}")
+        self.detection_publisher = DetectionPublisher(DetectionTypeEnum.audio)
 
     def detect_audio(self, audio) -> None:
         if not self.config.audio.enabled:
@@ -219,8 +217,8 @@ class AudioEventMaintainer(threading.Thread):
                     self.handle_detection(label, score)
                     audio_detections.append(label)
 
-            # add audio info to recordings queue
-            self.recordings_info_queue.put(
+            # send audio detection data
+            self.detection_publisher.send_data(
                 (
                     self.config.name,
                     datetime.datetime.now().timestamp(),
