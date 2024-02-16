@@ -444,9 +444,10 @@ class RecordingMaintainer(threading.Thread):
 
             # check if there is an updated config
             while True:
-                updated_topic, updated_record_config = (
-                    self.config_subscriber.check_for_update()
-                )
+                (
+                    updated_topic,
+                    updated_record_config,
+                ) = self.config_subscriber.check_for_update()
 
                 if not updated_topic:
                     break

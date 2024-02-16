@@ -338,9 +338,10 @@ class AudioEventMaintainer(threading.Thread):
 
         while not self.stop_event.is_set():
             # check if there is an updated config
-            updated_topic, updated_audio_config = (
-                self.config_subscriber.check_for_update()
-            )
+            (
+                updated_topic,
+                updated_audio_config,
+            ) = self.config_subscriber.check_for_update()
 
             if updated_topic:
                 self.config.audio = updated_audio_config
