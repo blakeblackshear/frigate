@@ -1,0 +1,12 @@
+name: Question
+description: General question about Frigate
+title: "[Question]: "
+labels: ["question"]
+assignees: []
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: What is your question:
+    validations:
+      required: true

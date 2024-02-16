@@ -1,6 +1,6 @@
-name: Hardware Acceleration Support Request
-description: Support for setting up GPU hardware acceleration in Frigate
-title: "[HW Accel Support]: "
+name: Detector Support Request
+description: Support for setting up object detector in Frigate (Coral, OpenVINO, TensorRT, etc.)
+title: "[Detector Support]: "
 labels: ["support", "triage"]
 assignees: []
 body:
@@ -14,7 +14,7 @@ body:
     id: version
     attributes:
       label: Version
-      description: Visible on the Debug page in the Web UI
+      description: Visible on the System page in the Web UI
     validations:
       required: true
   - type: textarea
@@ -38,14 +38,6 @@ body:
     attributes:
       label: Relevant log output
       description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
-      render: shell
-    validations:
-      required: true
-  - type: textarea
-    id: ffprobe
-    attributes:
-      label: FFprobe output from your camera
-      description: Run `ffprobe <camera_url>` and provide output below
       render: shell
     validations:
       required: true
@@ -74,20 +66,16 @@ body:
     validations:
       required: true
   - type: dropdown
-    id: network
+    id: coral
     attributes:
-      label: Network connection
+      label: Coral version
       options:
-        - Wired
-        - Wireless
-        - Mixed
-    validations:
-      required: true
-  - type: input
-    id: camera
-    attributes:
-      label: Camera make and model
-      description: Dahua, hikvision, amcrest, reolink, etc and model number
+        - USB
+        - PCIe
+        - M.2
+        - Dev Board
+        - Other
+        - CPU (no coral)
     validations:
       required: true
   - type: textarea

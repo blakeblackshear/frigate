@@ -1,6 +1,6 @@
-name: Config Support Request
-description: Support for Frigate configuration
-title: "[Config Support]: "
+name: Camera Support Request
+description: Support for setting up cameras in Frigate
+title: "[Camera Support]: "
 labels: ["support", "triage"]
 assignees: []
 body:
@@ -14,7 +14,7 @@ body:
     id: version
     attributes:
       label: Version
-      description: Visible on the Debug page in the Web UI
+      description: Visible on the System page in the Web UI
     validations:
       required: true
   - type: textarea
@@ -30,6 +30,14 @@ body:
     attributes:
       label: Relevant log output
       description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: ffprobe
+    attributes:
+      label: FFprobe output from your camera
+      description: Run `ffprobe <camera_url>` and provide output below
       render: shell
     validations:
       required: true
@@ -74,6 +82,23 @@ body:
         - Dev Board
         - Other
         - CPU (no coral)
+    validations:
+      required: true
+  - type: dropdown
+    id: network
+    attributes:
+      label: Network connection
+      options:
+        - Wired
+        - Wireless
+        - Mixed
+    validations:
+      required: true
+  - type: input
+    id: camera
+    attributes:
+      label: Camera make and model
+      description: Dahua, hikvision, amcrest, reolink, etc and model number
     validations:
       required: true
   - type: textarea

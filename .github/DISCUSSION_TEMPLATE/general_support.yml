@@ -14,7 +14,7 @@ body:
     id: version
     attributes:
       label: Version
-      description: Visible on the Debug page in the Web UI
+      description: Visible on the System page in the Web UI
     validations:
       required: true
   - type: textarea
