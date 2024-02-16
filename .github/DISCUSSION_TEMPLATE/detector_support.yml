@@ -1,8 +1,5 @@
-name: Detector Support Request
-description: Support for setting up object detector in Frigate (Coral, OpenVINO, TensorRT, etc.)
 title: "[Detector Support]: "
 labels: ["support", "triage"]
-assignees: []
 body:
   - type: textarea
     id: description
