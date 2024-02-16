@@ -53,7 +53,7 @@
     "sonner": "^1.4.0",
     "sort-by": "^1.2.0",
     "strftime": "^0.10.2",
-    "swr": "^2.2.4",
+    "swr": "^2.2.5",
     "tailwind-merge": "^2.1.0",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.8.0",
