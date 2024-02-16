@@ -1,8 +1,5 @@
-name: Hardware Acceleration Support Request
-description: Support for setting up GPU hardware acceleration in Frigate
 title: "[HW Accel Support]: "
 labels: ["support", "triage"]
-assignees: []
 body:
   - type: textarea
     id: description
