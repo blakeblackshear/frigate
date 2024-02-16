@@ -22,7 +22,7 @@ from frigate.comms.dispatcher import Communicator, Dispatcher
 from frigate.comms.inter_process import InterProcessCommunicator
 from frigate.comms.mqtt import MqttClient
 from frigate.comms.ws import WebSocketClient
-from frigate.config import BirdseyeModeEnum, FrigateConfig
+from frigate.config import FrigateConfig
 from frigate.const import (
     CACHE_DIR,
     CLIPS_DIR,

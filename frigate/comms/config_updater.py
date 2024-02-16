@@ -3,7 +3,7 @@
 import multiprocessing as mp
 import os
 from multiprocessing.synchronize import Event as MpEvent
-from typing import Callable, Optional
+from typing import Optional
 
 import zmq
 
