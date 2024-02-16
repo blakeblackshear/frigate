@@ -443,11 +443,14 @@ class RecordingMaintainer(threading.Thread):
             run_start = datetime.datetime.now().timestamp()
 
             # check if there is an updated config
-            updated_topic, updated_record_config = (
-                self.config_subscriber.check_for_update()
-            )
+            while True:
+                updated_topic, updated_record_config = (
+                    self.config_subscriber.check_for_update()
+                )
 
-            if updated_topic:
+                if not updated_topic:
+                    break
+
                 camera_name = updated_topic.rpartition("/")[-1]
                 self.config.cameras[camera_name].record = updated_record_config
 
