@@ -9,7 +9,7 @@ from frigate.config import BirdseyeModeEnum, FrigateConfig
 from frigate.const import INSERT_MANY_RECORDINGS, INSERT_PREVIEW, REQUEST_REGION_GRID
 from frigate.models import Previews, Recordings
 from frigate.ptz.onvif import OnvifCommandEnum, OnvifController
-from frigate.types import CameraMetricsTypes, FeatureMetricsTypes, PTZMetricsTypes
+from frigate.types import CameraMetricsTypes, PTZMetricsTypes
 from frigate.util.object import get_camera_regions_grid
 from frigate.util.services import restart_frigate
 
@@ -44,7 +44,6 @@ class Dispatcher:
         config_updater: ConfigPublisher,
         onvif: OnvifController,
         camera_metrics: dict[str, CameraMetricsTypes],
-        feature_metrics: dict[str, FeatureMetricsTypes],
         ptz_metrics: dict[str, PTZMetricsTypes],
         communicators: list[Communicator],
     ) -> None:
@@ -52,7 +51,6 @@ class Dispatcher:
         self.config_updater = config_updater
         self.onvif = onvif
         self.camera_metrics = camera_metrics
-        self.feature_metrics = feature_metrics
         self.ptz_metrics = ptz_metrics
         self.comms = communicators
 
@@ -252,13 +250,14 @@ class Dispatcher:
             if not audio_settings.enabled:
                 logger.info(f"Turning on audio detection for {camera_name}")
                 audio_settings.enabled = True
-                self.feature_metrics[camera_name]["audio_enabled"].value = True
         elif payload == "OFF":
-            if self.feature_metrics[camera_name]["audio_enabled"].value:
+            if audio_settings.enabled:
                 logger.info(f"Turning off audio detection for {camera_name}")
                 audio_settings.enabled = False
-                self.feature_metrics[camera_name]["audio_enabled"].value = False
 
+        self.config_updater.publish(
+            f"config/audio/{camera_name}", self.config.cameras[camera_name].audio
+        )
         self.publish(f"{camera_name}/audio/state", payload, retain=True)
 
     def _on_recordings_command(self, camera_name: str, payload: str) -> None:
@@ -275,14 +274,14 @@ class Dispatcher:
             if not record_settings.enabled:
                 logger.info(f"Turning on recordings for {camera_name}")
                 record_settings.enabled = True
-                self.feature_metrics[camera_name]["record_enabled"].value = True
         elif payload == "OFF":
-            if self.feature_metrics[camera_name]["record_enabled"].value:
+            if record_settings.enabled:
                 logger.info(f"Turning off recordings for {camera_name}")
                 record_settings.enabled = False
-                self.feature_metrics[camera_name]["record_enabled"].value = False
 
-        self.config_updater.publish(f"config/record/{camera_name}", self.config.cameras[camera_name].record)
+        self.config_updater.publish(
+            f"config/record/{camera_name}", self.config.cameras[camera_name].record
+        )
         self.publish(f"{camera_name}/recordings/state", payload, retain=True)
 
     def _on_snapshots_command(self, camera_name: str, payload: str) -> None:
@@ -349,8 +348,8 @@ class Dispatcher:
         logger.info(f"Setting birdseye mode for {camera_name} to {new_birdseye_mode}")
 
         # update the metric (need the mode converted to an int)
-        self.camera_metrics[camera_name][
-            "birdseye_mode"
-        ].value = BirdseyeModeEnum.get_index(new_birdseye_mode)
+        self.camera_metrics[camera_name]["birdseye_mode"].value = (
+            BirdseyeModeEnum.get_index(new_birdseye_mode)
+        )
 
         self.publish(f"{camera_name}/birdseye_mode/state", payload, retain=True)

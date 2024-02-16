@@ -13,6 +13,7 @@ import numpy as np
 import requests
 from setproctitle import setproctitle
 
+from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, CameraInput, FfmpegConfig, FrigateConfig
 from frigate.const import (
@@ -26,7 +27,7 @@ from frigate.const import (
 from frigate.ffmpeg_presets import parse_preset_input
 from frigate.log import LogPipe
 from frigate.object_detection import load_labels
-from frigate.types import CameraMetricsTypes, FeatureMetricsTypes
+from frigate.types import CameraMetricsTypes
 from frigate.util.builtin import get_ffmpeg_arg_list
 from frigate.util.services import listen
 from frigate.video import start_or_restart_ffmpeg, stop_ffmpeg
@@ -69,7 +70,6 @@ def listen_to_audio(
     config: FrigateConfig,
     recordings_info_queue: mp.Queue,
     camera_metrics: dict[str, CameraMetricsTypes],
-    process_info: dict[str, FeatureMetricsTypes],
 ) -> None:
     stop_event = mp.Event()
     audio_threads: list[threading.Thread] = []
@@ -97,7 +97,6 @@ def listen_to_audio(
                 camera,
                 recordings_info_queue,
                 camera_metrics,
-                process_info,
                 stop_event,
             )
             audio_threads.append(audio)
@@ -170,7 +169,6 @@ class AudioEventMaintainer(threading.Thread):
         camera: CameraConfig,
         recordings_info_queue: mp.Queue,
         camera_metrics: dict[str, CameraMetricsTypes],
-        feature_metrics: dict[str, FeatureMetricsTypes],
         stop_event: mp.Event,
     ) -> None:
         threading.Thread.__init__(self)
@@ -178,7 +176,6 @@ class AudioEventMaintainer(threading.Thread):
         self.config = camera
         self.recordings_info_queue = recordings_info_queue
         self.camera_metrics = camera_metrics
-        self.feature_metrics = feature_metrics
         self.detections: dict[dict[str, any]] = {}
         self.stop_event = stop_event
         self.detector = AudioTfl(stop_event, self.config.audio.num_threads)
@@ -191,9 +188,10 @@ class AudioEventMaintainer(threading.Thread):
 
         # create communication for audio detections
         self.requestor = InterProcessRequestor()
+        self.config_subscriber = ConfigSubscriber(f"config/audio/{camera.name}")
 
     def detect_audio(self, audio) -> None:
-        if not self.feature_metrics[self.config.name]["audio_enabled"].value:
+        if not self.config.audio.enabled:
             return
 
         audio_as_float = audio.astype(np.float32)
@@ -339,6 +337,14 @@ class AudioEventMaintainer(threading.Thread):
         self.start_or_restart_ffmpeg()
 
         while not self.stop_event.is_set():
+            # check if there is an updated config
+            updated_topic, updated_audio_config = (
+                self.config_subscriber.check_for_update()
+            )
+
+            if updated_topic:
+                self.config.audio = updated_audio_config
+
             self.read_audio()
 
         stop_ffmpeg(self.audio_listener, self.logger)

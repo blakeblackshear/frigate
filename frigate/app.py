@@ -57,7 +57,7 @@ from frigate.record.record import manage_recordings
 from frigate.stats import StatsEmitter, stats_init
 from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
-from frigate.types import CameraMetricsTypes, FeatureMetricsTypes, PTZMetricsTypes
+from frigate.types import CameraMetricsTypes, PTZMetricsTypes
 from frigate.util.object import get_camera_regions_grid
 from frigate.version import VERSION
 from frigate.video import capture_camera, track_camera
@@ -76,7 +76,6 @@ class FrigateApp:
         self.log_queue: Queue = mp.Queue()
         self.plus_api = PlusApi()
         self.camera_metrics: dict[str, CameraMetricsTypes] = {}
-        self.feature_metrics: dict[str, FeatureMetricsTypes] = {}
         self.ptz_metrics: dict[str, PTZMetricsTypes] = {}
         self.processes: dict[str, int] = {}
         self.region_grids: dict[str, list[list[dict[str, int]]]] = {}
@@ -221,14 +220,6 @@ class FrigateApp:
                 # from mypy 0.981 onwards
             }
             self.ptz_metrics[camera_name]["ptz_motor_stopped"].set()
-            self.feature_metrics[camera_name] = {
-                "audio_enabled": mp.Value(  # type: ignore[typeddict-item]
-                    # issue https://github.com/python/typeshed/issues/8799
-                    # from mypy 0.981 onwards
-                    "i",
-                    self.config.cameras[camera_name].audio.enabled,
-                ),
-            }
 
     def set_log_levels(self) -> None:
         logging.getLogger().setLevel(self.config.logger.default.value.upper())
@@ -411,7 +402,6 @@ class FrigateApp:
             self.inter_config_updater,
             self.onvif_controller,
             self.camera_metrics,
-            self.feature_metrics,
             self.ptz_metrics,
             comms,
         )
@@ -557,7 +547,6 @@ class FrigateApp:
                     self.config,
                     self.audio_recordings_info_queue,
                     self.camera_metrics,
-                    self.feature_metrics,
                 ),
             )
             audio_process.daemon = True
