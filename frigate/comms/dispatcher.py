@@ -319,17 +319,18 @@ class Dispatcher:
         birdseye_settings = self.config.cameras[camera_name].birdseye
 
         if payload == "ON":
-            if not self.camera_metrics[camera_name]["birdseye_enabled"].value:
+            if not birdseye_settings.enabled:
                 logger.info(f"Turning on birdseye for {camera_name}")
-                self.camera_metrics[camera_name]["birdseye_enabled"].value = True
                 birdseye_settings.enabled = True
 
         elif payload == "OFF":
-            if self.camera_metrics[camera_name]["birdseye_enabled"].value:
+            if birdseye_settings.enabled:
                 logger.info(f"Turning off birdseye for {camera_name}")
-                self.camera_metrics[camera_name]["birdseye_enabled"].value = False
                 birdseye_settings.enabled = False
 
+        self.config_updater.publish(
+            f"config/birdseye/{camera_name}", self.config.cameras[camera_name].birdseye
+        )
         self.publish(f"{camera_name}/birdseye/state", payload, retain=True)
 
     def _on_birdseye_mode_command(self, camera_name: str, payload: str) -> None:
@@ -340,16 +341,17 @@ class Dispatcher:
             return
 
         birdseye_config = self.config.cameras[camera_name].birdseye
+
         if not birdseye_config.enabled:
             logger.info(f"Birdseye mode not enabled for {camera_name}")
             return
 
-        new_birdseye_mode = BirdseyeModeEnum(payload.lower())
-        logger.info(f"Setting birdseye mode for {camera_name} to {new_birdseye_mode}")
-
-        # update the metric (need the mode converted to an int)
-        self.camera_metrics[camera_name]["birdseye_mode"].value = (
-            BirdseyeModeEnum.get_index(new_birdseye_mode)
+        birdseye_config.mode = BirdseyeModeEnum(payload.lower())
+        logger.info(
+            f"Setting birdseye mode for {camera_name} to {birdseye_config.mode}"
         )
 
+        self.config_updater.publish(
+            f"config/birdseye/{camera_name}", self.config.cameras[camera_name].birdseye
+        )
         self.publish(f"{camera_name}/birdseye_mode/state", payload, retain=True)
