@@ -445,7 +445,7 @@ class BirdsEyeFrameManager:
         if len(self.active_cameras) - len(active_cameras) == 0:
             if (
                 len(self.active_cameras) == 1
-                and self.active_cameras[0] == active_cameras[0]
+                and self.active_cameras != active_cameras
             ):
                 reset_layout = True
             elif max_camera_refresh:
