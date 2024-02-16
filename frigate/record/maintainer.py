@@ -17,6 +17,7 @@ from typing import Any, Optional, Tuple
 import numpy as np
 import psutil
 
+from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig, RetainModeEnum
 from frigate.const import (
@@ -62,7 +63,6 @@ class RecordingMaintainer(threading.Thread):
         config: FrigateConfig,
         object_recordings_info_queue: mp.Queue,
         audio_recordings_info_queue: Optional[mp.Queue],
-        process_info: dict[str, FeatureMetricsTypes],
         stop_event: MpEvent,
     ):
         threading.Thread.__init__(self)
@@ -71,10 +71,10 @@ class RecordingMaintainer(threading.Thread):
 
         # create communication for retained recordings
         self.requestor = InterProcessRequestor()
+        self.config_subscriber = ConfigSubscriber("config/record/")
 
         self.object_recordings_info_queue = object_recordings_info_queue
         self.audio_recordings_info_queue = audio_recordings_info_queue
-        self.process_info = process_info
         self.stop_event = stop_event
         self.object_recordings_info: dict[str, list] = defaultdict(list)
         self.audio_recordings_info: dict[str, list] = defaultdict(list)
@@ -200,7 +200,7 @@ class RecordingMaintainer(threading.Thread):
         # Just delete files if recordings are turned off
         if (
             camera not in self.config.cameras
-            or not self.process_info[camera]["record_enabled"].value
+            or not self.config.cameras[camera].record.enabled
         ):
             Path(cache_path).unlink(missing_ok=True)
             self.end_time_cache.pop(cache_path, None)
@@ -442,6 +442,16 @@ class RecordingMaintainer(threading.Thread):
         wait_time = 0.0
         while not self.stop_event.wait(wait_time):
             run_start = datetime.datetime.now().timestamp()
+
+            # check if there is an updated config
+            updated_topic, updated_record_config = (
+                self.config_subscriber.check_for_update()
+            )
+
+            if updated_topic:
+                camera_name = updated_topic.rpartition("/")[-1]
+                self.config.cameras[camera_name].record = updated_record_config
+
             stale_frame_count = 0
             stale_frame_count_threshold = 10
             # empty the object recordings info queue
@@ -460,7 +470,7 @@ class RecordingMaintainer(threading.Thread):
                     if frame_time < run_start - stale_frame_count_threshold:
                         stale_frame_count += 1
 
-                    if self.process_info[camera]["record_enabled"].value:
+                    if self.config.cameras[camera].record.enabled:
                         self.object_recordings_info[camera].append(
                             (
                                 frame_time,
@@ -498,7 +508,7 @@ class RecordingMaintainer(threading.Thread):
                         if frame_time < run_start - stale_frame_count_threshold:
                             stale_frame_count += 1
 
-                        if self.process_info[camera]["record_enabled"].value:
+                        if self.config.cameras[camera].record.enabled:
                             self.audio_recordings_info[camera].append(
                                 (
                                     frame_time,

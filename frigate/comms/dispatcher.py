@@ -4,6 +4,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Optional
 
+from frigate.comms.config_updater import ConfigPublisher
 from frigate.config import BirdseyeModeEnum, FrigateConfig
 from frigate.const import INSERT_MANY_RECORDINGS, INSERT_PREVIEW, REQUEST_REGION_GRID
 from frigate.models import Previews, Recordings
@@ -40,6 +41,7 @@ class Dispatcher:
     def __init__(
         self,
         config: FrigateConfig,
+        config_updater: ConfigPublisher,
         onvif: OnvifController,
         camera_metrics: dict[str, CameraMetricsTypes],
         feature_metrics: dict[str, FeatureMetricsTypes],
@@ -47,6 +49,7 @@ class Dispatcher:
         communicators: list[Communicator],
     ) -> None:
         self.config = config
+        self.config_updater = config_updater
         self.onvif = onvif
         self.camera_metrics = camera_metrics
         self.feature_metrics = feature_metrics
@@ -279,6 +282,7 @@ class Dispatcher:
                 record_settings.enabled = False
                 self.feature_metrics[camera_name]["record_enabled"].value = False
 
+        self.config_updater.publish(f"config/record/{camera_name}", self.config.cameras[camera_name].record)
         self.publish(f"{camera_name}/recordings/state", payload, retain=True)
 
     def _on_snapshots_command(self, camera_name: str, payload: str) -> None:
