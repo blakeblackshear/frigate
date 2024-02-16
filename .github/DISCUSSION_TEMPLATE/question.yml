@@ -4,6 +4,6 @@ body:
   - type: textarea
     id: description
     attributes:
-      label: What is your question:
+      label: "What is your question:"
     validations:
       required: true
