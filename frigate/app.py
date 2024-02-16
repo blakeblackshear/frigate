@@ -175,20 +175,6 @@ class FrigateApp:
                 "process": None,
                 "audio_rms": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
                 "audio_dBFS": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                "birdseye_enabled": mp.Value(  # type: ignore[typeddict-item]
-                    # issue https://github.com/python/typeshed/issues/8799
-                    # from mypy 0.981 onwards
-                    "i",
-                    self.config.cameras[camera_name].birdseye.enabled,
-                ),
-                "birdseye_mode": mp.Value(  # type: ignore[typeddict-item]
-                    # issue https://github.com/python/typeshed/issues/8799
-                    # from mypy 0.981 onwards
-                    "i",
-                    BirdseyeModeEnum.get_index(
-                        self.config.cameras[camera_name].birdseye.mode.value
-                    ),
-                ),
             }
             self.ptz_metrics[camera_name] = {
                 "ptz_autotracker_enabled": mp.Value(  # type: ignore[typeddict-item]
@@ -474,7 +460,6 @@ class FrigateApp:
             args=(
                 self.config,
                 self.video_output_queue,
-                self.camera_metrics,
             ),
         )
         output_processor.daemon = True

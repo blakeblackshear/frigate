@@ -21,7 +21,6 @@ from frigate.config import FrigateConfig
 from frigate.output.birdseye import Birdseye
 from frigate.output.camera import JsmpegCamera
 from frigate.output.preview import PreviewRecorder
-from frigate.types import CameraMetricsTypes
 from frigate.util.image import SharedMemoryFrameManager
 
 logger = logging.getLogger(__name__)
@@ -30,7 +29,6 @@ logger = logging.getLogger(__name__)
 def output_frames(
     config: FrigateConfig,
     video_output_queue: mp.Queue,
-    camera_metrics: dict[str, CameraMetricsTypes],
 ):
     threading.current_thread().name = "output"
     setproctitle("frigate.output")
@@ -70,9 +68,7 @@ def output_frames(
         preview_recorders[camera] = PreviewRecorder(cam_config)
 
     if config.birdseye.enabled:
-        birdseye = Birdseye(
-            config, frame_manager, camera_metrics, stop_event, websocket_server
-        )
+        birdseye = Birdseye(config, frame_manager, stop_event, websocket_server)
 
     websocket_thread.start()
 
