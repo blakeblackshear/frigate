@@ -42,11 +42,6 @@ class PTZMetricsTypes(TypedDict):
     ptz_min_zoom: Synchronized
 
 
-class FeatureMetricsTypes(TypedDict):
-    audio_enabled: Synchronized
-    record_enabled: Synchronized
-
-
 class StatsTrackingTypes(TypedDict):
     camera_metrics: dict[str, CameraMetricsTypes]
     detectors: dict[str, ObjectDetectProcess]

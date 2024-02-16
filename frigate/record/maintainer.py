@@ -29,7 +29,6 @@ from frigate.const import (
     RECORD_DIR,
 )
 from frigate.models import Event, Recordings
-from frigate.types import FeatureMetricsTypes
 from frigate.util.image import area
 from frigate.util.services import get_video_properties
 
