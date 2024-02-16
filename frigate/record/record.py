@@ -13,7 +13,6 @@ from setproctitle import setproctitle
 from frigate.config import FrigateConfig
 from frigate.models import Event, Recordings
 from frigate.record.maintainer import RecordingMaintainer
-from frigate.types import FeatureMetricsTypes
 from frigate.util.services import listen
 
 logger = logging.getLogger(__name__)
@@ -23,7 +22,6 @@ def manage_recordings(
     config: FrigateConfig,
     object_recordings_info_queue: mp.Queue,
     audio_recordings_info_queue: mp.Queue,
-    process_info: dict[str, FeatureMetricsTypes],
 ) -> None:
     stop_event = mp.Event()
 
@@ -53,7 +51,6 @@ def manage_recordings(
         config,
         object_recordings_info_queue,
         audio_recordings_info_queue,
-        process_info,
         stop_event,
     )
     maintainer.start()

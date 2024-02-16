@@ -7,29 +7,25 @@ from typing import Callable, Optional
 
 import zmq
 
-from frigate.comms.dispatcher import Communicator
 from frigate.const import PORT_INTER_PROCESS_CONFIG
 
 
-class ConfigPublisher(Communicator):
+class ConfigPublisher:
     """Publishes config changes to different processes."""
 
     def __init__(self) -> None:
-        INTER_PROCESS_COMM_PORT = (
+        INTER_PROCESS_CONFIG_PORT = (
             os.environ.get("INTER_PROCESS_CONFIG_PORT") or PORT_INTER_PROCESS_CONFIG
         )
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.PUB)
-        self.socket.bind(f"tcp://127.0.0.1:{INTER_PROCESS_COMM_PORT}")
+        self.socket.bind(f"tcp://127.0.0.1:{INTER_PROCESS_CONFIG_PORT}")
         self.stop_event: MpEvent = mp.Event()
 
-    def publish(self, topic: str, payload: str, retain: bool) -> None:
+    def publish(self, topic: str, payload: any) -> None:
         """There is no communication back to the processes."""
         self.socket.send_string(topic, flags=zmq.SNDMORE)
         self.socket.send_pyobj(payload)
-
-    def subscribe(self, receiver: Callable) -> None:
-        pass  # this class does not subscribe
 
     def stop(self) -> None:
         self.stop_event.set()
@@ -47,13 +43,15 @@ class ConfigSubscriber:
         self.socket.setsockopt_string(zmq.SUBSCRIBE, topic)
         self.socket.connect(f"tcp://127.0.0.1:{port}")
 
-    def check_for_update(self) -> Optional[any]:
-        """Sends data and then waits for reply."""
+    def check_for_update(self) -> Optional[tuple[str, any]]:
+        """Returns updated config or None if no update."""
         try:
-            self.socket.recv_string(flags=zmq.NOBLOCK)  # receive the topic string
-            return self.socket.recv_pyobj()
+            topic = self.socket.recv_string(
+                flags=zmq.NOBLOCK
+            )
+            return (topic, self.socket.recv_pyobj())
         except zmq.ZMQError:
-            return None
+            return (None, None)
 
     def stop(self) -> None:
         self.socket.close()

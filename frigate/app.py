@@ -17,6 +17,7 @@ from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
+from frigate.comms.config_updater import ConfigPublisher
 from frigate.comms.dispatcher import Communicator, Dispatcher
 from frigate.comms.inter_process import InterProcessCommunicator
 from frigate.comms.mqtt import MqttClient
@@ -227,12 +228,6 @@ class FrigateApp:
                     "i",
                     self.config.cameras[camera_name].audio.enabled,
                 ),
-                "record_enabled": mp.Value(  # type: ignore[typeddict-item]
-                    # issue https://github.com/python/typeshed/issues/8799
-                    # from mypy 0.981 onwards
-                    "i",
-                    self.config.cameras[camera_name].record.enabled,
-                ),
             }
 
     def set_log_levels(self) -> None:
@@ -348,7 +343,6 @@ class FrigateApp:
                 self.config,
                 self.object_recordings_info_queue,
                 self.audio_recordings_info_queue,
-                self.feature_metrics,
             ),
         )
         recording_process.daemon = True
@@ -386,6 +380,7 @@ class FrigateApp:
 
     def init_inter_process_communicator(self) -> None:
         self.inter_process_communicator = InterProcessCommunicator()
+        self.inter_config_updater = ConfigPublisher()
 
     def init_web_server(self) -> None:
         self.flask_app = create_app(
@@ -413,6 +408,7 @@ class FrigateApp:
 
         self.dispatcher = Dispatcher(
             self.config,
+            self.inter_config_updater,
             self.onvif_controller,
             self.camera_metrics,
             self.feature_metrics,
