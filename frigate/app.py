@@ -194,9 +194,6 @@ class FrigateApp:
         # Queues for clip processing
         self.event_queue: Queue = mp.Queue()
         self.event_processed_queue: Queue = mp.Queue()
-        self.video_output_queue: Queue = mp.Queue(
-            maxsize=sum(camera.enabled for camera in self.config.cameras.values()) * 2
-        )
 
         # Queue for cameras to push tracked objects to
         self.detected_frames_queue: Queue = mp.Queue(
@@ -404,7 +401,6 @@ class FrigateApp:
             self.detected_frames_queue,
             self.event_queue,
             self.event_processed_queue,
-            self.video_output_queue,
             self.ptz_autotracker_thread,
             self.stop_event,
         )
@@ -414,10 +410,7 @@ class FrigateApp:
         output_processor = mp.Process(
             target=output_frames,
             name="output_processor",
-            args=(
-                self.config,
-                self.video_output_queue,
-            ),
+            args=(self.config,),
         )
         output_processor.daemon = True
         self.output_processor = output_processor
@@ -670,11 +663,6 @@ class FrigateApp:
         self.detection_queue.close()
         self.detection_queue.join_thread()
 
-        # Stop Communicators
-        self.inter_process_communicator.stop()
-        self.inter_config_updater.stop()
-        self.inter_detection_proxy.stop()
-
         self.dispatcher.stop()
         self.detected_frames_processor.join()
         self.ptz_autotracker_thread.join()
@@ -693,7 +681,6 @@ class FrigateApp:
         for queue in [
             self.event_queue,
             self.event_processed_queue,
-            self.video_output_queue,
             self.detected_frames_queue,
             self.log_queue,
         ]:
@@ -702,3 +689,8 @@ class FrigateApp:
                     queue.get_nowait()
                 queue.close()
                 queue.join_thread()
+
+        # Stop Communicators
+        self.inter_process_communicator.stop()
+        self.inter_config_updater.stop()
+        self.inter_detection_proxy.stop()

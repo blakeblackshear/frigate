@@ -3,7 +3,6 @@
 import asyncio
 import datetime
 import logging
-import multiprocessing as mp
 import os
 import random
 import string
@@ -509,4 +508,5 @@ class RecordingMaintainer(threading.Thread):
 
         self.requestor.stop()
         self.config_subscriber.stop()
+        self.detection_subscriber.stop()
         logger.info("Exiting recording maintenance...")

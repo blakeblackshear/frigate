@@ -816,7 +816,6 @@ class TrackedObjectProcessor(threading.Thread):
         tracked_objects_queue,
         event_queue,
         event_processed_queue,
-        video_output_queue,
         ptz_autotracker_thread,
         stop_event,
     ):
@@ -827,7 +826,6 @@ class TrackedObjectProcessor(threading.Thread):
         self.tracked_objects_queue = tracked_objects_queue
         self.event_queue = event_queue
         self.event_processed_queue = event_processed_queue
-        self.video_output_queue = video_output_queue
         self.stop_event = stop_event
         self.camera_states: dict[str, CameraState] = {}
         self.frame_manager = SharedMemoryFrameManager()
@@ -1118,16 +1116,6 @@ class TrackedObjectProcessor(threading.Thread):
                 o.to_dict() for o in camera_state.tracked_objects.values()
             ]
 
-            self.video_output_queue.put(
-                (
-                    camera,
-                    frame_time,
-                    tracked_objects,
-                    motion_boxes,
-                    regions,
-                )
-            )
-
             # publish info on this frame
             self.detection_publisher.send_data(
                 (
@@ -1214,4 +1202,5 @@ class TrackedObjectProcessor(threading.Thread):
                 event_id, camera = self.event_processed_queue.get()
                 self.camera_states[camera].finished(event_id)
 
+        self.detection_publisher.stop()
         logger.info("Exiting object processor...")

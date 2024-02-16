@@ -8,9 +8,11 @@ from typing import Optional
 import zmq
 
 from frigate.const import (
-    PORT_INTER_PROCESS_DETECTION_SUB,
     PORT_INTER_PROCESS_DETECTION_PUB,
+    PORT_INTER_PROCESS_DETECTION_SUB,
 )
+
+SOCKET_CONTROL = "inproc://control.detections_updater"
 
 
 class DetectionTypeEnum(str, Enum):
@@ -36,14 +38,17 @@ class DetectionProxyRunner(threading.Thread):
             os.environ.get("INTER_PROCESS_DETECTION_SUB_PORT")
             or PORT_INTER_PROCESS_DETECTION_SUB
         )
+        control = self.context.socket(zmq.SUB)
+        control.connect(SOCKET_CONTROL)
+        control.setsockopt_string(zmq.SUBSCRIBE, "")
         incoming = self.context.socket(zmq.XSUB)
         incoming.bind(f"tcp://127.0.0.1:{PUB_PORT}")
         outgoing = self.context.socket(zmq.XPUB)
         outgoing.bind(f"tcp://127.0.0.1:{SUB_PORT}")
-        zmq.proxy(
-            incoming, outgoing
-        )  # blocking, will unblock when context is destroyed
 
+        zmq.proxy_steerable(
+            incoming, outgoing, None, control
+        )  # blocking, will unblock terminate message is received
         incoming.close()
         outgoing.close()
 
@@ -53,11 +58,15 @@ class DetectionProxy:
 
     def __init__(self) -> None:
         self.context = zmq.Context()
+        self.control = self.context.socket(zmq.PUB)
+        self.control.bind(SOCKET_CONTROL)
         self.runner = DetectionProxyRunner(self.context)
         self.runner.start()
 
     def stop(self) -> None:
-        self.context.destroy()  # destroying the context will stop the proxy
+        self.control.send_string("TERMINATE")  # tell the proxy to stop
+        self.runner.join()
+        self.context.destroy()
 
 
 class DetectionPublisher:
