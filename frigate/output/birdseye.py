@@ -785,5 +785,6 @@ class Birdseye:
                 pass
 
     def stop(self) -> None:
+        self.config_subscriber.stop()
         self.converter.join()
         self.broadcaster.join()

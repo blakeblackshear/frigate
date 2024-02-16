@@ -817,4 +817,6 @@ def process_frames(
             detection_fps.value = object_detector.fps.eps()
             frame_manager.close(f"{camera_name}{frame_time}")
 
+    motion_detector.stop()
     requestor.stop()
+    config_subscriber.stop()

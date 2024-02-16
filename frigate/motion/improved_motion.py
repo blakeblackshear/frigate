@@ -201,3 +201,7 @@ class ImprovedMotionDetector(MotionDetector):
             self.motion_frame_count = 0
 
         return motion_boxes
+
+    def stop(self) -> None:
+        """stop the motion detector."""
+        self.config_subscriber.stop()
