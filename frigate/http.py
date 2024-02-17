@@ -45,7 +45,7 @@ from frigate.const import (
     RECORD_DIR,
 )
 from frigate.events.external import ExternalEventProcessor
-from frigate.models import Event, Previews, Recordings, Regions, Timeline
+from frigate.models import Event, Previews, Recordings, Regions, ReviewSegment, Timeline
 from frigate.object_processing import TrackedObject
 from frigate.plus import PlusApi
 from frigate.ptz.onvif import OnvifController
@@ -1056,9 +1056,9 @@ def event_snapshot(id):
     else:
         response.headers["Cache-Control"] = "no-store"
     if download:
-        response.headers[
-            "Content-Disposition"
-        ] = f"attachment; filename=snapshot-{id}.jpg"
+        response.headers["Content-Disposition"] = (
+            f"attachment; filename=snapshot-{id}.jpg"
+        )
     return response
 
 
@@ -1245,9 +1245,9 @@ def event_clip(id):
     if download:
         response.headers["Content-Disposition"] = "attachment; filename=%s" % file_name
     response.headers["Content-Length"] = os.path.getsize(clip_path)
-    response.headers[
-        "X-Accel-Redirect"
-    ] = f"/clips/{file_name}"  # nginx: https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
+    response.headers["X-Accel-Redirect"] = (
+        f"/clips/{file_name}"  # nginx: https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
+    )
 
     return response
 
@@ -1952,9 +1952,9 @@ def get_recordings_storage_usage():
 
     total_mb = recording_stats["total"]
 
-    camera_usages: dict[
-        str, dict
-    ] = current_app.storage_maintainer.calculate_camera_usages()
+    camera_usages: dict[str, dict] = (
+        current_app.storage_maintainer.calculate_camera_usages()
+    )
 
     for camera_name in camera_usages.keys():
         if camera_usages.get(camera_name, {}).get("usage"):
@@ -2142,9 +2142,9 @@ def recording_clip(camera_name, start_ts, end_ts):
     if download:
         response.headers["Content-Disposition"] = "attachment; filename=%s" % file_name
     response.headers["Content-Length"] = os.path.getsize(path)
-    response.headers[
-        "X-Accel-Redirect"
-    ] = f"/cache/{file_name}"  # nginx: https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
+    response.headers["X-Accel-Redirect"] = (
+        f"/cache/{file_name}"  # nginx: https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
+    )
 
     return response
 
@@ -2388,6 +2388,36 @@ def vod_event(id):
             "sequences": [{"clips": [{"type": "source", "path": clip_path}]}],
         }
     )
+
+
+@bp.route("/review")
+def review():
+    camera = request.args.get("camera", "all")
+    limit = request.args.get("limit", 100)
+    severity = request.args.get("severity", None)
+
+    before = request.args.get("before", type=float, default=datetime.now().timestamp())
+    after = request.args.get(
+        "after", type=float, default=(datetime.now() - timedelta(hours=18)).timestamp()
+    )
+
+    clauses = [((ReviewSegment.start_time > after) & (ReviewSegment.end_time < before))]
+
+    if camera != "all":
+        clauses.append((ReviewSegment.camera == camera))
+
+    if severity:
+        clauses.append((ReviewSegment.severity == severity))
+
+    review = (
+        ReviewSegment.select()
+        .where(reduce(operator.and_, clauses))
+        .order_by(ReviewSegment.start_time.desc())
+        .limit(limit)
+        .dicts()
+    )
+
+    return jsonify([r for r in review])
 
 
 @bp.route(

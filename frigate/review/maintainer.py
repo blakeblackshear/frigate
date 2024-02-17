@@ -113,11 +113,15 @@ class ReviewSegmentMaintainer(threading.Thread):
                 segment.detections.add(object["id"])
                 segment.objects.add(object["label"])
 
-                if segment.severity == SeverityEnum.detection and object["has_clip"]:
+                if object["has_clip"]:
                     segment.severity = SeverityEnum.alert
 
-                if object["current_zones"]:
-                    segment.zones.update(object)
+                if len(object["current_zones"]) > 0:
+                    segment.zones.update(object["current_zones"])
+        elif (
+            segment.severity == SeverityEnum.signification_motion and len(motion) >= 20
+        ):
+            segment.last_update = frame_time
         elif frame_time > (
             segment.last_update
             + (camera_config.detect.max_disappeared / camera_config.detect.fps)
@@ -215,7 +219,8 @@ class ReviewSegmentMaintainer(threading.Thread):
                         current_tracked_objects,
                         motion_boxes,
                     )
-                elif topic == DetectionTypeEnum.audio:
+                elif topic == DetectionTypeEnum.audio and len(audio_detections) > 0:
+                    current_segment.last_update = frame_time
                     current_segment.audio.update(audio_detections)
             else:
                 if topic == DetectionTypeEnum.video:
