@@ -14,6 +14,7 @@ import Logs from "@/pages/Logs";
 import NoMatch from "@/pages/NoMatch";
 import Settings from "@/pages/Settings";
 import UIPlayground from "./pages/UIPlayground";
+import Events from "./pages/Events";
 
 function App() {
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -35,6 +36,7 @@ function App() {
             >
               <Routes>
                 <Route path="/" element={<Live />} />
+                <Route path="/events" element={<Events />} />
                 <Route path="/history" element={<History />} />
                 <Route path="/export" element={<Export />} />
                 <Route path="/storage" element={<Storage />} />
