@@ -25,7 +25,7 @@ def detect_gfx_version():
 
 
 def auto_override_gfx_version():
-    # If environment varialbe already in place, do not override
+    # If environment variable already in place, do not override
     gfx_version = detect_gfx_version()
     old_override = os.getenv("HSA_OVERRIDE_GFX_VERSION")
     if old_override not in (None, ""):
@@ -116,7 +116,7 @@ class ROCmDetector(DetectionApi):
                 # untested
                 self.model = migraphx.parse_tf(path)
             else:
-                raise Exception(f"AMD/ROCm: unkown model format {path}")
+                raise Exception(f"AMD/ROCm: unknown model format {path}")
             logger.info("AMD/ROCm: compiling the model")
             self.model.compile(
                 migraphx.get_target("gpu"), offload_copy=True, fast_math=True

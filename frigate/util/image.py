@@ -347,7 +347,7 @@ def yuv_to_3_channel_yuv(yuv_frame):
     # flatten the image into array
     yuv_data = yuv_frame.ravel()
 
-    # create a numpy array to hold all the 3 chanel yuv data
+    # create a numpy array to hold all the 3 channel yuv data
     all_yuv_data = np.empty((height, width, 3), dtype=np.uint8)
 
     y_count = height * width
@@ -575,7 +575,7 @@ def intersection_over_union(box_a, box_b):
 
     # compute the intersection over union by taking the intersection
     # area and dividing it by the sum of prediction + ground-truth
-    # areas - the interesection area
+    # areas - the intersection area
     iou = inter_area / float(box_a_area + box_b_area - inter_area)
 
     # return the intersection over union value

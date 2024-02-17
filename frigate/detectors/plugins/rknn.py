@@ -105,10 +105,10 @@ class Rknn(DetectionApi):
 
             if (config.model.width != 320) or (config.model.height != 320):
                 logger.error(
-                    "Make sure to set the model width and heigth to 320 in your config.yml."
+                    "Make sure to set the model width and height to 320 in your config.yml."
                 )
                 raise Exception(
-                    "Make sure to set the model width and heigth to 320 in your config.yml."
+                    "Make sure to set the model width and height to 320 in your config.yml."
                 )
 
             if config.model.input_pixel_format != "bgr":
