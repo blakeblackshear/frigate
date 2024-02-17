@@ -202,10 +202,12 @@ def get_bandwidth_stats(config) -> dict[str, dict]:
 
 
 def is_vaapi_amd_driver() -> bool:
+    # Use the explicitly configured driver, if available
     driver = os.environ.get(DRIVER_ENV_VAR)
     if driver:
         return driver == DRIVER_AMD
 
+    # Otherwise, ask vainfo what is has autodetected
     p = vainfo_hwaccel()
 
     if p.returncode != 0:
