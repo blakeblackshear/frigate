@@ -1,14 +1,7 @@
 import VideoPlayer from "./VideoPlayer";
-import React, {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useApiHost } from "@/api";
 import Player from "video.js/dist/types/player";
-import { AspectRatio } from "../ui/aspect-ratio";
-import { LuPlayCircle } from "react-icons/lu";
 import { isCurrentHour } from "@/utils/dateUtil";
 import { isSafari } from "@/utils/browserUtil";
 
@@ -116,10 +109,9 @@ export default function PreviewThumbnailPlayer({
   );
 
   return (
-    <AspectRatio
+    <div
       ref={relevantPreview ? inViewRef : null}
-      ratio={16 / 9}
-      className="bg-black flex justify-center items-center"
+      className="relative w-full h-full"
       onMouseEnter={() => onPlayback(true)}
       onMouseLeave={() => onPlayback(false)}
     >
@@ -134,7 +126,9 @@ export default function PreviewThumbnailPlayer({
         isMobile={isMobile}
         onClick={onClick}
       />
-    </AspectRatio>
+      <div className="absolute top-0 left-0 right-0 rounded-2xl z-10 w-full h-[30%] bg-gradient-to-b from-black/20 to-transparent pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 rounded-2xl z-10 w-full h-[10%] bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+    </div>
   );
 }
 
@@ -198,55 +192,48 @@ function PreviewContent({
     );
   } else {
     return (
-      <>
-        <div className="w-full">
-          <VideoPlayer
-            options={{
-              preload: "auto",
-              aspectRatio: "16:9",
-              autoplay: true,
-              controls: false,
-              muted: true,
-              loadingSpinner: false,
-              poster: relevantPreview
-                ? ""
-                : `${apiHost}api/preview/${camera}/${startTs}/thumbnail.jpg`,
-              sources: relevantPreview
-                ? [
-                    {
-                      src: `${relevantPreview.src}`,
-                      type: "video/mp4",
-                    },
-                  ]
-                : [],
-            }}
-            seekOptions={{}}
-            onReady={(player) => {
-              playerRef.current = player;
+      <VideoPlayer
+        options={{
+          preload: "auto",
+          autoplay: true,
+          controls: false,
+          muted: true,
+          fluid: true,
+          loadingSpinner: false,
+          poster: relevantPreview
+            ? ""
+            : `${apiHost}api/preview/${camera}/${startTs}/thumbnail.jpg`,
+          sources: relevantPreview
+            ? [
+                {
+                  src: `${relevantPreview.src}`,
+                  type: "video/mp4",
+                },
+              ]
+            : [],
+        }}
+        seekOptions={{}}
+        onReady={(player) => {
+          playerRef.current = player;
 
-              if (!relevantPreview) {
-                return;
-              }
+          if (!relevantPreview) {
+            return;
+          }
 
-              if (!isInitiallyVisible) {
-                player.pause(); // autoplay + pause is required for iOS
-              }
+          if (!isInitiallyVisible) {
+            player.pause(); // autoplay + pause is required for iOS
+          }
 
-              player.playbackRate(slowPlayack ? 2 : 8);
-              player.currentTime(startTs - relevantPreview.start);
-              if (isMobile && onClick) {
-                player.on("touchstart", handleTouchStart);
-              }
-            }}
-            onDispose={() => {
-              playerRef.current = null;
-            }}
-          />
-        </div>
-        {relevantPreview && (
-          <LuPlayCircle className="absolute z-10 left-1 bottom-1 w-4 h-4 text-white text-opacity-60" />
-        )}
-      </>
+          player.playbackRate(slowPlayack ? 2 : 8);
+          player.currentTime(startTs - relevantPreview.start);
+          if (isMobile && onClick) {
+            player.on("touchstart", handleTouchStart);
+          }
+        }}
+        onDispose={() => {
+          playerRef.current = null;
+        }}
+      />
     );
   }
 }

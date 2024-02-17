@@ -1,4 +1,5 @@
 import TimeAgo from "@/components/dynamic/TimeAgo";
+import PreviewThumbnailPlayer from "@/components/player/PreviewThumbnailPlayer";
 import ActivityIndicator from "@/components/ui/activity-indicator";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -14,7 +15,10 @@ export default function Events() {
   const { data: config } = useSWR<FrigateConfig>("config");
   const [severity, setSeverity] = useState<ReviewSeverity>("alert");
 
-  const { data: reviewSegments } = useSWR<ReviewSegment[]>("review");
+  const { data: reviewSegments } = useSWR<ReviewSegment[]>([
+    "review",
+    { limit: 500 },
+  ]);
 
   const previewTimes = useMemo(() => {
     if (!reviewSegments) {
@@ -89,7 +93,7 @@ export default function Events() {
           </Button>
           <Button className="mx-1" variant="secondary">
             <LuCalendar className=" mr-[10px]" />
-            Fab 13
+            Fab 17
           </Button>
           <Button className="mx-1" variant="secondary">
             <LuFilter className=" mr-[10px]" />
@@ -101,10 +105,35 @@ export default function Events() {
       <div className="flex flex-wrap gap-2 mt-2">
         {reviewSegments?.map((value) => {
           if (value.severity == severity) {
+            const detectConfig = config.cameras[value.camera].detect;
+            const relevantPreview = Object.values(allPreviews || []).find(
+              (preview) =>
+                preview.camera == value.camera &&
+                preview.start < value.start_time &&
+                preview.end > value.end_time
+            );
+
             return (
-              <div className="relative h-[234px] w-[416px] bg-blue-500 rounded-lg">
-                {value.camera} {value.data.objects}
-                <div className="absolute left-1 right-1 bottom-0 flex justify-between">
+              <div
+                className="relative h-[234px] rounded-2xl overflow-hidden"
+                style={{
+                  aspectRatio: detectConfig.width / detectConfig.height,
+                }}
+              >
+                {relevantPreview ? (
+                  <PreviewThumbnailPlayer
+                    relevantPreview={relevantPreview}
+                    camera={value.camera}
+                    startTs={value.start_time}
+                    isMobile={false}
+                    eventId=""
+                  />
+                ) : (
+                  <div>
+                    {value.camera} {value.data.objects}
+                  </div>
+                )}
+                <div className="absolute left-1 right-1 bottom-1 flex justify-between">
                   <TimeAgo time={value.start_time * 1000} />
                   {formatUnixTimestampToDateTime(value.start_time, {
                     strftime_fmt:
