@@ -14,7 +14,7 @@ from requests.exceptions import RequestException
 
 from frigate.comms.dispatcher import Dispatcher
 from frigate.config import FrigateConfig
-from frigate.const import CACHE_DIR, CLIPS_DIR, DRIVER_AMD, DRIVER_ENV_VAR, RECORD_DIR
+from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
 from frigate.object_detection import ObjectDetectProcess
 from frigate.types import CameraMetricsTypes, StatsTrackingTypes
 from frigate.util.services import (
@@ -24,6 +24,7 @@ from frigate.util.services import (
     get_intel_gpu_stats,
     get_jetson_stats,
     get_nvidia_gpu_stats,
+    is_vaapi_amd_driver,
 )
 from frigate.version import VERSION
 
@@ -205,9 +206,7 @@ async def set_gpu_stats(
                 stats["intel-qsv"] = {"gpu": -1, "mem": -1}
                 hwaccel_errors.append(args)
         elif "vaapi" in args:
-            driver = os.environ.get(DRIVER_ENV_VAR)
-
-            if driver == DRIVER_AMD:
+            if is_vaapi_amd_driver():
                 if not config.telemetry.stats.amd_gpu_stats:
                     continue
 
