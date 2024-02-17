@@ -6,35 +6,97 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { ReviewSegment, ReviewSeverity } from "@/types/review";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
-import { useMemo, useState } from "react";
+import axios from "axios";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { LuCalendar, LuFilter, LuVideo } from "react-icons/lu";
 import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
+import useSWRInfinite from "swr/infinite";
+
+const API_LIMIT = 12;
 
 export default function Events() {
   const { data: config } = useSWR<FrigateConfig>("config");
   const [severity, setSeverity] = useState<ReviewSeverity>("alert");
 
-  const { data: reviewSegments } = useSWR<ReviewSegment[]>([
-    "review",
-    { limit: 500 },
-  ]);
+  // review paging
+  const reviewSearchParams = {};
+  const reviewSegmentFetcher = useCallback((key: any) => {
+    const [path, params] = Array.isArray(key) ? key : [key, undefined];
+    return axios.get(path, { params }).then((res) => res.data);
+  }, []);
+
+  const getKey = useCallback(
+    (index: number, prevData: ReviewSegment[]) => {
+      if (index > 0) {
+        const lastDate = prevData[prevData.length - 1].start_time;
+        const pagedParams = reviewSearchParams
+          ? { before: lastDate, limit: API_LIMIT, severity: severity }
+          : {
+              ...reviewSearchParams,
+              before: lastDate,
+              limit: API_LIMIT,
+            };
+        return ["review", pagedParams];
+      }
+
+      const params = reviewSearchParams
+        ? { limit: API_LIMIT, severity: severity }
+        : { ...reviewSearchParams, limit: API_LIMIT };
+      return ["review", params];
+    },
+    [reviewSearchParams]
+  );
+
+  const {
+    data: reviewPages,
+    mutate: updateSegments,
+    size,
+    setSize,
+    isValidating,
+  } = useSWRInfinite<ReviewSegment[]>(getKey, reviewSegmentFetcher);
+
+  const isDone = useMemo(
+    () => (reviewPages?.at(-1)?.length ?? 0) < API_LIMIT,
+    [reviewPages]
+  );
+
+  const observer = useRef<IntersectionObserver | null>();
+  const lastReviewRef = useCallback(
+    (node: HTMLElement | null) => {
+      if (isValidating) return;
+      if (observer.current) observer.current.disconnect();
+      try {
+        observer.current = new IntersectionObserver((entries) => {
+          if (entries[0].isIntersecting && !isDone) {
+            setSize(size + 1);
+          }
+        });
+        if (node) observer.current.observe(node);
+      } catch (e) {
+        // no op
+      }
+    },
+    [isValidating, isDone]
+  );
+
+  // preview videos
 
   const previewTimes = useMemo(() => {
-    if (!reviewSegments) {
+    if (!reviewPages) {
       return undefined;
     }
 
     const startDate = new Date();
     startDate.setMinutes(0, 0, 0);
 
-    const endDate = new Date(reviewSegments.at(-1)!!.end_time);
+    const endDate = new Date(reviewPages.at(-1)!!.at(-1)!!.end_time);
     endDate.setHours(0, 0, 0, 0);
     return {
       start: startDate.getTime() / 1000,
       end: endDate.getTime() / 1000,
     };
-  }, [reviewSegments]);
+  }, [reviewPages]);
   const { data: allPreviews } = useSWR<Preview[]>(
     previewTimes
       ? `preview/all/start/${previewTimes.start}/end/${previewTimes.end}`
@@ -103,8 +165,10 @@ export default function Events() {
       </div>
 
       <div className="flex flex-wrap gap-2 mt-2">
-        {reviewSegments?.map((value) => {
-          if (value.severity == severity) {
+        {reviewPages?.map((reviewSegments, pageIdx) => {
+          return reviewSegments.map((value, segIdx) => {
+            const lastRow =
+              pageIdx == size - 1 && segIdx == reviewSegments.length - 1;
             const detectConfig = config.cameras[value.camera].detect;
             const relevantPreview = Object.values(allPreviews || []).find(
               (preview) =>
@@ -114,37 +178,42 @@ export default function Events() {
             );
 
             return (
-              <div
-                className="relative h-[234px] rounded-2xl overflow-hidden"
-                style={{
-                  aspectRatio: detectConfig.width / detectConfig.height,
-                }}
-              >
-                {relevantPreview ? (
-                  <PreviewThumbnailPlayer
-                    relevantPreview={relevantPreview}
-                    camera={value.camera}
-                    startTs={value.start_time}
-                    isMobile={false}
-                    eventId=""
-                  />
-                ) : (
-                  <div>
-                    {value.camera} {value.data.objects}
+              <>
+                <div
+                  ref={lastRow ? lastReviewRef : null}
+                  key={value.id}
+                  className="relative h-[234px] rounded-2xl overflow-hidden"
+                  style={{
+                    aspectRatio: detectConfig.width / detectConfig.height,
+                  }}
+                >
+                  {relevantPreview ? (
+                    <PreviewThumbnailPlayer
+                      relevantPreview={relevantPreview}
+                      camera={value.camera}
+                      startTs={value.start_time}
+                      isMobile={false}
+                      eventId=""
+                    />
+                  ) : (
+                    <div>
+                      {value.camera} {value.data.objects}
+                    </div>
+                  )}
+                  <div className="absolute left-1 right-1 bottom-1 flex justify-between">
+                    <TimeAgo time={value.start_time * 1000} />
+                    {formatUnixTimestampToDateTime(value.start_time, {
+                      strftime_fmt:
+                        config.ui.time_format == "24hour"
+                          ? "%b %-d, %H:%M"
+                          : "%b %-d, %I:%M %p",
+                    })}
                   </div>
-                )}
-                <div className="absolute left-1 right-1 bottom-1 flex justify-between">
-                  <TimeAgo time={value.start_time * 1000} />
-                  {formatUnixTimestampToDateTime(value.start_time, {
-                    strftime_fmt:
-                      config.ui.time_format == "24hour"
-                        ? "%b %-d, %H:%M"
-                        : "%b %-d, %I:%M %p",
-                  })}
                 </div>
-              </div>
+                {lastRow && !isDone && <ActivityIndicator />}
+              </>
             );
-          }
+          });
         })}
       </div>
     </>
