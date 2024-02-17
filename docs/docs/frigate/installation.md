@@ -49,7 +49,7 @@ services:
 
 :::caution
 
-Users of the Snapcraft build of Docker cannot use storage locations outside your $HOME folder. 
+Users of the Snapcraft build of Docker cannot use storage locations outside your $HOME folder.
 
 :::
 

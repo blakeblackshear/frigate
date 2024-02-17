@@ -13,7 +13,7 @@ The CPU detector type runs a TensorFlow Lite model utilizing the CPU without har
 
 :::tip
 
-If you do not have GPU or Edge TPU hardware, using the [OpenVINO Detector](#openvino-detector) is often more efficient than using the CPU detector. 
+If you do not have GPU or Edge TPU hardware, using the [OpenVINO Detector](#openvino-detector) is often more efficient than using the CPU detector.
 
 :::
 
@@ -204,7 +204,7 @@ model:
 
 ### Intel NCS2 VPU and Myriad X Setup
 
-Intel produces a neural net inference accelleration chip called Myriad X. This chip was sold in their Neural Compute Stick 2 (NCS2) which has been discontinued. If intending to use the MYRIAD device for accelleration, additional setup is required to pass through the USB device. The host needs a udev rule installed to handle the NCS2 device.
+Intel produces a neural net inference acceleration chip called Myriad X. This chip was sold in their Neural Compute Stick 2 (NCS2) which has been discontinued. If intending to use the MYRIAD device for acceleration, additional setup is required to pass through the USB device. The host needs a udev rule installed to handle the NCS2 device.
 
 ```bash
 sudo usermod -a -G users "$(whoami)"
@@ -403,7 +403,7 @@ model: # required
 
 Explanation for rknn specific options:
 
-- **core mask** controls which cores of your NPU should be used. This option applies only to SoCs with a multicore NPU (at the time of writing this in only the RK3588/S). The easiest way is to pass the value as a binary number. To do so, use the prefix `0b` and write a `0` to disable a core and a `1` to enable a core, whereas the last digit coresponds to core0, the second last to core1, etc. You also have to use the cores in ascending order (so you can't use core0 and core2; but you can use core0 and core1). Enabling more cores can reduce the inference speed, especially when using bigger models (see section below). Examples:
+- **core mask** controls which cores of your NPU should be used. This option applies only to SoCs with a multicore NPU (at the time of writing this in only the RK3588/S). The easiest way is to pass the value as a binary number. To do so, use the prefix `0b` and write a `0` to disable a core and a `1` to enable a core, whereas the last digit corresponds to core0, the second last to core1, etc. You also have to use the cores in ascending order (so you can't use core0 and core2; but you can use core0 and core1). Enabling more cores can reduce the inference speed, especially when using bigger models (see section below). Examples:
   - `core_mask: 0b000` or just `core_mask: 0` let the NPU decide which cores should be used. Default and recommended value.
   - `core_mask: 0b001` use only core0.
   - `core_mask: 0b011` use core0 and core1.
@@ -609,4 +609,3 @@ Other settings available for the rocm detector
 ### Expected performance
 
 On an AMD Ryzen 3 5400U with integrated GPU (gfx90c) the yolov8n runs in around 9ms per image (about 110 detections per second) and 18ms (55 detections per second) for yolov8s (at 320x320 detector resolution).
-

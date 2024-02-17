@@ -17,7 +17,7 @@ Before tuning motion it is important to understand the goal. In an optimal confi
 
 ## Create Motion Masks
 
-First, mask areas with regular motion not caused by the objects you want to detect. The best way to find candidates for motion masks is by watching the debug stream with motion boxes enabled. Good use cases for motion masks are timestamps or tree limbs and large bushes that regularly move due to wind. When possible, avoid creating motion masks that would block motion detection for objects you want to track **even if they are in locations where you don't want events**. Motion masks should not be used to avoid detecting objects in specific areas. More details can be found [in the masks docs.](/configuration/masks.md). 
+First, mask areas with regular motion not caused by the objects you want to detect. The best way to find candidates for motion masks is by watching the debug stream with motion boxes enabled. Good use cases for motion masks are timestamps or tree limbs and large bushes that regularly move due to wind. When possible, avoid creating motion masks that would block motion detection for objects you want to track **even if they are in locations where you don't want events**. Motion masks should not be used to avoid detecting objects in specific areas. More details can be found [in the masks docs.](/configuration/masks.md).
 
 ## Prepare For Testing
 
@@ -37,7 +37,7 @@ Remember that motion detection is just used to determine when object detection s
 
 ### Threshold
 
-The threshold value dictates how much of a change in a pixels luminance is required to be considered motion. 
+The threshold value dictates how much of a change in a pixels luminance is required to be considered motion.
 
 ```yaml
 # default threshold value
@@ -69,7 +69,7 @@ motion:
 
 Once the threshold calculation is run, the pixels that have changed are grouped together. The contour area value is used to decide which groups of changed pixels qualify as motion. Smaller values are more sensitive meaning people that are far away, small animals, etc. are more likely to be detected as motion, but it also means that small changes in shadows, leaves, etc. are detected as motion. Higher values are less sensitive meaning these things won't be detected as motion but with the risk that desired motion won't be detected until closer to the camera.
 
-Watching the motion boxes in the debug view, adjust the contour area until there are no motion boxes smaller than the smallest you'd expect frigate to detect something moving. 
+Watching the motion boxes in the debug view, adjust the contour area until there are no motion boxes smaller than the smallest you'd expect frigate to detect something moving.
 
 ### Improve Contrast
 
@@ -77,7 +77,7 @@ At this point if motion is working as desired there is no reason to continue wit
 
 ## Tuning Motion Detection During The Night
 
-Once daytime motion detection is tuned, there is a chance that the settings will work well for motion detection during the night as well. If this is the case then the preferred settings can be written to the config file and left alone. 
+Once daytime motion detection is tuned, there is a chance that the settings will work well for motion detection during the night as well. If this is the case then the preferred settings can be written to the config file and left alone.
 
 However, if the preferred day settings do not work well at night it is recommended to use HomeAssistant or some other solution to automate changing the settings. That way completely separate sets of motion settings can be used for optimal day and night motion detection.
 

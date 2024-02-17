@@ -3,7 +3,7 @@ id: ha_network_storage
 title: Home Assistant network storage
 ---
 
-As of Home Asisstant Core 2023.6, Network Mounted Storage is supported for addons.
+As of Home Assistant Core 2023.6, Network Mounted Storage is supported for addons.
 
 ## Setting Up Remote Storage For Frigate
 
