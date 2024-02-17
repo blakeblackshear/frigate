@@ -28,13 +28,13 @@ SQL = pw.SQL
 
 def migrate(migrator, database, fake=False, **kwargs):
     migrator.sql(
-        'CREATE TABLE IF NOT EXISTS "review_segment" ("id" VARCHAR(30) NOT NULL PRIMARY KEY, "camera" VARCHAR(20) NOT NULL, "start_time" DATETIME NOT NULL, "end_time" DATETIME, "has_been_reviewed" INTEGER NOT NULL, "severity" VARCHAR(30) NOT NULL, "thumb_path" VARCHAR(255) NOT NULL, "data" JSON NOT NULL)'
+        'CREATE TABLE IF NOT EXISTS "reviewsegment" ("id" VARCHAR(30) NOT NULL PRIMARY KEY, "camera" VARCHAR(20) NOT NULL, "start_time" DATETIME NOT NULL, "end_time" DATETIME, "has_been_reviewed" INTEGER NOT NULL, "severity" VARCHAR(30) NOT NULL, "thumb_path" VARCHAR(255) NOT NULL, "data" JSON NOT NULL)'
     )
     migrator.sql(
-        'CREATE INDEX IF NOT EXISTS "review_segment_camera" ON "review_segment" ("camera")'
+        'CREATE INDEX IF NOT EXISTS "review_segment_camera" ON "reviewsegment" ("camera")'
     )
     migrator.sql(
-        'CREATE INDEX "review_segment_start_time_end_time" ON "review_segment" ("start_time" DESC, "end_time" DESC)'
+        'CREATE INDEX "review_segment_start_time_end_time" ON "reviewsegment" ("start_time" DESC, "end_time" DESC)'
     )
 
 

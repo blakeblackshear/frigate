@@ -26,19 +26,27 @@ class SeverityEnum(str, Enum):
 
 
 class PendingReviewSegment:
-
-    def __init__(self, camera: str, frame_time: float, severity: SeverityEnum):
+    def __init__(
+        self,
+        camera: str,
+        frame_time: float,
+        severity: SeverityEnum,
+        detections: set[str] = set(),
+        objects: set[str] = set(),
+        zones: set[str] = set(),
+        audio: set[str] = set(),
+        motion: list[int] = [],
+    ):
         rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
         self.id = f"{frame_time}-{rand_id}"
         self.camera = camera
         self.start_time = frame_time
         self.severity = severity
-        self.data: dict[str, set] = {
-            "objects": set(),
-            "zones": set(),
-            "audio": set(),
-            "significant_motion_areas": [],
-        }
+        self.detections = detections
+        self.objects = objects
+        self.zones = zones
+        self.audio = audio
+        self.sig_motion_areas = motion
         self.last_update = frame_time
 
     def end(self) -> dict:
@@ -49,7 +57,13 @@ class PendingReviewSegment:
             ReviewSegment.end_time: self.last_update,
             ReviewSegment.severity: self.severity.value,
             ReviewSegment.thumb_path: "somewhere",
-            ReviewSegment.data: self.data,
+            ReviewSegment.data: {
+                "detections": list(self.detections),
+                "objects": list(self.objects),
+                "zones": list(self.zones),
+                "audio": list(self.audio),
+                "significant_motion_areas": self.sig_motion_areas,
+            },
         }
 
 
@@ -86,25 +100,71 @@ class ReviewSegmentMaintainer(threading.Thread):
         active_objects = [
             o
             for o in objects
-            if o.obj_data["motionless_count"]
-            > camera_config.detect.stationary.threshold
+            if o["motionless_count"] > camera_config.detect.stationary.threshold
         ]
 
         if len(active_objects) > 0:
+            segment.last_update = frame_time
 
             if segment.severity == SeverityEnum.signification_motion:
                 segment.severity = SeverityEnum.detection
 
             for object in active_objects:
-                segment.data["objects"].add(object.obj_data["label"])
+                segment.detections.add(object["id"])
+                segment.objects.add(object["label"])
 
-                if segment.severity == SeverityEnum.detection and object.has_clip:
+                if segment.severity == SeverityEnum.detection and object["has_clip"]:
                     segment.severity = SeverityEnum.alert
 
-                if object.current_zones:
-                    segment.data["zones"].update(object.current_zones)
-        elif frame_time > (segment.last_update + camera_config.detect.max_disappeared):
+                if object["current_zones"]:
+                    segment.zones.update(object)
+        elif frame_time > (
+            segment.last_update
+            + (camera_config.detect.max_disappeared / camera_config.detect.fps)
+        ):
             self.end_segment(segment)
+
+    def check_if_new_segment(
+        self,
+        camera: str,
+        frame_time: float,
+        objects: list[TrackedObject],
+        motion: list,
+    ) -> None:
+        """Check if a new review segment should be created."""
+        camera_config = self.config.cameras[camera]
+        active_objects = [
+            o
+            for o in objects
+            if o["motionless_count"] > camera_config.detect.stationary.threshold
+        ]
+
+        if len(active_objects) > 0:
+            has_sig_object = False
+            detections: set = set()
+            objects: set = set()
+            zones: set = set()
+
+            for object in active_objects:
+                if not has_sig_object and object["has_clip"]:
+                    has_sig_object = True
+
+                detections.add(object["id"])
+                objects.add(object["label"])
+                zones.update(object["current_zones"])
+
+            self.active_review_segments[camera] = PendingReviewSegment(
+                camera,
+                frame_time,
+                SeverityEnum.alert if has_sig_object else SeverityEnum.detection,
+                detections,
+                objects,
+                zones,
+            )
+        elif len(motion) >= 20:
+            self.active_review_segments[camera] = PendingReviewSegment(
+                camera, frame_time, SeverityEnum.signification_motion, motion=motion
+            )
 
     def run(self) -> None:
         while not self.stop_event.is_set():
@@ -150,13 +210,25 @@ class ReviewSegmentMaintainer(threading.Thread):
             if current_segment is not None:
                 if topic == DetectionTypeEnum.video:
                     self.update_existing_segment(
-                        topic,
                         current_segment,
                         frame_time,
                         current_tracked_objects,
                         motion_boxes,
                     )
                 elif topic == DetectionTypeEnum.audio:
-                    pass
+                    current_segment.audio.update(audio_detections)
             else:
-                pass
+                if topic == DetectionTypeEnum.video:
+                    self.check_if_new_segment(
+                        camera,
+                        frame_time,
+                        current_tracked_objects,
+                        motion_boxes,
+                    )
+                elif topic == DetectionTypeEnum.audio and len(audio_detections) > 0:
+                    self.active_review_segments[camera] = PendingReviewSegment(
+                        camera,
+                        frame_time,
+                        SeverityEnum.detection,
+                        audio=set(audio_detections),
+                    )

@@ -84,9 +84,7 @@ class ReviewSegment(Model):  # type: ignore[misc]
     has_been_reviewed = BooleanField(default=False)
     severity = CharField(max_length=30)  # alert, detection, significant_motion
     thumb_path = CharField(unique=True)
-    data = (
-        JSONField()
-    )  # additional data about detection like list of labels, zone, areas of significant motion
+    data = JSONField()  # additional data about detection like list of labels, zone, areas of significant motion
 
 
 class Previews(Model):  # type: ignore[misc]
