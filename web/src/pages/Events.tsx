@@ -186,17 +186,15 @@ export default function Events() {
               <div key={value.id}>
                 <div
                   ref={lastRow ? lastReviewRef : null}
-                  className="relative h-[234px] rounded-2xl overflow-hidden"
+                  className="relative h-[234px] rounded-lg overflow-hidden"
                   style={{
                     aspectRatio: detectConfig.width / detectConfig.height,
                   }}
                 >
                   <PreviewThumbnailPlayer
+                    review={value}
                     relevantPreview={relevantPreview}
-                    camera={value.camera}
-                    startTs={value.start_time}
                     isMobile={false}
-                    eventId=""
                   />
                   {(severity == "alert" || severity == "detection") && (
                     <div className="absolute top-1 right-1 flex">

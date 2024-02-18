@@ -4,12 +4,12 @@ import { useApiHost } from "@/api";
 import Player from "video.js/dist/types/player";
 import { isCurrentHour } from "@/utils/dateUtil";
 import { isSafari } from "@/utils/browserUtil";
+import { ReviewSegment } from "@/types/review";
+import { Slider } from "../ui/slider";
 
 type PreviewPlayerProps = {
-  camera: string;
+  review: ReviewSegment;
   relevantPreview?: Preview;
-  startTs: number;
-  eventId: string;
   isMobile: boolean;
   onClick?: () => void;
 };
@@ -23,17 +23,17 @@ type Preview = {
 };
 
 export default function PreviewThumbnailPlayer({
-  camera,
+  review,
   relevantPreview,
-  startTs,
-  eventId,
   isMobile,
   onClick,
 }: PreviewPlayerProps) {
   const playerRef = useRef<Player | null>(null);
 
   const [visible, setVisible] = useState(false);
+  const [hover, setHover] = useState(false);
   const [isInitiallyVisible, setIsInitiallyVisible] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const onPlayback = useCallback(
     (isHovered: Boolean) => {
@@ -50,13 +50,18 @@ export default function PreviewThumbnailPlayer({
       }
 
       if (isHovered) {
+        setHover(true);
         playerRef.current.play();
       } else {
+        setHover(false);
+        setProgress(0);
         playerRef.current.pause();
-        playerRef.current.currentTime(startTs - relevantPreview.start);
+        playerRef.current.currentTime(
+          review.start_time - relevantPreview.start
+        );
       }
     },
-    [relevantPreview, startTs, playerRef]
+    [relevantPreview, review, playerRef]
   );
 
   const autoPlayObserver = useRef<IntersectionObserver | null>();
@@ -111,47 +116,53 @@ export default function PreviewThumbnailPlayer({
   return (
     <div
       ref={relevantPreview ? inViewRef : null}
-      className="relative w-full h-full"
+      className="relative w-full h-full cursor-pointer"
       onMouseEnter={() => onPlayback(true)}
       onMouseLeave={() => onPlayback(false)}
     >
       <PreviewContent
         playerRef={playerRef}
+        review={review}
         relevantPreview={relevantPreview}
         isVisible={visible}
         isInitiallyVisible={isInitiallyVisible}
-        startTs={startTs}
-        camera={camera}
-        eventId={eventId}
         isMobile={isMobile}
+        setProgress={setProgress}
         onClick={onClick}
       />
       <div className="absolute top-0 left-0 right-0 rounded-2xl z-10 w-full h-[30%] bg-gradient-to-b from-black/20 to-transparent pointer-events-none" />
       <div className="absolute bottom-0 left-0 right-0 rounded-2xl z-10 w-full h-[10%] bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+      {hover && (
+        <Slider
+          className="absolute left-0 right-0 bottom-0 z-10"
+          value={[progress]}
+          min={0}
+          step={1}
+          max={100}
+        />
+      )}
     </div>
   );
 }
 
 type PreviewContentProps = {
   playerRef: React.MutableRefObject<Player | null>;
-  camera: string;
+  review: ReviewSegment;
   relevantPreview: Preview | undefined;
-  eventId: string;
   isVisible: boolean;
   isInitiallyVisible: boolean;
-  startTs: number;
   isMobile: boolean;
+  setProgress?: (progress: number) => void;
   onClick?: () => void;
 };
 function PreviewContent({
   playerRef,
-  camera,
+  review,
   relevantPreview,
-  eventId,
   isVisible,
   isInitiallyVisible,
-  startTs,
   isMobile,
+  setProgress,
   onClick,
 }: PreviewContentProps) {
   const apiHost = useApiHost();
@@ -183,18 +194,18 @@ function PreviewContent({
 
   if (relevantPreview && !isVisible) {
     return <div />;
-  } else if (!relevantPreview && isCurrentHour(startTs)) {
+  } else if (!relevantPreview && isCurrentHour(review.start_time)) {
     return (
       <img
         className="w-full"
-        src={`${apiHost}api/preview/${camera}/${startTs}/thumbnail.jpg`}
+        src={`${apiHost}api/preview/${review.camera}/${review.start_time}/thumbnail.jpg`}
       />
     );
-  } else if (!relevantPreview && !isCurrentHour(startTs)) {
+  } else if (!relevantPreview && !isCurrentHour(review.start_time)) {
     return (
       <img
         className="w-[160px]"
-        src={`${apiHost}api/events/${eventId}/thumbnail.jpg`}
+        src={`${apiHost}api/events/${review.id}/thumbnail.jpg`}
       />
     );
   } else {
@@ -224,12 +235,31 @@ function PreviewContent({
             return;
           }
 
+          const playerStartTime = review.start_time - relevantPreview.start;
+
           if (!isInitiallyVisible) {
             player.pause(); // autoplay + pause is required for iOS
           }
 
           player.playbackRate(slowPlayack ? 2 : 8);
-          player.currentTime(startTs - relevantPreview.start);
+          player.currentTime(playerStartTime);
+          player.on("timeupdate", () => {
+            if (!setProgress || playerRef.current?.paused()) {
+              return;
+            }
+
+            const playerProgress =
+              (player.currentTime() || 0) - playerStartTime;
+            const playerDuration = review.end_time - review.start_time;
+            const playerPercent = (playerProgress / playerDuration) * 100;
+
+            if (playerPercent > 100) {
+              playerRef.current?.pause();
+              setProgress(100.0);
+            } else {
+              setProgress(playerPercent);
+            }
+          });
           if (isMobile && onClick) {
             player.on("touchstart", handleTouchStart);
           }
