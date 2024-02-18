@@ -140,14 +140,17 @@ export default function PreviewThumbnailPlayer({
       />
       {!hover &&
         (review.severity == "alert" || review.severity == "detection") && (
-          <div className="absolute top-1 right-1 flex gap-1">
+          <div className="absolute top-1 left-[6px] flex gap-1">
             {review.data.objects.map((object) => {
-              return getIconForLabel(object);
+              return getIconForLabel(object, "w-3 h-3 text-white");
+            })}
+            {review.data.audio.map((audio) => {
+              return getIconForLabel(audio, "w-3 h-3 text-white");
             })}
           </div>
         )}
       {!hover && (
-        <div className="absolute left-1 right-1 bottom-1 flex justify-between">
+        <div className="absolute left-[6px] right-[6px] bottom-1 flex justify-between text-white">
           <TimeAgo time={review.start_time * 1000} />
           {config &&
             formatUnixTimestampToDateTime(review.start_time, {

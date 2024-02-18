@@ -18,7 +18,7 @@ import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
 
-const API_LIMIT = 20;
+const API_LIMIT = 100;
 
 export default function Events() {
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -37,7 +37,7 @@ export default function Events() {
       if (index > 0) {
         const lastDate = prevData[prevData.length - 1].start_time;
         const pagedParams = reviewSearchParams
-          ? { before: lastDate, limit: API_LIMIT, severity: severity }
+          ? { before: lastDate, limit: API_LIMIT }
           : {
               ...reviewSearchParams,
               before: lastDate,
@@ -47,7 +47,7 @@ export default function Events() {
       }
 
       const params = reviewSearchParams
-        ? { limit: API_LIMIT, severity: severity }
+        ? { limit: API_LIMIT }
         : { ...reviewSearchParams, limit: API_LIMIT };
       return ["review", params];
     },
@@ -61,6 +61,30 @@ export default function Events() {
     setSize,
     isValidating,
   } = useSWRInfinite<ReviewSegment[]>(getKey, reviewSegmentFetcher);
+
+  const reviewItems = useMemo(() => {
+    const alerts: ReviewSegment[] = [];
+    const detections: ReviewSegment[] = [];
+    const motion: ReviewSegment[] = [];
+
+    reviewPages?.forEach((page) => {
+      page.forEach((segment) => {
+        switch (segment.severity) {
+          case "alert":
+            alerts.push(segment);
+            break;
+          case "detection":
+            detections.push(segment);
+            break;
+          default:
+            motion.push(segment);
+            break;
+        }
+      });
+    });
+
+    return { alert: alerts, detection: detections, significant_motion: motion };
+  }, [reviewPages]);
 
   const isDone = useMemo(
     () => (reviewPages?.at(-1)?.length ?? 0) < API_LIMIT,
@@ -185,38 +209,35 @@ export default function Events() {
       </div>
 
       <div className="flex flex-wrap gap-2 mt-2">
-        {reviewPages?.map((reviewSegments, pageIdx) => {
-          return reviewSegments.map((value, segIdx) => {
-            const lastRow =
-              pageIdx == size - 1 && segIdx == reviewSegments.length - 1;
-            const detectConfig = config.cameras[value.camera].detect;
-            const relevantPreview = Object.values(allPreviews || []).find(
-              (preview) =>
-                preview.camera == value.camera &&
-                preview.start < value.start_time &&
-                preview.end > value.end_time
-            );
+        {reviewItems[severity]?.map((value, segIdx) => {
+          const lastRow = segIdx == reviewItems[severity].length - 1;
+          const detectConfig = config.cameras[value.camera].detect;
+          const relevantPreview = Object.values(allPreviews || []).find(
+            (preview) =>
+              preview.camera == value.camera &&
+              preview.start < value.start_time &&
+              preview.end > value.end_time
+          );
 
-            return (
-              <div key={value.id}>
-                <div
-                  ref={lastRow ? lastReviewRef : null}
-                  className="relative h-[234px] rounded-lg overflow-hidden"
-                  style={{
-                    aspectRatio: detectConfig.width / detectConfig.height,
-                  }}
-                >
-                  <PreviewThumbnailPlayer
-                    review={value}
-                    relevantPreview={relevantPreview}
-                    isMobile={false}
-                    setReviewed={() => setReviewed(value.id)}
-                  />
-                </div>
-                {lastRow && !isDone && <ActivityIndicator />}
+          return (
+            <div key={value.id}>
+              <div
+                ref={lastRow ? lastReviewRef : null}
+                className="relative h-[234px] rounded-lg overflow-hidden"
+                style={{
+                  aspectRatio: detectConfig.width / detectConfig.height,
+                }}
+              >
+                <PreviewThumbnailPlayer
+                  review={value}
+                  relevantPreview={relevantPreview}
+                  isMobile={false}
+                  setReviewed={() => setReviewed(value.id)}
+                />
               </div>
-            );
-          });
+              {lastRow && !isDone && <ActivityIndicator />}
+            </div>
+          );
         })}
       </div>
     </>
