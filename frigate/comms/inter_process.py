@@ -32,8 +32,13 @@ class InterProcessCommunicator(Communicator):
         self.reader_thread.start()
 
     def read(self) -> None:
-        while not self.stop_event.wait(0.1):
+        while not self.stop_event.is_set():
             while True:  # load all messages that are queued
+                has_message, _, _ = zmq.select([self.socket], [], [], 1)
+
+                if not has_message:
+                    break
+
                 try:
                     (topic, value) = self.socket.recv_pyobj(flags=zmq.NOBLOCK)
 

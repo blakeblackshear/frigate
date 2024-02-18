@@ -22,7 +22,6 @@ class DetectionTypeEnum(str, Enum):
 
 
 class DetectionProxyRunner(threading.Thread):
-
     def __init__(self, context: zmq.Context[zmq.Socket]) -> None:
         threading.Thread.__init__(self)
         self.name = "detection_proxy"
@@ -105,13 +104,18 @@ class DetectionSubscriber:
         self.socket.setsockopt_string(zmq.SUBSCRIBE, topic.value)
         self.socket.connect(f"tcp://127.0.0.1:{port}")
 
-    def get_data(self) -> Optional[tuple[str, any]]:
+    def get_data(self, timeout: float = None) -> Optional[tuple[str, any]]:
         """Returns detections or None if no update."""
         try:
-            topic = DetectionTypeEnum[self.socket.recv_string(flags=zmq.NOBLOCK)]
-            return (topic, self.socket.recv_pyobj())
+            has_update, _, _ = zmq.select([self.socket], [], [], timeout)
+
+            if has_update:
+                topic = DetectionTypeEnum[self.socket.recv_string(flags=zmq.NOBLOCK)]
+                return (topic, self.socket.recv_pyobj())
         except zmq.ZMQError:
-            return (None, None)
+            pass
+
+        return (None, None)
 
     def stop(self) -> None:
         self.socket.close()

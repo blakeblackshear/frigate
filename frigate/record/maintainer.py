@@ -450,7 +450,9 @@ class RecordingMaintainer(threading.Thread):
             stale_frame_count_threshold = 10
             # empty the object recordings info queue
             while True:
-                (topic, data) = self.detection_subscriber.get_data()
+                (topic, data) = self.detection_subscriber.get_data(
+                    timeout=QUEUE_READ_TIMEOUT
+                )
 
                 if not topic:
                     break

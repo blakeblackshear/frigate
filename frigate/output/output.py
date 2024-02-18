@@ -4,7 +4,6 @@ import logging
 import multiprocessing as mp
 import signal
 import threading
-import time
 from typing import Optional
 from wsgiref.simple_server import make_server
 
@@ -75,10 +74,9 @@ def output_frames(
     websocket_thread.start()
 
     while not stop_event.is_set():
-        (topic, data) = detection_subscriber.get_data()
+        (topic, data) = detection_subscriber.get_data(timeout=10)
 
         if not topic:
-            time.sleep(0.1)
             continue
 
         (
@@ -128,7 +126,7 @@ def output_frames(
         previous_frames[camera] = frame_time
 
     while True:
-        (topic, data) = detection_subscriber.get_data()
+        (topic, data) = detection_subscriber.get_data(timeout=0)
 
         if not topic:
             break
