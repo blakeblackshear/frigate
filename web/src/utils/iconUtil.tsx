@@ -9,14 +9,14 @@ import {
 export function getIconForLabel(label: string, className?: string) {
   switch (label) {
     case "car":
-      return <LuCar className={className} />;
+      return <LuCar key={label} className={className} />;
     case "dog":
-      return <LuDog className={className} />;
+      return <LuDog key={label} className={className} />;
     case "package":
-      return <LuBox className={className} />;
+      return <LuBox key={label} className={className} />;
     case "person":
-      return <LuPersonStanding className={className} />;
+      return <LuPersonStanding key={label} className={className} />;
     default:
-      return <LuLassoSelect className={className} />;
+      return <LuLassoSelect key={label} className={className} />;
   }
 }

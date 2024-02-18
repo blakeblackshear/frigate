@@ -2,15 +2,20 @@ import VideoPlayer from "./VideoPlayer";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useApiHost } from "@/api";
 import Player from "video.js/dist/types/player";
-import { isCurrentHour } from "@/utils/dateUtil";
+import { formatUnixTimestampToDateTime, isCurrentHour } from "@/utils/dateUtil";
 import { isSafari } from "@/utils/browserUtil";
 import { ReviewSegment } from "@/types/review";
 import { Slider } from "../ui/slider";
+import { getIconForLabel } from "@/utils/iconUtil";
+import TimeAgo from "../dynamic/TimeAgo";
+import useSWR from "swr";
+import { FrigateConfig } from "@/types/frigateConfig";
 
 type PreviewPlayerProps = {
   review: ReviewSegment;
   relevantPreview?: Preview;
   isMobile: boolean;
+  setReviewed?: () => void;
   onClick?: () => void;
 };
 
@@ -26,8 +31,10 @@ export default function PreviewThumbnailPlayer({
   review,
   relevantPreview,
   isMobile,
+  setReviewed,
   onClick,
 }: PreviewPlayerProps) {
+  const { data: config } = useSWR<FrigateConfig>("config");
   const playerRef = useRef<Player | null>(null);
 
   const [visible, setVisible] = useState(false);
@@ -128,8 +135,29 @@ export default function PreviewThumbnailPlayer({
         isInitiallyVisible={isInitiallyVisible}
         isMobile={isMobile}
         setProgress={setProgress}
+        setReviewed={setReviewed}
         onClick={onClick}
       />
+      {!hover &&
+        (review.severity == "alert" || review.severity == "detection") && (
+          <div className="absolute top-1 right-1 flex gap-1">
+            {review.data.objects.map((object) => {
+              return getIconForLabel(object);
+            })}
+          </div>
+        )}
+      {!hover && (
+        <div className="absolute left-1 right-1 bottom-1 flex justify-between">
+          <TimeAgo time={review.start_time * 1000} />
+          {config &&
+            formatUnixTimestampToDateTime(review.start_time, {
+              strftime_fmt:
+                config.ui.time_format == "24hour"
+                  ? "%b %-d, %H:%M"
+                  : "%b %-d, %I:%M %p",
+            })}
+        </div>
+      )}
       <div className="absolute top-0 left-0 right-0 rounded-2xl z-10 w-full h-[30%] bg-gradient-to-b from-black/20 to-transparent pointer-events-none" />
       <div className="absolute bottom-0 left-0 right-0 rounded-2xl z-10 w-full h-[10%] bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
       {hover && (
@@ -153,6 +181,7 @@ type PreviewContentProps = {
   isInitiallyVisible: boolean;
   isMobile: boolean;
   setProgress?: (progress: number) => void;
+  setReviewed?: () => void;
   onClick?: () => void;
 };
 function PreviewContent({
@@ -163,6 +192,7 @@ function PreviewContent({
   isInitiallyVisible,
   isMobile,
   setProgress,
+  setReviewed,
   onClick,
 }: PreviewContentProps) {
   const apiHost = useApiHost();
@@ -252,6 +282,14 @@ function PreviewContent({
               (player.currentTime() || 0) - playerStartTime;
             const playerDuration = review.end_time - review.start_time;
             const playerPercent = (playerProgress / playerDuration) * 100;
+
+            if (
+              setReviewed &&
+              !review.has_been_reviewed &&
+              playerPercent > 50
+            ) {
+              setReviewed();
+            }
 
             if (playerPercent > 100) {
               playerRef.current?.pause();

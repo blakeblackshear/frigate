@@ -2420,6 +2420,40 @@ def review():
     return jsonify([r for r in review])
 
 
+@bp.route("/review/<id>/viewed", methods=("POST",))
+def set_reviewed(id):
+    try:
+        review: ReviewSegment = ReviewSegment.get(ReviewSegment.id == id)
+    except DoesNotExist:
+        return make_response(
+            jsonify({"success": False, "message": "Review " + id + " not found"}), 404
+        )
+
+    review.has_been_reviewed = True
+    review.save()
+
+    return make_response(
+        jsonify({"success": True, "message": "Reviewed " + id + " viewed"}), 200
+    )
+
+
+@bp.route("/review/<id>/viewed", methods=("DELETE",))
+def set_not_reviewed(id):
+    try:
+        review: ReviewSegment = ReviewSegment.get(ReviewSegment.id == id)
+    except DoesNotExist:
+        return make_response(
+            jsonify({"success": False, "message": "Review " + id + " not found"}), 404
+        )
+
+    review.has_been_reviewed = False
+    review.save()
+
+    return make_response(
+        jsonify({"success": True, "message": "Reviewed " + id + " not viewed"}), 200
+    )
+
+
 @bp.route(
     "/export/<camera_name>/start/<int:start_time>/end/<int:end_time>", methods=["POST"]
 )

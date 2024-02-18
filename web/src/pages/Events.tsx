@@ -1,12 +1,16 @@
-import TimeAgo from "@/components/dynamic/TimeAgo";
 import PreviewThumbnailPlayer from "@/components/player/PreviewThumbnailPlayer";
 import ActivityIndicator from "@/components/ui/activity-indicator";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { ReviewSegment, ReviewSeverity } from "@/types/review";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
-import { getIconForLabel } from "@/utils/iconUtil";
 import axios from "axios";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { LuCalendar, LuFilter, LuVideo } from "react-icons/lu";
@@ -21,6 +25,7 @@ export default function Events() {
   const [severity, setSeverity] = useState<ReviewSeverity>("alert");
 
   // review paging
+
   const reviewSearchParams = {};
   const reviewSegmentFetcher = useCallback((key: any) => {
     const [path, params] = Array.isArray(key) ? key : [key, undefined];
@@ -79,6 +84,19 @@ export default function Events() {
       }
     },
     [isValidating, isDone]
+  );
+
+  // review status
+
+  const setReviewed = useCallback(
+    async (id: string) => {
+      const resp = await axios.post(`review/${id}/viewed`);
+
+      if (resp.status == 200) {
+        updateSegments();
+      }
+    },
+    [updateSegments]
   );
 
   // preview videos
@@ -158,10 +176,7 @@ export default function Events() {
             <LuVideo className=" mr-[10px]" />
             All Cameras
           </Button>
-          <Button className="mx-1" variant="secondary">
-            <LuCalendar className=" mr-[10px]" />
-            Fab 17
-          </Button>
+          <ReviewCalendarButton />
           <Button className="mx-1" variant="secondary">
             <LuFilter className=" mr-[10px]" />
             Filter
@@ -195,23 +210,8 @@ export default function Events() {
                     review={value}
                     relevantPreview={relevantPreview}
                     isMobile={false}
+                    setReviewed={() => setReviewed(value.id)}
                   />
-                  {(severity == "alert" || severity == "detection") && (
-                    <div className="absolute top-1 right-1 flex">
-                      {value.data.objects.map((object) => {
-                        return getIconForLabel(object);
-                      })}
-                    </div>
-                  )}
-                  <div className="absolute left-1 right-1 bottom-1 flex justify-between">
-                    <TimeAgo time={value.start_time * 1000} />
-                    {formatUnixTimestampToDateTime(value.start_time, {
-                      strftime_fmt:
-                        config.ui.time_format == "24hour"
-                          ? "%b %-d, %H:%M"
-                          : "%b %-d, %I:%M %p",
-                    })}
-                  </div>
                 </div>
                 {lastRow && !isDone && <ActivityIndicator />}
               </div>
@@ -220,5 +220,31 @@ export default function Events() {
         })}
       </div>
     </>
+  );
+}
+
+function ReviewCalendarButton() {
+  const disabledDates = useMemo(() => {
+    const tomorrow = new Date();
+    tomorrow.setHours(tomorrow.getHours() + 24, -1, 0, 0);
+    const future = new Date();
+    future.setFullYear(tomorrow.getFullYear() + 10);
+    return { from: tomorrow, to: future };
+  }, []);
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button className="mx-1" variant="secondary">
+          <LuCalendar className=" mr-[10px]" />
+          {formatUnixTimestampToDateTime(Date.now() / 1000, {
+            strftime_fmt: "%b %-d",
+          })}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent>
+        <Calendar mode="single" disabled={disabledDates} />
+      </PopoverContent>
+    </Popover>
   );
 }
