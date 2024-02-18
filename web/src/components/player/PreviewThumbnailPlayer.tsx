@@ -183,6 +183,13 @@ function PreviewContent({
 
   if (relevantPreview && !isVisible) {
     return <div />;
+  } else if (!relevantPreview && isCurrentHour(startTs)) {
+    return (
+      <img
+        className="w-full"
+        src={`${apiHost}api/preview/${camera}/${startTs}/thumbnail.jpg`}
+      />
+    );
   } else if (!relevantPreview && !isCurrentHour(startTs)) {
     return (
       <img
@@ -200,9 +207,6 @@ function PreviewContent({
           muted: true,
           fluid: true,
           loadingSpinner: false,
-          poster: relevantPreview
-            ? ""
-            : `${apiHost}api/preview/${camera}/${startTs}/thumbnail.jpg`,
           sources: relevantPreview
             ? [
                 {

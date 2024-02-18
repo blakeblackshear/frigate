@@ -6,6 +6,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { ReviewSegment, ReviewSeverity } from "@/types/review";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
+import { getIconForLabel } from "@/utils/iconUtil";
 import axios from "axios";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { LuCalendar, LuFilter, LuVideo } from "react-icons/lu";
@@ -13,7 +14,7 @@ import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
 
-const API_LIMIT = 12;
+const API_LIMIT = 20;
 
 export default function Events() {
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -83,7 +84,11 @@ export default function Events() {
   // preview videos
 
   const previewTimes = useMemo(() => {
-    if (!reviewPages) {
+    if (
+      !reviewPages ||
+      reviewPages.length == 0 ||
+      reviewPages.at(-1)!!.length == 0
+    ) {
       return undefined;
     }
 
@@ -178,26 +183,26 @@ export default function Events() {
             );
 
             return (
-              <>
+              <div key={value.id}>
                 <div
                   ref={lastRow ? lastReviewRef : null}
-                  key={value.id}
                   className="relative h-[234px] rounded-2xl overflow-hidden"
                   style={{
                     aspectRatio: detectConfig.width / detectConfig.height,
                   }}
                 >
-                  {relevantPreview ? (
-                    <PreviewThumbnailPlayer
-                      relevantPreview={relevantPreview}
-                      camera={value.camera}
-                      startTs={value.start_time}
-                      isMobile={false}
-                      eventId=""
-                    />
-                  ) : (
-                    <div>
-                      {value.camera} {value.data.objects}
+                  <PreviewThumbnailPlayer
+                    relevantPreview={relevantPreview}
+                    camera={value.camera}
+                    startTs={value.start_time}
+                    isMobile={false}
+                    eventId=""
+                  />
+                  {(severity == "alert" || severity == "detection") && (
+                    <div className="absolute top-1 right-1 flex">
+                      {value.data.objects.map((object) => {
+                        return getIconForLabel(object);
+                      })}
                     </div>
                   )}
                   <div className="absolute left-1 right-1 bottom-1 flex justify-between">
@@ -211,7 +216,7 @@ export default function Events() {
                   </div>
                 </div>
                 {lastRow && !isDone && <ActivityIndicator />}
-              </>
+              </div>
             );
           });
         })}
