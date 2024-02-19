@@ -12,6 +12,7 @@ from typing import Callable
 import cv2
 import numpy as np
 
+from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
 from frigate.comms.dispatcher import Dispatcher
 from frigate.config import (
     CameraConfig,
@@ -813,8 +814,6 @@ class TrackedObjectProcessor(threading.Thread):
         tracked_objects_queue,
         event_queue,
         event_processed_queue,
-        video_output_queue,
-        recordings_info_queue,
         ptz_autotracker_thread,
         stop_event,
     ):
@@ -825,13 +824,12 @@ class TrackedObjectProcessor(threading.Thread):
         self.tracked_objects_queue = tracked_objects_queue
         self.event_queue = event_queue
         self.event_processed_queue = event_processed_queue
-        self.video_output_queue = video_output_queue
-        self.recordings_info_queue = recordings_info_queue
         self.stop_event = stop_event
         self.camera_states: dict[str, CameraState] = {}
         self.frame_manager = SharedMemoryFrameManager()
         self.last_motion_detected: dict[str, float] = {}
         self.ptz_autotracker_thread = ptz_autotracker_thread
+        self.detection_publisher = DetectionPublisher(DetectionTypeEnum.video)
 
         def start(camera, obj: TrackedObject, current_frame_time):
             self.event_queue.put(
@@ -1116,18 +1114,8 @@ class TrackedObjectProcessor(threading.Thread):
                 o.to_dict() for o in camera_state.tracked_objects.values()
             ]
 
-            self.video_output_queue.put(
-                (
-                    camera,
-                    frame_time,
-                    tracked_objects,
-                    motion_boxes,
-                    regions,
-                )
-            )
-
-            # send info on this frame to the recordings maintainer
-            self.recordings_info_queue.put(
+            # publish info on this frame
+            self.detection_publisher.send_data(
                 (
                     camera,
                     frame_time,
@@ -1212,4 +1200,5 @@ class TrackedObjectProcessor(threading.Thread):
                 event_id, camera = self.event_processed_queue.get()
                 self.camera_states[camera].finished(event_id)
 
+        self.detection_publisher.stop()
         logger.info("Exiting object processor...")

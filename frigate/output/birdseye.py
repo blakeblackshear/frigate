@@ -14,9 +14,9 @@ import traceback
 import cv2
 import numpy as np
 
+from frigate.comms.config_updater import ConfigSubscriber
 from frigate.config import BirdseyeModeEnum, FrigateConfig
 from frigate.const import BASE_DIR, BIRDSEYE_PIPE
-from frigate.types import CameraMetricsTypes
 from frigate.util.image import (
     SharedMemoryFrameManager,
     copy_yuv_to_position,
@@ -267,7 +267,6 @@ class BirdsEyeFrameManager:
         config: FrigateConfig,
         frame_manager: SharedMemoryFrameManager,
         stop_event: mp.Event,
-        camera_metrics: dict[str, CameraMetricsTypes],
     ):
         self.config = config
         self.mode = config.birdseye.mode
@@ -278,7 +277,6 @@ class BirdsEyeFrameManager:
         self.frame = np.ndarray(self.yuv_shape, dtype=np.uint8)
         self.canvas = Canvas(width, height, config.birdseye.layout.scaling_factor)
         self.stop_event = stop_event
-        self.camera_metrics = camera_metrics
         self.inactivity_threshold = config.birdseye.inactivity_threshold
 
         if config.birdseye.layout.max_cameras:
@@ -435,10 +433,7 @@ class BirdsEyeFrameManager:
 
         # check if we need to reset the layout because there is a different number of cameras
         if len(self.active_cameras) - len(active_cameras) == 0:
-            if (
-                len(self.active_cameras) == 1
-                and self.active_cameras[0] == active_cameras[0]
-            ):
+            if len(self.active_cameras) == 1 and self.active_cameras != active_cameras:
                 reset_layout = True
             elif max_camera_refresh:
                 reset_layout = True
@@ -675,15 +670,12 @@ class BirdsEyeFrameManager:
     def update(self, camera, object_count, motion_count, frame_time, frame) -> bool:
         # don't process if birdseye is disabled for this camera
         camera_config = self.config.cameras[camera].birdseye
+
         if not camera_config.enabled:
             return False
 
-        # get our metrics (sync'd across processes)
-        # which allows us to control it via mqtt (or any other dispatcher)
-        camera_metrics = self.camera_metrics[camera]
-
         # disabling birdseye is a little tricky
-        if not camera_metrics["birdseye_enabled"].value:
+        if not camera_config.enabled:
             # if we've rendered a frame (we have a value for last_active_frame)
             # then we need to set it to zero
             if self.cameras[camera]["last_active_frame"] > 0:
@@ -691,12 +683,9 @@ class BirdsEyeFrameManager:
 
             return False
 
-        # get the birdseye mode state from camera metrics
-        birdseye_mode = BirdseyeModeEnum.get(camera_metrics["birdseye_mode"].value)
-
         # update the last active frame for the camera
         self.cameras[camera]["current_frame"] = frame_time
-        if self.camera_active(birdseye_mode, object_count, motion_count):
+        if self.camera_active(camera_config.mode, object_count, motion_count):
             self.cameras[camera]["last_active_frame"] = frame_time
 
         now = datetime.datetime.now().timestamp()
@@ -725,7 +714,6 @@ class Birdseye:
         self,
         config: FrigateConfig,
         frame_manager: SharedMemoryFrameManager,
-        camera_metrics: dict[str, CameraMetricsTypes],
         stop_event: mp.Event,
         websocket_server,
     ) -> None:
@@ -745,9 +733,8 @@ class Birdseye:
         self.broadcaster = BroadcastThread(
             "birdseye", self.converter, websocket_server, stop_event
         )
-        self.birdseye_manager = BirdsEyeFrameManager(
-            config, frame_manager, stop_event, camera_metrics
-        )
+        self.birdseye_manager = BirdsEyeFrameManager(config, frame_manager, stop_event)
+        self.config_subscriber = ConfigSubscriber("config/birdseye/")
 
         if config.birdseye.restream:
             self.birdseye_buffer = frame_manager.create(
@@ -766,6 +753,19 @@ class Birdseye:
         frame_time: float,
         frame,
     ) -> None:
+        # check if there is an updated config
+        while True:
+            (
+                updated_topic,
+                updated_birdseye_config,
+            ) = self.config_subscriber.check_for_update()
+
+            if not updated_topic:
+                break
+
+            camera_name = updated_topic.rpartition("/")[-1]
+            self.config.cameras[camera_name].birdseye = updated_birdseye_config
+
         if self.birdseye_manager.update(
             camera,
             len([o for o in current_tracked_objects if not o["stationary"]]),
@@ -785,5 +785,6 @@ class Birdseye:
                 pass
 
     def stop(self) -> None:
+        self.config_subscriber.stop()
         self.converter.join()
         self.broadcaster.join()

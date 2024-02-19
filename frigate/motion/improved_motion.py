@@ -5,6 +5,7 @@ import imutils
 import numpy as np
 from scipy.ndimage import gaussian_filter
 
+from frigate.comms.config_updater import ConfigSubscriber
 from frigate.config import MotionConfig
 from frigate.motion import MotionDetector
 
@@ -17,9 +18,6 @@ class ImprovedMotionDetector(MotionDetector):
         frame_shape,
         config: MotionConfig,
         fps: int,
-        improve_contrast,
-        threshold,
-        contour_area,
         name="improved",
         blur_radius=1,
         interpolation=cv2.INTER_NEAREST,
@@ -44,20 +42,27 @@ class ImprovedMotionDetector(MotionDetector):
         self.mask = np.where(resized_mask == [0])
         self.save_images = False
         self.calibrating = True
-        self.improve_contrast = improve_contrast
-        self.threshold = threshold
-        self.contour_area = contour_area
         self.blur_radius = blur_radius
         self.interpolation = interpolation
         self.contrast_values = np.zeros((contrast_frame_history, 2), np.uint8)
         self.contrast_values[:, 1:2] = 255
         self.contrast_values_index = 0
+        self.config_subscriber = ConfigSubscriber(f"config/motion/{name}")
 
     def is_calibrating(self):
         return self.calibrating
 
     def detect(self, frame):
         motion_boxes = []
+
+        # check for updated motion config
+        _, updated_motion_config = self.config_subscriber.check_for_update()
+
+        if updated_motion_config:
+            self.config = updated_motion_config
+
+        if not self.config.enabled:
+            return motion_boxes
 
         gray = frame[0 : self.frame_shape[0], 0 : self.frame_shape[1]]
 
@@ -72,7 +77,7 @@ class ImprovedMotionDetector(MotionDetector):
             resized_saved = resized_frame.copy()
 
         # Improve contrast
-        if self.improve_contrast.value:
+        if self.config.improve_contrast:
             # TODO tracking moving average of min/max to avoid sudden contrast changes
             minval = np.percentile(resized_frame, 4).astype(np.uint8)
             maxval = np.percentile(resized_frame, 96).astype(np.uint8)
@@ -110,7 +115,7 @@ class ImprovedMotionDetector(MotionDetector):
 
         # compute the threshold image for the current frame
         thresh = cv2.threshold(
-            frameDelta, self.threshold.value, 255, cv2.THRESH_BINARY
+            frameDelta, self.config.threshold, 255, cv2.THRESH_BINARY
         )[1]
 
         # dilate the thresholded image to fill in holes, then find contours
@@ -127,7 +132,7 @@ class ImprovedMotionDetector(MotionDetector):
             # if the contour is big enough, count it as motion
             contour_area = cv2.contourArea(c)
             total_contour_area += contour_area
-            if contour_area > self.contour_area.value:
+            if contour_area > self.config.contour_area:
                 x, y, w, h = cv2.boundingRect(c)
                 motion_boxes.append(
                     (
@@ -170,9 +175,11 @@ class ImprovedMotionDetector(MotionDetector):
             ]
             cv2.imwrite(
                 f"debug/frames/{self.name}-{self.frame_counter}.jpg",
-                cv2.hconcat(frames)
-                if self.frame_shape[0] > self.frame_shape[1]
-                else cv2.vconcat(frames),
+                (
+                    cv2.hconcat(frames)
+                    if self.frame_shape[0] > self.frame_shape[1]
+                    else cv2.vconcat(frames)
+                ),
             )
 
         if len(motion_boxes) > 0:
@@ -194,3 +201,7 @@ class ImprovedMotionDetector(MotionDetector):
             self.motion_frame_count = 0
 
         return motion_boxes
+
+    def stop(self) -> None:
+        """stop the motion detector."""
+        self.config_subscriber.stop()

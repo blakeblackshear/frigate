@@ -300,6 +300,7 @@ class RecordConfig(FrigateBaseModel):
 
 
 class MotionConfig(FrigateBaseModel):
+    enabled: bool = Field(default=True, title="Enable motion on all cameras.")
     threshold: int = Field(
         default=30,
         title="Motion detection threshold (1-255).",
@@ -320,6 +321,9 @@ class MotionConfig(FrigateBaseModel):
     mqtt_off_delay: int = Field(
         default=30,
         title="Delay for updating MQTT with no motion detected.",
+    )
+    enabled_in_config: Optional[bool] = Field(
+        title="Keep track of original state of motion detection."
     )
 
 
@@ -1041,6 +1045,14 @@ def verify_autotrack_zones(camera_config: CameraConfig) -> ValueError | None:
         )
 
 
+def verify_motion_and_detect(camera_config: CameraConfig) -> ValueError | None:
+    """Verify that required_zones are specified when autotracking is enabled."""
+    if camera_config.detect.enabled and not camera_config.motion.enabled:
+        raise ValueError(
+            f"Camera {camera_config.name} has motion detection disabled and object detection enabled but object detection requires motion detection."
+        )
+
+
 class FrigateConfig(FrigateBaseModel):
     mqtt: MqttConfig = Field(title="MQTT Configuration.")
     database: DatabaseConfig = Field(
@@ -1202,8 +1214,8 @@ class FrigateConfig(FrigateBaseModel):
                     **FRIGATE_ENV_VARS
                 )
             # set config pre-value
-            camera_config.record.enabled_in_config = camera_config.record.enabled
             camera_config.audio.enabled_in_config = camera_config.audio.enabled
+            camera_config.record.enabled_in_config = camera_config.record.enabled
             camera_config.onvif.autotracking.enabled_in_config = (
                 camera_config.onvif.autotracking.enabled
             )
@@ -1250,6 +1262,7 @@ class FrigateConfig(FrigateBaseModel):
                     raw_mask=camera_config.motion.mask,
                     **camera_config.motion.dict(exclude_unset=True),
                 )
+            camera_config.motion.enabled_in_config = camera_config.motion.enabled
 
             # Set live view stream if none is set
             if not camera_config.live.stream_name:
@@ -1261,6 +1274,7 @@ class FrigateConfig(FrigateBaseModel):
             verify_recording_segments_setup_with_reasonable_time(camera_config)
             verify_zone_objects_are_tracked(camera_config)
             verify_autotrack_zones(camera_config)
+            verify_motion_and_detect(camera_config)
 
             # generate the ffmpeg commands
             camera_config.create_ffmpeg_cmds()

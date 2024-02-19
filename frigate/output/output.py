@@ -2,7 +2,6 @@
 
 import logging
 import multiprocessing as mp
-import queue
 import signal
 import threading
 from typing import Optional
@@ -16,12 +15,12 @@ from ws4py.server.wsgirefserver import (
 )
 from ws4py.server.wsgiutils import WebSocketWSGIApplication
 
+from frigate.comms.detections_updater import DetectionSubscriber, DetectionTypeEnum
 from frigate.comms.ws import WebSocket
 from frigate.config import FrigateConfig
 from frigate.output.birdseye import Birdseye
 from frigate.output.camera import JsmpegCamera
 from frigate.output.preview import PreviewRecorder
-from frigate.types import CameraMetricsTypes
 from frigate.util.image import SharedMemoryFrameManager
 
 logger = logging.getLogger(__name__)
@@ -29,8 +28,6 @@ logger = logging.getLogger(__name__)
 
 def output_frames(
     config: FrigateConfig,
-    video_output_queue: mp.Queue,
-    camera_metrics: dict[str, CameraMetricsTypes],
 ):
     threading.current_thread().name = "output"
     setproctitle("frigate.output")
@@ -58,6 +55,8 @@ def output_frames(
     websocket_server.initialize_websockets_manager()
     websocket_thread = threading.Thread(target=websocket_server.serve_forever)
 
+    detection_subscriber = DetectionSubscriber(DetectionTypeEnum.video)
+
     jsmpeg_cameras: dict[str, JsmpegCamera] = {}
     birdseye: Optional[Birdseye] = None
     preview_recorders: dict[str, PreviewRecorder] = {}
@@ -70,23 +69,23 @@ def output_frames(
         preview_recorders[camera] = PreviewRecorder(cam_config)
 
     if config.birdseye.enabled:
-        birdseye = Birdseye(
-            config, frame_manager, camera_metrics, stop_event, websocket_server
-        )
+        birdseye = Birdseye(config, frame_manager, stop_event, websocket_server)
 
     websocket_thread.start()
 
     while not stop_event.is_set():
-        try:
-            (
-                camera,
-                frame_time,
-                current_tracked_objects,
-                motion_boxes,
-                regions,
-            ) = video_output_queue.get(True, 1)
-        except queue.Empty:
+        (topic, data) = detection_subscriber.get_data(timeout=10)
+
+        if not topic:
             continue
+
+        (
+            camera,
+            frame_time,
+            current_tracked_objects,
+            motion_boxes,
+            regions,
+        ) = data
 
         frame_id = f"{camera}{frame_time}"
 
@@ -126,18 +125,25 @@ def output_frames(
 
         previous_frames[camera] = frame_time
 
-    while not video_output_queue.empty():
+    while True:
+        (topic, data) = detection_subscriber.get_data(timeout=0)
+
+        if not topic:
+            break
+
         (
             camera,
             frame_time,
             current_tracked_objects,
             motion_boxes,
             regions,
-        ) = video_output_queue.get(True, 10)
+        ) = data
 
         frame_id = f"{camera}{frame_time}"
         frame = frame_manager.get(frame_id, config.cameras[camera].frame_shape_yuv)
         frame_manager.delete(frame_id)
+
+    detection_subscriber.stop()
 
     for jsmpeg in jsmpeg_cameras.values():
         jsmpeg.stop()
