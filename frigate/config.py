@@ -58,6 +58,7 @@ if os.path.isdir("/run/secrets"):
             ).read_text()
 
 DEFAULT_TRACKED_OBJECTS = ["person"]
+DEFAULT_ALERT_OBJECTS = ["person", "car"]
 DEFAULT_LISTEN_AUDIO = ["bark", "fire_alarm", "scream", "speech", "yell"]
 DEFAULT_DETECTORS = {"cpu": {"type": "cpu"}}
 DEFAULT_DETECT_DIMENSIONS = {"width": 1280, "height": 720}
@@ -512,6 +513,9 @@ class ZoneConfig(BaseModel):
 
 class ObjectConfig(FrigateBaseModel):
     track: List[str] = Field(default=DEFAULT_TRACKED_OBJECTS, title="Objects to track.")
+    alert: List[str] = Field(
+        default=DEFAULT_ALERT_OBJECTS, title="Objects to create alerts for."
+    )
     filters: Dict[str, FilterConfig] = Field(default={}, title="Object filters.")
     mask: Union[str, List[str]] = Field(default="", title="Object mask.")
 

@@ -113,7 +113,10 @@ class ReviewSegmentMaintainer(threading.Thread):
                 segment.detections.add(object["id"])
                 segment.objects.add(object["label"])
 
-                if object["has_clip"]:
+                if (
+                    object["has_clip"]
+                    and object["label"] in camera_config.objects.alert
+                ):
                     segment.severity = SeverityEnum.alert
 
                 if len(object["current_zones"]) > 0:
@@ -150,7 +153,11 @@ class ReviewSegmentMaintainer(threading.Thread):
             zones: set = set()
 
             for object in active_objects:
-                if not has_sig_object and object["has_clip"]:
+                if (
+                    not has_sig_object
+                    and object["has_clip"]
+                    and object["label"] in camera_config.objects.alert
+                ):
                     has_sig_object = True
 
                 detections.add(object["id"])
