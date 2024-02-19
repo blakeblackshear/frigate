@@ -1049,7 +1049,7 @@ def verify_motion_and_detect(camera_config: CameraConfig) -> ValueError | None:
     """Verify that required_zones are specified when autotracking is enabled."""
     if camera_config.detect.enabled and not camera_config.motion.enabled:
         raise ValueError(
-            f"Camera {camera_config.name} has motion detection disabled and object detection enabled but object detection requires motion detection ."
+            f"Camera {camera_config.name} has motion detection disabled and object detection enabled but object detection requires motion detection."
         )
 
 

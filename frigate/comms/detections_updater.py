@@ -1,18 +1,14 @@
 """Facilitates communication between processes."""
 
-import os
 import threading
 from enum import Enum
 from typing import Optional
 
 import zmq
 
-from frigate.const import (
-    PORT_INTER_PROCESS_DETECTION_PUB,
-    PORT_INTER_PROCESS_DETECTION_SUB,
-)
-
 SOCKET_CONTROL = "inproc://control.detections_updater"
+SOCKET_PUB = "ipc:///tmp/cache/detect_pub"
+SOCKET_SUB = "ipc:///tmp/cache/detect_sun"
 
 
 class DetectionTypeEnum(str, Enum):
@@ -29,21 +25,13 @@ class DetectionProxyRunner(threading.Thread):
 
     def run(self) -> None:
         """Run the proxy."""
-        PUB_PORT = (
-            os.environ.get("INTER_PROCESS_DETECTION_PUB_PORT")
-            or PORT_INTER_PROCESS_DETECTION_PUB
-        )
-        SUB_PORT = (
-            os.environ.get("INTER_PROCESS_DETECTION_SUB_PORT")
-            or PORT_INTER_PROCESS_DETECTION_SUB
-        )
         control = self.context.socket(zmq.SUB)
         control.connect(SOCKET_CONTROL)
         control.setsockopt_string(zmq.SUBSCRIBE, "")
         incoming = self.context.socket(zmq.XSUB)
-        incoming.bind(f"tcp://127.0.0.1:{PUB_PORT}")
+        incoming.bind(SOCKET_PUB)
         outgoing = self.context.socket(zmq.XPUB)
-        outgoing.bind(f"tcp://127.0.0.1:{SUB_PORT}")
+        outgoing.bind(SOCKET_SUB)
 
         zmq.proxy_steerable(
             incoming, outgoing, None, control
@@ -72,14 +60,10 @@ class DetectionPublisher:
     """Simplifies receiving video and audio detections."""
 
     def __init__(self, topic: DetectionTypeEnum) -> None:
-        port = (
-            os.environ.get("INTER_PROCESS_DETECTIONS_PORT")
-            or PORT_INTER_PROCESS_DETECTION_PUB
-        )
         self.topic = topic
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.PUB)
-        self.socket.connect(f"tcp://127.0.0.1:{port}")
+        self.socket.connect(SOCKET_PUB)
 
     def send_data(self, payload: any) -> None:
         """Publish detection."""
@@ -95,14 +79,10 @@ class DetectionSubscriber:
     """Simplifies receiving video and audio detections."""
 
     def __init__(self, topic: DetectionTypeEnum) -> None:
-        port = (
-            os.environ.get("INTER_PROCESS_DETECTIONS_PORT")
-            or PORT_INTER_PROCESS_DETECTION_SUB
-        )
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.SUB)
         self.socket.setsockopt_string(zmq.SUBSCRIBE, topic.value)
-        self.socket.connect(f"tcp://127.0.0.1:{port}")
+        self.socket.connect(SOCKET_SUB)
 
     def get_data(self, timeout: float = None) -> Optional[tuple[str, any]]:
         """Returns detections or None if no update."""
