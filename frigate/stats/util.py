@@ -1,18 +1,15 @@
+"""Utilities for stats."""
+
 import asyncio
-import json
-import logging
 import os
 import shutil
-import threading
 import time
-from multiprocessing.synchronize import Event as MpEvent
 from typing import Any, Optional
 
 import psutil
 import requests
 from requests.exceptions import RequestException
 
-from frigate.comms.dispatcher import Dispatcher
 from frigate.config import FrigateConfig
 from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
 from frigate.object_detection import ObjectDetectProcess
@@ -27,8 +24,6 @@ from frigate.util.services import (
     is_vaapi_amd_driver,
 )
 from frigate.version import VERSION
-
-logger = logging.getLogger(__name__)
 
 
 def get_latest_version(config: FrigateConfig) -> str:
@@ -318,31 +313,3 @@ def stats_snapshot(
         }
 
     return stats
-
-
-class StatsEmitter(threading.Thread):
-    def __init__(
-        self,
-        config: FrigateConfig,
-        stats_tracking: StatsTrackingTypes,
-        dispatcher: Dispatcher,
-        stop_event: MpEvent,
-    ):
-        threading.Thread.__init__(self)
-        self.name = "frigate_stats_emitter"
-        self.config = config
-        self.stats_tracking = stats_tracking
-        self.dispatcher = dispatcher
-        self.stop_event = stop_event
-        self.hwaccel_errors: list[str] = []
-
-    def run(self) -> None:
-        time.sleep(10)
-        while not self.stop_event.wait(self.config.mqtt.stats_interval):
-            logger.debug("Starting stats collection")
-            stats = stats_snapshot(
-                self.config, self.stats_tracking, self.hwaccel_errors
-            )
-            self.dispatcher.publish("stats", json.dumps(stats), retain=False)
-            logger.debug("Finished stats collection")
-        logger.info("Exiting stats emitter...")
