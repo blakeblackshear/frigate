@@ -172,7 +172,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                 segment.objects.add(object["label"])
 
                 if object["sub_label"]:
-                    segment.sub_labels.add(object["sub_label"])
+                    segment.sub_labels.add(object["sub_label"][0])
 
                 # if object is alert label and has qualified for recording
                 # mark this review as alert
@@ -228,7 +228,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                 objects.add(object["label"])
 
                 if object["sub_label"]:
-                    sub_labels.add(object["sub_label"])
+                    sub_labels.add(object["sub_label"][0])
 
                 zones.update(object["current_zones"])
 
