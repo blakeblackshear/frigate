@@ -1,3 +1,4 @@
+@import "/themes/tailwind-base.css";
 @import "/themes/theme-default.css";
 @import "/themes/theme-blue.css";
 @import "/themes/theme-gold.css";
@@ -26,4 +27,15 @@
 @font-face {
   font-family: "Inter";
   src: url("../fonts/Inter-VariableFont_slnt,wght.ttf");
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }

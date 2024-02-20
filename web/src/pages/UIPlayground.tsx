@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import Heading from "@/components/ui/heading";
 import ActivityScrubber, {
   ScrubberItem,
@@ -9,6 +9,8 @@ import { Event } from "@/types/event";
 import ActivityIndicator from "@/components/ui/activity-indicator";
 import { useApiHost } from "@/api";
 import TimelineScrubber from "@/components/playground/TimelineScrubber";
+import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
+import { ReviewData, ReviewSegment, ReviewSeverity } from "@/types/review";
 
 // Color data
 const colors = [
@@ -57,9 +59,46 @@ function eventsToScrubberItems(events: Event[]): ScrubberItem[] {
   }));
 }
 
+const generateRandomEvent = (): ReviewSegment => {
+  const start_time = Math.floor(Date.now() / 1000) - Math.random() * 60 * 60;
+  const end_time = Math.floor(start_time + Math.random() * 60 * 10);
+  const severities: ReviewSeverity[] = [
+    "significant_motion",
+    "detection",
+    "alert",
+  ];
+  const severity = severities[Math.floor(Math.random() * severities.length)];
+  const has_been_reviewed = Math.random() < 0.2;
+  const id = new Date(start_time * 1000).toISOString(); // Date string as mock ID
+
+  // You need to provide values for camera, thumb_path, and data
+  const camera = "CameraXYZ";
+  const thumb_path = "/path/to/thumb";
+  const data: ReviewData = {
+    audio: [],
+    detections: [],
+    objects: [],
+    significant_motion_areas: [],
+    zones: [],
+  };
+
+  return {
+    id,
+    start_time,
+    end_time,
+    severity,
+    has_been_reviewed,
+    camera,
+    thumb_path,
+    data,
+  };
+};
+
 function UIPlayground() {
   const { data: config } = useSWR<FrigateConfig>("config");
   const [timeline, setTimeline] = useState<string | undefined>(undefined);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [mockEvents, setMockEvents] = useState<ReviewSegment[]>([]);
 
   const onSelect = useCallback(({ items }: { items: string[] }) => {
     setTimeline(items[0]);
@@ -74,6 +113,11 @@ function UIPlayground() {
     "events",
     { limit: 10, after: recentTimestamp },
   ]);
+
+  useMemo(() => {
+    const initialEvents = Array.from({ length: 50 }, generateRandomEvent);
+    setMockEvents(initialEvents);
+  }, []);
 
   return (
     <>
@@ -111,25 +155,50 @@ function UIPlayground() {
         </div>
       )}
 
-      <Heading as="h4" className="my-5">
-        Color scheme
-      </Heading>
-      <p className="text-small">
-        Colors as set by the current theme. See the{" "}
-        <a className="underline" href="https://ui.shadcn.com/docs/theming">
-          shadcn theming docs
-        </a>{" "}
-        for usage.
-      </p>
+      <div className="flex">
+        <div className="flex-grow">
+          <div ref={contentRef}>
+            <Heading as="h4" className="my-5">
+              Color scheme
+            </Heading>
+            <p className="text-small">
+              Colors as set by the current theme. See the{" "}
+              <a
+                className="underline"
+                href="https://ui.shadcn.com/docs/theming"
+              >
+                shadcn theming docs
+              </a>{" "}
+              for usage.
+            </p>
 
-      <div className="w-72 my-5">
-        {colors.map((color, index) => (
-          <ColorSwatch
-            key={index}
-            name={color}
-            value={`hsl(var(--${color}))`}
+            <div className="my-5">
+              {colors.map((color, index) => (
+                <ColorSwatch
+                  key={index}
+                  name={color}
+                  value={`hsl(var(--${color}))`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="flex-none">
+          <EventReviewTimeline
+            segmentDuration={60} // seconds per segment
+            timestampSpread={15} // minutes between each major timestamp
+            timelineStart={Math.floor(Date.now() / 1000)} // start of the timeline - all times are numeric, not Date objects
+            timelineDuration={24 * 60 * 60} // in minutes, defaults to 24 hours
+            showHandlebar // show / hide the handlebar
+            handlebarTime={Math.floor(Date.now() / 1000) - 27 * 60} // set the time of the handlebar
+            showMinimap // show / hide the minimap
+            minimapStartTime={Math.floor(Date.now() / 1000) - 35 * 60} // start time of the minimap - the earlier time (eg 1:00pm)
+            minimapEndTime={Math.floor(Date.now() / 1000) - 21 * 60} // end of the minimap - the later time (eg 3:00pm)
+            events={mockEvents} // events, including new has_been_reviewed and severity properties
+            severityType={"alert"} // choose the severity type for the middle line - all other severity types are to the right
+            contentRef={contentRef} // optional content ref where previews are, can be used for observing/scrolling later
           />
-        ))}
+        </div>
       </div>
     </>
   );
