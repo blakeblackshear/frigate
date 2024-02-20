@@ -15,7 +15,12 @@ import psutil
 import py3nvml.py3nvml as nvml
 import requests
 
-from frigate.const import FFMPEG_HWACCEL_NVIDIA, FFMPEG_HWACCEL_VAAPI
+from frigate.const import (
+    DRIVER_AMD,
+    DRIVER_ENV_VAR,
+    FFMPEG_HWACCEL_NVIDIA,
+    FFMPEG_HWACCEL_VAAPI,
+)
 from frigate.util.builtin import clean_camera_user_pass, escape_special_characters
 
 logger = logging.getLogger(__name__)
@@ -194,6 +199,25 @@ def get_bandwidth_stats(config) -> dict[str, dict]:
                 continue
 
     return usages
+
+
+def is_vaapi_amd_driver() -> bool:
+    # Use the explicitly configured driver, if available
+    driver = os.environ.get(DRIVER_ENV_VAR)
+    if driver:
+        return driver == DRIVER_AMD
+
+    # Otherwise, ask vainfo what is has autodetected
+    p = vainfo_hwaccel()
+
+    if p.returncode != 0:
+        logger.error(f"Unable to poll vainfo: {p.stderr}")
+        return False
+    else:
+        output = p.stdout.decode("unicode_escape").split("\n")
+
+        # VA Info will print out the friendly name of the driver
+        return any("AMD Radeon Graphics" in line for line in output)
 
 
 def get_amd_gpu_stats() -> dict[str, str]:
