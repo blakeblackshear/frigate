@@ -1,6 +1,7 @@
 """Maintain review segments in db."""
 
 import logging
+import os
 import random
 import string
 import threading
@@ -8,15 +9,23 @@ from enum import Enum
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Optional
 
+import cv2
+import numpy as np
+
 from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionSubscriber, DetectionTypeEnum
 from frigate.comms.inter_process import InterProcessRequestor
-from frigate.config import FrigateConfig
-from frigate.const import UPSERT_REVIEW_SEGMENT
+from frigate.config import CameraConfig, FrigateConfig
+from frigate.const import CLIPS_DIR, UPSERT_REVIEW_SEGMENT
 from frigate.models import ReviewSegment
 from frigate.object_processing import TrackedObject
+from frigate.util.image import SharedMemoryFrameManager, calculate_16_9_crop
 
 logger = logging.getLogger(__name__)
+
+
+THUMB_HEIGHT = 180
+THUMB_WIDTH = 320
 
 
 class SeverityEnum(str, Enum):
@@ -49,14 +58,50 @@ class PendingReviewSegment:
         self.sig_motion_areas = motion
         self.last_update = frame_time
 
+        # thumbnail
+        self.frame = np.zeros((THUMB_HEIGHT * 3 // 2, THUMB_WIDTH), np.uint8)
+        self.frame_active_count = 0
+
+    def update_frame(
+        self, camera_config: CameraConfig, frame, objects: list[TrackedObject]
+    ):
+        self.frame_active_count = len(objects)
+        min_x = camera_config.frame_shape[1]
+        min_y = camera_config.frame_shape[0]
+        max_x = 0
+        max_y = 0
+
+        # find bounds for all boxes
+        for o in objects:
+            min_x = min(o["box"][0], min_x)
+            min_y = min(o["box"][1], min_y)
+            max_x = max(o["box"][2], max_x)
+            max_y = max(o["box"][3], max_y)
+
+        region = calculate_16_9_crop(
+            camera_config.frame_shape, min_x, min_y, max_x, max_y
+        )
+        color_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
+        color_frame = color_frame[region[1] : region[3], region[0] : region[2]]
+        width = int(THUMB_HEIGHT * color_frame.shape[1] / color_frame.shape[0])
+        self.frame = cv2.resize(
+            color_frame, dsize=(width, THUMB_HEIGHT), interpolation=cv2.INTER_AREA
+        )
+        cv2.imwrite(f"/media/frigate/frames/thumb_{self.id}.jpg", self.frame)
+
     def end(self) -> dict:
+        path = os.path.join(CLIPS_DIR, f"thumb-{self.camera}-{self.id}.jpg")
+
+        if self.frame is not None:
+            cv2.imwrite(path, self.frame)
+
         return {
             ReviewSegment.id: self.id,
             ReviewSegment.camera: self.camera,
             ReviewSegment.start_time: self.start_time,
             ReviewSegment.end_time: self.last_update,
             ReviewSegment.severity: self.severity.value,
-            ReviewSegment.thumb_path: "somewhere",
+            ReviewSegment.thumb_path: path,
             ReviewSegment.data: {
                 "detections": list(self.detections),
                 "objects": list(self.objects),
@@ -75,6 +120,7 @@ class ReviewSegmentMaintainer(threading.Thread):
         self.name = "review_segment_maintainer"
         self.config = config
         self.active_review_segments: dict[str, Optional[PendingReviewSegment]] = {}
+        self.frame_manager = SharedMemoryFrameManager()
 
         # create communication for review segments
         self.requestor = InterProcessRequestor()
@@ -106,13 +152,26 @@ class ReviewSegmentMaintainer(threading.Thread):
         if len(active_objects) > 0:
             segment.last_update = frame_time
 
+            # update type for this segment now that active objects are detected
             if segment.severity == SeverityEnum.signification_motion:
                 segment.severity = SeverityEnum.detection
+
+            if len(active_objects) > segment.frame_active_count:
+                frame_id = f"{camera_config.name}{frame_time}"
+                logger.error(f"get frame {frame_id}")
+                yuv_frame = self.frame_manager.get(
+                    frame_id, camera_config.frame_shape_yuv
+                )
+                segment.update_frame(camera_config, yuv_frame, active_objects)
+                self.frame_manager.close(frame_id)
+                logger.error(f"close frame {frame_id}")
 
             for object in active_objects:
                 segment.detections.add(object["id"])
                 segment.objects.add(object["label"])
 
+                # if object is alert label and has qualified for recording
+                # mark this review as alert
                 if (
                     segment.severity == SeverityEnum.detection
                     and object["has_clip"]
@@ -120,6 +179,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                 ):
                     segment.severity = SeverityEnum.alert
 
+                # keep zones up to date
                 if len(object["current_zones"]) > 0:
                     segment.zones.update(object["current_zones"])
         elif (
