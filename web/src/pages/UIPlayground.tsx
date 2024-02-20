@@ -159,18 +159,18 @@ function UIPlayground() {
         </div>
         <div className="flex-none">
           <ReviewTimeline
-            segmentDuration={60}
-            timestampSpread={15}
-            timelineStart={Date.now()}
-            timelineDuration={24 * 60 * 60}
-            showHandlebar
-            handlebarTime={Date.now() - 27 * 60 * 1000}
-            showMinimap
-            minimapStartTime={Date.now() - 35 * 60 * 1000}
-            minimapEndTime={Date.now() - 21 * 60 * 1000}
-            events={mockEvents}
-            severityType={"alert"}
-            contentRef={contentRef}
+            segmentDuration={60} // seconds per segment
+            timestampSpread={15} // minutes between each major timestamp
+            timelineStart={Date.now()} // start of the timeline - all times are numeric, not Date objects
+            timelineDuration={24 * 60 * 60} // in minutes, defaults to 24 hours
+            showHandlebar // show / hide the handlebar
+            handlebarTime={Date.now() - 27 * 60 * 1000} // set the time of the handlebar
+            showMinimap // show / hide the minimap
+            minimapStartTime={Date.now() - 35 * 60 * 1000} // start time of the minimap - the earlier time (eg 1:00pm)
+            minimapEndTime={Date.now() - 21 * 60 * 1000} // end of the minimap - the later time (eg 3:00pm)
+            events={mockEvents} // events, including new has_been_reviewed and severity properties
+            severityType={"alert"} // choose the severity type for the middle line - all other severity types are to the right
+            contentRef={contentRef} // optional content ref where previews are, can be used for observing/scrolling later
           />
         </div>
       </div>

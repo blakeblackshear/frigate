@@ -238,6 +238,3 @@ export function ReviewTimeline({
 }
 
 export default ReviewTimeline;
-
-// TODO: more minor tick marks for segmentDuration < 60
-// theme colors

@@ -155,14 +155,12 @@ export function EventSegment({
             className={`
           w-full h-2 bg-gradient-to-r
           ${
-            showRoundedCorners &&
-            isStartOfEvent(segmentTime, events, segmentDuration)
+            showRoundedCorners && isStartOfEvent(segmentTime)
               ? "rounded-bl-full rounded-br-full"
               : ""
           }
           ${
-            showRoundedCorners &&
-            isEndOfEvent(segmentTime, events, segmentDuration)
+            showRoundedCorners && isEndOfEvent(segmentTime)
               ? "rounded-tl-full rounded-tr-full"
               : ""
           }
@@ -196,14 +194,12 @@ export function EventSegment({
             className={`
             w-1 h-2 bg-gradient-to-r
             ${
-              showRoundedCorners &&
-              isStartOfEvent(segmentTime, events, segmentDuration)
+              showRoundedCorners && isStartOfEvent(segmentTime)
                 ? "rounded-bl-full rounded-br-full"
                 : ""
             }
             ${
-              showRoundedCorners &&
-              isEndOfEvent(segmentTime, events, segmentDuration)
+              showRoundedCorners && isEndOfEvent(segmentTime)
                 ? "rounded-tl-full rounded-tr-full"
                 : ""
             }
