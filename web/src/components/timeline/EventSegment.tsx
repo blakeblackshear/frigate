@@ -127,10 +127,6 @@ export function EventSegment({
   minimapEndTime,
   severityType,
 }: EventSegmentProps) {
-  const { isStartOfEvent, isEndOfEvent } = useEventUtils(
-    events,
-    segmentDuration
-  );
   const {
     getSeverity,
     getReviewed,
@@ -148,7 +144,7 @@ export function EventSegment({
     () => getReviewed(segmentTime),
     [getReviewed, segmentTime]
   );
-  const showRoundedCorners = useMemo(
+  const { roundTop, roundBottom } = useMemo(
     () => shouldShowRoundedCorners(segmentTime),
     [shouldShowRoundedCorners, segmentTime]
   );
@@ -239,16 +235,8 @@ export function EventSegment({
             key={`${segmentKey}_primary_data`}
             className={`
           w-full h-2 bg-gradient-to-r
-          ${
-            showRoundedCorners && isStartOfEvent(segmentTime)
-              ? "rounded-bl-full rounded-br-full"
-              : ""
-          }
-          ${
-            showRoundedCorners && isEndOfEvent(segmentTime)
-              ? "rounded-tl-full rounded-tr-full"
-              : ""
-          }
+          ${roundBottom ? "rounded-bl-full rounded-br-full" : ""}
+          ${roundTop ? "rounded-tl-full rounded-tr-full" : ""}
           ${severityColors[severity]}
 
           `}
@@ -262,16 +250,8 @@ export function EventSegment({
             key={`${segmentKey}_secondary_data`}
             className={`
             w-1 h-2 bg-gradient-to-r
-            ${
-              showRoundedCorners && isStartOfEvent(segmentTime)
-                ? "rounded-bl-full rounded-br-full"
-                : ""
-            }
-            ${
-              showRoundedCorners && isEndOfEvent(segmentTime)
-                ? "rounded-tl-full rounded-tr-full"
-                : ""
-            }
+            ${roundBottom ? "rounded-bl-full rounded-br-full" : ""}
+            ${roundTop ? "rounded-tl-full rounded-tr-full" : ""}
             ${severityColors[severity]}
 
           `}

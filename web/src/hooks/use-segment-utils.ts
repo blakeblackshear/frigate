@@ -60,27 +60,72 @@ export const useSegmentUtils = (
   }, [events, getSegmentStart, getSegmentEnd]);
 
   const shouldShowRoundedCorners = useCallback(
-    (segmentTime: number): boolean => {
+    (segmentTime: number): { roundTop: boolean, roundBottom: boolean } => {
+
       const prevSegmentTime = segmentTime - segmentDuration;
       const nextSegmentTime = segmentTime + segmentDuration;
 
-      const hasPrevEvent = events.some((e) => {
+      const severityEvents = events.filter(e => e.severity === severityType);
+
+      const otherEvents = events.filter(e => e.severity !== severityType);
+
+      const hasPrevSeverityEvent = severityEvents.some(e => {
         return (
           prevSegmentTime >= getSegmentStart(e.start_time) &&
-          prevSegmentTime < getSegmentEnd(e.end_time) &&
-          e.severity === severityType
+          prevSegmentTime < getSegmentEnd(e.end_time)
         );
       });
 
-      const hasNextEvent = events.some((e) => {
+      const hasNextSeverityEvent = severityEvents.some(e => {
         return (
-          nextSegmentTime >= getSegmentStart(e.start_time) &&
-          nextSegmentTime < getSegmentEnd(e.end_time) &&
-          e.severity === severityType
+          nextSegmentTime > getSegmentStart(e.start_time) &&
+          nextSegmentTime < getSegmentEnd(e.end_time)
         );
       });
 
-      return !hasPrevEvent || !hasNextEvent;
+      const hasPrevOtherEvent = otherEvents.some(e => {
+         return (
+           prevSegmentTime >= getSegmentStart(e.start_time) &&
+           prevSegmentTime < getSegmentEnd(e.end_time)
+         );
+      });
+
+      const hasNextOtherEvent = otherEvents.some(e => {
+         return (
+           nextSegmentTime > getSegmentStart(e.start_time) &&
+           nextSegmentTime < getSegmentEnd(e.end_time)
+         );
+      });
+
+      const hasOverlappingSeverityEvent = severityEvents.some(e => {
+        return segmentTime >= getSegmentStart(e.start_time) &&
+               segmentTime < getSegmentEnd(e.end_time)
+      });
+
+      const hasOverlappingOtherEvent = otherEvents.some(e => {
+        return segmentTime >= getSegmentStart(e.start_time) &&
+               segmentTime < getSegmentEnd(e.end_time)
+      });
+
+      let roundTop = false;
+      let roundBottom = false;
+
+      if (hasOverlappingSeverityEvent) {
+        roundBottom = !hasPrevSeverityEvent;
+        roundTop = !hasNextSeverityEvent;
+      } else if (hasOverlappingOtherEvent) {
+        roundBottom = !hasPrevOtherEvent;
+        roundTop = !hasNextOtherEvent;
+      } else {
+        roundTop = !hasNextSeverityEvent && !hasNextOtherEvent;
+        roundBottom = !hasPrevSeverityEvent && !hasPrevOtherEvent;
+      }
+
+      return {
+        roundTop,
+        roundBottom
+      };
+
     },
     [events, getSegmentStart, getSegmentEnd, segmentDuration, severityType]
   );
