@@ -231,6 +231,9 @@ def calculate_16_9_crop(frame_shape, xmin, ymin, xmax, ymax, multiplier=1.25):
     # if 16:9 by height is too small
     if aspect_y_size < y_size or aspect_y_size > frame_shape[0]:
         x_size = int((16 / 9) * y_size) // 4 * 4
+
+        if x_size / y_size > 1.8:
+            return None
     else:
         y_size = aspect_y_size // 4 * 4
 

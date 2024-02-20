@@ -81,6 +81,11 @@ class PendingReviewSegment:
         region = calculate_16_9_crop(
             camera_config.frame_shape, min_x, min_y, max_x, max_y
         )
+
+        # could not find suitable 16:9 region
+        if not region:
+            return
+
         color_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
         color_frame = color_frame[region[1] : region[3], region[0] : region[2]]
         width = int(THUMB_HEIGHT * color_frame.shape[1] / color_frame.shape[0])
