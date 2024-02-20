@@ -78,7 +78,7 @@ export const useSegmentUtils = (
 
       const hasNextSeverityEvent = severityEvents.some(e => {
         return (
-          nextSegmentTime > getSegmentStart(e.start_time) &&
+          nextSegmentTime >= getSegmentStart(e.start_time) &&
           nextSegmentTime < getSegmentEnd(e.end_time)
         );
       });
@@ -92,7 +92,7 @@ export const useSegmentUtils = (
 
       const hasNextOtherEvent = otherEvents.some(e => {
          return (
-           nextSegmentTime > getSegmentStart(e.start_time) &&
+           nextSegmentTime >= getSegmentStart(e.start_time) &&
            nextSegmentTime < getSegmentEnd(e.end_time)
          );
       });
