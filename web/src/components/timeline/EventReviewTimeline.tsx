@@ -208,7 +208,7 @@ export function EventReviewTimeline({
   return (
     <div
       ref={timelineRef}
-      className={`relative w-[120px] md:w-[100px] h-[100dvh] overflow-y-scroll no-scrollbar bg-secondary ${
+      className={`relative w-[120px] md:w-[100px] h-full overflow-y-scroll no-scrollbar bg-secondary ${
         isDragging && showHandlebar ? "cursor-grabbing" : "cursor-auto"
       }`}
     >

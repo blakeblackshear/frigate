@@ -1,5 +1,4 @@
 import useSWR from "swr";
-import PreviewThumbnailPlayer from "../player/PreviewThumbnailPlayer";
 import { Card } from "../ui/card";
 import { FrigateConfig } from "@/types/frigateConfig";
 import ActivityIndicator from "../ui/activity-indicator";
@@ -21,8 +20,10 @@ type HistoryCardProps = {
 };
 
 export default function HistoryCard({
+  // @ts-ignore
   relevantPreview,
   timeline,
+  // @ts-ignore
   isMobile,
   onClick,
   onDelete,
@@ -38,14 +39,6 @@ export default function HistoryCard({
       className="cursor-pointer my-2 xs:mr-2 w-full xs:w-[48%] sm:w-[284px]"
       onClick={onClick}
     >
-      <PreviewThumbnailPlayer
-        camera={timeline.camera}
-        relevantPreview={relevantPreview}
-        startTs={Object.values(timeline.entries)[0].timestamp}
-        eventId={Object.values(timeline.entries)[0].source_id}
-        isMobile={isMobile}
-        onClick={onClick}
-      />
       <>
         <div className="text-sm flex justify-between items-center">
           <div className="pl-1 pt-1">

@@ -117,7 +117,6 @@ function UIPlayground() {
   useMemo(() => {
     const initialEvents = Array.from({ length: 50 }, generateRandomEvent);
     setMockEvents(initialEvents);
-    console.log(initialEvents);
   }, []);
 
   return (
