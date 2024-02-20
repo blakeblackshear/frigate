@@ -10,7 +10,7 @@ import ActivityIndicator from "@/components/ui/activity-indicator";
 import { useApiHost } from "@/api";
 import TimelineScrubber from "@/components/playground/TimelineScrubber";
 import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
-import { ReviewSegment } from "@/types/review";
+import { ReviewData, ReviewSegment, ReviewSeverity } from "@/types/review";
 
 // Color data
 const colors = [
@@ -59,14 +59,39 @@ function eventsToScrubberItems(events: Event[]): ScrubberItem[] {
   }));
 }
 
-const generateRandomEvent = (): Event => {
+const generateRandomEvent = (): ReviewSegment => {
   const start_time = Math.floor(Date.now() / 1000) - Math.random() * 60 * 60;
   const end_time = Math.floor(start_time + Math.random() * 60 * 10);
-  const severities = ["motion", "detection", "alert"];
+  const severities: ReviewSeverity[] = [
+    "significant_motion",
+    "detection",
+    "alert",
+  ];
   const severity = severities[Math.floor(Math.random() * severities.length)];
   const has_been_reviewed = Math.random() < 0.2;
   const id = new Date(start_time * 1000).toISOString(); // Date string as mock ID
-  return { id, start_time, end_time, severity, has_been_reviewed };
+
+  // You need to provide values for camera, thumb_path, and data
+  const camera = "CameraXYZ";
+  const thumb_path = "/path/to/thumb";
+  const data: ReviewData = {
+    audio: [],
+    detections: [],
+    objects: [],
+    significant_motion_areas: [],
+    zones: [],
+  };
+
+  return {
+    id,
+    start_time,
+    end_time,
+    severity,
+    has_been_reviewed,
+    camera,
+    thumb_path,
+    data,
+  };
 };
 
 function UIPlayground() {
