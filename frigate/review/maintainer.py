@@ -42,6 +42,7 @@ class PendingReviewSegment:
         severity: SeverityEnum,
         detections: set[str] = set(),
         objects: set[str] = set(),
+        sub_labels: set[str] = set(),
         zones: set[str] = set(),
         audio: set[str] = set(),
         motion: list[int] = [],
@@ -53,6 +54,7 @@ class PendingReviewSegment:
         self.severity = severity
         self.detections = detections
         self.objects = objects
+        self.sub_labels = sub_labels
         self.zones = zones
         self.audio = audio
         self.sig_motion_areas = motion
@@ -109,6 +111,7 @@ class PendingReviewSegment:
             ReviewSegment.data: {
                 "detections": list(self.detections),
                 "objects": list(self.objects),
+                "sub_labels": list(self.sub_labels),
                 "zones": list(self.zones),
                 "audio": list(self.audio),
                 "significant_motion_areas": self.sig_motion_areas,
@@ -168,6 +171,9 @@ class ReviewSegmentMaintainer(threading.Thread):
                 segment.detections.add(object["id"])
                 segment.objects.add(object["label"])
 
+                if object["sub_label"]:
+                    segment.sub_labels.add(object["sub_label"])
+
                 # if object is alert label and has qualified for recording
                 # mark this review as alert
                 if (
@@ -207,6 +213,7 @@ class ReviewSegmentMaintainer(threading.Thread):
             has_sig_object = False
             detections: set = set()
             objects: set = set()
+            sub_labels: set = (set(),)
             zones: set = set()
 
             for object in active_objects:
@@ -219,6 +226,10 @@ class ReviewSegmentMaintainer(threading.Thread):
 
                 detections.add(object["id"])
                 objects.add(object["label"])
+
+                if object["sub_label"]:
+                    sub_labels.add(object["sub_label"])
+
                 zones.update(object["current_zones"])
 
             self.active_review_segments[camera] = PendingReviewSegment(
@@ -226,8 +237,9 @@ class ReviewSegmentMaintainer(threading.Thread):
                 frame_time,
                 SeverityEnum.alert if has_sig_object else SeverityEnum.detection,
                 detections,
-                objects,
-                zones,
+                objects=objects,
+                sub_labels=sub_labels,
+                zones=zones,
             )
         elif len(motion) >= 20:
             self.active_review_segments[camera] = PendingReviewSegment(
