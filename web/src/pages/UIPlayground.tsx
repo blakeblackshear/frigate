@@ -10,6 +10,7 @@ import ActivityIndicator from "@/components/ui/activity-indicator";
 import { useApiHost } from "@/api";
 import TimelineScrubber from "@/components/playground/TimelineScrubber";
 import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
+import { ReviewSegment } from "@/types/review";
 
 // Color data
 const colors = [
@@ -72,7 +73,7 @@ function UIPlayground() {
   const { data: config } = useSWR<FrigateConfig>("config");
   const [timeline, setTimeline] = useState<string | undefined>(undefined);
   const contentRef = useRef<HTMLDivElement>(null);
-  const [mockEvents, setMockEvents] = useState<Event[]>([]);
+  const [mockEvents, setMockEvents] = useState<ReviewSegment[]>([]);
 
   const onSelect = useCallback(({ items }: { items: string[] }) => {
     setTimeline(items[0]);
@@ -91,7 +92,6 @@ function UIPlayground() {
   useMemo(() => {
     const initialEvents = Array.from({ length: 50 }, generateRandomEvent);
     setMockEvents(initialEvents);
-    console.log(initialEvents);
   }, []);
 
   return (

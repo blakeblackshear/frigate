@@ -1,10 +1,10 @@
 import { useEventUtils } from "@/hooks/use-event-utils";
 import { useSegmentUtils } from "@/hooks/use-segment-utils";
-import { Event } from "@/types/event";
+import { ReviewSegment } from "@/types/review";
 import { useMemo } from "react";
 
 type EventSegmentProps = {
-  events: Event[];
+  events: ReviewSegment[];
   segmentTime: number;
   segmentDuration: number;
   timestampSpread: number;

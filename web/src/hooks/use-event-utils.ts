@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
-import { Event } from '@/types/event';
+import { ReviewSegment } from '@/types/review';
 
-export const useEventUtils = (events: Event[], segmentDuration: number) => {
+export const useEventUtils = (events: ReviewSegment[], segmentDuration: number) => {
   const isStartOfEvent = useCallback((time: number): boolean => {
     return events.some((event) => {
       const segmentStart = getSegmentStart(event.start_time);

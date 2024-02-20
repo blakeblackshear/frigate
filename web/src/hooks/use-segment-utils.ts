@@ -1,9 +1,9 @@
 import { useCallback, useMemo } from 'react';
-import { Event } from '@/types/event';
+import { ReviewSegment } from '@/types/review';
 
 export const useSegmentUtils = (
   segmentDuration: number,
-  events: Event[],
+  events: ReviewSegment[],
   severityType: string,
 ) => {
   const getSegmentStart = useCallback((time: number): number => {
@@ -20,7 +20,7 @@ export const useSegmentUtils = (
 
   const mapSeverityToNumber = useCallback((severity: string): number => {
     switch (severity) {
-      case "motion":
+      case "significant_motion":
         return 1;
       case "detection":
         return 2;
@@ -117,8 +117,17 @@ export const useSegmentUtils = (
         roundBottom = !hasPrevOtherEvent;
         roundTop = !hasNextOtherEvent;
       } else {
-        roundTop = !hasNextSeverityEvent && !hasNextOtherEvent;
-        roundBottom = !hasPrevSeverityEvent && !hasPrevOtherEvent;
+        roundTop = !hasNextSeverityEvent || !hasNextOtherEvent;
+        roundBottom = !hasPrevSeverityEvent || !hasPrevOtherEvent;
+      }
+
+      if (segmentTime == 1708459740) {
+        console.log("hasOverlappingSeverityEvent: " + hasOverlappingSeverityEvent)
+        console.log("hasPrevSeverityEvent: " + hasPrevSeverityEvent)
+        console.log("hasNextSeverityEvent: " + hasNextSeverityEvent)
+        console.log("hasOverlappingOtherEvent: " + hasOverlappingOtherEvent)
+        console.log("hasPrevOtherEvent: " + hasPrevOtherEvent)
+        console.log("hasNextOtherEvent: "+hasNextOtherEvent)
       }
 
       return {
