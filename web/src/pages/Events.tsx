@@ -1,4 +1,5 @@
 import PreviewThumbnailPlayer from "@/components/player/PreviewThumbnailPlayer";
+import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
 import ActivityIndicator from "@/components/ui/activity-indicator";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -12,7 +13,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { ReviewSegment, ReviewSeverity } from "@/types/review";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import axios from "axios";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LuCalendar, LuFilter, LuVideo } from "react-icons/lu";
 import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
@@ -23,6 +24,7 @@ const API_LIMIT = 100;
 export default function Events() {
   const { data: config } = useSWR<FrigateConfig>("config");
   const [severity, setSeverity] = useState<ReviewSeverity>("alert");
+  const contentRef = useRef<HTMLDivElement | null>(null);
 
   // review paging
 
@@ -63,12 +65,15 @@ export default function Events() {
   } = useSWRInfinite<ReviewSegment[]>(getKey, reviewSegmentFetcher);
 
   const reviewItems = useMemo(() => {
+    const all: ReviewSegment[] = [];
     const alerts: ReviewSegment[] = [];
     const detections: ReviewSegment[] = [];
     const motion: ReviewSegment[] = [];
 
     reviewPages?.forEach((page) => {
       page.forEach((segment) => {
+        all.push(segment);
+
         switch (segment.severity) {
           case "alert":
             alerts.push(segment);
@@ -83,7 +88,12 @@ export default function Events() {
       });
     });
 
-    return { alert: alerts, detection: detections, significant_motion: motion };
+    return {
+      all: all,
+      alert: alerts,
+      detection: detections,
+      significant_motion: motion,
+    };
   }, [reviewPages]);
 
   const isDone = useMemo(
@@ -91,24 +101,88 @@ export default function Events() {
     [reviewPages]
   );
 
-  const observer = useRef<IntersectionObserver | null>();
+  // review interaction
+
+  const pagingObserver = useRef<IntersectionObserver | null>();
   const lastReviewRef = useCallback(
     (node: HTMLElement | null) => {
       if (isValidating) return;
-      if (observer.current) observer.current.disconnect();
+      if (pagingObserver.current) pagingObserver.current.disconnect();
       try {
-        observer.current = new IntersectionObserver((entries) => {
+        pagingObserver.current = new IntersectionObserver((entries) => {
           if (entries[0].isIntersecting && !isDone) {
             setSize(size + 1);
           }
         });
-        if (node) observer.current.observe(node);
+        if (node) pagingObserver.current.observe(node);
       } catch (e) {
         // no op
       }
     },
     [isValidating, isDone]
   );
+
+  const [minimap, setMinimap] = useState<string[]>([]);
+  const minimapObserver = useRef<IntersectionObserver | null>();
+  useEffect(() => {
+    if (!contentRef.current) {
+      return;
+    }
+
+    const visibleTimestamps = new Set<string>();
+    minimapObserver.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const start = (entry.target as HTMLElement).dataset.start;
+
+          if (!start) {
+            return;
+          }
+
+          if (entry.isIntersecting) {
+            visibleTimestamps.add(start);
+          } else {
+            visibleTimestamps.delete(start);
+          }
+
+          setMinimap([...visibleTimestamps]);
+        });
+      },
+      { root: contentRef.current }
+    );
+
+    return () => {
+      minimapObserver.current?.disconnect();
+    };
+  }, [contentRef]);
+  const minimapRef = useCallback(
+    (node: HTMLElement | null) => {
+      if (!minimapObserver.current) {
+        return;
+      }
+
+      try {
+        if (node) minimapObserver.current.observe(node);
+      } catch (e) {
+        // no op
+      }
+    },
+    [minimapObserver.current]
+  );
+  const minimapBounds = useMemo(() => {
+    const data = {
+      start: Math.floor(Date.now() / 1000) - 35 * 60,
+      end: Math.floor(Date.now() / 1000) - 21 * 60,
+    };
+    const list = minimap.sort();
+
+    if (list.length > 0) {
+      data.end = parseFloat(list.at(-1)!!);
+      data.start = parseFloat(list[0]);
+    }
+
+    return data;
+  }, [minimap]);
 
   // review status
 
@@ -156,8 +230,8 @@ export default function Events() {
   }
 
   return (
-    <>
-      <div className="w-full flex justify-between">
+    <div className="relative w-full h-full overflow-hidden">
+      <div className="absolute flex justify-between left-0 top-0 right-0">
         <ToggleGroup
           type="single"
           defaultValue="alert"
@@ -208,7 +282,10 @@ export default function Events() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 mt-2">
+      <div
+        ref={contentRef}
+        className="absolute left-0 top-12 bottom-0 right-28 flex flex-wrap content-start gap-2 overflow-y-auto no-scrollbar"
+      >
         {reviewItems[severity]?.map((value, segIdx) => {
           const lastRow = segIdx == reviewItems[severity].length - 1;
           const relevantPreview = Object.values(allPreviews || []).find(
@@ -219,11 +296,12 @@ export default function Events() {
           );
 
           return (
-            <div key={value.id}>
-              <div
-                ref={lastRow ? lastReviewRef : null}
-                className="relative h-[234px] aspect-video rounded-lg overflow-hidden"
-              >
+            <div
+              key={value.id}
+              ref={lastRow ? lastReviewRef : minimapRef}
+              data-start={value.start_time}
+            >
+              <div className="h-[234px] aspect-video rounded-lg overflow-hidden">
                 <PreviewThumbnailPlayer
                   review={value}
                   relevantPreview={relevantPreview}
@@ -236,7 +314,21 @@ export default function Events() {
           );
         })}
       </div>
-    </>
+      <div className="absolute top-0 right-0 bottom-0">
+        <EventReviewTimeline
+          segmentDuration={60} // seconds per segment
+          timestampSpread={15} // minutes between each major timestamp
+          timelineStart={Math.floor(Date.now() / 1000)} // start of the timeline - all times are numeric, not Date objects
+          timelineDuration={24 * 60 * 60} // in minutes, defaults to 24 hours
+          showMinimap // show / hide the minimap
+          minimapStartTime={minimapBounds.start} // start time of the minimap - the earlier time (eg 1:00pm)
+          minimapEndTime={minimapBounds.end} // end of the minimap - the later time (eg 3:00pm)
+          events={reviewItems.all} // events, including new has_been_reviewed and severity properties
+          severityType={severity} // choose the severity type for the middle line - all other severity types are to the right
+          contentRef={contentRef} // optional content ref where previews are, can be used for observing/scrolling later
+        />
+      </div>
+    </div>
   );
 }
 

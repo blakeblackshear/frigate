@@ -126,7 +126,7 @@ export default function PreviewThumbnailPlayer({
           playerRef={playerRef}
           review={review}
           relevantPreview={relevantPreview}
-          isVisible={visible}
+          isVisible={isMobile ? visible : true}
           isMobile={isMobile}
           setProgress={setProgress}
           setReviewed={setReviewed}

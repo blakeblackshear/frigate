@@ -11,10 +11,11 @@ export interface ReviewSegment {
 
 export type ReviewSeverity = "alert" | "detection" | "significant_motion";
 
-type ReviewData = {
+export type ReviewData = {
   audio: string[];
   detections: string[];
   objects: string[];
+  sub_labels?: [string, number][];
   significant_motion_areas: number[];
   zones: string[];
 };
