@@ -100,7 +100,7 @@ class ReviewSegmentMaintainer(threading.Thread):
         active_objects = [
             o
             for o in objects
-            if o["motionless_count"] > camera_config.detect.stationary.threshold
+            if o["motionless_count"] < camera_config.detect.stationary.threshold
         ]
 
         if len(active_objects) > 0:
@@ -114,7 +114,8 @@ class ReviewSegmentMaintainer(threading.Thread):
                 segment.objects.add(object["label"])
 
                 if (
-                    object["has_clip"]
+                    segment.severity == SeverityEnum.detection
+                    and object["has_clip"]
                     and object["label"] in camera_config.objects.alert
                 ):
                     segment.severity = SeverityEnum.alert
@@ -125,11 +126,13 @@ class ReviewSegmentMaintainer(threading.Thread):
             segment.severity == SeverityEnum.signification_motion and len(motion) >= 20
         ):
             segment.last_update = frame_time
-        elif frame_time > (
-            segment.last_update
-            + (camera_config.detect.max_disappeared / camera_config.detect.fps)
-        ):
-            self.end_segment(segment)
+        else:
+            if segment.severity == SeverityEnum.alert and frame_time > (
+                segment.last_update + 60
+            ):
+                self.end_segment(segment)
+            elif frame_time > (segment.last_update + 10):
+                self.end_segment(segment)
 
     def check_if_new_segment(
         self,
@@ -143,7 +146,7 @@ class ReviewSegmentMaintainer(threading.Thread):
         active_objects = [
             o
             for o in objects
-            if o["motionless_count"] > camera_config.detect.stationary.threshold
+            if o["motionless_count"] < camera_config.detect.stationary.threshold
         ]
 
         if len(active_objects) > 0:
