@@ -91,7 +91,7 @@ function useDraggableHandler({
 
         const segmentIndex = Math.floor(newHandlePosition / segmentHeight);
         const segmentStartTime = alignDateToTimeline(
-          Math.floor(timelineStart - segmentIndex * segmentDuration * 1000)
+          timelineStart - segmentIndex * segmentDuration
         );
 
         if (showHandlebar) {
@@ -100,7 +100,7 @@ function useDraggableHandler({
             thumb.style.top = `${newHandlePosition - segmentHeight}px`;
             if (currentTimeRef.current) {
               currentTimeRef.current.textContent = new Date(
-                segmentStartTime
+                segmentStartTime*1000
               ).toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",

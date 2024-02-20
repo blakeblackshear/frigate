@@ -89,7 +89,7 @@ export function EventReviewTimeline({
     const segmentAlignedTime = alignDateToTimeline(timelineStart);
 
     return Array.from({ length: segmentCount }, (_, index) => {
-      const segmentTime = segmentAlignedTime - index * segmentDuration * 1000;
+      const segmentTime = segmentAlignedTime - index * segmentDuration;
 
       return (
         <EventSegment
@@ -134,7 +134,7 @@ export function EventReviewTimeline({
       requestAnimationFrame(() => {
         if (currentTimeRef.current && currentTimeSegment) {
           currentTimeRef.current.textContent = new Date(
-            currentTimeSegment
+            currentTimeSegment * 1000
           ).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
@@ -156,7 +156,7 @@ export function EventReviewTimeline({
       // Calculate the segment index corresponding to the target time
       const alignedHandlebarTime = alignDateToTimeline(handlebarTime);
       const segmentIndex = Math.ceil(
-        (timelineStart - alignedHandlebarTime) / (segmentDuration * 1000)
+        (timelineStart - alignedHandlebarTime) / segmentDuration
       );
 
       // Calculate the top position based on the segment index

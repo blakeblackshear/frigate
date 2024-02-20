@@ -7,14 +7,14 @@ export const useSegmentUtils = (
   severityType: string,
 ) => {
   const getSegmentStart = useCallback((time: number): number => {
-    return Math.floor(time / (segmentDuration * 1000)) * (segmentDuration * 1000);
+    return Math.floor(time / (segmentDuration)) * (segmentDuration);
   }, [segmentDuration]);
 
     const getSegmentEnd = useCallback((time: number | undefined): number => {
         if (time) {
-            return Math.ceil(time / (segmentDuration * 1000)) * (segmentDuration * 1000);
+            return Math.ceil(time / (segmentDuration)) * (segmentDuration);
         } else {
-            return Date.now()+(segmentDuration*1000);
+            return (Date.now()/1000)+(segmentDuration);
         }
   }, [segmentDuration]);
 
@@ -61,8 +61,8 @@ export const useSegmentUtils = (
 
   const shouldShowRoundedCorners = useCallback(
     (segmentTime: number): boolean => {
-      const prevSegmentTime = segmentTime - segmentDuration * 1000;
-      const nextSegmentTime = segmentTime + segmentDuration * 1000;
+      const prevSegmentTime = segmentTime - segmentDuration;
+      const nextSegmentTime = segmentTime + segmentDuration;
 
       const hasPrevEvent = events.some((e) => {
         return (

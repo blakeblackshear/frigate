@@ -46,7 +46,7 @@ function MinimapBounds({
     <>
       {isFirstSegmentInMinimap && (
         <div className="absolute inset-0 -bottom-5 w-full flex items-center justify-center text-xs text-primary font-medium z-20 text-center text-[9px]">
-          {new Date(alignedMinimapStartTime).toLocaleTimeString([], {
+          {new Date(alignedMinimapStartTime * 1000).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
             month: "short",
@@ -57,7 +57,7 @@ function MinimapBounds({
 
       {isLastSegmentInMinimap && (
         <div className="absolute inset-0 -top-1 w-full flex items-center justify-center text-xs text-primary font-medium z-20 text-center text-[9px]">
-          {new Date(alignedMinimapEndTime).toLocaleTimeString([], {
+          {new Date(alignedMinimapEndTime * 1000).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
             month: "short",
@@ -153,11 +153,8 @@ export function EventSegment({
     [shouldShowRoundedCorners, segmentTime]
   );
 
-  const timestamp = useMemo(() => new Date(segmentTime), [segmentTime]);
-  const segmentKey = useMemo(
-    () => Math.floor(segmentTime / 1000),
-    [segmentTime]
-  );
+  const timestamp = useMemo(() => new Date(segmentTime * 1000), [segmentTime]);
+  const segmentKey = useMemo(() => segmentTime, [segmentTime]);
 
   const alignedMinimapStartTime = useMemo(
     () => alignDateToTimeline(minimapStartTime ?? 0),

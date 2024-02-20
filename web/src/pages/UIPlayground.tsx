@@ -59,12 +59,12 @@ function eventsToScrubberItems(events: Event[]): ScrubberItem[] {
 }
 
 const generateRandomEvent = (): Event => {
-  const start_time = Date.now() - Math.random() * 3600000 * 3;
-  const end_time = start_time + Math.random() * 360000;
+  const start_time = Math.floor(Date.now() / 1000) - Math.random() * 60 * 60;
+  const end_time = Math.floor(start_time + Math.random() * 60 * 10);
   const severities = ["motion", "detection", "alert"];
   const severity = severities[Math.floor(Math.random() * severities.length)];
   const has_been_reviewed = Math.random() < 0.2;
-  const id = new Date(start_time).toISOString(); // Date string as mock ID
+  const id = new Date(start_time * 1000).toISOString(); // Date string as mock ID
   return { id, start_time, end_time, severity, has_been_reviewed };
 };
 
@@ -91,6 +91,7 @@ function UIPlayground() {
   useMemo(() => {
     const initialEvents = Array.from({ length: 50 }, generateRandomEvent);
     setMockEvents(initialEvents);
+    console.log(initialEvents);
   }, []);
 
   return (
@@ -161,13 +162,13 @@ function UIPlayground() {
           <EventReviewTimeline
             segmentDuration={60} // seconds per segment
             timestampSpread={15} // minutes between each major timestamp
-            timelineStart={Date.now()} // start of the timeline - all times are numeric, not Date objects
+            timelineStart={Math.floor(Date.now() / 1000)} // start of the timeline - all times are numeric, not Date objects
             timelineDuration={24 * 60 * 60} // in minutes, defaults to 24 hours
             showHandlebar // show / hide the handlebar
-            handlebarTime={Date.now() - 27 * 60 * 1000} // set the time of the handlebar
+            handlebarTime={Math.floor(Date.now() / 1000) - 27 * 60} // set the time of the handlebar
             showMinimap // show / hide the minimap
-            minimapStartTime={Date.now() - 35 * 60 * 1000} // start time of the minimap - the earlier time (eg 1:00pm)
-            minimapEndTime={Date.now() - 21 * 60 * 1000} // end of the minimap - the later time (eg 3:00pm)
+            minimapStartTime={Math.floor(Date.now() / 1000) - 35 * 60} // start time of the minimap - the earlier time (eg 1:00pm)
+            minimapEndTime={Math.floor(Date.now() / 1000) - 21 * 60} // end of the minimap - the later time (eg 3:00pm)
             events={mockEvents} // events, including new has_been_reviewed and severity properties
             severityType={"alert"} // choose the severity type for the middle line - all other severity types are to the right
             contentRef={contentRef} // optional content ref where previews are, can be used for observing/scrolling later
