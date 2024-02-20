@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import Heading from "@/components/ui/heading";
 import ActivityScrubber, {
   ScrubberItem,
@@ -9,6 +9,7 @@ import { Event } from "@/types/event";
 import ActivityIndicator from "@/components/ui/activity-indicator";
 import { useApiHost } from "@/api";
 import TimelineScrubber from "@/components/playground/TimelineScrubber";
+import { ReviewTimeline } from "@/components/timeline/ReviewTimeline";
 
 // Color data
 const colors = [
@@ -57,9 +58,21 @@ function eventsToScrubberItems(events: Event[]): ScrubberItem[] {
   }));
 }
 
+const generateRandomEvent = (): Event => {
+  const start_time = Date.now() - Math.random() * 3600000 * 3;
+  const end_time = start_time + Math.random() * 36000;
+  const severities = ["motion", "detection", "alert"];
+  const severity = severities[Math.floor(Math.random() * severities.length)];
+  const has_been_reviewed = Math.random() < 0.2;
+  const id = new Date(start_time).toISOString(); // Date string as mock ID
+  return { id, start_time, end_time, severity, has_been_reviewed };
+};
+
 function UIPlayground() {
   const { data: config } = useSWR<FrigateConfig>("config");
   const [timeline, setTimeline] = useState<string | undefined>(undefined);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [mockEvents, setMockEvents] = useState<Event[]>([]);
 
   const onSelect = useCallback(({ items }: { items: string[] }) => {
     setTimeline(items[0]);
@@ -74,6 +87,11 @@ function UIPlayground() {
     "events",
     { limit: 10, after: recentTimestamp },
   ]);
+
+  useMemo(() => {
+    const initialEvents = Array.from({ length: 50 }, generateRandomEvent);
+    setMockEvents(initialEvents);
+  }, []);
 
   return (
     <>
@@ -111,25 +129,50 @@ function UIPlayground() {
         </div>
       )}
 
-      <Heading as="h4" className="my-5">
-        Color scheme
-      </Heading>
-      <p className="text-small">
-        Colors as set by the current theme. See the{" "}
-        <a className="underline" href="https://ui.shadcn.com/docs/theming">
-          shadcn theming docs
-        </a>{" "}
-        for usage.
-      </p>
+      <div className="flex">
+        <div className="flex-grow">
+          <div ref={contentRef}>
+            <Heading as="h4" className="my-5">
+              Color scheme
+            </Heading>
+            <p className="text-small">
+              Colors as set by the current theme. See the{" "}
+              <a
+                className="underline"
+                href="https://ui.shadcn.com/docs/theming"
+              >
+                shadcn theming docs
+              </a>{" "}
+              for usage.
+            </p>
 
-      <div className="w-72 my-5">
-        {colors.map((color, index) => (
-          <ColorSwatch
-            key={index}
-            name={color}
-            value={`hsl(var(--${color}))`}
+            <div className="w-72 my-5">
+              {colors.map((color, index) => (
+                <ColorSwatch
+                  key={index}
+                  name={color}
+                  value={`hsl(var(--${color}))`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="flex-none">
+          <ReviewTimeline
+            segmentDuration={60}
+            timestampSpread={15}
+            timelineStart={Date.now()}
+            timelineDuration={24 * 60 * 60}
+            showHandlebar
+            handlebarTime={Date.now() - 27 * 60 * 1000}
+            showMinimap
+            minimapStartTime={Date.now() - 35 * 60 * 1000}
+            minimapEndTime={Date.now() - 21 * 60 * 1000}
+            events={mockEvents}
+            severityType={"alert"}
+            contentRef={contentRef}
           />
-        ))}
+        </div>
       </div>
     </>
   );
