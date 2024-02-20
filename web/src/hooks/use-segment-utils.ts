@@ -121,15 +121,6 @@ export const useSegmentUtils = (
         roundBottom = !hasPrevSeverityEvent || !hasPrevOtherEvent;
       }
 
-      if (segmentTime == 1708459740) {
-        console.log("hasOverlappingSeverityEvent: " + hasOverlappingSeverityEvent)
-        console.log("hasPrevSeverityEvent: " + hasPrevSeverityEvent)
-        console.log("hasNextSeverityEvent: " + hasNextSeverityEvent)
-        console.log("hasOverlappingOtherEvent: " + hasOverlappingOtherEvent)
-        console.log("hasPrevOtherEvent: " + hasPrevOtherEvent)
-        console.log("hasNextOtherEvent: "+hasNextOtherEvent)
-      }
-
       return {
         roundTop,
         roundBottom
