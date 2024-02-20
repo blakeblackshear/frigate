@@ -67,6 +67,18 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        severity_alert: {
+          DEFAULT: "hsl(var(--severity_alert))",
+          dimmed: "hsl(var(--severity_alert_dimmed))",
+        },
+        severity_detection: {
+          DEFAULT: "hsl(var(--severity_detection))",
+          dimmed: "hsl(var(--severity_detection_dimmed))",
+        },
+        severity_motion: {
+          DEFAULT: "hsl(var(--severity_motion))",
+          dimmed: "hsl(var(--severity_motion_dimmed))",
+        },
       },
       keyframes: {
         "accordion-down": {

@@ -29,7 +29,7 @@ function useDraggableHandler({
   currentTimeRef,
 }: DragHandlerProps) {
   const handleMouseDown = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
+    (e: React.MouseEvent<HTMLDivElement>|React.TouchEvent<HTMLDivElement>) => {
       e.preventDefault();
       e.stopPropagation();
       setIsDragging(true);
@@ -38,7 +38,7 @@ function useDraggableHandler({
   );
 
   const handleMouseUp = useCallback(
-    (e: MouseEvent) => {
+    (e: MouseEvent|TouchEvent) => {
       e.preventDefault();
       e.stopPropagation();
       if (isDragging) {
@@ -49,7 +49,7 @@ function useDraggableHandler({
   );
 
   const handleMouseMove = useCallback(
-    (e: MouseEvent) => {
+    (e: MouseEvent|TouchEvent) => {
       if (!contentRef.current || !timelineRef.current || !scrollTimeRef.current) {
         return;
       }

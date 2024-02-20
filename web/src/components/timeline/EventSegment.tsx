@@ -189,10 +189,10 @@ export function EventSegment({
   const segmentClasses = `flex flex-row ${
     showMinimap
       ? isInMinimapRange
-        ? "bg-muted"
+        ? "bg-card"
         : isLastSegmentInMinimap
           ? ""
-          : "opacity-80"
+          : "opacity-70"
       : ""
   } ${
     isFirstSegmentInMinimap || isLastSegmentInMinimap
@@ -202,12 +202,14 @@ export function EventSegment({
 
   const severityColors: { [key: number]: string } = {
     1: reviewed
-      ? "from-yellow-200/30 to-yellow-400/30"
-      : "from-yellow-200 to-yellow-400",
+      ? "from-severity_motion-dimmed/30 to-severity_motion/30"
+      : "from-severity_motion-dimmed to-severity_motion",
     2: reviewed
-      ? "from-orange-400/30 to-orange-600/30"
-      : "from-orange-400 to-orange-600",
-    3: reviewed ? "from-red-500/30 to-red-800/30" : "from-red-500 to-red-800",
+      ? "from-severity_detection-dimmed/30 to-severity_detection/30"
+      : "from-severity_detection-dimmed to-severity_detection",
+    3: reviewed
+      ? "from-severity_alert-dimmed/30 to-severity_alert/30"
+      : "from-severity_alert-dimmed to-severity_alert",
   };
 
   return (

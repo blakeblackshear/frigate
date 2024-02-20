@@ -146,7 +146,7 @@ function UIPlayground() {
               for usage.
             </p>
 
-            <div className="w-72 my-5">
+            <div className="my-5">
               {colors.map((color, index) => (
                 <ColorSwatch
                   key={index}

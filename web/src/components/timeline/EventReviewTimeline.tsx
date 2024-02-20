@@ -93,6 +93,7 @@ export function EventReviewTimeline({
 
       return (
         <EventSegment
+          key={segmentTime}
           events={events}
           segmentDuration={segmentDuration}
           segmentTime={segmentTime}
@@ -203,7 +204,7 @@ export function EventReviewTimeline({
   return (
     <div
       ref={timelineRef}
-      className={`relative md:w-[100px] h-screen overflow-y-scroll no-scrollbar ${
+      className={`relative w-[120px] md:w-[100px] h-[100dvh] overflow-y-scroll no-scrollbar bg-secondary ${
         isDragging && showHandlebar ? "cursor-grabbing" : "cursor-auto"
       }`}
     >
@@ -219,7 +220,7 @@ export function EventReviewTimeline({
               onMouseDown={handleMouseDown}
             >
               <div
-                className={`bg-red-500 rounded-full mx-auto ${
+                className={`bg-destructive rounded-full mx-auto ${
                   segmentDuration < 60 ? "w-20" : "w-16"
                 } h-5 flex items-center justify-center`}
               >
@@ -228,7 +229,7 @@ export function EventReviewTimeline({
                   className="text-white text-xs z-10"
                 ></div>
               </div>
-              <div className="absolute h-1 w-full bg-red-500 top-1/2 transform -translate-y-1/2"></div>
+              <div className="absolute h-1 w-full bg-destructive top-1/2 transform -translate-y-1/2"></div>
             </div>
           </div>
         </div>
