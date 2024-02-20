@@ -65,7 +65,6 @@ class PendingReviewSegment:
     def update_frame(
         self, camera_config: CameraConfig, frame, objects: list[TrackedObject]
     ):
-        self.frame_active_count = len(objects)
         min_x = camera_config.frame_shape[1]
         min_y = camera_config.frame_shape[0]
         max_x = 0
@@ -86,13 +85,13 @@ class PendingReviewSegment:
         if not region:
             return
 
+        self.frame_active_count = len(objects)
         color_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
         color_frame = color_frame[region[1] : region[3], region[0] : region[2]]
         width = int(THUMB_HEIGHT * color_frame.shape[1] / color_frame.shape[0])
         self.frame = cv2.resize(
             color_frame, dsize=(width, THUMB_HEIGHT), interpolation=cv2.INTER_AREA
         )
-        cv2.imwrite(f"/media/frigate/frames/thumb_{self.id}.jpg", self.frame)
 
     def end(self) -> dict:
         path = os.path.join(CLIPS_DIR, f"thumb-{self.camera}-{self.id}.jpg")
@@ -148,10 +147,13 @@ class ReviewSegmentMaintainer(threading.Thread):
     ) -> None:
         """Validate if existing review segment should continue."""
         camera_config = self.config.cameras[segment.camera]
+
+        # get objects that are not stationary and detected in this frame
         active_objects = [
             o
             for o in objects
             if o["motionless_count"] < camera_config.detect.stationary.threshold
+            and o["frame_time"] == frame_time
         ]
 
         if len(active_objects) > 0:
@@ -163,13 +165,11 @@ class ReviewSegmentMaintainer(threading.Thread):
 
             if len(active_objects) > segment.frame_active_count:
                 frame_id = f"{camera_config.name}{frame_time}"
-                logger.error(f"get frame {frame_id}")
                 yuv_frame = self.frame_manager.get(
                     frame_id, camera_config.frame_shape_yuv
                 )
                 segment.update_frame(camera_config, yuv_frame, active_objects)
                 self.frame_manager.close(frame_id)
-                logger.error(f"close frame {frame_id}")
 
             for object in active_objects:
                 segment.detections.add(object["id"])
@@ -212,6 +212,7 @@ class ReviewSegmentMaintainer(threading.Thread):
             o
             for o in objects
             if o["motionless_count"] < camera_config.detect.stationary.threshold
+            and o["frame_time"] == frame_time
         ]
 
         if len(active_objects) > 0:
