@@ -211,7 +211,6 @@ export default function Events() {
       <div className="flex flex-wrap gap-2 mt-2">
         {reviewItems[severity]?.map((value, segIdx) => {
           const lastRow = segIdx == reviewItems[severity].length - 1;
-          const detectConfig = config.cameras[value.camera].detect;
           const relevantPreview = Object.values(allPreviews || []).find(
             (preview) =>
               preview.camera == value.camera &&
@@ -223,10 +222,7 @@ export default function Events() {
             <div key={value.id}>
               <div
                 ref={lastRow ? lastReviewRef : null}
-                className="relative h-[234px] rounded-lg overflow-hidden"
-                style={{
-                  aspectRatio: detectConfig.width / detectConfig.height,
-                }}
+                className="relative h-[234px] aspect-video rounded-lg overflow-hidden"
               >
                 <PreviewThumbnailPlayer
                   review={value}

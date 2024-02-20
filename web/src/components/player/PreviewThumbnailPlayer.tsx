@@ -2,7 +2,7 @@ import VideoPlayer from "./VideoPlayer";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useApiHost } from "@/api";
 import Player from "video.js/dist/types/player";
-import { formatUnixTimestampToDateTime, isCurrentHour } from "@/utils/dateUtil";
+import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { isSafari } from "@/utils/browserUtil";
 import { ReviewSegment } from "@/types/review";
 import { Slider } from "../ui/slider";
@@ -34,12 +34,12 @@ export default function PreviewThumbnailPlayer({
   setReviewed,
   onClick,
 }: PreviewPlayerProps) {
+  const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
   const playerRef = useRef<Player | null>(null);
 
   const [visible, setVisible] = useState(false);
   const [hover, setHover] = useState(false);
-  const [isInitiallyVisible, setIsInitiallyVisible] = useState(false);
   const [progress, setProgress] = useState(0);
 
   const onPlayback = useCallback(
@@ -48,24 +48,18 @@ export default function PreviewThumbnailPlayer({
         return;
       }
 
-      if (!playerRef.current) {
-        if (isHovered) {
-          setIsInitiallyVisible(true);
-        }
-
-        return;
-      }
-
       if (isHovered) {
         setHover(true);
-        playerRef.current.play();
       } else {
         setHover(false);
         setProgress(0);
-        playerRef.current.pause();
-        playerRef.current.currentTime(
-          review.start_time - relevantPreview.start
-        );
+
+        if (playerRef.current) {
+          playerRef.current.pause();
+          playerRef.current.currentTime(
+            review.start_time - relevantPreview.start
+          );
+        }
       }
     },
     [relevantPreview, review, playerRef]
@@ -127,17 +121,23 @@ export default function PreviewThumbnailPlayer({
       onMouseEnter={() => onPlayback(true)}
       onMouseLeave={() => onPlayback(false)}
     >
-      <PreviewContent
-        playerRef={playerRef}
-        review={review}
-        relevantPreview={relevantPreview}
-        isVisible={visible}
-        isInitiallyVisible={isInitiallyVisible}
-        isMobile={isMobile}
-        setProgress={setProgress}
-        setReviewed={setReviewed}
-        onClick={onClick}
-      />
+      {hover ? (
+        <PreviewContent
+          playerRef={playerRef}
+          review={review}
+          relevantPreview={relevantPreview}
+          isVisible={visible}
+          isMobile={isMobile}
+          setProgress={setProgress}
+          setReviewed={setReviewed}
+          onClick={onClick}
+        />
+      ) : (
+        <img
+          className="h-full w-full"
+          src={`${apiHost}${review.thumb_path.replace("/media/frigate/", "")}`}
+        />
+      )}
       {!hover &&
         (review.severity == "alert" || review.severity == "detection") && (
           <div className="absolute top-1 left-[6px] flex gap-1">
@@ -184,7 +184,6 @@ type PreviewContentProps = {
   review: ReviewSegment;
   relevantPreview: Preview | undefined;
   isVisible: boolean;
-  isInitiallyVisible: boolean;
   isMobile: boolean;
   setProgress?: (progress: number) => void;
   setReviewed?: () => void;
@@ -195,13 +194,11 @@ function PreviewContent({
   review,
   relevantPreview,
   isVisible,
-  isInitiallyVisible,
   isMobile,
   setProgress,
   setReviewed,
   onClick,
 }: PreviewContentProps) {
-  const apiHost = useApiHost();
   const slowPlayack = isSafari();
 
   // handle touchstart -> touchend as click
@@ -228,23 +225,7 @@ function PreviewContent({
     });
   }, [playerRef, touchStart]);
 
-  if (relevantPreview && !isVisible) {
-    return <div />;
-  } else if (!relevantPreview && isCurrentHour(review.start_time)) {
-    return (
-      <img
-        className="w-full"
-        src={`${apiHost}api/preview/${review.camera}/${review.start_time}/thumbnail.jpg`}
-      />
-    );
-  } else if (!relevantPreview && !isCurrentHour(review.start_time)) {
-    return (
-      <img
-        className="w-[160px]"
-        src={`${apiHost}api/events/${review.id}/thumbnail.jpg`}
-      />
-    );
-  } else {
+  if (relevantPreview && isVisible) {
     return (
       <VideoPlayer
         options={{
@@ -253,6 +234,7 @@ function PreviewContent({
           controls: false,
           muted: true,
           fluid: true,
+          aspectRatio: '16:9',
           loadingSpinner: false,
           sources: relevantPreview
             ? [
@@ -272,10 +254,6 @@ function PreviewContent({
           }
 
           const playerStartTime = review.start_time - relevantPreview.start;
-
-          if (!isInitiallyVisible) {
-            player.pause(); // autoplay + pause is required for iOS
-          }
 
           player.playbackRate(slowPlayack ? 2 : 8);
           player.currentTime(playerStartTime);
