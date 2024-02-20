@@ -11,7 +11,7 @@ import EventSegment from "./EventSegment";
 import { useEventUtils } from "@/hooks/use-event-utils";
 import { Event } from "@/types/event";
 
-export type ReviewTimelineProps = {
+export type EventReviewTimelineProps = {
   segmentDuration: number;
   timestampSpread: number;
   timelineStart: number;
@@ -26,7 +26,7 @@ export type ReviewTimelineProps = {
   contentRef: RefObject<HTMLDivElement>;
 };
 
-export function ReviewTimeline({
+export function EventReviewTimeline({
   segmentDuration,
   timestampSpread,
   timelineStart,
@@ -39,7 +39,7 @@ export function ReviewTimeline({
   events,
   severityType,
   contentRef,
-}: ReviewTimelineProps) {
+}: EventReviewTimelineProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [currentTimeSegment, setCurrentTimeSegment] = useState<number>(0);
   const scrollTimeRef = useRef<HTMLDivElement>(null);
@@ -203,7 +203,7 @@ export function ReviewTimeline({
   return (
     <div
       ref={timelineRef}
-      className={`relative w-[100px] h-screen overflow-y-scroll no-scrollbar ${
+      className={`relative md:w-[100px] h-screen overflow-y-scroll no-scrollbar ${
         isDragging && showHandlebar ? "cursor-grabbing" : "cursor-auto"
       }`}
     >
@@ -237,4 +237,4 @@ export function ReviewTimeline({
   );
 }
 
-export default ReviewTimeline;
+export default EventReviewTimeline;

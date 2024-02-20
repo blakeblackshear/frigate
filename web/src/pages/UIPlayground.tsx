@@ -9,7 +9,7 @@ import { Event } from "@/types/event";
 import ActivityIndicator from "@/components/ui/activity-indicator";
 import { useApiHost } from "@/api";
 import TimelineScrubber from "@/components/playground/TimelineScrubber";
-import { ReviewTimeline } from "@/components/timeline/ReviewTimeline";
+import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
 
 // Color data
 const colors = [
@@ -60,7 +60,7 @@ function eventsToScrubberItems(events: Event[]): ScrubberItem[] {
 
 const generateRandomEvent = (): Event => {
   const start_time = Date.now() - Math.random() * 3600000 * 3;
-  const end_time = start_time + Math.random() * 36000;
+  const end_time = start_time + Math.random() * 360000;
   const severities = ["motion", "detection", "alert"];
   const severity = severities[Math.floor(Math.random() * severities.length)];
   const has_been_reviewed = Math.random() < 0.2;
@@ -158,7 +158,7 @@ function UIPlayground() {
           </div>
         </div>
         <div className="flex-none">
-          <ReviewTimeline
+          <EventReviewTimeline
             segmentDuration={60} // seconds per segment
             timestampSpread={15} // minutes between each major timestamp
             timelineStart={Date.now()} // start of the timeline - all times are numeric, not Date objects

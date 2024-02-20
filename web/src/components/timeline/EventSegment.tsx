@@ -14,6 +14,109 @@ type EventSegmentProps = {
   severityType: string;
 };
 
+type MinimapSegmentProps = {
+  isFirstSegmentInMinimap: boolean;
+  isLastSegmentInMinimap: boolean;
+  alignedMinimapStartTime: number;
+  alignedMinimapEndTime: number;
+};
+
+type TickSegmentProps = {
+  isFirstSegmentInMinimap: boolean;
+  isLastSegmentInMinimap: boolean;
+  timestamp: Date;
+  timestampSpread: number;
+};
+
+type TimestampSegmentProps = {
+  isFirstSegmentInMinimap: boolean;
+  isLastSegmentInMinimap: boolean;
+  timestamp: Date;
+  timestampSpread: number;
+  segmentKey: number;
+};
+
+function MinimapBounds({
+  isFirstSegmentInMinimap,
+  isLastSegmentInMinimap,
+  alignedMinimapStartTime,
+  alignedMinimapEndTime,
+}: MinimapSegmentProps) {
+  return (
+    <>
+      {isFirstSegmentInMinimap && (
+        <div className="absolute inset-0 -bottom-5 w-full flex items-center justify-center text-xs text-primary font-medium z-20 text-center text-[9px]">
+          {new Date(alignedMinimapStartTime).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+            month: "short",
+            day: "2-digit",
+          })}
+        </div>
+      )}
+
+      {isLastSegmentInMinimap && (
+        <div className="absolute inset-0 -top-1 w-full flex items-center justify-center text-xs text-primary font-medium z-20 text-center text-[9px]">
+          {new Date(alignedMinimapEndTime).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+            month: "short",
+            day: "2-digit",
+          })}
+        </div>
+      )}
+    </>
+  );
+}
+
+function Tick({
+  isFirstSegmentInMinimap,
+  isLastSegmentInMinimap,
+  timestamp,
+  timestampSpread,
+}: TickSegmentProps) {
+  return (
+    <div className="w-5 h-2 flex justify-left items-end">
+      {!isFirstSegmentInMinimap && !isLastSegmentInMinimap && (
+        <div
+          className={`h-0.5 ${
+            timestamp.getMinutes() % timestampSpread === 0 &&
+            timestamp.getSeconds() === 0
+              ? "w-4 bg-gray-400"
+              : "w-2 bg-gray-600"
+          }`}
+        ></div>
+      )}
+    </div>
+  );
+}
+
+function Timestamp({
+  isFirstSegmentInMinimap,
+  isLastSegmentInMinimap,
+  timestamp,
+  timestampSpread,
+  segmentKey,
+}: TimestampSegmentProps) {
+  return (
+    <div className="w-10 h-2 flex justify-left items-top z-10">
+      {!isFirstSegmentInMinimap && !isLastSegmentInMinimap && (
+        <div
+          key={`${segmentKey}_timestamp`}
+          className="text-[8px] text-gray-400"
+        >
+          {timestamp.getMinutes() % timestampSpread === 0 &&
+            timestamp.getSeconds() === 0 &&
+            timestamp.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function EventSegment({
   events,
   segmentTime,
@@ -97,56 +200,39 @@ export function EventSegment({
       : ""
   }`;
 
+  const severityColors: { [key: number]: string } = {
+    1: reviewed
+      ? "from-yellow-200/30 to-yellow-400/30"
+      : "from-yellow-200 to-yellow-400",
+    2: reviewed
+      ? "from-orange-400/30 to-orange-600/30"
+      : "from-orange-400 to-orange-600",
+    3: reviewed ? "from-red-500/30 to-red-800/30" : "from-red-500 to-red-800",
+  };
+
   return (
     <div key={segmentKey} className={segmentClasses}>
-      {isFirstSegmentInMinimap && (
-        <div className="absolute inset-0 -bottom-5 w-full flex items-center justify-center text-xs text-primary font-medium z-20 text-center text-[9px]">
-          {new Date(alignedMinimapStartTime).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-            month: "short",
-            day: "2-digit",
-          })}
-        </div>
-      )}
+      <MinimapBounds
+        isFirstSegmentInMinimap={isFirstSegmentInMinimap}
+        isLastSegmentInMinimap={isLastSegmentInMinimap}
+        alignedMinimapStartTime={alignedMinimapStartTime}
+        alignedMinimapEndTime={alignedMinimapEndTime}
+      />
 
-      {isLastSegmentInMinimap && (
-        <div className="absolute inset-0 -top-1 w-full flex items-center justify-center text-xs text-primary font-medium z-20 text-center text-[9px]">
-          {new Date(alignedMinimapEndTime).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-            month: "short",
-            day: "2-digit",
-          })}
-        </div>
-      )}
-      <div className="w-5 h-2 flex justify-left items-end">
-        {!isFirstSegmentInMinimap && !isLastSegmentInMinimap && (
-          <div
-            className={`h-0.5 ${
-              timestamp.getMinutes() % timestampSpread === 0 &&
-              timestamp.getSeconds() === 0
-                ? "w-4 bg-gray-400"
-                : "w-2 bg-gray-600"
-            }`}
-          ></div>
-        )}
-      </div>
-      <div className="w-10 h-2 flex justify-left items-top z-10">
-        {!isFirstSegmentInMinimap && !isLastSegmentInMinimap && (
-          <div
-            key={`${segmentKey}_timestamp`}
-            className="text-[8px] text-gray-400"
-          >
-            {timestamp.getMinutes() % timestampSpread === 0 &&
-              timestamp.getSeconds() === 0 &&
-              timestamp.toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-          </div>
-        )}
-      </div>
+      <Tick
+        isFirstSegmentInMinimap={isFirstSegmentInMinimap}
+        isLastSegmentInMinimap={isLastSegmentInMinimap}
+        timestamp={timestamp}
+        timestampSpread={timestampSpread}
+      />
+
+      <Timestamp
+        isFirstSegmentInMinimap={isFirstSegmentInMinimap}
+        isLastSegmentInMinimap={isLastSegmentInMinimap}
+        timestamp={timestamp}
+        timestampSpread={timestampSpread}
+        segmentKey={segmentKey}
+      />
 
       {severity == displaySeverityType && (
         <div className="mr-3 w-2 h-2 flex justify-left items-end">
@@ -164,23 +250,7 @@ export function EventSegment({
               ? "rounded-tl-full rounded-tr-full"
               : ""
           }
-          ${
-            reviewed
-              ? severity === 1
-                ? "from-yellow-200/30 to-yellow-400/30"
-                : severity === 2
-                  ? "from-orange-400/30 to-orange-600/30"
-                  : severity === 3
-                    ? "from-red-500/30 to-red-800/30"
-                    : ""
-              : severity === 1
-                ? "from-yellow-200 to-yellow-400"
-                : severity === 2
-                  ? "from-orange-400 to-orange-600"
-                  : severity === 3
-                    ? "from-red-500 to-red-800"
-                    : ""
-          }
+          ${severityColors[severity]}
 
           `}
           ></div>
@@ -203,23 +273,7 @@ export function EventSegment({
                 ? "rounded-tl-full rounded-tr-full"
                 : ""
             }
-            ${
-              reviewed
-                ? severity === 1
-                  ? "from-yellow-200/30 to-yellow-400/30"
-                  : severity === 2
-                    ? "from-orange-400/30 to-orange-600/30"
-                    : severity === 3
-                      ? "from-red-500/30 to-red-800/30"
-                      : ""
-                : severity === 1
-                  ? "from-yellow-200 to-yellow-400"
-                  : severity === 2
-                    ? "from-orange-400 to-orange-600"
-                    : severity === 3
-                      ? "from-red-500 to-red-800"
-                      : ""
-            }
+            ${severityColors[severity]}
 
           `}
           ></div>
