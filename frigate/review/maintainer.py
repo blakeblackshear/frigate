@@ -147,14 +147,7 @@ class ReviewSegmentMaintainer(threading.Thread):
     ) -> None:
         """Validate if existing review segment should continue."""
         camera_config = self.config.cameras[segment.camera]
-
-        # get objects that are not stationary and detected in this frame
-        active_objects = [
-            o
-            for o in objects
-            if o["motionless_count"] < camera_config.detect.stationary.threshold
-            and o["frame_time"] == frame_time
-        ]
+        active_objects = get_active_objects(frame_time, camera_config, objects)
 
         if len(active_objects) > 0:
             segment.last_update = frame_time
@@ -208,12 +201,7 @@ class ReviewSegmentMaintainer(threading.Thread):
     ) -> None:
         """Check if a new review segment should be created."""
         camera_config = self.config.cameras[camera]
-        active_objects = [
-            o
-            for o in objects
-            if o["motionless_count"] < camera_config.detect.stationary.threshold
-            and o["frame_time"] == frame_time
-        ]
+        active_objects = get_active_objects(frame_time, camera_config, objects)
 
         if len(active_objects) > 0:
             has_sig_object = False
@@ -313,3 +301,16 @@ class ReviewSegmentMaintainer(threading.Thread):
                         SeverityEnum.detection,
                         audio=set(audio_detections),
                     )
+
+
+def get_active_objects(
+    frame_time: float, camera_config: CameraConfig, all_objects: list[TrackedObject]
+) -> list[TrackedObject]:
+    """get active objects for detection."""
+    return [
+        o
+        for o in all_objects
+        if o["motionless_count"] < camera_config.detect.stationary.threshold
+        and o["frame_time"] == frame_time
+        and not o["false_positive"]
+    ]
