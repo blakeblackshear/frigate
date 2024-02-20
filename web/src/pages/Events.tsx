@@ -19,7 +19,7 @@ import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
 
-const API_LIMIT = 100;
+const API_LIMIT = 250;
 
 export default function Events() {
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -245,7 +245,7 @@ export default function Events() {
             value="alert"
             aria-label="Select alerts"
           >
-            <MdCircle className="w-2 h-2 mr-[10px] text-danger" />
+            <MdCircle className="w-2 h-2 mr-[10px] text-severity_alert" />
             Alerts
           </ToggleGroupItem>
           <ToggleGroupItem
@@ -255,7 +255,7 @@ export default function Events() {
             value="detection"
             aria-label="Select detections"
           >
-            <MdCircle className="w-2 h-2 mr-[10px] text-orange-400" />
+            <MdCircle className="w-2 h-2 mr-[10px] text-severity_detection" />
             Detections
           </ToggleGroupItem>
           <ToggleGroupItem
@@ -265,7 +265,7 @@ export default function Events() {
             value="significant_motion"
             aria-label="Select motion"
           >
-            <MdCircle className="w-2 h-2 mr-[10px] text-yellow-400" />
+            <MdCircle className="w-2 h-2 mr-[10px] text-severity_motion" />
             Motion
           </ToggleGroupItem>
         </ToggleGroup>
@@ -314,7 +314,7 @@ export default function Events() {
           );
         })}
       </div>
-      <div className="absolute top-0 right-0 bottom-0">
+      <div className="absolute top-12 right-0 bottom-0">
         <EventReviewTimeline
           segmentDuration={60} // seconds per segment
           timestampSpread={15} // minutes between each major timestamp

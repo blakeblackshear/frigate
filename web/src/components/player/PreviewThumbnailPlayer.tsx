@@ -39,6 +39,7 @@ export default function PreviewThumbnailPlayer({
   const playerRef = useRef<Player | null>(null);
 
   const [visible, setVisible] = useState(false);
+  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>();
   const [hover, setHover] = useState(false);
   const [progress, setProgress] = useState(0);
 
@@ -49,8 +50,17 @@ export default function PreviewThumbnailPlayer({
       }
 
       if (isHovered) {
-        setHover(true);
+        setHoverTimeout(
+          setTimeout(() => {
+            setHover(true);
+            setHoverTimeout(null);
+          }, 500)
+        );
       } else {
+        if (hoverTimeout) {
+          clearTimeout(hoverTimeout);
+        }
+
         setHover(false);
         setProgress(0);
 
@@ -62,7 +72,7 @@ export default function PreviewThumbnailPlayer({
         }
       }
     },
-    [relevantPreview, review, playerRef]
+    [hoverTimeout, relevantPreview, review, playerRef]
   );
 
   const autoPlayObserver = useRef<IntersectionObserver | null>();
@@ -234,7 +244,7 @@ function PreviewContent({
           controls: false,
           muted: true,
           fluid: true,
-          aspectRatio: '16:9',
+          aspectRatio: "16:9",
           loadingSpinner: false,
           sources: relevantPreview
             ? [
@@ -253,7 +263,11 @@ function PreviewContent({
             return;
           }
 
-          const playerStartTime = review.start_time - relevantPreview.start;
+          // start with a bit of padding
+          const playerStartTime = Math.max(
+            0,
+            review.start_time - relevantPreview.start - 8
+          );
 
           player.playbackRate(slowPlayack ? 2 : 8);
           player.currentTime(playerStartTime);
