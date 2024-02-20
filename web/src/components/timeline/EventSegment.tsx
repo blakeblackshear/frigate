@@ -1,6 +1,6 @@
 import { useEventUtils } from "@/hooks/use-event-utils";
 import { useSegmentUtils } from "@/hooks/use-segment-utils";
-import { ReviewSegment } from "@/types/review";
+import { ReviewSegment, ReviewSeverity } from "@/types/review";
 import { useMemo } from "react";
 
 type EventSegmentProps = {
@@ -11,7 +11,7 @@ type EventSegmentProps = {
   showMinimap: boolean;
   minimapStartTime?: number;
   minimapEndTime?: number;
-  severityType: string;
+  severityType: ReviewSeverity;
 };
 
 type MinimapSegmentProps = {

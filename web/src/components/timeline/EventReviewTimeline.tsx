@@ -9,7 +9,7 @@ import {
 } from "react";
 import EventSegment from "./EventSegment";
 import { useEventUtils } from "@/hooks/use-event-utils";
-import { ReviewSegment } from "@/types/review";
+import { ReviewSegment, ReviewSeverity } from "@/types/review";
 
 export type EventReviewTimelineProps = {
   segmentDuration: number;
@@ -22,7 +22,7 @@ export type EventReviewTimelineProps = {
   minimapStartTime?: number;
   minimapEndTime?: number;
   events: ReviewSegment[];
-  severityType: string;
+  severityType: ReviewSeverity;
   contentRef: RefObject<HTMLDivElement>;
 };
 
