@@ -45,6 +45,7 @@ from frigate.models import (
     Recordings,
     RecordingsToDelete,
     Regions,
+    ReviewSegment,
     Timeline,
 )
 from frigate.object_detection import ObjectDetectProcess
@@ -55,6 +56,7 @@ from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.ptz.onvif import OnvifController
 from frigate.record.cleanup import RecordingCleanup
 from frigate.record.record import manage_recordings
+from frigate.review.review import manage_review_segments
 from frigate.stats import StatsEmitter, stats_init
 from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
@@ -283,6 +285,18 @@ class FrigateApp:
         self.processes["recording"] = recording_process.pid or 0
         logger.info(f"Recording process started: {recording_process.pid}")
 
+    def init_review_segment_manager(self) -> None:
+        review_segment_process = mp.Process(
+            target=manage_review_segments,
+            name="review_segment_manager",
+            args=(self.config,),
+        )
+        review_segment_process.daemon = True
+        self.review_segment_process = review_segment_process
+        review_segment_process.start()
+        self.processes["review_segment"] = review_segment_process.pid or 0
+        logger.info(f"Recording process started: {review_segment_process.pid}")
+
     def bind_database(self) -> None:
         """Bind db to the main process."""
         # NOTE: all db accessing processes need to be created before the db can be bound to the main process
@@ -297,7 +311,15 @@ class FrigateApp:
                 60, 10 * len([c for c in self.config.cameras.values() if c.enabled])
             ),
         )
-        models = [Event, Recordings, RecordingsToDelete, Previews, Regions, Timeline]
+        models = [
+            Event,
+            Previews,
+            Recordings,
+            RecordingsToDelete,
+            Regions,
+            ReviewSegment,
+            Timeline,
+        ]
         self.db.bind(models)
 
     def init_stats(self) -> None:
@@ -608,6 +630,7 @@ class FrigateApp:
             self.init_database()
             self.init_onvif()
             self.init_recording_manager()
+            self.init_review_segment_manager()
             self.init_go2rtc()
             self.bind_database()
             self.init_inter_process_communicator()

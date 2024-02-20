@@ -211,6 +211,51 @@ def calculate_region(frame_shape, xmin, ymin, xmax, ymax, model_size, multiplier
     return (x_offset, y_offset, x_offset + size, y_offset + size)
 
 
+def calculate_16_9_crop(frame_shape, xmin, ymin, xmax, ymax, multiplier=1.25):
+    min_size = 200
+
+    # size is the longest edge and divisible by 4
+    x_size = int(xmax - xmin * multiplier)
+
+    if x_size < min_size:
+        x_size = min_size
+
+    y_size = int(ymax - ymin * multiplier)
+
+    if y_size < min_size:
+        y_size = min_size
+
+    # calculate 16x9 using height
+    aspect_y_size = int(9 / 16 * x_size)
+
+    # if 16:9 by height is too small
+    if aspect_y_size < y_size or aspect_y_size > frame_shape[0]:
+        x_size = int((16 / 9) * y_size) // 4 * 4
+
+        if x_size / y_size > 1.8:
+            return None
+    else:
+        y_size = aspect_y_size // 4 * 4
+
+    # x_offset is midpoint of bounding box minus half the size
+    x_offset = int((xmax - xmin) / 2.0 + xmin - x_size / 2.0)
+    # if outside the image
+    if x_offset < 0:
+        x_offset = 0
+    elif x_offset > (frame_shape[1] - x_size):
+        x_offset = max(0, (frame_shape[1] - x_size))
+
+    # y_offset is midpoint of bounding box minus half the size
+    y_offset = int((ymax - ymin) / 2.0 + ymin - y_size / 2.0)
+    # # if outside the image
+    if y_offset < 0:
+        y_offset = 0
+    elif y_offset > (frame_shape[0] - y_size):
+        y_offset = max(0, (frame_shape[0] - y_size))
+
+    return (x_offset, y_offset, x_offset + x_size, y_offset + y_size)
+
+
 def get_yuv_crop(frame_shape, crop):
     # crop should be (x1,y1,x2,y2)
     frame_height = frame_shape[0] // 3 * 2

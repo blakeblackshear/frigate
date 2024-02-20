@@ -70,6 +70,7 @@ MAX_PLAYLIST_SECONDS = 7200  # support 2 hour segments for a single playlist to 
 INSERT_MANY_RECORDINGS = "insert_many_recordings"
 INSERT_PREVIEW = "insert_preview"
 REQUEST_REGION_GRID = "request_region_grid"
+UPSERT_REVIEW_SEGMENT = "upsert_review_segment"
 
 # Autotracking
 

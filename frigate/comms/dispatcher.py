@@ -6,8 +6,13 @@ from typing import Any, Callable, Optional
 
 from frigate.comms.config_updater import ConfigPublisher
 from frigate.config import BirdseyeModeEnum, FrigateConfig
-from frigate.const import INSERT_MANY_RECORDINGS, INSERT_PREVIEW, REQUEST_REGION_GRID
-from frigate.models import Previews, Recordings
+from frigate.const import (
+    INSERT_MANY_RECORDINGS,
+    INSERT_PREVIEW,
+    REQUEST_REGION_GRID,
+    UPSERT_REVIEW_SEGMENT,
+)
+from frigate.models import Previews, Recordings, ReviewSegment
 from frigate.ptz.onvif import OnvifCommandEnum, OnvifController
 from frigate.types import PTZMetricsTypes
 from frigate.util.object import get_camera_regions_grid
@@ -102,6 +107,15 @@ class Dispatcher:
             return grid
         elif topic == INSERT_PREVIEW:
             Previews.insert(payload).execute()
+        elif topic == UPSERT_REVIEW_SEGMENT:
+            (
+                ReviewSegment.insert(payload)
+                .on_conflict(
+                    conflict_target=[ReviewSegment.id],
+                    update=payload,
+                )
+                .execute()
+            )
         else:
             self.publish(topic, payload, retain=False)
 
