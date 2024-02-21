@@ -2,23 +2,26 @@ import VideoPlayer from "./VideoPlayer";
 import React, {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
 import { useApiHost } from "@/api";
 import Player from "video.js/dist/types/player";
-import { AspectRatio } from "../ui/aspect-ratio";
-import { LuPlayCircle } from "react-icons/lu";
-import { isCurrentHour } from "@/utils/dateUtil";
-import { isSafari } from "@/utils/browserUtil";
+import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
+import { ReviewSegment } from "@/types/review";
+import { Slider } from "../ui/slider";
+import { getIconForLabel, getIconForSubLabel } from "@/utils/iconUtil";
+import TimeAgo from "../dynamic/TimeAgo";
+import useSWR from "swr";
+import { FrigateConfig } from "@/types/frigateConfig";
+import { isMobile, isSafari } from "react-device-detect";
 
 type PreviewPlayerProps = {
-  camera: string;
+  review: ReviewSegment;
   relevantPreview?: Preview;
-  startTs: number;
-  eventId: string;
-  isMobile: boolean;
-  onClick?: () => void;
+  autoPlayback?: boolean;
+  setReviewed?: () => void;
 };
 
 type Preview = {
@@ -30,17 +33,43 @@ type Preview = {
 };
 
 export default function PreviewThumbnailPlayer({
-  camera,
+  review,
   relevantPreview,
-  startTs,
-  eventId,
-  isMobile,
-  onClick,
+  autoPlayback = false,
+  setReviewed,
 }: PreviewPlayerProps) {
+  const apiHost = useApiHost();
+  const { data: config } = useSWR<FrigateConfig>("config");
   const playerRef = useRef<Player | null>(null);
 
-  const [visible, setVisible] = useState(false);
-  const [isInitiallyVisible, setIsInitiallyVisible] = useState(false);
+  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>();
+  const [playback, setPlayback] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  const playingBack = useMemo(
+    () => relevantPreview && playback,
+    [playback, autoPlayback, relevantPreview]
+  );
+
+  useEffect(() => {
+    if (!autoPlayback) {
+      setPlayback(false);
+
+      if (hoverTimeout) {
+        clearTimeout(hoverTimeout);
+      }
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      setPlayback(true);
+      setHoverTimeout(null);
+    }, 500);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [autoPlayback]);
 
   const onPlayback = useCallback(
     (isHovered: Boolean) => {
@@ -48,205 +77,181 @@ export default function PreviewThumbnailPlayer({
         return;
       }
 
-      if (!playerRef.current) {
-        if (isHovered) {
-          setIsInitiallyVisible(true);
-        }
-
-        return;
-      }
-
       if (isHovered) {
-        playerRef.current.play();
+        setHoverTimeout(
+          setTimeout(() => {
+            setPlayback(true);
+            setHoverTimeout(null);
+          }, 500)
+        );
       } else {
-        playerRef.current.pause();
-        playerRef.current.currentTime(startTs - relevantPreview.start);
-      }
-    },
-    [relevantPreview, startTs, playerRef]
-  );
-
-  const autoPlayObserver = useRef<IntersectionObserver | null>();
-  const preloadObserver = useRef<IntersectionObserver | null>();
-  const inViewRef = useCallback(
-    (node: HTMLElement | null) => {
-      if (!preloadObserver.current) {
-        try {
-          preloadObserver.current = new IntersectionObserver(
-            (entries) => {
-              const [{ isIntersecting }] = entries;
-              setVisible(isIntersecting);
-            },
-            {
-              threshold: 0,
-              root: document.getElementById("pageRoot"),
-              rootMargin: "10% 0px 25% 0px",
-            }
-          );
-          if (node) preloadObserver.current.observe(node);
-        } catch (e) {
-          // no op
+        if (hoverTimeout) {
+          clearTimeout(hoverTimeout);
         }
-      }
 
-      if (isMobile && !autoPlayObserver.current) {
-        try {
-          autoPlayObserver.current = new IntersectionObserver(
-            (entries) => {
-              const [{ isIntersecting }] = entries;
-              if (isIntersecting) {
-                onPlayback(true);
-              } else {
-                onPlayback(false);
-              }
-            },
-            {
-              threshold: 1.0,
-              root: document.getElementById("pageRoot"),
-              rootMargin: "-10% 0px -25% 0px",
-            }
+        setPlayback(false);
+        setProgress(0);
+
+        if (playerRef.current) {
+          playerRef.current.pause();
+          playerRef.current.currentTime(
+            review.start_time - relevantPreview.start
           );
-          if (node) autoPlayObserver.current.observe(node);
-        } catch (e) {
-          // no op
         }
       }
     },
-    [preloadObserver, autoPlayObserver, onPlayback]
+    [hoverTimeout, relevantPreview, review, playerRef]
   );
 
   return (
-    <AspectRatio
-      ref={relevantPreview ? inViewRef : null}
-      ratio={16 / 9}
-      className="bg-black flex justify-center items-center"
-      onMouseEnter={() => onPlayback(true)}
-      onMouseLeave={() => onPlayback(false)}
+    <div
+      className="relative w-full h-full cursor-pointer"
+      onMouseEnter={isMobile ? undefined : () => onPlayback(true)}
+      onMouseLeave={isMobile ? undefined : () => onPlayback(false)}
     >
-      <PreviewContent
-        playerRef={playerRef}
-        relevantPreview={relevantPreview}
-        isVisible={visible}
-        isInitiallyVisible={isInitiallyVisible}
-        startTs={startTs}
-        camera={camera}
-        eventId={eventId}
-        isMobile={isMobile}
-        onClick={onClick}
-      />
-    </AspectRatio>
+      {playingBack ? (
+        <PreviewContent
+          playerRef={playerRef}
+          review={review}
+          relevantPreview={relevantPreview}
+          playback={playingBack}
+          setProgress={setProgress}
+          setReviewed={setReviewed}
+        />
+      ) : (
+        <img
+          className="h-full w-full"
+          src={`${apiHost}${review.thumb_path.replace("/media/frigate/", "")}`}
+        />
+      )}
+      {!playingBack &&
+        (review.severity == "alert" || review.severity == "detection") && (
+          <div className="absolute top-1 left-[6px] flex gap-1">
+            {review.data.objects.map((object) => {
+              return getIconForLabel(object, "w-3 h-3 text-white");
+            })}
+            {review.data.audio.map((audio) => {
+              return getIconForLabel(audio, "w-3 h-3 text-white");
+            })}
+            {review.data.sub_labels?.map((sub) => {
+              return getIconForSubLabel(sub, "w-3 h-3 text-white");
+            })}
+          </div>
+        )}
+      {!playingBack && (
+        <div className="absolute left-[6px] right-[6px] bottom-1 flex justify-between text-white">
+          <TimeAgo time={review.start_time * 1000} />
+          {config &&
+            formatUnixTimestampToDateTime(review.start_time, {
+              strftime_fmt:
+                config.ui.time_format == "24hour"
+                  ? "%b %-d, %H:%M"
+                  : "%b %-d, %I:%M %p",
+            })}
+        </div>
+      )}
+      <div className="absolute top-0 left-0 right-0 rounded-2xl z-10 w-full h-[30%] bg-gradient-to-b from-black/20 to-transparent pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 rounded-2xl z-10 w-full h-[10%] bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+      {playingBack && (
+        <Slider
+          className="absolute left-0 right-0 bottom-0 z-10"
+          value={[progress]}
+          min={0}
+          step={1}
+          max={100}
+        />
+      )}
+      {!playingBack && review.has_been_reviewed && (
+        <div className="absolute left-0 top-0 bottom-0 right-0 bg-black bg-opacity-60" />
+      )}
+    </div>
   );
 }
 
 type PreviewContentProps = {
   playerRef: React.MutableRefObject<Player | null>;
-  camera: string;
+  review: ReviewSegment;
   relevantPreview: Preview | undefined;
-  eventId: string;
-  isVisible: boolean;
-  isInitiallyVisible: boolean;
-  startTs: number;
-  isMobile: boolean;
-  onClick?: () => void;
+  playback: boolean;
+  setProgress?: (progress: number) => void;
+  setReviewed?: () => void;
 };
 function PreviewContent({
   playerRef,
-  camera,
+  review,
   relevantPreview,
-  eventId,
-  isVisible,
-  isInitiallyVisible,
-  startTs,
-  isMobile,
-  onClick,
+  playback,
+  setProgress,
+  setReviewed,
 }: PreviewContentProps) {
-  const apiHost = useApiHost();
-  const slowPlayack = isSafari();
-
-  // handle touchstart -> touchend as click
-  const [touchStart, setTouchStart] = useState(0);
-  const handleTouchStart = useCallback(() => {
-    setTouchStart(new Date().getTime());
-  }, []);
-  useEffect(() => {
-    if (!isMobile || !playerRef.current || !onClick) {
-      return;
-    }
-
-    playerRef.current.on("touchend", () => {
-      if (!onClick) {
-        return;
-      }
-
-      const touchEnd = new Date().getTime();
-
-      // consider tap less than 100 ms
-      if (touchEnd - touchStart < 100) {
-        onClick();
-      }
-    });
-  }, [playerRef, touchStart]);
-
-  if (relevantPreview && !isVisible) {
-    return <div />;
-  } else if (!relevantPreview && !isCurrentHour(startTs)) {
+  if (relevantPreview && playback) {
     return (
-      <img
-        className="w-[160px]"
-        src={`${apiHost}api/events/${eventId}/thumbnail.jpg`}
+      <VideoPlayer
+        options={{
+          preload: "auto",
+          autoplay: true,
+          controls: false,
+          muted: true,
+          fluid: true,
+          aspectRatio: "16:9",
+          loadingSpinner: false,
+          sources: relevantPreview
+            ? [
+                {
+                  src: `${relevantPreview.src}`,
+                  type: "video/mp4",
+                },
+              ]
+            : [],
+        }}
+        seekOptions={{}}
+        onReady={(player) => {
+          playerRef.current = player;
+
+          if (!relevantPreview) {
+            return;
+          }
+
+          // start with a bit of padding
+          const playerStartTime = Math.max(
+            0,
+            review.start_time - relevantPreview.start - 8
+          );
+
+          player.playbackRate(isSafari ? 2 : 8);
+          player.currentTime(playerStartTime);
+          player.on("timeupdate", () => {
+            if (!setProgress || playerRef.current?.paused()) {
+              return;
+            }
+
+            const playerProgress =
+              (player.currentTime() || 0) - playerStartTime;
+
+            // end with a bit of padding
+            const playerDuration = review.end_time - review.start_time + 8;
+            const playerPercent = (playerProgress / playerDuration) * 100;
+
+            if (
+              setReviewed &&
+              !review.has_been_reviewed &&
+              playerPercent > 50
+            ) {
+              setReviewed();
+            }
+
+            if (playerPercent > 100) {
+              playerRef.current?.pause();
+              setProgress(100.0);
+            } else {
+              setProgress(playerPercent);
+            }
+          });
+        }}
+        onDispose={() => {
+          playerRef.current = null;
+        }}
       />
-    );
-  } else {
-    return (
-      <>
-        <div className="w-full">
-          <VideoPlayer
-            options={{
-              preload: "auto",
-              aspectRatio: "16:9",
-              autoplay: true,
-              controls: false,
-              muted: true,
-              loadingSpinner: false,
-              poster: relevantPreview
-                ? ""
-                : `${apiHost}api/preview/${camera}/${startTs}/thumbnail.jpg`,
-              sources: relevantPreview
-                ? [
-                    {
-                      src: `${relevantPreview.src}`,
-                      type: "video/mp4",
-                    },
-                  ]
-                : [],
-            }}
-            seekOptions={{}}
-            onReady={(player) => {
-              playerRef.current = player;
-
-              if (!relevantPreview) {
-                return;
-              }
-
-              if (!isInitiallyVisible) {
-                player.pause(); // autoplay + pause is required for iOS
-              }
-
-              player.playbackRate(slowPlayack ? 2 : 8);
-              player.currentTime(startTs - relevantPreview.start);
-              if (isMobile && onClick) {
-                player.on("touchstart", handleTouchStart);
-              }
-            }}
-            onDispose={() => {
-              playerRef.current = null;
-            }}
-          />
-        </div>
-        {relevantPreview && (
-          <LuPlayCircle className="absolute z-10 left-1 bottom-1 w-4 h-4 text-white text-opacity-60" />
-        )}
-      </>
     );
   }
 }

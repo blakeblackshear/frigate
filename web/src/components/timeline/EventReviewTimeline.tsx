@@ -47,7 +47,7 @@ export function EventReviewTimeline({
   const currentTimeRef = useRef<HTMLDivElement>(null);
   const observer = useRef<ResizeObserver | null>(null);
   const timelineDuration = useMemo(
-    () => timelineEnd - timelineStart,
+    () => timelineStart - timelineEnd,
     [timelineEnd, timelineStart]
   );
 
@@ -208,7 +208,7 @@ export function EventReviewTimeline({
   return (
     <div
       ref={timelineRef}
-      className={`relative w-[120px] md:w-[100px] h-[100dvh] overflow-y-scroll no-scrollbar bg-secondary ${
+      className={`relative w-[120px] md:w-[100px] h-full overflow-y-scroll no-scrollbar bg-secondary ${
         isDragging && showHandlebar ? "cursor-grabbing" : "cursor-auto"
       }`}
     >

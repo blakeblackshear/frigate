@@ -14,6 +14,7 @@ import Logs from "@/pages/Logs";
 import NoMatch from "@/pages/NoMatch";
 import Settings from "@/pages/Settings";
 import UIPlayground from "./pages/UIPlayground";
+import Events from "./pages/Events";
 
 function App() {
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -27,14 +28,15 @@ function App() {
       <BrowserRouter>
         <Wrapper>
           <Header onToggleNavbar={toggleNavbar} />
-          <div className="grid grid-cols-[auto,1fr] flex-grow-1 overflow-auto">
+          <div className="w-full h-full pt-2 overflow-hidden">
             <Sidebar sheetOpen={sheetOpen} setSheetOpen={setSheetOpen} />
             <div
               id="pageRoot"
-              className="overflow-x-hidden px-4 py-2 w-screen md:w-full"
+              className="absolute left-0 md:left-16 top-16 md:top-2 right-0 bottom-0 overflow-hidden"
             >
               <Routes>
                 <Route path="/" element={<Live />} />
+                <Route path="/events" element={<Events />} />
                 <Route path="/history" element={<History />} />
                 <Route path="/export" element={<Export />} />
                 <Route path="/storage" element={<Storage />} />

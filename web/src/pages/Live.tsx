@@ -5,8 +5,8 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Event as FrigateEvent } from "@/types/event";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { isSafari } from "@/utils/browserUtil";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { isSafari } from "react-device-detect";
 import useSWR from "swr";
 
 function Live() {
@@ -65,7 +65,6 @@ function Live() {
       .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
   }, [config]);
 
-  const safari = isSafari();
   const [windowVisible, setWindowVisible] = useState(true);
   const visibilityListener = useCallback(() => {
     setWindowVisible(document.visibilityState == "visible");
@@ -80,7 +79,7 @@ function Live() {
   }, []);
 
   return (
-    <>
+    <div className="w-full h-full overflow-scroll">
       {events && events.length > 0 && (
         <ScrollArea>
           <TooltipProvider>
@@ -111,12 +110,12 @@ function Live() {
               className={`mb-2 md:mb-0 rounded-2xl bg-black ${grow}`}
               windowVisible={windowVisible}
               cameraConfig={camera}
-              preferredLiveMode={safari ? "webrtc" : "mse"}
+              preferredLiveMode={isSafari ? "webrtc" : "mse"}
             />
           );
         })}
       </div>
-    </>
+    </div>
   );
 }
 
