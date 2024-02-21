@@ -1,22 +1,21 @@
 import VideoPlayer from "./VideoPlayer";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { useApiHost } from "@/api";
 import Player from "video.js/dist/types/player";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
-import { isSafari } from "@/utils/browserUtil";
 import { ReviewSegment } from "@/types/review";
 import { Slider } from "../ui/slider";
 import { getIconForLabel, getIconForSubLabel } from "@/utils/iconUtil";
 import TimeAgo from "../dynamic/TimeAgo";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
+import { isMobile, isSafari } from "react-device-detect";
 
 type PreviewPlayerProps = {
   review: ReviewSegment;
   relevantPreview?: Preview;
-  isMobile: boolean;
+  autoPlayback?: boolean;
   setReviewed?: () => void;
-  onClick?: () => void;
 };
 
 type Preview = {
@@ -30,18 +29,21 @@ type Preview = {
 export default function PreviewThumbnailPlayer({
   review,
   relevantPreview,
-  isMobile,
+  autoPlayback = false,
   setReviewed,
-  onClick,
 }: PreviewPlayerProps) {
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
   const playerRef = useRef<Player | null>(null);
 
-  const [visible, setVisible] = useState(false);
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>();
   const [hover, setHover] = useState(false);
   const [progress, setProgress] = useState(0);
+
+  const playingBack = useMemo(
+    () => relevantPreview && (hover || autoPlayback),
+    [hover, autoPlayback, relevantPreview]
+  );
 
   const onPlayback = useCallback(
     (isHovered: Boolean) => {
@@ -75,72 +77,20 @@ export default function PreviewThumbnailPlayer({
     [hoverTimeout, relevantPreview, review, playerRef]
   );
 
-  const autoPlayObserver = useRef<IntersectionObserver | null>();
-  const preloadObserver = useRef<IntersectionObserver | null>();
-  const inViewRef = useCallback(
-    (node: HTMLElement | null) => {
-      if (!preloadObserver.current) {
-        try {
-          preloadObserver.current = new IntersectionObserver(
-            (entries) => {
-              const [{ isIntersecting }] = entries;
-              setVisible(isIntersecting);
-            },
-            {
-              threshold: 0,
-              root: document.getElementById("pageRoot"),
-              rootMargin: "10% 0px 25% 0px",
-            }
-          );
-          if (node) preloadObserver.current.observe(node);
-        } catch (e) {
-          // no op
-        }
-      }
-
-      if (isMobile && !autoPlayObserver.current) {
-        try {
-          autoPlayObserver.current = new IntersectionObserver(
-            (entries) => {
-              const [{ isIntersecting }] = entries;
-              if (isIntersecting) {
-                onPlayback(true);
-              } else {
-                onPlayback(false);
-              }
-            },
-            {
-              threshold: 1.0,
-              root: document.getElementById("pageRoot"),
-              rootMargin: "-10% 0px -25% 0px",
-            }
-          );
-          if (node) autoPlayObserver.current.observe(node);
-        } catch (e) {
-          // no op
-        }
-      }
-    },
-    [preloadObserver, autoPlayObserver, onPlayback]
-  );
-
   return (
     <div
-      ref={relevantPreview ? inViewRef : null}
       className="relative w-full h-full cursor-pointer"
-      onMouseEnter={() => onPlayback(true)}
-      onMouseLeave={() => onPlayback(false)}
+      onMouseEnter={isMobile ? undefined : () => onPlayback(true)}
+      onMouseLeave={isMobile ? undefined : () => onPlayback(false)}
     >
-      {hover ? (
+      {playingBack ? (
         <PreviewContent
           playerRef={playerRef}
           review={review}
           relevantPreview={relevantPreview}
-          isVisible={isMobile ? visible : true}
-          isMobile={isMobile}
+          playback={playingBack}
           setProgress={setProgress}
           setReviewed={setReviewed}
-          onClick={onClick}
         />
       ) : (
         <img
@@ -148,7 +98,7 @@ export default function PreviewThumbnailPlayer({
           src={`${apiHost}${review.thumb_path.replace("/media/frigate/", "")}`}
         />
       )}
-      {!hover &&
+      {!playingBack &&
         (review.severity == "alert" || review.severity == "detection") && (
           <div className="absolute top-1 left-[6px] flex gap-1">
             {review.data.objects.map((object) => {
@@ -162,7 +112,7 @@ export default function PreviewThumbnailPlayer({
             })}
           </div>
         )}
-      {!hover && (
+      {!playingBack && (
         <div className="absolute left-[6px] right-[6px] bottom-1 flex justify-between text-white">
           <TimeAgo time={review.start_time * 1000} />
           {config &&
@@ -176,7 +126,7 @@ export default function PreviewThumbnailPlayer({
       )}
       <div className="absolute top-0 left-0 right-0 rounded-2xl z-10 w-full h-[30%] bg-gradient-to-b from-black/20 to-transparent pointer-events-none" />
       <div className="absolute bottom-0 left-0 right-0 rounded-2xl z-10 w-full h-[10%] bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
-      {hover && (
+      {playingBack && (
         <Slider
           className="absolute left-0 right-0 bottom-0 z-10"
           value={[progress]}
@@ -185,7 +135,7 @@ export default function PreviewThumbnailPlayer({
           max={100}
         />
       )}
-      {!hover && review.has_been_reviewed && (
+      {!playingBack && review.has_been_reviewed && (
         <div className="absolute left-0 top-0 bottom-0 right-0 bg-black bg-opacity-60" />
       )}
     </div>
@@ -196,49 +146,19 @@ type PreviewContentProps = {
   playerRef: React.MutableRefObject<Player | null>;
   review: ReviewSegment;
   relevantPreview: Preview | undefined;
-  isVisible: boolean;
-  isMobile: boolean;
+  playback: boolean;
   setProgress?: (progress: number) => void;
   setReviewed?: () => void;
-  onClick?: () => void;
 };
 function PreviewContent({
   playerRef,
   review,
   relevantPreview,
-  isVisible,
-  isMobile,
+  playback,
   setProgress,
   setReviewed,
-  onClick,
 }: PreviewContentProps) {
-  const slowPlayack = isSafari();
-
-  // handle touchstart -> touchend as click
-  const [touchStart, setTouchStart] = useState(0);
-  const handleTouchStart = useCallback(() => {
-    setTouchStart(new Date().getTime());
-  }, []);
-  useEffect(() => {
-    if (!isMobile || !playerRef.current || !onClick) {
-      return;
-    }
-
-    playerRef.current.on("touchend", () => {
-      if (!onClick) {
-        return;
-      }
-
-      const touchEnd = new Date().getTime();
-
-      // consider tap less than 100 ms
-      if (touchEnd - touchStart < 100) {
-        onClick();
-      }
-    });
-  }, [playerRef, touchStart]);
-
-  if (relevantPreview && isVisible) {
+  if (relevantPreview && playback) {
     return (
       <VideoPlayer
         options={{
@@ -272,7 +192,7 @@ function PreviewContent({
             review.start_time - relevantPreview.start - 8
           );
 
-          player.playbackRate(slowPlayack ? 2 : 8);
+          player.playbackRate(isSafari ? 2 : 8);
           player.currentTime(playerStartTime);
           player.on("timeupdate", () => {
             if (!setProgress || playerRef.current?.paused()) {
@@ -281,7 +201,9 @@ function PreviewContent({
 
             const playerProgress =
               (player.currentTime() || 0) - playerStartTime;
-            const playerDuration = review.end_time - review.start_time;
+
+            // end with a bit of padding
+            const playerDuration = (review.end_time - review.start_time) + 8;
             const playerPercent = (playerProgress / playerDuration) * 100;
 
             if (
@@ -299,9 +221,6 @@ function PreviewContent({
               setProgress(playerPercent);
             }
           });
-          if (isMobile && onClick) {
-            player.on("touchstart", handleTouchStart);
-          }
         }}
         onDispose={() => {
           playerRef.current = null;

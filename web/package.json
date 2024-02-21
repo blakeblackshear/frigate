@@ -45,6 +45,7 @@
     "react": "^18.2.0",
     "react-apexcharts": "^1.4.1",
     "react-day-picker": "^8.9.1",
+    "react-device-detect": "^2.2.3",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.48.2",
     "react-icons": "^4.12.0",

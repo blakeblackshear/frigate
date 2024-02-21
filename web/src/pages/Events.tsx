@@ -1,12 +1,8 @@
 import DesktopEventView from "@/views/events/DesktopEventView";
 import MobileEventView from "@/views/events/MobileEventView";
-import { useMemo } from "react";
+import { isMobile } from 'react-device-detect';
 
 export default function Events() {
-  const isMobile = useMemo(() => {
-    return window.innerWidth < 768;
-  }, []);
-
   if (isMobile) {
     return <MobileEventView />;
   }

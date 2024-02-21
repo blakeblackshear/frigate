@@ -4,7 +4,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { ReviewSegment, ReviewSeverity } from "@/types/review";
 import axios from "axios";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
@@ -112,6 +112,70 @@ export default function MobileEventView() {
     [isValidating, isDone]
   );
 
+  const [minimap, setMinimap] = useState<string[]>([]);
+  const minimapObserver = useRef<IntersectionObserver | null>();
+  useEffect(() => {
+    if (!contentRef.current) {
+      return;
+    }
+
+    const visibleTimestamps = new Set<string>();
+    minimapObserver.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const start = (entry.target as HTMLElement).dataset.start;
+          console.log(`${start} has been updated as intersect ${entry.isIntersecting}`)
+
+          if (!start) {
+            return;
+          }
+
+          if (entry.isIntersecting) {
+            visibleTimestamps.add(start);
+          } else {
+            visibleTimestamps.delete(start);
+          }
+
+          setMinimap([...visibleTimestamps]);
+        });
+      }, { threshold: 0.5 }
+    );
+
+    return () => {
+      minimapObserver.current?.disconnect();
+    };
+  }, [contentRef]);
+  const minimapRef = useCallback(
+    (node: HTMLElement | null) => {
+      if (!minimapObserver.current) {
+        return;
+      }
+
+      try {
+        if (node) minimapObserver.current.observe(node);
+      } catch (e) {
+        // no op
+      }
+    },
+    [minimapObserver.current]
+  );
+  const minimapBounds = useMemo(() => {
+    const data = {
+      start: Math.floor(Date.now() / 1000) - 35 * 60,
+      end: Math.floor(Date.now() / 1000) - 21 * 60,
+    };
+    const list = minimap.sort();
+
+    if (list.length > 0) {
+      data.end = parseFloat(list.at(-1)!!);
+      data.start = parseFloat(list[0]);
+    }
+
+    console.log("the new times are " + JSON.stringify(data))
+
+    return data;
+  }, [minimap]);
+
   // review status
 
   const setReviewed = useCallback(
@@ -213,14 +277,14 @@ export default function MobileEventView() {
           return (
             <div
               key={value.id}
-              ref={lastRow ? lastReviewRef : null}
+              ref={lastRow ? lastReviewRef : minimapRef}
               data-start={value.start_time}
             >
               <div className="w-full aspect-video rounded-lg overflow-hidden">
                 <PreviewThumbnailPlayer
                   review={value}
                   relevantPreview={relevantPreview}
-                  isMobile={true}
+                  autoPlayback={minimapBounds.end == value.start_time}
                   setReviewed={() => setReviewed(value.id)}
                 />
               </div>

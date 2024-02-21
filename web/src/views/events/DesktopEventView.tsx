@@ -148,7 +148,7 @@ export default function DesktopEventView() {
           setMinimap([...visibleTimestamps]);
         });
       },
-      { root: contentRef.current }
+      { root: contentRef.current, threshold: 0.5 }
     );
 
     return () => {
@@ -305,7 +305,6 @@ export default function DesktopEventView() {
                 <PreviewThumbnailPlayer
                   review={value}
                   relevantPreview={relevantPreview}
-                  isMobile={false}
                   setReviewed={() => setReviewed(value.id)}
                 />
               </div>
