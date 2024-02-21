@@ -50,7 +50,11 @@ function useDraggableHandler({
 
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
-      if (!contentRef.current || !timelineRef.current || !scrollTimeRef.current) {
+      if (
+        !contentRef.current ||
+        !timelineRef.current ||
+        !scrollTimeRef.current
+      ) {
         return;
       }
 
@@ -68,9 +72,7 @@ function useDraggableHandler({
         const segmentHeight =
           timelineHeight / (timelineDuration / segmentDuration);
 
-        const getCumulativeScrollTop = (
-          element: HTMLElement | null
-        ) => {
+        const getCumulativeScrollTop = (element: HTMLElement | null) => {
           let scrollTop = 0;
           while (element) {
             scrollTop += element.scrollTop;
@@ -100,7 +102,7 @@ function useDraggableHandler({
             thumb.style.top = `${newHandlePosition - segmentHeight}px`;
             if (currentTimeRef.current) {
               currentTimeRef.current.textContent = new Date(
-                segmentStartTime*1000
+                segmentStartTime * 1000
               ).toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
