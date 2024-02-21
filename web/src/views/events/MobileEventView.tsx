@@ -18,6 +18,20 @@ export default function MobileEventView() {
 
   // review paging
 
+  const [after, setAfter] = useState(0);
+  useEffect(() => {
+    const now = new Date();
+    now.setHours(now.getHours() - 24);
+    setAfter(now.getTime() / 1000);
+
+    const intervalId: NodeJS.Timeout = setInterval(() => {
+      const now = new Date();
+      now.setHours(now.getHours() - 24);
+      setAfter(now.getTime() / 1000);
+    }, 60000);
+    return () => clearInterval(intervalId);
+  }, [60000]);
+
   const reviewSearchParams = {};
   const reviewSegmentFetcher = useCallback((key: any) => {
     const [path, params] = Array.isArray(key) ? key : [key, undefined];
@@ -29,18 +43,19 @@ export default function MobileEventView() {
       if (index > 0) {
         const lastDate = prevData[prevData.length - 1].start_time;
         const pagedParams = reviewSearchParams
-          ? { before: lastDate, limit: API_LIMIT }
+          ? { before: lastDate, after: after, limit: API_LIMIT }
           : {
               ...reviewSearchParams,
               before: lastDate,
+              after: after,
               limit: API_LIMIT,
             };
         return ["review", pagedParams];
       }
 
       const params = reviewSearchParams
-        ? { limit: API_LIMIT }
-        : { ...reviewSearchParams, limit: API_LIMIT };
+        ? { limit: API_LIMIT, after: after }
+        : { ...reviewSearchParams, limit: API_LIMIT, after: after };
       return ["review", params];
     },
     [reviewSearchParams]
