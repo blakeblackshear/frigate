@@ -1,5 +1,12 @@
 import { BsPersonWalking } from "react-icons/bs";
-import { FaCarSide, FaCat, FaDog } from "react-icons/fa";
+import {
+  FaAmazon,
+  FaCarSide,
+  FaCat,
+  FaDog,
+  FaFedex,
+  FaUps,
+} from "react-icons/fa";
 import { LuBox, LuLassoSelect } from "react-icons/lu";
 
 export function getIconForLabel(label: string, className?: string) {
@@ -16,5 +23,16 @@ export function getIconForLabel(label: string, className?: string) {
       return <BsPersonWalking key={label} className={className} />;
     default:
       return <LuLassoSelect key={label} className={className} />;
+  }
+}
+
+export function getIconForSubLabel(label: string, className?: string) {
+  switch (label) {
+    case "amazon":
+      return <FaAmazon key={label} className={className} />;
+    case "fedex":
+      return <FaFedex key={label} className={className} />;
+    case "ups":
+      return <FaUps key={label} className={className} />;
   }
 }

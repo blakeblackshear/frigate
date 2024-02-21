@@ -6,7 +6,7 @@ import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { isSafari } from "@/utils/browserUtil";
 import { ReviewSegment } from "@/types/review";
 import { Slider } from "../ui/slider";
-import { getIconForLabel } from "@/utils/iconUtil";
+import { getIconForLabel, getIconForSubLabel } from "@/utils/iconUtil";
 import TimeAgo from "../dynamic/TimeAgo";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -156,6 +156,9 @@ export default function PreviewThumbnailPlayer({
             })}
             {review.data.audio.map((audio) => {
               return getIconForLabel(audio, "w-3 h-3 text-white");
+            })}
+            {review.data.sub_labels?.map((sub) => {
+              return getIconForSubLabel(sub, "w-3 h-3 text-white");
             })}
           </div>
         )}
