@@ -213,7 +213,7 @@ class ReviewSegmentMaintainer(threading.Thread):
             has_sig_object = False
             detections: set = set()
             objects: set = set()
-            sub_labels: set = (set(),)
+            sub_labels: set = set()
             zones: set = set()
 
             for object in active_objects:
