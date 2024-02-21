@@ -99,7 +99,7 @@ function Timestamp({
   segmentKey,
 }: TimestampSegmentProps) {
   return (
-    <div className="w-[36px] pl-[3px] h-2 flex justify-left items-top z-10">
+    <div className="w-[36px] pl-[3px] leading-[9px] h-2 flex justify-left items-top z-10">
       {!isFirstSegmentInMinimap && !isLastSegmentInMinimap && (
         <div
           key={`${segmentKey}_timestamp`}
