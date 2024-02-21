@@ -73,12 +73,8 @@ def yolov8_postprocess(
         boxes = np.stack((cx - w / 2, cy - h / 2, w, h), axis=1)
         indexes = cv2.dnn.NMSBoxes(boxes, confidences, score_threshold, nms_threshold)
         detections = detections[indexes]
-        # if still too many, trim the rest by confidence
-        if detections.shape[0] > box_count:
-            detections = detections[
-                np.argpartition(detections[:, 1], -box_count)[-box_count:]
-            ]
-        detections = detections.copy()
     # sort detections by confidence
     detections = detections[detections[:, 1].argsort()[::-1]]
+    # trim to box_count
+    detections = detections[:box_count]
     return np.resize(detections, (box_count, 6))

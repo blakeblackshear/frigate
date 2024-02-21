@@ -296,9 +296,19 @@ class TensorRtDetector(DetectionApi):
         )
         trt_outputs = self._do_inference()
         if self.model_type == ModelTypeEnum.yolov8:
-            return yolov8_postprocess(
-                self.input_shape[0], trt_outputs[0].reshape(self.output_shape[0])
-            )
+            detections = []
+            for o in trt_outputs:
+                detections.append(
+                    yolov8_postprocess(
+                        self.input_shape[0], o.reshape(self.output_shape[0])
+                    ),
+                )
+            detections = np.concatenate(detections)
+            # sort detections by confidence
+            detections = detections[detections[:, 1].argsort()[::-1]]
+            # trim to top 20
+            detections = detections[:20]
+            return np.resize(detections, (20, 6))
 
         raw_detections = self._postprocess_yolo(trt_outputs, self.conf_th)
 
