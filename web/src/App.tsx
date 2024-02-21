@@ -15,6 +15,8 @@ import NoMatch from "@/pages/NoMatch";
 import Settings from "@/pages/Settings";
 import UIPlayground from "./pages/UIPlayground";
 import Events from "./pages/Events";
+import { isDesktop } from "react-device-detect";
+import Statusbar from "./components/Statusbar";
 
 function App() {
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -30,9 +32,10 @@ function App() {
           <Header onToggleNavbar={toggleNavbar} />
           <div className="w-full h-full pt-2 overflow-hidden">
             <Sidebar sheetOpen={sheetOpen} setSheetOpen={setSheetOpen} />
+            {isDesktop && <Statusbar />}
             <div
               id="pageRoot"
-              className="absolute left-0 md:left-16 top-16 md:top-2 right-0 bottom-0 overflow-hidden"
+              className="absolute left-0 md:left-16 top-16 md:top-2 right-0 bottom-0 md:bottom-8 overflow-hidden"
             >
               <Routes>
                 <Route path="/" element={<Live />} />

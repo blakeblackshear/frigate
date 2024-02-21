@@ -34,7 +34,7 @@ function Sidebar({
           />
         ))}
       </div>
-      <SettingsNavItems className="hidden md:flex flex-col items-center" />
+      <SettingsNavItems className="hidden md:flex flex-col items-center mb-8" />
     </aside>
   );
 
