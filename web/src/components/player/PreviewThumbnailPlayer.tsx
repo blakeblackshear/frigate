@@ -1,5 +1,11 @@
 import VideoPlayer from "./VideoPlayer";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useApiHost } from "@/api";
 import Player from "video.js/dist/types/player";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
@@ -37,13 +43,33 @@ export default function PreviewThumbnailPlayer({
   const playerRef = useRef<Player | null>(null);
 
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>();
-  const [hover, setHover] = useState(false);
+  const [playback, setPlayback] = useState(false);
   const [progress, setProgress] = useState(0);
 
   const playingBack = useMemo(
-    () => relevantPreview && (hover || autoPlayback),
-    [hover, autoPlayback, relevantPreview]
+    () => relevantPreview && playback,
+    [playback, autoPlayback, relevantPreview]
   );
+
+  useEffect(() => {
+    if (!autoPlayback) {
+      setPlayback(false);
+
+      if (hoverTimeout) {
+        clearTimeout(hoverTimeout);
+      }
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      setPlayback(true);
+      setHoverTimeout(null);
+    }, 500);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [autoPlayback]);
 
   const onPlayback = useCallback(
     (isHovered: Boolean) => {
@@ -54,7 +80,7 @@ export default function PreviewThumbnailPlayer({
       if (isHovered) {
         setHoverTimeout(
           setTimeout(() => {
-            setHover(true);
+            setPlayback(true);
             setHoverTimeout(null);
           }, 500)
         );
@@ -63,7 +89,7 @@ export default function PreviewThumbnailPlayer({
           clearTimeout(hoverTimeout);
         }
 
-        setHover(false);
+        setPlayback(false);
         setProgress(0);
 
         if (playerRef.current) {
@@ -203,7 +229,7 @@ function PreviewContent({
               (player.currentTime() || 0) - playerStartTime;
 
             // end with a bit of padding
-            const playerDuration = (review.end_time - review.start_time) + 8;
+            const playerDuration = review.end_time - review.start_time + 8;
             const playerPercent = (playerProgress / playerDuration) * 100;
 
             if (

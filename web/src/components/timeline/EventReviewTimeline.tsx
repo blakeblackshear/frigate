@@ -47,7 +47,7 @@ export function EventReviewTimeline({
   const currentTimeRef = useRef<HTMLDivElement>(null);
   const observer = useRef<ResizeObserver | null>(null);
   const timelineDuration = useMemo(
-    () => timelineEnd - timelineStart,
+    () => timelineStart - timelineEnd,
     [timelineEnd, timelineStart]
   );
 

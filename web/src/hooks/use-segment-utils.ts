@@ -6,9 +6,12 @@ export const useSegmentUtils = (
   events: ReviewSegment[],
   severityType: string
 ) => {
-  const getSegmentStart = useCallback((time: number): number => {
-    return Math.floor(time / (segmentDuration)) * (segmentDuration);
-  }, [segmentDuration]);
+  const getSegmentStart = useCallback(
+    (time: number): number => {
+      return Math.floor(time / segmentDuration) * segmentDuration;
+    },
+    [segmentDuration]
+  );
 
   const getSegmentEnd = useCallback(
     (time: number | undefined): number => {
@@ -67,15 +70,18 @@ export const useSegmentUtils = (
     [events, getSegmentStart, getSegmentEnd, mapSeverityToNumber]
   );
 
-  const getReviewed = useCallback((time: number): boolean => {
-    return events.some((event) => {
-      const segmentStart = getSegmentStart(event.start_time);
-      const segmentEnd = getSegmentEnd(event.end_time);
-      return (
-        time >= segmentStart && time < segmentEnd && event.has_been_reviewed
-      );
-    });
-  }, [events, getSegmentStart, getSegmentEnd]);
+  const getReviewed = useCallback(
+    (time: number): boolean => {
+      return events.some((event) => {
+        const segmentStart = getSegmentStart(event.start_time);
+        const segmentEnd = getSegmentEnd(event.end_time);
+        return (
+          time >= segmentStart && time < segmentEnd && event.has_been_reviewed
+        );
+      });
+    },
+    [events, getSegmentStart, getSegmentEnd]
+  );
 
   const shouldShowRoundedCorners = useCallback(
     (segmentTime: number): { roundTop: boolean; roundBottom: boolean } => {
@@ -150,5 +156,12 @@ export const useSegmentUtils = (
     [events, getSegmentStart, getSegmentEnd, segmentDuration, severityType]
   );
 
-  return { getSegmentStart, getSegmentEnd, getSeverity, displaySeverityType, getReviewed, shouldShowRoundedCorners };
+  return {
+    getSegmentStart,
+    getSegmentEnd,
+    getSeverity,
+    displaySeverityType,
+    getReviewed,
+    shouldShowRoundedCorners,
+  };
 };

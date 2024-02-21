@@ -139,7 +139,6 @@ export default function MobileEventView() {
       (entries) => {
         entries.forEach((entry) => {
           const start = (entry.target as HTMLElement).dataset.start;
-          console.log(`${start} has been updated as intersect ${entry.isIntersecting}`)
 
           if (!start) {
             return;
@@ -153,7 +152,8 @@ export default function MobileEventView() {
 
           setMinimap([...visibleTimestamps]);
         });
-      }, { threshold: 0.5 }
+      },
+      { threshold: 0.5 }
     );
 
     return () => {
@@ -185,8 +185,6 @@ export default function MobileEventView() {
       data.end = parseFloat(list.at(-1)!!);
       data.start = parseFloat(list[0]);
     }
-
-    console.log("the new times are " + JSON.stringify(data))
 
     return data;
   }, [minimap]);
@@ -237,7 +235,7 @@ export default function MobileEventView() {
   }
 
   return (
-    <div className="w-full h-full">
+    <>
       <ToggleGroup
         type="single"
         defaultValue="alert"
@@ -278,7 +276,7 @@ export default function MobileEventView() {
 
       <div
         ref={contentRef}
-        className="grid grid-cols-1 sm:grid-cols-2 mt-2 gap-2 overflow-y-auto no-scrollbar"
+        className="w-full h-full grid grid-cols-1 sm:grid-cols-2 mt-2 gap-2 overflow-y-auto"
       >
         {reviewItems[severity]?.map((value, segIdx) => {
           const lastRow = segIdx == reviewItems[severity].length - 1;
@@ -308,6 +306,6 @@ export default function MobileEventView() {
           );
         })}
       </div>
-    </div>
+    </>
   );
 }
