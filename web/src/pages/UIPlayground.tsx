@@ -188,7 +188,7 @@ function UIPlayground() {
             segmentDuration={60} // seconds per segment
             timestampSpread={15} // minutes between each major timestamp
             timelineStart={Math.floor(Date.now() / 1000)} // start of the timeline - all times are numeric, not Date objects
-            timelineDuration={24 * 60 * 60} // in minutes, defaults to 24 hours
+            timelineEnd={Math.floor(Date.now() / 1000) + 2 * 60 * 60} // end of timeline - timestamp
             showHandlebar // show / hide the handlebar
             handlebarTime={Math.floor(Date.now() / 1000) - 27 * 60} // set the time of the handlebar
             showMinimap // show / hide the minimap

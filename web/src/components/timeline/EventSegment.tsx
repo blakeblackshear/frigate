@@ -1,7 +1,7 @@
 import { useEventUtils } from "@/hooks/use-event-utils";
 import { useSegmentUtils } from "@/hooks/use-segment-utils";
 import { ReviewSegment, ReviewSeverity } from "@/types/review";
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 
 type EventSegmentProps = {
   events: ReviewSegment[];
@@ -45,7 +45,7 @@ function MinimapBounds({
   return (
     <>
       {isFirstSegmentInMinimap && (
-        <div className="absolute inset-0 -bottom-5 w-full flex items-center justify-center text-xs text-primary font-medium z-20 text-center text-[9px]">
+        <div className="absolute inset-0 -bottom-5 w-full flex items-center justify-center text-xs text-primary font-medium z-20 text-center text-[8px]">
           {new Date(alignedMinimapStartTime * 1000).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
@@ -56,7 +56,7 @@ function MinimapBounds({
       )}
 
       {isLastSegmentInMinimap && (
-        <div className="absolute inset-0 -top-1 w-full flex items-center justify-center text-xs text-primary font-medium z-20 text-center text-[9px]">
+        <div className="absolute inset-0 -top-1 w-full flex items-center justify-center text-xs text-primary font-medium z-20 text-center text-[8px]">
           {new Date(alignedMinimapEndTime * 1000).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
@@ -76,14 +76,14 @@ function Tick({
   timestampSpread,
 }: TickSegmentProps) {
   return (
-    <div className="w-5 h-2 flex justify-left items-end">
+    <div className="w-[12px] h-2 flex justify-left items-end">
       {!isFirstSegmentInMinimap && !isLastSegmentInMinimap && (
         <div
           className={`h-0.5 ${
             timestamp.getMinutes() % timestampSpread === 0 &&
             timestamp.getSeconds() === 0
-              ? "w-4 bg-gray-400"
-              : "w-2 bg-gray-600"
+              ? "w-[12px] bg-gray-400"
+              : "w-[8px] bg-gray-600"
           }`}
         ></div>
       )}
@@ -99,7 +99,7 @@ function Timestamp({
   segmentKey,
 }: TimestampSegmentProps) {
   return (
-    <div className="w-10 h-2 flex justify-left items-top z-10">
+    <div className="w-[36px] pl-[3px] leading-[9px] h-2 flex justify-left items-top z-10">
       {!isFirstSegmentInMinimap && !isLastSegmentInMinimap && (
         <div
           key={`${segmentKey}_timestamp`}
@@ -137,7 +137,7 @@ export function EventSegment({
   const { alignDateToTimeline } = useEventUtils(events, segmentDuration);
 
   const severity = useMemo(
-    () => getSeverity(segmentTime),
+    () => getSeverity(segmentTime, displaySeverityType),
     [getSeverity, segmentTime]
   );
   const reviewed = useMemo(
@@ -195,13 +195,13 @@ export function EventSegment({
 
   const severityColors: { [key: number]: string } = {
     1: reviewed
-      ? "from-severity_motion-dimmed/30 to-severity_motion/30"
+      ? "from-severity_motion-dimmed/50 to-severity_motion/50"
       : "from-severity_motion-dimmed to-severity_motion",
     2: reviewed
-      ? "from-severity_detection-dimmed/30 to-severity_detection/30"
+      ? "from-severity_detection-dimmed/50 to-severity_detection/50"
       : "from-severity_detection-dimmed to-severity_detection",
     3: reviewed
-      ? "from-severity_alert-dimmed/30 to-severity_alert/30"
+      ? "from-severity_alert-dimmed/50 to-severity_alert/50"
       : "from-severity_alert-dimmed to-severity_alert",
   };
 
@@ -229,35 +229,40 @@ export function EventSegment({
         segmentKey={segmentKey}
       />
 
-      {severity == displaySeverityType && (
-        <div className="mr-3 w-2 h-2 flex justify-left items-end">
-          <div
-            key={`${segmentKey}_primary_data`}
-            className={`
-          w-full h-2 bg-gradient-to-r
-          ${roundBottom ? "rounded-bl-full rounded-br-full" : ""}
-          ${roundTop ? "rounded-tl-full rounded-tr-full" : ""}
-          ${severityColors[severity]}
-
+      {severity.map((severityValue, index) => (
+        <React.Fragment key={index}>
+          {severityValue === displaySeverityType && (
+            <div
+              className="mr-3 w-[8px] h-2 flex justify-left items-end"
+              data-severity={severityValue}
+            >
+              <div
+                key={`${segmentKey}_${index}_primary_data`}
+                className={`
+            w-full h-2 bg-gradient-to-r
+            ${roundBottom ? "rounded-bl-full rounded-br-full" : ""}
+            ${roundTop ? "rounded-tl-full rounded-tr-full" : ""}
+            ${severityColors[severityValue]}
           `}
-          ></div>
-        </div>
-      )}
+              ></div>
+            </div>
+          )}
 
-      {severity != displaySeverityType && (
-        <div className="h-2 flex flex-grow justify-end items-end">
-          <div
-            key={`${segmentKey}_secondary_data`}
-            className={`
+          {severityValue !== displaySeverityType && (
+            <div className="h-2 flex flex-grow justify-end items-end">
+              <div
+                key={`${segmentKey}_${index}_secondary_data`}
+                className={`
             w-1 h-2 bg-gradient-to-r
             ${roundBottom ? "rounded-bl-full rounded-br-full" : ""}
             ${roundTop ? "rounded-tl-full rounded-tr-full" : ""}
-            ${severityColors[severity]}
-
+            ${severityColors[severityValue]}
           `}
-          ></div>
-        </div>
-      )}
+              ></div>
+            </div>
+          )}
+        </React.Fragment>
+      ))}
     </div>
   );
 }
