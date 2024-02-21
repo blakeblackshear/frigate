@@ -41,7 +41,7 @@ function Logs() {
   }, [logs]);
 
   return (
-    <>
+    <div className="relative w-full h-full overflow-hidden">
       <div className="flex justify-between items-center">
         <Heading className="first:mt-2" as="h2">
           Logs
@@ -76,10 +76,10 @@ function Logs() {
         </div>
       </div>
 
-      <div className="overflow-auto font-mono text-sm bg-secondary rounded my-2 p-2 whitespace-pre-wrap">
+      <div className="absolute left-0 top-16 bottom-2 right-2 overflow-auto font-mono text-sm bg-secondary rounded p-2 whitespace-pre-wrap">
         {logs}
       </div>
-    </>
+    </div>
   );
 }
 

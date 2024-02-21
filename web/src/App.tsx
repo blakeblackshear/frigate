@@ -32,7 +32,7 @@ function App() {
             <Sidebar sheetOpen={sheetOpen} setSheetOpen={setSheetOpen} />
             <div
               id="pageRoot"
-              className="absolute left-0 md:left-16 top-16 md:top-0 right-0 bottom-0 overflow-hidden"
+              className="absolute left-0 md:left-16 top-16 md:top-2 right-0 bottom-0 overflow-hidden"
             >
               <Routes>
                 <Route path="/" element={<Live />} />
