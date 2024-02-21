@@ -12,16 +12,17 @@ services:
     build:
       context: .
       dockerfile: docker/main/Dockerfile
-      # Use target devcontainer-trt for TensorRT dev
       target: devcontainer
-    ## Uncomment this block for nvidia gpu support
+    # Run this command to build the devcontainer with tensorrt support, then uncomment the image and deploy blocks and comment the build block above
+    # ARCH=amd64 docker buildx bake --load --file=docker/tensorrt/trt.hcl --set tensorrt.tags=frigate:devcontainer-trt devcontainer-trt
+    # image: frigate:devcontainer-trt
     # deploy:
-    #       resources:
-    #           reservations:
-    #               devices:
-    #                   - driver: nvidia
-    #                     count: 1
-    #                     capabilities: [gpu]
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
     environment:
       YOLO_MODELS: yolov7-320
     devices:

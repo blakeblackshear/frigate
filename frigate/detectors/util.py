@@ -79,5 +79,6 @@ def yolov8_postprocess(
                 np.argpartition(detections[:, 1], -box_count)[-box_count:]
             ]
         detections = detections.copy()
-    detections.resize((box_count, 6))
-    return detections
+    # sort detections by confidence
+    detections = detections[detections[:, 1].argsort()[::-1]]
+    return np.resize(detections, (box_count, 6))

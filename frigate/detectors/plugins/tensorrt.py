@@ -1,4 +1,5 @@
 import ctypes
+import json
 import logging
 
 import numpy as np
@@ -15,7 +16,8 @@ from pydantic import Field
 from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
-from frigate.detectors.detector_config import BaseDetectorConfig
+from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
+from frigate.detectors.util import yolov8_postprocess
 
 logger = logging.getLogger(__name__)
 
@@ -85,28 +87,34 @@ class TensorRtDetector(DetectionApi):
                 e,
             )
 
+        if self.model_type == ModelTypeEnum.yolov8:
+            with open(model_path, "rb") as f, trt.Runtime(self.trt_logger) as runtime:
+                meta_len = int.from_bytes(
+                    f.read(4), byteorder="little"
+                )  # read metadata length
+                metadata = json.loads(f.read(meta_len).decode("utf-8"))  # read metadata
+                model = runtime.deserialize_cuda_engine(f.read())  # read engine
+                return model
+
         with open(model_path, "rb") as f, trt.Runtime(self.trt_logger) as runtime:
             return runtime.deserialize_cuda_engine(f.read())
 
-    def _get_input_shape(self):
+    def _get_input_output_shape(self):
         """Get input shape of the TensorRT YOLO engine."""
-        binding = self.engine[0]
-        assert self.engine.binding_is_input(binding)
-        binding_dims = self.engine.get_binding_shape(binding)
-        if len(binding_dims) == 4:
-            return (
-                tuple(binding_dims[2:]),
-                trt.nptype(self.engine.get_binding_dtype(binding)),
+        input_shape = None
+        output_shape = None
+        for i in range(self.engine.num_bindings):
+            name = self.engine.get_tensor_name(i)
+            shape = (
+                tuple(self.engine.get_binding_shape(name)),
+                trt.nptype(self.engine.get_binding_dtype(name)),
             )
-        elif len(binding_dims) == 3:
-            return (
-                tuple(binding_dims[1:]),
-                trt.nptype(self.engine.get_binding_dtype(binding)),
-            )
-        else:
-            raise ValueError(
-                "bad dims of binding %s: %s" % (binding, str(binding_dims))
-            )
+            if self.engine.get_tensor_mode(name) == trt.TensorIOMode.INPUT:
+                input_shape = shape
+            else:
+                output_shape = shape
+        assert output_shape is not None and input_shape is not None
+        return input_shape, output_shape
 
     def _allocate_buffers(self):
         """Allocates all host/device in/out buffers required for an engine."""
@@ -217,8 +225,9 @@ class TensorRtDetector(DetectionApi):
         self.nms_threshold = 0.4
         err, self.stream = cuda.cuStreamCreate(0)
         self.trt_logger = TrtLogger()
+        self.model_type = detector_config.model.model_type
         self.engine = self._load_engine(detector_config.model.path)
-        self.input_shape = self._get_input_shape()
+        self.input_shape, self.output_shape = self._get_input_output_shape()
 
         try:
             self.context = self.engine.create_execution_context()
@@ -261,7 +270,9 @@ class TensorRtDetector(DetectionApi):
         # filter low-conf detections and concatenate results of all yolo layers
         detections = []
         for o in trt_outputs:
+            # group outputs into arrs of 7
             dets = o.reshape((-1, 7))
+            # box_confidence x class_prob >= conf_th
             dets = dets[dets[:, 4] * dets[:, 6] >= conf_th]
             detections.append(dets)
         detections = np.concatenate(detections, axis=0)
@@ -284,6 +295,10 @@ class TensorRtDetector(DetectionApi):
             tensor_input.astype(self.input_shape[-1])
         )
         trt_outputs = self._do_inference()
+        if self.model_type == ModelTypeEnum.yolov8:
+            return yolov8_postprocess(
+                self.input_shape[0], trt_outputs[0].reshape(self.output_shape[0])
+            )
 
         raw_detections = self._postprocess_yolo(trt_outputs, self.conf_th)
 
@@ -298,10 +313,13 @@ class TensorRtDetector(DetectionApi):
         # Reorder elements by the score, best on top, remove class_prob
         ordered = raw_detections[raw_detections[:, 4].argsort()[::-1]][:, 0:6]
         # transform width to right with clamp to 0..1
+        # right of box
         ordered[:, 2] = np.clip(ordered[:, 2] + ordered[:, 0], 0, 1)
         # transform height to bottom with clamp to 0..1
+        # bottom of box
         ordered[:, 3] = np.clip(ordered[:, 3] + ordered[:, 1], 0, 1)
         # put result into the correct order and limit to top 20
+        # [class_id, box_confidence, y_min/h, x_min/w, y_max/h, x_max/w]
         detections = ordered[:, [5, 4, 1, 0, 3, 2]][:20]
 
         # pad to 20x6 shape

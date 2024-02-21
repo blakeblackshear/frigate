@@ -95,4 +95,5 @@ target "devcontainer-trt" {
   }
   platforms = ["linux/amd64"]
   target = "devcontainer-trt"
+  tags = ["frigate:devcontainer-trt"]
 }
