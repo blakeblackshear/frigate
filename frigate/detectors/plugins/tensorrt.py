@@ -300,7 +300,9 @@ class TensorRtDetector(DetectionApi):
             for o in trt_outputs:
                 detections.append(
                     yolov8_postprocess(
-                        self.input_shape[0], o.reshape(self.output_shape[0])
+                        self.input_shape[0],
+                        o.reshape(self.output_shape[0]),
+                        score_threshold=self.conf_th,
                     ),
                 )
             detections = np.concatenate(detections)
