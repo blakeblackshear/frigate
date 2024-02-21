@@ -15,7 +15,7 @@ export type EventReviewTimelineProps = {
   segmentDuration: number;
   timestampSpread: number;
   timelineStart: number;
-  timelineDuration?: number;
+  timelineEnd: number;
   showHandlebar?: boolean;
   handlebarTime?: number;
   showMinimap?: boolean;
@@ -30,7 +30,7 @@ export function EventReviewTimeline({
   segmentDuration,
   timestampSpread,
   timelineStart,
-  timelineDuration = 24 * 60 * 60,
+  timelineEnd,
   showHandlebar = false,
   handlebarTime,
   showMinimap = false,
@@ -46,6 +46,10 @@ export function EventReviewTimeline({
   const timelineRef = useRef<HTMLDivElement>(null);
   const currentTimeRef = useRef<HTMLDivElement>(null);
   const observer = useRef<ResizeObserver | null>(null);
+  const timelineDuration = useMemo(
+    () => timelineEnd - timelineStart,
+    [timelineEnd, timelineStart]
+  );
 
   const { alignDateToTimeline } = useEventUtils(events, segmentDuration);
 
