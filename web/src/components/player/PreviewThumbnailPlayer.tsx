@@ -127,7 +127,7 @@ export default function PreviewThumbnailPlayer({
         />
       )}
       {(review.severity == "alert" || review.severity == "detection") && (
-        <Chip className="absolute top-2 left-2 flex gap-1 bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500">
+        <Chip className="absolute top-2 left-2 flex gap-1 bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 z-0">
           {review.data.objects.map((object) => {
             return getIconForLabel(object, "w-3 h-3 text-white");
           })}
