@@ -5,7 +5,6 @@ import Wrapper from "@/components/Wrapper";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import Live from "@/pages/Live";
-import History from "@/pages/History";
 import Export from "@/pages/Export";
 import Storage from "@/pages/Storage";
 import System from "@/pages/System";
@@ -40,7 +39,6 @@ function App() {
               <Routes>
                 <Route path="/" element={<Live />} />
                 <Route path="/events" element={<Events />} />
-                <Route path="/history" element={<History />} />
                 <Route path="/export" element={<Export />} />
                 <Route path="/storage" element={<Storage />} />
                 <Route path="/system" element={<System />} />

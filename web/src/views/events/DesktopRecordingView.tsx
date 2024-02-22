@@ -5,7 +5,7 @@ import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
 import { Button } from "@/components/ui/button";
 import { ReviewSegment } from "@/types/review";
 import { getChunkedTimeRange } from "@/utils/timelineUtil";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 

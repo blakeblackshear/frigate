@@ -1,5 +1,4 @@
 import { useFrigateEvents } from "@/api/ws";
-import Chip from "@/components/Chip";
 import PreviewThumbnailPlayer from "@/components/player/PreviewThumbnailPlayer";
 import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
 import ActivityIndicator from "@/components/ui/activity-indicator";

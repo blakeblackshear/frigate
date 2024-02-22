@@ -16,7 +16,9 @@ import {
 import { Calendar } from "../ui/calendar";
 
 type HistoryFilterPopoverProps = {
+  // @ts-ignore
   filter: HistoryFilter | undefined;
+  // @ts-ignore
   onUpdateFilter: (filter: HistoryFilter) => void;
 };
 
