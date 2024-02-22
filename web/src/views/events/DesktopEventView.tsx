@@ -20,7 +20,7 @@ import useSWR from "swr";
 type DesktopEventViewProps = {
   reviewPages?: ReviewSegment[][];
   relevantPreviews?: Preview[];
-  timeRange: [number, number];
+  timeRange: { before: number; after: number };
   reachedEnd: boolean;
   isValidating: boolean;
   loadNextPage: () => void;
@@ -262,20 +262,18 @@ export default function DesktopEventView({
         )}
       </div>
       <div className="absolute top-12 right-0 bottom-0">
-        {timeRange[1] != 0 && (
-          <EventReviewTimeline
-            segmentDuration={60}
-            timestampSpread={15}
-            timelineStart={timeRange[0]}
-            timelineEnd={timeRange[1]}
-            showMinimap
-            minimapStartTime={minimapBounds.start}
-            minimapEndTime={minimapBounds.end}
-            events={reviewItems.all}
-            severityType={severity}
-            contentRef={contentRef}
-          />
-        )}
+        <EventReviewTimeline
+          segmentDuration={60}
+          timestampSpread={15}
+          timelineStart={timeRange.before}
+          timelineEnd={timeRange.after}
+          showMinimap
+          minimapStartTime={minimapBounds.start}
+          minimapEndTime={minimapBounds.end}
+          events={reviewItems.all}
+          severityType={severity}
+          contentRef={contentRef}
+        />
       </div>
     </div>
   );

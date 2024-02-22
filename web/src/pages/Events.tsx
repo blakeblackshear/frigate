@@ -4,7 +4,7 @@ import DesktopEventView from "@/views/events/DesktopEventView";
 import DesktopRecordingView from "@/views/events/DesktopRecordingView";
 import MobileEventView from "@/views/events/MobileEventView";
 import axios from "axios";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { isMobile } from "react-device-detect";
 import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
@@ -17,13 +17,9 @@ export default function Events() {
 
   // review paging
 
-  const [after, setAfter] = useState(getHoursAgo(24));
-  useEffect(() => {
-    const intervalId: NodeJS.Timeout = setInterval(() => {
-      setAfter(getHoursAgo(24));
-    }, 300000);
-    return () => clearInterval(intervalId);
-  }, [300000]);
+  const timeRange = useMemo(() => {
+    return { before: Date.now() / 1000, after: getHoursAgo(24) };
+  }, []);
 
   const reviewSegmentFetcher = useCallback((key: any) => {
     const [path, params] = Array.isArray(key) ? key : [key, undefined];
@@ -36,19 +32,24 @@ export default function Events() {
       if (index > 0) {
         const lastDate = prevData[prevData.length - 1].start_time;
         const pagedParams = reviewSearchParams
-          ? { before: lastDate, after: after, limit: API_LIMIT }
+          ? { before: lastDate, after: timeRange.after, limit: API_LIMIT }
           : {
               ...reviewSearchParams,
               before: lastDate,
-              after: after,
+              after: timeRange.after,
               limit: API_LIMIT,
             };
         return ["review", pagedParams];
       }
 
       const params = reviewSearchParams
-        ? { limit: API_LIMIT, after: after }
-        : { ...reviewSearchParams, limit: API_LIMIT, after: after };
+        ? { limit: API_LIMIT, before: timeRange.before, after: timeRange.after }
+        : {
+            ...reviewSearchParams,
+            limit: API_LIMIT,
+            before: timeRange.before,
+            after: timeRange.after,
+          };
       return ["review", params];
     },
     [reviewSearchParams]
@@ -60,7 +61,10 @@ export default function Events() {
     size,
     setSize,
     isValidating,
-  } = useSWRInfinite<ReviewSegment[]>(getKey, reviewSegmentFetcher);
+  } = useSWRInfinite<ReviewSegment[]>(getKey, reviewSegmentFetcher, {
+    revalidateOnFocus: false,
+    persistSize: true,
+  });
 
   const isDone = useMemo(
     () => (reviewPages?.at(-1)?.length ?? 0) < API_LIMIT,
@@ -186,7 +190,7 @@ export default function Events() {
       <DesktopEventView
         reviewPages={reviewPages}
         relevantPreviews={allPreviews}
-        timeRange={[Date.now() / 1000, after]}
+        timeRange={timeRange}
         reachedEnd={isDone}
         isValidating={isValidating}
         loadNextPage={() => setSize(size + 1)}
