@@ -185,8 +185,6 @@ export function EventSegment({
     // Check if the first segment is out of view
     const firstSegment = firstMinimapSegmentRef.current;
     if (firstSegment && showMinimap && isFirstSegmentInMinimap) {
-      // Scroll the first segment into view
-      console.log("scrolling into view");
       firstSegment.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
   }, [showMinimap, isFirstSegmentInMinimap, timestampSpread]);
