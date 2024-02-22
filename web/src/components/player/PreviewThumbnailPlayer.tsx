@@ -184,8 +184,12 @@ function PreviewContent({
   setProgress,
   setReviewed,
 }: PreviewContentProps) {
-  const [manualPlayback, setManualPlayback] = useState(false);
 
+  // manual playback
+  // safari is incapable of playing at a speed > 2x
+  // so manual seeking is required on iOS
+
+  const [manualPlayback, setManualPlayback] = useState(false);
   useEffect(() => {
     if (!manualPlayback || !playerRef.current) {
       return;
@@ -198,6 +202,8 @@ function PreviewContent({
     }, 125);
     return () => clearInterval(intervalId);
   }, [manualPlayback, playerRef]);
+
+  // preview
 
   if (relevantPreview && playback) {
     return (
