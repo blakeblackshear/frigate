@@ -241,6 +241,7 @@ function PreviewContent({
             0,
             review.start_time - relevantPreview.start - 8
           );
+          player.currentTime(playerStartTime);
 
           if (isSafari) {
             player.pause();
@@ -248,8 +249,6 @@ function PreviewContent({
           } else {
             player.playbackRate(8);
           }
-
-          player.currentTime(playerStartTime);
 
           let lastPercent = 0;
           player.on("timeupdate", () => {
