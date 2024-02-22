@@ -188,6 +188,15 @@ function PreviewContent({
   setProgress,
   setReviewed,
 }: PreviewContentProps) {
+  const playerStartTime = useMemo(() => {
+    if (!relevantPreview) {
+      return 0;
+    }
+
+    // start with a bit of padding
+    return Math.max(0, review.start_time - relevantPreview.start - 8);
+  }, []);
+
   // manual playback
   // safari is incapable of playing at a speed > 2x
   // so manual seeking is required on iOS
@@ -198,9 +207,11 @@ function PreviewContent({
       return;
     }
 
+    let counter = 0;
     const intervalId: NodeJS.Timeout = setInterval(() => {
       if (playerRef.current) {
-        playerRef.current.currentTime(playerRef.current.currentTime()!! + 1);
+        playerRef.current.currentTime(playerStartTime + counter);
+        counter += 1;
       }
     }, 125);
     return () => clearInterval(intervalId);
@@ -236,17 +247,11 @@ function PreviewContent({
             return;
           }
 
-          // start with a bit of padding
-          const playerStartTime = Math.max(
-            0,
-            review.start_time - relevantPreview.start - 8
-          );
-          player.currentTime(playerStartTime);
-
           if (isSafari) {
             player.pause();
             setManualPlayback(true);
           } else {
+            player.currentTime(playerStartTime);
             player.playbackRate(8);
           }
 
