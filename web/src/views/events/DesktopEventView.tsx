@@ -116,15 +116,15 @@ export default function DesktopEventView() {
     [reviewPages]
   );
 
-  useEffect(() => {
-    if (!reviewItems || !reviewItems.all) {
-      return
+  const currentItems = useMemo(() => {
+    const current = reviewItems[severity];
+
+    if (!current || current.length == 0) {
+      return null;
     }
 
-    if (reviewItems.all.length > 0 && reviewItems[severity].length == 0) {
-      setSize(size + 1)
-    }
-  }, [reviewItems, severity])
+    return current;
+  }, [reviewItems, severity]);
 
   // review interaction
 
@@ -311,32 +311,36 @@ export default function DesktopEventView() {
         ref={contentRef}
         className="absolute left-0 top-12 bottom-0 right-28 flex flex-wrap content-start gap-2 overflow-y-auto no-scrollbar"
       >
-        {reviewItems[severity]?.map((value, segIdx) => {
-          const lastRow = segIdx == reviewItems[severity].length - 1;
-          const relevantPreview = Object.values(allPreviews || []).find(
-            (preview) =>
-              preview.camera == value.camera &&
-              preview.start < value.start_time &&
-              preview.end > value.end_time
-          );
+        {currentItems ? (
+          currentItems.map((value, segIdx) => {
+            const lastRow = segIdx == reviewItems[severity].length - 1;
+            const relevantPreview = Object.values(allPreviews || []).find(
+              (preview) =>
+                preview.camera == value.camera &&
+                preview.start < value.start_time &&
+                preview.end > value.end_time
+            );
 
-          return (
-            <div
-              key={value.id}
-              ref={lastRow ? lastReviewRef : minimapRef}
-              data-start={value.start_time}
-            >
-              <div className="h-[234px] aspect-video rounded-lg overflow-hidden">
-                <PreviewThumbnailPlayer
-                  review={value}
-                  relevantPreview={relevantPreview}
-                  setReviewed={() => setReviewed(value.id)}
-                />
+            return (
+              <div
+                key={value.id}
+                ref={lastRow ? lastReviewRef : minimapRef}
+                data-start={value.start_time}
+              >
+                <div className="h-[234px] aspect-video rounded-lg overflow-hidden">
+                  <PreviewThumbnailPlayer
+                    review={value}
+                    relevantPreview={relevantPreview}
+                    setReviewed={() => setReviewed(value.id)}
+                  />
+                </div>
+                {lastRow && !isDone && <ActivityIndicator />}
               </div>
-              {lastRow && !isDone && <ActivityIndicator />}
-            </div>
-          );
-        })}
+            );
+          })
+        ) : (
+          <div ref={lastReviewRef} />
+        )}
       </div>
       <div className="absolute top-12 right-0 bottom-0">
         {after != 0 && (
