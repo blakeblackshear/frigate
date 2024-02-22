@@ -116,6 +116,16 @@ export default function DesktopEventView() {
     [reviewPages]
   );
 
+  const currentItems = useMemo(() => {
+    const current = reviewItems[severity];
+
+    if (!current || current.length == 0) {
+      return null;
+    }
+
+    return current;
+  }, [reviewItems, severity]);
+
   // review interaction
 
   const pagingObserver = useRef<IntersectionObserver | null>();
@@ -244,8 +254,6 @@ export default function DesktopEventView() {
     return <ActivityIndicator />;
   }
 
-  console.log("end of the timeline is " + after + " vs " + (Math.floor(Date.now() / 1000) + 2 * 60 * 60))
-
   return (
     <div className="relative w-full h-full">
       <div className="absolute flex justify-between left-0 top-0 right-0">
@@ -303,67 +311,56 @@ export default function DesktopEventView() {
         ref={contentRef}
         className="absolute left-0 top-12 bottom-0 right-28 flex flex-wrap content-start gap-2 overflow-y-auto no-scrollbar"
       >
-        {reviewItems[severity]?.map((value, segIdx) => {
-          const lastRow = segIdx == reviewItems[severity].length - 1;
-          const relevantPreview = Object.values(allPreviews || []).find(
-            (preview) =>
-              preview.camera == value.camera &&
-              preview.start < value.start_time &&
-              preview.end > value.end_time
-          );
+        {currentItems ? (
+          currentItems.map((value, segIdx) => {
+            const lastRow = segIdx == reviewItems[severity].length - 1;
+            const relevantPreview = Object.values(allPreviews || []).find(
+              (preview) =>
+                preview.camera == value.camera &&
+                preview.start < value.start_time &&
+                preview.end > value.end_time
+            );
 
-          return (
-            <div
-              key={value.id}
-              ref={lastRow ? lastReviewRef : minimapRef}
-              data-start={value.start_time}
-            >
-              <div className="h-[234px] aspect-video rounded-lg overflow-hidden">
-                <PreviewThumbnailPlayer
-                  review={value}
-                  relevantPreview={relevantPreview}
-                  setReviewed={() => setReviewed(value.id)}
-                />
+            return (
+              <div
+                key={value.id}
+                ref={lastRow ? lastReviewRef : minimapRef}
+                data-start={value.start_time}
+              >
+                <div className="h-[234px] aspect-video rounded-lg overflow-hidden">
+                  <PreviewThumbnailPlayer
+                    review={value}
+                    relevantPreview={relevantPreview}
+                    setReviewed={() => setReviewed(value.id)}
+                  />
+                </div>
+                {lastRow && !isDone && <ActivityIndicator />}
               </div>
-              {lastRow && !isDone && <ActivityIndicator />}
-            </div>
-          );
-        })}
+            );
+          })
+        ) : (
+          <div ref={lastReviewRef} />
+        )}
       </div>
       <div className="absolute top-12 right-0 bottom-0">
-        {after != 0 && (<EventReviewTimeline
-          segmentDuration={60}
-          timestampSpread={15}
-          timelineStart={Math.floor(Date.now() / 1000)} // start of the timeline - all times are numeric, not Date objects
-          timelineEnd={after} // end of timeline - timestamp
-          showMinimap
-          minimapStartTime={minimapBounds.start}
-          minimapEndTime={minimapBounds.end}
-          events={reviewItems.all}
-          severityType={severity}
-          contentRef={contentRef}
-        />)}
+        {after != 0 && (
+          <EventReviewTimeline
+            segmentDuration={60}
+            timestampSpread={15}
+            timelineStart={Math.floor(Date.now() / 1000)}
+            timelineEnd={after}
+            showMinimap
+            minimapStartTime={minimapBounds.start}
+            minimapEndTime={minimapBounds.end}
+            events={reviewItems.all}
+            severityType={severity}
+            contentRef={contentRef}
+          />
+        )}
       </div>
     </div>
   );
 }
-
-/**
- *          <EventReviewTimeline
-            segmentDuration={60} // seconds per segment
-            timestampSpread={15} // minutes between each major timestamp
-            timelineStart={Math.floor(Date.now() / 1000)} // start of the timeline - all times are numeric, not Date objects
-            timelineEnd={Math.floor(Date.now() / 1000) + 2 * 60 * 60} // end of timeline - timestamp
-            showHandlebar // show / hide the handlebar
-            handlebarTime={Math.floor(Date.now() / 1000) - 27 * 60} // set the time of the handlebar
-            showMinimap // show / hide the minimap
-            minimapStartTime={Math.floor(Date.now() / 1000) - 35 * 60} // start time of the minimap - the earlier time (eg 1:00pm)
-            minimapEndTime={Math.floor(Date.now() / 1000) - 21 * 60} // end of the minimap - the later time (eg 3:00pm)
-            events={mockEvents} // events, including new has_been_reviewed and severity properties
-            severityType={"alert"} // choose the severity type for the middle line - all other severity types are to the right
-            contentRef={contentRef} // optional content ref where previews are, can be used for observing/scrolling later
-          />
- */
 
 function ReviewCalendarButton() {
   const disabledDates = useMemo(() => {

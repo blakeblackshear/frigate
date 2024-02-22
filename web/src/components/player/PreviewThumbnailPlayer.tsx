@@ -16,6 +16,7 @@ import TimeAgo from "../dynamic/TimeAgo";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { isMobile, isSafari } from "react-device-detect";
+import Chip from "../Chip";
 
 type PreviewPlayerProps = {
   review: ReviewSegment;
@@ -121,26 +122,26 @@ export default function PreviewThumbnailPlayer({
       ) : (
         <img
           className="h-full w-full"
+          loading="lazy"
           src={`${apiHost}${review.thumb_path.replace("/media/frigate/", "")}`}
         />
       )}
-      {!playingBack &&
-        (review.severity == "alert" || review.severity == "detection") && (
-          <div className="absolute top-1 left-[6px] flex gap-1">
-            {review.data.objects.map((object) => {
-              return getIconForLabel(object, "w-3 h-3 text-white");
-            })}
-            {review.data.audio.map((audio) => {
-              return getIconForLabel(audio, "w-3 h-3 text-white");
-            })}
-            {review.data.sub_labels?.map((sub) => {
-              return getIconForSubLabel(sub, "w-3 h-3 text-white");
-            })}
-          </div>
-        )}
+      {(review.severity == "alert" || review.severity == "detection") && (
+        <Chip className="absolute top-2 left-2 flex gap-1 bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 z-0">
+          {review.data.objects.map((object) => {
+            return getIconForLabel(object, "w-3 h-3 text-white");
+          })}
+          {review.data.audio.map((audio) => {
+            return getIconForLabel(audio, "w-3 h-3 text-white");
+          })}
+          {review.data.sub_labels?.map((sub) => {
+            return getIconForSubLabel(sub, "w-3 h-3 text-white");
+          })}
+        </Chip>
+      )}
       {!playingBack && (
         <div className="absolute left-[6px] right-[6px] bottom-1 flex justify-between text-white">
-          <TimeAgo time={review.start_time * 1000} />
+          <TimeAgo time={review.start_time * 1000} dense />
           {config &&
             formatUnixTimestampToDateTime(review.start_time, {
               strftime_fmt:
@@ -184,6 +185,26 @@ function PreviewContent({
   setProgress,
   setReviewed,
 }: PreviewContentProps) {
+  // manual playback
+  // safari is incapable of playing at a speed > 2x
+  // so manual seeking is required on iOS
+
+  const [manualPlayback, setManualPlayback] = useState(false);
+  useEffect(() => {
+    if (!manualPlayback || !playerRef.current) {
+      return;
+    }
+
+    const intervalId: NodeJS.Timeout = setInterval(() => {
+      if (playerRef.current) {
+        playerRef.current.currentTime(playerRef.current.currentTime()!! + 1);
+      }
+    }, 125);
+    return () => clearInterval(intervalId);
+  }, [manualPlayback, playerRef]);
+
+  // preview
+
   if (relevantPreview && playback) {
     return (
       <VideoPlayer
@@ -218,10 +239,16 @@ function PreviewContent({
             review.start_time - relevantPreview.start - 8
           );
 
-          player.playbackRate(isSafari ? 2 : 8);
+          if (isSafari) {
+            player.pause();
+            setManualPlayback(true);
+          } else {
+            player.playbackRate(8);
+          }
+
           player.currentTime(playerStartTime);
           player.on("timeupdate", () => {
-            if (!setProgress || playerRef.current?.paused()) {
+            if (!setProgress) {
               return;
             }
 
@@ -242,6 +269,7 @@ function PreviewContent({
 
             if (playerPercent > 100) {
               playerRef.current?.pause();
+              setManualPlayback(false);
               setProgress(100.0);
             } else {
               setProgress(playerPercent);

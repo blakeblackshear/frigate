@@ -65,7 +65,7 @@ export default function Statusbar({}) {
         const gpu = parseInt(stats.gpu);
 
         return (
-          <div className="flex items-center text-sm">
+          <div key={gpuTitle} className="flex items-center text-sm">
             <MdCircle
               className={`w-2 h-2 mr-2 ${
                 gpu < 50
