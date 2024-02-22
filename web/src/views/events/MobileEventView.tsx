@@ -106,6 +106,16 @@ export default function MobileEventView() {
     [reviewPages]
   );
 
+  useEffect(() => {
+    if (!reviewItems || !reviewItems.all) {
+      return
+    }
+
+    if (reviewItems.all.length > 0 && reviewItems[severity].length == 0) {
+      setSize(size + 1)
+    }
+  }, [reviewItems, severity, size])
+
   // review interaction
 
   const pagingObserver = useRef<IntersectionObserver | null>();

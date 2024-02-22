@@ -116,6 +116,16 @@ export default function DesktopEventView() {
     [reviewPages]
   );
 
+  useEffect(() => {
+    if (!reviewItems || !reviewItems.all) {
+      return
+    }
+
+    if (reviewItems.all.length > 0 && reviewItems[severity].length == 0) {
+      setSize(size + 1)
+    }
+  }, [reviewItems, severity])
+
   // review interaction
 
   const pagingObserver = useRef<IntersectionObserver | null>();
