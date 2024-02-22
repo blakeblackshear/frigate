@@ -79,7 +79,7 @@ function Live() {
   }, []);
 
   return (
-    <div className="w-full h-full overflow-scroll px-2">
+    <div className="w-full h-full overflow-y-scroll px-2">
       {events && events.length > 0 && (
         <ScrollArea>
           <TooltipProvider>
