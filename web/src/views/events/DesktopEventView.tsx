@@ -261,7 +261,7 @@ export default function DesktopEventView({
         </Button>
       )}
 
-      <div className="flex h-full overflow-hidden">
+      <div className="flex h-full overflow-hidden overflow-hidden">
         <div
           ref={contentRef}
           className="flex flex-1 flex-wrap content-start gap-2 overflow-y-auto no-scrollbar"
