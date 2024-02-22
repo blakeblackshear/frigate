@@ -139,7 +139,7 @@ export default function Events() {
 
   // selected items
 
-  const selectedReviews = useMemo(() => {
+  const selectedData = useMemo(() => {
     if (!selectedReviewId) {
       return undefined;
     }
@@ -159,18 +159,21 @@ export default function Events() {
 
     return {
       selected: selectedReview,
-      cameraReviews: allReviews.filter(
-        (seg) => seg.camera == selectedReview?.camera
+      cameraSegments: allReviews.filter(
+        (seg) => seg.camera == selectedReview.camera
+      ),
+      cameraPreviews: allPreviews?.filter(
+        (seg) => seg.camera == selectedReview.camera
       ),
     };
   }, [selectedReviewId, reviewPages]);
 
-  if (selectedReviews) {
+  if (selectedData) {
     return (
       <DesktopRecordingView
-        reviewItems={selectedReviews.cameraReviews}
-        selectedReview={selectedReviews.selected}
-        relevantPreviews={allPreviews}
+        reviewItems={selectedData.cameraSegments}
+        selectedReview={selectedData.selected}
+        relevantPreviews={selectedData.cameraPreviews}
       />
     );
   } else {
