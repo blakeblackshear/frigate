@@ -18,6 +18,7 @@ export type EventReviewTimelineProps = {
   timelineDuration?: number;
   showHandlebar?: boolean;
   handlebarTime?: number;
+  setHandlebarTime?: React.Dispatch<React.SetStateAction<number>>;
   showMinimap?: boolean;
   minimapStartTime?: number;
   minimapEndTime?: number;
@@ -33,6 +34,7 @@ export function EventReviewTimeline({
   timelineDuration = 24 * 60 * 60,
   showHandlebar = false,
   handlebarTime,
+  setHandlebarTime,
   showMinimap = false,
   minimapStartTime,
   minimapEndTime,
@@ -62,6 +64,7 @@ export function EventReviewTimeline({
       isDragging,
       setIsDragging,
       currentTimeRef,
+      setHandlebarTime,
     });
 
   function handleResize() {
