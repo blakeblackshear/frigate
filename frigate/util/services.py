@@ -103,8 +103,17 @@ def get_cpu_stats() -> dict[str, dict]:
     docker_memlimit = get_docker_memlimit_bytes() / 1024
     total_mem = os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") / 1024
 
+    system_cpu = psutil.cpu_percent(
+        interval=None
+    )  # no interval as we don't want to be blocking
+    system_mem = psutil.virtual_memory()
+    usages["frigate.full_system"] = {
+        "cpu": str(system_cpu),
+        "mem": str(system_mem.percent),
+    }
+
     for process in psutil.process_iter(["pid", "name", "cpu_percent", "cmdline"]):
-        pid = process.info["pid"]
+        pid = str(process.info["pid"])
         try:
             cpu_percent = process.info["cpu_percent"]
             cmdline = process.info["cmdline"]

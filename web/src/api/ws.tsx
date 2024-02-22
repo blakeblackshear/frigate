@@ -11,6 +11,7 @@ import { produce, Draft } from "immer";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { FrigateEvent, ToggleableSetting } from "@/types/ws";
+import { FrigateStats } from "@/types/stats";
 
 type ReducerState = {
   [topic: string]: {
@@ -218,6 +219,13 @@ export function useFrigateEvents(): { payload: FrigateEvent } {
   const {
     value: { payload },
   } = useWs(`events`, "");
+  return { payload };
+}
+
+export function useFrigateStats(): { payload: FrigateStats } {
+  const {
+    value: { payload },
+  } = useWs("stats", "");
   return { payload };
 }
 

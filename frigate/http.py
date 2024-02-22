@@ -616,8 +616,8 @@ def event_preview(id: str, max_cache_age=2592000):
         )
 
     start_ts = event.start_time
-    end_ts = (
-        start_ts + min(event.end_time - event.start_time, 20) if event.end_time else 20
+    end_ts = start_ts + (
+        min(event.end_time - event.start_time, 20) if event.end_time else 20
     )
 
     if datetime.fromtimestamp(event.start_time) < datetime.now().replace(
