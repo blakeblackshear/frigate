@@ -181,6 +181,7 @@ export default function Events() {
       return (
         <MobileEventView
           reviewPages={reviewPages}
+          relevantPreviews={allPreviews}
           reachedEnd={isDone}
           isValidating={isValidating}
           loadNextPage={() => setSize(size + 1)}
@@ -199,6 +200,7 @@ export default function Events() {
         loadNextPage={() => setSize(size + 1)}
         markItemAsReviewed={markItemAsReviewed}
         onSelectReview={setSelectedReviewId}
+        pullLatestData={updateSegments}
       />
     );
   }

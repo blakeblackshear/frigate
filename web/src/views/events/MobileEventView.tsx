@@ -3,13 +3,13 @@ import ActivityIndicator from "@/components/ui/activity-indicator";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { ReviewSegment, ReviewSeverity } from "@/types/review";
-import axios from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
 
 type MobileEventViewProps = {
   reviewPages?: ReviewSegment[][];
+  relevantPreviews?: Preview[];
   reachedEnd: boolean;
   isValidating: boolean;
   loadNextPage: () => void;
@@ -17,6 +17,7 @@ type MobileEventViewProps = {
 };
 export default function MobileEventView({
   reviewPages,
+  relevantPreviews,
   reachedEnd,
   isValidating,
   loadNextPage,
@@ -153,34 +154,6 @@ export default function MobileEventView({
     return data;
   }, [minimap]);
 
-  // preview videos
-
-  const previewTimes = useMemo(() => {
-    if (
-      !reviewPages ||
-      reviewPages.length == 0 ||
-      reviewPages.at(-1)!!.length == 0
-    ) {
-      return undefined;
-    }
-
-    const startDate = new Date();
-    startDate.setMinutes(0, 0, 0);
-
-    const endDate = new Date(reviewPages.at(-1)!!.at(-1)!!.end_time);
-    endDate.setHours(0, 0, 0, 0);
-    return {
-      start: startDate.getTime() / 1000,
-      end: endDate.getTime() / 1000,
-    };
-  }, [reviewPages]);
-  const { data: allPreviews } = useSWR<Preview[]>(
-    previewTimes
-      ? `preview/all/start/${previewTimes.start}/end/${previewTimes.end}`
-      : null,
-    { revalidateOnFocus: false }
-  );
-
   if (!config) {
     return <ActivityIndicator />;
   }
@@ -232,7 +205,7 @@ export default function MobileEventView({
         {currentItems ? (
           currentItems.map((value, segIdx) => {
             const lastRow = segIdx == reviewItems[severity].length - 1;
-            const relevantPreview = Object.values(allPreviews || []).find(
+            const relevantPreview = Object.values(relevantPreviews || []).find(
               (preview) =>
                 preview.camera == value.camera &&
                 preview.start < value.start_time &&

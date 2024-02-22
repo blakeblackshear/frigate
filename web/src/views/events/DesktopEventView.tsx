@@ -1,3 +1,5 @@
+import { useFrigateEvents } from "@/api/ws";
+import Chip from "@/components/Chip";
 import PreviewThumbnailPlayer from "@/components/player/PreviewThumbnailPlayer";
 import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
 import ActivityIndicator from "@/components/ui/activity-indicator";
@@ -13,7 +15,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { ReviewSegment, ReviewSeverity } from "@/types/review";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { LuCalendar, LuFilter, LuVideo } from "react-icons/lu";
+import { LuCalendar, LuFilter, LuRefreshCcw, LuVideo } from "react-icons/lu";
 import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
 
@@ -26,6 +28,7 @@ type DesktopEventViewProps = {
   loadNextPage: () => void;
   markItemAsReviewed: (reviewId: string) => void;
   onSelectReview: (reviewId: string) => void;
+  pullLatestData: () => void;
 };
 export default function DesktopEventView({
   reviewPages,
@@ -36,6 +39,7 @@ export default function DesktopEventView({
   loadNextPage,
   markItemAsReviewed,
   onSelectReview,
+  pullLatestData,
 }: DesktopEventViewProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
   const [severity, setSeverity] = useState<ReviewSeverity>("alert");
@@ -168,6 +172,25 @@ export default function DesktopEventView({
     return data;
   }, [minimap]);
 
+  // new data alert
+
+  const { payload: eventUpdate } = useFrigateEvents();
+  const [hasUpdate, setHasUpdate] = useState(false);
+  useEffect(() => {
+    if (!eventUpdate) {
+      return;
+    }
+
+    // if event is ended and was saved, update events list
+    if (
+      eventUpdate.type == "end" &&
+      (eventUpdate.after.has_clip || eventUpdate.after.has_snapshot)
+    ) {
+      setHasUpdate(true);
+      return;
+    }
+  }, [eventUpdate]);
+
   if (!config) {
     return <ActivityIndicator />;
   }
@@ -224,6 +247,20 @@ export default function DesktopEventView({
           </Button>
         </div>
       </div>
+
+      {hasUpdate && (
+        <Button
+          className="absolute top-14 left-[50%] -translate-x-[50%] z-30 bg-gray-400 text-white"
+          variant="secondary"
+          onClick={() => {
+            setHasUpdate(false);
+            pullLatestData();
+          }}
+        >
+          <LuRefreshCcw className="w-4 h-4 mr-2" />
+          New Items To Review
+        </Button>
+      )}
 
       <div
         ref={contentRef}
