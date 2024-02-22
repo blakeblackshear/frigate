@@ -11,6 +11,7 @@ import { useApiHost } from "@/api";
 import TimelineScrubber from "@/components/playground/TimelineScrubber";
 import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
 import { ReviewData, ReviewSegment, ReviewSeverity } from "@/types/review";
+import { Button } from "@/components/ui/button";
 
 // Color data
 const colors = [
@@ -100,7 +101,7 @@ function UIPlayground() {
   const contentRef = useRef<HTMLDivElement>(null);
   const [mockEvents, setMockEvents] = useState<ReviewSegment[]>([]);
   const [handlebarTime, setHandlebarTime] = useState(
-    Math.floor(Date.now() / 1000) - 27 * 60
+    Math.floor(Date.now() / 1000) - 7 * 60
   );
 
   const onSelect = useCallback(({ items }: { items: string[] }) => {
@@ -121,6 +122,33 @@ function UIPlayground() {
     const initialEvents = Array.from({ length: 50 }, generateRandomEvent);
     setMockEvents(initialEvents);
   }, []);
+
+  const [zoomLevel, setZoomLevel] = useState(0);
+  const [zoomSettings, setZoomSettings] = useState({
+    segmentDuration: 60,
+    timestampSpread: 15,
+  });
+
+  const possibleZoomLevels = [
+    { segmentDuration: 60, timestampSpread: 15 },
+    { segmentDuration: 30, timestampSpread: 5 },
+    { segmentDuration: 10, timestampSpread: 1 },
+  ];
+
+  function handleZoomIn() {
+    const nextZoomLevel = Math.min(
+      possibleZoomLevels.length - 1,
+      zoomLevel + 1
+    );
+    setZoomLevel(nextZoomLevel);
+    setZoomSettings(possibleZoomLevels[nextZoomLevel]);
+  }
+
+  function handleZoomOut() {
+    const nextZoomLevel = Math.max(0, zoomLevel - 1);
+    setZoomLevel(nextZoomLevel);
+    setZoomSettings(possibleZoomLevels[nextZoomLevel]);
+  }
 
   return (
     <>
@@ -162,9 +190,20 @@ function UIPlayground() {
         <div className="flex-grow">
           <div ref={contentRef}>
             <Heading as="h4" className="my-5">
-              Handlebar time
+              Timeline
             </Heading>
-            <p className="text-small">{handlebarTime}</p>
+            <p className="text-small">Handlebar timestamp: {handlebarTime}</p>
+            <p>
+              <Button onClick={handleZoomOut} disabled={zoomLevel === 0}>
+                Zoom Out
+              </Button>
+              <Button
+                onClick={handleZoomIn}
+                disabled={zoomLevel === possibleZoomLevels.length - 1}
+              >
+                Zoom In
+              </Button>
+            </p>
             <Heading as="h4" className="my-5">
               Color scheme
             </Heading>
@@ -192,10 +231,10 @@ function UIPlayground() {
         </div>
         <div className="flex-none">
           <EventReviewTimeline
-            segmentDuration={60} // seconds per segment
-            timestampSpread={15} // minutes between each major timestamp
-            timelineStart={Math.floor(Date.now() / 1000)} // start of the timeline - all times are numeric, not Date objects
-            timelineEnd={Math.floor(Date.now() / 1000) + 2 * 60 * 60} // end of timeline - timestamp
+            segmentDuration={zoomSettings.segmentDuration} // seconds per segment
+            timestampSpread={zoomSettings.timestampSpread} // minutes between each major timestamp
+            timelineStart={Math.floor(Date.now() / 1000)} // timestamp start of the timeline - the earlier time
+            timelineEnd={Math.floor(Date.now() / 1000) - 6 * 60 * 60} // end of timeline - the later time
             showHandlebar // show / hide the handlebar
             handlebarTime={handlebarTime} // set the time of the handlebar
             setHandlebarTime={setHandlebarTime} // expose handler to set the handlebar time
