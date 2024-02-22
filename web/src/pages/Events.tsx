@@ -6,13 +6,14 @@ import MobileEventView from "@/views/events/MobileEventView";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { isMobile } from "react-device-detect";
+import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
 
 const API_LIMIT = 250;
 
 export default function Events() {
   // recordings viewer
-  const [selectedReview, setSelectedReview] = useOverlayState("review");
+  const [selectedReviewId, setSelectedReviewId] = useOverlayState("review");
 
   // review paging
 
@@ -66,6 +67,34 @@ export default function Events() {
     [reviewPages]
   );
 
+  // preview videos
+
+  const previewTimes = useMemo(() => {
+    if (
+      !reviewPages ||
+      reviewPages.length == 0 ||
+      reviewPages.at(-1)!!.length == 0
+    ) {
+      return undefined;
+    }
+
+    const startDate = new Date();
+    startDate.setMinutes(0, 0, 0);
+
+    const endDate = new Date(reviewPages.at(-1)!!.at(-1)!!.end_time);
+    endDate.setHours(0, 0, 0, 0);
+    return {
+      start: startDate.getTime() / 1000,
+      end: endDate.getTime() / 1000,
+    };
+  }, [reviewPages]);
+  const { data: allPreviews } = useSWR<Preview[]>(
+    previewTimes
+      ? `preview/all/start/${previewTimes.start}/end/${previewTimes.end}`
+      : null,
+    { revalidateOnFocus: false }
+  );
+
   // review status
 
   const markItemAsReviewed = useCallback(
@@ -104,8 +133,42 @@ export default function Events() {
     [updateSegments]
   );
 
-  if (selectedReview) {
-    return <DesktopRecordingView />;
+  // selected items
+
+  const selectedReviews = useMemo(() => {
+    if (!selectedReviewId) {
+      return undefined;
+    }
+
+    if (!reviewPages) {
+      return undefined;
+    }
+
+    const allReviews = reviewPages.flat();
+    const selectedReview = allReviews.find(
+      (item) => item.id == selectedReviewId
+    );
+
+    if (!selectedReview) {
+      return undefined;
+    }
+
+    return {
+      selected: selectedReview,
+      cameraReviews: allReviews.filter(
+        (seg) => seg.camera == selectedReview?.camera
+      ),
+    };
+  }, [selectedReviewId, reviewPages]);
+
+  if (selectedReviews) {
+    return (
+      <DesktopRecordingView
+        reviewItems={selectedReviews.cameraReviews}
+        selectedReview={selectedReviews.selected}
+        relevantPreviews={allPreviews}
+      />
+    );
   } else {
     if (isMobile) {
       return (
@@ -122,12 +185,13 @@ export default function Events() {
     return (
       <DesktopEventView
         reviewPages={reviewPages}
+        relevantPreviews={allPreviews}
         timeRange={[Date.now() / 1000, after]}
         reachedEnd={isDone}
         isValidating={isValidating}
         loadNextPage={() => setSize(size + 1)}
         markItemAsReviewed={markItemAsReviewed}
-        onSelectReview={setSelectedReview}
+        onSelectReview={setSelectedReviewId}
       />
     );
   }

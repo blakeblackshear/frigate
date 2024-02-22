@@ -19,6 +19,7 @@ import useSWR from "swr";
 
 type DesktopEventViewProps = {
   reviewPages?: ReviewSegment[][];
+  relevantPreviews?: Preview[];
   timeRange: [number, number];
   reachedEnd: boolean;
   isValidating: boolean;
@@ -28,6 +29,7 @@ type DesktopEventViewProps = {
 };
 export default function DesktopEventView({
   reviewPages,
+  relevantPreviews,
   timeRange,
   reachedEnd,
   isValidating,
@@ -166,34 +168,6 @@ export default function DesktopEventView({
     return data;
   }, [minimap]);
 
-  // preview videos
-
-  const previewTimes = useMemo(() => {
-    if (
-      !reviewPages ||
-      reviewPages.length == 0 ||
-      reviewPages.at(-1)!!.length == 0
-    ) {
-      return undefined;
-    }
-
-    const startDate = new Date();
-    startDate.setMinutes(0, 0, 0);
-
-    const endDate = new Date(reviewPages.at(-1)!!.at(-1)!!.end_time);
-    endDate.setHours(0, 0, 0, 0);
-    return {
-      start: startDate.getTime() / 1000,
-      end: endDate.getTime() / 1000,
-    };
-  }, [reviewPages]);
-  const { data: allPreviews } = useSWR<Preview[]>(
-    previewTimes
-      ? `preview/all/start/${previewTimes.start}/end/${previewTimes.end}`
-      : null,
-    { revalidateOnFocus: false }
-  );
-
   if (!config) {
     return <ActivityIndicator />;
   }
@@ -258,7 +232,7 @@ export default function DesktopEventView({
         {currentItems ? (
           currentItems.map((value, segIdx) => {
             const lastRow = segIdx == reviewItems[severity].length - 1;
-            const relevantPreview = Object.values(allPreviews || []).find(
+            const relevantPreview = Object.values(relevantPreviews || []).find(
               (preview) =>
                 preview.camera == value.camera &&
                 preview.start < value.start_time &&
