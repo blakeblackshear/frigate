@@ -241,6 +241,13 @@ class ReviewSegmentMaintainer(threading.Thread):
                 sub_labels=sub_labels,
                 zones=zones,
             )
+
+            frame_id = f"{camera_config.name}{frame_time}"
+            yuv_frame = self.frame_manager.get(frame_id, camera_config.frame_shape_yuv)
+            self.active_review_segments[camera].update_frame(
+                camera_config, yuv_frame, active_objects
+            )
+            self.frame_manager.close(frame_id)
         elif len(motion) >= 20:
             self.active_review_segments[camera] = PendingReviewSegment(
                 camera, frame_time, SeverityEnum.signification_motion, motion=motion
@@ -323,6 +330,7 @@ def get_active_objects(
         o
         for o in all_objects
         if o["motionless_count"] < camera_config.detect.stationary.threshold
+        and o["position_changes"] > 0
         and o["frame_time"] == frame_time
         and not o["false_positive"]
     ]
