@@ -168,6 +168,12 @@ function UIPlayground() {
     setZoomSettings(possibleZoomLevels[nextZoomLevel]);
   }
 
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleDraggingChange = (dragging: boolean) => {
+    setIsDragging(dragging);
+  };
+
   return (
     <>
       <div className="w-full h-full">
@@ -212,6 +218,9 @@ function UIPlayground() {
                 Timeline
               </Heading>
               <p className="text-small">Handlebar timestamp: {handlebarTime}</p>
+              <p className="text-small">
+                Handlebar is dragging: {isDragging ? "yes" : "no"}
+              </p>
               <p>
                 <Button onClick={handleZoomOut} disabled={zoomLevel === 0}>
                   Zoom Out
@@ -258,6 +267,7 @@ function UIPlayground() {
               showHandlebar // show / hide the handlebar
               handlebarTime={handlebarTime} // set the time of the handlebar
               setHandlebarTime={setHandlebarTime} // expose handler to set the handlebar time
+              onHandlebarDraggingChange={handleDraggingChange} // function for state of handlebar dragging
               showMinimap // show / hide the minimap
               minimapStartTime={minimapStartTime} // start time of the minimap - the earlier time (eg 1:00pm)
               minimapEndTime={minimapEndTime} // end of the minimap - the later time (eg 3:00pm)
