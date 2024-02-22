@@ -141,7 +141,7 @@ export default function PreviewThumbnailPlayer({
       )}
       {!playingBack && (
         <div className="absolute left-[6px] right-[6px] bottom-1 flex justify-between text-white">
-          <TimeAgo time={review.start_time * 1000} />
+          <TimeAgo time={review.start_time * 1000} dense />
           {config &&
             formatUnixTimestampToDateTime(review.start_time, {
               strftime_fmt:
