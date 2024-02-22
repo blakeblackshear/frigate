@@ -184,6 +184,21 @@ function PreviewContent({
   setProgress,
   setReviewed,
 }: PreviewContentProps) {
+  const [manualPlayback, setManualPlayback] = useState(false);
+
+  useEffect(() => {
+    if (!manualPlayback || !playerRef.current) {
+      return;
+    }
+
+    const intervalId: NodeJS.Timeout = setInterval(() => {
+      if (playerRef.current) {
+        playerRef.current.currentTime(playerRef.current.currentTime()!! + 1);
+      }
+    }, 125);
+    return () => clearInterval(intervalId);
+  }, [manualPlayback, playerRef]);
+
   if (relevantPreview && playback) {
     return (
       <VideoPlayer
@@ -218,10 +233,16 @@ function PreviewContent({
             review.start_time - relevantPreview.start - 8
           );
 
-          player.playbackRate(isSafari ? 2 : 8);
+          if (isSafari) {
+            player.pause();
+            setManualPlayback(true);
+          } else {
+            player.playbackRate(8);
+          }
+
           player.currentTime(playerStartTime);
           player.on("timeupdate", () => {
-            if (!setProgress || playerRef.current?.paused()) {
+            if (!setProgress) {
               return;
             }
 
@@ -242,6 +263,7 @@ function PreviewContent({
 
             if (playerPercent > 100) {
               playerRef.current?.pause();
+              setManualPlayback(false);
               setProgress(100.0);
             } else {
               setProgress(playerPercent);
