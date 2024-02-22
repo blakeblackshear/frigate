@@ -1,7 +1,7 @@
 import { useEventUtils } from "@/hooks/use-event-utils";
 import { useSegmentUtils } from "@/hooks/use-segment-utils";
 import { ReviewSegment, ReviewSeverity } from "@/types/review";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 
 type EventSegmentProps = {
   events: ReviewSegment[];
@@ -179,6 +179,18 @@ export function EventSegment({
     return showMinimap && segmentTime === alignedMinimapEndTime;
   }, [showMinimap, segmentTime, alignedMinimapEndTime]);
 
+  const firstMinimapSegmentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Check if the first segment is out of view
+    const firstSegment = firstMinimapSegmentRef.current;
+    if (firstSegment && showMinimap && isFirstSegmentInMinimap) {
+      // Scroll the first segment into view
+      console.log("scrolling into view");
+      firstSegment.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [showMinimap, isFirstSegmentInMinimap, timestampSpread]);
+
   const segmentClasses = `flex flex-row ${
     showMinimap
       ? isInMinimapRange
@@ -235,6 +247,7 @@ export function EventSegment({
             <div
               className="mr-3 w-[8px] h-2 flex justify-left items-end"
               data-severity={severityValue}
+              ref={isFirstSegmentInMinimap ? firstMinimapSegmentRef : undefined}
             >
               <div
                 key={`${segmentKey}_${index}_primary_data`}
