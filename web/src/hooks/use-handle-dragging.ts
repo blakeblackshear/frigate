@@ -111,7 +111,7 @@ function useDraggableHandler({
             }
           });
           if (setHandlebarTime) {
-            setHandlebarTime(segmentStartTime);
+            setHandlebarTime(timelineStart - segmentIndex * segmentDuration);
           }
         }
       }
