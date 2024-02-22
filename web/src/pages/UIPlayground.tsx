@@ -99,6 +99,9 @@ function UIPlayground() {
   const [timeline, setTimeline] = useState<string | undefined>(undefined);
   const contentRef = useRef<HTMLDivElement>(null);
   const [mockEvents, setMockEvents] = useState<ReviewSegment[]>([]);
+  const [handlebarTime, setHandlebarTime] = useState(
+    Math.floor(Date.now() / 1000) - 27 * 60
+  );
 
   const onSelect = useCallback(({ items }: { items: string[] }) => {
     setTimeline(items[0]);
@@ -159,6 +162,10 @@ function UIPlayground() {
         <div className="flex-grow">
           <div ref={contentRef}>
             <Heading as="h4" className="my-5">
+              Handlebar time
+            </Heading>
+            <p className="text-small">{handlebarTime}</p>
+            <Heading as="h4" className="my-5">
               Color scheme
             </Heading>
             <p className="text-small">
@@ -190,7 +197,8 @@ function UIPlayground() {
             timelineStart={Math.floor(Date.now() / 1000)} // start of the timeline - all times are numeric, not Date objects
             timelineEnd={Math.floor(Date.now() / 1000) + 2 * 60 * 60} // end of timeline - timestamp
             showHandlebar // show / hide the handlebar
-            handlebarTime={Math.floor(Date.now() / 1000) - 27 * 60} // set the time of the handlebar
+            handlebarTime={handlebarTime} // set the time of the handlebar
+            setHandlebarTime={setHandlebarTime} // expose handler to set the handlebar time
             showMinimap // show / hide the minimap
             minimapStartTime={Math.floor(Date.now() / 1000) - 35 * 60} // start time of the minimap - the earlier time (eg 1:00pm)
             minimapEndTime={Math.floor(Date.now() / 1000) - 21 * 60} // end of the minimap - the later time (eg 3:00pm)

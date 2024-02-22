@@ -12,6 +12,7 @@ interface DragHandlerProps {
   isDragging: boolean;
   setIsDragging: React.Dispatch<React.SetStateAction<boolean>>;
   currentTimeRef: React.MutableRefObject<HTMLDivElement | null>;
+  setHandlebarTime?: React.Dispatch<React.SetStateAction<number>>;
 }
 
 // TODO: handle mobile touch events
@@ -27,6 +28,7 @@ function useDraggableHandler({
   isDragging,
   setIsDragging,
   currentTimeRef,
+  setHandlebarTime,
 }: DragHandlerProps) {
   const handleMouseDown = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -110,6 +112,9 @@ function useDraggableHandler({
               });
             }
           });
+          if (setHandlebarTime) {
+            setHandlebarTime(timelineStart - segmentIndex * segmentDuration);
+          }
         }
       }
     },
