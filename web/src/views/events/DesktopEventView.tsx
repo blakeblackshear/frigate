@@ -12,72 +12,34 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { ReviewSegment, ReviewSeverity } from "@/types/review";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
-import axios from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LuCalendar, LuFilter, LuVideo } from "react-icons/lu";
 import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
-import useSWRInfinite from "swr/infinite";
 
-const API_LIMIT = 250;
-
-export default function DesktopEventView() {
+type DesktopEventViewProps = {
+  reviewPages?: ReviewSegment[][];
+  timeRange: [number, number];
+  reachedEnd: boolean;
+  isValidating: boolean;
+  loadNextPage: () => void;
+  markItemAsReviewed: (reviewId: string) => void;
+  onSelectReview: (reviewId: string) => void;
+};
+export default function DesktopEventView({
+  reviewPages,
+  timeRange,
+  reachedEnd,
+  isValidating,
+  loadNextPage,
+  markItemAsReviewed,
+  onSelectReview,
+}: DesktopEventViewProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
   const [severity, setSeverity] = useState<ReviewSeverity>("alert");
   const contentRef = useRef<HTMLDivElement | null>(null);
 
   // review paging
-
-  const [after, setAfter] = useState(0);
-  useEffect(() => {
-    const now = new Date();
-    now.setHours(now.getHours() - 24);
-    setAfter(now.getTime() / 1000);
-
-    const intervalId: NodeJS.Timeout = setInterval(() => {
-      const now = new Date();
-      now.setHours(now.getHours() - 24);
-      setAfter(now.getTime() / 1000);
-    }, 60000);
-    return () => clearInterval(intervalId);
-  }, [60000]);
-
-  const reviewSearchParams = {};
-  const reviewSegmentFetcher = useCallback((key: any) => {
-    const [path, params] = Array.isArray(key) ? key : [key, undefined];
-    return axios.get(path, { params }).then((res) => res.data);
-  }, []);
-
-  const getKey = useCallback(
-    (index: number, prevData: ReviewSegment[]) => {
-      if (index > 0) {
-        const lastDate = prevData[prevData.length - 1].start_time;
-        const pagedParams = reviewSearchParams
-          ? { before: lastDate, after: after, limit: API_LIMIT }
-          : {
-              ...reviewSearchParams,
-              before: lastDate,
-              after: after,
-              limit: API_LIMIT,
-            };
-        return ["review", pagedParams];
-      }
-
-      const params = reviewSearchParams
-        ? { limit: API_LIMIT, after: after }
-        : { ...reviewSearchParams, limit: API_LIMIT, after: after };
-      return ["review", params];
-    },
-    [reviewSearchParams]
-  );
-
-  const {
-    data: reviewPages,
-    mutate: updateSegments,
-    size,
-    setSize,
-    isValidating,
-  } = useSWRInfinite<ReviewSegment[]>(getKey, reviewSegmentFetcher);
 
   const reviewItems = useMemo(() => {
     const all: ReviewSegment[] = [];
@@ -111,11 +73,6 @@ export default function DesktopEventView() {
     };
   }, [reviewPages]);
 
-  const isDone = useMemo(
-    () => (reviewPages?.at(-1)?.length ?? 0) < API_LIMIT,
-    [reviewPages]
-  );
-
   const currentItems = useMemo(() => {
     const current = reviewItems[severity];
 
@@ -135,8 +92,8 @@ export default function DesktopEventView() {
       if (pagingObserver.current) pagingObserver.current.disconnect();
       try {
         pagingObserver.current = new IntersectionObserver((entries) => {
-          if (entries[0].isIntersecting && !isDone) {
-            setSize(size + 1);
+          if (entries[0].isIntersecting && !reachedEnd) {
+            loadNextPage();
           }
         });
         if (node) pagingObserver.current.observe(node);
@@ -144,7 +101,7 @@ export default function DesktopEventView() {
         // no op
       }
     },
-    [isValidating, isDone]
+    [isValidating, reachedEnd]
   );
 
   const [minimap, setMinimap] = useState<string[]>([]);
@@ -208,19 +165,6 @@ export default function DesktopEventView() {
 
     return data;
   }, [minimap]);
-
-  // review status
-
-  const setReviewed = useCallback(
-    async (id: string) => {
-      const resp = await axios.post(`review/${id}/viewed`);
-
-      if (resp.status == 200) {
-        updateSegments();
-      }
-    },
-    [updateSegments]
-  );
 
   // preview videos
 
@@ -331,10 +275,11 @@ export default function DesktopEventView() {
                   <PreviewThumbnailPlayer
                     review={value}
                     relevantPreview={relevantPreview}
-                    setReviewed={() => setReviewed(value.id)}
+                    setReviewed={() => markItemAsReviewed(value.id)}
+                    onClick={() => onSelectReview(value.id)}
                   />
                 </div>
-                {lastRow && !isDone && <ActivityIndicator />}
+                {lastRow && !reachedEnd && <ActivityIndicator />}
               </div>
             );
           })
@@ -343,12 +288,12 @@ export default function DesktopEventView() {
         )}
       </div>
       <div className="absolute top-12 right-0 bottom-0">
-        {after != 0 && (
+        {timeRange[1] != 0 && (
           <EventReviewTimeline
             segmentDuration={60}
             timestampSpread={15}
-            timelineStart={Math.floor(Date.now() / 1000)}
-            timelineEnd={after}
+            timelineStart={timeRange[0]}
+            timelineEnd={timeRange[1]}
             showMinimap
             minimapStartTime={minimapBounds.start}
             minimapEndTime={minimapBounds.end}

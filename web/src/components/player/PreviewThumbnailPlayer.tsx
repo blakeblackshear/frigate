@@ -23,6 +23,7 @@ type PreviewPlayerProps = {
   relevantPreview?: Preview;
   autoPlayback?: boolean;
   setReviewed?: () => void;
+  onClick?: () => void;
 };
 
 type Preview = {
@@ -38,6 +39,7 @@ export default function PreviewThumbnailPlayer({
   relevantPreview,
   autoPlayback = false,
   setReviewed,
+  onClick,
 }: PreviewPlayerProps) {
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -109,6 +111,7 @@ export default function PreviewThumbnailPlayer({
       className="relative w-full h-full cursor-pointer"
       onMouseEnter={isMobile ? undefined : () => onPlayback(true)}
       onMouseLeave={isMobile ? undefined : () => onPlayback(false)}
+      onClick={onClick}
     >
       {playingBack ? (
         <PreviewContent
@@ -247,6 +250,8 @@ function PreviewContent({
           }
 
           player.currentTime(playerStartTime);
+
+          let lastPercent = 0;
           player.on("timeupdate", () => {
             if (!setProgress) {
               return;
@@ -262,10 +267,13 @@ function PreviewContent({
             if (
               setReviewed &&
               !review.has_been_reviewed &&
+              lastPercent < 50 &&
               playerPercent > 50
             ) {
               setReviewed();
             }
+
+            lastPercent = playerPercent;
 
             if (playerPercent > 100) {
               playerRef.current?.pause();
