@@ -1055,9 +1055,9 @@ def event_snapshot(id):
     else:
         response.headers["Cache-Control"] = "no-store"
     if download:
-        response.headers[
-            "Content-Disposition"
-        ] = f"attachment; filename=snapshot-{id}.jpg"
+        response.headers["Content-Disposition"] = (
+            f"attachment; filename=snapshot-{id}.jpg"
+        )
     return response
 
 
@@ -1244,9 +1244,9 @@ def event_clip(id):
     if download:
         response.headers["Content-Disposition"] = "attachment; filename=%s" % file_name
     response.headers["Content-Length"] = os.path.getsize(clip_path)
-    response.headers[
-        "X-Accel-Redirect"
-    ] = f"/clips/{file_name}"  # nginx: https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
+    response.headers["X-Accel-Redirect"] = (
+        f"/clips/{file_name}"  # nginx: https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
+    )
 
     return response
 
@@ -1949,9 +1949,9 @@ def get_recordings_storage_usage():
 
     total_mb = recording_stats["total"]
 
-    camera_usages: dict[
-        str, dict
-    ] = current_app.storage_maintainer.calculate_camera_usages()
+    camera_usages: dict[str, dict] = (
+        current_app.storage_maintainer.calculate_camera_usages()
+    )
 
     for camera_name in camera_usages.keys():
         if camera_usages.get(camera_name, {}).get("usage"):
@@ -2139,9 +2139,9 @@ def recording_clip(camera_name, start_ts, end_ts):
     if download:
         response.headers["Content-Disposition"] = "attachment; filename=%s" % file_name
     response.headers["Content-Length"] = os.path.getsize(path)
-    response.headers[
-        "X-Accel-Redirect"
-    ] = f"/cache/{file_name}"  # nginx: https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
+    response.headers["X-Accel-Redirect"] = (
+        f"/cache/{file_name}"  # nginx: https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
+    )
 
     return response
 
@@ -2300,7 +2300,7 @@ def preview_hour(year_month, day, hour, camera_name, tz_name):
 @bp.route("/preview/<file_name>/thumbnail.jpg")
 def preview_thumbnail(file_name: str):
     """Get a thumbnail from the cached preview jpgs."""
-    safe_file_name_current = secure_filename(export_filename_check_extension(file_name))
+    safe_file_name_current = secure_filename(file_name)
     preview_dir = os.path.join(CACHE_DIR, "preview_frames")
 
     with open(os.path.join(preview_dir, safe_file_name_current), "rb") as image_file:
