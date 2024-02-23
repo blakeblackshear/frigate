@@ -330,7 +330,7 @@ function InProgressPreview({
         setProgress((key / (previewFrames.length - 1)) * 100);
       }
 
-      if (setReviewed && key == previewFrames.length / 2) {
+      if (setReviewed && key == Math.floor(previewFrames.length / 2)) {
         setReviewed();
       }
 
