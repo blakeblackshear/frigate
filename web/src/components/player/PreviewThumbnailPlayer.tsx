@@ -102,23 +102,23 @@ export default function PreviewThumbnailPlayer({
         onMouseLeave={isMobile ? undefined : () => onPlayback(false)}
         onClick={onClick}
       >
-        {playingBack ? (
-          <PreviewContent
-            review={review}
-            relevantPreview={relevantPreview}
-            setProgress={setProgress}
-            setReviewed={setReviewed}
-          />
-        ) : (
-          <img
-            className="h-full w-full"
-            loading="lazy"
-            src={`${apiHost}${review.thumb_path.replace(
-              "/media/frigate/",
-              ""
-            )}`}
-          />
+        {playingBack && (
+          <div className="absolute left-0 top-0 right-0 bottom-0">
+            <PreviewContent
+              review={review}
+              relevantPreview={relevantPreview}
+              setProgress={setProgress}
+              setReviewed={setReviewed}
+            />
+          </div>
         )}
+        <img
+          className={`w-full h-full transition-opacity ${
+            playingBack ? "opacity-0" : "opacity-100"
+          }`}
+          loading="lazy"
+          src={`${apiHost}${review.thumb_path.replace("/media/frigate/", "")}`}
+        />
         {(review.severity == "alert" || review.severity == "detection") && (
           <Chip className="absolute top-2 left-2 flex gap-1 bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 z-0">
             {review.data.objects.map((object) => {
