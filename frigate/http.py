@@ -2300,9 +2300,10 @@ def preview_hour(year_month, day, hour, camera_name, tz_name):
 @bp.route("/preview/<file_name>/thumbnail.jpg")
 def preview_thumbnail(file_name: str):
     """Get a thumbnail from the cached preview jpgs."""
+    safe_file_name_current = secure_filename(export_filename_check_extension(file_name))
     preview_dir = os.path.join(CACHE_DIR, "preview_frames")
 
-    with open(os.path.join(preview_dir, file_name), "rb") as image_file:
+    with open(os.path.join(preview_dir, safe_file_name_current), "rb") as image_file:
         jpg_bytes = image_file.read()
 
     response = make_response(jpg_bytes)
@@ -2414,6 +2415,7 @@ def review():
     review = (
         ReviewSegment.select()
         .where(reduce(operator.and_, clauses))
+        .order_by(ReviewSegment.severity.asc())
         .order_by(ReviewSegment.start_time.desc())
         .limit(limit)
         .dicts()
