@@ -280,7 +280,7 @@ export default function DesktopEventView({
             </div>
           )}
 
-          <div className="w-full mr-4 md:grid md:grid-cols-3 3xl:grid-cols-4 gap-4 overflow-y-auto no-scrollbar pointer-events-none">
+          <div className="w-full mr-4 md:grid md:grid-cols-3 3xl:grid-cols-4 gap-4">
             {currentItems ? (
               currentItems.map((value, segIdx) => {
                 const lastRow = segIdx == reviewItems[severity].length - 1;
