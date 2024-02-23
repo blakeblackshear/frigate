@@ -44,8 +44,6 @@ export default function DesktopRecordingView({
       return;
     }
 
-    console.log("current index and moving to ");
-
     if (selectedRangeIdx < timeRange.ranges.length - 1) {
       controllerRef.current.onClipEndedEvent(() => {
         setSelectedRangeIdx(selectedRangeIdx + 1);
