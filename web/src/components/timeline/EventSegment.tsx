@@ -186,14 +186,20 @@ export function EventSegment({
 
   const firstMinimapSegmentRef = useRef<HTMLDivElement>(null);
 
+  let debounceTimer: ReturnType<typeof setTimeout>;
+
+  function debounceScrollIntoView(element: HTMLElement) {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      element.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 100);
+  }
+
   useEffect(() => {
     // Check if the first segment is out of view
     const firstSegment = firstMinimapSegmentRef.current;
     if (firstSegment && showMinimap && isFirstSegmentInMinimap) {
-      firstSegment.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
+      debounceScrollIntoView(firstSegment);
     }
   }, [showMinimap, isFirstSegmentInMinimap, events, segmentDuration]);
 

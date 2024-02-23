@@ -247,58 +247,74 @@ export default function DesktopEventView({
         </div>
       </div>
 
-      {hasUpdate && (
-        <Button
-          className="absolute top-14 left-[50%] -translate-x-[50%] z-30 bg-gray-400 text-white"
-          variant="secondary"
-          onClick={() => {
-            setHasUpdate(false);
-            pullLatestData();
-          }}
-        >
-          <LuRefreshCcw className="w-4 h-4 mr-2" />
-          New Items To Review
-        </Button>
-      )}
-
       <div className="flex h-full overflow-hidden">
         <div
           ref={contentRef}
           className="flex flex-1 flex-wrap content-start gap-2 overflow-y-auto no-scrollbar"
         >
-          {currentItems ? (
-            currentItems.map((value, segIdx) => {
-              const lastRow = segIdx == reviewItems[severity].length - 1;
-              const relevantPreview = Object.values(
-                relevantPreviews || []
-              ).find(
-                (preview) =>
-                  preview.camera == value.camera &&
-                  preview.start < value.start_time &&
-                  preview.end > value.end_time
-              );
-
-              return (
-                <div
-                  key={value.id}
-                  ref={lastRow ? lastReviewRef : minimapRef}
-                  data-start={value.start_time}
+          {hasUpdate && (
+            <div className="absolute w-full z-30">
+              <div className="flex justify-center items-center mr-[100px]">
+                <Button
+                  className={`${
+                    hasUpdate
+                      ? "animate-in slide-in-from-top duration-500"
+                      : "invisible"
+                  }  text-center mt-5 mx-auto bg-gray-400 text-white`}
+                  variant="secondary"
+                  onClick={() => {
+                    setHasUpdate(false);
+                    pullLatestData();
+                    if (contentRef.current) {
+                      contentRef.current.scrollTo({
+                        top: 0,
+                        behavior: "smooth",
+                      });
+                    }
+                  }}
                 >
-                  <div className="h-[234px] aspect-video rounded-lg overflow-hidden">
-                    <PreviewThumbnailPlayer
-                      review={value}
-                      relevantPreview={relevantPreview}
-                      setReviewed={() => markItemAsReviewed(value.id)}
-                      onClick={() => onSelectReview(value.id)}
-                    />
-                  </div>
-                  {lastRow && !reachedEnd && <ActivityIndicator />}
-                </div>
-              );
-            })
-          ) : (
-            <div ref={lastReviewRef} />
+                  <LuRefreshCcw className="w-4 h-4 mr-2" />
+                  New Items To Review
+                </Button>
+              </div>
+            </div>
           )}
+
+          <div className="w-full mr-4 md:grid md:grid-cols-3 3xl:grid-cols-4 gap-4 overflow-y-auto no-scrollbar">
+            {currentItems ? (
+              currentItems.map((value, segIdx) => {
+                const lastRow = segIdx == reviewItems[severity].length - 1;
+                const relevantPreview = Object.values(
+                  relevantPreviews || []
+                ).find(
+                  (preview) =>
+                    preview.camera == value.camera &&
+                    preview.start < value.start_time &&
+                    preview.end > value.end_time
+                );
+
+                return (
+                  <div
+                    key={value.id}
+                    ref={lastRow ? lastReviewRef : minimapRef}
+                    data-start={value.start_time}
+                  >
+                    <div className="aspect-video rounded-lg overflow-hidden">
+                      <PreviewThumbnailPlayer
+                        review={value}
+                        relevantPreview={relevantPreview}
+                        setReviewed={() => markItemAsReviewed(value.id)}
+                        onClick={() => onSelectReview(value.id)}
+                      />
+                    </div>
+                    {lastRow && !reachedEnd && <ActivityIndicator />}
+                  </div>
+                );
+              })
+            ) : (
+              <div ref={lastReviewRef} />
+            )}
+          </div>
         </div>
         <div className="md:w-[100px] overflow-y-auto no-scrollbar">
           <EventReviewTimeline

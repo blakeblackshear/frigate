@@ -187,14 +187,7 @@ export function EventReviewTimeline({
 
       setCurrentTimeSegment(alignedHandlebarTime);
     }
-  }, [
-    handlebarTime,
-    segmentDuration,
-    showHandlebar,
-    timelineDuration,
-    timelineStart,
-    alignDateToTimeline,
-  ]);
+  }, []);
 
   useEffect(() => {
     generateSegments();
