@@ -102,7 +102,7 @@ function UIPlayground() {
   const contentRef = useRef<HTMLDivElement>(null);
   const [mockEvents, setMockEvents] = useState<ReviewSegment[]>([]);
   const [handlebarTime, setHandlebarTime] = useState(
-    Math.floor(Date.now() / 1000) - 7 * 60
+    Math.floor(Date.now() / 1000) - 15 * 60
   );
 
   const onSelect = useCallback(({ items }: { items: string[] }) => {
@@ -217,7 +217,16 @@ function UIPlayground() {
               <Heading as="h4" className="my-5">
                 Timeline
               </Heading>
-              <p className="text-small">Handlebar timestamp: {handlebarTime}</p>
+              <p className="text-small">
+                Handlebar timestamp: {handlebarTime} -&nbsp;
+                {new Date(handlebarTime * 1000).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  month: "short",
+                  day: "2-digit",
+                  second: "2-digit",
+                })}
+              </p>
               <p className="text-small">
                 Handlebar is dragging: {isDragging ? "yes" : "no"}
               </p>

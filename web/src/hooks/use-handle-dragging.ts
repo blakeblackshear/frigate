@@ -113,7 +113,10 @@ function useDraggableHandler({
             }
           });
           if (setHandlebarTime) {
-            setHandlebarTime(timelineStart - segmentIndex * segmentDuration);
+            setHandlebarTime(
+              timelineStart -
+                (newHandlePosition / segmentHeight) * segmentDuration
+            );
           }
         }
       }
@@ -132,10 +135,10 @@ function useDraggableHandler({
     // TODO: determine when we want to do this
     const handlebar = scrollTimeRef.current;
     if (handlebar && showHandlebar) {
-      // handlebar.scrollIntoView({
-      //   behavior: "smooth",
-      //   block: "center",
-      // });
+      handlebar.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
     }
   }, []);
 
