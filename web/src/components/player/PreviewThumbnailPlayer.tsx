@@ -380,12 +380,14 @@ function PreviewContextItems({
 
   return (
     <ContextMenuContent>
-      <ContextMenuItem onSelect={() => (setReviewed ? setReviewed() : null)}>
-        <div className="w-full flex justify-between items-center">
-          Mark As Reviewed
-          <LuCheckSquare className="ml-4 w-4 h-4" />
-        </div>
-      </ContextMenuItem>
+      {!review.has_been_reviewed && (
+        <ContextMenuItem onSelect={() => (setReviewed ? setReviewed() : null)}>
+          <div className="w-full flex justify-between items-center">
+            Mark As Reviewed
+            <LuCheckSquare className="ml-4 w-4 h-4" />
+          </div>
+        </ContextMenuItem>
+      )}
       <ContextMenuItem onSelect={() => exportReview()}>
         <div className="w-full flex justify-between items-center">
           Export
