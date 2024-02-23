@@ -1,14 +1,8 @@
 import VideoPlayer from "./VideoPlayer";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useApiHost } from "@/api";
 import Player from "video.js/dist/types/player";
-import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
+import { formatUnixTimestampToDateTime, isCurrentHour } from "@/utils/dateUtil";
 import { ReviewSegment } from "@/types/review";
 import { Slider } from "../ui/slider";
 import { getIconForLabel, getIconForSubLabel } from "@/utils/iconUtil";
@@ -43,16 +37,12 @@ export default function PreviewThumbnailPlayer({
 }: PreviewPlayerProps) {
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
-  const playerRef = useRef<Player | null>(null);
 
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>();
   const [playback, setPlayback] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  const playingBack = useMemo(
-    () => relevantPreview && playback,
-    [playback, autoPlayback, relevantPreview]
-  );
+  const playingBack = useMemo(() => playback, [playback, autoPlayback]);
 
   useEffect(() => {
     if (!autoPlayback) {
@@ -76,10 +66,6 @@ export default function PreviewThumbnailPlayer({
 
   const onPlayback = useCallback(
     (isHovered: Boolean) => {
-      if (!relevantPreview) {
-        return;
-      }
-
       if (isHovered) {
         setHoverTimeout(
           setTimeout(() => {
@@ -94,16 +80,9 @@ export default function PreviewThumbnailPlayer({
 
         setPlayback(false);
         setProgress(0);
-
-        if (playerRef.current) {
-          playerRef.current.pause();
-          playerRef.current.currentTime(
-            review.start_time - relevantPreview.start
-          );
-        }
       }
     },
-    [hoverTimeout, relevantPreview, review, playerRef]
+    [hoverTimeout, review]
   );
 
   return (
@@ -115,10 +94,8 @@ export default function PreviewThumbnailPlayer({
     >
       {playingBack ? (
         <PreviewContent
-          playerRef={playerRef}
           review={review}
           relevantPreview={relevantPreview}
-          playback={playingBack}
           setProgress={setProgress}
           setReviewed={setReviewed}
         />
@@ -173,21 +150,18 @@ export default function PreviewThumbnailPlayer({
 }
 
 type PreviewContentProps = {
-  playerRef: React.MutableRefObject<Player | null>;
   review: ReviewSegment;
   relevantPreview: Preview | undefined;
-  playback: boolean;
   setProgress?: (progress: number) => void;
   setReviewed?: () => void;
 };
 function PreviewContent({
-  playerRef,
   review,
   relevantPreview,
-  playback,
   setProgress,
   setReviewed,
 }: PreviewContentProps) {
+  const playerRef = useRef<Player | null>(null);
   const playerStartTime = useMemo(() => {
     if (!relevantPreview) {
       return 0;
@@ -219,7 +193,7 @@ function PreviewContent({
 
   // preview
 
-  if (relevantPreview && playback) {
+  if (relevantPreview) {
     return (
       <VideoPlayer
         options={{
@@ -293,5 +267,79 @@ function PreviewContent({
         }}
       />
     );
+  } else if (isCurrentHour(review.start_time)) {
+    return (
+      <InProgressPreview
+        review={review}
+        setProgress={setProgress}
+        setReviewed={setReviewed}
+      />
+    );
   }
+}
+
+const MIN_LOAD_TIMEOUT_MS = 200;
+type InProgressPreviewProps = {
+  review: ReviewSegment;
+  setProgress?: (progress: number) => void;
+  setReviewed?: () => void;
+};
+function InProgressPreview({
+  review,
+  setProgress,
+  setReviewed,
+}: InProgressPreviewProps) {
+  const apiHost = useApiHost();
+  const { data: previewFrames } = useSWR<string[]>(
+    `preview/${review.camera}/start/${Math.floor(
+      review.start_time
+    ) - 4}/end/${Math.ceil(review.end_time) + 4}/frames`
+  );
+  const [key, setKey] = useState(0);
+
+  const handleLoad = useCallback(() => {
+    if (!previewFrames) {
+      return;
+    }
+
+    if (key == previewFrames.length - 1) {
+      if (setProgress) {
+        setProgress(100);
+      }
+
+      return;
+    }
+
+    setTimeout(() => {
+      if (setProgress) {
+        setProgress((key / (previewFrames.length - 1)) * 100);
+      }
+
+      if (setReviewed && key == previewFrames.length / 2) {
+        setReviewed();
+      }
+
+      setKey(key + 1);
+    }, MIN_LOAD_TIMEOUT_MS);
+  }, [key, previewFrames]);
+
+  if (!previewFrames || previewFrames.length == 0) {
+    return (
+      <img
+        className="h-full w-full"
+        loading="lazy"
+        src={`${apiHost}${review.thumb_path.replace("/media/frigate/", "")}`}
+      />
+    );
+  }
+
+  return (
+    <div className="w-full h-full flex items-center bg-black">
+      <img
+        className="w-full"
+        src={`${apiHost}api/preview/${previewFrames[key]}/thumbnail.jpg`}
+        onLoad={handleLoad}
+      />
+    </div>
+  );
 }
