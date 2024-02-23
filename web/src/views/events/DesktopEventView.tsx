@@ -252,19 +252,34 @@ export default function DesktopEventView({
           ref={contentRef}
           className="flex flex-1 flex-wrap content-start gap-2 overflow-y-auto no-scrollbar"
         >
-          <Button
-            className={`${
-              hasUpdate ? "animate-in slide-in-from-top" : "invisible"
-            } absolute text-center left-1/2 transform mt-5 z-30 bg-gray-400 text-white`}
-            variant="secondary"
-            onClick={() => {
-              setHasUpdate(false);
-              pullLatestData();
-            }}
-          >
-            <LuRefreshCcw className="w-4 h-4 mr-2" />
-            New Items To Review
-          </Button>
+          {hasUpdate && (
+            <div className="absolute w-full z-30">
+              <div className="flex justify-center items-center mr-[100px]">
+                <Button
+                  className={`${
+                    hasUpdate
+                      ? "animate-in slide-in-from-top duration-500"
+                      : "invisible"
+                  }  text-center mt-5 mx-auto bg-gray-400 text-white`}
+                  variant="secondary"
+                  onClick={() => {
+                    setHasUpdate(false);
+                    pullLatestData();
+                    if (contentRef.current) {
+                      contentRef.current.scrollTo({
+                        top: 0,
+                        behavior: "smooth",
+                      });
+                    }
+                  }}
+                >
+                  <LuRefreshCcw className="w-4 h-4 mr-2" />
+                  New Items To Review
+                </Button>
+              </div>
+            </div>
+          )}
+
           <div className="w-full mr-4 md:grid md:grid-cols-3 3xl:grid-cols-4 gap-4 overflow-y-auto no-scrollbar">
             {currentItems ? (
               currentItems.map((value, segIdx) => {
