@@ -192,7 +192,7 @@ export function EventSegment({
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
       element.scrollIntoView({ behavior: "smooth", block: "center" });
-    }, 50);
+    }, 100);
   }
 
   useEffect(() => {
