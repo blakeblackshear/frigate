@@ -101,7 +101,8 @@ class ImprovedMotionDetector(MotionDetector):
 
         # mask frame
         # this has to come after contrast improvement
-        resized_frame[self.mask] = [255]
+        # Setting masked pixels to zero, to match the average frame at startup
+        resized_frame[self.mask] = [0]
 
         resized_frame = gaussian_filter(resized_frame, sigma=1, radius=self.blur_radius)
 
