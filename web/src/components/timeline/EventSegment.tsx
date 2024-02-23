@@ -1,7 +1,7 @@
 import { useEventUtils } from "@/hooks/use-event-utils";
 import { useSegmentUtils } from "@/hooks/use-segment-utils";
 import { ReviewSegment, ReviewSeverity } from "@/types/review";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 
 type EventSegmentProps = {
   events: ReviewSegment[];
@@ -19,6 +19,7 @@ type MinimapSegmentProps = {
   isLastSegmentInMinimap: boolean;
   alignedMinimapStartTime: number;
   alignedMinimapEndTime: number;
+  firstMinimapSegmentRef: React.MutableRefObject<HTMLDivElement | null>;
 };
 
 type TickSegmentProps = {
@@ -41,11 +42,15 @@ function MinimapBounds({
   isLastSegmentInMinimap,
   alignedMinimapStartTime,
   alignedMinimapEndTime,
+  firstMinimapSegmentRef,
 }: MinimapSegmentProps) {
   return (
     <>
       {isFirstSegmentInMinimap && (
-        <div className="absolute inset-0 -bottom-5 w-full flex items-center justify-center text-xs text-primary font-medium z-20 text-center text-[8px]">
+        <div
+          className="absolute inset-0 -bottom-5 w-full flex items-center justify-center text-xs text-primary font-medium z-20 text-center text-[8px] scroll-mt-8"
+          ref={firstMinimapSegmentRef}
+        >
           {new Date(alignedMinimapStartTime * 1000).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
@@ -179,6 +184,19 @@ export function EventSegment({
     return showMinimap && segmentTime === alignedMinimapEndTime;
   }, [showMinimap, segmentTime, alignedMinimapEndTime]);
 
+  const firstMinimapSegmentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Check if the first segment is out of view
+    const firstSegment = firstMinimapSegmentRef.current;
+    if (firstSegment && showMinimap && isFirstSegmentInMinimap) {
+      firstSegment.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [showMinimap, isFirstSegmentInMinimap, events, segmentDuration]);
+
   const segmentClasses = `flex flex-row ${
     showMinimap
       ? isInMinimapRange
@@ -212,6 +230,7 @@ export function EventSegment({
         isLastSegmentInMinimap={isLastSegmentInMinimap}
         alignedMinimapStartTime={alignedMinimapStartTime}
         alignedMinimapEndTime={alignedMinimapEndTime}
+        firstMinimapSegmentRef={firstMinimapSegmentRef}
       />
 
       <Tick

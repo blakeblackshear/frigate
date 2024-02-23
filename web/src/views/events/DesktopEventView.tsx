@@ -195,8 +195,8 @@ export default function DesktopEventView({
   }
 
   return (
-    <div className="relative w-full h-full">
-      <div className="absolute flex justify-between left-0 top-0 right-0">
+    <div className="flex flex-col w-full h-full">
+      <div className="flex justify-between mb-2">
         <ToggleGroup
           type="single"
           defaultValue="alert"
@@ -261,55 +261,59 @@ export default function DesktopEventView({
         </Button>
       )}
 
-      <div
-        ref={contentRef}
-        className="absolute left-0 top-12 bottom-0 right-28 flex flex-wrap content-start gap-2 overflow-y-auto no-scrollbar"
-      >
-        {currentItems ? (
-          currentItems.map((value, segIdx) => {
-            const lastRow = segIdx == reviewItems[severity].length - 1;
-            const relevantPreview = Object.values(relevantPreviews || []).find(
-              (preview) =>
-                preview.camera == value.camera &&
-                preview.start < value.start_time &&
-                preview.end > value.end_time
-            );
+      <div className="flex h-full overflow-hidden">
+        <div
+          ref={contentRef}
+          className="flex flex-1 flex-wrap content-start gap-2 overflow-y-auto no-scrollbar"
+        >
+          {currentItems ? (
+            currentItems.map((value, segIdx) => {
+              const lastRow = segIdx == reviewItems[severity].length - 1;
+              const relevantPreview = Object.values(
+                relevantPreviews || []
+              ).find(
+                (preview) =>
+                  preview.camera == value.camera &&
+                  preview.start < value.start_time &&
+                  preview.end > value.end_time
+              );
 
-            return (
-              <div
-                key={value.id}
-                ref={lastRow ? lastReviewRef : minimapRef}
-                data-start={value.start_time}
-              >
-                <div className="h-[234px] aspect-video rounded-lg overflow-hidden">
-                  <PreviewThumbnailPlayer
-                    review={value}
-                    relevantPreview={relevantPreview}
-                    setReviewed={() => markItemAsReviewed(value.id)}
-                    onClick={() => onSelectReview(value.id)}
-                  />
+              return (
+                <div
+                  key={value.id}
+                  ref={lastRow ? lastReviewRef : minimapRef}
+                  data-start={value.start_time}
+                >
+                  <div className="h-[234px] aspect-video rounded-lg overflow-hidden">
+                    <PreviewThumbnailPlayer
+                      review={value}
+                      relevantPreview={relevantPreview}
+                      setReviewed={() => markItemAsReviewed(value.id)}
+                      onClick={() => onSelectReview(value.id)}
+                    />
+                  </div>
+                  {lastRow && !reachedEnd && <ActivityIndicator />}
                 </div>
-                {lastRow && !reachedEnd && <ActivityIndicator />}
-              </div>
-            );
-          })
-        ) : (
-          <div ref={lastReviewRef} />
-        )}
-      </div>
-      <div className="absolute top-12 right-0 bottom-0">
-        <EventReviewTimeline
-          segmentDuration={60}
-          timestampSpread={15}
-          timelineStart={timeRange.before}
-          timelineEnd={timeRange.after}
-          showMinimap
-          minimapStartTime={minimapBounds.start}
-          minimapEndTime={minimapBounds.end}
-          events={reviewItems.all}
-          severityType={severity}
-          contentRef={contentRef}
-        />
+              );
+            })
+          ) : (
+            <div ref={lastReviewRef} />
+          )}
+        </div>
+        <div className="md:w-[100px] overflow-y-auto no-scrollbar">
+          <EventReviewTimeline
+            segmentDuration={60}
+            timestampSpread={15}
+            timelineStart={timeRange.before}
+            timelineEnd={timeRange.after}
+            showMinimap
+            minimapStartTime={minimapBounds.start}
+            minimapEndTime={minimapBounds.end}
+            events={reviewItems.all}
+            severityType={severity}
+            contentRef={contentRef}
+          />
+        </div>
       </div>
     </div>
   );

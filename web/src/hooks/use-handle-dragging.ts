@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 
 interface DragHandlerProps {
   contentRef: React.RefObject<HTMLElement>;
@@ -127,6 +127,17 @@ function useDraggableHandler({
       timelineStart,
     ]
   );
+
+  useEffect(() => {
+    // TODO: determine when we want to do this
+    const handlebar = scrollTimeRef.current;
+    if (handlebar && showHandlebar) {
+      // handlebar.scrollIntoView({
+      //   behavior: "smooth",
+      //   block: "center",
+      // });
+    }
+  }, []);
 
   return { handleMouseDown, handleMouseUp, handleMouseMove };
 }
