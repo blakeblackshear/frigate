@@ -106,7 +106,7 @@ function Logs() {
             })
           }
         >
-          Jump To Bottom
+          Jump to Bottom
         </div>
       )}
 
