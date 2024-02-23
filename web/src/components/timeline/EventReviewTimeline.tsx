@@ -25,6 +25,7 @@ export type EventReviewTimelineProps = {
   events: ReviewSegment[];
   severityType: ReviewSeverity;
   contentRef: RefObject<HTMLDivElement>;
+  onHandlebarDraggingChange?: (isDragging: boolean) => void;
 };
 
 export function EventReviewTimeline({
@@ -41,6 +42,7 @@ export function EventReviewTimeline({
   events,
   severityType,
   contentRef,
+  onHandlebarDraggingChange,
 }: EventReviewTimelineProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [currentTimeSegment, setCurrentTimeSegment] = useState<number>(0);
@@ -151,6 +153,12 @@ export function EventReviewTimeline({
       });
     }
   }, [currentTimeSegment, showHandlebar]);
+
+  useEffect(() => {
+    if (onHandlebarDraggingChange) {
+      onHandlebarDraggingChange(isDragging);
+    }
+  }, [isDragging, onHandlebarDraggingChange]);
 
   useEffect(() => {
     if (timelineRef.current && handlebarTime && showHandlebar) {

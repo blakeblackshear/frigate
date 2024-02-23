@@ -1,3 +1,4 @@
+import { useFrigateEvents } from "@/api/ws";
 import PreviewThumbnailPlayer from "@/components/player/PreviewThumbnailPlayer";
 import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
 import ActivityIndicator from "@/components/ui/activity-indicator";
@@ -12,72 +13,38 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { ReviewSegment, ReviewSeverity } from "@/types/review";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
-import axios from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { LuCalendar, LuFilter, LuVideo } from "react-icons/lu";
+import { LuCalendar, LuFilter, LuRefreshCcw, LuVideo } from "react-icons/lu";
 import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
-import useSWRInfinite from "swr/infinite";
 
-const API_LIMIT = 250;
-
-export default function DesktopEventView() {
+type DesktopEventViewProps = {
+  reviewPages?: ReviewSegment[][];
+  relevantPreviews?: Preview[];
+  timeRange: { before: number; after: number };
+  reachedEnd: boolean;
+  isValidating: boolean;
+  loadNextPage: () => void;
+  markItemAsReviewed: (reviewId: string) => void;
+  onSelectReview: (reviewId: string) => void;
+  pullLatestData: () => void;
+};
+export default function DesktopEventView({
+  reviewPages,
+  relevantPreviews,
+  timeRange,
+  reachedEnd,
+  isValidating,
+  loadNextPage,
+  markItemAsReviewed,
+  onSelectReview,
+  pullLatestData,
+}: DesktopEventViewProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
   const [severity, setSeverity] = useState<ReviewSeverity>("alert");
   const contentRef = useRef<HTMLDivElement | null>(null);
 
   // review paging
-
-  const [after, setAfter] = useState(0);
-  useEffect(() => {
-    const now = new Date();
-    now.setHours(now.getHours() - 24);
-    setAfter(now.getTime() / 1000);
-
-    const intervalId: NodeJS.Timeout = setInterval(() => {
-      const now = new Date();
-      now.setHours(now.getHours() - 24);
-      setAfter(now.getTime() / 1000);
-    }, 60000);
-    return () => clearInterval(intervalId);
-  }, [60000]);
-
-  const reviewSearchParams = {};
-  const reviewSegmentFetcher = useCallback((key: any) => {
-    const [path, params] = Array.isArray(key) ? key : [key, undefined];
-    return axios.get(path, { params }).then((res) => res.data);
-  }, []);
-
-  const getKey = useCallback(
-    (index: number, prevData: ReviewSegment[]) => {
-      if (index > 0) {
-        const lastDate = prevData[prevData.length - 1].start_time;
-        const pagedParams = reviewSearchParams
-          ? { before: lastDate, after: after, limit: API_LIMIT }
-          : {
-              ...reviewSearchParams,
-              before: lastDate,
-              after: after,
-              limit: API_LIMIT,
-            };
-        return ["review", pagedParams];
-      }
-
-      const params = reviewSearchParams
-        ? { limit: API_LIMIT, after: after }
-        : { ...reviewSearchParams, limit: API_LIMIT, after: after };
-      return ["review", params];
-    },
-    [reviewSearchParams]
-  );
-
-  const {
-    data: reviewPages,
-    mutate: updateSegments,
-    size,
-    setSize,
-    isValidating,
-  } = useSWRInfinite<ReviewSegment[]>(getKey, reviewSegmentFetcher);
 
   const reviewItems = useMemo(() => {
     const all: ReviewSegment[] = [];
@@ -111,11 +78,6 @@ export default function DesktopEventView() {
     };
   }, [reviewPages]);
 
-  const isDone = useMemo(
-    () => (reviewPages?.at(-1)?.length ?? 0) < API_LIMIT,
-    [reviewPages]
-  );
-
   const currentItems = useMemo(() => {
     const current = reviewItems[severity];
 
@@ -135,8 +97,8 @@ export default function DesktopEventView() {
       if (pagingObserver.current) pagingObserver.current.disconnect();
       try {
         pagingObserver.current = new IntersectionObserver((entries) => {
-          if (entries[0].isIntersecting && !isDone) {
-            setSize(size + 1);
+          if (entries[0].isIntersecting && !reachedEnd) {
+            loadNextPage();
           }
         });
         if (node) pagingObserver.current.observe(node);
@@ -144,7 +106,7 @@ export default function DesktopEventView() {
         // no op
       }
     },
-    [isValidating, isDone]
+    [isValidating, reachedEnd]
   );
 
   const [minimap, setMinimap] = useState<string[]>([]);
@@ -209,46 +171,24 @@ export default function DesktopEventView() {
     return data;
   }, [minimap]);
 
-  // review status
+  // new data alert
 
-  const setReviewed = useCallback(
-    async (id: string) => {
-      const resp = await axios.post(`review/${id}/viewed`);
-
-      if (resp.status == 200) {
-        updateSegments();
-      }
-    },
-    [updateSegments]
-  );
-
-  // preview videos
-
-  const previewTimes = useMemo(() => {
-    if (
-      !reviewPages ||
-      reviewPages.length == 0 ||
-      reviewPages.at(-1)!!.length == 0
-    ) {
-      return undefined;
+  const { payload: eventUpdate } = useFrigateEvents();
+  const [hasUpdate, setHasUpdate] = useState(false);
+  useEffect(() => {
+    if (!eventUpdate) {
+      return;
     }
 
-    const startDate = new Date();
-    startDate.setMinutes(0, 0, 0);
-
-    const endDate = new Date(reviewPages.at(-1)!!.at(-1)!!.end_time);
-    endDate.setHours(0, 0, 0, 0);
-    return {
-      start: startDate.getTime() / 1000,
-      end: endDate.getTime() / 1000,
-    };
-  }, [reviewPages]);
-  const { data: allPreviews } = useSWR<Preview[]>(
-    previewTimes
-      ? `preview/all/start/${previewTimes.start}/end/${previewTimes.end}`
-      : null,
-    { revalidateOnFocus: false }
-  );
+    // if event is ended and was saved, update events list
+    if (
+      eventUpdate.type == "end" &&
+      (eventUpdate.after.has_clip || eventUpdate.after.has_snapshot)
+    ) {
+      setHasUpdate(true);
+      return;
+    }
+  }, [eventUpdate]);
 
   if (!config) {
     return <ActivityIndicator />;
@@ -307,6 +247,20 @@ export default function DesktopEventView() {
         </div>
       </div>
 
+      {hasUpdate && (
+        <Button
+          className="absolute top-14 left-[50%] -translate-x-[50%] z-30 bg-gray-400 text-white"
+          variant="secondary"
+          onClick={() => {
+            setHasUpdate(false);
+            pullLatestData();
+          }}
+        >
+          <LuRefreshCcw className="w-4 h-4 mr-2" />
+          New Items To Review
+        </Button>
+      )}
+
       <div
         ref={contentRef}
         className="absolute left-0 top-12 bottom-0 right-28 flex flex-wrap content-start gap-2 overflow-y-auto no-scrollbar"
@@ -314,7 +268,7 @@ export default function DesktopEventView() {
         {currentItems ? (
           currentItems.map((value, segIdx) => {
             const lastRow = segIdx == reviewItems[severity].length - 1;
-            const relevantPreview = Object.values(allPreviews || []).find(
+            const relevantPreview = Object.values(relevantPreviews || []).find(
               (preview) =>
                 preview.camera == value.camera &&
                 preview.start < value.start_time &&
@@ -331,10 +285,11 @@ export default function DesktopEventView() {
                   <PreviewThumbnailPlayer
                     review={value}
                     relevantPreview={relevantPreview}
-                    setReviewed={() => setReviewed(value.id)}
+                    setReviewed={() => markItemAsReviewed(value.id)}
+                    onClick={() => onSelectReview(value.id)}
                   />
                 </div>
-                {lastRow && !isDone && <ActivityIndicator />}
+                {lastRow && !reachedEnd && <ActivityIndicator />}
               </div>
             );
           })
@@ -343,20 +298,18 @@ export default function DesktopEventView() {
         )}
       </div>
       <div className="absolute top-12 right-0 bottom-0">
-        {after != 0 && (
-          <EventReviewTimeline
-            segmentDuration={60}
-            timestampSpread={15}
-            timelineStart={Math.floor(Date.now() / 1000)}
-            timelineEnd={after}
-            showMinimap
-            minimapStartTime={minimapBounds.start}
-            minimapEndTime={minimapBounds.end}
-            events={reviewItems.all}
-            severityType={severity}
-            contentRef={contentRef}
-          />
-        )}
+        <EventReviewTimeline
+          segmentDuration={60}
+          timestampSpread={15}
+          timelineStart={timeRange.before}
+          timelineEnd={timeRange.after}
+          showMinimap
+          minimapStartTime={minimapBounds.start}
+          minimapEndTime={minimapBounds.end}
+          events={reviewItems.all}
+          severityType={severity}
+          contentRef={contentRef}
+        />
       </div>
     </div>
   );

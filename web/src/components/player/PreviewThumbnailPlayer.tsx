@@ -23,6 +23,7 @@ type PreviewPlayerProps = {
   relevantPreview?: Preview;
   autoPlayback?: boolean;
   setReviewed?: () => void;
+  onClick?: () => void;
 };
 
 type Preview = {
@@ -38,6 +39,7 @@ export default function PreviewThumbnailPlayer({
   relevantPreview,
   autoPlayback = false,
   setReviewed,
+  onClick,
 }: PreviewPlayerProps) {
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -109,6 +111,7 @@ export default function PreviewThumbnailPlayer({
       className="relative w-full h-full cursor-pointer"
       onMouseEnter={isMobile ? undefined : () => onPlayback(true)}
       onMouseLeave={isMobile ? undefined : () => onPlayback(false)}
+      onClick={onClick}
     >
       {playingBack ? (
         <PreviewContent
@@ -185,6 +188,15 @@ function PreviewContent({
   setProgress,
   setReviewed,
 }: PreviewContentProps) {
+  const playerStartTime = useMemo(() => {
+    if (!relevantPreview) {
+      return 0;
+    }
+
+    // start with a bit of padding
+    return Math.max(0, review.start_time - relevantPreview.start - 8);
+  }, []);
+
   // manual playback
   // safari is incapable of playing at a speed > 2x
   // so manual seeking is required on iOS
@@ -195,9 +207,11 @@ function PreviewContent({
       return;
     }
 
+    let counter = 0;
     const intervalId: NodeJS.Timeout = setInterval(() => {
       if (playerRef.current) {
-        playerRef.current.currentTime(playerRef.current.currentTime()!! + 1);
+        playerRef.current.currentTime(playerStartTime + counter);
+        counter += 1;
       }
     }, 125);
     return () => clearInterval(intervalId);
@@ -233,20 +247,15 @@ function PreviewContent({
             return;
           }
 
-          // start with a bit of padding
-          const playerStartTime = Math.max(
-            0,
-            review.start_time - relevantPreview.start - 8
-          );
-
           if (isSafari) {
             player.pause();
             setManualPlayback(true);
           } else {
+            player.currentTime(playerStartTime);
             player.playbackRate(8);
           }
 
-          player.currentTime(playerStartTime);
+          let lastPercent = 0;
           player.on("timeupdate", () => {
             if (!setProgress) {
               return;
@@ -262,10 +271,13 @@ function PreviewContent({
             if (
               setReviewed &&
               !review.has_been_reviewed &&
+              lastPercent < 50 &&
               playerPercent > 50
             ) {
               setReviewed();
             }
+
+            lastPercent = playerPercent;
 
             if (playerPercent > 100) {
               playerRef.current?.pause();

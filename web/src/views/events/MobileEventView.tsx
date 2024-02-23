@@ -3,71 +3,31 @@ import ActivityIndicator from "@/components/ui/activity-indicator";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { ReviewSegment, ReviewSeverity } from "@/types/review";
-import axios from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
-import useSWRInfinite from "swr/infinite";
 
-const API_LIMIT = 250;
-
-export default function MobileEventView() {
+type MobileEventViewProps = {
+  reviewPages?: ReviewSegment[][];
+  relevantPreviews?: Preview[];
+  reachedEnd: boolean;
+  isValidating: boolean;
+  loadNextPage: () => void;
+  markItemAsReviewed: (reviewId: string) => void;
+};
+export default function MobileEventView({
+  reviewPages,
+  relevantPreviews,
+  reachedEnd,
+  isValidating,
+  loadNextPage,
+  markItemAsReviewed,
+}: MobileEventViewProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
   const [severity, setSeverity] = useState<ReviewSeverity>("alert");
   const contentRef = useRef<HTMLDivElement | null>(null);
 
   // review paging
-
-  const [after, setAfter] = useState(0);
-  useEffect(() => {
-    const now = new Date();
-    now.setHours(now.getHours() - 24);
-    setAfter(now.getTime() / 1000);
-
-    const intervalId: NodeJS.Timeout = setInterval(() => {
-      const now = new Date();
-      now.setHours(now.getHours() - 24);
-      setAfter(now.getTime() / 1000);
-    }, 60000);
-    return () => clearInterval(intervalId);
-  }, [60000]);
-
-  const reviewSearchParams = {};
-  const reviewSegmentFetcher = useCallback((key: any) => {
-    const [path, params] = Array.isArray(key) ? key : [key, undefined];
-    return axios.get(path, { params }).then((res) => res.data);
-  }, []);
-
-  const getKey = useCallback(
-    (index: number, prevData: ReviewSegment[]) => {
-      if (index > 0) {
-        const lastDate = prevData[prevData.length - 1].start_time;
-        const pagedParams = reviewSearchParams
-          ? { before: lastDate, after: after, limit: API_LIMIT }
-          : {
-              ...reviewSearchParams,
-              before: lastDate,
-              after: after,
-              limit: API_LIMIT,
-            };
-        return ["review", pagedParams];
-      }
-
-      const params = reviewSearchParams
-        ? { limit: API_LIMIT, after: after }
-        : { ...reviewSearchParams, limit: API_LIMIT, after: after };
-      return ["review", params];
-    },
-    [reviewSearchParams]
-  );
-
-  const {
-    data: reviewPages,
-    mutate: updateSegments,
-    size,
-    setSize,
-    isValidating,
-  } = useSWRInfinite<ReviewSegment[]>(getKey, reviewSegmentFetcher);
 
   const reviewItems = useMemo(() => {
     const all: ReviewSegment[] = [];
@@ -101,11 +61,6 @@ export default function MobileEventView() {
     };
   }, [reviewPages]);
 
-  const isDone = useMemo(
-    () => (reviewPages?.at(-1)?.length ?? 0) < API_LIMIT,
-    [reviewPages]
-  );
-
   const currentItems = useMemo(() => {
     const current = reviewItems[severity];
 
@@ -125,8 +80,8 @@ export default function MobileEventView() {
       if (pagingObserver.current) pagingObserver.current.disconnect();
       try {
         pagingObserver.current = new IntersectionObserver((entries) => {
-          if (entries[0].isIntersecting && !isDone) {
-            setSize(size + 1);
+          if (entries[0].isIntersecting && !reachedEnd) {
+            loadNextPage();
           }
         });
         if (node) pagingObserver.current.observe(node);
@@ -134,7 +89,7 @@ export default function MobileEventView() {
         // no op
       }
     },
-    [isValidating, isDone]
+    [isValidating, reachedEnd]
   );
 
   const [minimap, setMinimap] = useState<string[]>([]);
@@ -199,47 +154,6 @@ export default function MobileEventView() {
     return data;
   }, [minimap]);
 
-  // review status
-
-  const setReviewed = useCallback(
-    async (id: string) => {
-      const resp = await axios.post(`review/${id}/viewed`);
-
-      if (resp.status == 200) {
-        updateSegments();
-      }
-    },
-    [updateSegments]
-  );
-
-  // preview videos
-
-  const previewTimes = useMemo(() => {
-    if (
-      !reviewPages ||
-      reviewPages.length == 0 ||
-      reviewPages.at(-1)!!.length == 0
-    ) {
-      return undefined;
-    }
-
-    const startDate = new Date();
-    startDate.setMinutes(0, 0, 0);
-
-    const endDate = new Date(reviewPages.at(-1)!!.at(-1)!!.end_time);
-    endDate.setHours(0, 0, 0, 0);
-    return {
-      start: startDate.getTime() / 1000,
-      end: endDate.getTime() / 1000,
-    };
-  }, [reviewPages]);
-  const { data: allPreviews } = useSWR<Preview[]>(
-    previewTimes
-      ? `preview/all/start/${previewTimes.start}/end/${previewTimes.end}`
-      : null,
-    { revalidateOnFocus: false }
-  );
-
   if (!config) {
     return <ActivityIndicator />;
   }
@@ -291,7 +205,7 @@ export default function MobileEventView() {
         {currentItems ? (
           currentItems.map((value, segIdx) => {
             const lastRow = segIdx == reviewItems[severity].length - 1;
-            const relevantPreview = Object.values(allPreviews || []).find(
+            const relevantPreview = Object.values(relevantPreviews || []).find(
               (preview) =>
                 preview.camera == value.camera &&
                 preview.start < value.start_time &&
@@ -309,10 +223,10 @@ export default function MobileEventView() {
                     review={value}
                     relevantPreview={relevantPreview}
                     autoPlayback={minimapBounds.end == value.start_time}
-                    setReviewed={() => setReviewed(value.id)}
+                    setReviewed={() => markItemAsReviewed(value.id)}
                   />
                 </div>
-                {lastRow && !isDone && <ActivityIndicator />}
+                {lastRow && !reachedEnd && <ActivityIndicator />}
               </div>
             );
           })

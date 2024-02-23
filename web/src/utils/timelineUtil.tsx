@@ -20,6 +20,7 @@ import {
   MdOutlinePictureInPictureAlt,
 } from "react-icons/md";
 import { FaBicycle } from "react-icons/fa";
+import { endOfHourOrCurrentTime } from "./dateUtil";
 
 export function getTimelineIcon(timelineItem: Timeline) {
   switch (timelineItem.class_type) {
@@ -117,4 +118,32 @@ export function getTimelineItemDescription(timelineItem: Timeline) {
     case "external":
       return `${label} detected`;
   }
+}
+
+export function getChunkedTimeRange(timestamp: number) {
+  const endOfThisHour = new Date();
+  endOfThisHour.setHours(endOfThisHour.getHours() + 1, 0, 0, 0);
+  const data: { start: number; end: number }[] = [];
+  const startDay = new Date(timestamp * 1000);
+  startDay.setHours(0, 0, 0, 0);
+  const startTimestamp = startDay.getTime() / 1000;
+  let start = startDay.getTime() / 1000;
+  let end = 0;
+
+  for (let i = 0; i < 24; i++) {
+    startDay.setHours(startDay.getHours() + 1);
+
+    if (startDay > endOfThisHour) {
+      break;
+    }
+
+    end = endOfHourOrCurrentTime(startDay.getTime() / 1000);
+    data.push({
+      start,
+      end,
+    });
+    start = startDay.getTime() / 1000;
+  }
+
+  return { start: startTimestamp, end, ranges: data };
 }
