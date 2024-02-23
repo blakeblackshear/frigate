@@ -2297,38 +2297,44 @@ def preview_hour(year_month, day, hour, camera_name, tz_name):
     return preview_ts(camera_name, start_ts, end_ts)
 
 
-@bp.route("/preview/<camera_name>/<frame_time>/thumbnail.jpg")
-def preview_thumbnail(camera_name, frame_time):
+@bp.route("/preview/<file_name>/thumbnail.jpg")
+def preview_thumbnail(file_name: str):
     """Get a thumbnail from the cached preview jpgs."""
+    safe_file_name_current = secure_filename(file_name)
     preview_dir = os.path.join(CACHE_DIR, "preview_frames")
-    file_start = f"preview_{camera_name}"
-    file_check = f"{file_start}-{frame_time}.jpg"
-    selected_preview = None
 
-    for file in sorted(os.listdir(preview_dir)):
-        if file.startswith(file_start):
-            if file > file_check:
-                selected_preview = file
-                break
-
-    if selected_preview is None:
-        return make_response(
-            jsonify(
-                {
-                    "success": False,
-                    "message": "Could not find valid preview jpg.",
-                }
-            ),
-            404,
-        )
-
-    with open(os.path.join(preview_dir, selected_preview), "rb") as image_file:
+    with open(os.path.join(preview_dir, safe_file_name_current), "rb") as image_file:
         jpg_bytes = image_file.read()
 
     response = make_response(jpg_bytes)
     response.headers["Content-Type"] = "image/jpeg"
     response.headers["Cache-Control"] = "private, max-age=31536000"
     return response
+
+
+@bp.route("/preview/<camera_name>/start/<int:start_ts>/end/<int:end_ts>/frames")
+@bp.route("/preview/<camera_name>/start/<float:start_ts>/end/<float:end_ts>/frames")
+def get_preview_frames_from_cache(camera_name: str, start_ts, end_ts):
+    """Get list of cached preview frames"""
+    preview_dir = os.path.join(CACHE_DIR, "preview_frames")
+    file_start = f"preview_{camera_name}"
+    start_file = f"{file_start}-{start_ts}.jpg"
+    end_file = f"{file_start}-{end_ts}.jpg"
+    selected_previews = []
+
+    for file in sorted(os.listdir(preview_dir)):
+        if not file.startswith(file_start):
+            continue
+
+        if file < start_file:
+            continue
+
+        if file > end_file:
+            break
+
+        selected_previews.append(file)
+
+    return jsonify(selected_previews)
 
 
 @bp.route("/vod/event/<id>")
@@ -2409,6 +2415,7 @@ def review():
     review = (
         ReviewSegment.select()
         .where(reduce(operator.and_, clauses))
+        .order_by(ReviewSegment.severity.asc())
         .order_by(ReviewSegment.start_time.desc())
         .limit(limit)
         .dicts()
