@@ -14,10 +14,10 @@ function Live() {
 
   // recent events
   const { payload: eventUpdate } = useFrigateEvents();
-  const { data: allEvents, mutate: updateEvents } = useSWR<FrigateEvent[]>(
-    ["events", { limit: 10 }],
-    { revalidateOnFocus: false }
-  );
+  const { data: allEvents, mutate: updateEvents } = useSWR<FrigateEvent[]>([
+    "events",
+    { limit: 10 },
+  ]);
 
   useEffect(() => {
     if (!eventUpdate) {
