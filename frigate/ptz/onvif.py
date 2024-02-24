@@ -92,6 +92,9 @@ class OnvifController:
             if (
                 onvif_profile.VideoEncoderConfiguration
                 and onvif_profile.VideoEncoderConfiguration.Encoding == "H264"
+                and onvif_profile.PTZConfiguration
+                and onvif_profile.PTZConfiguration.DefaultContinuousPanTiltVelocitySpace
+                is not None
             ):
                 profile = onvif_profile
                 logger.debug(f"Selected Onvif profile for {camera_name}: {profile}")
@@ -151,7 +154,10 @@ class OnvifController:
 
         # autoracking relative panning/tilting needs a relative zoom value set to 0
         # if camera supports relative movement
-        if self.config.cameras[camera_name].onvif.autotracking.zooming:
+        if (
+            self.config.cameras[camera_name].onvif.autotracking.zooming
+            != ZoomingModeEnum.disabled
+        ):
             zoom_space_id = next(
                 (
                     i
@@ -182,23 +188,21 @@ class OnvifController:
         try:
             if (
                 self.config.cameras[camera_name].onvif.autotracking.zooming
-                == ZoomingModeEnum.relative
+                != ZoomingModeEnum.disabled
             ):
                 if zoom_space_id is not None:
                     move_request.Translation.Zoom.space = ptz_config["Spaces"][
                         "RelativeZoomTranslationSpace"
-                    ][0]["URI"]
+                    ][zoom_space_id]["URI"]
+            else:
+                move_request.Translation.Zoom = []
         except Exception:
-            if (
-                self.config.cameras[camera_name].onvif.autotracking.zooming
-                == ZoomingModeEnum.relative
-            ):
-                self.config.cameras[
-                    camera_name
-                ].onvif.autotracking.zooming = ZoomingModeEnum.disabled
-                logger.warning(
-                    f"Disabling autotracking zooming for {camera_name}: Relative zoom not supported"
-                )
+            self.config.cameras[
+                camera_name
+            ].onvif.autotracking.zooming = ZoomingModeEnum.disabled
+            logger.warning(
+                f"Disabling autotracking zooming for {camera_name}: Relative zoom not supported"
+            )
 
         if move_request.Speed is None:
             move_request.Speed = configs.DefaultPTZSpeed if configs else None
@@ -387,7 +391,11 @@ class OnvifController:
         move_request.Translation.PanTilt.x = pan
         move_request.Translation.PanTilt.y = tilt
 
-        if "zoom-r" in self.cams[camera_name]["features"]:
+        if (
+            "zoom-r" in self.cams[camera_name]["features"]
+            and self.config.cameras[camera_name].onvif.autotracking.zooming
+            == ZoomingModeEnum.relative
+        ):
             move_request.Speed = {
                 "PanTilt": {
                     "x": speed,
@@ -403,7 +411,11 @@ class OnvifController:
         move_request.Translation.PanTilt.x = 0
         move_request.Translation.PanTilt.y = 0
 
-        if "zoom-r" in self.cams[camera_name]["features"]:
+        if (
+            "zoom-r" in self.cams[camera_name]["features"]
+            and self.config.cameras[camera_name].onvif.autotracking.zooming
+            == ZoomingModeEnum.relative
+        ):
             move_request.Translation.Zoom.x = 0
 
         self.cams[camera_name]["active"] = False
