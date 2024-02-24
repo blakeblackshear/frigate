@@ -11,6 +11,15 @@ import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { isMobile, isSafari } from "react-device-detect";
 import Chip from "../Chip";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "../ui/context-menu";
+import { LuCheckSquare, LuFileUp, LuTrash } from "react-icons/lu";
+import axios from "axios";
 
 type PreviewPlayerProps = {
   review: ReviewSegment;
@@ -86,66 +95,72 @@ export default function PreviewThumbnailPlayer({
   );
 
   return (
-    <div
-      className="relative w-full h-full cursor-pointer"
-      onMouseEnter={isMobile ? undefined : () => onPlayback(true)}
-      onMouseLeave={isMobile ? undefined : () => onPlayback(false)}
-      onClick={onClick}
-    >
-      {playingBack ? (
-        <PreviewContent
-          review={review}
-          relevantPreview={relevantPreview}
-          setProgress={setProgress}
-          setReviewed={setReviewed}
-        />
-      ) : (
-        <img
-          className="h-full w-full"
-          loading="lazy"
-          src={`${apiHost}${review.thumb_path.replace("/media/frigate/", "")}`}
-        />
-      )}
-      {(review.severity == "alert" || review.severity == "detection") && (
-        <Chip className="absolute top-2 left-2 flex gap-1 bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 z-0">
-          {review.data.objects.map((object) => {
-            return getIconForLabel(object, "w-3 h-3 text-white");
-          })}
-          {review.data.audio.map((audio) => {
-            return getIconForLabel(audio, "w-3 h-3 text-white");
-          })}
-          {review.data.sub_labels?.map((sub) => {
-            return getIconForSubLabel(sub, "w-3 h-3 text-white");
-          })}
-        </Chip>
-      )}
-      {!playingBack && (
-        <div className="absolute left-[6px] right-[6px] bottom-1 flex justify-between text-white">
-          <TimeAgo time={review.start_time * 1000} dense />
-          {config &&
-            formatUnixTimestampToDateTime(review.start_time, {
-              strftime_fmt:
-                config.ui.time_format == "24hour"
-                  ? "%b %-d, %H:%M"
-                  : "%b %-d, %I:%M %p",
+    <ContextMenu>
+      <ContextMenuTrigger
+        className="relative w-full h-full cursor-pointer"
+        onMouseEnter={isMobile ? undefined : () => onPlayback(true)}
+        onMouseLeave={isMobile ? undefined : () => onPlayback(false)}
+        onClick={onClick}
+      >
+        {playingBack ? (
+          <PreviewContent
+            review={review}
+            relevantPreview={relevantPreview}
+            setProgress={setProgress}
+            setReviewed={setReviewed}
+          />
+        ) : (
+          <img
+            className="h-full w-full"
+            loading="lazy"
+            src={`${apiHost}${review.thumb_path.replace(
+              "/media/frigate/",
+              ""
+            )}`}
+          />
+        )}
+        {(review.severity == "alert" || review.severity == "detection") && (
+          <Chip className="absolute top-2 left-2 flex gap-1 bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 z-0">
+            {review.data.objects.map((object) => {
+              return getIconForLabel(object, "w-3 h-3 text-white");
             })}
-        </div>
-      )}
-      <div className="absolute top-0 left-0 right-0 rounded-2xl z-10 w-full h-[30%] bg-gradient-to-b from-black/20 to-transparent pointer-events-none" />
-      <div className="absolute bottom-0 left-0 right-0 rounded-2xl z-10 w-full h-[10%] bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
-      {playingBack && (
-        <Slider
-          className="absolute left-0 right-0 bottom-0 z-10"
-          value={[progress]}
-          min={0}
-          step={1}
-          max={100}
-        />
-      )}
-      {!playingBack && review.has_been_reviewed && (
-        <div className="absolute left-0 top-0 bottom-0 right-0 bg-black bg-opacity-60" />
-      )}
-    </div>
+            {review.data.audio.map((audio) => {
+              return getIconForLabel(audio, "w-3 h-3 text-white");
+            })}
+            {review.data.sub_labels?.map((sub) => {
+              return getIconForSubLabel(sub, "w-3 h-3 text-white");
+            })}
+          </Chip>
+        )}
+        {!playingBack && (
+          <div className="absolute left-[6px] right-[6px] bottom-1 flex justify-between text-white">
+            <TimeAgo time={review.start_time * 1000} dense />
+            {config &&
+              formatUnixTimestampToDateTime(review.start_time, {
+                strftime_fmt:
+                  config.ui.time_format == "24hour"
+                    ? "%b %-d, %H:%M"
+                    : "%b %-d, %I:%M %p",
+              })}
+          </div>
+        )}
+        <div className="absolute top-0 left-0 right-0 rounded-2xl z-10 w-full h-[30%] bg-gradient-to-b from-black/20 to-transparent pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 rounded-2xl z-10 w-full h-[10%] bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+        {playingBack && (
+          <Slider
+            className="absolute left-0 right-0 bottom-0 z-10"
+            value={[progress]}
+            min={0}
+            step={1}
+            max={100}
+          />
+        )}
+        {!playingBack && review.has_been_reviewed && (
+          <div className="absolute left-0 top-0 bottom-0 right-0 bg-black bg-opacity-60" />
+        )}
+      </ContextMenuTrigger>
+      <PreviewContextItems review={review} setReviewed={setReviewed} />
+    </ContextMenu>
   );
 }
 
@@ -291,9 +306,9 @@ function InProgressPreview({
 }: InProgressPreviewProps) {
   const apiHost = useApiHost();
   const { data: previewFrames } = useSWR<string[]>(
-    `preview/${review.camera}/start/${Math.floor(
-      review.start_time
-    ) - 4}/end/${Math.ceil(review.end_time) + 4}/frames`
+    `preview/${review.camera}/start/${Math.floor(review.start_time) - 4}/end/${
+      Math.ceil(review.end_time) + 4
+    }/frames`
   );
   const [key, setKey] = useState(0);
 
@@ -315,7 +330,7 @@ function InProgressPreview({
         setProgress((key / (previewFrames.length - 1)) * 100);
       }
 
-      if (setReviewed && key == previewFrames.length / 2) {
+      if (setReviewed && key == Math.floor(previewFrames.length / 2)) {
         setReviewed();
       }
 
@@ -341,5 +356,51 @@ function InProgressPreview({
         onLoad={handleLoad}
       />
     </div>
+  );
+}
+
+type PreviewContextItemsProps = {
+  review: ReviewSegment;
+  setReviewed?: () => void;
+};
+function PreviewContextItems({
+  review,
+  setReviewed,
+}: PreviewContextItemsProps) {
+  const exportReview = useCallback(() => {
+    console.log(
+      "trying to export to " +
+        `export/${review.camera}/start/${review.start_time}/end/${review.end_time}`
+    );
+    axios.post(
+      `export/${review.camera}/start/${review.start_time}/end/${review.end_time}`,
+      { playback: "realtime" }
+    );
+  }, [review]);
+
+  return (
+    <ContextMenuContent>
+      {!review.has_been_reviewed && (
+        <ContextMenuItem onSelect={() => (setReviewed ? setReviewed() : null)}>
+          <div className="w-full flex justify-between items-center">
+            Mark As Reviewed
+            <LuCheckSquare className="ml-4 w-4 h-4" />
+          </div>
+        </ContextMenuItem>
+      )}
+      <ContextMenuItem onSelect={() => exportReview()}>
+        <div className="w-full flex justify-between items-center">
+          Export
+          <LuFileUp className="ml-4 w-4 h-4" />
+        </div>
+      </ContextMenuItem>
+      <ContextMenuSeparator />
+      <ContextMenuItem>
+        <div className="w-full flex justify-between items-center text-danger">
+          Delete
+          <LuTrash className="ml-4 w-4 h-4" />
+        </div>
+      </ContextMenuItem>
+    </ContextMenuContent>
   );
 }

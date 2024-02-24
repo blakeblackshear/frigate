@@ -151,8 +151,7 @@ function Export() {
   }, [deleteClip]);
 
   return (
-    <>
-      <Heading as="h2">Export</Heading>
+    <div className="w-full h-full overflow-hidden">
       <Toaster />
 
       <AlertDialog
@@ -199,7 +198,7 @@ function Export() {
         </DialogContent>
       </Dialog>
 
-      <div className="xl:flex justify-between">
+      <div className="w-full h-full xl:flex justify-between overflow-hidden">
         <div>
           <div className="my-2 flex">
             <DropdownMenu>
@@ -292,7 +291,7 @@ function Export() {
         </div>
 
         {exports && (
-          <Card className="p-4 xl:w-1/2">
+          <Card className="h-full p-4 xl:w-1/2 overflow-y-auto">
             <Heading as="h3">Exports</Heading>
             {Object.values(exports).map((item) => (
               <ExportCard
@@ -305,7 +304,7 @@ function Export() {
           </Card>
         )}
       </div>
-    </>
+    </div>
   );
 }
 
