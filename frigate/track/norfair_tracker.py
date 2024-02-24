@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 THRESHOLD_STATIONARY_IOU_AVERAGE = 0.6
-MAX_STATIONARY_IOU_HISTORY = 10
+MAX_STATIONARY_HISTORY = 10
 
 
 # Normalizes distance from estimate relative to object size
@@ -78,7 +78,7 @@ class NorfairTracker(ObjectTracker):
         self.untracked_object_boxes: list[list[int]] = []
         self.disappeared = {}
         self.positions = {}
-        self.stationary_iou: dict[str, list[int]] = {}
+        self.stationary_box_history: dict[str, list[list[int, int, int, int]]] = {}
         self.camera_config = config
         self.detect_config = config.detect
         self.ptz_metrics = ptz_metrics
@@ -144,7 +144,7 @@ class NorfairTracker(ObjectTracker):
 
     # tracks the current position of the object based on the last N bounding boxes
     # returns False if the object has moved outside its previous position
-    def update_position(self, id: str, box: [int, int, int, int]):
+    def update_position(self, id: str, box: list[int, int, int, int]):
         position = self.positions[id]
         position_box = (
             position["xmin"],
@@ -153,18 +153,17 @@ class NorfairTracker(ObjectTracker):
             position["ymax"],
         )
 
-        xmin, ymin, xmax, ymax = box
+        self.stationary_box_history[id].append(box)
 
-        iou = intersection_over_union(position_box, box)
-
-        self.stationary_iou[id].append(iou)
-
-        if len(self.stationary_iou[id]) > MAX_STATIONARY_IOU_HISTORY:
-            self.stationary_iou[id] = self.stationary_iou[id][
-                -MAX_STATIONARY_IOU_HISTORY:
+        if len(self.stationary_box_history[id]) > MAX_STATIONARY_HISTORY:
+            self.stationary_box_history[id] = self.stationary_box_history[id][
+                -MAX_STATIONARY_HISTORY:
             ]
 
+        # TODO calculate mean of boxes
         avg_iou = np.mean(self.stationary_iou[id])
+
+        xmin, ymin, xmax, ymax = box
 
         # if the iou drops below the threshold
         # assume the object has moved to a new position and reset the computed box
