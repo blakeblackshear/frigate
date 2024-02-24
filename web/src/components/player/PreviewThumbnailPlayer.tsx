@@ -167,6 +167,7 @@ export default function PreviewThumbnailPlayer({
   );
 }
 
+const PREVIEW_PADDING = 16;
 type PreviewContentProps = {
   review: ReviewSegment;
   relevantPreview: Preview | undefined;
@@ -189,7 +190,7 @@ function PreviewContent({
     }
 
     // start with a bit of padding
-    return Math.max(0, review.start_time - relevantPreview.start - 8);
+    return Math.max(0, review.start_time - relevantPreview.start - PREVIEW_PADDING);
   }, []);
   const [lastPercent, setLastPercent] = useState(0.0);
 
@@ -220,7 +221,7 @@ function PreviewContent({
       (playerRef.current?.currentTime || 0) - playerStartTime;
 
     // end with a bit of padding
-    const playerDuration = review.end_time - review.start_time + 8;
+    const playerDuration = review.end_time - review.start_time + PREVIEW_PADDING;
     const playerPercent = (playerProgress / playerDuration) * 100;
 
     if (
