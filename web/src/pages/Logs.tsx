@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Heading from "@/components/ui/heading";
 import copy from "copy-to-clipboard";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 
 const logTypes = ["frigate", "go2rtc", "nginx"] as const;
@@ -39,6 +39,26 @@ function Logs() {
   const handleCopyLogs = useCallback(() => {
     copy(logs);
   }, [logs]);
+
+  // scroll to bottom button
+
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  const [endVisible, setEndVisible] = useState(true);
+  const observer = useRef<IntersectionObserver | null>(null);
+  const endLogRef = useCallback(
+    (node: HTMLElement | null) => {
+      if (observer.current) observer.current.disconnect();
+      try {
+        observer.current = new IntersectionObserver((entries) => {
+          setEndVisible(entries[0].isIntersecting);
+        });
+        if (node) observer.current.observe(node);
+      } catch (e) {
+        // no op
+      }
+    },
+    [setEndVisible]
+  );
 
   return (
     <div className="relative w-full h-full overflow-hidden">
@@ -76,8 +96,26 @@ function Logs() {
         </div>
       </div>
 
-      <div className="absolute left-0 top-16 bottom-2 right-2 overflow-auto font-mono text-sm bg-secondary rounded p-2 whitespace-pre-wrap">
+      {!endVisible && (
+        <div
+          className="absolute bottom-8 left-[50%] -translate-x-[50%] rounded-xl bg-accent-foreground text-white z-20 p-2"
+          onClick={() =>
+            contentRef.current?.scrollTo({
+              top: contentRef.current?.scrollHeight,
+              behavior: "smooth",
+            })
+          }
+        >
+          Jump to Bottom
+        </div>
+      )}
+
+      <div
+        ref={contentRef}
+        className="absolute left-0 top-16 bottom-2 right-2 overflow-auto font-mono text-sm bg-secondary rounded p-2 whitespace-pre-wrap"
+      >
         {logs}
+        <div ref={endLogRef} />
       </div>
     </div>
   );
