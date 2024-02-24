@@ -17,6 +17,7 @@ from frigate.ptz.autotrack import PtzMotionEstimator
 from frigate.track import ObjectTracker
 from frigate.types import PTZMetricsTypes
 from frigate.util.image import intersection_over_union
+from frigate.util.object import average_boxes
 
 logger = logging.getLogger(__name__)
 
@@ -132,7 +133,7 @@ class NorfairTracker(ObjectTracker):
             "xmax": self.detect_config.width,
             "ymax": self.detect_config.height,
         }
-        self.stationary_iou[id] = []
+        self.stationary_box_history[id] = []
 
     def deregister(self, id, track_id):
         del self.tracked_objects[id]
@@ -146,13 +147,6 @@ class NorfairTracker(ObjectTracker):
     # returns False if the object has moved outside its previous position
     def update_position(self, id: str, box: list[int, int, int, int]):
         position = self.positions[id]
-        position_box = (
-            position["xmin"],
-            position["ymin"],
-            position["xmax"],
-            position["ymax"],
-        )
-
         self.stationary_box_history[id].append(box)
 
         if len(self.stationary_box_history[id]) > MAX_STATIONARY_HISTORY:
@@ -161,7 +155,9 @@ class NorfairTracker(ObjectTracker):
             ]
 
         # TODO calculate mean of boxes
-        avg_iou = np.mean(self.stationary_iou[id])
+        avg_iou = intersection_over_union(
+            box, average_boxes(self.stationary_box_history[id])
+        )
 
         xmin, ymin, xmax, ymax = box
 
@@ -234,7 +230,7 @@ class NorfairTracker(ObjectTracker):
             ):
                 self.tracked_objects[id]["position_changes"] += 1
             self.tracked_objects[id]["motionless_count"] = 0
-            self.stationary_iou[id] = []
+            self.stationary_box_history[id] = []
 
         self.tracked_objects[id].update(obj)
 
