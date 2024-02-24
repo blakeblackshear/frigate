@@ -181,7 +181,10 @@ function PreviewContent({
   setProgress,
   setReviewed,
 }: PreviewContentProps) {
-  const playerRef = useRef<Player | null>(null);
+  const playerRef = useRef<HTMLVideoElement | null>(null);
+
+  // keep track of playback state
+
   const playerStartTime = useMemo(() => {
     if (!relevantPreview) {
       return 0;
@@ -190,6 +193,57 @@ function PreviewContent({
     // start with a bit of padding
     return Math.max(0, review.start_time - relevantPreview.start - 8);
   }, []);
+  const [lastPercent, setLastPercent] = useState(0.0);
+
+  // initialize player correctly
+
+  useEffect(() => {
+    if (!playerRef.current) {
+      return;
+    }
+
+    if (isSafari) {
+      playerRef.current.pause();
+      setManualPlayback(true);
+    } else {
+      playerRef.current.currentTime = playerStartTime;
+      playerRef.current.playbackRate = 8;
+    }
+  }, [playerRef]);
+
+  // time progress update
+
+  const onProgress = useCallback(() => {
+    if (!setProgress) {
+      return;
+    }
+
+    const playerProgress =
+      (playerRef.current?.currentTime || 0) - playerStartTime;
+
+    // end with a bit of padding
+    const playerDuration = review.end_time - review.start_time + 8;
+    const playerPercent = (playerProgress / playerDuration) * 100;
+
+    if (
+      setReviewed &&
+      !review.has_been_reviewed &&
+      lastPercent < 50 &&
+      playerPercent > 50
+    ) {
+      setReviewed();
+    }
+
+    setLastPercent(playerPercent);
+
+    if (playerPercent > 100) {
+      playerRef.current?.pause();
+      setManualPlayback(false);
+      setProgress(100.0);
+    } else {
+      setProgress(playerPercent);
+    }
+  }, [setProgress, lastPercent]);
 
   // manual playback
   // safari is incapable of playing at a speed > 2x
@@ -204,7 +258,7 @@ function PreviewContent({
     let counter = 0;
     const intervalId: NodeJS.Timeout = setInterval(() => {
       if (playerRef.current) {
-        playerRef.current.currentTime(playerStartTime + counter);
+        playerRef.current.currentTime = playerStartTime + counter;
         counter += 1;
       }
     }, 125);
@@ -215,77 +269,17 @@ function PreviewContent({
 
   if (relevantPreview) {
     return (
-      <VideoPlayer
-        options={{
-          preload: "auto",
-          autoplay: true,
-          controls: false,
-          muted: true,
-          fluid: true,
-          aspectRatio: "16:9",
-          loadingSpinner: false,
-          sources: relevantPreview
-            ? [
-                {
-                  src: `${relevantPreview.src}`,
-                  type: "video/mp4",
-                },
-              ]
-            : [],
-        }}
-        seekOptions={{}}
-        onReady={(player) => {
-          playerRef.current = player;
-
-          if (!relevantPreview) {
-            return;
-          }
-
-          if (isSafari) {
-            player.pause();
-            setManualPlayback(true);
-          } else {
-            player.currentTime(playerStartTime);
-            player.playbackRate(8);
-          }
-
-          let lastPercent = 0;
-          player.on("timeupdate", () => {
-            if (!setProgress) {
-              return;
-            }
-
-            const playerProgress =
-              (player.currentTime() || 0) - playerStartTime;
-
-            // end with a bit of padding
-            const playerDuration = review.end_time - review.start_time + 8;
-            const playerPercent = (playerProgress / playerDuration) * 100;
-
-            if (
-              setReviewed &&
-              !review.has_been_reviewed &&
-              lastPercent < 50 &&
-              playerPercent > 50
-            ) {
-              setReviewed();
-            }
-
-            lastPercent = playerPercent;
-
-            if (playerPercent > 100) {
-              playerRef.current?.pause();
-              setManualPlayback(false);
-              setProgress(100.0);
-            } else {
-              setProgress(playerPercent);
-            }
-          });
-        }}
-        onDispose={() => {
-          playerRef.current = null;
-        }}
-      />
+      <video
+        ref={playerRef}
+        className="w-full h-full aspect-video bg-black"
+        autoPlay
+        playsInline
+        preload="auto"
+        muted
+        onTimeUpdate={onProgress}
+      >
+        <source src={relevantPreview.src} type={relevantPreview.type} />
+      </video>
     );
   } else if (isCurrentHour(review.start_time)) {
     return (
