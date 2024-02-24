@@ -154,7 +154,6 @@ class NorfairTracker(ObjectTracker):
                 -MAX_STATIONARY_HISTORY:
             ]
 
-        # TODO calculate mean of boxes
         avg_iou = intersection_over_union(
             box, average_boxes(self.stationary_box_history[id])
         )
