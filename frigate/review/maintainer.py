@@ -239,7 +239,9 @@ class ReviewSegmentMaintainer(threading.Thread):
                 detections,
                 objects=objects,
                 sub_labels=sub_labels,
+                audio=set(),
                 zones=zones,
+                motion=[],
             )
 
             frame_id = f"{camera_config.name}{frame_time}"
@@ -318,7 +320,12 @@ class ReviewSegmentMaintainer(threading.Thread):
                         camera,
                         frame_time,
                         SeverityEnum.detection,
-                        audio=set(audio_detections),
+                        set(),
+                        set(),
+                        set(),
+                        set(),
+                        set(audio_detections),
+                        [],
                     )
 
 
