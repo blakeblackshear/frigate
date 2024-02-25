@@ -2397,7 +2397,7 @@ def vod_event(id):
 def review():
     cameras = request.args.get("cameras", "all")
     labels = request.args.get("labels", "all")
-    reviewed = request.args.get("reviewed", default=False)
+    reviewed = request.args.get("reviewed", type=int, default=0)
     limit = request.args.get("limit", 100)
     severity = request.args.get("severity", None)
 
@@ -2426,7 +2426,7 @@ def review():
         label_clause = reduce(operator.or_, label_clauses)
         clauses.append((label_clause))
 
-    if not reviewed:
+    if reviewed == 1:
         clauses.append((ReviewSegment.has_been_reviewed == False))
 
     if severity:
