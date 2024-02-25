@@ -13,10 +13,7 @@ import {
 } from "../ui/dropdown-menu";
 import { Calendar } from "../ui/calendar";
 import { ReviewFilter } from "@/types/review";
-import {
-  formatUnixTimestampToDateTime,
-  getEndOfDayTimestamp,
-} from "@/utils/dateUtil";
+import { getEndOfDayTimestamp } from "@/utils/dateUtil";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 
 const ATTRIBUTES = ["amazon", "face", "fedex", "license_plate", "ups"];
