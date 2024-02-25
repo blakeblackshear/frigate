@@ -21,6 +21,11 @@ export default function Events() {
   const [reviewFilter, setReviewFilter, reviewSearchParams] =
     useApiFilter<ReviewFilter>();
 
+  const onUpdateFilter = useCallback((newFilter: ReviewFilter) => {
+      setSize(1);
+      setReviewFilter(newFilter);
+  }, [])
+
   // review paging
 
   const timeRange = useMemo(() => {
@@ -34,7 +39,6 @@ export default function Events() {
 
   const getKey = useCallback(
     (index: number, prevData: ReviewSegment[]) => {
-      console.log("The params are " + JSON.stringify(reviewSearchParams))
       if (index > 0) {
         const lastDate = prevData[prevData.length - 1].start_time;
         reviewSearchParams;
@@ -137,7 +141,7 @@ export default function Events() {
 
             return newData;
           },
-          { revalidate: false }
+          { revalidate: false, populateCache: true }
         );
       }
     },
@@ -209,7 +213,7 @@ export default function Events() {
         markItemAsReviewed={markItemAsReviewed}
         onSelectReview={setSelectedReviewId}
         pullLatestData={updateSegments}
-        updateFilter={setReviewFilter}
+        updateFilter={onUpdateFilter}
       />
     );
   }
