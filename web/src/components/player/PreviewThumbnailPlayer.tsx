@@ -7,7 +7,7 @@ import { getIconForLabel, getIconForSubLabel } from "@/utils/iconUtil";
 import TimeAgo from "../dynamic/TimeAgo";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { isFirefox, isMobile, isSafari } from "react-device-detect";
+import { isMobile, isSafari } from "react-device-detect";
 import Chip from "../Chip";
 import {
   ContextMenu,
@@ -201,7 +201,7 @@ function PreviewContent({
       return;
     }
 
-    if (isSafari || isFirefox) {
+    if (isSafari) {
       playerRef.current.pause();
       setManualPlayback(true);
     } else {
