@@ -19,6 +19,7 @@ import {
 import { LuCheckSquare, LuFileUp, LuTrash } from "react-icons/lu";
 import axios from "axios";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
+import { Skeleton } from "../ui/skeleton";
 
 type PreviewPlayerProps = {
   review: ReviewSegment;
@@ -120,6 +121,7 @@ export default function PreviewThumbnailPlayer({
               />
             </div>
           )}
+          {!imgLoaded && <Skeleton className="w-full h-full rounded-2xl" />}
           <img
             className={`w-full h-full transition-opacity ${
               playingBack ? "opacity-0" : "opacity-100"
@@ -129,8 +131,11 @@ export default function PreviewThumbnailPlayer({
               "/media/frigate/",
               ""
             )}`}
-            onLoad={() => setImgLoaded(true)}
+            onLoad={() => {
+              setImgLoaded(true);
+            }}
           />
+
           {imgLoaded &&
             (review.severity == "alert" || review.severity == "detection") && (
               <Chip className="absolute top-2 left-2 flex gap-1 bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 z-0">

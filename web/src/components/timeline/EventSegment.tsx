@@ -255,11 +255,12 @@ export function EventSegment({
       />
 
       {severity.map((severityValue, index) => (
-        <React.Fragment key={index}>
+        <React.Fragment key={segmentKey + "_severity"}>
           {severityValue === displaySeverityType && (
             <div
               className="mr-3 w-[8px] h-2 flex justify-left items-end"
               data-severity={severityValue}
+              data-timestamp={new Date(timestamp)}
             >
               <div
                 key={`${segmentKey}_${index}_primary_data`}
