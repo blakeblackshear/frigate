@@ -20,21 +20,21 @@ from frigate.ffmpeg_presets import (
     parse_preset_hardware_acceleration_encode,
 )
 from frigate.models import Previews
+from frigate.object_processing import TrackedObject
 from frigate.util.image import copy_yuv_to_position, get_yuv_crop
 
 logger = logging.getLogger(__name__)
 
 FOLDER_PREVIEW_FRAMES = "preview_frames"
-PREVIEW_OUTPUT_FPS = 1
 PREVIEW_SEGMENT_DURATION = 3600  # one hour
 # important to have lower keyframe to maintain scrubbing performance
 PREVIEW_KEYFRAME_INTERVAL = 60
 PREVIEW_BIT_RATES = {
-    RecordQualityEnum.very_low: 4096,
-    RecordQualityEnum.low: 6144,
-    RecordQualityEnum.medium: 8192,
-    RecordQualityEnum.high: 12288,
-    RecordQualityEnum.very_high: 16384,
+    RecordQualityEnum.very_low: 5120,
+    RecordQualityEnum.low: 7168,
+    RecordQualityEnum.medium: 9216,
+    RecordQualityEnum.high: 13312,
+    RecordQualityEnum.very_high: 17408,
 }
 
 
@@ -69,7 +69,7 @@ class FFMpegConverter(threading.Thread):
         self.ffmpeg_cmd = parse_preset_hardware_acceleration_encode(
             config.ffmpeg.hwaccel_args,
             input="-f concat -y -protocol_whitelist pipe,file -safe 0 -i /dev/stdin",
-            output=f"-g {PREVIEW_KEYFRAME_INTERVAL} -fpsmax {PREVIEW_OUTPUT_FPS} -bf 0 -b:v {PREVIEW_BIT_RATES[self.config.record.preview.quality]} {FPS_VFR_PARAM} -movflags +faststart -pix_fmt yuv420p {self.path}",
+            output=f"-g {PREVIEW_KEYFRAME_INTERVAL} -fpsmax 2 -bf 0 -b:v {PREVIEW_BIT_RATES[self.config.record.preview.quality]} {FPS_VFR_PARAM} -movflags +faststart -pix_fmt yuv420p {self.path}",
             type=EncodeTypeEnum.preview,
         )
 
@@ -175,8 +175,19 @@ class PreviewRecorder:
         frame_time: float,
     ) -> bool:
         """Decide if this frame should be added to PREVIEW."""
+        preview_output_fps = (
+            2
+            if any(
+                o["label"] == "car"
+                for o in get_active_objects(
+                    frame_time, self.config, current_tracked_objects
+                )
+            )
+            else 1
+        )
+
         # limit output to 1 fps
-        if (frame_time - self.last_output_time) < 1 / PREVIEW_OUTPUT_FPS:
+        if (frame_time - self.last_output_time) < 1 / preview_output_fps:
             return False
 
         # send frame if a non-stationary object is in a zone
@@ -264,3 +275,17 @@ class PreviewRecorder:
             pass
 
         self.requestor.stop()
+
+
+def get_active_objects(
+    frame_time: float, camera_config: CameraConfig, all_objects: list[TrackedObject]
+) -> list[TrackedObject]:
+    """get active objects for detection."""
+    return [
+        o
+        for o in all_objects
+        if o["motionless_count"] < camera_config.detect.stationary.threshold
+        and o["position_changes"] > 0
+        and o["frame_time"] == frame_time
+        and not o["false_positive"]
+    ]
