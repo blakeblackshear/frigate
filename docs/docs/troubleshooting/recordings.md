@@ -37,9 +37,26 @@ On linux, some helpful tools/commands in diagnosing would be:
 - iostat -sxy --human 1 1
 - vmstat 1
 
-On modern linux kernels, the system will utilize some swap if enabled. Setting vm.swappiness=1 no longer means that the kernel will only swap in order to avoid OOM. To prevent any swapping inside a container, set allocations memory and memory+swap to be the same and disable swapping by setting the following docker/podman run parameters: 
+On modern linux kernels, the system will utilize some swap if enabled. Setting vm.swappiness=1 no longer means that the kernel will only swap in order to avoid OOM. To prevent any swapping inside a container, set allocations memory and memory+swap to be the same and disable swapping by setting the following docker/podman run parameters:
 
-`--memory=<MAXRAM> --memory-swap=<MAXRAM> --memory-swappiness=0`. 
+**Compose example**
+```yaml
+version: "3.9"
+services:
+  frigate:
+    ...
+    mem_swappiness: 0
+    memswap_limit: <MAXSWAP>
+    deploy:
+      resources:
+        limits:
+          memory: <MAXRAM>
+```
+
+**Run command example**
+```
+--memory=<MAXRAM> --memory-swap=<MAXSWAP> --memory-swappiness=0
+```
 
 NOTE: These are hard-limits for the container, be sure there is enough headroom above what is shown by `docker stats` for your container. It will immediately halt if it hits `<MAXRAM>`. In general, running all cache and tmp filespace in RAM is preferable to disk I/O where possible.
 
