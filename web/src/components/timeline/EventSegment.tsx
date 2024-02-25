@@ -260,7 +260,6 @@ export function EventSegment({
             <div
               className="mr-3 w-[8px] h-2 flex justify-left items-end"
               data-severity={severityValue}
-              data-timestamp={new Date(timestamp)}
             >
               <div
                 key={`${segmentKey}_${index}_primary_data`}
