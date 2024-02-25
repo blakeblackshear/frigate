@@ -49,6 +49,7 @@ export default function PreviewThumbnailPlayer({
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>();
   const [playback, setPlayback] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
   const playingBack = useMemo(() => playback, [playback, autoPlayback]);
 
@@ -128,21 +129,23 @@ export default function PreviewThumbnailPlayer({
               "/media/frigate/",
               ""
             )}`}
+            onLoad={() => setImgLoaded(true)}
           />
-          {(review.severity == "alert" || review.severity == "detection") && (
-            <Chip className="absolute top-2 left-2 flex gap-1 bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 z-0">
-              {review.data.objects.map((object) => {
-                return getIconForLabel(object, "w-3 h-3 text-white");
-              })}
-              {review.data.audio.map((audio) => {
-                return getIconForLabel(audio, "w-3 h-3 text-white");
-              })}
-              {review.data.sub_labels?.map((sub) => {
-                return getIconForSubLabel(sub, "w-3 h-3 text-white");
-              })}
-            </Chip>
-          )}
-          {!playingBack && (
+          {imgLoaded &&
+            (review.severity == "alert" || review.severity == "detection") && (
+              <Chip className="absolute top-2 left-2 flex gap-1 bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 z-0">
+                {review.data.objects.map((object) => {
+                  return getIconForLabel(object, "w-3 h-3 text-white");
+                })}
+                {review.data.audio.map((audio) => {
+                  return getIconForLabel(audio, "w-3 h-3 text-white");
+                })}
+                {review.data.sub_labels?.map((sub) => {
+                  return getIconForSubLabel(sub, "w-3 h-3 text-white");
+                })}
+              </Chip>
+            )}
+          {!playingBack && imgLoaded && (
             <div className="absolute left-[6px] right-[6px] bottom-1 flex justify-between text-white">
               <TimeAgo time={review.start_time * 1000} dense />
               {formattedDate}
@@ -159,7 +162,7 @@ export default function PreviewThumbnailPlayer({
               max={100}
             />
           )}
-          {!playingBack && review.has_been_reviewed && (
+          {!playingBack && imgLoaded && review.has_been_reviewed && (
             <div className="absolute left-0 top-0 bottom-0 right-0 bg-black bg-opacity-60" />
           )}
         </div>
@@ -192,7 +195,10 @@ function PreviewContent({
     }
 
     // start with a bit of padding
-    return Math.max(0, review.start_time - relevantPreview.start - PREVIEW_PADDING);
+    return Math.max(
+      0,
+      review.start_time - relevantPreview.start - PREVIEW_PADDING
+    );
   }, []);
   const [lastPercent, setLastPercent] = useState(0.0);
 
@@ -223,7 +229,8 @@ function PreviewContent({
       (playerRef.current?.currentTime || 0) - playerStartTime;
 
     // end with a bit of padding
-    const playerDuration = review.end_time - review.start_time + PREVIEW_PADDING;
+    const playerDuration =
+      review.end_time - review.start_time + PREVIEW_PADDING;
     const playerPercent = (playerProgress / playerDuration) * 100;
 
     if (
