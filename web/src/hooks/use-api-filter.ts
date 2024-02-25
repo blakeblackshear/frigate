@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 
 type useApiFilterReturn<F extends FilterType> = [
-  filter: F,
+  filter: F | undefined,
   setFilter: (filter: F) => void,
   searchParams: {
     [key: string]: any;
