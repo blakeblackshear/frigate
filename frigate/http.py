@@ -2426,7 +2426,7 @@ def review():
         label_clause = reduce(operator.or_, label_clauses)
         clauses.append((label_clause))
 
-    if reviewed == 1:
+    if reviewed == 0:
         clauses.append((ReviewSegment.has_been_reviewed == False))
 
     if severity:

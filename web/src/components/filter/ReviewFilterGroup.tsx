@@ -90,7 +90,7 @@ export default function ReviewFilterGroup({
         updateLabelFilter={(newLabels) => {
           onUpdateFilter({ ...filter, labels: newLabels });
         }}
-        showReviewed={filter?.showReviewed || false}
+        showReviewed={filter?.showReviewed || 0}
         setShowReviewed={(reviewed) =>
           onUpdateFilter({ ...filter, showReviewed: reviewed })
         }
@@ -228,8 +228,8 @@ type GeneralFilterButtonProps = {
   allLabels: string[];
   selectedLabels: string[] | undefined;
   updateLabelFilter: (labels: string[] | undefined) => void;
-  showReviewed: boolean;
-  setShowReviewed: (reviewed: boolean) => void;
+  showReviewed?: 0 | 1;
+  setShowReviewed: (reviewed?: 0 | 1) => void;
 };
 function GeneralFilterButton({
   allLabels,
@@ -256,7 +256,7 @@ function GeneralFilterButton({
           <Button
             className="capitalize flex justify-between items-center cursor-pointer w-full"
             variant="secondary"
-            onClick={(_) => setShowReviewed(!showReviewed)}
+            onClick={(_) => setShowReviewed(showReviewed == 0 ? 1 : 0)}
           >
             {showReviewed ? (
               <LuCheck className="w-6 h-6" />
