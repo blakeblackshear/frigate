@@ -97,45 +97,6 @@ export default function ReviewFilterGroup({
       />
     </div>
   );
-
-  /*return (
-        </div>
-        <Calendar
-          mode="range"
-          disabled={disabledDates}
-          selected={dateRange}
-          onSelect={(range) => {
-            let afterTime = undefined;
-            if (range?.from != undefined) {
-              afterTime = range.from.getTime() / 1000;
-            }
-
-            // need to make sure the day selected for before covers the entire day
-            let beforeTime = undefined;
-            if (range?.from != undefined) {
-              const beforeDate = range.to ?? range.from;
-              beforeDate.setHours(beforeDate.getHours() + 24, -1, 0, 0);
-              beforeTime = beforeDate.getTime() / 1000;
-            }
-
-            setSelectedFilters({
-              ...selectedFilters,
-              after: afterTime,
-              before: beforeTime,
-            });
-          }}
-        />
-        <Button
-          onClick={() => {
-            onUpdateFilter(selectedFilters);
-            setOpen(false);
-          }}
-        >
-          Save
-        </Button>
-      </PopoverContent>
-    </Popover>
-  );*/
 }
 
 type CameraFilterButtonProps = {
