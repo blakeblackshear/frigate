@@ -19,3 +19,11 @@ export type ReviewData = {
   significant_motion_areas: number[];
   zones: string[];
 };
+
+export type ReviewFilter = {
+  cameras?: string[];
+  labels?: string[];
+  before?: number;
+  after?: number;
+  showReviewed?: boolean;
+};

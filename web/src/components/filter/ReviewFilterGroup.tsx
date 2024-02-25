@@ -1,4 +1,4 @@
-import { LuCheck, LuFilter } from "react-icons/lu";
+import { LuCalendar, LuCheck, LuFilter, LuVideo } from "react-icons/lu";
 import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import useSWR from "swr";
@@ -14,71 +14,49 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Calendar } from "../ui/calendar";
+import { ReviewFilter } from "@/types/review";
+import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 
-type HistoryFilterPopoverProps = {
-  // @ts-ignore
-  filter: HistoryFilter | undefined;
-  // @ts-ignore
-  onUpdateFilter: (filter: HistoryFilter) => void;
+type ReviewFilterGroupProps = {
+  filter?: ReviewFilter;
+  onUpdateFilter: (filter: ReviewFilter) => void;
 };
 
-export default function HistoryFilterPopover({
+export default function ReviewFilterGroup({
   filter,
   onUpdateFilter,
-}: HistoryFilterPopoverProps) {
+}: ReviewFilterGroupProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
-
-  const [open, setOpen] = useState(false);
-  const disabledDates = useMemo(() => {
-    const tomorrow = new Date();
-    tomorrow.setHours(tomorrow.getHours() + 24, -1, 0, 0);
-    const future = new Date();
-    future.setFullYear(2032);
-    return { from: tomorrow, to: future };
-  }, []);
 
   const { data: allLabels } = useSWR<string[]>(["labels"], {
     revalidateOnFocus: false,
   });
-  const { data: allSubLabels } = useSWR<string[]>(
-    ["sub_labels", { split_joined: 1 }],
-    {
-      revalidateOnFocus: false,
-    }
-  );
   const filterValues = useMemo(
     () => ({
       cameras: Object.keys(config?.cameras || {}),
       labels: Object.values(allLabels || {}),
     }),
-    [config, allLabels, allSubLabels]
+    [config, allLabels]
   );
-  const [selectedFilters, setSelectedFilters] = useState({
-    cameras: filter == undefined ? ["all"] : filter.cameras,
-    labels: filter == undefined ? ["all"] : filter.labels,
-    before: filter?.before,
-    after: filter?.after,
-    detailLevel: filter?.detailLevel ?? "normal",
-  });
-  const dateRange = useMemo(() => {
-    return selectedFilters?.before == undefined ||
-      selectedFilters?.after == undefined
-      ? undefined
-      : {
-          from: new Date(selectedFilters.after * 1000),
-          to: new Date(selectedFilters.before * 1000),
-        };
-  }, [selectedFilters]);
-
-  const allItems = useMemo(() => {
-    return {
-      cameras:
-        JSON.stringify(selectedFilters.cameras) == JSON.stringify(["all"]),
-      labels: JSON.stringify(selectedFilters.labels) == JSON.stringify(["all"]),
-    };
-  }, [selectedFilters]);
 
   return (
+    <div className="mr-2">
+      <CamerasFilterButton
+        allCameras={filterValues.cameras}
+        selectedCameras={filter?.cameras}
+        updateCameraFilter={(newCameras) => {
+          onUpdateFilter({ ...filter, cameras: newCameras });
+        }}
+      />
+      <CalendarFilterButton before={filter?.before} after={filter?.after} />
+      <Button className="mx-1" variant="secondary">
+        <LuFilter className=" mr-[10px]" />
+        Filter
+      </Button>
+    </div>
+  );
+
+  /*return (
     <Popover open={open} onOpenChange={(open) => setOpen(open)}>
       <PopoverTrigger asChild>
         <Button>
@@ -88,65 +66,7 @@ export default function HistoryFilterPopover({
       </PopoverTrigger>
       <PopoverContent className="w-screen sm:w-[340px]">
         <div className="flex justify-around">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button className="capitalize" variant="outline">
-                {allItems.cameras
-                  ? "All Cameras"
-                  : `${selectedFilters.cameras.length} Cameras`}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuLabel>Filter Cameras</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <FilterCheckBox
-                isChecked={allItems.cameras}
-                label="All Cameras"
-                onCheckedChange={(isChecked) => {
-                  if (isChecked) {
-                    setSelectedFilters({
-                      ...selectedFilters,
-                      cameras: ["all"],
-                    });
-                  }
-                }}
-              />
-              <DropdownMenuSeparator />
-              {filterValues.cameras.map((item) => (
-                <FilterCheckBox
-                  key={item}
-                  isChecked={selectedFilters.cameras.includes(item)}
-                  label={item.replaceAll("_", " ")}
-                  onCheckedChange={(isChecked) => {
-                    if (isChecked) {
-                      const selectedCameras = allItems.cameras
-                        ? []
-                        : [...selectedFilters.cameras];
-                      selectedCameras.push(item);
-                      setSelectedFilters({
-                        ...selectedFilters,
-                        cameras: selectedCameras,
-                      });
-                    } else {
-                      const selectedCameraList = [...selectedFilters.cameras];
 
-                      // can not deselect the last item
-                      if (selectedCameraList.length > 1) {
-                        selectedCameraList.splice(
-                          selectedCameraList.indexOf(item),
-                          1
-                        );
-                        setSelectedFilters({
-                          ...selectedFilters,
-                          cameras: selectedCameraList,
-                        });
-                      }
-                    }
-                  }}
-                />
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button className="capitalize" variant="outline">
@@ -216,9 +136,7 @@ export default function HistoryFilterPopover({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuLabel>
-                Detail Level
-              </DropdownMenuLabel>
+              <DropdownMenuLabel>Detail Level</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuRadioGroup
                 value={selectedFilters.detailLevel}
@@ -274,6 +192,120 @@ export default function HistoryFilterPopover({
         >
           Save
         </Button>
+      </PopoverContent>
+    </Popover>
+  );*/
+}
+
+type CameraFilterButtonProps = {
+  allCameras: string[];
+  selectedCameras: string[] | undefined;
+  updateCameraFilter: (cameras: string[] | undefined) => void;
+};
+function CamerasFilterButton({
+  allCameras,
+  selectedCameras,
+  updateCameraFilter,
+}: CameraFilterButtonProps) {
+  const [currentCameras, setCurrentCameras] = useState<string[] | undefined>(
+    selectedCameras
+  );
+
+  return (
+    <DropdownMenu
+      onOpenChange={(open) => {
+        if (!open) {
+          updateCameraFilter(currentCameras);
+        }
+      }}
+    >
+      <DropdownMenuTrigger asChild>
+        <Button className="mx-1 capitalize" variant="secondary">
+          <LuVideo className=" mr-[10px]" />
+          {selectedCameras == undefined
+            ? "All Cameras"
+            : `${selectedCameras.length} Cameras`}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuLabel>Filter Cameras</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <FilterCheckBox
+          isChecked={currentCameras == undefined}
+          label="All Cameras"
+          onCheckedChange={(isChecked) => {
+            if (isChecked) {
+              setCurrentCameras(undefined);
+            }
+          }}
+        />
+        <DropdownMenuSeparator />
+        {allCameras.map((item) => (
+          <FilterCheckBox
+            key={item}
+            isChecked={currentCameras?.includes(item) ?? false}
+            label={item.replaceAll("_", " ")}
+            onCheckedChange={(isChecked) => {
+              if (isChecked) {
+                const updatedCameras = currentCameras
+                  ? [...currentCameras]
+                  : [];
+
+                updatedCameras.push(item);
+                setCurrentCameras(updatedCameras);
+              } else {
+                const updatedCameras = currentCameras
+                  ? [...currentCameras]
+                  : [];
+
+                // can not deselect the last item
+                if (updatedCameras.length > 1) {
+                  updatedCameras.splice(updatedCameras.indexOf(item), 1);
+                  setCurrentCameras(updatedCameras);
+                }
+              }
+            }}
+          />
+        ))}
+        <DropdownMenuSeparator />
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+type CalendarFilterButtonProps = {
+  before: number | undefined;
+  after: number | undefined;
+};
+function CalendarFilterButton({ before, after }: CalendarFilterButtonProps) {
+  const disabledDates = useMemo(() => {
+    const tomorrow = new Date();
+    tomorrow.setHours(tomorrow.getHours() + 24, -1, 0, 0);
+    const future = new Date();
+    future.setFullYear(tomorrow.getFullYear() + 10);
+    return { from: tomorrow, to: future };
+  }, []);
+  const dateRange = useMemo(() => {
+    return before == undefined || after == undefined
+      ? undefined
+      : {
+          from: new Date(after * 1000),
+          to: new Date(before * 1000),
+        };
+  }, [before, after]);
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button className="mx-1" variant="secondary">
+          <LuCalendar className=" mr-[10px]" />
+          {formatUnixTimestampToDateTime(Date.now() / 1000, {
+            strftime_fmt: "%b %-d",
+          })}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent>
+        <Calendar mode="single" disabled={disabledDates} />
       </PopoverContent>
     </Popover>
   );
