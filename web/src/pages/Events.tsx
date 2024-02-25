@@ -34,11 +34,14 @@ export default function Events() {
 
   const getKey = useCallback(
     (index: number, prevData: ReviewSegment[]) => {
+      console.log("The params are " + JSON.stringify(reviewSearchParams))
       if (index > 0) {
         const lastDate = prevData[prevData.length - 1].start_time;
         reviewSearchParams;
         const pagedParams = {
           cameras: reviewSearchParams["cameras"],
+          labels: reviewSearchParams["labels"],
+          reviewed: reviewSearchParams["showReviewed"],
           before: lastDate,
           after: reviewSearchParams["after"] || timeRange.after,
           limit: API_LIMIT,
@@ -48,6 +51,8 @@ export default function Events() {
 
       const params = {
         cameras: reviewSearchParams["cameras"],
+        labels: reviewSearchParams["labels"],
+        reviewed: reviewSearchParams["showReviewed"],
         limit: API_LIMIT,
         before: reviewSearchParams["before"] || timeRange.before,
         after: reviewSearchParams["after"] || timeRange.after,

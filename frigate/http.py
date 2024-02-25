@@ -2396,6 +2396,8 @@ def vod_event(id):
 @bp.route("/review")
 def review():
     cameras = request.args.get("cameras", "all")
+    labels = request.args.get("labels", "all")
+    reviewed = request.args.get("reviewed", default=False)
     limit = request.args.get("limit", 100)
     severity = request.args.get("severity", None)
 
@@ -2409,6 +2411,23 @@ def review():
     if cameras != "all":
         camera_list = cameras.split(",")
         clauses.append((ReviewSegment.camera << camera_list))
+
+    if labels != "all":
+        # use matching so segments with multiple labels
+        # still match on a search where any label matches
+        label_clauses = []
+        filtered_labels = labels.split(",")
+
+        for label in filtered_labels:
+            label_clauses.append(
+                (ReviewSegment.data["objects"].cast("text") % f'*"{label}"*')
+            )
+
+        label_clause = reduce(operator.or_, label_clauses)
+        clauses.append((label_clause))
+
+    if not reviewed:
+        clauses.append((ReviewSegment.has_been_reviewed == False))
 
     if severity:
         clauses.append((ReviewSegment.severity == severity))

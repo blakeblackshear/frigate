@@ -8,14 +8,14 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Calendar } from "../ui/calendar";
 import { ReviewFilter } from "@/types/review";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
+
+const ATTRIBUTES = ["amazon", "face", "fedex", "license_plate", "ups"];
 
 type ReviewFilterGroupProps = {
   filter?: ReviewFilter;
@@ -28,9 +28,25 @@ export default function ReviewFilterGroup({
 }: ReviewFilterGroupProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
-  const { data: allLabels } = useSWR<string[]>(["labels"], {
-    revalidateOnFocus: false,
-  });
+  const allLabels = useMemo<string[]>(() => {
+    if (!config) {
+      return [];
+    }
+
+    const labels = new Set<string>();
+    const cameras = filter?.cameras || Object.keys(config.cameras);
+
+    cameras.forEach((camera) => {
+      config.cameras[camera].objects.track.forEach((label) => {
+        if (!ATTRIBUTES.includes(label)) {
+          labels.add(label);
+        }
+      });
+    });
+
+    return [...labels];
+  }, [config, filter]);
+
   const filterValues = useMemo(
     () => ({
       cameras: Object.keys(config?.cameras || {}),
@@ -49,10 +65,17 @@ export default function ReviewFilterGroup({
         }}
       />
       <CalendarFilterButton before={filter?.before} after={filter?.after} />
-      <Button className="mx-1" variant="secondary">
-        <LuFilter className=" mr-[10px]" />
-        Filter
-      </Button>
+      <GeneralFilterButton
+        allLabels={filterValues.labels}
+        selectedLabels={filter?.labels}
+        updateLabelFilter={(newLabels) => {
+          onUpdateFilter({ ...filter, labels: newLabels });
+        }}
+        showReviewed={filter?.showReviewed || false}
+        setShowReviewed={(reviewed) =>
+          onUpdateFilter({ ...filter, showReviewed: reviewed })
+        }
+      />
     </div>
   );
 
@@ -285,6 +308,7 @@ function CalendarFilterButton({ before, after }: CalendarFilterButtonProps) {
     future.setFullYear(tomorrow.getFullYear() + 10);
     return { from: tomorrow, to: future };
   }, []);
+  // @ts-ignore
   const dateRange = useMemo(() => {
     return before == undefined || after == undefined
       ? undefined
@@ -308,6 +332,118 @@ function CalendarFilterButton({ before, after }: CalendarFilterButtonProps) {
         <Calendar mode="single" disabled={disabledDates} />
       </PopoverContent>
     </Popover>
+  );
+}
+
+type GeneralFilterButtonProps = {
+  allLabels: string[];
+  selectedLabels: string[] | undefined;
+  updateLabelFilter: (labels: string[] | undefined) => void;
+  showReviewed: boolean;
+  setShowReviewed: (reviewed: boolean) => void;
+};
+function GeneralFilterButton({
+  allLabels,
+  selectedLabels,
+  updateLabelFilter,
+  showReviewed,
+  setShowReviewed,
+}: GeneralFilterButtonProps) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button className="mx-1" variant="secondary">
+          <LuFilter className=" mr-[10px]" />
+          Filter
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent side="left" asChild>
+        <div className="w-80 flex">
+          <LabelsFilterButton
+            allLabels={allLabels}
+            selectedLabels={selectedLabels}
+            updateLabelFilter={updateLabelFilter}
+          />
+          <FilterCheckBox
+            label="Show Reviewed"
+            isChecked={showReviewed}
+            onCheckedChange={(isChecked) => setShowReviewed(isChecked)}
+          />
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+type LabelFilterButtonProps = {
+  allLabels: string[];
+  selectedLabels: string[] | undefined;
+  updateLabelFilter: (labels: string[] | undefined) => void;
+};
+function LabelsFilterButton({
+  allLabels,
+  selectedLabels,
+  updateLabelFilter,
+}: LabelFilterButtonProps) {
+  const [currentLabels, setCurrentLabels] = useState<string[] | undefined>(
+    selectedLabels
+  );
+
+  return (
+    <DropdownMenu
+      onOpenChange={(open) => {
+        if (!open) {
+          updateLabelFilter(currentLabels);
+        }
+      }}
+    >
+      <DropdownMenuTrigger asChild>
+        <Button className="mx-1 capitalize" variant="secondary">
+          <LuVideo className=" mr-[10px]" />
+          {selectedLabels == undefined
+            ? "All Labels"
+            : `${selectedLabels.length} Labels`}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuLabel>Filter Labels</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <FilterCheckBox
+          isChecked={currentLabels == undefined}
+          label="All Labels"
+          onCheckedChange={(isChecked) => {
+            if (isChecked) {
+              setCurrentLabels(undefined);
+            }
+          }}
+        />
+        <DropdownMenuSeparator />
+        {allLabels.map((item) => (
+          <FilterCheckBox
+            key={item}
+            isChecked={currentLabels?.includes(item) ?? false}
+            label={item.replaceAll("_", " ")}
+            onCheckedChange={(isChecked) => {
+              if (isChecked) {
+                const updatedLabels = currentLabels ? [...currentLabels] : [];
+
+                updatedLabels.push(item);
+                setCurrentLabels(updatedLabels);
+              } else {
+                const updatedLabels = currentLabels ? [...currentLabels] : [];
+
+                // can not deselect the last item
+                if (updatedLabels.length > 1) {
+                  updatedLabels.splice(updatedLabels.indexOf(item), 1);
+                  setCurrentLabels(updatedLabels);
+                }
+              }
+            }}
+          />
+        ))}
+        <DropdownMenuSeparator />
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
