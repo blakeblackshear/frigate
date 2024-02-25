@@ -12,6 +12,7 @@ import useCameraActivity from "@/hooks/use-camera-activity";
 import { useRecordingsState } from "@/api/ws";
 import { LivePlayerMode } from "@/types/live";
 import useCameraLiveMode from "@/hooks/use-camera-live-mode";
+import { Skeleton } from "../ui/skeleton";
 
 type LivePlayerProps = {
   className?: string;
@@ -119,7 +120,7 @@ export default function LivePlayer({
       />
     );
   } else {
-    player = <ActivityIndicator />;
+    player = <Skeleton className="w-full h-full rounded-2xl" />;
   }
 
   return (

@@ -1,7 +1,7 @@
 import { useApiHost } from "@/api";
 import { useEffect, useRef, useState } from "react";
 import useSWR from "swr";
-import ActivityIndicator from "../ui/activity-indicator";
+import { Skeleton } from "../ui/skeleton";
 
 type CameraImageProps = {
   className?: string;
@@ -61,7 +61,7 @@ export default function CameraImage({
       )}
       {!hasLoaded && enabled ? (
         <div className="absolute left-0 right-0 top-0 bottom-0 flex justify-center items-center">
-          <ActivityIndicator />
+          <Skeleton className="w-full h-full rounded-2xl" />
         </div>
       ) : null}
     </div>
