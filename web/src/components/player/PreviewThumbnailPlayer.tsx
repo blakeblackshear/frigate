@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useApiHost } from "@/api";
-import { formatUnixTimestampToDateTime, isCurrentHour } from "@/utils/dateUtil";
+import { isCurrentHour } from "@/utils/dateUtil";
 import { ReviewSegment } from "@/types/review";
 import { Slider } from "../ui/slider";
 import { getIconForLabel, getIconForSubLabel } from "@/utils/iconUtil";

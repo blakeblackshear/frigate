@@ -45,7 +45,7 @@ export default function Events() {
         const pagedParams = {
           cameras: reviewSearchParams["cameras"],
           labels: reviewSearchParams["labels"],
-          reviewed: reviewSearchParams["showReviewed"],
+          reviewed: reviewSearchParams["showReviewed"] || false,
           before: lastDate,
           after: reviewSearchParams["after"] || timeRange.after,
           limit: API_LIMIT,
@@ -56,7 +56,7 @@ export default function Events() {
       const params = {
         cameras: reviewSearchParams["cameras"],
         labels: reviewSearchParams["labels"],
-        reviewed: reviewSearchParams["showReviewed"],
+        reviewed: reviewSearchParams["showReviewed"] || false,
         limit: API_LIMIT,
         before: reviewSearchParams["before"] || timeRange.before,
         after: reviewSearchParams["after"] || timeRange.after,
