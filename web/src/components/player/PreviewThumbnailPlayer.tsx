@@ -366,10 +366,6 @@ function PreviewContextItems({
   setReviewed,
 }: PreviewContextItemsProps) {
   const exportReview = useCallback(() => {
-    console.log(
-      "trying to export to " +
-        `export/${review.camera}/start/${review.start_time}/end/${review.end_time}`
-    );
     axios.post(
       `export/${review.camera}/start/${review.start_time}/end/${review.end_time}`,
       { playback: "realtime" }
