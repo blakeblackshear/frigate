@@ -25,5 +25,5 @@ export type ReviewFilter = {
   labels?: string[];
   before?: number;
   after?: number;
-  showReviewed?: boolean;
+  showReviewed?: 0 | 1;
 };

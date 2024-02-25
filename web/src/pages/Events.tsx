@@ -22,9 +22,9 @@ export default function Events() {
     useApiFilter<ReviewFilter>();
 
   const onUpdateFilter = useCallback((newFilter: ReviewFilter) => {
-      setSize(1);
-      setReviewFilter(newFilter);
-  }, [])
+    setSize(1);
+    setReviewFilter(newFilter);
+  }, []);
 
   // review paging
 
@@ -45,7 +45,7 @@ export default function Events() {
         const pagedParams = {
           cameras: reviewSearchParams["cameras"],
           labels: reviewSearchParams["labels"],
-          reviewed: reviewSearchParams["showReviewed"] == true ? 1 : 0,
+          reviewed: reviewSearchParams["showReviewed"],
           before: lastDate,
           after: reviewSearchParams["after"] || timeRange.after,
           limit: API_LIMIT,
@@ -56,7 +56,7 @@ export default function Events() {
       const params = {
         cameras: reviewSearchParams["cameras"],
         labels: reviewSearchParams["labels"],
-        reviewed: reviewSearchParams["showReviewed"] == true ? 1 : 0,
+        reviewed: reviewSearchParams["showReviewed"],
         limit: API_LIMIT,
         before: reviewSearchParams["before"] || timeRange.before,
         after: reviewSearchParams["after"] || timeRange.after,
