@@ -1,5 +1,6 @@
+import useApiFilter from "@/hooks/use-api-filter";
 import useOverlayState from "@/hooks/use-overlay-state";
-import { ReviewSegment } from "@/types/review";
+import { ReviewFilter, ReviewSegment } from "@/types/review";
 import DesktopEventView from "@/views/events/DesktopEventView";
 import DesktopRecordingView from "@/views/events/DesktopRecordingView";
 import MobileEventView from "@/views/events/MobileEventView";
@@ -15,6 +16,16 @@ export default function Events() {
   // recordings viewer
   const [selectedReviewId, setSelectedReviewId] = useOverlayState("review");
 
+  // review filter
+
+  const [reviewFilter, setReviewFilter, reviewSearchParams] =
+    useApiFilter<ReviewFilter>();
+
+  const onUpdateFilter = useCallback((newFilter: ReviewFilter) => {
+      setSize(1);
+      setReviewFilter(newFilter);
+  }, [])
+
   // review paging
 
   const timeRange = useMemo(() => {
@@ -26,30 +37,30 @@ export default function Events() {
     return axios.get(path, { params }).then((res) => res.data);
   }, []);
 
-  const reviewSearchParams = {};
   const getKey = useCallback(
     (index: number, prevData: ReviewSegment[]) => {
       if (index > 0) {
         const lastDate = prevData[prevData.length - 1].start_time;
-        const pagedParams = reviewSearchParams
-          ? { before: lastDate, after: timeRange.after, limit: API_LIMIT }
-          : {
-              ...reviewSearchParams,
-              before: lastDate,
-              after: timeRange.after,
-              limit: API_LIMIT,
-            };
+        reviewSearchParams;
+        const pagedParams = {
+          cameras: reviewSearchParams["cameras"],
+          labels: reviewSearchParams["labels"],
+          reviewed: reviewSearchParams["showReviewed"] || false,
+          before: lastDate,
+          after: reviewSearchParams["after"] || timeRange.after,
+          limit: API_LIMIT,
+        };
         return ["review", pagedParams];
       }
 
-      const params = reviewSearchParams
-        ? { limit: API_LIMIT, before: timeRange.before, after: timeRange.after }
-        : {
-            ...reviewSearchParams,
-            limit: API_LIMIT,
-            before: timeRange.before,
-            after: timeRange.after,
-          };
+      const params = {
+        cameras: reviewSearchParams["cameras"],
+        labels: reviewSearchParams["labels"],
+        reviewed: reviewSearchParams["showReviewed"] || false,
+        limit: API_LIMIT,
+        before: reviewSearchParams["before"] || timeRange.before,
+        after: reviewSearchParams["after"] || timeRange.after,
+      };
       return ["review", params];
     },
     [reviewSearchParams]
@@ -130,7 +141,7 @@ export default function Events() {
 
             return newData;
           },
-          { revalidate: false }
+          { revalidate: false, populateCache: true }
         );
       }
     },
@@ -197,10 +208,12 @@ export default function Events() {
         timeRange={timeRange}
         reachedEnd={isDone}
         isValidating={isValidating}
+        filter={reviewFilter}
         loadNextPage={() => setSize(size + 1)}
         markItemAsReviewed={markItemAsReviewed}
         onSelectReview={setSelectedReviewId}
         pullLatestData={updateSegments}
+        updateFilter={onUpdateFilter}
       />
     );
   }

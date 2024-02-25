@@ -3,11 +3,9 @@ import { useMemo, useState } from "react";
 type useApiFilterReturn<F extends FilterType> = [
   filter: F | undefined,
   setFilter: (filter: F) => void,
-  searchParams:
-    | {
-        [key: string]: any;
-      }
-    | undefined,
+  searchParams: {
+    [key: string]: any;
+  },
 ];
 
 export default function useApiFilter<
@@ -16,7 +14,7 @@ export default function useApiFilter<
   const [filter, setFilter] = useState<F | undefined>(undefined);
   const searchParams = useMemo(() => {
     if (filter == undefined) {
-      return undefined;
+      return {};
     }
 
     const search: { [key: string]: string } = {};

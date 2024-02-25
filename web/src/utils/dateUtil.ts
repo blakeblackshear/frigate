@@ -293,6 +293,11 @@ export function endOfHourOrCurrentTime(timestamp: number) {
   return Math.min(timestamp, now.getTime() / 1000);
 }
 
+export function getEndOfDayTimestamp(date: Date) {
+  date.setHours(23, 59, 59, 999);
+  return date.getTime() / 1000;
+}
+
 export function isCurrentHour(timestamp: number) {
   const now = new Date();
   now.setMinutes(0, 0, 0);

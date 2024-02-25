@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useApiHost } from "@/api";
-import { formatUnixTimestampToDateTime, isCurrentHour } from "@/utils/dateUtil";
+import { isCurrentHour } from "@/utils/dateUtil";
 import { ReviewSegment } from "@/types/review";
 import { Slider } from "../ui/slider";
 import { getIconForLabel, getIconForSubLabel } from "@/utils/iconUtil";
@@ -18,6 +18,7 @@ import {
 } from "../ui/context-menu";
 import { LuCheckSquare, LuFileUp, LuTrash } from "react-icons/lu";
 import axios from "axios";
+import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 
 type PreviewPlayerProps = {
   review: ReviewSegment;
@@ -92,6 +93,13 @@ export default function PreviewThumbnailPlayer({
     [hoverTimeout, review]
   );
 
+  // date
+
+  const formattedDate = useFormattedTimestamp(
+    review.start_time,
+    config?.ui.time_format == "24hour" ? "%b %-d, %H:%M" : "%b %-d, %I:%M %p"
+  );
+
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>
@@ -137,13 +145,7 @@ export default function PreviewThumbnailPlayer({
           {!playingBack && (
             <div className="absolute left-[6px] right-[6px] bottom-1 flex justify-between text-white">
               <TimeAgo time={review.start_time * 1000} dense />
-              {config &&
-                formatUnixTimestampToDateTime(review.start_time, {
-                  strftime_fmt:
-                    config.ui.time_format == "24hour"
-                      ? "%b %-d, %H:%M"
-                      : "%b %-d, %I:%M %p",
-                })}
+              {formattedDate}
             </div>
           )}
           <div className="absolute top-0 left-0 right-0 rounded-2xl z-10 w-full h-[30%] bg-gradient-to-b from-black/20 to-transparent pointer-events-none" />

@@ -1,20 +1,14 @@
 import { useFrigateEvents } from "@/api/ws";
+import ReviewFilterGroup from "@/components/filter/ReviewFilterGroup";
 import PreviewThumbnailPlayer from "@/components/player/PreviewThumbnailPlayer";
 import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
 import ActivityIndicator from "@/components/ui/activity-indicator";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { ReviewSegment, ReviewSeverity } from "@/types/review";
-import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
+import { ReviewFilter, ReviewSegment, ReviewSeverity } from "@/types/review";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { LuCalendar, LuFilter, LuRefreshCcw, LuVideo } from "react-icons/lu";
+import { LuRefreshCcw } from "react-icons/lu";
 import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
 
@@ -24,10 +18,12 @@ type DesktopEventViewProps = {
   timeRange: { before: number; after: number };
   reachedEnd: boolean;
   isValidating: boolean;
+  filter?: ReviewFilter;
   loadNextPage: () => void;
   markItemAsReviewed: (reviewId: string) => void;
   onSelectReview: (reviewId: string) => void;
   pullLatestData: () => void;
+  updateFilter: (filter: ReviewFilter) => void;
 };
 export default function DesktopEventView({
   reviewPages,
@@ -35,10 +31,12 @@ export default function DesktopEventView({
   timeRange,
   reachedEnd,
   isValidating,
+  filter,
   loadNextPage,
   markItemAsReviewed,
   onSelectReview,
   pullLatestData,
+  updateFilter,
 }: DesktopEventViewProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
   const [severity, setSeverity] = useState<ReviewSeverity>("alert");
@@ -234,17 +232,7 @@ export default function DesktopEventView({
             Motion
           </ToggleGroupItem>
         </ToggleGroup>
-        <div>
-          <Button className="mx-1" variant="secondary">
-            <LuVideo className=" mr-[10px]" />
-            All Cameras
-          </Button>
-          <ReviewCalendarButton />
-          <Button className="mx-1" variant="secondary">
-            <LuFilter className=" mr-[10px]" />
-            Filter
-          </Button>
-        </div>
+        <ReviewFilterGroup filter={filter} onUpdateFilter={updateFilter} />
       </div>
 
       <div className="flex h-full overflow-hidden">
@@ -332,31 +320,5 @@ export default function DesktopEventView({
         </div>
       </div>
     </div>
-  );
-}
-
-function ReviewCalendarButton() {
-  const disabledDates = useMemo(() => {
-    const tomorrow = new Date();
-    tomorrow.setHours(tomorrow.getHours() + 24, -1, 0, 0);
-    const future = new Date();
-    future.setFullYear(tomorrow.getFullYear() + 10);
-    return { from: tomorrow, to: future };
-  }, []);
-
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button className="mx-1" variant="secondary">
-          <LuCalendar className=" mr-[10px]" />
-          {formatUnixTimestampToDateTime(Date.now() / 1000, {
-            strftime_fmt: "%b %-d",
-          })}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent>
-        <Calendar mode="single" disabled={disabledDates} />
-      </PopoverContent>
-    </Popover>
   );
 }
