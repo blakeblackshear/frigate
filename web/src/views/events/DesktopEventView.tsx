@@ -8,7 +8,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { ReviewFilter, ReviewSegment, ReviewSeverity } from "@/types/review";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { LuRefreshCcw } from "react-icons/lu";
+import { LuFolderCheck, LuRefreshCcw } from "react-icons/lu";
 import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
 
@@ -275,6 +275,11 @@ export default function DesktopEventView({
               </div>
             </div>
           )}
+
+          <div className="absolute w-full h-full flex flex-col justify-center items-center">
+            <LuFolderCheck className="w-16 h-16" />
+            There are no {severity} items to review
+          </div>
 
           <div className="w-full mr-4 md:grid md:grid-cols-3 3xl:grid-cols-4 gap-4">
             {currentItems ? (
