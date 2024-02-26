@@ -261,8 +261,8 @@ export default function Events() {
         loadNextPage={onLoadNextPage}
         markItemAsReviewed={markItemAsReviewed}
         onSelectReview={setSelectedReviewId}
-        pullLatestData={updateSegments}
-        updateFilter={reloadData}
+        pullLatestData={reloadData}
+        updateFilter={onUpdateFilter}
       />
     );
   }
