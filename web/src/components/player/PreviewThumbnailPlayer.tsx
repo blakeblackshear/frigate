@@ -19,6 +19,7 @@ import {
 import { LuCheckSquare, LuFileUp, LuTrash } from "react-icons/lu";
 import axios from "axios";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
+import useImageLoaded from "@/hooks/use-image-loaded";
 import { Skeleton } from "../ui/skeleton";
 
 type PreviewPlayerProps = {
@@ -37,27 +38,6 @@ type Preview = {
   end: number;
 };
 
-const useImageLoaded = (): [
-  React.RefObject<HTMLImageElement>,
-  boolean,
-  () => void,
-] => {
-  const [loaded, setLoaded] = useState(false);
-  const ref = useRef<HTMLImageElement>(null);
-
-  const onLoad = () => {
-    setLoaded(true);
-  };
-
-  useEffect(() => {
-    if (ref.current && ref.current?.complete) {
-      onLoad();
-    }
-  });
-
-  return [ref, loaded, onLoad];
-};
-
 export default function PreviewThumbnailPlayer({
   review,
   relevantPreview,
@@ -71,6 +51,7 @@ export default function PreviewThumbnailPlayer({
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>();
   const [playback, setPlayback] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
 
   const playingBack = useMemo(() => playback, [playback, autoPlayback]);
 
@@ -114,8 +95,6 @@ export default function PreviewThumbnailPlayer({
     },
     [hoverTimeout, review]
   );
-
-  const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
 
   // date
 
