@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Heading from "@/components/ui/heading";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
