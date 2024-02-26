@@ -42,7 +42,7 @@
     "idb-keyval": "^6.2.1",
     "immer": "^10.0.3",
     "lucide-react": "^0.294.0",
-    "monaco-yaml": "^5.1.0",
+    "monaco-yaml": "^5.1.1",
     "next-themes": "^0.2.1",
     "react": "^18.2.0",
     "react-apexcharts": "^1.4.1",
@@ -59,7 +59,7 @@
     "sonner": "^1.4.0",
     "sort-by": "^1.2.0",
     "strftime": "^0.10.2",
-    "swr": "^2.2.4",
+    "swr": "^2.2.5",
     "tailwind-merge": "^2.1.0",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.8.0",
@@ -93,12 +93,12 @@
     "fake-indexeddb": "^5.0.1",
     "jest-websocket-mock": "^2.5.0",
     "jsdom": "^23.0.1",
-    "msw": "^2.0.10",
+    "msw": "^2.2.1",
     "postcss": "^8.4.32",
-    "prettier": "^3.1.0",
+    "prettier": "^3.2.5",
     "tailwindcss": "^3.3.5",
     "typescript": "^5.2.2",
-    "vite": "^5.0.0",
+    "vite": "^5.1.4",
     "vitest": "^1.0.0"
   }
 }
