@@ -200,7 +200,7 @@ export default function PreviewThumbnailPlayer({
           )}
         </div>
       </ContextMenuTrigger>
-      <PreviewContextItems review={review} setReviewed={setReviewed} />
+      <PreviewContextItems review={review} setReviewed={handleSetReviewed} />
     </ContextMenu>
   );
 }
@@ -210,7 +210,7 @@ type PreviewContentProps = {
   review: ReviewSegment;
   relevantPreview: Preview | undefined;
   setProgress?: (progress: number) => void;
-  setReviewed?: (reviewId: string) => void;
+  setReviewed?: () => void;
 };
 function PreviewContent({
   review,
@@ -272,7 +272,7 @@ function PreviewContent({
       lastPercent < 50 &&
       playerPercent > 50
     ) {
-      setReviewed(review.id);
+      setReviewed();
     }
 
     setLastPercent(playerPercent);
