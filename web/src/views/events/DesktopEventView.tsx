@@ -304,8 +304,8 @@ export default function DesktopEventView({
                       <PreviewThumbnailPlayer
                         review={value}
                         relevantPreview={relevantPreview}
-                        setReviewed={() => markItemAsReviewed(value.id)}
-                        onClick={() => onSelectReview(value.id)}
+                        setReviewed={markItemAsReviewed}
+                        onClick={onSelectReview(value.id}
                       />
                     </div>
                     {lastRow && !reachedEnd && <ActivityIndicator />}

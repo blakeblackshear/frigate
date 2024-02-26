@@ -223,7 +223,7 @@ export default function MobileEventView({
                     review={value}
                     relevantPreview={relevantPreview}
                     autoPlayback={minimapBounds.end == value.start_time}
-                    setReviewed={() => markItemAsReviewed(value.id)}
+                    setReviewed={markItemAsReviewed}
                   />
                 </div>
                 {lastRow && !reachedEnd && <ActivityIndicator />}
