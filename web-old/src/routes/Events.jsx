@@ -17,6 +17,7 @@ import { UploadPlus } from '../icons/UploadPlus';
 import { Clip } from '../icons/Clip';
 import { Zone } from '../icons/Zone';
 import { Camera } from '../icons/Camera';
+import { Cleanup } from '../icons/Cleanup';
 import { Clock } from '../icons/Clock';
 import { Delete } from '../icons/Delete';
 import { Download } from '../icons/Download';
@@ -97,6 +98,14 @@ export default function Events({ path, ...props }) {
     showDeleteFavorite: false,
   });
 
+  const [clearUnretainedState, setClearUnretainedState] = useState({
+    deletableEventList: [],
+    favoriteCount: 0,
+    showConfirmation: false,
+    showProgress: false,
+    showFeedback: false,
+  });
+
   const [showInProgress, setShowInProgress] = useState((props.event || props.cameras || props.labels) == null);
 
   const eventsFetcher = useCallback(
@@ -136,6 +145,7 @@ export default function Events({ path, ...props }) {
     isValidating,
   } = useSWRInfinite(getKey, eventsFetcher);
   const mutate = () => {
+    console.log("mutating refresh events");
     refreshEvents();
     refreshOngoingEvents();
   };
@@ -291,6 +301,58 @@ export default function Events({ path, ...props }) {
       route(`${path}?${queryString}`);
     },
     [path, searchParams, setSearchParams]
+  );
+
+  /**
+   * Invoked when the Cleanup button is clicked to batch delete all unsaved
+   * Events.
+   *
+   * Only iterates through the currently loaded Events in the eventPages array.
+   * This is to avoid user confusion that could result in deleting Events that
+   * are not displayed already.
+   *
+   * Blocks on loading the newest page if eventPages isn't loaded already.
+   *
+   */
+  const onClearUnretained = useCallback(
+    async (e) => {
+      e.stopPropagation();
+      console.log("clear unretained button clicked");
+      if (!eventPages) {
+        // unless output like this, eventPages is undefined. Not sure, I don't know web
+        // console.log(eventPages);
+        // eventPages?.map((page, i) => {
+        //   console.log("found ", page.length, " events in page ", i);
+        // });
+      // } else {
+        console.log("refreshing events");
+        // console.debug(eventPages);
+        // const refreshedEvents = eventsFetcher('events'. searchParams).then((res) => res.data);
+        // console.log("refreshed: ", refreshedEvents); 
+        await mutate(['events', searchParams]);
+      }
+
+      let favorites = [];
+      let deletables = [];
+      eventPages?.map((page, i) => {
+        for (let ev of page) {
+          if (ev.retain_indefinitely) {
+            favorites.push(ev.id);
+          } else {
+            console.log("adding deletable event id: ", ev.id);
+            deletables.push(ev.id);
+          }
+        }
+        // console.log("found ", page.length, " events in page ", i);
+      });
+
+      console.log("found ", favorites.length, " favorites");
+      console.log("found ", deletables.length, " events to clear");
+      // console.log("eventPages is undefined");
+
+      setClearUnretainedState({...state, deletableEventList: deletables, favoriteCount: favorites.length, showConfirmation: true, showFeedback: false, showProgress: false});
+    },
+    [eventPages, mutate, searchParams, setClearUnretainedState]
   );
 
   const onClickFilterSubmitted = useCallback(() => {
@@ -449,6 +511,18 @@ export default function Events({ path, ...props }) {
             onClick={() => setState({ ...state, showDatePicker: true })}
           />
         </div>
+
+        <div className="ml-right batch-actions">
+          <div className="ml-auto flex">
+            <Cleanup
+              className="h-8 w-8 text-red-500 cursor-pointer ml-auto"
+              onClick={(e) => onClearUnretained(e)}
+              fill="#f87171"
+              title="Cleanup Unsaved Events"
+            />
+          </div>
+        </div>
+
       </div>
       {state.showDownloadMenu && (
         <Menu onDismiss={() => setState({ ...state, showDownloadMenu: false })} relativeTo={downloadButton}>
@@ -658,6 +732,76 @@ export default function Events({ path, ...props }) {
           </div>
         </Dialog>
       )}
+      {clearUnretainedState.showConfirmation && (
+        <Dialog>
+          <div className="p-4">
+            <Heading size="lg">Delete {clearUnretainedState.deletableEventList.length} unsaved Events?</Heading>
+            <p className="mb-2">Confirm deletion of all unsaved events currently on display?</p>
+            {
+              clearUnretainedState.favoriteCount > 0 ? (
+              <p className="mb-2">{clearUnretainedState.favoriteCount} saved events will not be deleted.</p>
+              ) : (
+              <p className="mb-2" style="color: red;">This selection has no saved events!!</p>
+              )}
+            <p className="mb-2">Events not loaded to the web UI and any ongoing events are also not deleted.</p>
+          </div>
+          <div className="p-2 flex justify-start flex-row-reverse space-x-2">
+            <Button
+              className="ml-2"
+              onClick={() => setClearUnretainedState({ ...state, deletableEventList: clearUnretainedState.deletableEventList, favoriteCount: clearUnretainedState.favoriteCount, showConfirmation: false, showFeedback: false, showProgress: false })}
+              type="text"
+            >
+              Cancel
+            </Button>
+            <Button
+              className="ml-2"
+              color="red"
+              onClick={async (e) => {
+                // const delay = ms => new Promise(res => setTimeout(res, ms));
+                setClearUnretainedState({ ...state, deletableEventList: clearUnretainedState.deletableEventList, favoriteCount: clearUnretainedState.favoriteCount, showConfirmation: false, showFeedback: false, showProgress: true });
+                for (let id of clearUnretainedState.deletableEventList) {
+                  console.log("mock deleting event: ", id);
+                  // await delay(20000);
+                  await onDelete(e, id, false);
+                }
+
+                setClearUnretainedState({ ...state, deletableEventList: clearUnretainedState.deletableEventList, favoriteCount: clearUnretainedState.favoriteCount, showConfirmation: false, showFeedback: true, showProgress: false });
+              }}
+              type="text"
+            >
+              Delete
+            </Button>
+          </div>
+        </Dialog>
+      )}
+
+      {clearUnretainedState.showProgress && (
+        <Dialog>
+          <div className="p-4">
+            <Heading size="lg">Deleting {clearUnretainedState.deletableEventList.length} unsaved events</Heading>
+            <div class="loader"></div>
+          </div>
+        </Dialog>
+      )}
+
+      {clearUnretainedState.showFeedback && (
+        <Dialog>
+          <div className="p-4">
+            <Heading size="lg">{clearUnretainedState.deletableEventList.length} unsaved events were deleted.</Heading>
+            <p className="mb-2">{clearUnretainedState.favoriteCount} saved events were kept.</p>
+          </div>
+          <div className="p-2 flex justify-start flex-row-reverse space-x-2">
+            <Button
+              className="ml-2"
+              onClick={() => setClearUnretainedState({ ...state, showFeedback: false })}
+              type="text"
+            >
+              Ok
+            </Button>
+          </div>
+        </Dialog>
+      )}
+
       <div className="space-y-2">
         {ongoingEvents ? (
           <div>
