@@ -112,7 +112,7 @@ export default function PreviewThumbnailPlayer({
           onClick={onClick}
         >
           {playingBack && (
-            <div className="absolute left-0 top-0 right-0 bottom-0 animate-in fade-in">
+            <div className="absolute left-0 top-0 right-0 bottom-0">
               <PreviewContent
                 review={review}
                 relevantPreview={relevantPreview}
