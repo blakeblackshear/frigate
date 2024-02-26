@@ -226,7 +226,7 @@ export default function DynamicVideoPlayer({
             player.on("timeupdate", () => {
               controller.updateProgress(player.currentTime() || 0);
             });
-            player.on("ended", () => controller.fireClipEndEvent());
+            player.on("ended", () => controller.fireClipChangeEvent("forward"));
 
             if (onControllerReady) {
               onControllerReady(controller);
@@ -262,7 +262,7 @@ export default function DynamicVideoPlayer({
             previewRef.current = player;
             player.pause();
             player.on("seeked", () => controller.finishedSeeking());
-            player.on("loadeddata", () => controller.previewReady())
+            player.on("loadeddata", () => controller.previewReady());
           }}
           onDispose={() => {
             previewRef.current = undefined;
@@ -284,7 +284,8 @@ export class DynamicVideoController {
   // playback
   private recordings: Recording[] = [];
   private onPlaybackTimestamp: ((time: number) => void) | undefined = undefined;
-  private onClipEnded: (() => void) | undefined = undefined;
+  private onClipChange: ((dir: "forward" | "backward") => void) | undefined =
+    undefined;
   private annotationOffset: number;
   private timeToStart: number | undefined = undefined;
 
@@ -395,18 +396,22 @@ export class DynamicVideoController {
     this.onPlaybackTimestamp = listener;
   }
 
-  onClipEndedEvent(listener: () => void) {
-    this.onClipEnded = listener;
+  onClipChangedEvent(listener: (dir: "forward" | "backward") => void) {
+    this.onClipChange = listener;
   }
 
-  fireClipEndEvent() {
-    if (this.onClipEnded) {
-      this.onClipEnded();
+  fireClipChangeEvent(dir: "forward" | "backward") {
+    if (this.onClipChange) {
+      this.onClipChange(dir);
     }
   }
 
   scrubToTimestamp(time: number) {
     if (!this.preview) {
+      return;
+    }
+
+    if (!this.readyToScrub) {
       return;
     }
 
@@ -417,12 +422,8 @@ export class DynamicVideoController {
         this.timeToSeek = undefined;
         this.seeking = false;
         this.readyToScrub = false;
-        this.fireClipEndEvent();
+        this.fireClipChangeEvent("forward");
       }
-      return;
-    }
-
-    if (!this.readyToScrub) {
       return;
     }
 
@@ -432,20 +433,12 @@ export class DynamicVideoController {
       this.setScrubbing(true);
     }
 
-    console.log(
-      "scrubbing to " +
-        time +
-        " with current seek time " +
-        this.timeToSeek +
-        " and current player time " +
-        this.previewRef.current?.currentTime()
-    );
-
     if (this.seeking) {
       this.timeToSeek = time;
     } else {
-      console.log("player is being seeked to " + Math.max(0, time - this.preview.start))
-      this.previewRef.current?.currentTime(Math.max(0, time - this.preview.start));
+      this.previewRef.current?.currentTime(
+        Math.max(0, time - this.preview.start)
+      );
       this.seeking = true;
     }
   }
@@ -468,8 +461,7 @@ export class DynamicVideoController {
   }
 
   previewReady() {
-    console.log("the preview is ready")
-    this.previewRef.current?.pause()
+    this.previewRef.current?.pause();
     this.readyToScrub = true;
   }
 }

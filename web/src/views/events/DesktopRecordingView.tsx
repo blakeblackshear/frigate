@@ -48,11 +48,13 @@ export default function DesktopRecordingView({
       return;
     }
 
-    if (selectedRangeIdx < timeRange.ranges.length - 1) {
-      controllerRef.current.onClipEndedEvent(() => {
+    controllerRef.current.onClipChangedEvent((dir) => {
+      if (dir == "forward" && selectedRangeIdx < timeRange.ranges.length - 1) {
         setSelectedRangeIdx(selectedRangeIdx + 1);
-      });
-    }
+      } else if (selectedRangeIdx > 0) {
+        setSelectedRangeIdx(selectedRangeIdx - 1);
+      }
+    });
   }, [playerReady, selectedRangeIdx]);
 
   // scrubbing and timeline state
