@@ -304,7 +304,7 @@ export default function DesktopEventView({
                     data-segment-start={
                       alignDateToTimeline(value.start_time) - segmentDuration
                     }
-                    className="outline outline-destructive outline-offset-1 outline-0 rounded-lg shadow-none shadow-destructive transition-all duration-500"
+                    className="outline outline-offset-1 outline-0 rounded-lg shadow-none transition-all duration-500"
                   >
                     <div className="aspect-video rounded-lg overflow-hidden">
                       <PreviewThumbnailPlayer

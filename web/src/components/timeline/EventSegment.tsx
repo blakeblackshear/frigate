@@ -253,6 +253,10 @@ export function EventSegment({
       );
       if (element instanceof HTMLElement) {
         debounceScrollIntoView(element);
+        element.classList.add(
+          `outline-severity_${severityType}`,
+          `shadow-severity_${severityType}`
+        );
         element.classList.add("outline-4", "shadow-[0_0_6px_1px]");
         element.classList.remove("outline-0", "shadow-none");
 
