@@ -199,8 +199,6 @@ export default function DynamicVideoPlayer({
     return <ActivityIndicator />;
   }
 
-  //console.log(`${config.detect.width / config.detect.height < 1.7 ? "16:9" : undefined}`)
-
   return (
     <div className={className}>
       <div
@@ -228,7 +226,7 @@ export default function DynamicVideoPlayer({
             player.on("timeupdate", () => {
               controller.updateProgress(player.currentTime() || 0);
             });
-            player.on("ended", () => controller.fireClipEndEvent());
+            player.on("ended", () => controller.fireClipChangeEvent("forward"));
 
             if (onControllerReady) {
               onControllerReady(controller);
@@ -264,6 +262,7 @@ export default function DynamicVideoPlayer({
             previewRef.current = player;
             player.pause();
             player.on("seeked", () => controller.finishedSeeking());
+            player.on("loadeddata", () => controller.previewReady());
           }}
           onDispose={() => {
             previewRef.current = undefined;
@@ -285,7 +284,8 @@ export class DynamicVideoController {
   // playback
   private recordings: Recording[] = [];
   private onPlaybackTimestamp: ((time: number) => void) | undefined = undefined;
-  private onClipEnded: (() => void) | undefined = undefined;
+  private onClipChange: ((dir: "forward" | "backward") => void) | undefined =
+    undefined;
   private annotationOffset: number;
   private timeToStart: number | undefined = undefined;
 
@@ -293,6 +293,7 @@ export class DynamicVideoController {
   private preview: Preview | undefined = undefined;
   private timeToSeek: number | undefined = undefined;
   private seeking = false;
+  private readyToScrub = true;
 
   constructor(
     playerRef: MutableRefObject<Player | undefined>,
@@ -395,30 +396,50 @@ export class DynamicVideoController {
     this.onPlaybackTimestamp = listener;
   }
 
-  onClipEndedEvent(listener: () => void) {
-    this.onClipEnded = listener;
+  onClipChangedEvent(listener: (dir: "forward" | "backward") => void) {
+    this.onClipChange = listener;
   }
 
-  fireClipEndEvent() {
-    if (this.onClipEnded) {
-      this.onClipEnded();
+  fireClipChangeEvent(dir: "forward" | "backward") {
+    if (this.onClipChange) {
+      this.onClipChange(dir);
     }
   }
 
   scrubToTimestamp(time: number) {
+    if (!this.preview) {
+      return;
+    }
+
+    if (!this.readyToScrub) {
+      return;
+    }
+
+    if (time > this.preview.end) {
+      if (this.playerMode == "scrubbing") {
+        this.playerMode = "playback";
+        this.setScrubbing(false);
+        this.timeToSeek = undefined;
+        this.seeking = false;
+        this.readyToScrub = false;
+        this.fireClipChangeEvent("forward");
+      }
+      return;
+    }
+
     if (this.playerMode != "scrubbing") {
       this.playerMode = "scrubbing";
       this.playerRef.current?.pause();
       this.setScrubbing(true);
     }
 
-    if (this.preview) {
-      if (this.seeking) {
-        this.timeToSeek = time;
-      } else {
-        this.previewRef.current?.currentTime(time - this.preview.start);
-        this.seeking = true;
-      }
+    if (this.seeking) {
+      this.timeToSeek = time;
+    } else {
+      this.previewRef.current?.currentTime(
+        Math.max(0, time - this.preview.start)
+      );
+      this.seeking = true;
     }
   }
 
@@ -437,5 +458,10 @@ export class DynamicVideoController {
     } else {
       this.seeking = false;
     }
+  }
+
+  previewReady() {
+    this.previewRef.current?.pause();
+    this.readyToScrub = true;
   }
 }
