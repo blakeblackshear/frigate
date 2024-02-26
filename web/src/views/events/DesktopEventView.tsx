@@ -91,8 +91,8 @@ export default function DesktopEventView({
       return false;
     }
 
-    return contentRef.current.scrollHeight > contentRef.current.clientHeight
-  }, [contentRef.current?.scrollHeight])
+    return contentRef.current.scrollHeight > contentRef.current.clientHeight;
+  }, [contentRef.current?.scrollHeight]);
 
   // review interaction
 
@@ -276,10 +276,12 @@ export default function DesktopEventView({
             </div>
           )}
 
-          <div className="absolute w-full h-full flex flex-col justify-center items-center">
-            <LuFolderCheck className="w-16 h-16" />
-            There are no {severity} items to review
-          </div>
+          {reachedEnd && currentItems == null && (
+            <div className="w-full h-full flex flex-col justify-center items-center">
+              <LuFolderCheck className="w-16 h-16" />
+              There are no {severity} items to review
+            </div>
+          )}
 
           <div className="w-full mr-4 md:grid md:grid-cols-3 3xl:grid-cols-4 gap-4">
             {currentItems ? (
