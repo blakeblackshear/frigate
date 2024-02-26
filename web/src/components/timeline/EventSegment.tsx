@@ -1,7 +1,13 @@
 import { useEventUtils } from "@/hooks/use-event-utils";
 import { useSegmentUtils } from "@/hooks/use-segment-utils";
 import { ReviewSegment, ReviewSeverity } from "@/types/review";
-import React, { RefObject, useEffect, useMemo, useRef } from "react";
+import React, {
+  RefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
 
 type EventSegmentProps = {
   events: ReviewSegment[];
@@ -139,6 +145,7 @@ export function EventSegment({
     getReviewed,
     displaySeverityType,
     shouldShowRoundedCorners,
+    getEventStart,
   } = useSegmentUtils(segmentDuration, events, severityType);
 
   const { alignDateToTimeline } = useEventUtils(events, segmentDuration);
@@ -155,6 +162,13 @@ export function EventSegment({
     () => shouldShowRoundedCorners(segmentTime),
     [shouldShowRoundedCorners, segmentTime]
   );
+  const startTimestamp = useMemo(() => {
+    const eventStart = getEventStart(segmentTime);
+    if (eventStart) {
+      console.log("event start: " + new Date(eventStart * 1000));
+      return alignDateToTimeline(eventStart);
+    }
+  }, [getEventStart, segmentTime]);
 
   const timestamp = useMemo(() => new Date(segmentTime * 1000), [segmentTime]);
   const segmentKey = useMemo(() => segmentTime, [segmentTime]);
@@ -231,6 +245,26 @@ export function EventSegment({
       : "from-severity_alert-dimmed to-severity_alert",
   };
 
+  const segmentClick = useCallback(() => {
+    if (contentRef.current && startTimestamp) {
+      console.log(new Date(startTimestamp * 1000));
+      const element = contentRef.current.querySelector(
+        `[data-segment-start="${startTimestamp - segmentDuration}"]`
+      );
+      if (element instanceof HTMLElement) {
+        debounceScrollIntoView(element);
+        element.classList.add("outline-4", "shadow-[0_0_6px_1px]");
+        element.classList.remove("outline-0", "shadow-none");
+
+        // Remove the classes after a short timeout
+        setTimeout(() => {
+          element.classList.remove("outline-4", "shadow-[0_0_6px_1px]");
+          element.classList.add("outline-0", "shadow-none");
+        }, 3000);
+      }
+    }
+  }, [startTimestamp]);
+
   return (
     <div key={segmentKey} className={segmentClasses}>
       <MinimapBounds
@@ -272,14 +306,7 @@ export function EventSegment({
             ${severityColors[severityValue]}
           `}
                 onClick={() => {
-                  if (contentRef.current) {
-                    const element = contentRef.current.querySelector(
-                      `[data-segment-start="${segmentTime}"]`
-                    );
-                    if (element instanceof HTMLElement) {
-                      debounceScrollIntoView(element);
-                    }
-                  }
+                  segmentClick();
                 }}
               ></div>
             </div>

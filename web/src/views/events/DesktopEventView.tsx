@@ -253,7 +253,7 @@ export default function DesktopEventView({
           )}
 
           <div
-            className="w-full mr-4 md:grid md:grid-cols-3 3xl:grid-cols-4 gap-4"
+            className="w-full mx-2 my-2 md:grid md:grid-cols-3 3xl:grid-cols-4 gap-4"
             ref={contentRef}
           >
             {currentItems ? (
@@ -276,6 +276,7 @@ export default function DesktopEventView({
                     data-segment-start={
                       alignDateToTimeline(value.start_time) - segmentDuration
                     }
+                    className="outline outline-destructive outline-offset-1 outline-0 rounded-lg shadow-none shadow-destructive transition-all duration-500"
                   >
                     <div className="aspect-video rounded-lg overflow-hidden">
                       <PreviewThumbnailPlayer
@@ -294,7 +295,7 @@ export default function DesktopEventView({
             )}
           </div>
         </div>
-        <div className="md:w-[100px] overflow-y-auto no-scrollbar">
+        <div className="md:w-[100px] mt-2 overflow-y-auto no-scrollbar">
           <EventReviewTimeline
             segmentDuration={segmentDuration}
             timestampSpread={15}

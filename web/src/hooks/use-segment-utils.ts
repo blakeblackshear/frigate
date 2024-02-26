@@ -156,6 +156,21 @@ export const useSegmentUtils = (
     [events, getSegmentStart, getSegmentEnd, segmentDuration, severityType]
   );
 
+  const getEventStart = useCallback(
+    (time: number): number => {
+      const matchingEvent = events.find((event) => {
+        return (
+          time >= getSegmentStart(event.start_time) &&
+          time < getSegmentEnd(event.end_time) &&
+          event.severity == severityType
+        );
+      });
+
+      return matchingEvent?.start_time ?? 0;
+    },
+    [events, getSegmentStart, getSegmentEnd, severityType]
+  );
+
   return {
     getSegmentStart,
     getSegmentEnd,
@@ -163,5 +178,6 @@ export const useSegmentUtils = (
     displaySeverityType,
     getReviewed,
     shouldShowRoundedCorners,
+    getEventStart,
   };
 };
