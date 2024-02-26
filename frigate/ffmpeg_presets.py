@@ -69,8 +69,8 @@ PRESETS_HW_ACCEL_DECODE = {
     FFMPEG_HWACCEL_NVIDIA: "-hwaccel cuda -hwaccel_output_format cuda",
     "preset-jetson-h264": "-c:v h264_nvmpi -resize {1}x{2}",
     "preset-jetson-h265": "-c:v hevc_nvmpi -resize {1}x{2}",
-    "preset-rk-h264": "-hwaccel rkmpp -hwaccel_output_format drm_prime -afbc rga",
-    "preset-rk-h265": "-hwaccel rkmpp -hwaccel_output_format drm_prime -afbc rga",
+    "preset-rk-h264": "-hwaccel rkmpp -hwaccel_output_format drm_prime",
+    "preset-rk-h265": "-hwaccel rkmpp -hwaccel_output_format drm_prime",
 }
 PRESETS_HW_ACCEL_DECODE["preset-nvidia-h264"] = PRESETS_HW_ACCEL_DECODE[
     FFMPEG_HWACCEL_NVIDIA
@@ -91,8 +91,8 @@ PRESETS_HW_ACCEL_SCALE = {
     FFMPEG_HWACCEL_NVIDIA: "-r {0} -vf fps={0},scale_cuda=w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
     "preset-jetson-h264": "-r {0}",  # scaled in decoder
     "preset-jetson-h265": "-r {0}",  # scaled in decoder
-    "preset-rk-h264": "-r {0} -vf scale_rkrga=w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
-    "preset-rk-h265": "-r {0} -vf scale_rkrga=w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
+    "preset-rk-h264": "-r {0} -vf scale_rkrga=w={1}:h={2}:format=yuv420p:force_original_aspect_ratio=0,hwmap=mode=read,format=yuv420p",
+    "preset-rk-h265": "-r {0} -vf scale_rkrga=w={1}:h={2}:format=yuv420p:force_original_aspect_ratio=0,hwmap=mode=read,format=yuv420p",
     "default": "-r {0} -vf fps={0},scale={1}:{2}",
 }
 PRESETS_HW_ACCEL_SCALE["preset-nvidia-h264"] = PRESETS_HW_ACCEL_SCALE[
