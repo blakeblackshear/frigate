@@ -1,4 +1,3 @@
-import { useFrigateEvents } from "@/api/ws";
 import ReviewFilterGroup from "@/components/filter/ReviewFilterGroup";
 import PreviewThumbnailPlayer from "@/components/player/PreviewThumbnailPlayer";
 import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
@@ -19,6 +18,8 @@ type DesktopEventViewProps = {
   reachedEnd: boolean;
   isValidating: boolean;
   filter?: ReviewFilter;
+  hasUpdate: boolean;
+  setHasUpdate: (hasUpdated: boolean) => void;
   loadNextPage: () => void;
   markItemAsReviewed: (reviewId: string) => void;
   onSelectReview: (reviewId: string) => void;
@@ -32,6 +33,8 @@ export default function DesktopEventView({
   reachedEnd,
   isValidating,
   filter,
+  hasUpdate,
+  setHasUpdate,
   loadNextPage,
   markItemAsReviewed,
   onSelectReview,
@@ -177,25 +180,6 @@ export default function DesktopEventView({
     return data;
   }, [minimap]);
 
-  // new data alert
-
-  const { payload: eventUpdate } = useFrigateEvents();
-  const [hasUpdate, setHasUpdate] = useState(false);
-  useEffect(() => {
-    if (!eventUpdate) {
-      return;
-    }
-
-    // if event is ended and was saved, update events list
-    if (
-      eventUpdate.type == "end" &&
-      (eventUpdate.after.has_clip || eventUpdate.after.has_snapshot)
-    ) {
-      setHasUpdate(true);
-      return;
-    }
-  }, [eventUpdate]);
-
   if (!config) {
     return <ActivityIndicator />;
   }
@@ -306,8 +290,8 @@ export default function DesktopEventView({
                       <PreviewThumbnailPlayer
                         review={value}
                         relevantPreview={relevantPreview}
-                        setReviewed={() => markItemAsReviewed(value.id)}
-                        onClick={() => onSelectReview(value.id)}
+                        setReviewed={markItemAsReviewed}
+                        onClick={onSelectReview}
                       />
                     </div>
                     {lastRow && !reachedEnd && <ActivityIndicator />}

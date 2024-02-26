@@ -1,3 +1,4 @@
+import { useFrigateEvents } from "@/api/ws";
 import useApiFilter from "@/hooks/use-api-filter";
 import useOverlayState from "@/hooks/use-overlay-state";
 import { ReviewFilter, ReviewSegment } from "@/types/review";
@@ -5,7 +6,7 @@ import DesktopEventView from "@/views/events/DesktopEventView";
 import DesktopRecordingView from "@/views/events/DesktopRecordingView";
 import MobileEventView from "@/views/events/MobileEventView";
 import axios from "axios";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { isMobile } from "react-device-detect";
 import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
@@ -91,6 +92,10 @@ export default function Events() {
     () => (reviewPages?.at(-1)?.length ?? 0) < API_LIMIT,
     [reviewPages]
   );
+
+  const onLoadNextPage = useCallback(() => {
+    setSize(size + 1);
+  }, [size]);
 
   // preview videos
 
@@ -189,6 +194,25 @@ export default function Events() {
     };
   }, [selectedReviewId, reviewPages]);
 
+  // review updates
+
+  const { payload: eventUpdate } = useFrigateEvents();
+  const [hasUpdate, setHasUpdate] = useState(false);
+  useEffect(() => {
+    if (!eventUpdate) {
+      return;
+    }
+
+    // if event is ended and was saved, update events list
+    if (
+      eventUpdate.type == "end" &&
+      (eventUpdate.after.has_clip || eventUpdate.after.has_snapshot)
+    ) {
+      setHasUpdate(true);
+      return;
+    }
+  }, [eventUpdate]);
+
   if (selectedData) {
     return (
       <DesktopRecordingView
@@ -205,8 +229,11 @@ export default function Events() {
           relevantPreviews={allPreviews}
           reachedEnd={isDone}
           isValidating={isValidating}
-          loadNextPage={() => setSize(size + 1)}
+          hasUpdate={hasUpdate}
+          setHasUpdate={setHasUpdate}
+          loadNextPage={onLoadNextPage}
           markItemAsReviewed={markItemAsReviewed}
+          pullLatestData={updateSegments}
         />
       );
     }
@@ -219,7 +246,9 @@ export default function Events() {
         reachedEnd={isDone}
         isValidating={isValidating}
         filter={reviewFilter}
-        loadNextPage={() => setSize(size + 1)}
+        hasUpdate={hasUpdate}
+        setHasUpdate={setHasUpdate}
+        loadNextPage={onLoadNextPage}
         markItemAsReviewed={markItemAsReviewed}
         onSelectReview={setSelectedReviewId}
         pullLatestData={updateSegments}

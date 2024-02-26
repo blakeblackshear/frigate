@@ -26,8 +26,8 @@ type PreviewPlayerProps = {
   review: ReviewSegment;
   relevantPreview?: Preview;
   autoPlayback?: boolean;
-  setReviewed?: () => void;
-  onClick?: () => void;
+  setReviewed?: (reviewId: string) => void;
+  onClick?: (reviewId: string) => void;
 };
 
 type Preview = {
@@ -52,6 +52,22 @@ export default function PreviewThumbnailPlayer({
   const [playback, setPlayback] = useState(false);
   const [progress, setProgress] = useState(0);
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
+
+  // interaction
+
+  const handleOnClick = useCallback(() => {
+    if (onClick) {
+      onClick(review.id);
+    }
+  }, [review, onClick]);
+
+  const handleSetReviewed = useCallback(() => {
+    if (setReviewed) {
+      setReviewed(review.id);
+    }
+  }, [review, setReviewed]);
+
+  // playback
 
   const playingBack = useMemo(() => playback, [playback, autoPlayback]);
 
@@ -110,7 +126,7 @@ export default function PreviewThumbnailPlayer({
           className="relative w-full h-full cursor-pointer"
           onMouseEnter={isMobile ? undefined : () => onPlayback(true)}
           onMouseLeave={isMobile ? undefined : () => onPlayback(false)}
-          onClick={onClick}
+          onClick={handleOnClick}
         >
           {playingBack && (
             <div className="absolute left-0 top-0 right-0 bottom-0 animate-in fade-in">
@@ -118,7 +134,7 @@ export default function PreviewThumbnailPlayer({
                 review={review}
                 relevantPreview={relevantPreview}
                 setProgress={setProgress}
-                setReviewed={setReviewed}
+                setReviewed={handleSetReviewed}
               />
             </div>
           )}
@@ -184,7 +200,7 @@ export default function PreviewThumbnailPlayer({
           )}
         </div>
       </ContextMenuTrigger>
-      <PreviewContextItems review={review} setReviewed={setReviewed} />
+      <PreviewContextItems review={review} setReviewed={handleSetReviewed} />
     </ContextMenu>
   );
 }
@@ -321,7 +337,7 @@ const MIN_LOAD_TIMEOUT_MS = 200;
 type InProgressPreviewProps = {
   review: ReviewSegment;
   setProgress?: (progress: number) => void;
-  setReviewed?: () => void;
+  setReviewed?: (reviewId: string) => void;
 };
 function InProgressPreview({
   review,
@@ -355,7 +371,7 @@ function InProgressPreview({
       }
 
       if (setReviewed && key == Math.floor(previewFrames.length / 2)) {
-        setReviewed();
+        setReviewed(review.id);
       }
 
       setKey(key + 1);

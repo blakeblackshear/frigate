@@ -1,9 +1,11 @@
 import PreviewThumbnailPlayer from "@/components/player/PreviewThumbnailPlayer";
 import ActivityIndicator from "@/components/ui/activity-indicator";
+import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { ReviewSegment, ReviewSeverity } from "@/types/review";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { LuRefreshCcw } from "react-icons/lu";
 import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
 
@@ -12,16 +14,22 @@ type MobileEventViewProps = {
   relevantPreviews?: Preview[];
   reachedEnd: boolean;
   isValidating: boolean;
+  hasUpdate: boolean;
+  setHasUpdate: (hasUpdated: boolean) => void;
   loadNextPage: () => void;
   markItemAsReviewed: (reviewId: string) => void;
+  pullLatestData: () => void;
 };
 export default function MobileEventView({
   reviewPages,
   relevantPreviews,
   reachedEnd,
   isValidating,
+  hasUpdate,
+  setHasUpdate,
   loadNextPage,
   markItemAsReviewed,
+  pullLatestData,
 }: MobileEventViewProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
   const [severity, setSeverity] = useState<ReviewSeverity>("alert");
@@ -198,6 +206,34 @@ export default function MobileEventView({
         </ToggleGroupItem>
       </ToggleGroup>
 
+      {hasUpdate && (
+        <div className="absolute w-full z-30">
+          <div className="flex justify-center items-center">
+            <Button
+              className={`${
+                hasUpdate
+                  ? "animate-in slide-in-from-top duration-500"
+                  : "invisible"
+              }  text-center mt-5 mx-auto bg-gray-400 text-white`}
+              variant="secondary"
+              onClick={() => {
+                setHasUpdate(false);
+                pullLatestData();
+                if (contentRef.current) {
+                  contentRef.current.scrollTo({
+                    top: 0,
+                    behavior: "smooth",
+                  });
+                }
+              }}
+            >
+              <LuRefreshCcw className="w-4 h-4 mr-2" />
+              New Items To Review
+            </Button>
+          </div>
+        </div>
+      )}
+
       <div
         ref={contentRef}
         className="w-full h-full grid grid-cols-1 sm:grid-cols-2 mt-2 gap-2 overflow-y-auto"
@@ -223,7 +259,7 @@ export default function MobileEventView({
                     review={value}
                     relevantPreview={relevantPreview}
                     autoPlayback={minimapBounds.end == value.start_time}
-                    setReviewed={() => markItemAsReviewed(value.id)}
+                    setReviewed={markItemAsReviewed}
                   />
                 </div>
                 {lastRow && !reachedEnd && <ActivityIndicator />}
