@@ -5,6 +5,7 @@ import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
 import ActivityIndicator from "@/components/ui/activity-indicator";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { useEventUtils } from "@/hooks/use-event-utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { ReviewFilter, ReviewSegment, ReviewSeverity } from "@/types/review";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -41,6 +42,7 @@ export default function DesktopEventView({
   const { data: config } = useSWR<FrigateConfig>("config");
   const [severity, setSeverity] = useState<ReviewSeverity>("alert");
   const contentRef = useRef<HTMLDivElement | null>(null);
+  const segmentDuration = 60;
 
   // review paging
 
@@ -76,6 +78,11 @@ export default function DesktopEventView({
     };
   }, [reviewPages]);
 
+  const { alignDateToTimeline } = useEventUtils(
+    reviewItems.all,
+    segmentDuration
+  );
+
   const currentItems = useMemo(() => {
     const current = reviewItems[severity];
 
@@ -91,8 +98,8 @@ export default function DesktopEventView({
       return false;
     }
 
-    return contentRef.current.scrollHeight > contentRef.current.clientHeight
-  }, [contentRef.current?.scrollHeight])
+    return contentRef.current.scrollHeight > contentRef.current.clientHeight;
+  }, [contentRef.current?.scrollHeight]);
 
   // review interaction
 
@@ -244,10 +251,7 @@ export default function DesktopEventView({
       </div>
 
       <div className="flex h-full overflow-hidden">
-        <div
-          ref={contentRef}
-          className="flex flex-1 flex-wrap content-start gap-2 overflow-y-auto no-scrollbar"
-        >
+        <div className="flex flex-1 flex-wrap content-start gap-2 overflow-y-auto no-scrollbar">
           {hasUpdate && (
             <div className="absolute w-full z-30">
               <div className="flex justify-center items-center mr-[100px]">
@@ -276,7 +280,10 @@ export default function DesktopEventView({
             </div>
           )}
 
-          <div className="w-full mr-4 md:grid md:grid-cols-3 3xl:grid-cols-4 gap-4">
+          <div
+            className="w-full mr-4 md:grid md:grid-cols-3 3xl:grid-cols-4 gap-4"
+            ref={contentRef}
+          >
             {currentItems ? (
               currentItems.map((value, segIdx) => {
                 const lastRow = segIdx == reviewItems[severity].length - 1;
@@ -294,6 +301,9 @@ export default function DesktopEventView({
                     key={value.id}
                     ref={lastRow ? lastReviewRef : minimapRef}
                     data-start={value.start_time}
+                    data-segment-start={
+                      alignDateToTimeline(value.start_time) - segmentDuration
+                    }
                   >
                     <div className="aspect-video rounded-lg overflow-hidden">
                       <PreviewThumbnailPlayer
@@ -314,7 +324,7 @@ export default function DesktopEventView({
         </div>
         <div className="md:w-[100px] overflow-y-auto no-scrollbar">
           <EventReviewTimeline
-            segmentDuration={60}
+            segmentDuration={segmentDuration}
             timestampSpread={15}
             timelineStart={timeRange.before}
             timelineEnd={timeRange.after}

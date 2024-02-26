@@ -1,7 +1,7 @@
 import { useEventUtils } from "@/hooks/use-event-utils";
 import { useSegmentUtils } from "@/hooks/use-segment-utils";
 import { ReviewSegment, ReviewSeverity } from "@/types/review";
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { RefObject, useEffect, useMemo, useRef } from "react";
 
 type EventSegmentProps = {
   events: ReviewSegment[];
@@ -12,6 +12,7 @@ type EventSegmentProps = {
   minimapStartTime?: number;
   minimapEndTime?: number;
   severityType: ReviewSeverity;
+  contentRef: RefObject<HTMLDivElement>;
 };
 
 type MinimapSegmentProps = {
@@ -131,6 +132,7 @@ export function EventSegment({
   minimapStartTime,
   minimapEndTime,
   severityType,
+  contentRef,
 }: EventSegmentProps) {
   const {
     getSeverity,
@@ -269,6 +271,16 @@ export function EventSegment({
             ${roundTop ? "rounded-tl-full rounded-tr-full" : ""}
             ${severityColors[severityValue]}
           `}
+                onClick={() => {
+                  if (contentRef.current) {
+                    const element = contentRef.current.querySelector(
+                      `[data-segment-start="${segmentTime}"]`
+                    );
+                    if (element instanceof HTMLElement) {
+                      debounceScrollIntoView(element);
+                    }
+                  }
+                }}
               ></div>
             </div>
           )}

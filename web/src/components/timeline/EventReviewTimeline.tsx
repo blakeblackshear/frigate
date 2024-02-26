@@ -102,7 +102,7 @@ export function EventReviewTimeline({
 
       return (
         <EventSegment
-          key={segmentTime}
+          key={segmentTime + severityType}
           events={events}
           segmentDuration={segmentDuration}
           segmentTime={segmentTime}
@@ -111,6 +111,7 @@ export function EventReviewTimeline({
           minimapStartTime={minimapStartTime}
           minimapEndTime={minimapEndTime}
           severityType={severityType}
+          contentRef={contentRef}
         />
       );
     });
@@ -122,6 +123,7 @@ export function EventReviewTimeline({
     showMinimap,
     minimapStartTime,
     minimapEndTime,
+    events,
   ]);
 
   const segments = useMemo(
