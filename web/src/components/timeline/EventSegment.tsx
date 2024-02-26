@@ -255,7 +255,7 @@ export function EventSegment({
       />
 
       {severity.map((severityValue, index) => (
-        <React.Fragment key={segmentKey + "_severity"}>
+        <React.Fragment key={index}>
           {severityValue === displaySeverityType && (
             <div
               className="mr-3 w-[8px] h-2 flex justify-left items-end"
