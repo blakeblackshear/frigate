@@ -82,6 +82,10 @@ export default function Events() {
     [reviewPages]
   );
 
+  const onLoadNextPage = useCallback(() => {
+    setSize(size + 1);
+  }, [size]);
+
   // preview videos
 
   const previewTimes = useMemo(() => {
@@ -195,7 +199,7 @@ export default function Events() {
           relevantPreviews={allPreviews}
           reachedEnd={isDone}
           isValidating={isValidating}
-          loadNextPage={() => setSize(size + 1)}
+          loadNextPage={onLoadNextPage}
           markItemAsReviewed={markItemAsReviewed}
         />
       );
@@ -209,7 +213,7 @@ export default function Events() {
         reachedEnd={isDone}
         isValidating={isValidating}
         filter={reviewFilter}
-        loadNextPage={() => setSize(size + 1)}
+        loadNextPage={onLoadNextPage}
         markItemAsReviewed={markItemAsReviewed}
         onSelectReview={setSelectedReviewId}
         pullLatestData={updateSegments}
