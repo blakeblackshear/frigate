@@ -199,8 +199,6 @@ export default function DynamicVideoPlayer({
     return <ActivityIndicator />;
   }
 
-  //console.log(`${config.detect.width / config.detect.height < 1.7 ? "16:9" : undefined}`)
-
   return (
     <div className={className}>
       <div
@@ -406,19 +404,32 @@ export class DynamicVideoController {
   }
 
   scrubToTimestamp(time: number) {
+    if (!this.preview) {
+      return;
+    }
+
+    if (time > this.preview.end) {
+      if (this.playerMode == "scrubbing") {
+        this.fireClipEndEvent();
+        this.playerMode = "playback";
+        this.setScrubbing(false);
+        this.timeToSeek = undefined;
+        this.seeking = false;
+      }
+      return;
+    }
+
     if (this.playerMode != "scrubbing") {
       this.playerMode = "scrubbing";
       this.playerRef.current?.pause();
       this.setScrubbing(true);
     }
 
-    if (this.preview) {
-      if (this.seeking) {
-        this.timeToSeek = time;
-      } else {
-        this.previewRef.current?.currentTime(time - this.preview.start);
-        this.seeking = true;
-      }
+    if (this.seeking) {
+      this.timeToSeek = time;
+    } else {
+      this.previewRef.current?.currentTime(time - this.preview.start);
+      this.seeking = true;
     }
   }
 

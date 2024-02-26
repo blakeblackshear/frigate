@@ -20,8 +20,12 @@ export default function DesktopRecordingView({
   relevantPreviews,
 }: DesktopRecordingViewProps) {
   const navigate = useNavigate();
-  const controllerRef = useRef<DynamicVideoController | undefined>(undefined);
   const contentRef = useRef<HTMLDivElement | null>(null);
+
+  // controller state
+
+  const [playerReady, setPlayerReady] = useState(false);
+  const controllerRef = useRef<DynamicVideoController | undefined>(undefined);
 
   // timeline time
 
@@ -49,7 +53,7 @@ export default function DesktopRecordingView({
         setSelectedRangeIdx(selectedRangeIdx + 1);
       });
     }
-  }, [controllerRef, selectedRangeIdx]);
+  }, [playerReady, selectedRangeIdx]);
 
   // scrubbing and timeline state
 
@@ -62,13 +66,13 @@ export default function DesktopRecordingView({
     if (scrubbing) {
       controllerRef.current?.scrubToTimestamp(currentTime);
     }
-  }, [controllerRef, currentTime, scrubbing]);
+  }, [currentTime, scrubbing]);
 
   useEffect(() => {
     if (!scrubbing) {
       controllerRef.current?.seekToTimestamp(currentTime, true);
     }
-  }, [controllerRef, scrubbing]);
+  }, [scrubbing]);
 
   return (
     <div ref={contentRef} className="relative w-full h-full">
@@ -87,6 +91,7 @@ export default function DesktopRecordingView({
           cameraPreviews={relevantPreviews || []}
           onControllerReady={(controller) => {
             controllerRef.current = controller;
+            setPlayerReady(true);
             controllerRef.current.onPlayerTimeUpdate((timestamp: number) => {
               setCurrentTime(timestamp);
             });
