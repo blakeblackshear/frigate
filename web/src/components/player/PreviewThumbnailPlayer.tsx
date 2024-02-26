@@ -20,7 +20,6 @@ import { LuCheckSquare, LuFileUp, LuTrash } from "react-icons/lu";
 import axios from "axios";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import { Skeleton } from "../ui/skeleton";
-import { LazyLoadImage } from "react-lazy-load-image-component";
 
 type PreviewPlayerProps = {
   review: ReviewSegment;
@@ -122,48 +121,53 @@ export default function PreviewThumbnailPlayer({
               />
             </div>
           )}
-          <LazyLoadImage
-            className={`w-full h-full transition-opacity ${
-              playingBack ? "opacity-0" : "opacity-100"
-            }`}
-            src={`${apiHost}${review.thumb_path.replace(
-              "/media/frigate/",
-              ""
-            )}`}
-            onLoad={() => {
-              setImgLoaded(true);
-            }}
-            placeholder={<Skeleton className="w-full h-full rounded-xl" />}
-          />
-
-          {!playingBack && imgLoaded && (
-            <>
-              <div className="absolute top-0 left-0 right-0 rounded-t-l z-10 w-full h-[30%] bg-gradient-to-b from-black/60 to-transparent pointer-events-none animate-in fade-in">
-                <div className="flex h-full justify-between items-start mx-3 pb-1 text-white text-sm ">
-                  {(review.severity == "alert" ||
-                    review.severity == "detection") && (
-                    <Chip className="absolute top-2 left-2 flex gap-1 bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 z-0">
-                      {review.data.objects.map((object) => {
-                        return getIconForLabel(object, "w-3 h-3 text-white");
-                      })}
-                      {review.data.audio.map((audio) => {
-                        return getIconForLabel(audio, "w-3 h-3 text-white");
-                      })}
-                      {review.data.sub_labels?.map((sub) => {
-                        return getIconForSubLabel(sub, "w-3 h-3 text-white");
-                      })}
-                    </Chip>
-                  )}
-                </div>
-              </div>
-              <div className="absolute bottom-0 left-0 right-0 rounded-b-l z-10 w-full h-[20%] bg-gradient-to-t from-black/60 to-transparent pointer-events-none animate-in fade-in">
-                <div className="flex h-full justify-between items-end mx-3 pb-1 text-white text-sm ">
-                  <TimeAgo time={review.start_time * 1000} dense />
-                  {formattedDate}
-                </div>
-              </div>
-            </>
+          {!imgLoaded && (
+            <Skeleton className={`absolute inset-0 w-full h-full`} />
           )}
+          <div className={`${imgLoaded ? "visible" : "invisible"}`}>
+            <img
+              className={`w-full h-full transition-opacity ${
+                playingBack ? "opacity-0" : "opacity-100"
+              }`}
+              src={`${apiHost}${review.thumb_path.replace(
+                "/media/frigate/",
+                ""
+              )}`}
+              loading="lazy"
+              onLoad={() => {
+                setImgLoaded(true);
+              }}
+            />
+
+            {!playingBack && (
+              <>
+                <div className="absolute top-0 left-0 right-0 rounded-t-l z-10 w-full h-[30%] bg-gradient-to-b from-black/60 to-transparent pointer-events-none">
+                  <div className="flex h-full justify-between items-start mx-3 pb-1 text-white text-sm ">
+                    {(review.severity == "alert" ||
+                      review.severity == "detection") && (
+                      <Chip className="absolute top-2 left-2 flex gap-1 bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 z-0">
+                        {review.data.objects.map((object) => {
+                          return getIconForLabel(object, "w-3 h-3 text-white");
+                        })}
+                        {review.data.audio.map((audio) => {
+                          return getIconForLabel(audio, "w-3 h-3 text-white");
+                        })}
+                        {review.data.sub_labels?.map((sub) => {
+                          return getIconForSubLabel(sub, "w-3 h-3 text-white");
+                        })}
+                      </Chip>
+                    )}
+                  </div>
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 rounded-b-l z-10 w-full h-[20%] bg-gradient-to-t from-black/60 to-transparent pointer-events-none">
+                  <div className="flex h-full justify-between items-end mx-3 pb-1 text-white text-sm ">
+                    <TimeAgo time={review.start_time * 1000} dense />
+                    {formattedDate}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
           {playingBack && (
             <Slider
               className="absolute left-0 right-0 bottom-0 z-10"
@@ -358,7 +362,7 @@ function InProgressPreview({
 
   if (!previewFrames || previewFrames.length == 0) {
     return (
-      <LazyLoadImage
+      <img
         className="h-full w-full"
         src={`${apiHost}${review.thumb_path.replace("/media/frigate/", "")}`}
       />
