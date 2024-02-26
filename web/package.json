@@ -63,7 +63,6 @@
     "vaul": "^0.8.0",
     "video.js": "^8.6.1",
     "videojs-playlist": "^5.1.0",
-    "vis-timeline": "^7.7.3",
     "vite-plugin-monaco-editor": "^1.1.0",
     "zod": "^3.22.4"
   },

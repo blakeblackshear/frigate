@@ -1,14 +1,9 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Heading from "@/components/ui/heading";
-import ActivityScrubber, {
-  ScrubberItem,
-} from "@/components/scrubber/ActivityScrubber";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Event } from "@/types/event";
 import ActivityIndicator from "@/components/ui/activity-indicator";
-import { useApiHost } from "@/api";
-import TimelineScrubber from "@/components/playground/TimelineScrubber";
 import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
 import { ReviewData, ReviewSegment, ReviewSeverity } from "@/types/review";
 import { Button } from "@/components/ui/button";
@@ -46,18 +41,6 @@ function ColorSwatch({ name, value }: { name: string; value: string }) {
       <span>{name}</span>
     </div>
   );
-}
-
-function eventsToScrubberItems(events: Event[]): ScrubberItem[] {
-  const apiHost = useApiHost();
-
-  return events.map((event: Event) => ({
-    id: event.id,
-    content: `<div class="flex"><img class="" src="${apiHost}api/events/${event.id}/thumbnail.jpg" /><span>${event.label}</span></div>`,
-    start: new Date(event.start_time * 1000),
-    end: event.end_time ? new Date(event.end_time * 1000) : undefined,
-    type: "box",
-  }));
 }
 
 const generateRandomEvent = (): ReviewSegment => {
@@ -98,16 +81,11 @@ const generateRandomEvent = (): ReviewSegment => {
 
 function UIPlayground() {
   const { data: config } = useSWR<FrigateConfig>("config");
-  const [timeline, setTimeline] = useState<string | undefined>(undefined);
   const contentRef = useRef<HTMLDivElement>(null);
   const [mockEvents, setMockEvents] = useState<ReviewSegment[]>([]);
   const [handlebarTime, setHandlebarTime] = useState(
     Math.floor(Date.now() / 1000) - 15 * 60
   );
-
-  const onSelect = useCallback(({ items }: { items: string[] }) => {
-    setTimeline(items[0]);
-  }, []);
 
   const recentTimestamp = useMemo(() => {
     const now = new Date();
@@ -189,29 +167,6 @@ function UIPlayground() {
             </p>
 
             {!config && <ActivityIndicator />}
-
-            {config && (
-              <div>
-                {events && events.length > 0 && (
-                  <>
-                    <ActivityScrubber
-                      items={eventsToScrubberItems(events)}
-                      selectHandler={onSelect}
-                    />
-                  </>
-                )}
-              </div>
-            )}
-
-            {config && (
-              <div>
-                {timeline && (
-                  <>
-                    <TimelineScrubber eventID={timeline} />
-                  </>
-                )}
-              </div>
-            )}
 
             <div ref={contentRef}>
               <Heading as="h4" className="my-5">
