@@ -28,9 +28,19 @@ export default function Events() {
 
   // review paging
 
-  const timeRange = useMemo(() => {
+  const last24Hours = useMemo(() => {
     return { before: Date.now() / 1000, after: getHoursAgo(24) };
   }, []);
+  const selectedTimeRange = useMemo(() => {
+    if (reviewSearchParams["after"] == undefined) {
+      return last24Hours;
+    }
+
+    return {
+      before: Math.floor(reviewSearchParams["before"]),
+      after: Math.floor(reviewSearchParams["after"]),
+    };
+  }, [reviewSearchParams]);
 
   const reviewSegmentFetcher = useCallback((key: any) => {
     const [path, params] = Array.isArray(key) ? key : [key, undefined];
@@ -47,7 +57,7 @@ export default function Events() {
           labels: reviewSearchParams["labels"],
           reviewed: reviewSearchParams["showReviewed"],
           before: lastDate,
-          after: reviewSearchParams["after"] || timeRange.after,
+          after: reviewSearchParams["after"] || last24Hours.after,
           limit: API_LIMIT,
         };
         return ["review", pagedParams];
@@ -58,8 +68,8 @@ export default function Events() {
         labels: reviewSearchParams["labels"],
         reviewed: reviewSearchParams["showReviewed"],
         limit: API_LIMIT,
-        before: reviewSearchParams["before"] || timeRange.before,
-        after: reviewSearchParams["after"] || timeRange.after,
+        before: reviewSearchParams["before"] || last24Hours.before,
+        after: reviewSearchParams["after"] || last24Hours.after,
       };
       return ["review", params];
     },
@@ -205,7 +215,7 @@ export default function Events() {
       <DesktopEventView
         reviewPages={reviewPages}
         relevantPreviews={allPreviews}
-        timeRange={timeRange}
+        timeRange={selectedTimeRange}
         reachedEnd={isDone}
         isValidating={isValidating}
         filter={reviewFilter}

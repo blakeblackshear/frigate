@@ -200,6 +200,8 @@ export default function DesktopEventView({
     return <ActivityIndicator />;
   }
 
+  console.log("the time range is " + JSON.stringify(timeRange))
+
   return (
     <div className="flex flex-col w-full h-full">
       <div className="flex justify-between mb-2">
