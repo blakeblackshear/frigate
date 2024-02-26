@@ -14,7 +14,9 @@ type MobileEventViewProps = {
   relevantPreviews?: Preview[];
   reachedEnd: boolean;
   isValidating: boolean;
+  severity: ReviewSeverity;
   hasUpdate: boolean;
+  setSeverity: (severity: ReviewSeverity) => void;
   setHasUpdate: (hasUpdated: boolean) => void;
   loadNextPage: () => void;
   markItemAsReviewed: (reviewId: string) => void;
@@ -25,14 +27,15 @@ export default function MobileEventView({
   relevantPreviews,
   reachedEnd,
   isValidating,
+  severity,
   hasUpdate,
+  setSeverity,
   setHasUpdate,
   loadNextPage,
   markItemAsReviewed,
   pullLatestData,
 }: MobileEventViewProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
-  const [severity, setSeverity] = useState<ReviewSeverity>("alert");
   const contentRef = useRef<HTMLDivElement | null>(null);
 
   // review paging
