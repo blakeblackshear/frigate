@@ -113,7 +113,7 @@ export default function PreviewThumbnailPlayer({
           onClick={onClick}
         >
           {playingBack && (
-            <div className="absolute left-0 top-0 right-0 bottom-0">
+            <div className="absolute left-0 top-0 right-0 bottom-0 animate-in fade-in">
               <PreviewContent
                 review={review}
                 relevantPreview={relevantPreview}
@@ -124,7 +124,7 @@ export default function PreviewThumbnailPlayer({
           )}
           <LazyLoadImage
             className={`w-full h-full transition-opacity ${
-              playingBack && imgLoaded ? "opacity-0" : "opacity-100"
+              playingBack ? "opacity-0" : "opacity-100"
             }`}
             src={`${apiHost}${review.thumb_path.replace(
               "/media/frigate/",
@@ -138,7 +138,7 @@ export default function PreviewThumbnailPlayer({
 
           {!playingBack && imgLoaded && (
             <>
-              <div className="absolute top-0 left-0 right-0 rounded-t-l z-10 w-full h-[30%] bg-gradient-to-b from-black/60 to-transparent pointer-events-none">
+              <div className="absolute top-0 left-0 right-0 rounded-t-l z-10 w-full h-[30%] bg-gradient-to-b from-black/60 to-transparent pointer-events-none animate-in fade-in">
                 <div className="flex h-full justify-between items-start mx-3 pb-1 text-white text-sm ">
                   {(review.severity == "alert" ||
                     review.severity == "detection") && (
@@ -156,7 +156,7 @@ export default function PreviewThumbnailPlayer({
                   )}
                 </div>
               </div>
-              <div className="absolute bottom-0 left-0 right-0 rounded-b-l z-10 w-full h-[20%] bg-gradient-to-t from-black/60 to-transparent pointer-events-none">
+              <div className="absolute bottom-0 left-0 right-0 rounded-b-l z-10 w-full h-[20%] bg-gradient-to-t from-black/60 to-transparent pointer-events-none animate-in fade-in">
                 <div className="flex h-full justify-between items-end mx-3 pb-1 text-white text-sm ">
                   <TimeAgo time={review.start_time * 1000} dense />
                   {formattedDate}
