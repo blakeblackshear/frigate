@@ -145,7 +145,6 @@ export default function Events({ path, ...props }) {
     isValidating,
   } = useSWRInfinite(getKey, eventsFetcher);
   const mutate = () => {
-    console.log("mutating refresh events");
     refreshEvents();
     refreshOngoingEvents();
   };
@@ -319,16 +318,7 @@ export default function Events({ path, ...props }) {
       e.stopPropagation();
       console.log("clear unretained button clicked");
       if (!eventPages) {
-        // unless output like this, eventPages is undefined. Not sure, I don't know web
-        // console.log(eventPages);
-        // eventPages?.map((page, i) => {
-        //   console.log("found ", page.length, " events in page ", i);
-        // });
-      // } else {
-        console.log("refreshing events");
-        // console.debug(eventPages);
-        // const refreshedEvents = eventsFetcher('events'. searchParams).then((res) => res.data);
-        // console.log("refreshed: ", refreshedEvents); 
+        console.debug("refreshing events");
         await mutate(['events', searchParams]);
       }
 
@@ -339,18 +329,23 @@ export default function Events({ path, ...props }) {
           if (ev.retain_indefinitely) {
             favorites.push(ev.id);
           } else {
-            console.log("adding deletable event id: ", ev.id);
             deletables.push(ev.id);
           }
         }
-        // console.log("found ", page.length, " events in page ", i);
       });
 
-      console.log("found ", favorites.length, " favorites");
-      console.log("found ", deletables.length, " events to clear");
-      // console.log("eventPages is undefined");
+      console.debug("found ", favorites.length, " favorites");
+      console.debug("found ", deletables.length, " events to clear");
 
-      setClearUnretainedState({...state, deletableEventList: deletables, favoriteCount: favorites.length, showConfirmation: true, showFeedback: false, showProgress: false});
+      setClearUnretainedState(
+        {
+          ...state,
+          deletableEventList: deletables,
+          favoriteCount: favorites.length,
+          showConfirmation: true,
+          showFeedback: false,
+          showProgress: false
+        });
     },
     [eventPages, mutate, searchParams, setClearUnretainedState]
   );
@@ -512,6 +507,7 @@ export default function Events({ path, ...props }) {
           />
         </div>
 
+        {/* Separate box for batch mutable actions */}
         <div className="ml-right batch-actions">
           <div className="ml-auto flex">
             <Cleanup
@@ -732,6 +728,7 @@ export default function Events({ path, ...props }) {
           </div>
         </Dialog>
       )}
+
       {clearUnretainedState.showConfirmation && (
         <Dialog>
           <div className="p-4">
@@ -739,16 +736,24 @@ export default function Events({ path, ...props }) {
             <p className="mb-2">Confirm deletion of all unsaved events currently on display?</p>
             {
               clearUnretainedState.favoriteCount > 0 ? (
-              <p className="mb-2">{clearUnretainedState.favoriteCount} saved events will not be deleted.</p>
+                <p className="mb-2">{clearUnretainedState.favoriteCount} saved events will not be deleted.</p>
               ) : (
-              <p className="mb-2" style="color: red;">This selection has no saved events!!</p>
+                <p className="mb-2" style="color: red;">This selection has no saved events!!</p>
               )}
             <p className="mb-2">Events not loaded to the web UI and any ongoing events are also not deleted.</p>
           </div>
           <div className="p-2 flex justify-start flex-row-reverse space-x-2">
             <Button
               className="ml-2"
-              onClick={() => setClearUnretainedState({ ...state, deletableEventList: clearUnretainedState.deletableEventList, favoriteCount: clearUnretainedState.favoriteCount, showConfirmation: false, showFeedback: false, showProgress: false })}
+              onClick={() => setClearUnretainedState(
+                {
+                  ...state,
+                  deletableEventList: clearUnretainedState.deletableEventList,
+                  favoriteCount: clearUnretainedState.favoriteCount,
+                  showConfirmation: false,
+                  showFeedback: false,
+                  showProgress: false
+                })}
               type="text"
             >
               Cancel
@@ -757,15 +762,29 @@ export default function Events({ path, ...props }) {
               className="ml-2"
               color="red"
               onClick={async (e) => {
-                // const delay = ms => new Promise(res => setTimeout(res, ms));
-                setClearUnretainedState({ ...state, deletableEventList: clearUnretainedState.deletableEventList, favoriteCount: clearUnretainedState.favoriteCount, showConfirmation: false, showFeedback: false, showProgress: true });
+                setClearUnretainedState(
+                  {
+                    ...state,
+                    deletableEventList: clearUnretainedState.deletableEventList,
+                    favoriteCount: clearUnretainedState.favoriteCount,
+                    showConfirmation: false,
+                    showFeedback: false,
+                    showProgress: true
+                  });
+
                 for (let id of clearUnretainedState.deletableEventList) {
-                  console.log("mock deleting event: ", id);
-                  // await delay(20000);
                   await onDelete(e, id, false);
                 }
 
-                setClearUnretainedState({ ...state, deletableEventList: clearUnretainedState.deletableEventList, favoriteCount: clearUnretainedState.favoriteCount, showConfirmation: false, showFeedback: true, showProgress: false });
+                setClearUnretainedState(
+                  {
+                    ...state,
+                    deletableEventList: clearUnretainedState.deletableEventList,
+                    favoriteCount: clearUnretainedState.favoriteCount,
+                    showConfirmation: false,
+                    showFeedback: true,
+                    showProgress: false
+                  });
               }}
               type="text"
             >
