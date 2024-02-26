@@ -124,7 +124,7 @@ export default function PreviewThumbnailPlayer({
           {!imgLoaded && (
             <Skeleton className={`absolute inset-0 w-full h-full`} />
           )}
-          <div className={`${imgLoaded ? "vislble" : "invisible"}`}>
+          <div className={`${imgLoaded ? "visible" : "invisible"}`}>
             <img
               className={`w-full h-full transition-opacity ${
                 playingBack ? "opacity-0" : "opacity-100"
