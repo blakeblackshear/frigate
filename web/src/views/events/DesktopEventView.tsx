@@ -86,6 +86,14 @@ export default function DesktopEventView({
     return current;
   }, [reviewItems, severity]);
 
+  const showMinimap = useMemo(() => {
+    if (!contentRef.current) {
+      return false;
+    }
+
+    return contentRef.current.scrollHeight > contentRef.current.clientHeight
+  }, [contentRef.current?.scrollHeight])
+
   // review interaction
 
   const pagingObserver = useRef<IntersectionObserver | null>();
@@ -310,7 +318,7 @@ export default function DesktopEventView({
             timestampSpread={15}
             timelineStart={timeRange.before}
             timelineEnd={timeRange.after}
-            showMinimap
+            showMinimap={showMinimap}
             minimapStartTime={minimapBounds.start}
             minimapEndTime={minimapBounds.end}
             events={reviewItems.all}
