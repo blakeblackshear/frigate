@@ -262,6 +262,7 @@ export default function DynamicVideoPlayer({
             previewRef.current = player;
             player.pause();
             player.on("seeked", () => controller.finishedSeeking());
+            player.on("loadeddata", () => controller.previewReady())
           }}
           onDispose={() => {
             previewRef.current = undefined;
@@ -291,6 +292,7 @@ export class DynamicVideoController {
   private preview: Preview | undefined = undefined;
   private timeToSeek: number | undefined = undefined;
   private seeking = false;
+  private readyToScrub = true;
 
   constructor(
     playerRef: MutableRefObject<Player | undefined>,
@@ -410,12 +412,17 @@ export class DynamicVideoController {
 
     if (time > this.preview.end) {
       if (this.playerMode == "scrubbing") {
-        this.fireClipEndEvent();
         this.playerMode = "playback";
         this.setScrubbing(false);
         this.timeToSeek = undefined;
         this.seeking = false;
+        this.readyToScrub = false;
+        this.fireClipEndEvent();
       }
+      return;
+    }
+
+    if (!this.readyToScrub) {
       return;
     }
 
@@ -425,10 +432,20 @@ export class DynamicVideoController {
       this.setScrubbing(true);
     }
 
+    console.log(
+      "scrubbing to " +
+        time +
+        " with current seek time " +
+        this.timeToSeek +
+        " and current player time " +
+        this.previewRef.current?.currentTime()
+    );
+
     if (this.seeking) {
       this.timeToSeek = time;
     } else {
-      this.previewRef.current?.currentTime(time - this.preview.start);
+      console.log("player is being seeked to " + Math.max(0, time - this.preview.start))
+      this.previewRef.current?.currentTime(Math.max(0, time - this.preview.start));
       this.seeking = true;
     }
   }
@@ -448,5 +465,11 @@ export class DynamicVideoController {
     } else {
       this.seeking = false;
     }
+  }
+
+  previewReady() {
+    console.log("the preview is ready")
+    this.previewRef.current?.pause()
+    this.readyToScrub = true;
   }
 }
