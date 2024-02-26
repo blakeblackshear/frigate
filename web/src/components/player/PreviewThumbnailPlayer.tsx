@@ -19,6 +19,7 @@ import {
 import { LuCheckSquare, LuFileUp, LuTrash } from "react-icons/lu";
 import axios from "axios";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
+import useImageLoaded from "@/hooks/use-image-loaded";
 import { Skeleton } from "../ui/skeleton";
 
 type PreviewPlayerProps = {
@@ -50,7 +51,7 @@ export default function PreviewThumbnailPlayer({
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>();
   const [playback, setPlayback] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [imgLoaded, setImgLoaded] = useState(false);
+  const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
 
   const playingBack = useMemo(() => playback, [playback, autoPlayback]);
 
@@ -126,6 +127,7 @@ export default function PreviewThumbnailPlayer({
           )}
           <div className={`${imgLoaded ? "visible" : "invisible"}`}>
             <img
+              ref={imgRef}
               className={`w-full h-full transition-opacity ${
                 playingBack ? "opacity-0" : "opacity-100"
               }`}
@@ -135,7 +137,7 @@ export default function PreviewThumbnailPlayer({
               )}`}
               loading="lazy"
               onLoad={() => {
-                setImgLoaded(true);
+                onImgLoad();
               }}
             />
 
