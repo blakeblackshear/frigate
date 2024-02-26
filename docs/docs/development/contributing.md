@@ -155,6 +155,12 @@ cd web && npm install
 cd web && npm run dev
 ```
 
+##### 3a. Run the development server against a non-local instance
+
+To run the development server against a non-local instance, you will need to
+replace the `localhost` values in `vite.config.ts` with the IP address of the
+non-local backend server.
+
 #### 4. Making changes
 
 The Web UI is built using [Vite](https://vitejs.dev/), [Preact](https://preactjs.com), and [Tailwind CSS](https://tailwindcss.com).
