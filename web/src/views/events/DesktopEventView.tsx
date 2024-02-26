@@ -276,8 +276,8 @@ export default function DesktopEventView({
             </div>
           )}
 
-          {currentItems != undefined && currentItems.length == 0 && (
-            <div className="absolute w-full h-full flex flex-col justify-center items-center">
+          {reachedEnd && currentItems == null && (
+            <div className="w-full h-full flex flex-col justify-center items-center">
               <LuFolderCheck className="w-16 h-16" />
               There are no {severity} items to review
             </div>
