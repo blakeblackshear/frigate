@@ -91,8 +91,8 @@ export default function DesktopEventView({
       return false;
     }
 
-    return contentRef.current.scrollHeight > contentRef.current.clientHeight
-  }, [contentRef.current?.scrollHeight])
+    return contentRef.current.scrollHeight > contentRef.current.clientHeight;
+  }, [contentRef.current?.scrollHeight]);
 
   // review interaction
 
@@ -199,8 +199,6 @@ export default function DesktopEventView({
   if (!config) {
     return <ActivityIndicator />;
   }
-
-  console.log("the time range is " + JSON.stringify(timeRange))
 
   return (
     <div className="flex flex-col w-full h-full">
