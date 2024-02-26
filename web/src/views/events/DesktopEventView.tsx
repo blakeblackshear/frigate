@@ -133,7 +133,7 @@ export default function DesktopEventView({
           setMinimap([...visibleTimestamps]);
         });
       },
-      { root: contentRef.current, threshold: 0.5 }
+      { root: contentRef.current, threshold: 0.1 }
     );
 
     return () => {
