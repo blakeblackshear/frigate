@@ -2,7 +2,6 @@ import Providers from "@/context/providers";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Wrapper from "@/components/Wrapper";
 import Sidebar from "@/components/navigation/Sidebar";
-import Header from "@/components/navigation/Header";
 import Live from "@/pages/Live";
 import Export from "@/pages/Export";
 import Storage from "@/pages/Storage";
