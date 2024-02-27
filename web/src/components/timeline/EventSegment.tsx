@@ -237,13 +237,7 @@ export function EventSegment({
   }, [showMinimap, isFirstSegmentInMinimap, events, segmentDuration]);
 
   const segmentClasses = `flex flex-row ${
-    showMinimap
-      ? isInMinimapRange
-        ? "bg-card"
-        : isLastSegmentInMinimap
-          ? ""
-          : "opacity-70"
-      : ""
+    showMinimap ? (isInMinimapRange ? "bg-muted" : "bg-background") : ""
   } ${
     isFirstSegmentInMinimap || isLastSegmentInMinimap
       ? "relative h-2 border-b border-gray-500"
