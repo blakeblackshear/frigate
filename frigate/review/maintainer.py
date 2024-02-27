@@ -143,7 +143,9 @@ class ReviewSegmentMaintainer(threading.Thread):
         self.requestor.send_data(UPSERT_REVIEW_SEGMENT, seg_data)
         self.requestor.send_data(
             "reviews",
-            json.dumps({"type": "end", "review": {k.name: v for k, v in seg_data.items()}}),
+            json.dumps(
+                {"type": "end", "review": {k.name: v for k, v in seg_data.items()}}
+            ),
         )
         self.active_review_segments[segment.camera] = None
 
