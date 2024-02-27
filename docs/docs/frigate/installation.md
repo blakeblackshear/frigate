@@ -240,7 +240,7 @@ There may be other services running on your NAS that are using the same ports th
 
 You need to configure 2 paths:
 
-- The location of your config file in yaml format, this needs to be file and you need to go to the location of where your config.yml is located, this will be different depending on your NAS folder structure e.g. `/docker/frigate/config/config.yml` will mount to `/config/config.yml` within the container.
+- The location of your config directory which will be different depending on your NAS folder structure e.g. `/docker/frigate/config` will mount to `/config` within the container.
 - The location on your NAS where the recordings will be saved this needs to be a folder e.g. `/docker/volumes/frigate-0-media`
 
 ![image](https://user-images.githubusercontent.com/4516296/232585872-44431d15-55e0-4004-b78b-1e512702b911.png)
