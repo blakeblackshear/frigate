@@ -53,7 +53,7 @@
     "react-router-dom": "^6.20.1",
     "react-tracked": "^1.7.11",
     "react-transition-group": "^4.4.5",
-    "react-use-websocket": "^4.5.0",
+    "react-use-websocket": "^4.7.0",
     "recoil": "^0.7.7",
     "sonner": "^1.4.0",
     "sort-by": "^1.2.0",
