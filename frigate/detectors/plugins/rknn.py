@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 DETECTOR_KEY = "rknn"
 
-supported_socs = ["rk3562", "rk3566", "rk3568", "rk3588"]
+supported_socs = ["rk3562", "rk3566", "rk3568", "rk3588", "rk3588s"]
 
 yolov8_suffix = {
     "default-yolov8n": "n",
