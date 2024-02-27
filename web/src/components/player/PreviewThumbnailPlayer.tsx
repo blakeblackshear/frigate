@@ -7,7 +7,12 @@ import { getIconForLabel, getIconForSubLabel } from "@/utils/iconUtil";
 import TimeAgo from "../dynamic/TimeAgo";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { isFirefox, isMobile, isSafari } from "react-device-detect";
+import {
+  isFirefox,
+  isMobile,
+  isMobileSafari,
+  isSafari,
+} from "react-device-detect";
 import Chip from "../Chip";
 import {
   ContextMenu,
@@ -138,9 +143,7 @@ export default function PreviewThumbnailPlayer({
               />
             </div>
           )}
-          {!imgLoaded && (
-            <Skeleton className={`absolute inset-0 w-full h-full`} />
-          )}
+          <PreviewPlaceholder imgLoaded={imgLoaded} />
           <div className={`${imgLoaded ? "visible" : "invisible"}`}>
             <img
               ref={imgRef}
@@ -151,7 +154,7 @@ export default function PreviewThumbnailPlayer({
                 "/media/frigate/",
                 ""
               )}`}
-              loading="lazy"
+              loading={isMobileSafari ? "eager" : "lazy"}
               onLoad={() => {
                 onImgLoad();
               }}
@@ -437,5 +440,17 @@ function PreviewContextItems({
         </div>
       </ContextMenuItem>
     </ContextMenuContent>
+  );
+}
+
+function PreviewPlaceholder({ imgLoaded }: { imgLoaded: boolean }) {
+  if (imgLoaded) {
+    return;
+  }
+
+  return isMobileSafari ? (
+    <div className={`absolute inset-0 bg-gray-300`} />
+  ) : (
+    <Skeleton className={`absolute inset-0`} />
   );
 }
