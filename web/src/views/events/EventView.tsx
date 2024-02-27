@@ -234,12 +234,12 @@ export default function EventView({
           ref={contentRef}
           className="flex flex-1 flex-wrap content-start gap-2 overflow-y-auto no-scrollbar"
         >
-          <NewReviewData
+          {filter?.before == undefined && (<NewReviewData
             className="absolute w-full z-30"
             contentRef={contentRef}
             severity={severity}
             pullLatestData={pullLatestData}
-          />
+          />)}
 
           {reachedEnd && currentItems == null && (
             <div className="size-full flex flex-col justify-center items-center">
