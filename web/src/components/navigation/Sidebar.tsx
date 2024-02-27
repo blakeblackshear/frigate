@@ -5,7 +5,7 @@ import NavItem from "./NavItem";
 
 function Sidebar() {
   return (
-    <aside className="w-[52px] z-10 h-screen sticky top-0 overflow-y-auto scrollbar-hidden py-4 flex flex-col justify-between">
+    <aside className="absolute w-[52px] z-10 left-o inset-y-0 overflow-y-auto scrollbar-hidden py-4 flex flex-col justify-between">
       <span tabIndex={0} className="sr-only" />
       <div className="w-full flex flex-col gap-0 items-center">
         <Logo className="w-8 h-8 mb-6" />

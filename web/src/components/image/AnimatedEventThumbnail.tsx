@@ -41,8 +41,8 @@ export function AnimatedEventThumbnail({ event }: AnimatedEventThumbnailProps) {
             aspectRatio: aspectRatio,
           }}
         >
-          <div className="absolute bottom-0 w-full h-6 bg-gradient-to-t from-slate-900/50 to-transparent rounded">
-            <div className="absolute left-1 bottom-0 text-xs text-white w-full">
+          <div className="absolute bottom-0 inset-x-0 h-6 bg-gradient-to-t from-slate-900/50 to-transparent rounded">
+            <div className="w-full absolute left-1 bottom-0 text-xs text-white">
               <TimeAgo time={event.start_time * 1000} dense />
             </div>
           </div>

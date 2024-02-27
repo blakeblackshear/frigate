@@ -82,11 +82,11 @@ export default function DesktopRecordingView({
         className="absolute left-0 top-0 rounded-lg"
         onClick={() => navigate(-1)}
       >
-        <IoMdArrowRoundBack className="w-5 h-5 mr-[10px]" />
+        <IoMdArrowRoundBack className="size-5 mr-[10px]" />
         Back
       </Button>
 
-      <div className="absolute left-[20%] top-8 right-[20%]">
+      <div className="absolute top-8 inset-x-[20%]">
         <DynamicVideoPlayer
           camera={selectedReview.camera}
           timeRange={timeRange.ranges[selectedRangeIdx]}
@@ -106,7 +106,7 @@ export default function DesktopRecordingView({
         />
       </div>
 
-      <div className="absolute top-0 right-0 bottom-0">
+      <div className="absolute inset-y-0 right-0">
         <EventReviewTimeline
           segmentDuration={30}
           timestampSpread={15}
