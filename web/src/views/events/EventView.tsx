@@ -275,7 +275,7 @@ export default function EventView({
                     data-segment-start={
                       alignDateToTimeline(value.start_time) - segmentDuration
                     }
-                    className="outline outline-offset-1 outline-0 rounded-lg shadow-none transition-all duration-500"
+                    className="outline outline-offset-1 outline-0 rounded-lg shadow-none transition-all duration-500 my-1 md:my-0"
                   >
                     <div className="aspect-video rounded-lg overflow-hidden">
                       <PreviewThumbnailPlayer
