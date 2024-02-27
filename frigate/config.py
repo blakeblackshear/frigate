@@ -50,7 +50,7 @@ DEFAULT_TIME_FORMAT = "%m/%d/%Y %H:%M:%S"
 
 FRIGATE_ENV_VARS = {k: v for k, v in os.environ.items() if k.startswith("FRIGATE_")}
 # read docker secret files as env vars too
-if os.path.isdir("/run/secrets"):
+if os.path.isdir("/run/secrets") and os.access("/run/secrets", os.R_OK):
     for secret_file in os.listdir("/run/secrets"):
         if secret_file.startswith("FRIGATE_"):
             FRIGATE_ENV_VARS[secret_file] = Path(
