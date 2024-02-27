@@ -614,7 +614,7 @@ class FfmpegOutputArgsConfig(FrigateBaseModel):
         default=RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT,
         title="Record role FFmpeg output arguments.",
     )
-    _force_record_hvc1: bool = PrivateAttr()
+    _force_record_hvc1: bool = PrivateAttr(default=False)
 
 
 class FfmpegConfig(FrigateBaseModel):
@@ -881,7 +881,7 @@ class CameraConfig(FrigateBaseModel):
             record_args = get_ffmpeg_arg_list(
                 parse_preset_output_record(
                     self.ffmpeg.output_args.record,
-                    self.ffmpeg.output_args._force_record_hvc1
+                    self.ffmpeg.output_args._force_record_hvc1,
                 )
                 or self.ffmpeg.output_args.record
             )
@@ -1198,6 +1198,8 @@ class FrigateConfig(FrigateBaseModel):
                     # Apple only supports HEVC if it is hvc1 (vs. hev1)
                     camera_config.ffmpeg.output_args._force_record_hvc1 = (
                         stream_info["fourcc"] == "hevc"
+                        if stream_info.get("hevc")
+                        else False
                     )
 
             # Default min_initialized configuration
