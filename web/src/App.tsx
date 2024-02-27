@@ -16,9 +16,6 @@ import { isDesktop, isMobile } from "react-device-detect";
 import Statusbar from "./components/Statusbar";
 import Bottombar from "./components/navigation/Bottombar";
 
-const mobileInsets = "absolute left-0 top-2 right-0 bottom-0 bottom-16"
-const desktopInsets = "absolute left-16 top-16 top-2 right-0 bottom-8"
-
 function App() {
   return (
     <Providers>
@@ -30,7 +27,7 @@ function App() {
             {isMobile && <Bottombar />}
             <div
               id="pageRoot"
-              className={`${isDesktop ? desktopInsets : mobileInsets} overflow-hidden`}
+              className="absolute left-0 md:left-16 top-2 right-0 bottom-16 md:bottom-8 overflow-hidden"
             >
               <Routes>
                 <Route path="/" element={<Live />} />
