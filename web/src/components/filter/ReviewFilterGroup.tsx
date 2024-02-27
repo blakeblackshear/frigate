@@ -15,6 +15,7 @@ import { Calendar } from "../ui/calendar";
 import { ReviewFilter } from "@/types/review";
 import { getEndOfDayTimestamp } from "@/utils/dateUtil";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
+import { isMobile } from "react-device-detect";
 
 const ATTRIBUTES = ["amazon", "face", "fedex", "license_plate", "ups"];
 
@@ -122,11 +123,17 @@ function CamerasFilterButton({
       }}
     >
       <DropdownMenuTrigger asChild>
-        <Button className="mx-1 capitalize" variant="secondary">
-          <LuVideo className=" mr-[10px]" />
-          {selectedCameras == undefined
-            ? "All Cameras"
-            : `${selectedCameras.length} Cameras`}
+        <Button
+          size={isMobile ? "sm" : "default"}
+          className="mx-1 capitalize"
+          variant="secondary"
+        >
+          <LuVideo className="md:mr-[10px]" />
+          <div className="hidden md:block">
+            {selectedCameras == undefined
+              ? "All Cameras"
+              : `${selectedCameras.length} Cameras`}
+          </div>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
@@ -205,9 +212,15 @@ function CalendarFilterButton({
       }}
     >
       <PopoverTrigger asChild>
-        <Button className="mx-1" variant="secondary">
-          <LuCalendar className=" mr-[10px]" />
-          {day == undefined ? "Last 24 Hours" : selectedDate}
+        <Button
+          size={isMobile ? "sm" : "default"}
+          className="mx-1"
+          variant="secondary"
+        >
+          <LuCalendar className="md:mr-[10px]" />
+          <div className="hidden md:block">
+            {day == undefined ? "Last 24 Hours" : selectedDate}
+          </div>
         </Button>
       </PopoverTrigger>
       <PopoverContent>
@@ -241,9 +254,13 @@ function GeneralFilterButton({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button className="mx-1" variant="secondary">
-          <LuFilter className=" mr-[10px]" />
-          Filter
+        <Button
+          size={isMobile ? "sm" : "default"}
+          className="mx-1"
+          variant="secondary"
+        >
+          <LuFilter className="md:mr-[10px]" />
+          <div className="hidden md:block">Filter</div>
         </Button>
       </PopoverTrigger>
       <PopoverContent side="left" asChild>

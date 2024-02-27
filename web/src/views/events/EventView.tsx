@@ -229,9 +229,7 @@ export default function EventView({
             <div className="hidden md:block">Motion</div>
           </ToggleGroupItem>
         </ToggleGroup>
-        {isDesktop && (
-          <ReviewFilterGroup filter={filter} onUpdateFilter={updateFilter} />
-        )}
+        <ReviewFilterGroup filter={filter} onUpdateFilter={updateFilter} />
       </div>
 
       <div className="flex h-full overflow-hidden">
