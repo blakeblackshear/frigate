@@ -94,7 +94,7 @@ export default function DesktopEventView({
     }
 
     return contentRef.current.scrollHeight > contentRef.current.clientHeight;
-  }, [contentRef.current?.scrollHeight]);
+  }, [contentRef.current?.scrollHeight, severity]);
 
   // review interaction
 
