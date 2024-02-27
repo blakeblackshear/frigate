@@ -138,9 +138,7 @@ export default function PreviewThumbnailPlayer({
               />
             </div>
           )}
-          {!imgLoaded && (
-            <Skeleton className={`absolute inset-0 w-full h-full`} />
-          )}
+          <PreviewPlaceholder imgLoaded={imgLoaded} />
           <div className={`${imgLoaded ? "visible" : "invisible"}`}>
             <img
               ref={imgRef}
@@ -151,7 +149,7 @@ export default function PreviewThumbnailPlayer({
                 "/media/frigate/",
                 ""
               )}`}
-              loading="lazy"
+              loading={isSafari ? "eager" : "lazy"}
               onLoad={() => {
                 onImgLoad();
               }}
@@ -437,5 +435,17 @@ function PreviewContextItems({
         </div>
       </ContextMenuItem>
     </ContextMenuContent>
+  );
+}
+
+function PreviewPlaceholder({ imgLoaded }: { imgLoaded: boolean }) {
+  if (imgLoaded) {
+    return;
+  }
+
+  return isSafari ? (
+    <div className={`absolute inset-0 bg-gray-300`} />
+  ) : (
+    <Skeleton className={`absolute inset-0`} />
   );
 }

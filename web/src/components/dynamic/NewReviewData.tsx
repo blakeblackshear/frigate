@@ -39,7 +39,7 @@ export default function NewReviewData({
 
   return (
     <div className={className}>
-      <div className="flex justify-center items-center mr-[100px]">
+      <div className="flex justify-center items-center md:mr-[100px]">
         <Button
           className={`${
             hasUpdate
