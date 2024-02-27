@@ -129,10 +129,6 @@ export default function EventView({
   const [minimap, setMinimap] = useState<string[]>([]);
   const minimapObserver = useRef<IntersectionObserver | null>();
   useEffect(() => {
-    if (!contentRef.current) {
-      return;
-    }
-
     const visibleTimestamps = new Set<string>();
     minimapObserver.current = new IntersectionObserver(
       (entries) => {
@@ -152,7 +148,7 @@ export default function EventView({
           setMinimap([...visibleTimestamps]);
         });
       },
-      { root: contentRef.current, threshold: 0.1 }
+      { root: contentRef.current, threshold: isDesktop ? 0.1 : 0.5 }
     );
 
     return () => {
@@ -171,12 +167,12 @@ export default function EventView({
         // no op
       }
     },
-    [minimapObserver.current]
+    [minimapObserver]
   );
   const minimapBounds = useMemo(() => {
     const data = {
-      start: Math.floor(Date.now() / 1000) - 35 * 60,
-      end: Math.floor(Date.now() / 1000) - 21 * 60,
+      start: 0,
+      end: 0,
     };
     const list = minimap.sort();
 
