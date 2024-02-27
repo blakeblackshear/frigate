@@ -21,6 +21,7 @@ import axios from "axios";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import useImageLoaded from "@/hooks/use-image-loaded";
 import { Skeleton } from "../ui/skeleton";
+import { useSwipeable } from "react-swipeable";
 
 type PreviewPlayerProps = {
   review: ReviewSegment;
@@ -41,7 +42,6 @@ type Preview = {
 export default function PreviewThumbnailPlayer({
   review,
   relevantPreview,
-  autoPlayback = false,
   setReviewed,
   onClick,
 }: PreviewPlayerProps) {
@@ -61,6 +61,13 @@ export default function PreviewThumbnailPlayer({
     }
   }, [review, onClick]);
 
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: () => setPlayback(false),
+    onSwipedRight: () => setPlayback(true),
+    preventScrollOnSwipe: true,
+    
+  });
+
   const handleSetReviewed = useCallback(() => {
     if (setReviewed) {
       setReviewed(review.id);
@@ -69,27 +76,7 @@ export default function PreviewThumbnailPlayer({
 
   // playback
 
-  const playingBack = useMemo(() => playback, [playback, autoPlayback]);
-
-  useEffect(() => {
-    if (!autoPlayback) {
-      setPlayback(false);
-
-      if (hoverTimeout) {
-        clearTimeout(hoverTimeout);
-      }
-      return;
-    }
-
-    const timeout = setTimeout(() => {
-      setPlayback(true);
-      setHoverTimeout(null);
-    }, 500);
-
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [autoPlayback]);
+  const playingBack = useMemo(() => playback, [playback]);
 
   const onPlayback = useCallback(
     (isHovered: Boolean) => {
@@ -127,6 +114,7 @@ export default function PreviewThumbnailPlayer({
           onMouseEnter={isMobile ? undefined : () => onPlayback(true)}
           onMouseLeave={isMobile ? undefined : () => onPlayback(false)}
           onClick={handleOnClick}
+          {...swipeHandlers}
         >
           {playingBack && (
             <div className="absolute left-0 top-0 right-0 bottom-0 animate-in fade-in">

@@ -283,9 +283,6 @@ export default function EventView({
                         relevantPreview={relevantPreview}
                         setReviewed={markItemAsReviewed}
                         onClick={onSelectReview}
-                        autoPlayback={
-                          isMobile && minimapBounds.end == value.start_time
-                        }
                       />
                     </div>
                     {lastRow && !reachedEnd && <ActivityIndicator />}
