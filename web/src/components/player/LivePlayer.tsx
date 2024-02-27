@@ -12,6 +12,7 @@ import useCameraActivity from "@/hooks/use-camera-activity";
 import { useRecordingsState } from "@/api/ws";
 import { LivePlayerMode } from "@/types/live";
 import useCameraLiveMode from "@/hooks/use-camera-live-mode";
+import { isDesktop } from "react-device-detect";
 
 type LivePlayerProps = {
   className?: string;
@@ -153,7 +154,7 @@ export default function LivePlayer({
           className={`bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500`}
         >
           <MdLeakAdd className="w-4 h-4 text-motion" />
-          <div className="ml-1 text-white text-xs">Motion</div>
+          <div className="hidden md:block ml-1 text-white text-xs">Motion</div>
         </Chip>
 
         {cameraConfig.audio.enabled_in_config && (
@@ -162,19 +163,21 @@ export default function LivePlayer({
             className={`bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500`}
           >
             <BsSoundwave className="w-4 h-4 text-audio" />
-            <div className="ml-1 text-white text-xs">Sound</div>
+            <div className="hidden md:block ml-1 text-white text-xs">Sound</div>
           </Chip>
         )}
       </div>
 
-      <Chip className="absolute right-2 top-2 bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500">
-        {recording == "ON" && (
-          <MdCircle className="w-2 h-2 drop-shadow-md shadow-danger text-danger" />
-        )}
-        <div className="ml-1 capitalize text-white text-xs">
-          {cameraConfig.name.replaceAll("_", " ")}
-        </div>
-      </Chip>
+      {isDesktop && (
+        <Chip className="absolute right-2 top-2 bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500">
+          {recording == "ON" && (
+            <MdCircle className="w-2 h-2 drop-shadow-md shadow-danger text-danger" />
+          )}
+          <div className="ml-1 capitalize text-white text-xs">
+            {cameraConfig.name.replaceAll("_", " ")}
+          </div>
+        </Chip>
+      )}
     </div>
   );
 }

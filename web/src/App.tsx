@@ -1,9 +1,7 @@
 import Providers from "@/context/providers";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useState } from "react";
 import Wrapper from "@/components/Wrapper";
-import Sidebar from "@/components/Sidebar";
-import Header from "@/components/Header";
+import Sidebar from "@/components/navigation/Sidebar";
 import Live from "@/pages/Live";
 import Export from "@/pages/Export";
 import Storage from "@/pages/Storage";
@@ -14,27 +12,22 @@ import NoMatch from "@/pages/NoMatch";
 import Settings from "@/pages/Settings";
 import UIPlayground from "./pages/UIPlayground";
 import Events from "./pages/Events";
-import { isDesktop } from "react-device-detect";
+import { isDesktop, isMobile } from "react-device-detect";
 import Statusbar from "./components/Statusbar";
+import Bottombar from "./components/navigation/Bottombar";
 
 function App() {
-  const [sheetOpen, setSheetOpen] = useState(false);
-
-  const toggleNavbar = () => {
-    setSheetOpen((prev) => !prev);
-  };
-
   return (
     <Providers>
       <BrowserRouter>
         <Wrapper>
-          <Header onToggleNavbar={toggleNavbar} />
           <div className="w-full h-full pt-2 overflow-hidden">
-            <Sidebar sheetOpen={sheetOpen} setSheetOpen={setSheetOpen} />
+            {isDesktop && <Sidebar />}
             {isDesktop && <Statusbar />}
+            {isMobile && <Bottombar />}
             <div
               id="pageRoot"
-              className="absolute left-0 md:left-16 top-16 md:top-2 right-0 bottom-0 md:bottom-8 overflow-hidden"
+              className="absolute left-0 md:left-16 top-2 right-0 bottom-16 md:bottom-8 overflow-hidden"
             >
               <Routes>
                 <Route path="/" element={<Live />} />
