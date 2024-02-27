@@ -461,9 +461,18 @@ PRESETS_RECORD_OUTPUT = {
 }
 
 
-def parse_preset_output_record(arg: Any) -> list[str]:
+def parse_preset_output_record(arg: Any, force_record_hvc1: bool) -> list[str]:
     """Return the correct preset if in preset format otherwise return None."""
     if not isinstance(arg, str):
         return None
 
-    return PRESETS_RECORD_OUTPUT.get(arg, None)
+    preset = PRESETS_RECORD_OUTPUT.get(arg, None)
+
+    if not preset:
+        return None
+
+    if force_record_hvc1:
+        # Apple only supports HEVC if it is hvc1 (vs. hev1)
+        preset += ["-tag:v", "hvc1"]
+
+    return preset
