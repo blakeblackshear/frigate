@@ -1,7 +1,16 @@
+import { useApiHost } from "@/api";
 import { useEventUtils } from "@/hooks/use-event-utils";
 import { useSegmentUtils } from "@/hooks/use-segment-utils";
 import { ReviewSegment, ReviewSeverity } from "@/types/review";
-import React, { useEffect, useMemo, useRef } from "react";
+import React, {
+  RefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
+import { Tooltip, TooltipContent } from "../ui/tooltip";
+import { TooltipTrigger } from "@radix-ui/react-tooltip";
 
 type EventSegmentProps = {
   events: ReviewSegment[];
@@ -12,6 +21,7 @@ type EventSegmentProps = {
   minimapStartTime?: number;
   minimapEndTime?: number;
   severityType: ReviewSeverity;
+  contentRef: RefObject<HTMLDivElement>;
 };
 
 type MinimapSegmentProps = {
@@ -131,12 +141,15 @@ export function EventSegment({
   minimapStartTime,
   minimapEndTime,
   severityType,
+  contentRef,
 }: EventSegmentProps) {
   const {
     getSeverity,
     getReviewed,
     displaySeverityType,
     shouldShowRoundedCorners,
+    getEventStart,
+    getEventThumbnail,
   } = useSegmentUtils(segmentDuration, events, severityType);
 
   const { alignDateToTimeline } = useEventUtils(events, segmentDuration);
@@ -145,14 +158,34 @@ export function EventSegment({
     () => getSeverity(segmentTime, displaySeverityType),
     [getSeverity, segmentTime]
   );
+
   const reviewed = useMemo(
     () => getReviewed(segmentTime),
     [getReviewed, segmentTime]
   );
-  const { roundTop, roundBottom } = useMemo(
+
+  const {
+    roundTopPrimary,
+    roundBottomPrimary,
+    roundTopSecondary,
+    roundBottomSecondary,
+  } = useMemo(
     () => shouldShowRoundedCorners(segmentTime),
     [shouldShowRoundedCorners, segmentTime]
   );
+
+  const startTimestamp = useMemo(() => {
+    const eventStart = getEventStart(segmentTime);
+    if (eventStart) {
+      return alignDateToTimeline(eventStart);
+    }
+  }, [getEventStart, segmentTime]);
+
+  const apiHost = useApiHost();
+
+  const eventThumbnail = useMemo(() => {
+    return getEventThumbnail(segmentTime);
+  }, [getEventThumbnail, segmentTime]);
 
   const timestamp = useMemo(() => new Date(segmentTime * 1000), [segmentTime]);
   const segmentKey = useMemo(() => segmentTime, [segmentTime]);
@@ -204,13 +237,7 @@ export function EventSegment({
   }, [showMinimap, isFirstSegmentInMinimap, events, segmentDuration]);
 
   const segmentClasses = `flex flex-row ${
-    showMinimap
-      ? isInMinimapRange
-        ? "bg-card"
-        : isLastSegmentInMinimap
-          ? ""
-          : "opacity-70"
-      : ""
+    showMinimap ? (isInMinimapRange ? "bg-muted" : "bg-background") : ""
   } ${
     isFirstSegmentInMinimap || isLastSegmentInMinimap
       ? "relative h-2 border-b border-gray-500"
@@ -228,6 +255,29 @@ export function EventSegment({
       ? "from-severity_alert-dimmed/50 to-severity_alert/50"
       : "from-severity_alert-dimmed to-severity_alert",
   };
+
+  const segmentClick = useCallback(() => {
+    if (contentRef.current && startTimestamp) {
+      const element = contentRef.current.querySelector(
+        `[data-segment-start="${startTimestamp - segmentDuration}"]`
+      );
+      if (element instanceof HTMLElement) {
+        debounceScrollIntoView(element);
+        element.classList.add(
+          `outline-severity_${severityType}`,
+          `shadow-severity_${severityType}`
+        );
+        element.classList.add("outline-4", "shadow-[0_0_6px_1px]");
+        element.classList.remove("outline-0", "shadow-none");
+
+        // Remove the classes after a short timeout
+        setTimeout(() => {
+          element.classList.remove("outline-4", "shadow-[0_0_6px_1px]");
+          element.classList.add("outline-0", "shadow-none");
+        }, 3000);
+      }
+    }
+  }, [startTimestamp]);
 
   return (
     <div key={segmentKey} className={segmentClasses}>
@@ -257,20 +307,31 @@ export function EventSegment({
       {severity.map((severityValue, index) => (
         <React.Fragment key={index}>
           {severityValue === displaySeverityType && (
-            <div
-              className="mr-3 w-[8px] h-2 flex justify-left items-end"
-              data-severity={severityValue}
-            >
+            <Tooltip delayDuration={300}>
               <div
-                key={`${segmentKey}_${index}_primary_data`}
-                className={`
-            w-full h-2 bg-gradient-to-r
-            ${roundBottom ? "rounded-bl-full rounded-br-full" : ""}
-            ${roundTop ? "rounded-tl-full rounded-tr-full" : ""}
-            ${severityColors[severityValue]}
-          `}
-              ></div>
-            </div>
+                className="mr-3 w-[8px] h-2 flex justify-left items-end"
+                data-severity={severityValue}
+              >
+                <TooltipTrigger asChild>
+                  <div
+                    key={`${segmentKey}_${index}_primary_data`}
+                    className={`
+                      w-full h-2 bg-gradient-to-r
+                      ${roundBottomPrimary ? "rounded-bl-full rounded-br-full" : ""}
+                      ${roundTopPrimary ? "rounded-tl-full rounded-tr-full" : ""}
+                      ${severityColors[severityValue]}
+                    `}
+                    onClick={segmentClick}
+                  ></div>
+                </TooltipTrigger>
+                <TooltipContent className="rounded-2xl" side="left">
+                  <img
+                    className="rounded-lg"
+                    src={`${apiHost}${eventThumbnail.replace("/media/frigate/", "")}`}
+                  />
+                </TooltipContent>
+              </div>
+            </Tooltip>
           )}
 
           {severityValue !== displaySeverityType && (
@@ -278,11 +339,11 @@ export function EventSegment({
               <div
                 key={`${segmentKey}_${index}_secondary_data`}
                 className={`
-            w-1 h-2 bg-gradient-to-r
-            ${roundBottom ? "rounded-bl-full rounded-br-full" : ""}
-            ${roundTop ? "rounded-tl-full rounded-tr-full" : ""}
-            ${severityColors[severityValue]}
-          `}
+                  w-1 h-2 bg-gradient-to-r
+                  ${roundBottomSecondary ? "rounded-bl-full rounded-br-full" : ""}
+                  ${roundTopSecondary ? "rounded-tl-full rounded-tr-full" : ""}
+                  ${severityColors[severityValue]}
+                `}
               ></div>
             </div>
           )}

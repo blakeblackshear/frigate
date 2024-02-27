@@ -7,6 +7,11 @@ module.exports = {
     "./app/**/*.{ts,tsx}",
     "./src/**/*.{ts,tsx}",
   ],
+  safelist: [
+    {
+      pattern: /(outline|shadow)-severity_(alert|detection|motion)/,
+    },
+  ],
   theme: {
     container: {
       center: true,

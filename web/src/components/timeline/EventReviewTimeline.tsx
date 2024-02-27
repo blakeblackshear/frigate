@@ -10,6 +10,7 @@ import {
 import EventSegment from "./EventSegment";
 import { useEventUtils } from "@/hooks/use-event-utils";
 import { ReviewSegment, ReviewSeverity } from "@/types/review";
+import { TooltipProvider } from "../ui/tooltip";
 
 export type EventReviewTimelineProps = {
   segmentDuration: number;
@@ -102,7 +103,7 @@ export function EventReviewTimeline({
 
       return (
         <EventSegment
-          key={segmentTime}
+          key={segmentTime + severityType}
           events={events}
           segmentDuration={segmentDuration}
           segmentTime={segmentTime}
@@ -111,6 +112,7 @@ export function EventReviewTimeline({
           minimapStartTime={minimapStartTime}
           minimapEndTime={minimapEndTime}
           severityType={severityType}
+          contentRef={contentRef}
         />
       );
     });
@@ -122,6 +124,7 @@ export function EventReviewTimeline({
     showMinimap,
     minimapStartTime,
     minimapEndTime,
+    events,
   ]);
 
   const segments = useMemo(
@@ -210,39 +213,44 @@ export function EventReviewTimeline({
   ]);
 
   return (
-    <div
-      ref={timelineRef}
-      className={`relative w-[120px] md:w-[100px] h-full overflow-y-scroll no-scrollbar bg-secondary ${
-        isDragging && showHandlebar ? "cursor-grabbing" : "cursor-auto"
-      }`}
-    >
-      <div className="flex flex-col">{segments}</div>
-      {showHandlebar && (
-        <div className={`absolute left-0 top-0 z-20 w-full `} role="scrollbar">
-          <div className={`flex items-center justify-center `}>
-            <div
-              ref={scrollTimeRef}
-              className={`relative w-full ${
-                isDragging ? "cursor-grabbing" : "cursor-grab"
-              }`}
-              onMouseDown={handleMouseDown}
-            >
+    <TooltipProvider skipDelayDuration={3000}>
+      <div
+        ref={timelineRef}
+        className={`relative w-[120px] md:w-[100px] h-full overflow-y-scroll no-scrollbar bg-secondary ${
+          isDragging && showHandlebar ? "cursor-grabbing" : "cursor-auto"
+        }`}
+      >
+        <div className="flex flex-col">{segments}</div>
+        {showHandlebar && (
+          <div
+            className={`absolute left-0 top-0 z-20 w-full `}
+            role="scrollbar"
+          >
+            <div className={`flex items-center justify-center `}>
               <div
-                className={`bg-destructive rounded-full mx-auto ${
-                  segmentDuration < 60 ? "w-20" : "w-16"
-                } h-5 flex items-center justify-center`}
+                ref={scrollTimeRef}
+                className={`relative w-full ${
+                  isDragging ? "cursor-grabbing" : "cursor-grab"
+                }`}
+                onMouseDown={handleMouseDown}
               >
                 <div
-                  ref={currentTimeRef}
-                  className="text-white text-xs z-10"
-                ></div>
+                  className={`bg-destructive rounded-full mx-auto ${
+                    segmentDuration < 60 ? "w-20" : "w-16"
+                  } h-5 flex items-center justify-center`}
+                >
+                  <div
+                    ref={currentTimeRef}
+                    className="text-white text-xs z-10"
+                  ></div>
+                </div>
+                <div className="absolute h-1 w-full bg-destructive top-1/2 transform -translate-y-1/2"></div>
               </div>
-              <div className="absolute h-1 w-full bg-destructive top-1/2 transform -translate-y-1/2"></div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </TooltipProvider>
   );
 }
 

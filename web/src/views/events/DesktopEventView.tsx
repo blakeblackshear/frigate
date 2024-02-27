@@ -4,6 +4,7 @@ import PreviewThumbnailPlayer from "@/components/player/PreviewThumbnailPlayer";
 import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
 import ActivityIndicator from "@/components/ui/activity-indicator";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { useEventUtils } from "@/hooks/use-event-utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { ReviewFilter, ReviewSegment, ReviewSeverity } from "@/types/review";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -43,6 +44,7 @@ export default function DesktopEventView({
 }: DesktopEventViewProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
   const contentRef = useRef<HTMLDivElement | null>(null);
+  const segmentDuration = 60;
 
   // review paging
 
@@ -77,6 +79,11 @@ export default function DesktopEventView({
       significant_motion: motion,
     };
   }, [reviewPages]);
+
+  const { alignDateToTimeline } = useEventUtils(
+    reviewItems.all,
+    segmentDuration
+  );
 
   const currentItems = useMemo(() => {
     const current = reviewItems[severity];
@@ -245,7 +252,10 @@ export default function DesktopEventView({
             </div>
           )}
 
-          <div className="w-full mr-4 md:grid md:grid-cols-3 3xl:grid-cols-4 gap-4">
+          <div
+            className="w-full mx-2 my-2 md:grid md:grid-cols-3 3xl:grid-cols-4 gap-4"
+            ref={contentRef}
+          >
             {currentItems ? (
               currentItems.map((value, segIdx) => {
                 const lastRow = segIdx == reviewItems[severity].length - 1;
@@ -263,6 +273,10 @@ export default function DesktopEventView({
                     key={value.id}
                     ref={lastRow ? lastReviewRef : minimapRef}
                     data-start={value.start_time}
+                    data-segment-start={
+                      alignDateToTimeline(value.start_time) - segmentDuration
+                    }
+                    className="outline outline-offset-1 outline-0 rounded-lg shadow-none transition-all duration-500"
                   >
                     <div className="aspect-video rounded-lg overflow-hidden">
                       <PreviewThumbnailPlayer
@@ -281,9 +295,9 @@ export default function DesktopEventView({
             )}
           </div>
         </div>
-        <div className="md:w-[100px] overflow-y-auto no-scrollbar">
+        <div className="md:w-[100px] mt-2 overflow-y-auto no-scrollbar">
           <EventReviewTimeline
-            segmentDuration={60}
+            segmentDuration={segmentDuration}
             timestampSpread={15}
             timelineStart={timeRange.before}
             timelineEnd={timeRange.after}

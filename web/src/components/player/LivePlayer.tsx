@@ -126,7 +126,7 @@ export default function LivePlayer({
     <div
       className={`relative flex justify-center w-full outline ${
         activeTracking
-          ? "outline-destructive outline-1 rounded-2xl shadow-[0_0_6px_1px] shadow-destructive"
+          ? "outline-severity_alert outline-1 rounded-2xl shadow-[0_0_6px_1px] shadow-severity_alert"
           : "outline-0"
       } transition-all duration-500 ${className}`}
     >
