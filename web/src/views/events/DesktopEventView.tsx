@@ -18,7 +18,9 @@ type DesktopEventViewProps = {
   reachedEnd: boolean;
   isValidating: boolean;
   filter?: ReviewFilter;
+  severity: ReviewSeverity;
   hasUpdate: boolean;
+  setSeverity: (severity: ReviewSeverity) => void;
   setHasUpdate: (hasUpdated: boolean) => void;
   loadNextPage: () => void;
   markItemAsReviewed: (reviewId: string) => void;
@@ -33,7 +35,9 @@ export default function DesktopEventView({
   reachedEnd,
   isValidating,
   filter,
+  severity,
   hasUpdate,
+  setSeverity,
   setHasUpdate,
   loadNextPage,
   markItemAsReviewed,
@@ -42,7 +46,6 @@ export default function DesktopEventView({
   updateFilter,
 }: DesktopEventViewProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
-  const [severity, setSeverity] = useState<ReviewSeverity>("alert");
   const contentRef = useRef<HTMLDivElement | null>(null);
 
   // review paging

@@ -1,7 +1,7 @@
-import { useFrigateEvents } from "@/api/ws";
+import { useFrigateReviews } from "@/api/ws";
 import useApiFilter from "@/hooks/use-api-filter";
 import useOverlayState from "@/hooks/use-overlay-state";
-import { ReviewFilter, ReviewSegment } from "@/types/review";
+import { ReviewFilter, ReviewSegment, ReviewSeverity } from "@/types/review";
 import DesktopEventView from "@/views/events/DesktopEventView";
 import DesktopRecordingView from "@/views/events/DesktopRecordingView";
 import MobileEventView from "@/views/events/MobileEventView";
@@ -15,6 +15,8 @@ const API_LIMIT = 250;
 
 export default function Events() {
   // recordings viewer
+
+  const [severity, setSeverity] = useState<ReviewSeverity>("alert");
   const [selectedReviewId, setSelectedReviewId] = useOverlayState("review");
 
   // review filter
@@ -96,6 +98,11 @@ export default function Events() {
   const onLoadNextPage = useCallback(() => {
     setSize(size + 1);
   }, [size]);
+
+  const reloadData = useCallback(() => {
+    setSize(1);
+    updateSegments();
+  }, [])
 
   // preview videos
 
@@ -196,22 +203,21 @@ export default function Events() {
 
   // review updates
 
-  const { payload: eventUpdate } = useFrigateEvents();
+  const { payload: reviewUpdate } = useFrigateReviews();
   const [hasUpdate, setHasUpdate] = useState(false);
   useEffect(() => {
-    if (!eventUpdate) {
+    if (!reviewUpdate || hasUpdate) {
       return;
     }
 
-    // if event is ended and was saved, update events list
     if (
-      eventUpdate.type == "end" &&
-      (eventUpdate.after.has_clip || eventUpdate.after.has_snapshot)
+      reviewUpdate.type == "end" &&
+      reviewUpdate.review.severity == severity
     ) {
       setHasUpdate(true);
       return;
     }
-  }, [eventUpdate]);
+  }, [reviewUpdate]);
 
   if (selectedData) {
     return (
@@ -229,11 +235,13 @@ export default function Events() {
           relevantPreviews={allPreviews}
           reachedEnd={isDone}
           isValidating={isValidating}
+          severity={severity}
           hasUpdate={hasUpdate}
+          setSeverity={setSeverity}
           setHasUpdate={setHasUpdate}
           loadNextPage={onLoadNextPage}
           markItemAsReviewed={markItemAsReviewed}
-          pullLatestData={updateSegments}
+          pullLatestData={reloadData}
         />
       );
     }
@@ -246,12 +254,14 @@ export default function Events() {
         reachedEnd={isDone}
         isValidating={isValidating}
         filter={reviewFilter}
+        severity={severity}
         hasUpdate={hasUpdate}
+        setSeverity={setSeverity}
         setHasUpdate={setHasUpdate}
         loadNextPage={onLoadNextPage}
         markItemAsReviewed={markItemAsReviewed}
         onSelectReview={setSelectedReviewId}
-        pullLatestData={updateSegments}
+        pullLatestData={reloadData}
         updateFilter={onUpdateFilter}
       />
     );

@@ -1,5 +1,6 @@
 """Maintain review segments in db."""
 
+import json
 import logging
 import os
 import random
@@ -138,7 +139,14 @@ class ReviewSegmentMaintainer(threading.Thread):
 
     def end_segment(self, segment: PendingReviewSegment) -> None:
         """End segment."""
-        self.requestor.send_data(UPSERT_REVIEW_SEGMENT, segment.end())
+        seg_data = segment.end()
+        self.requestor.send_data(UPSERT_REVIEW_SEGMENT, seg_data)
+        self.requestor.send_data(
+            "reviews",
+            json.dumps(
+                {"type": "end", "review": {k.name: v for k, v in seg_data.items()}}
+            ),
+        )
         self.active_review_segments[segment.camera] = None
 
     def update_existing_segment(

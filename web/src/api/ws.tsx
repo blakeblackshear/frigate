@@ -10,7 +10,7 @@ import {
 import { produce, Draft } from "immer";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { FrigateEvent, ToggleableSetting } from "@/types/ws";
+import { FrigateEvent, FrigateReview, ToggleableSetting } from "@/types/ws";
 import { FrigateStats } from "@/types/stats";
 
 type ReducerState = {
@@ -218,7 +218,14 @@ export function useRestart(): {
 export function useFrigateEvents(): { payload: FrigateEvent } {
   const {
     value: { payload },
-  } = useWs(`events`, "");
+  } = useWs("events", "");
+  return { payload };
+}
+
+export function useFrigateReviews(): { payload: FrigateReview } {
+  const {
+    value: { payload },
+  } = useWs("reviews", "");
   return { payload };
 }
 
