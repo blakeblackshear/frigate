@@ -1304,7 +1304,7 @@ class FrigateConfig(FrigateBaseModel):
                     model.width != schema["width"]["default"]
                     or model.height != schema["height"]["default"]
                     or model.labelmap_path is not None
-                    or model.labelmap is not {}
+                    or model.labelmap
                     or model.input_tensor != schema["input_tensor"]["default"]
                     or model.input_pixel_format
                     != schema["input_pixel_format"]["default"]
