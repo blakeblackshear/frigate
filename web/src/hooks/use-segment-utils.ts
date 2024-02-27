@@ -84,7 +84,14 @@ export const useSegmentUtils = (
   );
 
   const shouldShowRoundedCorners = useCallback(
-    (segmentTime: number): { roundTop: boolean; roundBottom: boolean } => {
+    (
+      segmentTime: number
+    ): {
+      roundTopPrimary: boolean;
+      roundBottomPrimary: boolean;
+      roundTopSecondary: boolean;
+      roundBottomSecondary: boolean;
+    } => {
       const prevSegmentTime = segmentTime - segmentDuration;
       const nextSegmentTime = segmentTime + segmentDuration;
 
@@ -134,23 +141,26 @@ export const useSegmentUtils = (
         );
       });
 
-      let roundTop = false;
-      let roundBottom = false;
+      let roundTopPrimary = false;
+      let roundBottomPrimary = false;
+      let roundTopSecondary = false;
+      let roundBottomSecondary = false;
 
       if (hasOverlappingSeverityEvent) {
-        roundBottom = !hasPrevSeverityEvent;
-        roundTop = !hasNextSeverityEvent;
-      } else if (hasOverlappingOtherEvent) {
-        roundBottom = !hasPrevOtherEvent;
-        roundTop = !hasNextOtherEvent;
-      } else {
-        roundTop = !hasNextSeverityEvent || !hasNextOtherEvent;
-        roundBottom = !hasPrevSeverityEvent || !hasPrevOtherEvent;
+        roundBottomPrimary = !hasPrevSeverityEvent;
+        roundTopPrimary = !hasNextSeverityEvent;
+      }
+
+      if (hasOverlappingOtherEvent) {
+        roundBottomSecondary = !hasPrevOtherEvent;
+        roundTopSecondary = !hasNextOtherEvent;
       }
 
       return {
-        roundTop,
-        roundBottom,
+        roundTopPrimary,
+        roundBottomPrimary,
+        roundTopSecondary,
+        roundBottomSecondary,
       };
     },
     [events, getSegmentStart, getSegmentEnd, segmentDuration, severityType]
@@ -171,6 +181,21 @@ export const useSegmentUtils = (
     [events, getSegmentStart, getSegmentEnd, severityType]
   );
 
+  const getEventThumbnail = useCallback(
+    (time: number): string => {
+      const matchingEvent = events.find((event) => {
+        return (
+          time >= getSegmentStart(event.start_time) &&
+          time < getSegmentEnd(event.end_time) &&
+          event.severity == severityType
+        );
+      });
+
+      return matchingEvent?.thumb_path ?? "";
+    },
+    [events, getSegmentStart, getSegmentEnd, severityType]
+  );
+
   return {
     getSegmentStart,
     getSegmentEnd,
@@ -179,5 +204,6 @@ export const useSegmentUtils = (
     getReviewed,
     shouldShowRoundedCorners,
     getEventStart,
+    getEventThumbnail
   };
 };
