@@ -7,12 +7,7 @@ import { getIconForLabel, getIconForSubLabel } from "@/utils/iconUtil";
 import TimeAgo from "../dynamic/TimeAgo";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
-import {
-  isFirefox,
-  isMobile,
-  isMobileSafari,
-  isSafari,
-} from "react-device-detect";
+import { isFirefox, isMobile, isSafari } from "react-device-detect";
 import Chip from "../Chip";
 import {
   ContextMenu,
@@ -154,7 +149,7 @@ export default function PreviewThumbnailPlayer({
                 "/media/frigate/",
                 ""
               )}`}
-              loading={isMobileSafari ? "eager" : "lazy"}
+              loading={isSafari ? "eager" : "lazy"}
               onLoad={() => {
                 onImgLoad();
               }}
@@ -448,7 +443,7 @@ function PreviewPlaceholder({ imgLoaded }: { imgLoaded: boolean }) {
     return;
   }
 
-  return isMobileSafari ? (
+  return isSafari ? (
     <div className={`absolute inset-0 bg-gray-300`} />
   ) : (
     <Skeleton className={`absolute inset-0`} />
