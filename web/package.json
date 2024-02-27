@@ -35,7 +35,7 @@
     "apexcharts": "^3.45.1",
     "axios": "^1.6.2",
     "class-variance-authority": "^0.7.0",
-    "clsx": "^2.0.0",
+    "clsx": "^2.1.0",
     "copy-to-clipboard": "^3.3.3",
     "date-fns": "^2.30.0",
     "idb-keyval": "^6.2.1",
