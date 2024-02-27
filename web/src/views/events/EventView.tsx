@@ -1,3 +1,4 @@
+import Logo from "@/components/Logo";
 import NewReviewData from "@/components/dynamic/NewReviewData";
 import ReviewFilterGroup from "@/components/filter/ReviewFilterGroup";
 import PreviewThumbnailPlayer from "@/components/player/PreviewThumbnailPlayer";
@@ -8,11 +9,12 @@ import { useEventUtils } from "@/hooks/use-event-utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { ReviewFilter, ReviewSegment, ReviewSeverity } from "@/types/review";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { isDesktop, isMobile } from "react-device-detect";
 import { LuFolderCheck } from "react-icons/lu";
 import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
 
-type DesktopEventViewProps = {
+type EventViewProps = {
   reviewPages?: ReviewSegment[][];
   relevantPreviews?: Preview[];
   timeRange: { before: number; after: number };
@@ -27,7 +29,7 @@ type DesktopEventViewProps = {
   pullLatestData: () => void;
   updateFilter: (filter: ReviewFilter) => void;
 };
-export default function DesktopEventView({
+export default function EventView({
   reviewPages,
   relevantPreviews,
   timeRange,
@@ -41,7 +43,7 @@ export default function DesktopEventView({
   onSelectReview,
   pullLatestData,
   updateFilter,
-}: DesktopEventViewProps) {
+}: EventViewProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
   const contentRef = useRef<HTMLDivElement | null>(null);
   const segmentDuration = 60;
@@ -192,7 +194,8 @@ export default function DesktopEventView({
 
   return (
     <div className="flex flex-col w-full h-full">
-      <div className="flex justify-between mb-2">
+      <div className="relative flex justify-between mb-2">
+        <Logo className="absolute inset-y-0 inset-x-1/2 -translate-x-1/2 h-8" />
         <ToggleGroup
           type="single"
           defaultValue="alert"
@@ -206,8 +209,8 @@ export default function DesktopEventView({
             value="alert"
             aria-label="Select alerts"
           >
-            <MdCircle className="w-2 h-2 mr-[10px] text-severity_alert" />
-            Alerts
+            <MdCircle className="w-2 h-2 md:mr-[10px] text-severity_alert" />
+            <div className="hidden md:block">Alerts</div>
           </ToggleGroupItem>
           <ToggleGroupItem
             className={`px-3 py-4 rounded-2xl ${
@@ -216,8 +219,8 @@ export default function DesktopEventView({
             value="detection"
             aria-label="Select detections"
           >
-            <MdCircle className="w-2 h-2 mr-[10px] text-severity_detection" />
-            Detections
+            <MdCircle className="w-2 h-2 md:mr-[10px] text-severity_detection" />
+            <div className="hidden md:block">Detections</div>
           </ToggleGroupItem>
           <ToggleGroupItem
             className={`px-3 py-4 rounded-2xl ${
@@ -226,11 +229,13 @@ export default function DesktopEventView({
             value="significant_motion"
             aria-label="Select motion"
           >
-            <MdCircle className="w-2 h-2 mr-[10px] text-severity_motion" />
-            Motion
+            <MdCircle className="w-2 h-2 md:mr-[10px] text-severity_motion" />
+            <div className="hidden md:block">Motion</div>
           </ToggleGroupItem>
         </ToggleGroup>
-        <ReviewFilterGroup filter={filter} onUpdateFilter={updateFilter} />
+        {isDesktop && (
+          <ReviewFilterGroup filter={filter} onUpdateFilter={updateFilter} />
+        )}
       </div>
 
       <div className="flex h-full overflow-hidden">
@@ -284,6 +289,9 @@ export default function DesktopEventView({
                         relevantPreview={relevantPreview}
                         setReviewed={markItemAsReviewed}
                         onClick={onSelectReview}
+                        autoPlayback={
+                          isMobile && minimapBounds.end == value.start_time
+                        }
                       />
                     </div>
                     {lastRow && !reachedEnd && <ActivityIndicator />}
@@ -295,7 +303,7 @@ export default function DesktopEventView({
             )}
           </div>
         </div>
-        <div className="md:w-[100px] mt-2 overflow-y-auto no-scrollbar">
+        <div className="w-[44px] md:w-[100px] mt-2 overflow-y-auto no-scrollbar">
           <EventReviewTimeline
             segmentDuration={segmentDuration}
             timestampSpread={15}

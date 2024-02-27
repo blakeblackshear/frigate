@@ -9,8 +9,7 @@ import { Event as FrigateEvent } from "@/types/event";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { isDesktop, isMobile, isSafari } from "react-device-detect";
-import { LuGrid } from "react-icons/lu";
-import { CiGrid2V, CiGrid31 } from "react-icons/ci";
+import { CiGrid2H, CiGrid31 } from "react-icons/ci";
 import useSWR from "swr";
 
 function Live() {
@@ -92,7 +91,7 @@ function Live() {
     <div className="w-full h-full overflow-y-scroll px-2">
       {isMobile && (
         <div className="relative h-9 flex items-center justify-between">
-          <Logo className="absolute w-full h-8" />
+          <Logo className="absolute inset-y-0 inset-x-1/2 -translate-x-1/2 h-8" />
           <div />
           <div className="flex items-center gap-1">
             <Button
@@ -109,7 +108,7 @@ function Live() {
               variant="secondary"
               onClick={() => setLayout("list")}
             >
-              <CiGrid2V className="m-1" />
+              <CiGrid2H className="m-1" />
             </Button>
           </div>
         </div>
@@ -129,7 +128,7 @@ function Live() {
       )}
 
       <div
-        className={`mt-4 grid ${layout == "grid" ? "grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4" : ""} gap-4`}
+        className={`mt-4 grid ${layout == "grid" ? "grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4" : ""} gap-2 md:gap-4`}
       >
         {cameras.map((camera) => {
           let grow;

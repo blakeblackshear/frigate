@@ -1,12 +1,10 @@
 import useApiFilter from "@/hooks/use-api-filter";
 import useOverlayState from "@/hooks/use-overlay-state";
 import { ReviewFilter, ReviewSegment, ReviewSeverity } from "@/types/review";
-import DesktopEventView from "@/views/events/DesktopEventView";
 import DesktopRecordingView from "@/views/events/DesktopRecordingView";
-import MobileEventView from "@/views/events/MobileEventView";
+import EventView from "@/views/events/EventView";
 import axios from "axios";
 import { useCallback, useMemo, useState } from "react";
-import { isMobile } from "react-device-detect";
 import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
 
@@ -209,24 +207,8 @@ export default function Events() {
       />
     );
   } else {
-    if (isMobile) {
-      return (
-        <MobileEventView
-          reviewPages={reviewPages}
-          relevantPreviews={allPreviews}
-          reachedEnd={isDone}
-          isValidating={isValidating}
-          severity={severity}
-          setSeverity={setSeverity}
-          loadNextPage={onLoadNextPage}
-          markItemAsReviewed={markItemAsReviewed}
-          pullLatestData={reloadData}
-        />
-      );
-    }
-
     return (
-      <DesktopEventView
+      <EventView
         reviewPages={reviewPages}
         relevantPreviews={allPreviews}
         timeRange={selectedTimeRange}
