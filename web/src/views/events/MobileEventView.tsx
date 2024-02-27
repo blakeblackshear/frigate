@@ -101,10 +101,6 @@ export default function MobileEventView({
   const [minimap, setMinimap] = useState<string[]>([]);
   const minimapObserver = useRef<IntersectionObserver | null>();
   useEffect(() => {
-    if (!contentRef.current) {
-      return;
-    }
-
     const visibleTimestamps = new Set<string>();
     minimapObserver.current = new IntersectionObserver(
       (entries) => {
@@ -130,7 +126,7 @@ export default function MobileEventView({
     return () => {
       minimapObserver.current?.disconnect();
     };
-  }, [contentRef]);
+  }, []);
   const minimapRef = useCallback(
     (node: HTMLElement | null) => {
       if (!minimapObserver.current) {
@@ -147,8 +143,8 @@ export default function MobileEventView({
   );
   const minimapBounds = useMemo(() => {
     const data = {
-      start: Math.floor(Date.now() / 1000) - 35 * 60,
-      end: Math.floor(Date.now() / 1000) - 21 * 60,
+      start: 0,
+      end: 0,
     };
     const list = minimap.sort();
 
@@ -217,7 +213,7 @@ export default function MobileEventView({
       >
         {currentItems ? (
           currentItems.map((value, segIdx) => {
-            const lastRow = segIdx == reviewItems[severity].length - 1;
+            const lastRow = segIdx == currentItems.length - 1;
             const relevantPreview = Object.values(relevantPreviews || []).find(
               (preview) =>
                 preview.camera == value.camera &&
