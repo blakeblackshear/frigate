@@ -1,4 +1,3 @@
-import { useFrigateReviews } from "@/api/ws";
 import useApiFilter from "@/hooks/use-api-filter";
 import useOverlayState from "@/hooks/use-overlay-state";
 import { ReviewFilter, ReviewSegment, ReviewSeverity } from "@/types/review";
@@ -6,7 +5,7 @@ import DesktopEventView from "@/views/events/DesktopEventView";
 import DesktopRecordingView from "@/views/events/DesktopRecordingView";
 import MobileEventView from "@/views/events/MobileEventView";
 import axios from "axios";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { isMobile } from "react-device-detect";
 import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
@@ -102,7 +101,7 @@ export default function Events() {
   const reloadData = useCallback(() => {
     setSize(1);
     updateSegments();
-  }, [])
+  }, []);
 
   // preview videos
 
@@ -201,24 +200,6 @@ export default function Events() {
     };
   }, [selectedReviewId, reviewPages]);
 
-  // review updates
-
-  const { payload: reviewUpdate } = useFrigateReviews();
-  const [hasUpdate, setHasUpdate] = useState(false);
-  useEffect(() => {
-    if (!reviewUpdate || hasUpdate) {
-      return;
-    }
-
-    if (
-      reviewUpdate.type == "end" &&
-      reviewUpdate.review.severity == severity
-    ) {
-      setHasUpdate(true);
-      return;
-    }
-  }, [reviewUpdate]);
-
   if (selectedData) {
     return (
       <DesktopRecordingView
@@ -236,9 +217,7 @@ export default function Events() {
           reachedEnd={isDone}
           isValidating={isValidating}
           severity={severity}
-          hasUpdate={hasUpdate}
           setSeverity={setSeverity}
-          setHasUpdate={setHasUpdate}
           loadNextPage={onLoadNextPage}
           markItemAsReviewed={markItemAsReviewed}
           pullLatestData={reloadData}
@@ -255,9 +234,7 @@ export default function Events() {
         isValidating={isValidating}
         filter={reviewFilter}
         severity={severity}
-        hasUpdate={hasUpdate}
         setSeverity={setSeverity}
-        setHasUpdate={setHasUpdate}
         loadNextPage={onLoadNextPage}
         markItemAsReviewed={markItemAsReviewed}
         onSelectReview={setSelectedReviewId}

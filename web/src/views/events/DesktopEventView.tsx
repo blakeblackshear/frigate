@@ -1,13 +1,13 @@
+import NewReviewData from "@/components/dynamic/NewReviewData";
 import ReviewFilterGroup from "@/components/filter/ReviewFilterGroup";
 import PreviewThumbnailPlayer from "@/components/player/PreviewThumbnailPlayer";
 import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
 import ActivityIndicator from "@/components/ui/activity-indicator";
-import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { ReviewFilter, ReviewSegment, ReviewSeverity } from "@/types/review";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { LuFolderCheck, LuRefreshCcw } from "react-icons/lu";
+import { LuFolderCheck } from "react-icons/lu";
 import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
 
@@ -19,9 +19,7 @@ type DesktopEventViewProps = {
   isValidating: boolean;
   filter?: ReviewFilter;
   severity: ReviewSeverity;
-  hasUpdate: boolean;
   setSeverity: (severity: ReviewSeverity) => void;
-  setHasUpdate: (hasUpdated: boolean) => void;
   loadNextPage: () => void;
   markItemAsReviewed: (reviewId: string) => void;
   onSelectReview: (reviewId: string) => void;
@@ -36,9 +34,7 @@ export default function DesktopEventView({
   isValidating,
   filter,
   severity,
-  hasUpdate,
   setSeverity,
-  setHasUpdate,
   loadNextPage,
   markItemAsReviewed,
   onSelectReview,
@@ -98,7 +94,7 @@ export default function DesktopEventView({
     }
 
     return contentRef.current.scrollHeight > contentRef.current.clientHeight;
-  }, [contentRef.current?.scrollHeight]);
+  }, [contentRef.current?.scrollHeight, severity]);
 
   // review interaction
 
@@ -235,33 +231,12 @@ export default function DesktopEventView({
           ref={contentRef}
           className="flex flex-1 flex-wrap content-start gap-2 overflow-y-auto no-scrollbar"
         >
-          {hasUpdate && (
-            <div className="absolute w-full z-30">
-              <div className="flex justify-center items-center mr-[100px]">
-                <Button
-                  className={`${
-                    hasUpdate
-                      ? "animate-in slide-in-from-top duration-500"
-                      : "invisible"
-                  }  text-center mt-5 mx-auto bg-gray-400 text-white`}
-                  variant="secondary"
-                  onClick={() => {
-                    setHasUpdate(false);
-                    pullLatestData();
-                    if (contentRef.current) {
-                      contentRef.current.scrollTo({
-                        top: 0,
-                        behavior: "smooth",
-                      });
-                    }
-                  }}
-                >
-                  <LuRefreshCcw className="w-4 h-4 mr-2" />
-                  New Items To Review
-                </Button>
-              </div>
-            </div>
-          )}
+          <NewReviewData
+            className="absolute w-full z-30"
+            contentRef={contentRef}
+            severity={severity}
+            pullLatestData={pullLatestData}
+          />
 
           {reachedEnd && currentItems == null && (
             <div className="w-full h-full flex flex-col justify-center items-center">
