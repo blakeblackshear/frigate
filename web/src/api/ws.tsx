@@ -1,149 +1,104 @@
 import { baseUrl } from "./baseUrl";
-import {
-  ReactNode,
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useReducer,
-} from "react";
-import { produce, Draft } from "immer";
+import { useCallback, useEffect, useState } from "react";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { FrigateEvent, FrigateReview, ToggleableSetting } from "@/types/ws";
 import { FrigateStats } from "@/types/stats";
+import useSWR from "swr";
+import { createContainer } from "react-tracked";
 
-type ReducerState = {
-  [topic: string]: {
-    lastUpdate: number;
-    payload: any;
-    retain: boolean;
-  };
-};
-
-type ReducerAction = {
+type Update = {
   topic: string;
   payload: any;
   retain: boolean;
 };
 
-const initialState: ReducerState = {
-  _initial_state: {
-    lastUpdate: 0,
-    payload: "",
-    retain: false,
-  },
+type WsState = {
+  [topic: string]: any;
 };
 
-type WebSocketContextProps = {
-  state: ReducerState;
-  readyState: ReadyState;
-  sendJsonMessage: (message: any) => void;
-};
+type useValueReturn = [WsState, (update: Update) => void];
 
-export const WS = createContext<WebSocketContextProps>({
-  state: initialState,
-  readyState: ReadyState.CLOSED,
-  sendJsonMessage: () => {},
-});
+function useValue(): useValueReturn {
+  // basic config
+  const { data: config } = useSWR<FrigateConfig>("config", {
+    revalidateOnFocus: false,
+  });
+  const wsUrl = `${baseUrl.replace(/^http/, "ws")}ws`;
 
-export const useWebSocketContext = (): WebSocketContextProps => {
-  const context = useContext(WS);
-  if (!context) {
-    throw new Error(
-      "useWebSocketContext must be used within a WebSocketProvider"
-    );
-  }
-  return context;
-};
+  // main state
+  const [wsState, setWsState] = useState<WsState>({});
 
-function reducer(state: ReducerState, action: ReducerAction): ReducerState {
-  switch (action.topic) {
-    default:
-      return produce(state, (draftState: Draft<ReducerState>) => {
-        let parsedPayload = action.payload;
-        try {
-          parsedPayload = action.payload && JSON.parse(action.payload);
-        } catch (e) {}
-        draftState[action.topic] = {
-          lastUpdate: Date.now(),
-          payload: parsedPayload,
-          retain: action.retain,
-        };
-      });
-  }
-}
+  useEffect(() => {
+    if (!config) {
+      return;
+    }
 
-type WsProviderType = {
-  config: FrigateConfig;
-  children: ReactNode;
-  wsUrl?: string;
-};
+    const cameraStates: WsState = {};
 
-export function WsProvider({
-  config,
-  children,
-  wsUrl = `${baseUrl.replace(/^http/, "ws")}ws`,
-}: WsProviderType) {
-  const [state, dispatch] = useReducer(reducer, initialState);
+    Object.keys(config.cameras).forEach((camera) => {
+      const { name, record, detect, snapshots, audio } = config.cameras[camera];
+      cameraStates[`${name}/recordings/state`] = record.enabled ? "ON" : "OFF";
+      cameraStates[`${name}/detect/state`] = detect.enabled ? "ON" : "OFF";
+      cameraStates[`${name}/snapshots/state`] = snapshots.enabled
+        ? "ON"
+        : "OFF";
+      cameraStates[`${name}/audio/state`] = audio.enabled ? "ON" : "OFF";
+    });
 
+    setWsState({ ...wsState, ...cameraStates });
+  }, [config]);
+
+  // ws handler
   const { sendJsonMessage, readyState } = useWebSocket(wsUrl, {
     onMessage: (event) => {
-      dispatch(JSON.parse(event.data));
+      const data: Update = JSON.parse(event.data);
+
+      if (data) {
+        setWsState({ ...wsState, [data.topic]: data.payload });
+      }
     },
-    onOpen: () => dispatch({ topic: "", payload: "", retain: false }),
+    onOpen: () => {},
     shouldReconnect: () => true,
   });
 
-  useEffect(() => {
-    Object.keys(config.cameras).forEach((camera) => {
-      const { name, record, detect, snapshots, audio } = config.cameras[camera];
-      dispatch({
-        topic: `${name}/recordings/state`,
-        payload: record.enabled ? "ON" : "OFF",
-        retain: false,
-      });
-      dispatch({
-        topic: `${name}/detect/state`,
-        payload: detect.enabled ? "ON" : "OFF",
-        retain: false,
-      });
-      dispatch({
-        topic: `${name}/snapshots/state`,
-        payload: snapshots.enabled ? "ON" : "OFF",
-        retain: false,
-      });
-      dispatch({
-        topic: `${name}/audio/state`,
-        payload: audio.enabled ? "ON" : "OFF",
-        retain: false,
-      });
-    });
-  }, [config]);
-
-  return (
-    <WS.Provider value={{ state, readyState, sendJsonMessage }}>
-      {children}
-    </WS.Provider>
-  );
-}
-
-export function useWs(watchTopic: string, publishTopic: string) {
-  const { state, readyState, sendJsonMessage } = useWebSocketContext();
-
-  const value = state[watchTopic] || { payload: null };
-
-  const send = useCallback(
-    (payload: any, retain = false) => {
+  const setState = useCallback(
+    (message: Update) => {
       if (readyState === ReadyState.OPEN) {
         sendJsonMessage({
-          topic: publishTopic || watchTopic,
-          payload,
-          retain,
+          topic: message.topic,
+          payload: message.payload,
+          retain: message.retain,
         });
       }
     },
-    [sendJsonMessage, readyState, watchTopic, publishTopic]
+    [readyState, sendJsonMessage]
+  );
+
+  return [wsState, setState];
+}
+
+export const {
+  Provider: WsProvider,
+  useTrackedState: useWsState,
+  useUpdate: useWsUpdate,
+} = createContainer(useValue, { defaultState: {}, concurrentMode: true });
+
+export function useWs(watchTopic: string, publishTopic: string) {
+  const state = useWsState();
+  const sendJsonMessage = useWsUpdate();
+
+  const value = { payload: state[watchTopic] || null };
+
+  const send = useCallback(
+    (payload: any, retain = false) => {
+      sendJsonMessage({
+        topic: publishTopic || watchTopic,
+        payload,
+        retain,
+      });
+    },
+    [sendJsonMessage, watchTopic, publishTopic]
   );
 
   return { value, send };
@@ -219,21 +174,21 @@ export function useFrigateEvents(): { payload: FrigateEvent } {
   const {
     value: { payload },
   } = useWs("events", "");
-  return { payload };
+  return { payload: JSON.parse(payload) };
 }
 
 export function useFrigateReviews(): { payload: FrigateReview } {
   const {
     value: { payload },
   } = useWs("reviews", "");
-  return { payload };
+  return { payload: JSON.parse(payload) };
 }
 
 export function useFrigateStats(): { payload: FrigateStats } {
   const {
     value: { payload },
   } = useWs("stats", "");
-  return { payload };
+  return { payload: JSON.parse(payload) };
 }
 
 export function useMotionActivity(camera: string): { payload: string } {
