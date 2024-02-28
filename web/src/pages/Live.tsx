@@ -1,4 +1,4 @@
-import { useFrigateEvents } from "@/api/ws";
+import { useFrigateReviews } from "@/api/ws";
 import Logo from "@/components/Logo";
 import { AnimatedEventThumbnail } from "@/components/image/AnimatedEventThumbnail";
 import LivePlayer from "@/components/player/LivePlayer";
@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { usePersistence } from "@/hooks/use-persistence";
-import { Event as FrigateEvent } from "@/types/event";
 import { FrigateConfig } from "@/types/frigateConfig";
+import { ReviewSegment } from "@/types/review";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { isDesktop, isMobile, isSafari } from "react-device-detect";
 import { CiGrid2H, CiGrid31 } from "react-icons/ci";
@@ -24,10 +24,10 @@ function Live() {
   );
 
   // recent events
-  const { payload: eventUpdate } = useFrigateEvents();
-  const { data: allEvents, mutate: updateEvents } = useSWR<FrigateEvent[]>([
-    "events",
-    { limit: 10 },
+  const { payload: eventUpdate } = useFrigateReviews();
+  const { data: allEvents, mutate: updateEvents } = useSWR<ReviewSegment[]>([
+    "review",
+    { limit: 10, severity: "alert" },
   ]);
 
   useEffect(() => {
@@ -36,20 +36,9 @@ function Live() {
     }
 
     // if event is ended and was saved, update events list
-    if (
-      eventUpdate.type == "end" &&
-      (eventUpdate.after.has_clip || eventUpdate.after.has_snapshot)
-    ) {
+    if (eventUpdate.type == "end" && eventUpdate.review.severity == "alert") {
       updateEvents();
       return;
-    }
-
-    // if event is updated and has become a saved event, update events list
-    if (
-      !(eventUpdate.before.has_clip || eventUpdate.before.has_snapshot) &&
-      (eventUpdate.after.has_clip || eventUpdate.after.has_snapshot)
-    ) {
-      updateEvents();
     }
   }, [eventUpdate]);
 

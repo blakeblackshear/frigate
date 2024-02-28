@@ -607,7 +607,7 @@ def event_thumbnail(id, max_cache_age=2592000):
 
 
 @bp.route("/events/<id>/preview.gif")
-def event_preview(id: str, max_cache_age=2592000):
+def event_preview(id: str):
     try:
         event: Event = Event.get(Event.id == id)
     except DoesNotExist:
@@ -619,145 +619,7 @@ def event_preview(id: str, max_cache_age=2592000):
     end_ts = start_ts + (
         min(event.end_time - event.start_time, 20) if event.end_time else 20
     )
-
-    if datetime.fromtimestamp(event.start_time) < datetime.now().replace(
-        minute=0, second=0
-    ):
-        # has preview mp4
-        preview: Previews = (
-            Previews.select(
-                Previews.camera,
-                Previews.path,
-                Previews.duration,
-                Previews.start_time,
-                Previews.end_time,
-            )
-            .where(
-                Previews.start_time.between(start_ts, end_ts)
-                | Previews.end_time.between(start_ts, end_ts)
-                | ((start_ts > Previews.start_time) & (end_ts < Previews.end_time))
-            )
-            .where(Previews.camera == event.camera)
-            .limit(1)
-            .get()
-        )
-
-        if not preview:
-            return make_response(
-                jsonify({"success": False, "message": "Preview not found"}), 404
-            )
-
-        diff = event.start_time - preview.start_time
-        minutes = int(diff / 60)
-        seconds = int(diff % 60)
-        ffmpeg_cmd = [
-            "ffmpeg",
-            "-hide_banner",
-            "-loglevel",
-            "warning",
-            "-ss",
-            f"00:{minutes}:{seconds}",
-            "-t",
-            f"{end_ts - start_ts}",
-            "-i",
-            preview.path,
-            "-r",
-            "8",
-            "-vf",
-            "setpts=0.12*PTS",
-            "-loop",
-            "0",
-            "-c:v",
-            "gif",
-            "-f",
-            "gif",
-            "-",
-        ]
-
-        process = sp.run(
-            ffmpeg_cmd,
-            capture_output=True,
-        )
-
-        if process.returncode != 0:
-            logger.error(process.stderr)
-            return make_response(
-                jsonify({"success": False, "message": "Unable to create preview gif"}),
-                500,
-            )
-
-        gif_bytes = process.stdout
-    else:
-        # need to generate from existing images
-        preview_dir = os.path.join(CACHE_DIR, "preview_frames")
-        file_start = f"preview_{event.camera}"
-        start_file = f"{file_start}-{start_ts}.jpg"
-        end_file = f"{file_start}-{end_ts}.jpg"
-        selected_previews = []
-
-        for file in sorted(os.listdir(preview_dir)):
-            if not file.startswith(file_start):
-                continue
-
-            if file < start_file:
-                continue
-
-            if file > end_file:
-                break
-
-            selected_previews.append(f"file '/tmp/cache/preview_frames/{file}'")
-            selected_previews.append("duration 0.12")
-
-        if not selected_previews:
-            return make_response(
-                jsonify({"success": False, "message": "Preview not found"}), 404
-            )
-
-        last_file = selected_previews[-2]
-        selected_previews.append(last_file)
-
-        ffmpeg_cmd = [
-            "ffmpeg",
-            "-hide_banner",
-            "-loglevel",
-            "warning",
-            "-f",
-            "concat",
-            "-y",
-            "-protocol_whitelist",
-            "pipe,file",
-            "-safe",
-            "0",
-            "-i",
-            "/dev/stdin",
-            "-loop",
-            "0",
-            "-c:v",
-            "gif",
-            "-f",
-            "gif",
-            "-",
-        ]
-
-        process = sp.run(
-            ffmpeg_cmd,
-            input=str.encode("\n".join(selected_previews)),
-            capture_output=True,
-        )
-
-        if process.returncode != 0:
-            logger.error(process.stderr)
-            return make_response(
-                jsonify({"success": False, "message": "Unable to create preview gif"}),
-                500,
-            )
-
-        gif_bytes = process.stdout
-
-    response = make_response(gif_bytes)
-    response.headers["Content-Type"] = "image/gif"
-    response.headers["Cache-Control"] = f"private, max-age={max_cache_age}"
-    return response
+    return preview_gif(event.camera, start_ts, end_ts)
 
 
 @bp.route("/timeline")
@@ -2337,6 +2199,147 @@ def get_preview_frames_from_cache(camera_name: str, start_ts, end_ts):
     return jsonify(selected_previews)
 
 
+@bp.route("/<camera_name>/start/<int:start_ts>/end/<int:end_ts>/preview.gif")
+@bp.route("/<camera_name>/start/<float:start_ts>/end/<float:end_ts>/preview.gif")
+def preview_gif(camera_name: str, start_ts, end_ts, max_cache_age=2592000):
+    if datetime.fromtimestamp(start_ts) < datetime.now().replace(minute=0, second=0):
+        # has preview mp4
+        preview: Previews = (
+            Previews.select(
+                Previews.camera,
+                Previews.path,
+                Previews.duration,
+                Previews.start_time,
+                Previews.end_time,
+            )
+            .where(
+                Previews.start_time.between(start_ts, end_ts)
+                | Previews.end_time.between(start_ts, end_ts)
+                | ((start_ts > Previews.start_time) & (end_ts < Previews.end_time))
+            )
+            .where(Previews.camera == camera_name)
+            .limit(1)
+            .get()
+        )
+
+        if not preview:
+            return make_response(
+                jsonify({"success": False, "message": "Preview not found"}), 404
+            )
+
+        diff = start_ts - preview.start_time
+        minutes = int(diff / 60)
+        seconds = int(diff % 60)
+        ffmpeg_cmd = [
+            "ffmpeg",
+            "-hide_banner",
+            "-loglevel",
+            "warning",
+            "-ss",
+            f"00:{minutes}:{seconds}",
+            "-t",
+            f"{end_ts - start_ts}",
+            "-i",
+            preview.path,
+            "-r",
+            "8",
+            "-vf",
+            "setpts=0.12*PTS",
+            "-loop",
+            "0",
+            "-c:v",
+            "gif",
+            "-f",
+            "gif",
+            "-",
+        ]
+
+        process = sp.run(
+            ffmpeg_cmd,
+            capture_output=True,
+        )
+
+        if process.returncode != 0:
+            logger.error(process.stderr)
+            return make_response(
+                jsonify({"success": False, "message": "Unable to create preview gif"}),
+                500,
+            )
+
+        gif_bytes = process.stdout
+    else:
+        # need to generate from existing images
+        preview_dir = os.path.join(CACHE_DIR, "preview_frames")
+        file_start = f"preview_{camera_name}"
+        start_file = f"{file_start}-{start_ts}.jpg"
+        end_file = f"{file_start}-{end_ts}.jpg"
+        selected_previews = []
+
+        for file in sorted(os.listdir(preview_dir)):
+            if not file.startswith(file_start):
+                continue
+
+            if file < start_file:
+                continue
+
+            if file > end_file:
+                break
+
+            selected_previews.append(f"file '{os.path.join(preview_dir, file)}'")
+            selected_previews.append("duration 0.12")
+
+        if not selected_previews:
+            return make_response(
+                jsonify({"success": False, "message": "Preview not found"}), 404
+            )
+
+        last_file = selected_previews[-2]
+        selected_previews.append(last_file)
+
+        ffmpeg_cmd = [
+            "ffmpeg",
+            "-hide_banner",
+            "-loglevel",
+            "warning",
+            "-f",
+            "concat",
+            "-y",
+            "-protocol_whitelist",
+            "pipe,file",
+            "-safe",
+            "0",
+            "-i",
+            "/dev/stdin",
+            "-loop",
+            "0",
+            "-c:v",
+            "gif",
+            "-f",
+            "gif",
+            "-",
+        ]
+
+        process = sp.run(
+            ffmpeg_cmd,
+            input=str.encode("\n".join(selected_previews)),
+            capture_output=True,
+        )
+
+        if process.returncode != 0:
+            logger.error(process.stderr)
+            return make_response(
+                jsonify({"success": False, "message": "Unable to create preview gif"}),
+                500,
+            )
+
+        gif_bytes = process.stdout
+
+    response = make_response(gif_bytes)
+    response.headers["Content-Type"] = "image/gif"
+    response.headers["Cache-Control"] = f"private, max-age={max_cache_age}"
+    return response
+
+
 @bp.route("/vod/event/<id>")
 def vod_event(id):
     try:
@@ -2476,6 +2479,21 @@ def set_not_reviewed(id):
     return make_response(
         jsonify({"success": True, "message": "Reviewed " + id + " not viewed"}), 200
     )
+
+
+@bp.route("/review/<id>/preview.gif")
+def review_preview(id: str):
+    try:
+        review: ReviewSegment = ReviewSegment.get(ReviewSegment.id == id)
+    except DoesNotExist:
+        return make_response(
+            jsonify({"success": False, "message": "Review segment not found"}), 404
+        )
+
+    padding = 8
+    start_ts = review.start_time - padding
+    end_ts = review.end_time + padding
+    return preview_gif(review.camera, start_ts, end_ts)
 
 
 @bp.route(

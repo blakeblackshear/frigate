@@ -1,25 +1,35 @@
 import { baseUrl } from "@/api/baseUrl";
-import { Event as FrigateEvent } from "@/types/event";
 import TimeAgo from "../dynamic/TimeAgo";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useApiHost } from "@/api";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
+import { ReviewSegment } from "@/types/review";
+import { useNavigate } from "react-router-dom";
 
 type AnimatedEventThumbnailProps = {
-  event: FrigateEvent;
+  event: ReviewSegment;
 };
 export function AnimatedEventThumbnail({ event }: AnimatedEventThumbnailProps) {
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
+
+  // interaction
+
+  const navigate = useNavigate();
+  const onOpenReview = useCallback(() => {
+    navigate("events", { state: { review: event.id } });
+  }, [navigate, event]);
+
+  // image behavior
 
   const imageUrl = useMemo(() => {
     if (Date.now() / 1000 < event.start_time + 20) {
       return `${apiHost}api/preview/${event.camera}/${event.start_time}/thumbnail.jpg`;
     }
 
-    return `${baseUrl}api/events/${event.id}/preview.gif`;
+    return `${baseUrl}api/review/${event.id}/preview.gif`;
   }, [event]);
 
   const aspectRatio = useMemo(() => {
@@ -35,11 +45,12 @@ export function AnimatedEventThumbnail({ event }: AnimatedEventThumbnailProps) {
     <Tooltip>
       <TooltipTrigger asChild>
         <div
-          className="h-24 relative rounded bg-cover bg-no-repeat bg-center mr-4"
+          className="h-24 relative rounded bg-cover bg-no-repeat bg-center mr-4 cursor-pointer"
           style={{
             backgroundImage: `url(${imageUrl})`,
             aspectRatio: aspectRatio,
           }}
+          onClick={onOpenReview}
         >
           <div className="absolute bottom-0 inset-x-0 h-6 bg-gradient-to-t from-slate-900/50 to-transparent rounded">
             <div className="w-full absolute left-1 bottom-0 text-xs text-white">
@@ -49,13 +60,7 @@ export function AnimatedEventThumbnail({ event }: AnimatedEventThumbnailProps) {
         </div>
       </TooltipTrigger>
       <TooltipContent>
-        {`${event.label} ${
-          event.sub_label ? `(${event.sub_label})` : ""
-        } detected with score of ${(event.data.score * 100).toFixed(0)}% ${
-          event.data.sub_label_score
-            ? `(${event.data.sub_label_score * 100}%)`
-            : ""
-        }`}
+        {`${[...event.data.objects, ...event.data.audio, ...(event.data.sub_labels || [])].join(", ")} detected`}
       </TooltipContent>
     </Tooltip>
   );
