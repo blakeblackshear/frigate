@@ -185,6 +185,23 @@ def set_retain(id):
     )
 
 
+@bp.route("/events/<id>/plus", methods=("DELETE",))
+def clear_plus(id):
+    try:
+        event = Event.get(Event.id == id)
+    except DoesNotExist:
+        return make_response(
+            jsonify({"success": False, "message": "Event " + id + " not found"}), 404
+        )
+
+    event.plus_id = None
+    event.save()
+
+    return make_response(
+        jsonify({"success": True, "message": "Event " + id + " plus_id cleared"}), 200
+    )
+
+
 @bp.route("/events/<id>/plus", methods=("POST",))
 def send_to_plus(id):
     if not current_app.plus_api.is_active():

@@ -201,6 +201,10 @@ Permanently deletes the event along with any clips/snapshots.
 
 Sets retain to true for the event id.
 
+### `DELETE /api/events/<id>/plus`
+
+Clears the submit flag of an event that was previously submitted to Frigate+. Useful when an event was submitted as a false positive while being a positive, or vice versa. Also make sure to delete the image in Frigate+ accordingly!
+
 ### `POST /api/events/<id>/plus`
 
 Submits the snapshot of the event to Frigate+ for labeling.
