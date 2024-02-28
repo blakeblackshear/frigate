@@ -79,7 +79,7 @@ export default function DesktopRecordingView({
   return (
     <div ref={contentRef} className="relative w-full h-full">
       <Button
-        className="md:absolute md:inset-0 rounded-lg"
+        className="md:absolute md:top-0 md:left-0 rounded-lg"
         onClick={() => navigate(-1)}
       >
         <IoMdArrowRoundBack className="size-5 mr-[10px]" />
