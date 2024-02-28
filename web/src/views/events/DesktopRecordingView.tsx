@@ -106,7 +106,7 @@ export default function DesktopRecordingView({
         />
       </div>
 
-      <div className="md:absolute md:inset-y-0 md:right-0">
+      <div className="md:absolute md:w-[100px] md:inset-y-0 md:right-0">
         <EventReviewTimeline
           segmentDuration={30}
           timestampSpread={15}
