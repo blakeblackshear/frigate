@@ -1,14 +1,14 @@
 import { baseUrl } from "@/api/baseUrl";
-import { Event as FrigateEvent } from "@/types/event";
 import TimeAgo from "../dynamic/TimeAgo";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { useMemo } from "react";
 import { useApiHost } from "@/api";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
+import { ReviewSegment } from "@/types/review";
 
 type AnimatedEventThumbnailProps = {
-  event: FrigateEvent;
+  event: ReviewSegment;
 };
 export function AnimatedEventThumbnail({ event }: AnimatedEventThumbnailProps) {
   const apiHost = useApiHost();
@@ -19,7 +19,7 @@ export function AnimatedEventThumbnail({ event }: AnimatedEventThumbnailProps) {
       return `${apiHost}api/preview/${event.camera}/${event.start_time}/thumbnail.jpg`;
     }
 
-    return `${baseUrl}api/events/${event.id}/preview.gif`;
+    return `${baseUrl}api/review/${event.id}/preview.gif`;
   }, [event]);
 
   const aspectRatio = useMemo(() => {
@@ -49,13 +49,7 @@ export function AnimatedEventThumbnail({ event }: AnimatedEventThumbnailProps) {
         </div>
       </TooltipTrigger>
       <TooltipContent>
-        {`${event.label} ${
-          event.sub_label ? `(${event.sub_label})` : ""
-        } detected with score of ${(event.data.score * 100).toFixed(0)}% ${
-          event.data.sub_label_score
-            ? `(${event.data.sub_label_score * 100}%)`
-            : ""
-        }`}
+        {`${[...event.data.objects, ...event.data.audio, ...(event.data.sub_labels || [])].join(", ")} detected`}
       </TooltipContent>
     </Tooltip>
   );
