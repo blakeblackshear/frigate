@@ -505,10 +505,20 @@ async def get_video_properties(url, get_duration=False) -> dict[str, any]:
         # Get the height of frames in the video stream
         height = video.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
+        # Get the stream encoding
+        fourcc_int = int(video.get(cv2.CAP_PROP_FOURCC))
+        fourcc = (
+            chr((fourcc_int >> 0) & 255)
+            + chr((fourcc_int >> 8) & 255)
+            + chr((fourcc_int >> 16) & 255)
+            + chr((fourcc_int >> 24) & 255)
+        )
+
         # Release the video stream
         video.release()
 
         result["width"] = round(width)
         result["height"] = round(height)
+        result["fourcc"] = fourcc
 
     return result

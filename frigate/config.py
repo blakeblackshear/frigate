@@ -614,6 +614,7 @@ class FfmpegOutputArgsConfig(FrigateBaseModel):
         default=RECORD_FFMPEG_OUTPUT_ARGS_DEFAULT,
         title="Record role FFmpeg output arguments.",
     )
+    _force_record_hvc1: bool = PrivateAttr(default=False)
 
 
 class FfmpegConfig(FrigateBaseModel):
@@ -878,7 +879,10 @@ class CameraConfig(FrigateBaseModel):
 
         if "record" in ffmpeg_input.roles and self.record.enabled:
             record_args = get_ffmpeg_arg_list(
-                parse_preset_output_record(self.ffmpeg.output_args.record)
+                parse_preset_output_record(
+                    self.ffmpeg.output_args.record,
+                    self.ffmpeg.output_args._force_record_hvc1,
+                )
                 or self.ffmpeg.output_args.record
             )
 
@@ -1161,31 +1165,42 @@ class FrigateConfig(FrigateBaseModel):
             if camera_config.ffmpeg.hwaccel_args == "auto":
                 camera_config.ffmpeg.hwaccel_args = config.ffmpeg.hwaccel_args
 
-            if (
-                camera_config.detect.height is None
-                or camera_config.detect.width is None
-            ):
-                for input in camera_config.ffmpeg.inputs:
-                    if "detect" in input.roles:
-                        stream_info = {"width": 0, "height": 0}
-                        try:
-                            stream_info = asyncio.run(get_video_properties(input.path))
-                        except Exception:
-                            logger.warn(
-                                f"Error detecting stream resolution automatically for {input.path} Applying default values."
-                            )
-                            stream_info = {"width": 0, "height": 0}
+            for input in camera_config.ffmpeg.inputs:
+                need_record_fourcc = "record" in input.roles
+                need_detect_dimensions = "detect" in input.roles and (
+                    camera_config.detect.height is None
+                    or camera_config.detect.width is None
+                )
 
-                        camera_config.detect.width = (
-                            stream_info["width"]
-                            if stream_info.get("width")
-                            else DEFAULT_DETECT_DIMENSIONS["width"]
+                if need_detect_dimensions or need_record_fourcc:
+                    stream_info = {"width": 0, "height": 0, "fourcc": None}
+                    try:
+                        stream_info = asyncio.run(get_video_properties(input.path))
+                    except Exception:
+                        logger.warn(
+                            f"Error detecting stream parameters automatically for {input.path} Applying default values."
                         )
-                        camera_config.detect.height = (
-                            stream_info["height"]
-                            if stream_info.get("height")
-                            else DEFAULT_DETECT_DIMENSIONS["height"]
-                        )
+                        stream_info = {"width": 0, "height": 0, "fourcc": None}
+
+                if need_detect_dimensions:
+                    camera_config.detect.width = (
+                        stream_info["width"]
+                        if stream_info.get("width")
+                        else DEFAULT_DETECT_DIMENSIONS["width"]
+                    )
+                    camera_config.detect.height = (
+                        stream_info["height"]
+                        if stream_info.get("height")
+                        else DEFAULT_DETECT_DIMENSIONS["height"]
+                    )
+
+                if need_record_fourcc:
+                    # Apple only supports HEVC if it is hvc1 (vs. hev1)
+                    camera_config.ffmpeg.output_args._force_record_hvc1 = (
+                        stream_info["fourcc"] == "hevc"
+                        if stream_info.get("hevc")
+                        else False
+                    )
 
             # Default min_initialized configuration
             min_initialized = camera_config.detect.fps / 2
