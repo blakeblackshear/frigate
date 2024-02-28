@@ -1,16 +1,16 @@
 import { useEffect, useState, useCallback } from "react";
 import { get as getData, set as setData } from "idb-keyval";
 
-type usePersistenceReturn = [
-  value: any | undefined,
+type usePersistenceReturn<S extends any> = [
+  value: S | undefined,
   setValue: (value: string | boolean) => void,
   loaded: boolean,
 ];
 
-export function usePersistence(
+export function usePersistence<S>(
   key: string,
-  defaultValue: any | undefined = undefined
-): usePersistenceReturn {
+  defaultValue: S | undefined = undefined
+): usePersistenceReturn<S> {
   const [value, setInternalValue] = useState<any | undefined>(defaultValue);
   const [loaded, setLoaded] = useState<boolean>(false);
 
