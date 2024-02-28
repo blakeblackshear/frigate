@@ -189,7 +189,7 @@ class PtzAutotrackConfig(FrigateBaseModel):
     timeout: int = Field(
         default=10, title="Seconds to delay before returning to preset."
     )
-    movement_weights: Optional[Union[str, List[float]]] = Field(
+    movement_weights: Optional[Union[str, List[str]]] = Field(
         default=[],
         title="Internal value used for PTZ movements based on the speed of your camera's motor.",
     )
@@ -204,9 +204,9 @@ class PtzAutotrackConfig(FrigateBaseModel):
             return None
 
         if isinstance(v, str):
-            weights = list(map(float, v.split(",")))
+            weights = list(map(str, map(float, v.split(","))))
         elif isinstance(v, list):
-            weights = [float(val) for val in v]
+            weights = [str(val) for val in v]
         else:
             raise ValueError("Invalid type for movement_weights")
 
