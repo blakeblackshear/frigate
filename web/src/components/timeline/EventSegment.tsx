@@ -238,7 +238,7 @@ export function EventSegment({
     }
   }, [showMinimap, isFirstSegmentInMinimap, events, segmentDuration]);
 
-  const segmentClasses = `h-2 relative w-[55px] md:w-[100px] ${
+  const segmentClasses = `h-2 relative w-full ${
     showMinimap
       ? isInMinimapRange
         ? "bg-card"
