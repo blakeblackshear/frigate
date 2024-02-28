@@ -2490,8 +2490,9 @@ def review_preview(id: str):
             jsonify({"success": False, "message": "Review segment not found"}), 404
         )
 
-    start_ts = review.start_time
-    end_ts = review.end_time
+    padding = 8
+    start_ts = review.start_time - padding
+    end_ts = review.end_time + padding
     return preview_gif(review.camera, start_ts, end_ts)
 
 
