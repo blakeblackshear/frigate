@@ -37,7 +37,6 @@ function Live() {
 
     // if event is ended and was saved, update events list
     if (eventUpdate.type == "end" && eventUpdate.review.severity == "alert") {
-      console.log("new alert " + eventUpdate.review.id);
       updateEvents();
       return;
     }
