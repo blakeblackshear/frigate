@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { get as getData, set as setData } from "idb-keyval";
 
-type usePersistenceReturn<S extends any> = [
+type usePersistenceReturn<S> = [
   value: S | undefined,
   setValue: (value: S) => void,
   loaded: boolean,
