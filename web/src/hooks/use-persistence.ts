@@ -11,7 +11,7 @@ export function usePersistence<S>(
   key: string,
   defaultValue: S | undefined = undefined
 ): usePersistenceReturn<S> {
-  const [value, setInternalValue] = useState<any | undefined>(defaultValue);
+  const [value, setInternalValue] = useState<S | undefined>(defaultValue);
   const [loaded, setLoaded] = useState<boolean>(false);
 
   const setValue = useCallback(
