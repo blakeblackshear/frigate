@@ -10,7 +10,6 @@ import {
 import EventSegment from "./EventSegment";
 import { useEventUtils } from "@/hooks/use-event-utils";
 import { ReviewSegment, ReviewSeverity } from "@/types/review";
-import { TooltipProvider } from "../ui/tooltip";
 
 export type EventReviewTimelineProps = {
   segmentDuration: number;
