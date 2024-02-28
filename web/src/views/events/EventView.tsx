@@ -9,7 +9,7 @@ import { useEventUtils } from "@/hooks/use-event-utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { ReviewFilter, ReviewSegment, ReviewSeverity } from "@/types/review";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { isDesktop, isMobile } from "react-device-detect";
+import { isDesktop } from "react-device-detect";
 import { LuFolderCheck } from "react-icons/lu";
 import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
@@ -283,9 +283,6 @@ export default function EventView({
                         relevantPreview={relevantPreview}
                         setReviewed={markItemAsReviewed}
                         onClick={onSelectReview}
-                        autoPlayback={
-                          isMobile && minimapBounds.end == value.start_time
-                        }
                       />
                     </div>
                     {lastRow && !reachedEnd && <ActivityIndicator />}
