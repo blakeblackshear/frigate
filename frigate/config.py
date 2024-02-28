@@ -14,8 +14,8 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
+    TypeAdapter,
     field_validator,
-    parse_obj_as,
     validator,
 )
 from pydantic.fields import PrivateAttr
@@ -358,7 +358,7 @@ class RuntimeMotionConfig(MotionConfig):
         super().__init__(**config)
 
     def dict(self, **kwargs):
-        ret = super().dict(**kwargs)
+        ret = super().model_dump(**kwargs)
         if "mask" in ret:
             ret["mask"] = ret["raw_mask"]
             ret.pop("raw_mask")
@@ -468,7 +468,7 @@ class RuntimeFilterConfig(FilterConfig):
         super().__init__(**config)
 
     def dict(self, **kwargs):
-        ret = super().dict(**kwargs)
+        ret = super().model_dump(**kwargs)
         if "mask" in ret:
             ret["mask"] = ret["raw_mask"]
             ret.pop("raw_mask")
@@ -1001,7 +1001,7 @@ def verify_valid_live_stream_name(
     """Verify that a restream exists to use for live view."""
     if (
         camera_config.live.stream_name
-        not in frigate_config.go2rtc.dict().get("streams", {}).keys()
+        not in frigate_config.go2rtc.model_dump().get("streams", {}).keys()
     ):
         return ValueError(
             f"No restream with name {camera_config.live.stream_name} exists for camera {camera_config.name}."
@@ -1158,7 +1158,7 @@ class FrigateConfig(FrigateBaseModel):
             config.ffmpeg.hwaccel_args = auto_detect_hwaccel()
 
         # Global config to propagate down to camera level
-        global_config = config.dict(
+        global_config = config.model_dump(
             include={
                 "audio": ...,
                 "birdseye": ...,
@@ -1175,8 +1175,10 @@ class FrigateConfig(FrigateBaseModel):
         )
 
         for name, camera in config.cameras.items():
-            merged_config = deep_merge(camera.dict(exclude_unset=True), global_config)
-            camera_config: CameraConfig = CameraConfig.parse_obj(
+            merged_config = deep_merge(
+                camera.model_dump(exclude_unset=True), global_config
+            )
+            camera_config: CameraConfig = CameraConfig.model_validate(
                 {"name": name, **merged_config}
             )
 
@@ -1285,7 +1287,7 @@ class FrigateConfig(FrigateBaseModel):
                 # Set runtime filter to create masks
                 camera_config.objects.filters[object] = RuntimeFilterConfig(
                     frame_shape=camera_config.frame_shape,
-                    **filter.dict(exclude_unset=True),
+                    **filter.model_dump(exclude_unset=True),
                 )
 
             # Convert motion configuration
@@ -1297,7 +1299,7 @@ class FrigateConfig(FrigateBaseModel):
                 camera_config.motion = RuntimeMotionConfig(
                     frame_shape=camera_config.frame_shape,
                     raw_mask=camera_config.motion.mask,
-                    **camera_config.motion.dict(exclude_unset=True),
+                    **camera_config.motion.model_dump(exclude_unset=True),
                 )
             camera_config.motion.enabled_in_config = camera_config.motion.enabled
 
@@ -1327,12 +1329,13 @@ class FrigateConfig(FrigateBaseModel):
         config.model.check_and_load_plus_model(plus_api)
 
         for key, detector in config.detectors.items():
-            detector_config: DetectorConfig = parse_obj_as(DetectorConfig, detector)
+            adapter = TypeAdapter(DetectorConfig)
+            detector_config: DetectorConfig = adapter.validate_python(detector)
             if detector_config.model is None:
                 detector_config.model = config.model
             else:
                 model = detector_config.model
-                schema = ModelConfig.schema()["properties"]
+                schema = ModelConfig.model_json_schema()["properties"]
                 if (
                     model.width != schema["width"]["default"]
                     or model.height != schema["height"]["default"]
@@ -1346,8 +1349,8 @@ class FrigateConfig(FrigateBaseModel):
                         "Customizing more than a detector model path is unsupported."
                     )
             merged_model = deep_merge(
-                detector_config.model.dict(exclude_unset=True),
-                config.model.dict(exclude_unset=True),
+                detector_config.model.model_dump(exclude_unset=True),
+                config.model.model_dump(exclude_unset=True),
             )
 
             if "path" not in merged_model:
@@ -1356,7 +1359,7 @@ class FrigateConfig(FrigateBaseModel):
                 elif detector_config.type == "edgetpu":
                     merged_model["path"] = "/edgetpu_model.tflite"
 
-            detector_config.model = ModelConfig.parse_obj(merged_model)
+            detector_config.model = ModelConfig.model_validate(merged_model)
             detector_config.model.check_and_load_plus_model(
                 plus_api, detector_config.type
             )
@@ -1384,9 +1387,9 @@ class FrigateConfig(FrigateBaseModel):
         elif config_file.endswith(".json"):
             config = json.loads(raw_config)
 
-        return cls.parse_obj(config)
+        return cls.model_validate(config)
 
     @classmethod
     def parse_raw(cls, raw_config):
         config = load_config_with_no_duplicates(raw_config)
-        return cls.parse_obj(config)
+        return cls.model_validate(config)
