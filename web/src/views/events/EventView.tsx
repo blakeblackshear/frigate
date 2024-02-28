@@ -9,7 +9,7 @@ import { useEventUtils } from "@/hooks/use-event-utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { ReviewFilter, ReviewSegment, ReviewSeverity } from "@/types/review";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { isDesktop } from "react-device-detect";
+import { isDesktop, isMobile } from "react-device-detect";
 import { LuFolderCheck } from "react-icons/lu";
 import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
@@ -191,7 +191,9 @@ export default function EventView({
   return (
     <div className="flex flex-col size-full">
       <div className="relative flex justify-between mb-2">
-        <Logo className="absolute inset-y-0 inset-x-1/2 -translate-x-1/2 h-8" />
+        {isMobile && (
+          <Logo className="absolute inset-y-0 inset-x-1/2 -translate-x-1/2 h-8" />
+        )}
         <ToggleGroup
           className="*:px-3 *:py4 *:rounded-2xl"
           type="single"
@@ -234,14 +236,16 @@ export default function EventView({
           ref={contentRef}
           className="flex flex-1 flex-wrap content-start gap-2 overflow-y-auto no-scrollbar"
         >
-          <NewReviewData
-            className="absolute w-full z-30"
-            contentRef={contentRef}
-            severity={severity}
-            pullLatestData={pullLatestData}
-          />
+          {filter?.before == undefined && (
+            <NewReviewData
+              className="absolute w-full z-30"
+              contentRef={contentRef}
+              severity={severity}
+              pullLatestData={pullLatestData}
+            />
+          )}
 
-          {reachedEnd && currentItems == null && (
+          {!isValidating && currentItems == null && (
             <div className="size-full flex flex-col justify-center items-center">
               <LuFolderCheck className="size-16" />
               There are no {severity} items to review
@@ -287,9 +291,9 @@ export default function EventView({
                   </div>
                 );
               })
-            ) : (
+            ) : severity != "alert" ? (
               <div ref={lastReviewRef} />
-            )}
+            ) : null}
           </div>
         </div>
         <div className="w-[55px] md:w-[100px] mt-2 overflow-y-auto no-scrollbar">
