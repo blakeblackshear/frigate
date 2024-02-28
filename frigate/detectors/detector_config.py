@@ -36,7 +36,9 @@ class ModelTypeEnum(str, Enum):
 
 class ModelConfig(BaseModel):
     path: Optional[str] = Field(None, title="Custom Object detection model path.")
-    labelmap_path: Optional[str] = Field(None, title="Label map for custom object detector.")
+    labelmap_path: Optional[str] = Field(
+        None, title="Label map for custom object detector."
+    )
     width: int = Field(default=320, title="Object detection model input width.")
     height: int = Field(default=320, title="Object detection model input height.")
     labelmap: Dict[int, str] = Field(
@@ -131,6 +133,7 @@ class ModelConfig(BaseModel):
 
         for key, val in enumerate(enabled_labels):
             self._colormap[val] = tuple(int(round(255 * c)) for c in cmap(key)[:3])
+
     model_config = ConfigDict(extra="forbid")
 
 
