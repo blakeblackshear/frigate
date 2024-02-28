@@ -65,7 +65,6 @@ export default function PreviewThumbnailPlayer({
     onSwipedLeft: () => setPlayback(false),
     onSwipedRight: () => setPlayback(true),
     preventScrollOnSwipe: true,
-    
   });
 
   const handleSetReviewed = useCallback(() => {
@@ -110,14 +109,14 @@ export default function PreviewThumbnailPlayer({
     <ContextMenu>
       <ContextMenuTrigger asChild>
         <div
-          className="relative w-full h-full cursor-pointer"
+          className="relative size-full cursor-pointer"
           onMouseEnter={isMobile ? undefined : () => onPlayback(true)}
           onMouseLeave={isMobile ? undefined : () => onPlayback(false)}
           onClick={handleOnClick}
           {...swipeHandlers}
         >
           {playingBack && (
-            <div className="absolute left-0 top-0 right-0 bottom-0 animate-in fade-in">
+            <div className="absolute inset-0 animate-in fade-in">
               <PreviewContent
                 review={review}
                 relevantPreview={relevantPreview}
@@ -145,25 +144,25 @@ export default function PreviewThumbnailPlayer({
 
             {!playingBack && (
               <>
-                <div className="absolute top-0 left-0 right-0 rounded-t-l z-10 w-full h-[30%] bg-gradient-to-b from-black/60 to-transparent pointer-events-none">
+                <div className="absolute top-0 inset-x-0 rounded-t-l z-10 w-full h-[30%] bg-gradient-to-b from-black/60 to-transparent pointer-events-none">
                   <div className="flex h-full justify-between items-start mx-3 pb-1 text-white text-sm ">
                     {(review.severity == "alert" ||
                       review.severity == "detection") && (
                       <Chip className="absolute top-2 left-2 flex gap-1 bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 z-0">
                         {review.data.objects.map((object) => {
-                          return getIconForLabel(object, "w-3 h-3 text-white");
+                          return getIconForLabel(object, "size-3 text-white");
                         })}
                         {review.data.audio.map((audio) => {
-                          return getIconForLabel(audio, "w-3 h-3 text-white");
+                          return getIconForLabel(audio, "size-3 text-white");
                         })}
                         {review.data.sub_labels?.map((sub) => {
-                          return getIconForSubLabel(sub, "w-3 h-3 text-white");
+                          return getIconForSubLabel(sub, "size-3 text-white");
                         })}
                       </Chip>
                     )}
                   </div>
                 </div>
-                <div className="absolute bottom-0 left-0 right-0 rounded-b-l z-10 w-full h-[20%] bg-gradient-to-t from-black/60 to-transparent pointer-events-none">
+                <div className="absolute bottom-0 inset-x-0 rounded-b-l z-10 w-full h-[20%] bg-gradient-to-t from-black/60 to-transparent pointer-events-none">
                   <div className="flex h-full justify-between items-end mx-3 pb-1 text-white text-sm ">
                     <TimeAgo time={review.start_time * 1000} dense />
                     {formattedDate}
@@ -174,7 +173,7 @@ export default function PreviewThumbnailPlayer({
           </div>
           {playingBack && (
             <Slider
-              className="absolute left-0 right-0 bottom-0 z-10"
+              className="absolute inset-x-0 bottom-0 z-10"
               value={[progress]}
               min={0}
               step={1}
@@ -182,7 +181,7 @@ export default function PreviewThumbnailPlayer({
             />
           )}
           {!playingBack && imgLoaded && review.has_been_reviewed && (
-            <div className="absolute left-0 top-0 bottom-0 right-0 z-10 bg-black bg-opacity-60" />
+            <div className="absolute inset-0 z-10 bg-black bg-opacity-60" />
           )}
         </div>
       </ContextMenuTrigger>
@@ -298,7 +297,7 @@ function PreviewContent({
     return (
       <video
         ref={playerRef}
-        className="w-full h-full aspect-video bg-black"
+        className="size-full aspect-video bg-black"
         autoPlay
         playsInline
         preload="auto"
@@ -367,16 +366,16 @@ function InProgressPreview({
   if (!previewFrames || previewFrames.length == 0) {
     return (
       <img
-        className="h-full w-full"
+        className="size-full"
         src={`${apiHost}${review.thumb_path.replace("/media/frigate/", "")}`}
       />
     );
   }
 
   return (
-    <div className="w-full h-full flex items-center bg-black">
+    <div className="size-full flex items-center bg-black">
       <img
-        className="w-full"
+        className="size-full object-contain"
         src={`${apiHost}api/preview/${previewFrames[key]}/thumbnail.jpg`}
         onLoad={handleLoad}
       />
