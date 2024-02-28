@@ -5,6 +5,7 @@ import LivePlayer from "@/components/player/LivePlayer";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { usePersistence } from "@/hooks/use-persistence";
 import { Event as FrigateEvent } from "@/types/event";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -17,7 +18,8 @@ function Live() {
 
   // layout
 
-  const [layout, setLayout] = useState<"grid" | "list">(
+  const [layout, setLayout] = usePersistence<"grid" | "list">(
+    "live-layout",
     isDesktop ? "grid" : "list"
   );
 

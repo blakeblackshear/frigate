@@ -7,7 +7,7 @@ import { LivePlayerMode } from "@/types/live";
 export default function useCameraLiveMode(
   cameraConfig: CameraConfig,
   preferredMode?: string
-): LivePlayerMode {
+): LivePlayerMode | undefined {
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const restreamEnabled = useMemo(() => {
@@ -22,10 +22,10 @@ export default function useCameraLiveMode(
       )
     );
   }, [config, cameraConfig]);
-  const defaultLiveMode = useMemo(() => {
+  const defaultLiveMode = useMemo<LivePlayerMode | undefined>(() => {
     if (config && cameraConfig) {
       if (restreamEnabled) {
-        return cameraConfig.ui.live_mode || config?.ui.live_mode;
+        return cameraConfig.ui.live_mode || config.ui.live_mode;
       }
 
       return "jsmpeg";
@@ -33,7 +33,7 @@ export default function useCameraLiveMode(
 
     return undefined;
   }, [cameraConfig, restreamEnabled]);
-  const [viewSource] = usePersistence(
+  const [viewSource] = usePersistence<LivePlayerMode>(
     `${cameraConfig.name}-source`,
     defaultLiveMode
   );

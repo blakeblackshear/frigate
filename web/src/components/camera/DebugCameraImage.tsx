@@ -22,7 +22,7 @@ export default function DebugCameraImage({
   cameraConfig,
 }: DebugCameraImageProps) {
   const [showSettings, setShowSettings] = useState(false);
-  const [options, setOptions] = usePersistence(
+  const [options, setOptions] = usePersistence<Options>(
     `${cameraConfig?.name}-feed`,
     emptyObject
   );
@@ -36,7 +36,7 @@ export default function DebugCameraImage({
   const searchParams = useMemo(
     () =>
       new URLSearchParams(
-        Object.keys(options).reduce((memo, key) => {
+        Object.keys(options || {}).reduce((memo, key) => {
           //@ts-ignore we know this is correct
           memo.push([key, options[key] === true ? "1" : "0"]);
           return memo;
@@ -68,7 +68,7 @@ export default function DebugCameraImage({
           <CardContent>
             <DebugSettings
               handleSetOption={handleSetOption}
-              options={options}
+              options={options || {}}
             />
           </CardContent>
         </Card>
