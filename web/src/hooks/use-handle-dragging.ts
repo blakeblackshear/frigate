@@ -4,7 +4,8 @@ interface DragHandlerProps {
   contentRef: React.RefObject<HTMLElement>;
   timelineRef: React.RefObject<HTMLDivElement>;
   scrollTimeRef: React.RefObject<HTMLDivElement>;
-  alignDateToTimeline: (time: number) => number;
+  alignStartDateToTimeline: (time: number) => number;
+  alignEndDateToTimeline: (time: number) => number;
   segmentDuration: number;
   showHandlebar: boolean;
   timelineDuration: number;
@@ -20,7 +21,7 @@ function useDraggableHandler({
   contentRef,
   timelineRef,
   scrollTimeRef,
-  alignDateToTimeline,
+  alignStartDateToTimeline,
   segmentDuration,
   showHandlebar,
   timelineDuration,
@@ -94,7 +95,7 @@ function useDraggableHandler({
         );
 
         const segmentIndex = Math.floor(newHandlePosition / segmentHeight);
-        const segmentStartTime = alignDateToTimeline(
+        const segmentStartTime = alignStartDateToTimeline(
           timelineStart - segmentIndex * segmentDuration
         );
 

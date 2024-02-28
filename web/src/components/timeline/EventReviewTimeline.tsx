@@ -10,7 +10,6 @@ import {
 import EventSegment from "./EventSegment";
 import { useEventUtils } from "@/hooks/use-event-utils";
 import { ReviewSegment, ReviewSeverity } from "@/types/review";
-import { TooltipProvider } from "../ui/tooltip";
 
 export type EventReviewTimelineProps = {
   segmentDuration: number;
@@ -56,14 +55,18 @@ export function EventReviewTimeline({
     [timelineEnd, timelineStart]
   );
 
-  const { alignDateToTimeline } = useEventUtils(events, segmentDuration);
+  const { alignStartDateToTimeline, alignEndDateToTimeline } = useEventUtils(
+    events,
+    segmentDuration
+  );
 
   const { handleMouseDown, handleMouseUp, handleMouseMove } =
     useDraggableHandler({
       contentRef,
       timelineRef,
       scrollTimeRef,
-      alignDateToTimeline,
+      alignStartDateToTimeline,
+      alignEndDateToTimeline,
       segmentDuration,
       showHandlebar,
       timelineDuration,
@@ -96,7 +99,7 @@ export function EventReviewTimeline({
   // Generate segments for the timeline
   const generateSegments = useCallback(() => {
     const segmentCount = timelineDuration / segmentDuration;
-    const segmentAlignedTime = alignDateToTimeline(timelineStart);
+    const segmentAlignedTime = alignStartDateToTimeline(timelineStart);
 
     return Array.from({ length: segmentCount }, (_, index) => {
       const segmentTime = segmentAlignedTime - index * segmentDuration;
@@ -172,7 +175,7 @@ export function EventReviewTimeline({
         timelineHeight / (timelineDuration / segmentDuration);
 
       // Calculate the segment index corresponding to the target time
-      const alignedHandlebarTime = alignDateToTimeline(handlebarTime);
+      const alignedHandlebarTime = alignStartDateToTimeline(handlebarTime);
       const segmentIndex = Math.ceil(
         (timelineStart - alignedHandlebarTime) / segmentDuration
       );
@@ -213,44 +216,39 @@ export function EventReviewTimeline({
   ]);
 
   return (
-    <TooltipProvider skipDelayDuration={3000}>
-      <div
-        ref={timelineRef}
-        className={`relative w-[120px] md:w-[100px] h-full overflow-y-scroll no-scrollbar bg-secondary ${
-          isDragging && showHandlebar ? "cursor-grabbing" : "cursor-auto"
-        }`}
-      >
-        <div className="flex flex-col">{segments}</div>
-        {showHandlebar && (
-          <div
-            className={`absolute left-0 top-0 z-20 w-full `}
-            role="scrollbar"
-          >
-            <div className={`flex items-center justify-center `}>
+    <div
+      ref={timelineRef}
+      className={`relative h-full overflow-y-scroll no-scrollbar bg-secondary ${
+        isDragging && showHandlebar ? "cursor-grabbing" : "cursor-auto"
+      }`}
+    >
+      <div className="flex flex-col">{segments}</div>
+      {showHandlebar && (
+        <div className={`absolute left-0 top-0 z-20 w-full `} role="scrollbar">
+          <div className={`flex items-center justify-center `}>
+            <div
+              ref={scrollTimeRef}
+              className={`relative w-full ${
+                isDragging ? "cursor-grabbing" : "cursor-grab"
+              }`}
+              onMouseDown={handleMouseDown}
+            >
               <div
-                ref={scrollTimeRef}
-                className={`relative w-full ${
-                  isDragging ? "cursor-grabbing" : "cursor-grab"
-                }`}
-                onMouseDown={handleMouseDown}
+                className={`bg-destructive rounded-full mx-auto ${
+                  segmentDuration < 60 ? "w-20" : "w-16"
+                } h-5 flex items-center justify-center`}
               >
                 <div
-                  className={`bg-destructive rounded-full mx-auto ${
-                    segmentDuration < 60 ? "w-20" : "w-16"
-                  } h-5 flex items-center justify-center`}
-                >
-                  <div
-                    ref={currentTimeRef}
-                    className="text-white text-xs z-10"
-                  ></div>
-                </div>
-                <div className="absolute h-1 w-full bg-destructive top-1/2 transform -translate-y-1/2"></div>
+                  ref={currentTimeRef}
+                  className="text-white text-xs z-10"
+                ></div>
               </div>
+              <div className="absolute h-1 w-full bg-destructive top-1/2 transform -translate-y-1/2"></div>
             </div>
           </div>
-        )}
-      </div>
-    </TooltipProvider>
+        </div>
+      )}
+    </div>
   );
 }
 

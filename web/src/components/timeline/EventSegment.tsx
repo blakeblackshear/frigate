@@ -9,8 +9,13 @@ import React, {
   useMemo,
   useRef,
 } from "react";
-import { Tooltip, TooltipContent } from "../ui/tooltip";
-import { TooltipTrigger } from "@radix-ui/react-tooltip";
+import { isDesktop } from "react-device-detect";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "../ui/hover-card";
+import { HoverCardPortal } from "@radix-ui/react-hover-card";
 
 type EventSegmentProps = {
   events: ReviewSegment[];
@@ -33,8 +38,6 @@ type MinimapSegmentProps = {
 };
 
 type TickSegmentProps = {
-  isFirstSegmentInMinimap: boolean;
-  isLastSegmentInMinimap: boolean;
   timestamp: Date;
   timestampSpread: number;
 };
@@ -58,25 +61,23 @@ function MinimapBounds({
     <>
       {isFirstSegmentInMinimap && (
         <div
-          className="absolute inset-0 -bottom-5 w-full flex items-center justify-center text-xs text-primary font-medium z-20 text-center text-[8px] scroll-mt-8"
+          className="absolute inset-0 -bottom-7 w-full flex items-center justify-center text-primary font-medium z-20 text-center text-[10px] scroll-mt-8"
           ref={firstMinimapSegmentRef}
         >
           {new Date(alignedMinimapStartTime * 1000).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
-            month: "short",
-            day: "2-digit",
+            ...(isDesktop && { month: "short", day: "2-digit" }),
           })}
         </div>
       )}
 
       {isLastSegmentInMinimap && (
-        <div className="absolute inset-0 -top-1 w-full flex items-center justify-center text-xs text-primary font-medium z-20 text-center text-[8px]">
+        <div className="absolute inset-0 -top-3 w-full flex items-center justify-center text-primary font-medium z-20 text-center text-[10px]">
           {new Date(alignedMinimapEndTime * 1000).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
-            month: "short",
-            day: "2-digit",
+            ...(isDesktop && { month: "short", day: "2-digit" }),
           })}
         </div>
       )}
@@ -84,15 +85,10 @@ function MinimapBounds({
   );
 }
 
-function Tick({
-  isFirstSegmentInMinimap,
-  isLastSegmentInMinimap,
-  timestamp,
-  timestampSpread,
-}: TickSegmentProps) {
+function Tick({ timestamp, timestampSpread }: TickSegmentProps) {
   return (
-    <div className="w-[12px] h-2 flex justify-left items-end">
-      {!isFirstSegmentInMinimap && !isLastSegmentInMinimap && (
+    <div className="absolute">
+      <div className="flex items-end content-end w-[12px] h-2">
         <div
           className={`h-0.5 ${
             timestamp.getMinutes() % timestampSpread === 0 &&
@@ -101,7 +97,7 @@ function Tick({
               : "w-[8px] bg-gray-600"
           }`}
         ></div>
-      )}
+      </div>
     </div>
   );
 }
@@ -114,7 +110,7 @@ function Timestamp({
   segmentKey,
 }: TimestampSegmentProps) {
   return (
-    <div className="w-[36px] pl-[3px] leading-[9px] h-2 flex justify-left items-top z-10">
+    <div className="absolute left-[15px] top-[1px] h-2 z-10">
       {!isFirstSegmentInMinimap && !isLastSegmentInMinimap && (
         <div
           key={`${segmentKey}_timestamp`}
@@ -152,7 +148,10 @@ export function EventSegment({
     getEventThumbnail,
   } = useSegmentUtils(segmentDuration, events, severityType);
 
-  const { alignDateToTimeline } = useEventUtils(events, segmentDuration);
+  const { alignStartDateToTimeline, alignEndDateToTimeline } = useEventUtils(
+    events,
+    segmentDuration
+  );
 
   const severity = useMemo(
     () => getSeverity(segmentTime, displaySeverityType),
@@ -177,7 +176,7 @@ export function EventSegment({
   const startTimestamp = useMemo(() => {
     const eventStart = getEventStart(segmentTime);
     if (eventStart) {
-      return alignDateToTimeline(eventStart);
+      return alignStartDateToTimeline(eventStart);
     }
   }, [getEventStart, segmentTime]);
 
@@ -191,23 +190,26 @@ export function EventSegment({
   const segmentKey = useMemo(() => segmentTime, [segmentTime]);
 
   const alignedMinimapStartTime = useMemo(
-    () => alignDateToTimeline(minimapStartTime ?? 0),
-    [minimapStartTime, alignDateToTimeline]
+    () => alignStartDateToTimeline(minimapStartTime ?? 0),
+    [minimapStartTime, alignStartDateToTimeline]
   );
   const alignedMinimapEndTime = useMemo(
-    () => alignDateToTimeline(minimapEndTime ?? 0),
-    [minimapEndTime, alignDateToTimeline]
+    () => alignEndDateToTimeline(minimapEndTime ?? 0),
+    [minimapEndTime, alignEndDateToTimeline]
   );
 
   const isInMinimapRange = useMemo(() => {
     return (
       showMinimap &&
-      minimapStartTime &&
-      minimapEndTime &&
-      segmentTime > minimapStartTime &&
-      segmentTime < minimapEndTime
+      segmentTime >= alignedMinimapStartTime &&
+      segmentTime < alignedMinimapEndTime
     );
-  }, [showMinimap, minimapStartTime, minimapEndTime, segmentTime]);
+  }, [
+    showMinimap,
+    alignedMinimapStartTime,
+    alignedMinimapEndTime,
+    segmentTime,
+  ]);
 
   const isFirstSegmentInMinimap = useMemo(() => {
     return showMinimap && segmentTime === alignedMinimapStartTime;
@@ -236,11 +238,17 @@ export function EventSegment({
     }
   }, [showMinimap, isFirstSegmentInMinimap, events, segmentDuration]);
 
-  const segmentClasses = `flex flex-row ${
-    showMinimap ? (isInMinimapRange ? "bg-muted" : "bg-background") : ""
+  const segmentClasses = `h-2 relative w-[55px] md:w-[100px] ${
+    showMinimap
+      ? isInMinimapRange
+        ? "bg-card"
+        : isLastSegmentInMinimap
+          ? ""
+          : "opacity-70"
+      : ""
   } ${
     isFirstSegmentInMinimap || isLastSegmentInMinimap
-      ? "relative h-2 border-b border-gray-500"
+      ? "relative h-2 border-b-2 border-gray-500"
       : ""
   }`;
 
@@ -280,7 +288,11 @@ export function EventSegment({
   }, [startTimestamp]);
 
   return (
-    <div key={segmentKey} className={segmentClasses}>
+    <div
+      key={segmentKey}
+      className={segmentClasses}
+      data-segment-time={new Date(segmentTime * 1000)}
+    >
       <MinimapBounds
         isFirstSegmentInMinimap={isFirstSegmentInMinimap}
         isLastSegmentInMinimap={isLastSegmentInMinimap}
@@ -289,12 +301,7 @@ export function EventSegment({
         firstMinimapSegmentRef={firstMinimapSegmentRef}
       />
 
-      <Tick
-        isFirstSegmentInMinimap={isFirstSegmentInMinimap}
-        isLastSegmentInMinimap={isLastSegmentInMinimap}
-        timestamp={timestamp}
-        timestampSpread={timestampSpread}
-      />
+      <Tick timestamp={timestamp} timestampSpread={timestampSpread} />
 
       <Timestamp
         isFirstSegmentInMinimap={isFirstSegmentInMinimap}
@@ -307,35 +314,35 @@ export function EventSegment({
       {severity.map((severityValue, index) => (
         <React.Fragment key={index}>
           {severityValue === displaySeverityType && (
-            <Tooltip delayDuration={300}>
+            <HoverCard openDelay={200} closeDelay={100}>
               <div
-                className="mr-3 w-[8px] h-2 flex justify-left items-end"
+                className="absolute left-1/2 transform -translate-x-1/2 w-[8px] h-2 ml-[2px] z-10 cursor-pointer"
                 data-severity={severityValue}
               >
-                <TooltipTrigger asChild>
+                <HoverCardTrigger asChild>
                   <div
                     key={`${segmentKey}_${index}_primary_data`}
-                    className={`
-                      w-full h-2 bg-gradient-to-r
-                      ${roundBottomPrimary ? "rounded-bl-full rounded-br-full" : ""}
-                      ${roundTopPrimary ? "rounded-tl-full rounded-tr-full" : ""}
-                      ${severityColors[severityValue]}
-                    `}
+                    className={`w-full h-2 bg-gradient-to-r ${roundBottomPrimary ? "rounded-bl-full rounded-br-full" : ""} ${roundTopPrimary ? "rounded-tl-full rounded-tr-full" : ""} ${severityColors[severityValue]}`}
                     onClick={segmentClick}
                   ></div>
-                </TooltipTrigger>
-                <TooltipContent className="rounded-2xl" side="left">
-                  <img
-                    className="rounded-lg"
-                    src={`${apiHost}${eventThumbnail.replace("/media/frigate/", "")}`}
-                  />
-                </TooltipContent>
+                </HoverCardTrigger>
+                <HoverCardPortal>
+                  <HoverCardContent
+                    className="rounded-2xl w-[250px] p-2"
+                    side="left"
+                  >
+                    <img
+                      className="rounded-lg"
+                      src={`${apiHost}${eventThumbnail.replace("/media/frigate/", "")}`}
+                    />
+                  </HoverCardContent>
+                </HoverCardPortal>
               </div>
-            </Tooltip>
+            </HoverCard>
           )}
 
           {severityValue !== displaySeverityType && (
-            <div className="h-2 flex flex-grow justify-end items-end">
+            <div className="absolute right-0 h-2 z-10">
               <div
                 key={`${segmentKey}_${index}_secondary_data`}
                 className={`
