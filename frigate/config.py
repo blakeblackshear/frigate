@@ -1139,7 +1139,7 @@ class FrigateConfig(FrigateBaseModel):
 
     def runtime_config(self, plus_api: PlusApi = None) -> FrigateConfig:
         """Merge camera config with globals."""
-        config = self.copy(deep=True)
+        config = self.model_copy(deep=True)
 
         # MQTT user/password substitutions
         if config.mqtt.user or config.mqtt.password:
@@ -1330,7 +1330,7 @@ class FrigateConfig(FrigateBaseModel):
 
         for key, detector in config.detectors.items():
             adapter = TypeAdapter(DetectorConfig)
-            detector_config: DetectorConfig = adapter.validate_python(detector)
+            detector_config: DetectorConfig = adapter.validate_python(detector.model_dump())
             if detector_config.model is None:
                 detector_config.model = config.model
             else:

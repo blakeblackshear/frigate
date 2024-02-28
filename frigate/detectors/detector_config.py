@@ -140,7 +140,7 @@ class ModelConfig(BaseModel):
 class BaseDetectorConfig(BaseModel):
     # the type field must be defined in all subclasses
     type: str = Field(default="cpu", title="Detector Type")
-    model: ModelConfig = Field(
+    model: Optional[ModelConfig] = Field(
         default=None, title="Detector specific model configuration."
     )
     model_config = ConfigDict(extra="allow", arbitrary_types_allowed=True)
