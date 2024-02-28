@@ -82,7 +82,7 @@ export default function EventView({
     };
   }, [reviewPages]);
 
-  const { alignDateToTimeline } = useEventUtils(
+  const { alignStartDateToTimeline } = useEventUtils(
     reviewItems.all,
     segmentDuration
   );
@@ -270,7 +270,8 @@ export default function EventView({
                     ref={lastRow ? lastReviewRef : minimapRef}
                     data-start={value.start_time}
                     data-segment-start={
-                      alignDateToTimeline(value.start_time) - segmentDuration
+                      alignStartDateToTimeline(value.start_time) -
+                      segmentDuration
                     }
                     className="outline outline-offset-1 outline-0 rounded-lg shadow-none transition-all duration-500 my-1 md:my-0"
                   >
@@ -291,7 +292,7 @@ export default function EventView({
             )}
           </div>
         </div>
-        <div className="w-[44px] md:w-[100px] mt-2 overflow-y-auto no-scrollbar">
+        <div className="w-[55px] md:w-[100px] mt-2 overflow-y-auto no-scrollbar">
           <EventReviewTimeline
             segmentDuration={segmentDuration}
             timestampSpread={15}
