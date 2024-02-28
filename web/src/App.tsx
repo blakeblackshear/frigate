@@ -21,13 +21,13 @@ function App() {
     <Providers>
       <BrowserRouter>
         <Wrapper>
-          <div className="w-full h-full pt-2 overflow-hidden">
+          <div className="size-full pt-2 overflow-hidden">
             {isDesktop && <Sidebar />}
             {isDesktop && <Statusbar />}
             {isMobile && <Bottombar />}
             <div
               id="pageRoot"
-              className="absolute left-0 md:left-16 top-2 right-0 bottom-16 md:bottom-8 overflow-hidden"
+              className="absolute left-0 top-2 right-0 bottom-16 md:left-16 md:bottom-8 overflow-hidden"
             >
               <Routes>
                 <Route path="/" element={<Live />} />

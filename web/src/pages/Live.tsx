@@ -88,7 +88,7 @@ function Live() {
   }, []);
 
   return (
-    <div className="w-full h-full overflow-y-scroll px-2">
+    <div className="size-full overflow-y-scroll px-2">
       {isMobile && (
         <div className="relative h-9 flex items-center justify-between">
           <Logo className="absolute inset-y-0 inset-x-1/2 -translate-x-1/2 h-8" />
@@ -128,7 +128,7 @@ function Live() {
       )}
 
       <div
-        className={`mt-4 grid ${layout == "grid" ? "grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4" : ""} gap-2 md:gap-4`}
+        className={`mt-4 grid ${layout == "grid" ? "grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4" : ""} gap-2 md:gap-4  *:rounded-2xl *:bg-black`}
       >
         {cameras.map((camera) => {
           let grow;
@@ -143,7 +143,7 @@ function Live() {
           return (
             <LivePlayer
               key={camera.name}
-              className={`rounded-2xl bg-black ${grow}`}
+              className={grow}
               windowVisible={windowVisible}
               cameraConfig={camera}
               preferredLiveMode={isSafari ? "webrtc" : "mse"}

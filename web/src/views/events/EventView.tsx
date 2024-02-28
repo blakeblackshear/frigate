@@ -189,33 +189,30 @@ export default function EventView({
   }
 
   return (
-    <div className="flex flex-col w-full h-full">
+    <div className="flex flex-col size-full">
       <div className="relative flex justify-between mb-2">
         <Logo className="absolute inset-y-0 inset-x-1/2 -translate-x-1/2 h-8" />
         <ToggleGroup
+          className="*:px-3 *:py4 *:rounded-2xl"
           type="single"
           defaultValue="alert"
           size="sm"
           onValueChange={(value: ReviewSeverity) => setSeverity(value)}
         >
           <ToggleGroupItem
-            className={`px-3 py-4 rounded-2xl ${
-              severity == "alert" ? "" : "text-gray-500"
-            }`}
+            className={`${severity == "alert" ? "" : "text-gray-500"}`}
             value="alert"
             aria-label="Select alerts"
           >
-            <MdCircle className="w-2 h-2 md:mr-[10px] text-severity_alert" />
+            <MdCircle className="size-2 md:mr-[10px] text-severity_alert" />
             <div className="hidden md:block">Alerts</div>
           </ToggleGroupItem>
           <ToggleGroupItem
-            className={`px-3 py-4 rounded-2xl ${
-              severity == "detection" ? "" : "text-gray-500"
-            }`}
+            className={`${severity == "detection" ? "" : "text-gray-500"}`}
             value="detection"
             aria-label="Select detections"
           >
-            <MdCircle className="w-2 h-2 md:mr-[10px] text-severity_detection" />
+            <MdCircle className="size-2 md:mr-[10px] text-severity_detection" />
             <div className="hidden md:block">Detections</div>
           </ToggleGroupItem>
           <ToggleGroupItem
@@ -225,7 +222,7 @@ export default function EventView({
             value="significant_motion"
             aria-label="Select motion"
           >
-            <MdCircle className="w-2 h-2 md:mr-[10px] text-severity_motion" />
+            <MdCircle className="size-2 md:mr-[10px] text-severity_motion" />
             <div className="hidden md:block">Motion</div>
           </ToggleGroupItem>
         </ToggleGroup>
@@ -245,14 +242,14 @@ export default function EventView({
           />
 
           {reachedEnd && currentItems == null && (
-            <div className="w-full h-full flex flex-col justify-center items-center">
-              <LuFolderCheck className="w-16 h-16" />
+            <div className="size-full flex flex-col justify-center items-center">
+              <LuFolderCheck className="size-16" />
               There are no {severity} items to review
             </div>
           )}
 
           <div
-            className="w-full mx-2 my-2 md:grid md:grid-cols-3 3xl:grid-cols-4 gap-4"
+            className="w-full m-2 md:grid md:grid-cols-3 3xl:grid-cols-4 gap-4"
             ref={contentRef}
           >
             {currentItems ? (

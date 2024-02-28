@@ -52,7 +52,7 @@ export default function NavItem({
           }
         >
           <TooltipTrigger>
-            <Icon className="w-5 h-5 m-[6px]" />
+            <Icon className="size-5 md:m-[6px]" />
           </TooltipTrigger>
         </NavLink>
         <TooltipContent side="right">

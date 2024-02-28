@@ -131,17 +131,17 @@ export default function LivePlayer({
           : "outline-0"
       } transition-all duration-500 ${className}`}
     >
-      <div className="absolute top-0 left-0 right-0 rounded-2xl z-10 w-full h-[30%] bg-gradient-to-b from-black/20 to-transparent pointer-events-none"></div>
-      <div className="absolute bottom-0 left-0 right-0 rounded-2xl z-10 w-full h-[10%] bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
+      <div className="absolute top-0 inset-x-0 rounded-2xl z-10 w-full h-[30%] bg-gradient-to-b from-black/20 to-transparent pointer-events-none"></div>
+      <div className="absolute bottom-0 inset-x-0 rounded-2xl z-10 w-full h-[10%] bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
       {player}
 
       <div
-        className={`absolute left-0 top-0 right-0 bottom-0 w-full ${
+        className={`absolute inset-0 w-full ${
           showStillWithoutActivity && !liveReady ? "visible" : "invisible"
         }`}
       >
         <AutoUpdatingCameraImage
-          className="w-full h-full"
+          className="size-full"
           camera={cameraConfig.name}
           showFps={false}
           reloadInterval={stillReloadInterval}
@@ -153,7 +153,7 @@ export default function LivePlayer({
           in={activeMotion}
           className={`bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500`}
         >
-          <MdLeakAdd className="w-4 h-4 text-motion" />
+          <MdLeakAdd className="size-4 text-motion" />
           <div className="hidden md:block ml-1 text-white text-xs">Motion</div>
         </Chip>
 
@@ -162,7 +162,7 @@ export default function LivePlayer({
             in={activeAudio}
             className={`bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500`}
           >
-            <BsSoundwave className="w-4 h-4 text-audio" />
+            <BsSoundwave className="size-4 text-audio" />
             <div className="hidden md:block ml-1 text-white text-xs">Sound</div>
           </Chip>
         )}
@@ -171,7 +171,7 @@ export default function LivePlayer({
       {isDesktop && (
         <Chip className="absolute right-2 top-2 bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500">
           {recording == "ON" && (
-            <MdCircle className="w-2 h-2 drop-shadow-md shadow-danger text-danger" />
+            <MdCircle className="size-2 drop-shadow-md shadow-danger text-danger" />
           )}
           <div className="ml-1 capitalize text-white text-xs">
             {cameraConfig.name.replaceAll("_", " ")}

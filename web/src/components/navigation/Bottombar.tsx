@@ -4,7 +4,7 @@ import SettingsNavItems from "../settings/SettingsNavItems";
 
 function Bottombar() {
   return (
-      <div className="absolute h-16 left-4 bottom-0 right-4 flex flex-row items-center justify-between">
+      <div className="absolute h-16 inset-x-4 bottom-0 flex flex-row items-center justify-between">
         {navbarLinks.map((item) => (
           <NavItem
             className=""
