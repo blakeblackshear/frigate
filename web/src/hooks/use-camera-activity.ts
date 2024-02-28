@@ -13,12 +13,12 @@ type useCameraActivityReturn = {
 };
 
 export default function useCameraActivity(
-  camera: CameraConfig
+  camera: CameraConfig,
 ): useCameraActivityReturn {
   const [activeObjects, setActiveObjects] = useState<string[]>([]);
   const hasActiveObjects = useMemo(
     () => activeObjects.length > 0,
-    [activeObjects]
+    [activeObjects],
   );
 
   const { payload: detectingMotion } = useMotionActivity(camera.name);
@@ -56,7 +56,7 @@ export default function useCameraActivity(
         }
       }
     }
-  }, [event, activeObjects]);
+  }, [camera, event, activeObjects]);
 
   return {
     activeTracking: hasActiveObjects,

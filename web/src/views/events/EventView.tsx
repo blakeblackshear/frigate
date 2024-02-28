@@ -7,6 +7,7 @@ import ActivityIndicator from "@/components/ui/activity-indicator";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useEventUtils } from "@/hooks/use-event-utils";
 import { FrigateConfig } from "@/types/frigateConfig";
+import { Preview } from "@/types/preview";
 import { ReviewFilter, ReviewSegment, ReviewSeverity } from "@/types/review";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isDesktop, isMobile } from "react-device-detect";
@@ -84,7 +85,7 @@ export default function EventView({
 
   const { alignStartDateToTimeline } = useEventUtils(
     reviewItems.all,
-    segmentDuration
+    segmentDuration,
   );
 
   const currentItems = useMemo(() => {
@@ -103,6 +104,8 @@ export default function EventView({
     }
 
     return contentRef.current.scrollHeight > contentRef.current.clientHeight;
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contentRef.current?.scrollHeight, severity]);
 
   // review interaction
@@ -123,7 +126,7 @@ export default function EventView({
         // no op
       }
     },
-    [isValidating, reachedEnd]
+    [isValidating, reachedEnd, loadNextPage],
   );
 
   const [minimap, setMinimap] = useState<string[]>([]);
@@ -148,7 +151,7 @@ export default function EventView({
           setMinimap([...visibleTimestamps]);
         });
       },
-      { root: contentRef.current, threshold: isDesktop ? 0.1 : 0.5 }
+      { root: contentRef.current, threshold: isDesktop ? 0.1 : 0.5 },
     );
 
     return () => {
@@ -167,7 +170,7 @@ export default function EventView({
         // no op
       }
     },
-    [minimapObserver]
+    [minimapObserver],
   );
   const minimapBounds = useMemo(() => {
     const data = {
@@ -177,7 +180,7 @@ export default function EventView({
     const list = minimap.sort();
 
     if (list.length > 0) {
-      data.end = parseFloat(list.at(-1)!!);
+      data.end = parseFloat(list.at(-1) || "0");
       data.start = parseFloat(list[0]);
     }
 
@@ -260,12 +263,12 @@ export default function EventView({
               currentItems.map((value, segIdx) => {
                 const lastRow = segIdx == reviewItems[severity].length - 1;
                 const relevantPreview = Object.values(
-                  relevantPreviews || []
+                  relevantPreviews || [],
                 ).find(
                   (preview) =>
                     preview.camera == value.camera &&
                     preview.start < value.start_time &&
-                    preview.end > value.end_time
+                    preview.end > value.end_time,
                 );
 
                 return (

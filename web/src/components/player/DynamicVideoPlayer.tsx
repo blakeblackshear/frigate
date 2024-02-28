@@ -14,6 +14,9 @@ import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import ActivityIndicator from "../ui/activity-indicator";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
+import { Recording } from "@/types/record";
+import { Preview } from "@/types/preview";
+import { DynamicPlayback } from "@/types/playback";
 
 /**
  * Dynamically switches between video playback and scrubbing preview player.
@@ -37,7 +40,7 @@ export default function DynamicVideoPlayer({
   const timezone = useMemo(
     () =>
       config?.ui?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
-    [config]
+    [config],
   );
 
   // playback behavior
@@ -51,7 +54,7 @@ export default function DynamicVideoPlayer({
         config.cameras[camera].detect.height <
       1.7
     );
-  }, [config]);
+  }, [camera, config]);
 
   // controlling playback
 
@@ -60,7 +63,7 @@ export default function DynamicVideoPlayer({
   const [isScrubbing, setIsScrubbing] = useState(false);
   const [hasPreview, setHasPreview] = useState(false);
   const [focusedItem, setFocusedItem] = useState<Timeline | undefined>(
-    undefined
+    undefined,
   );
   const controller = useMemo(() => {
     if (!config) {
@@ -72,9 +75,9 @@ export default function DynamicVideoPlayer({
       previewRef,
       (config.cameras[camera]?.detect?.annotation_offset || 0) / 1000,
       setIsScrubbing,
-      setFocusedItem
+      setFocusedItem,
     );
-  }, [config]);
+  }, [camera, config]);
 
   // keyboard control
 
@@ -115,11 +118,11 @@ export default function DynamicVideoPlayer({
           break;
       }
     },
-    [playerRef]
+    [playerRef],
   );
   useKeyboardListener(
     ["ArrowLeft", "ArrowRight", "m", " "],
-    onKeyboardShortcut
+    onKeyboardShortcut,
   );
 
   // initial state
@@ -131,16 +134,18 @@ export default function DynamicVideoPlayer({
         date.getMonth() + 1
       }/${date.getDate()}/${date.getHours()}/${camera}/${timezone.replaceAll(
         "/",
-        ","
+        ",",
       )}/master.m3u8`,
       type: "application/vnd.apple.mpegurl",
     };
+    // we only want to calculate this once
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const initialPreviewSource = useMemo(() => {
     const preview = cameraPreviews.find(
       (preview) =>
         Math.round(preview.start) >= timeRange.start &&
-        Math.floor(preview.end) <= timeRange.end
+        Math.floor(preview.end) <= timeRange.end,
     );
 
     if (preview) {
@@ -153,6 +158,9 @@ export default function DynamicVideoPlayer({
       setHasPreview(false);
       return undefined;
     }
+
+    // we only want to calculate this once
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // state of playback player
@@ -165,7 +173,7 @@ export default function DynamicVideoPlayer({
   }, [timeRange]);
   const { data: recordings } = useSWR<Recording[]>(
     [`${camera}/recordings`, recordingParams],
-    { revalidateOnFocus: false }
+    { revalidateOnFocus: false },
   );
 
   useEffect(() => {
@@ -178,13 +186,13 @@ export default function DynamicVideoPlayer({
       date.getMonth() + 1
     }/${date.getDate()}/${date.getHours()}/${camera}/${timezone.replaceAll(
       "/",
-      ","
+      ",",
     )}/master.m3u8`;
 
     const preview = cameraPreviews.find(
       (preview) =>
         Math.round(preview.start) >= timeRange.start &&
-        Math.floor(preview.end) <= timeRange.end
+        Math.floor(preview.end) <= timeRange.end,
     );
     setHasPreview(preview != undefined);
 
@@ -193,6 +201,9 @@ export default function DynamicVideoPlayer({
       playbackUri,
       preview,
     });
+
+    // we only want this to change when recordings update
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controller, recordings]);
 
   if (!controller) {
@@ -300,7 +311,7 @@ export class DynamicVideoController {
     previewRef: MutableRefObject<Player | undefined>,
     annotationOffset: number,
     setScrubbing: (isScrubbing: boolean) => void,
-    setFocusedItem: (timeline: Timeline) => void
+    setFocusedItem: (timeline: Timeline) => void,
   ) {
     this.playerRef = playerRef;
     this.previewRef = previewRef;
@@ -437,7 +448,7 @@ export class DynamicVideoController {
       this.timeToSeek = time;
     } else {
       this.previewRef.current?.currentTime(
-        Math.max(0, time - this.preview.start)
+        Math.max(0, time - this.preview.start),
       );
       this.seeking = true;
     }
@@ -453,7 +464,7 @@ export class DynamicVideoController {
       this.timeToSeek != this.previewRef.current?.currentTime()
     ) {
       this.previewRef.current?.currentTime(
-        this.timeToSeek - this.preview.start
+        this.timeToSeek - this.preview.start,
       );
     } else {
       this.seeking = false;

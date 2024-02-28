@@ -199,7 +199,7 @@ export interface CameraConfig {
       coordinates: string;
       filters: Record<string, unknown>;
       inertia: number;
-      objects: any[];
+      objects: string[];
     };
   };
 }
@@ -383,7 +383,7 @@ export interface FrigateConfig {
   };
 
   telemetry: {
-    network_interfaces: any[];
+    network_interfaces: string[];
     stats: {
       amd_gpu_stats: boolean;
       intel_gpu_stats: boolean;

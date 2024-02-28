@@ -6,7 +6,7 @@ import { LivePlayerMode } from "@/types/live";
 
 export default function useCameraLiveMode(
   cameraConfig: CameraConfig,
-  preferredMode?: string
+  preferredMode?: string,
 ): LivePlayerMode | undefined {
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -18,7 +18,7 @@ export default function useCameraLiveMode(
     return (
       cameraConfig &&
       Object.keys(config.go2rtc.streams || {}).includes(
-        cameraConfig.live.stream_name
+        cameraConfig.live.stream_name,
       )
     );
   }, [config, cameraConfig]);
@@ -32,10 +32,12 @@ export default function useCameraLiveMode(
     }
 
     return undefined;
+    // config will be updated if camera config is updated
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cameraConfig, restreamEnabled]);
   const [viewSource] = usePersistence<LivePlayerMode>(
     `${cameraConfig.name}-source`,
-    defaultLiveMode
+    defaultLiveMode,
   );
 
   if (

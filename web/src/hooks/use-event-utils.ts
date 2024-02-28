@@ -3,7 +3,7 @@ import { ReviewSegment } from "@/types/review";
 
 export const useEventUtils = (
   events: ReviewSegment[],
-  segmentDuration: number
+  segmentDuration: number,
 ) => {
   const isStartOfEvent = useCallback(
     (time: number): boolean => {
@@ -12,7 +12,9 @@ export const useEventUtils = (
         return time >= segmentStart && time < segmentStart + segmentDuration;
       });
     },
-    [events, segmentDuration]
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [events, segmentDuration],
   );
 
   const isEndOfEvent = useCallback(
@@ -25,21 +27,23 @@ export const useEventUtils = (
         return false;
       });
     },
-    [events, segmentDuration]
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [events, segmentDuration],
   );
 
   const getSegmentStart = useCallback(
     (time: number): number => {
       return Math.floor(time / segmentDuration) * segmentDuration;
     },
-    [segmentDuration]
+    [segmentDuration],
   );
 
   const getSegmentEnd = useCallback(
     (time: number): number => {
       return Math.ceil(time / segmentDuration) * segmentDuration;
     },
-    [segmentDuration]
+    [segmentDuration],
   );
 
   const alignEndDateToTimeline = useCallback(
@@ -48,16 +52,16 @@ export const useEventUtils = (
       const adjustment = remainder !== 0 ? segmentDuration - remainder : 0;
       return time + adjustment;
     },
-    [segmentDuration]
+    [segmentDuration],
   );
 
   const alignStartDateToTimeline = useCallback(
     (time: number): number => {
       const remainder = time % segmentDuration;
-      const adjustment = remainder === 0 ? 0 : -(remainder);
+      const adjustment = remainder === 0 ? 0 : -remainder;
       return time + adjustment;
     },
-    [segmentDuration]
+    [segmentDuration],
   );
 
   return {

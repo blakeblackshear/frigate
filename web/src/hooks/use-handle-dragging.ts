@@ -37,7 +37,7 @@ function useDraggableHandler({
       e.stopPropagation();
       setIsDragging(true);
     },
-    [setIsDragging]
+    [setIsDragging],
   );
 
   const handleMouseUp = useCallback(
@@ -48,7 +48,7 @@ function useDraggableHandler({
         setIsDragging(false);
       }
     },
-    [isDragging, setIsDragging]
+    [isDragging, setIsDragging],
   );
 
   const handleMouseMove = useCallback(
@@ -90,13 +90,13 @@ function useDraggableHandler({
           visibleTimelineHeight - timelineTop + parentScrollTop,
           Math.max(
             segmentHeight + scrolled,
-            e.clientY - timelineTop + parentScrollTop
-          )
+            e.clientY - timelineTop + parentScrollTop,
+          ),
         );
 
         const segmentIndex = Math.floor(newHandlePosition / segmentHeight);
         const segmentStartTime = alignStartDateToTimeline(
-          timelineStart - segmentIndex * segmentDuration
+          timelineStart - segmentIndex * segmentDuration,
         );
 
         if (showHandlebar) {
@@ -105,7 +105,7 @@ function useDraggableHandler({
             thumb.style.top = `${newHandlePosition - segmentHeight}px`;
             if (currentTimeRef.current) {
               currentTimeRef.current.textContent = new Date(
-                segmentStartTime * 1000
+                segmentStartTime * 1000,
               ).toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
@@ -116,12 +116,14 @@ function useDraggableHandler({
           if (setHandlebarTime) {
             setHandlebarTime(
               timelineStart -
-                (newHandlePosition / segmentHeight) * segmentDuration
+                (newHandlePosition / segmentHeight) * segmentDuration,
             );
           }
         }
       }
     },
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       isDragging,
       contentRef,
@@ -129,7 +131,7 @@ function useDraggableHandler({
       showHandlebar,
       timelineDuration,
       timelineStart,
-    ]
+    ],
   );
 
   useEffect(() => {
@@ -141,6 +143,8 @@ function useDraggableHandler({
         block: "center",
       });
     }
+    // temporary until behavior is decided
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return { handleMouseDown, handleMouseUp, handleMouseMove };

@@ -57,7 +57,7 @@ function Logs() {
         // no op
       }
     },
-    [setEndVisible]
+    [setEndVisible],
   );
 
   return (

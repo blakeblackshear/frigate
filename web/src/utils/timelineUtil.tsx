@@ -102,7 +102,7 @@ export function getTimelineItemDescription(timelineItem: Timeline) {
       ) {
         title = `${timelineItem.data.attribute.replaceAll(
           "_",
-          " "
+          " ",
         )} detected for ${label}`;
       } else {
         title = `${

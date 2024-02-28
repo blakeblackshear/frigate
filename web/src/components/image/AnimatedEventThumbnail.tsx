@@ -30,7 +30,7 @@ export function AnimatedEventThumbnail({ event }: AnimatedEventThumbnailProps) {
     }
 
     return `${baseUrl}api/review/${event.id}/preview.gif`;
-  }, [event]);
+  }, [apiHost, event]);
 
   const aspectRatio = useMemo(() => {
     if (!config) {
@@ -39,7 +39,7 @@ export function AnimatedEventThumbnail({ event }: AnimatedEventThumbnailProps) {
 
     const detect = config.cameras[event.camera].detect;
     return detect.width / detect.height;
-  }, [config]);
+  }, [config, event]);
 
   return (
     <Tooltip>

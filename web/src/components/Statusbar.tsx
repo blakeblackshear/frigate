@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
 
-export default function Statusbar({}) {
+export default function Statusbar() {
   const { data: initialStats } = useSWR<FrigateStats>("stats", {
     revalidateOnFocus: false,
   });

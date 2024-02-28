@@ -1,12 +1,13 @@
 module.exports = {
   root: true,
-  env: { browser: true, es2021: true, "vitest-globals/env": true },
   extends: [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:react-hooks/recommended",
-    "plugin:prettier",
+    "plugin:vitest-globals/recommended",
+    "plugin:prettier/recommended",
   ],
+  env: { browser: true, es2021: true, "vitest-globals/env": true },
   ignorePatterns: ["dist", ".eslintrc.cjs"],
   parser: "@typescript-eslint/parser",
   parserOptions: {
@@ -21,9 +22,11 @@ module.exports = {
       version: 27,
     },
   },
-  ignorePatterns: ["*.d.ts"],
-  plugins: ["react-refresh"],
+  ignorePatterns: ["*.d.ts", "/src/components/ui/*"],
+  plugins: ["react-hooks", "react-refresh"],
   rules: {
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "error",
     "react-refresh/only-export-components": [
       "warn",
       { allowConstantExport: true },

@@ -9,7 +9,7 @@ type usePersistenceReturn<S> = [
 
 export function usePersistence<S>(
   key: string,
-  defaultValue: S | undefined = undefined
+  defaultValue: S | undefined = undefined,
 ): usePersistenceReturn<S> {
   const [value, setInternalValue] = useState<S | undefined>(defaultValue);
   const [loaded, setLoaded] = useState<boolean>(false);
@@ -23,7 +23,7 @@ export function usePersistence<S>(
 
       update();
     },
-    [key]
+    [key],
   );
 
   useEffect(() => {

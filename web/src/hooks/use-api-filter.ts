@@ -1,9 +1,12 @@
+import { FilterType } from "@/types/filter";
 import { useMemo, useState } from "react";
 
 type useApiFilterReturn<F extends FilterType> = [
   filter: F | undefined,
   setFilter: (filter: F) => void,
   searchParams: {
+    // accept any type for a filter
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
   },
 ];

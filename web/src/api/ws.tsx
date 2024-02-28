@@ -9,12 +9,12 @@ import { createContainer } from "react-tracked";
 
 type Update = {
   topic: string;
-  payload: any;
+  payload: unknown;
   retain: boolean;
 };
 
 type WsState = {
-  [topic: string]: any;
+  [topic: string]: unknown;
 };
 
 type useValueReturn = [WsState, (update: Update) => void];
@@ -47,6 +47,8 @@ function useValue(): useValueReturn {
     });
 
     setWsState({ ...wsState, ...cameraStates });
+    // we only want this to run initially when the config is loaded
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config]);
 
   // ws handler
@@ -72,7 +74,7 @@ function useValue(): useValueReturn {
         });
       }
     },
-    [readyState, sendJsonMessage]
+    [readyState, sendJsonMessage],
   );
 
   return [wsState, setState];
@@ -91,14 +93,14 @@ export function useWs(watchTopic: string, publishTopic: string) {
   const value = { payload: state[watchTopic] || null };
 
   const send = useCallback(
-    (payload: any, retain = false) => {
+    (payload: unknown, retain = false) => {
       sendJsonMessage({
         topic: publishTopic || watchTopic,
         payload,
         retain,
       });
     },
-    [sendJsonMessage, watchTopic, publishTopic]
+    [sendJsonMessage, watchTopic, publishTopic],
   );
 
   return { value, send };
@@ -112,7 +114,7 @@ export function useDetectState(camera: string): {
     value: { payload },
     send,
   } = useWs(`${camera}/detect/state`, `${camera}/detect/set`);
-  return { payload, send };
+  return { payload: payload as ToggleableSetting, send };
 }
 
 export function useRecordingsState(camera: string): {
@@ -123,7 +125,7 @@ export function useRecordingsState(camera: string): {
     value: { payload },
     send,
   } = useWs(`${camera}/recordings/state`, `${camera}/recordings/set`);
-  return { payload, send };
+  return { payload: payload as ToggleableSetting, send };
 }
 
 export function useSnapshotsState(camera: string): {
@@ -134,7 +136,7 @@ export function useSnapshotsState(camera: string): {
     value: { payload },
     send,
   } = useWs(`${camera}/snapshots/state`, `${camera}/snapshots/set`);
-  return { payload, send };
+  return { payload: payload as ToggleableSetting, send };
 }
 
 export function useAudioState(camera: string): {
@@ -145,7 +147,7 @@ export function useAudioState(camera: string): {
     value: { payload },
     send,
   } = useWs(`${camera}/audio/state`, `${camera}/audio/set`);
-  return { payload, send };
+  return { payload: payload as ToggleableSetting, send };
 }
 
 export function usePtzCommand(camera: string): {
@@ -156,7 +158,7 @@ export function usePtzCommand(camera: string): {
     value: { payload },
     send,
   } = useWs(`${camera}/ptz`, `${camera}/ptz`);
-  return { payload, send };
+  return { payload: payload as string, send };
 }
 
 export function useRestart(): {
@@ -167,40 +169,40 @@ export function useRestart(): {
     value: { payload },
     send,
   } = useWs("restart", "restart");
-  return { payload, send };
+  return { payload: payload as string, send };
 }
 
 export function useFrigateEvents(): { payload: FrigateEvent } {
   const {
     value: { payload },
   } = useWs("events", "");
-  return { payload: JSON.parse(payload) };
+  return { payload: JSON.parse(payload as string) };
 }
 
 export function useFrigateReviews(): { payload: FrigateReview } {
   const {
     value: { payload },
   } = useWs("reviews", "");
-  return { payload: JSON.parse(payload) };
+  return { payload: JSON.parse(payload as string) };
 }
 
 export function useFrigateStats(): { payload: FrigateStats } {
   const {
     value: { payload },
   } = useWs("stats", "");
-  return { payload: JSON.parse(payload) };
+  return { payload: JSON.parse(payload as string) };
 }
 
 export function useMotionActivity(camera: string): { payload: string } {
   const {
     value: { payload },
   } = useWs(`${camera}/motion`, "");
-  return { payload };
+  return { payload: payload as string };
 }
 
 export function useAudioActivity(camera: string): { payload: number } {
   const {
     value: { payload },
   } = useWs(`${camera}/audio/rms`, "");
-  return { payload };
+  return { payload: payload as number };
 }

@@ -4,13 +4,13 @@ import { ReviewSegment } from "@/types/review";
 export const useSegmentUtils = (
   segmentDuration: number,
   events: ReviewSegment[],
-  severityType: string
+  severityType: string,
 ) => {
   const getSegmentStart = useCallback(
     (time: number): number => {
       return Math.floor(time / segmentDuration) * segmentDuration;
     },
-    [segmentDuration]
+    [segmentDuration],
   );
 
   const getSegmentEnd = useCallback(
@@ -23,7 +23,7 @@ export const useSegmentUtils = (
         return Date.now() / 1000 + segmentDuration;
       }
     },
-    [segmentDuration]
+    [segmentDuration],
   );
 
   const mapSeverityToNumber = useCallback((severity: string): number => {
@@ -41,7 +41,7 @@ export const useSegmentUtils = (
 
   const displaySeverityType = useMemo(
     () => mapSeverityToNumber(severityType ?? ""),
-    [severityType]
+    [mapSeverityToNumber, severityType],
   );
 
   const getSeverity = useCallback(
@@ -54,7 +54,7 @@ export const useSegmentUtils = (
 
       if (activeEvents?.length === 0) return [0];
       const severityValues = activeEvents.map((event) =>
-        mapSeverityToNumber(event.severity)
+        mapSeverityToNumber(event.severity),
       );
       const highestSeverityValue = Math.max(...severityValues);
 
@@ -67,7 +67,7 @@ export const useSegmentUtils = (
         return [highestSeverityValue];
       }
     },
-    [events, getSegmentStart, getSegmentEnd, mapSeverityToNumber]
+    [events, getSegmentStart, getSegmentEnd, mapSeverityToNumber],
   );
 
   const getReviewed = useCallback(
@@ -80,12 +80,12 @@ export const useSegmentUtils = (
         );
       });
     },
-    [events, getSegmentStart, getSegmentEnd]
+    [events, getSegmentStart, getSegmentEnd],
   );
 
   const shouldShowRoundedCorners = useCallback(
     (
-      segmentTime: number
+      segmentTime: number,
     ): {
       roundTopPrimary: boolean;
       roundBottomPrimary: boolean;
@@ -163,7 +163,7 @@ export const useSegmentUtils = (
         roundBottomSecondary,
       };
     },
-    [events, getSegmentStart, getSegmentEnd, segmentDuration, severityType]
+    [events, getSegmentStart, getSegmentEnd, segmentDuration, severityType],
   );
 
   const getEventStart = useCallback(
@@ -178,7 +178,7 @@ export const useSegmentUtils = (
 
       return matchingEvent?.start_time ?? 0;
     },
-    [events, getSegmentStart, getSegmentEnd, severityType]
+    [events, getSegmentStart, getSegmentEnd, severityType],
   );
 
   const getEventThumbnail = useCallback(
@@ -193,7 +193,7 @@ export const useSegmentUtils = (
 
       return matchingEvent?.thumb_path ?? "";
     },
-    [events, getSegmentStart, getSegmentEnd, severityType]
+    [events, getSegmentStart, getSegmentEnd, severityType],
   );
 
   return {
@@ -204,6 +204,6 @@ export const useSegmentUtils = (
     getReviewed,
     shouldShowRoundedCorners,
     getEventStart,
-    getEventThumbnail
+    getEventThumbnail,
   };
 };

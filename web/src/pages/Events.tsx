@@ -1,5 +1,6 @@
 import useApiFilter from "@/hooks/use-api-filter";
 import useOverlayState from "@/hooks/use-overlay-state";
+import { Preview } from "@/types/preview";
 import { ReviewFilter, ReviewSegment, ReviewSeverity } from "@/types/review";
 import DesktopRecordingView from "@/views/events/DesktopRecordingView";
 import EventView from "@/views/events/EventView";
@@ -24,6 +25,8 @@ export default function Events() {
   const onUpdateFilter = useCallback((newFilter: ReviewFilter) => {
     setSize(1);
     setReviewFilter(newFilter);
+    // we don't want this updating
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // review paging
@@ -41,9 +44,9 @@ export default function Events() {
       before: Math.floor(reviewSearchParams["before"]),
       after: Math.floor(reviewSearchParams["after"]),
     };
-  }, [reviewSearchParams]);
+  }, [last24Hours, reviewSearchParams]);
 
-  const reviewSegmentFetcher = useCallback((key: any) => {
+  const reviewSegmentFetcher = useCallback((key: Array<string> | string) => {
     const [path, params] = Array.isArray(key) ? key : [key, undefined];
     return axios.get(path, { params }).then((res) => res.data);
   }, []);
@@ -74,7 +77,7 @@ export default function Events() {
       };
       return ["review", params];
     },
-    [reviewSearchParams, last24Hours]
+    [reviewSearchParams, last24Hours],
   );
 
   const {
@@ -90,7 +93,7 @@ export default function Events() {
 
   const isDone = useMemo(
     () => (reviewPages?.at(-1)?.length ?? 0) < API_LIMIT,
-    [reviewPages]
+    [reviewPages],
   );
 
   const onLoadNextPage = useCallback(() => setSize(size + 1), [size, setSize]);
@@ -103,7 +106,7 @@ export default function Events() {
     if (
       !reviewPages ||
       reviewPages.length == 0 ||
-      reviewPages.at(-1)!!.length == 0
+      reviewPages.at(-1)?.length == 0
     ) {
       return undefined;
     }
@@ -111,7 +114,7 @@ export default function Events() {
     const startDate = new Date();
     startDate.setMinutes(0, 0, 0);
 
-    const endDate = new Date(reviewPages.at(-1)!!.at(-1)!!.end_time);
+    const endDate = new Date(reviewPages.at(-1)?.at(-1)?.end_time || 0);
     endDate.setHours(0, 0, 0, 0);
     return {
       start: startDate.getTime() / 1000,
@@ -122,7 +125,7 @@ export default function Events() {
     previewTimes
       ? `preview/all/start/${previewTimes.start}/end/${previewTimes.end}`
       : null,
-    { revalidateOnFocus: false }
+    { revalidateOnFocus: false },
   );
 
   // review status
@@ -156,11 +159,11 @@ export default function Events() {
 
             return newData;
           },
-          { revalidate: false, populateCache: true }
+          { revalidate: false, populateCache: true },
         );
       }
     },
-    [updateSegments]
+    [updateSegments],
   );
 
   // selected items
@@ -176,7 +179,7 @@ export default function Events() {
 
     const allReviews = reviewPages.flat();
     const selectedReview = allReviews.find(
-      (item) => item.id == selectedReviewId
+      (item) => item.id == selectedReviewId,
     );
 
     if (!selectedReview) {
@@ -186,12 +189,15 @@ export default function Events() {
     return {
       selected: selectedReview,
       cameraSegments: allReviews.filter(
-        (seg) => seg.camera == selectedReview.camera
+        (seg) => seg.camera == selectedReview.camera,
       ),
       cameraPreviews: allPreviews?.filter(
-        (seg) => seg.camera == selectedReview.camera
+        (seg) => seg.camera == selectedReview.camera,
       ),
     };
+
+    // previews will not update after item is selected
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedReviewId, reviewPages]);
 
   if (selectedData) {

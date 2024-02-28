@@ -1,6 +1,6 @@
 import { baseUrl } from "@/api/baseUrl";
 import { useResizeObserver } from "@/hooks/resize-observer";
-// @ts-ignore we know this doesn't have types
+// @ts-expect-error we know this doesn't have types
 import JSMpeg from "@cycjimmy/jsmpeg-player";
 import { useEffect, useMemo, useRef } from "react";
 
@@ -47,10 +47,10 @@ export default function JSMpegPlayer({
     }
 
     return 100;
-  }, [availableWidth, aspectRatio, height]);
+  }, [availableWidth, aspectRatio, containerHeight, height]);
   const scaledWidth = useMemo(
     () => Math.ceil(scaledHeight * aspectRatio - scrollBarWidth),
-    [scaledHeight, aspectRatio, scrollBarWidth]
+    [scaledHeight, aspectRatio, scrollBarWidth],
   );
 
   useEffect(() => {
@@ -62,7 +62,7 @@ export default function JSMpegPlayer({
       playerRef.current,
       url,
       {},
-      { protocols: [], audio: false, videoBufferSize: 1024 * 1024 * 4 }
+      { protocols: [], audio: false, videoBufferSize: 1024 * 1024 * 4 },
     );
 
     const fullscreen = () => {
@@ -79,6 +79,7 @@ export default function JSMpegPlayer({
       if (playerRef.current) {
         try {
           video.destroy();
+          // eslint-disable-next-line no-empty
         } catch (e) {}
         playerRef.current = null;
       }

@@ -2,7 +2,7 @@ import { useFrigateReviews } from "@/api/ws";
 import { ReviewSeverity } from "@/types/review";
 import { Button } from "../ui/button";
 import { LuRefreshCcw } from "react-icons/lu";
-import { MutableRefObject, useEffect, useState } from "react";
+import { MutableRefObject, useEffect, useMemo, useState } from "react";
 
 type NewReviewDataProps = {
   className: string;
@@ -18,7 +18,8 @@ export default function NewReviewData({
 }: NewReviewDataProps) {
   const { payload: review } = useFrigateReviews();
 
-  const [reviewId, setReviewId] = useState("");
+  const startCheckTs = useMemo(() => Date.now() / 1000, []);
+  const [reviewTs, setReviewTs] = useState(startCheckTs);
   const [hasUpdate, setHasUpdate] = useState(false);
 
   useEffect(() => {
@@ -27,15 +28,15 @@ export default function NewReviewData({
     }
 
     if (review.type == "end" && review.review.severity == severity) {
-      setReviewId(review.review.id);
+      setReviewTs(review.review.start_time);
     }
-  }, [review]);
+  }, [review, severity]);
 
   useEffect(() => {
-    if (reviewId != "") {
+    if (reviewTs > startCheckTs) {
       setHasUpdate(true);
     }
-  }, [reviewId]);
+  }, [startCheckTs, reviewTs]);
 
   return (
     <div className={className}>
