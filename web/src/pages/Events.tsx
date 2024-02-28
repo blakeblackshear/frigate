@@ -93,9 +93,7 @@ export default function Events() {
     [reviewPages]
   );
 
-  const onLoadNextPage = useCallback(() => {
-    setSize(size + 1);
-  }, [size]);
+  const onLoadNextPage = useCallback(() => setSize(size + 1), [size, setSize]);
 
   const reloadData = useCallback(() => setBeforeTs(Date.now() / 1000), []);
 
