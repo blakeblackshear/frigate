@@ -3,7 +3,7 @@ import { get as getData, set as setData } from "idb-keyval";
 
 type usePersistenceReturn<S extends any> = [
   value: S | undefined,
-  setValue: (value: string | boolean) => void,
+  setValue: (value: S) => void,
   loaded: boolean,
 ];
 
@@ -15,7 +15,7 @@ export function usePersistence<S>(
   const [loaded, setLoaded] = useState<boolean>(false);
 
   const setValue = useCallback(
-    (value: string | boolean) => {
+    (value: S) => {
       setInternalValue(value);
       async function update() {
         await setData(key, value);
