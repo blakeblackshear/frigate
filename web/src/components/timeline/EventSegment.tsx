@@ -316,7 +316,7 @@ export function EventSegment({
           {severityValue === displaySeverityType && (
             <HoverCard openDelay={200} closeDelay={100}>
               <div
-                className="absolute left-1/2 transform -translate-x-1/2 w-[8px] h-2 ml-[2px] z-10"
+                className="absolute left-1/2 transform -translate-x-1/2 w-[8px] h-2 ml-[2px] z-10 cursor-pointer"
                 data-severity={severityValue}
               >
                 <HoverCardTrigger asChild>
