@@ -74,7 +74,7 @@ export default function Events() {
       };
       return ["review", params];
     },
-    [reviewSearchParams]
+    [reviewSearchParams, last24Hours]
   );
 
   const {
@@ -97,10 +97,7 @@ export default function Events() {
     setSize(size + 1);
   }, [size]);
 
-  const reloadData = useCallback(() => {
-    setSize(1);
-    setBeforeTs(Date.now() / 1000);
-  }, []);
+  const reloadData = useCallback(() => setBeforeTs(Date.now() / 1000), []);
 
   // preview videos
 
