@@ -83,6 +83,7 @@ class TestConfig(unittest.TestCase):
                 },
                 "openvino": {
                     "type": "openvino",
+                    "model": {"path": "/openvino_model.xml"}
                 },
             },
             # needs to be a file that will exist, doesnt matter what
@@ -1534,11 +1535,11 @@ class TestConfig(unittest.TestCase):
 
         runtime_config = frigate_config.runtime_config()
         assert runtime_config.cameras["back"].onvif.autotracking.movement_weights == [
-            "0.0",
-            "1.0",
-            "1.23",
-            "2.34",
-            "0.5",
+            0.0,
+            1.0,
+            1.23,
+            2.34,
+            0.5,
         ]
 
     def test_fails_invalid_movement_weights(self):

@@ -189,7 +189,7 @@ class PtzAutotrackConfig(FrigateBaseModel):
     timeout: int = Field(
         default=10, title="Seconds to delay before returning to preset."
     )
-    movement_weights: Optional[Union[str, List[str]]] = Field(
+    movement_weights: Optional[Union[str, List[float]]] = Field(
         default=[],
         title="Internal value used for PTZ movements based on the speed of your camera's motor.",
     )
