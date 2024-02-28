@@ -28,9 +28,10 @@ export default function Events() {
 
   // review paging
 
+  const [beforeTs, setBeforeTs] = useState(Date.now() / 1000);
   const last24Hours = useMemo(() => {
-    return { before: Date.now() / 1000, after: getHoursAgo(24) };
-  }, []);
+    return { before: beforeTs, after: getHoursAgo(24) };
+  }, [beforeTs]);
   const selectedTimeRange = useMemo(() => {
     if (reviewSearchParams["after"] == undefined) {
       return last24Hours;
@@ -73,7 +74,7 @@ export default function Events() {
       };
       return ["review", params];
     },
-    [reviewSearchParams]
+    [reviewSearchParams, last24Hours]
   );
 
   const {
@@ -96,10 +97,7 @@ export default function Events() {
     setSize(size + 1);
   }, [size]);
 
-  const reloadData = useCallback(() => {
-    setSize(1);
-    updateSegments();
-  }, []);
+  const reloadData = useCallback(() => setBeforeTs(Date.now() / 1000), []);
 
   // preview videos
 

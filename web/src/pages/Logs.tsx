@@ -97,8 +97,9 @@ function Logs() {
       </div>
 
       {!endVisible && (
-        <div
-          className="absolute bottom-8 left-[50%] -translate-x-[50%] rounded-xl bg-accent-foreground text-white z-20 p-2"
+        <Button
+          className="absolute bottom-8 left-[50%] -translate-x-[50%] rounded-xl bg-accent-foreground text-white bg-gray-400 z-20 p-2"
+          variant="secondary"
           onClick={() =>
             contentRef.current?.scrollTo({
               top: contentRef.current?.scrollHeight,
@@ -107,7 +108,7 @@ function Logs() {
           }
         >
           Jump to Bottom
-        </div>
+        </Button>
       )}
 
       <div
