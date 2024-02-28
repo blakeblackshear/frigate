@@ -51,7 +51,7 @@ function Export() {
   const { data: config } = useSWR<FrigateConfig>("config");
   const { data: exports, mutate } = useSWR<ExportItem[]>(
     "exports/",
-    (url: string) => axios({ baseURL: baseUrl, url }).then((res) => res.data)
+    (url: string) => axios({ baseURL: baseUrl, url }).then((res) => res.data),
   );
 
   // Export States
@@ -96,7 +96,7 @@ function Export() {
       parseInt(startHour),
       parseInt(startMin),
       parseInt(startSec),
-      0
+      0,
     );
     const start = startDate.getTime() / 1000;
     const endDate = new Date((date.to || date.from).getTime());
@@ -117,7 +117,7 @@ function Export() {
         if (response.status == 200) {
           toast.success(
             "Successfully started export. View the file in the /exports folder.",
-            { position: "top-center" }
+            { position: "top-center" },
           );
         }
 
@@ -127,7 +127,7 @@ function Export() {
         if (error.response?.data?.message) {
           toast.error(
             `Failed to start export: ${error.response.data.message}`,
-            { position: "top-center" }
+            { position: "top-center" },
           );
         } else {
           toast.error(`Failed to start export: ${error.message}`, {
@@ -148,7 +148,7 @@ function Export() {
         mutate();
       }
     });
-  }, [deleteClip]);
+  }, [deleteClip, mutate]);
 
   return (
     <div className="w-full h-full overflow-hidden">
@@ -156,7 +156,7 @@ function Export() {
 
       <AlertDialog
         open={deleteClip != undefined}
-        onOpenChange={(_) => setDeleteClip(undefined)}
+        onOpenChange={() => setDeleteClip(undefined)}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -176,7 +176,7 @@ function Export() {
 
       <Dialog
         open={selectedClip != undefined}
-        onOpenChange={(_) => setSelectedClip(undefined)}
+        onOpenChange={() => setSelectedClip(undefined)}
       >
         <DialogContent>
           <DialogHeader>

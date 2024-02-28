@@ -1,9 +1,4 @@
-import {
-  LuConstruction,
-  LuFileUp,
-  LuFlag,
-  LuVideo,
-} from "react-icons/lu";
+import { LuConstruction, LuFileUp, LuFlag, LuVideo } from "react-icons/lu";
 
 export const navbarLinks = [
   {

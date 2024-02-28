@@ -52,12 +52,12 @@ export function EventReviewTimeline({
   const observer = useRef<ResizeObserver | null>(null);
   const timelineDuration = useMemo(
     () => timelineStart - timelineEnd,
-    [timelineEnd, timelineStart]
+    [timelineEnd, timelineStart],
   );
 
   const { alignStartDateToTimeline, alignEndDateToTimeline } = useEventUtils(
     events,
-    segmentDuration
+    segmentDuration,
   );
 
   const { handleMouseDown, handleMouseUp, handleMouseMove } =
@@ -79,6 +79,7 @@ export function EventReviewTimeline({
 
   function handleResize() {
     // TODO: handle screen resize for mobile
+    // eslint-disable-next-line no-empty
     if (timelineRef.current && contentRef.current) {
     }
   }
@@ -94,6 +95,8 @@ export function EventReviewTimeline({
         observer.current?.unobserve(content);
       };
     }
+    // should only be calculated at beginning
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Generate segments for the timeline
@@ -119,6 +122,8 @@ export function EventReviewTimeline({
         />
       );
     });
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     segmentDuration,
     timestampSpread,
@@ -132,6 +137,8 @@ export function EventReviewTimeline({
 
   const segments = useMemo(
     () => generateSegments(),
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       segmentDuration,
       timestampSpread,
@@ -141,7 +148,7 @@ export function EventReviewTimeline({
       minimapStartTime,
       minimapEndTime,
       events,
-    ]
+    ],
   );
 
   useEffect(() => {
@@ -149,7 +156,7 @@ export function EventReviewTimeline({
       requestAnimationFrame(() => {
         if (currentTimeRef.current && currentTimeSegment) {
           currentTimeRef.current.textContent = new Date(
-            currentTimeSegment * 1000
+            currentTimeSegment * 1000,
           ).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
@@ -158,6 +165,8 @@ export function EventReviewTimeline({
         }
       });
     }
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentTimeSegment, showHandlebar]);
 
   useEffect(() => {
@@ -177,7 +186,7 @@ export function EventReviewTimeline({
       // Calculate the segment index corresponding to the target time
       const alignedHandlebarTime = alignStartDateToTimeline(handlebarTime);
       const segmentIndex = Math.ceil(
-        (timelineStart - alignedHandlebarTime) / segmentDuration
+        (timelineStart - alignedHandlebarTime) / segmentDuration,
       );
 
       // Calculate the top position based on the segment index
@@ -193,6 +202,8 @@ export function EventReviewTimeline({
 
       setCurrentTimeSegment(alignedHandlebarTime);
     }
+    // should only be run once
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -207,6 +218,8 @@ export function EventReviewTimeline({
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     currentTimeSegment,
     generateSegments,

@@ -7,7 +7,7 @@ type CameraImageProps = {
   className?: string;
   camera: string;
   onload?: () => void;
-  searchParams?: {};
+  searchParams?: string;
 };
 
 export default function CameraImage({

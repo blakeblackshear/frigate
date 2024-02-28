@@ -54,7 +54,7 @@ export default function ReviewFilterGroup({
       cameras: Object.keys(config?.cameras || {}),
       labels: Object.values(allLabels || {}),
     }),
-    [config, allLabels]
+    [config, allLabels],
   );
 
   // handle updating filters
@@ -67,7 +67,7 @@ export default function ReviewFilterGroup({
         before: day == undefined ? undefined : getEndOfDayTimestamp(day),
       });
     },
-    [onUpdateFilter]
+    [filter, onUpdateFilter],
   );
 
   return (
@@ -111,7 +111,7 @@ function CamerasFilterButton({
   updateCameraFilter,
 }: CameraFilterButtonProps) {
   const [currentCameras, setCurrentCameras] = useState<string[] | undefined>(
-    selectedCameras
+    selectedCameras,
   );
 
   return (
@@ -200,7 +200,7 @@ function CalendarFilterButton({
   }, []);
   const selectedDate = useFormattedTimestamp(
     day == undefined ? 0 : day?.getTime() / 1000,
-    "%b %-d"
+    "%b %-d",
   );
 
   return (
@@ -273,7 +273,7 @@ function GeneralFilterButton({
           <Button
             className="capitalize flex justify-between items-center cursor-pointer w-full"
             variant="secondary"
-            onClick={(_) => setShowReviewed(showReviewed == 0 ? 1 : 0)}
+            onClick={() => setShowReviewed(showReviewed == 0 ? 1 : 0)}
           >
             {showReviewed ? (
               <LuCheck className="w-6 h-6" />
@@ -299,7 +299,7 @@ function LabelsFilterButton({
   updateLabelFilter,
 }: LabelFilterButtonProps) {
   const [currentLabels, setCurrentLabels] = useState<string[] | undefined>(
-    selectedLabels
+    selectedLabels,
   );
 
   return (
@@ -375,7 +375,7 @@ function FilterCheckBox({
     <Button
       className="capitalize flex justify-between items-center cursor-pointer w-full"
       variant="ghost"
-      onClick={(_) => onCheckedChange(!isChecked)}
+      onClick={() => onCheckedChange(!isChecked)}
     >
       {isChecked ? (
         <LuCheck className="w-6 h-6" />

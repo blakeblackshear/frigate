@@ -8,7 +8,7 @@ type CameraImageProps = {
   className?: string;
   camera: string;
   onload?: (event: Event) => void;
-  searchParams?: {};
+  searchParams?: string;
   stretch?: boolean; // stretch to fit width
   fitAspect?: number; // shrink to fit height
 };
@@ -58,10 +58,17 @@ export default function CameraImage({
     }
 
     return 100;
-  }, [availableWidth, aspectRatio, height, stretch]);
+  }, [
+    availableWidth,
+    aspectRatio,
+    containerHeight,
+    fitAspect,
+    height,
+    stretch,
+  ]);
   const scaledWidth = useMemo(
     () => Math.ceil(scaledHeight * aspectRatio - scrollBarWidth),
-    [scaledHeight, aspectRatio, scrollBarWidth]
+    [scaledHeight, aspectRatio, scrollBarWidth],
   );
 
   const img = useMemo(() => new Image(), []);
@@ -74,7 +81,7 @@ export default function CameraImage({
       }
       onload && onload(event);
     },
-    [img, scaledHeight, scaledWidth, setHasLoaded, onload, canvasRef]
+    [img, scaledHeight, scaledWidth, setHasLoaded, onload, canvasRef],
   );
 
   useEffect(() => {

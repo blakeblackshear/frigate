@@ -91,7 +91,7 @@ const TimeAgo: FunctionComponent<IProp> = ({
     } else {
       return 3600000; // refresh every hour
     }
-  }, [currentTime, manualRefreshInterval]);
+  }, [currentTime, manualRefreshInterval, time]);
 
   useEffect(() => {
     const intervalId: NodeJS.Timeout = setInterval(() => {
@@ -102,7 +102,7 @@ const TimeAgo: FunctionComponent<IProp> = ({
 
   const timeAgoValue = useMemo(
     () => timeAgo({ time, currentTime, ...rest }),
-    [currentTime, rest]
+    [currentTime, rest, time],
   );
 
   return <span>{timeAgoValue}</span>;

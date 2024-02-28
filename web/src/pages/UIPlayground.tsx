@@ -2,7 +2,6 @@ import { useMemo, useRef, useState } from "react";
 import Heading from "@/components/ui/heading";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { Event } from "@/types/event";
 import ActivityIndicator from "@/components/ui/activity-indicator";
 import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
 import { ReviewData, ReviewSegment, ReviewSeverity } from "@/types/review";
@@ -84,18 +83,8 @@ function UIPlayground() {
   const contentRef = useRef<HTMLDivElement>(null);
   const [mockEvents, setMockEvents] = useState<ReviewSegment[]>([]);
   const [handlebarTime, setHandlebarTime] = useState(
-    Math.floor(Date.now() / 1000) - 15 * 60
+    Math.floor(Date.now() / 1000) - 15 * 60,
   );
-
-  const recentTimestamp = useMemo(() => {
-    const now = new Date();
-    now.setMinutes(now.getMinutes() - 240);
-    return now.getTime() / 1000;
-  }, []);
-  const { data: events } = useSWR<Event[]>([
-    "events",
-    { limit: 10, after: recentTimestamp },
-  ]);
 
   useMemo(() => {
     const initialEvents = Array.from({ length: 50 }, generateRandomEvent);
@@ -108,16 +97,16 @@ function UIPlayground() {
       return Math.min(...mockEvents.map((event) => event.start_time));
     }
     return Math.floor(Date.now() / 1000); // Default to current time if no events
-  }, [events]);
+  }, [mockEvents]);
 
   const minimapEndTime = useMemo(() => {
     if (mockEvents && mockEvents.length > 0) {
       return Math.max(
-        ...mockEvents.map((event) => event.end_time ?? event.start_time)
+        ...mockEvents.map((event) => event.end_time ?? event.start_time),
       );
     }
     return Math.floor(Date.now() / 1000); // Default to current time if no events
-  }, [events]);
+  }, [mockEvents]);
 
   const [zoomLevel, setZoomLevel] = useState(0);
   const [zoomSettings, setZoomSettings] = useState({
@@ -134,7 +123,7 @@ function UIPlayground() {
   function handleZoomIn() {
     const nextZoomLevel = Math.min(
       possibleZoomLevels.length - 1,
-      zoomLevel + 1
+      zoomLevel + 1,
     );
     setZoomLevel(nextZoomLevel);
     setZoomSettings(possibleZoomLevels[nextZoomLevel]);

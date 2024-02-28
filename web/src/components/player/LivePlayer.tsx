@@ -36,7 +36,7 @@ export default function LivePlayer({
 
   const cameraActive = useMemo(
     () => windowVisible && (activeMotion || activeTracking),
-    [activeMotion, activeTracking, windowVisible]
+    [activeMotion, activeTracking, windowVisible],
   );
 
   // camera live state
@@ -56,6 +56,8 @@ export default function LivePlayer({
     if (!cameraActive) {
       setLiveReady(false);
     }
+    // live mode won't change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cameraActive, liveReady]);
 
   const { payload: recording } = useRecordingsState(cameraConfig.name);
@@ -76,7 +78,7 @@ export default function LivePlayer({
     }
 
     return 30000;
-  }, []);
+  }, [liveReady, cameraActive, windowVisible]);
 
   if (!cameraConfig) {
     return <ActivityIndicator />;

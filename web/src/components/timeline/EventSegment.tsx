@@ -150,17 +150,19 @@ export function EventSegment({
 
   const { alignStartDateToTimeline, alignEndDateToTimeline } = useEventUtils(
     events,
-    segmentDuration
+    segmentDuration,
   );
 
   const severity = useMemo(
     () => getSeverity(segmentTime, displaySeverityType),
-    [getSeverity, segmentTime]
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [getSeverity, segmentTime],
   );
 
   const reviewed = useMemo(
     () => getReviewed(segmentTime),
-    [getReviewed, segmentTime]
+    [getReviewed, segmentTime],
   );
 
   const {
@@ -170,7 +172,7 @@ export function EventSegment({
     roundBottomSecondary,
   } = useMemo(
     () => shouldShowRoundedCorners(segmentTime),
-    [shouldShowRoundedCorners, segmentTime]
+    [shouldShowRoundedCorners, segmentTime],
   );
 
   const startTimestamp = useMemo(() => {
@@ -178,6 +180,8 @@ export function EventSegment({
     if (eventStart) {
       return alignStartDateToTimeline(eventStart);
     }
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getEventStart, segmentTime]);
 
   const apiHost = useApiHost();
@@ -191,11 +195,11 @@ export function EventSegment({
 
   const alignedMinimapStartTime = useMemo(
     () => alignStartDateToTimeline(minimapStartTime ?? 0),
-    [minimapStartTime, alignStartDateToTimeline]
+    [minimapStartTime, alignStartDateToTimeline],
   );
   const alignedMinimapEndTime = useMemo(
     () => alignEndDateToTimeline(minimapEndTime ?? 0),
-    [minimapEndTime, alignEndDateToTimeline]
+    [minimapEndTime, alignEndDateToTimeline],
   );
 
   const isInMinimapRange = useMemo(() => {
@@ -236,6 +240,8 @@ export function EventSegment({
     if (firstSegment && showMinimap && isFirstSegmentInMinimap) {
       debounceScrollIntoView(firstSegment);
     }
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showMinimap, isFirstSegmentInMinimap, events, segmentDuration]);
 
   const segmentClasses = `h-2 relative w-full ${
@@ -267,13 +273,13 @@ export function EventSegment({
   const segmentClick = useCallback(() => {
     if (contentRef.current && startTimestamp) {
       const element = contentRef.current.querySelector(
-        `[data-segment-start="${startTimestamp - segmentDuration}"]`
+        `[data-segment-start="${startTimestamp - segmentDuration}"]`,
       );
       if (element instanceof HTMLElement) {
         debounceScrollIntoView(element);
         element.classList.add(
           `outline-severity_${severityType}`,
-          `shadow-severity_${severityType}`
+          `shadow-severity_${severityType}`,
         );
         element.classList.add("outline-4", "shadow-[0_0_6px_1px]");
         element.classList.remove("outline-0", "shadow-none");
@@ -285,6 +291,8 @@ export function EventSegment({
         }, 3000);
       }
     }
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startTimestamp]);
 
   return (

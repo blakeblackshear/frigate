@@ -24,25 +24,25 @@ export default function DebugCameraImage({
   const [showSettings, setShowSettings] = useState(false);
   const [options, setOptions] = usePersistence<Options>(
     `${cameraConfig?.name}-feed`,
-    emptyObject
+    emptyObject,
   );
   const handleSetOption = useCallback(
     (id: string, value: boolean) => {
       const newOptions = { ...options, [id]: value };
       setOptions(newOptions);
     },
-    [options]
+    [options, setOptions],
   );
   const searchParams = useMemo(
     () =>
       new URLSearchParams(
         Object.keys(options || {}).reduce((memo, key) => {
-          //@ts-ignore we know this is correct
+          //@ts-expect-error we know this is correct
           memo.push([key, options[key] === true ? "1" : "0"]);
           return memo;
-        }, [])
+        }, []),
       ),
-    [options]
+    [options],
   );
   const handleToggleSettings = useCallback(() => {
     setShowSettings(!showSettings);

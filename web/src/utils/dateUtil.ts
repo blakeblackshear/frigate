@@ -132,7 +132,7 @@ export const formatUnixTimestampToDateTime = (
     date_style?: "full" | "long" | "medium" | "short";
     time_style?: "full" | "long" | "medium" | "short";
     strftime_fmt?: string;
-  }
+  },
 ): string => {
   const { timezone, time_format, date_style, time_style, strftime_fmt } =
     config;
@@ -187,7 +187,7 @@ export const formatUnixTimestampToDateTime = (
 
       return `${date.toLocaleDateString(
         locale,
-        dateOptions
+        dateOptions,
       )} ${date.toLocaleTimeString(locale, timeOptions)}`;
     }
 
@@ -213,7 +213,7 @@ interface DurationToken {
  */
 export const getDurationFromTimestamps = (
   start_time: number,
-  end_time: number | null
+  end_time: number | null,
 ): string => {
   if (isNaN(start_time)) {
     return "Invalid start time";
@@ -259,7 +259,7 @@ const getUTCOffset = (date: Date, timezone: string): number => {
 
   // Otherwise, calculate offset using provided timezone
   const utcDate = new Date(
-    date.getTime() - date.getTimezoneOffset() * 60 * 1000
+    date.getTime() - date.getTimezoneOffset() * 60 * 1000,
   );
   // locale of en-CA is required for proper locale format
   let iso = utcDate

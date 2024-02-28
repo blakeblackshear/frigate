@@ -7,7 +7,7 @@ export function useResizeObserver(...refs: MutableRefObject<Element | null>[]) {
       height: 0,
       x: -Infinity,
       y: -Infinity,
-    })
+    }),
   );
   const resizeObserver = useMemo(
     () =>
@@ -16,7 +16,7 @@ export function useResizeObserver(...refs: MutableRefObject<Element | null>[]) {
           setDimensions(entries.map((entry) => entry.contentRect));
         });
       }),
-    []
+    [],
   );
 
   useEffect(() => {

@@ -58,7 +58,7 @@ export default function WebRtcPlayer({
           .filter((kind) => media.indexOf(kind) >= 0)
           .map(
             (kind) =>
-              pc.addTransceiver(kind, { direction: "recvonly" }).receiver.track
+              pc.addTransceiver(kind, { direction: "recvonly" }).receiver.track,
           );
         localTracks.push(...tracks);
       }
@@ -66,12 +66,12 @@ export default function WebRtcPlayer({
       videoRef.current.srcObject = new MediaStream(localTracks);
       return pc;
     },
-    [videoRef]
+    [videoRef],
   );
 
   async function getMediaTracks(
     media: string,
-    constraints: MediaStreamConstraints
+    constraints: MediaStreamConstraints,
   ) {
     try {
       const stream =
@@ -126,7 +126,7 @@ export default function WebRtcPlayer({
         }
       });
     },
-    []
+    [],
   );
 
   useEffect(() => {
@@ -140,7 +140,7 @@ export default function WebRtcPlayer({
 
     const url = `${baseUrl.replace(
       /^http/,
-      "ws"
+      "ws",
     )}live/webrtc/api/ws?src=${camera}`;
     const ws = new WebSocket(url);
     const aPc = PeerConnection("video+audio");

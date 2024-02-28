@@ -20,7 +20,7 @@ function Live() {
 
   const [layout, setLayout] = usePersistence<"grid" | "list">(
     "live-layout",
-    isDesktop ? "grid" : "list"
+    isDesktop ? "grid" : "list",
   );
 
   // recent events
@@ -40,7 +40,7 @@ function Live() {
       updateEvents();
       return;
     }
-  }, [eventUpdate]);
+  }, [eventUpdate, updateEvents]);
 
   const events = useMemo(() => {
     if (!allEvents) {
@@ -76,7 +76,7 @@ function Live() {
     return () => {
       removeEventListener("visibilitychange", visibilityListener);
     };
-  }, []);
+  }, [visibilityListener]);
 
   return (
     <div className="size-full overflow-y-scroll px-2">
@@ -123,7 +123,7 @@ function Live() {
       >
         {cameras.map((camera) => {
           let grow;
-          let aspectRatio = camera.detect.width / camera.detect.height;
+          const aspectRatio = camera.detect.width / camera.detect.height;
           if (aspectRatio > 2) {
             grow = `${layout == "grid" ? "col-span-2" : ""} aspect-wide`;
           } else if (aspectRatio < 1) {

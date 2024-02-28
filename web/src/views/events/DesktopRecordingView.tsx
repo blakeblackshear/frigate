@@ -3,6 +3,7 @@ import DynamicVideoPlayer, {
 } from "@/components/player/DynamicVideoPlayer";
 import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
 import { Button } from "@/components/ui/button";
+import { Preview } from "@/types/preview";
 import { ReviewSegment } from "@/types/review";
 import { getChunkedTimeRange } from "@/utils/timelineUtil";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -31,7 +32,7 @@ export default function DesktopRecordingView({
 
   const timeRange = useMemo(
     () => getChunkedTimeRange(selectedReview.start_time),
-    []
+    [selectedReview],
   );
   const [selectedRangeIdx, setSelectedRangeIdx] = useState(
     timeRange.ranges.findIndex((chunk) => {
@@ -39,7 +40,7 @@ export default function DesktopRecordingView({
         chunk.start <= selectedReview.start_time &&
         chunk.end >= selectedReview.start_time
       );
-    })
+    }),
   );
 
   // move to next clip
@@ -55,13 +56,13 @@ export default function DesktopRecordingView({
         setSelectedRangeIdx(selectedRangeIdx - 1);
       }
     });
-  }, [playerReady, selectedRangeIdx]);
+  }, [playerReady, selectedRangeIdx, timeRange]);
 
   // scrubbing and timeline state
 
   const [scrubbing, setScrubbing] = useState(false);
   const [currentTime, setCurrentTime] = useState<number>(
-    selectedReview?.start_time || Date.now() / 1000
+    selectedReview?.start_time || Date.now() / 1000,
   );
 
   useEffect(() => {
@@ -74,6 +75,9 @@ export default function DesktopRecordingView({
     if (!scrubbing) {
       controllerRef.current?.seekToTimestamp(currentTime, true);
     }
+
+    // we only want to seek when user stops scrubbing
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scrubbing]);
 
   return (
@@ -100,7 +104,7 @@ export default function DesktopRecordingView({
 
             controllerRef.current?.seekToTimestamp(
               selectedReview.start_time,
-              true
+              true,
             );
           }}
         />

@@ -78,13 +78,13 @@ export default function PreviewThumbnailPlayer({
   const playingBack = useMemo(() => playback, [playback]);
 
   const onPlayback = useCallback(
-    (isHovered: Boolean) => {
+    (isHovered: boolean) => {
       if (isHovered) {
         setHoverTimeout(
           setTimeout(() => {
             setPlayback(true);
             setHoverTimeout(null);
-          }, 500)
+          }, 500),
         );
       } else {
         if (hoverTimeout) {
@@ -95,14 +95,17 @@ export default function PreviewThumbnailPlayer({
         setProgress(0);
       }
     },
-    [hoverTimeout, review]
+
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [hoverTimeout, review],
   );
 
   // date
 
   const formattedDate = useFormattedTimestamp(
     review.start_time,
-    config?.ui.time_format == "24hour" ? "%b %-d, %H:%M" : "%b %-d, %I:%M %p"
+    config?.ui.time_format == "24hour" ? "%b %-d, %H:%M" : "%b %-d, %I:%M %p",
   );
 
   return (
@@ -134,7 +137,7 @@ export default function PreviewThumbnailPlayer({
               }`}
               src={`${apiHost}${review.thumb_path.replace(
                 "/media/frigate/",
-                ""
+                "",
               )}`}
               loading={isSafari ? "eager" : "lazy"}
               onLoad={() => {
@@ -215,8 +218,11 @@ function PreviewContent({
     // start with a bit of padding
     return Math.max(
       0,
-      review.start_time - relevantPreview.start - PREVIEW_PADDING
+      review.start_time - relevantPreview.start - PREVIEW_PADDING,
     );
+
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const [lastPercent, setLastPercent] = useState(0.0);
 
@@ -234,6 +240,9 @@ function PreviewContent({
       playerRef.current.currentTime = playerStartTime;
       playerRef.current.playbackRate = 8;
     }
+
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playerRef]);
 
   // time progress update
@@ -269,6 +278,9 @@ function PreviewContent({
     } else {
       setProgress(playerPercent);
     }
+
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setProgress, lastPercent]);
 
   // manual playback
@@ -289,6 +301,9 @@ function PreviewContent({
       }
     }, 125);
     return () => clearInterval(intervalId);
+
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [manualPlayback, playerRef]);
 
   // preview
@@ -333,7 +348,7 @@ function InProgressPreview({
   const { data: previewFrames } = useSWR<string[]>(
     `preview/${review.camera}/start/${Math.floor(review.start_time) - 4}/end/${
       Math.ceil(review.end_time) + 4
-    }/frames`
+    }/frames`,
   );
   const [key, setKey] = useState(0);
 
@@ -361,6 +376,9 @@ function InProgressPreview({
 
       setKey(key + 1);
     }, MIN_LOAD_TIMEOUT_MS);
+
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, previewFrames]);
 
   if (!previewFrames || previewFrames.length == 0) {
@@ -394,7 +412,7 @@ function PreviewContextItems({
   const exportReview = useCallback(() => {
     axios.post(
       `export/${review.camera}/start/${review.start_time}/end/${review.end_time}`,
-      { playback: "realtime" }
+      { playback: "realtime" },
     );
   }, [review]);
 
