@@ -6,6 +6,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { TooltipPortal } from "@radix-ui/react-tooltip";
 
 const variants = {
   primary: {
@@ -54,10 +55,12 @@ export default function NavItem({
           <TooltipTrigger>
             <Icon className="size-5 md:m-[6px]" />
           </TooltipTrigger>
+          <TooltipPortal>
+            <TooltipContent side="right">
+              <p>{title}</p>
+            </TooltipContent>
+          </TooltipPortal>
         </NavLink>
-        <TooltipContent side="right">
-          <p>{title}</p>
-        </TooltipContent>
       </Tooltip>
     )
   );
