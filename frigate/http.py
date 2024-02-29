@@ -1384,7 +1384,7 @@ def end_event(event_id):
 
 @bp.route("/config")
 def config():
-    config = current_app.frigate_config.model_dump(mode="json")
+    config = current_app.frigate_config.model_dump(mode="json", exclude_none=True)
 
     # remove the mqtt password
     config["mqtt"].pop("password", None)
@@ -1404,9 +1404,9 @@ def config():
     config["plus"] = {"enabled": current_app.plus_api.is_active()}
 
     for detector, detector_config in config["detectors"].items():
-        detector_config["model"]["labelmap"] = (
-            current_app.frigate_config.model.merged_labelmap
-        )
+        detector_config["model"][
+            "labelmap"
+        ] = current_app.frigate_config.model.merged_labelmap
 
     return jsonify(config)
 

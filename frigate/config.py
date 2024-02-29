@@ -342,6 +342,10 @@ class MotionConfig(FrigateBaseModel):
     def serialize_mask(self, value: Any, info):
         return self.raw_mask
 
+    @field_serializer("raw_mask", when_used="json")
+    def serialize_raw_mask(self, value: Any, info):
+        return None
+
 
 class RuntimeMotionConfig(MotionConfig):
     raw_mask: Union[str, List[str]] = ""
@@ -372,6 +376,10 @@ class RuntimeMotionConfig(MotionConfig):
     @field_serializer("mask", when_used="json")
     def serialize_mask(self, value: Any, info):
         return self.raw_mask
+
+    @field_serializer("raw_mask", when_used="json")
+    def serialize_raw_mask(self, value: Any, info):
+        return None
 
     model_config = ConfigDict(arbitrary_types_allowed=True, extra="ignore")
 
@@ -457,6 +465,10 @@ class FilterConfig(FrigateBaseModel):
     @field_serializer("mask", when_used="json")
     def serialize_mask(self, value: Any, info):
         return self.raw_mask
+
+    @field_serializer("raw_mask", when_used="json")
+    def serialize_raw_mask(self, value: Any, info):
+        return None
 
 
 class AudioFilterConfig(FrigateBaseModel):
