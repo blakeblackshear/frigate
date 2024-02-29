@@ -143,15 +143,15 @@ class MqttConfig(FrigateBaseModel):
     client_id: str = Field(default="frigate", title="MQTT Client ID")
     stats_interval: int = Field(default=60, title="MQTT Camera Stats Interval")
     user: Optional[str] = Field(None, title="MQTT Username")
-    password: Optional[str] = Field(None, title="MQTT Password")
+    password: Optional[str] = Field(None, title="MQTT Password", validate_default=True)
     tls_ca_certs: Optional[str] = Field(None, title="MQTT TLS CA Certificates")
     tls_client_cert: Optional[str] = Field(None, title="MQTT TLS Client Certificate")
     tls_client_key: Optional[str] = Field(None, title="MQTT TLS Client Key")
     tls_insecure: Optional[bool] = Field(None, title="MQTT TLS Insecure")
 
     @field_validator("password")
-    @classmethod
-    def validate_password(cls, v, info: ValidationInfo):
+    def user_requires_pass(cls, v, info: ValidationInfo):
+        print(f"doing a check where {v} is None and {info.data['user']} is None")
         if (v is None) != (info.data["user"] is None):
             raise ValueError("Password must be provided with username.")
         return v
