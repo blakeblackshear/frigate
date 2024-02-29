@@ -187,6 +187,10 @@ export default function EventView({
     return data;
   }, [minimap]);
 
+  // preview playback
+
+  const [previewTime, setPreviewTime] = useState<number>();
+
   if (!config) {
     return <ActivityIndicator />;
   }
@@ -287,6 +291,7 @@ export default function EventView({
                         review={value}
                         relevantPreview={relevantPreview}
                         setReviewed={markItemAsReviewed}
+                        onTimeUpdate={setPreviewTime}
                         onClick={onSelectReview}
                       />
                     </div>
@@ -308,6 +313,8 @@ export default function EventView({
             showMinimap={showMinimap}
             minimapStartTime={minimapBounds.start}
             minimapEndTime={minimapBounds.end}
+            showHandlebar={previewTime != undefined}
+            handlebarTime={previewTime}
             events={reviewItems.all}
             severityType={severity}
             contentRef={contentRef}

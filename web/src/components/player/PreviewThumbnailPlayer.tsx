@@ -29,6 +29,7 @@ type PreviewPlayerProps = {
   autoPlayback?: boolean;
   setReviewed?: (reviewId: string) => void;
   onClick?: (reviewId: string) => void;
+  onTimeUpdate?: (time: number | undefined) => void;
 };
 
 type Preview = {
@@ -44,6 +45,7 @@ export default function PreviewThumbnailPlayer({
   relevantPreview,
   setReviewed,
   onClick,
+  onTimeUpdate,
 }: PreviewPlayerProps) {
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -62,7 +64,7 @@ export default function PreviewThumbnailPlayer({
   }, [ignoreClick, review, onClick]);
 
   const swipeHandlers = useSwipeable({
-    onSwipedLeft: () => setPlayback(false),
+    onSwipedLeft: () => (setReviewed ? setReviewed(review.id) : null),
     onSwipedRight: () => setPlayback(true),
     preventScrollOnSwipe: true,
   });
@@ -92,6 +94,10 @@ export default function PreviewThumbnailPlayer({
         }
 
         setPlayback(false);
+
+        if (onTimeUpdate) {
+          onTimeUpdate(undefined);
+        }
       }
     },
 
@@ -125,6 +131,7 @@ export default function PreviewThumbnailPlayer({
                 setReviewed={handleSetReviewed}
                 setIgnoreClick={setIgnoreClick}
                 isPlayingBack={setPlayback}
+                onTimeUpdate={onTimeUpdate}
               />
             </div>
           )}
@@ -190,6 +197,7 @@ type PreviewContentProps = {
   setReviewed?: () => void;
   setIgnoreClick: (ignore: boolean) => void;
   isPlayingBack: (ended: boolean) => void;
+  onTimeUpdate?: (time: number | undefined) => void;
 };
 function PreviewContent({
   review,
@@ -197,6 +205,7 @@ function PreviewContent({
   setReviewed,
   setIgnoreClick,
   isPlayingBack,
+  onTimeUpdate,
 }: PreviewContentProps) {
   // preview
 
@@ -208,6 +217,7 @@ function PreviewContent({
         setReviewed={setReviewed}
         setIgnoreClick={setIgnoreClick}
         isPlayingBack={isPlayingBack}
+        onTimeUpdate={onTimeUpdate}
       />
     );
   } else if (isCurrentHour(review.start_time)) {
@@ -217,6 +227,7 @@ function PreviewContent({
         setReviewed={setReviewed}
         setIgnoreClick={setIgnoreClick}
         isPlayingBack={isPlayingBack}
+        onTimeUpdate={onTimeUpdate}
       />
     );
   }
@@ -229,6 +240,7 @@ type VideoPreviewProps = {
   setReviewed?: () => void;
   setIgnoreClick: (ignore: boolean) => void;
   isPlayingBack: (ended: boolean) => void;
+  onTimeUpdate?: (time: number | undefined) => void;
 };
 function VideoPreview({
   review,
@@ -236,6 +248,7 @@ function VideoPreview({
   setReviewed,
   setIgnoreClick,
   isPlayingBack,
+  onTimeUpdate,
 }: VideoPreviewProps) {
   const playerRef = useRef<HTMLVideoElement | null>(null);
 
@@ -286,8 +299,10 @@ function VideoPreview({
   // time progress update
 
   const onProgress = useCallback(() => {
-    if (!setProgress) {
-      return;
+    if (onTimeUpdate) {
+      onTimeUpdate(
+        relevantPreview.start + (playerRef.current?.currentTime || 0),
+      );
     }
 
     const playerProgress =
@@ -310,6 +325,10 @@ function VideoPreview({
     if (playerPercent > 100) {
       if (isMobile) {
         isPlayingBack(false);
+
+        if (onTimeUpdate) {
+          onTimeUpdate(undefined);
+        }
       } else {
         playerRef.current?.pause();
       }
@@ -424,17 +443,19 @@ type InProgressPreviewProps = {
   setReviewed?: (reviewId: string) => void;
   setIgnoreClick: (ignore: boolean) => void;
   isPlayingBack: (ended: boolean) => void;
+  onTimeUpdate?: (time: number | undefined) => void;
 };
 function InProgressPreview({
   review,
   setReviewed,
   setIgnoreClick,
   isPlayingBack,
+  onTimeUpdate,
 }: InProgressPreviewProps) {
   const apiHost = useApiHost();
   const { data: previewFrames } = useSWR<string[]>(
-    `preview/${review.camera}/start/${Math.floor(review.start_time) - 4}/end/${
-      Math.ceil(review.end_time) + 4
+    `preview/${review.camera}/start/${Math.floor(review.start_time) - PREVIEW_PADDING}/end/${
+      Math.ceil(review.end_time) + PREVIEW_PADDING
     }/frames`,
   );
   const [manualFrame, setManualFrame] = useState(false);
@@ -445,6 +466,10 @@ function InProgressPreview({
       return;
     }
 
+    if (onTimeUpdate) {
+      onTimeUpdate(review.start_time - PREVIEW_PADDING + key);
+    }
+
     if (manualFrame) {
       return;
     }
@@ -452,6 +477,10 @@ function InProgressPreview({
     if (key == previewFrames.length - 1) {
       if (isMobile) {
         isPlayingBack(false);
+
+        if (onTimeUpdate) {
+          onTimeUpdate(undefined);
+        }
       }
 
       return;
