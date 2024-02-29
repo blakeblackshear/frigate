@@ -6,7 +6,7 @@ import logging
 import os
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,6 +15,7 @@ from pydantic import (
     ConfigDict,
     Field,
     TypeAdapter,
+    field_serializer,
     field_validator,
     validator,
 )
@@ -336,7 +337,11 @@ class MotionConfig(FrigateBaseModel):
     enabled_in_config: Optional[bool] = Field(
         None, title="Keep track of original state of motion detection."
     )
+    raw_mask: Union[str, List[str]] = ""
 
+    @field_serializer("mask", when_used="json")
+    def serialize_mask(self, value: Any, info):
+        return self.raw_mask
 
 class RuntimeMotionConfig(MotionConfig):
     raw_mask: Union[str, List[str]] = ""
@@ -363,6 +368,10 @@ class RuntimeMotionConfig(MotionConfig):
             ret["mask"] = ret["raw_mask"]
             ret.pop("raw_mask")
         return ret
+
+    @field_serializer("mask", when_used="json")
+    def serialize_mask(self, value: Any, info):
+        return self.raw_mask
 
     model_config = ConfigDict(arbitrary_types_allowed=True, extra="ignore")
 
@@ -443,6 +452,11 @@ class FilterConfig(FrigateBaseModel):
         None,
         title="Detection area polygon mask for this filter configuration.",
     )
+    raw_mask: Union[str, List[str]] = ""
+
+    @field_serializer("mask", when_used="json")
+    def serialize_mask(self, value: Any, info):
+        return self.raw_mask
 
 
 class AudioFilterConfig(FrigateBaseModel):

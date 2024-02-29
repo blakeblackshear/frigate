@@ -1384,7 +1384,7 @@ def end_event(event_id):
 
 @bp.route("/config")
 def config():
-    config = current_app.frigate_config.model_dump()
+    config = current_app.frigate_config.model_dump(mode='json')
 
     # remove the mqtt password
     config["mqtt"].pop("password", None)
