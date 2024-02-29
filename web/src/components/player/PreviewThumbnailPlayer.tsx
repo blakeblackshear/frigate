@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useApiHost } from "@/api";
 import { isCurrentHour } from "@/utils/dateUtil";
 import { ReviewSegment } from "@/types/review";
-import { Slider } from "../ui/slider";
+import { Slider } from "../ui/slider-no-thumb";
 import { getIconForLabel, getIconForSubLabel } from "@/utils/iconUtil";
 import TimeAgo from "../dynamic/TimeAgo";
 import useSWR from "swr";
@@ -50,16 +50,16 @@ export default function PreviewThumbnailPlayer({
 
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>();
   const [playback, setPlayback] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [ignoreClick, setIgnoreClick] = useState(false);
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
 
   // interaction
 
   const handleOnClick = useCallback(() => {
-    if (onClick) {
+    if (onClick && !ignoreClick) {
       onClick(review.id);
     }
-  }, [review, onClick]);
+  }, [ignoreClick, review, onClick]);
 
   const swipeHandlers = useSwipeable({
     onSwipedLeft: () => setPlayback(false),
@@ -92,7 +92,6 @@ export default function PreviewThumbnailPlayer({
         }
 
         setPlayback(false);
-        setProgress(0);
       }
     },
 
@@ -123,8 +122,8 @@ export default function PreviewThumbnailPlayer({
               <PreviewContent
                 review={review}
                 relevantPreview={relevantPreview}
-                setProgress={setProgress}
                 setReviewed={handleSetReviewed}
+                setIgnoreClick={setIgnoreClick}
               />
             </div>
           )}
@@ -174,15 +173,6 @@ export default function PreviewThumbnailPlayer({
               </>
             )}
           </div>
-          {playingBack && (
-            <Slider
-              className="absolute inset-x-0 bottom-0 z-10"
-              value={[progress]}
-              min={0}
-              step={1}
-              max={100}
-            />
-          )}
           {!playingBack && imgLoaded && review.has_been_reviewed && (
             <div className="absolute inset-0 z-10 bg-black bg-opacity-60" />
           )}
@@ -193,23 +183,58 @@ export default function PreviewThumbnailPlayer({
   );
 }
 
-const PREVIEW_PADDING = 16;
 type PreviewContentProps = {
   review: ReviewSegment;
   relevantPreview: Preview | undefined;
-  setProgress?: (progress: number) => void;
   setReviewed?: () => void;
+  setIgnoreClick: (ignore: boolean) => void;
 };
 function PreviewContent({
   review,
   relevantPreview,
-  setProgress,
   setReviewed,
+  setIgnoreClick,
 }: PreviewContentProps) {
+  // preview
+
+  if (relevantPreview) {
+    return (
+      <VideoPreview
+        review={review}
+        relevantPreview={relevantPreview}
+        setReviewed={setReviewed}
+        setIgnoreClick={setIgnoreClick}
+      />
+    );
+  } else if (isCurrentHour(review.start_time)) {
+    return (
+      <InProgressPreview
+        review={review}
+        setReviewed={setReviewed}
+        setIgnoreClick={setIgnoreClick}
+      />
+    );
+  }
+}
+
+const PREVIEW_PADDING = 16;
+type VideoPreviewProps = {
+  review: ReviewSegment;
+  relevantPreview: Preview;
+  setReviewed?: () => void;
+  setIgnoreClick: (ignore: boolean) => void;
+};
+function VideoPreview({
+  review,
+  relevantPreview,
+  setReviewed,
+  setIgnoreClick,
+}: VideoPreviewProps) {
   const playerRef = useRef<HTMLVideoElement | null>(null);
 
   // keep track of playback state
 
+  const [progress, setProgress] = useState(0);
   const playerStartTime = useMemo(() => {
     if (!relevantPreview) {
       return 0;
@@ -224,6 +249,12 @@ function PreviewContent({
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  const playerDuration = useMemo(
+    () => review.end_time - review.start_time + PREVIEW_PADDING,
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
   const [lastPercent, setLastPercent] = useState(0.0);
 
   // initialize player correctly
@@ -256,8 +287,6 @@ function PreviewContent({
       (playerRef.current?.currentTime || 0) - playerStartTime;
 
     // end with a bit of padding
-    const playerDuration =
-      review.end_time - review.start_time + PREVIEW_PADDING;
     const playerPercent = (playerProgress / playerDuration) * 100;
 
     if (
@@ -306,10 +335,53 @@ function PreviewContent({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [manualPlayback, playerRef]);
 
-  // preview
+  // user interaction
 
-  if (relevantPreview) {
-    return (
+  const onManualSeek = useCallback(
+    (values: number[]) => {
+      const value = values[0];
+
+      if (!playerRef.current) {
+        return;
+      }
+
+      if (manualPlayback) {
+        setManualPlayback(false);
+        setIgnoreClick(true);
+      }
+
+      if (playerRef.current.paused == false) {
+        playerRef.current.pause();
+        setIgnoreClick(true);
+      }
+
+      setProgress(value);
+      playerRef.current.currentTime =
+        playerStartTime + (value / 100.0) * playerDuration;
+    },
+    [
+      manualPlayback,
+      playerDuration,
+      playerRef,
+      playerStartTime,
+      setIgnoreClick,
+    ],
+  );
+
+  const onStopManualSeek = useCallback(() => {
+    setTimeout(() => {
+      setIgnoreClick(false);
+
+      if (isSafari || (isFirefox && isMobile)) {
+        setManualPlayback(true);
+      } else {
+        playerRef.current?.play();
+      }
+    }, 500);
+  }, [playerRef, setIgnoreClick]);
+
+  return (
+    <div className="relative size-full aspect-video bg-black">
       <video
         ref={playerRef}
         className="size-full aspect-video bg-black"
@@ -321,28 +393,29 @@ function PreviewContent({
       >
         <source src={relevantPreview.src} type={relevantPreview.type} />
       </video>
-    );
-  } else if (isCurrentHour(review.start_time)) {
-    return (
-      <InProgressPreview
-        review={review}
-        setProgress={setProgress}
-        setReviewed={setReviewed}
+      <Slider
+        className="absolute inset-x-0 bottom-0 z-30"
+        value={[progress]}
+        onValueChange={onManualSeek}
+        onValueCommit={onStopManualSeek}
+        min={0}
+        step={1}
+        max={100}
       />
-    );
-  }
+    </div>
+  );
 }
 
 const MIN_LOAD_TIMEOUT_MS = 200;
 type InProgressPreviewProps = {
   review: ReviewSegment;
-  setProgress?: (progress: number) => void;
   setReviewed?: (reviewId: string) => void;
+  setIgnoreClick: (ignore: boolean) => void;
 };
 function InProgressPreview({
   review,
-  setProgress,
   setReviewed,
+  setIgnoreClick,
 }: InProgressPreviewProps) {
   const apiHost = useApiHost();
   const { data: previewFrames } = useSWR<string[]>(
@@ -350,6 +423,7 @@ function InProgressPreview({
       Math.ceil(review.end_time) + 4
     }/frames`,
   );
+  const [manualFrame, setManualFrame] = useState(false);
   const [key, setKey] = useState(0);
 
   const handleLoad = useCallback(() => {
@@ -357,19 +431,15 @@ function InProgressPreview({
       return;
     }
 
-    if (key == previewFrames.length - 1) {
-      if (setProgress) {
-        setProgress(100);
-      }
+    if (manualFrame) {
+      return;
+    }
 
+    if (key == previewFrames.length - 1) {
       return;
     }
 
     setTimeout(() => {
-      if (setProgress) {
-        setProgress((key / (previewFrames.length - 1)) * 100);
-      }
-
       if (setReviewed && key == Math.floor(previewFrames.length / 2)) {
         setReviewed(review.id);
       }
@@ -379,7 +449,35 @@ function InProgressPreview({
 
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, previewFrames]);
+  }, [key, manualFrame, previewFrames]);
+
+  // user interaction
+
+  const onManualSeek = useCallback(
+    (values: number[]) => {
+      const value = values[0];
+
+      if (!manualFrame) {
+        setManualFrame(true);
+        setIgnoreClick(true);
+      }
+
+      setKey(value);
+    },
+    [manualFrame, setIgnoreClick, setManualFrame, setKey],
+  );
+
+  const onStopManualSeek = useCallback(
+    (values: number[]) => {
+      const value = values[0];
+      setTimeout(() => {
+        setIgnoreClick(false);
+        setManualFrame(false);
+        setKey(value - 1);
+      }, 500);
+    },
+    [setManualFrame, setIgnoreClick],
+  );
 
   if (!previewFrames || previewFrames.length == 0) {
     return (
@@ -391,11 +489,20 @@ function InProgressPreview({
   }
 
   return (
-    <div className="size-full flex items-center bg-black">
+    <div className="relative size-full flex items-center bg-black">
       <img
         className="size-full object-contain"
         src={`${apiHost}api/preview/${previewFrames[key]}/thumbnail.jpg`}
         onLoad={handleLoad}
+      />
+      <Slider
+        className="absolute inset-x-0 bottom-0 z-30"
+        value={[key]}
+        onValueChange={onManualSeek}
+        onValueCommit={onStopManualSeek}
+        min={0}
+        step={1}
+        max={previewFrames.length - 1}
       />
     </div>
   );
