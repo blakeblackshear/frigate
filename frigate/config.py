@@ -1330,7 +1330,9 @@ class FrigateConfig(FrigateBaseModel):
 
         for key, detector in config.detectors.items():
             adapter = TypeAdapter(DetectorConfig)
-            model_dict = detector if isinstance(detector, dict) else detector.model_dump()
+            model_dict = (
+                detector if isinstance(detector, dict) else detector.model_dump()
+            )
             detector_config: DetectorConfig = adapter.validate_python(model_dict)
             if detector_config.model is None:
                 detector_config.model = config.model
