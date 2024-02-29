@@ -12,7 +12,7 @@ pandas == 2.1.4
 peewee == 3.17.*
 peewee_migrate == 1.12.*
 psutil == 5.9.*
-pydantic == 1.10.*
+pydantic == 2.6.*
 git+https://github.com/fbcotter/py3nvml#egg=py3nvml
 PyYAML == 6.0.*
 pytz == 2023.3.post1

@@ -7,7 +7,7 @@ from typing import Dict, Optional, Tuple
 
 import matplotlib.pyplot as plt
 import requests
-from pydantic import BaseModel, Extra, Field
+from pydantic import BaseModel, ConfigDict, Field
 from pydantic.fields import PrivateAttr
 
 from frigate.plus import PlusApi
@@ -35,8 +35,10 @@ class ModelTypeEnum(str, Enum):
 
 
 class ModelConfig(BaseModel):
-    path: Optional[str] = Field(title="Custom Object detection model path.")
-    labelmap_path: Optional[str] = Field(title="Label map for custom object detector.")
+    path: Optional[str] = Field(None, title="Custom Object detection model path.")
+    labelmap_path: Optional[str] = Field(
+        None, title="Label map for custom object detector."
+    )
     width: int = Field(default=320, title="Object detection model input width.")
     height: int = Field(default=320, title="Object detection model input height.")
     labelmap: Dict[int, str] = Field(
@@ -132,17 +134,15 @@ class ModelConfig(BaseModel):
         for key, val in enumerate(enabled_labels):
             self._colormap[val] = tuple(int(round(255 * c)) for c in cmap(key)[:3])
 
-    class Config:
-        extra = Extra.forbid
+    model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
 
 class BaseDetectorConfig(BaseModel):
     # the type field must be defined in all subclasses
     type: str = Field(default="cpu", title="Detector Type")
-    model: ModelConfig = Field(
+    model: Optional[ModelConfig] = Field(
         default=None, title="Detector specific model configuration."
     )
-
-    class Config:
-        extra = Extra.allow
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(
+        extra="allow", arbitrary_types_allowed=True, protected_namespaces=()
+    )

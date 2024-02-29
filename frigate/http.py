@@ -917,9 +917,9 @@ def event_snapshot(id):
     else:
         response.headers["Cache-Control"] = "no-store"
     if download:
-        response.headers[
-            "Content-Disposition"
-        ] = f"attachment; filename=snapshot-{id}.jpg"
+        response.headers["Content-Disposition"] = (
+            f"attachment; filename=snapshot-{id}.jpg"
+        )
     return response
 
 
@@ -1106,9 +1106,9 @@ def event_clip(id):
     if download:
         response.headers["Content-Disposition"] = "attachment; filename=%s" % file_name
     response.headers["Content-Length"] = os.path.getsize(clip_path)
-    response.headers[
-        "X-Accel-Redirect"
-    ] = f"/clips/{file_name}"  # nginx: https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
+    response.headers["X-Accel-Redirect"] = (
+        f"/clips/{file_name}"  # nginx: https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
+    )
 
     return response
 
@@ -1384,7 +1384,7 @@ def end_event(event_id):
 
 @bp.route("/config")
 def config():
-    config = current_app.frigate_config.dict()
+    config = current_app.frigate_config.model_dump(mode="json", exclude_none=True)
 
     # remove the mqtt password
     config["mqtt"].pop("password", None)
@@ -1404,9 +1404,9 @@ def config():
     config["plus"] = {"enabled": current_app.plus_api.is_active()}
 
     for detector, detector_config in config["detectors"].items():
-        detector_config["model"][
-            "labelmap"
-        ] = current_app.frigate_config.model.merged_labelmap
+        detector_config["model"]["labelmap"] = (
+            current_app.frigate_config.model.merged_labelmap
+        )
 
     return jsonify(config)
 
@@ -1811,9 +1811,9 @@ def get_recordings_storage_usage():
 
     total_mb = recording_stats["total"]
 
-    camera_usages: dict[
-        str, dict
-    ] = current_app.storage_maintainer.calculate_camera_usages()
+    camera_usages: dict[str, dict] = (
+        current_app.storage_maintainer.calculate_camera_usages()
+    )
 
     for camera_name in camera_usages.keys():
         if camera_usages.get(camera_name, {}).get("usage"):
@@ -2001,9 +2001,9 @@ def recording_clip(camera_name, start_ts, end_ts):
     if download:
         response.headers["Content-Disposition"] = "attachment; filename=%s" % file_name
     response.headers["Content-Length"] = os.path.getsize(path)
-    response.headers[
-        "X-Accel-Redirect"
-    ] = f"/cache/{file_name}"  # nginx: https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
+    response.headers["X-Accel-Redirect"] = (
+        f"/cache/{file_name}"  # nginx: https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
+    )
 
     return response
 
