@@ -343,6 +343,7 @@ class MotionConfig(FrigateBaseModel):
     def serialize_mask(self, value: Any, info):
         return self.raw_mask
 
+
 class RuntimeMotionConfig(MotionConfig):
     raw_mask: Union[str, List[str]] = ""
     mask: np.ndarray = None
