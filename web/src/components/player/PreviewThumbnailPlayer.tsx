@@ -32,7 +32,7 @@ import { useSwipeable } from "react-swipeable";
 
 type PreviewPlayerProps = {
   review: ReviewSegment;
-  relevantPreview?: Preview;
+  allPreviews?: Preview[];
   autoPlayback?: boolean;
   setReviewed?: (reviewId: string) => void;
   onTimeUpdate?: (time: number | undefined) => void;
@@ -49,7 +49,7 @@ type Preview = {
 
 export default function PreviewThumbnailPlayer({
   review,
-  relevantPreview,
+  allPreviews,
   setReviewed,
   onClick,
   onTimeUpdate,
@@ -86,6 +86,17 @@ export default function PreviewThumbnailPlayer({
   }, [review, setReviewed]);
 
   // playback
+
+  const relevantPreview = useMemo(
+    () =>
+      Object.values(allPreviews || []).find(
+        (preview) =>
+          preview.camera == review.camera &&
+          preview.start < review.start_time &&
+          preview.end > review.end_time,
+      ),
+    [allPreviews],
+  );
 
   const playingBack = useMemo(() => playback, [playback]);
 

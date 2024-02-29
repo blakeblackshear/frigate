@@ -305,14 +305,6 @@ export default function EventView({
               currentItems.map((value, segIdx) => {
                 const lastRow = segIdx == reviewItems[severity].length - 1;
                 const selected = selectedReviews.includes(value.id);
-                const relevantPreview = Object.values(
-                  relevantPreviews || [],
-                ).find(
-                  (preview) =>
-                    preview.camera == value.camera &&
-                    preview.start < value.start_time &&
-                    preview.end > value.end_time,
-                );
 
                 return (
                   <div
@@ -328,7 +320,7 @@ export default function EventView({
                     <div className="aspect-video rounded-lg overflow-hidden">
                       <PreviewThumbnailPlayer
                         review={value}
-                        relevantPreview={relevantPreview}
+                        allPreviews={relevantPreviews}
                         setReviewed={markItemAsReviewed}
                         onTimeUpdate={setPreviewTime}
                         onClick={onSelectReview}
