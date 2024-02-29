@@ -5,11 +5,13 @@ import ReviewFilterGroup from "@/components/filter/ReviewFilterGroup";
 import PreviewThumbnailPlayer from "@/components/player/PreviewThumbnailPlayer";
 import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
 import ActivityIndicator from "@/components/ui/activity-indicator";
+import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useEventUtils } from "@/hooks/use-event-utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
 import { ReviewFilter, ReviewSegment, ReviewSeverity } from "@/types/review";
+import axios from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isDesktop, isMobile } from "react-device-detect";
 import { LuFolderCheck } from "react-icons/lu";
@@ -109,36 +111,6 @@ export default function EventView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contentRef.current?.scrollHeight, severity]);
 
-  // review interaction
-
-  const [selectedReviews, setSelectedReviews] = useState<string[]>([]);
-  const onSelectReview = useCallback(
-    (reviewId: string, ctrl: boolean) => {
-      if (selectedReviews.length > 0 || ctrl) {
-        const index = selectedReviews.indexOf(reviewId);
-
-        if (index != -1) {
-          if (selectedReviews.length == 1) {
-            setSelectedReviews([]);
-          } else {
-            const copy = [
-              ...selectedReviews.slice(0, index),
-              ...selectedReviews.slice(index + 1),
-            ];
-            setSelectedReviews(copy);
-          }
-        } else {
-          const copy = [...selectedReviews];
-          copy.push(reviewId);
-          setSelectedReviews(copy);
-        }
-      } else {
-        onOpenReview(reviewId);
-      }
-    },
-    [selectedReviews, setSelectedReviews],
-  );
-
   // timeline interaction
 
   const pagingObserver = useRef<IntersectionObserver | null>();
@@ -222,6 +194,59 @@ export default function EventView({
 
   const [previewTime, setPreviewTime] = useState<number>();
 
+  // review interaction
+
+  const [selectedReviews, setSelectedReviews] = useState<string[]>([]);
+  const onSelectReview = useCallback(
+    (reviewId: string, ctrl: boolean) => {
+      if (selectedReviews.length > 0 || ctrl) {
+        const index = selectedReviews.indexOf(reviewId);
+
+        if (index != -1) {
+          if (selectedReviews.length == 1) {
+            setSelectedReviews([]);
+          } else {
+            const copy = [
+              ...selectedReviews.slice(0, index),
+              ...selectedReviews.slice(index + 1),
+            ];
+            setSelectedReviews(copy);
+          }
+        } else {
+          const copy = [...selectedReviews];
+          copy.push(reviewId);
+          setSelectedReviews(copy);
+        }
+      } else {
+        onOpenReview(reviewId);
+      }
+    },
+    [selectedReviews, setSelectedReviews],
+  );
+
+  const markScrolledItemsAsReviewed = useCallback(async () => {
+    if (!currentItems) {
+      return;
+    }
+
+    const scrolled: string[] = [];
+
+    currentItems.find((value) => {
+      if (value.start_time > minimapBounds.end) {
+        scrolled.push(value.id);
+        return false;
+      } else {
+        return true;
+      }
+    });
+
+    const idList = scrolled.join(",");
+
+    await axios.post(`reviews/${idList}/viewed`);
+    setSelectedReviews([]);
+    pullLatestData();
+  }, [currentItems, minimapBounds]);
+
   if (!config) {
     return <ActivityIndicator />;
   }
@@ -275,6 +300,15 @@ export default function EventView({
           />
         )}
       </div>
+
+      {selectedReviews.length > 0 && (
+        <Button
+          className="absolute right-14 md:right-28 bottom-2 z-50"
+          onClick={markScrolledItemsAsReviewed}
+        >
+          Mark Above Items As Reviewed
+        </Button>
+      )}
 
       <div className="flex h-full overflow-hidden">
         <div
