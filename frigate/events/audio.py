@@ -247,9 +247,9 @@ class AudioEventMaintainer(threading.Thread):
 
     def handle_detection(self, label: str, score: float) -> None:
         if self.detections.get(label):
-            self.detections[label][
-                "last_detection"
-            ] = datetime.datetime.now().timestamp()
+            self.detections[label]["last_detection"] = (
+                datetime.datetime.now().timestamp()
+            )
         else:
             self.requestor.send_data(f"{self.config.name}/audio/{label}", "ON")
 

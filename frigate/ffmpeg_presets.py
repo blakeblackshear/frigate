@@ -115,12 +115,12 @@ PRESETS_HW_ACCEL_ENCODE_BIRDSEYE = {
     "preset-rk-h265": "ffmpeg -hide_banner {0} -c:v hevc_rkmpp -profile:v high {1}",
     "default": "ffmpeg -hide_banner {0} -c:v libx264 -g 50 -profile:v high -level:v 4.1 -preset:v superfast -tune:v zerolatency {1}",
 }
-PRESETS_HW_ACCEL_ENCODE_BIRDSEYE[
-    "preset-nvidia-h264"
-] = PRESETS_HW_ACCEL_ENCODE_BIRDSEYE[FFMPEG_HWACCEL_NVIDIA]
-PRESETS_HW_ACCEL_ENCODE_BIRDSEYE[
-    "preset-nvidia-h265"
-] = PRESETS_HW_ACCEL_ENCODE_BIRDSEYE[FFMPEG_HWACCEL_NVIDIA]
+PRESETS_HW_ACCEL_ENCODE_BIRDSEYE["preset-nvidia-h264"] = (
+    PRESETS_HW_ACCEL_ENCODE_BIRDSEYE[FFMPEG_HWACCEL_NVIDIA]
+)
+PRESETS_HW_ACCEL_ENCODE_BIRDSEYE["preset-nvidia-h265"] = (
+    PRESETS_HW_ACCEL_ENCODE_BIRDSEYE[FFMPEG_HWACCEL_NVIDIA]
+)
 
 PRESETS_HW_ACCEL_ENCODE_TIMELAPSE = {
     "preset-rpi-64-h264": "ffmpeg -hide_banner {0} -c:v h264_v4l2m2m -pix_fmt yuv420p {1}",
@@ -136,9 +136,9 @@ PRESETS_HW_ACCEL_ENCODE_TIMELAPSE = {
     "preset-rk-h265": "ffmpeg -hide_banner {0} -c:v hevc_rkmpp -profile:v high {1}",
     "default": "ffmpeg -hide_banner {0} -c:v libx264 -preset:v ultrafast -tune:v zerolatency {1}",
 }
-PRESETS_HW_ACCEL_ENCODE_TIMELAPSE[
-    "preset-nvidia-h264"
-] = PRESETS_HW_ACCEL_ENCODE_TIMELAPSE[FFMPEG_HWACCEL_NVIDIA]
+PRESETS_HW_ACCEL_ENCODE_TIMELAPSE["preset-nvidia-h264"] = (
+    PRESETS_HW_ACCEL_ENCODE_TIMELAPSE[FFMPEG_HWACCEL_NVIDIA]
+)
 
 # encoding of previews is only done on CPU due to comparable encode times and better quality from libx264
 PRESETS_HW_ACCEL_ENCODE_PREVIEW = {

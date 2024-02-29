@@ -126,9 +126,9 @@ class OnvifController:
         logger.debug(f"Onvif config for {camera_name}: {ptz_config}")
 
         service_capabilities_request = ptz.create_type("GetServiceCapabilities")
-        self.cams[camera_name][
-            "service_capabilities_request"
-        ] = service_capabilities_request
+        self.cams[camera_name]["service_capabilities_request"] = (
+            service_capabilities_request
+        )
 
         fov_space_id = next(
             (
@@ -244,9 +244,9 @@ class OnvifController:
             supported_features.append("zoom-r")
             try:
                 # get camera's zoom limits from onvif config
-                self.cams[camera_name][
-                    "relative_zoom_range"
-                ] = ptz_config.Spaces.RelativeZoomTranslationSpace[0]
+                self.cams[camera_name]["relative_zoom_range"] = (
+                    ptz_config.Spaces.RelativeZoomTranslationSpace[0]
+                )
             except Exception:
                 if (
                     self.config.cameras[camera_name].onvif.autotracking.zooming
@@ -263,9 +263,9 @@ class OnvifController:
             supported_features.append("zoom-a")
             try:
                 # get camera's zoom limits from onvif config
-                self.cams[camera_name][
-                    "absolute_zoom_range"
-                ] = ptz_config.Spaces.AbsoluteZoomPositionSpace[0]
+                self.cams[camera_name]["absolute_zoom_range"] = (
+                    ptz_config.Spaces.AbsoluteZoomPositionSpace[0]
+                )
                 self.cams[camera_name]["zoom_limits"] = configs.ZoomLimits
             except Exception:
                 if self.config.cameras[camera_name].onvif.autotracking.zooming:
@@ -282,9 +282,9 @@ class OnvifController:
             and configs.DefaultRelativePanTiltTranslationSpace is not None
         ):
             supported_features.append("pt-r-fov")
-            self.cams[camera_name][
-                "relative_fov_range"
-            ] = ptz_config.Spaces.RelativePanTiltTranslationSpace[fov_space_id]
+            self.cams[camera_name]["relative_fov_range"] = (
+                ptz_config.Spaces.RelativePanTiltTranslationSpace[fov_space_id]
+            )
 
         self.cams[camera_name]["features"] = supported_features
 
