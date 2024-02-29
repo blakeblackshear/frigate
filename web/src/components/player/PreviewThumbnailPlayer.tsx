@@ -124,6 +124,7 @@ export default function PreviewThumbnailPlayer({
                 relevantPreview={relevantPreview}
                 setReviewed={handleSetReviewed}
                 setIgnoreClick={setIgnoreClick}
+                isPlayingBack={setPlayback}
               />
             </div>
           )}
@@ -188,12 +189,14 @@ type PreviewContentProps = {
   relevantPreview: Preview | undefined;
   setReviewed?: () => void;
   setIgnoreClick: (ignore: boolean) => void;
+  isPlayingBack: (ended: boolean) => void;
 };
 function PreviewContent({
   review,
   relevantPreview,
   setReviewed,
   setIgnoreClick,
+  isPlayingBack,
 }: PreviewContentProps) {
   // preview
 
@@ -204,6 +207,7 @@ function PreviewContent({
         relevantPreview={relevantPreview}
         setReviewed={setReviewed}
         setIgnoreClick={setIgnoreClick}
+        isPlayingBack={isPlayingBack}
       />
     );
   } else if (isCurrentHour(review.start_time)) {
@@ -212,6 +216,7 @@ function PreviewContent({
         review={review}
         setReviewed={setReviewed}
         setIgnoreClick={setIgnoreClick}
+        isPlayingBack={isPlayingBack}
       />
     );
   }
@@ -223,12 +228,14 @@ type VideoPreviewProps = {
   relevantPreview: Preview;
   setReviewed?: () => void;
   setIgnoreClick: (ignore: boolean) => void;
+  isPlayingBack: (ended: boolean) => void;
 };
 function VideoPreview({
   review,
   relevantPreview,
   setReviewed,
   setIgnoreClick,
+  isPlayingBack,
 }: VideoPreviewProps) {
   const playerRef = useRef<HTMLVideoElement | null>(null);
 
@@ -301,7 +308,12 @@ function VideoPreview({
     setLastPercent(playerPercent);
 
     if (playerPercent > 100) {
-      playerRef.current?.pause();
+      if (isMobile) {
+        isPlayingBack(false);
+      } else {
+        playerRef.current?.pause();
+      }
+
       setManualPlayback(false);
       setProgress(100.0);
     } else {
@@ -411,11 +423,13 @@ type InProgressPreviewProps = {
   review: ReviewSegment;
   setReviewed?: (reviewId: string) => void;
   setIgnoreClick: (ignore: boolean) => void;
+  isPlayingBack: (ended: boolean) => void;
 };
 function InProgressPreview({
   review,
   setReviewed,
   setIgnoreClick,
+  isPlayingBack,
 }: InProgressPreviewProps) {
   const apiHost = useApiHost();
   const { data: previewFrames } = useSWR<string[]>(
@@ -436,6 +450,10 @@ function InProgressPreview({
     }
 
     if (key == previewFrames.length - 1) {
+      if (isMobile) {
+        isPlayingBack(false);
+      }
+
       return;
     }
 
