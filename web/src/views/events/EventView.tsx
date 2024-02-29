@@ -301,15 +301,6 @@ export default function EventView({
         )}
       </div>
 
-      {selectedReviews.length > 0 && (
-        <Button
-          className="absolute right-14 md:right-28 bottom-2 z-50"
-          onClick={markScrolledItemsAsReviewed}
-        >
-          Mark Above Items As Reviewed
-        </Button>
-      )}
-
       <div className="flex h-full overflow-hidden">
         <div
           ref={contentRef}
@@ -357,6 +348,7 @@ export default function EventView({
                         allPreviews={relevantPreviews}
                         setReviewed={markItemAsReviewed}
                         onTimeUpdate={setPreviewTime}
+                        markAboveReviewed={markScrolledItemsAsReviewed}
                         onClick={onSelectReview}
                       />
                     </div>

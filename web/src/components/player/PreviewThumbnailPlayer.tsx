@@ -22,7 +22,7 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "../ui/context-menu";
-import { LuCheckSquare, LuFileUp, LuTrash } from "react-icons/lu";
+import { LuCheckCheck, LuCheckSquare, LuFileUp, LuTrash } from "react-icons/lu";
 import { RiCheckboxMultipleLine } from "react-icons/ri";
 import axios from "axios";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
@@ -33,9 +33,9 @@ import { useSwipeable } from "react-swipeable";
 type PreviewPlayerProps = {
   review: ReviewSegment;
   allPreviews?: Preview[];
-  autoPlayback?: boolean;
-  setReviewed?: (reviewId: string) => void;
   onTimeUpdate?: (time: number | undefined) => void;
+  setReviewed: (reviewId: string) => void;
+  markAboveReviewed: () => void;
   onClick: (reviewId: string, ctrl: boolean) => void;
 };
 
@@ -51,6 +51,7 @@ export default function PreviewThumbnailPlayer({
   review,
   allPreviews,
   setReviewed,
+  markAboveReviewed,
   onClick,
   onTimeUpdate,
 }: PreviewPlayerProps) {
@@ -79,11 +80,10 @@ export default function PreviewThumbnailPlayer({
     preventScrollOnSwipe: true,
   });
 
-  const handleSetReviewed = useCallback(() => {
-    if (setReviewed) {
-      setReviewed(review.id);
-    }
-  }, [review, setReviewed]);
+  const handleSetReviewed = useCallback(
+    () => setReviewed(review.id),
+    [review, setReviewed],
+  );
 
   // playback
 
@@ -211,6 +211,7 @@ export default function PreviewThumbnailPlayer({
         review={review}
         onSelect={() => onClick(review.id, true)}
         setReviewed={handleSetReviewed}
+        markAboveReviewed={markAboveReviewed}
       />
     </ContextMenu>
   );
@@ -583,12 +584,14 @@ function InProgressPreview({
 type PreviewContextItemsProps = {
   review: ReviewSegment;
   onSelect: () => void;
-  setReviewed?: () => void;
+  setReviewed: () => void;
+  markAboveReviewed: () => void;
 };
 function PreviewContextItems({
   review,
   onSelect,
   setReviewed,
+  markAboveReviewed,
 }: PreviewContextItemsProps) {
   const exportReview = useCallback(() => {
     axios.post(
@@ -604,16 +607,20 @@ function PreviewContextItems({
   return (
     <ContextMenuContent>
       {isMobile && (
-        <>
-          <ContextMenuItem onSelect={onSelect}>
-            <div className="w-full flex justify-between items-center">
-              Select
-              <RiCheckboxMultipleLine className="ml-4 size-4" />
-            </div>
-          </ContextMenuItem>
-          <ContextMenuSeparator />
-        </>
+        <ContextMenuItem onSelect={onSelect}>
+          <div className="w-full flex justify-between items-center">
+            Select
+            <RiCheckboxMultipleLine className="ml-4 size-4" />
+          </div>
+        </ContextMenuItem>
       )}
+      <ContextMenuItem onSelect={markAboveReviewed}>
+        <div className="w-full flex justify-between items-center">
+          Mark Above as Reviewed
+          <LuCheckCheck className="ml-4 size-4" />
+        </div>
+      </ContextMenuItem>
+      <ContextMenuSeparator />
       {!review.has_been_reviewed && (
         <ContextMenuItem onSelect={() => (setReviewed ? setReviewed() : null)}>
           <div className="w-full flex justify-between items-center">
