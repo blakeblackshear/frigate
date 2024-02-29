@@ -134,7 +134,7 @@ class ModelConfig(BaseModel):
         for key, val in enumerate(enabled_labels):
             self._colormap[val] = tuple(int(round(255 * c)) for c in cmap(key)[:3])
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
 
 class BaseDetectorConfig(BaseModel):
@@ -143,4 +143,6 @@ class BaseDetectorConfig(BaseModel):
     model: Optional[ModelConfig] = Field(
         default=None, title="Detector specific model configuration."
     )
-    model_config = ConfigDict(extra="allow", arbitrary_types_allowed=True)
+    model_config = ConfigDict(
+        extra="allow", arbitrary_types_allowed=True, protected_namespaces=()
+    )
