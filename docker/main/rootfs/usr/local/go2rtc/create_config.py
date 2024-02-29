@@ -109,9 +109,9 @@ if int(os.environ["LIBAVFORMAT_VERSION_MAJOR"]) < 59:
             "rtsp": "-fflags nobuffer -flags low_delay -stimeout 5000000 -user_agent go2rtc/ffmpeg -rtsp_transport tcp -i {input}"
         }
     elif go2rtc_config["ffmpeg"].get("rtsp") is None:
-        go2rtc_config["ffmpeg"][
-            "rtsp"
-        ] = "-fflags nobuffer -flags low_delay -stimeout 5000000 -user_agent go2rtc/ffmpeg -rtsp_transport tcp -i {input}"
+        go2rtc_config["ffmpeg"]["rtsp"] = (
+            "-fflags nobuffer -flags low_delay -stimeout 5000000 -user_agent go2rtc/ffmpeg -rtsp_transport tcp -i {input}"
+        )
 
 # add hardware acceleration presets for rockchip devices
 # may be removed if frigate uses a go2rtc version that includes these presets
