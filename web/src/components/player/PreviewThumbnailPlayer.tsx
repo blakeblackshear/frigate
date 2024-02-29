@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useApiHost } from "@/api";
 import { isCurrentHour } from "@/utils/dateUtil";
 import { ReviewSegment } from "@/types/review";
@@ -17,6 +23,7 @@ import {
   ContextMenuTrigger,
 } from "../ui/context-menu";
 import { LuCheckSquare, LuFileUp, LuTrash } from "react-icons/lu";
+import { RiCheckboxMultipleLine } from "react-icons/ri";
 import axios from "axios";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import useImageLoaded from "@/hooks/use-image-loaded";
@@ -28,8 +35,8 @@ type PreviewPlayerProps = {
   relevantPreview?: Preview;
   autoPlayback?: boolean;
   setReviewed?: (reviewId: string) => void;
-  onClick?: (reviewId: string) => void;
   onTimeUpdate?: (time: number | undefined) => void;
+  onClick: (reviewId: string, ctrl: boolean) => void;
 };
 
 type Preview = {
@@ -57,11 +64,14 @@ export default function PreviewThumbnailPlayer({
 
   // interaction
 
-  const handleOnClick = useCallback(() => {
-    if (onClick && !ignoreClick) {
-      onClick(review.id);
-    }
-  }, [ignoreClick, review, onClick]);
+  const handleOnClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!ignoreClick) {
+        onClick(review.id, e.metaKey);
+      }
+    },
+    [ignoreClick, review, onClick],
+  );
 
   const swipeHandlers = useSwipeable({
     onSwipedLeft: () => (setReviewed ? setReviewed(review.id) : null),
@@ -186,7 +196,11 @@ export default function PreviewThumbnailPlayer({
           )}
         </div>
       </ContextMenuTrigger>
-      <PreviewContextItems review={review} setReviewed={handleSetReviewed} />
+      <PreviewContextItems
+        review={review}
+        onSelect={() => onClick(review.id, true)}
+        setReviewed={handleSetReviewed}
+      />
     </ContextMenu>
   );
 }
@@ -557,10 +571,12 @@ function InProgressPreview({
 
 type PreviewContextItemsProps = {
   review: ReviewSegment;
+  onSelect: () => void;
   setReviewed?: () => void;
 };
 function PreviewContextItems({
   review,
+  onSelect,
   setReviewed,
 }: PreviewContextItemsProps) {
   const exportReview = useCallback(() => {
@@ -570,27 +586,42 @@ function PreviewContextItems({
     );
   }, [review]);
 
+  const deleteReview = useCallback(() => {
+    axios.delete(`reviews/${review.id}`);
+  }, [review]);
+
   return (
     <ContextMenuContent>
+      {isMobile && (
+        <>
+          <ContextMenuItem onSelect={onSelect}>
+            <div className="w-full flex justify-between items-center">
+              Select
+              <RiCheckboxMultipleLine className="ml-4 size-4" />
+            </div>
+          </ContextMenuItem>
+          <ContextMenuSeparator />
+        </>
+      )}
       {!review.has_been_reviewed && (
         <ContextMenuItem onSelect={() => (setReviewed ? setReviewed() : null)}>
           <div className="w-full flex justify-between items-center">
             Mark As Reviewed
-            <LuCheckSquare className="ml-4 w-4 h-4" />
+            <LuCheckSquare className="ml-4 size-4" />
           </div>
         </ContextMenuItem>
       )}
-      <ContextMenuItem onSelect={() => exportReview()}>
+      <ContextMenuItem onSelect={exportReview}>
         <div className="w-full flex justify-between items-center">
           Export
-          <LuFileUp className="ml-4 w-4 h-4" />
+          <LuFileUp className="ml-4 size-4" />
         </div>
       </ContextMenuItem>
       <ContextMenuSeparator />
-      <ContextMenuItem>
+      <ContextMenuItem onSelect={deleteReview}>
         <div className="w-full flex justify-between items-center text-danger">
           Delete
-          <LuTrash className="ml-4 w-4 h-4" />
+          <LuTrash className="ml-4 size-4" />
         </div>
       </ContextMenuItem>
     </ContextMenuContent>

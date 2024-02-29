@@ -1,5 +1,6 @@
 import Logo from "@/components/Logo";
 import NewReviewData from "@/components/dynamic/NewReviewData";
+import ReviewActionGroup from "@/components/filter/ReviewActionGroup";
 import ReviewFilterGroup from "@/components/filter/ReviewFilterGroup";
 import PreviewThumbnailPlayer from "@/components/player/PreviewThumbnailPlayer";
 import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
@@ -26,7 +27,7 @@ type EventViewProps = {
   setSeverity: (severity: ReviewSeverity) => void;
   loadNextPage: () => void;
   markItemAsReviewed: (reviewId: string) => void;
-  onSelectReview: (reviewId: string) => void;
+  onOpenReview: (reviewId: string) => void;
   pullLatestData: () => void;
   updateFilter: (filter: ReviewFilter) => void;
 };
@@ -41,7 +42,7 @@ export default function EventView({
   setSeverity,
   loadNextPage,
   markItemAsReviewed,
-  onSelectReview,
+  onOpenReview,
   pullLatestData,
   updateFilter,
 }: EventViewProps) {
@@ -109,6 +110,36 @@ export default function EventView({
   }, [contentRef.current?.scrollHeight, severity]);
 
   // review interaction
+
+  const [selectedReviews, setSelectedReviews] = useState<string[]>([]);
+  const onSelectReview = useCallback(
+    (reviewId: string, ctrl: boolean) => {
+      if (selectedReviews.length > 0 || ctrl) {
+        const index = selectedReviews.indexOf(reviewId);
+
+        if (index != -1) {
+          if (selectedReviews.length == 1) {
+            setSelectedReviews([]);
+          } else {
+            const copy = [
+              ...selectedReviews.slice(0, index),
+              ...selectedReviews.slice(index + 1),
+            ];
+            setSelectedReviews(copy);
+          }
+        } else {
+          const copy = [...selectedReviews];
+          copy.push(reviewId);
+          setSelectedReviews(copy);
+        }
+      } else {
+        onOpenReview(reviewId);
+      }
+    },
+    [selectedReviews, setSelectedReviews],
+  );
+
+  // timeline interaction
 
   const pagingObserver = useRef<IntersectionObserver | null>();
   const lastReviewRef = useCallback(
@@ -236,6 +267,13 @@ export default function EventView({
           </ToggleGroupItem>
         </ToggleGroup>
         <ReviewFilterGroup filter={filter} onUpdateFilter={updateFilter} />
+        {selectedReviews.length > 0 && (
+          <ReviewActionGroup
+            selectedReviews={selectedReviews}
+            setSelectedReviews={setSelectedReviews}
+            pullLatestData={pullLatestData}
+          />
+        )}
       </div>
 
       <div className="flex h-full overflow-hidden">
@@ -260,12 +298,13 @@ export default function EventView({
           )}
 
           <div
-            className="w-full m-2 md:grid md:grid-cols-3 3xl:grid-cols-4 gap-4"
+            className="w-full m-2 grid md:grid-cols-3 3xl:grid-cols-4 gap-2 md:gap-4"
             ref={contentRef}
           >
             {currentItems ? (
               currentItems.map((value, segIdx) => {
                 const lastRow = segIdx == reviewItems[severity].length - 1;
+                const selected = selectedReviews.includes(value.id);
                 const relevantPreview = Object.values(
                   relevantPreviews || [],
                 ).find(
@@ -284,7 +323,7 @@ export default function EventView({
                       alignStartDateToTimeline(value.start_time) -
                       segmentDuration
                     }
-                    className="outline outline-offset-1 outline-0 rounded-lg shadow-none transition-all duration-500 my-1 md:my-0"
+                    className={`outline outline-offset-1 rounded-lg shadow-none transition-all my-1 md:my-0 ${selected ? `outline-4 shadow-[0_0_6px_1px] outline-severity_${value.severity} shadow-severity_${value.severity}` : "outline-0 duration-500"}`}
                   >
                     <div className="aspect-video rounded-lg overflow-hidden">
                       <PreviewThumbnailPlayer
