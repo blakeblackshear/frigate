@@ -425,7 +425,7 @@ function VideoPreview({
         <source src={relevantPreview.src} type={relevantPreview.type} />
       </video>
       <Slider
-        className="absolute inset-x-0 bottom-0 z-30"
+        className="absolute inset-x-0 bottom-0"
         value={[progress]}
         onValueChange={onManualSeek}
         onValueCommit={onStopManualSeek}
@@ -543,7 +543,7 @@ function InProgressPreview({
         onLoad={handleLoad}
       />
       <Slider
-        className="absolute inset-x-0 bottom-0 z-30"
+        className="absolute inset-x-0 bottom-0"
         value={[key]}
         onValueChange={onManualSeek}
         onValueCommit={onStopManualSeek}
