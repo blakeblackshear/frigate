@@ -58,7 +58,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import ActivityIndicator from "../ui/activity-indicator";
-import { TooltipPortal } from "@radix-ui/react-tooltip";
 
 type SettingsNavItemsProps = {
   className?: string;
@@ -107,11 +106,9 @@ export default function SettingsNavItems({ className }: SettingsNavItemsProps) {
                     <LuSettings />
                   </Button>
                 </TooltipTrigger>
-                <TooltipPortal>
-                  <TooltipContent side="right">
-                    <p>Settings</p>
-                  </TooltipContent>
-                </TooltipPortal>
+                <TooltipContent side="right">
+                  <p>Settings</p>
+                </TooltipContent>
               </Tooltip>
             </a>
           </DropdownMenuTrigger>
@@ -252,11 +249,9 @@ export default function SettingsNavItems({ className }: SettingsNavItemsProps) {
               <VscAccount />
             </Button>
           </TooltipTrigger>
-          <TooltipPortal>
-            <TooltipContent side="right">
-              <p>Account</p>
-            </TooltipContent>
-          </TooltipPortal>
+          <TooltipContent side="right">
+            <p>Account</p>
+          </TooltipContent>
         </Tooltip>
       </div>
       {restartDialogOpen && (
