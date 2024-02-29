@@ -15,9 +15,9 @@ from pydantic import (
     ConfigDict,
     Field,
     TypeAdapter,
+    ValidationInfo,
     field_serializer,
     field_validator,
-    validator,
 )
 from pydantic.fields import PrivateAttr
 
@@ -149,11 +149,10 @@ class MqttConfig(FrigateBaseModel):
     tls_client_key: Optional[str] = Field(None, title="MQTT TLS Client Key")
     tls_insecure: Optional[bool] = Field(None, title="MQTT TLS Insecure")
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
-    @validator("password", pre=True, always=True)
-    def validate_password(cls, v, values):
-        if (v is None) != (values["user"] is None):
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, v, info: ValidationInfo):
+        if (v is None) != (info.data["user"] is None):
             raise ValueError("Password must be provided with username.")
         return v
 
@@ -207,7 +206,7 @@ class PtzAutotrackConfig(FrigateBaseModel):
         if isinstance(v, str):
             weights = list(map(str, map(float, v.split(","))))
         elif isinstance(v, list):
-            weights = [str(val) for val in v]
+            weights = [str(float(val)) for val in v]
         else:
             raise ValueError("Invalid type for movement_weights")
 
@@ -1238,7 +1237,7 @@ class FrigateConfig(FrigateBaseModel):
                     )
 
             # Default min_initialized configuration
-            min_initialized = camera_config.detect.fps / 2
+            min_initialized = int(camera_config.detect.fps / 2)
             if camera_config.detect.min_initialized is None:
                 camera_config.detect.min_initialized = min_initialized
 
