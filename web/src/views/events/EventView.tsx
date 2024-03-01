@@ -246,13 +246,29 @@ export default function EventView({
     pullLatestData();
   }, [currentItems, minimapBounds]);
 
+  const exportReview = useCallback(
+    (id: string) => {
+      const review = currentItems?.find((seg) => seg.id == id);
+
+      if (!review) {
+        return;
+      }
+
+      axios.post(
+        `export/${review.camera}/start/${review.start_time}/end/${review.end_time}`,
+        { playback: "realtime" },
+      );
+    },
+    [selectedReviews],
+  );
+
   if (!config) {
     return <ActivityIndicator />;
   }
 
   return (
     <div className="flex flex-col size-full">
-      <div className="relative flex justify-between mb-2">
+      <div className="h-8 relative flex justify-between items-center mb-2">
         {isMobile && (
           <Logo className="absolute inset-y-0 inset-x-1/2 -translate-x-1/2 h-8" />
         )}
@@ -290,11 +306,14 @@ export default function EventView({
             <div className="hidden md:block">Motion</div>
           </ToggleGroupItem>
         </ToggleGroup>
-        <ReviewFilterGroup filter={filter} onUpdateFilter={updateFilter} />
-        {selectedReviews.length > 0 && (
+
+        {selectedReviews.length <= 0 ? (
+          <ReviewFilterGroup filter={filter} onUpdateFilter={updateFilter} />
+        ) : (
           <ReviewActionGroup
             selectedReviews={selectedReviews}
             setSelectedReviews={setSelectedReviews}
+            onExport={exportReview}
             pullLatestData={pullLatestData}
           />
         )}
