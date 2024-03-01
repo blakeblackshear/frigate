@@ -366,7 +366,7 @@ export default function EventView({
             timestampSpread={15}
             timelineStart={timeRange.before}
             timelineEnd={timeRange.after}
-            showMinimap={showMinimap}
+            showMinimap={showMinimap && !previewTime}
             minimapStartTime={minimapBounds.start}
             minimapEndTime={minimapBounds.end}
             showHandlebar={previewTime != undefined}
