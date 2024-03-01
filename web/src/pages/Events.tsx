@@ -9,7 +9,7 @@ import { useCallback, useMemo, useState } from "react";
 import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
 
-const API_LIMIT = 250;
+const API_LIMIT = 100;
 
 export default function Events() {
   // recordings viewer
@@ -221,7 +221,7 @@ export default function Events() {
         setSeverity={setSeverity}
         loadNextPage={onLoadNextPage}
         markItemAsReviewed={markItemAsReviewed}
-        onSelectReview={setSelectedReviewId}
+        onOpenReview={setSelectedReviewId}
         pullLatestData={reloadData}
         updateFilter={onUpdateFilter}
       />

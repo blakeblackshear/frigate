@@ -2464,6 +2464,24 @@ def set_reviewed(id):
     )
 
 
+@bp.route("/reviews/<ids>/viewed", methods=("POST",))
+def set_multiple_reviewed(ids: str):
+    list_of_ids = ids.split(",")
+
+    if not list_of_ids or len(list_of_ids) == 0:
+        return make_response(
+            jsonify({"success": False, "message": "Not a valid list of ids"}), 404
+        )
+
+    ReviewSegment.update(has_been_reviewed=True).where(
+        ReviewSegment.id << list_of_ids
+    ).execute()
+
+    return make_response(
+        jsonify({"success": True, "message": "Reviewed multiple items"}), 200
+    )
+
+
 @bp.route("/review/<id>/viewed", methods=("DELETE",))
 def set_not_reviewed(id):
     try:
@@ -2479,6 +2497,20 @@ def set_not_reviewed(id):
     return make_response(
         jsonify({"success": True, "message": "Reviewed " + id + " not viewed"}), 200
     )
+
+
+@bp.route("/reviews/<ids>", methods=("DELETE",))
+def delete_reviews(ids: str):
+    list_of_ids = ids.split(",")
+
+    if not list_of_ids or len(list_of_ids) == 0:
+        return make_response(
+            jsonify({"success": False, "message": "Not a valid list of ids"}), 404
+        )
+
+    ReviewSegment.delete().where(ReviewSegment.id << list_of_ids).execute()
+
+    return make_response(jsonify({"success": True, "message": "Delete reviews"}), 200)
 
 
 @bp.route("/review/<id>/preview.gif")
