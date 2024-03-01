@@ -18,7 +18,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { CameraConfig } from "@/types/frigateConfig";
 import { CameraPtzInfo } from "@/types/ptz";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { isSafari } from "react-device-detect";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import {
@@ -27,6 +27,7 @@ import {
   FaAngleRight,
   FaAngleUp,
 } from "react-icons/fa";
+import { GiSpeaker, GiSpeakerOff } from "react-icons/gi";
 import { IoMdArrowBack } from "react-icons/io";
 import { LuEar, LuEarOff, LuVideo, LuVideoOff } from "react-icons/lu";
 import {
@@ -34,6 +35,7 @@ import {
   MdPersonOff,
   MdPersonSearch,
   MdPhotoCamera,
+  MdSpeaker,
   MdZoomIn,
   MdZoomOut,
 } from "react-icons/md";
@@ -59,6 +61,10 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
   );
   const { payload: audioState, send: sendAudio } = useAudioState(camera.name);
 
+  // playback state
+
+  const [audio, setAudio] = useState(false);
+
   const growClassName = useMemo(() => {
     if (camera.detect.width / camera.detect.height > 2) {
       return "absolute left-2 right-2 top-[50%] -translate-y-[50%]";
@@ -76,6 +82,12 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
         </Button>
         <TooltipProvider>
           <div className="flex items-center gap-1 mr-1 *:rounded-lg">
+            <CameraFeatureToggle
+              Icon={audio ? GiSpeaker : GiSpeakerOff}
+              isActive={audio}
+              title={`${audio ? "Disable" : "Enable"} Camera Audio`}
+              onClick={() => setAudio(!audio)}
+            />
             <CameraFeatureToggle
               Icon={detectState == "ON" ? MdPersonSearch : MdPersonOff}
               isActive={detectState == "ON"}
@@ -117,6 +129,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
             windowVisible
             showStillWithoutActivity={false}
             cameraConfig={camera}
+            playAudio={audio}
             preferredLiveMode={isSafari ? "webrtc" : "mse"}
           />
         </div>

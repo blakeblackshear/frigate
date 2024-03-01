@@ -5,6 +5,7 @@ type MSEPlayerProps = {
   camera: string;
   className?: string;
   playbackEnabled?: boolean;
+  audioEnabled?: boolean;
   onPlaying?: () => void;
 };
 
@@ -12,6 +13,7 @@ function MSEPlayer({
   camera,
   className,
   playbackEnabled = true,
+  audioEnabled = false,
   onPlaying,
 }: MSEPlayerProps) {
   let connectTS: number = 0;
@@ -273,7 +275,7 @@ function MSEPlayer({
       playsInline
       preload="auto"
       onLoadedData={onPlaying}
-      muted
+      muted={!audioEnabled}
     />
   );
 }

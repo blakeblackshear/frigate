@@ -20,6 +20,7 @@ type LivePlayerProps = {
   preferredLiveMode?: LivePlayerMode;
   showStillWithoutActivity?: boolean;
   windowVisible?: boolean;
+  playAudio?: boolean;
   onClick?: () => void;
 };
 
@@ -29,6 +30,7 @@ export default function LivePlayer({
   preferredLiveMode,
   showStillWithoutActivity = true,
   windowVisible = true,
+  playAudio = false,
   onClick,
 }: LivePlayerProps) {
   // camera activity
@@ -95,6 +97,7 @@ export default function LivePlayer({
         className={`rounded-2xl h-full ${liveReady ? "" : "hidden"}`}
         camera={cameraConfig.live.stream_name}
         playbackEnabled={cameraActive}
+        audioEnabled={playAudio}
         onPlaying={() => setLiveReady(true)}
       />
     );
@@ -105,6 +108,7 @@ export default function LivePlayer({
           className={`rounded-2xl h-full ${liveReady ? "" : "hidden"}`}
           camera={cameraConfig.name}
           playbackEnabled={cameraActive}
+          audioEnabled={playAudio}
           onPlaying={() => setLiveReady(true)}
         />
       );
