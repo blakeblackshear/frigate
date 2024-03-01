@@ -33,7 +33,7 @@ import { useSwipeable } from "react-swipeable";
 type PreviewPlayerProps = {
   review: ReviewSegment;
   allPreviews?: Preview[];
-  onTimeUpdate?: (time: number | undefined) => void;
+  onTimeUpdate?: React.Dispatch<React.SetStateAction<number | undefined>>;
   setReviewed: (reviewId: string) => void;
   markAboveReviewed: () => void;
   onClick: (reviewId: string, ctrl: boolean) => void;
