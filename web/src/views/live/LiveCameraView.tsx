@@ -35,7 +35,6 @@ import {
   MdPersonOff,
   MdPersonSearch,
   MdPhotoCamera,
-  MdSpeaker,
   MdZoomIn,
   MdZoomOut,
 } from "react-icons/md";
