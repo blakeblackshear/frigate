@@ -87,16 +87,48 @@ export default function PreviewThumbnailPlayer({
 
   // playback
 
-  const relevantPreview = useMemo(
-    () =>
-      Object.values(allPreviews || []).find(
-        (preview) =>
-          preview.camera == review.camera &&
-          preview.start < review.start_time &&
-          preview.end > review.end_time,
-      ),
-    [allPreviews],
-  );
+  const relevantPreview = useMemo(() => {
+    if (!allPreviews) {
+      return undefined;
+    }
+
+    let multiHour = false;
+    const firstIndex = Object.values(allPreviews).findIndex((preview) => {
+      if (preview.camera != review.camera || preview.end < review.start_time) {
+        return false;
+      }
+
+      if (review.end_time > preview.end) {
+        multiHour = true;
+      }
+
+      return true;
+    });
+
+    if (firstIndex == -1) {
+      return undefined;
+    }
+
+    if (!multiHour) {
+      return allPreviews[firstIndex];
+    }
+
+    const firstPrev = allPreviews[firstIndex];
+    const firstDuration = firstPrev.end - review.start_time;
+    const secondDuration = review.end_time - firstPrev.end;
+
+    if (firstDuration > secondDuration) {
+      // the first preview is longer than the second, return the first
+      return firstPrev;
+    } else {
+      // the second preview is longer, return the second if it exists
+      if (firstIndex < allPreviews.length - 1) {
+        return allPreviews[firstIndex + 1];
+      }
+
+      return undefined;
+    }
+  }, [allPreviews]);
 
   const playingBack = useMemo(() => playback, [playback]);
 
