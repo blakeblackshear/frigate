@@ -13,7 +13,7 @@ import { getIconForLabel, getIconForSubLabel } from "@/utils/iconUtil";
 import TimeAgo from "../dynamic/TimeAgo";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { isFirefox, isMobile, isSafari } from "react-device-detect";
+import { isDesktop, isFirefox, isMobile, isSafari } from "react-device-detect";
 import Chip from "../Chip";
 import {
   ContextMenu,
@@ -166,87 +166,98 @@ export default function PreviewThumbnailPlayer({
     config?.ui.time_format == "24hour" ? "%b %-d, %H:%M" : "%b %-d, %I:%M %p",
   );
 
-  return (
-    <ContextMenu>
-      <ContextMenuTrigger asChild>
-        <div
-          className="relative size-full cursor-pointer"
-          onMouseEnter={isMobile ? undefined : () => onPlayback(true)}
-          onMouseLeave={isMobile ? undefined : () => onPlayback(false)}
-          onClick={handleOnClick}
-          {...swipeHandlers}
-        >
-          {playingBack && (
-            <div className="absolute inset-0 animate-in fade-in">
-              <PreviewContent
-                review={review}
-                relevantPreview={relevantPreview}
-                setReviewed={handleSetReviewed}
-                setIgnoreClick={setIgnoreClick}
-                isPlayingBack={setPlayback}
-                onTimeUpdate={onTimeUpdate}
-              />
-            </div>
-          )}
-          <PreviewPlaceholder imgLoaded={imgLoaded} />
-          <div className={`${imgLoaded ? "visible" : "invisible"}`}>
-            <img
-              ref={imgRef}
-              className={`w-full h-full transition-opacity ${
-                playingBack ? "opacity-0" : "opacity-100"
-              }`}
-              src={`${apiHost}${review.thumb_path.replace(
-                "/media/frigate/",
-                "",
-              )}`}
-              loading={isSafari ? "eager" : "lazy"}
-              onLoad={() => {
-                onImgLoad();
-              }}
-            />
-
-            {!playingBack && (
-              <>
-                <div className="absolute top-0 inset-x-0 rounded-t-l z-10 w-full h-[30%] bg-gradient-to-b from-black/60 to-transparent pointer-events-none">
-                  <div className="flex h-full justify-between items-start mx-3 pb-1 text-white text-sm ">
-                    {(review.severity == "alert" ||
-                      review.severity == "detection") && (
-                      <Chip className="absolute top-2 left-2 flex gap-1 bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 z-0">
-                        {review.data.objects.map((object) => {
-                          return getIconForLabel(object, "size-3 text-white");
-                        })}
-                        {review.data.audio.map((audio) => {
-                          return getIconForLabel(audio, "size-3 text-white");
-                        })}
-                        {review.data.sub_labels?.map((sub) => {
-                          return getIconForSubLabel(sub, "size-3 text-white");
-                        })}
-                      </Chip>
-                    )}
-                  </div>
-                </div>
-                <div className="absolute bottom-0 inset-x-0 rounded-b-l z-10 w-full h-[20%] bg-gradient-to-t from-black/60 to-transparent pointer-events-none">
-                  <div className="flex h-full justify-between items-end mx-3 pb-1 text-white text-sm ">
-                    <TimeAgo time={review.start_time * 1000} dense />
-                    {formattedDate}
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-          {!playingBack && imgLoaded && review.has_been_reviewed && (
-            <div className="absolute inset-0 z-10 bg-black bg-opacity-60" />
-          )}
+  const previewContent = (
+    <div
+      className="relative size-full cursor-pointer"
+      onMouseEnter={isMobile ? undefined : () => onPlayback(true)}
+      onMouseLeave={isMobile ? undefined : () => onPlayback(false)}
+      onContextMenu={
+        isDesktop
+          ? undefined
+          : (e) => {
+              e.preventDefault();
+              onClick(review.id, true);
+            }
+      }
+      onClick={handleOnClick}
+      {...swipeHandlers}
+    >
+      {playingBack && (
+        <div className="absolute inset-0 animate-in fade-in">
+          <PreviewContent
+            review={review}
+            relevantPreview={relevantPreview}
+            setReviewed={handleSetReviewed}
+            setIgnoreClick={setIgnoreClick}
+            isPlayingBack={setPlayback}
+            onTimeUpdate={onTimeUpdate}
+          />
         </div>
-      </ContextMenuTrigger>
-      <PreviewContextItems
-        review={review}
-        onSelect={() => onClick(review.id, true)}
-        setReviewed={handleSetReviewed}
-        markAboveReviewed={markAboveReviewed}
-      />
-    </ContextMenu>
+      )}
+      <PreviewPlaceholder imgLoaded={imgLoaded} />
+      <div className={`${imgLoaded ? "visible" : "invisible"}`}>
+        <img
+          ref={imgRef}
+          className={`w-full h-full transition-opacity ${
+            playingBack ? "opacity-0" : "opacity-100"
+          }`}
+          src={`${apiHost}${review.thumb_path.replace("/media/frigate/", "")}`}
+          loading={isSafari ? "eager" : "lazy"}
+          onLoad={() => {
+            onImgLoad();
+          }}
+        />
+
+        {!playingBack && (
+          <>
+            <div className="absolute top-0 inset-x-0 rounded-t-l z-10 w-full h-[30%] bg-gradient-to-b from-black/60 to-transparent pointer-events-none">
+              <div className="flex h-full justify-between items-start mx-3 pb-1 text-white text-sm ">
+                {(review.severity == "alert" ||
+                  review.severity == "detection") && (
+                  <Chip className="absolute top-2 left-2 flex gap-1 bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 z-0">
+                    {review.data.objects.map((object) => {
+                      return getIconForLabel(object, "size-3 text-white");
+                    })}
+                    {review.data.audio.map((audio) => {
+                      return getIconForLabel(audio, "size-3 text-white");
+                    })}
+                    {review.data.sub_labels?.map((sub) => {
+                      return getIconForSubLabel(sub, "size-3 text-white");
+                    })}
+                  </Chip>
+                )}
+              </div>
+            </div>
+            <div className="absolute bottom-0 inset-x-0 rounded-b-l z-10 w-full h-[20%] bg-gradient-to-t from-black/60 to-transparent pointer-events-none">
+              <div className="flex h-full justify-between items-end mx-3 pb-1 text-white text-sm ">
+                <TimeAgo time={review.start_time * 1000} dense />
+                {formattedDate}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+      {!playingBack && imgLoaded && review.has_been_reviewed && (
+        <div className="absolute inset-0 z-10 bg-black bg-opacity-60" />
+      )}
+    </div>
   );
+
+  if (isDesktop) {
+    return (
+      <ContextMenu>
+        <ContextMenuTrigger asChild>{previewContent}</ContextMenuTrigger>
+        <PreviewContextItems
+          review={review}
+          onSelect={() => onClick(review.id, true)}
+          setReviewed={handleSetReviewed}
+          markAboveReviewed={markAboveReviewed}
+        />
+      </ContextMenu>
+    );
+  }
+
+  return previewContent;
 }
 
 type PreviewContentProps = {
