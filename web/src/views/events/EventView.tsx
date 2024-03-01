@@ -322,7 +322,7 @@ export default function EventView({
           )}
 
           <div
-            className="w-full m-2 grid md:grid-cols-3 3xl:grid-cols-4 gap-2 md:gap-4"
+            className="w-full m-2 grid sm:grid-cols-2 md:grid-cols-3 3xl:grid-cols-4 gap-2 md:gap-4"
             ref={contentRef}
           >
             {currentItems ? (
