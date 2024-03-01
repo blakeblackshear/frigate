@@ -223,28 +223,21 @@ export default function EventView({
     [selectedReviews, setSelectedReviews],
   );
 
-  const markScrolledItemsAsReviewed = useCallback(async () => {
-    if (!currentItems) {
-      return;
-    }
+  const exportReview = useCallback(
+    (id: string) => {
+      const review = currentItems?.find((seg) => seg.id == id);
 
-    const scrolled: string[] = [];
-
-    currentItems.find((value) => {
-      if (value.start_time > minimapBounds.end) {
-        scrolled.push(value.id);
-        return false;
-      } else {
-        return true;
+      if (!review) {
+        return;
       }
-    });
 
-    const idList = scrolled.join(",");
-
-    await axios.post(`reviews/${idList}/viewed`);
-    setSelectedReviews([]);
-    pullLatestData();
-  }, [currentItems, minimapBounds]);
+      axios.post(
+        `export/${review.camera}/start/${review.start_time}/end/${review.end_time}`,
+        { playback: "realtime" },
+      );
+    },
+    [selectedReviews],
+  );
 
   if (!config) {
     return <ActivityIndicator />;
@@ -252,7 +245,7 @@ export default function EventView({
 
   return (
     <div className="flex flex-col size-full">
-      <div className="relative flex justify-between mb-2">
+      <div className="h-8 relative flex justify-between items-center mb-2">
         {isMobile && (
           <Logo className="absolute inset-y-0 inset-x-1/2 -translate-x-1/2 h-8" />
         )}
@@ -290,11 +283,14 @@ export default function EventView({
             <div className="hidden md:block">Motion</div>
           </ToggleGroupItem>
         </ToggleGroup>
-        <ReviewFilterGroup filter={filter} onUpdateFilter={updateFilter} />
-        {selectedReviews.length > 0 && (
+
+        {selectedReviews.length <= 0 ? (
+          <ReviewFilterGroup filter={filter} onUpdateFilter={updateFilter} />
+        ) : (
           <ReviewActionGroup
             selectedReviews={selectedReviews}
             setSelectedReviews={setSelectedReviews}
+            onExport={exportReview}
             pullLatestData={pullLatestData}
           />
         )}
@@ -347,7 +343,6 @@ export default function EventView({
                         allPreviews={relevantPreviews}
                         setReviewed={markItemAsReviewed}
                         onTimeUpdate={setPreviewTime}
-                        markAboveReviewed={markScrolledItemsAsReviewed}
                         onClick={onSelectReview}
                       />
                     </div>
