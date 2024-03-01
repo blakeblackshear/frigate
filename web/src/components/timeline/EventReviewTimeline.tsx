@@ -191,12 +191,12 @@ export function EventReviewTimeline({
             >
               <div
                 className={`bg-destructive rounded-full mx-auto ${
-                  segmentDuration < 60 ? "w-20" : "w-16"
+                  segmentDuration < 60 ? "w-14 md:w-20" : "w-12 md:w-16"
                 } h-5 flex items-center justify-center`}
               >
                 <div
                   ref={handlebarTimeRef}
-                  className="text-white text-xs z-10"
+                  className="text-white text-[8px] md:text-xs z-10"
                 ></div>
               </div>
               <div className="absolute h-1 w-full bg-destructive top-1/2 transform -translate-y-1/2"></div>
