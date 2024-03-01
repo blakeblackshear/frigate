@@ -1,6 +1,12 @@
 import { usePtzCommand } from "@/api/ws";
 import LivePlayer from "@/components/player/LivePlayer";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { CameraConfig } from "@/types/frigateConfig";
 import { CameraPtzInfo } from "@/types/ptz";
@@ -204,9 +210,22 @@ function PtzControlPanel({ camera }: { camera: string }) {
         </>
       )}
       {(ptz?.presets?.length ?? 0) > 0 && (
-        <Button>
-          <BsThreeDotsVertical />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button>
+              <BsThreeDotsVertical />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            {ptz?.presets.map((preset) => {
+              return (
+                <DropdownMenuItem onSelect={() => sendPtz(`preset_${preset}`)}>
+                  {preset}
+                </DropdownMenuItem>
+              );
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
       )}
     </div>
   );
