@@ -7,6 +7,7 @@ import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
 import ActivityIndicator from "@/components/ui/activity-indicator";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useEventUtils } from "@/hooks/use-event-utils";
+import { useScrollLockout } from "@/hooks/use-mouse-listener";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
 import { ReviewFilter, ReviewSegment, ReviewSeverity } from "@/types/review";
@@ -192,6 +193,7 @@ export default function EventView({
   // preview playback
 
   const [previewTime, setPreviewTime] = useState<number>();
+  const scrollLock = useScrollLockout(contentRef);
 
   // review interaction
 
@@ -220,7 +222,7 @@ export default function EventView({
         onOpenReview(reviewId);
       }
     },
-    [selectedReviews, setSelectedReviews],
+    [selectedReviews, setSelectedReviews, onOpenReview],
   );
 
   const exportReview = useCallback(
@@ -236,7 +238,7 @@ export default function EventView({
         { playback: "realtime" },
       );
     },
-    [selectedReviews],
+    [currentItems],
   );
 
   if (!config) {
@@ -342,6 +344,7 @@ export default function EventView({
                         review={value}
                         allPreviews={relevantPreviews}
                         setReviewed={markItemAsReviewed}
+                        scrollLock={scrollLock}
                         onTimeUpdate={setPreviewTime}
                         onClick={onSelectReview}
                       />
