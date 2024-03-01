@@ -45,10 +45,9 @@ export function EventReviewTimeline({
   onHandlebarDraggingChange,
 }: EventReviewTimelineProps) {
   const [isDragging, setIsDragging] = useState(false);
-  const [currentTimeSegment, setCurrentTimeSegment] = useState<number>(0);
   const scrollTimeRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
-  const currentTimeRef = useRef<HTMLDivElement>(null);
+  const handlebarTimeRef = useRef<HTMLDivElement>(null);
   const observer = useRef<ResizeObserver | null>(null);
   const timelineDuration = useMemo(
     () => timelineStart - timelineEnd,
@@ -69,12 +68,13 @@ export function EventReviewTimeline({
       alignEndDateToTimeline,
       segmentDuration,
       showHandlebar,
+      handlebarTime,
+      setHandlebarTime,
       timelineDuration,
       timelineStart,
       isDragging,
       setIsDragging,
-      currentTimeRef,
-      setHandlebarTime,
+      handlebarTimeRef,
     });
 
   function handleResize() {
@@ -152,65 +152,14 @@ export function EventReviewTimeline({
   );
 
   useEffect(() => {
-    if (showHandlebar) {
-      requestAnimationFrame(() => {
-        if (currentTimeRef.current && currentTimeSegment) {
-          currentTimeRef.current.textContent = new Date(
-            currentTimeSegment * 1000,
-          ).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-            ...(segmentDuration < 60 && { second: "2-digit" }),
-          });
-        }
-      });
-    }
-    // we know that these deps are correct
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentTimeSegment, showHandlebar]);
-
-  useEffect(() => {
     if (onHandlebarDraggingChange) {
       onHandlebarDraggingChange(isDragging);
     }
   }, [isDragging, onHandlebarDraggingChange]);
 
   useEffect(() => {
-    if (timelineRef.current && handlebarTime && showHandlebar) {
-      const { scrollHeight: timelineHeight } = timelineRef.current;
-
-      // Calculate the height of an individual segment
-      const segmentHeight =
-        timelineHeight / (timelineDuration / segmentDuration);
-
-      // Calculate the segment index corresponding to the target time
-      const alignedHandlebarTime = alignStartDateToTimeline(handlebarTime);
-      const segmentIndex = Math.ceil(
-        (timelineStart - alignedHandlebarTime) / segmentDuration,
-      );
-
-      // Calculate the top position based on the segment index
-      const newTopPosition = Math.max(0, segmentIndex * segmentHeight);
-
-      // Set the top position of the handle
-      const thumb = scrollTimeRef.current;
-      if (thumb) {
-        requestAnimationFrame(() => {
-          thumb.style.top = `${newTopPosition}px`;
-        });
-      }
-
-      setCurrentTimeSegment(alignedHandlebarTime);
-    }
-    // should only be run once
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
     generateSegments();
-    if (!currentTimeSegment && !handlebarTime) {
-      setCurrentTimeSegment(timelineStart);
-    }
+
     // TODO: touch events for mobile
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
@@ -220,13 +169,7 @@ export function EventReviewTimeline({
     };
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    currentTimeSegment,
-    generateSegments,
-    timelineStart,
-    handleMouseUp,
-    handleMouseMove,
-  ]);
+  }, [generateSegments, timelineStart, handleMouseUp, handleMouseMove]);
 
   return (
     <div
@@ -248,12 +191,12 @@ export function EventReviewTimeline({
             >
               <div
                 className={`bg-destructive rounded-full mx-auto ${
-                  segmentDuration < 60 ? "w-20" : "w-16"
+                  segmentDuration < 60 ? "w-14 md:w-20" : "w-12 md:w-16"
                 } h-5 flex items-center justify-center`}
               >
                 <div
-                  ref={currentTimeRef}
-                  className="text-white text-xs z-10"
+                  ref={handlebarTimeRef}
+                  className="text-white text-[8px] md:text-xs z-10"
                 ></div>
               </div>
               <div className="absolute h-1 w-full bg-destructive top-1/2 transform -translate-y-1/2"></div>
