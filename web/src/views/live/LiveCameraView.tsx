@@ -19,7 +19,12 @@ import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { CameraConfig } from "@/types/frigateConfig";
 import { CameraPtzInfo } from "@/types/ptz";
 import React, { useCallback, useMemo, useState } from "react";
-import { isSafari } from "react-device-detect";
+import {
+  isDesktop,
+  isMobile,
+  isSafari,
+  useMobileOrientation,
+} from "react-device-detect";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import {
   FaAngleDown,
@@ -46,6 +51,7 @@ type LiveCameraViewProps = {
 };
 export default function LiveCameraView({ camera }: LiveCameraViewProps) {
   const navigate = useNavigate();
+  const { isPortrait } = useMobileOrientation();
 
   // camera features
 
@@ -65,41 +71,55 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
   const [audio, setAudio] = useState(false);
 
   const growClassName = useMemo(() => {
-    if (camera.detect.width / camera.detect.height > 2) {
+    if (isMobile) {
+      if (isPortrait) {
+        return "absolute left-2 right-2 top-[50%] -translate-y-[50%]";
+      } else {
+        return "absolute top-2 bottom-2 left-[50%] -translate-x-[50%]";
+      }
+    } else if (camera.detect.width / camera.detect.height > 2) {
       return "absolute left-2 right-2 top-[50%] -translate-y-[50%]";
     } else {
       return "absolute top-2 bottom-2 left-[50%] -translate-x-[50%]";
     }
-  }, [camera]);
+  }, [camera, isPortrait]);
 
   return (
-    <div className="size-full flex flex-col">
-      <div className="w-full h-12 flex items-center justify-between">
-        <Button className="rounded-lg" onClick={() => navigate(-1)}>
-          <IoMdArrowBack className="size-5 mr-[10px]" />
-          Back
+    <div className="size-full flex flex-col landscape:flex-row">
+      <div className="w-full landscape:w-min landscape:h-full h-12 flex flex-row landscape:flex-col items-center justify-between">
+        <Button
+          className={`rounded-lg ${isMobile ? "ml-2" : "ml-0"}`}
+          size={isMobile ? "icon" : "default"}
+          onClick={() => navigate(-1)}
+        >
+          <IoMdArrowBack className="size-5 lg:mr-[10px]" />
+          {isDesktop && "Back"}
         </Button>
         <TooltipProvider>
-          <div className="flex items-center gap-1 mr-1 *:rounded-lg">
+          <div className="flex flex-row landscape:flex-col items-center gap-1 mr-1 *:rounded-lg">
             <CameraFeatureToggle
+              className="p-2 md:p-0"
               Icon={audio ? GiSpeaker : GiSpeakerOff}
               isActive={audio}
               title={`${audio ? "Disable" : "Enable"} Camera Audio`}
               onClick={() => setAudio(!audio)}
             />
             <CameraFeatureToggle
+              className="p-2 md:p-0"
               Icon={detectState == "ON" ? MdPersonSearch : MdPersonOff}
               isActive={detectState == "ON"}
               title={`${detectState == "ON" ? "Disable" : "Enable"} Detect`}
               onClick={() => sendDetect(detectState == "ON" ? "OFF" : "ON")}
             />
             <CameraFeatureToggle
+              className="p-2 md:p-0"
               Icon={recordState == "ON" ? LuVideo : LuVideoOff}
               isActive={recordState == "ON"}
               title={`${recordState == "ON" ? "Disable" : "Enable"} Recording`}
               onClick={() => sendRecord(recordState == "ON" ? "OFF" : "ON")}
             />
             <CameraFeatureToggle
+              className="p-2 md:p-0"
               Icon={snapshotState == "ON" ? MdPhotoCamera : MdNoPhotography}
               isActive={snapshotState == "ON"}
               title={`${snapshotState == "ON" ? "Disable" : "Enable"} Snapshots`}
@@ -107,6 +127,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
             />
             {camera.audio.enabled_in_config && (
               <CameraFeatureToggle
+                className="p-2 md:p-0"
                 Icon={audioState == "ON" ? LuEar : LuEarOff}
                 isActive={audioState == "ON"}
                 title={`${audioState == "ON" ? "Disable" : "Enable"} Audio Detect`}
