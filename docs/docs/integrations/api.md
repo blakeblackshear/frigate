@@ -43,7 +43,7 @@ Accepts the following query string parameters:
 
 Example parameters:
 
-- `h=300`: resizes the image to 300 pixes tall
+- `h=300`: resizes the image to 300 pixels tall
 
 ### `GET /api/stats`
 

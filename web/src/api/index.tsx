@@ -1,9 +1,8 @@
 import { baseUrl } from "./baseUrl";
-import useSWR, { SWRConfig } from "swr";
+import { SWRConfig } from "swr";
 import { WsProvider } from "./ws";
 import axios from "axios";
 import { ReactNode } from "react";
-import { FrigateConfig } from "@/types/frigateConfig";
 
 axios.defaults.baseURL = `${baseUrl}api/`;
 
@@ -38,9 +37,7 @@ type WsWithConfigType = {
 };
 
 function WsWithConfig({ children }: WsWithConfigType) {
-  const { data } = useSWR<FrigateConfig>("config");
-
-  return data ? <WsProvider config={data}>{children}</WsProvider> : children;
+  return <WsProvider>{children}</WsProvider>;
 }
 
 export function useApiHost() {

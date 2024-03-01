@@ -1,160 +1,147 @@
-import BirdseyeLivePlayer from "@/components/player/BirdseyeLivePlayer";
+import { useFrigateReviews } from "@/api/ws";
+import Logo from "@/components/Logo";
+import { AnimatedEventThumbnail } from "@/components/image/AnimatedEventThumbnail";
 import LivePlayer from "@/components/player/LivePlayer";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import Heading from "@/components/ui/heading";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { usePersistence } from "@/hooks/use-persistence";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { ReviewSegment } from "@/types/review";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { isDesktop, isMobile, isSafari } from "react-device-detect";
+import { CiGrid2H, CiGrid31 } from "react-icons/ci";
 import useSWR from "swr";
 
 function Live() {
   const { data: config } = useSWR<FrigateConfig>("config");
-  const { camera: openedCamera } = useParams();
 
-  const [camera, setCamera] = useState<string>(
-    openedCamera ?? (config?.birdseye.enabled ? "birdseye" : "Select A Camera")
+  // layout
+
+  const [layout, setLayout] = usePersistence<"grid" | "list">(
+    "live-layout",
+    isDesktop ? "grid" : "list",
   );
-  const cameraConfig = useMemo(() => {
-    return camera == "birdseye" ? undefined : config?.cameras[camera];
-  }, [camera, config]);
-  const sortedCameras = useMemo(() => {
+
+  // recent events
+  const { payload: eventUpdate } = useFrigateReviews();
+  const { data: allEvents, mutate: updateEvents } = useSWR<ReviewSegment[]>([
+    "review",
+    { limit: 10, severity: "alert" },
+  ]);
+
+  useEffect(() => {
+    if (!eventUpdate) {
+      return;
+    }
+
+    // if event is ended and was saved, update events list
+    if (eventUpdate.type == "end" && eventUpdate.review.severity == "alert") {
+      updateEvents();
+      return;
+    }
+  }, [eventUpdate, updateEvents]);
+
+  const events = useMemo(() => {
+    if (!allEvents) {
+      return [];
+    }
+
+    const date = new Date();
+    date.setHours(date.getHours() - 1);
+    const cutoff = date.getTime() / 1000;
+    return allEvents.filter((event) => event.start_time > cutoff);
+  }, [allEvents]);
+
+  // camera live views
+
+  const cameras = useMemo(() => {
     if (!config) {
       return [];
     }
 
-    return Object.values(config.cameras).sort(
-      (aConf, bConf) => aConf.ui.order - bConf.ui.order
-    );
+    return Object.values(config.cameras)
+      .filter((conf) => conf.ui.dashboard && conf.enabled)
+      .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
   }, [config]);
-  const restreamEnabled = useMemo(() => {
-    if (!config) {
-      return false;
-    }
 
-    if (camera == "birdseye") {
-      return config.birdseye.restream;
-    }
+  const [windowVisible, setWindowVisible] = useState(true);
+  const visibilityListener = useCallback(() => {
+    setWindowVisible(document.visibilityState == "visible");
+  }, []);
 
-    return (
-      cameraConfig &&
-      Object.keys(config.go2rtc.streams || {}).includes(
-        cameraConfig.live.stream_name
-      )
-    );
-  }, [config, cameraConfig]);
-  const defaultLiveMode = useMemo(() => {
-    if (cameraConfig) {
-      if (restreamEnabled) {
-        return cameraConfig.ui.live_mode || config?.ui.live_mode;
-      }
+  useEffect(() => {
+    addEventListener("visibilitychange", visibilityListener);
 
-      return "jsmpeg";
-    }
-
-    return undefined;
-  }, [cameraConfig, restreamEnabled]);
-  const [viewSource, setViewSource, sourceIsLoaded] = usePersistence(
-    `${camera}-source`,
-    camera == "birdseye" ? "jsmpeg" : defaultLiveMode
-  );
+    return () => {
+      removeEventListener("visibilitychange", visibilityListener);
+    };
+  }, [visibilityListener]);
 
   return (
-    <div className=" w-full">
-      <div className="flex justify-between">
-        <Heading as="h2">Live</Heading>
-        <div className="flex">
-          <div className="mx-1">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button className="capitalize" variant="outline">
-                  {camera?.replaceAll("_", " ") || "Select A Camera"}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuLabel>Select A Camera</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuRadioGroup
-                  value={camera}
-                  onValueChange={setCamera}
-                >
-                  {config?.birdseye.enabled && (
-                    <DropdownMenuRadioItem value="birdseye">
-                      Birdseye
-                    </DropdownMenuRadioItem>
-                  )}
-                  {sortedCameras.map((item) => (
-                    <DropdownMenuRadioItem
-                      className="capitalize"
-                      key={item.name}
-                      value={item.name}
-                    >
-                      {item.name.replaceAll("_", " ")}
-                    </DropdownMenuRadioItem>
-                  ))}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-          <div className="mx-1">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button className="capitalize" variant="outline">
-                  {viewSource || defaultLiveMode || "Select A Live Mode"}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuLabel>Select A Live Mode</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuRadioGroup
-                  value={`${viewSource}`}
-                  onValueChange={setViewSource}
-                >
-                  {restreamEnabled && (
-                    <DropdownMenuRadioItem value="webrtc">
-                      Webrtc
-                    </DropdownMenuRadioItem>
-                  )}
-                  {restreamEnabled && (
-                    <DropdownMenuRadioItem value="mse">
-                      MSE
-                    </DropdownMenuRadioItem>
-                  )}
-                  <DropdownMenuRadioItem value="jsmpeg">
-                    Jsmpeg
-                  </DropdownMenuRadioItem>
-                  {camera != "birdseye" && (
-                    <DropdownMenuRadioItem value="debug">
-                      Debug
-                    </DropdownMenuRadioItem>
-                  )}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
+    <div className="size-full overflow-y-scroll px-2">
+      {isMobile && (
+        <div className="relative h-9 flex items-center justify-between">
+          <Logo className="absolute inset-y-0 inset-x-1/2 -translate-x-1/2 h-8" />
+          <div />
+          <div className="flex items-center gap-1">
+            <Button
+              className={layout == "grid" ? "text-blue-600 bg-blue-200" : ""}
+              size="xs"
+              variant="secondary"
+              onClick={() => setLayout("grid")}
+            >
+              <CiGrid31 className="m-1" />
+            </Button>
+            <Button
+              className={layout == "list" ? "text-blue-600 bg-blue-200" : ""}
+              size="xs"
+              variant="secondary"
+              onClick={() => setLayout("list")}
+            >
+              <CiGrid2H className="m-1" />
+            </Button>
           </div>
         </div>
+      )}
+
+      {events && events.length > 0 && (
+        <ScrollArea>
+          <TooltipProvider>
+            <div className="flex">
+              {events.map((event) => {
+                return <AnimatedEventThumbnail key={event.id} event={event} />;
+              })}
+            </div>
+          </TooltipProvider>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+      )}
+
+      <div
+        className={`mt-4 grid ${layout == "grid" ? "grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4" : ""} gap-2 md:gap-4  *:rounded-2xl *:bg-black`}
+      >
+        {cameras.map((camera) => {
+          let grow;
+          const aspectRatio = camera.detect.width / camera.detect.height;
+          if (aspectRatio > 2) {
+            grow = `${layout == "grid" ? "col-span-2" : ""} aspect-wide`;
+          } else if (aspectRatio < 1) {
+            grow = `${layout == "grid" ? "row-span-2 aspect-tall md:h-full" : ""} aspect-tall`;
+          } else {
+            grow = "aspect-video";
+          }
+          return (
+            <LivePlayer
+              key={camera.name}
+              className={grow}
+              windowVisible={windowVisible}
+              cameraConfig={camera}
+              preferredLiveMode={isSafari ? "webrtc" : "mse"}
+            />
+          );
+        })}
       </div>
-      {config && camera == "birdseye" && sourceIsLoaded && (
-        <BirdseyeLivePlayer
-          birdseyeConfig={config?.birdseye}
-          liveMode={`${viewSource ?? defaultLiveMode}`}
-        />
-      )}
-      {cameraConfig && sourceIsLoaded && (
-        <LivePlayer
-          liveMode={`${viewSource ?? defaultLiveMode}`}
-          cameraConfig={cameraConfig}
-        />
-      )}
     </div>
   );
 }

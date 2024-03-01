@@ -69,8 +69,8 @@ PRESETS_HW_ACCEL_DECODE = {
     FFMPEG_HWACCEL_NVIDIA: "-hwaccel cuda -hwaccel_output_format cuda",
     "preset-jetson-h264": "-c:v h264_nvmpi -resize {1}x{2}",
     "preset-jetson-h265": "-c:v hevc_nvmpi -resize {1}x{2}",
-    "preset-rk-h264": "-c:v h264_rkmpp_decoder",
-    "preset-rk-h265": "-c:v hevc_rkmpp_decoder",
+    "preset-rk-h264": "-hwaccel rkmpp -hwaccel_output_format drm_prime",
+    "preset-rk-h265": "-hwaccel rkmpp -hwaccel_output_format drm_prime",
 }
 PRESETS_HW_ACCEL_DECODE["preset-nvidia-h264"] = PRESETS_HW_ACCEL_DECODE[
     FFMPEG_HWACCEL_NVIDIA
@@ -91,8 +91,8 @@ PRESETS_HW_ACCEL_SCALE = {
     FFMPEG_HWACCEL_NVIDIA: "-r {0} -vf fps={0},scale_cuda=w={1}:h={2}:format=nv12,hwdownload,format=nv12,format=yuv420p",
     "preset-jetson-h264": "-r {0}",  # scaled in decoder
     "preset-jetson-h265": "-r {0}",  # scaled in decoder
-    "preset-rk-h264": "-r {0} -vf fps={0},scale={1}:{2}",
-    "preset-rk-h265": "-r {0} -vf fps={0},scale={1}:{2}",
+    "preset-rk-h264": "-r {0} -vf scale_rkrga=w={1}:h={2}:format=yuv420p:force_original_aspect_ratio=0,hwmap=mode=read,format=yuv420p",
+    "preset-rk-h265": "-r {0} -vf scale_rkrga=w={1}:h={2}:format=yuv420p:force_original_aspect_ratio=0,hwmap=mode=read,format=yuv420p",
     "default": "-r {0} -vf fps={0},scale={1}:{2}",
 }
 PRESETS_HW_ACCEL_SCALE["preset-nvidia-h264"] = PRESETS_HW_ACCEL_SCALE[
@@ -111,16 +111,16 @@ PRESETS_HW_ACCEL_ENCODE_BIRDSEYE = {
     FFMPEG_HWACCEL_NVIDIA: "ffmpeg -hide_banner {0} -c:v h264_nvenc -g 50 -profile:v high -level:v auto -preset:v p2 -tune:v ll {1}",
     "preset-jetson-h264": "ffmpeg -hide_banner {0} -c:v h264_nvmpi -profile high {1}",
     "preset-jetson-h265": "ffmpeg -hide_banner {0} -c:v h264_nvmpi -profile high {1}",
-    "preset-rk-h264": "ffmpeg -hide_banner {0} -c:v h264_rkmpp_encoder -profile high {1}",
-    "preset-rk-h265": "ffmpeg -hide_banner {0} -c:v hevc_rkmpp_encoder -profile high {1}",
+    "preset-rk-h264": "ffmpeg -hide_banner {0} -c:v h264_rkmpp -profile:v high {1}",
+    "preset-rk-h265": "ffmpeg -hide_banner {0} -c:v hevc_rkmpp -profile:v high {1}",
     "default": "ffmpeg -hide_banner {0} -c:v libx264 -g 50 -profile:v high -level:v 4.1 -preset:v superfast -tune:v zerolatency {1}",
 }
-PRESETS_HW_ACCEL_ENCODE_BIRDSEYE[
-    "preset-nvidia-h264"
-] = PRESETS_HW_ACCEL_ENCODE_BIRDSEYE[FFMPEG_HWACCEL_NVIDIA]
-PRESETS_HW_ACCEL_ENCODE_BIRDSEYE[
-    "preset-nvidia-h265"
-] = PRESETS_HW_ACCEL_ENCODE_BIRDSEYE[FFMPEG_HWACCEL_NVIDIA]
+PRESETS_HW_ACCEL_ENCODE_BIRDSEYE["preset-nvidia-h264"] = (
+    PRESETS_HW_ACCEL_ENCODE_BIRDSEYE[FFMPEG_HWACCEL_NVIDIA]
+)
+PRESETS_HW_ACCEL_ENCODE_BIRDSEYE["preset-nvidia-h265"] = (
+    PRESETS_HW_ACCEL_ENCODE_BIRDSEYE[FFMPEG_HWACCEL_NVIDIA]
+)
 
 PRESETS_HW_ACCEL_ENCODE_TIMELAPSE = {
     "preset-rpi-64-h264": "ffmpeg -hide_banner {0} -c:v h264_v4l2m2m -pix_fmt yuv420p {1}",
@@ -132,13 +132,13 @@ PRESETS_HW_ACCEL_ENCODE_TIMELAPSE = {
     "preset-nvidia-h265": "ffmpeg -hide_banner -hwaccel cuda -hwaccel_output_format cuda -extra_hw_frames 8 {0} -c:v hevc_nvenc {1}",
     "preset-jetson-h264": "ffmpeg -hide_banner {0} -c:v h264_nvmpi -profile high {1}",
     "preset-jetson-h265": "ffmpeg -hide_banner {0} -c:v hevc_nvmpi -profile high {1}",
-    "preset-rk-h264": "ffmpeg -hide_banner {0} -c:v h264_rkmpp_encoder -profile high {1}",
-    "preset-rk-h265": "ffmpeg -hide_banner {0} -c:v hevc_rkmpp_encoder -profile high {1}",
+    "preset-rk-h264": "ffmpeg -hide_banner {0} -c:v h264_rkmpp -profile:v high {1}",
+    "preset-rk-h265": "ffmpeg -hide_banner {0} -c:v hevc_rkmpp -profile:v high {1}",
     "default": "ffmpeg -hide_banner {0} -c:v libx264 -preset:v ultrafast -tune:v zerolatency {1}",
 }
-PRESETS_HW_ACCEL_ENCODE_TIMELAPSE[
-    "preset-nvidia-h264"
-] = PRESETS_HW_ACCEL_ENCODE_TIMELAPSE[FFMPEG_HWACCEL_NVIDIA]
+PRESETS_HW_ACCEL_ENCODE_TIMELAPSE["preset-nvidia-h264"] = (
+    PRESETS_HW_ACCEL_ENCODE_TIMELAPSE[FFMPEG_HWACCEL_NVIDIA]
+)
 
 # encoding of previews is only done on CPU due to comparable encode times and better quality from libx264
 PRESETS_HW_ACCEL_ENCODE_PREVIEW = {
@@ -175,7 +175,7 @@ def parse_preset_hardware_acceleration_scale(
     if not isinstance(arg, str) or " " in arg:
         scale = PRESETS_HW_ACCEL_SCALE["default"]
     else:
-        scale = PRESETS_HW_ACCEL_SCALE.get(arg, "")
+        scale = PRESETS_HW_ACCEL_SCALE.get(arg, PRESETS_HW_ACCEL_SCALE["default"])
 
     scale = scale.format(fps, width, height).split(" ")
     scale.extend(detect_args)
@@ -461,9 +461,18 @@ PRESETS_RECORD_OUTPUT = {
 }
 
 
-def parse_preset_output_record(arg: Any) -> list[str]:
+def parse_preset_output_record(arg: Any, force_record_hvc1: bool) -> list[str]:
     """Return the correct preset if in preset format otherwise return None."""
     if not isinstance(arg, str):
         return None
 
-    return PRESETS_RECORD_OUTPUT.get(arg, None)
+    preset = PRESETS_RECORD_OUTPUT.get(arg, None)
+
+    if not preset:
+        return None
+
+    if force_record_hvc1:
+        # Apple only supports HEVC if it is hvc1 (vs. hev1)
+        preset += ["-tag:v", "hvc1"]
+
+    return preset

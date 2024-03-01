@@ -13,7 +13,7 @@ For more detailed recommendations, you can refer to the docs on [improving your 
 
 ## Step 2: Submit a model request
 
-Once you have an initial set of verified images, you can request a model on the Models page. Each model request requires 1 of the training credits that you receive with your annual subscription. This model will support all [label types available](./index.md#available-label-types) even if you do not submit any examples for those labels. Model creation can take up to 36 hours.
+Once you have an initial set of verified images, you can request a model on the Models page. Each model request requires 1 of the 12 trainings that you receive with your annual subscription. This model will support all [label types available](./index.md#available-label-types) even if you do not submit any examples for those labels. Model creation can take up to 36 hours.
 ![Plus Models Page](/img/plus/plus-models.jpg)
 
 ## Step 3: Set your model id in the config

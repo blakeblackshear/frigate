@@ -1,4 +1,4 @@
-type Recording = {
+export type Recording = {
   id: string;
   camera: string;
   start_time: number;
@@ -11,7 +11,7 @@ type Recording = {
   dBFS: number;
 };
 
-type RecordingSegment = {
+export type RecordingSegment = {
   id: string;
   start_time: number;
   end_time: number;
@@ -21,7 +21,7 @@ type RecordingSegment = {
   duration: number;
 };
 
-type RecordingActivity = {
+export type RecordingActivity = {
   [hour: number]: RecordingSegmentActivity[];
 };
 

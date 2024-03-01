@@ -25,7 +25,7 @@ cameras:
 
 ## VSCode Configuration Schema
 
-VSCode (and VSCode addon) supports the JSON schemas which will automatically validate the config. This can be added by adding `# yaml-language-server: $schema=http://frigate_host:5000/api/config/schema.json` to the top of the config file. `frigate_host` being the IP address of Frigate or `ccab4aaf-frigate` if running in the addon.
+VSCode supports JSON schemas for automatically validating configuration files. You can enable this feature by adding `# yaml-language-server: $schema=http://frigate_host:5000/api/config/schema.json` to the beginning of the configuration file. Replace `frigate_host` with the IP address or hostname of your Frigate server. If you're using both VSCode and Frigate as an add-on, you should use `ccab4aaf-frigate` instead. Make sure to expose port `5000` for the Web Interface when accessing the config from VSCode on another machine.
 
 ## Environment Variable Substitution
 

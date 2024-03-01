@@ -24,11 +24,11 @@ from flask import (
     Flask,
     Response,
     current_app,
-    escape,
     jsonify,
     make_response,
     request,
 )
+from markupsafe import escape
 from peewee import DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
 from playhouse.sqliteq import SqliteQueueDatabase
@@ -45,12 +45,12 @@ from frigate.const import (
     RECORD_DIR,
 )
 from frigate.events.external import ExternalEventProcessor
-from frigate.models import Event, Previews, Recordings, Regions, Timeline
+from frigate.models import Event, Previews, Recordings, Regions, ReviewSegment, Timeline
 from frigate.object_processing import TrackedObject
 from frigate.plus import PlusApi
 from frigate.ptz.onvif import OnvifController
 from frigate.record.export import PlaybackFactorEnum, RecordingExporter
-from frigate.stats import stats_snapshot
+from frigate.stats.emitter import StatsEmitter
 from frigate.storage import StorageMaintainer
 from frigate.util.builtin import (
     clean_camera_user_pass,
@@ -70,12 +70,12 @@ bp = Blueprint("frigate", __name__)
 def create_app(
     frigate_config,
     database: SqliteQueueDatabase,
-    stats_tracking,
     detected_frames_processor,
     storage_maintainer: StorageMaintainer,
     onvif: OnvifController,
     external_processor: ExternalEventProcessor,
     plus_api: PlusApi,
+    stats_emitter: StatsEmitter,
 ):
     app = Flask(__name__)
 
@@ -97,14 +97,13 @@ def create_app(
             database.close()
 
     app.frigate_config = frigate_config
-    app.stats_tracking = stats_tracking
     app.detected_frames_processor = detected_frames_processor
     app.storage_maintainer = storage_maintainer
     app.onvif = onvif
     app.external_processor = external_processor
     app.plus_api = plus_api
     app.camera_error_image = None
-    app.hwaccel_errors = []
+    app.stats_emitter = stats_emitter
 
     app.register_blueprint(bp)
 
@@ -277,6 +276,13 @@ def send_to_plus(id):
                 box,
                 event.label,
             )
+        except ValueError:
+            message = "Error uploading annotation, unsupported label provided."
+            logger.error(message)
+            return make_response(
+                jsonify({"success": False, "message": message}),
+                400,
+            )
         except Exception as ex:
             logger.exception(ex)
             return make_response(
@@ -347,6 +353,13 @@ def false_positive(id):
             event.model_hash,
             event.model_type,
             event.detector_type,
+        )
+    except ValueError:
+        message = "Error uploading false positive, unsupported label provided."
+        logger.error(message)
+        return make_response(
+            jsonify({"success": False, "message": message}),
+            400,
         )
     except Exception as ex:
         logger.exception(ex)
@@ -591,6 +604,22 @@ def event_thumbnail(id, max_cache_age=2592000):
     else:
         response.headers["Cache-Control"] = "no-store"
     return response
+
+
+@bp.route("/events/<id>/preview.gif")
+def event_preview(id: str):
+    try:
+        event: Event = Event.get(Event.id == id)
+    except DoesNotExist:
+        return make_response(
+            jsonify({"success": False, "message": "Event not found"}), 404
+        )
+
+    start_ts = event.start_time
+    end_ts = start_ts + (
+        min(event.end_time - event.start_time, 20) if event.end_time else 20
+    )
+    return preview_gif(event.camera, start_ts, end_ts)
 
 
 @bp.route("/timeline")
@@ -904,9 +933,9 @@ def event_snapshot(id):
     else:
         response.headers["Cache-Control"] = "no-store"
     if download:
-        response.headers[
-            "Content-Disposition"
-        ] = f"attachment; filename=snapshot-{id}.jpg"
+        response.headers["Content-Disposition"] = (
+            f"attachment; filename=snapshot-{id}.jpg"
+        )
     return response
 
 
@@ -1093,9 +1122,9 @@ def event_clip(id):
     if download:
         response.headers["Content-Disposition"] = "attachment; filename=%s" % file_name
     response.headers["Content-Length"] = os.path.getsize(clip_path)
-    response.headers[
-        "X-Accel-Redirect"
-    ] = f"/clips/{file_name}"  # nginx: https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
+    response.headers["X-Accel-Redirect"] = (
+        f"/clips/{file_name}"  # nginx: https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
+    )
 
     return response
 
@@ -1371,7 +1400,7 @@ def end_event(event_id):
 
 @bp.route("/config")
 def config():
-    config = current_app.frigate_config.dict()
+    config = current_app.frigate_config.model_dump(mode="json", exclude_none=True)
 
     # remove the mqtt password
     config["mqtt"].pop("password", None)
@@ -1391,9 +1420,9 @@ def config():
     config["plus"] = {"enabled": current_app.plus_api.is_active()}
 
     for detector, detector_config in config["detectors"].items():
-        detector_config["model"][
-            "labelmap"
-        ] = current_app.frigate_config.model.merged_labelmap
+        detector_config["model"]["labelmap"] = (
+            current_app.frigate_config.model.merged_labelmap
+        )
 
     return jsonify(config)
 
@@ -1587,12 +1616,12 @@ def version():
 
 @bp.route("/stats")
 def stats():
-    stats = stats_snapshot(
-        current_app.frigate_config,
-        current_app.stats_tracking,
-        current_app.hwaccel_errors,
-    )
-    return jsonify(stats)
+    return jsonify(current_app.stats_emitter.get_latest_stats())
+
+
+@bp.route("/stats/history")
+def stats_history():
+    return jsonify(current_app.stats_emitter.get_stats_history())
 
 
 @bp.route("/<camera_name>")
@@ -1789,20 +1818,18 @@ def get_snapshot_from_recording(camera_name: str, frame_time: str):
 
 @bp.route("/recordings/storage", methods=["GET"])
 def get_recordings_storage_usage():
-    recording_stats = stats_snapshot(
-        current_app.frigate_config,
-        current_app.stats_tracking,
-        current_app.hwaccel_errors,
-    )["service"]["storage"][RECORD_DIR]
+    recording_stats = current_app.stats_emitter.get_latest_stats()["service"][
+        "storage"
+    ][RECORD_DIR]
 
     if not recording_stats:
         return jsonify({})
 
     total_mb = recording_stats["total"]
 
-    camera_usages: dict[
-        str, dict
-    ] = current_app.storage_maintainer.calculate_camera_usages()
+    camera_usages: dict[str, dict] = (
+        current_app.storage_maintainer.calculate_camera_usages()
+    )
 
     for camera_name in camera_usages.keys():
         if camera_usages.get(camera_name, {}).get("usage"):
@@ -1990,9 +2017,9 @@ def recording_clip(camera_name, start_ts, end_ts):
     if download:
         response.headers["Content-Disposition"] = "attachment; filename=%s" % file_name
     response.headers["Content-Length"] = os.path.getsize(path)
-    response.headers[
-        "X-Accel-Redirect"
-    ] = f"/cache/{file_name}"  # nginx: https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
+    response.headers["X-Accel-Redirect"] = (
+        f"/cache/{file_name}"  # nginx: https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
+    )
 
     return response
 
@@ -2148,37 +2175,184 @@ def preview_hour(year_month, day, hour, camera_name, tz_name):
     return preview_ts(camera_name, start_ts, end_ts)
 
 
-@bp.route("/preview/<camera_name>/<frame_time>/thumbnail.jpg")
-def preview_thumbnail(camera_name, frame_time):
+@bp.route("/preview/<file_name>/thumbnail.jpg")
+def preview_thumbnail(file_name: str):
     """Get a thumbnail from the cached preview jpgs."""
+    safe_file_name_current = secure_filename(file_name)
     preview_dir = os.path.join(CACHE_DIR, "preview_frames")
-    file_start = f"preview_{camera_name}"
-    file_check = f"{file_start}-{frame_time}.jpg"
-    selected_preview = None
 
-    for file in os.listdir(preview_dir):
-        if file.startswith(file_start):
-            if file < file_check:
-                selected_preview = file
-                break
-
-    if selected_preview is None:
-        return make_response(
-            jsonify(
-                {
-                    "success": False,
-                    "message": "Could not find valid preview jpg.",
-                }
-            ),
-            404,
-        )
-
-    with open(os.path.join(preview_dir, selected_preview), "rb") as image_file:
+    with open(os.path.join(preview_dir, safe_file_name_current), "rb") as image_file:
         jpg_bytes = image_file.read()
 
     response = make_response(jpg_bytes)
     response.headers["Content-Type"] = "image/jpeg"
     response.headers["Cache-Control"] = "private, max-age=31536000"
+    return response
+
+
+@bp.route("/preview/<camera_name>/start/<int:start_ts>/end/<int:end_ts>/frames")
+@bp.route("/preview/<camera_name>/start/<float:start_ts>/end/<float:end_ts>/frames")
+def get_preview_frames_from_cache(camera_name: str, start_ts, end_ts):
+    """Get list of cached preview frames"""
+    preview_dir = os.path.join(CACHE_DIR, "preview_frames")
+    file_start = f"preview_{camera_name}"
+    start_file = f"{file_start}-{start_ts}.jpg"
+    end_file = f"{file_start}-{end_ts}.jpg"
+    selected_previews = []
+
+    for file in sorted(os.listdir(preview_dir)):
+        if not file.startswith(file_start):
+            continue
+
+        if file < start_file:
+            continue
+
+        if file > end_file:
+            break
+
+        selected_previews.append(file)
+
+    return jsonify(selected_previews)
+
+
+@bp.route("/<camera_name>/start/<int:start_ts>/end/<int:end_ts>/preview.gif")
+@bp.route("/<camera_name>/start/<float:start_ts>/end/<float:end_ts>/preview.gif")
+def preview_gif(camera_name: str, start_ts, end_ts, max_cache_age=2592000):
+    if datetime.fromtimestamp(start_ts) < datetime.now().replace(minute=0, second=0):
+        # has preview mp4
+        preview: Previews = (
+            Previews.select(
+                Previews.camera,
+                Previews.path,
+                Previews.duration,
+                Previews.start_time,
+                Previews.end_time,
+            )
+            .where(
+                Previews.start_time.between(start_ts, end_ts)
+                | Previews.end_time.between(start_ts, end_ts)
+                | ((start_ts > Previews.start_time) & (end_ts < Previews.end_time))
+            )
+            .where(Previews.camera == camera_name)
+            .limit(1)
+            .get()
+        )
+
+        if not preview:
+            return make_response(
+                jsonify({"success": False, "message": "Preview not found"}), 404
+            )
+
+        diff = start_ts - preview.start_time
+        minutes = int(diff / 60)
+        seconds = int(diff % 60)
+        ffmpeg_cmd = [
+            "ffmpeg",
+            "-hide_banner",
+            "-loglevel",
+            "warning",
+            "-ss",
+            f"00:{minutes}:{seconds}",
+            "-t",
+            f"{end_ts - start_ts}",
+            "-i",
+            preview.path,
+            "-r",
+            "8",
+            "-vf",
+            "setpts=0.12*PTS",
+            "-loop",
+            "0",
+            "-c:v",
+            "gif",
+            "-f",
+            "gif",
+            "-",
+        ]
+
+        process = sp.run(
+            ffmpeg_cmd,
+            capture_output=True,
+        )
+
+        if process.returncode != 0:
+            logger.error(process.stderr)
+            return make_response(
+                jsonify({"success": False, "message": "Unable to create preview gif"}),
+                500,
+            )
+
+        gif_bytes = process.stdout
+    else:
+        # need to generate from existing images
+        preview_dir = os.path.join(CACHE_DIR, "preview_frames")
+        file_start = f"preview_{camera_name}"
+        start_file = f"{file_start}-{start_ts}.jpg"
+        end_file = f"{file_start}-{end_ts}.jpg"
+        selected_previews = []
+
+        for file in sorted(os.listdir(preview_dir)):
+            if not file.startswith(file_start):
+                continue
+
+            if file < start_file:
+                continue
+
+            if file > end_file:
+                break
+
+            selected_previews.append(f"file '{os.path.join(preview_dir, file)}'")
+            selected_previews.append("duration 0.12")
+
+        if not selected_previews:
+            return make_response(
+                jsonify({"success": False, "message": "Preview not found"}), 404
+            )
+
+        last_file = selected_previews[-2]
+        selected_previews.append(last_file)
+
+        ffmpeg_cmd = [
+            "ffmpeg",
+            "-hide_banner",
+            "-loglevel",
+            "warning",
+            "-f",
+            "concat",
+            "-y",
+            "-protocol_whitelist",
+            "pipe,file",
+            "-safe",
+            "0",
+            "-i",
+            "/dev/stdin",
+            "-loop",
+            "0",
+            "-c:v",
+            "gif",
+            "-f",
+            "gif",
+            "-",
+        ]
+
+        process = sp.run(
+            ffmpeg_cmd,
+            input=str.encode("\n".join(selected_previews)),
+            capture_output=True,
+        )
+
+        if process.returncode != 0:
+            logger.error(process.stderr)
+            return make_response(
+                jsonify({"success": False, "message": "Unable to create preview gif"}),
+                500,
+            )
+
+        gif_bytes = process.stdout
+
+    response = make_response(gif_bytes)
+    response.headers["Content-Type"] = "image/gif"
+    response.headers["Cache-Control"] = f"private, max-age={max_cache_age}"
     return response
 
 
@@ -2238,6 +2412,138 @@ def vod_event(id):
     )
 
 
+@bp.route("/review")
+def review():
+    cameras = request.args.get("cameras", "all")
+    labels = request.args.get("labels", "all")
+    reviewed = request.args.get("reviewed", type=int, default=0)
+    limit = request.args.get("limit", 100)
+    severity = request.args.get("severity", None)
+
+    before = request.args.get("before", type=float, default=datetime.now().timestamp())
+    after = request.args.get(
+        "after", type=float, default=(datetime.now() - timedelta(hours=18)).timestamp()
+    )
+
+    clauses = [((ReviewSegment.start_time > after) & (ReviewSegment.end_time < before))]
+
+    if cameras != "all":
+        camera_list = cameras.split(",")
+        clauses.append((ReviewSegment.camera << camera_list))
+
+    if labels != "all":
+        # use matching so segments with multiple labels
+        # still match on a search where any label matches
+        label_clauses = []
+        filtered_labels = labels.split(",")
+
+        for label in filtered_labels:
+            label_clauses.append(
+                (ReviewSegment.data["objects"].cast("text") % f'*"{label}"*')
+            )
+
+        label_clause = reduce(operator.or_, label_clauses)
+        clauses.append((label_clause))
+
+    if reviewed == 0:
+        clauses.append((ReviewSegment.has_been_reviewed == False))
+
+    if severity:
+        clauses.append((ReviewSegment.severity == severity))
+
+    review = (
+        ReviewSegment.select()
+        .where(reduce(operator.and_, clauses))
+        .order_by(ReviewSegment.severity.asc())
+        .order_by(ReviewSegment.start_time.desc())
+        .limit(limit)
+        .dicts()
+    )
+
+    return jsonify([r for r in review])
+
+
+@bp.route("/review/<id>/viewed", methods=("POST",))
+def set_reviewed(id):
+    try:
+        review: ReviewSegment = ReviewSegment.get(ReviewSegment.id == id)
+    except DoesNotExist:
+        return make_response(
+            jsonify({"success": False, "message": "Review " + id + " not found"}), 404
+        )
+
+    review.has_been_reviewed = True
+    review.save()
+
+    return make_response(
+        jsonify({"success": True, "message": "Reviewed " + id + " viewed"}), 200
+    )
+
+
+@bp.route("/reviews/<ids>/viewed", methods=("POST",))
+def set_multiple_reviewed(ids: str):
+    list_of_ids = ids.split(",")
+
+    if not list_of_ids or len(list_of_ids) == 0:
+        return make_response(
+            jsonify({"success": False, "message": "Not a valid list of ids"}), 404
+        )
+
+    ReviewSegment.update(has_been_reviewed=True).where(
+        ReviewSegment.id << list_of_ids
+    ).execute()
+
+    return make_response(
+        jsonify({"success": True, "message": "Reviewed multiple items"}), 200
+    )
+
+
+@bp.route("/review/<id>/viewed", methods=("DELETE",))
+def set_not_reviewed(id):
+    try:
+        review: ReviewSegment = ReviewSegment.get(ReviewSegment.id == id)
+    except DoesNotExist:
+        return make_response(
+            jsonify({"success": False, "message": "Review " + id + " not found"}), 404
+        )
+
+    review.has_been_reviewed = False
+    review.save()
+
+    return make_response(
+        jsonify({"success": True, "message": "Reviewed " + id + " not viewed"}), 200
+    )
+
+
+@bp.route("/reviews/<ids>", methods=("DELETE",))
+def delete_reviews(ids: str):
+    list_of_ids = ids.split(",")
+
+    if not list_of_ids or len(list_of_ids) == 0:
+        return make_response(
+            jsonify({"success": False, "message": "Not a valid list of ids"}), 404
+        )
+
+    ReviewSegment.delete().where(ReviewSegment.id << list_of_ids).execute()
+
+    return make_response(jsonify({"success": True, "message": "Delete reviews"}), 200)
+
+
+@bp.route("/review/<id>/preview.gif")
+def review_preview(id: str):
+    try:
+        review: ReviewSegment = ReviewSegment.get(ReviewSegment.id == id)
+    except DoesNotExist:
+        return make_response(
+            jsonify({"success": False, "message": "Review segment not found"}), 404
+        )
+
+    padding = 8
+    start_ts = review.start_time - padding
+    end_ts = review.end_time + padding
+    return preview_gif(review.camera, start_ts, end_ts)
+
+
 @bp.route(
     "/export/<camera_name>/start/<int:start_time>/end/<int:end_time>", methods=["POST"]
 )
@@ -2281,9 +2587,11 @@ def export_recording(camera_name: str, start_time, end_time):
         camera_name,
         int(start_time),
         int(end_time),
-        PlaybackFactorEnum[playback_factor]
-        if playback_factor in PlaybackFactorEnum.__members__.values()
-        else PlaybackFactorEnum.realtime,
+        (
+            PlaybackFactorEnum[playback_factor]
+            if playback_factor in PlaybackFactorEnum.__members__.values()
+            else PlaybackFactorEnum.realtime
+        ),
     )
     exporter.start()
     return make_response(
@@ -2439,12 +2747,16 @@ def ffprobe():
         output.append(
             {
                 "return_code": ffprobe.returncode,
-                "stderr": ffprobe.stderr.decode("unicode_escape").strip()
-                if ffprobe.returncode != 0
-                else "",
-                "stdout": json.loads(ffprobe.stdout.decode("unicode_escape").strip())
-                if ffprobe.returncode == 0
-                else "",
+                "stderr": (
+                    ffprobe.stderr.decode("unicode_escape").strip()
+                    if ffprobe.returncode != 0
+                    else ""
+                ),
+                "stdout": (
+                    json.loads(ffprobe.stdout.decode("unicode_escape").strip())
+                    if ffprobe.returncode == 0
+                    else ""
+                ),
             }
         )
 
@@ -2457,12 +2769,16 @@ def vainfo():
     return jsonify(
         {
             "return_code": vainfo.returncode,
-            "stderr": vainfo.stderr.decode("unicode_escape").strip()
-            if vainfo.returncode != 0
-            else "",
-            "stdout": vainfo.stdout.decode("unicode_escape").strip()
-            if vainfo.returncode == 0
-            else "",
+            "stderr": (
+                vainfo.stderr.decode("unicode_escape").strip()
+                if vainfo.returncode != 0
+                else ""
+            ),
+            "stdout": (
+                vainfo.stdout.decode("unicode_escape").strip()
+                if vainfo.returncode == 0
+                else ""
+            ),
         }
     )
 

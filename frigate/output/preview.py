@@ -2,7 +2,6 @@
 
 import datetime
 import logging
-import multiprocessing as mp
 import os
 import shutil
 import subprocess as sp
@@ -12,6 +11,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
+from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, RecordQualityEnum
 from frigate.const import CACHE_DIR, CLIPS_DIR, INSERT_PREVIEW
 from frigate.ffmpeg_presets import (
@@ -20,21 +20,21 @@ from frigate.ffmpeg_presets import (
     parse_preset_hardware_acceleration_encode,
 )
 from frigate.models import Previews
+from frigate.object_processing import TrackedObject
 from frigate.util.image import copy_yuv_to_position, get_yuv_crop
 
 logger = logging.getLogger(__name__)
 
 FOLDER_PREVIEW_FRAMES = "preview_frames"
-PREVIEW_OUTPUT_FPS = 1
 PREVIEW_SEGMENT_DURATION = 3600  # one hour
 # important to have lower keyframe to maintain scrubbing performance
 PREVIEW_KEYFRAME_INTERVAL = 60
 PREVIEW_BIT_RATES = {
-    RecordQualityEnum.very_low: 4096,
-    RecordQualityEnum.low: 6144,
-    RecordQualityEnum.medium: 8192,
-    RecordQualityEnum.high: 12288,
-    RecordQualityEnum.very_high: 16384,
+    RecordQualityEnum.very_low: 5120,
+    RecordQualityEnum.low: 7168,
+    RecordQualityEnum.medium: 9216,
+    RecordQualityEnum.high: 13312,
+    RecordQualityEnum.very_high: 17408,
 }
 
 
@@ -53,13 +53,13 @@ class FFMpegConverter(threading.Thread):
         self,
         config: CameraConfig,
         frame_times: list[float],
-        inter_process_queue: mp.Queue,
+        requestor: InterProcessRequestor,
     ):
         threading.Thread.__init__(self)
         self.name = f"{config.name}_preview_converter"
         self.config = config
         self.frame_times = frame_times
-        self.inter_process_queue = inter_process_queue
+        self.requestor = requestor
         self.path = os.path.join(
             CLIPS_DIR,
             f"previews/{self.config.name}/{self.frame_times[0]}-{self.frame_times[-1]}.mp4",
@@ -69,7 +69,7 @@ class FFMpegConverter(threading.Thread):
         self.ffmpeg_cmd = parse_preset_hardware_acceleration_encode(
             config.ffmpeg.hwaccel_args,
             input="-f concat -y -protocol_whitelist pipe,file -safe 0 -i /dev/stdin",
-            output=f"-g {PREVIEW_KEYFRAME_INTERVAL} -fpsmax {PREVIEW_OUTPUT_FPS} -bf 0 -b:v {PREVIEW_BIT_RATES[self.config.record.preview.quality]} {FPS_VFR_PARAM} -movflags +faststart -pix_fmt yuv420p {self.path}",
+            output=f"-g {PREVIEW_KEYFRAME_INTERVAL} -fpsmax 2 -bf 0 -b:v {PREVIEW_BIT_RATES[self.config.record.preview.quality]} {FPS_VFR_PARAM} -movflags +faststart -pix_fmt yuv420p {self.path}",
             type=EncodeTypeEnum.preview,
         )
 
@@ -105,18 +105,16 @@ class FFMpegConverter(threading.Thread):
 
         if p.returncode == 0:
             logger.debug("successfully saved preview")
-            self.inter_process_queue.put_nowait(
-                (
-                    INSERT_PREVIEW,
-                    {
-                        Previews.id: f"{self.config.name}_{end}",
-                        Previews.camera: self.config.name,
-                        Previews.path: self.path,
-                        Previews.start_time: start,
-                        Previews.end_time: end,
-                        Previews.duration: end - start,
-                    },
-                )
+            self.requestor.send_data(
+                INSERT_PREVIEW,
+                {
+                    Previews.id: f"{self.config.name}_{end}",
+                    Previews.camera: self.config.name,
+                    Previews.path: self.path,
+                    Previews.start_time: start,
+                    Previews.end_time: end,
+                    Previews.duration: end - start,
+                },
             )
         else:
             logger.error(f"Error saving preview for {self.config.name} :: {p.stderr}")
@@ -128,16 +126,18 @@ class FFMpegConverter(threading.Thread):
 
 
 class PreviewRecorder:
-    def __init__(self, config: CameraConfig, inter_process_queue: mp.Queue) -> None:
+    def __init__(self, config: CameraConfig) -> None:
         self.config = config
-        self.inter_process_queue = inter_process_queue
         self.start_time = 0
         self.last_output_time = 0
         self.output_frames = []
-        self.out_height = 160
+        self.out_height = 180
         self.out_width = (
             int((config.detect.width / config.detect.height) * self.out_height) // 4 * 4
         )
+
+        # create communication for finished previews
+        self.requestor = InterProcessRequestor()
 
         y, u1, u2, v1, v2 = get_yuv_crop(
             self.config.frame_shape_yuv,
@@ -175,8 +175,19 @@ class PreviewRecorder:
         frame_time: float,
     ) -> bool:
         """Decide if this frame should be added to PREVIEW."""
+        preview_output_fps = (
+            2
+            if any(
+                o["label"] == "car"
+                for o in get_active_objects(
+                    frame_time, self.config, current_tracked_objects
+                )
+            )
+            else 1
+        )
+
         # limit output to 1 fps
-        if (frame_time - self.last_output_time) < 1 / PREVIEW_OUTPUT_FPS:
+        if (frame_time - self.last_output_time) < 1 / preview_output_fps:
             return False
 
         # send frame if a non-stationary object is in a zone
@@ -237,7 +248,7 @@ class PreviewRecorder:
             FFMpegConverter(
                 self.config,
                 self.output_frames,
-                self.inter_process_queue,
+                self.requestor,
             ).start()
 
             # reset frame cache
@@ -262,3 +273,19 @@ class PreviewRecorder:
             shutil.rmtree(os.path.join(CACHE_DIR, FOLDER_PREVIEW_FRAMES))
         except FileNotFoundError:
             pass
+
+        self.requestor.stop()
+
+
+def get_active_objects(
+    frame_time: float, camera_config: CameraConfig, all_objects: list[TrackedObject]
+) -> list[TrackedObject]:
+    """get active objects for detection."""
+    return [
+        o
+        for o in all_objects
+        if o["motionless_count"] < camera_config.detect.stationary.threshold
+        and o["position_changes"] > 0
+        and o["frame_time"] == frame_time
+        and not o["false_positive"]
+    ]

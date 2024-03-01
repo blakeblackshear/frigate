@@ -196,6 +196,8 @@ EXPOSE 8555/tcp 8555/udp
 
 # Configure logging to prepend timestamps, log to stdout, keep 0 archives and rotate on 10MB
 ENV S6_LOGGING_SCRIPT="T 1 n0 s10000000 T"
+# Do not fail on long-running download scripts
+ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
 
 ENTRYPOINT ["/init"]
 CMD []

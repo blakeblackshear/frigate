@@ -2,11 +2,16 @@
 module.exports = {
   darkMode: ["class"],
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
-	],
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+  ],
+  safelist: [
+    {
+      pattern: /(outline|shadow)-severity_(alert|detection|motion)/,
+    },
+  ],
   theme: {
     container: {
       center: true,
@@ -15,7 +20,18 @@ module.exports = {
         "2xl": "1400px",
       },
     },
+    fontFamily: {
+      sans: ['"Inter"', "sans-serif"],
+    },
     extend: {
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+      },
+      aspectRatio: {
+        wide: "32 / 9",
+        tall: "8 / 9",
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -56,11 +72,18 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-      },
-      borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        severity_alert: {
+          DEFAULT: "hsl(var(--severity_alert))",
+          dimmed: "hsl(var(--severity_alert_dimmed))",
+        },
+        severity_detection: {
+          DEFAULT: "hsl(var(--severity_detection))",
+          dimmed: "hsl(var(--severity_detection_dimmed))",
+        },
+        severity_motion: {
+          DEFAULT: "hsl(var(--severity_motion))",
+          dimmed: "hsl(var(--severity_motion_dimmed))",
+        },
       },
       keyframes: {
         "accordion-down": {
@@ -72,12 +95,8 @@ module.exports = {
           to: { height: 0 },
         },
       },
-      animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
-      },
       screens: {
-        "xs": "480px",
+        xs: "480px",
         "2xl": "1440px",
         "3xl": "1920px",
         "4xl": "2560px",
@@ -85,4 +104,4 @@ module.exports = {
     },
   },
   plugins: [require("tailwindcss-animate")],
-}
+};

@@ -17,11 +17,13 @@ from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
+from frigate.comms.config_updater import ConfigPublisher
+from frigate.comms.detections_updater import DetectionProxy
 from frigate.comms.dispatcher import Communicator, Dispatcher
 from frigate.comms.inter_process import InterProcessCommunicator
 from frigate.comms.mqtt import MqttClient
 from frigate.comms.ws import WebSocketClient
-from frigate.config import BirdseyeModeEnum, FrigateConfig
+from frigate.config import FrigateConfig
 from frigate.const import (
     CACHE_DIR,
     CLIPS_DIR,
@@ -43,6 +45,7 @@ from frigate.models import (
     Recordings,
     RecordingsToDelete,
     Regions,
+    ReviewSegment,
     Timeline,
 )
 from frigate.object_detection import ObjectDetectProcess
@@ -53,10 +56,12 @@ from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.ptz.onvif import OnvifController
 from frigate.record.cleanup import RecordingCleanup
 from frigate.record.record import manage_recordings
-from frigate.stats import StatsEmitter, stats_init
+from frigate.review.review import manage_review_segments
+from frigate.stats.emitter import StatsEmitter
+from frigate.stats.util import stats_init
 from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
-from frigate.types import CameraMetricsTypes, FeatureMetricsTypes, PTZMetricsTypes
+from frigate.types import CameraMetricsTypes, PTZMetricsTypes
 from frigate.util.object import get_camera_regions_grid
 from frigate.version import VERSION
 from frigate.video import capture_camera, track_camera
@@ -75,7 +80,6 @@ class FrigateApp:
         self.log_queue: Queue = mp.Queue()
         self.plus_api = PlusApi()
         self.camera_metrics: dict[str, CameraMetricsTypes] = {}
-        self.feature_metrics: dict[str, FeatureMetricsTypes] = {}
         self.ptz_metrics: dict[str, PTZMetricsTypes] = {}
         self.processes: dict[str, int] = {}
         self.region_grids: dict[str, list[list[dict[str, int]]]] = {}
@@ -129,35 +133,6 @@ class FrigateApp:
                 # issue https://github.com/python/typeshed/issues/8799
                 # from mypy 0.981 onwards
                 "process_fps": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "detection_enabled": mp.Value(  # type: ignore[typeddict-item]
-                    # issue https://github.com/python/typeshed/issues/8799
-                    # from mypy 0.981 onwards
-                    "i",
-                    self.config.cameras[camera_name].detect.enabled,
-                ),
-                "motion_enabled": mp.Value("i", True),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "improve_contrast_enabled": mp.Value(  # type: ignore[typeddict-item]
-                    # issue https://github.com/python/typeshed/issues/8799
-                    # from mypy 0.981 onwards
-                    "i",
-                    self.config.cameras[camera_name].motion.improve_contrast,
-                ),
-                "motion_threshold": mp.Value(  # type: ignore[typeddict-item]
-                    # issue https://github.com/python/typeshed/issues/8799
-                    # from mypy 0.981 onwards
-                    "i",
-                    self.config.cameras[camera_name].motion.threshold,
-                ),
-                "motion_contour_area": mp.Value(  # type: ignore[typeddict-item]
-                    # issue https://github.com/python/typeshed/issues/8799
-                    # from mypy 0.981 onwards
-                    "i",
-                    self.config.cameras[camera_name].motion.contour_area,
-                ),
                 "detection_fps": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
                 # issue https://github.com/python/typeshed/issues/8799
                 # from mypy 0.981 onwards
@@ -171,25 +146,10 @@ class FrigateApp:
                 # issue https://github.com/python/typeshed/issues/8799
                 # from mypy 0.981 onwards
                 "frame_queue": mp.Queue(maxsize=2),
-                "region_grid_queue": mp.Queue(maxsize=1),
                 "capture_process": None,
                 "process": None,
                 "audio_rms": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
                 "audio_dBFS": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                "birdseye_enabled": mp.Value(  # type: ignore[typeddict-item]
-                    # issue https://github.com/python/typeshed/issues/8799
-                    # from mypy 0.981 onwards
-                    "i",
-                    self.config.cameras[camera_name].birdseye.enabled,
-                ),
-                "birdseye_mode": mp.Value(  # type: ignore[typeddict-item]
-                    # issue https://github.com/python/typeshed/issues/8799
-                    # from mypy 0.981 onwards
-                    "i",
-                    BirdseyeModeEnum.get_index(
-                        self.config.cameras[camera_name].birdseye.mode.value
-                    ),
-                ),
             }
             self.ptz_metrics[camera_name] = {
                 "ptz_autotracker_enabled": mp.Value(  # type: ignore[typeddict-item]
@@ -221,20 +181,6 @@ class FrigateApp:
                 # from mypy 0.981 onwards
             }
             self.ptz_metrics[camera_name]["ptz_motor_stopped"].set()
-            self.feature_metrics[camera_name] = {
-                "audio_enabled": mp.Value(  # type: ignore[typeddict-item]
-                    # issue https://github.com/python/typeshed/issues/8799
-                    # from mypy 0.981 onwards
-                    "i",
-                    self.config.cameras[camera_name].audio.enabled,
-                ),
-                "record_enabled": mp.Value(  # type: ignore[typeddict-item]
-                    # issue https://github.com/python/typeshed/issues/8799
-                    # from mypy 0.981 onwards
-                    "i",
-                    self.config.cameras[camera_name].record.enabled,
-                ),
-            }
 
     def set_log_levels(self) -> None:
         logging.getLogger().setLevel(self.config.logger.default.value.upper())
@@ -251,30 +197,14 @@ class FrigateApp:
         # Queues for clip processing
         self.event_queue: Queue = mp.Queue()
         self.event_processed_queue: Queue = mp.Queue()
-        self.video_output_queue: Queue = mp.Queue(
-            maxsize=sum(camera.enabled for camera in self.config.cameras.values()) * 2
-        )
 
         # Queue for cameras to push tracked objects to
         self.detected_frames_queue: Queue = mp.Queue(
             maxsize=sum(camera.enabled for camera in self.config.cameras.values()) * 2
         )
 
-        # Queue for object recordings info
-        self.object_recordings_info_queue: Queue = mp.Queue()
-
-        # Queue for audio recordings info if enabled
-        self.audio_recordings_info_queue: Optional[Queue] = (
-            mp.Queue()
-            if len([c for c in self.config.cameras.values() if c.audio.enabled]) > 0
-            else None
-        )
-
         # Queue for timeline events
         self.timeline_queue: Queue = mp.Queue()
-
-        # Queue for inter process communication
-        self.inter_process_queue: Queue = mp.Queue()
 
     def init_database(self) -> None:
         def vacuum_db(db: SqliteExtDatabase) -> None:
@@ -348,19 +278,25 @@ class FrigateApp:
         recording_process = mp.Process(
             target=manage_recordings,
             name="recording_manager",
-            args=(
-                self.config,
-                self.inter_process_queue,
-                self.object_recordings_info_queue,
-                self.audio_recordings_info_queue,
-                self.feature_metrics,
-            ),
+            args=(self.config,),
         )
         recording_process.daemon = True
         self.recording_process = recording_process
         recording_process.start()
         self.processes["recording"] = recording_process.pid or 0
         logger.info(f"Recording process started: {recording_process.pid}")
+
+    def init_review_segment_manager(self) -> None:
+        review_segment_process = mp.Process(
+            target=manage_review_segments,
+            name="review_segment_manager",
+            args=(self.config,),
+        )
+        review_segment_process.daemon = True
+        self.review_segment_process = review_segment_process
+        review_segment_process.start()
+        self.processes["review_segment"] = review_segment_process.pid or 0
+        logger.info(f"Recording process started: {review_segment_process.pid}")
 
     def bind_database(self) -> None:
         """Bind db to the main process."""
@@ -376,13 +312,16 @@ class FrigateApp:
                 60, 10 * len([c for c in self.config.cameras.values() if c.enabled])
             ),
         )
-        models = [Event, Recordings, RecordingsToDelete, Previews, Regions, Timeline]
+        models = [
+            Event,
+            Previews,
+            Recordings,
+            RecordingsToDelete,
+            Regions,
+            ReviewSegment,
+            Timeline,
+        ]
         self.db.bind(models)
-
-    def init_stats(self) -> None:
-        self.stats_tracking = stats_init(
-            self.config, self.camera_metrics, self.detectors, self.processes
-        )
 
     def init_external_event_processor(self) -> None:
         self.external_event_processor = ExternalEventProcessor(
@@ -390,20 +329,20 @@ class FrigateApp:
         )
 
     def init_inter_process_communicator(self) -> None:
-        self.inter_process_communicator = InterProcessCommunicator(
-            self.inter_process_queue
-        )
+        self.inter_process_communicator = InterProcessCommunicator()
+        self.inter_config_updater = ConfigPublisher()
+        self.inter_detection_proxy = DetectionProxy()
 
     def init_web_server(self) -> None:
         self.flask_app = create_app(
             self.config,
             self.db,
-            self.stats_tracking,
             self.detected_frames_processor,
             self.storage_maintainer,
             self.onvif_controller,
             self.external_event_processor,
             self.plus_api,
+            self.stats_emitter,
         )
 
     def init_onvif(self) -> None:
@@ -420,9 +359,8 @@ class FrigateApp:
 
         self.dispatcher = Dispatcher(
             self.config,
+            self.inter_config_updater,
             self.onvif_controller,
-            self.camera_metrics,
-            self.feature_metrics,
             self.ptz_metrics,
             comms,
         )
@@ -481,8 +419,6 @@ class FrigateApp:
             self.detected_frames_queue,
             self.event_queue,
             self.event_processed_queue,
-            self.video_output_queue,
-            self.object_recordings_info_queue,
             self.ptz_autotracker_thread,
             self.stop_event,
         )
@@ -492,12 +428,7 @@ class FrigateApp:
         output_processor = mp.Process(
             target=output_frames,
             name="output_processor",
-            args=(
-                self.config,
-                self.video_output_queue,
-                self.inter_process_queue,
-                self.camera_metrics,
-            ),
+            args=(self.config,),
         )
         output_processor.daemon = True
         self.output_processor = output_processor
@@ -534,7 +465,6 @@ class FrigateApp:
                     self.detection_queue,
                     self.detection_out_events[name],
                     self.detected_frames_queue,
-                    self.inter_process_queue,
                     self.camera_metrics[name],
                     self.ptz_metrics[name],
                     self.region_grids[name],
@@ -568,10 +498,7 @@ class FrigateApp:
                 name="audio_capture",
                 args=(
                     self.config,
-                    self.audio_recordings_info_queue,
                     self.camera_metrics,
-                    self.feature_metrics,
-                    self.inter_process_communicator,
                 ),
             )
             audio_process.daemon = True
@@ -611,8 +538,9 @@ class FrigateApp:
     def start_stats_emitter(self) -> None:
         self.stats_emitter = StatsEmitter(
             self.config,
-            self.stats_tracking,
-            self.dispatcher,
+            stats_init(
+                self.config, self.camera_metrics, self.detectors, self.processes
+            ),
             self.stop_event,
         )
         self.stats_emitter.start()
@@ -647,6 +575,25 @@ class FrigateApp:
 
         self.init_logger()
         logger.info(f"Starting Frigate ({VERSION})")
+
+        if not os.environ.get("I_PROMISE_I_WONT_MAKE_AN_ISSUE_ON_GITHUB"):
+            print(
+                "**********************************************************************************"
+            )
+            print(
+                "**********************************************************************************"
+            )
+            print("Frigate 0.14 UNSTABLE")
+            print("This build is not for public use. Please use Frigate stable.")
+            print("Unstable/experimental builds are not enabled, Frigate is exiting.")
+            print(
+                "**********************************************************************************"
+            )
+            print(
+                "**********************************************************************************"
+            )
+            sys.exit(1)
+
         try:
             self.ensure_dirs()
             try:
@@ -680,6 +627,7 @@ class FrigateApp:
             self.init_database()
             self.init_onvif()
             self.init_recording_manager()
+            self.init_review_segment_manager()
             self.init_go2rtc()
             self.bind_database()
             self.init_inter_process_communicator()
@@ -697,14 +645,13 @@ class FrigateApp:
         self.start_camera_capture_processes()
         self.start_audio_processors()
         self.start_storage_maintainer()
-        self.init_stats()
         self.init_external_event_processor()
+        self.start_stats_emitter()
         self.init_web_server()
         self.start_timeline_processor()
         self.start_event_processor()
         self.start_event_cleanup()
         self.start_record_cleanup()
-        self.start_stats_emitter()
         self.start_watchdog()
         self.check_shm()
 
@@ -753,15 +700,16 @@ class FrigateApp:
         for queue in [
             self.event_queue,
             self.event_processed_queue,
-            self.video_output_queue,
             self.detected_frames_queue,
-            self.object_recordings_info_queue,
-            self.audio_recordings_info_queue,
             self.log_queue,
-            self.inter_process_queue,
         ]:
             if queue is not None:
                 while not queue.empty():
                     queue.get_nowait()
                 queue.close()
                 queue.join_thread()
+
+        # Stop Communicators
+        self.inter_process_communicator.stop()
+        self.inter_config_updater.stop()
+        self.inter_detection_proxy.stop()

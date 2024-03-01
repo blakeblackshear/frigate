@@ -87,7 +87,7 @@ There are many ways to authenticate a website but a straightforward approach is 
 
 ## Nginx Reverse Proxy
 
-This method shows a working example for subdomain type reverse proxy with SSL enabled. 
+This method shows a working example for subdomain type reverse proxy with SSL enabled.
 
 ### Setup server and port to reverse proxy
 
@@ -123,7 +123,7 @@ This section points to your SSL files, the example below shows locations to a de
 ```
 
 
-### Setup reverse proxy settings 
+### Setup reverse proxy settings
 
 The settings below enabled connection upgrade, sets up logging (optional) and proxies everything from the `/` context to the docker host and port specified earlier in the configuration
 

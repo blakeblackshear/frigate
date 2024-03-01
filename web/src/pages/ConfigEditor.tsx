@@ -38,7 +38,7 @@ function ConfigEditor() {
           editorRef.current.getValue(),
           {
             headers: { "Content-Type": "text/plain" },
-          }
+          },
         )
         .then((response) => {
           if (response.status === 200) {
@@ -56,7 +56,7 @@ function ConfigEditor() {
           }
         });
     },
-    [editorRef]
+    [editorRef],
   );
 
   const handleCopyConfig = useCallback(async () => {
@@ -123,28 +123,24 @@ function ConfigEditor() {
   }
 
   return (
-    <div className="absolute top-28 bottom-16 right-0 left-0 md:left-24 lg:left-60">
+    <div className="absolute top-2 bottom-16 right-0 left-0 md:left-12">
       <div className="lg:flex justify-between mr-1">
         <Heading as="h2">Config</Heading>
         <div>
-          <Button
-            size="sm"
-            className="mx-1"
-            onClick={(_) => handleCopyConfig()}
-          >
+          <Button size="sm" className="mx-1" onClick={() => handleCopyConfig()}>
             Copy Config
           </Button>
           <Button
             size="sm"
             className="mx-1"
-            onClick={(_) => onHandleSaveConfig("restart")}
+            onClick={() => onHandleSaveConfig("restart")}
           >
             Save & Restart
           </Button>
           <Button
             size="sm"
             className="mx-1"
-            onClick={(_) => onHandleSaveConfig("saveonly")}
+            onClick={() => onHandleSaveConfig("saveonly")}
           >
             Save Only
           </Button>

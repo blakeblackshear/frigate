@@ -12,7 +12,9 @@ export default function useOverlayState(key: string) {
       newLocationState[key] = value;
       navigate(location.pathname, { state: newLocationState });
     },
-    [navigate]
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [key, navigate],
   );
 
   const overlayStateValue = location.state && location.state[key];

@@ -1,10 +1,11 @@
 import { baseUrl } from "@/api/baseUrl";
 import { useResizeObserver } from "@/hooks/resize-observer";
-// @ts-ignore we know this doesn't have types
+// @ts-expect-error we know this doesn't have types
 import JSMpeg from "@cycjimmy/jsmpeg-player";
 import { useEffect, useMemo, useRef } from "react";
 
 type JSMpegPlayerProps = {
+  className?: string;
   camera: string;
   width: number;
   height: number;
@@ -14,11 +15,13 @@ export default function JSMpegPlayer({
   camera,
   width,
   height,
+  className,
 }: JSMpegPlayerProps) {
   const url = `${baseUrl.replace(/^http/, "ws")}live/jsmpeg/${camera}`;
   const playerRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [{ width: containerWidth }] = useResizeObserver(containerRef);
+  const [{ width: containerWidth, height: containerHeight }] =
+    useResizeObserver(containerRef);
 
   // Add scrollbar width (when visible) to the available observer width to eliminate screen juddering.
   // https://github.com/blakeblackshear/frigate/issues/1657
@@ -35,15 +38,19 @@ export default function JSMpegPlayer({
     const scaledHeight = Math.floor(availableWidth / aspectRatio);
     const finalHeight = Math.min(scaledHeight, height);
 
+    if (containerHeight < finalHeight) {
+      return containerHeight;
+    }
+
     if (finalHeight > 0) {
       return finalHeight;
     }
 
     return 100;
-  }, [availableWidth, aspectRatio, height]);
+  }, [availableWidth, aspectRatio, containerHeight, height]);
   const scaledWidth = useMemo(
     () => Math.ceil(scaledHeight * aspectRatio - scrollBarWidth),
-    [scaledHeight, aspectRatio, scrollBarWidth]
+    [scaledHeight, aspectRatio, scrollBarWidth],
   );
 
   useEffect(() => {
@@ -55,7 +62,7 @@ export default function JSMpegPlayer({
       playerRef.current,
       url,
       {},
-      { protocols: [], audio: false, videoBufferSize: 1024 * 1024 * 4 }
+      { protocols: [], audio: false, videoBufferSize: 1024 * 1024 * 4 },
     );
 
     const fullscreen = () => {
@@ -72,6 +79,7 @@ export default function JSMpegPlayer({
       if (playerRef.current) {
         try {
           video.destroy();
+          // eslint-disable-next-line no-empty
         } catch (e) {}
         playerRef.current = null;
       }
@@ -79,7 +87,7 @@ export default function JSMpegPlayer({
   }, [url]);
 
   return (
-    <div ref={containerRef}>
+    <div className={className} ref={containerRef}>
       <div
         ref={playerRef}
         className={`jsmpeg`}

@@ -7,7 +7,7 @@ import Player from "video.js/dist/types/player";
 type VideoPlayerProps = {
   children?: ReactElement | ReactElement[];
   options?: {
-    [key: string]: any;
+    [key: string]: unknown;
   };
   seekOptions?: {
     forward?: number;
@@ -23,7 +23,7 @@ export default function VideoPlayer({
   options,
   seekOptions = { forward: 30, backward: 10 },
   remotePlayback = false,
-  onReady = (_) => {},
+  onReady = () => {},
   onDispose = () => {},
 }: VideoPlayerProps) {
   const videoRef = useRef<HTMLDivElement | null>(null);
@@ -47,7 +47,7 @@ export default function VideoPlayer({
     if (!playerRef.current) {
       // The Video.js player needs to be _inside_ the component el for React 18 Strict Mode.
       const videoElement = document.createElement(
-        "video-js"
+        "video-js",
       ) as HTMLVideoElement;
       videoElement.controls = true;
       videoElement.playsInline = true;
@@ -62,9 +62,12 @@ export default function VideoPlayer({
         { ...defaultOptions, ...options },
         () => {
           onReady && onReady(player);
-        }
+        },
       ));
     }
+
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [options, videoRef]);
 
   // Dispose the Video.js player when the functional component unmounts
@@ -78,6 +81,9 @@ export default function VideoPlayer({
         onDispose();
       }
     };
+
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playerRef]);
 
   return (

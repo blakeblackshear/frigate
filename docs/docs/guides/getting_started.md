@@ -237,7 +237,7 @@ cameras:
 
 More details on available detectors can be found [here](../configuration/object_detectors.md).
 
-Restart Frigate and you should start seeing detections for `person`. If you want to track other objects, they will need to be added according to the [configuration file reference](../configuration/index.md#full-configuration-reference).
+Restart Frigate and you should start seeing detections for `person`. If you want to track other objects, they will need to be added according to the [configuration file reference](../configuration/reference.md).
 
 ### Step 5: Setup motion masks
 
@@ -305,7 +305,7 @@ cameras:
 
 If you don't have separate streams for detect and record, you would just add the record role to the list on the first input.
 
-By default, Frigate will retain video of all events for 10 days. The full set of options for recording can be found [here](../configuration/index.md#full-configuration-reference).
+By default, Frigate will retain video of all events for 10 days. The full set of options for recording can be found [here](../configuration/reference.md).
 
 #### Snapshots
 
@@ -325,7 +325,7 @@ cameras:
     motion: ...
 ```
 
-By default, Frigate will retain snapshots of all events for 10 days. The full set of options for snapshots can be found [here](../configuration/index.md#full-configuration-reference).
+By default, Frigate will retain snapshots of all events for 10 days. The full set of options for snapshots can be found [here](../configuration/reference.md).
 
 ### Step 7: Complete config
 

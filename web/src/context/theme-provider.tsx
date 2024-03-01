@@ -67,6 +67,7 @@ export function ThemeProvider({
       const storedData = JSON.parse(localStorage.getItem(storageKey) || "{}");
       return storedData.theme || defaultTheme;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("Error parsing theme data from storage:", error);
       return defaultTheme;
     }
@@ -79,6 +80,7 @@ export function ThemeProvider({
         ? defaultColorScheme
         : storedData.colorScheme || defaultColorScheme;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("Error parsing color scheme data from storage:", error);
       return defaultColorScheme;
     }

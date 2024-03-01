@@ -6,6 +6,7 @@ from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
+from frigate.detectors.util import yolov8_postprocess
 
 try:
     from tflite_runtime.interpreter import Interpreter, load_delegate
@@ -54,10 +55,28 @@ class EdgeTpuTfl(DetectionApi):
 
         self.tensor_input_details = self.interpreter.get_input_details()
         self.tensor_output_details = self.interpreter.get_output_details()
+        self.model_type = detector_config.model.model_type
 
     def detect_raw(self, tensor_input):
+        if self.model_type == "yolov8":
+            scale, zero_point = self.tensor_input_details[0]["quantization"]
+            tensor_input = (
+                (tensor_input - scale * zero_point * 255) * (1.0 / (scale * 255))
+            ).astype(self.tensor_input_details[0]["dtype"])
+
         self.interpreter.set_tensor(self.tensor_input_details[0]["index"], tensor_input)
         self.interpreter.invoke()
+
+        if self.model_type == "yolov8":
+            scale, zero_point = self.tensor_output_details[0]["quantization"]
+            tensor_output = self.interpreter.get_tensor(
+                self.tensor_output_details[0]["index"]
+            )
+            tensor_output = (tensor_output.astype(np.float32) - zero_point) * scale
+            model_input_shape = self.tensor_input_details[0]["shape"]
+            tensor_output[:, [0, 2]] *= model_input_shape[2]
+            tensor_output[:, [1, 3]] *= model_input_shape[1]
+            return yolov8_postprocess(model_input_shape, tensor_output)
 
         boxes = self.interpreter.tensor(self.tensor_output_details[0]["index"])()[0]
         class_ids = self.interpreter.tensor(self.tensor_output_details[1]["index"])()[0]

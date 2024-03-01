@@ -42,11 +42,6 @@ class Rknn(DetectionApi):
     type_key = DETECTOR_KEY
 
     def __init__(self, config: RknnDetectorConfig):
-        # create symlink for Home Assistant add on
-        if not os.path.isfile("/proc/device-tree/compatible"):
-            if os.path.isfile("/device-tree/compatible"):
-                os.symlink("/device-tree/compatible", "/proc/device-tree/compatible")
-
         # find out SoC
         try:
             with open("/proc/device-tree/compatible") as file:
@@ -105,10 +100,10 @@ class Rknn(DetectionApi):
 
             if (config.model.width != 320) or (config.model.height != 320):
                 logger.error(
-                    "Make sure to set the model width and heigth to 320 in your config.yml."
+                    "Make sure to set the model width and height to 320 in your config.yml."
                 )
                 raise Exception(
-                    "Make sure to set the model width and heigth to 320 in your config.yml."
+                    "Make sure to set the model width and height to 320 in your config.yml."
                 )
 
             if config.model.input_pixel_format != "bgr":

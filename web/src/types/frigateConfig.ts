@@ -1,10 +1,12 @@
+import { LivePlayerMode } from "./live";
+
 export interface UiConfig {
   timezone?: string;
   time_format?: "browser" | "12hour" | "24hour";
   date_style?: "full" | "long" | "medium" | "short";
   time_style?: "full" | "long" | "medium" | "short";
   strftime_fmt?: string;
-  live_mode?: string;
+  live_mode?: LivePlayerMode;
   use_experimental?: boolean;
   dashboard: boolean;
   order: number;
@@ -197,7 +199,7 @@ export interface CameraConfig {
       coordinates: string;
       filters: Record<string, unknown>;
       inertia: number;
-      objects: any[];
+      objects: string[];
     };
   };
 }
@@ -381,7 +383,7 @@ export interface FrigateConfig {
   };
 
   telemetry: {
-    network_interfaces: any[];
+    network_interfaces: string[];
     stats: {
       amd_gpu_stats: boolean;
       intel_gpu_stats: boolean;

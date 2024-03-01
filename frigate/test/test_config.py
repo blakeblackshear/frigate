@@ -1,6 +1,7 @@
 import json
 import os
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 from pydantic import ValidationError
@@ -70,7 +71,9 @@ class TestConfig(unittest.TestCase):
         assert runtime_config.detectors["cpu"].type == DetectorTypeEnum.cpu
         assert runtime_config.detectors["cpu"].model.width == 320
 
-    def test_detector_custom_model_path(self):
+    @patch("frigate.detectors.detector_config.load_labels")
+    def test_detector_custom_model_path(self, mock_labels):
+        mock_labels.return_value = {}
         config = {
             "detectors": {
                 "cpu": {
@@ -110,7 +113,7 @@ class TestConfig(unittest.TestCase):
         assert runtime_config.detectors["openvino"].model.path == "/etc/hosts"
 
         assert runtime_config.model.width == 512
-        assert runtime_config.detectors["cpu"].model.width == 512
+        assert runtime_config.detectors["cpu"].model.width == 320
         assert runtime_config.detectors["edgetpu"].model.width == 160
         assert runtime_config.detectors["openvino"].model.width == 512
 

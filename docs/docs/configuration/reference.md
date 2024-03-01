@@ -145,6 +145,14 @@ birdseye:
   #   motion - cameras are included if motion was detected in the last 30 seconds
   #   continuous - all cameras are included always
   mode: objects
+  # Optional: Threshold for camera activity to stop showing camera (default: shown below)
+  inactivity_threshold: 30
+  # Optional: Configure the birdseye layout
+  layout:
+    # Optional: Scaling factor for the layout calculator (default: shown below)
+    scaling_factor: 2.0
+    # Optional: Maximum number of cameras to show at one time, showing the most recent (default: show all cameras)
+    max_cameras: 1
 
 # Optional: ffmpeg configuration
 # More information about presets at https://docs.frigate.video/configuration/ffmpeg_presets

@@ -11,6 +11,8 @@ import time
 import cv2
 from setproctitle import setproctitle
 
+from frigate.comms.config_updater import ConfigSubscriber
+from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, DetectConfig, ModelConfig
 from frigate.const import (
     ALL_ATTRIBUTE_LABELS,
@@ -388,7 +390,6 @@ def track_camera(
     detection_queue,
     result_connection,
     detected_objects_queue,
-    inter_process_queue,
     process_info,
     ptz_metrics,
     region_grid,
@@ -406,12 +407,6 @@ def track_camera(
     listen()
 
     frame_queue = process_info["frame_queue"]
-    region_grid_queue = process_info["region_grid_queue"]
-    detection_enabled = process_info["detection_enabled"]
-    motion_enabled = process_info["motion_enabled"]
-    improve_contrast_enabled = process_info["improve_contrast_enabled"]
-    motion_threshold = process_info["motion_threshold"]
-    motion_contour_area = process_info["motion_contour_area"]
 
     frame_shape = config.frame_shape
     objects_to_track = config.objects.track
@@ -421,9 +416,6 @@ def track_camera(
         frame_shape,
         config.motion,
         config.detect.fps,
-        improve_contrast_enabled,
-        motion_threshold,
-        motion_contour_area,
     )
     object_detector = RemoteObjectDetector(
         name, labelmap, detection_queue, result_connection, model_config, stop_event
@@ -433,11 +425,13 @@ def track_camera(
 
     frame_manager = SharedMemoryFrameManager()
 
+    # create communication for region grid updates
+    requestor = InterProcessRequestor()
+
     process_frames(
         name,
-        inter_process_queue,
+        requestor,
         frame_queue,
-        region_grid_queue,
         frame_shape,
         model_config,
         config.detect,
@@ -449,8 +443,6 @@ def track_camera(
         process_info,
         objects_to_track,
         object_filters,
-        detection_enabled,
-        motion_enabled,
         stop_event,
         ptz_metrics,
         region_grid,
@@ -505,9 +497,8 @@ def detect(
 
 def process_frames(
     camera_name: str,
-    inter_process_queue: mp.Queue,
+    requestor: InterProcessRequestor,
     frame_queue: mp.Queue,
-    region_grid_queue: mp.Queue,
     frame_shape,
     model_config: ModelConfig,
     detect_config: DetectConfig,
@@ -519,8 +510,6 @@ def process_frames(
     process_info: dict,
     objects_to_track: list[str],
     object_filters,
-    detection_enabled: mp.Value,
-    motion_enabled: mp.Value,
     stop_event,
     ptz_metrics: PTZMetricsTypes,
     region_grid,
@@ -530,6 +519,7 @@ def process_frames(
     detection_fps = process_info["detection_fps"]
     current_frame_time = process_info["detection_frame"]
     next_region_update = get_tomorrow_at_time(2)
+    config_subscriber = ConfigSubscriber(f"config/detect/{camera_name}")
 
     fps_tracker = EventsPerSecond()
     fps_tracker.start()
@@ -540,17 +530,17 @@ def process_frames(
     region_min_size = get_min_region_size(model_config)
 
     while not stop_event.is_set():
+        # check for updated detect config
+        _, updated_detect_config = config_subscriber.check_for_update()
+
+        if updated_detect_config:
+            detect_config = updated_detect_config
+
         if (
             datetime.datetime.now().astimezone(datetime.timezone.utc)
             > next_region_update
         ):
-            inter_process_queue.put((REQUEST_REGION_GRID, camera_name))
-
-            try:
-                region_grid = region_grid_queue.get(True, 10)
-            except queue.Empty:
-                logger.error(f"Unable to get updated region grid for {camera_name}")
-
+            region_grid = requestor.send_data(REQUEST_REGION_GRID, camera_name)
             next_region_update = get_tomorrow_at_time(2)
 
         try:
@@ -576,13 +566,13 @@ def process_frames(
             continue
 
         # look for motion if enabled
-        motion_boxes = motion_detector.detect(frame) if motion_enabled.value else []
+        motion_boxes = motion_detector.detect(frame)
 
         regions = []
         consolidated_detections = []
 
         # if detection is disabled
-        if not detection_enabled.value:
+        if not detect_config.enabled:
             object_tracker.match_and_update(frame_time, [])
         else:
             # get stationary object ids
@@ -826,3 +816,7 @@ def process_frames(
             )
             detection_fps.value = object_detector.fps.eps()
             frame_manager.close(f"{camera_name}{frame_time}")
+
+    motion_detector.stop()
+    requestor.stop()
+    config_subscriber.stop()

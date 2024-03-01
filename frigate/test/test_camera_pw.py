@@ -43,7 +43,7 @@ class TestUserPassMasking(unittest.TestCase):
         self.rtsp_log_message = "Did you mean file:rtsp://user:password@192.168.1.3:554"
 
     def test_rtsp_in_log_message(self):
-        """Test that the rtsp url in a log message is espaced."""
+        """Test that the rtsp url in a log message is escaped."""
         escaped = clean_camera_user_pass(self.rtsp_log_message)
         print(f"The escaped is {escaped}")
         assert escaped == "Did you mean file:rtsp://*:*@192.168.1.3:554"

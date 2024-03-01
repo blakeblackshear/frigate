@@ -3,9 +3,17 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type MSEPlayerProps = {
   camera: string;
+  className?: string;
+  playbackEnabled?: boolean;
+  onPlaying?: () => void;
 };
 
-function MSEPlayer({ camera }: MSEPlayerProps) {
+function MSEPlayer({
+  camera,
+  className,
+  playbackEnabled = true,
+  onPlaying,
+}: MSEPlayerProps) {
   let connectTS: number = 0;
 
   const RECONNECT_TIMEOUT: number = 30000;
@@ -29,8 +37,10 @@ function MSEPlayer({ camera }: MSEPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTIDRef = useRef<number | null>(null);
-  const ondataRef = useRef<((data: any) => void) | null>(null);
-  const onmessageRef = useRef<{ [key: string]: (msg: any) => void }>({});
+  const ondataRef = useRef<((data: ArrayBufferLike) => void) | null>(null);
+  const onmessageRef = useRef<{
+    [key: string]: (msg: { value: string; type: string }) => void;
+  }>({});
   const msRef = useRef<MediaSource | null>(null);
 
   const wsURL = useMemo(() => {
@@ -41,7 +51,7 @@ function MSEPlayer({ camera }: MSEPlayerProps) {
     const currentVideo = videoRef.current;
 
     if (currentVideo) {
-      currentVideo.play().catch((er: any) => {
+      currentVideo.play().catch((er: { name: string }) => {
         if (er.name === "NotAllowedError" && !currentVideo.muted) {
           currentVideo.muted = true;
           currentVideo.play().catch(() => {});
@@ -51,16 +61,19 @@ function MSEPlayer({ camera }: MSEPlayerProps) {
   };
 
   const send = useCallback(
-    (value: any) => {
+    (value: object) => {
       if (wsRef.current) wsRef.current.send(JSON.stringify(value));
     },
-    [wsRef]
+    [wsRef],
   );
 
   const codecs = useCallback((isSupported: (type: string) => boolean) => {
     return CODECS.filter((codec) =>
-      isSupported(`video/mp4; codecs="${codec}"`)
+      isSupported(`video/mp4; codecs="${codec}"`),
     ).join();
+
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onConnect = useCallback(() => {
@@ -68,6 +81,8 @@ function MSEPlayer({ camera }: MSEPlayerProps) {
 
     setWsState(WebSocket.CONNECTING);
 
+    // TODO may need to check this later
+    // eslint-disable-next-line
     connectTS = Date.now();
 
     wsRef.current = new WebSocket(wsURL);
@@ -102,6 +117,8 @@ function MSEPlayer({ camera }: MSEPlayerProps) {
     onmessageRef.current = {};
 
     onMse();
+    // only run once
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onClose = useCallback(() => {
@@ -127,11 +144,11 @@ function MSEPlayer({ camera }: MSEPlayerProps) {
         () => {
           send({
             type: "mse",
-            // @ts-ignore
+            // @ts-expect-error for typing
             value: codecs(MediaSource.isTypeSupported),
           });
         },
-        { once: true }
+        { once: true },
       );
 
       if (videoRef.current) {
@@ -148,7 +165,7 @@ function MSEPlayer({ camera }: MSEPlayerProps) {
             value: codecs(MediaSource.isTypeSupported),
           });
         },
-        { once: true }
+        { once: true },
       );
       videoRef.current!.src = URL.createObjectURL(msRef.current!);
       videoRef.current!.srcObject = null;
@@ -176,6 +193,7 @@ function MSEPlayer({ camera }: MSEPlayerProps) {
             }
           }
         } catch (e) {
+          // eslint-disable-next-line no-console
           console.debug(e);
         }
       });
@@ -193,6 +211,7 @@ function MSEPlayer({ camera }: MSEPlayerProps) {
           try {
             sb?.appendBuffer(data);
           } catch (e) {
+            // eslint-disable-next-line no-console
             console.debug(e);
           }
         }
@@ -201,11 +220,15 @@ function MSEPlayer({ camera }: MSEPlayerProps) {
   };
 
   useEffect(() => {
+    if (!playbackEnabled) {
+      return;
+    }
+
     // iOS 17.1+ uses ManagedMediaSource
     const MediaSourceConstructor =
       "ManagedMediaSource" in window ? window.ManagedMediaSource : MediaSource;
 
-    // @ts-ignore
+    // @ts-expect-error for typing
     msRef.current = new MediaSourceConstructor();
 
     if ("hidden" in document && visibilityCheck) {
@@ -229,28 +252,28 @@ function MSEPlayer({ camera }: MSEPlayerProps) {
             }
           });
         },
-        { threshold: visibilityThreshold }
+        { threshold: visibilityThreshold },
       );
       observer.observe(videoRef.current!);
     }
 
+    onConnect();
+
     return () => {
       onDisconnect();
     };
-  }, [onDisconnect, onConnect]);
-
-  useEffect(() => {
-    onConnect();
-  }, [wsURL]);
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playbackEnabled, onDisconnect, onConnect]);
 
   return (
     <video
       ref={videoRef}
-      controls
+      className={className}
       playsInline
       preload="auto"
+      onLoadedData={onPlaying}
       muted
-      style={{ display: "block", width: "100%", height: "100%" }}
     />
   );
 }

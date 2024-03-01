@@ -26,6 +26,10 @@ LABEL_CONSOLIDATION_MAP = {
     "face": 0.5,
 }
 LABEL_CONSOLIDATION_DEFAULT = 0.9
+LABEL_NMS_MAP = {
+    "car": 0.6,
+}
+LABEL_NMS_DEFAULT = 0.4
 
 # Audio Consts
 
@@ -66,6 +70,7 @@ MAX_PLAYLIST_SECONDS = 7200  # support 2 hour segments for a single playlist to 
 INSERT_MANY_RECORDINGS = "insert_many_recordings"
 INSERT_PREVIEW = "insert_preview"
 REQUEST_REGION_GRID = "request_region_grid"
+UPSERT_REVIEW_SEGMENT = "upsert_review_segment"
 
 # Autotracking
 

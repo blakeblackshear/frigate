@@ -2,75 +2,110 @@ import WebRtcPlayer from "./WebRTCPlayer";
 import { CameraConfig } from "@/types/frigateConfig";
 import AutoUpdatingCameraImage from "../camera/AutoUpdatingCameraImage";
 import ActivityIndicator from "../ui/activity-indicator";
-import { Button } from "../ui/button";
-import { LuSettings } from "react-icons/lu";
-import { useCallback, useMemo, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Switch } from "../ui/switch";
-import { Label } from "../ui/label";
-import { usePersistence } from "@/hooks/use-persistence";
+import { useEffect, useMemo, useState } from "react";
 import MSEPlayer from "./MsePlayer";
 import JSMpegPlayer from "./JSMpegPlayer";
-
-const emptyObject = Object.freeze({});
+import { MdCircle, MdLeakAdd } from "react-icons/md";
+import { BsSoundwave } from "react-icons/bs";
+import Chip from "../Chip";
+import useCameraActivity from "@/hooks/use-camera-activity";
+import { useRecordingsState } from "@/api/ws";
+import { LivePlayerMode } from "@/types/live";
+import useCameraLiveMode from "@/hooks/use-camera-live-mode";
+import { isDesktop } from "react-device-detect";
 
 type LivePlayerProps = {
+  className?: string;
   cameraConfig: CameraConfig;
-  liveMode: string;
+  preferredLiveMode?: LivePlayerMode;
+  showStillWithoutActivity?: boolean;
+  windowVisible?: boolean;
 };
 
-type Options = { [key: string]: boolean };
-
 export default function LivePlayer({
+  className,
   cameraConfig,
-  liveMode,
+  preferredLiveMode,
+  showStillWithoutActivity = true,
+  windowVisible = true,
 }: LivePlayerProps) {
-  const [showSettings, setShowSettings] = useState(false);
+  // camera activity
 
-  const [options, setOptions] = usePersistence(
-    `${cameraConfig.name}-feed`,
-    emptyObject
+  const { activeMotion, activeAudio, activeTracking } =
+    useCameraActivity(cameraConfig);
+
+  const cameraActive = useMemo(
+    () => windowVisible && (activeMotion || activeTracking),
+    [activeMotion, activeTracking, windowVisible],
   );
 
-  const handleSetOption = useCallback(
-    (id: string, value: boolean) => {
-      const newOptions = { ...options, [id]: value };
-      setOptions(newOptions);
-    },
-    [options, setOptions]
-  );
+  // camera live state
 
-  const searchParams = useMemo(
-    () =>
-      new URLSearchParams(
-        Object.keys(options).reduce((memo, key) => {
-          //@ts-ignore we know this is correct
-          memo.push([key, options[key] === true ? "1" : "0"]);
-          return memo;
-        }, [])
-      ),
-    [options]
-  );
+  const liveMode = useCameraLiveMode(cameraConfig, preferredLiveMode);
 
-  const handleToggleSettings = useCallback(() => {
-    setShowSettings(!showSettings);
-  }, [showSettings, setShowSettings]);
+  const [liveReady, setLiveReady] = useState(false);
+  useEffect(() => {
+    if (!liveReady) {
+      if (cameraActive && liveMode == "jsmpeg") {
+        setLiveReady(true);
+      }
 
+      return;
+    }
+
+    if (!cameraActive) {
+      setLiveReady(false);
+    }
+    // live mode won't change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cameraActive, liveReady]);
+
+  const { payload: recording } = useRecordingsState(cameraConfig.name);
+
+  // camera still state
+
+  const stillReloadInterval = useMemo(() => {
+    if (!windowVisible) {
+      return -1; // no reason to update the image when the window is not visible
+    }
+
+    if (liveReady) {
+      return 60000;
+    }
+
+    if (cameraActive) {
+      return 200;
+    }
+
+    return 30000;
+  }, [liveReady, cameraActive, windowVisible]);
+
+  if (!cameraConfig) {
+    return <ActivityIndicator />;
+  }
+
+  let player;
   if (liveMode == "webrtc") {
-    return (
-      <div className="max-w-5xl">
-        <WebRtcPlayer camera={cameraConfig.live.stream_name} />
-      </div>
+    player = (
+      <WebRtcPlayer
+        className={`rounded-2xl h-full ${liveReady ? "" : "hidden"}`}
+        camera={cameraConfig.live.stream_name}
+        playbackEnabled={cameraActive}
+        onPlaying={() => setLiveReady(true)}
+      />
     );
   } else if (liveMode == "mse") {
     if ("MediaSource" in window || "ManagedMediaSource" in window) {
-      return (
-        <div className="max-w-5xl">
-          <MSEPlayer camera={cameraConfig.live.stream_name} />
-        </div>
+      player = (
+        <MSEPlayer
+          className={`rounded-2xl h-full ${liveReady ? "" : "hidden"}`}
+          camera={cameraConfig.name}
+          playbackEnabled={cameraActive}
+          onPlaying={() => setLiveReady(true)}
+        />
       );
     } else {
-      return (
+      player = (
         <div className="w-5xl text-center text-sm">
           MSE is only supported on iOS 17.1+. You'll need to update if available
           or use jsmpeg / webRTC streams. See the docs for more info.
@@ -78,116 +113,73 @@ export default function LivePlayer({
       );
     }
   } else if (liveMode == "jsmpeg") {
-    return (
-      <div className={`max-w-[${cameraConfig.detect.width}px]`}>
-        <JSMpegPlayer
-          camera={cameraConfig.name}
-          width={cameraConfig.detect.width}
-          height={cameraConfig.detect.height}
-        />
-      </div>
-    );
-  } else if (liveMode == "debug") {
-    return (
-      <>
-        <AutoUpdatingCameraImage
-          camera={cameraConfig.name}
-          searchParams={searchParams}
-        />
-        <Button onClick={handleToggleSettings} variant="link" size="sm">
-          <span className="w-5 h-5">
-            <LuSettings />
-          </span>{" "}
-          <span>{showSettings ? "Hide" : "Show"} Options</span>
-        </Button>
-        {showSettings ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>Options</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <DebugSettings
-                handleSetOption={handleSetOption}
-                options={options}
-              />
-            </CardContent>
-          </Card>
-        ) : null}
-      </>
+    player = (
+      <JSMpegPlayer
+        className="w-full flex justify-center rounded-2xl overflow-hidden"
+        camera={cameraConfig.name}
+        width={cameraConfig.detect.width}
+        height={cameraConfig.detect.height}
+      />
     );
   } else {
-    <ActivityIndicator />;
+    player = <ActivityIndicator />;
   }
-}
 
-type DebugSettingsProps = {
-  handleSetOption: (id: string, value: boolean) => void;
-  options: Options;
-};
-
-function DebugSettings({ handleSetOption, options }: DebugSettingsProps) {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      <div className="flex items-center space-x-2">
-        <Switch
-          id="bbox"
-          checked={options["bbox"]}
-          onCheckedChange={(isChecked) => {
-            handleSetOption("bbox", isChecked);
-          }}
+    <div
+      className={`relative flex justify-center w-full outline ${
+        activeTracking
+          ? "outline-severity_alert outline-1 rounded-2xl shadow-[0_0_6px_2px] shadow-severity_alert"
+          : "outline-0 outline-background"
+      } transition-all duration-500 ${className}`}
+    >
+      <div className="absolute top-0 inset-x-0 rounded-2xl z-10 w-full h-[30%] bg-gradient-to-b from-black/20 to-transparent pointer-events-none"></div>
+      <div className="absolute bottom-0 inset-x-0 rounded-2xl z-10 w-full h-[10%] bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
+      {player}
+
+      <div
+        className={`absolute inset-0 w-full ${
+          showStillWithoutActivity && !liveReady ? "visible" : "invisible"
+        }`}
+      >
+        <AutoUpdatingCameraImage
+          className="size-full"
+          camera={cameraConfig.name}
+          showFps={false}
+          reloadInterval={stillReloadInterval}
         />
-        <Label htmlFor="bbox">Bounding Box</Label>
       </div>
-      <div className="flex items-center space-x-2">
-        <Switch
-          id="timestamp"
-          checked={options["timestamp"]}
-          onCheckedChange={(isChecked) => {
-            handleSetOption("timestamp", isChecked);
-          }}
-        />
-        <Label htmlFor="timestamp">Timestamp</Label>
+
+      <div className="absolute flex left-2 top-2 gap-2">
+        <Chip
+          in={activeMotion}
+          className={`bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500`}
+        >
+          <MdLeakAdd className="size-4 text-motion" />
+          <div className="hidden md:block ml-1 text-white text-xs">Motion</div>
+        </Chip>
+
+        {cameraConfig.audio.enabled_in_config && (
+          <Chip
+            in={activeAudio}
+            className={`bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500`}
+          >
+            <BsSoundwave className="size-4 text-audio" />
+            <div className="hidden md:block ml-1 text-white text-xs">Sound</div>
+          </Chip>
+        )}
       </div>
-      <div className="flex items-center space-x-2">
-        <Switch
-          id="zones"
-          checked={options["zones"]}
-          onCheckedChange={(isChecked) => {
-            handleSetOption("zones", isChecked);
-          }}
-        />
-        <Label htmlFor="zones">Zones</Label>
-      </div>
-      <div className="flex items-center space-x-2">
-        <Switch
-          id="mask"
-          checked={options["mask"]}
-          onCheckedChange={(isChecked) => {
-            handleSetOption("mask", isChecked);
-          }}
-        />
-        <Label htmlFor="mask">Mask</Label>
-      </div>
-      <div className="flex items-center space-x-2">
-        <Switch
-          id="motion"
-          checked={options["motion"]}
-          onCheckedChange={(isChecked) => {
-            handleSetOption("motion", isChecked);
-          }}
-        />
-        <Label htmlFor="motion">Motion</Label>
-      </div>
-      <div className="flex items-center space-x-2">
-        <Switch
-          id="regions"
-          checked={options["regions"]}
-          onCheckedChange={(isChecked) => {
-            handleSetOption("regions", isChecked);
-          }}
-        />
-        <Label htmlFor="regions">Regions</Label>
-      </div>
+
+      {isDesktop && (
+        <Chip className="absolute right-2 top-2 bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500">
+          {recording == "ON" && (
+            <MdCircle className="size-2 drop-shadow-md shadow-danger text-danger" />
+          )}
+          <div className="ml-1 capitalize text-white text-xs">
+            {cameraConfig.name.replaceAll("_", " ")}
+          </div>
+        </Chip>
+      )}
     </div>
   );
 }

@@ -40,14 +40,15 @@ The USB version is compatible with the widest variety of hardware and does not r
 
 The PCIe and M.2 versions require installation of a driver on the host. Follow the instructions for your version from https://coral.ai
 
-A single Coral can handle many cameras and will be sufficient for the majority of users. You can calculate the maximum performance of your Coral based on the inference speed reported by Frigate. With an inference speed of 10, your Coral will top out at `1000/10=100`, or 100 frames per second. If your detection fps is regularly getting close to that, you should first consider tuning motion masks. If those are already properly configured, a second Coral may be needed.
+A single Coral can handle many cameras using the default model and will be sufficient for the majority of users. You can calculate the maximum performance of your Coral based on the inference speed reported by Frigate. With an inference speed of 10, your Coral will top out at `1000/10=100`, or 100 frames per second. If your detection fps is regularly getting close to that, you should first consider tuning motion masks. If those are already properly configured, a second Coral may be needed.
 
-### OpenVino
+### OpenVINO
 
 The OpenVINO detector type is able to run on:
 
 - 6th Gen Intel Platforms and newer that have an iGPU
 - x86 & Arm64 hosts with VPU Hardware (ex: Intel NCS2)
+- Most modern AMD CPUs (though this is officially not supported by Intel)
 
 More information is available [in the detector docs](/configuration/object_detectors#openvino-detector)
 
@@ -104,6 +105,12 @@ Frigate supports SBCs with the following Rockchip SoCs:
 - RK3562
 
 Using the yolov8n model and an Orange Pi 5 Plus with RK3588 SoC inference speeds vary between 20 - 25 ms.
+
+#### AMD GPUs and iGPUs
+
+With the [rocm](../configuration/object_detectors.md#amdrocm-gpu-detector) detector Frigate can take advantage of many AMD GPUs and iGPUs.
+
+An AMD Ryzen mini PC with AMD Ryzen 3 5400U iGPU takes about 9 ms to evaluate yolov8n.
 
 ## What does Frigate use the CPU for and what does it use a detector for? (ELI5 Version)
 

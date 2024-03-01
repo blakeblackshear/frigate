@@ -47,7 +47,7 @@ function Storage() {
       service["storage"]["/media/frigate/recordings"]["total"] !=
         service["storage"]["/media/frigate/clips"]["total"]
     );
-  }, service);
+  }, [service]);
 
   const getUnitSize = (MB: number) => {
     if (isNaN(MB) || MB < 0) return "Invalid number";
@@ -106,12 +106,12 @@ function Storage() {
                   </TableCell>
                   <TableCell>
                     {getUnitSize(
-                      service["storage"]["/media/frigate/recordings"]["used"]
+                      service["storage"]["/media/frigate/recordings"]["used"],
                     )}
                   </TableCell>
                   <TableCell>
                     {getUnitSize(
-                      service["storage"]["/media/frigate/recordings"]["total"]
+                      service["storage"]["/media/frigate/recordings"]["total"],
                     )}
                   </TableCell>
                 </TableRow>
@@ -120,12 +120,12 @@ function Storage() {
                     <TableCell>Snapshots</TableCell>
                     <TableCell>
                       {getUnitSize(
-                        service["storage"]["/media/frigate/clips"]["used"]
+                        service["storage"]["/media/frigate/clips"]["used"],
                       )}
                     </TableCell>
                     <TableCell>
                       {getUnitSize(
-                        service["storage"]["/media/frigate/clips"]["total"]
+                        service["storage"]["/media/frigate/clips"]["total"],
                       )}
                     </TableCell>
                   </TableRow>

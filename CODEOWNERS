@@ -2,5 +2,5 @@
 /docker/tensorrt/ @madsciencetist @NateMeyer
 /docker/tensorrt/*arm64* @madsciencetist
 /docker/tensorrt/*jetson* @madsciencetist
-
 /docker/rockchip/ @MarcA711
+/docker/rocm/ @harakas

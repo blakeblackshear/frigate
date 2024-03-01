@@ -2,18 +2,23 @@ import { baseUrl } from "@/api/baseUrl";
 import { useCallback, useEffect, useRef } from "react";
 
 type WebRtcPlayerProps = {
+  className?: string;
   camera: string;
-  width?: number;
-  height?: number;
+  playbackEnabled?: boolean;
+  onPlaying?: () => void;
 };
 
 export default function WebRtcPlayer({
+  className,
   camera,
-  width,
-  height,
+  playbackEnabled = true,
+  onPlaying,
 }: WebRtcPlayerProps) {
+  // camera states
+
   const pcRef = useRef<RTCPeerConnection | undefined>();
   const videoRef = useRef<HTMLVideoElement | null>(null);
+
   const PeerConnection = useCallback(
     async (media: string) => {
       if (!videoRef.current) {
@@ -53,7 +58,7 @@ export default function WebRtcPlayer({
           .filter((kind) => media.indexOf(kind) >= 0)
           .map(
             (kind) =>
-              pc.addTransceiver(kind, { direction: "recvonly" }).receiver.track
+              pc.addTransceiver(kind, { direction: "recvonly" }).receiver.track,
           );
         localTracks.push(...tracks);
       }
@@ -61,12 +66,12 @@ export default function WebRtcPlayer({
       videoRef.current.srcObject = new MediaStream(localTracks);
       return pc;
     },
-    [videoRef]
+    [videoRef],
   );
 
   async function getMediaTracks(
     media: string,
-    constraints: MediaStreamConstraints
+    constraints: MediaStreamConstraints,
   ) {
     try {
       const stream =
@@ -121,7 +126,7 @@ export default function WebRtcPlayer({
         }
       });
     },
-    []
+    [],
   );
 
   useEffect(() => {
@@ -129,9 +134,13 @@ export default function WebRtcPlayer({
       return;
     }
 
+    if (!playbackEnabled) {
+      return;
+    }
+
     const url = `${baseUrl.replace(
       /^http/,
-      "ws"
+      "ws",
     )}live/webrtc/api/ws?src=${camera}`;
     const ws = new WebSocket(url);
     const aPc = PeerConnection("video+audio");
@@ -143,19 +152,16 @@ export default function WebRtcPlayer({
         pcRef.current = undefined;
       }
     };
-  }, [camera, connect, PeerConnection, pcRef, videoRef]);
+  }, [camera, connect, PeerConnection, pcRef, videoRef, playbackEnabled]);
 
   return (
-    <div>
-      <video
-        ref={videoRef}
-        autoPlay
-        playsInline
-        controls
-        muted
-        width={width}
-        height={height}
-      />
-    </div>
+    <video
+      ref={videoRef}
+      className={className}
+      autoPlay
+      playsInline
+      muted
+      onLoadedData={onPlaying}
+    />
   );
 }
