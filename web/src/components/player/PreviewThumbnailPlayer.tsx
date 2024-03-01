@@ -13,18 +13,8 @@ import { getIconForLabel, getIconForSubLabel } from "@/utils/iconUtil";
 import TimeAgo from "../dynamic/TimeAgo";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { isDesktop, isFirefox, isMobile, isSafari } from "react-device-detect";
+import { isFirefox, isMobile, isSafari } from "react-device-detect";
 import Chip from "../Chip";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuTrigger,
-} from "../ui/context-menu";
-import { LuCheckCheck, LuCheckSquare, LuFileUp, LuTrash } from "react-icons/lu";
-import { RiCheckboxMultipleLine } from "react-icons/ri";
-import axios from "axios";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import useImageLoaded from "@/hooks/use-image-loaded";
 import { Skeleton } from "../ui/skeleton";
@@ -35,7 +25,6 @@ type PreviewPlayerProps = {
   allPreviews?: Preview[];
   onTimeUpdate?: React.Dispatch<React.SetStateAction<number | undefined>>;
   setReviewed: (reviewId: string) => void;
-  markAboveReviewed: () => void;
   onClick: (reviewId: string, ctrl: boolean) => void;
 };
 
@@ -51,7 +40,6 @@ export default function PreviewThumbnailPlayer({
   review,
   allPreviews,
   setReviewed,
-  markAboveReviewed,
   onClick,
   onTimeUpdate,
 }: PreviewPlayerProps) {
@@ -166,19 +154,15 @@ export default function PreviewThumbnailPlayer({
     config?.ui.time_format == "24hour" ? "%b %-d, %H:%M" : "%b %-d, %I:%M %p",
   );
 
-  const previewContent = (
+  return (
     <div
       className="relative size-full cursor-pointer"
       onMouseEnter={isMobile ? undefined : () => onPlayback(true)}
       onMouseLeave={isMobile ? undefined : () => onPlayback(false)}
-      onContextMenu={
-        isDesktop
-          ? undefined
-          : (e) => {
-              e.preventDefault();
-              onClick(review.id, true);
-            }
-      }
+      onContextMenu={(e) => {
+        e.preventDefault();
+        onClick(review.id, true);
+      }}
       onClick={handleOnClick}
       {...swipeHandlers}
     >
@@ -242,22 +226,6 @@ export default function PreviewThumbnailPlayer({
       )}
     </div>
   );
-
-  if (isDesktop) {
-    return (
-      <ContextMenu>
-        <ContextMenuTrigger asChild>{previewContent}</ContextMenuTrigger>
-        <PreviewContextItems
-          review={review}
-          onSelect={() => onClick(review.id, true)}
-          setReviewed={handleSetReviewed}
-          markAboveReviewed={markAboveReviewed}
-        />
-      </ContextMenu>
-    );
-  }
-
-  return previewContent;
 }
 
 type PreviewContentProps = {
@@ -621,71 +589,6 @@ function InProgressPreview({
         max={previewFrames.length - 1}
       />
     </div>
-  );
-}
-
-type PreviewContextItemsProps = {
-  review: ReviewSegment;
-  onSelect: () => void;
-  setReviewed: () => void;
-  markAboveReviewed: () => void;
-};
-function PreviewContextItems({
-  review,
-  onSelect,
-  setReviewed,
-  markAboveReviewed,
-}: PreviewContextItemsProps) {
-  const exportReview = useCallback(() => {
-    axios.post(
-      `export/${review.camera}/start/${review.start_time}/end/${review.end_time}`,
-      { playback: "realtime" },
-    );
-  }, [review]);
-
-  const deleteReview = useCallback(() => {
-    axios.delete(`reviews/${review.id}`);
-  }, [review]);
-
-  return (
-    <ContextMenuContent>
-      {isMobile && (
-        <ContextMenuItem onSelect={onSelect}>
-          <div className="w-full flex justify-between items-center">
-            Select
-            <RiCheckboxMultipleLine className="ml-4 size-4" />
-          </div>
-        </ContextMenuItem>
-      )}
-      <ContextMenuItem onSelect={markAboveReviewed}>
-        <div className="w-full flex justify-between items-center">
-          Mark Above as Reviewed
-          <LuCheckCheck className="ml-4 size-4" />
-        </div>
-      </ContextMenuItem>
-      <ContextMenuSeparator />
-      {!review.has_been_reviewed && (
-        <ContextMenuItem onSelect={() => (setReviewed ? setReviewed() : null)}>
-          <div className="w-full flex justify-between items-center">
-            Mark As Reviewed
-            <LuCheckSquare className="ml-4 size-4" />
-          </div>
-        </ContextMenuItem>
-      )}
-      <ContextMenuItem onSelect={exportReview}>
-        <div className="w-full flex justify-between items-center">
-          Export
-          <LuFileUp className="ml-4 size-4" />
-        </div>
-      </ContextMenuItem>
-      <ContextMenuSeparator />
-      <ContextMenuItem onSelect={deleteReview}>
-        <div className="w-full flex justify-between items-center text-danger">
-          Delete
-          <LuTrash className="ml-4 size-4" />
-        </div>
-      </ContextMenuItem>
-    </ContextMenuContent>
   );
 }
 

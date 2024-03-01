@@ -223,29 +223,6 @@ export default function EventView({
     [selectedReviews, setSelectedReviews],
   );
 
-  const markScrolledItemsAsReviewed = useCallback(async () => {
-    if (!currentItems) {
-      return;
-    }
-
-    const scrolled: string[] = [];
-
-    currentItems.find((value) => {
-      if (value.start_time > minimapBounds.end) {
-        scrolled.push(value.id);
-        return false;
-      } else {
-        return true;
-      }
-    });
-
-    const idList = scrolled.join(",");
-
-    await axios.post(`reviews/${idList}/viewed`);
-    setSelectedReviews([]);
-    pullLatestData();
-  }, [currentItems, minimapBounds]);
-
   const exportReview = useCallback(
     (id: string) => {
       const review = currentItems?.find((seg) => seg.id == id);
@@ -366,7 +343,6 @@ export default function EventView({
                         allPreviews={relevantPreviews}
                         setReviewed={markItemAsReviewed}
                         onTimeUpdate={setPreviewTime}
-                        markAboveReviewed={markScrolledItemsAsReviewed}
                         onClick={onSelectReview}
                       />
                     </div>
