@@ -1,4 +1,11 @@
-import { usePtzCommand } from "@/api/ws";
+import {
+  useAudioState,
+  useDetectState,
+  usePtzCommand,
+  useRecordingsState,
+  useSnapshotsState,
+} from "@/api/ws";
+import CameraFeatureToggle from "@/components/dynamic/CameraFeatureToggle";
 import LivePlayer from "@/components/player/LivePlayer";
 import { Button } from "@/components/ui/button";
 import {
@@ -7,6 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { CameraConfig } from "@/types/frigateConfig";
 import { CameraPtzInfo } from "@/types/ptz";
@@ -20,7 +28,15 @@ import {
   FaAngleUp,
 } from "react-icons/fa";
 import { IoMdArrowBack } from "react-icons/io";
-import { MdZoomIn, MdZoomOut } from "react-icons/md";
+import { LuEar, LuEarOff, LuVideo, LuVideoOff } from "react-icons/lu";
+import {
+  MdNoPhotography,
+  MdPersonOff,
+  MdPersonSearch,
+  MdPhotoCamera,
+  MdZoomIn,
+  MdZoomOut,
+} from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import useSWR from "swr";
 
@@ -29,6 +45,19 @@ type LiveCameraViewProps = {
 };
 export default function LiveCameraView({ camera }: LiveCameraViewProps) {
   const navigate = useNavigate();
+
+  // camera features
+
+  const { payload: detectState, send: sendDetect } = useDetectState(
+    camera.name,
+  );
+  const { payload: recordState, send: sendRecord } = useRecordingsState(
+    camera.name,
+  );
+  const { payload: snapshotState, send: sendSnapshot } = useSnapshotsState(
+    camera.name,
+  );
+  const { payload: audioState, send: sendAudio } = useAudioState(camera.name);
 
   const growClassName = useMemo(() => {
     if (camera.detect.width / camera.detect.height > 2) {
@@ -45,6 +74,36 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
           <IoMdArrowBack className="size-5 mr-[10px]" />
           Back
         </Button>
+        <TooltipProvider>
+          <div className="flex items-center gap-1 mr-1 *:rounded-lg">
+            <CameraFeatureToggle
+              Icon={detectState == "ON" ? MdPersonSearch : MdPersonOff}
+              isActive={detectState == "ON"}
+              title={`${detectState == "ON" ? "Disable" : "Enable"} Detect`}
+              onClick={() => sendDetect(detectState == "ON" ? "OFF" : "ON")}
+            />
+            <CameraFeatureToggle
+              Icon={recordState == "ON" ? LuVideo : LuVideoOff}
+              isActive={recordState == "ON"}
+              title={`${recordState == "ON" ? "Disable" : "Enable"} Recording`}
+              onClick={() => sendRecord(recordState == "ON" ? "OFF" : "ON")}
+            />
+            <CameraFeatureToggle
+              Icon={snapshotState == "ON" ? MdPhotoCamera : MdNoPhotography}
+              isActive={snapshotState == "ON"}
+              title={`${snapshotState == "ON" ? "Disable" : "Enable"} Snapshots`}
+              onClick={() => sendSnapshot(snapshotState == "ON" ? "OFF" : "ON")}
+            />
+            {camera.audio.enabled_in_config && (
+              <CameraFeatureToggle
+                Icon={audioState == "ON" ? LuEar : LuEarOff}
+                isActive={audioState == "ON"}
+                title={`${audioState == "ON" ? "Disable" : "Enable"} Audio Detect`}
+                onClick={() => sendAudio(audioState == "ON" ? "OFF" : "ON")}
+              />
+            )}
+          </div>
+        </TooltipProvider>
       </div>
 
       <div className="relative size-full">
@@ -70,7 +129,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
 function PtzControlPanel({ camera }: { camera: string }) {
   const { data: ptz } = useSWR<CameraPtzInfo>(`${camera}/ptz/info`);
 
-  const { payload: _, send: sendPtz } = usePtzCommand(camera);
+  const { send: sendPtz } = usePtzCommand(camera);
 
   const onStop = useCallback(
     (e: React.SyntheticEvent) => {
