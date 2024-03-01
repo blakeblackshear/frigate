@@ -6,6 +6,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useState } from "react";
+import { isDesktop } from "react-device-detect";
 
 const variants = {
   primary: {
@@ -39,9 +41,11 @@ export default function NavItem({
 }: NavItemProps) {
   const shouldRender = dev ? ENV !== "production" : true;
 
+  const [showTooltip, setShowTooltip] = useState(false);
+
   return (
     shouldRender && (
-      <Tooltip>
+      <Tooltip open={isDesktop && showTooltip}>
         <NavLink
           to={url}
           onClick={onClick}
@@ -50,6 +54,8 @@ export default function NavItem({
               variants[variant][isActive ? "active" : "inactive"]
             }`
           }
+          onMouseEnter={() => (isDesktop ? setShowTooltip(true) : null)}
+          onMouseLeave={() => (isDesktop ? setShowTooltip(false) : null)}
         >
           <TooltipTrigger>
             <Icon className="size-5 md:m-[6px]" />
