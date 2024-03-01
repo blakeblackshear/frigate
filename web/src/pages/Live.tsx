@@ -1,19 +1,8 @@
-import { useFrigateReviews } from "@/api/ws";
-import Logo from "@/components/Logo";
-import { AnimatedEventThumbnail } from "@/components/image/AnimatedEventThumbnail";
-import LivePlayer from "@/components/player/LivePlayer";
-import { Button } from "@/components/ui/button";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import useOverlayState from "@/hooks/use-overlay-state";
-import { usePersistence } from "@/hooks/use-persistence";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { ReviewSegment } from "@/types/review";
 import LiveCameraView from "@/views/live/LiveCameraView";
 import LiveDashboardView from "@/views/live/LiveDashboardView";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { isDesktop, isMobile, isSafari } from "react-device-detect";
-import { CiGrid2H, CiGrid31 } from "react-icons/ci";
+import { useMemo } from "react";
 import useSWR from "swr";
 
 function Live() {

@@ -1,10 +1,22 @@
+import { usePtzCommand } from "@/api/ws";
 import LivePlayer from "@/components/player/LivePlayer";
 import { Button } from "@/components/ui/button";
+import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { CameraConfig } from "@/types/frigateConfig";
-import { useMemo } from "react";
+import { CameraPtzInfo } from "@/types/ptz";
+import React, { useCallback, useMemo } from "react";
 import { isSafari } from "react-device-detect";
+import { BsThreeDotsVertical } from "react-icons/bs";
+import {
+  FaAngleDown,
+  FaAngleLeft,
+  FaAngleRight,
+  FaAngleUp,
+} from "react-icons/fa";
 import { IoMdArrowBack } from "react-icons/io";
+import { MdZoomIn, MdZoomOut } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
+import useSWR from "swr";
 
 type LiveCameraViewProps = {
   camera: CameraConfig;
@@ -43,7 +55,159 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
             preferredLiveMode={isSafari ? "webrtc" : "mse"}
           />
         </div>
+        {camera.onvif.host != "" && <PtzControlPanel camera={camera.name} />}
       </div>
+    </div>
+  );
+}
+
+function PtzControlPanel({ camera }: { camera: string }) {
+  const { data: ptz } = useSWR<CameraPtzInfo>(`${camera}/ptz/info`);
+
+  const { payload: _, send: sendPtz } = usePtzCommand(camera);
+
+  const onStop = useCallback(
+    (e: React.SyntheticEvent) => {
+      e.preventDefault();
+      sendPtz("STOP");
+    },
+    [sendPtz],
+  );
+
+  useKeyboardListener(
+    ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "+", "-"],
+    (key, down, repeat) => {
+      if (repeat) {
+        return;
+      }
+
+      if (!down) {
+        sendPtz("STOP");
+        return;
+      }
+
+      switch (key) {
+        case "ArrowLeft":
+          sendPtz("MOVE_LEFT");
+          break;
+        case "ArrowRight":
+          sendPtz("MOVE_RIGHT");
+          break;
+        case "ArrowUp":
+          sendPtz("MOVE_UP");
+          break;
+        case "ArrowDown":
+          sendPtz("MOVE_DOWN");
+          break;
+        case "+":
+          sendPtz("ZOOM_IN");
+          break;
+        case "-":
+          sendPtz("ZOOM_OUT");
+          break;
+      }
+    },
+  );
+
+  return (
+    <div className="absolute left-[50%] -translate-x-[50%] bottom-[10%] flex items-center gap-1">
+      {ptz?.features?.includes("pt") && (
+        <>
+          <Button
+            onMouseDown={(e) => {
+              e.preventDefault();
+              sendPtz("MOVE_LEFT");
+            }}
+            onTouchStart={(e) => {
+              e.preventDefault();
+              sendPtz("MOVE_LEFT");
+            }}
+            onMouseUp={onStop}
+            onTouchEnd={onStop}
+          >
+            <FaAngleLeft />
+          </Button>
+          <Button
+            onMouseDown={(e) => {
+              e.preventDefault();
+              sendPtz("MOVE_UP");
+            }}
+            onTouchStart={(e) => {
+              e.preventDefault();
+              sendPtz("MOVE_UP");
+            }}
+            onMouseUp={onStop}
+            onTouchEnd={onStop}
+          >
+            <FaAngleUp />
+          </Button>
+          <Button
+            onMouseDown={(e) => {
+              e.preventDefault();
+              sendPtz("MOVE_DOWN");
+            }}
+            onTouchStart={(e) => {
+              e.preventDefault();
+              sendPtz("MOVE_DOWN");
+            }}
+            onMouseUp={onStop}
+            onTouchEnd={onStop}
+          >
+            <FaAngleDown />
+          </Button>
+          <Button
+            onMouseDown={(e) => {
+              e.preventDefault();
+              sendPtz("MOVE_RIGHT");
+            }}
+            onTouchStart={(e) => {
+              e.preventDefault();
+              sendPtz("MOVE_RIGHT");
+            }}
+            onMouseUp={onStop}
+            onTouchEnd={onStop}
+          >
+            <FaAngleRight />
+          </Button>
+        </>
+      )}
+      {ptz?.features?.includes("zoom") && (
+        <>
+          <Button
+            onMouseDown={(e) => {
+              e.preventDefault();
+              sendPtz("ZOOM_IN");
+            }}
+            onTouchStart={(e) => {
+              e.preventDefault();
+              sendPtz("ZOOM_IN");
+            }}
+            onMouseUp={onStop}
+            onTouchEnd={onStop}
+          >
+            <MdZoomIn />
+          </Button>
+          <Button
+            onMouseDown={(e) => {
+              e.preventDefault();
+              sendPtz("ZOOM_OUT");
+            }}
+            onTouchStart={(e) => {
+              e.preventDefault();
+              sendPtz("ZOOM_OUT");
+            }}
+            onMouseUp={onStop}
+            onTouchEnd={onStop}
+          >
+            <MdZoomOut />
+          </Button>
+        </>
+      )}
+      {(ptz?.presets?.length ?? 0) > 0 && (
+        <Button>
+          <BsThreeDotsVertical />
+        </Button>
+      )}
     </div>
   );
 }
