@@ -85,8 +85,12 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
   }, [camera, isPortrait]);
 
   return (
-    <div className="size-full flex flex-col landscape:flex-row">
-      <div className="w-full landscape:w-min landscape:h-full h-12 flex flex-row landscape:flex-col items-center justify-between">
+    <div
+      className={`size-full flex flex-col ${isMobile ? "landscape:flex-row" : ""}`}
+    >
+      <div
+        className={`w-full h-12 flex flex-row items-center justify-between ${isMobile ? "landscape:w-min landscape:h-full landscape:flex-col" : ""}`}
+      >
         <Button
           className={`rounded-lg ${isMobile ? "ml-2" : "ml-0"}`}
           size={isMobile ? "icon" : "default"}
@@ -96,7 +100,9 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
           {isDesktop && "Back"}
         </Button>
         <TooltipProvider>
-          <div className="flex flex-row landscape:flex-col items-center gap-1 mr-1 *:rounded-lg">
+          <div
+            className={`flex flex-row items-center gap-1 mr-1 *:rounded-lg ${isMobile ? "landscape:flex-col" : ""}`}
+          >
             <CameraFeatureToggle
               className="p-2 md:p-0"
               Icon={audio ? GiSpeaker : GiSpeakerOff}
