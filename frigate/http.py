@@ -864,6 +864,25 @@ def label_thumbnail(camera_name, label):
         return response
 
 
+@bp.route("/<camera_name>/<label>/clip.mp4")
+def label_clip(camera_name, label):
+    label = unquote(label)
+    event_query = Event.select(fn.MAX(Event.id)).where(
+        Event.camera == camera_name, Event.has_clip == True
+    )
+    if label != "any":
+        event_query = event_query.where(Event.label == label)
+
+    try:
+        event = event_query.get()
+
+        return event_clip(event)
+    except DoesNotExist:
+        return make_response(
+            jsonify({"success": False, "message": "Event not found"}), 404
+        )
+
+
 @bp.route("/events/<id>/snapshot.jpg")
 def event_snapshot(id):
     download = request.args.get("download", type=bool)
