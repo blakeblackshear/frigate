@@ -108,7 +108,7 @@ export default function Events() {
 
   // review summary
 
-  const { data: reviewSummary, mutate: updateSummary } = useSWR([
+  const { data: reviewSummary } = useSWR([
     "review/summary",
     { timezone: timezone },
     { revalidateOnFocus: false },
