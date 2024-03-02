@@ -23,6 +23,7 @@ import { useSwipeable } from "react-swipeable";
 type PreviewPlayerProps = {
   review: ReviewSegment;
   allPreviews?: Preview[];
+  scrollLock?: boolean;
   onTimeUpdate?: React.Dispatch<React.SetStateAction<number | undefined>>;
   setReviewed: (reviewId: string) => void;
   onClick: (reviewId: string, ctrl: boolean) => void;
@@ -39,6 +40,7 @@ type Preview = {
 export default function PreviewThumbnailPlayer({
   review,
   allPreviews,
+  scrollLock = false,
   setReviewed,
   onClick,
   onTimeUpdate,
@@ -116,12 +118,16 @@ export default function PreviewThumbnailPlayer({
 
       return undefined;
     }
-  }, [allPreviews]);
+  }, [allPreviews, review]);
 
   const playingBack = useMemo(() => playback, [playback]);
 
   const onPlayback = useCallback(
     (isHovered: boolean) => {
+      if (isHovered && scrollLock) {
+        return;
+      }
+
       if (isHovered) {
         setHoverTimeout(
           setTimeout(() => {
@@ -144,7 +150,7 @@ export default function PreviewThumbnailPlayer({
 
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [hoverTimeout, review],
+    [hoverTimeout, scrollLock, review],
   );
 
   // date
@@ -462,7 +468,7 @@ function VideoPreview({
         <source src={relevantPreview.src} type={relevantPreview.type} />
       </video>
       <Slider
-        className="absolute inset-x-0 bottom-0"
+        className="absolute inset-x-0 bottom-0 z-30"
         value={[progress]}
         onValueChange={onManualSeek}
         onValueCommit={onStopManualSeek}
@@ -580,7 +586,7 @@ function InProgressPreview({
         onLoad={handleLoad}
       />
       <Slider
-        className="absolute inset-x-0 bottom-0"
+        className="absolute inset-x-0 bottom-0 z-30"
         value={[key]}
         onValueChange={onManualSeek}
         onValueCommit={onStopManualSeek}
