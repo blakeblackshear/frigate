@@ -10,7 +10,12 @@ import { useEventUtils } from "@/hooks/use-event-utils";
 import { useScrollLockout } from "@/hooks/use-mouse-listener";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
-import { ReviewFilter, ReviewSegment, ReviewSeverity } from "@/types/review";
+import {
+  ReviewFilter,
+  ReviewSegment,
+  ReviewSeverity,
+  ReviewSummary,
+} from "@/types/review";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isDesktop, isMobile } from "react-device-detect";
@@ -20,6 +25,7 @@ import useSWR from "swr";
 
 type EventViewProps = {
   reviewPages?: ReviewSegment[][];
+  reviewSummary?: ReviewSummary[];
   relevantPreviews?: Preview[];
   timeRange: { before: number; after: number };
   reachedEnd: boolean;
@@ -35,6 +41,7 @@ type EventViewProps = {
 };
 export default function EventView({
   reviewPages,
+  reviewSummary,
   relevantPreviews,
   timeRange,
   reachedEnd,
@@ -51,6 +58,35 @@ export default function EventView({
   const { data: config } = useSWR<FrigateConfig>("config");
   const contentRef = useRef<HTMLDivElement | null>(null);
   const segmentDuration = 60;
+
+  // review counts
+
+  const reviewCounts = useMemo(() => {
+    if (!reviewSummary) {
+      return { alert: 0, detection: 0, significant_motion: 0 };
+    }
+
+    let summary;
+    if (filter?.before == undefined) {
+      summary = reviewSummary[0];
+    } else {
+      summary = reviewSummary[0];
+    }
+
+    if (filter?.showReviewed == 1) {
+      return {
+        alert: summary.total_alert,
+        detection: summary.total_detection,
+        significant_motion: summary.total_motion,
+      };
+    } else {
+      return {
+        alert: summary.total_alert - summary.reviewed_alert,
+        detection: summary.total_detection - summary.reviewed_detection,
+        significant_motion: summary.total_motion - summary.reviewed_motion,
+      };
+    }
+  }, [filter, reviewSummary]);
 
   // review paging
 
@@ -264,7 +300,7 @@ export default function EventView({
             aria-label="Select alerts"
           >
             <MdCircle className="size-2 md:mr-[10px] text-severity_alert" />
-            <div className="hidden md:block">Alerts</div>
+            <div className="hidden md:block">Alerts ∙ {reviewCounts.alert}</div>
           </ToggleGroupItem>
           <ToggleGroupItem
             className={`${severity == "detection" ? "" : "text-gray-500"}`}
@@ -272,7 +308,9 @@ export default function EventView({
             aria-label="Select detections"
           >
             <MdCircle className="size-2 md:mr-[10px] text-severity_detection" />
-            <div className="hidden md:block">Detections</div>
+            <div className="hidden md:block">
+              Detections ∙ {reviewCounts.detection}
+            </div>
           </ToggleGroupItem>
           <ToggleGroupItem
             className={`px-3 py-4 rounded-2xl ${
@@ -282,7 +320,9 @@ export default function EventView({
             aria-label="Select motion"
           >
             <MdCircle className="size-2 md:mr-[10px] text-severity_motion" />
-            <div className="hidden md:block">Motion</div>
+            <div className="hidden md:block">
+              Motion ∙ {reviewCounts.significant_motion}
+            </div>
           </ToggleGroupItem>
         </ToggleGroup>
 

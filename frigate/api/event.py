@@ -23,9 +23,7 @@ from frigate.const import (
 )
 from frigate.models import Event, Timeline
 from frigate.object_processing import TrackedObject
-from frigate.util.builtin import (
-    get_tz_modifiers,
-)
+from frigate.util.builtin import get_tz_modifiers
 
 logger = logging.getLogger(__name__)
 

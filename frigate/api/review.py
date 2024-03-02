@@ -10,9 +10,10 @@ from flask import (
     make_response,
     request,
 )
-from peewee import DoesNotExist, operator
+from peewee import Case, DoesNotExist, fn, operator
 
 from frigate.models import ReviewSegment
+from frigate.util.builtin import get_tz_modifiers
 
 logger = logging.getLogger(__name__)
 
@@ -68,6 +69,106 @@ def review():
     )
 
     return jsonify([r for r in review])
+
+
+@ReviewBp.route("/review/summary")
+def review_summary():
+    tz_name = request.args.get("timezone", default="utc", type=str)
+    hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(tz_name)
+    month_ago = (datetime.now() - timedelta(days=30)).timestamp()
+
+    groups = (
+        ReviewSegment.select(
+            fn.strftime(
+                "%Y-%m-%d",
+                fn.datetime(
+                    ReviewSegment.start_time,
+                    "unixepoch",
+                    hour_modifier,
+                    minute_modifier,
+                ),
+            ).alias("day"),
+            fn.SUM(
+                Case(
+                    None,
+                    [
+                        (
+                            (ReviewSegment.severity == "alert"),
+                            ReviewSegment.has_been_reviewed,
+                        )
+                    ],
+                    0,
+                )
+            ).alias("reviewed_alert"),
+            fn.SUM(
+                Case(
+                    None,
+                    [
+                        (
+                            (ReviewSegment.severity == "detection"),
+                            ReviewSegment.has_been_reviewed,
+                        )
+                    ],
+                    0,
+                )
+            ).alias("reviewed_detection"),
+            fn.SUM(
+                Case(
+                    None,
+                    [
+                        (
+                            (ReviewSegment.severity == "significant_motion"),
+                            ReviewSegment.has_been_reviewed,
+                        )
+                    ],
+                    0,
+                )
+            ).alias("reviewed_motion"),
+            fn.SUM(
+                Case(
+                    None,
+                    [
+                        (
+                            (ReviewSegment.severity == "alert"),
+                            1,
+                        )
+                    ],
+                    0,
+                )
+            ).alias("total_alert"),
+            fn.SUM(
+                Case(
+                    None,
+                    [
+                        (
+                            (ReviewSegment.severity == "detection"),
+                            1,
+                        )
+                    ],
+                    0,
+                )
+            ).alias("total_detection"),
+            fn.SUM(
+                Case(
+                    None,
+                    [
+                        (
+                            (ReviewSegment.severity == "significant_motion"),
+                            1,
+                        )
+                    ],
+                    0,
+                )
+            ).alias("total_motion"),
+        )
+        .where(ReviewSegment.start_time > month_ago)
+        .group_by(
+            (ReviewSegment.start_time + seconds_offset).cast("int") / (3600 * 24),
+        )
+        .order_by(ReviewSegment.start_time.desc())
+    )
+
+    return jsonify([e for e in groups.dicts().iterator()])
 
 
 @ReviewBp.route("/review/<id>/viewed", methods=("POST",))

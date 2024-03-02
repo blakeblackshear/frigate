@@ -38,16 +38,16 @@ QUEUE_READ_TIMEOUT = 0.00001  # seconds
 
 class SegmentInfo:
     def __init__(
-        self, motion_box_count: int, active_object_count: int, average_dBFS: int
+        self, motion_area: int, active_object_count: int, average_dBFS: int
     ) -> None:
-        self.motion_box_count = motion_box_count
+        self.motion_area = motion_area
         self.active_object_count = active_object_count
         self.average_dBFS = average_dBFS
 
     def should_discard_segment(self, retain_mode: RetainModeEnum) -> bool:
         return (
             retain_mode == RetainModeEnum.motion
-            and self.motion_box_count == 0
+            and self.motion_area == 0
             and self.average_dBFS == 0
         ) or (
             retain_mode == RetainModeEnum.active_objects
@@ -412,7 +412,7 @@ class RecordingMaintainer(threading.Thread):
                     Recordings.start_time: start_time.timestamp(),
                     Recordings.end_time: end_time.timestamp(),
                     Recordings.duration: duration,
-                    Recordings.motion: segment_info.motion_box_count,
+                    Recordings.motion: segment_info.motion_area,
                     # TODO: update this to store list of active objects at some point
                     Recordings.objects: segment_info.active_object_count,
                     Recordings.dBFS: segment_info.average_dBFS,
