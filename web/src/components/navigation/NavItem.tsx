@@ -15,8 +15,8 @@ const variants = {
     inactive: "text-muted-foreground bg-secondary",
   },
   secondary: {
-    active: "font-bold text-primary",
-    inactive: "text-secondary-foreground",
+    active: "font-bold text-selected",
+    inactive: "text-muted-foreground",
   },
 };
 

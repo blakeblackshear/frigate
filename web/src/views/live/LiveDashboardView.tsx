@@ -81,17 +81,23 @@ export default function LiveDashboardView({
           <div />
           <div className="flex items-center gap-1">
             <Button
-              className={layout == "grid" ? "text-blue-600 bg-blue-200" : ""}
+              className={
+                layout == "grid"
+                  ? "text-selected bg-blue-900 focus:bg-blue-900 bg-opacity-60 focus:bg-opacity-60"
+                  : "text-muted-foreground bg-muted"
+              }
               size="xs"
-              variant="secondary"
               onClick={() => setLayout("grid")}
             >
               <CiGrid31 className="m-1" />
             </Button>
             <Button
-              className={layout == "list" ? "text-blue-600 bg-blue-200" : ""}
+              className={
+                layout == "list"
+                  ? "text-selected bg-blue-900 focus:bg-blue-900 bg-opacity-60 focus:bg-opacity-60"
+                  : "text-muted-foreground bg-muted"
+              }
               size="xs"
-              variant="secondary"
               onClick={() => setLayout("list")}
             >
               <CiGrid2H className="m-1" />
