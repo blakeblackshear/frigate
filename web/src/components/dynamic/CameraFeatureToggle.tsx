@@ -8,12 +8,12 @@ import { isDesktop } from "react-device-detect";
 
 const variants = {
   primary: {
-    active: "font-bold text-primary-foreground bg-primary",
-    inactive: "text-muted-foreground bg-muted",
+    active: "font-bold text-primary-foreground bg-selected",
+    inactive: "text-secondary-foreground bg-secondary",
   },
   secondary: {
     active: "font-bold text-primary",
-    inactive: "text-muted-foreground",
+    inactive: "text-secondary-foreground",
   },
 };
 
