@@ -121,8 +121,8 @@
     --destructive-foreground: hsl(210 40% 98%);
     --destructive-foreground: 210 40% 98%;
 
-    --border: hsl(0, 0%, 58%);
-    --border: 0, 0%, 58%;
+    --border: hsl(0, 0%, 32%);
+    --border: 0, 0%, 32%;
 
     --input: hsl(217.2 32.6% 17.5%);
     --input: 217.2 32.6% 17.5%;
