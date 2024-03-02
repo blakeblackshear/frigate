@@ -10,8 +10,8 @@ from playhouse.shortcuts import model_to_dict
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
+from frigate.api.app import create_app
 from frigate.config import FrigateConfig
-from frigate.http import create_app
 from frigate.models import Event, Recordings
 from frigate.plus import PlusApi
 from frigate.stats.emitter import StatsEmitter
