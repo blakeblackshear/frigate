@@ -1,5 +1,5 @@
 click == 8.1.*
-Flask == 2.3.*
+Flask == 3.0.*
 imutils == 0.5.*
 markupsafe == 2.1.*
 matplotlib == 3.7.*
