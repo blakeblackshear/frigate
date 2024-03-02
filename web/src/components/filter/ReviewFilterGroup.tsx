@@ -15,7 +15,6 @@ import { Calendar } from "../ui/calendar";
 import { ReviewFilter } from "@/types/review";
 import { getEndOfDayTimestamp } from "@/utils/dateUtil";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
-import { isMobile } from "react-device-detect";
 import { FaCalendarAlt, FaFilter, FaVideo } from "react-icons/fa";
 
 const ATTRIBUTES = ["amazon", "face", "fedex", "license_plate", "ups"];
