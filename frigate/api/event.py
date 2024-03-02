@@ -591,6 +591,7 @@ def set_sub_label(id):
         200,
     )
 
+
 @EventBp.route("/events/<id>", methods=("DELETE",))
 def delete_event(id):
     try:

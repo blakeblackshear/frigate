@@ -740,6 +740,7 @@ def export_delete(file_name: str):
         200,
     )
 
+
 @MediaBp.route("/<camera_name>/<label>/snapshot.jpg")
 def label_snapshot(camera_name, label):
     label = unquote(label)
@@ -931,6 +932,7 @@ def grid_snapshot(camera_name):
             404,
         )
 
+
 @MediaBp.route("/events/<id>/snapshot.jpg")
 def event_snapshot(id):
     download = request.args.get("download", type=bool)
@@ -1027,6 +1029,7 @@ def event_clip(id):
     )
 
     return response
+
 
 @MediaBp.route("/events/<id>/thumbnail.jpg")
 def event_thumbnail(id, max_cache_age=2592000):

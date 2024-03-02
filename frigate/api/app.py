@@ -162,9 +162,9 @@ def config():
     config["plus"] = {"enabled": current_app.plus_api.is_active()}
 
     for detector, detector_config in config["detectors"].items():
-        detector_config["model"][
-            "labelmap"
-        ] = current_app.frigate_config.model.merged_labelmap
+        detector_config["model"]["labelmap"] = (
+            current_app.frigate_config.model.merged_labelmap
+        )
 
     return jsonify(config)
 
