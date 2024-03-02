@@ -72,7 +72,7 @@
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.7",
     "@testing-library/jest-dom": "^6.1.5",
-    "@types/node": "^20.10.3",
+    "@types/node": "^20.11.24",
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
     "@types/react-icons": "^3.0.0",
