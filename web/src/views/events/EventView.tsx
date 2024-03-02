@@ -247,7 +247,7 @@ export default function EventView({
 
   return (
     <div className="flex flex-col size-full">
-      <div className="h-8 relative flex justify-between items-center mb-2">
+      <div className="h-10 relative flex justify-between items-center mb-2">
         {isMobile && (
           <Logo className="absolute inset-y-0 inset-x-1/2 -translate-x-1/2 h-8" />
         )}
