@@ -863,10 +863,13 @@ def label_thumbnail(camera_name, label):
         response.headers["Cache-Control"] = "no-store"
         return response
 
+
 @bp.route("/<camera_name>/<label>/clip.mp4")
 def label_clip(camera_name, label):
     label = unquote(label)
-    event_query = Event.select(fn.MAX(Event.id)).where(Event.camera == camera_name, Event.has_clip == True)
+    event_query = Event.select(fn.MAX(Event.id)).where(
+        Event.camera == camera_name, Event.has_clip == True
+    )
     if label != "any":
         event_query = event_query.where(Event.label == label)
 
