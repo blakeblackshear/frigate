@@ -5,6 +5,7 @@ type WebRtcPlayerProps = {
   className?: string;
   camera: string;
   playbackEnabled?: boolean;
+  audioEnabled?: boolean;
   onPlaying?: () => void;
 };
 
@@ -12,6 +13,7 @@ export default function WebRtcPlayer({
   className,
   camera,
   playbackEnabled = true,
+  audioEnabled = false,
   onPlaying,
 }: WebRtcPlayerProps) {
   // camera states
@@ -160,7 +162,7 @@ export default function WebRtcPlayer({
       className={className}
       autoPlay
       playsInline
-      muted
+      muted={!audioEnabled}
       onLoadedData={onPlaying}
     />
   );

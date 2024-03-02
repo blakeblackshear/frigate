@@ -20,6 +20,8 @@ type LivePlayerProps = {
   preferredLiveMode?: LivePlayerMode;
   showStillWithoutActivity?: boolean;
   windowVisible?: boolean;
+  playAudio?: boolean;
+  onClick?: () => void;
 };
 
 export default function LivePlayer({
@@ -28,6 +30,8 @@ export default function LivePlayer({
   preferredLiveMode,
   showStillWithoutActivity = true,
   windowVisible = true,
+  playAudio = false,
+  onClick,
 }: LivePlayerProps) {
   // camera activity
 
@@ -35,8 +39,10 @@ export default function LivePlayer({
     useCameraActivity(cameraConfig);
 
   const cameraActive = useMemo(
-    () => windowVisible && (activeMotion || activeTracking),
-    [activeMotion, activeTracking, windowVisible],
+    () =>
+      !showStillWithoutActivity ||
+      (windowVisible && (activeMotion || activeTracking)),
+    [activeMotion, activeTracking, showStillWithoutActivity, windowVisible],
   );
 
   // camera live state
@@ -91,6 +97,7 @@ export default function LivePlayer({
         className={`rounded-2xl h-full ${liveReady ? "" : "hidden"}`}
         camera={cameraConfig.live.stream_name}
         playbackEnabled={cameraActive}
+        audioEnabled={playAudio}
         onPlaying={() => setLiveReady(true)}
       />
     );
@@ -101,6 +108,7 @@ export default function LivePlayer({
           className={`rounded-2xl h-full ${liveReady ? "" : "hidden"}`}
           camera={cameraConfig.name}
           playbackEnabled={cameraActive}
+          audioEnabled={playAudio}
           onPlaying={() => setLiveReady(true)}
         />
       );
@@ -127,11 +135,12 @@ export default function LivePlayer({
 
   return (
     <div
-      className={`relative flex justify-center w-full outline ${
+      className={`relative flex justify-center w-full outline cursor-pointer ${
         activeTracking
           ? "outline-severity_alert outline-1 rounded-2xl shadow-[0_0_6px_2px] shadow-severity_alert"
           : "outline-0 outline-background"
       } transition-all duration-500 ${className}`}
+      onClick={onClick}
     >
       <div className="absolute top-0 inset-x-0 rounded-2xl z-10 w-full h-[30%] bg-gradient-to-b from-black/20 to-transparent pointer-events-none"></div>
       <div className="absolute bottom-0 inset-x-0 rounded-2xl z-10 w-full h-[10%] bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>

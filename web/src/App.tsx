@@ -27,7 +27,7 @@ function App() {
             {isMobile && <Bottombar />}
             <div
               id="pageRoot"
-              className="absolute left-0 top-2 right-0 bottom-16 md:left-16 md:bottom-8 overflow-hidden"
+              className={`absolute top-2 right-0 overflow-hidden ${isMobile ? "left-0 bottom-16" : "left-16 bottom-8"}`}
             >
               <Routes>
                 <Route path="/" element={<Live />} />
