@@ -17,6 +17,7 @@ from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
+from frigate.api.app import create_app
 from frigate.comms.config_updater import ConfigPublisher
 from frigate.comms.detections_updater import DetectionProxy
 from frigate.comms.dispatcher import Communicator, Dispatcher
@@ -37,7 +38,6 @@ from frigate.events.audio import listen_to_audio
 from frigate.events.cleanup import EventCleanup
 from frigate.events.external import ExternalEventProcessor
 from frigate.events.maintainer import EventProcessor
-from frigate.http import create_app
 from frigate.log import log_process, root_configurer
 from frigate.models import (
     Event,

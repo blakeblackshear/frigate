@@ -151,7 +151,6 @@ class MqttConfig(FrigateBaseModel):
 
     @field_validator("password")
     def user_requires_pass(cls, v, info: ValidationInfo):
-        print(f"doing a check where {v} is None and {info.data['user']} is None")
         if (v is None) != (info.data["user"] is None):
             raise ValueError("Password must be provided with username.")
         return v
