@@ -104,7 +104,11 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
       if (isPortrait) {
         return "absolute left-2 right-2 top-[50%] -translate-y-[50%]";
       } else {
-        return "absolute top-2 bottom-2 left-[50%] -translate-x-[50%]";
+        if (aspect > 16 / 9) {
+          return "absolute left-12 top-[50%] -translate-y-[50%]";
+        } else {
+          return "absolute top-2 bottom-2 left-[50%] -translate-x-[50%]";
+        }
       }
     }
 
