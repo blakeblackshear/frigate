@@ -1,21 +1,22 @@
-import { LuConstruction, LuFileUp, LuFlag, LuVideo } from "react-icons/lu";
+import { FaCompactDisc, FaFlag, FaVideo } from "react-icons/fa";
+import { LuConstruction } from "react-icons/lu";
 
 export const navbarLinks = [
   {
     id: 1,
-    icon: LuVideo,
+    icon: FaVideo,
     title: "Live",
     url: "/",
   },
   {
     id: 2,
-    icon: LuFlag,
+    icon: FaFlag,
     title: "Events",
     url: "/events",
   },
   {
     id: 3,
-    icon: LuFileUp,
+    icon: FaCompactDisc,
     title: "Export",
     url: "/export",
   },

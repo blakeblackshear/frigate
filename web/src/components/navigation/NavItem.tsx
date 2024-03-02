@@ -11,11 +11,11 @@ import { isDesktop } from "react-device-detect";
 
 const variants = {
   primary: {
-    active: "font-bold text-primary-foreground bg-primary",
-    inactive: "text-muted-foreground bg-muted",
+    active: "font-bold text-white bg-selected",
+    inactive: "text-muted-foreground bg-secondary",
   },
   secondary: {
-    active: "font-bold text-primary",
+    active: "font-bold text-selected",
     inactive: "text-muted-foreground",
   },
 };

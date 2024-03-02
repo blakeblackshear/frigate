@@ -1,4 +1,4 @@
-import { LuCalendar, LuCheck, LuFilter, LuVideo } from "react-icons/lu";
+import { LuCheck, LuVideo } from "react-icons/lu";
 import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import useSWR from "swr";
@@ -15,7 +15,7 @@ import { Calendar } from "../ui/calendar";
 import { ReviewFilter } from "@/types/review";
 import { getEndOfDayTimestamp } from "@/utils/dateUtil";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
-import { isMobile } from "react-device-detect";
+import { FaCalendarAlt, FaFilter, FaVideo } from "react-icons/fa";
 
 const ATTRIBUTES = ["amazon", "face", "fedex", "license_plate", "ups"];
 
@@ -123,12 +123,8 @@ function CamerasFilterButton({
       }}
     >
       <DropdownMenuTrigger asChild>
-        <Button
-          size={isMobile ? "sm" : "default"}
-          className="mx-1 capitalize"
-          variant="secondary"
-        >
-          <LuVideo className="md:mr-[10px]" />
+        <Button size="sm" className="mx-1 capitalize" variant="secondary">
+          <FaVideo className="md:mr-[10px] text-muted-foreground" />
           <div className="hidden md:block">
             {selectedCameras == undefined
               ? "All Cameras"
@@ -212,12 +208,8 @@ function CalendarFilterButton({
       }}
     >
       <PopoverTrigger asChild>
-        <Button
-          size={isMobile ? "sm" : "default"}
-          className="mx-1"
-          variant="secondary"
-        >
-          <LuCalendar className="md:mr-[10px]" />
+        <Button size="sm" className="mx-1" variant="secondary">
+          <FaCalendarAlt className="md:mr-[10px] text-muted-foreground" />
           <div className="hidden md:block">
             {day == undefined ? "Last 24 Hours" : selectedDate}
           </div>
@@ -254,12 +246,8 @@ function GeneralFilterButton({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button
-          size={isMobile ? "sm" : "default"}
-          className="mx-1"
-          variant="secondary"
-        >
-          <LuFilter className="md:mr-[10px]" />
+        <Button size="sm" className="mx-1" variant="secondary">
+          <FaFilter className="md:mr-[10px] text-muted-foreground" />
           <div className="hidden md:block">Filter</div>
         </Button>
       </PopoverTrigger>
@@ -373,7 +361,7 @@ function FilterCheckBox({
 }: FilterCheckBoxProps) {
   return (
     <Button
-      className="capitalize flex justify-between items-center cursor-pointer w-full"
+      className="capitalize flex justify-between items-center cursor-pointer w-full text-primary-foreground"
       variant="ghost"
       onClick={() => onCheckedChange(!isChecked)}
     >

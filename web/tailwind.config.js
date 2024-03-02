@@ -44,6 +44,7 @@ module.exports = {
         audio: "#ea580c",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        selected: "hsl(var(--selected))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",

@@ -101,7 +101,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
         </Button>
         <TooltipProvider>
           <div
-            className={`flex flex-row items-center gap-1 mr-1 *:rounded-lg ${isMobile ? "landscape:flex-col" : ""}`}
+            className={`flex flex-row items-center gap-2 mr-1 *:rounded-lg ${isMobile ? "landscape:flex-col" : ""}`}
           >
             <CameraFeatureToggle
               className="p-2 md:p-0"
