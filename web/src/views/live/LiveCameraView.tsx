@@ -37,6 +37,7 @@ import {
   FaAngleLeft,
   FaAngleRight,
   FaAngleUp,
+  FaCompress,
   FaExpand,
 } from "react-icons/fa";
 import { GiSpeaker, GiSpeakerOff } from "react-icons/gi";
@@ -99,19 +100,19 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
   const growClassName = useMemo(() => {
     const aspect = camera.detect.width / camera.detect.height;
 
-    if (fullscreen) {
-      if (aspect > 16 / 9) {
-        return "absolute inset-x-0 top-[50%] -translate-y-[50%]";
-      } else {
-        return "absolute inset-y-0 left-[50%] -translate-x-[50%]";
-      }
-    }
-
     if (isMobile) {
       if (isPortrait) {
         return "absolute left-2 right-2 top-[50%] -translate-y-[50%]";
       } else {
         return "absolute top-2 bottom-2 left-[50%] -translate-x-[50%]";
+      }
+    }
+
+    if (fullscreen) {
+      if (aspect > 16 / 9) {
+        return "absolute inset-x-0 top-[50%] -translate-y-[50%]";
+      } else {
+        return "absolute inset-y-0 left-[50%] -translate-x-[50%]";
       }
     } else if (aspect > 2) {
       return "absolute left-2 right-2 top-[50%] -translate-y-[50%]";
@@ -132,7 +133,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
       <div
         className={
           fullscreen
-            ? `absolute right-24 top-1 z-40`
+            ? `absolute right-32 top-1 z-40 ${isMobile ? "landscape:left-2 landscape:right-auto landscape:bottom-1 landscape:top-auto" : ""}`
             : `w-full h-12 flex flex-row items-center justify-between ${isMobile ? "landscape:w-min landscape:h-full landscape:flex-col" : ""}`
         }
       >
@@ -154,9 +155,10 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
           >
             <CameraFeatureToggle
               className="p-2 md:p-0"
-              Icon={fullscreen ? FaExpand : FaExpand}
+              variant={fullscreen ? "overlay" : "primary"}
+              Icon={fullscreen ? FaCompress : FaExpand}
               isActive={fullscreen}
-              title={fullscreen ? "Fullscreen" : "Close"}
+              title={fullscreen ? "Close" : "Fullscreen"}
               onClick={() => {
                 if (fullscreen) {
                   document.exitFullscreen();
@@ -167,6 +169,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
             />
             <CameraFeatureToggle
               className="p-2 md:p-0"
+              variant={fullscreen ? "overlay" : "primary"}
               Icon={audio ? GiSpeaker : GiSpeakerOff}
               isActive={audio}
               title={`${audio ? "Disable" : "Enable"} Camera Audio`}
@@ -174,6 +177,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
             />
             <CameraFeatureToggle
               className="p-2 md:p-0"
+              variant={fullscreen ? "overlay" : "primary"}
               Icon={detectState == "ON" ? MdPersonSearch : MdPersonOff}
               isActive={detectState == "ON"}
               title={`${detectState == "ON" ? "Disable" : "Enable"} Detect`}
@@ -181,6 +185,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
             />
             <CameraFeatureToggle
               className="p-2 md:p-0"
+              variant={fullscreen ? "overlay" : "primary"}
               Icon={recordState == "ON" ? LuVideo : LuVideoOff}
               isActive={recordState == "ON"}
               title={`${recordState == "ON" ? "Disable" : "Enable"} Recording`}
@@ -188,6 +193,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
             />
             <CameraFeatureToggle
               className="p-2 md:p-0"
+              variant={fullscreen ? "overlay" : "primary"}
               Icon={snapshotState == "ON" ? MdPhotoCamera : MdNoPhotography}
               isActive={snapshotState == "ON"}
               title={`${snapshotState == "ON" ? "Disable" : "Enable"} Snapshots`}
@@ -196,6 +202,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
             {camera.audio.enabled_in_config && (
               <CameraFeatureToggle
                 className="p-2 md:p-0"
+                variant={fullscreen ? "overlay" : "primary"}
                 Icon={audioState == "ON" ? LuEar : LuEarOff}
                 isActive={audioState == "ON"}
                 title={`${audioState == "ON" ? "Disable" : "Enable"} Audio Detect`}

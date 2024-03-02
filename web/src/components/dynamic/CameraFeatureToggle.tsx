@@ -8,18 +8,18 @@ import { isDesktop } from "react-device-detect";
 
 const variants = {
   primary: {
-    active: "font-bold text-primary-foreground bg-selected",
-    inactive: "text-secondary-foreground bg-secondary",
+    active: "font-bold text-white bg-selected rounded-lg",
+    inactive: "text-secondary-foreground bg-secondary rounded-lg",
   },
-  secondary: {
-    active: "font-bold text-primary",
-    inactive: "text-secondary-foreground",
+  overlay: {
+    active: "font-bold text-white bg-selected rounded-full",
+    inactive: "text-primary-white rounded-full bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500",
   },
 };
 
 type CameraFeatureToggleProps = {
   className?: string;
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "overlay";
   isActive: boolean;
   Icon: IconType;
   title: string;
@@ -37,7 +37,7 @@ export default function CameraFeatureToggle({
   const content = (
     <div
       onClick={onClick}
-      className={`${className} flex flex-col justify-center items-center rounded-lg ${
+      className={`${className} flex flex-col justify-center items-center ${
         variants[variant][isActive ? "active" : "inactive"]
       }`}
     >
