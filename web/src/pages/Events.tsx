@@ -1,4 +1,4 @@
-import ActivityIndicator from "@/components/ui/activity-indicator";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 import useApiFilter from "@/hooks/use-api-filter";
 import { useTimezone } from "@/hooks/use-date-utils";
 import useOverlayState from "@/hooks/use-overlay-state";
