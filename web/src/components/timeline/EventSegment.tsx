@@ -16,6 +16,7 @@ import {
   HoverCardTrigger,
 } from "../ui/hover-card";
 import { HoverCardPortal } from "@radix-ui/react-hover-card";
+import scrollIntoView from "scroll-into-view-if-needed";
 
 type EventSegmentProps = {
   events: ReviewSegment[];
@@ -225,20 +226,14 @@ export function EventSegment({
 
   const firstMinimapSegmentRef = useRef<HTMLDivElement>(null);
 
-  let debounceTimer: ReturnType<typeof setTimeout>;
-
-  function debounceScrollIntoView(element: HTMLElement) {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      element.scrollIntoView({ behavior: "smooth", block: "center" });
-    }, 100);
-  }
-
   useEffect(() => {
     // Check if the first segment is out of view
     const firstSegment = firstMinimapSegmentRef.current;
     if (firstSegment && showMinimap && isFirstSegmentInMinimap) {
-      debounceScrollIntoView(firstSegment);
+      scrollIntoView(firstSegment, {
+        scrollMode: "if-needed",
+        behavior: "smooth",
+      });
     }
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -276,7 +271,10 @@ export function EventSegment({
         `[data-segment-start="${startTimestamp - segmentDuration}"]`,
       );
       if (element instanceof HTMLElement) {
-        debounceScrollIntoView(element);
+        scrollIntoView(element, {
+          scrollMode: "if-needed",
+          behavior: "smooth",
+        });
         element.classList.add(
           `outline-severity_${severityType}`,
           `shadow-severity_${severityType}`,
