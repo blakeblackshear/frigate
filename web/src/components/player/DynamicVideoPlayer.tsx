@@ -18,6 +18,8 @@ import { Recording } from "@/types/record";
 import { Preview } from "@/types/preview";
 import { DynamicPlayback } from "@/types/playback";
 
+type PlayerMode = "playback" | "scrubbing";
+
 /**
  * Dynamically switches between video playback and scrubbing preview player.
  */
@@ -26,6 +28,7 @@ type DynamicVideoPlayerProps = {
   camera: string;
   timeRange: { start: number; end: number };
   cameraPreviews: Preview[];
+  defaultMode?: PlayerMode;
   onControllerReady?: (controller: DynamicVideoController) => void;
 };
 export default function DynamicVideoPlayer({
@@ -33,6 +36,7 @@ export default function DynamicVideoPlayer({
   camera,
   timeRange,
   cameraPreviews,
+  defaultMode = "playback",
   onControllerReady,
 }: DynamicVideoPlayerProps) {
   const apiHost = useApiHost();
@@ -60,7 +64,7 @@ export default function DynamicVideoPlayer({
 
   const playerRef = useRef<Player | undefined>(undefined);
   const previewRef = useRef<Player | undefined>(undefined);
-  const [isScrubbing, setIsScrubbing] = useState(false);
+  const [isScrubbing, setIsScrubbing] = useState(defaultMode == "scrubbing");
   const [hasPreview, setHasPreview] = useState(false);
   const [focusedItem, setFocusedItem] = useState<Timeline | undefined>(
     undefined,
@@ -74,10 +78,11 @@ export default function DynamicVideoPlayer({
       playerRef,
       previewRef,
       (config.cameras[camera]?.detect?.annotation_offset || 0) / 1000,
+      defaultMode,
       setIsScrubbing,
       setFocusedItem,
     );
-  }, [camera, config]);
+  }, [camera, config, defaultMode]);
 
   // keyboard control
 
@@ -178,7 +183,7 @@ export default function DynamicVideoPlayer({
   );
 
   useEffect(() => {
-    if (!controller || !recordings || recordings.length == 0) {
+    if (!controller || !recordings) {
       return;
     }
 
@@ -292,7 +297,7 @@ export class DynamicVideoController {
   private previewRef: MutableRefObject<Player | undefined>;
   private setScrubbing: (isScrubbing: boolean) => void;
   private setFocusedItem: (timeline: Timeline) => void;
-  private playerMode: "playback" | "scrubbing" = "playback";
+  private playerMode: PlayerMode = "playback";
 
   // playback
   private recordings: Recording[] = [];
@@ -301,6 +306,7 @@ export class DynamicVideoController {
     undefined;
   private annotationOffset: number;
   private timeToStart: number | undefined = undefined;
+  private clipChangeLockout: boolean = false;
 
   // preview
   private preview: Preview | undefined = undefined;
@@ -312,12 +318,14 @@ export class DynamicVideoController {
     playerRef: MutableRefObject<Player | undefined>,
     previewRef: MutableRefObject<Player | undefined>,
     annotationOffset: number,
+    defaultMode: PlayerMode,
     setScrubbing: (isScrubbing: boolean) => void,
     setFocusedItem: (timeline: Timeline) => void,
   ) {
     this.playerRef = playerRef;
     this.previewRef = previewRef;
     this.annotationOffset = annotationOffset;
+    this.playerMode = defaultMode;
     this.setScrubbing = setScrubbing;
     this.setFocusedItem = setFocusedItem;
   }
@@ -429,13 +437,35 @@ export class DynamicVideoController {
     }
 
     if (time > this.preview.end) {
+      if (this.clipChangeLockout) {
+        return;
+      }
+
       if (this.playerMode == "scrubbing") {
         this.playerMode = "playback";
         this.setScrubbing(false);
         this.timeToSeek = undefined;
         this.seeking = false;
         this.readyToScrub = false;
+        this.clipChangeLockout = true;
         this.fireClipChangeEvent("forward");
+      }
+      return;
+    }
+
+    if (time < this.preview.start) {
+      if (this.clipChangeLockout) {
+        return;
+      }
+
+      if (this.playerMode == "scrubbing") {
+        this.playerMode = "playback";
+        this.setScrubbing(false);
+        this.timeToSeek = undefined;
+        this.seeking = false;
+        this.readyToScrub = false;
+        this.clipChangeLockout = true;
+        this.fireClipChangeEvent("backward");
       }
       return;
     }
@@ -460,6 +490,8 @@ export class DynamicVideoController {
     if (!this.preview || this.playerMode == "playback") {
       return;
     }
+
+    this.clipChangeLockout = false;
 
     if (
       this.timeToSeek &&

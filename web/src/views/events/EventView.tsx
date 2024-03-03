@@ -533,9 +533,7 @@ function MotionReview({
 
     let cameras;
     if (!filter || !filter.cameras) {
-      cameras = Object.values(config.cameras).filter(
-        (cam) => cam.name == "front_cam",
-      );
+      cameras = Object.values(config.cameras);
     } else {
       const filteredCams = filter.cameras;
 
@@ -569,6 +567,26 @@ function MotionReview({
     timeRangeSegments.ranges[selectedRangeIdx].start,
   );
 
+  // move to next clip
+  useEffect(() => {
+    if (!videoPlayersRef.current) {
+      return;
+    }
+
+    Object.values(videoPlayersRef.current).forEach((controller) => {
+      controller.onClipChangedEvent((dir) => {
+        if (
+          dir == "forward" &&
+          selectedRangeIdx < timeRangeSegments.ranges.length - 1
+        ) {
+          setSelectedRangeIdx(selectedRangeIdx + 1);
+        } else if (selectedRangeIdx > 0) {
+          setSelectedRangeIdx(selectedRangeIdx - 1);
+        }
+      });
+    });
+  }, [selectedRangeIdx, timeRangeSegments]);
+
   useEffect(() => {
     Object.values(videoPlayersRef.current).forEach((controller) => {
       controller.scrubToTimestamp(currentTime);
@@ -579,7 +597,7 @@ function MotionReview({
     <>
       <div
         ref={contentRef}
-        className={`size-full mt-4 grid sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 gap-2 md:gap-4`}
+        className={`size-full m-2 grid sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 gap-2 overflow-auto`}
       >
         {reviewCameras.map((camera) => {
           let grow;
@@ -597,9 +615,9 @@ function MotionReview({
                 camera={camera.name}
                 timeRange={timeRangeSegments.ranges[selectedRangeIdx]}
                 cameraPreviews={relevantPreviews || []}
+                defaultMode="scrubbing"
                 onControllerReady={(controller) => {
                   videoPlayersRef.current[camera.name] = controller;
-                  //setPlayerReady(true);
                 }}
               />
             </div>
