@@ -28,7 +28,7 @@ type DynamicVideoPlayerProps = {
   camera: string;
   timeRange: { start: number; end: number };
   cameraPreviews: Preview[];
-  defaultMode?: PlayerMode;
+  previewOnly?: boolean;
   onControllerReady?: (controller: DynamicVideoController) => void;
 };
 export default function DynamicVideoPlayer({
@@ -36,7 +36,7 @@ export default function DynamicVideoPlayer({
   camera,
   timeRange,
   cameraPreviews,
-  defaultMode = "playback",
+  previewOnly = false,
   onControllerReady,
 }: DynamicVideoPlayerProps) {
   const apiHost = useApiHost();
@@ -64,7 +64,7 @@ export default function DynamicVideoPlayer({
 
   const playerRef = useRef<Player | undefined>(undefined);
   const previewRef = useRef<Player | undefined>(undefined);
-  const [isScrubbing, setIsScrubbing] = useState(defaultMode == "scrubbing");
+  const [isScrubbing, setIsScrubbing] = useState(previewOnly);
   const [hasPreview, setHasPreview] = useState(false);
   const [focusedItem, setFocusedItem] = useState<Timeline | undefined>(
     undefined,
@@ -78,11 +78,11 @@ export default function DynamicVideoPlayer({
       playerRef,
       previewRef,
       (config.cameras[camera]?.detect?.annotation_offset || 0) / 1000,
-      defaultMode,
+      previewOnly ? "scrubbing" : "playback",
       setIsScrubbing,
       setFocusedItem,
     );
-  }, [camera, config, defaultMode]);
+  }, [camera, config, previewOnly]);
 
   // keyboard control
 
@@ -178,12 +178,12 @@ export default function DynamicVideoPlayer({
     };
   }, [timeRange]);
   const { data: recordings } = useSWR<Recording[]>(
-    [`${camera}/recordings`, recordingParams],
+    previewOnly ? null : [`${camera}/recordings`, recordingParams],
     { revalidateOnFocus: false },
   );
 
   useEffect(() => {
-    if (!controller || !recordings) {
+    if (!controller || (!previewOnly && !recordings)) {
       return;
     }
 
@@ -204,7 +204,7 @@ export default function DynamicVideoPlayer({
     setHasPreview(preview != undefined);
 
     controller.newPlayback({
-      recordings,
+      recordings: recordings ?? [],
       playbackUri,
       preview,
     });
@@ -219,49 +219,53 @@ export default function DynamicVideoPlayer({
 
   return (
     <div className={className}>
-      <div
-        className={`w-full relative ${
-          hasPreview && isScrubbing ? "hidden" : "visible"
-        }`}
-      >
-        <VideoPlayer
-          options={{
-            preload: "auto",
-            autoplay: true,
-            sources: [initialPlaybackSource],
-            aspectRatio: tallVideo ? "16:9" : undefined,
-            controlBar: {
-              remainingTimeDisplay: false,
-              progressControl: {
-                seekBar: false,
-              },
-            },
-          }}
-          seekOptions={{ forward: 10, backward: 5 }}
-          onReady={(player) => {
-            playerRef.current = player;
-            player.on("playing", () => setFocusedItem(undefined));
-            player.on("timeupdate", () => {
-              controller.updateProgress(player.currentTime() || 0);
-            });
-            player.on("ended", () => controller.fireClipChangeEvent("forward"));
-
-            if (onControllerReady) {
-              onControllerReady(controller);
-            }
-          }}
-          onDispose={() => {
-            playerRef.current = undefined;
-          }}
+      {!previewOnly && (
+        <div
+          className={`w-full relative ${
+            hasPreview && isScrubbing ? "hidden" : "visible"
+          }`}
         >
-          {config && focusedItem && (
-            <TimelineEventOverlay
-              timeline={focusedItem}
-              cameraConfig={config.cameras[camera]}
-            />
-          )}
-        </VideoPlayer>
-      </div>
+          <VideoPlayer
+            options={{
+              preload: "auto",
+              autoplay: true,
+              sources: [initialPlaybackSource],
+              aspectRatio: tallVideo ? "16:9" : undefined,
+              controlBar: {
+                remainingTimeDisplay: false,
+                progressControl: {
+                  seekBar: false,
+                },
+              },
+            }}
+            seekOptions={{ forward: 10, backward: 5 }}
+            onReady={(player) => {
+              playerRef.current = player;
+              player.on("playing", () => setFocusedItem(undefined));
+              player.on("timeupdate", () => {
+                controller.updateProgress(player.currentTime() || 0);
+              });
+              player.on("ended", () =>
+                controller.fireClipChangeEvent("forward"),
+              );
+
+              if (onControllerReady) {
+                onControllerReady(controller);
+              }
+            }}
+            onDispose={() => {
+              playerRef.current = undefined;
+            }}
+          >
+            {config && focusedItem && (
+              <TimelineEventOverlay
+                timeline={focusedItem}
+                cameraConfig={config.cameras[camera]}
+              />
+            )}
+          </VideoPlayer>
+        </div>
+      )}
       <div
         className={`w-full ${hasPreview && isScrubbing ? "visible" : "hidden"}`}
       >
@@ -281,6 +285,10 @@ export default function DynamicVideoPlayer({
             player.pause();
             player.on("seeked", () => controller.finishedSeeking());
             player.on("loadeddata", () => controller.previewReady());
+
+            if (previewOnly && onControllerReady) {
+              onControllerReady(controller);
+            }
           }}
           onDispose={() => {
             previewRef.current = undefined;

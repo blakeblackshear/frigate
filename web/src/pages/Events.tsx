@@ -5,8 +5,8 @@ import useOverlayState from "@/hooks/use-overlay-state";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
 import { ReviewFilter, ReviewSegment, ReviewSeverity } from "@/types/review";
-import DesktopRecordingView from "@/views/events/DesktopRecordingView";
 import EventView from "@/views/events/EventView";
+import RecordingView from "@/views/events/RecordingView";
 import axios from "axios";
 import { useCallback, useMemo, useState } from "react";
 import useSWR from "swr";
@@ -220,7 +220,7 @@ export default function Events() {
 
   if (selectedData) {
     return (
-      <DesktopRecordingView
+      <RecordingView
         reviewItems={selectedData.cameraSegments}
         selectedReview={selectedData.selected}
         relevantPreviews={selectedData.cameraPreviews}

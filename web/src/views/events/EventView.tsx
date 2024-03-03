@@ -13,7 +13,12 @@ import { useEventUtils } from "@/hooks/use-event-utils";
 import { useScrollLockout } from "@/hooks/use-mouse-listener";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
-import { ReviewFilter, ReviewSegment, ReviewSeverity } from "@/types/review";
+import {
+  ReviewFilter,
+  ReviewSegment,
+  ReviewSeverity,
+  ReviewSummary,
+} from "@/types/review";
 import { getChunkedTimeRange } from "@/utils/timelineUtil";
 import axios from "axios";
 import {
@@ -621,7 +626,7 @@ function MotionReview({
                 camera={camera.name}
                 timeRange={timeRangeSegments.ranges[selectedRangeIdx]}
                 cameraPreviews={relevantPreviews || []}
-                defaultMode="scrubbing"
+                previewOnly
                 onControllerReady={(controller) => {
                   videoPlayersRef.current[camera.name] = controller;
                   setPlayerReady(true);
