@@ -6,6 +6,7 @@ import ActivityIndicator from "@/components/ui/activity-indicator";
 import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
 import { ReviewData, ReviewSegment, ReviewSeverity } from "@/types/review";
 import { Button } from "@/components/ui/button";
+import CameraActivityIndicator from "@/components/CameraActivityIndicator";
 
 // Color data
 const colors = [
@@ -174,6 +175,9 @@ function UIPlayground() {
               <p className="text-small">
                 Handlebar is dragging: {isDragging ? "yes" : "no"}
               </p>
+              <div className="w-[40px] my-4">
+                <CameraActivityIndicator />
+              </div>
               <p>
                 <Button onClick={handleZoomOut} disabled={zoomLevel === 0}>
                   Zoom Out
