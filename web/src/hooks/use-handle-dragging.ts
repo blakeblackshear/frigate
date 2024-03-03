@@ -68,7 +68,11 @@ function useDraggableHandler({
   }, []);
 
   const updateHandlebarPosition = useCallback(
-    (newHandlePosition: number, segmentStartTime: number) => {
+    (
+      newHandlePosition: number,
+      segmentStartTime: number,
+      updateHandle: boolean,
+    ) => {
       const thumb = scrollTimeRef.current;
       if (thumb) {
         requestAnimationFrame(() => {
@@ -87,7 +91,8 @@ function useDraggableHandler({
             });
           }
         });
-        if (setHandlebarTime) {
+
+        if (setHandlebarTime && updateHandle) {
           setHandlebarTime(segmentStartTime);
         }
       }
@@ -146,7 +151,15 @@ function useDraggableHandler({
         updateHandlebarPosition(
           newHandlePosition - segmentHeight,
           segmentStartTime,
+          false,
         );
+
+        if (setHandlebarTime) {
+          setHandlebarTime(
+            timelineStart -
+              (newHandlePosition / segmentHeight) * segmentDuration,
+          );
+        }
       }
     },
     // we know that these deps are correct
@@ -185,7 +198,11 @@ function useDraggableHandler({
         parentScrollTop -
         scrolled;
 
-      updateHandlebarPosition(newHandlePosition - segmentHeight, handlebarTime);
+      updateHandlebarPosition(
+        newHandlePosition - segmentHeight,
+        handlebarTime,
+        true,
+      );
     }
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
