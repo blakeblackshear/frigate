@@ -61,7 +61,7 @@ function MinimapBounds({
     <>
       {isFirstSegmentInMinimap && (
         <div
-          className="absolute inset-0 -bottom-7 w-full flex items-center justify-center text-primary font-medium z-20 text-center text-[10px] scroll-mt-8"
+          className="absolute inset-0 -bottom-7 w-full flex items-center justify-center text-primary-foreground font-medium z-20 text-center text-[10px] scroll-mt-8"
           ref={firstMinimapSegmentRef}
         >
           {new Date(alignedMinimapStartTime * 1000).toLocaleTimeString([], {
@@ -73,7 +73,7 @@ function MinimapBounds({
       )}
 
       {isLastSegmentInMinimap && (
-        <div className="absolute inset-0 -top-3 w-full flex items-center justify-center text-primary font-medium z-20 text-center text-[10px]">
+        <div className="absolute inset-0 -top-3 w-full flex items-center justify-center text-primary-foreground font-medium z-20 text-center text-[10px]">
           {new Date(alignedMinimapEndTime * 1000).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
@@ -247,7 +247,7 @@ export function EventSegment({
   const segmentClasses = `h-2 relative w-full ${
     showMinimap
       ? isInMinimapRange
-        ? "bg-card"
+        ? "bg-secondary-highlight"
         : isLastSegmentInMinimap
           ? ""
           : "opacity-70"

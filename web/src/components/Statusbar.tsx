@@ -28,7 +28,7 @@ export default function Statusbar() {
   }, [stats]);
 
   return (
-    <div className="absolute left-0 bottom-0 right-0 w-full h-8 flex items-center px-4 bg-primary z-10 text-secondary-foreground">
+    <div className="absolute left-0 bottom-0 right-0 w-full h-8 flex items-center px-4 bg-primary z-10 text-secondary-foreground border-t border-secondary-highlight">
       {cpuPercent && (
         <div className="flex items-center text-sm mr-4">
           <MdCircle

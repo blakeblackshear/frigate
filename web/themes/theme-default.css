@@ -30,6 +30,9 @@
     --secondary-foreground: hsl(0, 0%, 45%);
     --secondary-foreground: 0, 0%, 45%;
 
+    --secondary-highlight: hsl(0, 0%, 94%);
+    --secondary-highlight: 0, 0%, 94%;
+
     --muted: hsl(210 40% 96.1%);
     --muted: 210 40% 96.1%;
 
@@ -102,6 +105,9 @@
 
     --secondary-foreground: hsl(0, 0%, 83%);
     --secondary-foreground: 0, 0%, 83%;
+
+    --secondary-highlight: hsl(0, 0%, 25%);
+    --secondary-highlight: 0, 0%, 25%;
 
     --muted: hsl(0, 0%, 8%);
     --muted: 0, 0%, 8%;
