@@ -82,8 +82,8 @@ function useDraggableHandler({
               ...(segmentDuration < 60 && { second: "2-digit" }),
             });
             scrollIntoView(thumb, {
+              scrollMode: "if-needed",
               behavior: "smooth",
-              block: "center",
             });
           }
         });
