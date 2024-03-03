@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from "react";
-import scrollIntoView from "scroll-into-view-if-needed";
+import { isMobile } from "react-device-detect";
 
 type DragHandlerProps = {
   contentRef: React.RefObject<HTMLElement>;
@@ -34,7 +34,9 @@ function useDraggableHandler({
   setIsDragging,
 }: DragHandlerProps) {
   const handleMouseDown = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
+    (
+      e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>,
+    ) => {
       e.preventDefault();
       e.stopPropagation();
       setIsDragging(true);
@@ -43,7 +45,9 @@ function useDraggableHandler({
   );
 
   const handleMouseUp = useCallback(
-    (e: MouseEvent) => {
+    (
+      e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>,
+    ) => {
       e.preventDefault();
       e.stopPropagation();
       if (isDragging) {
@@ -76,10 +80,6 @@ function useDraggableHandler({
               minute: "2-digit",
               ...(segmentDuration < 60 && { second: "2-digit" }),
             });
-            scrollIntoView(thumb, {
-              scrollMode: "if-needed",
-              behavior: "smooth",
-            });
           }
         });
         if (setHandlebarTime) {
@@ -91,7 +91,9 @@ function useDraggableHandler({
   );
 
   const handleMouseMove = useCallback(
-    (e: MouseEvent) => {
+    (
+      e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>,
+    ) => {
       if (
         !contentRef.current ||
         !timelineRef.current ||
@@ -100,10 +102,17 @@ function useDraggableHandler({
         return;
       }
 
+      let clientY;
+      if (isMobile && e.nativeEvent instanceof TouchEvent) {
+        clientY = e.nativeEvent.touches[0].clientY;
+      } else if (e.nativeEvent instanceof MouseEvent) {
+        clientY = e.nativeEvent.clientY;
+      }
+
       e.preventDefault();
       e.stopPropagation();
 
-      if (showHandlebar && isDragging) {
+      if (showHandlebar && isDragging && clientY) {
         const {
           scrollHeight: timelineHeight,
           clientHeight: visibleTimelineHeight,
@@ -120,7 +129,7 @@ function useDraggableHandler({
           visibleTimelineHeight - timelineTop + parentScrollTop,
           Math.max(
             segmentHeight + scrolled,
-            e.clientY - timelineTop + parentScrollTop,
+            clientY - timelineTop + parentScrollTop,
           ),
         );
 
@@ -172,6 +181,11 @@ function useDraggableHandler({
         scrolled;
 
       updateHandlebarPosition(newHandlePosition - segmentHeight, handlebarTime);
+
+      scrollTimeRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
     }
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
