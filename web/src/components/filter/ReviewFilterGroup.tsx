@@ -71,7 +71,7 @@ export default function ReviewFilterGroup({
   );
 
   return (
-    <>
+    <div>
       <CamerasFilterButton
         allCameras={filterValues.cameras}
         selectedCameras={filter?.cameras}
@@ -96,7 +96,7 @@ export default function ReviewFilterGroup({
           onUpdateFilter({ ...filter, showReviewed: reviewed })
         }
       />
-    </>
+    </div>
   );
 }
 
