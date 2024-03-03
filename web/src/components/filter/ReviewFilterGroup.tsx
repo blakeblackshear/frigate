@@ -71,7 +71,7 @@ export default function ReviewFilterGroup({
   );
 
   return (
-    <div className="mr-2">
+    <div>
       <CamerasFilterButton
         allCameras={filterValues.cameras}
         selectedCameras={filter?.cameras}
@@ -246,7 +246,7 @@ function GeneralFilterButton({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button size="sm" className="mx-1" variant="secondary">
+        <Button size="sm" className="ml-1" variant="secondary">
           <FaFilter className="md:mr-[10px] text-muted-foreground" />
           <div className="hidden md:block">Filter</div>
         </Button>

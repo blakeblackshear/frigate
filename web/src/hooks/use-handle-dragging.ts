@@ -1,4 +1,5 @@
 import { useCallback, useEffect } from "react";
+import scrollIntoView from "scroll-into-view-if-needed";
 
 type DragHandlerProps = {
   contentRef: React.RefObject<HTMLElement>;
@@ -74,6 +75,10 @@ function useDraggableHandler({
               hour: "2-digit",
               minute: "2-digit",
               ...(segmentDuration < 60 && { second: "2-digit" }),
+            });
+            scrollIntoView(thumb, {
+              scrollMode: "if-needed",
+              behavior: "smooth",
             });
           }
         });
@@ -167,11 +172,6 @@ function useDraggableHandler({
         scrolled;
 
       updateHandlebarPosition(newHandlePosition - segmentHeight, handlebarTime);
-
-      scrollTimeRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
     }
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -247,12 +247,12 @@ export default function EventView({
 
   return (
     <div className="flex flex-col size-full">
-      <div className="h-10 relative flex justify-between items-center mb-2">
+      <div className="h-10 relative flex justify-between items-center m-2">
         {isMobile && (
           <Logo className="absolute inset-y-0 inset-x-1/2 -translate-x-1/2 h-8" />
         )}
         <ToggleGroup
-          className="*:px-3 *:py4 *:rounded-2xl"
+          className="*:px-3 *:py-4 *:rounded-2xl"
           type="single"
           defaultValue="alert"
           size="sm"
@@ -315,7 +315,7 @@ export default function EventView({
           {!isValidating && currentItems == null && (
             <div className="size-full flex flex-col justify-center items-center">
               <LuFolderCheck className="size-16" />
-              There are no {severity} items to review
+              There are no {severity.replace(/_/g, " ")} items to review
             </div>
           )}
 
