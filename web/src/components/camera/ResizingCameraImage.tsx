@@ -1,7 +1,7 @@
 import { useApiHost } from "@/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
-import ActivityIndicator from "../ui/activity-indicator";
+import ActivityIndicator from "../indicators/activity-indicator";
 import { useResizeObserver } from "@/hooks/resize-observer";
 
 type CameraImageProps = {

@@ -4,7 +4,7 @@ import { configureMonacoYaml } from "monaco-yaml";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useApiHost } from "@/api";
 import Heading from "@/components/ui/heading";
-import ActivityIndicator from "@/components/ui/activity-indicator";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import copy from "copy-to-clipboard";

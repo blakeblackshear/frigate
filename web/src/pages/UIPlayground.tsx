@@ -2,11 +2,11 @@ import { useMemo, useRef, useState } from "react";
 import Heading from "@/components/ui/heading";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
-import ActivityIndicator from "@/components/ui/activity-indicator";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
 import { ReviewData, ReviewSegment, ReviewSeverity } from "@/types/review";
 import { Button } from "@/components/ui/button";
-import CameraActivityIndicator from "@/components/CameraActivityIndicator";
+import CameraActivityIndicator from "@/components/indicators/CameraActivityIndicator";
 
 // Color data
 const colors = [

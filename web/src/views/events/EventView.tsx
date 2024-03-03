@@ -4,7 +4,7 @@ import ReviewActionGroup from "@/components/filter/ReviewActionGroup";
 import ReviewFilterGroup from "@/components/filter/ReviewFilterGroup";
 import PreviewThumbnailPlayer from "@/components/player/PreviewThumbnailPlayer";
 import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
-import ActivityIndicator from "@/components/ui/activity-indicator";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useEventUtils } from "@/hooks/use-event-utils";
 import { useScrollLockout } from "@/hooks/use-mouse-listener";
