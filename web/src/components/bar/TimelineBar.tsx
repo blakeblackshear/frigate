@@ -2,7 +2,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { GraphDataPoint } from "@/types/graph";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import useSWR from "swr";
-import ActivityIndicator from "../ui/activity-indicator";
+import ActivityIndicator from "../indicators/activity-indicator";
 
 type TimelineBarProps = {
   startTime: number;

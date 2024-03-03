@@ -1,7 +1,7 @@
 import WebRtcPlayer from "./WebRTCPlayer";
 import { CameraConfig } from "@/types/frigateConfig";
 import AutoUpdatingCameraImage from "../camera/AutoUpdatingCameraImage";
-import ActivityIndicator from "../ui/activity-indicator";
+import ActivityIndicator from "../indicators/activity-indicator";
 import { useEffect, useMemo, useState } from "react";
 import MSEPlayer from "./MsePlayer";
 import JSMpegPlayer from "./JSMpegPlayer";
@@ -11,7 +11,7 @@ import { useRecordingsState } from "@/api/ws";
 import { LivePlayerMode } from "@/types/live";
 import useCameraLiveMode from "@/hooks/use-camera-live-mode";
 import { isDesktop } from "react-device-detect";
-import CameraActivityIndicator from "../CameraActivityIndicator";
+import CameraActivityIndicator from "../indicators/CameraActivityIndicator";
 
 type LivePlayerProps = {
   className?: string;

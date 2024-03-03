@@ -57,7 +57,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import ActivityIndicator from "../ui/activity-indicator";
+import ActivityIndicator from "../indicators/activity-indicator";
 
 type SettingsNavItemsProps = {
   className?: string;

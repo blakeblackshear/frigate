@@ -14,7 +14,7 @@ import TimeAgo from "../dynamic/TimeAgo";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { isFirefox, isMobile, isSafari } from "react-device-detect";
-import Chip from "../Chip";
+import Chip from "@/components/indicators/Chip";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import useImageLoaded from "@/hooks/use-image-loaded";
 import { Skeleton } from "../ui/skeleton";

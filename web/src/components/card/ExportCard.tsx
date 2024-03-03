@@ -1,5 +1,5 @@
 import { baseUrl } from "@/api/baseUrl";
-import ActivityIndicator from "../ui/activity-indicator";
+import ActivityIndicator from "../indicators/activity-indicator";
 import { Card } from "../ui/card";
 import { LuPlay, LuTrash } from "react-icons/lu";
 import { Button } from "../ui/button";
