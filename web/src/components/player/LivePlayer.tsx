@@ -1,18 +1,17 @@
 import WebRtcPlayer from "./WebRTCPlayer";
 import { CameraConfig } from "@/types/frigateConfig";
 import AutoUpdatingCameraImage from "../camera/AutoUpdatingCameraImage";
-import ActivityIndicator from "../ui/activity-indicator";
+import ActivityIndicator from "../indicators/activity-indicator";
 import { useEffect, useMemo, useState } from "react";
 import MSEPlayer from "./MsePlayer";
 import JSMpegPlayer from "./JSMpegPlayer";
-import { MdCircle, MdLeakAdd } from "react-icons/md";
-import { BsSoundwave } from "react-icons/bs";
-import Chip from "../Chip";
+import { MdCircle } from "react-icons/md";
 import useCameraActivity from "@/hooks/use-camera-activity";
 import { useRecordingsState } from "@/api/ws";
 import { LivePlayerMode } from "@/types/live";
 import useCameraLiveMode from "@/hooks/use-camera-live-mode";
 import { isDesktop } from "react-device-detect";
+import CameraActivityIndicator from "../indicators/CameraActivityIndicator";
 
 type LivePlayerProps = {
   className?: string;
@@ -159,35 +158,19 @@ export default function LivePlayer({
         />
       </div>
 
-      <div className="absolute flex left-2 top-2 gap-2">
-        <Chip
-          in={activeMotion}
-          className={`bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500`}
-        >
-          <MdLeakAdd className="size-4 text-motion" />
-          <div className="hidden md:block ml-1 text-white text-xs">Motion</div>
-        </Chip>
-
-        {cameraConfig.audio.enabled_in_config && (
-          <Chip
-            in={activeAudio}
-            className={`bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500`}
-          >
-            <BsSoundwave className="size-4 text-audio" />
-            <div className="hidden md:block ml-1 text-white text-xs">Sound</div>
-          </Chip>
+      <div className="absolute right-2 bottom-2 w-[40px]">
+        {(activeMotion ||
+          (cameraConfig.audio.enabled_in_config && activeAudio)) && (
+          <CameraActivityIndicator />
         )}
       </div>
 
       {isDesktop && (
-        <Chip className="absolute right-2 top-2 bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500">
+        <div className="absolute right-2 top-2 size-4">
           {recording == "ON" && (
-            <MdCircle className="size-2 drop-shadow-md shadow-danger text-danger" />
+            <MdCircle className="size-2 drop-shadow-md shadow-danger text-danger animate-pulse" />
           )}
-          <div className="ml-1 capitalize text-white text-xs">
-            {cameraConfig.name.replaceAll("_", " ")}
-          </div>
-        </Chip>
+        </div>
       )}
     </div>
   );

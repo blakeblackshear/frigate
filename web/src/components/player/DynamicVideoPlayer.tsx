@@ -12,7 +12,7 @@ import TimelineEventOverlay from "../overlay/TimelineDataOverlay";
 import { useApiHost } from "@/api";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
-import ActivityIndicator from "../ui/activity-indicator";
+import ActivityIndicator from "../indicators/activity-indicator";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { Recording } from "@/types/record";
 import { Preview } from "@/types/preview";

@@ -27,6 +27,11 @@ module.exports = {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        move: "move 3s ease-in-out infinite",
+        scale1: "scale1 3s ease-in-out infinite",
+        scale2: "scale2 3s ease-in-out infinite",
+        scale3: "scale3 3s ease-in-out infinite",
+        scale4: "scale4 3s ease-in-out infinite",
       },
       aspectRatio: {
         wide: "32 / 9",
@@ -95,6 +100,27 @@ module.exports = {
         "accordion-up": {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: 0 },
+        },
+        move: {
+          "50%": { left: "calc(100% - 7px)" },
+        },
+        scale1: {
+          "0%, 100%": { transform: "scale(1.3)" },
+          "10%, 90%": { transform: "scale(1.4)" },
+          "20%, 80%": { transform: "scale(1)" },
+        },
+        scale2: {
+          "20%, 80%": { transform: "scale(1.4)" },
+          "10%, 30%, 70%, 90%": { transform: "scale(1)" },
+        },
+        scale3: {
+          "30%, 70%": { transform: "scale(1.4)" },
+          "20%, 40%, 60%, 80%": { transform: "scale(1)" },
+        },
+        scale4: {
+          "50%": { transform: "scale(1.3)" },
+          "40%, 60%": { transform: "scale(1.4)" },
+          "30%, 70%": { transform: "scale(1)" },
         },
       },
       screens: {

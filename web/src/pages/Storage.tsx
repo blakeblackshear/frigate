@@ -1,5 +1,5 @@
 import { useWs } from "@/api/ws";
-import ActivityIndicator from "@/components/ui/activity-indicator";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Heading from "@/components/ui/heading";

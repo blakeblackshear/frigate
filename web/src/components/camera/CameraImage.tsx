@@ -1,7 +1,7 @@
 import { useApiHost } from "@/api";
 import { useEffect, useRef, useState } from "react";
 import useSWR from "swr";
-import ActivityIndicator from "../ui/activity-indicator";
+import ActivityIndicator from "../indicators/activity-indicator";
 
 type CameraImageProps = {
   className?: string;
