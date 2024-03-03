@@ -120,7 +120,7 @@ export function getTimelineItemDescription(timelineItem: Timeline) {
   }
 }
 
-export function getChunkedTimeRange(timestamp: number) {
+export function getChunkedTimeDay(timestamp: number) {
   const endOfThisHour = new Date();
   endOfThisHour.setHours(endOfThisHour.getHours() + 1, 0, 0, 0);
   const data: { start: number; end: number }[] = [];
@@ -146,4 +146,34 @@ export function getChunkedTimeRange(timestamp: number) {
   }
 
   return { start: startTimestamp, end, ranges: data };
+}
+
+export function getChunkedTimeRange(
+  startTimestamp: number,
+  endTimestamp: number,
+) {
+  const endOfThisHour = new Date();
+  endOfThisHour.setHours(endOfThisHour.getHours() + 1, 0, 0, 0);
+  const data: { start: number; end: number }[] = [];
+  const startDay = new Date(startTimestamp * 1000);
+  startDay.setMinutes(0, 0, 0);
+  let start = startDay.getTime() / 1000;
+  let end = 0;
+
+  while (end < endTimestamp) {
+    startDay.setHours(startDay.getHours() + 1);
+
+    if (startDay > endOfThisHour || startDay.getTime() / 1000 > endTimestamp) {
+      break;
+    }
+
+    end = endOfHourOrCurrentTime(startDay.getTime() / 1000);
+    data.push({
+      start,
+      end,
+    });
+    start = startDay.getTime() / 1000;
+  }
+
+  return { start: startTimestamp, end: endTimestamp, ranges: data };
 }

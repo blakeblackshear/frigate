@@ -144,6 +144,7 @@ export default function DynamicVideoPlayer({
   const initialPreviewSource = useMemo(() => {
     const preview = cameraPreviews.find(
       (preview) =>
+        preview.camera == camera &&
         Math.round(preview.start) >= timeRange.start &&
         Math.floor(preview.end) <= timeRange.end,
     );
@@ -191,6 +192,7 @@ export default function DynamicVideoPlayer({
 
     const preview = cameraPreviews.find(
       (preview) =>
+        preview.camera == camera &&
         Math.round(preview.start) >= timeRange.start &&
         Math.floor(preview.end) <= timeRange.end,
     );
