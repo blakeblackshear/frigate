@@ -525,6 +525,7 @@ function MotionReview({
 }: MotionReviewProps) {
   const segmentDuration = 30;
   const { data: config } = useSWR<FrigateConfig>("config");
+  const [playerReady, setPlayerReady] = useState(false);
 
   const reviewCameras = useMemo(() => {
     if (!config) {
@@ -569,12 +570,17 @@ function MotionReview({
 
   // move to next clip
   useEffect(() => {
-    if (!videoPlayersRef.current) {
+    if (
+      !videoPlayersRef.current &&
+      Object.values(videoPlayersRef.current).length > 0
+    ) {
       return;
     }
 
-    Object.values(videoPlayersRef.current).forEach((controller) => {
-      controller.onClipChangedEvent((dir) => {
+    const firstController = Object.values(videoPlayersRef.current)[0];
+
+    if (firstController) {
+      firstController.onClipChangedEvent((dir) => {
         if (
           dir == "forward" &&
           selectedRangeIdx < timeRangeSegments.ranges.length - 1
@@ -584,8 +590,8 @@ function MotionReview({
           setSelectedRangeIdx(selectedRangeIdx - 1);
         }
       });
-    });
-  }, [selectedRangeIdx, timeRangeSegments]);
+    }
+  }, [selectedRangeIdx, timeRangeSegments, videoPlayersRef, playerReady]);
 
   useEffect(() => {
     Object.values(videoPlayersRef.current).forEach((controller) => {
@@ -618,6 +624,7 @@ function MotionReview({
                 defaultMode="scrubbing"
                 onControllerReady={(controller) => {
                   videoPlayersRef.current[camera.name] = controller;
+                  setPlayerReady(true);
                 }}
               />
             </div>

@@ -306,7 +306,7 @@ export class DynamicVideoController {
     undefined;
   private annotationOffset: number;
   private timeToStart: number | undefined = undefined;
-  private clipChangeLockout: boolean = false;
+  private clipChangeLockout: boolean = true;
 
   // preview
   private preview: Preview | undefined = undefined;
