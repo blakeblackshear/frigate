@@ -157,12 +157,6 @@ export function EventReviewTimeline({
     }
   }, [isDragging, onHandlebarDraggingChange]);
 
-  useEffect(() => {
-    generateSegments();
-    // we know that these deps are correct
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [generateSegments, timelineStart, handleMouseUp, handleMouseMove]);
-
   return (
     <div
       ref={timelineRef}
