@@ -157,23 +157,13 @@ export function EventReviewTimeline({
     }
   }, [isDragging, onHandlebarDraggingChange]);
 
-  useEffect(() => {
-    generateSegments();
-
-    // TODO: touch events for mobile
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-    // we know that these deps are correct
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [generateSegments, timelineStart, handleMouseUp, handleMouseMove]);
-
   return (
     <div
       ref={timelineRef}
+      onMouseMove={handleMouseMove}
+      onTouchMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onTouchEnd={handleMouseUp}
       className={`relative h-full overflow-y-scroll no-scrollbar bg-secondary ${
         isDragging && showHandlebar ? "cursor-grabbing" : "cursor-auto"
       }`}
@@ -181,13 +171,16 @@ export function EventReviewTimeline({
       <div className="flex flex-col">{segments}</div>
       {showHandlebar && (
         <div className={`absolute left-0 top-0 z-20 w-full `} role="scrollbar">
-          <div className={`flex items-center justify-center `}>
+          <div
+            className="flex items-center justify-center touch-none select-none"
+            onMouseDown={handleMouseDown}
+            onTouchStart={handleMouseDown}
+          >
             <div
               ref={scrollTimeRef}
               className={`relative w-full ${
                 isDragging ? "cursor-grabbing" : "cursor-grab"
               }`}
-              onMouseDown={handleMouseDown}
             >
               <div
                 className={`bg-destructive rounded-full mx-auto ${
