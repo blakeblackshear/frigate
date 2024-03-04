@@ -63,7 +63,7 @@ export type MockMotionData = {
 function generateRandomMotionAudioData(): MockMotionData[] {
   const now = new Date();
   const endTime = now.getTime() / 1000;
-  const startTime = endTime - 24 * 60 * 60; // 24 hours ago
+  const startTime = endTime - 0.25 * 60 * 60; // 24 hours ago
   const interval = 30; // 30 seconds
 
   const data = [];
@@ -75,14 +75,17 @@ function generateRandomMotionAudioData(): MockMotionData[] {
     const endTimestamp = startTimestamp + interval;
     const motionValue = Math.floor(Math.random() * 101); // Random number between 0 and 100
     const audioValue = Math.random() * -100; // Random negative value between -100 and 0
+    const foo = new Date(startTimestamp * 1000);
     data.push({
       start_time: startTimestamp,
       end_time: endTimestamp,
       motionValue,
       audioValue,
+      foo,
     });
   }
 
+  console.log(data);
   return data;
 }
 
@@ -295,7 +298,7 @@ function UIPlayground() {
                 handlebarTime={handlebarTime} // set the time of the handlebar
                 setHandlebarTime={setHandlebarTime} // expose handler to set the handlebar time
                 onHandlebarDraggingChange={handleDraggingChange} // function for state of handlebar dragging
-                showMinimap // show / hide the minimap
+                // show / hide the minimap
                 minimapStartTime={minimapStartTime} // start time of the minimap - the earlier time (eg 1:00pm)
                 minimapEndTime={minimapEndTime} // end of the minimap - the later time (eg 3:00pm)
                 events={mockEvents} // events, including new has_been_reviewed and severity properties
@@ -314,7 +317,7 @@ function UIPlayground() {
                 handlebarTime={handlebarTime} // set the time of the handlebar
                 setHandlebarTime={setHandlebarTime} // expose handler to set the handlebar time
                 onHandlebarDraggingChange={handleDraggingChange} // function for state of handlebar dragging
-                showMinimap // show / hide the minimap
+                // show / hide the minimap
                 minimapStartTime={minimapStartTime} // start time of the minimap - the earlier time (eg 1:00pm)
                 minimapEndTime={minimapEndTime} // end of the minimap - the later time (eg 3:00pm)
                 events={mockEvents} // events, including new has_been_reviewed and severity properties
