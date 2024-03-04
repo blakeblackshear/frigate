@@ -6,11 +6,37 @@ import { FaCar, FaCat, FaCircle, FaDog, FaLeaf } from "react-icons/fa";
 import useOverlayState from "@/hooks/use-overlay-state";
 import { Button } from "../ui/button";
 import { useNavigate } from "react-router-dom";
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
-export function CameraGroupSelector() {
+type CameraGroupSelectorProps = {
+  className?: string;
+};
+export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
   const navigate = useNavigate();
+
+  // tooltip
+
+  const [tooltip, setTooltip] = useState<string>();
+  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout>();
+  const showTooltip = useCallback(
+    (newTooltip: string | undefined) => {
+      if (!newTooltip) {
+        setTooltip(newTooltip);
+
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+      } else {
+        setTimeoutId(setTimeout(() => setTooltip(newTooltip), 500));
+      }
+    },
+    [timeoutId],
+  );
+
+  // groups
+
   const [group, setGroup] = useOverlayState("cameraGroup");
 
   const groups = useMemo(() => {
@@ -25,33 +51,50 @@ export function CameraGroupSelector() {
 
   return (
     <div
-      className={`flex items-center justify-start gap-2 ${isDesktop ? "flex-col mb-4" : ""}`}
+      className={`flex items-center justify-start gap-2 ${className ?? ""} ${isDesktop ? "flex-col" : ""}`}
     >
-      <Button
-        className={
-          group == undefined
-            ? "text-selected bg-blue-900 focus:bg-blue-900 bg-opacity-60 focus:bg-opacity-60"
-            : "text-muted-foreground bg-secondary focus:text-muted-foreground focus:bg-secondary"
-        }
-        size="xs"
-        onClick={() => navigate(-1)}
-      >
-        <MdHome className="size-4" />
-      </Button>
-      {groups.map(([name, config]) => {
-        return (
+      <Tooltip open={tooltip == "home"}>
+        <TooltipTrigger asChild>
           <Button
-            key={name}
             className={
-              group == name
+              group == undefined
                 ? "text-selected bg-blue-900 focus:bg-blue-900 bg-opacity-60 focus:bg-opacity-60"
-                : "text-muted-foreground bg-secondary"
+                : "text-muted-foreground bg-secondary focus:text-muted-foreground focus:bg-secondary"
             }
             size="xs"
-            onClick={() => setGroup(name, group != undefined)}
+            onClick={() => navigate(-1)}
+            onMouseEnter={() => (isDesktop ? showTooltip("home") : null)}
+            onMouseLeave={() => (isDesktop ? showTooltip(undefined) : null)}
           >
-            {getGroupIcon(config.icon)}
+            <MdHome className="size-4" />
           </Button>
+        </TooltipTrigger>
+        <TooltipContent className="capitalize" side="right">
+          Home
+        </TooltipContent>
+      </Tooltip>
+      {groups.map(([name, config]) => {
+        return (
+          <Tooltip key={name} open={tooltip == name}>
+            <TooltipTrigger asChild>
+              <Button
+                className={
+                  group == name
+                    ? "text-selected bg-blue-900 focus:bg-blue-900 bg-opacity-60 focus:bg-opacity-60"
+                    : "text-muted-foreground bg-secondary"
+                }
+                size="xs"
+                onClick={() => setGroup(name, group != undefined)}
+                onMouseEnter={() => (isDesktop ? showTooltip(name) : null)}
+                onMouseLeave={() => (isDesktop ? showTooltip(undefined) : null)}
+              >
+                {getGroupIcon(config.icon)}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="capitalize" side="right">
+              {name}
+            </TooltipContent>
+          </Tooltip>
         );
       })}
     </div>

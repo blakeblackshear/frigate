@@ -2,7 +2,6 @@ import Logo from "../Logo";
 import { navbarLinks } from "@/pages/site-navigation";
 import SettingsNavItems from "../settings/SettingsNavItems";
 import NavItem from "./NavItem";
-import { CameraGroupSelector } from "../filter/CameraGroupSelector";
 
 function Sidebar() {
   return (
@@ -11,16 +10,14 @@ function Sidebar() {
       <div className="w-full flex flex-col gap-0 items-center">
         <Logo className="w-8 h-8 mb-6" />
         {navbarLinks.map((item) => (
-          <div key={item.id}>
-            <NavItem
-              className={`mx-[10px] ${item.id == 1 ? "mb-2" : "mb-6"}`}
-              Icon={item.icon}
-              title={item.title}
-              url={item.url}
-              dev={item.dev}
-            />
-            {item.id == 1 && <CameraGroupSelector />}
-          </div>
+          <NavItem
+            className="mx-[10px] mb-6"
+            key={item.id}
+            Icon={item.icon}
+            title={item.title}
+            url={item.url}
+            dev={item.dev}
+          />
         ))}
       </div>
       <SettingsNavItems className="hidden md:flex flex-col items-center mb-8" />
