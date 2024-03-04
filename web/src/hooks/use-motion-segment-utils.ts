@@ -42,8 +42,8 @@ export const useMotionSegmentUtils = (
     (time: number): number => {
       const matchingEvent = motion_events.find((event) => {
         return (
-          time > getSegmentStart(event.start_time) &&
-          time <= getSegmentEnd(event.start_time)
+          time >= getSegmentStart(event.start_time) &&
+          time < getSegmentEnd(event.start_time)
         );
       });
 
@@ -56,8 +56,8 @@ export const useMotionSegmentUtils = (
     (time: number): number => {
       const matchingEvent = motion_events.find((event) => {
         return (
-          time > getSegmentStart(event.start_time) &&
-          time <= getSegmentEnd(event.start_time)
+          time >= getSegmentStart(event.start_time) &&
+          time < getSegmentEnd(event.start_time)
         );
       });
 
