@@ -56,7 +56,7 @@ export default function DynamicVideoPlayer({
     return (
       config.cameras[camera].detect.width /
         config.cameras[camera].detect.height <
-      1.7
+      1
     );
   }, [camera, config]);
 
@@ -267,7 +267,7 @@ export default function DynamicVideoPlayer({
       )}
       <video
         ref={previewRef}
-        className={`size-full rounded-2xl ${currentPreview != undefined && isScrubbing ? "visible" : "hidden"} ${tallVideo ? "aspect-video" : ""} bg-black`}
+        className={`size-full rounded-2xl ${currentPreview != undefined && isScrubbing ? "visible" : "hidden"} ${tallVideo ? "aspect-tall" : ""} bg-black`}
         preload="auto"
         autoPlay
         playsInline
