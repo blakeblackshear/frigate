@@ -406,7 +406,7 @@ export class DynamicVideoController {
     }
   }
 
-  onPlayerTimeUpdate(listener: (timestamp: number) => void) {
+  onPlayerTimeUpdate(listener: ((timestamp: number) => void) | undefined) {
     this.onPlaybackTimestamp = listener;
   }
 
