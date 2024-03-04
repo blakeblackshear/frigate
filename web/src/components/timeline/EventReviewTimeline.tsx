@@ -184,7 +184,7 @@ export function EventReviewTimeline({
             >
               <div
                 className={`bg-destructive rounded-full mx-auto ${
-                  segmentDuration < 60 ? "w-14 md:w-20" : "w-12 md:w-16"
+                  segmentDuration < 60 ? "w-16 md:w-20" : "w-12 md:w-16"
                 } h-5 flex items-center justify-center`}
               >
                 <div
