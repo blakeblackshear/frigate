@@ -91,6 +91,12 @@ module.exports = {
           DEFAULT: "hsl(var(--severity_motion))",
           dimmed: "hsl(var(--severity_motion_dimmed))",
         },
+        motion_review: {
+          DEFAULT: "hsl(var(--motion_review))",
+        },
+        audio_review: {
+          DEFAULT: "hsl(var(--audio_review))",
+        },
       },
       keyframes: {
         "accordion-down": {
