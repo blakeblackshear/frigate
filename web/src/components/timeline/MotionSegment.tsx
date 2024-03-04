@@ -213,15 +213,6 @@ export function MotionSegment({
         <div className="flex flex-row justify-center w-[20px] md:w-[40px] mb-[1px]">
           <div className="w-[10px] md:w-[20px] flex justify-end">
             <div
-              data-segment-time={
-                new Date(segmentTime * 1000 + (segmentDuration * 1000) / 2)
-              }
-              data-motion-value={getMotionSegmentValue(
-                segmentTime + segmentDuration / 2,
-              )}
-              data-audio-value={getAudioSegmentValue(
-                segmentTime + segmentDuration / 2,
-              )}
               key={`${segmentKey}_motion_data_1`}
               className={`h-[2px] rounded-full bg-motion_review`}
               onClick={segmentClick}
@@ -251,9 +242,6 @@ export function MotionSegment({
         <div className="flex flex-row justify-center w-[20px] md:w-[40px]">
           <div className="w-[10px] md:w-[20px] flex justify-end">
             <div
-              data-segment-time={new Date(segmentTime * 1000)}
-              data-motion-value={getMotionSegmentValue(segmentTime)}
-              data-audio-value={getAudioSegmentValue(segmentTime)}
               key={`${segmentKey}_motion_data_2`}
               className={`h-[2px] rounded-full bg-motion_review`}
               onClick={segmentClick}
