@@ -204,6 +204,12 @@ export interface CameraConfig {
   };
 }
 
+export type CameraGroupConfig = {
+  cameras: string[];
+  icon: string;
+  order: number;
+};
+
 export interface FrigateConfig {
   audio: {
     enabled: boolean;
@@ -275,6 +281,8 @@ export interface FrigateConfig {
   };
 
   go2rtc: Record<string, unknown>;
+
+  camera_groups: { [groupName: string]: CameraGroupConfig };
 
   live: {
     height: number;

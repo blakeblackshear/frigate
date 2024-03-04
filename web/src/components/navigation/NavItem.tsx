@@ -6,7 +6,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useState } from "react";
 import { isDesktop } from "react-device-detect";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 
@@ -42,32 +41,36 @@ export default function NavItem({
 }: NavItemProps) {
   const shouldRender = dev ? ENV !== "production" : true;
 
-  const [showTooltip, setShowTooltip] = useState(false);
+  if (!shouldRender) {
+    return;
+  }
 
-  return (
-    shouldRender && (
-      <Tooltip open={isDesktop && showTooltip}>
-        <NavLink
-          to={url}
-          onClick={onClick}
-          className={({ isActive }) =>
-            `${className} flex flex-col justify-center items-center rounded-lg ${
-              variants[variant][isActive ? "active" : "inactive"]
-            }`
-          }
-          onMouseEnter={() => (isDesktop ? setShowTooltip(true) : null)}
-          onMouseLeave={() => (isDesktop ? setShowTooltip(false) : null)}
-        >
-          <TooltipTrigger>
-            <Icon className="size-5 md:m-[6px]" />
-          </TooltipTrigger>
-        </NavLink>
+  const content = (
+    <NavLink
+      to={url}
+      onClick={onClick}
+      className={({ isActive }) =>
+        `${className} flex flex-col justify-center items-center rounded-lg ${
+          variants[variant][isActive ? "active" : "inactive"]
+        }`
+      }
+    >
+      <Icon className="size-5 md:m-[6px]" />
+    </NavLink>
+  );
+
+  if (isDesktop) {
+    return (
+      <Tooltip>
+        <TooltipTrigger>{content}</TooltipTrigger>
         <TooltipPortal>
           <TooltipContent side="right">
             <p>{title}</p>
           </TooltipContent>
         </TooltipPortal>
       </Tooltip>
-    )
-  );
+    );
+  }
+
+  return content;
 }

@@ -1003,6 +1003,16 @@ class LoggerConfig(FrigateBaseModel):
     )
 
 
+class CameraGroupConfig(FrigateBaseModel):
+    """Represents a group of cameras."""
+
+    cameras: list[str] = Field(
+        default_factory=list, title="List of cameras in this group."
+    )
+    icon: str = Field(default="generic", title="Icon that represents camera group.")
+    order: int = Field(default=0, title="Sort order for group.")
+
+
 def verify_config_roles(camera_config: CameraConfig) -> None:
     """Verify that roles are setup in the config correctly."""
     assigned_roles = list(
@@ -1157,6 +1167,9 @@ class FrigateConfig(FrigateBaseModel):
         default_factory=DetectConfig, title="Global object tracking configuration."
     )
     cameras: Dict[str, CameraConfig] = Field(title="Camera configuration.")
+    camera_groups: Dict[str, CameraGroupConfig] = Field(
+        default_factory=CameraGroupConfig, title="Camera group configuration"
+    )
     timestamp_style: TimestampStyleConfig = Field(
         default_factory=TimestampStyleConfig,
         title="Global timestamp style configuration.",

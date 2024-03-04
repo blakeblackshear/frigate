@@ -2,7 +2,7 @@ import { LuCheck, LuVideo } from "react-icons/lu";
 import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import useSWR from "swr";
-import { FrigateConfig } from "@/types/frigateConfig";
+import { CameraGroupConfig, FrigateConfig } from "@/types/frigateConfig";
 import { useCallback, useMemo, useState } from "react";
 import {
   DropdownMenu,
@@ -16,6 +16,8 @@ import { ReviewFilter } from "@/types/review";
 import { getEndOfDayTimestamp } from "@/utils/dateUtil";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import { FaCalendarAlt, FaFilter, FaVideo } from "react-icons/fa";
+import { getIconTypeForGroup } from "@/utils/iconUtil";
+import { IconType } from "react-icons";
 
 const ATTRIBUTES = ["amazon", "face", "fedex", "license_plate", "ups"];
 
@@ -57,6 +59,16 @@ export default function ReviewFilterGroup({
     [config, allLabels],
   );
 
+  const groups = useMemo(() => {
+    if (!config) {
+      return [];
+    }
+
+    return Object.entries(config.camera_groups).sort(
+      (a, b) => a[1].order - b[1].order,
+    );
+  }, [config]);
+
   // handle updating filters
 
   const onUpdateSelectedDay = useCallback(
@@ -74,6 +86,7 @@ export default function ReviewFilterGroup({
     <div>
       <CamerasFilterButton
         allCameras={filterValues.cameras}
+        groups={groups}
         selectedCameras={filter?.cameras}
         updateCameraFilter={(newCameras) => {
           onUpdateFilter({ ...filter, cameras: newCameras });
@@ -102,11 +115,13 @@ export default function ReviewFilterGroup({
 
 type CameraFilterButtonProps = {
   allCameras: string[];
+  groups: [string, CameraGroupConfig][];
   selectedCameras: string[] | undefined;
   updateCameraFilter: (cameras: string[] | undefined) => void;
 };
 function CamerasFilterButton({
   allCameras,
+  groups,
   selectedCameras,
   updateCameraFilter,
 }: CameraFilterButtonProps) {
@@ -144,6 +159,24 @@ function CamerasFilterButton({
             }
           }}
         />
+        {groups.length > 0 && (
+          <>
+            <DropdownMenuSeparator />
+            {groups.map(([name, conf]) => {
+              return (
+                <FilterCheckBox
+                  key={name}
+                  label={name}
+                  CheckIcon={getIconTypeForGroup(conf.icon)}
+                  isChecked
+                  onCheckedChange={() => {
+                    setCurrentCameras([...conf.cameras]);
+                  }}
+                />
+              );
+            })}
+          </>
+        )}
         <DropdownMenuSeparator />
         {allCameras.map((item) => (
           <FilterCheckBox
@@ -350,12 +383,14 @@ function LabelsFilterButton({
 
 type FilterCheckBoxProps = {
   label: string;
+  CheckIcon?: IconType;
   isChecked: boolean;
   onCheckedChange: (isChecked: boolean) => void;
 };
 
 function FilterCheckBox({
   label,
+  CheckIcon = LuCheck,
   isChecked,
   onCheckedChange,
 }: FilterCheckBoxProps) {
@@ -366,7 +401,7 @@ function FilterCheckBox({
       onClick={() => onCheckedChange(!isChecked)}
     >
       {isChecked ? (
-        <LuCheck className="w-6 h-6" />
+        <CheckIcon className="w-6 h-6" />
       ) : (
         <div className="w-6 h-6" />
       )}

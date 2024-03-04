@@ -1,5 +1,6 @@
 import { useFrigateReviews } from "@/api/ws";
 import Logo from "@/components/Logo";
+import { CameraGroupSelector } from "@/components/filter/CameraGroupSelector";
 import { AnimatedEventThumbnail } from "@/components/image/AnimatedEventThumbnail";
 import LivePlayer from "@/components/player/LivePlayer";
 import { Button } from "@/components/ui/button";
@@ -78,7 +79,7 @@ export default function LiveDashboardView({
       {isMobile && (
         <div className="relative h-9 flex items-center justify-between">
           <Logo className="absolute inset-y-0 inset-x-1/2 -translate-x-1/2 h-8" />
-          <div />
+          <CameraGroupSelector />
           <div className="flex items-center gap-1">
             <Button
               className={
