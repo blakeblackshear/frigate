@@ -113,6 +113,7 @@ export function MotionReviewTimeline({
     minimapStartTime,
     minimapEndTime,
     events,
+    motion_events,
   ]);
 
   const segments = useMemo(
@@ -128,6 +129,7 @@ export function MotionReviewTimeline({
       minimapStartTime,
       minimapEndTime,
       events,
+      motion_events,
     ],
   );
 

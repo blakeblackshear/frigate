@@ -217,15 +217,10 @@ export function MotionSegment({
               className={`h-[2px] rounded-full bg-motion_review`}
               onClick={segmentClick}
               style={{
-                width:
-                  maxSegmentWidth -
-                  interpolateMotionAudioData(
-                    getMotionSegmentValue(segmentTime - segmentDuration / 2),
-                    0,
-                    100,
-                    1,
-                    maxSegmentWidth,
-                  ),
+                width: interpolateMotionAudioData(
+                  getMotionSegmentValue(segmentTime + segmentDuration / 2),
+                  maxSegmentWidth,
+                ),
               }}
             ></div>
           </div>
@@ -236,10 +231,7 @@ export function MotionSegment({
               onClick={segmentClick}
               style={{
                 width: interpolateMotionAudioData(
-                  getAudioSegmentValue(segmentTime - segmentDuration / 2),
-                  -100,
-                  0,
-                  1,
+                  getAudioSegmentValue(segmentTime + segmentDuration / 2),
                   maxSegmentWidth,
                 ),
               }}
@@ -254,15 +246,10 @@ export function MotionSegment({
               className={`h-[2px] rounded-full bg-motion_review`}
               onClick={segmentClick}
               style={{
-                width:
-                  maxSegmentWidth -
-                  interpolateMotionAudioData(
-                    getMotionSegmentValue(segmentTime),
-                    0,
-                    100,
-                    1,
-                    maxSegmentWidth,
-                  ),
+                width: interpolateMotionAudioData(
+                  getMotionSegmentValue(segmentTime),
+                  maxSegmentWidth,
+                ),
               }}
             ></div>
           </div>
@@ -274,9 +261,6 @@ export function MotionSegment({
               style={{
                 width: interpolateMotionAudioData(
                   getAudioSegmentValue(segmentTime),
-                  -100,
-                  0,
-                  1,
                   maxSegmentWidth,
                 ),
               }}
