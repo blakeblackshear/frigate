@@ -4,6 +4,8 @@ import logging
 from datetime import datetime, timedelta
 from functools import reduce
 
+import numpy as np
+import pandas as pd
 from flask import (
     Blueprint,
     jsonify,
@@ -12,7 +14,7 @@ from flask import (
 )
 from peewee import Case, DoesNotExist, fn, operator
 
-from frigate.models import ReviewSegment
+from frigate.models import Recordings, ReviewSegment
 from frigate.util.builtin import get_tz_modifiers
 
 logger = logging.getLogger(__name__)
@@ -258,3 +260,59 @@ def delete_reviews(ids: str):
     ReviewSegment.delete().where(ReviewSegment.id << list_of_ids).execute()
 
     return make_response(jsonify({"success": True, "message": "Delete reviews"}), 200)
+
+
+@ReviewBp.route("/review/activity")
+def review_activity():
+    """Get motion and audio activity."""
+    before = request.args.get("before", type=float, default=datetime.now().timestamp())
+    after = request.args.get(
+        "after", type=float, default=(datetime.now() - timedelta(hours=1)).timestamp()
+    )
+
+    # get scale in seconds
+    scale = request.args.get(
+        "scale", type=int, default=30
+    )
+
+    all_recordings: list[Recordings] = (
+        Recordings.select(
+            Recordings.start_time,
+            Recordings.duration,
+            Recordings.objects,
+            Recordings.motion,
+            Recordings.dBFS,
+        )
+        .where((Recordings.start_time > after) & (Recordings.end_time < before))
+        .order_by(Recordings.start_time.asc())
+        .iterator()
+    )
+
+    # format is: { timestamp: segment_start_ts, motion: [0-100], audio: [0 - -100] }
+    # periods where active objects / audio was detected will cause motion / audio to be scaled down
+    data: list[dict[str, float]] = []
+
+    for rec in all_recordings:
+        factor = 0.1 if rec.objects > 0 else 1.0
+        data.append({
+            "date": rec.start_time,
+            "motion": rec.motion * factor,
+            "audio": rec.dBFS * factor,
+        })
+
+    # resample data using pandas to get activity on scaled basis
+    df = pd.DataFrame(data, columns=["date", "motion", "audio"])
+
+    # set date as datetime index
+    df["date"] = pd.to_datetime(df["date"], unit="s")
+    df.set_index(["date"], inplace=True)
+
+    # normalize data
+    df = df.resample(f"{scale}S").mean().fillna(0.0)
+    df["motion"] = (df["motion"] - df["motion"].min()) / (df["motion"].max() - df["motion"].min()) * 100
+    df["audio"] = (df["audio"] - df["audio"].max()) / (df["audio"].min() - df["audio"].max()) * -100
+
+    # change types for output
+    df.index = df.index.astype(int) // (10**9)
+    normalized = df.reset_index().to_dict("records")
+    return jsonify(normalized)
