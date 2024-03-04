@@ -1,28 +1,34 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { MockMotionData } from "@/pages/UIPlayground";
 
 export const useMotionSegmentUtils = (
   segmentDuration: number,
   motion_events: MockMotionData[],
 ) => {
+  const halfSegmentDuration = useMemo(
+    () => segmentDuration / 2,
+    [segmentDuration],
+  );
+
   const getSegmentStart = useCallback(
     (time: number): number => {
-      return Math.floor(time / segmentDuration) * segmentDuration;
+      return Math.floor(time / halfSegmentDuration) * halfSegmentDuration;
     },
-    [segmentDuration],
+    [halfSegmentDuration],
   );
 
   const getSegmentEnd = useCallback(
     (time: number | undefined): number => {
       if (time) {
         return (
-          Math.floor(time / segmentDuration) * segmentDuration + segmentDuration
+          Math.floor(time / halfSegmentDuration) * halfSegmentDuration +
+          halfSegmentDuration
         );
       } else {
-        return Date.now() / 1000 + segmentDuration;
+        return Date.now() / 1000 + halfSegmentDuration;
       }
     },
-    [segmentDuration],
+    [halfSegmentDuration],
   );
 
   const interpolateMotionAudioData = useCallback(
@@ -37,13 +43,13 @@ export const useMotionSegmentUtils = (
       const matchingEvent = motion_events.find((event) => {
         return (
           time >= getSegmentStart(event.start_time) &&
-          time < getSegmentEnd(event.start_time + segmentDuration / 2)
+          time < getSegmentEnd(event.start_time)
         );
       });
 
       return matchingEvent?.motionValue ?? 0;
     },
-    [motion_events, getSegmentStart, getSegmentEnd, segmentDuration],
+    [motion_events, getSegmentStart, getSegmentEnd],
   );
 
   const getAudioSegmentValue = useCallback(
@@ -51,7 +57,7 @@ export const useMotionSegmentUtils = (
       const matchingEvent = motion_events.find((event) => {
         return (
           time >= getSegmentStart(event.start_time) &&
-          time < getSegmentEnd(event.end_time)
+          time < getSegmentEnd(event.start_time)
         );
       });
 
