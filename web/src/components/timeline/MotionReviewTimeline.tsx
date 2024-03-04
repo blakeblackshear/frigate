@@ -7,12 +7,13 @@ import {
   useState,
   RefObject,
 } from "react";
-import EventSegment from "./EventSegment";
+import MotionSegment from "./MotionSegment";
 import { useEventUtils } from "@/hooks/use-event-utils";
 import { ReviewSegment, ReviewSeverity } from "@/types/review";
 import ReviewTimeline from "./ReviewTimeline";
+import { MockMotionData } from "@/pages/UIPlayground";
 
-export type EventReviewTimelineProps = {
+export type MotionReviewTimelineProps = {
   segmentDuration: number;
   timestampSpread: number;
   timelineStart: number;
@@ -24,12 +25,13 @@ export type EventReviewTimelineProps = {
   minimapStartTime?: number;
   minimapEndTime?: number;
   events: ReviewSegment[];
+  motion_events: MockMotionData[];
   severityType: ReviewSeverity;
   contentRef: RefObject<HTMLDivElement>;
   onHandlebarDraggingChange?: (isDragging: boolean) => void;
 };
 
-export function EventReviewTimeline({
+export function MotionReviewTimeline({
   segmentDuration,
   timestampSpread,
   timelineStart,
@@ -41,10 +43,10 @@ export function EventReviewTimeline({
   minimapStartTime,
   minimapEndTime,
   events,
-  severityType,
+  motion_events,
   contentRef,
   onHandlebarDraggingChange,
-}: EventReviewTimelineProps) {
+}: MotionReviewTimelineProps) {
   const [isDragging, setIsDragging] = useState(false);
   const scrollTimeRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
@@ -86,16 +88,16 @@ export function EventReviewTimeline({
       const segmentTime = segmentAlignedTime - index * segmentDuration;
 
       return (
-        <EventSegment
-          key={segmentTime + severityType}
+        <MotionSegment
+          key={segmentTime}
           events={events}
+          motion_events={motion_events}
           segmentDuration={segmentDuration}
           segmentTime={segmentTime}
           timestampSpread={timestampSpread}
           showMinimap={showMinimap}
           minimapStartTime={minimapStartTime}
           minimapEndTime={minimapEndTime}
-          severityType={severityType}
           contentRef={contentRef}
         />
       );
@@ -152,4 +154,4 @@ export function EventReviewTimeline({
   );
 }
 
-export default EventReviewTimeline;
+export default MotionReviewTimeline;

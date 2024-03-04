@@ -73,6 +73,12 @@
 
     --severity_motion: var(--yellow-400);
     --severity_motion_dimmed: var(--yellow-200);
+
+    --motion_review: hsl(44, 94%, 50%);
+    --motion_review: 44, 94%, 50%;
+
+    --audio_review: hsl(228, 94%, 67%);
+    --audio_review: 228, 94%, 67%;
   }
 
   .dark {
