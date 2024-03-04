@@ -6,10 +6,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { isDesktop } from "react-device-detect";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
-import { CameraGroupSelector } from "../filter/CameraGroupSelector";
 
 const variants = {
   primary: {
@@ -43,58 +42,36 @@ export default function NavItem({
 }: NavItemProps) {
   const shouldRender = dev ? ENV !== "production" : true;
 
-  const [showTooltip, setShowTooltip] = useState(false);
-  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout>();
-  const showTooltipTimer = useCallback(
-    (showTooltip: boolean) => {
-      if (!showTooltip) {
-        setShowTooltip(showTooltip);
+  if (!shouldRender) {
+    return;
+  }
 
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-        }
-      } else {
-        setTimeoutId(setTimeout(() => setShowTooltip(showTooltip), 500));
+  const content = (
+    <NavLink
+      to={url}
+      onClick={onClick}
+      className={({ isActive }) =>
+        `${className} flex flex-col justify-center items-center rounded-lg ${
+          variants[variant][isActive ? "active" : "inactive"]
+        }`
       }
-    },
-    [timeoutId],
+    >
+      <Icon className="size-5 md:m-[6px]" />
+    </NavLink>
   );
 
-  return (
-    shouldRender && (
-      <Tooltip open={isDesktop && showTooltip}>
-        <NavLink
-          to={url}
-          onClick={onClick}
-          className={`${className} flex flex-col justify-center items-center rounded-lg`}
-        >
-          {({ isActive }) => (
-            <>
-              <TooltipTrigger
-                className={`rounded-lg ${variants[variant][isActive ? "active" : "inactive"]}`}
-              >
-                <Icon
-                  className="size-5 md:m-[6px]"
-                  onMouseEnter={() =>
-                    isDesktop ? showTooltipTimer(true) : null
-                  }
-                  onMouseLeave={() =>
-                    isDesktop ? showTooltipTimer(false) : null
-                  }
-                />
-              </TooltipTrigger>
-              {isDesktop && title == "Live" && isActive && (
-                <CameraGroupSelector className="mt-2" />
-              )}
-            </>
-          )}
-        </NavLink>
+  if (isDesktop) {
+    return (
+      <Tooltip>
+        <TooltipTrigger>{content}</TooltipTrigger>
         <TooltipPortal>
           <TooltipContent side="right">
             <p>{title}</p>
           </TooltipContent>
         </TooltipPortal>
       </Tooltip>
-    )
-  );
+    );
+  }
+
+  return content;
 }
