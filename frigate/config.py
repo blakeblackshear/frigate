@@ -1010,6 +1010,7 @@ class CameraGroupConfig(FrigateBaseModel):
         default_factory=list, title="List of cameras in this group."
     )
     icon: str = Field(default="generic", title="Icon that represents camera group.")
+    order: int = Field(default=0, title="Sort order for group.")
 
 
 def verify_config_roles(camera_config: CameraConfig) -> None:
