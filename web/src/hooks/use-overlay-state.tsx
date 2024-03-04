@@ -1,7 +1,9 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-export default function useOverlayState(key: string) {
+export default function useOverlayState(
+  key: string,
+): [string | undefined, (value: string) => void] {
   const location = useLocation();
   const navigate = useNavigate();
   const currentLocationState = location.state;
@@ -17,6 +19,10 @@ export default function useOverlayState(key: string) {
     [key, navigate],
   );
 
-  const overlayStateValue = location.state && location.state[key];
+  const overlayStateValue = useMemo<string | undefined>(
+    () => location.state && location.state[key],
+    [location, key],
+  );
+
   return [overlayStateValue, setOverlayStateValue];
 }
