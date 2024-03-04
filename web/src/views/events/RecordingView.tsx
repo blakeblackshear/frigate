@@ -98,9 +98,22 @@ export function DesktopRecordingView({
       videoPlayersRef.current[mainCamera].onPlayerTimeUpdate(undefined);
       videoPlayersRef.current[mainCamera].scrubToTimestamp(currentTime);
       videoPlayersRef.current[newCam].seekToTimestamp(currentTime, true);
+      videoPlayersRef.current[newCam].onPlayerTimeUpdate(
+        (timestamp: number) => {
+          setCurrentTime(timestamp);
+
+          allCameras.forEach((cam) => {
+            if (cam != newCam) {
+              videoPlayersRef.current[cam]?.scrubToTimestamp(
+                Math.floor(timestamp),
+              );
+            }
+          });
+        },
+      );
       setMainCamera(newCam);
     },
-    [currentTime, mainCamera],
+    [allCameras, currentTime, mainCamera],
   );
 
   return (
@@ -130,6 +143,14 @@ export function DesktopRecordingView({
                     setPlayerReady(true);
                     controller.onPlayerTimeUpdate((timestamp: number) => {
                       setCurrentTime(timestamp);
+
+                      allCameras.forEach((otherCam) => {
+                        if (cam != otherCam) {
+                          videoPlayersRef.current[otherCam]?.scrubToTimestamp(
+                            Math.floor(timestamp),
+                          );
+                        }
+                      });
                     });
 
                     controller.seekToTimestamp(startTime, true);
@@ -140,11 +161,7 @@ export function DesktopRecordingView({
           }
 
           return (
-            <div
-              key={cam}
-              className="aspect-video flex items-center"
-              onClick={() => onSelectCamera(cam)}
-            >
+            <div key={cam} className="aspect-video flex items-center">
               <DynamicVideoPlayer
                 className="size-full"
                 camera={cam}
@@ -156,13 +173,14 @@ export function DesktopRecordingView({
                   setPlayerReady(true);
                   controller.scrubToTimestamp(startTime);
                 }}
+                onClick={() => onSelectCamera(cam)}
               />
             </div>
           );
         })}
       </div>
 
-      <div className="absolute overflow-hidden w-56 inset-y-0 right-0 cursor-pointer">
+      <div className="absolute overflow-hidden w-56 inset-y-0 right-0">
         <EventReviewTimeline
           segmentDuration={30}
           timestampSpread={15}
