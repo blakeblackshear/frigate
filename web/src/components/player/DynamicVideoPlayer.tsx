@@ -63,9 +63,8 @@ export default function DynamicVideoPlayer({
   // controlling playback
 
   const playerRef = useRef<Player | undefined>(undefined);
-  const previewRef = useRef<Player | undefined>(undefined);
+  const previewRef = useRef<HTMLVideoElement | null>(null);
   const [isScrubbing, setIsScrubbing] = useState(previewOnly);
-  const [hasPreview, setHasPreview] = useState(false);
   const [focusedItem, setFocusedItem] = useState<Timeline | undefined>(
     undefined,
   );
@@ -155,19 +154,19 @@ export default function DynamicVideoPlayer({
     );
 
     if (preview) {
-      setHasPreview(true);
       return {
         src: preview.src,
         type: preview.type,
       };
     } else {
-      setHasPreview(false);
       return undefined;
     }
 
     // we only want to calculate this once
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const [currentPreview, setCurrentPreview] = useState(initialPreviewSource);
 
   // state of playback player
 
@@ -201,7 +200,7 @@ export default function DynamicVideoPlayer({
         Math.round(preview.start) >= timeRange.start &&
         Math.floor(preview.end) <= timeRange.end,
     );
-    setHasPreview(preview != undefined);
+    setCurrentPreview(preview);
 
     controller.newPlayback({
       recordings: recordings ?? [],
@@ -222,7 +221,7 @@ export default function DynamicVideoPlayer({
       {!previewOnly && (
         <div
           className={`w-full relative ${
-            hasPreview && isScrubbing ? "hidden" : "visible"
+            currentPreview != undefined && isScrubbing ? "hidden" : "visible"
           }`}
         >
           <VideoPlayer
@@ -266,35 +265,27 @@ export default function DynamicVideoPlayer({
           </VideoPlayer>
         </div>
       )}
-      <div
-        className={`w-full ${hasPreview && isScrubbing ? "visible" : "hidden"}`}
+      <video
+        ref={previewRef}
+        className={`size-full rounded-2xl ${currentPreview != undefined && isScrubbing ? "visible" : "hidden"} ${tallVideo ? "aspect-video" : ""} bg-black`}
+        preload="auto"
+        autoPlay
+        playsInline
+        muted
+        onSeeked={() => controller.finishedSeeking()}
+        onLoadedData={() => controller.previewReady()}
+        onLoadStart={
+          previewOnly && onControllerReady
+            ? () => {
+                onControllerReady(controller);
+              }
+            : undefined
+        }
       >
-        <VideoPlayer
-          options={{
-            preload: "auto",
-            autoplay: true,
-            controls: false,
-            muted: true,
-            loadingSpinner: false,
-            sources: hasPreview ? initialPreviewSource : null,
-            aspectRatio: tallVideo ? "16:9" : undefined,
-          }}
-          seekOptions={{}}
-          onReady={(player) => {
-            previewRef.current = player;
-            player.pause();
-            player.on("seeked", () => controller.finishedSeeking());
-            player.on("loadeddata", () => controller.previewReady());
-
-            if (previewOnly && onControllerReady) {
-              onControllerReady(controller);
-            }
-          }}
-          onDispose={() => {
-            previewRef.current = undefined;
-          }}
-        />
-      </div>
+        {currentPreview != undefined && (
+          <source src={currentPreview.src} type={currentPreview.type} />
+        )}
+      </video>
     </div>
   );
 }
@@ -302,7 +293,7 @@ export default function DynamicVideoPlayer({
 export class DynamicVideoController {
   // main state
   private playerRef: MutableRefObject<Player | undefined>;
-  private previewRef: MutableRefObject<Player | undefined>;
+  private previewRef: MutableRefObject<HTMLVideoElement | null>;
   private setScrubbing: (isScrubbing: boolean) => void;
   private setFocusedItem: (timeline: Timeline) => void;
   private playerMode: PlayerMode = "playback";
@@ -324,7 +315,7 @@ export class DynamicVideoController {
 
   constructor(
     playerRef: MutableRefObject<Player | undefined>,
-    previewRef: MutableRefObject<Player | undefined>,
+    previewRef: MutableRefObject<HTMLVideoElement | null>,
     annotationOffset: number,
     defaultMode: PlayerMode,
     setScrubbing: (isScrubbing: boolean) => void,
@@ -352,12 +343,6 @@ export class DynamicVideoController {
     }
 
     this.preview = newPlayback.preview;
-    if (this.preview && this.previewRef.current) {
-      this.previewRef.current.src({
-        src: this.preview.src,
-        type: this.preview.type,
-      });
-    }
   }
 
   seekToTimestamp(time: number, play: boolean = false) {
@@ -487,15 +472,22 @@ export class DynamicVideoController {
     if (this.seeking) {
       this.timeToSeek = time;
     } else {
-      this.previewRef.current?.currentTime(
-        Math.max(0, time - this.preview.start),
-      );
-      this.seeking = true;
+      if (this.previewRef.current) {
+        this.previewRef.current.currentTime = Math.max(
+          0,
+          time - this.preview.start,
+        );
+        this.seeking = true;
+      }
     }
   }
 
   finishedSeeking() {
-    if (!this.preview || this.playerMode == "playback") {
+    if (
+      !this.previewRef.current ||
+      !this.preview ||
+      this.playerMode == "playback"
+    ) {
       return;
     }
 
@@ -503,11 +495,10 @@ export class DynamicVideoController {
 
     if (
       this.timeToSeek &&
-      this.timeToSeek != this.previewRef.current?.currentTime()
+      this.timeToSeek != this.previewRef.current?.currentTime
     ) {
-      this.previewRef.current?.currentTime(
-        this.timeToSeek - this.preview.start,
-      );
+      this.previewRef.current.currentTime =
+        this.timeToSeek - this.preview.start;
     } else {
       this.seeking = false;
     }

@@ -608,7 +608,7 @@ function MotionReview({
     <>
       <div
         ref={contentRef}
-        className="size-full m-2 grid sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 gap-2 md:gap-4 overflow-auto no-scrollbar"
+        className="w-full h-min m-2 grid sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 gap-2 md:gap-4 overflow-auto no-scrollbar"
       >
         {reviewCameras.map((camera) => {
           let grow;
