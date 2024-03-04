@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useState } from "react";
 import { isDesktop } from "react-device-detect";
+import { TooltipPortal } from "@radix-ui/react-tooltip";
 
 const variants = {
   primary: {
@@ -61,9 +62,11 @@ export default function NavItem({
             <Icon className="size-5 md:m-[6px]" />
           </TooltipTrigger>
         </NavLink>
-        <TooltipContent side="right">
-          <p>{title}</p>
-        </TooltipContent>
+        <TooltipPortal>
+          <TooltipContent side="right">
+            <p>{title}</p>
+          </TooltipContent>
+        </TooltipPortal>
       </Tooltip>
     )
   );
