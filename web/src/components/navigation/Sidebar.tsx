@@ -11,7 +11,7 @@ function Sidebar() {
         <Logo className="w-8 h-8 mb-6" />
         {navbarLinks.map((item) => (
           <NavItem
-            className="mx-[10px] mb-6"
+            className="mx-[10px] mb-4"
             key={item.id}
             Icon={item.icon}
             title={item.title}

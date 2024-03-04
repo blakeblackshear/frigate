@@ -3,13 +3,35 @@ import {
   FaAmazon,
   FaCarSide,
   FaCat,
+  FaCircle,
   FaDog,
   FaFedex,
   FaFire,
+  FaLeaf,
   FaUps,
 } from "react-icons/fa";
 import { LuBox, LuLassoSelect } from "react-icons/lu";
 import { MdRecordVoiceOver } from "react-icons/md";
+
+export function getIconTypeForGroup(icon: string) {
+  switch (icon) {
+    case "car":
+      return FaCarSide;
+    case "cat":
+      return FaCat;
+    case "dog":
+      return FaDog;
+    case "leaf":
+      return FaLeaf;
+    default:
+      return FaCircle;
+  }
+}
+
+export function getIconForGroup(icon: string, className: string = "size-4") {
+  const GroupIcon = getIconTypeForGroup(icon);
+  return <GroupIcon className={className} />;
+}
 
 export function getIconForLabel(label: string, className?: string) {
   switch (label) {

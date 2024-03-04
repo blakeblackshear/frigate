@@ -2,12 +2,12 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { isDesktop } from "react-device-detect";
 import useSWR from "swr";
 import { MdHome } from "react-icons/md";
-import { FaCar, FaCat, FaCircle, FaDog, FaLeaf } from "react-icons/fa";
 import useOverlayState from "@/hooks/use-overlay-state";
 import { Button } from "../ui/button";
 import { useNavigate } from "react-router-dom";
 import { useCallback, useMemo, useState } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { getIconForGroup } from "@/utils/iconUtil";
 
 type CameraGroupSelectorProps = {
   className?: string;
@@ -88,7 +88,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
                 onMouseEnter={() => (isDesktop ? showTooltip(name) : null)}
                 onMouseLeave={() => (isDesktop ? showTooltip(undefined) : null)}
               >
-                {getGroupIcon(config.icon)}
+                {getIconForGroup(config.icon)}
               </Button>
             </TooltipTrigger>
             <TooltipContent className="capitalize" side="right">
@@ -100,23 +100,3 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
     </div>
   );
 }
-
-function getGroupIcon(icon: string) {
-  switch (icon) {
-    case "car":
-      return <FaCar className="size-4" />;
-    case "cat":
-      return <FaCat className="size-4" />;
-    case "dog":
-      return <FaDog className="size-4" />;
-    case "leaf":
-      return <FaLeaf className="size-4" />;
-    default:
-      return <FaCircle className="size-4" />;
-  }
-}
-
-/**
- * {config &&
-          }
- */
