@@ -45,13 +45,13 @@ export const useMotionSegmentUtils = (
       const matchingEvent = motion_events.find((event) => {
         return (
           time >= getSegmentStart(event.start_time) &&
-          time < getSegmentEnd(event.end_time)
+          time < getSegmentEnd(event.start_time + segmentDuration / 2)
         );
       });
 
       return matchingEvent?.motionValue ?? 0;
     },
-    [motion_events, getSegmentStart, getSegmentEnd],
+    [motion_events, getSegmentStart, getSegmentEnd, segmentDuration],
   );
 
   const getAudioSegmentValue = useCallback(
