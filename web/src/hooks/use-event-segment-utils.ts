@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { ReviewSegment } from "@/types/review";
 
-export const useSegmentUtils = (
+export const useEventSegmentUtils = (
   segmentDuration: number,
   events: ReviewSegment[],
   severityType: string,

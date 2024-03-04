@@ -7,6 +7,16 @@ import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
 import { ReviewData, ReviewSegment, ReviewSeverity } from "@/types/review";
 import { Button } from "@/components/ui/button";
 import CameraActivityIndicator from "@/components/indicators/CameraActivityIndicator";
+import MotionReviewTimeline from "@/components/timeline/MotionReviewTimeline";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Color data
 const colors = [
@@ -41,6 +51,39 @@ function ColorSwatch({ name, value }: { name: string; value: string }) {
       <span>{name}</span>
     </div>
   );
+}
+
+export type MockMotionData = {
+  start_time: number;
+  end_time: number;
+  motionValue: number;
+  audioValue: number;
+};
+
+function generateRandomMotionAudioData(): MockMotionData[] {
+  const now = new Date();
+  const endTime = now.getTime() / 1000;
+  const startTime = endTime - 24 * 60 * 60; // 24 hours ago
+  const interval = 30; // 30 seconds
+
+  const data = [];
+  for (
+    let startTimestamp = startTime;
+    startTimestamp < endTime;
+    startTimestamp += interval
+  ) {
+    const endTimestamp = startTimestamp + interval;
+    const motionValue = Math.floor(Math.random() * 101); // Random number between 0 and 100
+    const audioValue = Math.random() * -100; // Random negative value between -100 and 0
+    data.push({
+      start_time: startTimestamp,
+      end_time: endTimestamp,
+      motionValue,
+      audioValue,
+    });
+  }
+
+  return data;
 }
 
 const generateRandomEvent = (): ReviewSegment => {
@@ -83,6 +126,7 @@ function UIPlayground() {
   const { data: config } = useSWR<FrigateConfig>("config");
   const contentRef = useRef<HTMLDivElement>(null);
   const [mockEvents, setMockEvents] = useState<ReviewSegment[]>([]);
+  const [mockMotionData, setMockMotionData] = useState<MockMotionData[]>([]);
   const [handlebarTime, setHandlebarTime] = useState(
     Math.floor(Date.now() / 1000) - 15 * 60,
   );
@@ -90,6 +134,7 @@ function UIPlayground() {
   useMemo(() => {
     const initialEvents = Array.from({ length: 50 }, generateRandomEvent);
     setMockEvents(initialEvents);
+    setMockMotionData(generateRandomMotionAudioData());
   }, []);
 
   // Calculate minimap start and end times based on events
@@ -142,6 +187,8 @@ function UIPlayground() {
     setIsDragging(dragging);
   };
 
+  const [isEventsReviewTimeline, setIsEventsReviewTimeline] = useState(true);
+
   return (
     <>
       <div className="w-full h-full">
@@ -175,6 +222,28 @@ function UIPlayground() {
               <p className="text-small">
                 Handlebar is dragging: {isDragging ? "yes" : "no"}
               </p>
+              <div className="my-4">
+                <Heading as="h4">Timeline type</Heading>
+                <Select
+                  defaultValue={isEventsReviewTimeline ? "event" : "motion"}
+                  onValueChange={(checked) => {
+                    setIsEventsReviewTimeline(checked == "event");
+                  }}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select a timeline" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Timeline Type</SelectLabel>
+                      <SelectItem value="event">Event Review</SelectItem>
+                      <SelectItem value="motion">
+                        Motion/Audio Review
+                      </SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="w-[40px] my-4">
                 <CameraActivityIndicator />
               </div>
@@ -215,23 +284,44 @@ function UIPlayground() {
             </div>
           </div>
 
-          <div className="w-[100px] overflow-y-auto no-scrollbar">
-            <EventReviewTimeline
-              segmentDuration={zoomSettings.segmentDuration} // seconds per segment
-              timestampSpread={zoomSettings.timestampSpread} // minutes between each major timestamp
-              timelineStart={Math.floor(Date.now() / 1000)} // timestamp start of the timeline - the earlier time
-              timelineEnd={Math.floor(Date.now() / 1000) - 6 * 60 * 60} // end of timeline - the later time
-              showHandlebar // show / hide the handlebar
-              handlebarTime={handlebarTime} // set the time of the handlebar
-              setHandlebarTime={setHandlebarTime} // expose handler to set the handlebar time
-              onHandlebarDraggingChange={handleDraggingChange} // function for state of handlebar dragging
-              showMinimap // show / hide the minimap
-              minimapStartTime={minimapStartTime} // start time of the minimap - the earlier time (eg 1:00pm)
-              minimapEndTime={minimapEndTime} // end of the minimap - the later time (eg 3:00pm)
-              events={mockEvents} // events, including new has_been_reviewed and severity properties
-              severityType={"alert"} // choose the severity type for the middle line - all other severity types are to the right
-              contentRef={contentRef} // optional content ref where previews are, can be used for observing/scrolling later
-            />
+          <div className="w-[55px] md:w-[100px] overflow-y-auto no-scrollbar">
+            {!isEventsReviewTimeline && (
+              <MotionReviewTimeline
+                segmentDuration={zoomSettings.segmentDuration} // seconds per segment
+                timestampSpread={zoomSettings.timestampSpread} // minutes between each major timestamp
+                timelineStart={Math.floor(Date.now() / 1000)} // timestamp start of the timeline - the earlier time
+                timelineEnd={Math.floor(Date.now() / 1000) - 6 * 60 * 60} // end of timeline - the later time
+                showHandlebar // show / hide the handlebar
+                handlebarTime={handlebarTime} // set the time of the handlebar
+                setHandlebarTime={setHandlebarTime} // expose handler to set the handlebar time
+                onHandlebarDraggingChange={handleDraggingChange} // function for state of handlebar dragging
+                showMinimap // show / hide the minimap
+                minimapStartTime={minimapStartTime} // start time of the minimap - the earlier time (eg 1:00pm)
+                minimapEndTime={minimapEndTime} // end of the minimap - the later time (eg 3:00pm)
+                events={mockEvents} // events, including new has_been_reviewed and severity properties
+                motion_events={mockMotionData}
+                severityType={"alert"} // choose the severity type for the middle line - all other severity types are to the right
+                contentRef={contentRef} // optional content ref where previews are, can be used for observing/scrolling later
+              />
+            )}
+            {isEventsReviewTimeline && (
+              <EventReviewTimeline
+                segmentDuration={zoomSettings.segmentDuration} // seconds per segment
+                timestampSpread={zoomSettings.timestampSpread} // minutes between each major timestamp
+                timelineStart={Math.floor(Date.now() / 1000)} // timestamp start of the timeline - the earlier time
+                timelineEnd={Math.floor(Date.now() / 1000) - 6 * 60 * 60} // end of timeline - the later time
+                showHandlebar // show / hide the handlebar
+                handlebarTime={handlebarTime} // set the time of the handlebar
+                setHandlebarTime={setHandlebarTime} // expose handler to set the handlebar time
+                onHandlebarDraggingChange={handleDraggingChange} // function for state of handlebar dragging
+                showMinimap // show / hide the minimap
+                minimapStartTime={minimapStartTime} // start time of the minimap - the earlier time (eg 1:00pm)
+                minimapEndTime={minimapEndTime} // end of the minimap - the later time (eg 3:00pm)
+                events={mockEvents} // events, including new has_been_reviewed and severity properties
+                severityType={"alert"} // choose the severity type for the middle line - all other severity types are to the right
+                contentRef={contentRef} // optional content ref where previews are, can be used for observing/scrolling later
+              />
+            )}
           </div>
         </div>
       </div>

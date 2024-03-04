@@ -1,7 +1,6 @@
-import { useApiHost } from "@/api";
 import { useEventUtils } from "@/hooks/use-event-utils";
 import { useEventSegmentUtils } from "@/hooks/use-event-segment-utils";
-import { ReviewSegment, ReviewSeverity } from "@/types/review";
+import { ReviewSegment } from "@/types/review";
 import React, {
   RefObject,
   useCallback,
@@ -9,46 +8,49 @@ import React, {
   useMemo,
   useRef,
 } from "react";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "../ui/hover-card";
-import { HoverCardPortal } from "@radix-ui/react-hover-card";
 import scrollIntoView from "scroll-into-view-if-needed";
 import { MinimapBounds, Tick, Timestamp } from "./segment-metadata";
+import { MockMotionData } from "@/pages/UIPlayground";
+import { useMotionSegmentUtils } from "@/hooks/use-motion-segment-utils";
+import { isMobile } from "react-device-detect";
 
-type EventSegmentProps = {
+type MotionSegmentProps = {
   events: ReviewSegment[];
+  motion_events: MockMotionData[];
   segmentTime: number;
   segmentDuration: number;
   timestampSpread: number;
   showMinimap: boolean;
   minimapStartTime?: number;
   minimapEndTime?: number;
-  severityType: ReviewSeverity;
   contentRef: RefObject<HTMLDivElement>;
 };
 
-export function EventSegment({
+export function MotionSegment({
   events,
+  motion_events,
   segmentTime,
   segmentDuration,
   timestampSpread,
   showMinimap,
   minimapStartTime,
   minimapEndTime,
-  severityType,
   contentRef,
-}: EventSegmentProps) {
+}: MotionSegmentProps) {
+  const severityType = "all";
   const {
     getSeverity,
     getReviewed,
     displaySeverityType,
     shouldShowRoundedCorners,
     getEventStart,
-    getEventThumbnail,
   } = useEventSegmentUtils(segmentDuration, events, severityType);
+
+  const {
+    getMotionSegmentValue,
+    getAudioSegmentValue,
+    interpolateMotionAudioData,
+  } = useMotionSegmentUtils(segmentDuration, motion_events);
 
   const { alignStartDateToTimeline, alignEndDateToTimeline } = useEventUtils(
     events,
@@ -67,12 +69,7 @@ export function EventSegment({
     [getReviewed, segmentTime],
   );
 
-  const {
-    roundTopPrimary,
-    roundBottomPrimary,
-    roundTopSecondary,
-    roundBottomSecondary,
-  } = useMemo(
+  const { roundTopSecondary, roundBottomSecondary } = useMemo(
     () => shouldShowRoundedCorners(segmentTime),
     [shouldShowRoundedCorners, segmentTime],
   );
@@ -86,14 +83,12 @@ export function EventSegment({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getEventStart, segmentTime]);
 
-  const apiHost = useApiHost();
-
-  const eventThumbnail = useMemo(() => {
-    return getEventThumbnail(segmentTime);
-  }, [getEventThumbnail, segmentTime]);
-
   const timestamp = useMemo(() => new Date(segmentTime * 1000), [segmentTime]);
   const segmentKey = useMemo(() => segmentTime, [segmentTime]);
+
+  const maxSegmentWidth = useMemo(() => {
+    return isMobile ? 15 : 25;
+  }, []);
 
   const alignedMinimapStartTime = useMemo(
     () => alignStartDateToTimeline(minimapStartTime ?? 0),
@@ -214,53 +209,99 @@ export function EventSegment({
         segmentKey={segmentKey}
       />
 
+      <div className="absolute left-1/2 transform -translate-x-1/2 w-[20px] md:w-[40px] h-2 z-10 cursor-pointer">
+        <div className="flex flex-row justify-center w-[20px] md:w-[40px] mb-[1px]">
+          <div className="w-[10px] md:w-[20px] flex justify-end">
+            <div
+              key={`${segmentKey}_motion_data_1`}
+              className={`h-[2px] rounded-full bg-motion_review`}
+              onClick={segmentClick}
+              style={{
+                width:
+                  maxSegmentWidth -
+                  interpolateMotionAudioData(
+                    getMotionSegmentValue(segmentTime - segmentDuration / 2),
+                    0,
+                    100,
+                    1,
+                    maxSegmentWidth,
+                  ),
+              }}
+            ></div>
+          </div>
+          <div className="w-[10px] md:w-[20px]">
+            <div
+              key={`${segmentKey}_audio_data_1`}
+              className={`h-[2px] rounded-full bg-audio_review`}
+              onClick={segmentClick}
+              style={{
+                width: interpolateMotionAudioData(
+                  getAudioSegmentValue(segmentTime - segmentDuration / 2),
+                  -100,
+                  0,
+                  1,
+                  maxSegmentWidth,
+                ),
+              }}
+            ></div>
+          </div>
+        </div>
+
+        <div className="flex flex-row justify-center w-[20px] md:w-[40px]">
+          <div className="w-[10px] md:w-[20px] flex justify-end">
+            <div
+              key={`${segmentKey}_motion_data_2`}
+              className={`h-[2px] rounded-full bg-motion_review`}
+              onClick={segmentClick}
+              style={{
+                width:
+                  maxSegmentWidth -
+                  interpolateMotionAudioData(
+                    getMotionSegmentValue(segmentTime),
+                    0,
+                    100,
+                    1,
+                    maxSegmentWidth,
+                  ),
+              }}
+            ></div>
+          </div>
+          <div className="w-[10px] md:w-[20px]">
+            <div
+              key={`${segmentKey}_audio_data_2`}
+              className={`h-[2px] rounded-full bg-audio_review`}
+              onClick={segmentClick}
+              style={{
+                width: interpolateMotionAudioData(
+                  getAudioSegmentValue(segmentTime),
+                  -100,
+                  0,
+                  1,
+                  maxSegmentWidth,
+                ),
+              }}
+            ></div>
+          </div>
+        </div>
+      </div>
+
       {severity.map((severityValue: number, index: number) => (
         <React.Fragment key={index}>
-          {severityValue === displaySeverityType && (
-            <HoverCard openDelay={200} closeDelay={100}>
-              <div
-                className="absolute left-1/2 transform -translate-x-1/2 w-[8px] h-2 ml-[2px] z-10 cursor-pointer"
-                data-severity={severityValue}
-              >
-                <HoverCardTrigger asChild>
-                  <div
-                    key={`${segmentKey}_${index}_primary_data`}
-                    className={`w-full h-2 bg-gradient-to-r ${roundBottomPrimary ? "rounded-bl-full rounded-br-full" : ""} ${roundTopPrimary ? "rounded-tl-full rounded-tr-full" : ""} ${severityColors[severityValue]}`}
-                    onClick={segmentClick}
-                  ></div>
-                </HoverCardTrigger>
-                <HoverCardPortal>
-                  <HoverCardContent
-                    className="rounded-2xl w-[250px] p-2"
-                    side="left"
-                  >
-                    <img
-                      className="rounded-lg"
-                      src={`${apiHost}${eventThumbnail.replace("/media/frigate/", "")}`}
-                    />
-                  </HoverCardContent>
-                </HoverCardPortal>
-              </div>
-            </HoverCard>
-          )}
-
-          {severityValue !== displaySeverityType && (
-            <div className="absolute right-0 h-2 z-10">
-              <div
-                key={`${segmentKey}_${index}_secondary_data`}
-                className={`
+          <div className="absolute right-0 h-2 z-10">
+            <div
+              key={`${segmentKey}_${index}_secondary_data`}
+              className={`
                   w-1 h-2 bg-gradient-to-r
                   ${roundBottomSecondary ? "rounded-bl-full rounded-br-full" : ""}
                   ${roundTopSecondary ? "rounded-tl-full rounded-tr-full" : ""}
                   ${severityColors[severityValue]}
                 `}
-              ></div>
-            </div>
-          )}
+            ></div>
+          </div>
         </React.Fragment>
       ))}
     </div>
   );
 }
 
-export default EventSegment;
+export default MotionSegment;
