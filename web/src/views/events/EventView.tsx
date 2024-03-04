@@ -433,7 +433,7 @@ function DetectionReview({
     <>
       <div
         ref={contentRef}
-        className="flex flex-1 flex-wrap content-start gap-2 overflow-y-auto no-scrollbar"
+        className="flex flex-1 flex-wrap content-start gap-2 md:gap-4 overflow-y-auto no-scrollbar"
       >
         {filter?.before == undefined && (
           <NewReviewData
@@ -608,7 +608,7 @@ function MotionReview({
     <>
       <div
         ref={contentRef}
-        className={`size-full m-2 grid sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 gap-2 overflow-auto`}
+        className="size-full m-2 grid sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 gap-2 md:gap-4 overflow-auto no-scrollbar"
       >
         {reviewCameras.map((camera) => {
           let grow;
