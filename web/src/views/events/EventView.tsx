@@ -567,7 +567,11 @@ function MotionReview({
 
   const { data: motionData } = useSWR<MotionData[]>([
     "review/activity",
-    { before: timeRange.before, after: timeRange.after },
+    {
+      before: timeRange.before,
+      after: timeRange.after,
+      scale: segmentDuration / 2,
+    },
   ]);
 
   // timeline time
