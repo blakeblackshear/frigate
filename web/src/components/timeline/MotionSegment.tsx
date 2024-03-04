@@ -219,9 +219,6 @@ export function MotionSegment({
               style={{
                 width: interpolateMotionAudioData(
                   getMotionSegmentValue(segmentTime),
-                  0,
-                  100,
-                  1,
                   maxSegmentWidth,
                 ),
               }}
@@ -235,9 +232,6 @@ export function MotionSegment({
               style={{
                 width: interpolateMotionAudioData(
                   getAudioSegmentValue(segmentTime),
-                  -100,
-                  0,
-                  1,
                   maxSegmentWidth,
                 ),
               }}
@@ -253,10 +247,7 @@ export function MotionSegment({
               onClick={segmentClick}
               style={{
                 width: interpolateMotionAudioData(
-                  getMotionSegmentValue(segmentTime - segmentDuration / 2),
-                  0,
-                  100,
-                  1,
+                  getMotionSegmentValue(segmentTime + segmentDuration / 2),
                   maxSegmentWidth,
                 ),
               }}
@@ -269,10 +260,7 @@ export function MotionSegment({
               onClick={segmentClick}
               style={{
                 width: interpolateMotionAudioData(
-                  getAudioSegmentValue(segmentTime - segmentDuration / 2),
-                  -100,
-                  0,
-                  1,
+                  getAudioSegmentValue(segmentTime + segmentDuration / 2),
                   maxSegmentWidth,
                 ),
               }}

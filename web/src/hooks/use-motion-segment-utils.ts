@@ -26,16 +26,8 @@ export const useMotionSegmentUtils = (
   );
 
   const interpolateMotionAudioData = useCallback(
-    (
-      value: number,
-      oldMin: number,
-      oldMax: number,
-      newMin: number,
-      newMax: number,
-    ): number => {
-      return (
-        ((value - oldMin) / (oldMax - oldMin)) * (newMax - newMin) + newMin
-      );
+    (value: number, newMax: number): number => {
+      return Math.ceil((Math.abs(value) / 100.0) * newMax) || 1;
     },
     [],
   );
