@@ -37,3 +37,9 @@ export type ReviewSummary = {
   total_detection: number;
   total_motion: number;
 };
+
+export type MotionData = {
+  start_time: number;
+  motion: number;
+  audio: number;
+};

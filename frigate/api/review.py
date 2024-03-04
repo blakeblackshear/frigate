@@ -295,17 +295,17 @@ def review_activity():
     for rec in all_recordings:
         factor = 0.1 if rec.objects > 0 else 1.0
         data.append({
-            "date": rec.start_time,
+            "start_time": rec.start_time,
             "motion": rec.motion * factor,
             "audio": rec.dBFS * factor,
         })
 
     # resample data using pandas to get activity on scaled basis
-    df = pd.DataFrame(data, columns=["date", "motion", "audio"])
+    df = pd.DataFrame(data, columns=["start_time", "motion", "audio"])
 
     # set date as datetime index
-    df["date"] = pd.to_datetime(df["date"], unit="s")
-    df.set_index(["date"], inplace=True)
+    df["start_time"] = pd.to_datetime(df["start_time"], unit="s")
+    df.set_index(["start_time"], inplace=True)
 
     # normalize data
     df = df.resample(f"{scale}S").mean().fillna(0.0)

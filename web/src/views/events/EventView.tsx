@@ -14,6 +14,7 @@ import { useScrollLockout } from "@/hooks/use-mouse-listener";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
 import {
+  MotionData,
   ReviewFilter,
   ReviewSegment,
   ReviewSeverity,
@@ -33,6 +34,7 @@ import { isDesktop, isMobile } from "react-device-detect";
 import { LuFolderCheck } from "react-icons/lu";
 import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
+import MotionReviewTimeline from "@/components/timeline/MotionReviewTimeline";
 
 type EventViewProps = {
   reviewPages?: ReviewSegment[][];
@@ -561,6 +563,13 @@ function MotionReview({
     {},
   );
 
+  // motion data
+
+  const { data: motionData } = useSWR<MotionData[]>([
+    "review/activity",
+    { before: timeRange.before, after: timeRange.after },
+  ]);
+
   // timeline time
 
   const lastFullHour = useMemo(() => {
@@ -580,6 +589,7 @@ function MotionReview({
   );
 
   // move to next clip
+
   useEffect(() => {
     if (
       !videoPlayersRef.current &&
@@ -643,7 +653,7 @@ function MotionReview({
         })}
       </div>
       <div className="w-[55px] md:w-[100px] mt-2 overflow-y-auto no-scrollbar">
-        <EventReviewTimeline
+        <MotionReviewTimeline
           segmentDuration={segmentDuration}
           timestampSpread={15}
           timelineStart={timeRangeSegments.end}
@@ -652,6 +662,7 @@ function MotionReview({
           handlebarTime={currentTime}
           setHandlebarTime={setCurrentTime}
           events={reviewItems.all}
+          motion_events={motionData ?? []}
           severityType="significant_motion"
           contentRef={contentRef}
         />
