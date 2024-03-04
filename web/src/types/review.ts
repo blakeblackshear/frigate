@@ -27,3 +27,13 @@ export type ReviewFilter = {
   after?: number;
   showReviewed?: 0 | 1;
 };
+
+export type ReviewSummary = {
+  day: string;
+  reviewed_alert: number;
+  reviewed_detection: number;
+  reviewed_motion: number;
+  total_alert: number;
+  total_detection: number;
+  total_motion: number;
+};

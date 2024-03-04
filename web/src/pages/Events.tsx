@@ -1,5 +1,8 @@
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 import useApiFilter from "@/hooks/use-api-filter";
+import { useTimezone } from "@/hooks/use-date-utils";
 import useOverlayState from "@/hooks/use-overlay-state";
+import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
 import { ReviewFilter, ReviewSegment, ReviewSeverity } from "@/types/review";
 import DesktopRecordingView from "@/views/events/DesktopRecordingView";
@@ -12,6 +15,9 @@ import useSWRInfinite from "swr/infinite";
 const API_LIMIT = 100;
 
 export default function Events() {
+  const { data: config } = useSWR<FrigateConfig>("config");
+  const timezone = useTimezone(config);
+
   // recordings viewer
 
   const [severity, setSeverity] = useState<ReviewSeverity>("alert");
@@ -99,6 +105,14 @@ export default function Events() {
   const onLoadNextPage = useCallback(() => setSize(size + 1), [size, setSize]);
 
   const reloadData = useCallback(() => setBeforeTs(Date.now() / 1000), []);
+
+  // review summary
+
+  const { data: reviewSummary } = useSWR([
+    "review/summary",
+    { timezone: timezone },
+    { revalidateOnFocus: false },
+  ]);
 
   // preview videos
 
@@ -200,6 +214,10 @@ export default function Events() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedReviewId, reviewPages]);
 
+  if (!timezone) {
+    return <ActivityIndicator />;
+  }
+
   if (selectedData) {
     return (
       <DesktopRecordingView
@@ -212,6 +230,7 @@ export default function Events() {
     return (
       <EventView
         reviewPages={reviewPages}
+        reviewSummary={reviewSummary}
         relevantPreviews={allPreviews}
         timeRange={selectedTimeRange}
         reachedEnd={isDone}
