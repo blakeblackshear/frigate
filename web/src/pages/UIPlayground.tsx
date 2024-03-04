@@ -284,7 +284,7 @@ function UIPlayground() {
             </div>
           </div>
 
-          <div className="w-[100px] overflow-y-auto no-scrollbar">
+          <div className="w-[55px] md:w-[100px] overflow-y-auto no-scrollbar">
             {!isEventsReviewTimeline && (
               <MotionReviewTimeline
                 segmentDuration={zoomSettings.segmentDuration} // seconds per segment

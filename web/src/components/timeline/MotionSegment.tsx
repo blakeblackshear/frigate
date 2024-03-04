@@ -12,6 +12,7 @@ import scrollIntoView from "scroll-into-view-if-needed";
 import { MinimapBounds, Tick, Timestamp } from "./segment-metadata";
 import { MockMotionData } from "@/pages/UIPlayground";
 import { useMotionSegmentUtils } from "@/hooks/use-motion-segment-utils";
+import { isMobile } from "react-device-detect";
 
 type MotionSegmentProps = {
   events: ReviewSegment[];
@@ -84,6 +85,10 @@ export function MotionSegment({
 
   const timestamp = useMemo(() => new Date(segmentTime * 1000), [segmentTime]);
   const segmentKey = useMemo(() => segmentTime, [segmentTime]);
+
+  const maxSegmentWidth = useMemo(() => {
+    return isMobile ? 15 : 25;
+  }, []);
 
   const alignedMinimapStartTime = useMemo(
     () => alignStartDateToTimeline(minimapStartTime ?? 0),
@@ -204,27 +209,27 @@ export function MotionSegment({
         segmentKey={segmentKey}
       />
 
-      <div className="absolute left-1/2 transform -translate-x-1/2 w-[40px] h-2 ml-[px] z-10 cursor-pointer">
-        <div className="flex flex-row justify-center w-[40px] mb-[1px]">
-          <div className="w-[20px] flex justify-end">
+      <div className="absolute left-1/2 transform -translate-x-1/2 w-[20px] md:w-[40px] h-2 z-10 cursor-pointer">
+        <div className="flex flex-row justify-center w-[20px] md:w-[40px] mb-[1px]">
+          <div className="w-[10px] md:w-[20px] flex justify-end">
             <div
               key={`${segmentKey}_motion_data_1`}
               className={`h-[2px] rounded-full bg-motion_review`}
               onClick={segmentClick}
               style={{
                 width:
-                  20 -
+                  maxSegmentWidth -
                   interpolateMotionAudioData(
                     getMotionSegmentValue(segmentTime - segmentDuration / 2),
                     0,
                     100,
                     1,
-                    20,
+                    maxSegmentWidth,
                   ),
               }}
             ></div>
           </div>
-          <div className="w-[20px]">
+          <div className="w-[10px] md:w-[20px]">
             <div
               key={`${segmentKey}_audio_data_1`}
               className={`h-[2px] rounded-full bg-audio_review`}
@@ -235,33 +240,33 @@ export function MotionSegment({
                   -100,
                   0,
                   1,
-                  20,
+                  maxSegmentWidth,
                 ),
               }}
             ></div>
           </div>
         </div>
 
-        <div className="flex flex-row justify-center w-[40px]">
-          <div className="w-[20px] flex justify-end">
+        <div className="flex flex-row justify-center w-[20px] md:w-[40px]">
+          <div className="w-[10px] md:w-[20px] flex justify-end">
             <div
               key={`${segmentKey}_motion_data_2`}
               className={`h-[2px] rounded-full bg-motion_review`}
               onClick={segmentClick}
               style={{
                 width:
-                  20 -
+                  maxSegmentWidth -
                   interpolateMotionAudioData(
                     getMotionSegmentValue(segmentTime),
                     0,
                     100,
                     1,
-                    20,
+                    maxSegmentWidth,
                   ),
               }}
             ></div>
           </div>
-          <div className="w-[20px]">
+          <div className="w-[10px] md:w-[20px]">
             <div
               key={`${segmentKey}_audio_data_2`}
               className={`h-[2px] rounded-full bg-audio_review`}
@@ -272,7 +277,7 @@ export function MotionSegment({
                   -100,
                   0,
                   1,
-                  20,
+                  maxSegmentWidth,
                 ),
               }}
             ></div>
