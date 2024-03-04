@@ -11,17 +11,16 @@ function Sidebar() {
       <div className="w-full flex flex-col gap-0 items-center">
         <Logo className="w-8 h-8 mb-6" />
         {navbarLinks.map((item) => (
-          <>
+          <div key={item.id}>
             <NavItem
               className={`mx-[10px] ${item.id == 1 ? "mb-2" : "mb-6"}`}
-              key={item.id}
               Icon={item.icon}
               title={item.title}
               url={item.url}
               dev={item.dev}
             />
             {item.id == 1 && <CameraGroupSelector />}
-          </>
+          </div>
         ))}
       </div>
       <SettingsNavItems className="hidden md:flex flex-col items-center mb-8" />

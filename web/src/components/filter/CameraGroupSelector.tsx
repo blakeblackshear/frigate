@@ -31,7 +31,7 @@ export function CameraGroupSelector() {
         className={
           group == undefined
             ? "text-selected bg-blue-900 focus:bg-blue-900 bg-opacity-60 focus:bg-opacity-60"
-            : "text-muted-foreground bg-secondary"
+            : "text-muted-foreground bg-secondary focus:text-muted-foreground focus:bg-secondary"
         }
         size="xs"
         onClick={() => navigate(-1)}
