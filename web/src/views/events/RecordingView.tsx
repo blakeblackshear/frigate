@@ -81,7 +81,7 @@ export default function RecordingView({
   }, [scrubbing]);
 
   return (
-    <div ref={contentRef} className="relative w-full h-full">
+    <div ref={contentRef} className="flex flex-col relative w-full h-full">
       <Button
         className="md:absolute md:top-0 md:left-0 rounded-lg"
         onClick={() => navigate(-1)}
@@ -110,7 +110,7 @@ export default function RecordingView({
         />
       </div>
 
-      <div className="md:absolute md:w-[100px] md:inset-y-0 md:right-0">
+      <div className="flex-grow overflow-hidden md:absolute md:w-[100px] md:inset-y-0 md:right-0">
         <EventReviewTimeline
           segmentDuration={30}
           timestampSpread={15}
