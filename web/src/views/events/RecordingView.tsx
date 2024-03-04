@@ -162,7 +162,7 @@ export function DesktopRecordingView({
         })}
       </div>
 
-      <div className="absolute overflow-hidden w-56 inset-y-0 right-0">
+      <div className="absolute overflow-hidden w-56 inset-y-0 right-0 cursor-pointer">
         <EventReviewTimeline
           segmentDuration={30}
           timestampSpread={15}
