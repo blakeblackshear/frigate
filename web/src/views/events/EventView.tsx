@@ -2,6 +2,9 @@ import Logo from "@/components/Logo";
 import NewReviewData from "@/components/dynamic/NewReviewData";
 import ReviewActionGroup from "@/components/filter/ReviewActionGroup";
 import ReviewFilterGroup from "@/components/filter/ReviewFilterGroup";
+import DynamicVideoPlayer, {
+  DynamicVideoController,
+} from "@/components/player/DynamicVideoPlayer";
 import PreviewThumbnailPlayer from "@/components/player/PreviewThumbnailPlayer";
 import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
@@ -16,8 +19,16 @@ import {
   ReviewSeverity,
   ReviewSummary,
 } from "@/types/review";
+import { getChunkedTimeRange } from "@/utils/timelineUtil";
 import axios from "axios";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  MutableRefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { isDesktop, isMobile } from "react-device-detect";
 import { LuFolderCheck } from "react-icons/lu";
 import { MdCircle } from "react-icons/md";
@@ -57,7 +68,6 @@ export default function EventView({
 }: EventViewProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
   const contentRef = useRef<HTMLDivElement | null>(null);
-  const segmentDuration = 60;
 
   // review counts
 
@@ -122,11 +132,6 @@ export default function EventView({
     };
   }, [reviewPages]);
 
-  const { alignStartDateToTimeline } = useEventUtils(
-    reviewItems.all,
-    segmentDuration,
-  );
-
   const currentItems = useMemo(() => {
     const current = reviewItems[severity];
 
@@ -137,99 +142,7 @@ export default function EventView({
     return current;
   }, [reviewItems, severity]);
 
-  const showMinimap = useMemo(() => {
-    if (!contentRef.current) {
-      return false;
-    }
-
-    return contentRef.current.scrollHeight > contentRef.current.clientHeight;
-    // we know that these deps are correct
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [contentRef.current?.scrollHeight, severity]);
-
-  // timeline interaction
-
-  const pagingObserver = useRef<IntersectionObserver | null>();
-  const lastReviewRef = useCallback(
-    (node: HTMLElement | null) => {
-      if (isValidating) return;
-      if (pagingObserver.current) pagingObserver.current.disconnect();
-      try {
-        pagingObserver.current = new IntersectionObserver((entries) => {
-          if (entries[0].isIntersecting && !reachedEnd) {
-            loadNextPage();
-          }
-        });
-        if (node) pagingObserver.current.observe(node);
-      } catch (e) {
-        // no op
-      }
-    },
-    [isValidating, reachedEnd, loadNextPage],
-  );
-
-  const [minimap, setMinimap] = useState<string[]>([]);
-  const minimapObserver = useRef<IntersectionObserver | null>();
-  useEffect(() => {
-    const visibleTimestamps = new Set<string>();
-    minimapObserver.current = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const start = (entry.target as HTMLElement).dataset.start;
-
-          if (!start) {
-            return;
-          }
-
-          if (entry.isIntersecting) {
-            visibleTimestamps.add(start);
-          } else {
-            visibleTimestamps.delete(start);
-          }
-
-          setMinimap([...visibleTimestamps]);
-        });
-      },
-      { root: contentRef.current, threshold: isDesktop ? 0.1 : 0.5 },
-    );
-
-    return () => {
-      minimapObserver.current?.disconnect();
-    };
-  }, [contentRef]);
-  const minimapRef = useCallback(
-    (node: HTMLElement | null) => {
-      if (!minimapObserver.current) {
-        return;
-      }
-
-      try {
-        if (node) minimapObserver.current.observe(node);
-      } catch (e) {
-        // no op
-      }
-    },
-    [minimapObserver],
-  );
-  const minimapBounds = useMemo(() => {
-    const data = {
-      start: 0,
-      end: 0,
-    };
-    const list = minimap.sort();
-
-    if (list.length > 0) {
-      data.end = parseFloat(list.at(-1) || "0");
-      data.start = parseFloat(list[0]);
-    }
-
-    return data;
-  }, [minimap]);
-
-  // preview playback
-
-  const [previewTime, setPreviewTime] = useState<number>();
-  const scrollLock = useScrollLockout(contentRef);
+  const pagingObserver = useRef<IntersectionObserver | null>(null);
 
   // review interaction
 
@@ -339,82 +252,404 @@ export default function EventView({
       </div>
 
       <div className="flex h-full overflow-hidden">
-        <div
-          ref={contentRef}
-          className="flex flex-1 flex-wrap content-start gap-2 overflow-y-auto no-scrollbar"
-        >
-          {filter?.before == undefined && (
-            <NewReviewData
-              className="absolute w-full z-30"
-              contentRef={contentRef}
-              severity={severity}
-              pullLatestData={pullLatestData}
-            />
-          )}
-
-          {!isValidating && currentItems == null && (
-            <div className="size-full flex flex-col justify-center items-center">
-              <LuFolderCheck className="size-16" />
-              There are no {severity.replace(/_/g, " ")} items to review
-            </div>
-          )}
-
-          <div
-            className="w-full m-2 grid sm:grid-cols-2 md:grid-cols-3 3xl:grid-cols-4 gap-2 md:gap-4"
-            ref={contentRef}
-          >
-            {currentItems ? (
-              currentItems.map((value, segIdx) => {
-                const lastRow = segIdx == reviewItems[severity].length - 1;
-                const selected = selectedReviews.includes(value.id);
-
-                return (
-                  <div
-                    key={value.id}
-                    ref={lastRow ? lastReviewRef : minimapRef}
-                    data-start={value.start_time}
-                    data-segment-start={
-                      alignStartDateToTimeline(value.start_time) -
-                      segmentDuration
-                    }
-                    className={`outline outline-offset-1 rounded-lg shadow-none transition-all my-1 md:my-0 ${selected ? `outline-4 shadow-[0_0_6px_1px] outline-severity_${value.severity} shadow-severity_${value.severity}` : "outline-0 duration-500"}`}
-                  >
-                    <div className="aspect-video rounded-lg overflow-hidden">
-                      <PreviewThumbnailPlayer
-                        review={value}
-                        allPreviews={relevantPreviews}
-                        setReviewed={markItemAsReviewed}
-                        scrollLock={scrollLock}
-                        onTimeUpdate={setPreviewTime}
-                        onClick={onSelectReview}
-                      />
-                    </div>
-                    {lastRow && !reachedEnd && <ActivityIndicator />}
-                  </div>
-                );
-              })
-            ) : severity != "alert" ? (
-              <div ref={lastReviewRef} />
-            ) : null}
-          </div>
-        </div>
-        <div className="w-[55px] md:w-[100px] mt-2 overflow-y-auto no-scrollbar">
-          <EventReviewTimeline
-            segmentDuration={segmentDuration}
-            timestampSpread={15}
-            timelineStart={timeRange.before}
-            timelineEnd={timeRange.after}
-            showMinimap={showMinimap && !previewTime}
-            minimapStartTime={minimapBounds.start}
-            minimapEndTime={minimapBounds.end}
-            showHandlebar={previewTime != undefined}
-            handlebarTime={previewTime}
-            events={reviewItems.all}
-            severityType={severity}
+        {severity != "significant_motion" && (
+          <DetectionReview
             contentRef={contentRef}
+            currentItems={currentItems}
+            reviewItems={reviewItems}
+            relevantPreviews={relevantPreviews}
+            pagingObserver={pagingObserver}
+            selectedReviews={selectedReviews}
+            severity={severity}
+            filter={filter}
+            isValidating={isValidating}
+            reachedEnd={reachedEnd}
+            timeRange={timeRange}
+            loadNextPage={loadNextPage}
+            markItemAsReviewed={markItemAsReviewed}
+            onSelectReview={onSelectReview}
+            pullLatestData={pullLatestData}
           />
-        </div>
+        )}
+        {severity == "significant_motion" && (
+          <MotionReview
+            contentRef={contentRef}
+            reviewItems={reviewItems}
+            relevantPreviews={relevantPreviews}
+            timeRange={timeRange}
+            filter={filter}
+          />
+        )}
       </div>
     </div>
+  );
+}
+
+type DetectionReviewProps = {
+  contentRef: MutableRefObject<HTMLDivElement | null>;
+  currentItems: ReviewSegment[] | null;
+  reviewItems: {
+    all: ReviewSegment[];
+    alert: ReviewSegment[];
+    detection: ReviewSegment[];
+    significant_motion: ReviewSegment[];
+  };
+  relevantPreviews?: Preview[];
+  pagingObserver: MutableRefObject<IntersectionObserver | null>;
+  selectedReviews: string[];
+  severity: ReviewSeverity;
+  filter?: ReviewFilter;
+  isValidating: boolean;
+  reachedEnd: boolean;
+  timeRange: { before: number; after: number };
+  loadNextPage: () => void;
+  markItemAsReviewed: (id: string) => void;
+  onSelectReview: (id: string, ctrl: boolean) => void;
+  pullLatestData: () => void;
+};
+function DetectionReview({
+  contentRef,
+  currentItems,
+  reviewItems,
+  relevantPreviews,
+  pagingObserver,
+  selectedReviews,
+  severity,
+  filter,
+  isValidating,
+  reachedEnd,
+  timeRange,
+  loadNextPage,
+  markItemAsReviewed,
+  onSelectReview,
+  pullLatestData,
+}: DetectionReviewProps) {
+  const segmentDuration = 60;
+
+  // preview
+
+  const [previewTime, setPreviewTime] = useState<number>();
+
+  // review interaction
+
+  const lastReviewRef = useCallback(
+    (node: HTMLElement | null) => {
+      if (isValidating) return;
+      if (pagingObserver.current) pagingObserver.current.disconnect();
+      try {
+        pagingObserver.current = new IntersectionObserver((entries) => {
+          if (entries[0].isIntersecting && !reachedEnd) {
+            loadNextPage();
+          }
+        });
+        if (node) pagingObserver.current.observe(node);
+      } catch (e) {
+        // no op
+      }
+    },
+    [isValidating, pagingObserver, reachedEnd, loadNextPage],
+  );
+
+  // timeline interaction
+
+  const { alignStartDateToTimeline } = useEventUtils(
+    reviewItems.all,
+    segmentDuration,
+  );
+
+  const scrollLock = useScrollLockout(contentRef);
+
+  const [minimap, setMinimap] = useState<string[]>([]);
+  const minimapObserver = useRef<IntersectionObserver | null>(null);
+  useEffect(() => {
+    const visibleTimestamps = new Set<string>();
+    minimapObserver.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const start = (entry.target as HTMLElement).dataset.start;
+
+          if (!start) {
+            return;
+          }
+
+          if (entry.isIntersecting) {
+            visibleTimestamps.add(start);
+          } else {
+            visibleTimestamps.delete(start);
+          }
+
+          setMinimap([...visibleTimestamps]);
+        });
+      },
+      { root: contentRef.current, threshold: isDesktop ? 0.1 : 0.5 },
+    );
+
+    return () => {
+      minimapObserver.current?.disconnect();
+    };
+  }, [contentRef, minimapObserver]);
+
+  const minimapBounds = useMemo(() => {
+    const data = {
+      start: 0,
+      end: 0,
+    };
+    const list = minimap.sort();
+
+    if (list.length > 0) {
+      data.end = parseFloat(list.at(-1) || "0");
+      data.start = parseFloat(list[0]);
+    }
+
+    return data;
+  }, [minimap]);
+
+  const minimapRef = useCallback(
+    (node: HTMLElement | null) => {
+      if (!minimapObserver.current) {
+        return;
+      }
+
+      try {
+        if (node) minimapObserver.current.observe(node);
+      } catch (e) {
+        // no op
+      }
+    },
+    [minimapObserver],
+  );
+
+  const showMinimap = useMemo(() => {
+    if (!contentRef.current) {
+      return false;
+    }
+
+    return contentRef.current.scrollHeight > contentRef.current.clientHeight;
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contentRef.current?.scrollHeight, severity]);
+
+  return (
+    <>
+      <div
+        ref={contentRef}
+        className="flex flex-1 flex-wrap content-start gap-2 md:gap-4 overflow-y-auto no-scrollbar"
+      >
+        {filter?.before == undefined && (
+          <NewReviewData
+            className="absolute w-full z-30"
+            contentRef={contentRef}
+            severity={severity}
+            pullLatestData={pullLatestData}
+          />
+        )}
+
+        {!isValidating && currentItems == null && (
+          <div className="size-full flex flex-col justify-center items-center">
+            <LuFolderCheck className="size-16" />
+            There are no {severity.replace(/_/g, " ")} items to review
+          </div>
+        )}
+
+        <div
+          className="w-full m-2 grid sm:grid-cols-2 md:grid-cols-3 3xl:grid-cols-4 gap-2 md:gap-4"
+          ref={contentRef}
+        >
+          {currentItems ? (
+            currentItems.map((value, segIdx) => {
+              const lastRow = segIdx == currentItems.length - 1;
+              const selected = selectedReviews.includes(value.id);
+
+              return (
+                <div
+                  key={value.id}
+                  ref={lastRow ? lastReviewRef : minimapRef}
+                  data-start={value.start_time}
+                  data-segment-start={
+                    alignStartDateToTimeline(value.start_time) - segmentDuration
+                  }
+                  className={`outline outline-offset-1 rounded-lg shadow-none transition-all my-1 md:my-0 ${selected ? `outline-4 shadow-[0_0_6px_1px] outline-severity_${value.severity} shadow-severity_${value.severity}` : "outline-0 duration-500"}`}
+                >
+                  <div className="aspect-video rounded-lg overflow-hidden">
+                    <PreviewThumbnailPlayer
+                      review={value}
+                      allPreviews={relevantPreviews}
+                      setReviewed={markItemAsReviewed}
+                      scrollLock={scrollLock}
+                      onTimeUpdate={setPreviewTime}
+                      onClick={onSelectReview}
+                    />
+                  </div>
+                  {lastRow && !reachedEnd && <ActivityIndicator />}
+                </div>
+              );
+            })
+          ) : severity != "alert" ? (
+            <div ref={lastReviewRef} />
+          ) : null}
+        </div>
+      </div>
+      <div className="w-[55px] md:w-[100px] mt-2 overflow-y-auto no-scrollbar">
+        <EventReviewTimeline
+          segmentDuration={segmentDuration}
+          timestampSpread={15}
+          timelineStart={timeRange.before}
+          timelineEnd={timeRange.after}
+          showMinimap={showMinimap && !previewTime}
+          minimapStartTime={minimapBounds.start}
+          minimapEndTime={minimapBounds.end}
+          showHandlebar={previewTime != undefined}
+          handlebarTime={previewTime}
+          events={reviewItems.all}
+          severityType={severity}
+          contentRef={contentRef}
+        />
+      </div>
+    </>
+  );
+}
+
+type MotionReviewProps = {
+  contentRef: MutableRefObject<HTMLDivElement | null>;
+  reviewItems: {
+    all: ReviewSegment[];
+    alert: ReviewSegment[];
+    detection: ReviewSegment[];
+    significant_motion: ReviewSegment[];
+  };
+  relevantPreviews?: Preview[];
+  timeRange: { before: number; after: number };
+  filter?: ReviewFilter;
+};
+function MotionReview({
+  contentRef,
+  reviewItems,
+  relevantPreviews,
+  timeRange,
+  filter,
+}: MotionReviewProps) {
+  const segmentDuration = 30;
+  const { data: config } = useSWR<FrigateConfig>("config");
+  const [playerReady, setPlayerReady] = useState(false);
+
+  const reviewCameras = useMemo(() => {
+    if (!config) {
+      return [];
+    }
+
+    let cameras;
+    if (!filter || !filter.cameras) {
+      cameras = Object.values(config.cameras);
+    } else {
+      const filteredCams = filter.cameras;
+
+      cameras = Object.values(config.cameras).filter((cam) =>
+        filteredCams.includes(cam.name),
+      );
+    }
+
+    return cameras.sort((a, b) => a.ui.order - b.ui.order);
+  }, [config, filter]);
+
+  const videoPlayersRef = useRef<{ [camera: string]: DynamicVideoController }>(
+    {},
+  );
+
+  // timeline time
+
+  const lastFullHour = useMemo(() => {
+    const end = new Date(timeRange.before * 1000);
+    end.setMinutes(0, 0, 0);
+    return end.getTime() / 1000;
+  }, [timeRange]);
+  const timeRangeSegments = useMemo(
+    () => getChunkedTimeRange(timeRange.after, lastFullHour),
+    [lastFullHour, timeRange],
+  );
+  const [selectedRangeIdx, setSelectedRangeIdx] = useState(
+    timeRangeSegments.ranges.length - 1,
+  );
+  const [currentTime, setCurrentTime] = useState<number>(
+    timeRangeSegments.ranges[selectedRangeIdx].start,
+  );
+
+  // move to next clip
+  useEffect(() => {
+    if (
+      !videoPlayersRef.current &&
+      Object.values(videoPlayersRef.current).length > 0
+    ) {
+      return;
+    }
+
+    const firstController = Object.values(videoPlayersRef.current)[0];
+
+    if (firstController) {
+      firstController.onClipChangedEvent((dir) => {
+        if (
+          dir == "forward" &&
+          selectedRangeIdx < timeRangeSegments.ranges.length - 1
+        ) {
+          setSelectedRangeIdx(selectedRangeIdx + 1);
+        } else if (selectedRangeIdx > 0) {
+          setSelectedRangeIdx(selectedRangeIdx - 1);
+        }
+      });
+    }
+  }, [selectedRangeIdx, timeRangeSegments, videoPlayersRef, playerReady]);
+
+  useEffect(() => {
+    Object.values(videoPlayersRef.current).forEach((controller) => {
+      controller.scrubToTimestamp(currentTime);
+    });
+  }, [currentTime]);
+
+  return (
+    <>
+      <div
+        ref={contentRef}
+        className="w-full h-min m-2 grid sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 gap-2 md:gap-4 overflow-auto no-scrollbar"
+      >
+        {reviewCameras.map((camera) => {
+          let grow;
+          const aspectRatio = camera.detect.width / camera.detect.height;
+          if (aspectRatio > 2) {
+            grow = "sm:col-span-2 aspect-wide";
+          } else if (aspectRatio < 1) {
+            grow = "md:row-span-2 md:h-full aspect-tall";
+          } else {
+            grow = "aspect-video";
+          }
+          return (
+            <div key={camera.name} className={`${grow}`}>
+              <DynamicVideoPlayer
+                camera={camera.name}
+                timeRange={timeRangeSegments.ranges[selectedRangeIdx]}
+                cameraPreviews={relevantPreviews || []}
+                previewOnly
+                onControllerReady={(controller) => {
+                  videoPlayersRef.current[camera.name] = controller;
+                  setPlayerReady(true);
+                }}
+              />
+            </div>
+          );
+        })}
+      </div>
+      <div className="w-[55px] md:w-[100px] mt-2 overflow-y-auto no-scrollbar">
+        <EventReviewTimeline
+          segmentDuration={segmentDuration}
+          timestampSpread={15}
+          timelineStart={timeRangeSegments.end}
+          timelineEnd={timeRangeSegments.start}
+          showHandlebar
+          handlebarTime={currentTime}
+          setHandlebarTime={setCurrentTime}
+          events={reviewItems.all}
+          severityType="significant_motion"
+          contentRef={contentRef}
+        />
+      </div>
+    </>
   );
 }

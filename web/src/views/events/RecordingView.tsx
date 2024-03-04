@@ -5,21 +5,21 @@ import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
 import { Button } from "@/components/ui/button";
 import { Preview } from "@/types/preview";
 import { ReviewSegment } from "@/types/review";
-import { getChunkedTimeRange } from "@/utils/timelineUtil";
+import { getChunkedTimeDay } from "@/utils/timelineUtil";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 
-type DesktopRecordingViewProps = {
+type RecordingViewProps = {
   selectedReview: ReviewSegment;
   reviewItems: ReviewSegment[];
   relevantPreviews?: Preview[];
 };
-export default function DesktopRecordingView({
+export default function RecordingView({
   selectedReview,
   reviewItems,
   relevantPreviews,
-}: DesktopRecordingViewProps) {
+}: RecordingViewProps) {
   const navigate = useNavigate();
   const contentRef = useRef<HTMLDivElement | null>(null);
 
@@ -31,7 +31,7 @@ export default function DesktopRecordingView({
   // timeline time
 
   const timeRange = useMemo(
-    () => getChunkedTimeRange(selectedReview.start_time),
+    () => getChunkedTimeDay(selectedReview.start_time),
     [selectedReview],
   );
   const [selectedRangeIdx, setSelectedRangeIdx] = useState(

@@ -88,7 +88,7 @@ export default function VideoPlayer({
 
   return (
     <div data-vjs-player>
-      <div ref={videoRef} />
+      <div className="rounded-2xl overflow-hidden" ref={videoRef} />
       {children}
     </div>
   );
