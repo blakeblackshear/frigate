@@ -293,11 +293,10 @@ def review_activity():
     data: list[dict[str, float]] = []
 
     for rec in all_recordings:
-        factor = 0.1 if rec.objects > 0 else 1.0
         data.append({
             "start_time": rec.start_time,
-            "motion": rec.motion * factor,
-            "audio": rec.dBFS * factor,
+            "motion": rec.motion if rec.objects == 0 else 0,
+            "audio": rec.dBFS if rec.objects == 0 else 0,
         })
 
     # resample data using pandas to get activity on scaled basis
