@@ -164,7 +164,7 @@ export default function Events() {
 
   const markItemAsReviewed = useCallback(
     async (review: ReviewSegment) => {
-      const resp = await axios.post(`review/${review.id}/viewed`);
+      const resp = await axios.post(`reviews/viewed`, { ids: [review.id] });
 
       if (resp.status == 200) {
         updateSegments(

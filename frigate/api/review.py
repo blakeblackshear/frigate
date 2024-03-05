@@ -195,26 +195,10 @@ def review_summary():
     return jsonify([e for e in groups.dicts().iterator()])
 
 
-@ReviewBp.route("/review/<id>/viewed", methods=("POST",))
-def set_reviewed(id):
-    try:
-        review: ReviewSegment = ReviewSegment.get(ReviewSegment.id == id)
-    except DoesNotExist:
-        return make_response(
-            jsonify({"success": False, "message": "Review " + id + " not found"}), 404
-        )
-
-    review.has_been_reviewed = True
-    review.save()
-
-    return make_response(
-        jsonify({"success": True, "message": "Reviewed " + id + " viewed"}), 200
-    )
-
-
-@ReviewBp.route("/reviews/<ids>/viewed", methods=("POST",))
-def set_multiple_reviewed(ids: str):
-    list_of_ids = ids.split(",")
+@ReviewBp.route("/reviews/viewed", methods=("POST",))
+def set_multiple_reviewed():
+    json: dict[str, any] = request.get_json(silent=True) or {}
+    list_of_ids = json.get("ids", "")
 
     if not list_of_ids or len(list_of_ids) == 0:
         return make_response(
