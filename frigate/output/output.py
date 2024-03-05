@@ -2,6 +2,8 @@
 
 import logging
 import multiprocessing as mp
+import os
+import shutil
 import signal
 import threading
 from typing import Optional
@@ -18,6 +20,7 @@ from ws4py.server.wsgiutils import WebSocketWSGIApplication
 from frigate.comms.detections_updater import DetectionSubscriber, DetectionTypeEnum
 from frigate.comms.ws import WebSocket
 from frigate.config import FrigateConfig
+from frigate.const import CACHE_DIR, CLIPS_DIR
 from frigate.output.birdseye import Birdseye
 from frigate.output.camera import JsmpegCamera
 from frigate.output.preview import PreviewRecorder
@@ -60,6 +63,8 @@ def output_frames(
     jsmpeg_cameras: dict[str, JsmpegCamera] = {}
     birdseye: Optional[Birdseye] = None
     preview_recorders: dict[str, PreviewRecorder] = {}
+
+    move_preview_frames("cache")
 
     for camera, cam_config in config.cameras.items():
         if not cam_config.enabled:
@@ -151,6 +156,8 @@ def output_frames(
     for preview in preview_recorders.values():
         preview.stop()
 
+    move_preview_frames("clips")
+
     if birdseye is not None:
         birdseye.stop()
 
@@ -160,3 +167,16 @@ def output_frames(
     websocket_server.shutdown()
     websocket_thread.join()
     logger.info("exiting output process...")
+
+
+def move_preview_frames(loc: str):
+    preview_holdover = os.path.join(CLIPS_DIR, "preview_restart_cache")
+    preview_cache = os.path.join(CACHE_DIR, "preview_frames")
+
+    if loc == "clips":
+        shutil.move(preview_cache, preview_holdover)
+    elif loc == "cache":
+        if not os.path.exists(preview_holdover):
+            return
+
+        shutil.move(preview_holdover, preview_cache)

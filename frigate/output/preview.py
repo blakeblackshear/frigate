@@ -3,7 +3,6 @@
 import datetime
 import logging
 import os
-import shutil
 import subprocess as sp
 import threading
 from pathlib import Path
@@ -26,6 +25,7 @@ from frigate.util.image import copy_yuv_to_position, get_yuv_crop
 logger = logging.getLogger(__name__)
 
 FOLDER_PREVIEW_FRAMES = "preview_frames"
+PREVIEW_CACHE_DIR = os.path.join(CACHE_DIR, FOLDER_PREVIEW_FRAMES)
 PREVIEW_SEGMENT_DURATION = 3600  # one hour
 # important to have lower keyframe to maintain scrubbing performance
 PREVIEW_KEYFRAME_INTERVAL = 60
@@ -163,10 +163,36 @@ class PreviewRecorder:
             .timestamp()
         )
 
-        Path(os.path.join(CACHE_DIR, "preview_frames")).mkdir(exist_ok=True)
+        Path(PREVIEW_CACHE_DIR).mkdir(exist_ok=True)
         Path(os.path.join(CLIPS_DIR, f"previews/{config.name}")).mkdir(
             parents=True, exist_ok=True
         )
+
+        # check for existing items in cache
+        start_ts = (
+            datetime.datetime.now()
+            .replace(minute=0, second=0, microsecond=0)
+            .timestamp()
+        )
+
+        file_start = f"preview_{config.name}"
+        start_file = f"{file_start}-{start_ts}.jpg"
+
+        for file in sorted(os.listdir(os.path.join(CACHE_DIR, FOLDER_PREVIEW_FRAMES))):
+            if not file.startswith(file_start):
+                continue
+
+            if file < start_file:
+                os.unlink(os.path.join(PREVIEW_CACHE_DIR, file))
+                continue
+
+            ts = float(file.split("-")[1][:-4])
+
+            if self.start_time == 0:
+                self.start_time = ts
+
+            self.last_output_time = ts
+            self.output_frames.append(ts)
 
     def should_write_frame(
         self,
@@ -269,11 +295,6 @@ class PreviewRecorder:
             self.write_frame_to_cache(frame_time, frame)
 
     def stop(self) -> None:
-        try:
-            shutil.rmtree(os.path.join(CACHE_DIR, FOLDER_PREVIEW_FRAMES))
-        except FileNotFoundError:
-            pass
-
         self.requestor.stop()
 
 
