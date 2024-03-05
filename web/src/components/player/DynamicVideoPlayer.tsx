@@ -85,6 +85,16 @@ export default function DynamicVideoPlayer({
     );
   }, [camera, config, previewOnly]);
 
+  useEffect(() => {
+    if (!controller) {
+      return;
+    }
+
+    if (onControllerReady) {
+      onControllerReady(controller);
+    }
+  }, [controller, onControllerReady]);
+
   const [hasRecordingAtTime, setHasRecordingAtTime] = useState(true);
 
   // keyboard control
@@ -215,6 +225,10 @@ export default function DynamicVideoPlayer({
     );
     setCurrentPreview(preview);
 
+    if (preview && previewRef.current) {
+      previewRef.current.load();
+    }
+
     controller.newPlayback({
       recordings: recordings ?? [],
       playbackUri,
@@ -283,27 +297,20 @@ export default function DynamicVideoPlayer({
       )}
       <video
         ref={previewRef}
-        className={`size-full rounded-2xl ${currentPreview != undefined && isScrubbing ? "visible" : "hidden"} ${tallVideo ? "aspect-tall" : ""} bg-black`}
+        className={`size-full rounded-2xl ${currentPreview != undefined && (previewOnly || isScrubbing) ? "visible" : "hidden"} ${tallVideo ? "aspect-tall" : ""} bg-black`}
         preload="auto"
         autoPlay
         playsInline
         muted
         onSeeked={onPreviewSeeked}
         onLoadedData={() => controller.previewReady()}
-        onLoadStart={
-          previewOnly && onControllerReady
-            ? () => {
-                onControllerReady(controller);
-              }
-            : undefined
-        }
       >
         {currentPreview != undefined && (
           <source src={currentPreview.src} type={currentPreview.type} />
         )}
       </video>
       {onClick && !hasRecordingAtTime && (
-        <div className="absolute inset-0 z-10 bg-black bg-opacity-60" />
+        <div className="absolute inset-0 z-10 bg-black bg-opacity-60 rounded-2xl" />
       )}
     </div>
   );
