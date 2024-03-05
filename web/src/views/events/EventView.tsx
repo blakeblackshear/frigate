@@ -529,7 +529,7 @@ type MotionReviewProps = {
   relevantPreviews?: Preview[];
   timeRange: { before: number; after: number };
   filter?: ReviewFilter;
-  onSelectReview: (data: string) => void;
+  onSelectReview: (data: string, ctrl: boolean) => void;
 };
 function MotionReview({
   contentRef,
@@ -656,7 +656,7 @@ function MotionReview({
                 setPlayerReady(true);
               }}
               onClick={() =>
-                onSelectReview(`motion,${camera.name},${currentTime}`)
+                onSelectReview(`motion,${camera.name},${currentTime}`, false)
               }
             />
           );
