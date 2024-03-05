@@ -271,9 +271,7 @@ def review_activity():
     )
 
     # get scale in seconds
-    scale = request.args.get(
-        "scale", type=int, default=30
-    )
+    scale = request.args.get("scale", type=int, default=30)
 
     all_recordings: list[Recordings] = (
         Recordings.select(
@@ -293,11 +291,13 @@ def review_activity():
     data: list[dict[str, float]] = []
 
     for rec in all_recordings:
-        data.append({
-            "start_time": rec.start_time,
-            "motion": rec.motion if rec.objects == 0 else 0,
-            "audio": rec.dBFS if rec.objects == 0 else 0,
-        })
+        data.append(
+            {
+                "start_time": rec.start_time,
+                "motion": rec.motion if rec.objects == 0 else 0,
+                "audio": rec.dBFS if rec.objects == 0 else 0,
+            }
+        )
 
     # resample data using pandas to get activity on scaled basis
     df = pd.DataFrame(data, columns=["start_time", "motion", "audio"])
@@ -308,8 +308,16 @@ def review_activity():
 
     # normalize data
     df = df.resample(f"{scale}S").mean().fillna(0.0)
-    df["motion"] = (df["motion"] - df["motion"].min()) / (df["motion"].max() - df["motion"].min()) * 100
-    df["audio"] = (df["audio"] - df["audio"].max()) / (df["audio"].min() - df["audio"].max()) * -100
+    df["motion"] = (
+        (df["motion"] - df["motion"].min())
+        / (df["motion"].max() - df["motion"].min())
+        * 100
+    )
+    df["audio"] = (
+        (df["audio"] - df["audio"].max())
+        / (df["audio"].min() - df["audio"].max())
+        * -100
+    )
 
     # change types for output
     df.index = df.index.astype(int) // (10**9)
