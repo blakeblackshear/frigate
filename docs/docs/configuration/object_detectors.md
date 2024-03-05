@@ -123,9 +123,9 @@ or when using docker compose:
 ```yaml
 services:
   frigate:
-...
-    environment:
-      DOWNLOAD_YOLOV8: "1"
+---
+environment:
+  DOWNLOAD_YOLOV8: "1"
 ```
 
 When this variable is set then frigate will at startup fetch [yolov8.small.models.tar.gz](https://github.com/harakas/models/releases/download/yolov8.1-1.1/yolov8.small.models.tar.gz) and extract it into the `/config/model_cache/yolov8/` directory.
@@ -313,7 +313,7 @@ frigate:
 
 ### Configuration Parameters
 
-The TensorRT detector can be selected by specifying `tensorrt` as the model type. The GPU will need to be passed through to the docker container using the same methods described in the [Hardware Acceleration](hardware_acceleration.md#nvidia-gpu) section. If you pass through multiple GPUs, you can select which GPU is used for a detector with the `device` configuration parameter. The `device` parameter is an integer value of the GPU index, as shown by `nvidia-smi` within the container.
+The TensorRT detector can be selected by specifying `tensorrt` as the model type. The GPU will need to be passed through to the docker container using the same methods described in the [Hardware Acceleration](hardware_acceleration.md#nvidia-gpus) section. If you pass through multiple GPUs, you can select which GPU is used for a detector with the `device` configuration parameter. The `device` parameter is an integer value of the GPU index, as shown by `nvidia-smi` within the container.
 
 The TensorRT detector uses `.trt` model files that are located in `/config/model_cache/tensorrt` by default. These model path and dimensions used will depend on which model you have generated.
 
@@ -484,11 +484,10 @@ When using docker compose:
 ```yaml
 services:
   frigate:
-...
-    devices:
-      - /dev/dri
-      - /dev/kfd
-...
+---
+devices:
+  - /dev/dri
+  - /dev/kfd
 ```
 
 For reference on recommended settings see [running ROCm/pytorch in Docker](https://rocm.docs.amd.com/projects/install-on-linux/en/develop/how-to/3rd-party/pytorch-install.html#using-docker-with-pytorch-pre-installed).
@@ -503,9 +502,9 @@ For chipset specific frigate rocm builds this variable is already set automatica
 
 For the general rocm frigate build there is some automatic detection:
 
-  - gfx90c -> 9.0.0
-  - gfx1031 -> 10.3.0
-  - gfx1103 -> 11.0.0
+- gfx90c -> 9.0.0
+- gfx1031 -> 10.3.0
+- gfx1103 -> 11.0.0
 
 If you have something else you might need to override the `HSA_OVERRIDE_GFX_VERSION` at Docker launch. Suppose the version you want is `9.0.0`, then you should configure it from command line as:
 
@@ -519,18 +518,18 @@ When using docker compose:
 ```yaml
 services:
   frigate:
-...
-    environment:
-      HSA_OVERRIDE_GFX_VERSION: "9.0.0"
+---
+environment:
+  HSA_OVERRIDE_GFX_VERSION: "9.0.0"
 ```
 
 Figuring out what version you need can be complicated as you can't tell the chipset name and driver from the AMD brand name.
 
-  - first make sure that rocm environment is running properly by running `/opt/rocm/bin/rocminfo` in the frigate container -- it should list both the CPU and the GPU with their properties
-  - find the chipset version you have (gfxNNN) from the output of the `rocminfo` (see below)
-  - use a search engine to query what `HSA_OVERRIDE_GFX_VERSION` you need for the given gfx name ("gfxNNN ROCm HSA_OVERRIDE_GFX_VERSION")
-  - override the `HSA_OVERRIDE_GFX_VERSION` with relevant value
-  - if things are not working check the frigate docker logs
+- first make sure that rocm environment is running properly by running `/opt/rocm/bin/rocminfo` in the frigate container -- it should list both the CPU and the GPU with their properties
+- find the chipset version you have (gfxNNN) from the output of the `rocminfo` (see below)
+- use a search engine to query what `HSA_OVERRIDE_GFX_VERSION` you need for the given gfx name ("gfxNNN ROCm HSA_OVERRIDE_GFX_VERSION")
+- override the `HSA_OVERRIDE_GFX_VERSION` with relevant value
+- if things are not working check the frigate docker logs
 
 #### Figuring out if AMD/ROCm is working and found your GPU
 
@@ -566,9 +565,9 @@ or when using docker compose:
 ```yaml
 services:
   frigate:
-...
-    environment:
-      DOWNLOAD_YOLOV8: "1"
+---
+environment:
+  DOWNLOAD_YOLOV8: "1"
 ```
 
 Download can be triggered also in regular frigate builds using that environment variable. The following files will be available under `/config/model_cache/yolov8/`:

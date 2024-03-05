@@ -212,7 +212,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Create short sha
         run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
-      - uses: int128/docker-manifest-create-action@v1
+      - uses: int128/docker-manifest-create-action@v2
         with:
           tags: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ env.SHORT_SHA }}
           suffixes: |
