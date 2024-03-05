@@ -627,18 +627,18 @@ function MotionReview({
             grow = "aspect-video";
           }
           return (
-            <div key={camera.name} className={`${grow}`}>
-              <DynamicVideoPlayer
-                camera={camera.name}
-                timeRange={timeRangeSegments.ranges[selectedRangeIdx]}
-                cameraPreviews={relevantPreviews || []}
-                previewOnly
-                onControllerReady={(controller) => {
-                  videoPlayersRef.current[camera.name] = controller;
-                  setPlayerReady(true);
-                }}
-              />
-            </div>
+            <DynamicVideoPlayer
+              key={camera.name}
+              className={`${grow}`}
+              camera={camera.name}
+              timeRange={timeRangeSegments.ranges[selectedRangeIdx]}
+              cameraPreviews={relevantPreviews || []}
+              previewOnly
+              onControllerReady={(controller) => {
+                videoPlayersRef.current[camera.name] = controller;
+                setPlayerReady(true);
+              }}
+            />
           );
         })}
       </div>

@@ -11,9 +11,13 @@ import {
   ReviewSummary,
 } from "@/types/review";
 import EventView from "@/views/events/EventView";
-import RecordingView from "@/views/events/RecordingView";
+import {
+  DesktopRecordingView,
+  MobileRecordingView,
+} from "@/views/events/RecordingView";
 import axios from "axios";
 import { useCallback, useMemo, useState } from "react";
+import { isMobile } from "react-device-detect";
 import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
 
@@ -237,6 +241,10 @@ export default function Events() {
   // selected items
 
   const selectedData = useMemo(() => {
+    if (!config) {
+      return undefined;
+    }
+
     if (!selectedReviewId) {
       return undefined;
     }
@@ -244,6 +252,8 @@ export default function Events() {
     if (!reviewPages) {
       return undefined;
     }
+
+    const allCameras = reviewFilter?.cameras ?? Object.keys(config.cameras);
 
     const allReviews = reviewPages.flat();
     const selectedReview = allReviews.find(
@@ -256,11 +266,9 @@ export default function Events() {
 
     return {
       selected: selectedReview,
-      cameraSegments: allReviews.filter(
-        (seg) => seg.camera == selectedReview.camera,
-      ),
-      cameraPreviews: allPreviews?.filter(
-        (seg) => seg.camera == selectedReview.camera,
+      allCameras: allCameras,
+      cameraSegments: allReviews.filter((seg) =>
+        allCameras.includes(seg.camera),
       ),
     };
 
@@ -273,11 +281,24 @@ export default function Events() {
   }
 
   if (selectedData) {
+    if (isMobile) {
+      return (
+        <MobileRecordingView
+          reviewItems={selectedData.cameraSegments}
+          selectedReview={selectedData.selected}
+          relevantPreviews={allPreviews}
+        />
+      );
+    }
+
     return (
-      <RecordingView
+      <DesktopRecordingView
+        startCamera={selectedData.selected.camera}
+        startTime={selectedData.selected.start_time}
+        allCameras={selectedData.allCameras}
+        severity={selectedData.selected.severity}
         reviewItems={selectedData.cameraSegments}
-        selectedReview={selectedData.selected}
-        relevantPreviews={selectedData.cameraPreviews}
+        allPreviews={allPreviews}
       />
     );
   } else {

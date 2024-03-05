@@ -30,6 +30,7 @@ type DynamicVideoPlayerProps = {
   cameraPreviews: Preview[];
   previewOnly?: boolean;
   onControllerReady?: (controller: DynamicVideoController) => void;
+  onClick?: () => void;
 };
 export default function DynamicVideoPlayer({
   className,
@@ -38,6 +39,7 @@ export default function DynamicVideoPlayer({
   cameraPreviews,
   previewOnly = false,
   onControllerReady,
+  onClick,
 }: DynamicVideoPlayerProps) {
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -82,6 +84,8 @@ export default function DynamicVideoPlayer({
       setFocusedItem,
     );
   }, [camera, config, previewOnly]);
+
+  const [hasRecordingAtTime, setHasRecordingAtTime] = useState(true);
 
   // keyboard control
 
@@ -145,28 +149,35 @@ export default function DynamicVideoPlayer({
     // we only want to calculate this once
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const initialPreviewSource = useMemo(() => {
-    const preview = cameraPreviews.find(
+  const initialPreview = useMemo(() => {
+    return cameraPreviews.find(
       (preview) =>
         preview.camera == camera &&
         Math.round(preview.start) >= timeRange.start &&
         Math.floor(preview.end) <= timeRange.end,
     );
 
-    if (preview) {
-      return {
-        src: preview.src,
-        type: preview.type,
-      };
-    } else {
-      return undefined;
-    }
-
     // we only want to calculate this once
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const [currentPreview, setCurrentPreview] = useState(initialPreviewSource);
+  const [currentPreview, setCurrentPreview] = useState(initialPreview);
+
+  const onPreviewSeeked = useCallback(() => {
+    if (!controller) {
+      return;
+    }
+
+    controller.finishedSeeking();
+
+    if (currentPreview && previewOnly && previewRef.current && onClick) {
+      setHasRecordingAtTime(
+        controller.hasRecordingAtTime(
+          currentPreview.start + previewRef.current.currentTime,
+        ),
+      );
+    }
+  }, [controller, currentPreview, onClick, previewOnly]);
 
   // state of playback player
 
@@ -177,7 +188,9 @@ export default function DynamicVideoPlayer({
     };
   }, [timeRange]);
   const { data: recordings } = useSWR<Recording[]>(
-    previewOnly ? null : [`${camera}/recordings`, recordingParams],
+    previewOnly && onClick == undefined
+      ? null
+      : [`${camera}/recordings`, recordingParams],
     { revalidateOnFocus: false },
   );
 
@@ -217,7 +230,10 @@ export default function DynamicVideoPlayer({
   }
 
   return (
-    <div className={className}>
+    <div
+      className={`relative ${className ?? ""} ${onClick ? (hasRecordingAtTime ? "cursor-pointer" : "") : ""}`}
+      onClick={onClick}
+    >
       {!previewOnly && (
         <div
           className={`w-full relative ${
@@ -272,7 +288,7 @@ export default function DynamicVideoPlayer({
         autoPlay
         playsInline
         muted
-        onSeeked={() => controller.finishedSeeking()}
+        onSeeked={onPreviewSeeked}
         onLoadedData={() => controller.previewReady()}
         onLoadStart={
           previewOnly && onControllerReady
@@ -286,6 +302,9 @@ export default function DynamicVideoPlayer({
           <source src={currentPreview.src} type={currentPreview.type} />
         )}
       </video>
+      {onClick && !hasRecordingAtTime && (
+        <div className="absolute inset-0 z-10 bg-black bg-opacity-60" />
+      )}
     </div>
   );
 }
@@ -406,7 +425,7 @@ export class DynamicVideoController {
     }
   }
 
-  onPlayerTimeUpdate(listener: (timestamp: number) => void) {
+  onPlayerTimeUpdate(listener: ((timestamp: number) => void) | undefined) {
     this.onPlaybackTimestamp = listener;
   }
 
@@ -507,5 +526,17 @@ export class DynamicVideoController {
   previewReady() {
     this.previewRef.current?.pause();
     this.readyToScrub = true;
+  }
+
+  hasRecordingAtTime(time: number): boolean {
+    if (!this.recordings || this.recordings.length == 0) {
+      return false;
+    }
+
+    return (
+      this.recordings.find(
+        (segment) => segment.start_time <= time && segment.end_time >= time,
+      ) != undefined
+    );
   }
 }
