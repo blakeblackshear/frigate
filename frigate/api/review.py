@@ -4,7 +4,6 @@ import logging
 from datetime import datetime, timedelta
 from functools import reduce
 
-import numpy as np
 import pandas as pd
 from flask import (
     Blueprint,
