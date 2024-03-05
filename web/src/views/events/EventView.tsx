@@ -286,6 +286,7 @@ export default function EventView({
             relevantPreviews={relevantPreviews}
             timeRange={timeRange}
             filter={filter}
+            onSelectReview={onSelectReview}
           />
         )}
       </div>
@@ -528,6 +529,7 @@ type MotionReviewProps = {
   relevantPreviews?: Preview[];
   timeRange: { before: number; after: number };
   filter?: ReviewFilter;
+  onSelectReview: (data: string) => void;
 };
 function MotionReview({
   contentRef,
@@ -535,6 +537,7 @@ function MotionReview({
   relevantPreviews,
   timeRange,
   filter,
+  onSelectReview,
 }: MotionReviewProps) {
   const segmentDuration = 30;
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -652,6 +655,9 @@ function MotionReview({
                 videoPlayersRef.current[camera.name] = controller;
                 setPlayerReady(true);
               }}
+              onClick={() =>
+                onSelectReview(`motion,${camera.name},${currentTime}`)
+              }
             />
           );
         })}

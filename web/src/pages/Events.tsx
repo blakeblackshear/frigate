@@ -240,12 +240,8 @@ export default function Events() {
 
   // selected items
 
-  const selectedData = useMemo(() => {
+  const selectedReviewData = useMemo(() => {
     if (!config) {
-      return undefined;
-    }
-
-    if (!selectedReviewId) {
       return undefined;
     }
 
@@ -253,9 +249,28 @@ export default function Events() {
       return undefined;
     }
 
+    if (!selectedReviewId) {
+      return undefined;
+    }
+
     const allCameras = reviewFilter?.cameras ?? Object.keys(config.cameras);
 
     const allReviews = reviewPages.flat();
+
+    if (selectedReviewId.startsWith("motion")) {
+      const motionData = selectedReviewId.split(",");
+      // format is motion,camera,start_time
+      return {
+        camera: motionData[1],
+        severity: "significant_motion" as ReviewSeverity,
+        start_time: parseFloat(motionData[2]),
+        allCameras: allCameras,
+        cameraSegments: allReviews.filter((seg) =>
+          allCameras.includes(seg.camera),
+        ),
+      };
+    }
+
     const selectedReview = allReviews.find(
       (item) => item.id == selectedReviewId,
     );
@@ -265,7 +280,9 @@ export default function Events() {
     }
 
     return {
-      selected: selectedReview,
+      camera: selectedReview.camera,
+      severity: selectedReview.severity,
+      start_time: selectedReview.start_time,
       allCameras: allCameras,
       cameraSegments: allReviews.filter((seg) =>
         allCameras.includes(seg.camera),
@@ -280,12 +297,14 @@ export default function Events() {
     return <ActivityIndicator />;
   }
 
-  if (selectedData) {
+  if (selectedReviewData) {
     if (isMobile) {
       return (
         <MobileRecordingView
-          reviewItems={selectedData.cameraSegments}
-          selectedReview={selectedData.selected}
+          reviewItems={selectedReviewData.cameraSegments}
+          startCamera={selectedReviewData.camera}
+          startTime={selectedReviewData.start_time}
+          severity={selectedReviewData.severity}
           relevantPreviews={allPreviews}
         />
       );
@@ -293,11 +312,11 @@ export default function Events() {
 
     return (
       <DesktopRecordingView
-        startCamera={selectedData.selected.camera}
-        startTime={selectedData.selected.start_time}
-        allCameras={selectedData.allCameras}
-        severity={selectedData.selected.severity}
-        reviewItems={selectedData.cameraSegments}
+        startCamera={selectedReviewData.camera}
+        startTime={selectedReviewData.start_time}
+        allCameras={selectedReviewData.allCameras}
+        severity={selectedReviewData.severity}
+        reviewItems={selectedReviewData.cameraSegments}
         allPreviews={allPreviews}
       />
     );

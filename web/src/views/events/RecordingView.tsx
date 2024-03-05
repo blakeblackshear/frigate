@@ -2,13 +2,17 @@ import DynamicVideoPlayer, {
   DynamicVideoController,
 } from "@/components/player/DynamicVideoPlayer";
 import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
+import MotionReviewTimeline from "@/components/timeline/MotionReviewTimeline";
 import { Button } from "@/components/ui/button";
 import { Preview } from "@/types/preview";
-import { ReviewSegment, ReviewSeverity } from "@/types/review";
+import { MotionData, ReviewSegment, ReviewSeverity } from "@/types/review";
 import { getChunkedTimeDay } from "@/utils/timelineUtil";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
+import useSWR from "swr";
+
+const SEGMENT_DURATION = 30;
 
 type DesktopRecordingViewProps = {
   startCamera: string;
@@ -116,6 +120,21 @@ export function DesktopRecordingView({
     [allCameras, currentTime, mainCamera],
   );
 
+  // motion timeline data
+
+  const { data: motionData } = useSWR<MotionData[]>(
+    severity == "significant_motion"
+      ? [
+          "review/activity",
+          {
+            before: timeRange.end,
+            after: timeRange.start,
+            scale: SEGMENT_DURATION / 2,
+          },
+        ]
+      : null,
+  );
+
   return (
     <div ref={contentRef} className="relative size-full">
       <Button
@@ -181,31 +200,52 @@ export function DesktopRecordingView({
       </div>
 
       <div className="absolute overflow-hidden w-56 inset-y-0 right-0">
-        <EventReviewTimeline
-          segmentDuration={30}
-          timestampSpread={15}
-          timelineStart={timeRange.end}
-          timelineEnd={timeRange.start}
-          showHandlebar
-          handlebarTime={currentTime}
-          setHandlebarTime={setCurrentTime}
-          events={reviewItems}
-          severityType={severity}
-          contentRef={contentRef}
-          onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
-        />
+        {severity != "significant_motion" ? (
+          <EventReviewTimeline
+            segmentDuration={30}
+            timestampSpread={15}
+            timelineStart={timeRange.end}
+            timelineEnd={timeRange.start}
+            showHandlebar
+            handlebarTime={currentTime}
+            setHandlebarTime={setCurrentTime}
+            events={reviewItems}
+            severityType={severity}
+            contentRef={contentRef}
+            onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
+          />
+        ) : (
+          <MotionReviewTimeline
+            segmentDuration={30}
+            timestampSpread={15}
+            timelineStart={timeRange.end}
+            timelineEnd={timeRange.start}
+            showHandlebar
+            handlebarTime={currentTime}
+            setHandlebarTime={setCurrentTime}
+            events={reviewItems}
+            motion_events={motionData ?? []}
+            severityType={severity}
+            contentRef={contentRef}
+            onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
+          />
+        )}
       </div>
     </div>
   );
 }
 
 type MobileRecordingViewProps = {
-  selectedReview: ReviewSegment;
+  startCamera: string;
+  startTime: number;
+  severity: ReviewSeverity;
   reviewItems: ReviewSegment[];
   relevantPreviews?: Preview[];
 };
 export function MobileRecordingView({
-  selectedReview,
+  startCamera,
+  startTime,
+  severity,
   reviewItems,
   relevantPreviews,
 }: MobileRecordingViewProps) {
@@ -219,16 +259,10 @@ export function MobileRecordingView({
 
   // timeline time
 
-  const timeRange = useMemo(
-    () => getChunkedTimeDay(selectedReview.start_time),
-    [selectedReview],
-  );
+  const timeRange = useMemo(() => getChunkedTimeDay(startTime), [startTime]);
   const [selectedRangeIdx, setSelectedRangeIdx] = useState(
     timeRange.ranges.findIndex((chunk) => {
-      return (
-        chunk.start <= selectedReview.start_time &&
-        chunk.end >= selectedReview.start_time
-      );
+      return chunk.start <= startTime && chunk.end >= startTime;
     }),
   );
 
@@ -251,7 +285,7 @@ export function MobileRecordingView({
 
   const [scrubbing, setScrubbing] = useState(false);
   const [currentTime, setCurrentTime] = useState<number>(
-    selectedReview?.start_time || Date.now() / 1000,
+    startTime || Date.now() / 1000,
   );
 
   useEffect(() => {
@@ -269,6 +303,21 @@ export function MobileRecordingView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scrubbing]);
 
+  // motion timeline data
+
+  const { data: motionData } = useSWR<MotionData[]>(
+    severity == "significant_motion"
+      ? [
+          "review/activity",
+          {
+            before: timeRange.end,
+            after: timeRange.start,
+            scale: SEGMENT_DURATION / 2,
+          },
+        ]
+      : null,
+  );
+
   return (
     <div ref={contentRef} className="flex flex-col relative w-full h-full">
       <Button className="rounded-lg" onClick={() => navigate(-1)}>
@@ -278,7 +327,7 @@ export function MobileRecordingView({
 
       <div>
         <DynamicVideoPlayer
-          camera={selectedReview.camera}
+          camera={startCamera}
           timeRange={timeRange.ranges[selectedRangeIdx]}
           cameraPreviews={relevantPreviews || []}
           onControllerReady={(controller) => {
@@ -288,28 +337,42 @@ export function MobileRecordingView({
               setCurrentTime(timestamp);
             });
 
-            controllerRef.current?.seekToTimestamp(
-              selectedReview.start_time,
-              true,
-            );
+            controllerRef.current?.seekToTimestamp(startTime, true);
           }}
         />
       </div>
 
       <div className="flex-grow overflow-hidden">
-        <EventReviewTimeline
-          segmentDuration={30}
-          timestampSpread={15}
-          timelineStart={timeRange.end}
-          timelineEnd={timeRange.start}
-          showHandlebar
-          handlebarTime={currentTime}
-          setHandlebarTime={setCurrentTime}
-          events={reviewItems}
-          severityType={selectedReview.severity}
-          contentRef={contentRef}
-          onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
-        />
+        {severity != "significant_motion" ? (
+          <EventReviewTimeline
+            segmentDuration={30}
+            timestampSpread={15}
+            timelineStart={timeRange.end}
+            timelineEnd={timeRange.start}
+            showHandlebar
+            handlebarTime={currentTime}
+            setHandlebarTime={setCurrentTime}
+            events={reviewItems}
+            severityType={severity}
+            contentRef={contentRef}
+            onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
+          />
+        ) : (
+          <MotionReviewTimeline
+            segmentDuration={30}
+            timestampSpread={15}
+            timelineStart={timeRange.end}
+            timelineEnd={timeRange.start}
+            showHandlebar
+            handlebarTime={currentTime}
+            setHandlebarTime={setCurrentTime}
+            events={reviewItems}
+            motion_events={motionData ?? []}
+            severityType={severity}
+            contentRef={contentRef}
+            onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
+          />
+        )}
       </div>
     </div>
   );
