@@ -602,6 +602,7 @@ function MotionReview({
       before: timeRange.before,
       after: timeRange.after,
       scale: segmentDuration / 2,
+      cameras: filter?.cameras?.join(",") ?? null,
     },
   ]);
 

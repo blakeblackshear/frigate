@@ -356,13 +356,17 @@ def delete_reviews(ids: str):
 @ReviewBp.route("/review/activity")
 def review_activity():
     """Get motion and audio activity."""
+    cameras = request.args.get("cameras", "all")
     before = request.args.get("before", type=float, default=datetime.now().timestamp())
     after = request.args.get(
         "after", type=float, default=(datetime.now() - timedelta(hours=1)).timestamp()
     )
 
-    # get scale in seconds
-    scale = request.args.get("scale", type=int, default=30)
+    clauses = [(Recordings.start_time > after) & (Recordings.end_time < before)]
+
+    if cameras != "all":
+        camera_list = cameras.split(",")
+        clauses.append((Recordings.camera << camera_list))
 
     all_recordings: list[Recordings] = (
         Recordings.select(
@@ -372,7 +376,7 @@ def review_activity():
             Recordings.motion,
             Recordings.dBFS,
         )
-        .where((Recordings.start_time > after) & (Recordings.end_time < before))
+        .where(reduce(operator.and_, clauses))
         .order_by(Recordings.start_time.asc())
         .iterator()
     )
@@ -389,6 +393,9 @@ def review_activity():
                 "audio": rec.dBFS if rec.objects == 0 else 0,
             }
         )
+
+    # get scale in seconds
+    scale = request.args.get("scale", type=int, default=30)
 
     # resample data using pandas to get activity on scaled basis
     df = pd.DataFrame(data, columns=["start_time", "motion", "audio"])
