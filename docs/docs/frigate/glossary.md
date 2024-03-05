@@ -27,7 +27,7 @@ Motion masks prevent detection of [motion](#motion) in masked areas from trigger
 
 ### Object Mask
 
-Object filter masks drop any bounding boxes where the bottom center (overlap doesn't matter) is in the masked area. It forces them to be considered a [false positive](#false_positive) so that they are ignored.
+Object filter masks drop any bounding boxes where the bottom center (overlap doesn't matter) is in the masked area. It forces them to be considered a [false positive](#false-positive) so that they are ignored.
 
 ## Min Score
 
