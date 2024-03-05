@@ -300,7 +300,6 @@ def review_summary():
     for e in last_month.dicts().iterator():
         data[e["day"]] = e
 
-
     return jsonify(data)
 
 
