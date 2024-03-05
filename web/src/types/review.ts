@@ -28,7 +28,7 @@ export type ReviewFilter = {
   showReviewed?: 0 | 1;
 };
 
-export type ReviewSummary = {
+type ReviewSummaryDay = {
   day: string;
   reviewed_alert: number;
   reviewed_detection: number;
@@ -36,6 +36,10 @@ export type ReviewSummary = {
   total_alert: number;
   total_detection: number;
   total_motion: number;
+};
+
+export type ReviewSummary = {
+  [day: string]: ReviewSummaryDay;
 };
 
 export type MotionData = {

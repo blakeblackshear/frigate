@@ -76,10 +76,111 @@ def review():
 def review_summary():
     tz_name = request.args.get("timezone", default="utc", type=str)
     hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(tz_name)
+    day_ago = (datetime.now() - timedelta(hours=24)).timestamp()
     month_ago = (datetime.now() - timedelta(days=30)).timestamp()
 
     cameras = request.args.get("cameras", "all")
     labels = request.args.get("labels", "all")
+
+    clauses = [(ReviewSegment.start_time > day_ago)]
+
+    if cameras != "all":
+        camera_list = cameras.split(",")
+        clauses.append((ReviewSegment.camera << camera_list))
+
+    if labels != "all":
+        # use matching so segments with multiple labels
+        # still match on a search where any label matches
+        label_clauses = []
+        filtered_labels = labels.split(",")
+
+        for label in filtered_labels:
+            label_clauses.append(
+                (ReviewSegment.data["objects"].cast("text") % f'*"{label}"*')
+            )
+
+        label_clause = reduce(operator.or_, label_clauses)
+        clauses.append((label_clause))
+
+    last_24 = (
+        ReviewSegment.select(
+            fn.SUM(
+                Case(
+                    None,
+                    [
+                        (
+                            (ReviewSegment.severity == "alert"),
+                            ReviewSegment.has_been_reviewed,
+                        )
+                    ],
+                    0,
+                )
+            ).alias("reviewed_alert"),
+            fn.SUM(
+                Case(
+                    None,
+                    [
+                        (
+                            (ReviewSegment.severity == "detection"),
+                            ReviewSegment.has_been_reviewed,
+                        )
+                    ],
+                    0,
+                )
+            ).alias("reviewed_detection"),
+            fn.SUM(
+                Case(
+                    None,
+                    [
+                        (
+                            (ReviewSegment.severity == "significant_motion"),
+                            ReviewSegment.has_been_reviewed,
+                        )
+                    ],
+                    0,
+                )
+            ).alias("reviewed_motion"),
+            fn.SUM(
+                Case(
+                    None,
+                    [
+                        (
+                            (ReviewSegment.severity == "alert"),
+                            1,
+                        )
+                    ],
+                    0,
+                )
+            ).alias("total_alert"),
+            fn.SUM(
+                Case(
+                    None,
+                    [
+                        (
+                            (ReviewSegment.severity == "detection"),
+                            1,
+                        )
+                    ],
+                    0,
+                )
+            ).alias("total_detection"),
+            fn.SUM(
+                Case(
+                    None,
+                    [
+                        (
+                            (ReviewSegment.severity == "significant_motion"),
+                            1,
+                        )
+                    ],
+                    0,
+                )
+            ).alias("total_motion"),
+        )
+        .where(reduce(operator.and_, clauses))
+        .dicts()
+        .get()
+    )
 
     clauses = [(ReviewSegment.start_time > month_ago)]
 
@@ -101,7 +202,7 @@ def review_summary():
         label_clause = reduce(operator.or_, label_clauses)
         clauses.append((label_clause))
 
-    groups = (
+    last_month = (
         ReviewSegment.select(
             fn.strftime(
                 "%Y-%m-%d",
@@ -192,7 +293,15 @@ def review_summary():
         .order_by(ReviewSegment.start_time.desc())
     )
 
-    return jsonify([e for e in groups.dicts().iterator()])
+    data = {
+        "last24Hours": last_24,
+    }
+
+    for e in last_month.dicts().iterator():
+        data[e["day"]] = e
+
+
+    return jsonify(data)
 
 
 @ReviewBp.route("/reviews/viewed", methods=("POST",))

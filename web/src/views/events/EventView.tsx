@@ -39,7 +39,7 @@ import { Button } from "@/components/ui/button";
 
 type EventViewProps = {
   reviewPages?: ReviewSegment[][];
-  reviewSummary?: ReviewSummary[];
+  reviewSummary?: ReviewSummary;
   relevantPreviews?: Preview[];
   timeRange: { before: number; after: number };
   reachedEnd: boolean;
@@ -75,17 +75,17 @@ export default function EventView({
   // review counts
 
   const reviewCounts = useMemo(() => {
-    if (!reviewSummary || reviewSummary.length == 0) {
+    if (!reviewSummary) {
       return { alert: 0, detection: 0, significant_motion: 0 };
     }
 
     let summary;
     if (filter?.before == undefined) {
-      summary = reviewSummary[0];
+      summary = reviewSummary["last24Hours"];
     } else {
       const day = new Date(filter.before * 1000);
       const key = `${day.getFullYear()}-${("0" + (day.getMonth() + 1)).slice(-2)}-${("0" + day.getDate()).slice(-2)}`;
-      summary = reviewSummary.find((check) => check.day == key);
+      summary = reviewSummary[key];
     }
 
     if (!summary) {
