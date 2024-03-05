@@ -117,9 +117,9 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
 
     if (fullscreen) {
       if (aspect > 16 / 9) {
-        return "absolute inset-x-0 top-[50%] -translate-y-[50%]";
+        return "absolute inset-x-2 top-[50%] -translate-y-[50%]";
       } else {
-        return "absolute inset-y-0 left-[50%] -translate-x-[50%]";
+        return "absolute inset-y-2 left-[50%] -translate-x-[50%]";
       }
     } else {
       return "absolute top-2 bottom-2 left-[50%] -translate-x-[50%]";
@@ -135,14 +135,14 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
   }, [camera]);
 
   const aspectRatio = useMemo<number>(() => {
-    if (isMobile) {
+    if (isMobile || fullscreen) {
       return cameraAspectRatio;
     } else {
       return windowAspectRatio < cameraAspectRatio
         ? windowAspectRatio - 0.05
         : cameraAspectRatio - 0.03;
     }
-  }, [cameraAspectRatio, windowAspectRatio]);
+  }, [cameraAspectRatio, windowAspectRatio, fullscreen]);
 
   return (
     <div
