@@ -72,7 +72,7 @@ export default function EventView({
   // review counts
 
   const reviewCounts = useMemo(() => {
-    if (!reviewSummary) {
+    if (!reviewSummary || reviewSummary.length == 0) {
       return { alert: 0, detection: 0, significant_motion: 0 };
     }
 
@@ -80,7 +80,13 @@ export default function EventView({
     if (filter?.before == undefined) {
       summary = reviewSummary[0];
     } else {
-      summary = reviewSummary[0];
+      const day = new Date(filter.before * 1000);
+      const key = `${day.getFullYear()}-${("0" + (day.getMonth() + 1)).slice(-2)}-${("0" + day.getDate()).slice(-2)}`;
+      summary = reviewSummary.find((check) => check.day == key);
+    }
+
+    if (!summary) {
+      return { alert: 0, detection: 0, significant_motion: 0 };
     }
 
     if (filter?.showReviewed == 1) {

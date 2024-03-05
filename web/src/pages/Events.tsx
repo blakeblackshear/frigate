@@ -115,7 +115,15 @@ export default function Events() {
 
   const { data: reviewSummary, mutate: updateSummary } = useSWR<
     ReviewSummary[]
-  >(["review/summary", { timezone: timezone }, { revalidateOnFocus: false }]);
+  >([
+    "review/summary",
+    {
+      timezone: timezone,
+      cameras: reviewSearchParams["cameras"] ?? null,
+      labels: reviewSearchParams["labels"] ?? null,
+    },
+    { revalidateOnFocus: false },
+  ]);
 
   // preview videos
 
