@@ -121,8 +121,6 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
       } else {
         return "absolute inset-y-0 left-[50%] -translate-x-[50%]";
       }
-    } else if (aspect > 2) {
-      return "absolute left-0 right-0 top-[50%] -translate-y-[50%]";
     } else {
       return "absolute top-2 bottom-2 left-[50%] -translate-x-[50%]";
     }
