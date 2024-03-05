@@ -286,7 +286,7 @@ These instructions were originally based on the [Jellyfin documentation](https:/
 
 ## NVIDIA Jetson (Orin AGX, Orin NX, Orin Nano\*, Xavier AGX, Xavier NX, TX2, TX1, Nano)
 
-We provide docker images that are based on Jetpack/L4T. They come with an `ffmpeg` build
+A separate set of docker images is available that is based on Jetpack/L4T. They come with an `ffmpeg` build
 with codecs that use the Jetson's dedicated media engine. If your Jetson host is running Jetpack 4.6, use the
 `stable-tensorrt-jp4` tagged image, or if your Jetson host is running Jetpack 5.0+, use the `stable-tensorrt-jp5`
 tagged image. Note that the Orin Nano has no video encoder, so frigate will use software encoding on this platform,
