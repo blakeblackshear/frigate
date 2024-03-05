@@ -232,6 +232,7 @@ export default function DynamicVideoPlayer({
   return (
     <div
       className={`relative ${className ?? ""} ${onClick ? (hasRecordingAtTime ? "cursor-pointer" : "") : ""}`}
+      onClick={onClick}
     >
       {!previewOnly && (
         <div
