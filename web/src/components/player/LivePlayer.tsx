@@ -93,7 +93,7 @@ export default function LivePlayer({
   if (liveMode == "webrtc") {
     player = (
       <WebRtcPlayer
-        className={`rounded-2xl h-full ${liveReady ? "" : "hidden"}`}
+        className={`rounded-2xl size-full ${liveReady ? "" : "hidden"}`}
         camera={cameraConfig.live.stream_name}
         playbackEnabled={cameraActive}
         audioEnabled={playAudio}
@@ -104,7 +104,7 @@ export default function LivePlayer({
     if ("MediaSource" in window || "ManagedMediaSource" in window) {
       player = (
         <MSEPlayer
-          className={`rounded-2xl h-full ${liveReady ? "" : "hidden"}`}
+          className={`rounded-2xl size-full ${liveReady ? "" : "hidden"}`}
           camera={cameraConfig.name}
           playbackEnabled={cameraActive}
           audioEnabled={playAudio}
