@@ -71,6 +71,7 @@ function useDraggableHandler({
     (
       newHandlePosition: number,
       segmentStartTime: number,
+      scrollTimeline: boolean,
       updateHandle: boolean,
     ) => {
       const thumb = scrollTimeRef.current;
@@ -85,10 +86,12 @@ function useDraggableHandler({
               minute: "2-digit",
               ...(segmentDuration < 60 && { second: "2-digit" }),
             });
-            scrollIntoView(thumb, {
-              scrollMode: "if-needed",
-              behavior: "smooth",
-            });
+            if (scrollTimeline) {
+              scrollIntoView(thumb, {
+                block: "center",
+                behavior: "smooth",
+              });
+            }
           }
         });
 
@@ -136,7 +139,7 @@ function useDraggableHandler({
         const parentScrollTop = getCumulativeScrollTop(timelineRef.current);
 
         const newHandlePosition = Math.min(
-          visibleTimelineHeight - timelineTop + parentScrollTop,
+          visibleTimelineHeight + parentScrollTop,
           Math.max(
             segmentHeight + scrolled,
             clientY - timelineTop + parentScrollTop,
@@ -148,9 +151,14 @@ function useDraggableHandler({
           timelineStart - segmentIndex * segmentDuration,
         );
 
+        const scrollTimeline =
+          clientY < visibleTimelineHeight * 0.1 ||
+          clientY > visibleTimelineHeight * 0.9;
+
         updateHandlebarPosition(
           newHandlePosition - segmentHeight,
           segmentStartTime,
+          scrollTimeline,
           false,
         );
 
@@ -201,6 +209,7 @@ function useDraggableHandler({
       updateHandlebarPosition(
         newHandlePosition - segmentHeight,
         handlebarTime,
+        true,
         true,
       );
     }
