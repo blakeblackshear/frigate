@@ -212,9 +212,11 @@ export default function EventView({
         <ToggleGroup
           className="*:px-3 *:py-4 *:rounded-2xl"
           type="single"
-          defaultValue="alert"
           size="sm"
-          onValueChange={(value: ReviewSeverity) => setSeverity(value)}
+          value={severity}
+          onValueChange={(value: ReviewSeverity) =>
+            value ? setSeverity(value) : null
+          } // don't allow the severity to be unselected
         >
           <ToggleGroupItem
             className={`${severity == "alert" ? "" : "text-gray-500"}`}
@@ -510,7 +512,11 @@ function DetectionReview({
           {currentItems && (
             <div className="col-span-full flex justify-center items-center">
               {reachedEnd ? (
-                <Button className="text-white" onClick={markAllReviewed}>
+                <Button
+                  className="text-white"
+                  variant="select"
+                  onClick={markAllReviewed}
+                >
                   Mark all items as reviewed
                 </Button>
               ) : (

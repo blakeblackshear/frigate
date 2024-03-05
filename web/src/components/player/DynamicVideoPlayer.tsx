@@ -29,7 +29,7 @@ type DynamicVideoPlayerProps = {
   timeRange: { start: number; end: number };
   cameraPreviews: Preview[];
   previewOnly?: boolean;
-  onControllerReady?: (controller: DynamicVideoController) => void;
+  onControllerReady: (controller: DynamicVideoController) => void;
   onClick?: () => void;
 };
 export default function DynamicVideoPlayer({
@@ -86,14 +86,17 @@ export default function DynamicVideoPlayer({
   }, [camera, config, previewOnly]);
 
   useEffect(() => {
-    if (!controller) {
+    if (!playerRef.current && !previewRef.current) {
       return;
     }
 
-    if (onControllerReady) {
+    if (controller) {
       onControllerReady(controller);
     }
-  }, [controller, onControllerReady]);
+
+    // we only want to fire once when players are ready
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playerRef, previewRef]);
 
   const [hasRecordingAtTime, setHasRecordingAtTime] = useState(true);
 
@@ -277,10 +280,6 @@ export default function DynamicVideoPlayer({
               player.on("ended", () =>
                 controller.fireClipChangeEvent("forward"),
               );
-
-              if (onControllerReady) {
-                onControllerReady(controller);
-              }
             }}
             onDispose={() => {
               playerRef.current = undefined;
