@@ -45,7 +45,7 @@ type EventViewProps = {
   severity: ReviewSeverity;
   setSeverity: (severity: ReviewSeverity) => void;
   loadNextPage: () => void;
-  markItemAsReviewed: (reviewId: string) => void;
+  markItemAsReviewed: (review: ReviewSegment) => void;
   onOpenReview: (reviewId: string) => void;
   pullLatestData: () => void;
   updateFilter: (filter: ReviewFilter) => void;
@@ -303,7 +303,7 @@ type DetectionReviewProps = {
   reachedEnd: boolean;
   timeRange: { before: number; after: number };
   loadNextPage: () => void;
-  markItemAsReviewed: (id: string) => void;
+  markItemAsReviewed: (review: ReviewSegment) => void;
   onSelectReview: (id: string, ctrl: boolean) => void;
   pullLatestData: () => void;
 };

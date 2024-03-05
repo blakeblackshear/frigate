@@ -25,7 +25,7 @@ type PreviewPlayerProps = {
   allPreviews?: Preview[];
   scrollLock?: boolean;
   onTimeUpdate?: React.Dispatch<React.SetStateAction<number | undefined>>;
-  setReviewed: (reviewId: string) => void;
+  setReviewed: (review: ReviewSegment) => void;
   onClick: (reviewId: string, ctrl: boolean) => void;
 };
 
@@ -65,13 +65,13 @@ export default function PreviewThumbnailPlayer({
   );
 
   const swipeHandlers = useSwipeable({
-    onSwipedLeft: () => (setReviewed ? setReviewed(review.id) : null),
+    onSwipedLeft: () => (setReviewed ? setReviewed(review) : null),
     onSwipedRight: () => setPlayback(true),
     preventScrollOnSwipe: true,
   });
 
   const handleSetReviewed = useCallback(
-    () => setReviewed(review.id),
+    () => setReviewed(review),
     [review, setReviewed],
   );
 
