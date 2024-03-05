@@ -75,7 +75,7 @@ export default function LiveDashboardView({
   }, [visibilityListener]);
 
   return (
-    <div className="size-full overflow-y-scroll px-2">
+    <div className="size-full overflow-y-auto px-2">
       {isMobile && (
         <div className="relative h-9 flex items-center justify-between">
           <Logo className="absolute inset-y-0 inset-x-1/2 -translate-x-1/2 h-8" />
