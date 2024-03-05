@@ -279,6 +279,11 @@ export default function Events() {
       return undefined;
     }
 
+    // mark item as reviewed since it has been opened
+    if (!selectedReview?.has_been_reviewed) {
+      markItemAsReviewed(selectedReview);
+    }
+
     return {
       camera: selectedReview.camera,
       severity: selectedReview.severity,
