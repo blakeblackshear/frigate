@@ -1224,7 +1224,7 @@ class FrigateConfig(FrigateBaseModel):
                 camera_config.ffmpeg.hwaccel_args = config.ffmpeg.hwaccel_args
 
             for input in camera_config.ffmpeg.inputs:
-                need_record_fourcc = "record" in input.roles
+                need_record_fourcc = False and "record" in input.roles
                 need_detect_dimensions = "detect" in input.roles and (
                     camera_config.detect.height is None
                     or camera_config.detect.width is None
