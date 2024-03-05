@@ -5,12 +5,9 @@ import json
 import logging
 import os
 import traceback
-from collections import defaultdict
 from datetime import datetime, timedelta
 from functools import reduce
 
-import numpy as np
-import pandas as pd
 import requests
 from flask import (
     Blueprint,
@@ -31,7 +28,7 @@ from frigate.api.review import ReviewBp
 from frigate.config import FrigateConfig
 from frigate.const import CONFIG_DIR
 from frigate.events.external import ExternalEventProcessor
-from frigate.models import Event, Recordings, Timeline
+from frigate.models import Event, Timeline
 from frigate.plus import PlusApi
 from frigate.ptz.onvif import OnvifController
 from frigate.stats.emitter import StatsEmitter
@@ -632,102 +629,3 @@ def hourly_timeline():
             "hours": hours,
         }
     )
-
-
-@bp.route("/<camera_name>/recording/hourly/activity")
-def hourly_timeline_activity(camera_name: str):
-    """Get hourly summary for timeline."""
-    if camera_name not in current_app.frigate_config.cameras:
-        return make_response(
-            jsonify({"success": False, "message": "Camera not found"}),
-            404,
-        )
-
-    before = request.args.get("before", type=float, default=datetime.now())
-    after = request.args.get(
-        "after", type=float, default=datetime.now() - timedelta(hours=1)
-    )
-    tz_name = request.args.get("timezone", default="utc", type=str)
-
-    _, minute_modifier, _ = get_tz_modifiers(tz_name)
-    minute_offset = int(minute_modifier.split(" ")[0])
-
-    all_recordings: list[Recordings] = (
-        Recordings.select(
-            Recordings.start_time,
-            Recordings.duration,
-            Recordings.objects,
-            Recordings.motion,
-        )
-        .where(Recordings.camera == camera_name)
-        .where(Recordings.motion > 0)
-        .where((Recordings.start_time > after) & (Recordings.end_time < before))
-        .order_by(Recordings.start_time.asc())
-        .iterator()
-    )
-
-    # data format is ex:
-    # {timestamp: [{ date: 1, count: 1, type: motion }]}] }}
-    hours: dict[int, list[dict[str, any]]] = defaultdict(list)
-
-    key = datetime.fromtimestamp(after).replace(second=0, microsecond=0) + timedelta(
-        minutes=minute_offset
-    )
-    check = (key + timedelta(hours=1)).timestamp()
-
-    # set initial start so data is representative of full hour
-    hours[int(key.timestamp())].append(
-        [
-            key.timestamp(),
-            0,
-            False,
-        ]
-    )
-
-    for recording in all_recordings:
-        if recording.start_time > check:
-            hours[int(key.timestamp())].append(
-                [
-                    (key + timedelta(minutes=59, seconds=59)).timestamp(),
-                    0,
-                    False,
-                ]
-            )
-            key = key + timedelta(hours=1)
-            check = (key + timedelta(hours=1)).timestamp()
-            hours[int(key.timestamp())].append(
-                [
-                    key.timestamp(),
-                    0,
-                    False,
-                ]
-            )
-
-        data_type = recording.objects > 0
-        count = recording.motion + recording.objects
-        hours[int(key.timestamp())].append(
-            [
-                recording.start_time + (recording.duration / 2),
-                0 if count == 0 else np.log2(count),
-                data_type,
-            ]
-        )
-
-    # resample data using pandas to get activity on minute to minute basis
-    for key, data in hours.items():
-        df = pd.DataFrame(data, columns=["date", "count", "hasObjects"])
-
-        # set date as datetime index
-        df["date"] = pd.to_datetime(df["date"], unit="s")
-        df.set_index(["date"], inplace=True)
-
-        # normalize data
-        df = df.resample("T").mean().fillna(0)
-
-        # change types for output
-        df.index = df.index.astype(int) // (10**9)
-        df["count"] = df["count"].astype(int)
-        df["hasObjects"] = df["hasObjects"].astype(bool)
-        hours[key] = df.reset_index().to_dict("records")
-
-    return jsonify(hours)

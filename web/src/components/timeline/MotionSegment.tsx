@@ -1,6 +1,6 @@
 import { useEventUtils } from "@/hooks/use-event-utils";
 import { useEventSegmentUtils } from "@/hooks/use-event-segment-utils";
-import { ReviewSegment } from "@/types/review";
+import { MotionData, ReviewSegment } from "@/types/review";
 import React, {
   RefObject,
   useCallback,
@@ -10,13 +10,12 @@ import React, {
 } from "react";
 import scrollIntoView from "scroll-into-view-if-needed";
 import { MinimapBounds, Tick, Timestamp } from "./segment-metadata";
-import { MockMotionData } from "@/pages/UIPlayground";
 import { useMotionSegmentUtils } from "@/hooks/use-motion-segment-utils";
 import { isMobile } from "react-device-detect";
 
 type MotionSegmentProps = {
   events: ReviewSegment[];
-  motion_events: MockMotionData[];
+  motion_events: MotionData[];
   segmentTime: number;
   segmentDuration: number;
   timestampSpread: number;

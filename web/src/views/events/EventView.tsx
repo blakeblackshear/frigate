@@ -14,6 +14,7 @@ import { useScrollLockout } from "@/hooks/use-mouse-listener";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
 import {
+  MotionData,
   ReviewFilter,
   ReviewSegment,
   ReviewSeverity,
@@ -33,6 +34,7 @@ import { isDesktop, isMobile } from "react-device-detect";
 import { LuFolderCheck } from "react-icons/lu";
 import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
+import MotionReviewTimeline from "@/components/timeline/MotionReviewTimeline";
 
 type EventViewProps = {
   reviewPages?: ReviewSegment[][];
@@ -284,6 +286,7 @@ export default function EventView({
             relevantPreviews={relevantPreviews}
             timeRange={timeRange}
             filter={filter}
+            onSelectReview={onSelectReview}
           />
         )}
       </div>
@@ -526,6 +529,7 @@ type MotionReviewProps = {
   relevantPreviews?: Preview[];
   timeRange: { before: number; after: number };
   filter?: ReviewFilter;
+  onSelectReview: (data: string, ctrl: boolean) => void;
 };
 function MotionReview({
   contentRef,
@@ -533,6 +537,7 @@ function MotionReview({
   relevantPreviews,
   timeRange,
   filter,
+  onSelectReview,
 }: MotionReviewProps) {
   const segmentDuration = 30;
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -561,6 +566,17 @@ function MotionReview({
     {},
   );
 
+  // motion data
+
+  const { data: motionData } = useSWR<MotionData[]>([
+    "review/activity",
+    {
+      before: timeRange.before,
+      after: timeRange.after,
+      scale: segmentDuration / 2,
+    },
+  ]);
+
   // timeline time
 
   const lastFullHour = useMemo(() => {
@@ -580,6 +596,7 @@ function MotionReview({
   );
 
   // move to next clip
+
   useEffect(() => {
     if (
       !videoPlayersRef.current &&
@@ -638,12 +655,15 @@ function MotionReview({
                 videoPlayersRef.current[camera.name] = controller;
                 setPlayerReady(true);
               }}
+              onClick={() =>
+                onSelectReview(`motion,${camera.name},${currentTime}`, false)
+              }
             />
           );
         })}
       </div>
       <div className="w-[55px] md:w-[100px] mt-2 overflow-y-auto no-scrollbar">
-        <EventReviewTimeline
+        <MotionReviewTimeline
           segmentDuration={segmentDuration}
           timestampSpread={15}
           timelineStart={timeRangeSegments.end}
@@ -652,6 +672,7 @@ function MotionReview({
           handlebarTime={currentTime}
           setHandlebarTime={setCurrentTime}
           events={reviewItems.all}
+          motion_events={motionData ?? []}
           severityType="significant_motion"
           contentRef={contentRef}
         />

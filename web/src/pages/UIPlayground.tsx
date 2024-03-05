@@ -4,7 +4,12 @@ import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
-import { ReviewData, ReviewSegment, ReviewSeverity } from "@/types/review";
+import {
+  MotionData,
+  ReviewData,
+  ReviewSegment,
+  ReviewSeverity,
+} from "@/types/review";
 import { Button } from "@/components/ui/button";
 import CameraActivityIndicator from "@/components/indicators/CameraActivityIndicator";
 import MotionReviewTimeline from "@/components/timeline/MotionReviewTimeline";
@@ -53,14 +58,7 @@ function ColorSwatch({ name, value }: { name: string; value: string }) {
   );
 }
 
-export type MockMotionData = {
-  start_time: number;
-  end_time: number;
-  motionValue: number;
-  audioValue: number;
-};
-
-function generateRandomMotionAudioData(): MockMotionData[] {
+function generateRandomMotionAudioData(): MotionData[] {
   const now = new Date();
   const endTime = now.getTime() / 1000;
   const startTime = endTime - 24 * 60 * 60; // 24 hours ago
@@ -72,14 +70,12 @@ function generateRandomMotionAudioData(): MockMotionData[] {
     startTimestamp < endTime;
     startTimestamp += interval
   ) {
-    const endTimestamp = startTimestamp + interval;
-    const motionValue = Math.floor(Math.random() * 101); // Random number between 0 and 100
-    const audioValue = Math.random() * -100; // Random negative value between -100 and 0
+    const motion = Math.floor(Math.random() * 101); // Random number between 0 and 100
+    const audio = Math.random() * -100; // Random negative value between -100 and 0
     data.push({
       start_time: startTimestamp,
-      end_time: endTimestamp,
-      motionValue,
-      audioValue,
+      motion,
+      audio,
     });
   }
 
@@ -126,7 +122,7 @@ function UIPlayground() {
   const { data: config } = useSWR<FrigateConfig>("config");
   const contentRef = useRef<HTMLDivElement>(null);
   const [mockEvents, setMockEvents] = useState<ReviewSegment[]>([]);
-  const [mockMotionData, setMockMotionData] = useState<MockMotionData[]>([]);
+  const [mockMotionData, setMockMotionData] = useState<MotionData[]>([]);
   const [handlebarTime, setHandlebarTime] = useState(
     Math.floor(Date.now() / 1000) - 15 * 60,
   );

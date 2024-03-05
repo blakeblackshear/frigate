@@ -1,9 +1,9 @@
 import { useCallback, useMemo } from "react";
-import { MockMotionData } from "@/pages/UIPlayground";
+import { MotionData } from "@/types/review";
 
 export const useMotionSegmentUtils = (
   segmentDuration: number,
-  motion_events: MockMotionData[],
+  motion_events: MotionData[],
 ) => {
   const halfSegmentDuration = useMemo(
     () => segmentDuration / 2,
@@ -47,7 +47,7 @@ export const useMotionSegmentUtils = (
         );
       });
 
-      return matchingEvent?.motionValue ?? 0;
+      return matchingEvent?.motion ?? 0;
     },
     [motion_events, getSegmentStart, getSegmentEnd],
   );
@@ -61,7 +61,7 @@ export const useMotionSegmentUtils = (
         );
       });
 
-      return matchingEvent?.audioValue ?? 0;
+      return matchingEvent?.audio ?? 0;
     },
     [motion_events, getSegmentStart, getSegmentEnd],
   );
