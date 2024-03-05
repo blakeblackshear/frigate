@@ -109,8 +109,6 @@ export default function Events() {
 
   const onLoadNextPage = useCallback(() => setSize(size + 1), [size, setSize]);
 
-  const reloadData = useCallback(() => setBeforeTs(Date.now() / 1000), []);
-
   // review summary
 
   const { data: reviewSummary, mutate: updateSummary } = useSWR<
@@ -124,6 +122,11 @@ export default function Events() {
     },
     { revalidateOnFocus: false },
   ]);
+
+  const reloadData = useCallback(() => {
+    setBeforeTs(Date.now() / 1000);
+    updateSummary();
+  }, [updateSummary]);
 
   // preview videos
 
