@@ -9,9 +9,8 @@ import {
 } from "react";
 import MotionSegment from "./MotionSegment";
 import { useEventUtils } from "@/hooks/use-event-utils";
-import { ReviewSegment, ReviewSeverity } from "@/types/review";
+import { MotionData, ReviewSegment, ReviewSeverity } from "@/types/review";
 import ReviewTimeline from "./ReviewTimeline";
-import { MockMotionData } from "@/pages/UIPlayground";
 
 export type MotionReviewTimelineProps = {
   segmentDuration: number;
@@ -25,7 +24,7 @@ export type MotionReviewTimelineProps = {
   minimapStartTime?: number;
   minimapEndTime?: number;
   events: ReviewSegment[];
-  motion_events: MockMotionData[];
+  motion_events: MotionData[];
   severityType: ReviewSeverity;
   contentRef: RefObject<HTMLDivElement>;
   onHandlebarDraggingChange?: (isDragging: boolean) => void;
