@@ -348,6 +348,34 @@ Recording retention config still applies to manual events, if frigate is configu
 
 End a specific manual event without a predetermined length.
 
+### `GET /api/events/<id>/preview.gif`
+
+Gif covering the first 20 seconds of a specific event.
+
+## Previews
+
+Previews are low res / fps videos that are quickly scrubbable and can be used for notifications or time-lapses.
+
+### `GET /api/preview/<camera>/start/<start-timestamp>/end/<end-timestamp>`
+
+Metadata about previews for this time range.
+
+### `GET /api/preview/<year>-<month>/<day>/<hour>/<camera>/<timezone>`
+
+Metadata about previews for this hour
+
+### `GET /api/preview/<camera>/start/<start-timestamp>/end/<end-timestamp>`
+
+List of frames in the preview cache for the time range. Previews are only kept in the cache until they are combined into an mp4 at the end of the hour.
+
+### `GET /api/preview/<file_name>/thumbnail.jpg`
+
+Specific preview frame from preview cache.
+
+### `GET /<camera>/start/<start-timestamp>/end/<end-timestamp>/preview.gif`
+
+Gif made from preview video / frames during this time range
+
 ## Recordings
 
 ### `GET /vod/<year>-<month>/<day>/<hour>/<camera>/master.m3u8`
@@ -366,7 +394,7 @@ HTTP Live Streaming Video on Demand URL for the camera with the specified time r
 
 Export recordings from `start-timestamp` to `end-timestamp` for `camera` as a single mp4 file. These recordings will be exported to the `/media/frigate/exports` folder.
 
-It is also possible to export this recording as a timelapse.
+It is also possible to export this recording as a time-lapse.
 
 **Optional Body:**
 
@@ -400,6 +428,48 @@ Get recording segment details for the given timestamp range.
 ### `GET /api/<camera_name>/recordings/<frame_time>/snapshot.png`
 
 Returns the snapshot image from the specific point in that cameras recordings.
+
+## Reviews
+
+### `GET /api/review`
+
+Reviews from the database. Accepts the following query string parameters:
+
+| param                | Type  | Description                                                            |
+| -------------------- | ----- | ---------------------------------------------------------------------- |
+| `before`             | int   | Epoch time                                                             |
+| `after`              | int   | Epoch time                                                             |
+| `cameras`            | str   | , separated list of cameras                                            |
+| `labels`             | str   | , separated list of labels                                             |
+| `reviewed`           | int   | Include items that have been reviewed (0 or 1)                         |
+| `limit`              | int   | Limit the number of events returned                                    |
+| `severity`           | str   | Limit items to severity (alert, detection, significant_motion)         |
+
+### `GET /api/review/summary`
+
+Summary of reviews for the last 30 days. Accepts the following query string parameters:
+
+| param                | Type  | Description                                                            |
+| -------------------- | ----- | ---------------------------------------------------------------------- |
+| `cameras`            | str   | , separated list of cameras                                            |
+| `labels`             | str   | , separated list of labels                                             |
+| `timezone`           | str   | Timezone name                                                          |
+
+### `POST /api/review/<id>/viewed`
+
+Mark an item as reviewed.
+
+### `DELETE /api/review/<id>/viewed`
+
+Mark an item as not reviewed.
+
+### `POST /api/reviews/<ids>/viewed`
+
+Mark multiple items as reviewed. IDs are passed in as a comma separated list.
+
+### `DELETE /api/reviews/<ids>`
+
+Delete items. IDs are passed in as a comma separated list
 
 ## Timeline
 
