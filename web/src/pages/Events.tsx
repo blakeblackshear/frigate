@@ -4,7 +4,12 @@ import { useTimezone } from "@/hooks/use-date-utils";
 import useOverlayState from "@/hooks/use-overlay-state";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
-import { ReviewFilter, ReviewSegment, ReviewSeverity } from "@/types/review";
+import {
+  ReviewFilter,
+  ReviewSegment,
+  ReviewSeverity,
+  ReviewSummary,
+} from "@/types/review";
 import EventView from "@/views/events/EventView";
 import RecordingView from "@/views/events/RecordingView";
 import axios from "axios";
@@ -104,15 +109,24 @@ export default function Events() {
 
   const onLoadNextPage = useCallback(() => setSize(size + 1), [size, setSize]);
 
-  const reloadData = useCallback(() => setBeforeTs(Date.now() / 1000), []);
-
   // review summary
 
-  const { data: reviewSummary } = useSWR([
+  const { data: reviewSummary, mutate: updateSummary } = useSWR<
+    ReviewSummary[]
+  >([
     "review/summary",
-    { timezone: timezone },
+    {
+      timezone: timezone,
+      cameras: reviewSearchParams["cameras"] ?? null,
+      labels: reviewSearchParams["labels"] ?? null,
+    },
     { revalidateOnFocus: false },
   ]);
+
+  const reloadData = useCallback(() => {
+    setBeforeTs(Date.now() / 1000);
+    updateSummary();
+  }, [updateSummary]);
 
   // preview videos
 
@@ -145,8 +159,8 @@ export default function Events() {
   // review status
 
   const markItemAsReviewed = useCallback(
-    async (reviewId: string) => {
-      const resp = await axios.post(`review/${reviewId}/viewed`);
+    async (review: ReviewSegment) => {
+      const resp = await axios.post(`review/${review.id}/viewed`);
 
       if (resp.status == 200) {
         updateSegments(
@@ -158,7 +172,9 @@ export default function Events() {
             const newData: ReviewSegment[][] = [];
 
             data.forEach((page) => {
-              const reviewIndex = page.findIndex((item) => item.id == reviewId);
+              const reviewIndex = page.findIndex(
+                (item) => item.id == review.id,
+              );
 
               if (reviewIndex == -1) {
                 newData.push([...page]);
@@ -175,9 +191,47 @@ export default function Events() {
           },
           { revalidate: false, populateCache: true },
         );
+
+        updateSummary(
+          (data: ReviewSummary[] | undefined) => {
+            if (!data) {
+              return data;
+            }
+
+            const day = new Date(review.start_time * 1000);
+            const key = `${day.getFullYear()}-${("0" + (day.getMonth() + 1)).slice(-2)}-${("0" + day.getDate()).slice(-2)}`;
+            const index = data.findIndex((summary) => summary.day == key);
+
+            if (index == -1) {
+              return data;
+            }
+
+            const item = data[index];
+            return [
+              ...data.slice(0, index),
+              {
+                ...item,
+                reviewed_alert:
+                  review.severity == "alert"
+                    ? item.reviewed_alert + 1
+                    : item.reviewed_alert,
+                reviewed_detection:
+                  review.severity == "detection"
+                    ? item.reviewed_detection + 1
+                    : item.reviewed_detection,
+                reviewed_motion:
+                  review.severity == "significant_motion"
+                    ? item.reviewed_motion + 1
+                    : item.reviewed_motion,
+              },
+              ...data.slice(index + 1),
+            ];
+          },
+          { revalidate: false, populateCache: true },
+        );
       }
     },
-    [updateSegments],
+    [updateSegments, updateSummary],
   );
 
   // selected items

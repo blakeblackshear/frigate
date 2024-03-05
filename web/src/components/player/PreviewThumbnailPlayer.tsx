@@ -25,7 +25,7 @@ type PreviewPlayerProps = {
   allPreviews?: Preview[];
   scrollLock?: boolean;
   onTimeUpdate?: React.Dispatch<React.SetStateAction<number | undefined>>;
-  setReviewed: (reviewId: string) => void;
+  setReviewed: (review: ReviewSegment) => void;
   onClick: (reviewId: string, ctrl: boolean) => void;
 };
 
@@ -65,13 +65,13 @@ export default function PreviewThumbnailPlayer({
   );
 
   const swipeHandlers = useSwipeable({
-    onSwipedLeft: () => (setReviewed ? setReviewed(review.id) : null),
+    onSwipedLeft: () => (setReviewed ? setReviewed(review) : null),
     onSwipedRight: () => setPlayback(true),
     preventScrollOnSwipe: true,
   });
 
   const handleSetReviewed = useCallback(
-    () => setReviewed(review.id),
+    () => setReviewed(review),
     [review, setReviewed],
   );
 
@@ -237,7 +237,7 @@ export default function PreviewThumbnailPlayer({
 type PreviewContentProps = {
   review: ReviewSegment;
   relevantPreview: Preview | undefined;
-  setReviewed?: () => void;
+  setReviewed: () => void;
   setIgnoreClick: (ignore: boolean) => void;
   isPlayingBack: (ended: boolean) => void;
   onTimeUpdate?: (time: number | undefined) => void;
@@ -280,7 +280,7 @@ const PREVIEW_PADDING = 16;
 type VideoPreviewProps = {
   review: ReviewSegment;
   relevantPreview: Preview;
-  setReviewed?: () => void;
+  setReviewed: () => void;
   setIgnoreClick: (ignore: boolean) => void;
   isPlayingBack: (ended: boolean) => void;
   onTimeUpdate?: (time: number | undefined) => void;
@@ -366,6 +366,10 @@ function VideoPreview({
     setLastPercent(playerPercent);
 
     if (playerPercent > 100) {
+      if (!review.has_been_reviewed) {
+        setReviewed();
+      }
+
       if (isMobile) {
         isPlayingBack(false);
 
@@ -483,7 +487,7 @@ function VideoPreview({
 const MIN_LOAD_TIMEOUT_MS = 200;
 type InProgressPreviewProps = {
   review: ReviewSegment;
-  setReviewed?: (reviewId: string) => void;
+  setReviewed: (reviewId: string) => void;
   setIgnoreClick: (ignore: boolean) => void;
   isPlayingBack: (ended: boolean) => void;
   onTimeUpdate?: (time: number | undefined) => void;
@@ -518,6 +522,10 @@ function InProgressPreview({
     }
 
     if (key == previewFrames.length - 1) {
+      if (!review.has_been_reviewed) {
+        setReviewed(review.id);
+      }
+
       if (isMobile) {
         isPlayingBack(false);
 

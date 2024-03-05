@@ -77,6 +77,29 @@ def review_summary():
     hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(tz_name)
     month_ago = (datetime.now() - timedelta(days=30)).timestamp()
 
+    cameras = request.args.get("cameras", "all")
+    labels = request.args.get("labels", "all")
+
+    clauses = [(ReviewSegment.start_time > month_ago)]
+
+    if cameras != "all":
+        camera_list = cameras.split(",")
+        clauses.append((ReviewSegment.camera << camera_list))
+
+    if labels != "all":
+        # use matching so segments with multiple labels
+        # still match on a search where any label matches
+        label_clauses = []
+        filtered_labels = labels.split(",")
+
+        for label in filtered_labels:
+            label_clauses.append(
+                (ReviewSegment.data["objects"].cast("text") % f'*"{label}"*')
+            )
+
+        label_clause = reduce(operator.or_, label_clauses)
+        clauses.append((label_clause))
+
     groups = (
         ReviewSegment.select(
             fn.strftime(
@@ -161,7 +184,7 @@ def review_summary():
                 )
             ).alias("total_motion"),
         )
-        .where(ReviewSegment.start_time > month_ago)
+        .where(reduce(operator.and_, clauses))
         .group_by(
             (ReviewSegment.start_time + seconds_offset).cast("int") / (3600 * 24),
         )

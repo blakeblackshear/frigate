@@ -1168,7 +1168,7 @@ class FrigateConfig(FrigateBaseModel):
     )
     cameras: Dict[str, CameraConfig] = Field(title="Camera configuration.")
     camera_groups: Dict[str, CameraGroupConfig] = Field(
-        default_factory=CameraGroupConfig, title="Camera group configuration"
+        default_factory=dict, title="Camera group configuration"
     )
     timestamp_style: TimestampStyleConfig = Field(
         default_factory=TimestampStyleConfig,
