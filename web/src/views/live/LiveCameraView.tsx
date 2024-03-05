@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useResizeObserver } from "@/hooks/resize-observer";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { CameraConfig } from "@/types/frigateConfig";
 import { CameraPtzInfo } from "@/types/ptz";
@@ -61,6 +62,8 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
   const navigate = useNavigate();
   const { isPortrait } = useMobileOrientation();
   const mainRef = useRef<HTMLDivElement | null>(null);
+  const [{ width: windowWidth, height: windowHeight }] =
+    useResizeObserver(window);
 
   // camera features
 
@@ -105,7 +108,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
         return "absolute left-2 right-2 top-[50%] -translate-y-[50%]";
       } else {
         if (aspect > 16 / 9) {
-          return "absolute left-12 top-[50%] -translate-y-[50%]";
+          return "absolute left-0 top-[50%] -translate-y-[50%]";
         } else {
           return "absolute top-2 bottom-2 left-[50%] -translate-x-[50%]";
         }
@@ -114,16 +117,32 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
 
     if (fullscreen) {
       if (aspect > 16 / 9) {
-        return "absolute inset-x-0 top-[50%] -translate-y-[50%]";
+        return "absolute inset-x-2 top-[50%] -translate-y-[50%]";
       } else {
-        return "absolute inset-y-0 left-[50%] -translate-x-[50%]";
+        return "absolute inset-y-2 left-[50%] -translate-x-[50%]";
       }
-    } else if (aspect > 2) {
-      return "absolute left-2 right-2 top-[50%] -translate-y-[50%]";
     } else {
       return "absolute top-2 bottom-2 left-[50%] -translate-x-[50%]";
     }
   }, [camera, fullscreen, isPortrait]);
+
+  const windowAspectRatio = useMemo(() => {
+    return windowWidth / windowHeight;
+  }, [windowWidth, windowHeight]);
+
+  const cameraAspectRatio = useMemo(() => {
+    return camera.detect.width / camera.detect.height;
+  }, [camera]);
+
+  const aspectRatio = useMemo<number>(() => {
+    if (isMobile || fullscreen) {
+      return cameraAspectRatio;
+    } else {
+      return windowAspectRatio < cameraAspectRatio
+        ? windowAspectRatio - 0.05
+        : cameraAspectRatio - 0.03;
+    }
+  }, [cameraAspectRatio, windowAspectRatio, fullscreen]);
 
   return (
     <div
@@ -216,14 +235,16 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
           </div>
         </TooltipProvider>
       </div>
-      <div className="relative size-full">
+      <div className="relative size-full p-2">
         <div
           className={growClassName}
-          style={{ aspectRatio: camera.detect.width / camera.detect.height }}
+          style={{
+            aspectRatio: aspectRatio,
+          }}
         >
           <LivePlayer
             key={camera.name}
-            className={`size-full ${fullscreen ? "*:rounded-none" : ""}`}
+            className={`${fullscreen ? "*:rounded-none" : ""}`}
             windowVisible
             showStillWithoutActivity={false}
             cameraConfig={camera}

@@ -1,7 +1,11 @@
 import { MutableRefObject, useEffect, useMemo, useState } from "react";
 
-export function useResizeObserver(...refs: MutableRefObject<Element | null>[]) {
-  const [dimensions, setDimensions] = useState(
+type RefType = MutableRefObject<Element | null> | Window;
+
+export function useResizeObserver(...refs: RefType[]) {
+  const [dimensions, setDimensions] = useState<
+    { width: number; height: number; x: number; y: number }[]
+  >(
     new Array(refs.length).fill({
       width: 0,
       height: 0,
@@ -21,14 +25,18 @@ export function useResizeObserver(...refs: MutableRefObject<Element | null>[]) {
 
   useEffect(() => {
     refs.forEach((ref) => {
-      if (ref.current) {
+      if (ref instanceof Window) {
+        resizeObserver.observe(document.body);
+      } else if (ref.current) {
         resizeObserver.observe(ref.current);
       }
     });
 
     return () => {
       refs.forEach((ref) => {
-        if (ref.current) {
+        if (ref instanceof Window) {
+          resizeObserver.unobserve(document.body);
+        } else if (ref.current) {
           resizeObserver.unobserve(ref.current);
         }
       });
