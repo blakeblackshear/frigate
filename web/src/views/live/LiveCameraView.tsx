@@ -105,12 +105,12 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
 
     if (isMobile) {
       if (isPortrait) {
-        return "absolute left-0 right-0";
+        return "absolute left-2 right-2 top-[50%] -translate-y-[50%]";
       } else {
         if (aspect > 16 / 9) {
           return "absolute left-0 top-[50%] -translate-y-[50%]";
         } else {
-          return "absolute top-0 bottom-0 left-[50%] -translate-x-[50%]";
+          return "absolute top-2 bottom-2 left-[50%] -translate-x-[50%]";
         }
       }
     }
@@ -124,7 +124,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
     } else if (aspect > 2) {
       return "absolute left-0 right-0 top-[50%] -translate-y-[50%]";
     } else {
-      return "absolute top-0 bottom-0 left-[50%] -translate-x-[50%]";
+      return "absolute top-2 bottom-2 left-[50%] -translate-x-[50%]";
     }
   }, [camera, fullscreen, isPortrait]);
 
@@ -136,13 +136,15 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
     return camera.detect.width / camera.detect.height;
   }, [camera]);
 
-  const aspectRatio = useMemo<number>(
-    () =>
-      windowAspectRatio < cameraAspectRatio
+  const aspectRatio = useMemo<number>(() => {
+    if (isMobile) {
+      return cameraAspectRatio;
+    } else {
+      return windowAspectRatio < cameraAspectRatio
         ? windowAspectRatio - 0.05
-        : cameraAspectRatio - 0.03,
-    [cameraAspectRatio, windowAspectRatio],
-  );
+        : cameraAspectRatio - 0.03;
+    }
+  }, [cameraAspectRatio, windowAspectRatio]);
 
   return (
     <div
