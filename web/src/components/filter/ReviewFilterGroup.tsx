@@ -16,8 +16,11 @@ import { ReviewFilter } from "@/types/review";
 import { getEndOfDayTimestamp } from "@/utils/dateUtil";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import { FaCalendarAlt, FaFilter, FaVideo } from "react-icons/fa";
-import { getIconTypeForGroup } from "@/utils/iconUtil";
 import { IconType } from "react-icons";
+import { isMobile } from "react-device-detect";
+import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
+import { Switch } from "../ui/switch";
+import { Label } from "../ui/label";
 
 const ATTRIBUTES = ["amazon", "face", "fedex", "license_plate", "ups"];
 
@@ -137,6 +140,105 @@ function CamerasFilterButton({
     selectedCameras,
   );
 
+  const trigger = (
+    <Button size="sm" className="mx-1 capitalize" variant="secondary">
+      <FaVideo className="md:mr-[10px] text-muted-foreground" />
+      <div className="hidden md:block">
+        {selectedCameras == undefined
+          ? "All Cameras"
+          : `${selectedCameras.length} Cameras`}
+      </div>
+    </Button>
+  );
+  const content = (
+    <>
+      <DropdownMenuLabel className="flex justify-center">
+        Filter Cameras
+      </DropdownMenuLabel>
+      <DropdownMenuSeparator />
+      <FilterCheckBox
+        isChecked={currentCameras == undefined}
+        label="All Cameras"
+        onCheckedChange={(isChecked) => {
+          if (isChecked) {
+            setCurrentCameras(undefined);
+          }
+        }}
+      />
+      {groups.length > 0 && (
+        <>
+          <DropdownMenuSeparator />
+          {groups.map(([name, conf]) => {
+            return (
+              <FilterCheckBox
+                key={name}
+                label={name}
+                isChecked={false}
+                onCheckedChange={() => {
+                  setCurrentCameras([...conf.cameras]);
+                }}
+              />
+            );
+          })}
+        </>
+      )}
+      <DropdownMenuSeparator />
+      {allCameras.map((item) => (
+        <FilterCheckBox
+          key={item}
+          isChecked={currentCameras?.includes(item) ?? false}
+          label={item.replaceAll("_", " ")}
+          onCheckedChange={(isChecked) => {
+            if (isChecked) {
+              const updatedCameras = currentCameras ? [...currentCameras] : [];
+
+              updatedCameras.push(item);
+              setCurrentCameras(updatedCameras);
+            } else {
+              const updatedCameras = currentCameras ? [...currentCameras] : [];
+
+              // can not deselect the last item
+              if (updatedCameras.length > 1) {
+                updatedCameras.splice(updatedCameras.indexOf(item), 1);
+                setCurrentCameras(updatedCameras);
+              }
+            }
+          }}
+        />
+      ))}
+      <DropdownMenuSeparator />
+      <div className="flex justify-center items-center">
+        <Button
+          variant="select"
+          onClick={() => {
+            updateCameraFilter(currentCameras);
+            setOpen(false);
+          }}
+        >
+          Apply
+        </Button>
+      </div>
+    </>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer
+        open={open}
+        onOpenChange={(open) => {
+          if (!open) {
+            setCurrentCameras(selectedCameras);
+          }
+
+          setOpen(open);
+        }}
+      >
+        <DrawerTrigger asChild>{trigger}</DrawerTrigger>
+        <DrawerContent>{content}</DrawerContent>
+      </Drawer>
+    );
+  }
+
   return (
     <DropdownMenu
       open={open}
@@ -148,87 +250,8 @@ function CamerasFilterButton({
         setOpen(open);
       }}
     >
-      <DropdownMenuTrigger asChild>
-        <Button size="sm" className="mx-1 capitalize" variant="secondary">
-          <FaVideo className="md:mr-[10px] text-muted-foreground" />
-          <div className="hidden md:block">
-            {selectedCameras == undefined
-              ? "All Cameras"
-              : `${selectedCameras.length} Cameras`}
-          </div>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        <DropdownMenuLabel>Filter Cameras</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <FilterCheckBox
-          isChecked={currentCameras == undefined}
-          label="All Cameras"
-          onCheckedChange={(isChecked) => {
-            if (isChecked) {
-              setCurrentCameras(undefined);
-            }
-          }}
-        />
-        {groups.length > 0 && (
-          <>
-            <DropdownMenuSeparator />
-            {groups.map(([name, conf]) => {
-              return (
-                <FilterCheckBox
-                  key={name}
-                  label={name}
-                  CheckIcon={getIconTypeForGroup(conf.icon)}
-                  isChecked
-                  onCheckedChange={() => {
-                    setCurrentCameras([...conf.cameras]);
-                  }}
-                />
-              );
-            })}
-          </>
-        )}
-        <DropdownMenuSeparator />
-        {allCameras.map((item) => (
-          <FilterCheckBox
-            key={item}
-            isChecked={currentCameras?.includes(item) ?? false}
-            label={item.replaceAll("_", " ")}
-            onCheckedChange={(isChecked) => {
-              if (isChecked) {
-                const updatedCameras = currentCameras
-                  ? [...currentCameras]
-                  : [];
-
-                updatedCameras.push(item);
-                setCurrentCameras(updatedCameras);
-              } else {
-                const updatedCameras = currentCameras
-                  ? [...currentCameras]
-                  : [];
-
-                // can not deselect the last item
-                if (updatedCameras.length > 1) {
-                  updatedCameras.splice(updatedCameras.indexOf(item), 1);
-                  setCurrentCameras(updatedCameras);
-                }
-              }
-            }}
-          />
-        ))}
-        <DropdownMenuSeparator />
-        <div className="flex justify-center items-center">
-          <Button
-            variant="select"
-            onClick={() => {
-              updateCameraFilter(currentCameras);
-              setOpen(false);
-            }}
-          >
-            Apply
-          </Button>
-        </div>
-      </DropdownMenuContent>
+      <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+      <DropdownMenuContent>{content}</DropdownMenuContent>
     </DropdownMenu>
   );
 }
@@ -255,6 +278,58 @@ function CalendarFilterButton({
     "%b %-d",
   );
 
+  const trigger = (
+    <Button size="sm" className="mx-1" variant="secondary">
+      <FaCalendarAlt className="md:mr-[10px] text-muted-foreground" />
+      <div className="hidden md:block">
+        {day == undefined ? "Last 24 Hours" : selectedDate}
+      </div>
+    </Button>
+  );
+  const content = (
+    <>
+      <Calendar
+        mode="single"
+        disabled={disabledDates}
+        selected={selectedDay}
+        showOutsideDays={false}
+        onSelect={(day) => {
+          setSelectedDay(day);
+        }}
+      />
+      <DropdownMenuSeparator />
+      <div className="flex justify-center items-center">
+        <Button
+          variant="select"
+          onClick={() => {
+            updateSelectedDay(selectedDay);
+            setOpen(false);
+          }}
+        >
+          Apply
+        </Button>
+      </div>
+    </>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer
+        open={open}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedDay(day);
+          }
+
+          setOpen(open);
+        }}
+      >
+        <DrawerTrigger asChild>{trigger}</DrawerTrigger>
+        <DrawerContent>{content}</DrawerContent>
+      </Drawer>
+    );
+  }
+
   return (
     <Popover
       open={open}
@@ -266,36 +341,8 @@ function CalendarFilterButton({
         setOpen(open);
       }}
     >
-      <PopoverTrigger asChild>
-        <Button size="sm" className="mx-1" variant="secondary">
-          <FaCalendarAlt className="md:mr-[10px] text-muted-foreground" />
-          <div className="hidden md:block">
-            {day == undefined ? "Last 24 Hours" : selectedDate}
-          </div>
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent>
-        <Calendar
-          mode="single"
-          disabled={disabledDates}
-          selected={selectedDay}
-          onSelect={(day) => {
-            setSelectedDay(day);
-          }}
-        />
-        <DropdownMenuSeparator />
-        <div className="flex justify-center items-center">
-          <Button
-            variant="select"
-            onClick={() => {
-              updateSelectedDay(selectedDay);
-              setOpen(false);
-            }}
-          >
-            Apply
-          </Button>
-        </div>
-      </PopoverContent>
+      <PopoverTrigger asChild>{trigger}</PopoverTrigger>
+      <PopoverContent>{content}</PopoverContent>
     </Popover>
   );
 }
@@ -320,6 +367,101 @@ function GeneralFilterButton({
     selectedLabels,
   );
 
+  const trigger = (
+    <Button size="sm" className="ml-1" variant="secondary">
+      <FaFilter className="md:mr-[10px] text-muted-foreground" />
+      <div className="hidden md:block">Filter</div>
+    </Button>
+  );
+  const content = (
+    <>
+      <div className="flex p-2 justify-start items-center">
+        <Switch
+          id="reviewed"
+          checked={reviewed == 1}
+          onCheckedChange={() => setReviewed(reviewed == 0 ? 1 : 0)}
+        />
+        <Label className="ml-2" htmlFor="reviewed">Show Reviewed</Label>
+      </div>
+      <DropdownMenuSeparator />
+      <DropdownMenuLabel className="flex justify-center items-center">
+        Filter Labels
+      </DropdownMenuLabel>
+      <DropdownMenuSeparator />
+      <FilterCheckBox
+        isChecked={currentLabels == undefined}
+        label="All Labels"
+        onCheckedChange={(isChecked) => {
+          if (isChecked) {
+            setCurrentLabels(undefined);
+          }
+        }}
+      />
+      <DropdownMenuSeparator />
+      {allLabels.map((item) => (
+        <FilterCheckBox
+          key={item}
+          isChecked={currentLabels?.includes(item) ?? false}
+          label={item.replaceAll("_", " ")}
+          onCheckedChange={(isChecked) => {
+            if (isChecked) {
+              const updatedLabels = currentLabels ? [...currentLabels] : [];
+
+              updatedLabels.push(item);
+              setCurrentLabels(updatedLabels);
+            } else {
+              const updatedLabels = currentLabels ? [...currentLabels] : [];
+
+              // can not deselect the last item
+              if (updatedLabels.length > 1) {
+                updatedLabels.splice(updatedLabels.indexOf(item), 1);
+                setCurrentLabels(updatedLabels);
+              }
+            }
+          }}
+        />
+      ))}
+      <DropdownMenuSeparator />
+      <div className="flex justify-center items-center">
+        <Button
+          variant="select"
+          onClick={() => {
+            if (reviewed != showReviewed) {
+              setShowReviewed(reviewed);
+            }
+
+            if (selectedLabels != currentLabels) {
+              updateLabelFilter(currentLabels);
+            }
+
+            setOpen(false);
+          }}
+        >
+          Apply
+        </Button>
+      </div>
+    </>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer
+        open={open}
+        onOpenChange={(open) => {
+          if (!open) {
+            setReviewed(showReviewed ?? 0);
+            setCurrentLabels(selectedLabels);
+          }
+
+          setOpen(open);
+        }}
+      >
+        <DrawerTrigger asChild>{trigger}</DrawerTrigger>
+        <DrawerContent>{content}</DrawerContent>
+      </Drawer>
+    );
+  }
+
   return (
     <Popover
       open={open}
@@ -332,85 +474,8 @@ function GeneralFilterButton({
         setOpen(open);
       }}
     >
-      <PopoverTrigger asChild>
-        <Button size="sm" className="ml-1" variant="secondary">
-          <FaFilter className="md:mr-[10px] text-muted-foreground" />
-          <div className="hidden md:block">Filter</div>
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent side="left">
-        <>
-          <Button
-            className="capitalize flex justify-between items-center w-full"
-            variant="ghost"
-            onClick={() => setReviewed(reviewed == 0 ? 1 : 0)}
-          >
-            {reviewed ? (
-              <LuCheck className="w-6 h-6" />
-            ) : (
-              <div className="w-6 h-6" />
-            )}
-            <div className="ml-1 w-full flex justify-start text-primary-foreground">
-              Show Reviewed
-            </div>
-          </Button>
-          <DropdownMenuSeparator />
-          <DropdownMenuLabel>Filter Labels</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <FilterCheckBox
-            isChecked={currentLabels == undefined}
-            label="All Labels"
-            onCheckedChange={(isChecked) => {
-              if (isChecked) {
-                setCurrentLabels(undefined);
-              }
-            }}
-          />
-          <DropdownMenuSeparator />
-          {allLabels.map((item) => (
-            <FilterCheckBox
-              key={item}
-              isChecked={currentLabels?.includes(item) ?? false}
-              label={item.replaceAll("_", " ")}
-              onCheckedChange={(isChecked) => {
-                if (isChecked) {
-                  const updatedLabels = currentLabels ? [...currentLabels] : [];
-
-                  updatedLabels.push(item);
-                  setCurrentLabels(updatedLabels);
-                } else {
-                  const updatedLabels = currentLabels ? [...currentLabels] : [];
-
-                  // can not deselect the last item
-                  if (updatedLabels.length > 1) {
-                    updatedLabels.splice(updatedLabels.indexOf(item), 1);
-                    setCurrentLabels(updatedLabels);
-                  }
-                }
-              }}
-            />
-          ))}
-          <DropdownMenuSeparator />
-          <div className="flex justify-center items-center">
-            <Button
-              variant="select"
-              onClick={() => {
-                if (reviewed != showReviewed) {
-                  setShowReviewed(reviewed);
-                }
-
-                if (selectedLabels != currentLabels) {
-                  updateLabelFilter(currentLabels);
-                }
-
-                setOpen(false);
-              }}
-            >
-              Apply
-            </Button>
-          </div>
-        </>
-      </PopoverContent>
+      <PopoverTrigger asChild>{trigger}</PopoverTrigger>
+      <PopoverContent side="left">{content}</PopoverContent>
     </Popover>
   );
 }
