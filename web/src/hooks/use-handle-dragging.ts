@@ -200,14 +200,12 @@ function useDraggableHandler({
           let newPosition = clientYPosition;
 
           if (draggingAtTopEdge) {
-            newPosition =
-              scrolled - (isMobile ? segmentHeight : segmentHeight * 2);
+            newPosition = scrolled - segmentHeight;
             timelineRef.current.scrollTop = newPosition;
           }
 
           if (draggingAtBottomEdge) {
-            newPosition =
-              scrolled + (isMobile ? segmentHeight : segmentHeight * 2);
+            newPosition = scrolled + segmentHeight;
             timelineRef.current.scrollTop = newPosition;
           }
         }
