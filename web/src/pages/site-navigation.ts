@@ -1,3 +1,4 @@
+import Logo from "@/components/Logo";
 import { FaCompactDisc, FaFlag, FaVideo } from "react-icons/fa";
 import { LuConstruction } from "react-icons/lu";
 
@@ -19,6 +20,12 @@ export const navbarLinks = [
     icon: FaCompactDisc,
     title: "Export",
     url: "/export",
+  },
+  {
+    id: 5,
+    icon: Logo,
+    title: "Frigate+",
+    url: "/plus",
   },
   {
     id: 4,
