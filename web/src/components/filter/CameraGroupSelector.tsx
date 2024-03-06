@@ -246,7 +246,7 @@ function NewGroupDialog({ open, setOpen, currentGroups }: NewGroupDialogProps) {
             </div>
           </div>
         ))}
-        <DropdownMenuSeparator />
+        {currentGroups.length > 0 && <DropdownMenuSeparator />}
         {editState == "none" && (
           <Button
             className="text-primary-foreground justify-start"
