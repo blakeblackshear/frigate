@@ -44,7 +44,7 @@ export function ReviewTimeline({
       onTouchMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onTouchEnd={handleMouseUp}
-      className={`relative h-full overflow-y-scroll no-scrollbar bg-secondary ${
+      className={`relative h-full overflow-y-auto no-scrollbar bg-secondary ${
         isDragging && showHandlebar ? "cursor-grabbing" : "cursor-auto"
       }`}
     >
@@ -64,7 +64,7 @@ export function ReviewTimeline({
             >
               <div
                 className={`bg-destructive rounded-full mx-auto ${
-                  segmentDuration < 60 ? "w-14 md:w-20" : "w-12 md:w-16"
+                  segmentDuration < 60 ? "w-12 md:w-20" : "w-12 md:w-16"
                 } h-5 flex items-center justify-center`}
               >
                 <div

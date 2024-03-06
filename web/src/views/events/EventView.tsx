@@ -658,38 +658,40 @@ function MotionReview({
 
   return (
     <>
-      <div
-        ref={contentRef}
-        className="w-full h-min m-2 grid sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 gap-2 md:gap-4 overflow-auto no-scrollbar"
-      >
-        {reviewCameras.map((camera) => {
-          let grow;
-          const aspectRatio = camera.detect.width / camera.detect.height;
-          if (aspectRatio > 2) {
-            grow = "sm:col-span-2 aspect-wide";
-          } else if (aspectRatio < 1) {
-            grow = "md:row-span-2 md:h-full aspect-tall";
-          } else {
-            grow = "aspect-video";
-          }
-          return (
-            <DynamicVideoPlayer
-              key={camera.name}
-              className={`${grow}`}
-              camera={camera.name}
-              timeRange={timeRangeSegments.ranges[selectedRangeIdx]}
-              cameraPreviews={relevantPreviews || []}
-              previewOnly
-              onControllerReady={(controller) => {
-                videoPlayersRef.current[camera.name] = controller;
-                setPlayerReady(true);
-              }}
-              onClick={() =>
-                onSelectReview(`motion,${camera.name},${currentTime}`, false)
-              }
-            />
-          );
-        })}
+      <div className="flex flex-1 flex-wrap content-start gap-2 md:gap-4 overflow-y-auto no-scrollbar">
+        <div
+          ref={contentRef}
+          className="w-full m-2 grid sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 gap-2 md:gap-4 overflow-auto no-scrollbar"
+        >
+          {reviewCameras.map((camera) => {
+            let grow;
+            const aspectRatio = camera.detect.width / camera.detect.height;
+            if (aspectRatio > 2) {
+              grow = "sm:col-span-2 aspect-wide";
+            } else if (aspectRatio < 1) {
+              grow = "md:row-span-2 md:h-full aspect-tall";
+            } else {
+              grow = "aspect-video";
+            }
+            return (
+              <DynamicVideoPlayer
+                key={camera.name}
+                className={`${grow}`}
+                camera={camera.name}
+                timeRange={timeRangeSegments.ranges[selectedRangeIdx]}
+                cameraPreviews={relevantPreviews || []}
+                previewOnly
+                onControllerReady={(controller) => {
+                  videoPlayersRef.current[camera.name] = controller;
+                  setPlayerReady(true);
+                }}
+                onClick={() =>
+                  onSelectReview(`motion,${camera.name},${currentTime}`, false)
+                }
+              />
+            );
+          })}
+        </div>
       </div>
       <div className="w-[55px] md:w-[100px] mt-2 overflow-y-auto no-scrollbar">
         <MotionReviewTimeline

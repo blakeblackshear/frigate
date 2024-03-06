@@ -17,6 +17,7 @@ import {
 import { HoverCardPortal } from "@radix-ui/react-hover-card";
 import scrollIntoView from "scroll-into-view-if-needed";
 import { MinimapBounds, Tick, Timestamp } from "./segment-metadata";
+import useTapUtils from "@/hooks/use-tap-utils";
 
 type EventSegmentProps = {
   events: ReviewSegment[];
@@ -87,6 +88,8 @@ export function EventSegment({
   }, [getEventStart, segmentTime]);
 
   const apiHost = useApiHost();
+
+  const { handleTouchStart } = useTapUtils();
 
   const eventThumbnail = useMemo(() => {
     return getEventThumbnail(segmentTime);
@@ -227,6 +230,9 @@ export function EventSegment({
                     key={`${segmentKey}_${index}_primary_data`}
                     className={`w-full h-2 bg-gradient-to-r ${roundBottomPrimary ? "rounded-bl-full rounded-br-full" : ""} ${roundTopPrimary ? "rounded-tl-full rounded-tr-full" : ""} ${severityColors[severityValue]}`}
                     onClick={segmentClick}
+                    onTouchStart={(event) =>
+                      handleTouchStart(event, segmentClick)
+                    }
                   ></div>
                 </HoverCardTrigger>
                 <HoverCardPortal>

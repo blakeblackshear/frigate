@@ -1,17 +1,12 @@
 import { useEventUtils } from "@/hooks/use-event-utils";
 import { useEventSegmentUtils } from "@/hooks/use-event-segment-utils";
 import { MotionData, ReviewSegment } from "@/types/review";
-import React, {
-  RefObject,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import scrollIntoView from "scroll-into-view-if-needed";
 import { MinimapBounds, Tick, Timestamp } from "./segment-metadata";
 import { useMotionSegmentUtils } from "@/hooks/use-motion-segment-utils";
 import { isMobile } from "react-device-detect";
+import useTapUtils from "@/hooks/use-tap-utils";
 
 type MotionSegmentProps = {
   events: ReviewSegment[];
@@ -22,7 +17,7 @@ type MotionSegmentProps = {
   showMinimap: boolean;
   minimapStartTime?: number;
   minimapEndTime?: number;
-  contentRef: RefObject<HTMLDivElement>;
+  setHandlebarTime?: React.Dispatch<React.SetStateAction<number>>;
 };
 
 export function MotionSegment({
@@ -34,7 +29,7 @@ export function MotionSegment({
   showMinimap,
   minimapStartTime,
   minimapEndTime,
-  contentRef,
+  setHandlebarTime,
 }: MotionSegmentProps) {
   const severityType = "all";
   const {
@@ -42,19 +37,17 @@ export function MotionSegment({
     getReviewed,
     displaySeverityType,
     shouldShowRoundedCorners,
-    getEventStart,
   } = useEventSegmentUtils(segmentDuration, events, severityType);
 
-  const {
-    getMotionSegmentValue,
-    getAudioSegmentValue,
-    interpolateMotionAudioData,
-  } = useMotionSegmentUtils(segmentDuration, motion_events);
+  const { getMotionSegmentValue, interpolateMotionAudioData, getMotionStart } =
+    useMotionSegmentUtils(segmentDuration, motion_events);
 
   const { alignStartDateToTimeline, alignEndDateToTimeline } = useEventUtils(
     events,
     segmentDuration,
   );
+
+  const { handleTouchStart } = useTapUtils();
 
   const severity = useMemo(
     () => getSeverity(segmentTime, displaySeverityType),
@@ -74,19 +67,19 @@ export function MotionSegment({
   );
 
   const startTimestamp = useMemo(() => {
-    const eventStart = getEventStart(segmentTime);
+    const eventStart = getMotionStart(segmentTime);
     if (eventStart) {
       return alignStartDateToTimeline(eventStart);
     }
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getEventStart, segmentTime]);
+  }, [getMotionStart, segmentTime]);
 
   const timestamp = useMemo(() => new Date(segmentTime * 1000), [segmentTime]);
   const segmentKey = useMemo(() => segmentTime, [segmentTime]);
 
   const maxSegmentWidth = useMemo(() => {
-    return isMobile ? 15 : 25;
+    return isMobile ? 30 : 50;
   }, []);
 
   const alignedMinimapStartTime = useMemo(
@@ -161,32 +154,10 @@ export function MotionSegment({
   };
 
   const segmentClick = useCallback(() => {
-    if (contentRef.current && startTimestamp) {
-      const element = contentRef.current.querySelector(
-        `[data-segment-start="${startTimestamp - segmentDuration}"]`,
-      );
-      if (element instanceof HTMLElement) {
-        scrollIntoView(element, {
-          scrollMode: "if-needed",
-          behavior: "smooth",
-        });
-        element.classList.add(
-          `outline-severity_${severityType}`,
-          `shadow-severity_${severityType}`,
-        );
-        element.classList.add("outline-4", "shadow-[0_0_6px_1px]");
-        element.classList.remove("outline-0", "shadow-none");
-
-        // Remove the classes after a short timeout
-        setTimeout(() => {
-          element.classList.remove("outline-4", "shadow-[0_0_6px_1px]");
-          element.classList.add("outline-0", "shadow-none");
-        }, 3000);
-      }
+    if (startTimestamp && setHandlebarTime) {
+      setHandlebarTime(startTimestamp);
     }
-    // we know that these deps are correct
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startTimestamp]);
+  }, [startTimestamp, setHandlebarTime]);
 
   return (
     <div key={segmentKey} className={segmentClasses}>
@@ -210,11 +181,12 @@ export function MotionSegment({
 
       <div className="absolute left-1/2 transform -translate-x-1/2 w-[20px] md:w-[40px] h-2 z-10 cursor-pointer">
         <div className="flex flex-row justify-center w-[20px] md:w-[40px] mb-[1px]">
-          <div className="w-[10px] md:w-[20px] flex justify-end">
+          <div className="flex justify-center">
             <div
               key={`${segmentKey}_motion_data_1`}
               className={`h-[2px] rounded-full bg-motion_review`}
               onClick={segmentClick}
+              onTouchStart={(event) => handleTouchStart(event, segmentClick)}
               style={{
                 width: interpolateMotionAudioData(
                   getMotionSegmentValue(segmentTime + segmentDuration / 2),
@@ -223,43 +195,18 @@ export function MotionSegment({
               }}
             ></div>
           </div>
-          <div className="w-[10px] md:w-[20px]">
-            <div
-              key={`${segmentKey}_audio_data_1`}
-              className={`h-[2px] rounded-full bg-audio_review`}
-              onClick={segmentClick}
-              style={{
-                width: interpolateMotionAudioData(
-                  getAudioSegmentValue(segmentTime + segmentDuration / 2),
-                  maxSegmentWidth,
-                ),
-              }}
-            ></div>
-          </div>
         </div>
 
         <div className="flex flex-row justify-center w-[20px] md:w-[40px]">
-          <div className="w-[10px] md:w-[20px] flex justify-end">
+          <div className="flex justify-center">
             <div
               key={`${segmentKey}_motion_data_2`}
               className={`h-[2px] rounded-full bg-motion_review`}
               onClick={segmentClick}
+              onTouchStart={(event) => handleTouchStart(event, segmentClick)}
               style={{
                 width: interpolateMotionAudioData(
                   getMotionSegmentValue(segmentTime),
-                  maxSegmentWidth,
-                ),
-              }}
-            ></div>
-          </div>
-          <div className="w-[10px] md:w-[20px]">
-            <div
-              key={`${segmentKey}_audio_data_2`}
-              className={`h-[2px] rounded-full bg-audio_review`}
-              onClick={segmentClick}
-              style={{
-                width: interpolateMotionAudioData(
-                  getAudioSegmentValue(segmentTime),
                   maxSegmentWidth,
                 ),
               }}
