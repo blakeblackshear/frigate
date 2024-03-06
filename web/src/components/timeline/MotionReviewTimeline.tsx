@@ -97,7 +97,7 @@ export function MotionReviewTimeline({
           showMinimap={showMinimap}
           minimapStartTime={minimapStartTime}
           minimapEndTime={minimapEndTime}
-          contentRef={contentRef}
+          setHandlebarTime={setHandlebarTime}
         />
       );
     });

@@ -1,6 +1,6 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { isDesktop, isMobile } from "react-device-detect";
 import scrollIntoView from "scroll-into-view-if-needed";
-import { isMobile } from "react-device-detect";
 
 type DragHandlerProps = {
   contentRef: React.RefObject<HTMLElement>;
@@ -34,15 +34,55 @@ function useDraggableHandler({
   isDragging,
   setIsDragging,
 }: DragHandlerProps) {
+  const [clientYPosition, setClientYPosition] = useState<number | null>(null);
+
+  const draggingAtTopEdge = useMemo(() => {
+    if (clientYPosition && timelineRef.current) {
+      return (
+        clientYPosition - timelineRef.current.offsetTop <
+          timelineRef.current.clientHeight * 0.03 && isDragging
+      );
+    }
+  }, [clientYPosition, timelineRef, isDragging]);
+
+  const draggingAtBottomEdge = useMemo(() => {
+    if (clientYPosition && timelineRef.current) {
+      return (
+        clientYPosition >
+          (timelineRef.current.clientHeight + timelineRef.current.offsetTop) *
+            0.97 && isDragging
+      );
+    }
+  }, [clientYPosition, timelineRef, isDragging]);
+
+  const getClientYPosition = useCallback(
+    (
+      e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>,
+    ) => {
+      let clientY;
+      if (isMobile && e.nativeEvent instanceof TouchEvent) {
+        clientY = e.nativeEvent.touches[0].clientY;
+      } else if (e.nativeEvent instanceof MouseEvent) {
+        clientY = e.nativeEvent.clientY;
+      }
+
+      if (clientY) {
+        setClientYPosition(clientY);
+      }
+    },
+    [setClientYPosition],
+  );
+
   const handleMouseDown = useCallback(
     (
       e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>,
     ) => {
       e.preventDefault();
       e.stopPropagation();
+      getClientYPosition(e);
       setIsDragging(true);
     },
-    [setIsDragging],
+    [setIsDragging, getClientYPosition],
   );
 
   const handleMouseUp = useCallback(
@@ -84,7 +124,7 @@ function useDraggableHandler({
             ).toLocaleTimeString([], {
               hour: "2-digit",
               minute: "2-digit",
-              ...(segmentDuration < 60 && { second: "2-digit" }),
+              ...(segmentDuration < 60 && isDesktop && { second: "2-digit" }),
             });
             if (scrollTimeline) {
               scrollIntoView(thumb, {
@@ -115,20 +155,24 @@ function useDraggableHandler({
         return;
       }
 
-      let clientY;
-      if (isMobile && e.nativeEvent instanceof TouchEvent) {
-        clientY = e.nativeEvent.touches[0].clientY;
-      } else if (e.nativeEvent instanceof MouseEvent) {
-        clientY = e.nativeEvent.clientY;
-      }
+      getClientYPosition(e);
+    },
 
-      e.preventDefault();
-      e.stopPropagation();
+    [contentRef, scrollTimeRef, timelineRef, getClientYPosition],
+  );
 
-      if (showHandlebar && isDragging && clientY) {
+  useEffect(() => {
+    let animationFrameId: number | null = null;
+
+    const handleScroll = () => {
+      if (
+        timelineRef.current &&
+        showHandlebar &&
+        isDragging &&
+        clientYPosition
+      ) {
         const {
           scrollHeight: timelineHeight,
-          clientHeight: visibleTimelineHeight,
           scrollTop: scrolled,
           offsetTop: timelineTop,
         } = timelineRef.current;
@@ -139,10 +183,11 @@ function useDraggableHandler({
         const parentScrollTop = getCumulativeScrollTop(timelineRef.current);
 
         const newHandlePosition = Math.min(
-          visibleTimelineHeight + parentScrollTop,
+          segmentHeight * (timelineDuration / segmentDuration) -
+            segmentHeight * 2,
           Math.max(
             segmentHeight + scrolled,
-            clientY - timelineTop + parentScrollTop,
+            clientYPosition - timelineTop + parentScrollTop,
           ),
         );
 
@@ -151,14 +196,24 @@ function useDraggableHandler({
           timelineStart - segmentIndex * segmentDuration,
         );
 
-        const scrollTimeline =
-          clientY < visibleTimelineHeight * 0.1 ||
-          clientY > visibleTimelineHeight * 0.9;
+        if (draggingAtTopEdge || draggingAtBottomEdge) {
+          let newPosition = clientYPosition;
+
+          if (draggingAtTopEdge) {
+            newPosition = scrolled - segmentHeight;
+            timelineRef.current.scrollTop = newPosition;
+          }
+
+          if (draggingAtBottomEdge) {
+            newPosition = scrolled + segmentHeight;
+            timelineRef.current.scrollTop = newPosition;
+          }
+        }
 
         updateHandlebarPosition(
           newHandlePosition - segmentHeight,
           segmentStartTime,
-          scrollTimeline,
+          false,
           false,
         );
 
@@ -168,22 +223,41 @@ function useDraggableHandler({
               (newHandlePosition / segmentHeight) * segmentDuration,
           );
         }
+
+        if (draggingAtTopEdge || draggingAtBottomEdge) {
+          animationFrameId = requestAnimationFrame(handleScroll);
+        }
       }
-    },
+    };
+
+    const startScroll = () => {
+      if (isDragging) {
+        handleScroll();
+      }
+    };
+
+    const stopScroll = () => {
+      if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
+
+    startScroll();
+
+    return stopScroll;
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      isDragging,
-      contentRef,
-      segmentDuration,
-      showHandlebar,
-      timelineDuration,
-      timelineStart,
-      updateHandlebarPosition,
-      alignStartDateToTimeline,
-      getCumulativeScrollTop,
-    ],
-  );
+  }, [
+    clientYPosition,
+    isDragging,
+    segmentDuration,
+    timelineStart,
+    timelineDuration,
+    timelineRef,
+    draggingAtTopEdge,
+    draggingAtBottomEdge,
+    showHandlebar,
+  ]);
 
   useEffect(() => {
     if (

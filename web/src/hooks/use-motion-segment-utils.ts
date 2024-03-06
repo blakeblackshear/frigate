@@ -66,9 +66,25 @@ export const useMotionSegmentUtils = (
     [motion_events, getSegmentStart, getSegmentEnd],
   );
 
+  const getMotionStart = useCallback(
+    (time: number): number => {
+      const matchingEvent = motion_events.find((event) => {
+        return (
+          time >= getSegmentStart(event.start_time) &&
+          time < getSegmentEnd(event.start_time) &&
+          event.motion
+        );
+      });
+
+      return matchingEvent?.start_time ?? 0;
+    },
+    [motion_events, getSegmentStart, getSegmentEnd],
+  );
+
   return {
     getMotionSegmentValue,
     getAudioSegmentValue,
     interpolateMotionAudioData,
+    getMotionStart,
   };
 };
