@@ -1,4 +1,4 @@
-import { FrigateConfig } from "@/types/frigateConfig";
+import { FrigateConfig, GROUP_ICONS } from "@/types/frigateConfig";
 import { isDesktop } from "react-device-detect";
 import useSWR from "swr";
 import { MdHome } from "react-icons/md";
@@ -8,6 +8,17 @@ import { useNavigate } from "react-router-dom";
 import { useCallback, useMemo, useState } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { getIconForGroup } from "@/utils/iconUtil";
+import { LuPlus } from "react-icons/lu";
+import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
+import { Input } from "../ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import FilterCheckBox from "./FilterCheckBox";
 
 type CameraGroupSelectorProps = {
   className?: string;
@@ -49,10 +60,16 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
     );
   }, [config]);
 
+  // add group
+
+  const [addGroup, setAddGroup] = useState(false);
+
   return (
     <div
       className={`flex items-center justify-start gap-2 ${className ?? ""} ${isDesktop ? "flex-col" : ""}`}
     >
+      <NewGroupDialog open={addGroup} setOpen={setAddGroup} />
+
       <Tooltip open={tooltip == "home"}>
         <TooltipTrigger asChild>
           <Button
@@ -97,6 +114,92 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
           </Tooltip>
         );
       })}
+      {isDesktop && (
+        <Button
+          className="text-muted-foreground bg-secondary"
+          size="xs"
+          onClick={() => setAddGroup(true)}
+        >
+          <LuPlus className="size-4 text-primary-foreground" />
+        </Button>
+      )}
     </div>
+  );
+}
+
+type NewGroupDialogProps = {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+};
+function NewGroupDialog({ open, setOpen }: NewGroupDialogProps) {
+  const { data: config } = useSWR<FrigateConfig>("config");
+  const [newTitle, setNewTitle] = useState("");
+  const [icon, setIcon] = useState("");
+  const [cameras, setCameras] = useState<string[]>([]);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent className="min-w-0 w-80">
+        <DialogTitle>Create New Camera Group</DialogTitle>
+        <Input
+          type="text"
+          placeholder="Name"
+          value={newTitle}
+          onChange={(e) => setNewTitle(e.target.value)}
+        />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <div className="flex justify-start gap-2 items-center cursor-pointer">
+              {icon.length == 0 ? "Select Icon" : "Icon: "}
+              {icon ? getIconForGroup(icon) : <div className="size-4" />}
+            </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuRadioGroup value={icon} onValueChange={setIcon}>
+              {GROUP_ICONS.map((gIcon) => (
+                <DropdownMenuRadioItem
+                  key={gIcon}
+                  className="w-full flex justify-start items-center gap-2 cursor-pointer hover:bg-secondary"
+                  value={gIcon}
+                >
+                  {getIconForGroup(gIcon)}
+                  {gIcon}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <div className="flex justify-start gap-2 items-center cursor-pointer">
+              {cameras.length == 0
+                ? "Select Cameras"
+                : `${cameras.length} Cameras`}
+            </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            {Object.keys(config?.cameras ?? {}).map((camera) => (
+              <FilterCheckBox
+                key={camera}
+                isChecked={cameras.includes(camera)}
+                label={camera.replaceAll("_", " ")}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    setCameras([...cameras, camera]);
+                  } else {
+                    const index = cameras.indexOf(camera);
+                    setCameras([
+                      ...cameras.slice(0, index),
+                      ...cameras.slice(index + 1),
+                    ]);
+                  }
+                }}
+              />
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <Button variant="select">Submit</Button>
+      </DialogContent>
+    </Dialog>
   );
 }
