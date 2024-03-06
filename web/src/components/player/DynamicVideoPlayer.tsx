@@ -301,6 +301,7 @@ export default function DynamicVideoPlayer({
         autoPlay
         playsInline
         muted
+        disableRemotePlayback
         onSeeked={onPreviewSeeked}
         onLoadedData={() => controller.previewReady()}
       >
@@ -308,9 +309,6 @@ export default function DynamicVideoPlayer({
           <source src={currentPreview.src} type={currentPreview.type} />
         )}
       </video>
-      {onClick && !hasRecordingAtTime && (
-        <div className="absolute inset-0 z-10 bg-black bg-opacity-60 rounded-2xl" />
-      )}
     </div>
   );
 }
