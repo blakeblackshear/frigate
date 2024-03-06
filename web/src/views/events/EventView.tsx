@@ -517,7 +517,7 @@ function DetectionReview({
                   variant="select"
                   onClick={markAllReviewed}
                 >
-                  Mark all items as reviewed
+                  Mark these items as reviewed
                 </Button>
               ) : (
                 <ActivityIndicator />
