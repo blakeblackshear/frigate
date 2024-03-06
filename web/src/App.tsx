@@ -15,6 +15,7 @@ import Events from "./pages/Events";
 import { isDesktop, isMobile } from "react-device-detect";
 import Statusbar from "./components/Statusbar";
 import Bottombar from "./components/navigation/Bottombar";
+import SubmitPlus from "./pages/SubmitPlus";
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
                 <Route path="/events" element={<Events />} />
                 <Route path="/export" element={<Export />} />
                 <Route path="/storage" element={<Storage />} />
+                <Route path="/plus" element={<SubmitPlus />} />
                 <Route path="/system" element={<System />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/config" element={<ConfigEditor />} />
