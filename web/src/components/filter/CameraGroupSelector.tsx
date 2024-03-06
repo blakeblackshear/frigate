@@ -1,4 +1,8 @@
-import { FrigateConfig, GROUP_ICONS } from "@/types/frigateConfig";
+import {
+  CameraGroupConfig,
+  FrigateConfig,
+  GROUP_ICONS,
+} from "@/types/frigateConfig";
 import { isDesktop } from "react-device-detect";
 import useSWR from "swr";
 import { MdHome } from "react-icons/md";
@@ -8,7 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { useCallback, useMemo, useState } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { getIconForGroup } from "@/utils/iconUtil";
-import { LuPlus } from "react-icons/lu";
+import { LuPencil, LuPlus, LuTrash } from "react-icons/lu";
 import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
 import { Input } from "../ui/input";
 import {
@@ -16,6 +20,7 @@ import {
   DropdownMenuContent,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import FilterCheckBox from "./FilterCheckBox";
@@ -72,7 +77,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
       <NewGroupDialog
         open={addGroup}
         setOpen={setAddGroup}
-        index={groups.length}
+        currentGroups={groups}
       />
 
       <Tooltip open={tooltip == "home"}>
@@ -135,14 +140,21 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
 type NewGroupDialogProps = {
   open: boolean;
   setOpen: (open: boolean) => void;
-  index: number;
+  currentGroups: [string, CameraGroupConfig][];
 };
-function NewGroupDialog({ open, setOpen, index }: NewGroupDialogProps) {
+function NewGroupDialog({ open, setOpen, currentGroups }: NewGroupDialogProps) {
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
+
+  // add fields
+
+  const [editState, setEditState] = useState<"none" | "add" | "edit">("none");
   const [newTitle, setNewTitle] = useState("");
   const [icon, setIcon] = useState("");
   const [cameras, setCameras] = useState<string[]>([]);
+
+  // validation
+
   const [error, setError] = useState("");
 
   const onCreateGroup = useCallback(async () => {
@@ -162,7 +174,7 @@ function NewGroupDialog({ open, setOpen, index }: NewGroupDialogProps) {
     }
 
     setError("");
-    const orderQuery = `camera_groups.${newTitle}.order=${index}`;
+    const orderQuery = `camera_groups.${newTitle}.order=${currentGroups.length}`;
     const iconQuery = `camera_groups.${newTitle}.icon=${icon}`;
     const cameraQueries = cameras
       .map((cam) => `&camera_groups.${newTitle}.cameras=${cam}`)
@@ -181,73 +193,136 @@ function NewGroupDialog({ open, setOpen, index }: NewGroupDialogProps) {
       setCameras([]);
       updateConfig();
     }
-  }, [index, cameras, newTitle, icon, setOpen, updateConfig]);
+  }, [currentGroups, cameras, newTitle, icon, setOpen, updateConfig]);
+
+  const onDeleteGroup = useCallback(
+    async (name: string) => {
+      const req = axios.put(`config/set?camera_groups.${name}`, {
+        requires_restart: 0,
+      });
+
+      if ((await req).status == 200) {
+        updateConfig();
+      }
+    },
+    [updateConfig],
+  );
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(open) => {
+        setEditState("none");
+        setNewTitle("");
+        setIcon("");
+        setCameras([]);
+        setOpen(open);
+      }}
+    >
       <DialogContent className="min-w-0 w-96">
-        <DialogTitle>Create New Camera Group</DialogTitle>
-        <Input
-          type="text"
-          placeholder="Name"
-          value={newTitle}
-          onChange={(e) => setNewTitle(e.target.value)}
-        />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <div className="flex justify-start gap-2 items-center cursor-pointer">
-              {icon.length == 0 ? "Select Icon" : "Icon: "}
-              {icon ? getIconForGroup(icon) : <div className="size-4" />}
-            </div>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuRadioGroup value={icon} onValueChange={setIcon}>
-              {GROUP_ICONS.map((gIcon) => (
-                <DropdownMenuRadioItem
-                  key={gIcon}
-                  className="w-full flex justify-start items-center gap-2 cursor-pointer hover:bg-secondary"
-                  value={gIcon}
-                >
-                  {getIconForGroup(gIcon)}
-                  {gIcon}
-                </DropdownMenuRadioItem>
-              ))}
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <div className="flex justify-start gap-2 items-center cursor-pointer">
-              {cameras.length == 0
-                ? "Select Cameras"
-                : `${cameras.length} Cameras`}
-            </div>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            {Object.keys(config?.cameras ?? {}).map((camera) => (
-              <FilterCheckBox
-                key={camera}
-                isChecked={cameras.includes(camera)}
-                label={camera.replaceAll("_", " ")}
-                onCheckedChange={(checked) => {
-                  if (checked) {
-                    setCameras([...cameras, camera]);
-                  } else {
-                    const index = cameras.indexOf(camera);
-                    setCameras([
-                      ...cameras.slice(0, index),
-                      ...cameras.slice(index + 1),
-                    ]);
-                  }
+        <DialogTitle>Camera Groups</DialogTitle>
+        {currentGroups.map((group) => (
+          <div className="flex justify-between items-center">
+            {group[0]}
+            <div className="flex justify-center gap-1">
+              <Button
+                size="icon"
+                onClick={() => {
+                  setNewTitle(group[0]);
+                  setIcon(group[1].icon);
+                  setCameras(group[1].cameras);
+                  setEditState("edit");
                 }}
-              />
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-        {error && <div className="text-danger">{error}</div>}
-        <Button variant="select" onClick={onCreateGroup}>
-          Submit
-        </Button>
+              >
+                <LuPencil />
+              </Button>
+              <Button
+                className="text-destructive"
+                size="icon"
+                onClick={() => onDeleteGroup(group[0])}
+              >
+                <LuTrash />
+              </Button>
+            </div>
+          </div>
+        ))}
+        <DropdownMenuSeparator />
+        {editState == "none" && (
+          <Button
+            className="text-primary-foreground justify-start"
+            variant="ghost"
+            onClick={() => setEditState("add")}
+          >
+            <LuPlus className="size-4 mr-1" />
+            Create new group
+          </Button>
+        )}
+        {editState != "none" && (
+          <>
+            <Input
+              type="text"
+              placeholder="Name"
+              disabled={editState == "edit"}
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+            />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div className="flex justify-start gap-2 items-center cursor-pointer">
+                  {icon.length == 0 ? "Select Icon" : "Icon: "}
+                  {icon ? getIconForGroup(icon) : <div className="size-4" />}
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuRadioGroup value={icon} onValueChange={setIcon}>
+                  {GROUP_ICONS.map((gIcon) => (
+                    <DropdownMenuRadioItem
+                      key={gIcon}
+                      className="w-full flex justify-start items-center gap-2 cursor-pointer hover:bg-secondary"
+                      value={gIcon}
+                    >
+                      {getIconForGroup(gIcon)}
+                      {gIcon}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div className="flex justify-start gap-2 items-center cursor-pointer">
+                  {cameras.length == 0
+                    ? "Select Cameras"
+                    : `${cameras.length} Cameras`}
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                {Object.keys(config?.cameras ?? {}).map((camera) => (
+                  <FilterCheckBox
+                    key={camera}
+                    isChecked={cameras.includes(camera)}
+                    label={camera.replaceAll("_", " ")}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setCameras([...cameras, camera]);
+                      } else {
+                        const index = cameras.indexOf(camera);
+                        setCameras([
+                          ...cameras.slice(0, index),
+                          ...cameras.slice(index + 1),
+                        ]);
+                      }
+                    }}
+                  />
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            {error && <div className="text-danger">{error}</div>}
+            <Button variant="select" onClick={onCreateGroup}>
+              Submit
+            </Button>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );
