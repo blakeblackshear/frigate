@@ -76,10 +76,111 @@ def review():
 def review_summary():
     tz_name = request.args.get("timezone", default="utc", type=str)
     hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(tz_name)
+    day_ago = (datetime.now() - timedelta(hours=24)).timestamp()
     month_ago = (datetime.now() - timedelta(days=30)).timestamp()
 
     cameras = request.args.get("cameras", "all")
     labels = request.args.get("labels", "all")
+
+    clauses = [(ReviewSegment.start_time > day_ago)]
+
+    if cameras != "all":
+        camera_list = cameras.split(",")
+        clauses.append((ReviewSegment.camera << camera_list))
+
+    if labels != "all":
+        # use matching so segments with multiple labels
+        # still match on a search where any label matches
+        label_clauses = []
+        filtered_labels = labels.split(",")
+
+        for label in filtered_labels:
+            label_clauses.append(
+                (ReviewSegment.data["objects"].cast("text") % f'*"{label}"*')
+            )
+
+        label_clause = reduce(operator.or_, label_clauses)
+        clauses.append((label_clause))
+
+    last_24 = (
+        ReviewSegment.select(
+            fn.SUM(
+                Case(
+                    None,
+                    [
+                        (
+                            (ReviewSegment.severity == "alert"),
+                            ReviewSegment.has_been_reviewed,
+                        )
+                    ],
+                    0,
+                )
+            ).alias("reviewed_alert"),
+            fn.SUM(
+                Case(
+                    None,
+                    [
+                        (
+                            (ReviewSegment.severity == "detection"),
+                            ReviewSegment.has_been_reviewed,
+                        )
+                    ],
+                    0,
+                )
+            ).alias("reviewed_detection"),
+            fn.SUM(
+                Case(
+                    None,
+                    [
+                        (
+                            (ReviewSegment.severity == "significant_motion"),
+                            ReviewSegment.has_been_reviewed,
+                        )
+                    ],
+                    0,
+                )
+            ).alias("reviewed_motion"),
+            fn.SUM(
+                Case(
+                    None,
+                    [
+                        (
+                            (ReviewSegment.severity == "alert"),
+                            1,
+                        )
+                    ],
+                    0,
+                )
+            ).alias("total_alert"),
+            fn.SUM(
+                Case(
+                    None,
+                    [
+                        (
+                            (ReviewSegment.severity == "detection"),
+                            1,
+                        )
+                    ],
+                    0,
+                )
+            ).alias("total_detection"),
+            fn.SUM(
+                Case(
+                    None,
+                    [
+                        (
+                            (ReviewSegment.severity == "significant_motion"),
+                            1,
+                        )
+                    ],
+                    0,
+                )
+            ).alias("total_motion"),
+        )
+        .where(reduce(operator.and_, clauses))
+        .dicts()
+        .get()
+    )
 
     clauses = [(ReviewSegment.start_time > month_ago)]
 
@@ -101,7 +202,7 @@ def review_summary():
         label_clause = reduce(operator.or_, label_clauses)
         clauses.append((label_clause))
 
-    groups = (
+    last_month = (
         ReviewSegment.select(
             fn.strftime(
                 "%Y-%m-%d",
@@ -192,29 +293,20 @@ def review_summary():
         .order_by(ReviewSegment.start_time.desc())
     )
 
-    return jsonify([e for e in groups.dicts().iterator()])
+    data = {
+        "last24Hours": last_24,
+    }
+
+    for e in last_month.dicts().iterator():
+        data[e["day"]] = e
+
+    return jsonify(data)
 
 
-@ReviewBp.route("/review/<id>/viewed", methods=("POST",))
-def set_reviewed(id):
-    try:
-        review: ReviewSegment = ReviewSegment.get(ReviewSegment.id == id)
-    except DoesNotExist:
-        return make_response(
-            jsonify({"success": False, "message": "Review " + id + " not found"}), 404
-        )
-
-    review.has_been_reviewed = True
-    review.save()
-
-    return make_response(
-        jsonify({"success": True, "message": "Reviewed " + id + " viewed"}), 200
-    )
-
-
-@ReviewBp.route("/reviews/<ids>/viewed", methods=("POST",))
-def set_multiple_reviewed(ids: str):
-    list_of_ids = ids.split(",")
+@ReviewBp.route("/reviews/viewed", methods=("POST",))
+def set_multiple_reviewed():
+    json: dict[str, any] = request.get_json(silent=True) or {}
+    list_of_ids = json.get("ids", "")
 
     if not list_of_ids or len(list_of_ids) == 0:
         return make_response(
@@ -264,13 +356,17 @@ def delete_reviews(ids: str):
 @ReviewBp.route("/review/activity")
 def review_activity():
     """Get motion and audio activity."""
+    cameras = request.args.get("cameras", "all")
     before = request.args.get("before", type=float, default=datetime.now().timestamp())
     after = request.args.get(
         "after", type=float, default=(datetime.now() - timedelta(hours=1)).timestamp()
     )
 
-    # get scale in seconds
-    scale = request.args.get("scale", type=int, default=30)
+    clauses = [(Recordings.start_time > after) & (Recordings.end_time < before)]
+
+    if cameras != "all":
+        camera_list = cameras.split(",")
+        clauses.append((Recordings.camera << camera_list))
 
     all_recordings: list[Recordings] = (
         Recordings.select(
@@ -280,7 +376,7 @@ def review_activity():
             Recordings.motion,
             Recordings.dBFS,
         )
-        .where((Recordings.start_time > after) & (Recordings.end_time < before))
+        .where(reduce(operator.and_, clauses))
         .order_by(Recordings.start_time.asc())
         .iterator()
     )
@@ -297,6 +393,9 @@ def review_activity():
                 "audio": rec.dBFS if rec.objects == 0 else 0,
             }
         )
+
+    # get scale in seconds
+    scale = request.args.get("scale", type=int, default=30)
 
     # resample data using pandas to get activity on scaled basis
     df = pd.DataFrame(data, columns=["start_time", "motion", "audio"])

@@ -115,9 +115,7 @@ export default function Events() {
 
   // review summary
 
-  const { data: reviewSummary, mutate: updateSummary } = useSWR<
-    ReviewSummary[]
-  >([
+  const { data: reviewSummary, mutate: updateSummary } = useSWR<ReviewSummary>([
     "review/summary",
     {
       timezone: timezone,
@@ -164,7 +162,7 @@ export default function Events() {
 
   const markItemAsReviewed = useCallback(
     async (review: ReviewSegment) => {
-      const resp = await axios.post(`review/${review.id}/viewed`);
+      const resp = await axios.post(`reviews/viewed`, { ids: [review.id] });
 
       if (resp.status == 200) {
         updateSegments(
@@ -197,23 +195,30 @@ export default function Events() {
         );
 
         updateSummary(
-          (data: ReviewSummary[] | undefined) => {
+          (data: ReviewSummary | undefined) => {
             if (!data) {
               return data;
             }
 
             const day = new Date(review.start_time * 1000);
-            const key = `${day.getFullYear()}-${("0" + (day.getMonth() + 1)).slice(-2)}-${("0" + day.getDate()).slice(-2)}`;
-            const index = data.findIndex((summary) => summary.day == key);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
 
-            if (index == -1) {
+            let key;
+            if (day.getTime() > today.getTime()) {
+              key = "last24Hours";
+            } else {
+              key = `${day.getFullYear()}-${("0" + (day.getMonth() + 1)).slice(-2)}-${("0" + day.getDate()).slice(-2)}`;
+            }
+
+            if (!Object.keys(data).includes(key)) {
               return data;
             }
 
-            const item = data[index];
-            return [
-              ...data.slice(0, index),
-              {
+            const item = data[key];
+            return {
+              ...data,
+              [key]: {
                 ...item,
                 reviewed_alert:
                   review.severity == "alert"
@@ -228,8 +233,7 @@ export default function Events() {
                     ? item.reviewed_motion + 1
                     : item.reviewed_motion,
               },
-              ...data.slice(index + 1),
-            ];
+            };
           },
           { revalidate: false, populateCache: true },
         );
@@ -277,6 +281,11 @@ export default function Events() {
 
     if (!selectedReview) {
       return undefined;
+    }
+
+    // mark item as reviewed since it has been opened
+    if (!selectedReview?.has_been_reviewed) {
+      markItemAsReviewed(selectedReview);
     }
 
     return {

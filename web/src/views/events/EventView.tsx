@@ -35,10 +35,11 @@ import { LuFolderCheck } from "react-icons/lu";
 import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
 import MotionReviewTimeline from "@/components/timeline/MotionReviewTimeline";
+import { Button } from "@/components/ui/button";
 
 type EventViewProps = {
   reviewPages?: ReviewSegment[][];
-  reviewSummary?: ReviewSummary[];
+  reviewSummary?: ReviewSummary;
   relevantPreviews?: Preview[];
   timeRange: { before: number; after: number };
   reachedEnd: boolean;
@@ -74,17 +75,17 @@ export default function EventView({
   // review counts
 
   const reviewCounts = useMemo(() => {
-    if (!reviewSummary || reviewSummary.length == 0) {
+    if (!reviewSummary) {
       return { alert: 0, detection: 0, significant_motion: 0 };
     }
 
     let summary;
     if (filter?.before == undefined) {
-      summary = reviewSummary[0];
+      summary = reviewSummary["last24Hours"];
     } else {
       const day = new Date(filter.before * 1000);
       const key = `${day.getFullYear()}-${("0" + (day.getMonth() + 1)).slice(-2)}-${("0" + day.getDate()).slice(-2)}`;
-      summary = reviewSummary.find((check) => check.day == key);
+      summary = reviewSummary[key];
     }
 
     if (!summary) {
@@ -211,9 +212,11 @@ export default function EventView({
         <ToggleGroup
           className="*:px-3 *:py-4 *:rounded-2xl"
           type="single"
-          defaultValue="alert"
           size="sm"
-          onValueChange={(value: ReviewSeverity) => setSeverity(value)}
+          value={severity}
+          onValueChange={(value: ReviewSeverity) =>
+            value ? setSeverity(value) : null
+          } // don't allow the severity to be unselected
         >
           <ToggleGroupItem
             className={`${severity == "alert" ? "" : "text-gray-500"}`}
@@ -241,9 +244,7 @@ export default function EventView({
             aria-label="Select motion"
           >
             <MdCircle className="size-2 md:mr-[10px] text-severity_motion" />
-            <div className="hidden md:block">
-              Motion ∙ {reviewCounts.significant_motion}
-            </div>
+            <div className="hidden md:block">Motion</div>
           </ToggleGroupItem>
         </ToggleGroup>
 
@@ -303,6 +304,7 @@ type DetectionReviewProps = {
     detection: ReviewSegment[];
     significant_motion: ReviewSegment[];
   };
+  itemsToReview?: number;
   relevantPreviews?: Preview[];
   pagingObserver: MutableRefObject<IntersectionObserver | null>;
   selectedReviews: string[];
@@ -320,6 +322,7 @@ function DetectionReview({
   contentRef,
   currentItems,
   reviewItems,
+  itemsToReview,
   relevantPreviews,
   pagingObserver,
   selectedReviews,
@@ -358,6 +361,17 @@ function DetectionReview({
     },
     [isValidating, pagingObserver, reachedEnd, loadNextPage],
   );
+
+  const markAllReviewed = useCallback(async () => {
+    if (!currentItems) {
+      return;
+    }
+
+    await axios.post(`reviews/viewed`, {
+      ids: currentItems?.map((seg) => seg.id),
+    });
+    pullLatestData();
+  }, [currentItems, pullLatestData]);
 
   // timeline interaction
 
@@ -453,7 +467,7 @@ function DetectionReview({
           />
         )}
 
-        {!isValidating && currentItems == null && (
+        {(itemsToReview == 0 || (currentItems == null && !isValidating)) && (
           <div className="size-full flex flex-col justify-center items-center">
             <LuFolderCheck className="size-16" />
             There are no {severity.replace(/_/g, " ")} items to review
@@ -489,13 +503,27 @@ function DetectionReview({
                       onClick={onSelectReview}
                     />
                   </div>
-                  {lastRow && !reachedEnd && <ActivityIndicator />}
                 </div>
               );
             })
-          ) : severity != "alert" ? (
+          ) : itemsToReview != 0 ? (
             <div ref={lastReviewRef} />
           ) : null}
+          {currentItems && (
+            <div className="col-span-full flex justify-center items-center">
+              {reachedEnd ? (
+                <Button
+                  className="text-white"
+                  variant="select"
+                  onClick={markAllReviewed}
+                >
+                  Mark all items as reviewed
+                </Button>
+              ) : (
+                <ActivityIndicator />
+              )}
+            </div>
+          )}
         </div>
       </div>
       <div className="w-[55px] md:w-[100px] mt-2 overflow-y-auto no-scrollbar">
@@ -574,6 +602,7 @@ function MotionReview({
       before: timeRange.before,
       after: timeRange.after,
       scale: segmentDuration / 2,
+      cameras: filter?.cameras?.join(",") ?? null,
     },
   ]);
 

@@ -22,7 +22,7 @@ export default function ReviewActionGroup({
 
   const onMarkAsReviewed = useCallback(async () => {
     const idList = selectedReviews.join(",");
-    await axios.post(`reviews/${idList}/viewed`);
+    await axios.post(`reviews/viewed`, { ids: idList });
     setSelectedReviews([]);
     pullLatestData();
   }, [selectedReviews, setSelectedReviews, pullLatestData]);
