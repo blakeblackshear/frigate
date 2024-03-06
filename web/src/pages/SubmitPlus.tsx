@@ -84,7 +84,7 @@ export default function SubmitPlus() {
             onClick={() => setUpload(event)}
           >
             <img
-              className="rounded-2xl"
+              className="h-full object-contain rounded-2xl"
               src={`${baseUrl}api/events/${event.id}/snapshot.jpg`}
             />
           </div>
