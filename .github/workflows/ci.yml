@@ -38,6 +38,8 @@ jobs:
           tags: ${{ steps.setup.outputs.image-name }}-amd64
           cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
       - name: Build and push TensorRT (x86 GPU)
+        env:
+          COMPUTE_LEVEL: "50 60 70 80 90"
         uses: docker/bake-action@v4
         with:
           push: true
