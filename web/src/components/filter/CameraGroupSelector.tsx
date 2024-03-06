@@ -19,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import FilterCheckBox from "./FilterCheckBox";
+import axios from "axios";
 
 type CameraGroupSelectorProps = {
   className?: string;
@@ -68,7 +69,11 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
     <div
       className={`flex items-center justify-start gap-2 ${className ?? ""} ${isDesktop ? "flex-col" : ""}`}
     >
-      <NewGroupDialog open={addGroup} setOpen={setAddGroup} />
+      <NewGroupDialog
+        open={addGroup}
+        setOpen={setAddGroup}
+        index={groups.length}
+      />
 
       <Tooltip open={tooltip == "home"}>
         <TooltipTrigger asChild>
@@ -79,7 +84,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
                 : "text-muted-foreground bg-secondary focus:text-muted-foreground focus:bg-secondary"
             }
             size="xs"
-            onClick={() => navigate(-1)}
+            onClick={() => (group ? navigate(-1) : null)}
             onMouseEnter={() => (isDesktop ? showTooltip("home") : null)}
             onMouseLeave={() => (isDesktop ? showTooltip(undefined) : null)}
           >
@@ -130,16 +135,57 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
 type NewGroupDialogProps = {
   open: boolean;
   setOpen: (open: boolean) => void;
+  index: number;
 };
-function NewGroupDialog({ open, setOpen }: NewGroupDialogProps) {
-  const { data: config } = useSWR<FrigateConfig>("config");
+function NewGroupDialog({ open, setOpen, index }: NewGroupDialogProps) {
+  const { data: config, mutate: updateConfig } =
+    useSWR<FrigateConfig>("config");
   const [newTitle, setNewTitle] = useState("");
   const [icon, setIcon] = useState("");
   const [cameras, setCameras] = useState<string[]>([]);
+  const [error, setError] = useState("");
+
+  const onCreateGroup = useCallback(async () => {
+    if (!newTitle) {
+      setError("A title must be selected");
+      return;
+    }
+
+    if (!icon) {
+      setError("An icon must be selected");
+      return;
+    }
+
+    if (!cameras || cameras.length < 2) {
+      setError("At least 2 cameras must be selected");
+      return;
+    }
+
+    setError("");
+    const orderQuery = `camera_groups.${newTitle}.order=${index}`;
+    const iconQuery = `camera_groups.${newTitle}.icon=${icon}`;
+    const cameraQueries = cameras
+      .map((cam) => `&camera_groups.${newTitle}.cameras=${cam}`)
+      .join("");
+
+    const req = axios.put(
+      `config/set?${orderQuery}&${iconQuery}${cameraQueries}`,
+      { requires_restart: 0 },
+    );
+
+    setOpen(false);
+
+    if ((await req).status == 200) {
+      setNewTitle("");
+      setIcon("");
+      setCameras([]);
+      updateConfig();
+    }
+  }, [index, cameras, newTitle, icon, setOpen, updateConfig]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="min-w-0 w-80">
+      <DialogContent className="min-w-0 w-96">
         <DialogTitle>Create New Camera Group</DialogTitle>
         <Input
           type="text"
@@ -198,7 +244,10 @@ function NewGroupDialog({ open, setOpen }: NewGroupDialogProps) {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
-        <Button variant="select">Submit</Button>
+        {error && <div className="text-danger">{error}</div>}
+        <Button variant="select" onClick={onCreateGroup}>
+          Submit
+        </Button>
       </DialogContent>
     </Dialog>
   );

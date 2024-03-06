@@ -204,17 +204,22 @@ def update_yaml_from_url(file_path, url):
                 key_path.pop(i - 1)
             except ValueError:
                 pass
-        new_value = new_value_list[0]
-        update_yaml_file(file_path, key_path, new_value)
+
+        if len(new_value_list) > 1:
+            update_yaml_file(file_path, key_path, new_value_list)
+        else:
+            update_yaml_file(file_path, key_path, new_value_list[0])
 
 
 def update_yaml_file(file_path, key_path, new_value):
     yaml = YAML()
+    yaml.indent(mapping=2, sequence=4, offset=2)
     with open(file_path, "r") as f:
         data = yaml.load(f)
 
     data = update_yaml(data, key_path, new_value)
-
+    with open("/config/test.yaml", "w") as f:
+        yaml.dump(data, f)
     with open(file_path, "w") as f:
         yaml.dump(data, f)
 
