@@ -38,32 +38,26 @@ import MotionReviewTimeline from "@/components/timeline/MotionReviewTimeline";
 import { Button } from "@/components/ui/button";
 
 type EventViewProps = {
-  reviewPages?: ReviewSegment[][];
+  reviews?: ReviewSegment[];
   reviewSummary?: ReviewSummary;
   relevantPreviews?: Preview[];
   timeRange: { before: number; after: number };
-  reachedEnd: boolean;
-  isValidating: boolean;
   filter?: ReviewFilter;
   severity: ReviewSeverity;
   setSeverity: (severity: ReviewSeverity) => void;
-  loadNextPage: () => void;
   markItemAsReviewed: (review: ReviewSegment) => void;
   onOpenReview: (reviewId: string) => void;
   pullLatestData: () => void;
   updateFilter: (filter: ReviewFilter) => void;
 };
 export default function EventView({
-  reviewPages,
+  reviews,
   reviewSummary,
   relevantPreviews,
   timeRange,
-  reachedEnd,
-  isValidating,
   filter,
   severity,
   setSeverity,
-  loadNextPage,
   markItemAsReviewed,
   onOpenReview,
   pullLatestData,
@@ -115,22 +109,20 @@ export default function EventView({
     const detections: ReviewSegment[] = [];
     const motion: ReviewSegment[] = [];
 
-    reviewPages?.forEach((page) => {
-      page.forEach((segment) => {
-        all.push(segment);
+    reviews?.forEach((segment) => {
+      all.push(segment);
 
-        switch (segment.severity) {
-          case "alert":
-            alerts.push(segment);
-            break;
-          case "detection":
-            detections.push(segment);
-            break;
-          default:
-            motion.push(segment);
-            break;
-        }
-      });
+      switch (segment.severity) {
+        case "alert":
+          alerts.push(segment);
+          break;
+        case "detection":
+          detections.push(segment);
+          break;
+        default:
+          motion.push(segment);
+          break;
+      }
     });
 
     return {
@@ -139,7 +131,7 @@ export default function EventView({
       detection: detections,
       significant_motion: motion,
     };
-  }, [reviewPages]);
+  }, [reviews]);
 
   const currentItems = useMemo(() => {
     const current = reviewItems[severity];
@@ -150,8 +142,6 @@ export default function EventView({
 
     return current;
   }, [reviewItems, severity]);
-
-  const pagingObserver = useRef<IntersectionObserver | null>(null);
 
   // review interaction
 
@@ -267,14 +257,11 @@ export default function EventView({
             currentItems={currentItems}
             reviewItems={reviewItems}
             relevantPreviews={relevantPreviews}
-            pagingObserver={pagingObserver}
             selectedReviews={selectedReviews}
+            itemsToReview={reviewCounts[severity]}
             severity={severity}
             filter={filter}
-            isValidating={isValidating}
-            reachedEnd={reachedEnd}
             timeRange={timeRange}
-            loadNextPage={loadNextPage}
             markItemAsReviewed={markItemAsReviewed}
             onSelectReview={onSelectReview}
             pullLatestData={pullLatestData}
@@ -306,14 +293,10 @@ type DetectionReviewProps = {
   };
   itemsToReview?: number;
   relevantPreviews?: Preview[];
-  pagingObserver: MutableRefObject<IntersectionObserver | null>;
   selectedReviews: string[];
   severity: ReviewSeverity;
   filter?: ReviewFilter;
-  isValidating: boolean;
-  reachedEnd: boolean;
   timeRange: { before: number; after: number };
-  loadNextPage: () => void;
   markItemAsReviewed: (review: ReviewSegment) => void;
   onSelectReview: (id: string, ctrl: boolean) => void;
   pullLatestData: () => void;
@@ -324,14 +307,10 @@ function DetectionReview({
   reviewItems,
   itemsToReview,
   relevantPreviews,
-  pagingObserver,
   selectedReviews,
   severity,
   filter,
-  isValidating,
-  reachedEnd,
   timeRange,
-  loadNextPage,
   markItemAsReviewed,
   onSelectReview,
   pullLatestData,
@@ -344,23 +323,7 @@ function DetectionReview({
 
   // review interaction
 
-  const lastReviewRef = useCallback(
-    (node: HTMLElement | null) => {
-      if (isValidating) return;
-      if (pagingObserver.current) pagingObserver.current.disconnect();
-      try {
-        pagingObserver.current = new IntersectionObserver((entries) => {
-          if (entries[0].isIntersecting && !reachedEnd) {
-            loadNextPage();
-          }
-        });
-        if (node) pagingObserver.current.observe(node);
-      } catch (e) {
-        // no op
-      }
-    },
-    [isValidating, pagingObserver, reachedEnd, loadNextPage],
-  );
+  const [hasUpdate, setHasUpdate] = useState(false);
 
   const markAllReviewed = useCallback(async () => {
     if (!currentItems) {
@@ -370,6 +333,7 @@ function DetectionReview({
     await axios.post(`reviews/viewed`, {
       ids: currentItems?.map((seg) => seg.id),
     });
+    setHasUpdate(false);
     pullLatestData();
   }, [currentItems, pullLatestData]);
 
@@ -463,11 +427,13 @@ function DetectionReview({
             className="absolute w-full z-30"
             contentRef={contentRef}
             severity={severity}
+            hasUpdate={hasUpdate}
+            setHasUpdate={setHasUpdate}
             pullLatestData={pullLatestData}
           />
         )}
 
-        {(itemsToReview == 0 || (currentItems == null && !isValidating)) && (
+        {itemsToReview == 0 && (
           <div className="size-full flex flex-col justify-center items-center">
             <LuFolderCheck className="size-16" />
             There are no {severity.replace(/_/g, " ")} items to review
@@ -478,15 +444,18 @@ function DetectionReview({
           className="w-full m-2 grid sm:grid-cols-2 md:grid-cols-3 3xl:grid-cols-4 gap-2 md:gap-4"
           ref={contentRef}
         >
-          {currentItems ? (
-            currentItems.map((value, segIdx) => {
-              const lastRow = segIdx == currentItems.length - 1;
+          {currentItems &&
+            currentItems.map((value) => {
+              if (value.has_been_reviewed && filter?.showReviewed != 1) {
+                return;
+              }
+
               const selected = selectedReviews.includes(value.id);
 
               return (
                 <div
                   key={value.id}
-                  ref={lastRow ? lastReviewRef : minimapRef}
+                  ref={minimapRef}
                   data-start={value.start_time}
                   data-segment-start={
                     alignStartDateToTimeline(value.start_time) - segmentDuration
@@ -505,23 +474,16 @@ function DetectionReview({
                   </div>
                 </div>
               );
-            })
-          ) : itemsToReview != 0 ? (
-            <div ref={lastReviewRef} />
-          ) : null}
-          {currentItems && (
+            })}
+          {(itemsToReview ?? 0) > 0 && (
             <div className="col-span-full flex justify-center items-center">
-              {reachedEnd ? (
-                <Button
-                  className="text-white"
-                  variant="select"
-                  onClick={markAllReviewed}
-                >
-                  Mark these items as reviewed
-                </Button>
-              ) : (
-                <ActivityIndicator />
-              )}
+              <Button
+                className="text-white"
+                variant="select"
+                onClick={markAllReviewed}
+              >
+                Mark these items as reviewed
+              </Button>
             </div>
           )}
         </div>
