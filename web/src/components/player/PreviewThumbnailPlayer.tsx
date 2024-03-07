@@ -47,14 +47,11 @@ export default function PreviewThumbnailPlayer({
 }: PreviewPlayerProps) {
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
-
-  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>();
-  const [playback, setPlayback] = useState(false);
-  const [ignoreClick, setIgnoreClick] = useState(false);
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
 
   // interaction
 
+  const [ignoreClick, setIgnoreClick] = useState(false);
   const handleOnClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (!ignoreClick) {
@@ -120,38 +117,39 @@ export default function PreviewThumbnailPlayer({
     }
   }, [allPreviews, review]);
 
+  // Hover Playback
+
+  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>();
+  const [playback, setPlayback] = useState(false);
   const playingBack = useMemo(() => playback, [playback]);
+  const [isHovered, setIsHovered] = useState(false);
 
-  const onPlayback = useCallback(
-    (isHovered: boolean) => {
-      if (isHovered && scrollLock) {
-        return;
+  useEffect(() => {
+    if (isHovered && scrollLock) {
+      return;
+    }
+
+    if (isHovered) {
+      setHoverTimeout(
+        setTimeout(() => {
+          setPlayback(true);
+          setHoverTimeout(null);
+        }, 500),
+      );
+    } else {
+      if (hoverTimeout) {
+        clearTimeout(hoverTimeout);
       }
 
-      if (isHovered) {
-        setHoverTimeout(
-          setTimeout(() => {
-            setPlayback(true);
-            setHoverTimeout(null);
-          }, 500),
-        );
-      } else {
-        if (hoverTimeout) {
-          clearTimeout(hoverTimeout);
-        }
+      setPlayback(false);
 
-        setPlayback(false);
-
-        if (onTimeUpdate) {
-          onTimeUpdate(undefined);
-        }
+      if (onTimeUpdate) {
+        onTimeUpdate(undefined);
       }
-    },
-
+    }
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [hoverTimeout, scrollLock, review],
-  );
+  }, [isHovered, scrollLock]);
 
   // date
 
@@ -163,8 +161,8 @@ export default function PreviewThumbnailPlayer({
   return (
     <div
       className="relative size-full cursor-pointer"
-      onMouseEnter={isMobile ? undefined : () => onPlayback(true)}
-      onMouseLeave={isMobile ? undefined : () => onPlayback(false)}
+      onMouseEnter={isMobile ? undefined : () => setIsHovered(true)}
+      onMouseLeave={isMobile ? undefined : () => setIsHovered(false)}
       onContextMenu={(e) => {
         e.preventDefault();
         onClick(review.id, true);
