@@ -323,6 +323,8 @@ function DetectionReview({
 
   // review interaction
 
+  const [hasUpdate, setHasUpdate] = useState(false);
+
   const markAllReviewed = useCallback(async () => {
     if (!currentItems) {
       return;
@@ -331,6 +333,7 @@ function DetectionReview({
     await axios.post(`reviews/viewed`, {
       ids: currentItems?.map((seg) => seg.id),
     });
+    setHasUpdate(false);
     pullLatestData();
   }, [currentItems, pullLatestData]);
 
@@ -424,6 +427,8 @@ function DetectionReview({
             className="absolute w-full z-30"
             contentRef={contentRef}
             severity={severity}
+            hasUpdate={hasUpdate}
+            setHasUpdate={setHasUpdate}
             pullLatestData={pullLatestData}
           />
         )}

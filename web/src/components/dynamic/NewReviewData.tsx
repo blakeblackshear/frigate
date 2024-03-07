@@ -8,19 +8,22 @@ type NewReviewDataProps = {
   className: string;
   contentRef: MutableRefObject<HTMLDivElement | null>;
   severity: ReviewSeverity;
+  hasUpdate: boolean;
+  setHasUpdate: (update: boolean) => void;
   pullLatestData: () => void;
 };
 export default function NewReviewData({
   className,
   contentRef,
   severity,
+  hasUpdate,
+  setHasUpdate,
   pullLatestData,
 }: NewReviewDataProps) {
   const { payload: review } = useFrigateReviews();
 
   const startCheckTs = useMemo(() => Date.now() / 1000, []);
   const [reviewTs, setReviewTs] = useState(startCheckTs);
-  const [hasUpdate, setHasUpdate] = useState(false);
 
   useEffect(() => {
     if (!review) {
@@ -36,7 +39,7 @@ export default function NewReviewData({
     if (reviewTs > startCheckTs) {
       setHasUpdate(true);
     }
-  }, [startCheckTs, reviewTs]);
+  }, [startCheckTs, reviewTs, setHasUpdate]);
 
   return (
     <div className={className}>
