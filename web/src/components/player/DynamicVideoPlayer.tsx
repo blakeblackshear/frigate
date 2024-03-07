@@ -453,7 +453,7 @@ export class DynamicVideoController {
     }
 
     if (time > this.preview.end) {
-      if (this.clipChangeLockout) {
+      if (this.clipChangeLockout && time - this.preview.end < 30) {
         return;
       }
 
@@ -470,7 +470,7 @@ export class DynamicVideoController {
     }
 
     if (time < this.preview.start) {
-      if (this.clipChangeLockout) {
+      if (this.clipChangeLockout && this.preview.start - time < 30) {
         return;
       }
 
