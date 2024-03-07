@@ -226,6 +226,7 @@ function NewGroupDialog({ open, setOpen, currentGroups }: NewGroupDialogProps) {
             {group[0]}
             <div className="flex justify-center gap-1">
               <Button
+                className="bg-transparent"
                 size="icon"
                 onClick={() => {
                   setNewTitle(group[0]);
@@ -237,7 +238,7 @@ function NewGroupDialog({ open, setOpen, currentGroups }: NewGroupDialogProps) {
                 <LuPencil />
               </Button>
               <Button
-                className="text-destructive"
+                className="text-destructive bg-transparent"
                 size="icon"
                 onClick={() => onDeleteGroup(group[0])}
               >
