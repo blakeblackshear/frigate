@@ -29,7 +29,10 @@ export default function Events() {
 
   // recordings viewer
 
-  const [severity, setSeverity] = useState<ReviewSeverity>("alert");
+  const [severity, setSeverity] = useOverlayState<ReviewSeverity>(
+    "severity",
+    "alert",
+  );
   const [selectedReviewId, setSelectedReviewId] = useOverlayState("review");
 
   // review filter
@@ -339,7 +342,7 @@ export default function Events() {
         reachedEnd={isDone}
         isValidating={isValidating}
         filter={reviewFilter}
-        severity={severity}
+        severity={severity ?? "alert"}
         setSeverity={setSeverity}
         loadNextPage={onLoadNextPage}
         markItemAsReviewed={markItemAsReviewed}
