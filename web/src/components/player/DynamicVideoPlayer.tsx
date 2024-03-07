@@ -471,25 +471,25 @@ export class DynamicVideoController {
   }
 
   onPlayerTimeUpdate(listener: ((timestamp: number) => void) | undefined) {
+    if (this.playerProgressListener) {
+      this.playerRef.off("timeupdate", this.playerProgressListener);
+    }
+
     if (listener) {
       this.playerProgressListener = () =>
         listener(this.getProgress(this.playerRef.currentTime() || 0));
       this.playerRef.on("timeupdate", this.playerProgressListener);
-    } else {
-      if (this.playerProgressListener) {
-        this.playerRef.off("timeupdate", this.playerProgressListener);
-      }
     }
   }
 
-  onClipChangedEvent(listener: (dir: "forward") => void) {
+  onClipChangedEvent(listener: ((dir: "forward") => void) | undefined) {
+    if (this.playerEndedListener) {
+      this.playerRef.off("ended", this.playerEndedListener);
+    }
+
     if (listener) {
       this.playerEndedListener = () => listener("forward");
       this.playerRef.on("ended", this.playerEndedListener);
-    } else {
-      if (this.playerEndedListener) {
-        this.playerRef.off("ended", this.playerEndedListener);
-      }
     }
   }
 

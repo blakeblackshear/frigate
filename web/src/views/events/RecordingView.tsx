@@ -117,6 +117,7 @@ export function DesktopRecordingView({
       const lastController = videoPlayersRef.current[mainCamera];
       const newController = videoPlayersRef.current[newCam];
       lastController.onPlayerTimeUpdate(undefined);
+      lastController.onClipChangedEvent(undefined);
       lastController.scrubToTimestamp(currentTime);
       newController.onCanPlay(() => {
         newController.seekToTimestamp(currentTime, true);
