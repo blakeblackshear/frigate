@@ -133,16 +133,6 @@ export default function EventView({
     };
   }, [reviews]);
 
-  const currentItems = useMemo(() => {
-    const current = reviewItems[severity];
-
-    if (!current || current.length == 0) {
-      return null;
-    }
-
-    return current;
-  }, [reviewItems, severity]);
-
   // review interaction
 
   const [selectedReviews, setSelectedReviews] = useState<string[]>([]);
@@ -175,7 +165,7 @@ export default function EventView({
 
   const exportReview = useCallback(
     (id: string) => {
-      const review = currentItems?.find((seg) => seg.id == id);
+      const review = reviewItems.all?.find((seg) => seg.id == id);
 
       if (!review) {
         return;
@@ -186,7 +176,7 @@ export default function EventView({
         { playback: "realtime" },
       );
     },
-    [currentItems],
+    [reviewItems],
   );
 
   if (!config) {
@@ -254,7 +244,6 @@ export default function EventView({
         {severity != "significant_motion" && (
           <DetectionReview
             contentRef={contentRef}
-            currentItems={currentItems}
             reviewItems={reviewItems}
             relevantPreviews={relevantPreviews}
             selectedReviews={selectedReviews}
@@ -284,7 +273,6 @@ export default function EventView({
 
 type DetectionReviewProps = {
   contentRef: MutableRefObject<HTMLDivElement | null>;
-  currentItems: ReviewSegment[] | null;
   reviewItems: {
     all: ReviewSegment[];
     alert: ReviewSegment[];
@@ -303,7 +291,6 @@ type DetectionReviewProps = {
 };
 function DetectionReview({
   contentRef,
-  currentItems,
   reviewItems,
   itemsToReview,
   relevantPreviews,
@@ -316,6 +303,23 @@ function DetectionReview({
   pullLatestData,
 }: DetectionReviewProps) {
   const segmentDuration = 60;
+
+  // review data
+  const currentItems = useMemo(() => {
+    const current = reviewItems[severity];
+
+    if (!current || current.length == 0) {
+      return null;
+    }
+
+    if (filter?.showReviewed != 1) {
+      return current.filter((seg) => !seg.has_been_reviewed);
+    } else {
+      return current;
+    }
+    // only refresh when severity or filter changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [severity, filter, reviewItems.all.length]);
 
   // preview
 
@@ -446,10 +450,6 @@ function DetectionReview({
         >
           {currentItems &&
             currentItems.map((value) => {
-              if (value.has_been_reviewed && filter?.showReviewed != 1) {
-                return;
-              }
-
               const selected = selectedReviews.includes(value.id);
 
               return (
