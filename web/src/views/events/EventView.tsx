@@ -600,13 +600,18 @@ function MotionReview({
 
     if (firstController) {
       firstController.onClipChangedEvent((dir) => {
-        if (
-          dir == "forward" &&
-          selectedRangeIdx < timeRangeSegments.ranges.length - 1
-        ) {
-          setSelectedRangeIdx(selectedRangeIdx + 1);
-        } else if (selectedRangeIdx > 0) {
-          setSelectedRangeIdx(selectedRangeIdx - 1);
+        if (dir == "forward") {
+          if (selectedRangeIdx < timeRangeSegments.ranges.length - 1) {
+            setSelectedRangeIdx(selectedRangeIdx + 1);
+          }
+        } else {
+          const index = timeRangeSegments.ranges.findIndex(
+            (seg) => seg.start <= dir && seg.end >= dir,
+          );
+
+          if (index != -1) {
+            setSelectedRangeIdx(index);
+          }
         }
       });
     }
