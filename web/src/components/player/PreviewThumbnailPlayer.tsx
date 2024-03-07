@@ -67,10 +67,10 @@ export default function PreviewThumbnailPlayer({
     preventScrollOnSwipe: true,
   });
 
-  const handleSetReviewed = useCallback(
-    () => setReviewed(review),
-    [review, setReviewed],
-  );
+  const handleSetReviewed = useCallback(() => {
+    review.has_been_reviewed = true;
+    setReviewed(review);
+  }, [review, setReviewed]);
 
   // playback
 
