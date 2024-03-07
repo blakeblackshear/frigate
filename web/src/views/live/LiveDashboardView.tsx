@@ -43,7 +43,7 @@ export default function LiveDashboardView({
 
     // if event is ended and was saved, update events list
     if (eventUpdate.type == "end" && eventUpdate.review.severity == "alert") {
-      updateEvents();
+      setTimeout(() => updateEvents(), 1000);
       return;
     }
   }, [eventUpdate, updateEvents]);
