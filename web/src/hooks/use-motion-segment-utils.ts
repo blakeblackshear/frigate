@@ -43,7 +43,7 @@ export const useMotionSegmentUtils = (
       const matchingEvent = motion_events.find((event) => {
         return (
           time >= getSegmentStart(event.start_time) &&
-          time < getSegmentEnd(event.start_time)
+          time <= getSegmentEnd(event.start_time)
         );
       });
 
