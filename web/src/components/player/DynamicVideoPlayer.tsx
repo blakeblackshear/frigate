@@ -28,6 +28,7 @@ type DynamicVideoPlayerProps = {
   timeRange: { start: number; end: number };
   cameraPreviews: Preview[];
   previewOnly?: boolean;
+  preloadRecordings: boolean;
   onControllerReady: (controller: DynamicVideoController) => void;
   onClick?: () => void;
 };
@@ -37,6 +38,7 @@ export default function DynamicVideoPlayer({
   timeRange,
   cameraPreviews,
   previewOnly = false,
+  preloadRecordings = true,
   onControllerReady,
   onClick,
 }: DynamicVideoPlayerProps) {
@@ -100,8 +102,14 @@ export default function DynamicVideoPlayer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controller]);
 
+  const [initPreviewOnly, setInitPreviewOnly] = useState(previewOnly);
+
   useEffect(() => {
     if (!controller || !playerRef) {
+      return;
+    }
+
+    if (previewOnly == initPreviewOnly) {
       return;
     }
 
@@ -110,8 +118,10 @@ export default function DynamicVideoPlayer({
       controller.removePlayerListeners();
     } else {
       controller.setPlayerListeners();
-      playerRef.play();
+      controller.seekToTimestamp(playerRef.currentTime() || 0, true);
     }
+
+    setInitPreviewOnly(previewOnly);
     // we only want to fire once when players are ready
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controller, previewOnly]);
@@ -266,42 +276,44 @@ export default function DynamicVideoPlayer({
       className={`relative ${className ?? ""} ${onClick ? (hasRecordingAtTime ? "cursor-pointer" : "") : ""}`}
       onClick={onClick}
     >
-      <div
-        className={`w-full relative ${
-          previewOnly || (currentPreview != undefined && isScrubbing)
-            ? "hidden"
-            : "visible"
-        }`}
-      >
-        <VideoPlayer
-          options={{
-            preload: "auto",
-            autoplay: !previewOnly,
-            sources: [initialPlaybackSource],
-            aspectRatio: tallVideo ? "16:9" : undefined,
-            controlBar: {
-              remainingTimeDisplay: false,
-              progressControl: {
-                seekBar: false,
-              },
-            },
-          }}
-          seekOptions={{ forward: 10, backward: 5 }}
-          onReady={(player) => {
-            setPlayerRef(player);
-          }}
-          onDispose={() => {
-            setPlayerRef(undefined);
-          }}
+      {preloadRecordings && (
+        <div
+          className={`w-full relative ${
+            previewOnly || (currentPreview != undefined && isScrubbing)
+              ? "hidden"
+              : "visible"
+          }`}
         >
-          {config && focusedItem && (
-            <TimelineEventOverlay
-              timeline={focusedItem}
-              cameraConfig={config.cameras[camera]}
-            />
-          )}
-        </VideoPlayer>
-      </div>
+          <VideoPlayer
+            options={{
+              preload: "auto",
+              autoplay: !previewOnly,
+              sources: [initialPlaybackSource],
+              aspectRatio: tallVideo ? "16:9" : undefined,
+              controlBar: {
+                remainingTimeDisplay: false,
+                progressControl: {
+                  seekBar: false,
+                },
+              },
+            }}
+            seekOptions={{ forward: 10, backward: 5 }}
+            onReady={(player) => {
+              setPlayerRef(player);
+            }}
+            onDispose={() => {
+              setPlayerRef(undefined);
+            }}
+          >
+            {config && focusedItem && (
+              <TimelineEventOverlay
+                timeline={focusedItem}
+                cameraConfig={config.cameras[camera]}
+              />
+            )}
+          </VideoPlayer>
+        </div>
+      )}
       <video
         ref={previewRef}
         className={`size-full rounded-2xl ${currentPreview != undefined && (previewOnly || isScrubbing) ? "visible" : "hidden"} ${tallVideo ? "aspect-tall" : ""} bg-black`}

@@ -659,6 +659,7 @@ function MotionReview({
                 timeRange={currentTimeRange}
                 cameraPreviews={relevantPreviews || []}
                 previewOnly
+                preloadRecordings={false}
                 onControllerReady={(controller) => {
                   videoPlayersRef.current[camera.name] = controller;
                   setPlayerReady(true);
