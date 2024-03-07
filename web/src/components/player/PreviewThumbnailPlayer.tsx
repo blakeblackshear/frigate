@@ -292,10 +292,12 @@ function VideoPreview({
   onTimeUpdate,
 }: VideoPreviewProps) {
   const playerRef = useRef<HTMLVideoElement | null>(null);
+  const sliderRef = useRef<HTMLDivElement | null>(null);
 
   // keep track of playback state
 
   const [progress, setProgress] = useState(0);
+  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout>();
   const playerStartTime = useMemo(() => {
     if (!relevantPreview) {
       return 0;
@@ -456,6 +458,26 @@ function VideoPreview({
     }, 500);
   }, [playerRef, setIgnoreClick]);
 
+  const onProgressHover = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      if (!sliderRef.current) {
+        return;
+      }
+
+      const rect = sliderRef.current.getBoundingClientRect();
+      const positionX = event.clientX - rect.left;
+      const width = sliderRef.current.clientWidth;
+      onManualSeek([Math.round((positionX / width) * 100)]);
+
+      if (hoverTimeout) {
+        clearTimeout(hoverTimeout);
+      }
+
+      setHoverTimeout(setTimeout(() => onStopManualSeek(), 500));
+    },
+    [sliderRef, hoverTimeout, onManualSeek, onStopManualSeek, setHoverTimeout],
+  );
+
   return (
     <div className="relative size-full aspect-video bg-black">
       <video
@@ -470,6 +492,7 @@ function VideoPreview({
         <source src={relevantPreview.src} type={relevantPreview.type} />
       </video>
       <Slider
+        ref={sliderRef}
         className="absolute inset-x-0 bottom-0 z-30"
         value={[progress]}
         onValueChange={onManualSeek}
@@ -477,6 +500,7 @@ function VideoPreview({
         min={0}
         step={1}
         max={100}
+        onMouseMove={isMobile ? undefined : onProgressHover}
       />
     </div>
   );
@@ -498,12 +522,14 @@ function InProgressPreview({
   onTimeUpdate,
 }: InProgressPreviewProps) {
   const apiHost = useApiHost();
+  const sliderRef = useRef<HTMLDivElement | null>(null);
   const { data: previewFrames } = useSWR<string[]>(
     `preview/${review.camera}/start/${Math.floor(review.start_time) - PREVIEW_PADDING}/end/${
       Math.ceil(review.end_time) + PREVIEW_PADDING
     }/frames`,
   );
   const [manualFrame, setManualFrame] = useState(false);
+  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout>();
   const [key, setKey] = useState(0);
 
   const handleLoad = useCallback(() => {
@@ -575,6 +601,34 @@ function InProgressPreview({
     [setManualFrame, setIgnoreClick],
   );
 
+  const onProgressHover = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      if (!sliderRef.current || !previewFrames) {
+        return;
+      }
+
+      const rect = sliderRef.current.getBoundingClientRect();
+      const positionX = event.clientX - rect.left;
+      const width = sliderRef.current.clientWidth;
+      const progress = [Math.round((positionX / width) * previewFrames.length)];
+      onManualSeek(progress);
+
+      if (hoverTimeout) {
+        clearTimeout(hoverTimeout);
+      }
+
+      setHoverTimeout(setTimeout(() => onStopManualSeek(progress), 500));
+    },
+    [
+      sliderRef,
+      hoverTimeout,
+      previewFrames,
+      onManualSeek,
+      onStopManualSeek,
+      setHoverTimeout,
+    ],
+  );
+
   if (!previewFrames || previewFrames.length == 0) {
     return (
       <img
@@ -592,6 +646,7 @@ function InProgressPreview({
         onLoad={handleLoad}
       />
       <Slider
+        ref={sliderRef}
         className="absolute inset-x-0 bottom-0 z-30"
         value={[key]}
         onValueChange={onManualSeek}
@@ -599,6 +654,7 @@ function InProgressPreview({
         min={0}
         step={1}
         max={previewFrames.length - 1}
+        onMouseMove={isMobile ? undefined : onProgressHover}
       />
     </div>
   );
