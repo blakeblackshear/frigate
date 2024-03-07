@@ -1,4 +1,3 @@
-import { LuCheck } from "react-icons/lu";
 import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import useSWR from "swr";
@@ -16,11 +15,11 @@ import { ReviewFilter } from "@/types/review";
 import { getEndOfDayTimestamp } from "@/utils/dateUtil";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import { FaCalendarAlt, FaFilter, FaVideo } from "react-icons/fa";
-import { IconType } from "react-icons";
 import { isMobile } from "react-device-detect";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
+import FilterCheckBox from "./FilterCheckBox";
 
 const ATTRIBUTES = ["amazon", "face", "fedex", "license_plate", "ups"];
 
@@ -477,34 +476,5 @@ function GeneralFilterButton({
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
       <PopoverContent side="left">{content}</PopoverContent>
     </Popover>
-  );
-}
-
-type FilterCheckBoxProps = {
-  label: string;
-  CheckIcon?: IconType;
-  isChecked: boolean;
-  onCheckedChange: (isChecked: boolean) => void;
-};
-
-function FilterCheckBox({
-  label,
-  CheckIcon = LuCheck,
-  isChecked,
-  onCheckedChange,
-}: FilterCheckBoxProps) {
-  return (
-    <Button
-      className="capitalize flex justify-between items-center cursor-pointer w-full text-primary-foreground"
-      variant="ghost"
-      onClick={() => onCheckedChange(!isChecked)}
-    >
-      {isChecked ? (
-        <CheckIcon className="w-6 h-6" />
-      ) : (
-        <div className="w-6 h-6" />
-      )}
-      <div className="ml-1 w-full flex justify-start">{label}</div>
-    </Button>
   );
 }

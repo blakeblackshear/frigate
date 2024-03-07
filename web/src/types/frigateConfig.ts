@@ -204,9 +204,11 @@ export interface CameraConfig {
   };
 }
 
+export const GROUP_ICONS = ["car", "cat", "dog", "leaf"] as const;
+
 export type CameraGroupConfig = {
   cameras: string[];
-  icon: string;
+  icon: (typeof GROUP_ICONS)[number];
   order: number;
 };
 
