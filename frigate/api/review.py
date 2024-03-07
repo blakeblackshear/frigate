@@ -26,7 +26,7 @@ def review():
     cameras = request.args.get("cameras", "all")
     labels = request.args.get("labels", "all")
     reviewed = request.args.get("reviewed", type=int, default=0)
-    limit = request.args.get("limit", 100)
+    limit = request.args.get("limit", type=int, default=None)
     severity = request.args.get("severity", None)
 
     before = request.args.get("before", type=float, default=datetime.now().timestamp())
