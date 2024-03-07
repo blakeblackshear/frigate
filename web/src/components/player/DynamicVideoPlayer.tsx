@@ -76,6 +76,7 @@ export default function DynamicVideoPlayer({
     }
 
     return new DynamicVideoController(
+      camera,
       playerRef,
       previewRef,
       (config.cameras[camera]?.detect?.annotation_offset || 0) / 1000,
@@ -236,6 +237,7 @@ export default function DynamicVideoPlayer({
       recordings: recordings ?? [],
       playbackUri,
       preview,
+      timeRange,
     });
 
     // we only want this to change when recordings update
@@ -315,20 +317,24 @@ export default function DynamicVideoPlayer({
 
 export class DynamicVideoController {
   // main state
+  public camera = "";
   private playerRef: MutableRefObject<Player | undefined>;
   private previewRef: MutableRefObject<HTMLVideoElement | null>;
   private setScrubbing: (isScrubbing: boolean) => void;
   private setFocusedItem: (timeline: Timeline) => void;
   private playerMode: PlayerMode = "playback";
+  private timeRange: { start: number; end: number } | undefined = undefined;
 
   // playback
   private recordings: Recording[] = [];
-  private onPlaybackTimestamp: ((time: number) => void) | undefined = undefined;
-  private onClipChange: ((dir: "forward" | "backward") => void) | undefined =
+  private onPlaybackTimestamp:
+    | ((time: number, first: boolean) => void)
+    | undefined = undefined;
+  private onClipChange: ((dir: "forward" | number) => void) | undefined =
     undefined;
   private annotationOffset: number;
   private timeToStart: number | undefined = undefined;
-  private clipChangeLockout: boolean = true;
+  private firstProgressUpdate: boolean = true;
 
   // preview
   private preview: Preview | undefined = undefined;
@@ -337,6 +343,7 @@ export class DynamicVideoController {
   private readyToScrub = true;
 
   constructor(
+    camera: string,
     playerRef: MutableRefObject<Player | undefined>,
     previewRef: MutableRefObject<HTMLVideoElement | null>,
     annotationOffset: number,
@@ -344,6 +351,7 @@ export class DynamicVideoController {
     setScrubbing: (isScrubbing: boolean) => void,
     setFocusedItem: (timeline: Timeline) => void,
   ) {
+    this.camera = camera;
     this.playerRef = playerRef;
     this.previewRef = previewRef;
     this.annotationOffset = annotationOffset;
@@ -354,6 +362,7 @@ export class DynamicVideoController {
 
   newPlayback(newPlayback: DynamicPlayback) {
     this.recordings = newPlayback.recordings;
+    this.firstProgressUpdate = true;
 
     this.playerRef.current?.src({
       src: newPlayback.playbackUri,
@@ -366,6 +375,7 @@ export class DynamicVideoController {
     }
 
     this.preview = newPlayback.preview;
+    this.timeRange = newPlayback.timeRange;
   }
 
   seekToTimestamp(time: number, play: boolean = false) {
@@ -425,64 +435,59 @@ export class DynamicVideoController {
         }
       });
 
-      this.onPlaybackTimestamp(timestamp);
+      this.onPlaybackTimestamp(timestamp, this.firstProgressUpdate);
+      this.firstProgressUpdate = false;
     }
   }
 
-  onPlayerTimeUpdate(listener: ((timestamp: number) => void) | undefined) {
+  onPlayerTimeUpdate(
+    listener: ((timestamp: number, first: boolean) => void) | undefined,
+  ) {
     this.onPlaybackTimestamp = listener;
   }
 
-  onClipChangedEvent(listener: (dir: "forward" | "backward") => void) {
+  onClipChangedEvent(listener: (dir: "forward" | number) => void) {
     this.onClipChange = listener;
   }
 
-  fireClipChangeEvent(dir: "forward" | "backward") {
+  fireClipChangeEvent(dir: "forward" | number) {
     if (this.onClipChange) {
       this.onClipChange(dir);
     }
   }
 
   scrubToTimestamp(time: number) {
-    if (!this.preview) {
+    if (!this.preview || !this.timeRange) {
       return;
     }
 
-    if (!this.readyToScrub) {
-      return;
-    }
+    const outsideHourBounds =
+      this.timeRange.start - time > 3600 || time - this.timeRange.end > 3600;
 
-    if (time > this.preview.end) {
-      if (this.clipChangeLockout && time - this.preview.end < 30) {
-        return;
+    if (!this.readyToScrub || outsideHourBounds) {
+      if (outsideHourBounds) {
+        this.fireClipChangeEvent(time);
       }
 
+      return;
+    }
+
+    if (time > this.timeRange.end || time < this.timeRange.start) {
       if (this.playerMode == "scrubbing") {
-        this.playerMode = "playback";
-        this.setScrubbing(false);
         this.timeToSeek = undefined;
         this.seeking = false;
         this.readyToScrub = false;
-        this.clipChangeLockout = true;
-        this.fireClipChangeEvent("forward");
+        this.fireClipChangeEvent(time);
+
+        if (this.recordings.length > 0) {
+          this.playerMode = "playback";
+          this.setScrubbing(false);
+        }
       }
       return;
     }
 
-    if (time < this.preview.start) {
-      if (this.clipChangeLockout && this.preview.start - time < 30) {
-        return;
-      }
-
-      if (this.playerMode == "scrubbing") {
-        this.playerMode = "playback";
-        this.setScrubbing(false);
-        this.timeToSeek = undefined;
-        this.seeking = false;
-        this.readyToScrub = false;
-        this.clipChangeLockout = true;
-        this.fireClipChangeEvent("backward");
-      }
+    if (time < this.preview.start || time > this.preview.end) {
       return;
     }
 
@@ -513,8 +518,6 @@ export class DynamicVideoController {
     ) {
       return;
     }
-
-    this.clipChangeLockout = false;
 
     if (
       this.timeToSeek &&
