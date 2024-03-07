@@ -1,14 +1,13 @@
 import { baseUrl } from "@/api/baseUrl";
+import { Button } from "@/components/ui/button";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Event } from "@/types/event";
 import axios from "axios";
 import { useCallback, useState } from "react";
@@ -27,64 +26,75 @@ export default function SubmitPlus() {
         return;
       }
 
-      const resp = (await falsePositive)
-        ? await axios.put(`events/${upload.id}/false_positive`)
-        : await axios.post(`events/${upload.id}/plus`, {
+      falsePositive
+        ? axios.put(`events/${upload.id}/false_positive`)
+        : axios.post(`events/${upload.id}/plus`, {
             include_annotation: 1,
           });
 
-      if (resp.status == 200) {
-        refresh();
-      }
+      refresh(
+        (data: Event[] | undefined) => {
+          if (!data) {
+            return data;
+          }
+
+          const index = data.findIndex((e) => e.id == upload.id);
+
+          if (index == -1) {
+            return data;
+          }
+
+          return [...data.slice(0, index), ...data.slice(index + 1)];
+        },
+        { revalidate: false, populateCache: true },
+      );
+      setUpload(undefined);
     },
     [refresh, upload],
   );
 
   return (
     <div className="size-full p-2 grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 overflow-auto">
-      <AlertDialog
+      <Dialog
         open={upload != undefined}
         onOpenChange={(open) => (!open ? setUpload(undefined) : null)}
       >
-        <AlertDialogContent className="md:max-w-4xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Submit To Frigate+</AlertDialogTitle>
-            <AlertDialogDescription>
+        <DialogContent className="md:max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Submit To Frigate+</DialogTitle>
+            <DialogDescription>
               Objects in locations you want to avoid are not false positives.
               Submitting them as false positives will confuse the model.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
+            </DialogDescription>
+          </DialogHeader>
           <img
             className="flex-grow-0"
             src={`${baseUrl}api/events/${upload?.id}/snapshot.jpg`}
             alt={`${upload?.label}`}
           />
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
+          <DialogFooter>
+            <Button>Cancel</Button>
+            <Button
               className="bg-success"
               onClick={() => onSubmitToPlus(false)}
             >
               This is a {upload?.label}
-            </AlertDialogAction>
-            <AlertDialogAction
-              className="bg-danger"
-              onClick={() => onSubmitToPlus(true)}
-            >
+            </Button>
+            <Button variant="destructive" onClick={() => onSubmitToPlus(true)}>
               This is not a {upload?.label}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {events?.map((event) => {
         return (
           <div
-            className="size-full aspect-video rounded-2xl flex justify-center items-center bg-black cursor-pointer"
+            className="size-full rounded-2xl flex justify-center items-center bg-black cursor-pointer"
             onClick={() => setUpload(event)}
           >
             <img
-              className="h-full object-contain rounded-2xl"
+              className="aspect-video h-full object-contain rounded-2xl"
               src={`${baseUrl}api/events/${event.id}/snapshot.jpg`}
             />
           </div>
