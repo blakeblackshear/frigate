@@ -12,7 +12,6 @@ import TimelineEventOverlay from "../overlay/TimelineDataOverlay";
 import { useApiHost } from "@/api";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
-import ActivityIndicator from "../indicators/activity-indicator";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { Recording } from "@/types/record";
 import { Preview } from "@/types/preview";
@@ -64,14 +63,14 @@ export default function DynamicVideoPlayer({
 
   // controlling playback
 
-  const playerRef = useRef<Player | undefined>(undefined);
+  const [playerRef, setPlayerRef] = useState<Player | undefined>(undefined);
   const previewRef = useRef<HTMLVideoElement | null>(null);
   const [isScrubbing, setIsScrubbing] = useState(previewOnly);
   const [focusedItem, setFocusedItem] = useState<Timeline | undefined>(
     undefined,
   );
   const controller = useMemo(() => {
-    if (!config) {
+    if (!config || !playerRef || !previewRef.current) {
       return undefined;
     }
 
@@ -84,10 +83,12 @@ export default function DynamicVideoPlayer({
       setIsScrubbing,
       setFocusedItem,
     );
-  }, [camera, config, previewOnly]);
+    // we only want to fire once when players are ready
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [camera, config, playerRef, previewRef]);
 
   useEffect(() => {
-    if (!playerRef.current && !previewRef.current) {
+    if (!controller) {
       return;
     }
 
@@ -97,7 +98,23 @@ export default function DynamicVideoPlayer({
 
     // we only want to fire once when players are ready
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playerRef, previewRef]);
+  }, [controller]);
+
+  useEffect(() => {
+    if (!controller || !playerRef) {
+      return;
+    }
+
+    if (previewOnly) {
+      playerRef.autoplay(false);
+      controller.removePlayerListeners();
+    } else {
+      controller.setPlayerListeners();
+      playerRef.play();
+    }
+    // we only want to fire once when players are ready
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [controller, previewOnly]);
 
   const [hasRecordingAtTime, setHasRecordingAtTime] = useState(true);
 
@@ -108,33 +125,33 @@ export default function DynamicVideoPlayer({
       switch (key) {
         case "ArrowLeft":
           if (down) {
-            const currentTime = playerRef.current?.currentTime();
+            const currentTime = playerRef?.currentTime();
 
             if (currentTime) {
-              playerRef.current?.currentTime(Math.max(0, currentTime - 5));
+              playerRef?.currentTime(Math.max(0, currentTime - 5));
             }
           }
           break;
         case "ArrowRight":
           if (down) {
-            const currentTime = playerRef.current?.currentTime();
+            const currentTime = playerRef?.currentTime();
 
             if (currentTime) {
-              playerRef.current?.currentTime(currentTime + 5);
+              playerRef?.currentTime(currentTime + 5);
             }
           }
           break;
         case "m":
-          if (down && !repeat && playerRef.current) {
-            playerRef.current.muted(!playerRef.current.muted());
+          if (down && !repeat && playerRef) {
+            playerRef.muted(!playerRef.muted());
           }
           break;
         case " ":
-          if (down && playerRef.current) {
-            if (playerRef.current.paused()) {
-              playerRef.current.play();
+          if (down && playerRef) {
+            if (playerRef.paused()) {
+              playerRef.play();
             } else {
-              playerRef.current.pause();
+              playerRef.pause();
             }
           }
           break;
@@ -244,58 +261,47 @@ export default function DynamicVideoPlayer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controller, recordings]);
 
-  if (!controller) {
-    return <ActivityIndicator />;
-  }
-
   return (
     <div
       className={`relative ${className ?? ""} ${onClick ? (hasRecordingAtTime ? "cursor-pointer" : "") : ""}`}
       onClick={onClick}
     >
-      {!previewOnly && (
-        <div
-          className={`w-full relative ${
-            currentPreview != undefined && isScrubbing ? "hidden" : "visible"
-          }`}
-        >
-          <VideoPlayer
-            options={{
-              preload: "auto",
-              autoplay: true,
-              sources: [initialPlaybackSource],
-              aspectRatio: tallVideo ? "16:9" : undefined,
-              controlBar: {
-                remainingTimeDisplay: false,
-                progressControl: {
-                  seekBar: false,
-                },
+      <div
+        className={`w-full relative ${
+          previewOnly || (currentPreview != undefined && isScrubbing)
+            ? "hidden"
+            : "visible"
+        }`}
+      >
+        <VideoPlayer
+          options={{
+            preload: "auto",
+            autoplay: !previewOnly,
+            sources: [initialPlaybackSource],
+            aspectRatio: tallVideo ? "16:9" : undefined,
+            controlBar: {
+              remainingTimeDisplay: false,
+              progressControl: {
+                seekBar: false,
               },
-            }}
-            seekOptions={{ forward: 10, backward: 5 }}
-            onReady={(player) => {
-              playerRef.current = player;
-              player.on("playing", () => setFocusedItem(undefined));
-              player.on("timeupdate", () => {
-                controller.updateProgress(player.currentTime() || 0);
-              });
-              player.on("ended", () =>
-                controller.fireClipChangeEvent("forward"),
-              );
-            }}
-            onDispose={() => {
-              playerRef.current = undefined;
-            }}
-          >
-            {config && focusedItem && (
-              <TimelineEventOverlay
-                timeline={focusedItem}
-                cameraConfig={config.cameras[camera]}
-              />
-            )}
-          </VideoPlayer>
-        </div>
-      )}
+            },
+          }}
+          seekOptions={{ forward: 10, backward: 5 }}
+          onReady={(player) => {
+            setPlayerRef(player);
+          }}
+          onDispose={() => {
+            setPlayerRef(undefined);
+          }}
+        >
+          {config && focusedItem && (
+            <TimelineEventOverlay
+              timeline={focusedItem}
+              cameraConfig={config.cameras[camera]}
+            />
+          )}
+        </VideoPlayer>
+      </div>
       <video
         ref={previewRef}
         className={`size-full rounded-2xl ${currentPreview != undefined && (previewOnly || isScrubbing) ? "visible" : "hidden"} ${tallVideo ? "aspect-tall" : ""} bg-black`}
@@ -305,7 +311,7 @@ export default function DynamicVideoPlayer({
         muted
         disableRemotePlayback
         onSeeked={onPreviewSeeked}
-        onLoadedData={() => controller.previewReady()}
+        onLoadedData={() => controller?.previewReady()}
       >
         {currentPreview != undefined && (
           <source src={currentPreview.src} type={currentPreview.type} />
@@ -318,7 +324,7 @@ export default function DynamicVideoPlayer({
 export class DynamicVideoController {
   // main state
   public camera = "";
-  private playerRef: MutableRefObject<Player | undefined>;
+  private playerRef: Player;
   private previewRef: MutableRefObject<HTMLVideoElement | null>;
   private setScrubbing: (isScrubbing: boolean) => void;
   private setFocusedItem: (timeline: Timeline) => void;
@@ -327,24 +333,26 @@ export class DynamicVideoController {
 
   // playback
   private recordings: Recording[] = [];
-  private onPlaybackTimestamp:
-    | ((time: number, first: boolean) => void)
-    | undefined = undefined;
-  private onClipChange: ((dir: "forward" | number) => void) | undefined =
-    undefined;
+  private onPlaybackTimestamp: ((time: number) => void) | undefined = undefined;
+  private onClipChange: ((dir: "forward") => void) | undefined = undefined;
   private annotationOffset: number;
   private timeToStart: number | undefined = undefined;
-  private firstProgressUpdate: boolean = true;
 
   // preview
   private preview: Preview | undefined = undefined;
   private timeToSeek: number | undefined = undefined;
   private seeking = false;
-  private readyToScrub = true;
+
+  // listeners
+  private playerProgressListener = () => {
+    this.updateProgress(this.playerRef.currentTime() || 0);
+  };
+  private playerEndedListener = () => this.fireClipChangeEvent("forward");
+  private canPlayListener: (() => void) | null = null;
 
   constructor(
     camera: string,
-    playerRef: MutableRefObject<Player | undefined>,
+    playerRef: Player,
     previewRef: MutableRefObject<HTMLVideoElement | null>,
     annotationOffset: number,
     defaultMode: PlayerMode,
@@ -362,9 +370,8 @@ export class DynamicVideoController {
 
   newPlayback(newPlayback: DynamicPlayback) {
     this.recordings = newPlayback.recordings;
-    this.firstProgressUpdate = true;
 
-    this.playerRef.current?.src({
+    this.playerRef.src({
       src: newPlayback.playbackUri,
       type: "application/vnd.apple.mpegurl",
     });
@@ -375,6 +382,12 @@ export class DynamicVideoController {
     }
 
     this.preview = newPlayback.preview;
+
+    if (this.preview) {
+      this.seeking = false;
+      this.timeToSeek = undefined;
+    }
+
     this.timeRange = newPlayback.timeRange;
   }
 
@@ -406,15 +419,39 @@ export class DynamicVideoController {
         segment.end_time - segment.start_time - (segment.end_time - time);
       return true;
     });
-    this.playerRef.current?.currentTime(seekSeconds);
+    this.playerRef.currentTime(seekSeconds);
 
     if (play) {
-      this.playerRef.current?.play();
+      this.playerRef.play();
+    } else {
+      this.playerRef.pause();
+    }
+  }
+
+  setPlayerListeners() {
+    this.playerRef.on("timeupdate", this.playerProgressListener);
+    this.playerRef.on("ended", this.playerEndedListener);
+  }
+
+  removePlayerListeners() {
+    this.playerRef.off("timeupdate", this.playerProgressListener);
+    this.playerRef.off("ended", this.playerEndedListener);
+  }
+
+  onCanPlay(listener: (() => void) | null) {
+    if (listener) {
+      this.canPlayListener = listener;
+      this.playerRef.on("canplay", this.canPlayListener);
+    } else {
+      if (this.canPlayListener) {
+        this.playerRef.off("canplay", this.canPlayListener);
+        this.canPlayListener = null;
+      }
     }
   }
 
   seekToTimelineItem(timeline: Timeline) {
-    this.playerRef.current?.pause();
+    this.playerRef.pause();
     this.seekToTimestamp(timeline.timestamp + this.annotationOffset);
     this.setFocusedItem(timeline);
   }
@@ -435,14 +472,11 @@ export class DynamicVideoController {
         }
       });
 
-      this.onPlaybackTimestamp(timestamp, this.firstProgressUpdate);
-      this.firstProgressUpdate = false;
+      this.onPlaybackTimestamp(timestamp);
     }
   }
 
-  onPlayerTimeUpdate(
-    listener: ((timestamp: number, first: boolean) => void) | undefined,
-  ) {
+  onPlayerTimeUpdate(listener: ((timestamp: number) => void) | undefined) {
     this.onPlaybackTimestamp = listener;
   }
 
@@ -450,7 +484,7 @@ export class DynamicVideoController {
     this.onClipChange = listener;
   }
 
-  fireClipChangeEvent(dir: "forward" | number) {
+  fireClipChangeEvent(dir: "forward") {
     if (this.onClipChange) {
       this.onClipChange(dir);
     }
@@ -461,39 +495,13 @@ export class DynamicVideoController {
       return;
     }
 
-    const outsideHourBounds =
-      this.timeRange.start - time > 3600 || time - this.timeRange.end > 3600;
-
-    if (!this.readyToScrub || outsideHourBounds) {
-      if (outsideHourBounds) {
-        this.fireClipChangeEvent(time);
-      }
-
-      return;
-    }
-
-    if (time > this.timeRange.end || time < this.timeRange.start) {
-      if (this.playerMode == "scrubbing") {
-        this.timeToSeek = undefined;
-        this.seeking = false;
-        this.readyToScrub = false;
-        this.fireClipChangeEvent(time);
-
-        if (this.recordings.length > 0) {
-          this.playerMode = "playback";
-          this.setScrubbing(false);
-        }
-      }
-      return;
-    }
-
     if (time < this.preview.start || time > this.preview.end) {
       return;
     }
 
     if (this.playerMode != "scrubbing") {
       this.playerMode = "scrubbing";
-      this.playerRef.current?.pause();
+      this.playerRef.pause();
       this.setScrubbing(true);
     }
 
@@ -532,7 +540,6 @@ export class DynamicVideoController {
 
   previewReady() {
     this.previewRef.current?.pause();
-    this.readyToScrub = true;
   }
 
   hasRecordingAtTime(time: number): boolean {
