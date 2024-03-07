@@ -115,9 +115,7 @@ export default function DynamicVideoPlayer({
 
     if (previewOnly) {
       playerRef.autoplay(false);
-      controller.removePlayerListeners();
     } else {
-      controller.setPlayerListeners();
       controller.seekToTimestamp(playerRef.currentTime() || 0, true);
     }
 
@@ -345,8 +343,6 @@ export class DynamicVideoController {
 
   // playback
   private recordings: Recording[] = [];
-  private onPlaybackTimestamp: ((time: number) => void) | undefined = undefined;
-  private onClipChange: ((dir: "forward") => void) | undefined = undefined;
   private annotationOffset: number;
   private timeToStart: number | undefined = undefined;
 
@@ -356,10 +352,8 @@ export class DynamicVideoController {
   private seeking = false;
 
   // listeners
-  private playerProgressListener = () => {
-    this.updateProgress(this.playerRef.currentTime() || 0);
-  };
-  private playerEndedListener = () => this.fireClipChangeEvent("forward");
+  private playerProgressListener: (() => void) | null = null;
+  private playerEndedListener: (() => void) | null = null;
   private canPlayListener: (() => void) | null = null;
 
   constructor(
@@ -440,16 +434,6 @@ export class DynamicVideoController {
     }
   }
 
-  setPlayerListeners() {
-    this.playerRef.on("timeupdate", this.playerProgressListener);
-    this.playerRef.on("ended", this.playerEndedListener);
-  }
-
-  removePlayerListeners() {
-    this.playerRef.off("timeupdate", this.playerProgressListener);
-    this.playerRef.off("ended", this.playerEndedListener);
-  }
-
   onCanPlay(listener: (() => void) | null) {
     if (listener) {
       this.canPlayListener = listener;
@@ -468,37 +452,44 @@ export class DynamicVideoController {
     this.setFocusedItem(timeline);
   }
 
-  updateProgress(playerTime: number) {
-    if (this.onPlaybackTimestamp) {
-      // take a player time in seconds and convert to timestamp in timeline
-      let timestamp = 0;
-      let totalTime = 0;
-      (this.recordings || []).every((segment) => {
-        if (totalTime + segment.duration > playerTime) {
-          // segment is here
-          timestamp = segment.start_time + (playerTime - totalTime);
-          return false;
-        } else {
-          totalTime += segment.duration;
-          return true;
-        }
-      });
+  getProgress(playerTime: number): number {
+    // take a player time in seconds and convert to timestamp in timeline
+    let timestamp = 0;
+    let totalTime = 0;
+    (this.recordings || []).every((segment) => {
+      if (totalTime + segment.duration > playerTime) {
+        // segment is here
+        timestamp = segment.start_time + (playerTime - totalTime);
+        return false;
+      } else {
+        totalTime += segment.duration;
+        return true;
+      }
+    });
 
-      this.onPlaybackTimestamp(timestamp);
-    }
+    return timestamp;
   }
 
   onPlayerTimeUpdate(listener: ((timestamp: number) => void) | undefined) {
-    this.onPlaybackTimestamp = listener;
+    if (listener) {
+      this.playerProgressListener = () =>
+        listener(this.getProgress(this.playerRef.currentTime() || 0));
+      this.playerRef.on("timeupdate", this.playerProgressListener);
+    } else {
+      if (this.playerProgressListener) {
+        this.playerRef.off("timeupdate", this.playerProgressListener);
+      }
+    }
   }
 
-  onClipChangedEvent(listener: (dir: "forward" | number) => void) {
-    this.onClipChange = listener;
-  }
-
-  fireClipChangeEvent(dir: "forward") {
-    if (this.onClipChange) {
-      this.onClipChange(dir);
+  onClipChangedEvent(listener: (dir: "forward") => void) {
+    if (listener) {
+      this.playerEndedListener = () => listener("forward");
+      this.playerRef.on("ended", this.playerEndedListener);
+    } else {
+      if (this.playerEndedListener) {
+        this.playerRef.off("ended", this.playerEndedListener);
+      }
     }
   }
 
