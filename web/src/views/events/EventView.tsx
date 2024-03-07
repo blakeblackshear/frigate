@@ -634,6 +634,10 @@ function MotionReview({
     });
   }, [currentTime, currentTimeRange, timeRangeSegments]);
 
+  if (!relevantPreviews) {
+    return <ActivityIndicator />;
+  }
+
   return (
     <>
       <div className="flex flex-1 flex-wrap content-start gap-2 md:gap-4 overflow-y-auto no-scrollbar">
