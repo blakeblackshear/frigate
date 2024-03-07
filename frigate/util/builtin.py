@@ -208,7 +208,12 @@ def update_yaml_from_url(file_path, url):
         if len(new_value_list) > 1:
             update_yaml_file(file_path, key_path, new_value_list)
         else:
-            update_yaml_file(file_path, key_path, new_value_list[0])
+            value = str(new_value_list[0])
+
+            if value.isnumeric():
+                value = int(value)
+
+            update_yaml_file(file_path, key_path, value)
 
 
 def update_yaml_file(file_path, key_path, new_value):
