@@ -16,6 +16,7 @@ type PreviewVideoPlayerProps = {
   camera: string;
   timeRange: { start: number; end: number };
   cameraPreviews: Preview[];
+  startTime?: number;
   onControllerReady: (controller: PreviewVideoController) => void;
   onClick?: () => void;
 };
@@ -24,6 +25,7 @@ export default function PreviewVideoPlayer({
   camera,
   timeRange,
   cameraPreviews,
+  startTime,
   onControllerReady,
   onClick,
 }: PreviewVideoPlayerProps) {
@@ -128,6 +130,10 @@ export default function PreviewVideoPlayer({
           } else {
             previewRef.current?.pause();
           }
+
+          if (previewRef.current && startTime && currentPreview) {
+            previewRef.current.currentTime = startTime - currentPreview.start;
+          }
         }}
       >
         {currentPreview != undefined && (
@@ -164,13 +170,13 @@ export class PreviewVideoController {
     this.timeRange = newPlayback.timeRange;
   }
 
-  scrubToTimestamp(time: number) {
+  scrubToTimestamp(time: number): boolean {
     if (!this.preview || !this.timeRange) {
-      return;
+      return false;
     }
 
     if (time < this.preview.start || time > this.preview.end) {
-      return;
+      return false;
     }
 
     if (this.seeking) {
@@ -184,6 +190,8 @@ export class PreviewVideoController {
         this.seeking = true;
       }
     }
+
+    return true;
   }
 
   setNewPreviewStartTime(time: number) {

@@ -1,11 +1,4 @@
-import {
-  MutableRefObject,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import VideoPlayer from "./VideoPlayer";
 import Player from "video.js/dist/types/player";
 import TimelineEventOverlay from "../overlay/TimelineDataOverlay";
@@ -16,6 +9,9 @@ import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { Recording } from "@/types/record";
 import { Preview } from "@/types/preview";
 import { DynamicPlayback } from "@/types/playback";
+import PreviewVideoPlayer, {
+  PreviewVideoController,
+} from "./PreviewVideoPlayer";
 
 type PlayerMode = "playback" | "scrubbing";
 
@@ -28,7 +24,6 @@ type DynamicVideoPlayerProps = {
   timeRange: { start: number; end: number };
   cameraPreviews: Preview[];
   previewOnly?: boolean;
-  preloadRecordings: boolean;
   onControllerReady: (controller: DynamicVideoController) => void;
   onClick?: () => void;
 };
@@ -38,7 +33,6 @@ export default function DynamicVideoPlayer({
   timeRange,
   cameraPreviews,
   previewOnly = false,
-  preloadRecordings = true,
   onControllerReady,
   onClick,
 }: DynamicVideoPlayerProps) {
@@ -51,35 +45,36 @@ export default function DynamicVideoPlayer({
   );
 
   // playback behavior
-  const tallVideo = useMemo(() => {
+  const wideVideo = useMemo(() => {
     if (!config) {
       return false;
     }
 
     return (
       config.cameras[camera].detect.width /
-        config.cameras[camera].detect.height <
-      1
+        config.cameras[camera].detect.height >
+      1.7
     );
   }, [camera, config]);
 
   // controlling playback
 
-  const [playerRef, setPlayerRef] = useState<Player | undefined>(undefined);
-  const previewRef = useRef<HTMLVideoElement | null>(null);
+  const playerRef = useRef<Player | null>(null);
+  const [previewController, setPreviewController] =
+    useState<PreviewVideoController | null>(null);
   const [isScrubbing, setIsScrubbing] = useState(previewOnly);
   const [focusedItem, setFocusedItem] = useState<Timeline | undefined>(
     undefined,
   );
   const controller = useMemo(() => {
-    if (!config || !playerRef || !previewRef.current) {
+    if (!config || !playerRef.current || !previewController) {
       return undefined;
     }
 
     return new DynamicVideoController(
       camera,
-      playerRef,
-      previewRef,
+      playerRef.current,
+      previewController,
       (config.cameras[camera]?.detect?.annotation_offset || 0) / 1000,
       previewOnly ? "scrubbing" : "playback",
       setIsScrubbing,
@@ -87,7 +82,7 @@ export default function DynamicVideoPlayer({
     );
     // we only want to fire once when players are ready
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [camera, config, playerRef, previewRef]);
+  }, [camera, config, playerRef.current, previewController]);
 
   useEffect(() => {
     if (!controller) {
@@ -105,7 +100,7 @@ export default function DynamicVideoPlayer({
   const [initPreviewOnly, setInitPreviewOnly] = useState(previewOnly);
 
   useEffect(() => {
-    if (!controller || !playerRef) {
+    if (!controller || !playerRef.current) {
       return;
     }
 
@@ -113,10 +108,8 @@ export default function DynamicVideoPlayer({
       return;
     }
 
-    if (previewOnly) {
-      playerRef.autoplay(false);
-    } else {
-      controller.seekToTimestamp(playerRef.currentTime() || 0, true);
+    if (!previewOnly) {
+      controller.seekToTimestamp(playerRef.current.currentTime() || 0, true);
     }
 
     setInitPreviewOnly(previewOnly);
@@ -124,48 +117,52 @@ export default function DynamicVideoPlayer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controller, previewOnly]);
 
-  const [hasRecordingAtTime, setHasRecordingAtTime] = useState(true);
-
   // keyboard control
 
   const onKeyboardShortcut = useCallback(
     (key: string, down: boolean, repeat: boolean) => {
+      if (!playerRef.current || previewOnly) {
+        return;
+      }
+
       switch (key) {
         case "ArrowLeft":
           if (down) {
-            const currentTime = playerRef?.currentTime();
+            const currentTime = playerRef.current.currentTime();
 
             if (currentTime) {
-              playerRef?.currentTime(Math.max(0, currentTime - 5));
+              playerRef.current.currentTime(Math.max(0, currentTime - 5));
             }
           }
           break;
         case "ArrowRight":
           if (down) {
-            const currentTime = playerRef?.currentTime();
+            const currentTime = playerRef.current.currentTime();
 
             if (currentTime) {
-              playerRef?.currentTime(currentTime + 5);
+              playerRef.current.currentTime(currentTime + 5);
             }
           }
           break;
         case "m":
           if (down && !repeat && playerRef) {
-            playerRef.muted(!playerRef.muted());
+            playerRef.current.muted(!playerRef.current.muted());
           }
           break;
         case " ":
           if (down && playerRef) {
-            if (playerRef.paused()) {
-              playerRef.play();
+            if (playerRef.current.paused()) {
+              playerRef.current.play();
             } else {
-              playerRef.pause();
+              playerRef.current.pause();
             }
           }
           break;
       }
     },
-    [playerRef],
+    // only update when preview only changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [playerRef.current, previewOnly],
   );
   useKeyboardListener(
     ["ArrowLeft", "ArrowRight", "m", " "],
@@ -188,35 +185,6 @@ export default function DynamicVideoPlayer({
     // we only want to calculate this once
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const initialPreview = useMemo(() => {
-    return cameraPreviews.find(
-      (preview) =>
-        preview.camera == camera &&
-        Math.round(preview.start) >= timeRange.start &&
-        Math.floor(preview.end) <= timeRange.end,
-    );
-
-    // we only want to calculate this once
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const [currentPreview, setCurrentPreview] = useState(initialPreview);
-
-  const onPreviewSeeked = useCallback(() => {
-    if (!controller) {
-      return;
-    }
-
-    controller.finishedSeeking();
-
-    if (currentPreview && previewOnly && previewRef.current && onClick) {
-      setHasRecordingAtTime(
-        controller.hasRecordingAtTime(
-          currentPreview.start + previewRef.current.currentTime,
-        ),
-      );
-    }
-  }, [controller, currentPreview, onClick, previewOnly]);
 
   // state of playback player
 
@@ -246,23 +214,9 @@ export default function DynamicVideoPlayer({
       ",",
     )}/master.m3u8`;
 
-    const preview = cameraPreviews.find(
-      (preview) =>
-        preview.camera == camera &&
-        Math.round(preview.start) >= timeRange.start &&
-        Math.floor(preview.end) <= timeRange.end,
-    );
-    setCurrentPreview(preview);
-
-    if (preview && previewRef.current) {
-      previewRef.current.load();
-    }
-
     controller.newPlayback({
       recordings: recordings ?? [],
       playbackUri,
-      preview,
-      timeRange,
     });
 
     // we only want this to change when recordings update
@@ -271,62 +225,53 @@ export default function DynamicVideoPlayer({
 
   return (
     <div
-      className={`relative ${className ?? ""} ${onClick ? (hasRecordingAtTime ? "cursor-pointer" : "") : ""}`}
+      className={`relative ${className ?? ""} ${onClick ? "cursor-pointer" : ""}`}
       onClick={onClick}
     >
-      {preloadRecordings && (
-        <div
-          className={`w-full relative ${
-            previewOnly || (currentPreview != undefined && isScrubbing)
-              ? "hidden"
-              : "visible"
-          }`}
-        >
-          <VideoPlayer
-            options={{
-              preload: "auto",
-              autoplay: !previewOnly,
-              sources: [initialPlaybackSource],
-              aspectRatio: tallVideo ? "16:9" : undefined,
-              controlBar: {
-                remainingTimeDisplay: false,
-                progressControl: {
-                  seekBar: false,
-                },
-              },
-            }}
-            seekOptions={{ forward: 10, backward: 5 }}
-            onReady={(player) => {
-              setPlayerRef(player);
-            }}
-            onDispose={() => {
-              setPlayerRef(undefined);
-            }}
-          >
-            {config && focusedItem && (
-              <TimelineEventOverlay
-                timeline={focusedItem}
-                cameraConfig={config.cameras[camera]}
-              />
-            )}
-          </VideoPlayer>
-        </div>
-      )}
-      <video
-        ref={previewRef}
-        className={`size-full rounded-2xl ${currentPreview != undefined && (previewOnly || isScrubbing) ? "visible" : "hidden"} ${tallVideo ? "aspect-tall" : ""} bg-black`}
-        preload="auto"
-        autoPlay
-        playsInline
-        muted
-        disableRemotePlayback
-        onSeeked={onPreviewSeeked}
-        onLoadedData={() => controller?.previewReady()}
+      <div
+        className={`w-full relative ${
+          previewOnly || isScrubbing ? "hidden" : "visible"
+        }`}
       >
-        {currentPreview != undefined && (
-          <source src={currentPreview.src} type={currentPreview.type} />
-        )}
-      </video>
+        <VideoPlayer
+          options={{
+            preload: "auto",
+            autoplay: !previewOnly,
+            sources: [initialPlaybackSource],
+            aspectRatio: wideVideo ? undefined : "16:9",
+            controlBar: {
+              remainingTimeDisplay: false,
+              progressControl: {
+                seekBar: false,
+              },
+            },
+          }}
+          seekOptions={{ forward: 10, backward: 5 }}
+          onReady={(player) => {
+            playerRef.current = player;
+          }}
+          onDispose={() => {
+            playerRef.current = null;
+          }}
+        >
+          {config && focusedItem && (
+            <TimelineEventOverlay
+              timeline={focusedItem}
+              cameraConfig={config.cameras[camera]}
+            />
+          )}
+        </VideoPlayer>
+      </div>
+      <PreviewVideoPlayer
+        className={`${isScrubbing ? "visible" : "hidden"} ${className ?? ""}`}
+        camera={camera}
+        timeRange={timeRange}
+        cameraPreviews={cameraPreviews}
+        onControllerReady={(previewController) => {
+          setPreviewController(previewController);
+        }}
+        onClick={onClick}
+      />
     </div>
   );
 }
@@ -334,22 +279,17 @@ export default function DynamicVideoPlayer({
 export class DynamicVideoController {
   // main state
   public camera = "";
-  private playerRef: Player;
-  private previewRef: MutableRefObject<HTMLVideoElement | null>;
+  private playerController: Player;
+  private previewController: PreviewVideoController;
   private setScrubbing: (isScrubbing: boolean) => void;
   private setFocusedItem: (timeline: Timeline) => void;
   private playerMode: PlayerMode = "playback";
-  private timeRange: { start: number; end: number } | undefined = undefined;
 
   // playback
   private recordings: Recording[] = [];
   private annotationOffset: number;
   private timeToStart: number | undefined = undefined;
-
-  // preview
-  private preview: Preview | undefined = undefined;
-  private timeToSeek: number | undefined = undefined;
-  private seeking = false;
+  private canPlay: boolean = false;
 
   // listeners
   private playerProgressListener: (() => void) | null = null;
@@ -358,16 +298,16 @@ export class DynamicVideoController {
 
   constructor(
     camera: string,
-    playerRef: Player,
-    previewRef: MutableRefObject<HTMLVideoElement | null>,
+    playerController: Player,
+    previewController: PreviewVideoController,
     annotationOffset: number,
     defaultMode: PlayerMode,
     setScrubbing: (isScrubbing: boolean) => void,
     setFocusedItem: (timeline: Timeline) => void,
   ) {
     this.camera = camera;
-    this.playerRef = playerRef;
-    this.previewRef = previewRef;
+    this.playerController = playerController;
+    this.previewController = previewController;
     this.annotationOffset = annotationOffset;
     this.playerMode = defaultMode;
     this.setScrubbing = setScrubbing;
@@ -376,33 +316,26 @@ export class DynamicVideoController {
 
   newPlayback(newPlayback: DynamicPlayback) {
     this.recordings = newPlayback.recordings;
-
-    this.playerRef.src({
+    this.playerController.src({
       src: newPlayback.playbackUri,
       type: "application/vnd.apple.mpegurl",
     });
+    this.canPlay = false;
 
     if (this.timeToStart) {
       this.seekToTimestamp(this.timeToStart);
       this.timeToStart = undefined;
     }
+  }
 
-    this.preview = newPlayback.preview;
-
-    if (this.preview) {
-      this.seeking = false;
-      this.timeToSeek = undefined;
-    }
-
-    this.timeRange = newPlayback.timeRange;
+  autoPlay(play: boolean) {
+    this.playerController.autoplay(play);
   }
 
   seekToTimestamp(time: number, play: boolean = false) {
     if (this.playerMode != "playback") {
       this.playerMode = "playback";
       this.setScrubbing(false);
-      this.timeToSeek = undefined;
-      this.seeking = false;
     }
 
     if (this.recordings.length == 0) {
@@ -425,29 +358,17 @@ export class DynamicVideoController {
         segment.end_time - segment.start_time - (segment.end_time - time);
       return true;
     });
-    this.playerRef.currentTime(seekSeconds);
+    this.playerController.currentTime(seekSeconds);
 
     if (play) {
-      this.playerRef.play();
+      this.playerController.play();
     } else {
-      this.playerRef.pause();
-    }
-  }
-
-  onCanPlay(listener: (() => void) | null) {
-    if (listener) {
-      this.canPlayListener = listener;
-      this.playerRef.on("canplay", this.canPlayListener);
-    } else {
-      if (this.canPlayListener) {
-        this.playerRef.off("canplay", this.canPlayListener);
-        this.canPlayListener = null;
-      }
+      this.playerController.pause();
     }
   }
 
   seekToTimelineItem(timeline: Timeline) {
-    this.playerRef.pause();
+    this.playerController.pause();
     this.seekToTimestamp(timeline.timestamp + this.annotationOffset);
     this.setFocusedItem(timeline);
   }
@@ -470,79 +391,61 @@ export class DynamicVideoController {
     return timestamp;
   }
 
-  onPlayerTimeUpdate(listener: ((timestamp: number) => void) | undefined) {
-    if (this.playerProgressListener) {
-      this.playerRef.off("timeupdate", this.playerProgressListener);
+  onCanPlay(listener: (() => void) | null) {
+    if (this.canPlayListener) {
+      this.playerController.off("canplay", this.canPlayListener);
+      this.canPlayListener = null;
     }
 
     if (listener) {
-      this.playerProgressListener = () =>
-        listener(this.getProgress(this.playerRef.currentTime() || 0));
-      this.playerRef.on("timeupdate", this.playerProgressListener);
+      this.canPlayListener = () => {
+        this.canPlay = true;
+        listener();
+      };
+      this.playerController.on("canplay", this.canPlayListener);
     }
   }
 
-  onClipChangedEvent(listener: ((dir: "forward") => void) | undefined) {
+  onPlayerTimeUpdate(listener: ((timestamp: number) => void) | null) {
+    if (this.playerProgressListener) {
+      this.playerController.off("timeupdate", this.playerProgressListener);
+      this.playerProgressListener = null;
+    }
+
+    if (listener) {
+      this.playerProgressListener = () => {
+        if (this.canPlay) {
+          listener(this.getProgress(this.playerController.currentTime() || 0));
+        }
+      };
+      this.playerController.on("timeupdate", this.playerProgressListener);
+    }
+  }
+
+  onClipChangedEvent(listener: ((dir: "forward") => void) | null) {
     if (this.playerEndedListener) {
-      this.playerRef.off("ended", this.playerEndedListener);
+      this.playerController.off("ended", this.playerEndedListener);
+      this.playerEndedListener = null;
     }
 
     if (listener) {
       this.playerEndedListener = () => listener("forward");
-      this.playerRef.on("ended", this.playerEndedListener);
+      this.playerController.on("ended", this.playerEndedListener);
     }
   }
 
-  scrubToTimestamp(time: number) {
-    if (!this.preview || !this.timeRange) {
-      return;
+  scrubToTimestamp(time: number, saveIfNotReady: boolean = false) {
+    const scrubResult = this.previewController.scrubToTimestamp(time);
+
+    if (!scrubResult && saveIfNotReady) {
+      this.previewController.setNewPreviewStartTime(time);
     }
 
-    if (time < this.preview.start || time > this.preview.end) {
-      return;
-    }
-
-    if (this.playerMode != "scrubbing") {
+    if (scrubResult && this.playerMode != "scrubbing") {
       this.playerMode = "scrubbing";
-      this.playerRef.pause();
+      this.playerController.pause();
       this.setScrubbing(true);
     }
-
-    if (this.seeking) {
-      this.timeToSeek = time;
-    } else {
-      if (this.previewRef.current) {
-        this.previewRef.current.currentTime = Math.max(
-          0,
-          time - this.preview.start,
-        );
-        this.seeking = true;
-      }
-    }
-  }
-
-  finishedSeeking() {
-    if (
-      !this.previewRef.current ||
-      !this.preview ||
-      this.playerMode == "playback"
-    ) {
-      return;
-    }
-
-    if (
-      this.timeToSeek &&
-      this.timeToSeek != this.previewRef.current?.currentTime
-    ) {
-      this.previewRef.current.currentTime =
-        this.timeToSeek - this.preview.start;
-    } else {
-      this.seeking = false;
-    }
-  }
-
-  previewReady() {
-    this.previewRef.current?.pause();
   }
 
   hasRecordingAtTime(time: number): boolean {

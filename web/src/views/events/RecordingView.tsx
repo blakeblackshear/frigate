@@ -35,7 +35,6 @@ export function DesktopRecordingView({
 
   // controller state
 
-  const [playerReady, setPlayerReady] = useState(false);
   const [mainCamera, setMainCamera] = useState(startCamera);
   const videoPlayersRef = useRef<{ [camera: string]: DynamicVideoController }>(
     {},
@@ -74,7 +73,9 @@ export function DesktopRecordingView({
         }
       });
     }
-  }, [selectedRangeIdx, timeRange, videoPlayersRef, playerReady, mainCamera]);
+    // we only want to fire once when players are ready
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedRangeIdx, timeRange, videoPlayersRef.current, mainCamera]);
 
   // scrubbing and timeline state
 
@@ -116,9 +117,11 @@ export function DesktopRecordingView({
     (newCam: string) => {
       const lastController = videoPlayersRef.current[mainCamera];
       const newController = videoPlayersRef.current[newCam];
-      lastController.onPlayerTimeUpdate(undefined);
-      lastController.onClipChangedEvent(undefined);
+      lastController.onPlayerTimeUpdate(null);
+      lastController.onClipChangedEvent(null);
+      lastController.autoPlay(false);
       lastController.scrubToTimestamp(currentTime);
+      newController.autoPlay(true);
       newController.onCanPlay(() => {
         newController.seekToTimestamp(currentTime, true);
         newController.onCanPlay(null);
@@ -176,10 +179,8 @@ export function DesktopRecordingView({
                   camera={cam}
                   timeRange={currentTimeRange}
                   cameraPreviews={allPreviews ?? []}
-                  preloadRecordings
                   onControllerReady={(controller) => {
                     videoPlayersRef.current[cam] = controller;
-                    setPlayerReady(true);
                     controller.onPlayerTimeUpdate((timestamp: number) => {
                       setCurrentTime(timestamp);
 
@@ -210,11 +211,9 @@ export function DesktopRecordingView({
                 timeRange={currentTimeRange}
                 cameraPreviews={allPreviews ?? []}
                 previewOnly
-                preloadRecordings
                 onControllerReady={(controller) => {
                   videoPlayersRef.current[cam] = controller;
-                  setPlayerReady(true);
-                  controller.scrubToTimestamp(startTime);
+                  controller.scrubToTimestamp(startTime, true);
                 }}
                 onClick={() => onSelectCamera(cam)}
               />
@@ -372,7 +371,6 @@ export function MobileRecordingView({
           camera={startCamera}
           timeRange={currentTimeRange}
           cameraPreviews={relevantPreviews || []}
-          preloadRecordings
           onControllerReady={(controller) => {
             controllerRef.current = controller;
             setPlayerReady(true);
