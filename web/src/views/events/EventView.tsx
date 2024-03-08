@@ -579,11 +579,16 @@ function MotionReview({
     () => getChunkedTimeRange(timeRange.after, lastFullHour),
     [lastFullHour, timeRange],
   );
+
   const [selectedRangeIdx, setSelectedRangeIdx] = useState(
     timeRangeSegments.ranges.length - 1,
   );
   const [currentTime, setCurrentTime] = useState<number>(
     timeRangeSegments.ranges[selectedRangeIdx].start,
+  );
+  const currentTimeRange = useMemo(
+    () => timeRangeSegments.ranges[selectedRangeIdx],
+    [selectedRangeIdx, timeRangeSegments],
   );
 
   // move to next clip
@@ -600,23 +605,38 @@ function MotionReview({
 
     if (firstController) {
       firstController.onClipChangedEvent((dir) => {
-        if (
-          dir == "forward" &&
-          selectedRangeIdx < timeRangeSegments.ranges.length - 1
-        ) {
-          setSelectedRangeIdx(selectedRangeIdx + 1);
-        } else if (selectedRangeIdx > 0) {
-          setSelectedRangeIdx(selectedRangeIdx - 1);
+        if (dir == "forward") {
+          if (selectedRangeIdx < timeRangeSegments.ranges.length - 1) {
+            setSelectedRangeIdx(selectedRangeIdx + 1);
+          }
         }
       });
     }
   }, [selectedRangeIdx, timeRangeSegments, videoPlayersRef, playerReady]);
 
   useEffect(() => {
+    if (
+      currentTime > currentTimeRange.end + 60 ||
+      currentTime < currentTimeRange.start - 60
+    ) {
+      const index = timeRangeSegments.ranges.findIndex(
+        (seg) => seg.start <= currentTime && seg.end >= currentTime,
+      );
+
+      if (index != -1) {
+        setSelectedRangeIdx(index);
+      }
+      return;
+    }
+
     Object.values(videoPlayersRef.current).forEach((controller) => {
       controller.scrubToTimestamp(currentTime);
     });
-  }, [currentTime]);
+  }, [currentTime, currentTimeRange, timeRangeSegments]);
+
+  if (!relevantPreviews) {
+    return <ActivityIndicator />;
+  }
 
   return (
     <>
@@ -640,9 +660,10 @@ function MotionReview({
                 key={camera.name}
                 className={`${grow}`}
                 camera={camera.name}
-                timeRange={timeRangeSegments.ranges[selectedRangeIdx]}
+                timeRange={currentTimeRange}
                 cameraPreviews={relevantPreviews || []}
                 previewOnly
+                preloadRecordings={false}
                 onControllerReady={(controller) => {
                   videoPlayersRef.current[camera.name] = controller;
                   setPlayerReady(true);

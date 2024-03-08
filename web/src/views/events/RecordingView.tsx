@@ -49,6 +49,10 @@ export function DesktopRecordingView({
       return chunk.start <= startTime && chunk.end >= startTime;
     }),
   );
+  const currentTimeRange = useMemo(
+    () => timeRange.ranges[selectedRangeIdx],
+    [selectedRangeIdx, timeRange],
+  );
 
   // move to next clip
   useEffect(() => {
@@ -59,21 +63,18 @@ export function DesktopRecordingView({
       return;
     }
 
-    const firstController = Object.values(videoPlayersRef.current)[0];
+    const mainController = videoPlayersRef.current[mainCamera];
 
-    if (firstController) {
-      firstController.onClipChangedEvent((dir) => {
-        if (
-          dir == "forward" &&
-          selectedRangeIdx < timeRange.ranges.length - 1
-        ) {
-          setSelectedRangeIdx(selectedRangeIdx + 1);
-        } else if (selectedRangeIdx > 0) {
-          setSelectedRangeIdx(selectedRangeIdx - 1);
+    if (mainController) {
+      mainController.onClipChangedEvent((dir) => {
+        if (dir == "forward") {
+          if (selectedRangeIdx < timeRange.ranges.length - 1) {
+            setSelectedRangeIdx(selectedRangeIdx + 1);
+          }
         }
       });
     }
-  }, [selectedRangeIdx, timeRange, videoPlayersRef, playerReady]);
+  }, [selectedRangeIdx, timeRange, videoPlayersRef, playerReady, mainCamera]);
 
   // scrubbing and timeline state
 
@@ -82,11 +83,25 @@ export function DesktopRecordingView({
 
   useEffect(() => {
     if (scrubbing) {
+      if (
+        currentTime > currentTimeRange.end + 60 ||
+        currentTime < currentTimeRange.start - 60
+      ) {
+        const index = timeRange.ranges.findIndex(
+          (seg) => seg.start <= currentTime && seg.end >= currentTime,
+        );
+
+        if (index != -1) {
+          setSelectedRangeIdx(index);
+        }
+        return;
+      }
+
       Object.values(videoPlayersRef.current).forEach((controller) => {
         controller.scrubToTimestamp(currentTime);
       });
     }
-  }, [currentTime, scrubbing]);
+  }, [currentTime, scrubbing, timeRange, currentTimeRange]);
 
   useEffect(() => {
     if (!scrubbing) {
@@ -99,22 +114,26 @@ export function DesktopRecordingView({
 
   const onSelectCamera = useCallback(
     (newCam: string) => {
-      videoPlayersRef.current[mainCamera].onPlayerTimeUpdate(undefined);
-      videoPlayersRef.current[mainCamera].scrubToTimestamp(currentTime);
-      videoPlayersRef.current[newCam].seekToTimestamp(currentTime, true);
-      videoPlayersRef.current[newCam].onPlayerTimeUpdate(
-        (timestamp: number) => {
-          setCurrentTime(timestamp);
+      const lastController = videoPlayersRef.current[mainCamera];
+      const newController = videoPlayersRef.current[newCam];
+      lastController.onPlayerTimeUpdate(undefined);
+      lastController.onClipChangedEvent(undefined);
+      lastController.scrubToTimestamp(currentTime);
+      newController.onCanPlay(() => {
+        newController.seekToTimestamp(currentTime, true);
+        newController.onCanPlay(null);
+      });
+      newController.onPlayerTimeUpdate((timestamp: number) => {
+        setCurrentTime(timestamp);
 
-          allCameras.forEach((cam) => {
-            if (cam != newCam) {
-              videoPlayersRef.current[cam]?.scrubToTimestamp(
-                Math.floor(timestamp),
-              );
-            }
-          });
-        },
-      );
+        allCameras.forEach((cam) => {
+          if (cam != newCam) {
+            videoPlayersRef.current[cam]?.scrubToTimestamp(
+              Math.floor(timestamp),
+            );
+          }
+        });
+      });
       setMainCamera(newCam);
     },
     [allCameras, currentTime, mainCamera],
@@ -155,8 +174,9 @@ export function DesktopRecordingView({
               >
                 <DynamicVideoPlayer
                   camera={cam}
-                  timeRange={timeRange.ranges[selectedRangeIdx]}
+                  timeRange={currentTimeRange}
                   cameraPreviews={allPreviews ?? []}
+                  preloadRecordings
                   onControllerReady={(controller) => {
                     videoPlayersRef.current[cam] = controller;
                     setPlayerReady(true);
@@ -172,7 +192,10 @@ export function DesktopRecordingView({
                       });
                     });
 
-                    controller.seekToTimestamp(startTime, true);
+                    controller.onCanPlay(() => {
+                      controller.seekToTimestamp(startTime, true);
+                      controller.onCanPlay(null);
+                    });
                   }}
                 />
               </div>
@@ -184,9 +207,10 @@ export function DesktopRecordingView({
               <DynamicVideoPlayer
                 className="size-full"
                 camera={cam}
-                timeRange={timeRange.ranges[selectedRangeIdx]}
+                timeRange={currentTimeRange}
                 cameraPreviews={allPreviews ?? []}
                 previewOnly
+                preloadRecordings
                 onControllerReady={(controller) => {
                   videoPlayersRef.current[cam] = controller;
                   setPlayerReady(true);
@@ -265,6 +289,10 @@ export function MobileRecordingView({
       return chunk.start <= startTime && chunk.end >= startTime;
     }),
   );
+  const currentTimeRange = useMemo(
+    () => timeRange.ranges[selectedRangeIdx],
+    [selectedRangeIdx, timeRange],
+  );
 
   // move to next clip
   useEffect(() => {
@@ -273,10 +301,10 @@ export function MobileRecordingView({
     }
 
     controllerRef.current.onClipChangedEvent((dir) => {
-      if (dir == "forward" && selectedRangeIdx < timeRange.ranges.length - 1) {
-        setSelectedRangeIdx(selectedRangeIdx + 1);
-      } else if (selectedRangeIdx > 0) {
-        setSelectedRangeIdx(selectedRangeIdx - 1);
+      if (dir == "forward") {
+        if (selectedRangeIdx < timeRange.ranges.length - 1) {
+          setSelectedRangeIdx(selectedRangeIdx + 1);
+        }
       }
     });
   }, [playerReady, selectedRangeIdx, timeRange]);
@@ -290,9 +318,23 @@ export function MobileRecordingView({
 
   useEffect(() => {
     if (scrubbing) {
+      if (
+        currentTime > currentTimeRange.end + 60 ||
+        currentTime < currentTimeRange.start - 60
+      ) {
+        const index = timeRange.ranges.findIndex(
+          (seg) => seg.start <= currentTime && seg.end >= currentTime,
+        );
+
+        if (index != -1) {
+          setSelectedRangeIdx(index);
+        }
+        return;
+      }
+
       controllerRef.current?.scrubToTimestamp(currentTime);
     }
-  }, [currentTime, scrubbing]);
+  }, [currentTime, scrubbing, currentTimeRange, timeRange]);
 
   useEffect(() => {
     if (!scrubbing) {
@@ -328,8 +370,9 @@ export function MobileRecordingView({
       <div>
         <DynamicVideoPlayer
           camera={startCamera}
-          timeRange={timeRange.ranges[selectedRangeIdx]}
+          timeRange={currentTimeRange}
           cameraPreviews={relevantPreviews || []}
+          preloadRecordings
           onControllerReady={(controller) => {
             controllerRef.current = controller;
             setPlayerReady(true);
