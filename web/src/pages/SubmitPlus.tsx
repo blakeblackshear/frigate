@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +21,7 @@ import { Event } from "@/types/event";
 import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
 import { useCallback, useMemo, useState } from "react";
+import { isMobile } from "react-device-detect";
 import { FaList, FaVideo } from "react-icons/fa";
 import useSWR from "swr";
 
@@ -193,9 +195,13 @@ function PlusFilterGroup({
     undefined,
   );
 
+  const Menu = isMobile ? Drawer : DropdownMenu;
+  const Trigger = isMobile ? DrawerTrigger : DropdownMenuTrigger;
+  const Content = isMobile ? DrawerContent : DropdownMenuContent;
+
   return (
     <div className="w-full h-16 flex justify-start gap-2 items-center">
-      <DropdownMenu
+      <Menu
         open={open == "camera"}
         onOpenChange={(open) => {
           if (!open) {
@@ -204,7 +210,7 @@ function PlusFilterGroup({
           setOpen(open ? "camera" : "none");
         }}
       >
-        <DropdownMenuTrigger asChild>
+        <Trigger asChild>
           <Button size="sm" className="mx-1 capitalize" variant="secondary">
             <FaVideo className="md:mr-[10px] text-muted-foreground" />
             <div className="hidden md:block">
@@ -213,8 +219,8 @@ function PlusFilterGroup({
                 : `${selectedCameras.length} Cameras`}
             </div>
           </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
+        </Trigger>
+        <Content className={isMobile ? "max-h-[75dvh]" : ""}>
           <DropdownMenuLabel className="flex justify-center">
             Filter Cameras
           </DropdownMenuLabel>
@@ -229,33 +235,35 @@ function PlusFilterGroup({
             }}
           />
           <DropdownMenuSeparator />
-          {allCameras.map((item) => (
-            <FilterCheckBox
-              key={item}
-              isChecked={currentCameras?.includes(item) ?? false}
-              label={item.replaceAll("_", " ")}
-              onCheckedChange={(isChecked) => {
-                if (isChecked) {
-                  const updatedCameras = currentCameras
-                    ? [...currentCameras]
-                    : [];
+          <div className={isMobile ? "h-auto overflow-y-auto" : ""}>
+            {allCameras.map((item) => (
+              <FilterCheckBox
+                key={item}
+                isChecked={currentCameras?.includes(item) ?? false}
+                label={item.replaceAll("_", " ")}
+                onCheckedChange={(isChecked) => {
+                  if (isChecked) {
+                    const updatedCameras = currentCameras
+                      ? [...currentCameras]
+                      : [];
 
-                  updatedCameras.push(item);
-                  setCurrentCameras(updatedCameras);
-                } else {
-                  const updatedCameras = currentCameras
-                    ? [...currentCameras]
-                    : [];
-
-                  // can not deselect the last item
-                  if (updatedCameras.length > 1) {
-                    updatedCameras.splice(updatedCameras.indexOf(item), 1);
+                    updatedCameras.push(item);
                     setCurrentCameras(updatedCameras);
+                  } else {
+                    const updatedCameras = currentCameras
+                      ? [...currentCameras]
+                      : [];
+
+                    // can not deselect the last item
+                    if (updatedCameras.length > 1) {
+                      updatedCameras.splice(updatedCameras.indexOf(item), 1);
+                      setCurrentCameras(updatedCameras);
+                    }
                   }
-                }
-              }}
-            />
-          ))}
+                }}
+              />
+            ))}
+          </div>
           <DropdownMenuSeparator />
           <div className="flex justify-center items-center">
             <Button
@@ -268,9 +276,9 @@ function PlusFilterGroup({
               Apply
             </Button>
           </div>
-        </DropdownMenuContent>
-      </DropdownMenu>
-      <DropdownMenu
+        </Content>
+      </Menu>
+      <Menu
         open={open == "label"}
         onOpenChange={(open) => {
           if (!open) {
@@ -279,7 +287,7 @@ function PlusFilterGroup({
           setOpen(open ? "label" : "none");
         }}
       >
-        <DropdownMenuTrigger asChild>
+        <Trigger asChild>
           <Button size="sm" className="mx-1 capitalize" variant="secondary">
             <FaList className="md:mr-[10px] text-muted-foreground" />
             <div className="hidden md:block">
@@ -288,8 +296,8 @@ function PlusFilterGroup({
                 : `${selectedLabels.length} Labels`}
             </div>
           </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
+        </Trigger>
+        <Content className={isMobile ? "max-h-[75dvh]" : ""}>
           <DropdownMenuLabel className="flex justify-center">
             Filter Labels
           </DropdownMenuLabel>
@@ -304,29 +312,35 @@ function PlusFilterGroup({
             }}
           />
           <DropdownMenuSeparator />
-          {allLabels.map((item) => (
-            <FilterCheckBox
-              key={item}
-              isChecked={currentLabels?.includes(item) ?? false}
-              label={item.replaceAll("_", " ")}
-              onCheckedChange={(isChecked) => {
-                if (isChecked) {
-                  const updatedLabels = currentLabels ? [...currentLabels] : [];
+          <div className={isMobile ? "h-auto overflow-y-auto" : ""}>
+            {allLabels.map((item) => (
+              <FilterCheckBox
+                key={item}
+                isChecked={currentLabels?.includes(item) ?? false}
+                label={item.replaceAll("_", " ")}
+                onCheckedChange={(isChecked) => {
+                  if (isChecked) {
+                    const updatedLabels = currentLabels
+                      ? [...currentLabels]
+                      : [];
 
-                  updatedLabels.push(item);
-                  setCurrentLabels(updatedLabels);
-                } else {
-                  const updatedLabels = currentLabels ? [...currentLabels] : [];
-
-                  // can not deselect the last item
-                  if (updatedLabels.length > 1) {
-                    updatedLabels.splice(updatedLabels.indexOf(item), 1);
+                    updatedLabels.push(item);
                     setCurrentLabels(updatedLabels);
+                  } else {
+                    const updatedLabels = currentLabels
+                      ? [...currentLabels]
+                      : [];
+
+                    // can not deselect the last item
+                    if (updatedLabels.length > 1) {
+                      updatedLabels.splice(updatedLabels.indexOf(item), 1);
+                      setCurrentLabels(updatedLabels);
+                    }
                   }
-                }
-              }}
-            />
-          ))}
+                }}
+              />
+            ))}
+          </div>
           <DropdownMenuSeparator />
           <div className="flex justify-center items-center">
             <Button
@@ -339,8 +353,8 @@ function PlusFilterGroup({
               Apply
             </Button>
           </div>
-        </DropdownMenuContent>
-      </DropdownMenu>
+        </Content>
+      </Menu>
     </div>
   );
 }

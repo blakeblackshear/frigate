@@ -155,56 +155,62 @@ function CamerasFilterButton({
         Filter Cameras
       </DropdownMenuLabel>
       <DropdownMenuSeparator />
-      <FilterCheckBox
-        isChecked={currentCameras == undefined}
-        label="All Cameras"
-        onCheckedChange={(isChecked) => {
-          if (isChecked) {
-            setCurrentCameras(undefined);
-          }
-        }}
-      />
-      {groups.length > 0 && (
-        <>
-          <DropdownMenuSeparator />
-          {groups.map(([name, conf]) => {
-            return (
-              <FilterCheckBox
-                key={name}
-                label={name}
-                isChecked={false}
-                onCheckedChange={() => {
-                  setCurrentCameras([...conf.cameras]);
-                }}
-              />
-            );
-          })}
-        </>
-      )}
-      <DropdownMenuSeparator />
-      {allCameras.map((item) => (
+      <div className="h-auto overflow-y-auto overflow-x-hidden">
         <FilterCheckBox
-          key={item}
-          isChecked={currentCameras?.includes(item) ?? false}
-          label={item.replaceAll("_", " ")}
+          isChecked={currentCameras == undefined}
+          label="All Cameras"
           onCheckedChange={(isChecked) => {
             if (isChecked) {
-              const updatedCameras = currentCameras ? [...currentCameras] : [];
-
-              updatedCameras.push(item);
-              setCurrentCameras(updatedCameras);
-            } else {
-              const updatedCameras = currentCameras ? [...currentCameras] : [];
-
-              // can not deselect the last item
-              if (updatedCameras.length > 1) {
-                updatedCameras.splice(updatedCameras.indexOf(item), 1);
-                setCurrentCameras(updatedCameras);
-              }
+              setCurrentCameras(undefined);
             }
           }}
         />
-      ))}
+        {groups.length > 0 && (
+          <>
+            <DropdownMenuSeparator />
+            {groups.map(([name, conf]) => {
+              return (
+                <FilterCheckBox
+                  key={name}
+                  label={name}
+                  isChecked={false}
+                  onCheckedChange={() => {
+                    setCurrentCameras([...conf.cameras]);
+                  }}
+                />
+              );
+            })}
+          </>
+        )}
+        <DropdownMenuSeparator />
+        {allCameras.map((item) => (
+          <FilterCheckBox
+            key={item}
+            isChecked={currentCameras?.includes(item) ?? false}
+            label={item.replaceAll("_", " ")}
+            onCheckedChange={(isChecked) => {
+              if (isChecked) {
+                const updatedCameras = currentCameras
+                  ? [...currentCameras]
+                  : [];
+
+                updatedCameras.push(item);
+                setCurrentCameras(updatedCameras);
+              } else {
+                const updatedCameras = currentCameras
+                  ? [...currentCameras]
+                  : [];
+
+                // can not deselect the last item
+                if (updatedCameras.length > 1) {
+                  updatedCameras.splice(updatedCameras.indexOf(item), 1);
+                  setCurrentCameras(updatedCameras);
+                }
+              }
+            }}
+          />
+        ))}
+      </div>
       <DropdownMenuSeparator />
       <div className="flex justify-center items-center">
         <Button
@@ -233,7 +239,9 @@ function CamerasFilterButton({
         }}
       >
         <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-        <DrawerContent>{content}</DrawerContent>
+        <DrawerContent className="max-h-[75dvh] overflow-hidden">
+          {content}
+        </DrawerContent>
       </Drawer>
     );
   }
@@ -380,46 +388,50 @@ function GeneralFilterButton({
           checked={reviewed == 1}
           onCheckedChange={() => setReviewed(reviewed == 0 ? 1 : 0)}
         />
-        <Label className="ml-2" htmlFor="reviewed">Show Reviewed</Label>
+        <Label className="ml-2" htmlFor="reviewed">
+          Show Reviewed
+        </Label>
       </div>
       <DropdownMenuSeparator />
       <DropdownMenuLabel className="flex justify-center items-center">
         Filter Labels
       </DropdownMenuLabel>
       <DropdownMenuSeparator />
-      <FilterCheckBox
-        isChecked={currentLabels == undefined}
-        label="All Labels"
-        onCheckedChange={(isChecked) => {
-          if (isChecked) {
-            setCurrentLabels(undefined);
-          }
-        }}
-      />
-      <DropdownMenuSeparator />
-      {allLabels.map((item) => (
+      <div className="h-auto overflow-y-auto overflow-x-hidden">
         <FilterCheckBox
-          key={item}
-          isChecked={currentLabels?.includes(item) ?? false}
-          label={item.replaceAll("_", " ")}
+          isChecked={currentLabels == undefined}
+          label="All Labels"
           onCheckedChange={(isChecked) => {
             if (isChecked) {
-              const updatedLabels = currentLabels ? [...currentLabels] : [];
-
-              updatedLabels.push(item);
-              setCurrentLabels(updatedLabels);
-            } else {
-              const updatedLabels = currentLabels ? [...currentLabels] : [];
-
-              // can not deselect the last item
-              if (updatedLabels.length > 1) {
-                updatedLabels.splice(updatedLabels.indexOf(item), 1);
-                setCurrentLabels(updatedLabels);
-              }
+              setCurrentLabels(undefined);
             }
           }}
         />
-      ))}
+        <DropdownMenuSeparator />
+        {allLabels.map((item) => (
+          <FilterCheckBox
+            key={item}
+            isChecked={currentLabels?.includes(item) ?? false}
+            label={item.replaceAll("_", " ")}
+            onCheckedChange={(isChecked) => {
+              if (isChecked) {
+                const updatedLabels = currentLabels ? [...currentLabels] : [];
+
+                updatedLabels.push(item);
+                setCurrentLabels(updatedLabels);
+              } else {
+                const updatedLabels = currentLabels ? [...currentLabels] : [];
+
+                // can not deselect the last item
+                if (updatedLabels.length > 1) {
+                  updatedLabels.splice(updatedLabels.indexOf(item), 1);
+                  setCurrentLabels(updatedLabels);
+                }
+              }
+            }}
+          />
+        ))}
+      </div>
       <DropdownMenuSeparator />
       <div className="flex justify-center items-center">
         <Button
@@ -456,7 +468,9 @@ function GeneralFilterButton({
         }}
       >
         <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-        <DrawerContent>{content}</DrawerContent>
+        <DrawerContent className="max-h-[75dvh] overflow-hidden">
+          {content}
+        </DrawerContent>
       </Drawer>
     );
   }
