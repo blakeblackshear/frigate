@@ -45,7 +45,6 @@ export default function PreviewVideoPlayer({
   // controlling playback
 
   const previewRef = useRef<HTMLVideoElement | null>(null);
-  const [previewReady, setPreviewReady] = useState(false);
   const controller = useMemo(() => {
     if (!config || !previewRef.current) {
       return undefined;
@@ -54,7 +53,7 @@ export default function PreviewVideoPlayer({
     return new PreviewVideoController(camera, previewRef);
     // we only care when preview is ready
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [camera, config, previewReady]);
+  }, [camera, config, previewRef.current]);
 
   useEffect(() => {
     if (!controller) {
@@ -135,7 +134,6 @@ export default function PreviewVideoPlayer({
         onSeeked={onPreviewSeeked}
         onLoadedData={() => {
           previewRef.current?.pause();
-          setPreviewReady(true);
           controller?.previewReady();
         }}
       >
