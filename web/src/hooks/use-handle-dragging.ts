@@ -35,6 +35,7 @@ function useDraggableHandler({
   setIsDragging,
 }: DragHandlerProps) {
   const [clientYPosition, setClientYPosition] = useState<number | null>(null);
+  const [initialClickAdjustment, setInitialClickAdjustment] = useState(0);
 
   const draggingAtTopEdge = useMemo(() => {
     if (clientYPosition && timelineRef.current) {
@@ -81,8 +82,13 @@ function useDraggableHandler({
       e.stopPropagation();
       getClientYPosition(e);
       setIsDragging(true);
+
+      if (scrollTimeRef.current && clientYPosition) {
+        const handlebarRect = scrollTimeRef.current.getBoundingClientRect();
+        setInitialClickAdjustment(clientYPosition - handlebarRect.top);
+      }
     },
-    [setIsDragging, getClientYPosition],
+    [setIsDragging, getClientYPosition, scrollTimeRef, clientYPosition],
   );
 
   const handleMouseUp = useCallback(
@@ -93,6 +99,7 @@ function useDraggableHandler({
       e.stopPropagation();
       if (isDragging) {
         setIsDragging(false);
+        setInitialClickAdjustment(0);
       }
     },
     [isDragging, setIsDragging],
@@ -184,11 +191,17 @@ function useDraggableHandler({
         const parentScrollTop = getCumulativeScrollTop(timelineRef.current);
 
         const newHandlePosition = Math.min(
+          // end of timeline
           segmentHeight * (timelineDuration / segmentDuration) -
             segmentHeight * 2,
           Math.max(
+            // start of timeline
             segmentHeight + scrolled,
-            clientYPosition - timelineTop + parentScrollTop,
+            // current Y position
+            clientYPosition -
+              timelineTop +
+              parentScrollTop -
+              initialClickAdjustment,
           ),
         );
 
