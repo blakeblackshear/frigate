@@ -63,7 +63,6 @@ export default function PreviewVideoPlayer({
     if (controller) {
       onControllerReady(controller);
     }
-
     // we only want to fire once when players are ready
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controller]);
@@ -104,6 +103,7 @@ export default function PreviewVideoPlayer({
         Math.floor(preview.end) <= timeRange.end,
     );
     setCurrentPreview(preview);
+
     controller.newPlayback({
       preview,
       timeRange,
@@ -136,8 +136,11 @@ export default function PreviewVideoPlayer({
         disableRemotePlayback
         onSeeked={onPreviewSeeked}
         onLoadedData={() => {
-          previewRef.current?.pause();
-          controller?.previewReady();
+          if (controller) {
+            controller.previewReady();
+          } else {
+            previewRef.current?.pause();
+          }
         }}
       >
         {currentPreview != undefined && (
@@ -169,11 +172,8 @@ export class PreviewVideoController {
 
   newPlayback(newPlayback: PreviewPlayback) {
     this.preview = newPlayback.preview;
-
-    if (this.preview) {
-      this.seeking = false;
-      this.timeToSeek = undefined;
-    }
+    this.seeking = false;
+    this.timeToSeek = undefined;
 
     this.timeRange = newPlayback.timeRange;
   }
@@ -217,6 +217,8 @@ export class PreviewVideoController {
   }
 
   previewReady() {
+    this.seeking = false;
+    this.timeToSeek = undefined;
     this.previewRef.current?.pause();
   }
 }
