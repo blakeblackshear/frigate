@@ -201,16 +201,11 @@ class PreviewRecorder:
         frame_time: float,
     ) -> bool:
         """Decide if this frame should be added to PREVIEW."""
-        active_objs = get_active_objects(frame_time, self.config, current_tracked_objects)
-
-        preview_output_fps = (
-            2
-            if any(
-                o["label"] == "car"
-                for o in active_objs
-            )
-            else 1
+        active_objs = get_active_objects(
+            frame_time, self.config, current_tracked_objects
         )
+
+        preview_output_fps = 2 if any(o["label"] == "car" for o in active_objs) else 1
 
         # limit output to 1 fps
         if (frame_time - self.last_output_time) < 1 / preview_output_fps:
