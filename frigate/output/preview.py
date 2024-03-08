@@ -212,7 +212,7 @@ class PreviewRecorder:
             return False
 
         # send frame if a non-stationary object is in a zone
-        if len(active_objs > 0):
+        if len(active_objs) > 0:
             self.last_output_time = frame_time
             return True
 
