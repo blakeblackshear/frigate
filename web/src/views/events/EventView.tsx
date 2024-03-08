@@ -2,9 +2,6 @@ import Logo from "@/components/Logo";
 import NewReviewData from "@/components/dynamic/NewReviewData";
 import ReviewActionGroup from "@/components/filter/ReviewActionGroup";
 import ReviewFilterGroup from "@/components/filter/ReviewFilterGroup";
-import DynamicVideoPlayer, {
-  DynamicVideoController,
-} from "@/components/player/DynamicVideoPlayer";
 import PreviewThumbnailPlayer from "@/components/player/PreviewThumbnailPlayer";
 import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
@@ -36,6 +33,9 @@ import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
 import MotionReviewTimeline from "@/components/timeline/MotionReviewTimeline";
 import { Button } from "@/components/ui/button";
+import PreviewVideoPlayer, {
+  PreviewVideoController,
+} from "@/components/player/PreviewVideoPlayer";
 
 type EventViewProps = {
   reviews?: ReviewSegment[];
@@ -531,7 +531,6 @@ function MotionReview({
 }: MotionReviewProps) {
   const segmentDuration = 30;
   const { data: config } = useSWR<FrigateConfig>("config");
-  const [playerReady, setPlayerReady] = useState(false);
 
   const reviewCameras = useMemo(() => {
     if (!config) {
@@ -552,7 +551,7 @@ function MotionReview({
     return cameras.sort((a, b) => a.ui.order - b.ui.order);
   }, [config, filter]);
 
-  const videoPlayersRef = useRef<{ [camera: string]: DynamicVideoController }>(
+  const videoPlayersRef = useRef<{ [camera: string]: PreviewVideoController }>(
     {},
   );
 
@@ -592,27 +591,6 @@ function MotionReview({
   );
 
   // move to next clip
-
-  useEffect(() => {
-    if (
-      !videoPlayersRef.current &&
-      Object.values(videoPlayersRef.current).length > 0
-    ) {
-      return;
-    }
-
-    const firstController = Object.values(videoPlayersRef.current)[0];
-
-    if (firstController) {
-      firstController.onClipChangedEvent((dir) => {
-        if (dir == "forward") {
-          if (selectedRangeIdx < timeRangeSegments.ranges.length - 1) {
-            setSelectedRangeIdx(selectedRangeIdx + 1);
-          }
-        }
-      });
-    }
-  }, [selectedRangeIdx, timeRangeSegments, videoPlayersRef, playerReady]);
 
   useEffect(() => {
     if (
@@ -656,17 +634,14 @@ function MotionReview({
               grow = "aspect-video";
             }
             return (
-              <DynamicVideoPlayer
+              <PreviewVideoPlayer
                 key={camera.name}
                 className={`${grow}`}
                 camera={camera.name}
                 timeRange={currentTimeRange}
                 cameraPreviews={relevantPreviews || []}
-                previewOnly
-                preloadRecordings={false}
                 onControllerReady={(controller) => {
                   videoPlayersRef.current[camera.name] = controller;
-                  setPlayerReady(true);
                 }}
                 onClick={() =>
                   onSelectReview(`motion,${camera.name},${currentTime}`, false)

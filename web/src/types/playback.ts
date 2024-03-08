@@ -7,3 +7,8 @@ export type DynamicPlayback = {
   preview: Preview | undefined;
   timeRange: { end: number; start: number };
 };
+
+export type PreviewPlayback = {
+  preview: Preview | undefined;
+  timeRange: { end: number; start: number };
+};
