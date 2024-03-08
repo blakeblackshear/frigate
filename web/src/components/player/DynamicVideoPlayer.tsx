@@ -328,6 +328,10 @@ export class DynamicVideoController {
     }
   }
 
+  autoPlay(play: boolean) {
+    this.playerController.autoplay(play);
+  }
+
   seekToTimestamp(time: number, play: boolean = false) {
     if (this.playerMode != "playback") {
       this.playerMode = "playback";
