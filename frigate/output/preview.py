@@ -201,13 +201,13 @@ class PreviewRecorder:
         frame_time: float,
     ) -> bool:
         """Decide if this frame should be added to PREVIEW."""
+        active_objs = get_active_objects(frame_time, self.config, current_tracked_objects)
+
         preview_output_fps = (
             2
             if any(
                 o["label"] == "car"
-                for o in get_active_objects(
-                    frame_time, self.config, current_tracked_objects
-                )
+                for o in active_objs
             )
             else 1
         )
@@ -217,14 +217,16 @@ class PreviewRecorder:
             return False
 
         # send frame if a non-stationary object is in a zone
-        if any(
-            (len(o["current_zones"]) > 0 and not o["stationary"])
-            for o in current_tracked_objects
-        ):
+        if len(active_objs > 0):
             self.last_output_time = frame_time
             return True
 
         if len(motion_boxes) > 0:
+            self.last_output_time = frame_time
+            return True
+
+        # ensure that at least 2 frames are written every minute
+        if frame_time - self.last_output_time > 30:
             self.last_output_time = frame_time
             return True
 
