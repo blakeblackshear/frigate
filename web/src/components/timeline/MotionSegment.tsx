@@ -82,6 +82,19 @@ export function MotionSegment({
     return isMobile ? 30 : 50;
   }, []);
 
+  const segmentWidth = useMemo(() => {
+    return interpolateMotionAudioData(
+      getMotionSegmentValue(segmentTime + segmentDuration / 2),
+      maxSegmentWidth,
+    );
+  }, [
+    segmentTime,
+    segmentDuration,
+    maxSegmentWidth,
+    getMotionSegmentValue,
+    interpolateMotionAudioData,
+  ]);
+
   const alignedMinimapStartTime = useMemo(
     () => alignStartDateToTimeline(minimapStartTime ?? 0),
     [minimapStartTime, alignStartDateToTimeline],
@@ -154,13 +167,18 @@ export function MotionSegment({
   };
 
   const segmentClick = useCallback(() => {
-    if (startTimestamp && setHandlebarTime) {
+    if (startTimestamp && setHandlebarTime && segmentWidth > 1) {
       setHandlebarTime(startTimestamp);
     }
-  }, [startTimestamp, setHandlebarTime]);
+  }, [startTimestamp, setHandlebarTime, segmentWidth]);
 
   return (
-    <div key={segmentKey} className={segmentClasses}>
+    <div
+      key={segmentKey}
+      className={segmentClasses}
+      onClick={segmentClick}
+      onTouchStart={(event) => handleTouchStart(event, segmentClick)}
+    >
       <MinimapBounds
         isFirstSegmentInMinimap={isFirstSegmentInMinimap}
         isLastSegmentInMinimap={isLastSegmentInMinimap}
@@ -185,13 +203,8 @@ export function MotionSegment({
             <div
               key={`${segmentKey}_motion_data_1`}
               className={`h-[2px] rounded-full bg-motion_review`}
-              onClick={segmentClick}
-              onTouchStart={(event) => handleTouchStart(event, segmentClick)}
               style={{
-                width: interpolateMotionAudioData(
-                  getMotionSegmentValue(segmentTime + segmentDuration / 2),
-                  maxSegmentWidth,
-                ),
+                width: segmentWidth,
               }}
             ></div>
           </div>
@@ -202,13 +215,8 @@ export function MotionSegment({
             <div
               key={`${segmentKey}_motion_data_2`}
               className={`h-[2px] rounded-full bg-motion_review`}
-              onClick={segmentClick}
-              onTouchStart={(event) => handleTouchStart(event, segmentClick)}
               style={{
-                width: interpolateMotionAudioData(
-                  getMotionSegmentValue(segmentTime),
-                  maxSegmentWidth,
-                ),
+                width: segmentWidth,
               }}
             ></div>
           </div>

@@ -29,6 +29,7 @@ type EventSegmentProps = {
   minimapEndTime?: number;
   severityType: ReviewSeverity;
   contentRef: RefObject<HTMLDivElement>;
+  setHandlebarTime?: React.Dispatch<React.SetStateAction<number>>;
 };
 
 export function EventSegment({
@@ -41,6 +42,7 @@ export function EventSegment({
   minimapEndTime,
   severityType,
   contentRef,
+  setHandlebarTime,
 }: EventSegmentProps) {
   const {
     getSeverity,
@@ -191,6 +193,10 @@ export function EventSegment({
           element.classList.remove("outline-4", "shadow-[0_0_6px_1px]");
           element.classList.add("outline-0", "shadow-none");
         }, 3000);
+      }
+
+      if (setHandlebarTime) {
+        setHandlebarTime(startTimestamp);
       }
     }
     // we know that these deps are correct

@@ -97,6 +97,7 @@ export function EventReviewTimeline({
           minimapEndTime={minimapEndTime}
           severityType={severityType}
           contentRef={contentRef}
+          setHandlebarTime={setHandlebarTime}
         />
       );
     });
