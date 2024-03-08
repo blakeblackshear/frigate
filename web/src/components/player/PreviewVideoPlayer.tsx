@@ -29,19 +29,6 @@ export default function PreviewVideoPlayer({
 }: PreviewVideoPlayerProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
-  // playback behavior
-  const tallVideo = useMemo(() => {
-    if (!config) {
-      return false;
-    }
-
-    return (
-      config.cameras[camera].detect.width /
-        config.cameras[camera].detect.height <
-      1
-    );
-  }, [camera, config]);
-
   // controlling playback
 
   const previewRef = useRef<HTMLVideoElement | null>(null);
@@ -123,12 +110,12 @@ export default function PreviewVideoPlayer({
 
   return (
     <div
-      className={`relative ${className ?? ""} ${onClick ? "cursor-pointer" : ""}`}
+      className={`relative w-full ${className ?? ""} ${onClick ? "cursor-pointer" : ""}`}
       onClick={onClick}
     >
       <video
         ref={previewRef}
-        className={`size-full rounded-2xl ${tallVideo ? "aspect-tall" : ""} bg-black`}
+        className={`size-full rounded-2xl bg-black`}
         preload="auto"
         autoPlay
         playsInline
