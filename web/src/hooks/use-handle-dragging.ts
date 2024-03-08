@@ -83,7 +83,7 @@ function useDraggableHandler({
       getClientYPosition(e);
       setIsDragging(true);
 
-      if (scrollTimeRef.current && clientYPosition) {
+      if (scrollTimeRef.current && clientYPosition && isDesktop) {
         const handlebarRect = scrollTimeRef.current.getBoundingClientRect();
         setInitialClickAdjustment(clientYPosition - handlebarRect.top);
       }
