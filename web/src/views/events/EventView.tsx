@@ -44,6 +44,7 @@ type EventViewProps = {
   timeRange: { before: number; after: number };
   filter?: ReviewFilter;
   severity: ReviewSeverity;
+  startTime?: number;
   setSeverity: (severity: ReviewSeverity) => void;
   markItemAsReviewed: (review: ReviewSegment) => void;
   onOpenReview: (reviewId: string) => void;
@@ -57,6 +58,7 @@ export default function EventView({
   timeRange,
   filter,
   severity,
+  startTime,
   setSeverity,
   markItemAsReviewed,
   onOpenReview,
@@ -262,6 +264,7 @@ export default function EventView({
             reviewItems={reviewItems}
             relevantPreviews={relevantPreviews}
             timeRange={timeRange}
+            startTime={startTime}
             filter={filter}
             onSelectReview={onSelectReview}
           />
@@ -518,6 +521,7 @@ type MotionReviewProps = {
   };
   relevantPreviews?: Preview[];
   timeRange: { before: number; after: number };
+  startTime?: number;
   filter?: ReviewFilter;
   onSelectReview: (data: string, ctrl: boolean) => void;
 };
@@ -526,6 +530,7 @@ function MotionReview({
   reviewItems,
   relevantPreviews,
   timeRange,
+  startTime,
   filter,
   onSelectReview,
 }: MotionReviewProps) {
@@ -579,11 +584,21 @@ function MotionReview({
     [lastFullHour, timeRange],
   );
 
-  const [selectedRangeIdx, setSelectedRangeIdx] = useState(
-    timeRangeSegments.ranges.length - 1,
-  );
+  const initialIndex = useMemo(() => {
+    if (!startTime) {
+      return timeRangeSegments.ranges.length - 1;
+    }
+
+    return timeRangeSegments.ranges.findIndex(
+      (seg) => seg.start <= startTime && seg.end >= startTime,
+    );
+    // only render once
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const [selectedRangeIdx, setSelectedRangeIdx] = useState(initialIndex);
   const [currentTime, setCurrentTime] = useState<number>(
-    timeRangeSegments.ranges[selectedRangeIdx].start,
+    startTime ?? timeRangeSegments.ranges[selectedRangeIdx].start,
   );
   const currentTimeRange = useMemo(
     () => timeRangeSegments.ranges[selectedRangeIdx],
@@ -642,6 +657,7 @@ function MotionReview({
                 className={`${grow}`}
                 camera={camera.name}
                 timeRange={currentTimeRange}
+                startTime={startTime}
                 cameraPreviews={relevantPreviews || []}
                 onControllerReady={(controller) => {
                   videoPlayersRef.current[camera.name] = controller;

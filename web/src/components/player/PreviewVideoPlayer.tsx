@@ -16,6 +16,7 @@ type PreviewVideoPlayerProps = {
   camera: string;
   timeRange: { start: number; end: number };
   cameraPreviews: Preview[];
+  startTime?: number;
   onControllerReady: (controller: PreviewVideoController) => void;
   onClick?: () => void;
 };
@@ -24,6 +25,7 @@ export default function PreviewVideoPlayer({
   camera,
   timeRange,
   cameraPreviews,
+  startTime,
   onControllerReady,
   onClick,
 }: PreviewVideoPlayerProps) {
@@ -127,6 +129,10 @@ export default function PreviewVideoPlayer({
             controller.previewReady();
           } else {
             previewRef.current?.pause();
+          }
+
+          if (previewRef.current && startTime && currentPreview) {
+            previewRef.current.currentTime = startTime - currentPreview.start;
           }
         }}
       >

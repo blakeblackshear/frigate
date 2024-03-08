@@ -31,6 +31,7 @@ export default function Events() {
     "alert",
   );
   const [selectedReviewId, setSelectedReviewId] = useOverlayState("review");
+  const [startTime, setStartTime] = useState<number>();
 
   // review filter
 
@@ -221,11 +222,13 @@ export default function Events() {
 
     if (selectedReviewId.startsWith("motion")) {
       const motionData = selectedReviewId.split(",");
+      const motionStart = parseFloat(motionData[2]);
+      setStartTime(motionStart);
       // format is motion,camera,start_time
       return {
         camera: motionData[1],
         severity: "significant_motion" as ReviewSeverity,
-        start_time: parseFloat(motionData[2]),
+        start_time: motionStart,
         allCameras: allCameras,
         cameraSegments: reviews.filter((seg) =>
           allCameras.includes(seg.camera),
@@ -292,6 +295,7 @@ export default function Events() {
         timeRange={selectedTimeRange}
         filter={reviewFilter}
         severity={severity ?? "alert"}
+        startTime={startTime}
         setSeverity={setSeverity}
         markItemAsReviewed={markItemAsReviewed}
         onOpenReview={setSelectedReviewId}
