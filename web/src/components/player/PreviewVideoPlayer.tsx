@@ -104,11 +104,6 @@ export default function PreviewVideoPlayer({
         Math.floor(preview.end) <= timeRange.end,
     );
     setCurrentPreview(preview);
-
-    if (preview && previewRef.current) {
-      previewRef.current.load();
-    }
-
     controller.newPlayback({
       preview,
       timeRange,
@@ -117,6 +112,14 @@ export default function PreviewVideoPlayer({
     // we only want this to change when recordings update
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controller, timeRange]);
+
+  useEffect(() => {
+    if (!currentPreview || !previewRef.current) {
+      return;
+    }
+
+    previewRef.current.load();
+  }, [currentPreview, previewRef]);
 
   return (
     <div
