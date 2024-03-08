@@ -130,6 +130,7 @@ function useDraggableHandler({
               scrollIntoView(thumb, {
                 block: "center",
                 behavior: "smooth",
+                scrollMode: "if-needed",
               });
             }
           }
