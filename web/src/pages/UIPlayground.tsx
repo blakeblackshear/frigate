@@ -285,7 +285,7 @@ function UIPlayground() {
               <MotionReviewTimeline
                 segmentDuration={zoomSettings.segmentDuration} // seconds per segment
                 timestampSpread={zoomSettings.timestampSpread} // minutes between each major timestamp
-                timelineStart={Math.round(((Date.now() / 1000) * 60) / 60) * 60} // timestamp start of the timeline - the earlier time
+                timelineStart={Math.floor(Date.now() / 1000)} // timestamp start of the timeline - the earlier time
                 timelineEnd={Math.floor(Date.now() / 1000) - 6 * 60 * 60} // end of timeline - the later time
                 showHandlebar // show / hide the handlebar
                 handlebarTime={handlebarTime} // set the time of the handlebar
