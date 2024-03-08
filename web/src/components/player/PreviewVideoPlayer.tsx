@@ -164,13 +164,13 @@ export class PreviewVideoController {
     this.timeRange = newPlayback.timeRange;
   }
 
-  scrubToTimestamp(time: number) {
+  scrubToTimestamp(time: number): boolean {
     if (!this.preview || !this.timeRange) {
-      return;
+      return false;
     }
 
     if (time < this.preview.start || time > this.preview.end) {
-      return;
+      return false;
     }
 
     if (this.seeking) {
@@ -184,6 +184,8 @@ export class PreviewVideoController {
         this.seeking = true;
       }
     }
+
+    return true;
   }
 
   setNewPreviewStartTime(time: number) {
