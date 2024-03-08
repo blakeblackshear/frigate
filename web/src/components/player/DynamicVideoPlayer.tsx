@@ -289,6 +289,7 @@ export class DynamicVideoController {
   private recordings: Recording[] = [];
   private annotationOffset: number;
   private timeToStart: number | undefined = undefined;
+  private canPlay: boolean = false;
 
   // listeners
   private playerProgressListener: (() => void) | null = null;
@@ -315,11 +316,11 @@ export class DynamicVideoController {
 
   newPlayback(newPlayback: DynamicPlayback) {
     this.recordings = newPlayback.recordings;
-
     this.playerController.src({
       src: newPlayback.playbackUri,
       type: "application/vnd.apple.mpegurl",
     });
+    this.canPlay = false;
 
     if (this.timeToStart) {
       this.seekToTimestamp(this.timeToStart);
@@ -393,7 +394,10 @@ export class DynamicVideoController {
     }
 
     if (listener) {
-      this.canPlayListener = listener;
+      this.canPlayListener = () => {
+        this.canPlay = true;
+        listener();
+      };
       this.playerController.on("canplay", this.canPlayListener);
     }
   }
@@ -405,8 +409,11 @@ export class DynamicVideoController {
     }
 
     if (listener) {
-      this.playerProgressListener = () =>
-        listener(this.getProgress(this.playerController.currentTime() || 0));
+      this.playerProgressListener = () => {
+        if (this.canPlay) {
+          listener(this.getProgress(this.playerController.currentTime() || 0));
+        }
+      };
       this.playerController.on("timeupdate", this.playerProgressListener);
     }
   }
