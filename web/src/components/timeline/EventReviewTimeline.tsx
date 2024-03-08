@@ -59,6 +59,11 @@ export function EventReviewTimeline({
     segmentDuration,
   );
 
+  const timelineStartAligned = useMemo(
+    () => alignStartDateToTimeline(timelineStart),
+    [timelineStart, alignStartDateToTimeline],
+  );
+
   const { handleMouseDown, handleMouseUp, handleMouseMove } =
     useDraggableHandler({
       contentRef,
@@ -71,7 +76,7 @@ export function EventReviewTimeline({
       handlebarTime,
       setHandlebarTime,
       timelineDuration,
-      timelineStart,
+      timelineStartAligned,
       isDragging,
       setIsDragging,
       handlebarTimeRef,
@@ -80,10 +85,9 @@ export function EventReviewTimeline({
   // Generate segments for the timeline
   const generateSegments = useCallback(() => {
     const segmentCount = timelineDuration / segmentDuration;
-    const segmentAlignedTime = alignStartDateToTimeline(timelineStart);
 
     return Array.from({ length: segmentCount }, (_, index) => {
-      const segmentTime = segmentAlignedTime - index * segmentDuration;
+      const segmentTime = timelineStartAligned - index * segmentDuration;
 
       return (
         <EventSegment

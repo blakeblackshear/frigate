@@ -14,7 +14,7 @@ type DragHandlerProps = {
   setHandlebarTime?: React.Dispatch<React.SetStateAction<number>>;
   handlebarTimeRef: React.MutableRefObject<HTMLDivElement | null>;
   timelineDuration: number;
-  timelineStart: number;
+  timelineStartAligned: number;
   isDragging: boolean;
   setIsDragging: React.Dispatch<React.SetStateAction<boolean>>;
 };
@@ -30,7 +30,7 @@ function useDraggableHandler({
   setHandlebarTime,
   handlebarTimeRef,
   timelineDuration,
-  timelineStart,
+  timelineStartAligned,
   isDragging,
   setIsDragging,
 }: DragHandlerProps) {
@@ -83,7 +83,7 @@ function useDraggableHandler({
       getClientYPosition(e);
       setIsDragging(true);
 
-      if (scrollTimeRef.current && clientYPosition) {
+      if (scrollTimeRef.current && clientYPosition && isDesktop) {
         const handlebarRect = scrollTimeRef.current.getBoundingClientRect();
         setInitialClickAdjustment(clientYPosition - handlebarRect.top);
       }
@@ -207,7 +207,7 @@ function useDraggableHandler({
 
         const segmentIndex = Math.floor(newHandlePosition / segmentHeight);
         const segmentStartTime = alignStartDateToTimeline(
-          timelineStart - segmentIndex * segmentDuration,
+          timelineStartAligned - segmentIndex * segmentDuration,
         );
 
         if (draggingAtTopEdge || draggingAtBottomEdge) {
@@ -233,8 +233,9 @@ function useDraggableHandler({
 
         if (setHandlebarTime) {
           setHandlebarTime(
-            timelineStart -
-              (newHandlePosition / segmentHeight) * segmentDuration,
+            timelineStartAligned -
+              ((newHandlePosition - segmentHeight / 2 - 2) / segmentHeight) *
+                segmentDuration,
           );
         }
 
@@ -265,7 +266,7 @@ function useDraggableHandler({
     clientYPosition,
     isDragging,
     segmentDuration,
-    timelineStart,
+    timelineStartAligned,
     timelineDuration,
     timelineRef,
     draggingAtTopEdge,
@@ -290,20 +291,17 @@ function useDraggableHandler({
       const parentScrollTop = getCumulativeScrollTop(timelineRef.current);
 
       const newHandlePosition =
-        ((timelineStart - handlebarTime) / segmentDuration) * segmentHeight +
+        ((timelineStartAligned - handlebarTime) / segmentDuration) *
+          segmentHeight +
         parentScrollTop -
-        scrolled;
+        scrolled -
+        2; // height of handlebar horizontal line
 
-      updateHandlebarPosition(
-        newHandlePosition - segmentHeight,
-        handlebarTime,
-        true,
-        true,
-      );
+      updateHandlebarPosition(newHandlePosition, handlebarTime, true, true);
     }
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [handlebarTime, showHandlebar, scrollTimeRef, timelineStart]);
+  }, [handlebarTime, showHandlebar, scrollTimeRef, timelineStartAligned]);
 
   return { handleMouseDown, handleMouseUp, handleMouseMove };
 }
