@@ -173,7 +173,6 @@ export class PreviewVideoController {
   newPlayback(newPlayback: PreviewPlayback) {
     this.preview = newPlayback.preview;
     this.seeking = false;
-    this.timeToSeek = undefined;
 
     this.timeRange = newPlayback.timeRange;
   }
@@ -200,6 +199,10 @@ export class PreviewVideoController {
     }
   }
 
+  setNewPreviewStartTime(time: number) {
+    this.timeToSeek = time;
+  }
+
   finishedSeeking() {
     if (!this.previewRef.current || !this.preview) {
       return;
@@ -218,7 +221,10 @@ export class PreviewVideoController {
 
   previewReady() {
     this.seeking = false;
-    this.timeToSeek = undefined;
     this.previewRef.current?.pause();
+
+    if (this.timeToSeek) {
+      this.finishedSeeking();
+    }
   }
 }

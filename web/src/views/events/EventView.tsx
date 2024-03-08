@@ -602,6 +602,9 @@ function MotionReview({
       );
 
       if (index != -1) {
+        Object.values(videoPlayersRef.current).forEach((controller) => {
+          controller.setNewPreviewStartTime(currentTime);
+        });
         setSelectedRangeIdx(index);
       }
       return;
