@@ -353,8 +353,8 @@ def delete_reviews(ids: str):
     return make_response(jsonify({"success": True, "message": "Delete reviews"}), 200)
 
 
-@ReviewBp.route("/review/activity")
-def review_activity():
+@ReviewBp.route("/review/activity/motion")
+def motion_activity():
     """Get motion and audio activity."""
     cameras = request.args.get("cameras", "all")
     before = request.args.get("before", type=float, default=datetime.now().timestamp())
@@ -374,6 +374,68 @@ def review_activity():
             Recordings.duration,
             Recordings.objects,
             Recordings.motion,
+        )
+        .where(reduce(operator.and_, clauses))
+        .order_by(Recordings.start_time.asc())
+        .iterator()
+    )
+
+    # format is: { timestamp: segment_start_ts, motion: [0-100], audio: [0 - -100] }
+    # periods where active objects / audio was detected will cause motion to be scaled down
+    data: list[dict[str, float]] = []
+
+    for rec in all_recordings:
+        data.append(
+            {
+                "start_time": rec.start_time,
+                "motion": rec.motion if rec.objects == 0 else 0,
+            }
+        )
+
+    # get scale in seconds
+    scale = request.args.get("scale", type=int, default=30)
+
+    # resample data using pandas to get activity on scaled basis
+    df = pd.DataFrame(data, columns=["start_time", "motion"])
+
+    # set date as datetime index
+    df["start_time"] = pd.to_datetime(df["start_time"], unit="s")
+    df.set_index(["start_time"], inplace=True)
+
+    # normalize data
+    df = df.resample(f"{scale}S").sum().fillna(0.0)
+    df["motion"] = (
+        (df["motion"] - df["motion"].min())
+        / (df["motion"].max() - df["motion"].min())
+        * 100
+    )
+
+    # change types for output
+    df.index = df.index.astype(int) // (10**9)
+    normalized = df.reset_index().to_dict("records")
+    return jsonify(normalized)
+
+
+@ReviewBp.route("/review/activity/audio")
+def audio_activity():
+    """Get motion and audio activity."""
+    cameras = request.args.get("cameras", "all")
+    before = request.args.get("before", type=float, default=datetime.now().timestamp())
+    after = request.args.get(
+        "after", type=float, default=(datetime.now() - timedelta(hours=1)).timestamp()
+    )
+
+    clauses = [(Recordings.start_time > after) & (Recordings.end_time < before)]
+
+    if cameras != "all":
+        camera_list = cameras.split(",")
+        clauses.append((Recordings.camera << camera_list))
+
+    all_recordings: list[Recordings] = (
+        Recordings.select(
+            Recordings.start_time,
+            Recordings.duration,
+            Recordings.objects,
             Recordings.dBFS,
         )
         .where(reduce(operator.and_, clauses))
@@ -382,14 +444,13 @@ def review_activity():
     )
 
     # format is: { timestamp: segment_start_ts, motion: [0-100], audio: [0 - -100] }
-    # periods where active objects / audio was detected will cause motion / audio to be scaled down
+    # periods where active objects / audio was detected will cause audio to be scaled down
     data: list[dict[str, float]] = []
 
     for rec in all_recordings:
         data.append(
             {
                 "start_time": rec.start_time,
-                "motion": rec.motion if rec.objects == 0 else 0,
                 "audio": rec.dBFS if rec.objects == 0 else 0,
             }
         )
@@ -398,7 +459,7 @@ def review_activity():
     scale = request.args.get("scale", type=int, default=30)
 
     # resample data using pandas to get activity on scaled basis
-    df = pd.DataFrame(data, columns=["start_time", "motion", "audio"])
+    df = pd.DataFrame(data, columns=["start_time", "audio"])
 
     # set date as datetime index
     df["start_time"] = pd.to_datetime(df["start_time"], unit="s")
@@ -406,11 +467,6 @@ def review_activity():
 
     # normalize data
     df = df.resample(f"{scale}S").mean().fillna(0.0)
-    df["motion"] = (
-        (df["motion"] - df["motion"].min())
-        / (df["motion"].max() - df["motion"].min())
-        * 100
-    )
     df["audio"] = (
         (df["audio"] - df["audio"].max())
         / (df["audio"].min() - df["audio"].max())

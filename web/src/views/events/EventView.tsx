@@ -564,7 +564,7 @@ function MotionReview({
   // motion data
 
   const { data: motionData } = useSWR<MotionData[]>([
-    "review/activity",
+    "review/activity/motion",
     {
       before: timeRange.before,
       after: timeRange.after,

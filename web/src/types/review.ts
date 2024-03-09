@@ -44,6 +44,6 @@ export type ReviewSummary = {
 
 export type MotionData = {
   start_time: number;
-  motion: number;
-  audio: number;
+  motion?: number;
+  audio?: number;
 };
