@@ -104,7 +104,7 @@ class PendingReviewSegment:
         path = os.path.join(CLIPS_DIR, f"thumb-{self.camera}-{self.id}.jpg")
 
         if self.frame is not None:
-            cv2.imwrite(path, self.frame)
+            cv2.imwrite(path, self.frame, [int(cv2.IMWRITE_WEBP_QUALITY), 60])
 
         return {
             ReviewSegment.id: self.id,
