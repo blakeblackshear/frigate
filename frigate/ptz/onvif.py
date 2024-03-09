@@ -569,16 +569,22 @@ class OnvifController:
         service_capabilities_request = self.cams[camera_name][
             "service_capabilities_request"
         ]
-        service_capabilities = onvif.get_service("ptz").GetServiceCapabilities(
-            service_capabilities_request
-        )
+        try:
+            service_capabilities = onvif.get_service("ptz").GetServiceCapabilities(
+                service_capabilities_request
+            )
 
-        logger.debug(
-            f"Onvif service capabilities for {camera_name}: {service_capabilities}"
-        )
+            logger.debug(
+                f"Onvif service capabilities for {camera_name}: {service_capabilities}"
+            )
 
-        # MoveStatus is required for autotracking - should return "true" if supported
-        return find_by_key(vars(service_capabilities), "MoveStatus")
+            # MoveStatus is required for autotracking - should return "true" if supported
+            return find_by_key(vars(service_capabilities), "MoveStatus")
+        except Exception:
+            logger.warning(
+                f"Camera {camera_name} does not support the ONVIF GetServiceCapabilities method. Autotracking will not function correctly and must be disabled in your config."
+            )
+            return False
 
     def get_camera_status(self, camera_name: str) -> None:
         if camera_name not in self.cams.keys():
