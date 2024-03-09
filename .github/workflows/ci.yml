@@ -37,69 +37,6 @@ jobs:
           target: frigate
           tags: ${{ steps.setup.outputs.image-name }}-amd64
           cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
-      - name: Build and push TensorRT (x86 GPU)
-        env:
-          COMPUTE_LEVEL: "50 60 70 80 90"
-        uses: docker/bake-action@v4
-        with:
-          push: true
-          targets: tensorrt
-          files: docker/tensorrt/trt.hcl
-          set: |
-            tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt
-            *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
-            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64,mode=max
-      - name: AMD/ROCm general build
-        env:
-          AMDGPU: gfx
-          HSA_OVERRIDE: 0
-        uses: docker/bake-action@v3
-        with:
-          push: true
-          targets: rocm
-          files: docker/rocm/rocm.hcl
-          set: |
-            rocm.tags=${{ steps.setup.outputs.image-name }}-rocm
-            *.cache-from=type=gha
-      - name: AMD/ROCm gfx900
-        env:
-          AMDGPU: gfx900
-          HSA_OVERRIDE: 1
-          HSA_OVERRIDE_GFX_VERSION: 9.0.0
-        uses: docker/bake-action@v3
-        with:
-          push: true
-          targets: rocm
-          files: docker/rocm/rocm.hcl
-          set: |
-            rocm.tags=${{ steps.setup.outputs.image-name }}-rocm-gfx900
-            *.cache-from=type=gha
-      - name: AMD/ROCm gfx1030
-        env:
-          AMDGPU: gfx1030
-          HSA_OVERRIDE: 1
-          HSA_OVERRIDE_GFX_VERSION: 10.3.0
-        uses: docker/bake-action@v3
-        with:
-          push: true
-          targets: rocm
-          files: docker/rocm/rocm.hcl
-          set: |
-            rocm.tags=${{ steps.setup.outputs.image-name }}-rocm-gfx1030
-            *.cache-from=type=gha
-      - name: AMD/ROCm gfx1100
-        env:
-          AMDGPU: gfx1100
-          HSA_OVERRIDE: 1
-          HSA_OVERRIDE_GFX_VERSION: 11.0.0
-        uses: docker/bake-action@v3
-        with:
-          push: true
-          targets: rocm
-          files: docker/rocm/rocm.hcl
-          set: |
-            rocm.tags=${{ steps.setup.outputs.image-name }}-rocm-gfx1100
-            *.cache-from=type=gha
   arm64_build:
     runs-on: ubuntu-latest
     name: ARM Build
@@ -193,6 +130,82 @@ jobs:
             tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt-jp5
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp5
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp5,mode=max
+  amd64_extra_builds:
+    runs-on: ubuntu-latest
+    name: AMD64 Extra Build
+    needs:
+      - amd64_build
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Set up QEMU and Buildx
+        id: setup
+        uses: ./.github/actions/setup
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push TensorRT (x86 GPU)
+        env:
+          COMPUTE_LEVEL: "50 60 70 80 90"
+        uses: docker/bake-action@v4
+        with:
+          push: true
+          targets: tensorrt
+          files: docker/tensorrt/trt.hcl
+          set: |
+            tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt
+            *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
+            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64,mode=max
+      - name: AMD/ROCm general build
+        env:
+          AMDGPU: gfx
+          HSA_OVERRIDE: 0
+        uses: docker/bake-action@v3
+        with:
+          push: true
+          targets: rocm
+          files: docker/rocm/rocm.hcl
+          set: |
+            rocm.tags=${{ steps.setup.outputs.image-name }}-rocm
+            *.cache-from=type=gha
+      - name: AMD/ROCm gfx900
+        env:
+          AMDGPU: gfx900
+          HSA_OVERRIDE: 1
+          HSA_OVERRIDE_GFX_VERSION: 9.0.0
+        uses: docker/bake-action@v3
+        with:
+          push: true
+          targets: rocm
+          files: docker/rocm/rocm.hcl
+          set: |
+            rocm.tags=${{ steps.setup.outputs.image-name }}-rocm-gfx900
+            *.cache-from=type=gha
+      - name: AMD/ROCm gfx1030
+        env:
+          AMDGPU: gfx1030
+          HSA_OVERRIDE: 1
+          HSA_OVERRIDE_GFX_VERSION: 10.3.0
+        uses: docker/bake-action@v3
+        with:
+          push: true
+          targets: rocm
+          files: docker/rocm/rocm.hcl
+          set: |
+            rocm.tags=${{ steps.setup.outputs.image-name }}-rocm-gfx1030
+            *.cache-from=type=gha
+      - name: AMD/ROCm gfx1100
+        env:
+          AMDGPU: gfx1100
+          HSA_OVERRIDE: 1
+          HSA_OVERRIDE_GFX_VERSION: 11.0.0
+        uses: docker/bake-action@v3
+        with:
+          push: true
+          targets: rocm
+          files: docker/rocm/rocm.hcl
+          set: |
+            rocm.tags=${{ steps.setup.outputs.image-name }}-rocm-gfx1100
+            *.cache-from=type=gha
   # The majority of users running arm64 are rpi users, so the rpi
   # build should be the primary arm64 image
   assemble_default_build:
