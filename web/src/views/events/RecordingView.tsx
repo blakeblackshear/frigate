@@ -40,6 +40,8 @@ export function DesktopRecordingView({
     {},
   );
 
+  const [playbackStart, setPlaybackStart] = useState(startTime);
+
   // timeline time
 
   const timeRange = useMemo(() => getChunkedTimeDay(startTime), [startTime]);
@@ -119,13 +121,7 @@ export function DesktopRecordingView({
       const newController = videoPlayersRef.current[newCam];
       lastController.onPlayerTimeUpdate(null);
       lastController.onClipChangedEvent(null);
-      lastController.autoPlay(false);
       lastController.scrubToTimestamp(currentTime);
-      newController.autoPlay(true);
-      newController.onCanPlay(() => {
-        newController.seekToTimestamp(currentTime, true);
-        newController.onCanPlay(null);
-      });
       newController.onPlayerTimeUpdate((timestamp: number) => {
         setCurrentTime(timestamp);
 
@@ -137,6 +133,8 @@ export function DesktopRecordingView({
           }
         });
       });
+      newController.seekToTimestamp(currentTime, true);
+      setPlaybackStart(currentTime);
       setMainCamera(newCam);
     },
     [allCameras, currentTime, mainCamera],
@@ -179,6 +177,7 @@ export function DesktopRecordingView({
                   camera={cam}
                   timeRange={currentTimeRange}
                   cameraPreviews={allPreviews ?? []}
+                  startTime={playbackStart}
                   onControllerReady={(controller) => {
                     videoPlayersRef.current[cam] = controller;
                     controller.onPlayerTimeUpdate((timestamp: number) => {
@@ -191,11 +190,6 @@ export function DesktopRecordingView({
                           );
                         }
                       });
-                    });
-
-                    controller.onCanPlay(() => {
-                      controller.seekToTimestamp(startTime, true);
-                      controller.onCanPlay(null);
                     });
                   }}
                 />
