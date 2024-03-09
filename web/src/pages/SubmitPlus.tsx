@@ -107,7 +107,7 @@ export default function SubmitPlus() {
                 alt={`${upload?.label}`}
               />
               <DialogFooter>
-                <Button>Cancel</Button>
+                <Button onClick={() => setUpload(undefined)}>Cancel</Button>
                 <Button
                   className="bg-success"
                   onClick={() => onSubmitToPlus(false)}
