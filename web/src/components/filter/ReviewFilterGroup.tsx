@@ -212,7 +212,7 @@ function CamerasFilterButton({
         ))}
       </div>
       <DropdownMenuSeparator />
-      <div className="flex justify-center items-center">
+      <div className="flex justify-evenly items-center">
         <Button
           variant="select"
           onClick={() => {
@@ -221,6 +221,15 @@ function CamerasFilterButton({
           }}
         >
           Apply
+        </Button>
+        <Button
+          variant="secondary"
+          onClick={() => {
+            setCurrentCameras(undefined);
+            updateCameraFilter(undefined);
+          }}
+        >
+          Reset
         </Button>
       </div>
     </>
@@ -271,8 +280,6 @@ function CalendarFilterButton({
   day,
   updateSelectedDay,
 }: CalendarFilterButtonProps) {
-  const [open, setOpen] = useState(false);
-  const [selectedDay, setSelectedDay] = useState(day);
   const disabledDates = useMemo(() => {
     const tomorrow = new Date();
     tomorrow.setHours(tomorrow.getHours() + 24, -1, 0, 0);
@@ -298,22 +305,21 @@ function CalendarFilterButton({
       <Calendar
         mode="single"
         disabled={disabledDates}
-        selected={selectedDay}
+        selected={day}
         showOutsideDays={false}
         onSelect={(day) => {
-          setSelectedDay(day);
+          updateSelectedDay(day);
         }}
       />
       <DropdownMenuSeparator />
       <div className="flex justify-center items-center">
         <Button
-          variant="select"
+          variant="secondary"
           onClick={() => {
-            updateSelectedDay(selectedDay);
-            setOpen(false);
+            updateSelectedDay(undefined);
           }}
         >
-          Apply
+          Reset
         </Button>
       </div>
     </>
@@ -321,16 +327,7 @@ function CalendarFilterButton({
 
   if (isMobile) {
     return (
-      <Drawer
-        open={open}
-        onOpenChange={(open) => {
-          if (!open) {
-            setSelectedDay(day);
-          }
-
-          setOpen(open);
-        }}
-      >
+      <Drawer>
         <DrawerTrigger asChild>{trigger}</DrawerTrigger>
         <DrawerContent>{content}</DrawerContent>
       </Drawer>
@@ -338,16 +335,7 @@ function CalendarFilterButton({
   }
 
   return (
-    <Popover
-      open={open}
-      onOpenChange={(open) => {
-        if (!open) {
-          setSelectedDay(day);
-        }
-
-        setOpen(open);
-      }}
-    >
+    <Popover>
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
       <PopoverContent>{content}</PopoverContent>
     </Popover>
@@ -433,7 +421,7 @@ function GeneralFilterButton({
         ))}
       </div>
       <DropdownMenuSeparator />
-      <div className="flex justify-center items-center">
+      <div className="flex justify-evenly items-center">
         <Button
           variant="select"
           onClick={() => {
@@ -449,6 +437,17 @@ function GeneralFilterButton({
           }}
         >
           Apply
+        </Button>
+        <Button
+          variant="secondary"
+          onClick={() => {
+            setReviewed(0);
+            setShowReviewed(undefined);
+            setCurrentLabels(undefined);
+            updateLabelFilter(undefined);
+          }}
+        >
+          Reset
         </Button>
       </div>
     </>
