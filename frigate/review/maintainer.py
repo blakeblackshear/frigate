@@ -28,6 +28,10 @@ logger = logging.getLogger(__name__)
 THUMB_HEIGHT = 180
 THUMB_WIDTH = 320
 
+THRESHOLD_ALERT_ACTIVITY = 120
+THRESHOLD_DETECTION_ACTIVITY = 30
+THRESHOLD_MOTION_ACTIVITY = 30
+
 
 class SeverityEnum(str, Enum):
     alert = "alert"
@@ -100,7 +104,7 @@ class PendingReviewSegment:
         path = os.path.join(CLIPS_DIR, f"thumb-{self.camera}-{self.id}.jpg")
 
         if self.frame is not None:
-            cv2.imwrite(path, self.frame)
+            cv2.imwrite(path, self.frame, [int(cv2.IMWRITE_WEBP_QUALITY), 60])
 
         return {
             ReviewSegment.id: self.id,
@@ -195,15 +199,16 @@ class ReviewSegmentMaintainer(threading.Thread):
                 if len(object["current_zones"]) > 0:
                     segment.zones.update(object["current_zones"])
         elif (
-            segment.severity == SeverityEnum.signification_motion and len(motion) >= 20
+            segment.severity == SeverityEnum.signification_motion
+            and len(motion) >= THRESHOLD_MOTION_ACTIVITY
         ):
             segment.last_update = frame_time
         else:
             if segment.severity == SeverityEnum.alert and frame_time > (
-                segment.last_update + 60
+                segment.last_update + THRESHOLD_ALERT_ACTIVITY
             ):
                 self.end_segment(segment)
-            elif frame_time > (segment.last_update + 10):
+            elif frame_time > (segment.last_update + THRESHOLD_DETECTION_ACTIVITY):
                 self.end_segment(segment)
 
     def check_if_new_segment(

@@ -222,7 +222,7 @@ function NewGroupDialog({ open, setOpen, currentGroups }: NewGroupDialogProps) {
       <DialogContent className="min-w-0 w-96">
         <DialogTitle>Camera Groups</DialogTitle>
         {currentGroups.map((group) => (
-          <div className="flex justify-between items-center">
+          <div key={group[0]} className="flex justify-between items-center">
             {group[0]}
             <div className="flex justify-center gap-1">
               <Button

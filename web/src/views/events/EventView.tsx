@@ -260,6 +260,7 @@ export default function EventView({
         )}
         {severity == "significant_motion" && (
           <MotionReview
+            key={timeRange.before}
             contentRef={contentRef}
             reviewItems={reviewItems}
             relevantPreviews={relevantPreviews}
@@ -563,7 +564,7 @@ function MotionReview({
   // motion data
 
   const { data: motionData } = useSWR<MotionData[]>([
-    "review/activity",
+    "review/activity/motion",
     {
       before: timeRange.before,
       after: timeRange.after,
@@ -598,7 +599,7 @@ function MotionReview({
 
   const [selectedRangeIdx, setSelectedRangeIdx] = useState(initialIndex);
   const [currentTime, setCurrentTime] = useState<number>(
-    startTime ?? timeRangeSegments.ranges[selectedRangeIdx].start,
+    startTime ?? timeRangeSegments.ranges[selectedRangeIdx]?.start,
   );
   const currentTimeRange = useMemo(
     () => timeRangeSegments.ranges[selectedRangeIdx],
