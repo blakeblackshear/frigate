@@ -85,7 +85,7 @@ export default function EventView({
     }
 
     if (!summary) {
-      return { alert: 0, detection: 0, significant_motion: 0 };
+      return { alert: -1, detection: -1, significant_motion: -1 };
     }
 
     if (filter?.showReviewed == 1) {
@@ -206,7 +206,9 @@ export default function EventView({
             aria-label="Select alerts"
           >
             <MdCircle className="size-2 md:mr-[10px] text-severity_alert" />
-            <div className="hidden md:block">Alerts ∙ {reviewCounts.alert}</div>
+            <div className="hidden md:block">
+              Alerts{` ∙ ${reviewCounts.alert > -1 ? reviewCounts.alert : ""}`}
+            </div>
           </ToggleGroupItem>
           <ToggleGroupItem
             className={`${severity == "detection" ? "" : "text-gray-500"}`}
@@ -215,7 +217,8 @@ export default function EventView({
           >
             <MdCircle className="size-2 md:mr-[10px] text-severity_detection" />
             <div className="hidden md:block">
-              Detections ∙ {reviewCounts.detection}
+              Detections
+              {` ∙ ${reviewCounts.detection > -1 ? reviewCounts.detection : ""}`}
             </div>
           </ToggleGroupItem>
           <ToggleGroupItem
