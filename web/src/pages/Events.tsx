@@ -270,6 +270,7 @@ export default function Events() {
           reviewItems={selectedReviewData.cameraSegments}
           startCamera={selectedReviewData.camera}
           startTime={selectedReviewData.start_time}
+          allCameras={selectedReviewData.allCameras}
           severity={selectedReviewData.severity}
           relevantPreviews={allPreviews}
         />
