@@ -373,7 +373,9 @@ export function MobileRecordingView({
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button>{playbackCamera}</Button>
+            <Button className="capitalize">
+              {playbackCamera.replaceAll("_", " ")}
+            </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuRadioGroup
@@ -384,7 +386,11 @@ export function MobileRecordingView({
               }}
             >
               {allCameras.map((cam) => (
-                <DropdownMenuRadioItem key={cam} value={cam}>
+                <DropdownMenuRadioItem
+                  key={cam}
+                  className="capitalize"
+                  value={cam}
+                >
                   {cam.replaceAll("_", " ")}
                 </DropdownMenuRadioItem>
               ))}
@@ -395,7 +401,7 @@ export function MobileRecordingView({
 
       <div>
         <DynamicVideoPlayer
-          camera={startCamera}
+          camera={playbackCamera}
           timeRange={currentTimeRange}
           cameraPreviews={relevantPreviews || []}
           startTime={playbackStart}

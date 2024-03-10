@@ -99,26 +99,6 @@ export default function DynamicVideoPlayer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controller]);
 
-  const [initPreviewOnly, setInitPreviewOnly] = useState(previewOnly);
-
-  useEffect(() => {
-    if (!controller || !playerRef) {
-      return;
-    }
-
-    if (previewOnly == initPreviewOnly) {
-      return;
-    }
-
-    if (!previewOnly) {
-      controller.seekToTimestamp(playerRef.currentTime() || 0, true);
-    }
-
-    setInitPreviewOnly(previewOnly);
-    // we only want to fire once when players are ready
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [controller, previewOnly]);
-
   // keyboard control
 
   const onKeyboardShortcut = useCallback(
@@ -191,13 +171,20 @@ export default function DynamicVideoPlayer({
   // start at correct time
 
   useEffect(() => {
-    if (previewOnly || !startTime) {
-      return;
-    }
-
     const player = playerRef;
 
     if (!player) {
+      return;
+    }
+
+    if (previewOnly) {
+      player.autoplay(false);
+      return;
+    }
+
+    player.autoplay(true);
+
+    if (!startTime) {
       return;
     }
 
