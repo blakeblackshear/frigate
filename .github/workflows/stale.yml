@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Delete old images
-        uses: snok/container-retentation-policy@v2
+        uses: snok/container-retention-policy@v2
         with:
           image-names: dev-*
           cut-off: 60 days ago UTC
