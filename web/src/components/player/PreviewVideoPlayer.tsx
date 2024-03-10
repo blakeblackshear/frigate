@@ -140,6 +140,11 @@ export default function PreviewVideoPlayer({
           <source src={currentPreview.src} type={currentPreview.type} />
         )}
       </video>
+      {cameraPreviews && !currentPreview && (
+        <div className="absolute inset-x-0 top-1/2 -y-translate-1/2 bg-black text-white rounded-2xl align-center text-center">
+          No Preview Found
+        </div>
+      )}
     </div>
   );
 }
