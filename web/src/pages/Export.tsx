@@ -11,13 +11,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
   DropdownMenuRadioGroup,
@@ -28,12 +22,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu";
-import Heading from "@/components/ui/heading";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Toaster } from "@/components/ui/sonner";
 import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
