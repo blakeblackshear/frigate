@@ -3,14 +3,16 @@ import { CSSTransition } from "react-transition-group";
 
 type ChipProps = {
   className?: string;
-  children?: ReactNode[];
+  children?: ReactNode | ReactNode[];
   in?: boolean;
+  onClick?: () => void;
 };
 
 export default function Chip({
   className,
   children,
   in: inProp = true,
+  onClick,
 }: ChipProps) {
   const nodeRef = useRef(null);
 
@@ -30,6 +32,7 @@ export default function Chip({
       <div
         ref={nodeRef}
         className={`flex px-2 py-1.5 rounded-2xl items-center z-10 ${className}`}
+        onClick={onClick}
       >
         {children}
       </div>

@@ -217,7 +217,7 @@ export default function PreviewThumbnailPlayer({
               </div>
             </div>
             <div className="absolute bottom-0 inset-x-0 rounded-b-l z-10 w-full h-[20%] bg-gradient-to-t from-black/60 to-transparent pointer-events-none">
-              <div className="flex h-full justify-between items-end mx-3 pb-1 text-white text-sm ">
+              <div className="flex h-full justify-between items-end mx-3 pb-1 text-white text-sm">
                 <TimeAgo time={review.start_time * 1000} dense />
                 {formattedDate}
               </div>
