@@ -441,10 +441,10 @@ function DetectionReview({
           />
         )}
 
-        {itemsToReview == 0 && (
-          <div className="size-full flex flex-col justify-center items-center">
+        {(currentItems == null || currentItems.length == 0) && (
+          <div className="size-full flex flex-col justify-center items-center text-center">
             <LuFolderCheck className="size-16" />
-            There are no {severity.replace(/_/g, " ")} items to review
+            There are no {severity.replace(/_/g, " ")}s to review
           </div>
         )}
 
