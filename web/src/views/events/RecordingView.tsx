@@ -366,7 +366,7 @@ export function MobileRecordingView({
 
   return (
     <div ref={contentRef} className="flex flex-col relative w-full h-full">
-      <div className="flex justify-evenly items-center">
+      <div className="flex justify-evenly items-center p-2">
         <Button className="rounded-lg" onClick={() => navigate(-1)}>
           <IoMdArrowRoundBack className="size-5 mr-[10px]" />
           Back
