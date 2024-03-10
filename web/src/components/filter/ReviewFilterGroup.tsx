@@ -212,7 +212,7 @@ function CamerasFilterButton({
         ))}
       </div>
       <DropdownMenuSeparator />
-      <div className="flex justify-evenly items-center">
+      <div className="p-2 flex justify-evenly items-center">
         <Button
           variant="select"
           onClick={() => {
@@ -312,7 +312,7 @@ function CalendarFilterButton({
         }}
       />
       <DropdownMenuSeparator />
-      <div className="flex justify-center items-center">
+      <div className="p-2 flex justify-center items-center">
         <Button
           variant="secondary"
           onClick={() => {
@@ -421,7 +421,7 @@ function GeneralFilterButton({
         ))}
       </div>
       <DropdownMenuSeparator />
-      <div className="flex justify-evenly items-center">
+      <div className="p-2 flex justify-evenly items-center">
         <Button
           variant="select"
           onClick={() => {
