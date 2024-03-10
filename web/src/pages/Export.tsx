@@ -1,6 +1,5 @@
 import { baseUrl } from "@/api/baseUrl";
 import ExportCard from "@/components/card/ExportCard";
-import VideoPlayer from "@/components/player/VideoPlayer";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -12,13 +11,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Card } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
   DropdownMenuRadioGroup,
   DropdownMenuTrigger,
@@ -28,18 +22,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu";
-import Heading from "@/components/ui/heading";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Toaster } from "@/components/ui/sonner";
 import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
 import { format } from "date-fns";
 import { useCallback, useState } from "react";
 import { DateRange } from "react-day-picker";
+import { isDesktop } from "react-device-detect";
 import { toast } from "sonner";
 import useSWR from "swr";
 
@@ -67,7 +56,6 @@ function Export() {
   const [startTime, setStartTime] = useState("00:00:00");
   const [endTime, setEndTime] = useState("23:59:59");
 
-  const [selectedClip, setSelectedClip] = useState<string | undefined>();
   const [deleteClip, setDeleteClip] = useState<string | undefined>();
 
   const onHandleExport = () => {
@@ -150,8 +138,12 @@ function Export() {
     });
   }, [deleteClip, mutate]);
 
+  const Create = isDesktop ? Dialog : Drawer;
+  const Trigger = isDesktop ? DialogTrigger : DrawerTrigger;
+  const Content = isDesktop ? DialogContent : DrawerContent;
+
   return (
-    <div className="w-full h-full overflow-hidden">
+    <div className="size-full p-2 overflow-hidden flex flex-col">
       <Toaster />
 
       <AlertDialog
@@ -174,67 +166,48 @@ function Export() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <Dialog
-        open={selectedClip != undefined}
-        onOpenChange={() => setSelectedClip(undefined)}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Playback</DialogTitle>
-          </DialogHeader>
-          <VideoPlayer
-            options={{
-              preload: "auto",
-              autoplay: true,
-              sources: [
-                {
-                  src: `${baseUrl}exports/${selectedClip}`,
-                  type: "video/mp4",
-                },
-              ],
-            }}
-            seekOptions={{ forward: 10, backward: 5 }}
-          />
-        </DialogContent>
-      </Dialog>
-
-      <div className="w-full h-full xl:flex justify-between overflow-hidden">
-        <div>
-          <div className="my-2 flex">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button className="capitalize" variant="outline">
-                  {camera?.replaceAll("_", " ") || "Select A Camera"}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuLabel>Select A Camera</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuRadioGroup
-                  value={camera}
-                  onValueChange={setCamera}
-                >
-                  {Object.keys(config?.cameras || {}).map((item) => (
-                    <DropdownMenuRadioItem
-                      className="capitalize"
-                      key={item}
-                      value={item}
-                    >
-                      {item.replaceAll("_", " ")}
-                    </DropdownMenuRadioItem>
-                  ))}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <div className="mx-2">
+      <div className="w-full h-14">
+        <Create>
+          <Trigger>
+            <Button variant="select">New Export</Button>
+          </Trigger>
+          <Content className="flex flex-col justify-center items-center">
+            <div className="w-full flex justify-evenly items-center">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button className="capitalize" variant="outline">
+                  <Button className="capitalize" variant="secondary">
+                    {camera?.replaceAll("_", " ") || "Select A Camera"}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuLabel className="flex justify-center items-center">
+                    Select A Camera
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuRadioGroup
+                    value={camera}
+                    onValueChange={setCamera}
+                  >
+                    {Object.keys(config?.cameras || {}).map((item) => (
+                      <DropdownMenuRadioItem
+                        className="capitalize"
+                        key={item}
+                        value={item}
+                      >
+                        {item.replaceAll("_", " ")}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className="capitalize" variant="secondary">
                     {playback?.split("_")[0] || "Select A Playback Factor"}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuLabel>
+                  <DropdownMenuLabel className="flex justify-center items-center">
                     Select A Playback Factor
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
@@ -252,56 +225,54 @@ function Export() {
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-          </div>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline">{`${
+            <Calendar mode="range" selected={date} onSelect={setDate} />
+            <div className="w-full flex justify-evenly">
+              <input
+                className="w-36 p-1 border border-input bg-background text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                id="startTime"
+                type="time"
+                value={startTime}
+                step="1"
+                onChange={(e) => setStartTime(e.target.value)}
+              />
+              <input
+                className="w-36 p-1 mx-2 border border-input bg-background text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                id="endTime"
+                type="time"
+                value={endTime}
+                step="1"
+                onChange={(e) => setEndTime(e.target.value)}
+              />
+            </div>
+            <div className="w-full flex items-center justify-between px-4">
+              {`${
                 date?.from ? format(date?.from, "LLL dd, y") : ""
               } ${startTime} -> ${
                 date?.to ? format(date?.to, "LLL dd, y") : ""
-              } ${endTime}`}</Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-84">
-              <Calendar mode="range" selected={date} onSelect={setDate} />
-              <div className="flex justify-between">
-                <input
-                  className="p-1 border border-input bg-background text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
-                  id="startTime"
-                  type="time"
-                  value={startTime}
-                  step="1"
-                  onChange={(e) => setStartTime(e.target.value)}
-                />
-                <input
-                  className="p-1 mx-2 border border-input bg-background text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
-                  id="endTime"
-                  type="time"
-                  value={endTime}
-                  step="1"
-                  onChange={(e) => setEndTime(e.target.value)}
-                />
-              </div>
-            </PopoverContent>
-          </Popover>
-          <div>
-            <Button className="my-4" onClick={() => onHandleExport()}>
-              Submit
-            </Button>
-          </div>
-        </div>
+              } ${endTime}`}
+              <Button
+                className="my-4"
+                variant="select"
+                onClick={() => onHandleExport()}
+              >
+                Submit
+              </Button>
+            </div>
+          </Content>
+        </Create>
+      </div>
 
+      <div className="size-full overflow-hidden">
         {exports && (
-          <Card className="h-full p-4 xl:w-1/2 overflow-y-auto">
-            <Heading as="h3">Exports</Heading>
+          <div className="size-full grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 overflow-y-auto">
             {Object.values(exports).map((item) => (
               <ExportCard
                 key={item.name}
                 file={item}
-                onSelect={(file) => setSelectedClip(file)}
                 onDelete={(file) => setDeleteClip(file)}
               />
             ))}
-          </Card>
+          </div>
         )}
       </div>
     </div>
