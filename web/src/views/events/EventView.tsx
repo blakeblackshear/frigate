@@ -445,7 +445,7 @@ function DetectionReview({
         )}
 
         {(currentItems == null || currentItems.length == 0) && (
-          <div className="size-full flex flex-col justify-center items-center text-center">
+          <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 flex flex-col justify-center items-center text-center">
             <LuFolderCheck className="size-16" />
             There are no {severity.replace(/_/g, " ")}s to review
           </div>
@@ -482,17 +482,19 @@ function DetectionReview({
                 </div>
               );
             })}
-          {(itemsToReview ?? 0) > 0 && (
-            <div className="col-span-full flex justify-center items-center">
-              <Button
-                className="text-white"
-                variant="select"
-                onClick={markAllReviewed}
-              >
-                Mark these items as reviewed
-              </Button>
-            </div>
-          )}
+          {currentItems != null &&
+            currentItems.length > 0 &&
+            (itemsToReview ?? 0) > 0 && (
+              <div className="col-span-full flex justify-center items-center">
+                <Button
+                  className="text-white"
+                  variant="select"
+                  onClick={markAllReviewed}
+                >
+                  Mark these items as reviewed
+                </Button>
+              </div>
+            )}
         </div>
       </div>
       <div className="w-[55px] md:w-[100px] mt-2 overflow-y-auto no-scrollbar">
