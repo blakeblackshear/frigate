@@ -46,7 +46,7 @@ export function EventReviewTimeline({
   onHandlebarDraggingChange,
 }: EventReviewTimelineProps) {
   const [isDragging, setIsDragging] = useState(false);
-  const scrollTimeRef = useRef<HTMLDivElement>(null);
+  const handlebarRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
   const handlebarTimeRef = useRef<HTMLDivElement>(null);
   const timelineDuration = useMemo(
@@ -68,7 +68,7 @@ export function EventReviewTimeline({
     useDraggableHandler({
       contentRef,
       timelineRef,
-      scrollTimeRef,
+      handlebarRef,
       alignStartDateToTimeline,
       alignEndDateToTimeline,
       segmentDuration,
@@ -143,7 +143,7 @@ export function EventReviewTimeline({
   return (
     <ReviewTimeline
       timelineRef={timelineRef}
-      scrollTimeRef={scrollTimeRef}
+      handlebarRef={handlebarRef}
       handlebarTimeRef={handlebarTimeRef}
       handleMouseMove={handleMouseMove}
       handleMouseUp={handleMouseUp}

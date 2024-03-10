@@ -2,7 +2,7 @@ import { ReactNode, RefObject } from "react";
 
 export type ReviewTimelineProps = {
   timelineRef: RefObject<HTMLDivElement>;
-  scrollTimeRef: RefObject<HTMLDivElement>;
+  handlebarRef: RefObject<HTMLDivElement>;
   handlebarTimeRef: RefObject<HTMLDivElement>;
   handleMouseMove: (
     e:
@@ -27,7 +27,7 @@ export type ReviewTimelineProps = {
 
 export function ReviewTimeline({
   timelineRef,
-  scrollTimeRef,
+  handlebarRef,
   handlebarTimeRef,
   handleMouseMove,
   handleMouseUp,
@@ -50,14 +50,17 @@ export function ReviewTimeline({
     >
       <div className="flex flex-col">{children}</div>
       {showHandlebar && (
-        <div className="absolute left-0 top-0 z-20 w-full" role="scrollbar">
+        <div
+          className="absolute left-0 top-0 z-20 w-full"
+          role="scrollbar"
+          ref={handlebarRef}
+        >
           <div
             className="flex items-center justify-center touch-none select-none"
             onMouseDown={handleMouseDown}
             onTouchStart={handleMouseDown}
           >
             <div
-              ref={scrollTimeRef}
               className={`relative w-full ${
                 isDragging ? "cursor-grabbing" : "cursor-grab"
               }`}

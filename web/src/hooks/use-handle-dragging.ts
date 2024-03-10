@@ -5,7 +5,7 @@ import scrollIntoView from "scroll-into-view-if-needed";
 type DragHandlerProps = {
   contentRef: React.RefObject<HTMLElement>;
   timelineRef: React.RefObject<HTMLDivElement>;
-  scrollTimeRef: React.RefObject<HTMLDivElement>;
+  handlebarRef: React.RefObject<HTMLDivElement>;
   alignStartDateToTimeline: (time: number) => number;
   alignEndDateToTimeline: (time: number) => number;
   segmentDuration: number;
@@ -22,7 +22,7 @@ type DragHandlerProps = {
 function useDraggableHandler({
   contentRef,
   timelineRef,
-  scrollTimeRef,
+  handlebarRef,
   alignStartDateToTimeline,
   segmentDuration,
   showHandlebar,
@@ -83,12 +83,12 @@ function useDraggableHandler({
       getClientYPosition(e);
       setIsDragging(true);
 
-      if (scrollTimeRef.current && clientYPosition && isDesktop) {
-        const handlebarRect = scrollTimeRef.current.getBoundingClientRect();
+      if (handlebarRef.current && clientYPosition && isDesktop) {
+        const handlebarRect = handlebarRef.current.getBoundingClientRect();
         setInitialClickAdjustment(clientYPosition - handlebarRect.top);
       }
     },
-    [setIsDragging, getClientYPosition, scrollTimeRef, clientYPosition],
+    [setIsDragging, getClientYPosition, handlebarRef, clientYPosition],
   );
 
   const handleMouseUp = useCallback(
@@ -121,7 +121,7 @@ function useDraggableHandler({
       scrollTimeline: boolean,
       updateHandle: boolean,
     ) => {
-      const thumb = scrollTimeRef.current;
+      const thumb = handlebarRef.current;
       if (thumb) {
         requestAnimationFrame(() => {
           thumb.style.top = `${newHandlePosition}px`;
@@ -148,7 +148,7 @@ function useDraggableHandler({
         }
       }
     },
-    [segmentDuration, handlebarTimeRef, scrollTimeRef, setHandlebarTime],
+    [segmentDuration, handlebarTimeRef, handlebarRef, setHandlebarTime],
   );
 
   const handleMouseMove = useCallback(
@@ -158,7 +158,7 @@ function useDraggableHandler({
       if (
         !contentRef.current ||
         !timelineRef.current ||
-        !scrollTimeRef.current
+        !handlebarRef.current
       ) {
         return;
       }
@@ -166,7 +166,7 @@ function useDraggableHandler({
       getClientYPosition(e);
     },
 
-    [contentRef, scrollTimeRef, timelineRef, getClientYPosition],
+    [contentRef, handlebarRef, timelineRef, getClientYPosition],
   );
 
   useEffect(() => {
@@ -277,7 +277,7 @@ function useDraggableHandler({
   useEffect(() => {
     if (
       timelineRef.current &&
-      scrollTimeRef.current &&
+      handlebarRef.current &&
       showHandlebar &&
       handlebarTime &&
       !isDragging
@@ -301,7 +301,7 @@ function useDraggableHandler({
     }
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [handlebarTime, showHandlebar, scrollTimeRef, timelineStartAligned]);
+  }, [handlebarTime, showHandlebar, handlebarRef, timelineStartAligned]);
 
   return { handleMouseDown, handleMouseUp, handleMouseMove };
 }
