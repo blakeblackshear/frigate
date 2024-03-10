@@ -4,6 +4,13 @@ import DynamicVideoPlayer, {
 import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
 import MotionReviewTimeline from "@/components/timeline/MotionReviewTimeline";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Preview } from "@/types/preview";
 import { MotionData, ReviewSegment, ReviewSeverity } from "@/types/review";
 import { getChunkedTimeDay } from "@/utils/timelineUtil";
@@ -39,6 +46,8 @@ export function DesktopRecordingView({
   const videoPlayersRef = useRef<{ [camera: string]: DynamicVideoController }>(
     {},
   );
+
+  const [playbackStart, setPlaybackStart] = useState(startTime);
 
   // timeline time
 
@@ -119,13 +128,7 @@ export function DesktopRecordingView({
       const newController = videoPlayersRef.current[newCam];
       lastController.onPlayerTimeUpdate(null);
       lastController.onClipChangedEvent(null);
-      lastController.autoPlay(false);
       lastController.scrubToTimestamp(currentTime);
-      newController.autoPlay(true);
-      newController.onCanPlay(() => {
-        newController.seekToTimestamp(currentTime, true);
-        newController.onCanPlay(null);
-      });
       newController.onPlayerTimeUpdate((timestamp: number) => {
         setCurrentTime(timestamp);
 
@@ -137,6 +140,8 @@ export function DesktopRecordingView({
           }
         });
       });
+      newController.seekToTimestamp(currentTime, true);
+      setPlaybackStart(currentTime);
       setMainCamera(newCam);
     },
     [allCameras, currentTime, mainCamera],
@@ -179,6 +184,7 @@ export function DesktopRecordingView({
                   camera={cam}
                   timeRange={currentTimeRange}
                   cameraPreviews={allPreviews ?? []}
+                  startTime={playbackStart}
                   onControllerReady={(controller) => {
                     videoPlayersRef.current[cam] = controller;
                     controller.onPlayerTimeUpdate((timestamp: number) => {
@@ -191,11 +197,6 @@ export function DesktopRecordingView({
                           );
                         }
                       });
-                    });
-
-                    controller.onCanPlay(() => {
-                      controller.seekToTimestamp(startTime, true);
-                      controller.onCanPlay(null);
                     });
                   }}
                 />
@@ -264,6 +265,7 @@ type MobileRecordingViewProps = {
   severity: ReviewSeverity;
   reviewItems: ReviewSegment[];
   relevantPreviews?: Preview[];
+  allCameras: string[];
 };
 export function MobileRecordingView({
   startCamera,
@@ -271,6 +273,7 @@ export function MobileRecordingView({
   severity,
   reviewItems,
   relevantPreviews,
+  allCameras,
 }: MobileRecordingViewProps) {
   const navigate = useNavigate();
   const contentRef = useRef<HTMLDivElement | null>(null);
@@ -279,6 +282,8 @@ export function MobileRecordingView({
 
   const [playerReady, setPlayerReady] = useState(false);
   const controllerRef = useRef<DynamicVideoController | undefined>(undefined);
+  const [playbackCamera, setPlaybackCamera] = useState(startCamera);
+  const [playbackStart, setPlaybackStart] = useState(startTime);
 
   // timeline time
 
@@ -361,16 +366,45 @@ export function MobileRecordingView({
 
   return (
     <div ref={contentRef} className="flex flex-col relative w-full h-full">
-      <Button className="rounded-lg" onClick={() => navigate(-1)}>
-        <IoMdArrowRoundBack className="size-5 mr-[10px]" />
-        Back
-      </Button>
+      <div className="flex justify-evenly items-center">
+        <Button className="rounded-lg" onClick={() => navigate(-1)}>
+          <IoMdArrowRoundBack className="size-5 mr-[10px]" />
+          Back
+        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button className="capitalize">
+              {playbackCamera.replaceAll("_", " ")}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuRadioGroup
+              value={playbackCamera}
+              onValueChange={(cam) => {
+                setPlaybackStart(currentTime);
+                setPlaybackCamera(cam);
+              }}
+            >
+              {allCameras.map((cam) => (
+                <DropdownMenuRadioItem
+                  key={cam}
+                  className="capitalize"
+                  value={cam}
+                >
+                  {cam.replaceAll("_", " ")}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
 
       <div>
         <DynamicVideoPlayer
-          camera={startCamera}
+          camera={playbackCamera}
           timeRange={currentTimeRange}
           cameraPreviews={relevantPreviews || []}
+          startTime={playbackStart}
           onControllerReady={(controller) => {
             controllerRef.current = controller;
             setPlayerReady(true);

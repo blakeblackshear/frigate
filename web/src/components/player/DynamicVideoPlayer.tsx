@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import VideoPlayer from "./VideoPlayer";
 import Player from "video.js/dist/types/player";
 import TimelineEventOverlay from "../overlay/TimelineDataOverlay";
@@ -24,6 +24,7 @@ type DynamicVideoPlayerProps = {
   timeRange: { start: number; end: number };
   cameraPreviews: Preview[];
   previewOnly?: boolean;
+  startTime?: number;
   onControllerReady: (controller: DynamicVideoController) => void;
   onClick?: () => void;
 };
@@ -33,6 +34,7 @@ export default function DynamicVideoPlayer({
   timeRange,
   cameraPreviews,
   previewOnly = false,
+  startTime,
   onControllerReady,
   onClick,
 }: DynamicVideoPlayerProps) {
@@ -59,7 +61,7 @@ export default function DynamicVideoPlayer({
 
   // controlling playback
 
-  const playerRef = useRef<Player | null>(null);
+  const [playerRef, setPlayerRef] = useState<Player | null>(null);
   const [previewController, setPreviewController] =
     useState<PreviewVideoController | null>(null);
   const [isScrubbing, setIsScrubbing] = useState(previewOnly);
@@ -67,13 +69,13 @@ export default function DynamicVideoPlayer({
     undefined,
   );
   const controller = useMemo(() => {
-    if (!config || !playerRef.current || !previewController) {
+    if (!config || !playerRef || !previewController) {
       return undefined;
     }
 
     return new DynamicVideoController(
       camera,
-      playerRef.current,
+      playerRef,
       previewController,
       (config.cameras[camera]?.detect?.annotation_offset || 0) / 1000,
       previewOnly ? "scrubbing" : "playback",
@@ -82,7 +84,7 @@ export default function DynamicVideoPlayer({
     );
     // we only want to fire once when players are ready
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [camera, config, playerRef.current, previewController]);
+  }, [camera, config, playerRef, previewController]);
 
   useEffect(() => {
     if (!controller) {
@@ -97,64 +99,44 @@ export default function DynamicVideoPlayer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controller]);
 
-  const [initPreviewOnly, setInitPreviewOnly] = useState(previewOnly);
-
-  useEffect(() => {
-    if (!controller || !playerRef.current) {
-      return;
-    }
-
-    if (previewOnly == initPreviewOnly) {
-      return;
-    }
-
-    if (!previewOnly) {
-      controller.seekToTimestamp(playerRef.current.currentTime() || 0, true);
-    }
-
-    setInitPreviewOnly(previewOnly);
-    // we only want to fire once when players are ready
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [controller, previewOnly]);
-
   // keyboard control
 
   const onKeyboardShortcut = useCallback(
     (key: string, down: boolean, repeat: boolean) => {
-      if (!playerRef.current || previewOnly) {
+      if (!playerRef || previewOnly) {
         return;
       }
 
       switch (key) {
         case "ArrowLeft":
           if (down) {
-            const currentTime = playerRef.current.currentTime();
+            const currentTime = playerRef.currentTime();
 
             if (currentTime) {
-              playerRef.current.currentTime(Math.max(0, currentTime - 5));
+              playerRef.currentTime(Math.max(0, currentTime - 5));
             }
           }
           break;
         case "ArrowRight":
           if (down) {
-            const currentTime = playerRef.current.currentTime();
+            const currentTime = playerRef.currentTime();
 
             if (currentTime) {
-              playerRef.current.currentTime(currentTime + 5);
+              playerRef.currentTime(currentTime + 5);
             }
           }
           break;
         case "m":
           if (down && !repeat && playerRef) {
-            playerRef.current.muted(!playerRef.current.muted());
+            playerRef.muted(!playerRef.muted());
           }
           break;
         case " ":
           if (down && playerRef) {
-            if (playerRef.current.paused()) {
-              playerRef.current.play();
+            if (playerRef.paused()) {
+              playerRef.play();
             } else {
-              playerRef.current.pause();
+              playerRef.pause();
             }
           }
           break;
@@ -162,7 +144,7 @@ export default function DynamicVideoPlayer({
     },
     // only update when preview only changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [playerRef.current, previewOnly],
+    [playerRef, previewOnly],
   );
   useKeyboardListener(
     ["ArrowLeft", "ArrowRight", "m", " "],
@@ -185,6 +167,42 @@ export default function DynamicVideoPlayer({
     // we only want to calculate this once
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // start at correct time
+
+  useEffect(() => {
+    const player = playerRef;
+
+    if (!player) {
+      return;
+    }
+
+    if (previewOnly) {
+      player.autoplay(false);
+      return;
+    }
+
+    player.autoplay(true);
+
+    if (!startTime) {
+      return;
+    }
+
+    if (player.isReady_) {
+      controller?.seekToTimestamp(startTime, true);
+      return;
+    }
+
+    const callback = () => {
+      controller?.seekToTimestamp(startTime, true);
+    };
+    player.on("loadeddata", callback);
+    return () => {
+      player.off("loadeddata", callback);
+    };
+    // we only want to calculate this once
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [previewOnly, startTime, controller]);
 
   // state of playback player
 
@@ -236,7 +254,7 @@ export default function DynamicVideoPlayer({
         <VideoPlayer
           options={{
             preload: "auto",
-            autoplay: !previewOnly,
+            autoplay: false,
             sources: [initialPlaybackSource],
             aspectRatio: wideVideo ? undefined : "16:9",
             controlBar: {
@@ -248,10 +266,10 @@ export default function DynamicVideoPlayer({
           }}
           seekOptions={{ forward: 10, backward: 5 }}
           onReady={(player) => {
-            playerRef.current = player;
+            setPlayerRef(player);
           }}
           onDispose={() => {
-            playerRef.current = null;
+            setPlayerRef(null);
           }}
         >
           {config && focusedItem && (
@@ -289,12 +307,10 @@ export class DynamicVideoController {
   private recordings: Recording[] = [];
   private annotationOffset: number;
   private timeToStart: number | undefined = undefined;
-  private canPlay: boolean = false;
 
   // listeners
   private playerProgressListener: (() => void) | null = null;
   private playerEndedListener: (() => void) | null = null;
-  private canPlayListener: (() => void) | null = null;
 
   constructor(
     camera: string,
@@ -320,16 +336,11 @@ export class DynamicVideoController {
       src: newPlayback.playbackUri,
       type: "application/vnd.apple.mpegurl",
     });
-    this.canPlay = false;
 
     if (this.timeToStart) {
       this.seekToTimestamp(this.timeToStart);
       this.timeToStart = undefined;
     }
-  }
-
-  autoPlay(play: boolean) {
-    this.playerController.autoplay(play);
   }
 
   seekToTimestamp(time: number, play: boolean = false) {
@@ -391,21 +402,6 @@ export class DynamicVideoController {
     return timestamp;
   }
 
-  onCanPlay(listener: (() => void) | null) {
-    if (this.canPlayListener) {
-      this.playerController.off("canplay", this.canPlayListener);
-      this.canPlayListener = null;
-    }
-
-    if (listener) {
-      this.canPlayListener = () => {
-        this.canPlay = true;
-        listener();
-      };
-      this.playerController.on("canplay", this.canPlayListener);
-    }
-  }
-
   onPlayerTimeUpdate(listener: ((timestamp: number) => void) | null) {
     if (this.playerProgressListener) {
       this.playerController.off("timeupdate", this.playerProgressListener);
@@ -414,9 +410,13 @@ export class DynamicVideoController {
 
     if (listener) {
       this.playerProgressListener = () => {
-        if (this.canPlay) {
-          listener(this.getProgress(this.playerController.currentTime() || 0));
+        const progress = this.playerController.currentTime() || 0;
+
+        if (progress == 0) {
+          return;
         }
+
+        listener(this.getProgress(progress));
       };
       this.playerController.on("timeupdate", this.playerProgressListener);
     }
