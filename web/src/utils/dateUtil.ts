@@ -258,9 +258,7 @@ const getUTCOffset = (date: Date, timezone: string): number => {
   }
 
   // Otherwise, calculate offset using provided timezone
-  const utcDate = new Date(
-    date.getTime() - date.getTimezoneOffset() * 60 * 1000,
-  );
+  const utcDate = new Date(date.getTime());
   // locale of en-CA is required for proper locale format
   let iso = utcDate
     .toLocaleString("en-CA", { timeZone: timezone, hour12: false })
@@ -274,7 +272,11 @@ const getUTCOffset = (date: Date, timezone: string): number => {
     target = new Date(`${iso}+000`);
   }
 
-  return (target.getTime() - utcDate.getTime()) / 60 / 1000;
+  return (
+    (target.getTime() - utcDate.getTime() - date.getTimezoneOffset()) /
+    60 /
+    1000
+  );
 };
 
 export function getRangeForTimestamp(timestamp: number) {
