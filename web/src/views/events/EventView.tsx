@@ -106,6 +106,10 @@ export default function EventView({
   // review paging
 
   const reviewItems = useMemo(() => {
+    if (!reviews) {
+      return undefined;
+    }
+
     const all: ReviewSegment[] = [];
     const alerts: ReviewSegment[] = [];
     const detections: ReviewSegment[] = [];
@@ -167,7 +171,7 @@ export default function EventView({
 
   const exportReview = useCallback(
     (id: string) => {
-      const review = reviewItems.all?.find((seg) => seg.id == id);
+      const review = reviewItems?.all?.find((seg) => seg.id == id);
 
       if (!review) {
         return;
@@ -280,7 +284,7 @@ export default function EventView({
 
 type DetectionReviewProps = {
   contentRef: MutableRefObject<HTMLDivElement | null>;
-  reviewItems: {
+  reviewItems?: {
     all: ReviewSegment[];
     alert: ReviewSegment[];
     detection: ReviewSegment[];
@@ -313,10 +317,14 @@ function DetectionReview({
 
   // review data
   const currentItems = useMemo(() => {
+    if (!reviewItems) {
+      return null;
+    }
+
     const current = reviewItems[severity];
 
     if (!current || current.length == 0) {
-      return null;
+      return [];
     }
 
     if (filter?.showReviewed != 1) {
@@ -326,7 +334,7 @@ function DetectionReview({
     }
     // only refresh when severity or filter changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [severity, filter, reviewItems.all.length]);
+  }, [severity, filter, reviewItems?.all.length]);
 
   // preview
 
@@ -351,7 +359,7 @@ function DetectionReview({
   // timeline interaction
 
   const { alignStartDateToTimeline } = useEventUtils(
-    reviewItems.all,
+    reviewItems?.all ?? [],
     segmentDuration,
   );
 
@@ -444,7 +452,13 @@ function DetectionReview({
           />
         )}
 
-        {(currentItems == null || currentItems.length == 0) && (
+        {currentItems == null && (
+          <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2">
+            <ActivityIndicator />
+          </div>
+        )}
+
+        {currentItems != null && currentItems.length == 0 && (
           <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 flex flex-col justify-center items-center text-center">
             <LuFolderCheck className="size-16" />
             There are no {severity.replace(/_/g, " ")}s to review
@@ -508,7 +522,7 @@ function DetectionReview({
           minimapEndTime={minimapBounds.end}
           showHandlebar={previewTime != undefined}
           handlebarTime={previewTime}
-          events={reviewItems.all}
+          events={reviewItems?.all ?? []}
           severityType={severity}
           contentRef={contentRef}
         />
@@ -519,7 +533,7 @@ function DetectionReview({
 
 type MotionReviewProps = {
   contentRef: MutableRefObject<HTMLDivElement | null>;
-  reviewItems: {
+  reviewItems?: {
     all: ReviewSegment[];
     alert: ReviewSegment[];
     detection: ReviewSegment[];
@@ -685,7 +699,7 @@ function MotionReview({
           showHandlebar
           handlebarTime={currentTime}
           setHandlebarTime={setCurrentTime}
-          events={reviewItems.all}
+          events={reviewItems?.all ?? []}
           motion_events={motionData ?? []}
           severityType="significant_motion"
           contentRef={contentRef}
