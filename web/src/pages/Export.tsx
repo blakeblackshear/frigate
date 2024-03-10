@@ -143,7 +143,7 @@ function Export() {
   const Content = isDesktop ? DialogContent : DrawerContent;
 
   return (
-    <div className="size-full p-2 overflow-hidden">
+    <div className="size-full p-2 overflow-hidden flex flex-col">
       <Toaster />
 
       <AlertDialog
