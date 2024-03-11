@@ -191,10 +191,10 @@ export function DesktopRecordingView({
 
       <div className="flex h-full justify-center overflow-hidden">
         <div className="flex flex-1 flex-wrap">
-          <div className="flex flex-col h-full px-2 justify-end">
-            <div key={mainCamera} className="flex justify-center mb-5">
+          <div className="w-full flex flex-col h-full px-2 justify-center">
+            <div key={mainCamera} className="flex justify-center items mb-5">
               <DynamicVideoPlayer
-                className={`w-[85%] ${grow}`}
+                className={`w-[82%] ${grow}`}
                 camera={mainCamera}
                 timeRange={currentTimeRange}
                 cameraPreviews={allPreviews ?? []}
@@ -203,25 +203,17 @@ export function DesktopRecordingView({
                   videoPlayersRef.current[mainCamera] = controller;
                   controller.onPlayerTimeUpdate((timestamp: number) => {
                     setCurrentTime(timestamp);
-
-                    allCameras.forEach((otherCam) => {
-                      if (mainCamera != otherCam) {
-                        videoPlayersRef.current[otherCam]?.scrubToTimestamp(
-                          Math.floor(timestamp),
-                        );
-                      }
-                    });
                   });
                 }}
               />
             </div>
-            <div className="flex justify-end gap-2 overflow-x-auto">
+            <div className="w-full flex justify-center gap-2 overflow-x-auto">
               {allCameras.map((cam) => {
                 if (cam !== mainCamera) {
                   return (
                     <div
                       key={cam}
-                      className="aspect-video flex items-center we-[300px]"
+                      className="aspect-video flex items-center w-[260px]"
                     >
                       <DynamicVideoPlayer
                         className="size-full"
