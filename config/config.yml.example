@@ -1,16 +1,20 @@
 mqtt:
-  host: mqtt
+  enabled: False
 
 cameras:
-  test:
+  Portiek: # <------ Name the camera
+    enabled: True
     ffmpeg:
       inputs:
-        - path: /media/frigate/car-stopping.mp4
-          input_args: -re -stream_loop -1 -fflags +genpts
+        - path: rtsp://admin:admin@192.168.178.183:8554/Streaming/Channels/101 # <----- The stream you want to use for detection
           roles:
             - detect
-            - rtmp
+  Portiek: # <------ Name the camera
+    enabled: True
+    ffmpeg:
+      inputs:
+        - path: rtsp://admin:admin@192.168.178.183:8554/Streaming/Channels/101 # <----- The stream you want to use for detection
+          roles:
+            - detect
     detect:
-      height: 1080
-      width: 1920
-      fps: 5
+      enabled: False # <---- disable detection until you have a working camera feed
