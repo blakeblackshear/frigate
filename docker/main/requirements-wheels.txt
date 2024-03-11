@@ -3,7 +3,7 @@ Flask == 3.0.*
 imutils == 0.5.*
 markupsafe == 2.1.*
 matplotlib == 3.7.*
-mypy == 1.6.1
+mypy == 1.9.0
 numpy == 1.23.*
 onvif_zeep == 0.2.12
 opencv-python-headless == 4.7.0.*
