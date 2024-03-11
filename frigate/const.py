@@ -57,6 +57,10 @@ DRIVER_AMD = "radeonsi"
 DRIVER_INTEL_i965 = "i965"
 DRIVER_INTEL_iHD = "iHD"
 
+# Preview Values
+
+PREVIEW_FRAME_TYPE = "webp"
+
 # Record Values
 
 CACHE_SEGMENT_FORMAT = "%Y%m%d%H%M%S%z"

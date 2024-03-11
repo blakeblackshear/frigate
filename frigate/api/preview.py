@@ -11,7 +11,7 @@ from flask import (
     make_response,
 )
 
-from frigate.const import CACHE_DIR
+from frigate.const import CACHE_DIR, PREVIEW_FRAME_TYPE
 from frigate.models import Previews
 
 logger = logging.getLogger(__name__)
@@ -97,8 +97,8 @@ def get_preview_frames_from_cache(camera_name: str, start_ts, end_ts):
     """Get list of cached preview frames"""
     preview_dir = os.path.join(CACHE_DIR, "preview_frames")
     file_start = f"preview_{camera_name}"
-    start_file = f"{file_start}-{start_ts}.jpg"
-    end_file = f"{file_start}-{end_ts}.jpg"
+    start_file = f"{file_start}-{start_ts}.{PREVIEW_FRAME_TYPE}"
+    end_file = f"{file_start}-{end_ts}.{PREVIEW_FRAME_TYPE}"
     selected_previews = []
 
     for file in sorted(os.listdir(preview_dir)):
