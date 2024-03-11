@@ -527,6 +527,7 @@ function InProgressPreview({
     `preview/${review.camera}/start/${Math.floor(review.start_time) - PREVIEW_PADDING}/end/${
       Math.ceil(review.end_time) + PREVIEW_PADDING
     }/frames`,
+    { revalidateOnFocus: false },
   );
   const [manualFrame, setManualFrame] = useState(false);
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout>();
@@ -642,7 +643,7 @@ function InProgressPreview({
     <div className="relative size-full flex items-center bg-black">
       <img
         className="size-full object-contain"
-        src={`${apiHost}api/preview/${previewFrames[key]}/thumbnail.jpg`}
+        src={`${apiHost}api/preview/${previewFrames[key]}/thumbnail.webp`}
         onLoad={handleLoad}
       />
       <Slider

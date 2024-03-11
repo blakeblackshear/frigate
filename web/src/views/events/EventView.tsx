@@ -33,9 +33,9 @@ import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
 import MotionReviewTimeline from "@/components/timeline/MotionReviewTimeline";
 import { Button } from "@/components/ui/button";
-import PreviewVideoPlayer, {
-  PreviewVideoController,
-} from "@/components/player/PreviewVideoPlayer";
+import PreviewPlayer, {
+  PreviewController,
+} from "@/components/player/PreviewPlayer";
 
 type EventViewProps = {
   reviews?: ReviewSegment[];
@@ -578,9 +578,7 @@ function MotionReview({
     return cameras.sort((a, b) => a.ui.order - b.ui.order);
   }, [config, filter]);
 
-  const videoPlayersRef = useRef<{ [camera: string]: PreviewVideoController }>(
-    {},
-  );
+  const videoPlayersRef = useRef<{ [camera: string]: PreviewController }>({});
 
   // motion data
 
@@ -596,14 +594,9 @@ function MotionReview({
 
   // timeline time
 
-  const lastFullHour = useMemo(() => {
-    const end = new Date(timeRange.before * 1000);
-    end.setMinutes(0, 0, 0);
-    return end.getTime() / 1000;
-  }, [timeRange]);
   const timeRangeSegments = useMemo(
-    () => getChunkedTimeRange(timeRange.after, lastFullHour),
-    [lastFullHour, timeRange],
+    () => getChunkedTimeRange(timeRange.after, timeRange.before),
+    [timeRange],
   );
 
   const initialIndex = useMemo(() => {
@@ -620,7 +613,7 @@ function MotionReview({
 
   const [selectedRangeIdx, setSelectedRangeIdx] = useState(initialIndex);
   const [currentTime, setCurrentTime] = useState<number>(
-    startTime ?? timeRangeSegments.ranges[selectedRangeIdx]?.start,
+    startTime ?? timeRangeSegments.ranges[selectedRangeIdx]?.end,
   );
   const currentTimeRange = useMemo(
     () => timeRangeSegments.ranges[selectedRangeIdx],
@@ -674,7 +667,7 @@ function MotionReview({
               grow = "aspect-video";
             }
             return (
-              <PreviewVideoPlayer
+              <PreviewPlayer
                 key={camera.name}
                 className={`${grow}`}
                 camera={camera.name}

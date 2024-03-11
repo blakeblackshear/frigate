@@ -9,9 +9,7 @@ import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { Recording } from "@/types/record";
 import { Preview } from "@/types/preview";
 import { DynamicPlayback } from "@/types/playback";
-import PreviewVideoPlayer, {
-  PreviewVideoController,
-} from "./PreviewVideoPlayer";
+import PreviewPlayer, { PreviewController } from "./PreviewPlayer";
 
 type PlayerMode = "playback" | "scrubbing";
 
@@ -40,11 +38,6 @@ export default function DynamicVideoPlayer({
 }: DynamicVideoPlayerProps) {
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
-  const timezone = useMemo(
-    () =>
-      config?.ui?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
-    [config],
-  );
 
   // playback behavior
   const wideVideo = useMemo(() => {
@@ -63,7 +56,7 @@ export default function DynamicVideoPlayer({
 
   const [playerRef, setPlayerRef] = useState<Player | null>(null);
   const [previewController, setPreviewController] =
-    useState<PreviewVideoController | null>(null);
+    useState<PreviewController | null>(null);
   const [isScrubbing, setIsScrubbing] = useState(previewOnly);
   const [focusedItem, setFocusedItem] = useState<Timeline | undefined>(
     undefined,
@@ -154,14 +147,8 @@ export default function DynamicVideoPlayer({
   // initial state
 
   const initialPlaybackSource = useMemo(() => {
-    const date = new Date(timeRange.start * 1000);
     return {
-      src: `${apiHost}vod/${date.getFullYear()}-${
-        date.getMonth() + 1
-      }/${date.getDate()}/${date.getHours()}/${camera}/${timezone.replaceAll(
-        "/",
-        ",",
-      )}/master.m3u8`,
+      src: `${apiHost}vod/${camera}/start/${timeRange.start}/end/${timeRange.end}/master.m3u8`,
       type: "application/vnd.apple.mpegurl",
     };
     // we only want to calculate this once
@@ -224,13 +211,7 @@ export default function DynamicVideoPlayer({
       return;
     }
 
-    const date = new Date(timeRange.start * 1000);
-    const playbackUri = `${apiHost}vod/${date.getFullYear()}-${
-      date.getMonth() + 1
-    }/${date.getDate()}/${date.getHours()}/${camera}/${timezone.replaceAll(
-      "/",
-      ",",
-    )}/master.m3u8`;
+    const playbackUri = `${apiHost}vod/${camera}/start/${timeRange.start}/end/${timeRange.end}/master.m3u8`;
 
     controller.newPlayback({
       recordings: recordings ?? [],
@@ -280,7 +261,7 @@ export default function DynamicVideoPlayer({
           )}
         </VideoPlayer>
       </div>
-      <PreviewVideoPlayer
+      <PreviewPlayer
         className={`${isScrubbing ? "visible" : "hidden"} ${className ?? ""}`}
         camera={camera}
         timeRange={timeRange}
@@ -298,7 +279,7 @@ export class DynamicVideoController {
   // main state
   public camera = "";
   private playerController: Player;
-  private previewController: PreviewVideoController;
+  private previewController: PreviewController;
   private setScrubbing: (isScrubbing: boolean) => void;
   private setFocusedItem: (timeline: Timeline) => void;
   private playerMode: PlayerMode = "playback";
@@ -315,7 +296,7 @@ export class DynamicVideoController {
   constructor(
     camera: string,
     playerController: Player,
-    previewController: PreviewVideoController,
+    previewController: PreviewController,
     annotationOffset: number,
     defaultMode: PlayerMode,
     setScrubbing: (isScrubbing: boolean) => void,

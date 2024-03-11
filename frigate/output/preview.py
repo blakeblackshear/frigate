@@ -12,7 +12,7 @@ import numpy as np
 
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, RecordQualityEnum
-from frigate.const import CACHE_DIR, CLIPS_DIR, INSERT_PREVIEW
+from frigate.const import CACHE_DIR, CLIPS_DIR, INSERT_PREVIEW, PREVIEW_FRAME_TYPE
 from frigate.ffmpeg_presets import (
     FPS_VFR_PARAM,
     EncodeTypeEnum,
@@ -42,12 +42,12 @@ def get_cache_image_name(camera: str, frame_time: float) -> str:
     """Get the image name in cache."""
     return os.path.join(
         CACHE_DIR,
-        f"{FOLDER_PREVIEW_FRAMES}/preview_{camera}-{frame_time}.jpg",
+        f"{FOLDER_PREVIEW_FRAMES}/preview_{camera}-{frame_time}.{PREVIEW_FRAME_TYPE}",
     )
 
 
 class FFMpegConverter(threading.Thread):
-    """Convert a list of jpg frames into a vfr mp4."""
+    """Convert a list of still frames into a vfr mp4."""
 
     def __init__(
         self,
@@ -176,7 +176,7 @@ class PreviewRecorder:
         )
 
         file_start = f"preview_{config.name}"
-        start_file = f"{file_start}-{start_ts}.jpg"
+        start_file = f"{file_start}-{start_ts}.webp"
 
         for file in sorted(os.listdir(os.path.join(CACHE_DIR, FOLDER_PREVIEW_FRAMES))):
             if not file.startswith(file_start):
@@ -186,7 +186,7 @@ class PreviewRecorder:
                 os.unlink(os.path.join(PREVIEW_CACHE_DIR, file))
                 continue
 
-            ts = float(file.split("-")[1][:-4])
+            ts = float(file.split("-")[1][: -(len(PREVIEW_FRAME_TYPE) + 1)])
 
             if self.start_time == 0:
                 self.start_time = ts
@@ -242,12 +242,11 @@ class PreviewRecorder:
             small_frame,
             cv2.COLOR_YUV2BGR_I420,
         )
-        _, jpg = cv2.imencode(".jpg", small_frame)
-        with open(
+        cv2.imwrite(
             get_cache_image_name(self.config.name, frame_time),
-            "wb",
-        ) as j:
-            j.write(jpg.tobytes())
+            small_frame,
+            [int(cv2.IMWRITE_WEBP_QUALITY), 80],
+        )
 
     def write_data(
         self,

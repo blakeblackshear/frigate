@@ -30,6 +30,7 @@ from frigate.const import (
     CLIPS_DIR,
     EXPORT_DIR,
     MAX_SEGMENT_DURATION,
+    PREVIEW_FRAME_TYPE,
     RECORD_DIR,
 )
 from frigate.models import Event, Previews, Recordings, Regions, ReviewSegment
@@ -1173,8 +1174,8 @@ def preview_gif(camera_name: str, start_ts, end_ts, max_cache_age=2592000):
         # need to generate from existing images
         preview_dir = os.path.join(CACHE_DIR, "preview_frames")
         file_start = f"preview_{camera_name}"
-        start_file = f"{file_start}-{start_ts}.jpg"
-        end_file = f"{file_start}-{end_ts}.jpg"
+        start_file = f"{file_start}-{start_ts}.{PREVIEW_FRAME_TYPE}"
+        end_file = f"{file_start}-{end_ts}.{PREVIEW_FRAME_TYPE}"
         selected_previews = []
 
         for file in sorted(os.listdir(preview_dir)):
@@ -1258,8 +1259,9 @@ def review_preview(id: str):
 
 
 @MediaBp.route("/preview/<file_name>/thumbnail.jpg")
+@MediaBp.route("/preview/<file_name>/thumbnail.webp")
 def preview_thumbnail(file_name: str):
-    """Get a thumbnail from the cached preview jpgs."""
+    """Get a thumbnail from the cached preview frames."""
     safe_file_name_current = secure_filename(file_name)
     preview_dir = os.path.join(CACHE_DIR, "preview_frames")
 

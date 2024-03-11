@@ -1,6 +1,9 @@
 import DynamicVideoPlayer, {
   DynamicVideoController,
 } from "@/components/player/DynamicVideoPlayer";
+import PreviewPlayer, {
+  PreviewController,
+} from "@/components/player/PreviewPlayer";
 import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
 import MotionReviewTimeline from "@/components/timeline/MotionReviewTimeline";
 import { Button } from "@/components/ui/button";
@@ -11,6 +14,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
 import { MotionData, ReviewSegment, ReviewSeverity } from "@/types/review";
 import { getChunkedTimeDay } from "@/utils/timelineUtil";
@@ -37,15 +41,15 @@ export function DesktopRecordingView({
   allCameras,
   allPreviews,
 }: DesktopRecordingViewProps) {
+  const { data: config } = useSWR<FrigateConfig>("config");
   const navigate = useNavigate();
   const contentRef = useRef<HTMLDivElement | null>(null);
 
   // controller state
 
   const [mainCamera, setMainCamera] = useState(startCamera);
-  const videoPlayersRef = useRef<{ [camera: string]: DynamicVideoController }>(
-    {},
-  );
+  const mainControllerRef = useRef<DynamicVideoController | null>(null);
+  const previewRefs = useRef<{ [camera: string]: PreviewController }>({});
 
   const [playbackStart, setPlaybackStart] = useState(startTime);
 
@@ -64,27 +68,20 @@ export function DesktopRecordingView({
 
   // move to next clip
   useEffect(() => {
-    if (
-      !videoPlayersRef.current &&
-      Object.values(videoPlayersRef.current).length > 0
-    ) {
+    if (!mainControllerRef.current) {
       return;
     }
 
-    const mainController = videoPlayersRef.current[mainCamera];
-
-    if (mainController) {
-      mainController.onClipChangedEvent((dir) => {
-        if (dir == "forward") {
-          if (selectedRangeIdx < timeRange.ranges.length - 1) {
-            setSelectedRangeIdx(selectedRangeIdx + 1);
-          }
+    mainControllerRef.current.onClipChangedEvent((dir) => {
+      if (dir == "forward") {
+        if (selectedRangeIdx < timeRange.ranges.length - 1) {
+          setSelectedRangeIdx(selectedRangeIdx + 1);
         }
-      });
-    }
+      }
+    });
     // we only want to fire once when players are ready
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedRangeIdx, timeRange, videoPlayersRef.current, mainCamera]);
+  }, [selectedRangeIdx, timeRange, mainControllerRef.current, mainCamera]);
 
   // scrubbing and timeline state
 
@@ -107,7 +104,9 @@ export function DesktopRecordingView({
         return;
       }
 
-      Object.values(videoPlayersRef.current).forEach((controller) => {
+      mainControllerRef.current?.scrubToTimestamp(currentTime);
+
+      Object.values(previewRefs.current).forEach((controller) => {
         controller.scrubToTimestamp(currentTime);
       });
     }
@@ -115,7 +114,7 @@ export function DesktopRecordingView({
 
   useEffect(() => {
     if (!scrubbing) {
-      videoPlayersRef.current[mainCamera]?.seekToTimestamp(currentTime, true);
+      mainControllerRef.current?.seekToTimestamp(currentTime, true);
     }
 
     // we only want to seek when user stops scrubbing
@@ -124,27 +123,10 @@ export function DesktopRecordingView({
 
   const onSelectCamera = useCallback(
     (newCam: string) => {
-      const lastController = videoPlayersRef.current[mainCamera];
-      const newController = videoPlayersRef.current[newCam];
-      lastController.onPlayerTimeUpdate(null);
-      lastController.onClipChangedEvent(null);
-      lastController.scrubToTimestamp(currentTime);
-      newController.onPlayerTimeUpdate((timestamp: number) => {
-        setCurrentTime(timestamp);
-
-        allCameras.forEach((cam) => {
-          if (cam != newCam) {
-            videoPlayersRef.current[cam]?.scrubToTimestamp(
-              Math.floor(timestamp),
-            );
-          }
-        });
-      });
-      newController.seekToTimestamp(currentTime, true);
-      setPlaybackStart(currentTime);
       setMainCamera(newCam);
+      setPlaybackStart(currentTime);
     },
-    [allCameras, currentTime, mainCamera],
+    [currentTime],
   );
 
   // motion timeline data
@@ -162,6 +144,21 @@ export function DesktopRecordingView({
       : null,
   );
 
+  const grow = useMemo(() => {
+    if (!config) {
+      return "aspect-video";
+    }
+
+    const aspectRatio =
+      config.cameras[mainCamera].detect.width /
+      config.cameras[mainCamera].detect.height;
+    if (aspectRatio > 2) {
+      return "aspect-wide";
+    } else {
+      return "aspect-video";
+    }
+  }, [config, mainCamera]);
+
   return (
     <div ref={contentRef} className="relative size-full">
       <Button
@@ -174,47 +171,39 @@ export function DesktopRecordingView({
 
       <div className="flex h-full justify-center overflow-hidden">
         <div className="flex flex-1 flex-wrap">
-          <div className="flex flex-col h-full px-2 justify-end">
-            <div key={mainCamera} className="flex justify-center mb-5">
+          <div className="w-full flex flex-col h-full px-2 justify-center items-center">
+            <div
+              key={mainCamera}
+              className="w-[82%] flex justify-center items mb-5"
+            >
               <DynamicVideoPlayer
-                className="w-[85%]"
+                className={`w-full ${grow}`}
                 camera={mainCamera}
                 timeRange={currentTimeRange}
                 cameraPreviews={allPreviews ?? []}
                 startTime={playbackStart}
                 onControllerReady={(controller) => {
-                  videoPlayersRef.current[mainCamera] = controller;
+                  mainControllerRef.current = controller;
                   controller.onPlayerTimeUpdate((timestamp: number) => {
                     setCurrentTime(timestamp);
-
-                    allCameras.forEach((otherCam) => {
-                      if (mainCamera != otherCam) {
-                        videoPlayersRef.current[otherCam]?.scrubToTimestamp(
-                          Math.floor(timestamp),
-                        );
-                      }
-                    });
                   });
                 }}
               />
             </div>
-            <div className="flex justify-end gap-2 overflow-x-auto">
+            <div className="w-full flex justify-center gap-2 overflow-x-auto">
               {allCameras.map((cam) => {
                 if (cam !== mainCamera) {
                   return (
-                    <div
-                      key={cam}
-                      className="aspect-video flex items-center we-[300px]"
-                    >
-                      <DynamicVideoPlayer
+                    <div key={cam}>
+                      <PreviewPlayer
                         className="size-full"
                         camera={cam}
                         timeRange={currentTimeRange}
                         cameraPreviews={allPreviews ?? []}
-                        previewOnly
+                        startTime={startTime}
                         onControllerReady={(controller) => {
-                          videoPlayersRef.current[cam] = controller;
-                          controller.scrubToTimestamp(startTime, true);
+                          previewRefs.current[cam] = controller;
+                          controller.scrubToTimestamp(startTime);
                         }}
                         onClick={() => onSelectCamera(cam)}
                       />
