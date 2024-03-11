@@ -82,7 +82,19 @@ export function MotionSegment({
     return isMobile ? 30 : 50;
   }, []);
 
-  const segmentWidth = useMemo(() => {
+  const firstHalfSegmentWidth = useMemo(() => {
+    return interpolateMotionAudioData(
+      getMotionSegmentValue(segmentTime),
+      maxSegmentWidth,
+    );
+  }, [
+    segmentTime,
+    maxSegmentWidth,
+    getMotionSegmentValue,
+    interpolateMotionAudioData,
+  ]);
+
+  const secondHalfSegmentWidth = useMemo(() => {
     return interpolateMotionAudioData(
       getMotionSegmentValue(segmentTime + segmentDuration / 2),
       maxSegmentWidth,
@@ -167,10 +179,19 @@ export function MotionSegment({
   };
 
   const segmentClick = useCallback(() => {
-    if (startTimestamp && setHandlebarTime && segmentWidth > 1) {
+    if (
+      startTimestamp &&
+      setHandlebarTime &&
+      (firstHalfSegmentWidth > 1 || secondHalfSegmentWidth > 1)
+    ) {
       setHandlebarTime(startTimestamp);
     }
-  }, [startTimestamp, setHandlebarTime, segmentWidth]);
+  }, [
+    startTimestamp,
+    setHandlebarTime,
+    firstHalfSegmentWidth,
+    secondHalfSegmentWidth,
+  ]);
 
   return (
     <div
@@ -204,7 +225,7 @@ export function MotionSegment({
               key={`${segmentKey}_motion_data_1`}
               className={`h-[2px] rounded-full bg-motion_review`}
               style={{
-                width: segmentWidth,
+                width: secondHalfSegmentWidth,
               }}
             ></div>
           </div>
@@ -216,7 +237,7 @@ export function MotionSegment({
               key={`${segmentKey}_motion_data_2`}
               className={`h-[2px] rounded-full bg-motion_review`}
               style={{
-                width: segmentWidth,
+                width: firstHalfSegmentWidth,
               }}
             ></div>
           </div>
