@@ -10,8 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { Calendar } from "../ui/calendar";
-import { ReviewFilter } from "@/types/review";
+import { ReviewFilter, ReviewSummary } from "@/types/review";
 import { getEndOfDayTimestamp } from "@/utils/dateUtil";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import { FaCalendarAlt, FaFilter, FaVideo } from "react-icons/fa";
@@ -20,15 +19,18 @@ import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
 import FilterCheckBox from "./FilterCheckBox";
+import ReviewActivityCalendar from "../overlay/ReviewActivityCalendar";
 
 const ATTRIBUTES = ["amazon", "face", "fedex", "license_plate", "ups"];
 
 type ReviewFilterGroupProps = {
+  reviewSummary?: ReviewSummary;
   filter?: ReviewFilter;
   onUpdateFilter: (filter: ReviewFilter) => void;
 };
 
 export default function ReviewFilterGroup({
+  reviewSummary,
   filter,
   onUpdateFilter,
 }: ReviewFilterGroupProps) {
@@ -102,6 +104,7 @@ export default function ReviewFilterGroup({
         }}
       />
       <CalendarFilterButton
+        reviewSummary={reviewSummary}
         day={
           filter?.after == undefined ? undefined : new Date(filter.after * 1000)
         }
@@ -273,22 +276,17 @@ function CamerasFilterButton({
 }
 
 type CalendarFilterButtonProps = {
+  reviewSummary?: ReviewSummary;
   day?: Date;
   updateSelectedDay: (day?: Date) => void;
 };
 function CalendarFilterButton({
+  reviewSummary,
   day,
   updateSelectedDay,
 }: CalendarFilterButtonProps) {
-  const disabledDates = useMemo(() => {
-    const tomorrow = new Date();
-    tomorrow.setHours(tomorrow.getHours() + 24, -1, 0, 0);
-    const future = new Date();
-    future.setFullYear(tomorrow.getFullYear() + 10);
-    return { from: tomorrow, to: future };
-  }, []);
   const selectedDate = useFormattedTimestamp(
-    day == undefined ? 0 : day?.getTime() / 1000,
+    day == undefined ? 0 : day?.getTime() / 1000 + 1,
     "%b %-d",
   );
 
@@ -302,14 +300,10 @@ function CalendarFilterButton({
   );
   const content = (
     <>
-      <Calendar
-        mode="single"
-        disabled={disabledDates}
-        selected={day}
-        showOutsideDays={false}
-        onSelect={(day) => {
-          updateSelectedDay(day);
-        }}
+      <ReviewActivityCalendar
+        reviewSummary={reviewSummary}
+        selectedDay={day}
+        onSelect={updateSelectedDay}
       />
       <DropdownMenuSeparator />
       <div className="p-2 flex justify-center items-center">

@@ -238,7 +238,11 @@ export default function EventView({
         </ToggleGroup>
 
         {selectedReviews.length <= 0 ? (
-          <ReviewFilterGroup filter={filter} onUpdateFilter={updateFilter} />
+          <ReviewFilterGroup
+            reviewSummary={reviewSummary}
+            filter={filter}
+            onUpdateFilter={updateFilter}
+          />
         ) : (
           <ReviewActionGroup
             selectedReviews={selectedReviews}
