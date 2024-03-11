@@ -38,11 +38,6 @@ export default function DynamicVideoPlayer({
 }: DynamicVideoPlayerProps) {
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
-  const timezone = useMemo(
-    () =>
-      config?.ui?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
-    [config],
-  );
 
   // playback behavior
   const wideVideo = useMemo(() => {
@@ -152,14 +147,8 @@ export default function DynamicVideoPlayer({
   // initial state
 
   const initialPlaybackSource = useMemo(() => {
-    const date = new Date(timeRange.start * 1000);
     return {
-      src: `${apiHost}vod/${date.getFullYear()}-${
-        date.getMonth() + 1
-      }/${date.getDate()}/${date.getHours()}/${camera}/${timezone.replaceAll(
-        "/",
-        ",",
-      )}/master.m3u8`,
+      src: `${apiHost}vod/${camera}/start/${timeRange.start}/end/${timeRange.end}/master.m3u8`,
       type: "application/vnd.apple.mpegurl",
     };
     // we only want to calculate this once
@@ -222,13 +211,7 @@ export default function DynamicVideoPlayer({
       return;
     }
 
-    const date = new Date(timeRange.start * 1000);
-    const playbackUri = `${apiHost}vod/${date.getFullYear()}-${
-      date.getMonth() + 1
-    }/${date.getDate()}/${date.getHours()}/${camera}/${timezone.replaceAll(
-      "/",
-      ",",
-    )}/master.m3u8`;
+    const playbackUri = `${apiHost}vod/${camera}/start/${timeRange.start}/end/${timeRange.end}/master.m3u8`;
 
     controller.newPlayback({
       recordings: recordings ?? [],
@@ -436,7 +419,7 @@ export class DynamicVideoController {
     const scrubResult = this.previewController.scrubToTimestamp(time);
 
     if (!scrubResult && saveIfNotReady) {
-      //this.previewController.setNewPreviewStartTime(time);
+      this.previewController.setNewPreviewStartTime(time);
     }
 
     if (scrubResult && this.playerMode != "scrubbing") {

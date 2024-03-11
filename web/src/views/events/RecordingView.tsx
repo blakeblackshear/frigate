@@ -11,6 +11,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
 import { MotionData, ReviewSegment, ReviewSeverity } from "@/types/review";
 import { getChunkedTimeDay } from "@/utils/timelineUtil";
@@ -37,6 +38,7 @@ export function DesktopRecordingView({
   allCameras,
   allPreviews,
 }: DesktopRecordingViewProps) {
+  const { data: config } = useSWR<FrigateConfig>("config");
   const navigate = useNavigate();
   const contentRef = useRef<HTMLDivElement | null>(null);
 
@@ -162,6 +164,21 @@ export function DesktopRecordingView({
       : null,
   );
 
+  const grow = useMemo(() => {
+    if (!config) {
+      return "aspect-video";
+    }
+
+    const aspectRatio =
+      config.cameras[mainCamera].detect.width /
+      config.cameras[mainCamera].detect.height;
+    if (aspectRatio > 2) {
+      return "aspect-wide";
+    } else {
+      return "aspect-video";
+    }
+  }, [config, mainCamera]);
+
   return (
     <div ref={contentRef} className="relative size-full">
       <Button
@@ -177,7 +194,7 @@ export function DesktopRecordingView({
           <div className="flex flex-col h-full px-2 justify-end">
             <div key={mainCamera} className="flex justify-center mb-5">
               <DynamicVideoPlayer
-                className="w-[85%]"
+                className={`w-[85%] ${grow}`}
                 camera={mainCamera}
                 timeRange={currentTimeRange}
                 cameraPreviews={allPreviews ?? []}
