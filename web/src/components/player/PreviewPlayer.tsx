@@ -363,7 +363,7 @@ function PreviewFramesPlayer({
     }
 
     if (!startTime) {
-      controller.scrubToTimestamp(timeRange.start);
+      controller.scrubToTimestamp(frameTimes?.at(-1) ?? timeRange.start);
     } else {
       controller.scrubToTimestamp(startTime);
     }
@@ -412,7 +412,7 @@ class PreviewFramesController extends PreviewController {
     }
 
     const frame = this.frameTimes.find((p) => {
-      return time < p;
+      return time <= p;
     });
 
     if (!frame) {

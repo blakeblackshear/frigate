@@ -613,7 +613,7 @@ function MotionReview({
 
   const [selectedRangeIdx, setSelectedRangeIdx] = useState(initialIndex);
   const [currentTime, setCurrentTime] = useState<number>(
-    startTime ?? timeRangeSegments.ranges[selectedRangeIdx]?.start,
+    startTime ?? timeRangeSegments.ranges[selectedRangeIdx]?.end,
   );
   const currentTimeRange = useMemo(
     () => timeRangeSegments.ranges[selectedRangeIdx],
