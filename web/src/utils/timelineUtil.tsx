@@ -163,7 +163,7 @@ export function getChunkedTimeRange(
   while (end < endTimestamp) {
     startDay.setHours(startDay.getHours() + 1);
 
-    if (startDay > endOfThisHour || startDay.getTime() / 1000 > endTimestamp) {
+    if (startDay > endOfThisHour) {
       break;
     }
 
