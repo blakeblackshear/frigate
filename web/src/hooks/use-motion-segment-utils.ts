@@ -40,14 +40,20 @@ export const useMotionSegmentUtils = (
 
   const getMotionSegmentValue = useCallback(
     (time: number): number => {
-      const matchingEvent = motion_events.find((event) => {
+      const segmentStart = getSegmentStart(time);
+      const segmentEnd = getSegmentEnd(time);
+      const matchingEvents = motion_events.filter((event) => {
         return (
-          time >= getSegmentStart(event.start_time) &&
-          time <= getSegmentEnd(event.start_time)
+          event.start_time >= segmentStart && event.start_time < segmentEnd
         );
       });
 
-      return matchingEvent?.motion ?? 0;
+      const totalMotion = matchingEvents.reduce(
+        (acc, curr) => acc + (curr.motion ?? 0),
+        0,
+      );
+
+      return totalMotion;
     },
     [motion_events, getSegmentStart, getSegmentEnd],
   );
