@@ -9,9 +9,7 @@ import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { Recording } from "@/types/record";
 import { Preview } from "@/types/preview";
 import { DynamicPlayback } from "@/types/playback";
-import PreviewVideoPlayer, {
-  PreviewVideoController,
-} from "./PreviewVideoPlayer";
+import PreviewPlayer, { PreviewController } from "./PreviewPlayer";
 
 type PlayerMode = "playback" | "scrubbing";
 
@@ -63,7 +61,7 @@ export default function DynamicVideoPlayer({
 
   const [playerRef, setPlayerRef] = useState<Player | null>(null);
   const [previewController, setPreviewController] =
-    useState<PreviewVideoController | null>(null);
+    useState<PreviewController | null>(null);
   const [isScrubbing, setIsScrubbing] = useState(previewOnly);
   const [focusedItem, setFocusedItem] = useState<Timeline | undefined>(
     undefined,
@@ -280,7 +278,7 @@ export default function DynamicVideoPlayer({
           )}
         </VideoPlayer>
       </div>
-      <PreviewVideoPlayer
+      <PreviewPlayer
         className={`${isScrubbing ? "visible" : "hidden"} ${className ?? ""}`}
         camera={camera}
         timeRange={timeRange}
@@ -298,7 +296,7 @@ export class DynamicVideoController {
   // main state
   public camera = "";
   private playerController: Player;
-  private previewController: PreviewVideoController;
+  private previewController: PreviewController;
   private setScrubbing: (isScrubbing: boolean) => void;
   private setFocusedItem: (timeline: Timeline) => void;
   private playerMode: PlayerMode = "playback";
@@ -315,7 +313,7 @@ export class DynamicVideoController {
   constructor(
     camera: string,
     playerController: Player,
-    previewController: PreviewVideoController,
+    previewController: PreviewController,
     annotationOffset: number,
     defaultMode: PlayerMode,
     setScrubbing: (isScrubbing: boolean) => void,
@@ -438,7 +436,7 @@ export class DynamicVideoController {
     const scrubResult = this.previewController.scrubToTimestamp(time);
 
     if (!scrubResult && saveIfNotReady) {
-      this.previewController.setNewPreviewStartTime(time);
+      //this.previewController.setNewPreviewStartTime(time);
     }
 
     if (scrubResult && this.playerMode != "scrubbing") {
