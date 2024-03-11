@@ -172,88 +172,93 @@ export function DesktopRecordingView({
         Back
       </Button>
 
-      <div className="absolute h-32 left-2 right-28 bottom-4 flex justify-center gap-1">
-        {allCameras.map((cam) => {
-          if (cam == mainCamera) {
-            return (
-              <div
-                key={cam}
-                className="fixed left-96 right-96 top-[40%] -translate-y-[50%]"
-              >
-                <DynamicVideoPlayer
-                  camera={cam}
-                  timeRange={currentTimeRange}
-                  cameraPreviews={allPreviews ?? []}
-                  startTime={playbackStart}
-                  onControllerReady={(controller) => {
-                    videoPlayersRef.current[cam] = controller;
-                    controller.onPlayerTimeUpdate((timestamp: number) => {
-                      setCurrentTime(timestamp);
-
-                      allCameras.forEach((otherCam) => {
-                        if (cam != otherCam) {
-                          videoPlayersRef.current[otherCam]?.scrubToTimestamp(
-                            Math.floor(timestamp),
-                          );
-                        }
-                      });
-                    });
-                  }}
-                />
-              </div>
-            );
-          }
-
-          return (
-            <div key={cam} className="aspect-video flex items-center">
+      <div className="flex h-full justify-center overflow-hidden">
+        <div className="flex flex-1 flex-wrap">
+          <div className="flex flex-col h-full px-2 justify-end">
+            <div key={mainCamera} className="flex justify-center mb-5">
               <DynamicVideoPlayer
-                className="size-full"
-                camera={cam}
+                className="w-[85%]"
+                camera={mainCamera}
                 timeRange={currentTimeRange}
                 cameraPreviews={allPreviews ?? []}
-                previewOnly
+                startTime={playbackStart}
                 onControllerReady={(controller) => {
-                  videoPlayersRef.current[cam] = controller;
-                  controller.scrubToTimestamp(startTime, true);
+                  videoPlayersRef.current[mainCamera] = controller;
+                  controller.onPlayerTimeUpdate((timestamp: number) => {
+                    setCurrentTime(timestamp);
+
+                    allCameras.forEach((otherCam) => {
+                      if (mainCamera != otherCam) {
+                        videoPlayersRef.current[otherCam]?.scrubToTimestamp(
+                          Math.floor(timestamp),
+                        );
+                      }
+                    });
+                  });
                 }}
-                onClick={() => onSelectCamera(cam)}
               />
             </div>
-          );
-        })}
-      </div>
+            <div className="flex justify-end gap-2 overflow-x-auto">
+              {allCameras.map((cam) => {
+                if (cam !== mainCamera) {
+                  return (
+                    <div
+                      key={cam}
+                      className="aspect-video flex items-center we-[300px]"
+                    >
+                      <DynamicVideoPlayer
+                        className="size-full"
+                        camera={cam}
+                        timeRange={currentTimeRange}
+                        cameraPreviews={allPreviews ?? []}
+                        previewOnly
+                        onControllerReady={(controller) => {
+                          videoPlayersRef.current[cam] = controller;
+                          controller.scrubToTimestamp(startTime, true);
+                        }}
+                        onClick={() => onSelectCamera(cam)}
+                      />
+                    </div>
+                  );
+                }
+                return null;
+              })}
+            </div>
+          </div>
+        </div>
 
-      <div className="absolute overflow-hidden w-56 inset-y-0 right-0">
-        {severity != "significant_motion" ? (
-          <EventReviewTimeline
-            segmentDuration={30}
-            timestampSpread={15}
-            timelineStart={timeRange.end}
-            timelineEnd={timeRange.start}
-            showHandlebar
-            handlebarTime={currentTime}
-            setHandlebarTime={setCurrentTime}
-            events={reviewItems}
-            severityType={severity}
-            contentRef={contentRef}
-            onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
-          />
-        ) : (
-          <MotionReviewTimeline
-            segmentDuration={30}
-            timestampSpread={15}
-            timelineStart={timeRange.end}
-            timelineEnd={timeRange.start}
-            showHandlebar
-            handlebarTime={currentTime}
-            setHandlebarTime={setCurrentTime}
-            events={reviewItems}
-            motion_events={motionData ?? []}
-            severityType={severity}
-            contentRef={contentRef}
-            onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
-          />
-        )}
+        <div className="w-[55px] md:w-[100px] mt-2 overflow-y-auto no-scrollbar">
+          {severity != "significant_motion" ? (
+            <EventReviewTimeline
+              segmentDuration={30}
+              timestampSpread={15}
+              timelineStart={timeRange.end}
+              timelineEnd={timeRange.start}
+              showHandlebar
+              handlebarTime={currentTime}
+              setHandlebarTime={setCurrentTime}
+              events={reviewItems}
+              severityType={severity}
+              contentRef={contentRef}
+              onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
+            />
+          ) : (
+            <MotionReviewTimeline
+              segmentDuration={30}
+              timestampSpread={15}
+              timelineStart={timeRange.end}
+              timelineEnd={timeRange.start}
+              showHandlebar
+              handlebarTime={currentTime}
+              setHandlebarTime={setCurrentTime}
+              events={reviewItems}
+              motion_events={motionData ?? []}
+              severityType={severity}
+              contentRef={contentRef}
+              onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
