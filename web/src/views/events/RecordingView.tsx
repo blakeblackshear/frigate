@@ -194,10 +194,7 @@ export function DesktopRecordingView({
               {allCameras.map((cam) => {
                 if (cam !== mainCamera) {
                   return (
-                    <div
-                      key={cam}
-                      className="aspect-video flex items-center w-[260px]"
-                    >
+                    <div key={cam} className="aspect-video flex items-center">
                       <PreviewPlayer
                         className="size-full"
                         camera={cam}
