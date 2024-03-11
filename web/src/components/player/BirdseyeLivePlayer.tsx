@@ -39,6 +39,7 @@ export default function BirdseyeLivePlayer({
       <div className={`max-w-[${birdseyeConfig.width}px]`}>
         <JSMpegPlayer
           camera="birdseye"
+          className="w-full flex justify-center rounded-2xl overflow-hidden"
           width={birdseyeConfig.width}
           height={birdseyeConfig.height}
         />

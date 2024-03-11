@@ -18,9 +18,16 @@ function Live() {
 
     if (cameraGroup) {
       const group = config.camera_groups[cameraGroup];
-      return Object.values(config.cameras)
+      console.log(config.cameras);
+      const groupCameras = Object.values(config.cameras)
         .filter((conf) => conf.enabled && group.cameras.includes(conf.name))
         .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
+      if (group.cameras.includes("birdseye")) {
+        groupCameras.push({
+          name: "birdseye",
+        });
+      }
+      return groupCameras;
     }
 
     return Object.values(config.cameras)
