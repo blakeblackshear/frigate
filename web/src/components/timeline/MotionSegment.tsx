@@ -196,7 +196,6 @@ export function MotionSegment({
   return (
     <div
       key={segmentKey}
-      data-segment-key={segmentKey}
       className={segmentClasses}
       onClick={segmentClick}
       onTouchStart={(event) => handleTouchStart(event, segmentClick)}
