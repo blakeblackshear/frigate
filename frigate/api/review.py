@@ -403,7 +403,7 @@ def motion_activity():
     df.set_index(["start_time"], inplace=True)
 
     # normalize data
-    df = df.resample(f"{scale}S").sum().fillna(0)
+    df = df.resample(f"{scale}S").sum().fillna(0.0)
     mean = df["motion"].mean()
     std = df["motion"].std()
     df["motion"] = (df["motion"] - mean) / std
