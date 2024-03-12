@@ -2,19 +2,10 @@ mqtt:
   enabled: False
 
 cameras:
-  Portiek: # <------ Name the camera
-    enabled: True
+  dummy_camera: # <--- this will be changed to your actual camera later
+    enabled: False
     ffmpeg:
       inputs:
-        - path: rtsp://admin:admin@192.168.178.183:8554/Streaming/Channels/101 # <----- The stream you want to use for detection
+        - path: rtsp://admin:admin@192.168.178.183:8554/Streaming/Channels/101 
           roles:
             - detect
-  Portiek: # <------ Name the camera
-    enabled: True
-    ffmpeg:
-      inputs:
-        - path: rtsp://admin:admin@192.168.178.183:8554/Streaming/Channels/101 # <----- The stream you want to use for detection
-          roles:
-            - detect
-    detect:
-      enabled: False # <---- disable detection until you have a working camera feed
