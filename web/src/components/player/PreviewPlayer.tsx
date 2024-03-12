@@ -276,9 +276,15 @@ class PreviewVideoController extends PreviewController {
         if (isAndroid) {
           const currentTs =
             this.previewRef.current.currentTime + this.preview.start;
-          this.previewRef.current.currentTime =
-            this.previewRef.current.currentTime +
-            (this.timeToSeek - currentTs) / 2;
+          const diff = this.timeToSeek - currentTs;
+
+          if (diff < 30) {
+            this.previewRef.current.currentTime =
+              this.previewRef.current.currentTime + diff / 2;
+          } else {
+            this.previewRef.current.currentTime =
+              this.timeToSeek - this.preview.start;
+          }
         } else {
           this.previewRef.current.currentTime =
             this.timeToSeek - this.preview.start;
