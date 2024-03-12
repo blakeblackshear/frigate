@@ -53,6 +53,11 @@ export function DesktopRecordingView({
 
   const [playbackStart, setPlaybackStart] = useState(startTime);
 
+  const mainCameraReviewItems = useMemo(
+    () => reviewItems.filter((cam) => cam.camera == mainCamera),
+    [reviewItems, mainCamera],
+  );
+
   // timeline time
 
   const timeRange = useMemo(() => getChunkedTimeDay(startTime), [startTime]);
@@ -139,6 +144,7 @@ export function DesktopRecordingView({
             before: timeRange.end,
             after: timeRange.start,
             scale: SEGMENT_DURATION / 2,
+            cameras: mainCamera,
           },
         ]
       : null,
@@ -229,7 +235,7 @@ export function DesktopRecordingView({
               showHandlebar
               handlebarTime={currentTime}
               setHandlebarTime={setCurrentTime}
-              events={reviewItems}
+              events={mainCameraReviewItems}
               severityType={severity}
               contentRef={contentRef}
               onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
@@ -243,7 +249,7 @@ export function DesktopRecordingView({
               showHandlebar
               handlebarTime={currentTime}
               setHandlebarTime={setCurrentTime}
-              events={reviewItems}
+              events={mainCameraReviewItems}
               motion_events={motionData ?? []}
               severityType={severity}
               contentRef={contentRef}
@@ -293,6 +299,11 @@ export function MobileRecordingView({
   const currentTimeRange = useMemo(
     () => timeRange.ranges[selectedRangeIdx],
     [selectedRangeIdx, timeRange],
+  );
+
+  const mainCameraReviewItems = useMemo(
+    () => reviewItems.filter((cam) => cam.camera == playbackCamera),
+    [reviewItems, playbackCamera],
   );
 
   // move to next clip
@@ -356,6 +367,7 @@ export function MobileRecordingView({
             before: timeRange.end,
             after: timeRange.start,
             scale: SEGMENT_DURATION / 2,
+            cameras: playbackCamera,
           },
         ]
       : null,
@@ -424,7 +436,7 @@ export function MobileRecordingView({
             showHandlebar
             handlebarTime={currentTime}
             setHandlebarTime={setCurrentTime}
-            events={reviewItems}
+            events={mainCameraReviewItems}
             severityType={severity}
             contentRef={contentRef}
             onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
@@ -438,7 +450,7 @@ export function MobileRecordingView({
             showHandlebar
             handlebarTime={currentTime}
             setHandlebarTime={setCurrentTime}
-            events={reviewItems}
+            events={mainCameraReviewItems}
             motion_events={motionData ?? []}
             severityType={severity}
             contentRef={contentRef}
