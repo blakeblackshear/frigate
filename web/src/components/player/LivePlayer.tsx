@@ -20,6 +20,7 @@ type LivePlayerProps = {
   showStillWithoutActivity?: boolean;
   windowVisible?: boolean;
   playAudio?: boolean;
+  micEnabled?: boolean; // only webrtc supports mic
   onClick?: () => void;
 };
 
@@ -30,6 +31,7 @@ export default function LivePlayer({
   showStillWithoutActivity = true,
   windowVisible = true,
   playAudio = false,
+  micEnabled = false,
   onClick,
 }: LivePlayerProps) {
   // camera activity
@@ -97,6 +99,7 @@ export default function LivePlayer({
         camera={cameraConfig.live.stream_name}
         playbackEnabled={cameraActive}
         audioEnabled={playAudio}
+        microphoneEnabled={micEnabled}
         onPlaying={() => setLiveReady(true)}
       />
     );

@@ -6,6 +6,7 @@ type WebRtcPlayerProps = {
   camera: string;
   playbackEnabled?: boolean;
   audioEnabled?: boolean;
+  microphoneEnabled?: boolean;
   onPlaying?: () => void;
 };
 
@@ -14,6 +15,7 @@ export default function WebRtcPlayer({
   camera,
   playbackEnabled = true,
   audioEnabled = false,
+  microphoneEnabled = false,
   onPlaying,
 }: WebRtcPlayerProps) {
   // camera states
@@ -145,7 +147,9 @@ export default function WebRtcPlayer({
       "ws",
     )}live/webrtc/api/ws?src=${camera}`;
     const ws = new WebSocket(url);
-    const aPc = PeerConnection("video+audio");
+    const aPc = PeerConnection(
+      microphoneEnabled ? "video+audio+microphone" : "video+audio",
+    );
     connect(ws, aPc);
 
     return () => {
@@ -154,7 +158,15 @@ export default function WebRtcPlayer({
         pcRef.current = undefined;
       }
     };
-  }, [camera, connect, PeerConnection, pcRef, videoRef, playbackEnabled]);
+  }, [
+    camera,
+    connect,
+    PeerConnection,
+    pcRef,
+    videoRef,
+    playbackEnabled,
+    microphoneEnabled,
+  ]);
 
   return (
     <video
