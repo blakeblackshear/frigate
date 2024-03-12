@@ -130,7 +130,7 @@ export default function LiveDashboardView({
       <div
         className={`my-4 grid ${layout == "grid" ? "grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4" : ""} gap-2 md:gap-4  *:rounded-2xl *:bg-black`}
       >
-        {includeBirdseye && birdseyeConfig && (
+        {includeBirdseye && birdseyeConfig?.enabled && (
           <BirdseyeLivePlayer
             birdseyeConfig={birdseyeConfig}
             liveMode={birdseyeConfig.restream ? "mse" : "jsmpeg"}

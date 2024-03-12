@@ -146,6 +146,8 @@ function NewGroupDialog({ open, setOpen, currentGroups }: NewGroupDialogProps) {
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
 
+  const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
+
   // add fields
 
   const [editState, setEditState] = useState<"none" | "add" | "edit">("none");
@@ -298,26 +300,27 @@ function NewGroupDialog({ open, setOpen, currentGroups }: NewGroupDialogProps) {
                 </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                {[...Object.keys(config?.cameras ?? {}), "birdseye"].map(
-                  (camera) => (
-                    <FilterCheckBox
-                      key={camera}
-                      isChecked={cameras.includes(camera)}
-                      label={camera.replaceAll("_", " ")}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setCameras([...cameras, camera]);
-                        } else {
-                          const index = cameras.indexOf(camera);
-                          setCameras([
-                            ...cameras.slice(0, index),
-                            ...cameras.slice(index + 1),
-                          ]);
-                        }
-                      }}
-                    />
-                  ),
-                )}
+                {[
+                  ...Object.keys(config?.cameras ?? {}),
+                  ...(birdseyeConfig?.enabled ? ["birdseye"] : []),
+                ].map((camera) => (
+                  <FilterCheckBox
+                    key={camera}
+                    isChecked={cameras.includes(camera)}
+                    label={camera.replaceAll("_", " ")}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setCameras([...cameras, camera]);
+                      } else {
+                        const index = cameras.indexOf(camera);
+                        setCameras([
+                          ...cameras.slice(0, index),
+                          ...cameras.slice(index + 1),
+                        ]);
+                      }
+                    }}
+                  />
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
             {error && <div className="text-danger">{error}</div>}
