@@ -146,7 +146,6 @@ export default function LiveDashboardView({
           } else {
             grow = "aspect-video";
           }
-          // console.log(camera.name);
           return (
             <LivePlayer
               key={camera.name}
