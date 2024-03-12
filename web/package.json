@@ -80,7 +80,7 @@
     "@types/react-transition-group": "^4.4.10",
     "@types/strftime": "^0.9.8",
     "@typescript-eslint/eslint-plugin": "^6.10.0",
-    "@typescript-eslint/parser": "^6.10.0",
+    "@typescript-eslint/parser": "^7.2.0",
     "@vitejs/plugin-react-swc": "^3.6.0",
     "@vitest/coverage-v8": "^1.0.0",
     "autoprefixer": "^10.4.17",
