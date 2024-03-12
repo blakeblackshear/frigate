@@ -10,7 +10,7 @@ import { Recording } from "@/types/record";
 import { Preview } from "@/types/preview";
 import { DynamicPlayback } from "@/types/playback";
 import PreviewPlayer, { PreviewController } from "./PreviewPlayer";
-import { isDesktop, isMobile } from "react-device-detect";
+import { isDesktop } from "react-device-detect";
 import { LuPause, LuPlay } from "react-icons/lu";
 import {
   DropdownMenu,
