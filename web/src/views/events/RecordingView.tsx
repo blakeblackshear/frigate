@@ -134,7 +134,7 @@ export function DesktopRecordingView({
   const { data: motionData } = useSWR<MotionData[]>(
     severity == "significant_motion"
       ? [
-          "review/activity",
+          "review/activity/motion",
           {
             before: timeRange.end,
             after: timeRange.start,
@@ -351,7 +351,7 @@ export function MobileRecordingView({
   const { data: motionData } = useSWR<MotionData[]>(
     severity == "significant_motion"
       ? [
-          "review/activity",
+          "review/activity/motion",
           {
             before: timeRange.end,
             after: timeRange.start,
