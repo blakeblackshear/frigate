@@ -28,11 +28,11 @@ services:
       - /dev/bus/usb:/dev/bus/usb
       # - /dev/dri:/dev/dri # for intel hwaccel, needs to be updated for your hardware
     volumes:
-      - .:/workspace/frigate:cached
-      - ./web/dist:/opt/frigate/web:cached
+      - /home/frigate:/workspace/frigate:cached
+      - /home/frigate/web/dist:/opt/frigate/web:cached
       - /etc/localtime:/etc/localtime:ro
-      - ./config:/config
-      - ./debug:/media/frigate
+      - /home/frigate/config:/config
+      - /home/frigate/debug:/media/frigate
       - /dev/bus/usb:/dev/bus/usb
   mqtt:
     container_name: mqtt
