@@ -26,10 +26,9 @@ function Live() {
 
     if (cameraGroup) {
       const group = config.camera_groups[cameraGroup];
-      const groupCameras = Object.values(config.cameras)
+      return Object.values(config.cameras)
         .filter((conf) => conf.enabled && group.cameras.includes(conf.name))
         .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
-      return groupCameras;
     }
 
     return Object.values(config.cameras)
