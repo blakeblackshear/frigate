@@ -161,7 +161,7 @@ export default function PreviewThumbnailPlayer({
   return (
     <div
       className="relative size-full cursor-pointer"
-      onMouseEnter={isMobile ? undefined : () => setIsHovered(true)}
+      onMouseOver={isMobile ? undefined : () => setIsHovered(true)}
       onMouseLeave={isMobile ? undefined : () => setIsHovered(false)}
       onContextMenu={(e) => {
         e.preventDefault();

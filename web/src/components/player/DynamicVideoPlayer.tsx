@@ -10,6 +10,16 @@ import { Recording } from "@/types/record";
 import { Preview } from "@/types/preview";
 import { DynamicPlayback } from "@/types/playback";
 import PreviewPlayer, { PreviewController } from "./PreviewPlayer";
+import { isDesktop, isMobile } from "react-device-detect";
+import { LuPause, LuPlay } from "react-icons/lu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { MdForward10, MdReplay10 } from "react-icons/md";
 
 type PlayerMode = "playback" | "scrubbing";
 
@@ -21,20 +31,16 @@ type DynamicVideoPlayerProps = {
   camera: string;
   timeRange: { start: number; end: number };
   cameraPreviews: Preview[];
-  previewOnly?: boolean;
   startTime?: number;
   onControllerReady: (controller: DynamicVideoController) => void;
-  onClick?: () => void;
 };
 export default function DynamicVideoPlayer({
   className,
   camera,
   timeRange,
   cameraPreviews,
-  previewOnly = false,
   startTime,
   onControllerReady,
-  onClick,
 }: DynamicVideoPlayerProps) {
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -57,7 +63,9 @@ export default function DynamicVideoPlayer({
   const [playerRef, setPlayerRef] = useState<Player | null>(null);
   const [previewController, setPreviewController] =
     useState<PreviewController | null>(null);
-  const [isScrubbing, setIsScrubbing] = useState(previewOnly);
+  const [controls, setControls] = useState(false);
+  const [controlsOpen, setControlsOpen] = useState(false);
+  const [isScrubbing, setIsScrubbing] = useState(false);
   const [focusedItem, setFocusedItem] = useState<Timeline | undefined>(
     undefined,
   );
@@ -71,7 +79,7 @@ export default function DynamicVideoPlayer({
       playerRef,
       previewController,
       (config.cameras[camera]?.detect?.annotation_offset || 0) / 1000,
-      previewOnly ? "scrubbing" : "playback",
+      "playback",
       setIsScrubbing,
       setFocusedItem,
     );
@@ -96,7 +104,7 @@ export default function DynamicVideoPlayer({
 
   const onKeyboardShortcut = useCallback(
     (key: string, down: boolean, repeat: boolean) => {
-      if (!playerRef || previewOnly) {
+      if (!playerRef) {
         return;
       }
 
@@ -137,7 +145,7 @@ export default function DynamicVideoPlayer({
     },
     // only update when preview only changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [playerRef, previewOnly],
+    [playerRef],
   );
   useKeyboardListener(
     ["ArrowLeft", "ArrowRight", "m", " "],
@@ -164,13 +172,6 @@ export default function DynamicVideoPlayer({
       return;
     }
 
-    if (previewOnly) {
-      player.autoplay(false);
-      return;
-    }
-
-    player.autoplay(true);
-
     if (!startTime) {
       return;
     }
@@ -189,7 +190,7 @@ export default function DynamicVideoPlayer({
     };
     // we only want to calculate this once
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [previewOnly, startTime, controller]);
+  }, [startTime, controller]);
 
   // state of playback player
 
@@ -200,14 +201,12 @@ export default function DynamicVideoPlayer({
     };
   }, [timeRange]);
   const { data: recordings } = useSWR<Recording[]>(
-    previewOnly && onClick == undefined
-      ? null
-      : [`${camera}/recordings`, recordingParams],
+    [`${camera}/recordings`, recordingParams],
     { revalidateOnFocus: false },
   );
 
   useEffect(() => {
-    if (!controller || (!previewOnly && !recordings)) {
+    if (!controller || !recordings) {
       return;
     }
 
@@ -224,26 +223,39 @@ export default function DynamicVideoPlayer({
 
   return (
     <div
-      className={`relative ${className ?? ""} ${onClick ? "cursor-pointer" : ""}`}
-      onClick={onClick}
+      className={`relative ${className ?? ""} cursor-pointer`}
+      onMouseOver={
+        isDesktop
+          ? () => {
+              setControls(true);
+            }
+          : undefined
+      }
+      onMouseOut={
+        isDesktop
+          ? () => {
+              setControls(controlsOpen);
+            }
+          : undefined
+      }
+      onClick={
+        isMobile
+          ? (e) => {
+              e.stopPropagation();
+              setControls(!controls);
+            }
+          : undefined
+      }
     >
-      <div
-        className={`w-full relative ${
-          previewOnly || isScrubbing ? "hidden" : "visible"
-        }`}
-      >
+      <div className={`w-full relative ${isScrubbing ? "hidden" : "visible"}`}>
         <VideoPlayer
           options={{
             preload: "auto",
-            autoplay: false,
+            autoplay: true,
             sources: [initialPlaybackSource],
             aspectRatio: wideVideo ? undefined : "16:9",
-            controlBar: {
-              remainingTimeDisplay: false,
-              progressControl: {
-                seekBar: false,
-              },
-            },
+            controls: false,
+            nativeControlsForTouch: true,
           }}
           seekOptions={{ forward: 10, backward: 5 }}
           onReady={(player) => {
@@ -260,6 +272,12 @@ export default function DynamicVideoPlayer({
             />
           )}
         </VideoPlayer>
+        <PlayerControls
+          player={playerRef}
+          show={controls}
+          controlsOpen={controlsOpen}
+          setControlsOpen={setControlsOpen}
+        />
       </div>
       <PreviewPlayer
         className={`${isScrubbing ? "visible" : "hidden"} ${className ?? ""}`}
@@ -269,7 +287,6 @@ export default function DynamicVideoPlayer({
         onControllerReady={(previewController) => {
           setPreviewController(previewController);
         }}
-        onClick={onClick}
       />
     </div>
   );
@@ -440,4 +457,112 @@ export class DynamicVideoController {
       ) != undefined
     );
   }
+}
+
+type PlayerControlsProps = {
+  player: Player | null;
+  show: boolean;
+  controlsOpen: boolean;
+  setControlsOpen: (open: boolean) => void;
+};
+function PlayerControls({
+  player,
+  show,
+  controlsOpen,
+  setControlsOpen,
+}: PlayerControlsProps) {
+  const playbackRates = useMemo(() => {
+    if (!player) {
+      return [];
+    }
+
+    // @ts-expect-error player getter requires undefined
+    return player.playbackRates(undefined);
+  }, [player]);
+
+  const onReplay = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      e.stopPropagation();
+
+      const currentTime = player?.currentTime();
+
+      if (!player || !currentTime) {
+        return;
+      }
+
+      player.currentTime(Math.max(0, currentTime - 10));
+    },
+    [player],
+  );
+
+  const onSkip = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      e.stopPropagation();
+
+      const currentTime = player?.currentTime();
+
+      if (!player || !currentTime) {
+        return;
+      }
+
+      player.currentTime(currentTime + 10);
+    },
+    [player],
+  );
+
+  const onTogglePlay = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      e.stopPropagation();
+
+      if (!player) {
+        return;
+      }
+
+      if (player.paused()) {
+        player.play();
+      } else {
+        player.pause();
+      }
+    },
+    [player],
+  );
+
+  if (!player || !show) {
+    return;
+  }
+
+  return (
+    <div
+      className={`absolute bottom-5 left-1/2 -translate-x-1/2 px-4 py-2 flex justify-between items-center gap-8 text-white z-10 bg-black bg-opacity-60 rounded-lg`}
+    >
+      <MdReplay10 className="size-5 cursor-pointer" onClick={onReplay} />
+      <div className="cursor-pointer" onClick={onTogglePlay}>
+        {player.paused() ? (
+          <LuPlay className="size-5 fill-white" />
+        ) : (
+          <LuPause className="size-5 fill-white" />
+        )}
+      </div>
+      <MdForward10 className="size-5 cursor-pointer" onClick={onSkip} />
+      <DropdownMenu
+        open={controlsOpen}
+        onOpenChange={(open) => {
+          setControlsOpen(open);
+        }}
+      >
+        <DropdownMenuTrigger>{`${player.playbackRate()}x`}</DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuRadioGroup
+            onValueChange={(rate) => player.playbackRate(parseInt(rate))}
+          >
+            {playbackRates.map((rate) => (
+              <DropdownMenuRadioItem key={rate} value={rate.toString()}>
+                {rate}x
+              </DropdownMenuRadioItem>
+            ))}
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
 }
