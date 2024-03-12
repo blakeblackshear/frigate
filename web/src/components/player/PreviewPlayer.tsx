@@ -12,6 +12,7 @@ import { Preview } from "@/types/preview";
 import { PreviewPlayback } from "@/types/playback";
 import { isCurrentHour } from "@/utils/dateUtil";
 import { baseUrl } from "@/api/baseUrl";
+import { isAndroid } from "react-device-detect";
 
 type PreviewPlayerProps = {
   className?: string;
@@ -235,7 +236,7 @@ class PreviewVideoController extends PreviewController {
   }
 
   override scrubToTimestamp(time: number): boolean {
-    if (!this.preview || !this.timeRange) {
+    if (!this.previewRef.current || !this.preview || !this.timeRange) {
       return false;
     }
 
@@ -246,13 +247,11 @@ class PreviewVideoController extends PreviewController {
     if (this.seeking) {
       this.timeToSeek = time;
     } else {
-      if (this.previewRef.current) {
-        this.previewRef.current.currentTime = Math.max(
-          0,
-          time - this.preview.start,
-        );
-        this.seeking = true;
-      }
+      this.previewRef.current.currentTime = Math.max(
+        0,
+        time - this.preview.start,
+      );
+      this.seeking = true;
     }
 
     return true;
@@ -263,12 +262,25 @@ class PreviewVideoController extends PreviewController {
       return;
     }
 
-    if (
-      this.timeToSeek &&
-      this.timeToSeek != this.previewRef.current?.currentTime
-    ) {
-      this.previewRef.current.currentTime =
-        this.timeToSeek - this.preview.start;
+    if (this.timeToSeek) {
+      if (
+        Math.round(this.previewRef.current.currentTime + this.preview.start) !=
+        Math.round(this.timeToSeek)
+      ) {
+        if (isAndroid) {
+          const currentTs =
+            this.previewRef.current.currentTime + this.preview.start;
+          this.previewRef.current.currentTime =
+            this.previewRef.current.currentTime +
+            (this.timeToSeek - currentTs) / 2;
+        } else {
+          this.previewRef.current.currentTime =
+            this.timeToSeek - this.preview.start;
+        }
+      } else {
+        this.seeking = false;
+        this.timeToSeek = undefined;
+      }
     } else {
       this.seeking = false;
     }
