@@ -1,23 +1,25 @@
 {
   "name": "Frigate",
   "short_name": "Frigate",
-  "start_url": "./",
-  "scope": ".",
+  "start_url": "/",
   "icons": [
     {
       "src": "/images/android-chrome-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/images/android-chrome-192x192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/images/favicon-32x32.png",
       "sizes": "32x32",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/images/android-chrome-192x192.png",
