@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import BirdseyeLivePlayer from "@/components/player/BirdseyeLivePlayer";
 
 // Color data
 const colors = [
@@ -184,6 +185,7 @@ function UIPlayground() {
   };
 
   const [isEventsReviewTimeline, setIsEventsReviewTimeline] = useState(true);
+  const birdseyeConfig = config?.birdseye;
 
   return (
     <>
@@ -242,6 +244,14 @@ function UIPlayground() {
               </div>
               <div className="w-[40px] my-4">
                 <CameraActivityIndicator />
+              </div>
+              <div className="">
+                {birdseyeConfig && (
+                  <BirdseyeLivePlayer
+                    birdseyeConfig={birdseyeConfig}
+                    liveMode={birdseyeConfig.restream ? "mse" : "jsmpeg"}
+                  />
+                )}
               </div>
               <p>
                 <Button onClick={handleZoomOut} disabled={zoomLevel === 0}>

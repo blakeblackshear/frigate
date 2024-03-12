@@ -146,6 +146,8 @@ function NewGroupDialog({ open, setOpen, currentGroups }: NewGroupDialogProps) {
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
 
+  const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
+
   // add fields
 
   const [editState, setEditState] = useState<"none" | "add" | "edit">("none");
@@ -298,7 +300,10 @@ function NewGroupDialog({ open, setOpen, currentGroups }: NewGroupDialogProps) {
                 </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                {Object.keys(config?.cameras ?? {}).map((camera) => (
+                {[
+                  ...(birdseyeConfig?.enabled ? ["birdseye"] : []),
+                  ...Object.keys(config?.cameras ?? {}),
+                ].map((camera) => (
                   <FilterCheckBox
                     key={camera}
                     isChecked={cameras.includes(camera)}

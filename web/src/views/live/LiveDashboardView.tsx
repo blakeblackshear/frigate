@@ -2,12 +2,13 @@ import { useFrigateReviews } from "@/api/ws";
 import Logo from "@/components/Logo";
 import { CameraGroupSelector } from "@/components/filter/CameraGroupSelector";
 import { AnimatedEventThumbnail } from "@/components/image/AnimatedEventThumbnail";
+import BirdseyeLivePlayer from "@/components/player/BirdseyeLivePlayer";
 import LivePlayer from "@/components/player/LivePlayer";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { usePersistence } from "@/hooks/use-persistence";
-import { CameraConfig } from "@/types/frigateConfig";
+import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import { ReviewSegment } from "@/types/review";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { isDesktop, isMobile, isSafari } from "react-device-detect";
@@ -16,12 +17,16 @@ import useSWR from "swr";
 
 type LiveDashboardViewProps = {
   cameras: CameraConfig[];
+  includeBirdseye: boolean;
   onSelectCamera: (camera: string) => void;
 };
 export default function LiveDashboardView({
   cameras,
+  includeBirdseye,
   onSelectCamera,
 }: LiveDashboardViewProps) {
+  const { data: config } = useSWR<FrigateConfig>("config");
+
   // layout
 
   const [layout, setLayout] = usePersistence<"grid" | "list">(
@@ -74,6 +79,8 @@ export default function LiveDashboardView({
     };
   }, [visibilityListener]);
 
+  const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
+
   return (
     <div className="size-full overflow-y-auto px-2">
       {isMobile && (
@@ -123,6 +130,12 @@ export default function LiveDashboardView({
       <div
         className={`my-4 grid ${layout == "grid" ? "grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4" : ""} gap-2 md:gap-4  *:rounded-2xl *:bg-black`}
       >
+        {includeBirdseye && birdseyeConfig?.enabled && (
+          <BirdseyeLivePlayer
+            birdseyeConfig={birdseyeConfig}
+            liveMode={birdseyeConfig.restream ? "mse" : "jsmpeg"}
+          />
+        )}
         {cameras.map((camera) => {
           let grow;
           const aspectRatio = camera.detect.width / camera.detect.height;
