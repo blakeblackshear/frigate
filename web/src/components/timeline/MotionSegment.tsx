@@ -244,21 +244,27 @@ export function MotionSegment({
         </div>
       </div>
 
-      {severity.map((severityValue: number, index: number) => (
-        <React.Fragment key={index}>
-          <div className="absolute right-0 h-2 z-10">
-            <div
-              key={`${segmentKey}_${index}_secondary_data`}
-              className={`
-                  w-1 h-2 bg-gradient-to-r
-                  ${roundBottomSecondary ? "rounded-bl-full rounded-br-full" : ""}
-                  ${roundTopSecondary ? "rounded-tl-full rounded-tr-full" : ""}
-                  ${severityColors[severityValue]}
-                `}
-            ></div>
-          </div>
-        </React.Fragment>
-      ))}
+      {severity.map((severityValue: number, index: number) => {
+        if (severityValue > 1) {
+          return (
+            <React.Fragment key={index}>
+              <div className="absolute right-0 h-2 z-10">
+                <div
+                  key={`${segmentKey}_${index}_secondary_data`}
+                  className={`
+              w-1 h-2 bg-gradient-to-r
+              ${roundBottomSecondary ? "rounded-bl-full rounded-br-full" : ""}
+              ${roundTopSecondary ? "rounded-tl-full rounded-tr-full" : ""}
+              ${severityColors[severityValue]}
+            `}
+                ></div>
+              </div>
+            </React.Fragment>
+          );
+        } else {
+          return null;
+        }
+      })}
     </div>
   );
 }
