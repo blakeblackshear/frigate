@@ -40,6 +40,8 @@ import {
   FaAngleUp,
   FaCompress,
   FaExpand,
+  FaMicrophone,
+  FaMicrophoneSlash,
 } from "react-icons/fa";
 import { GiSpeaker, GiSpeakerOff } from "react-icons/gi";
 import { IoMdArrowBack } from "react-icons/io";
@@ -98,6 +100,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
   // playback state
 
   const [audio, setAudio] = useState(false);
+  const [mic, setMic] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
 
   const growClassName = useMemo(() => {
@@ -190,6 +193,16 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
                 }
               }}
             />
+            {window.isSecureContext && (
+              <CameraFeatureToggle
+                className="p-2 md:p-0"
+                variant={fullscreen ? "overlay" : "primary"}
+                Icon={mic ? FaMicrophone : FaMicrophoneSlash}
+                isActive={mic}
+                title={`${mic ? "Disable" : "Enable"} Two Way Talk`}
+                onClick={() => setMic(!mic)}
+              />
+            )}
             <CameraFeatureToggle
               className="p-2 md:p-0"
               variant={fullscreen ? "overlay" : "primary"}
@@ -249,7 +262,8 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
             showStillWithoutActivity={false}
             cameraConfig={camera}
             playAudio={audio}
-            preferredLiveMode={isSafari ? "webrtc" : "mse"}
+            micEnabled={mic}
+            preferredLiveMode={isSafari || mic ? "webrtc" : "mse"}
           />
         </div>
         {camera.onvif.host != "" && <PtzControlPanel camera={camera.name} />}
@@ -410,7 +424,10 @@ function PtzControlPanel({ camera }: { camera: string }) {
           <DropdownMenuContent>
             {ptz?.presets.map((preset) => {
               return (
-                <DropdownMenuItem onSelect={() => sendPtz(`preset_${preset}`)}>
+                <DropdownMenuItem
+                  key={preset}
+                  onSelect={() => sendPtz(`preset_${preset}`)}
+                >
                   {preset}
                 </DropdownMenuItem>
               );
