@@ -34,7 +34,7 @@ export default function BirdseyeLivePlayer({
   } else if (liveMode == "jsmpeg") {
     player = (
       <JSMpegPlayer
-        className={`w-full max-w-[${birdseyeConfig.width}px] flex justify-center rounded-2xl overflow-hidden`}
+        className="size-full flex justify-center rounded-2xl overflow-hidden"
         camera="birdseye"
         width={birdseyeConfig.width}
         height={birdseyeConfig.height}
@@ -48,7 +48,7 @@ export default function BirdseyeLivePlayer({
     <div className={`relative flex justify-center w-full cursor-pointer`}>
       <div className="absolute top-0 inset-x-0 rounded-2xl z-10 w-full h-[30%] bg-gradient-to-b from-black/20 to-transparent pointer-events-none"></div>
       <div className="absolute bottom-0 inset-x-0 rounded-2xl z-10 w-full h-[10%] bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
-      <div className="">{player}</div>
+      <div className="size-full">{player}</div>
     </div>
   );
 }

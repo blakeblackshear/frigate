@@ -301,8 +301,8 @@ function NewGroupDialog({ open, setOpen, currentGroups }: NewGroupDialogProps) {
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 {[
-                  ...Object.keys(config?.cameras ?? {}),
                   ...(birdseyeConfig?.enabled ? ["birdseye"] : []),
+                  ...Object.keys(config?.cameras ?? {}),
                 ].map((camera) => (
                   <FilterCheckBox
                     key={camera}
