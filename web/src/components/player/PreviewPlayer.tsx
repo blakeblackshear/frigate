@@ -13,6 +13,7 @@ import { PreviewPlayback } from "@/types/playback";
 import { isCurrentHour } from "@/utils/dateUtil";
 import { baseUrl } from "@/api/baseUrl";
 import { isAndroid } from "react-device-detect";
+import { Skeleton } from "../ui/skeleton";
 
 type PreviewPlayerProps = {
   className?: string;
@@ -119,6 +120,7 @@ function PreviewVideoPlayer({
 
   // initial state
 
+  const [loaded, setLoaded] = useState(false);
   const initialPreview = useMemo(() => {
     return cameraPreviews.find(
       (preview) =>
@@ -152,6 +154,7 @@ function PreviewVideoPlayer({
         Math.round(preview.start) >= timeRange.start &&
         Math.floor(preview.end) <= timeRange.end,
     );
+    setLoaded(false);
     setCurrentPreview(preview);
 
     controller.newPlayback({
@@ -186,6 +189,8 @@ function PreviewVideoPlayer({
         disableRemotePlayback
         onSeeked={onPreviewSeeked}
         onLoadedData={() => {
+          setLoaded(true);
+
           if (controller) {
             controller.previewReady();
           } else {
@@ -201,6 +206,7 @@ function PreviewVideoPlayer({
           <source src={currentPreview.src} type={currentPreview.type} />
         )}
       </video>
+      {!loaded && <Skeleton className="absolute inset-0" />}
       {cameraPreviews && !currentPreview && (
         <div className="absolute inset-x-0 top-1/2 -y-translate-1/2 bg-black text-white rounded-2xl align-center text-center">
           No Preview Found
@@ -270,9 +276,15 @@ class PreviewVideoController extends PreviewController {
         if (isAndroid) {
           const currentTs =
             this.previewRef.current.currentTime + this.preview.start;
-          this.previewRef.current.currentTime =
-            this.previewRef.current.currentTime +
-            (this.timeToSeek - currentTs) / 2;
+          const diff = this.timeToSeek - currentTs;
+
+          if (diff < 30) {
+            this.previewRef.current.currentTime =
+              this.previewRef.current.currentTime + diff / 2;
+          } else {
+            this.previewRef.current.currentTime =
+              this.timeToSeek - this.preview.start;
+          }
         } else {
           this.previewRef.current.currentTime =
             this.timeToSeek - this.preview.start;

@@ -10,7 +10,7 @@ import { Recording } from "@/types/record";
 import { Preview } from "@/types/preview";
 import { DynamicPlayback } from "@/types/playback";
 import PreviewPlayer, { PreviewController } from "./PreviewPlayer";
-import { isDesktop, isMobile } from "react-device-detect";
+import { isDesktop } from "react-device-detect";
 import { LuPause, LuPlay } from "react-icons/lu";
 import {
   DropdownMenu,
@@ -152,6 +152,19 @@ export default function DynamicVideoPlayer({
     onKeyboardShortcut,
   );
 
+  // mobile tap controls
+
+  useEffect(() => {
+    if (isDesktop || !playerRef) {
+      return;
+    }
+
+    const callback = () => setControls(!controls);
+    playerRef.on("touchstart", callback);
+
+    return () => playerRef.off("touchstart", callback);
+  }, [controls, playerRef]);
+
   // initial state
 
   const initialPlaybackSource = useMemo(() => {
@@ -238,14 +251,6 @@ export default function DynamicVideoPlayer({
             }
           : undefined
       }
-      onClick={
-        isMobile
-          ? (e) => {
-              e.stopPropagation();
-              setControls(!controls);
-            }
-          : undefined
-      }
     >
       <div className={`w-full relative ${isScrubbing ? "hidden" : "visible"}`}>
         <VideoPlayer
@@ -255,9 +260,8 @@ export default function DynamicVideoPlayer({
             sources: [initialPlaybackSource],
             aspectRatio: wideVideo ? undefined : "16:9",
             controls: false,
-            nativeControlsForTouch: true,
+            nativeControlsForTouch: false,
           }}
-          seekOptions={{ forward: 10, backward: 5 }}
           onReady={(player) => {
             setPlayerRef(player);
           }}

@@ -1,18 +1,17 @@
 import { baseUrl } from "@/api/baseUrl";
 import TimeAgo from "../dynamic/TimeAgo";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import { useCallback, useMemo } from "react";
-import { useApiHost } from "@/api";
+import { useCallback, useMemo, useState } from "react";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { ReviewSegment } from "@/types/review";
 import { useNavigate } from "react-router-dom";
+import { Skeleton } from "../ui/skeleton";
 
 type AnimatedEventThumbnailProps = {
   event: ReviewSegment;
 };
 export function AnimatedEventThumbnail({ event }: AnimatedEventThumbnailProps) {
-  const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
 
   // interaction
@@ -24,13 +23,15 @@ export function AnimatedEventThumbnail({ event }: AnimatedEventThumbnailProps) {
 
   // image behavior
 
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(0);
   const imageUrl = useMemo(() => {
-    if (Date.now() / 1000 < event.start_time + 20) {
-      return `${apiHost}api/preview/${event.camera}/${event.start_time}/thumbnail.jpg`;
+    if (error > 0) {
+      return `${baseUrl}api/review/${event.id}/preview.gif?key=${error}`;
     }
 
     return `${baseUrl}api/review/${event.id}/preview.gif`;
-  }, [apiHost, event]);
+  }, [error, event]);
 
   const aspectRatio = useMemo(() => {
     if (!config) {
@@ -44,14 +45,22 @@ export function AnimatedEventThumbnail({ event }: AnimatedEventThumbnailProps) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div
-          className="h-24 relative rounded bg-cover bg-no-repeat bg-center mr-4 cursor-pointer"
-          style={{
-            backgroundImage: `url(${imageUrl})`,
-            aspectRatio: aspectRatio,
-          }}
-          onClick={onOpenReview}
-        >
+        <div className="h-24 relative">
+          <img
+            className="size-full rounded object-cover object-center cursor-pointer"
+            src={imageUrl}
+            style={{
+              aspectRatio: aspectRatio,
+            }}
+            onClick={onOpenReview}
+            onLoad={() => setLoaded(true)}
+            onError={() => {
+              if (error < 2) {
+                setError(error + 1);
+              }
+            }}
+          />
+          {!loaded && <Skeleton className="absolute inset-0" />}
           <div className="absolute bottom-0 inset-x-0 h-6 bg-gradient-to-t from-slate-900/50 to-transparent rounded">
             <div className="w-full absolute left-1 bottom-0 text-xs text-white">
               <TimeAgo time={event.start_time * 1000} dense />

@@ -117,7 +117,7 @@ export default function LiveDashboardView({
       {events && events.length > 0 && (
         <ScrollArea>
           <TooltipProvider>
-            <div className="flex">
+            <div className="flex gap-4 items-center">
               {events.map((event) => {
                 return <AnimatedEventThumbnail key={event.id} event={event} />;
               })}
