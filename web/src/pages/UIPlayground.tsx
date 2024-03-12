@@ -186,7 +186,6 @@ function UIPlayground() {
 
   const [isEventsReviewTimeline, setIsEventsReviewTimeline] = useState(true);
   const birdseyeConfig = config?.birdseye;
-  console.log(birdseyeConfig);
 
   return (
     <>

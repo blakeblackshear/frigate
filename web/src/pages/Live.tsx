@@ -11,6 +11,14 @@ function Live() {
   const [selectedCameraName, setSelectedCameraName] = useOverlayState("camera");
   const [cameraGroup] = useOverlayState("cameraGroup");
 
+  const includesBirdseye = useMemo(() => {
+    if (config && cameraGroup) {
+      return config.camera_groups[cameraGroup].cameras.includes("birdseye");
+    } else {
+      return false;
+    }
+  }, [config, cameraGroup]);
+
   const cameras = useMemo(() => {
     if (!config) {
       return [];
@@ -18,15 +26,9 @@ function Live() {
 
     if (cameraGroup) {
       const group = config.camera_groups[cameraGroup];
-      console.log(config.cameras);
       const groupCameras = Object.values(config.cameras)
         .filter((conf) => conf.enabled && group.cameras.includes(conf.name))
         .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
-      if (group.cameras.includes("birdseye")) {
-        groupCameras.push({
-          name: "birdseye",
-        });
-      }
       return groupCameras;
     }
 
@@ -47,6 +49,7 @@ function Live() {
   return (
     <LiveDashboardView
       cameras={cameras}
+      includeBirdseye={includesBirdseye}
       onSelectCamera={setSelectedCameraName}
     />
   );
