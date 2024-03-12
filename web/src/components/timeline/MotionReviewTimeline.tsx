@@ -51,8 +51,8 @@ export function MotionReviewTimeline({
   const timelineRef = useRef<HTMLDivElement>(null);
   const handlebarTimeRef = useRef<HTMLDivElement>(null);
   const timelineDuration = useMemo(
-    () => timelineStart - timelineEnd,
-    [timelineEnd, timelineStart],
+    () => timelineStart - timelineEnd + 4 * segmentDuration,
+    [timelineEnd, timelineStart, segmentDuration],
   );
 
   const { alignStartDateToTimeline, alignEndDateToTimeline } = useEventUtils(
@@ -61,8 +61,8 @@ export function MotionReviewTimeline({
   );
 
   const timelineStartAligned = useMemo(
-    () => alignStartDateToTimeline(timelineStart),
-    [timelineStart, alignStartDateToTimeline],
+    () => alignStartDateToTimeline(timelineStart) + 2 * segmentDuration,
+    [timelineStart, alignStartDateToTimeline, segmentDuration],
   );
 
   const { handleMouseDown, handleMouseUp, handleMouseMove } =

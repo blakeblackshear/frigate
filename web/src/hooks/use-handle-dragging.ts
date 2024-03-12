@@ -195,8 +195,8 @@ function useDraggableHandler({
           segmentHeight * (timelineDuration / segmentDuration) -
             segmentHeight * 2,
           Math.max(
-            // start of timeline
-            segmentHeight + scrolled,
+            // start of timeline - 2 segments added for handlebar visibility
+            segmentHeight * 2 + scrolled,
             // current Y position
             clientYPosition -
               timelineTop +

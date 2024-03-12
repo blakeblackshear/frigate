@@ -123,7 +123,7 @@ function ConfigEditor() {
   }
 
   return (
-    <div className="absolute top-2 bottom-16 right-0 left-0 md:left-12">
+    <div className="absolute top-2 bottom-16 right-0 left-0 md:left-2">
       <div className="lg:flex justify-between mr-1">
         <Heading as="h2">Config</Heading>
         <div>

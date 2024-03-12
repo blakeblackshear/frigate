@@ -48,7 +48,11 @@ export function ReviewTimeline({
         isDragging && showHandlebar ? "cursor-grabbing" : "cursor-auto"
       }`}
     >
-      <div className="flex flex-col">{children}</div>
+      <div className="flex flex-col relative">
+        <div className="absolute top-0 inset-x-0 z-20 w-full h-[30px] bg-gradient-to-b from-secondary to-transparent pointer-events-none"></div>
+        <div className="absolute bottom-0 inset-x-0 z-20 w-full h-[30px] bg-gradient-to-t from-secondary to-transparent pointer-events-none"></div>
+        {children}
+      </div>
       {showHandlebar && (
         <div
           className="absolute left-0 top-0 z-20 w-full"
