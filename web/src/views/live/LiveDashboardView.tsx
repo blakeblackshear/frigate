@@ -79,7 +79,7 @@ export default function LiveDashboardView({
     };
   }, [visibilityListener]);
 
-  const birdseyeConfig = config?.birdseye;
+  const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
 
   return (
     <div className="size-full overflow-y-auto px-2">
