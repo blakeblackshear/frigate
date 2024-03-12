@@ -64,7 +64,7 @@ export function Tick({ timestamp, timestampSpread }: TickSegmentProps) {
           className={`h-0.5 ${
             timestamp.getMinutes() % timestampSpread === 0 &&
             timestamp.getSeconds() === 0
-              ? "w-[12px] bg-neutral-600"
+              ? "w-[12px] bg-neutral-600 dark:bg-neutral-500"
               : timestamp.getMinutes() % (timestampSpread == 15 ? 5 : 1) ===
                     0 && timestamp.getSeconds() === 0
                 ? "w-[8px] bg-neutral-500 dark:bg-neutral-600" // Minor tick mark
@@ -88,7 +88,7 @@ export function Timestamp({
       {!isFirstSegmentInMinimap && !isLastSegmentInMinimap && (
         <div
           key={`${segmentKey}_timestamp`}
-          className="text-[8px] text-neutral-600"
+          className="text-[8px] text-neutral-600 dark:text-neutral-500"
         >
           {timestamp.getMinutes() % timestampSpread === 0 &&
             timestamp.getSeconds() === 0 &&
