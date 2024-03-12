@@ -186,6 +186,9 @@ export function DesktopRecordingView({
                   mainControllerRef.current = controller;
                   controller.onPlayerTimeUpdate((timestamp: number) => {
                     setCurrentTime(timestamp);
+                    Object.values(previewRefs.current ?? {}).forEach((prev) =>
+                      prev.scrubToTimestamp(Math.floor(timestamp)),
+                    );
                   });
                 }}
               />
