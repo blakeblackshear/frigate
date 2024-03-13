@@ -100,12 +100,8 @@ export default function WebRtcPlayer({
         return;
       }
 
-      console.log("passed aPc")
-
       pcRef.current = await aPc;
       const ws = new WebSocket(wsURL);
-
-      console.log("pc has loaded")
 
       ws.addEventListener("open", () => {
         pcRef.current?.addEventListener("icecandidate", (ev) => {
