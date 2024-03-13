@@ -21,6 +21,10 @@ import { MdForward10, MdReplay10 } from "react-icons/md";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 
 const HLS_MIME_TYPE = "application/vnd.apple.mpegurl" as const;
+const unsupportedErrorCodes = [
+  MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED,
+  MediaError.MEDIA_ERR_DECODE,
+];
 
 type HlsVideoPlayerProps = {
   className: string;
@@ -188,7 +192,7 @@ export default function HlsVideoPlayer({
           if (
             !hlsRef.current &&
             // @ts-expect-error code does exist
-            e.target.error.code == MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED &&
+            unsupportedErrorCodes.includes(e.target.error.code) &&
             videoRef.current
           ) {
             setUseHlsCompat(true);
