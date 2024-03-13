@@ -345,14 +345,23 @@ export class DynamicVideoController {
     }
   }
 
+  pause() {
+    this.playerController.pause();
+  }
+
   seekToTimestamp(time: number, play: boolean = false) {
     if (this.playerMode != "playback") {
       this.playerMode = "playback";
       this.setScrubbing(false);
     }
 
-    if (this.recordings.length == 0) {
+    if (
+      this.recordings.length == 0 ||
+      time < this.recordings[0].start_time ||
+      time > this.recordings[this.recordings.length - 1].end_time
+    ) {
       this.timeToStart = time;
+      return;
     }
 
     let seekSeconds = 0;
@@ -371,12 +380,15 @@ export class DynamicVideoController {
         segment.end_time - segment.start_time - (segment.end_time - time);
       return true;
     });
-    this.playerController.currentTime(seekSeconds);
 
-    if (play) {
-      this.playerController.play();
-    } else {
-      this.playerController.pause();
+    if (seekSeconds != 0) {
+      this.playerController.currentTime(seekSeconds);
+
+      if (play) {
+        this.playerController.play();
+      } else {
+        this.playerController.pause();
+      }
     }
   }
 
