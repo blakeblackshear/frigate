@@ -125,7 +125,7 @@ export default function LivePlayer({
   } else if (liveMode == "jsmpeg") {
     player = (
       <JSMpegPlayer
-        className="w-full flex justify-center rounded-2xl overflow-hidden"
+        className="size-full flex justify-center rounded-2xl overflow-hidden"
         camera={cameraConfig.name}
         width={cameraConfig.detect.width}
         height={cameraConfig.detect.height}
@@ -137,7 +137,7 @@ export default function LivePlayer({
 
   return (
     <div
-      className={`relative flex justify-center w-full outline cursor-pointer ${
+      className={`relative flex justify-center ${liveMode == "jsmpeg" ? "size-full" : "w-full"} outline cursor-pointer ${
         activeTracking
           ? "outline-severity_alert outline-1 rounded-2xl shadow-[0_0_6px_2px] shadow-severity_alert"
           : "outline-0 outline-background"

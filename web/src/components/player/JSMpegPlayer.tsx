@@ -1,8 +1,7 @@
 import { baseUrl } from "@/api/baseUrl";
-import { useResizeObserver } from "@/hooks/resize-observer";
 // @ts-expect-error we know this doesn't have types
 import JSMpeg from "@cycjimmy/jsmpeg-player";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 
 type JSMpegPlayerProps = {
   className?: string;
@@ -20,38 +19,6 @@ export default function JSMpegPlayer({
   const url = `${baseUrl.replace(/^http/, "ws")}live/jsmpeg/${camera}`;
   const playerRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [{ width: containerWidth, height: containerHeight }] =
-    useResizeObserver(containerRef);
-
-  // Add scrollbar width (when visible) to the available observer width to eliminate screen juddering.
-  // https://github.com/blakeblackshear/frigate/issues/1657
-  let scrollBarWidth = 0;
-  if (window.innerWidth && document.body.offsetWidth) {
-    scrollBarWidth = window.innerWidth - document.body.offsetWidth;
-  }
-  const availableWidth = scrollBarWidth
-    ? containerWidth + scrollBarWidth
-    : containerWidth;
-  const aspectRatio = width / height;
-
-  const scaledHeight = useMemo(() => {
-    const scaledHeight = Math.floor(availableWidth / aspectRatio);
-    const finalHeight = Math.min(scaledHeight, height);
-
-    if (containerHeight < finalHeight) {
-      return containerHeight;
-    }
-
-    if (finalHeight > 0) {
-      return finalHeight;
-    }
-
-    return 100;
-  }, [availableWidth, aspectRatio, containerHeight, height]);
-  const scaledWidth = useMemo(
-    () => Math.ceil(scaledHeight * aspectRatio - scrollBarWidth),
-    [scaledHeight, aspectRatio, scrollBarWidth],
-  );
 
   useEffect(() => {
     if (!playerRef.current) {
@@ -64,16 +31,6 @@ export default function JSMpegPlayer({
       {},
       { protocols: [], audio: false, videoBufferSize: 1024 * 1024 * 4 },
     );
-
-    const fullscreen = () => {
-      if (video.els.canvas.webkitRequestFullScreen) {
-        video.els.canvas.webkitRequestFullScreen();
-      } else {
-        video.els.canvas.mozRequestFullScreen();
-      }
-    };
-
-    video.els.canvas.addEventListener("click", fullscreen);
 
     return () => {
       if (playerRef.current) {
@@ -90,11 +47,8 @@ export default function JSMpegPlayer({
     <div className={className} ref={containerRef}>
       <div
         ref={playerRef}
-        className={`jsmpeg`}
-        style={{
-          height: `${scaledHeight}px`,
-          width: `${scaledWidth}px`,
-        }}
+        className="jsmpeg h-full"
+        style={{ aspectRatio: width / height }}
       />
     </div>
   );
