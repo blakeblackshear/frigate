@@ -17,8 +17,16 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { MdForward10, MdReplay10 } from "react-icons/md";
+import {
+  MdForward10,
+  MdReplay10,
+  MdVolumeDown,
+  MdVolumeMute,
+  MdVolumeOff,
+  MdVolumeUp,
+} from "react-icons/md";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
+import { Slider } from "../ui/slider-volume";
 
 const HLS_MIME_TYPE = "application/vnd.apple.mpegurl" as const;
 const unsupportedErrorCodes = [
@@ -166,6 +174,7 @@ export default function HlsVideoPlayer({
         autoPlay
         controls={false}
         playsInline
+        muted
         onPlay={() => {
           setIsPlaying(true);
 
@@ -280,6 +289,22 @@ function VideoControls({
     [isPlaying, video],
   );
 
+  // volume control
+
+  const VolumeIcon = useMemo(() => {
+    if (!video || video?.muted) {
+      return MdVolumeOff;
+    } else if (video.volume <= 0.33) {
+      return MdVolumeMute;
+    } else if (video.volume <= 0.67) {
+      return MdVolumeDown;
+    } else {
+      return MdVolumeUp;
+    }
+    // only update when specific fields change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [video?.volume, video?.muted]);
+
   if (!video || !show) {
     return;
   }
@@ -288,6 +313,25 @@ function VideoControls({
     <div
       className={`absolute bottom-5 left-1/2 -translate-x-1/2 px-4 py-2 flex justify-between items-center gap-8 text-white z-50 bg-black bg-opacity-60 rounded-lg`}
     >
+      <div className="flex justify-normal items-center gap-2">
+        <VolumeIcon
+          className="size-5"
+          onClick={(e: React.MouseEvent) => {
+            e.stopPropagation();
+            video.muted = !video.muted;
+          }}
+        />
+        {video.muted == false && (
+          <Slider
+            className="w-20"
+            value={[video.volume]}
+            min={0}
+            max={1}
+            step={0.02}
+            onValueChange={(value) => (video.volume = value[0])}
+          />
+        )}
+      </div>
       <MdReplay10 className="size-5 cursor-pointer" onClick={onReplay} />
       <div className="cursor-pointer" onClick={onTogglePlay}>
         {isPlaying ? (
