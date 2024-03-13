@@ -81,6 +81,7 @@ def run_detector(
     out_events: dict[str, mp.Event],
     avg_speed,
     start,
+    using_fallback_detector,
     detector_config,
 ):
     threading.current_thread().name = f"detector:{name}"
@@ -99,7 +100,14 @@ def run_detector(
     signal.signal(signal.SIGINT, receiveSignal)
 
     frame_manager = SharedMemoryFrameManager()
-    object_detector = LocalObjectDetector(detector_config=detector_config)
+    try:
+        object_detector = LocalObjectDetector(detector_config=detector_config)
+    except Exception as ex:
+        logger.error(f"Got exception when initializing detector: {ex}, falling back to CPU detector")
+
+        object_detector = LocalObjectDetector(detector_config=detector_config.fallback_config)
+        using_fallback_detector.value = 1
+        
 
     outputs = {}
     for name in out_events.keys():
@@ -146,6 +154,7 @@ class ObjectDetectProcess:
         self.detection_queue = detection_queue
         self.avg_inference_speed = mp.Value("d", 0.01)
         self.detection_start = mp.Value("d", 0.0)
+        self.using_fallback_detector = mp.Value("i", 0)
         self.detect_process = None
         self.detector_config = detector_config
         self.start_or_restart()
@@ -176,6 +185,7 @@ class ObjectDetectProcess:
                 self.out_events,
                 self.avg_inference_speed,
                 self.detection_start,
+                self.using_fallback_detector,
                 self.detector_config,
             ),
         )
