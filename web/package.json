@@ -65,7 +65,7 @@
     "swr": "^2.2.5",
     "tailwind-merge": "^2.1.0",
     "tailwindcss-animate": "^1.0.7",
-    "vaul": "^0.8.0",
+    "vaul": "^0.9.0",
     "vite-plugin-monaco-editor": "^1.1.0",
     "zod": "^3.22.4"
   },
