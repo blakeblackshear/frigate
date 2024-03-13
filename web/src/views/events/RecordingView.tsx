@@ -446,11 +446,11 @@ export function MobileRecordingView({
           camera={playbackCamera}
           timeRange={currentTimeRange}
           cameraPreviews={relevantPreviews || []}
-          startTime={playbackStart}
+          startTimestamp={playbackStart}
           onControllerReady={(controller) => {
             controllerRef.current = controller;
           }}
-          onTimeUpdate={setCurrentTime}
+          onTimestampUpdate={setCurrentTime}
           onClipEnded={onClipEnded}
         />
       </div>
