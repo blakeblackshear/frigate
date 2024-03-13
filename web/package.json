@@ -39,6 +39,7 @@
     "clsx": "^2.1.0",
     "copy-to-clipboard": "^3.3.3",
     "date-fns": "^2.30.0",
+    "hls.js": "^1.5.7",
     "idb-keyval": "^6.2.1",
     "immer": "^10.0.3",
     "lucide-react": "^0.294.0",
@@ -65,8 +66,6 @@
     "tailwind-merge": "^2.1.0",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.8.0",
-    "video.js": "^8.6.1",
-    "videojs-playlist": "^5.1.0",
     "vite-plugin-monaco-editor": "^1.1.0",
     "zod": "^3.22.4"
   },

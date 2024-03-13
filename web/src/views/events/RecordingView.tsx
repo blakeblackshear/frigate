@@ -1,9 +1,8 @@
-import DynamicVideoPlayer, {
-  DynamicVideoController,
-} from "@/components/player/DynamicVideoPlayer";
 import PreviewPlayer, {
   PreviewController,
 } from "@/components/player/PreviewPlayer";
+import { DynamicVideoController } from "@/components/player/dynamic/DynamicVideoController";
+import DynamicVideoPlayer from "@/components/player/dynamic/DynamicVideoPlayer";
 import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
 import MotionReviewTimeline from "@/components/timeline/MotionReviewTimeline";
 import { Button } from "@/components/ui/button";
@@ -72,21 +71,16 @@ export function DesktopRecordingView({
   );
 
   // move to next clip
-  useEffect(() => {
+
+  const onClipEnded = useCallback(() => {
     if (!mainControllerRef.current) {
       return;
     }
 
-    mainControllerRef.current.onClipChangedEvent((dir) => {
-      if (dir == "forward") {
-        if (selectedRangeIdx < timeRange.ranges.length - 1) {
-          setSelectedRangeIdx(selectedRangeIdx + 1);
-        }
-      }
-    });
-    // we only want to fire once when players are ready
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedRangeIdx, timeRange, mainControllerRef.current, mainCamera]);
+    if (selectedRangeIdx < timeRange.ranges.length - 1) {
+      setSelectedRangeIdx(selectedRangeIdx + 1);
+    }
+  }, [selectedRangeIdx, timeRange]);
 
   // scrubbing and timeline state
 
@@ -101,8 +95,8 @@ export function DesktopRecordingView({
       );
 
       if (index != -1) {
-        setSelectedRangeIdx(index);
         setPlaybackStart(currentTime);
+        setSelectedRangeIdx(index);
       }
     },
     [timeRange],
@@ -134,7 +128,14 @@ export function DesktopRecordingView({
 
   useEffect(() => {
     if (!scrubbing) {
-      mainControllerRef.current?.seekToTimestamp(currentTime, true);
+      if (
+        currentTimeRange.start <= currentTime &&
+        currentTimeRange.end >= currentTime
+      ) {
+        mainControllerRef.current?.seekToTimestamp(currentTime, true);
+      } else {
+        updateSelectedSegment(currentTime);
+      }
     }
 
     // we only want to seek when user stops scrubbing
@@ -221,16 +222,17 @@ export function DesktopRecordingView({
                 camera={mainCamera}
                 timeRange={currentTimeRange}
                 cameraPreviews={allPreviews ?? []}
-                startTime={playbackStart}
+                startTimestamp={playbackStart}
+                onTimestampUpdate={(timestamp) => {
+                  setPlayerTime(timestamp);
+                  setCurrentTime(timestamp);
+                  Object.values(previewRefs.current ?? {}).forEach((prev) =>
+                    prev.scrubToTimestamp(Math.floor(timestamp)),
+                  );
+                }}
+                onClipEnded={onClipEnded}
                 onControllerReady={(controller) => {
                   mainControllerRef.current = controller;
-                  controller.onPlayerTimeUpdate((timestamp: number) => {
-                    setPlayerTime(timestamp);
-                    setCurrentTime(timestamp);
-                    Object.values(previewRefs.current ?? {}).forEach((prev) =>
-                      prev.scrubToTimestamp(Math.floor(timestamp)),
-                    );
-                  });
                 }}
               />
             </div>
@@ -318,7 +320,6 @@ export function MobileRecordingView({
 
   // controller state
 
-  const [playerReady, setPlayerReady] = useState(false);
   const controllerRef = useRef<DynamicVideoController | undefined>(undefined);
   const [playbackCamera, setPlaybackCamera] = useState(startCamera);
   const [playbackStart, setPlaybackStart] = useState(startTime);
@@ -341,20 +342,17 @@ export function MobileRecordingView({
     [reviewItems, playbackCamera],
   );
 
-  // move to next clip
-  useEffect(() => {
+  // handle clip change
+
+  const onClipEnded = useCallback(() => {
     if (!controllerRef.current) {
       return;
     }
 
-    controllerRef.current.onClipChangedEvent((dir) => {
-      if (dir == "forward") {
-        if (selectedRangeIdx < timeRange.ranges.length - 1) {
-          setSelectedRangeIdx(selectedRangeIdx + 1);
-        }
-      }
-    });
-  }, [playerReady, selectedRangeIdx, timeRange]);
+    if (selectedRangeIdx < timeRange.ranges.length - 1) {
+      setSelectedRangeIdx(selectedRangeIdx + 1);
+    }
+  }, [selectedRangeIdx, timeRange]);
 
   // scrubbing and timeline state
 
@@ -448,16 +446,12 @@ export function MobileRecordingView({
           camera={playbackCamera}
           timeRange={currentTimeRange}
           cameraPreviews={relevantPreviews || []}
-          startTime={playbackStart}
+          startTimestamp={playbackStart}
           onControllerReady={(controller) => {
             controllerRef.current = controller;
-            setPlayerReady(true);
-            controllerRef.current.onPlayerTimeUpdate((timestamp: number) => {
-              setCurrentTime(timestamp);
-            });
-
-            controllerRef.current?.seekToTimestamp(startTime, true);
           }}
+          onTimestampUpdate={setCurrentTime}
+          onClipEnded={onClipEnded}
         />
       </div>
 

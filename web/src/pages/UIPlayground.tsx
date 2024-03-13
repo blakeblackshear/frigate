@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import BirdseyeLivePlayer from "@/components/player/BirdseyeLivePlayer";
+import HlsVideoPlayer from "@/components/player/HlsVideoPlayer";
 
 // Color data
 const colors = [
@@ -157,6 +158,8 @@ function UIPlayground() {
     timestampSpread: 15,
   });
 
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
   const possibleZoomLevels = [
     { segmentDuration: 60, timestampSpread: 15 },
     { segmentDuration: 30, timestampSpread: 5 },
@@ -288,6 +291,14 @@ function UIPlayground() {
                 ))}
               </div>
             </div>
+          </div>
+
+          <div className="absolute left-96 top-96 bottom-96 right-96">
+            <HlsVideoPlayer
+              className="size-full"
+              videoRef={videoRef}
+              currentSource="http://localhost:5173/vod/side_cam/start/1710345600/end/1710349200/master.m3u8"
+            />
           </div>
 
           <div className="w-[55px] md:w-[100px] overflow-y-auto no-scrollbar">

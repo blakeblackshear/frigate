@@ -105,6 +105,7 @@ def camera_ptz_info(camera_name):
 
 
 @MediaBp.route("/<camera_name>/latest.jpg")
+@MediaBp.route("/<camera_name>/latest.webp")
 def latest_frame(camera_name):
     draw_options = {
         "bounding_boxes": request.args.get("bbox", type=int),
@@ -156,11 +157,11 @@ def latest_frame(camera_name):
 
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
 
-        ret, jpg = cv2.imencode(
-            ".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), resize_quality]
+        ret, img = cv2.imencode(
+            ".webp", frame, [int(cv2.IMWRITE_WEBP_QUALITY), resize_quality]
         )
-        response = make_response(jpg.tobytes())
-        response.headers["Content-Type"] = "image/jpeg"
+        response = make_response(img.tobytes())
+        response.headers["Content-Type"] = "image/webp"
         response.headers["Cache-Control"] = "no-store"
         return response
     elif camera_name == "birdseye" and current_app.frigate_config.birdseye.restream:
@@ -174,11 +175,11 @@ def latest_frame(camera_name):
 
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
 
-        ret, jpg = cv2.imencode(
-            ".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), resize_quality]
+        ret, img = cv2.imencode(
+            ".webp", frame, [int(cv2.IMWRITE_WEBP_QUALITY), resize_quality]
         )
-        response = make_response(jpg.tobytes())
-        response.headers["Content-Type"] = "image/jpeg"
+        response = make_response(img.tobytes())
+        response.headers["Content-Type"] = "image/webp"
         response.headers["Cache-Control"] = "no-store"
         return response
     else:
