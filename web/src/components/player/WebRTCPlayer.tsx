@@ -1,5 +1,5 @@
 import { baseUrl } from "@/api/baseUrl";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 type WebRtcPlayerProps = {
   className?: string;
@@ -18,6 +18,12 @@ export default function WebRtcPlayer({
   microphoneEnabled = false,
   onPlaying,
 }: WebRtcPlayerProps) {
+  // metadata
+
+  const wsURL = useMemo(() => {
+    return `${baseUrl.replace(/^http/, "ws")}live/webrtc/api/ws?src=${camera}`;
+  }, [camera]);
+
   // camera states
 
   const pcRef = useRef<RTCPeerConnection | undefined>();
@@ -89,12 +95,13 @@ export default function WebRtcPlayer({
   }
 
   const connect = useCallback(
-    async (ws: WebSocket, aPc: Promise<RTCPeerConnection | undefined>) => {
+    async (aPc: Promise<RTCPeerConnection | undefined>) => {
       if (!aPc) {
         return;
       }
 
       pcRef.current = await aPc;
+      const ws = new WebSocket(wsURL);
 
       ws.addEventListener("open", () => {
         pcRef.current?.addEventListener("icecandidate", (ev) => {
@@ -130,7 +137,7 @@ export default function WebRtcPlayer({
         }
       });
     },
-    [],
+    [wsURL],
   );
 
   useEffect(() => {
@@ -142,15 +149,10 @@ export default function WebRtcPlayer({
       return;
     }
 
-    const url = `${baseUrl.replace(
-      /^http/,
-      "ws",
-    )}live/webrtc/api/ws?src=${camera}`;
-    const ws = new WebSocket(url);
     const aPc = PeerConnection(
       microphoneEnabled ? "video+audio+microphone" : "video+audio",
     );
-    connect(ws, aPc);
+    connect(aPc);
 
     return () => {
       if (pcRef.current) {

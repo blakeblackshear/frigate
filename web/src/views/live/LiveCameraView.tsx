@@ -129,6 +129,14 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
     }
   }, [camera, fullscreen, isPortrait]);
 
+  const preferredLiveMode = useMemo(() => {
+    if (isSafari || mic) {
+      return "webrtc";
+    }
+
+    return "mse";
+  }, [mic]);
+
   const windowAspectRatio = useMemo(() => {
     return windowWidth / windowHeight;
   }, [windowWidth, windowHeight]);
@@ -263,7 +271,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
             cameraConfig={camera}
             playAudio={audio}
             micEnabled={mic}
-            preferredLiveMode={isSafari || mic ? "webrtc" : "mse"}
+            preferredLiveMode={preferredLiveMode}
           />
         </div>
         {camera.onvif.host != "" && <PtzControlPanel camera={camera.name} />}
