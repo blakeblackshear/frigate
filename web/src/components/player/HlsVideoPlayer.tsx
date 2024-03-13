@@ -94,7 +94,6 @@ export default function HlsVideoPlayer({
   // controls
 
   const [isPlaying, setIsPlaying] = useState(true);
-  const [volume, setVolume] = useState(0.0);
   const [mobileCtrlTimeout, setMobileCtrlTimeout] = useState<NodeJS.Timeout>();
   const [controls, setControls] = useState(isMobile);
   const [controlsOpen, setControlsOpen] = useState(false);
@@ -126,11 +125,7 @@ export default function HlsVideoPlayer({
           break;
         case "m":
           if (down && !repeat && videoRef.current) {
-            if (videoRef.current.muted) {
-              videoRef.current.volume = 1;
-            } else {
-              videoRef.current.volume = 0;
-            }
+            videoRef.current.muted = !videoRef.current.muted;
           }
           break;
         case " ":
@@ -179,8 +174,7 @@ export default function HlsVideoPlayer({
         autoPlay
         controls={false}
         playsInline
-        muted={volume == 0.0}
-        onVolumeChange={() => setVolume(videoRef.current?.volume ?? 0.0)}
+        muted
         onPlay={() => {
           setIsPlaying(true);
 
@@ -217,7 +211,6 @@ export default function HlsVideoPlayer({
       <VideoControls
         video={videoRef.current}
         isPlaying={isPlaying}
-        volume={volume}
         show={controls}
         controlsOpen={controlsOpen}
         setControlsOpen={setControlsOpen}
@@ -230,7 +223,6 @@ export default function HlsVideoPlayer({
 type VideoControlsProps = {
   video: HTMLVideoElement | null;
   isPlaying: boolean;
-  volume: number;
   show: boolean;
   controlsOpen: boolean;
   setControlsOpen: (open: boolean) => void;
@@ -238,7 +230,6 @@ type VideoControlsProps = {
 function VideoControls({
   video,
   isPlaying,
-  volume,
   show,
   controlsOpen,
   setControlsOpen,
@@ -300,18 +291,19 @@ function VideoControls({
 
   // volume control
 
-  const [showVolume, setShowVolume] = useState(false);
   const VolumeIcon = useMemo(() => {
-    if (volume == 0) {
+    if (!video || video?.muted) {
       return MdVolumeOff;
-    } else if (volume <= 0.33) {
+    } else if (video.volume <= 0.33) {
       return MdVolumeMute;
-    } else if (volume <= 0.67) {
+    } else if (video.volume <= 0.67) {
       return MdVolumeDown;
     } else {
       return MdVolumeUp;
     }
-  }, [volume]);
+    // only update when specific fields change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [video?.volume, video?.muted]);
 
   if (!video || !show) {
     return;
@@ -324,24 +316,18 @@ function VideoControls({
       <div className="flex justify-normal items-center gap-2">
         <VolumeIcon
           className="size-5"
-          onClick={(e) => {
+          onClick={(e: React.MouseEvent) => {
             e.stopPropagation();
-            if (volume == 0) {
-              setShowVolume(true);
-              video.volume = 1;
-            } else {
-              setShowVolume(false);
-              video.volume = 0;
-            }
+            video.muted = !video.muted;
           }}
         />
-        {showVolume && (
+        {video.muted == false && (
           <Slider
             className="w-20"
-            value={[volume]}
+            value={[video.volume]}
             min={0}
             max={1}
-            step={0.05}
+            step={0.02}
             onValueChange={(value) => (video.volume = value[0])}
           />
         )}
