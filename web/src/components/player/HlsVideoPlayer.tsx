@@ -321,25 +321,25 @@ function VideoControls({
     <div
       className={`absolute bottom-5 left-1/2 -translate-x-1/2 px-4 py-2 flex justify-between items-center gap-8 text-white z-50 bg-black bg-opacity-60 rounded-lg`}
     >
-      <div
-        className="flex justify-normal items-center gap-2"
-        onMouseOver={isDesktop ? () => setShowVolume(true) : undefined}
-        onMouseOut={isDesktop ? () => setShowVolume(false) : undefined}
-        onClick={(e) => {
-          e.stopPropagation();
+      <div className="flex justify-normal items-center gap-2">
+        <VolumeIcon
+          className="size-5"
+          onClick={(e) => {
+            e.stopPropagation();
 
-          if (isDesktop) {
-            if (video.muted) {
-              video.volume = 1;
+            if (isDesktop) {
+              if (volume == 0) {
+                setShowVolume(true);
+                video.volume = 1;
+              } else {
+                setShowVolume(false);
+                video.volume = 0;
+              }
             } else {
-              video.volume = 0;
+              setShowVolume(!showVolume);
             }
-          } else {
-            setShowVolume(!showVolume);
-          }
-        }}
-      >
-        <VolumeIcon className="size-5" />
+          }}
+        />
         {showVolume && (
           <Slider
             className="w-20"
