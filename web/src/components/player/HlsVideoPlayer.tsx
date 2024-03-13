@@ -62,6 +62,8 @@ export default function HlsVideoPlayer({
       return;
     }
 
+    const currentPlaybackRate = videoRef.current.playbackRate;
+
     if (!hlsRef.current) {
       videoRef.current.src = currentSource;
       videoRef.current.load();
@@ -69,6 +71,7 @@ export default function HlsVideoPlayer({
     }
 
     hlsRef.current.loadSource(currentSource);
+    videoRef.current.playbackRate = currentPlaybackRate;
   }, [videoRef, hlsRef, currentSource]);
 
   // controls
