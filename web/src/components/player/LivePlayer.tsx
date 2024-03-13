@@ -46,8 +46,7 @@ export default function LivePlayer({
 
   // camera live state
 
-  // const liveMode = useCameraLiveMode(cameraConfig, preferredLiveMode);
-  const liveMode = "jsmpeg";
+  const liveMode = useCameraLiveMode(cameraConfig, preferredLiveMode);
 
   const [liveReady, setLiveReady] = useState(false);
   useEffect(() => {
