@@ -17,8 +17,16 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { MdForward10, MdReplay10 } from "react-icons/md";
+import {
+  MdForward10,
+  MdReplay10,
+  MdVolumeDown,
+  MdVolumeMute,
+  MdVolumeOff,
+  MdVolumeUp,
+} from "react-icons/md";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
+import { Slider } from "../ui/slider-volume";
 
 const HLS_MIME_TYPE = "application/vnd.apple.mpegurl" as const;
 const unsupportedErrorCodes = [
@@ -86,6 +94,7 @@ export default function HlsVideoPlayer({
   // controls
 
   const [isPlaying, setIsPlaying] = useState(true);
+  const [volume, setVolume] = useState(0.0);
   const [mobileCtrlTimeout, setMobileCtrlTimeout] = useState<NodeJS.Timeout>();
   const [controls, setControls] = useState(isMobile);
   const [controlsOpen, setControlsOpen] = useState(false);
@@ -117,7 +126,11 @@ export default function HlsVideoPlayer({
           break;
         case "m":
           if (down && !repeat && videoRef.current) {
-            videoRef.current.muted = !videoRef.current.muted;
+            if (videoRef.current.muted) {
+              videoRef.current.volume = 1;
+            } else {
+              videoRef.current.volume = 0;
+            }
           }
           break;
         case " ":
@@ -166,6 +179,8 @@ export default function HlsVideoPlayer({
         autoPlay
         controls={false}
         playsInline
+        muted={volume == 0.0}
+        onVolumeChange={() => setVolume(videoRef.current?.volume ?? 0.0)}
         onPlay={() => {
           setIsPlaying(true);
 
@@ -202,6 +217,7 @@ export default function HlsVideoPlayer({
       <VideoControls
         video={videoRef.current}
         isPlaying={isPlaying}
+        volume={volume}
         show={controls}
         controlsOpen={controlsOpen}
         setControlsOpen={setControlsOpen}
@@ -214,6 +230,7 @@ export default function HlsVideoPlayer({
 type VideoControlsProps = {
   video: HTMLVideoElement | null;
   isPlaying: boolean;
+  volume: number;
   show: boolean;
   controlsOpen: boolean;
   setControlsOpen: (open: boolean) => void;
@@ -221,6 +238,7 @@ type VideoControlsProps = {
 function VideoControls({
   video,
   isPlaying,
+  volume,
   show,
   controlsOpen,
   setControlsOpen,
@@ -280,6 +298,21 @@ function VideoControls({
     [isPlaying, video],
   );
 
+  // volume control
+
+  const [showVolume, setShowVolume] = useState(false);
+  const VolumeIcon = useMemo(() => {
+    if (volume == 0) {
+      return MdVolumeOff;
+    } else if (volume <= 0.33) {
+      return MdVolumeMute;
+    } else if (volume <= 0.67) {
+      return MdVolumeDown;
+    } else {
+      return MdVolumeUp;
+    }
+  }, [volume]);
+
   if (!video || !show) {
     return;
   }
@@ -288,6 +321,36 @@ function VideoControls({
     <div
       className={`absolute bottom-5 left-1/2 -translate-x-1/2 px-4 py-2 flex justify-between items-center gap-8 text-white z-50 bg-black bg-opacity-60 rounded-lg`}
     >
+      <div
+        className="flex justify-normal items-center gap-2"
+        onMouseOver={isDesktop ? () => setShowVolume(true) : undefined}
+        onMouseOut={isDesktop ? () => setShowVolume(false) : undefined}
+        onClick={(e) => {
+          e.stopPropagation();
+
+          if (isDesktop) {
+            if (video.muted) {
+              video.volume = 1;
+            } else {
+              video.volume = 0;
+            }
+          } else {
+            setShowVolume(!showVolume);
+          }
+        }}
+      >
+        <VolumeIcon className="size-5" />
+        {showVolume && (
+          <Slider
+            className="w-20"
+            value={[volume]}
+            min={0}
+            max={1}
+            step={0.05}
+            onValueChange={(value) => (video.volume = value[0])}
+          />
+        )}
+      </div>
       <MdReplay10 className="size-5 cursor-pointer" onClick={onReplay} />
       <div className="cursor-pointer" onClick={onTogglePlay}>
         {isPlaying ? (
