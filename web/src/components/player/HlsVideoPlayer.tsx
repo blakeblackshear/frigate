@@ -181,6 +181,7 @@ export default function HlsVideoPlayer({
         onEnded={onClipEnded}
         onError={(e) => {
           if (
+            !hlsRef.current &&
             // @ts-expect-error code does exist
             e.target.error.code == MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED &&
             videoRef.current
