@@ -326,17 +326,12 @@ function VideoControls({
           className="size-5"
           onClick={(e) => {
             e.stopPropagation();
-
-            if (isDesktop) {
-              if (volume == 0) {
-                setShowVolume(true);
-                video.volume = 1;
-              } else {
-                setShowVolume(false);
-                video.volume = 0;
-              }
+            if (volume == 0) {
+              setShowVolume(true);
+              video.volume = 1;
             } else {
-              setShowVolume(!showVolume);
+              setShowVolume(false);
+              video.volume = 0;
             }
           }}
         />
