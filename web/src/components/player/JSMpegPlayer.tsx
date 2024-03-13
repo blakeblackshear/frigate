@@ -47,7 +47,7 @@ export default function JSMpegPlayer({
     <div className={className} ref={containerRef}>
       <div
         ref={playerRef}
-        className="jsmpeg size-full"
+        className="jsmpeg h-full"
         style={{ aspectRatio: width / height }}
       />
     </div>
