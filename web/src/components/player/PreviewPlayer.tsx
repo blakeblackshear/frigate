@@ -154,8 +154,11 @@ function PreviewVideoPlayer({
         Math.round(preview.start) >= timeRange.start &&
         Math.floor(preview.end) <= timeRange.end,
     );
-    setLoaded(false);
-    setCurrentPreview(preview);
+
+    if (preview != currentPreview) {
+      setCurrentPreview(preview);
+      setLoaded(false);
+    }
 
     controller.newPlayback({
       preview,

@@ -92,6 +92,21 @@ export function DesktopRecordingView({
 
   const [scrubbing, setScrubbing] = useState(false);
   const [currentTime, setCurrentTime] = useState<number>(startTime);
+  const [playerTime, setPlayerTime] = useState(startTime);
+
+  const updateSelectedSegment = useCallback(
+    (currentTime: number) => {
+      const index = timeRange.ranges.findIndex(
+        (seg) => seg.start <= currentTime && seg.end >= currentTime,
+      );
+
+      if (index != -1) {
+        setSelectedRangeIdx(index);
+        setPlaybackStart(currentTime);
+      }
+    },
+    [timeRange],
+  );
 
   useEffect(() => {
     if (scrubbing) {
@@ -99,13 +114,7 @@ export function DesktopRecordingView({
         currentTime > currentTimeRange.end + 60 ||
         currentTime < currentTimeRange.start - 60
       ) {
-        const index = timeRange.ranges.findIndex(
-          (seg) => seg.start <= currentTime && seg.end >= currentTime,
-        );
-
-        if (index != -1) {
-          setSelectedRangeIdx(index);
-        }
+        updateSelectedSegment(currentTime);
         return;
       }
 
@@ -115,7 +124,13 @@ export function DesktopRecordingView({
         controller.scrubToTimestamp(currentTime);
       });
     }
-  }, [currentTime, scrubbing, timeRange, currentTimeRange]);
+  }, [
+    currentTime,
+    scrubbing,
+    timeRange,
+    currentTimeRange,
+    updateSelectedSegment,
+  ]);
 
   useEffect(() => {
     if (!scrubbing) {
@@ -125,6 +140,25 @@ export function DesktopRecordingView({
     // we only want to seek when user stops scrubbing
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scrubbing]);
+
+  useEffect(() => {
+    if (!scrubbing) {
+      if (Math.abs(currentTime - playerTime) > 10) {
+        mainControllerRef.current?.pause();
+
+        if (
+          currentTimeRange.start <= currentTime &&
+          currentTimeRange.end >= currentTime
+        ) {
+          mainControllerRef.current?.seekToTimestamp(currentTime, true);
+        } else {
+          updateSelectedSegment(currentTime);
+        }
+      }
+    }
+    // we only want to seek when current time doesn't match the player update time
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentTime]);
 
   const onSelectCamera = useCallback(
     (newCam: string) => {
@@ -191,6 +225,7 @@ export function DesktopRecordingView({
                 onControllerReady={(controller) => {
                   mainControllerRef.current = controller;
                   controller.onPlayerTimeUpdate((timestamp: number) => {
+                    setPlayerTime(timestamp);
                     setCurrentTime(timestamp);
                     Object.values(previewRefs.current ?? {}).forEach((prev) =>
                       prev.scrubToTimestamp(Math.floor(timestamp)),
