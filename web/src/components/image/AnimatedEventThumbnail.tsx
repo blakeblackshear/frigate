@@ -45,7 +45,7 @@ export function AnimatedEventThumbnail({ event }: AnimatedEventThumbnailProps) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div className="h-24 relative">
+        <div className="w-max h-24 relative">
           <img
             className="size-full rounded object-cover object-center cursor-pointer"
             src={imageUrl}
