@@ -45,13 +45,15 @@ export function AnimatedEventThumbnail({ event }: AnimatedEventThumbnailProps) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div className="w-max h-24 relative">
+        <div
+          className="h-24 relative"
+          style={{
+            aspectRatio: aspectRatio,
+          }}
+        >
           <img
             className="size-full rounded object-cover object-center cursor-pointer"
             src={imageUrl}
-            style={{
-              aspectRatio: aspectRatio,
-            }}
             onClick={onOpenReview}
             onLoad={() => setLoaded(true)}
             onError={() => {
