@@ -1,6 +1,5 @@
 import { useEffect, useRef, ReactElement } from "react";
 import videojs from "video.js";
-import "videojs-playlist";
 import "video.js/dist/video-js.css";
 import Player from "video.js/dist/types/player";
 

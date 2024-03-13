@@ -1,9 +1,7 @@
-import DynamicVideoPlayer, {
-  DynamicVideoController,
-} from "@/components/player/DynamicVideoPlayer";
 import PreviewPlayer, {
   PreviewController,
 } from "@/components/player/PreviewPlayer";
+import { DynamicVideoController } from "@/components/player/dynamic/DynamicVideoController";
 import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
 import MotionReviewTimeline from "@/components/timeline/MotionReviewTimeline";
 import { Button } from "@/components/ui/button";
@@ -14,14 +12,26 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Skeleton } from "@/components/ui/skeleton";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
 import { MotionData, ReviewSegment, ReviewSeverity } from "@/types/review";
 import { getChunkedTimeDay } from "@/utils/timelineUtil";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import useSWR from "swr";
+
+const DynamicVideoPlayer = React.lazy(
+  () => import("@/components/player/dynamic/DynamicVideoPlayer"),
+);
 
 const SEGMENT_DURATION = 30;
 
@@ -216,23 +226,25 @@ export function DesktopRecordingView({
               key={mainCamera}
               className="w-[82%] flex justify-center items mb-5"
             >
-              <DynamicVideoPlayer
-                className={`w-full ${grow}`}
-                camera={mainCamera}
-                timeRange={currentTimeRange}
-                cameraPreviews={allPreviews ?? []}
-                startTime={playbackStart}
-                onControllerReady={(controller) => {
-                  mainControllerRef.current = controller;
-                  controller.onPlayerTimeUpdate((timestamp: number) => {
-                    setPlayerTime(timestamp);
-                    setCurrentTime(timestamp);
-                    Object.values(previewRefs.current ?? {}).forEach((prev) =>
-                      prev.scrubToTimestamp(Math.floor(timestamp)),
-                    );
-                  });
-                }}
-              />
+              <Suspense fallback={<Skeleton className={`w-full ${grow}`} />}>
+                <DynamicVideoPlayer
+                  className={`w-full ${grow}`}
+                  camera={mainCamera}
+                  timeRange={currentTimeRange}
+                  cameraPreviews={allPreviews ?? []}
+                  startTime={playbackStart}
+                  onControllerReady={(controller) => {
+                    mainControllerRef.current = controller;
+                    controller.onPlayerTimeUpdate((timestamp: number) => {
+                      setPlayerTime(timestamp);
+                      setCurrentTime(timestamp);
+                      Object.values(previewRefs.current ?? {}).forEach((prev) =>
+                        prev.scrubToTimestamp(Math.floor(timestamp)),
+                      );
+                    });
+                  }}
+                />
+              </Suspense>
             </div>
             <div className="w-full flex justify-center gap-2 overflow-x-auto">
               {allCameras.map((cam) => {
