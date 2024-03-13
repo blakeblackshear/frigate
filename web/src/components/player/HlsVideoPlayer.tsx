@@ -179,6 +179,16 @@ export default function HlsVideoPlayer({
         }
         onLoadedData={onPlayerLoaded}
         onEnded={onClipEnded}
+        onError={(e) => {
+          if (
+            // @ts-expect-error code does exist
+            e.target.error.code == MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED &&
+            videoRef.current
+          ) {
+            hlsRef.current = new Hls();
+            hlsRef.current.attachMedia(videoRef.current);
+          }
+        }}
       />
       <VideoControls
         video={videoRef.current}
