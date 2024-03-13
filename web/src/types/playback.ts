@@ -3,7 +3,6 @@ import { Recording } from "./record";
 
 export type DynamicPlayback = {
   recordings: Recording[];
-  playbackUri: string;
 };
 
 export type PreviewPlayback = {

@@ -1,4 +1,3 @@
-import Player from "video.js/dist/types/player";
 import { Recording } from "@/types/record";
 import { DynamicPlayback } from "@/types/playback";
 import { PreviewController } from "../PreviewPlayer";
@@ -8,7 +7,7 @@ type PlayerMode = "playback" | "scrubbing";
 export class DynamicVideoController {
   // main state
   public camera = "";
-  private playerController: Player;
+  private playerController: HTMLVideoElement;
   private previewController: PreviewController;
   private setScrubbing: (isScrubbing: boolean) => void;
   private setFocusedItem: (timeline: Timeline) => void;
@@ -19,13 +18,9 @@ export class DynamicVideoController {
   private annotationOffset: number;
   private timeToStart: number | undefined = undefined;
 
-  // listeners
-  private playerProgressListener: (() => void) | null = null;
-  private playerEndedListener: (() => void) | null = null;
-
   constructor(
     camera: string,
-    playerController: Player,
+    playerController: HTMLVideoElement,
     previewController: PreviewController,
     annotationOffset: number,
     defaultMode: PlayerMode,
@@ -43,10 +38,6 @@ export class DynamicVideoController {
 
   newPlayback(newPlayback: DynamicPlayback) {
     this.recordings = newPlayback.recordings;
-    this.playerController.src({
-      src: newPlayback.playbackUri,
-      type: "application/vnd.apple.mpegurl",
-    });
 
     if (this.timeToStart) {
       this.seekToTimestamp(this.timeToStart);
@@ -91,7 +82,7 @@ export class DynamicVideoController {
     });
 
     if (seekSeconds != 0) {
-      this.playerController.currentTime(seekSeconds);
+      this.playerController.currentTime = seekSeconds;
 
       if (play) {
         this.playerController.play();
@@ -123,38 +114,6 @@ export class DynamicVideoController {
     });
 
     return timestamp;
-  }
-
-  onPlayerTimeUpdate(listener: ((timestamp: number) => void) | null) {
-    if (this.playerProgressListener) {
-      this.playerController.off("timeupdate", this.playerProgressListener);
-      this.playerProgressListener = null;
-    }
-
-    if (listener) {
-      this.playerProgressListener = () => {
-        const progress = this.playerController.currentTime() || 0;
-
-        if (progress == 0) {
-          return;
-        }
-
-        listener(this.getProgress(progress));
-      };
-      this.playerController.on("timeupdate", this.playerProgressListener);
-    }
-  }
-
-  onClipChangedEvent(listener: ((dir: "forward") => void) | null) {
-    if (this.playerEndedListener) {
-      this.playerController.off("ended", this.playerEndedListener);
-      this.playerEndedListener = null;
-    }
-
-    if (listener) {
-      this.playerEndedListener = () => listener("forward");
-      this.playerController.on("ended", this.playerEndedListener);
-    }
   }
 
   scrubToTimestamp(time: number, saveIfNotReady: boolean = false) {
