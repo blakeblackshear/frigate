@@ -22,7 +22,7 @@ import useKeyboardListener from "@/hooks/use-keyboard-listener";
 
 const HLS_MIME_TYPE = "application/vnd.apple.mpegurl" as const;
 
-type HlsVideovideoProps = {
+type HlsVideoPlayerProps = {
   className: string;
   children?: ReactNode;
   videoRef: MutableRefObject<HTMLVideoElement | null>;
@@ -31,7 +31,7 @@ type HlsVideovideoProps = {
   onPlayerLoaded?: () => void;
   onTimeUpdate?: (time: number) => void;
 };
-export default function HlsVideovideo({
+export default function HlsVideoPlayer({
   className,
   children,
   videoRef,
@@ -39,7 +39,7 @@ export default function HlsVideovideo({
   onClipEnded,
   onPlayerLoaded,
   onTimeUpdate,
-}: HlsVideovideoProps) {
+}: HlsVideoPlayerProps) {
   // playback
 
   const hlsRef = useRef<Hls>();
@@ -74,6 +74,7 @@ export default function HlsVideovideo({
   // controls
 
   const [isPlaying, setIsPlaying] = useState(true);
+  const [mobileCtrlTimeout, setMobileCtrlTimeout] = useState<NodeJS.Timeout>();
   const [controls, setControls] = useState(isMobile);
   const [controlsOpen, setControlsOpen] = useState(false);
 
@@ -148,13 +149,26 @@ export default function HlsVideovideo({
     >
       <video
         ref={videoRef}
-        className="size-full"
+        className="size-full rounded-2xl"
         preload="auto"
         autoPlay
         controls={false}
         playsInline
-        onPlay={() => setIsPlaying(true)}
-        onPause={() => setIsPlaying(false)}
+        onPlay={() => {
+          setIsPlaying(true);
+
+          if (isMobile) {
+            setControls(true);
+            setMobileCtrlTimeout(setTimeout(() => setControls(false), 4000));
+          }
+        }}
+        onPause={() => {
+          setIsPlaying(false);
+
+          if (isMobile && mobileCtrlTimeout) {
+            clearTimeout(mobileCtrlTimeout);
+          }
+        }}
         onTimeUpdate={() =>
           onTimeUpdate && videoRef.current
             ? onTimeUpdate(videoRef.current.currentTime)
