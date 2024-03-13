@@ -43,6 +43,7 @@ export default function HlsVideoPlayer({
   // playback
 
   const hlsRef = useRef<Hls>();
+  const [useHlsCompat, setUseHlsCompat] = useState(false);
 
   useEffect(() => {
     if (!videoRef.current) {
@@ -52,8 +53,7 @@ export default function HlsVideoPlayer({
     if (videoRef.current.canPlayType(HLS_MIME_TYPE)) {
       return;
     } else if (Hls.isSupported()) {
-      hlsRef.current = new Hls();
-      hlsRef.current.attachMedia(videoRef.current);
+      setUseHlsCompat(true);
     }
   }, [videoRef]);
 
@@ -64,15 +64,20 @@ export default function HlsVideoPlayer({
 
     const currentPlaybackRate = videoRef.current.playbackRate;
 
-    if (!hlsRef.current) {
+    if (!useHlsCompat) {
       videoRef.current.src = currentSource;
       videoRef.current.load();
       return;
     }
 
+    if (!hlsRef.current) {
+      hlsRef.current = new Hls();
+      hlsRef.current.attachMedia(videoRef.current);
+    }
+
     hlsRef.current.loadSource(currentSource);
     videoRef.current.playbackRate = currentPlaybackRate;
-  }, [videoRef, hlsRef, currentSource]);
+  }, [videoRef, hlsRef, useHlsCompat, currentSource]);
 
   // controls
 
@@ -186,8 +191,7 @@ export default function HlsVideoPlayer({
             e.target.error.code == MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED &&
             videoRef.current
           ) {
-            hlsRef.current = new Hls();
-            hlsRef.current.attachMedia(videoRef.current);
+            setUseHlsCompat(true);
           }
         }}
       />
