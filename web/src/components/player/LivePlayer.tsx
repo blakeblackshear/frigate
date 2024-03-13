@@ -46,7 +46,8 @@ export default function LivePlayer({
 
   // camera live state
 
-  const liveMode = useCameraLiveMode(cameraConfig, preferredLiveMode);
+  // const liveMode = useCameraLiveMode(cameraConfig, preferredLiveMode);
+  const liveMode = "jsmpeg";
 
   const [liveReady, setLiveReady] = useState(false);
   useEffect(() => {
@@ -124,6 +125,8 @@ export default function LivePlayer({
       <JSMpegPlayer
         className="size-full flex justify-center rounded-2xl overflow-hidden"
         camera={cameraConfig.name}
+        width={cameraConfig.detect.width}
+        height={cameraConfig.detect.height}
       />
     );
   } else {

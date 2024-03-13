@@ -6,9 +6,16 @@ import { useEffect, useRef } from "react";
 type JSMpegPlayerProps = {
   className?: string;
   camera: string;
+  width: number;
+  height: number;
 };
 
-export default function JSMpegPlayer({ camera, className }: JSMpegPlayerProps) {
+export default function JSMpegPlayer({
+  camera,
+  width,
+  height,
+  className,
+}: JSMpegPlayerProps) {
   const url = `${baseUrl.replace(/^http/, "ws")}live/jsmpeg/${camera}`;
   const playerRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -38,7 +45,11 @@ export default function JSMpegPlayer({ camera, className }: JSMpegPlayerProps) {
 
   return (
     <div className={className} ref={containerRef}>
-      <div ref={playerRef} className="jsmpeg size-full" />
+      <div
+        ref={playerRef}
+        className="jsmpeg size-full"
+        style={{ aspectRatio: width / height }}
+      />
     </div>
   );
 }

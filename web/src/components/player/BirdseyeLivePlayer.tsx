@@ -37,7 +37,11 @@ export default function BirdseyeLivePlayer({
   } else if (liveMode == "jsmpeg") {
     return (
       <div className={`max-w-[${birdseyeConfig.width}px]`}>
-        <JSMpegPlayer camera="birdseye" />
+        <JSMpegPlayer
+          camera="birdseye"
+          width={birdseyeConfig.width}
+          height={birdseyeConfig.height}
+        />
       </div>
     );
   } else {
