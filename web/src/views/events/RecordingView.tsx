@@ -234,6 +234,7 @@ export function DesktopRecordingView({
                 onControllerReady={(controller) => {
                   mainControllerRef.current = controller;
                 }}
+                isScrubbing={scrubbing}
               />
             </div>
             <div className="w-full flex justify-center gap-2 overflow-x-auto">
@@ -452,6 +453,7 @@ export function MobileRecordingView({
           }}
           onTimestampUpdate={setCurrentTime}
           onClipEnded={onClipEnded}
+          isScrubbing={scrubbing}
         />
       </div>
 
