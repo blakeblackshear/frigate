@@ -407,6 +407,8 @@ def motion_activity():
     mean = df["motion"].mean()
     std = df["motion"].std()
     df["motion"] = (df["motion"] - mean) / std
+    outliers = df.quantile(0.999)["motion"]
+    df[df > outliers] = outliers
     df["motion"] = (
         (df["motion"] - df["motion"].min())
         / (df["motion"].max() - df["motion"].min())
