@@ -177,7 +177,7 @@ export default function DynamicVideoPlayer({
           )}
         </HlsVideoPlayer>
       </div>
-      {isLoading && <Skeleton className="size-full" />}
+      {isLoading && !isScrubbing && <Skeleton className="size-full" />}
       <PreviewPlayer
         className={`${isScrubbing ? "visible" : "hidden"} ${className ?? ""}`}
         camera={camera}
