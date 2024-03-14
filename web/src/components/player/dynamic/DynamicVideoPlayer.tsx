@@ -8,6 +8,7 @@ import { Preview } from "@/types/preview";
 import PreviewPlayer, { PreviewController } from "../PreviewPlayer";
 import { DynamicVideoController } from "./DynamicVideoController";
 import HlsVideoPlayer from "../HlsVideoPlayer";
+import { Skeleton } from "@/components/ui/skeleton";
 
 /**
  * Dynamically switches between video playback and scrubbing preview player.
@@ -90,6 +91,7 @@ export default function DynamicVideoPlayer({
 
   // initial state
 
+  const [isLoading, setIsLoading] = useState(false);
   const [source, setSource] = useState(
     `${apiHost}vod/${camera}/start/${timeRange.start}/end/${timeRange.end}/master.m3u8`,
   );
@@ -110,9 +112,13 @@ export default function DynamicVideoPlayer({
         return;
       }
 
+      if (isLoading) {
+        setIsLoading(false);
+      }
+
       onTimestampUpdate(controller.getProgress(time));
     },
-    [controller, onTimestampUpdate],
+    [controller, isLoading, onTimestampUpdate],
   );
 
   // state of playback player
@@ -140,6 +146,7 @@ export default function DynamicVideoPlayer({
     setSource(
       `${apiHost}vod/${camera}/start/${timeRange.start}/end/${timeRange.end}/master.m3u8`,
     );
+    setIsLoading(true);
 
     controller.newPlayback({
       recordings: recordings ?? [],
@@ -151,7 +158,9 @@ export default function DynamicVideoPlayer({
 
   return (
     <div className={`relative ${className ?? ""} cursor-pointer`}>
-      <div className={`w-full relative ${isScrubbing ? "hidden" : "visible"}`}>
+      <div
+        className={`w-full relative ${isScrubbing || isLoading ? "hidden" : "visible"}`}
+      >
         <HlsVideoPlayer
           className={`  ${wideVideo ? "" : "aspect-video"}`}
           videoRef={playerRef}
@@ -168,6 +177,7 @@ export default function DynamicVideoPlayer({
           )}
         </HlsVideoPlayer>
       </div>
+      {isLoading && <Skeleton className="size-full" />}
       <PreviewPlayer
         className={`${isScrubbing ? "visible" : "hidden"} ${className ?? ""}`}
         camera={camera}
