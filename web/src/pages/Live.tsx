@@ -1,4 +1,6 @@
-import useOverlayState from "@/hooks/use-overlay-state";
+import useOverlayState, {
+  usePersistedOverlayState,
+} from "@/hooks/use-overlay-state";
 import { FrigateConfig } from "@/types/frigateConfig";
 import LiveCameraView from "@/views/live/LiveCameraView";
 import LiveDashboardView from "@/views/live/LiveDashboardView";
@@ -9,7 +11,7 @@ function Live() {
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const [selectedCameraName, setSelectedCameraName] = useOverlayState("camera");
-  const [cameraGroup] = useOverlayState("cameraGroup");
+  const [cameraGroup] = usePersistedOverlayState("cameraGroup");
 
   const includesBirdseye = useMemo(() => {
     if (config && cameraGroup) {

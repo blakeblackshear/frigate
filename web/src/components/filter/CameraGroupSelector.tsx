@@ -6,9 +6,8 @@ import {
 import { isDesktop } from "react-device-detect";
 import useSWR from "swr";
 import { MdHome } from "react-icons/md";
-import useOverlayState from "@/hooks/use-overlay-state";
+import { usePersistedOverlayState } from "@/hooks/use-overlay-state";
 import { Button } from "../ui/button";
-import { useNavigate } from "react-router-dom";
 import { useCallback, useMemo, useState } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { getIconForGroup } from "@/utils/iconUtil";
@@ -31,7 +30,6 @@ type CameraGroupSelectorProps = {
 };
 export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
-  const navigate = useNavigate();
 
   // tooltip
 
@@ -54,7 +52,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
 
   // groups
 
-  const [group, setGroup] = useOverlayState("cameraGroup");
+  const [group, setGroup] = usePersistedOverlayState("cameraGroup");
 
   const groups = useMemo(() => {
     if (!config) {
@@ -89,7 +87,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
                 : "text-muted-foreground bg-secondary focus:text-muted-foreground focus:bg-secondary"
             }
             size="xs"
-            onClick={() => (group ? navigate(-1) : null)}
+            onClick={() => (group ? setGroup(undefined, true) : null)}
             onMouseEnter={() => (isDesktop ? showTooltip("home") : null)}
             onMouseLeave={() => (isDesktop ? showTooltip(undefined) : null)}
           >
