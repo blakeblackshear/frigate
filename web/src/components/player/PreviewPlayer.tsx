@@ -271,8 +271,6 @@ class PreviewVideoController extends PreviewController {
       return;
     }
 
-    this.seekCheck = Date.now() / 1000;
-
     if (this.timeToSeek) {
       const diff =
         Math.round(this.timeToSeek) -
