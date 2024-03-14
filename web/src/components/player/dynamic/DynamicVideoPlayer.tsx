@@ -163,7 +163,7 @@ export default function DynamicVideoPlayer({
         className={`w-full relative ${isScrubbing || isLoading ? "hidden" : "visible"}`}
       >
         <HlsVideoPlayer
-          className={`  ${wideVideo ? "" : "aspect-video"}`}
+          className={`${wideVideo ? "" : "aspect-video"}`}
           videoRef={playerRef}
           currentSource={source}
           onTimeUpdate={onTimeUpdate}
@@ -184,6 +184,7 @@ export default function DynamicVideoPlayer({
         camera={camera}
         timeRange={timeRange}
         cameraPreviews={cameraPreviews}
+        startTime={startTimestamp}
         onControllerReady={(previewController) => {
           setPreviewController(previewController);
         }}
