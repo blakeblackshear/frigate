@@ -223,7 +223,7 @@ export function MotionSegment({
           <div className="flex justify-center">
             <div
               key={`${segmentKey}_motion_data_1`}
-              className={`h-[2px] rounded-full bg-motion_review`}
+              className={`h-[2px] rounded-full ${severity[0] != 0 ? "bg-motion_review-dimmed" : "bg-motion_review"}`}
               style={{
                 width: secondHalfSegmentWidth,
               }}
@@ -235,7 +235,7 @@ export function MotionSegment({
           <div className="flex justify-center">
             <div
               key={`${segmentKey}_motion_data_2`}
-              className={`h-[2px] rounded-full bg-motion_review`}
+              className={`h-[2px] rounded-full ${severity[0] != 0 ? "bg-motion_review-dimmed" : "bg-motion_review"}`}
               style={{
                 width: firstHalfSegmentWidth,
               }}
