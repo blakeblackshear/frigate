@@ -71,6 +71,13 @@ class RecordingMaintainer(threading.Thread):
         self.audio_recordings_info: dict[str, list] = defaultdict(list)
         self.end_time_cache: dict[str, Tuple[datetime.datetime, float]] = {}
 
+        self.camera_frame_area: dict[str, int] = {}
+
+        for camera in self.config.cameras.values():
+            self.camera_frame_area[camera.name] = (
+                camera.detect.width * camera.detect.height * 0.1
+            )
+
     async def move_files(self) -> None:
         cache_files = [
             d
@@ -289,8 +296,9 @@ class RecordingMaintainer(threading.Thread):
     def segment_stats(
         self, camera: str, start_time: datetime.datetime, end_time: datetime.datetime
     ) -> SegmentInfo:
+        video_frame_count = 0
         active_count = 0
-        motion_count = 0
+        total_motion_area = 0
         for frame in self.object_recordings_info[camera]:
             # frame is after end time of segment
             if frame[0] > end_time.timestamp():
@@ -299,6 +307,7 @@ class RecordingMaintainer(threading.Thread):
             if frame[0] < start_time.timestamp():
                 continue
 
+            video_frame_count += 1
             active_count += len(
                 [
                     o
@@ -307,7 +316,21 @@ class RecordingMaintainer(threading.Thread):
                 ]
             )
 
-            motion_count += sum([area(box) for box in frame[2]])
+            total_motion_area += sum([area(box) for box in frame[2]])
+
+        if video_frame_count > 0:
+            normalized_motion_area = min(
+                int(
+                    (
+                        total_motion_area
+                        / (self.camera_frame_area[camera] * video_frame_count)
+                    )
+                    * 100
+                ),
+                100,
+            )
+        else:
+            normalized_motion_area = 0
 
         audio_values = []
         for frame in self.audio_recordings_info[camera]:
@@ -327,7 +350,7 @@ class RecordingMaintainer(threading.Thread):
 
         average_dBFS = 0 if not audio_values else np.average(audio_values)
 
-        return SegmentInfo(motion_count, active_count, round(average_dBFS))
+        return SegmentInfo(normalized_motion_area, active_count, round(average_dBFS))
 
     async def move_segment(
         self,

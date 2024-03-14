@@ -5,12 +5,7 @@ from datetime import datetime, timedelta
 from functools import reduce
 
 import pandas as pd
-from flask import (
-    Blueprint,
-    jsonify,
-    make_response,
-    request,
-)
+from flask import Blueprint, jsonify, make_response, request
 from peewee import Case, DoesNotExist, fn, operator
 
 from frigate.models import Recordings, ReviewSegment
@@ -363,34 +358,22 @@ def motion_activity():
     )
 
     clauses = [(Recordings.start_time > after) & (Recordings.end_time < before)]
+    clauses.append((Recordings.motion <= 100))
 
     if cameras != "all":
         camera_list = cameras.split(",")
         clauses.append((Recordings.camera << camera_list))
 
-    all_recordings: list[Recordings] = (
+    data: list[Recordings] = (
         Recordings.select(
             Recordings.start_time,
-            Recordings.duration,
-            Recordings.objects,
             Recordings.motion,
         )
         .where(reduce(operator.and_, clauses))
         .order_by(Recordings.start_time.asc())
+        .dicts()
         .iterator()
     )
-
-    # format is: { timestamp: segment_start_ts, motion: [0-100], audio: [0 - -100] }
-    # periods where active objects / audio was detected will cause motion to be scaled down
-    data: list[dict[str, float]] = []
-
-    for rec in all_recordings:
-        data.append(
-            {
-                "start_time": rec.start_time,
-                "motion": rec.motion if rec.objects == 0 else 0,
-            }
-        )
 
     # get scale in seconds
     scale = request.args.get("scale", type=int, default=30)
@@ -403,16 +386,10 @@ def motion_activity():
     df.set_index(["start_time"], inplace=True)
 
     # normalize data
-    df = df.resample(f"{scale}S").sum().fillna(0.0)
-    mean = df["motion"].mean()
-    std = df["motion"].std()
-    df["motion"] = (df["motion"] - mean) / std
-    outliers = df.quantile(0.999)["motion"]
-    df[df > outliers] = outliers
-    df["motion"] = (
-        (df["motion"] - df["motion"].min())
-        / (df["motion"].max() - df["motion"].min())
-        * 100
+    df = (
+        df.resample(f"{scale}S")
+        .apply(lambda x: max(x, key=abs, default=0.0))
+        .fillna(0.0)
     )
 
     # change types for output
