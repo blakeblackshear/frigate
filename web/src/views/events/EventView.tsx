@@ -47,6 +47,7 @@ type EventViewProps = {
   startTime?: number;
   setSeverity: (severity: ReviewSeverity) => void;
   markItemAsReviewed: (review: ReviewSegment) => void;
+  markAllItemsAsReviewed: (currentItems: ReviewSegment[]) => void;
   onOpenReview: (reviewId: string) => void;
   pullLatestData: () => void;
   updateFilter: (filter: ReviewFilter) => void;
@@ -61,6 +62,7 @@ export default function EventView({
   startTime,
   setSeverity,
   markItemAsReviewed,
+  markAllItemsAsReviewed,
   onOpenReview,
   pullLatestData,
   updateFilter,
@@ -265,6 +267,7 @@ export default function EventView({
             filter={filter}
             timeRange={timeRange}
             markItemAsReviewed={markItemAsReviewed}
+            markAllItemsAsReviewed={markAllItemsAsReviewed}
             onSelectReview={onSelectReview}
             pullLatestData={pullLatestData}
           />
@@ -301,6 +304,7 @@ type DetectionReviewProps = {
   filter?: ReviewFilter;
   timeRange: { before: number; after: number };
   markItemAsReviewed: (review: ReviewSegment) => void;
+  markAllItemsAsReviewed: (currentItems: ReviewSegment[]) => void;
   onSelectReview: (id: string, ctrl: boolean) => void;
   pullLatestData: () => void;
 };
@@ -314,6 +318,7 @@ function DetectionReview({
   filter,
   timeRange,
   markItemAsReviewed,
+  markAllItemsAsReviewed,
   onSelectReview,
   pullLatestData,
 }: DetectionReviewProps) {
@@ -347,18 +352,6 @@ function DetectionReview({
   // review interaction
 
   const [hasUpdate, setHasUpdate] = useState(false);
-
-  const markAllReviewed = useCallback(async () => {
-    if (!currentItems) {
-      return;
-    }
-
-    await axios.post(`reviews/viewed`, {
-      ids: currentItems?.map((seg) => seg.id),
-    });
-    setHasUpdate(false);
-    pullLatestData();
-  }, [currentItems, pullLatestData]);
 
   // timeline interaction
 
@@ -505,7 +498,10 @@ function DetectionReview({
               <Button
                 className="text-white"
                 variant="select"
-                onClick={markAllReviewed}
+                onClick={() => {
+                  setHasUpdate(false);
+                  markAllItemsAsReviewed(currentItems ?? []);
+                }}
               >
                 Mark these items as reviewed
               </Button>
