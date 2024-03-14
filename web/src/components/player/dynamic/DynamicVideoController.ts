@@ -9,7 +9,6 @@ export class DynamicVideoController {
   public camera = "";
   private playerController: HTMLVideoElement;
   private previewController: PreviewController;
-  private isScrubbing: boolean;
   private setFocusedItem: (timeline: Timeline) => void;
   private playerMode: PlayerMode = "playback";
 
@@ -24,7 +23,6 @@ export class DynamicVideoController {
     previewController: PreviewController,
     annotationOffset: number,
     defaultMode: PlayerMode,
-    isScrubbing: boolean,
     setFocusedItem: (timeline: Timeline) => void,
   ) {
     this.camera = camera;
@@ -32,7 +30,6 @@ export class DynamicVideoController {
     this.previewController = previewController;
     this.annotationOffset = annotationOffset;
     this.playerMode = defaultMode;
-    this.isScrubbing = isScrubbing;
     this.setFocusedItem = setFocusedItem;
   }
 
@@ -122,7 +119,7 @@ export class DynamicVideoController {
       this.previewController.setNewPreviewStartTime(time);
     }
 
-    if (scrubResult && this.playerMode != "scrubbing" && !this.isScrubbing) {
+    if (scrubResult && this.playerMode != "scrubbing") {
       this.playerMode = "scrubbing";
       this.playerController.pause();
     }

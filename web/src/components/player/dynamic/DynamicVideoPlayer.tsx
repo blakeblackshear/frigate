@@ -68,8 +68,7 @@ export default function DynamicVideoPlayer({
       playerRef.current,
       previewController,
       (config.cameras[camera]?.detect?.annotation_offset || 0) / 1000,
-      "playback",
-      isScrubbing,
+      isScrubbing ? "scrubbing" : "playback",
       setFocusedItem,
     );
     // we only want to fire once when players are ready
