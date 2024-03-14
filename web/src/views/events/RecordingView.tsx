@@ -89,13 +89,16 @@ export function DesktopRecordingView({
   const [playerTime, setPlayerTime] = useState(startTime);
 
   const updateSelectedSegment = useCallback(
-    (currentTime: number) => {
+    (currentTime: number, updateStartTime: boolean) => {
       const index = timeRange.ranges.findIndex(
         (seg) => seg.start <= currentTime && seg.end >= currentTime,
       );
 
       if (index != -1) {
-        setPlaybackStart(currentTime);
+        if (updateStartTime) {
+          setPlaybackStart(currentTime);
+        }
+
         setSelectedRangeIdx(index);
       }
     },
@@ -108,7 +111,7 @@ export function DesktopRecordingView({
         currentTime > currentTimeRange.end + 60 ||
         currentTime < currentTimeRange.start - 60
       ) {
-        updateSelectedSegment(currentTime);
+        updateSelectedSegment(currentTime, false);
         return;
       }
 
@@ -128,38 +131,20 @@ export function DesktopRecordingView({
 
   useEffect(() => {
     if (!scrubbing) {
-      if (
-        currentTimeRange.start <= currentTime &&
-        currentTimeRange.end >= currentTime
-      ) {
-        mainControllerRef.current?.seekToTimestamp(currentTime, true);
-      } else {
-        updateSelectedSegment(currentTime);
-      }
-    }
-
-    // we only want to seek when user stops scrubbing
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scrubbing]);
-
-  useEffect(() => {
-    if (!scrubbing) {
       if (Math.abs(currentTime - playerTime) > 10) {
-        mainControllerRef.current?.pause();
-
         if (
           currentTimeRange.start <= currentTime &&
           currentTimeRange.end >= currentTime
         ) {
           mainControllerRef.current?.seekToTimestamp(currentTime, true);
         } else {
-          updateSelectedSegment(currentTime);
+          updateSelectedSegment(currentTime, true);
         }
       }
     }
     // we only want to seek when current time doesn't match the player update time
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentTime]);
+  }, [currentTime, scrubbing]);
 
   const onSelectCamera = useCallback(
     (newCam: string) => {

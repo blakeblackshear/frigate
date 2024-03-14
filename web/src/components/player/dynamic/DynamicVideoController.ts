@@ -47,10 +47,6 @@ export class DynamicVideoController {
   }
 
   seekToTimestamp(time: number, play: boolean = false) {
-    if (this.playerMode != "playback") {
-      this.playerMode = "playback";
-    }
-
     if (
       this.recordings.length == 0 ||
       time < this.recordings[0].start_time ||
@@ -58,6 +54,10 @@ export class DynamicVideoController {
     ) {
       this.timeToStart = time;
       return;
+    }
+
+    if (this.playerMode != "playback") {
+      this.playerMode = "playback";
     }
 
     let seekSeconds = 0;

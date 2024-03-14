@@ -133,6 +133,10 @@ export default function DynamicVideoPlayer({
       return;
     }
 
+    if (playerRef.current) {
+      playerRef.current.autoplay = !isScrubbing;
+    }
+
     setSource(
       `${apiHost}vod/${camera}/start/${timeRange.start}/end/${timeRange.end}/master.m3u8`,
     );
