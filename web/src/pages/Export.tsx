@@ -172,16 +172,16 @@ function Export() {
             <Button variant="select">New Export</Button>
           </Trigger>
           <Content className="flex flex-col justify-center items-center">
-            <div className="w-full flex justify-evenly items-center">
+            <div className="w-full flex justify-evenly items-center mt-4 md:mt-0">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button className="capitalize" variant="secondary">
-                    {camera?.replaceAll("_", " ") || "Select A Camera"}
+                    {camera?.replaceAll("_", " ") || "Select Camera"}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                   <DropdownMenuLabel className="flex justify-center items-center">
-                    Select A Camera
+                    Select Camera
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuRadioGroup
@@ -203,12 +203,12 @@ function Export() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button className="capitalize" variant="secondary">
-                    {playback?.split("_")[0] || "Select A Playback Factor"}
+                    {playback?.split("_")[0] || "Select Playback"}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                   <DropdownMenuLabel className="flex justify-center items-center">
-                    Select A Playback Factor
+                    Select Playback
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuRadioGroup
