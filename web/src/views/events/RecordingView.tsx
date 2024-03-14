@@ -343,8 +343,24 @@ export function MobileRecordingView({
   // scrubbing and timeline state
 
   const [scrubbing, setScrubbing] = useState(false);
-  const [currentTime, setCurrentTime] = useState<number>(
-    startTime || Date.now() / 1000,
+  const [currentTime, setCurrentTime] = useState<number>(startTime);
+  const [playerTime, setPlayerTime] = useState(startTime);
+
+  const updateSelectedSegment = useCallback(
+    (currentTime: number, updateStartTime: boolean) => {
+      const index = timeRange.ranges.findIndex(
+        (seg) => seg.start <= currentTime && seg.end >= currentTime,
+      );
+
+      if (index != -1) {
+        if (updateStartTime) {
+          setPlaybackStart(currentTime);
+        }
+
+        setSelectedRangeIdx(index);
+      }
+    },
+    [timeRange],
   );
 
   useEffect(() => {
@@ -353,28 +369,36 @@ export function MobileRecordingView({
         currentTime > currentTimeRange.end + 60 ||
         currentTime < currentTimeRange.start - 60
       ) {
-        const index = timeRange.ranges.findIndex(
-          (seg) => seg.start <= currentTime && seg.end >= currentTime,
-        );
-
-        if (index != -1) {
-          setSelectedRangeIdx(index);
-        }
+        updateSelectedSegment(currentTime, false);
         return;
       }
 
       controllerRef.current?.scrubToTimestamp(currentTime);
     }
-  }, [currentTime, scrubbing, currentTimeRange, timeRange]);
+  }, [
+    currentTime,
+    scrubbing,
+    timeRange,
+    currentTimeRange,
+    updateSelectedSegment,
+  ]);
 
   useEffect(() => {
     if (!scrubbing) {
-      controllerRef.current?.seekToTimestamp(currentTime, true);
+      if (Math.abs(currentTime - playerTime) > 10) {
+        if (
+          currentTimeRange.start <= currentTime &&
+          currentTimeRange.end >= currentTime
+        ) {
+          controllerRef.current?.seekToTimestamp(currentTime, true);
+        } else {
+          updateSelectedSegment(currentTime, true);
+        }
+      }
     }
-
-    // we only want to seek when user stops scrubbing
+    // we only want to seek when current time doesn't match the player update time
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scrubbing]);
+  }, [currentTime, scrubbing]);
 
   // motion timeline data
 
@@ -436,7 +460,10 @@ export function MobileRecordingView({
           onControllerReady={(controller) => {
             controllerRef.current = controller;
           }}
-          onTimestampUpdate={setCurrentTime}
+          onTimestampUpdate={(timestamp) => {
+            setPlayerTime(timestamp);
+            setCurrentTime(timestamp);
+          }}
           onClipEnded={onClipEnded}
           isScrubbing={scrubbing}
         />
