@@ -125,6 +125,10 @@ export default function SubmitPlus() {
           </Dialog>
 
           {events?.map((event) => {
+            if (event.data.type != "object") {
+              return;
+            }
+
             return (
               <div
                 className="w-full rounded-2xl aspect-video flex justify-center items-center bg-black cursor-pointer"
