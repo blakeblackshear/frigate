@@ -8,7 +8,6 @@ import useSWR from "swr";
 import { MdHome } from "react-icons/md";
 import { usePersistedOverlayState } from "@/hooks/use-overlay-state";
 import { Button } from "../ui/button";
-import { useNavigate } from "react-router-dom";
 import { useCallback, useMemo, useState } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { getIconForGroup } from "@/utils/iconUtil";
