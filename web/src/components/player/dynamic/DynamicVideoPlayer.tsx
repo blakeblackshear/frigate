@@ -8,7 +8,6 @@ import { Preview } from "@/types/preview";
 import PreviewPlayer, { PreviewController } from "../PreviewPlayer";
 import { DynamicVideoController } from "./DynamicVideoController";
 import HlsVideoPlayer from "../HlsVideoPlayer";
-import { Skeleton } from "@/components/ui/skeleton";
 
 /**
  * Dynamically switches between video playback and scrubbing preview player.
@@ -98,6 +97,12 @@ export default function DynamicVideoPlayer({
 
   // start at correct time
 
+  useEffect(() => {
+    if (isScrubbing) {
+      setIsLoading(true);
+    }
+  }, [isScrubbing]);
+
   const onPlayerLoaded = useCallback(() => {
     if (!controller || !startTimestamp) {
       return;
@@ -112,13 +117,9 @@ export default function DynamicVideoPlayer({
         return;
       }
 
-      if (isLoading) {
-        setIsLoading(false);
-      }
-
       onTimestampUpdate(controller.getProgress(time));
     },
-    [controller, isLoading, onTimestampUpdate],
+    [controller, onTimestampUpdate],
   );
 
   // state of playback player
@@ -168,6 +169,7 @@ export default function DynamicVideoPlayer({
           onTimeUpdate={onTimeUpdate}
           onPlayerLoaded={onPlayerLoaded}
           onClipEnded={onClipEnded}
+          onPlaying={() => setIsLoading(false)}
         >
           {config && focusedItem && (
             <TimelineEventOverlay
@@ -177,9 +179,8 @@ export default function DynamicVideoPlayer({
           )}
         </HlsVideoPlayer>
       </div>
-      {isLoading && !isScrubbing && <Skeleton className="size-full" />}
       <PreviewPlayer
-        className={`${isScrubbing ? "visible" : "hidden"} ${className ?? ""}`}
+        className={`${isScrubbing || isLoading ? "visible" : "hidden"} ${className ?? ""}`}
         camera={camera}
         timeRange={timeRange}
         cameraPreviews={cameraPreviews}

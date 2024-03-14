@@ -42,6 +42,7 @@ type HlsVideoPlayerProps = {
   onClipEnded?: () => void;
   onPlayerLoaded?: () => void;
   onTimeUpdate?: (time: number) => void;
+  onPlaying?: () => void;
 };
 export default function HlsVideoPlayer({
   className,
@@ -51,6 +52,7 @@ export default function HlsVideoPlayer({
   onClipEnded,
   onPlayerLoaded,
   onTimeUpdate,
+  onPlaying,
 }: HlsVideoPlayerProps) {
   // playback
 
@@ -183,6 +185,7 @@ export default function HlsVideoPlayer({
             setMobileCtrlTimeout(setTimeout(() => setControls(false), 4000));
           }
         }}
+        onPlaying={onPlaying}
         onPause={() => {
           setIsPlaying(false);
 
