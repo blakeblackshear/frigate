@@ -1329,7 +1329,7 @@ class FrigateConfig(FrigateBaseModel):
         )
         detector_config.model.compute_model_hash()
 
-        if detector_config.type != "cpu":
+        if detector_config.enable_cpu_fallback and detector_config.type != "cpu":
             fallback_config = config.copy(deep=True)
             fallback_config.model = ModelConfig()
             detector_config.fallback_config = self.generate_detector_config(

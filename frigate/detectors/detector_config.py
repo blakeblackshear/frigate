@@ -139,6 +139,9 @@ class ModelConfig(BaseModel):
 class BaseDetectorConfig(BaseModel):
     # the type field must be defined in all subclasses
     type: str = Field(default="cpu", title="Detector Type")
+    enable_cpu_fallback: bool = Field(
+        default=False, title="Fallback to CPU if startup fails"
+    )
     model: ModelConfig = Field(
         default=None, title="Detector specific model configuration."
     )

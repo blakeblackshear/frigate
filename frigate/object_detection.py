@@ -103,11 +103,16 @@ def run_detector(
     try:
         object_detector = LocalObjectDetector(detector_config=detector_config)
     except Exception as ex:
-        logger.error(f"Got exception when initializing detector: {ex}, falling back to CPU detector")
-
-        object_detector = LocalObjectDetector(detector_config=detector_config.fallback_config)
-        using_fallback_detector.value = 1
-        
+        if detector_config.enable_cpu_fallback:
+            logger.error(
+                f"Got exception when initializing detector: {ex}, falling back to CPU detector"
+            )
+            object_detector = LocalObjectDetector(
+                detector_config=detector_config.fallback_config
+            )
+            using_fallback_detector.value = 1
+        else:
+            raise ex
 
     outputs = {}
     for name in out_events.keys():
