@@ -128,6 +128,40 @@ export default function Events() {
 
   // review status
 
+  const markAllItemsAsReviewed = useCallback(
+    async (currentItems: ReviewSegment[]) => {
+      if (currentItems.length == 0) {
+        return;
+      }
+
+      const severity = currentItems[0].severity;
+      updateSegments(
+        (data: ReviewSegment[] | undefined) => {
+          if (!data) {
+            return data;
+          }
+
+          const newData = [...data];
+
+          newData.forEach((seg) => {
+            if (seg.severity == severity) {
+              seg.has_been_reviewed = true;
+            }
+          });
+
+          return newData;
+        },
+        { revalidate: false, populateCache: true },
+      );
+
+      await axios.post(`reviews/viewed`, {
+        ids: currentItems?.map((seg) => seg.id),
+      });
+      reloadData();
+    },
+    [reloadData, updateSegments],
+  );
+
   const markItemAsReviewed = useCallback(
     async (review: ReviewSegment) => {
       const resp = await axios.post(`reviews/viewed`, { ids: [review.id] });
@@ -299,6 +333,7 @@ export default function Events() {
         startTime={startTime}
         setSeverity={setSeverity}
         markItemAsReviewed={markItemAsReviewed}
+        markAllItemsAsReviewed={markAllItemsAsReviewed}
         onOpenReview={setSelectedReviewId}
         pullLatestData={reloadData}
         updateFilter={onUpdateFilter}
