@@ -363,6 +363,7 @@ def motion_activity():
     )
 
     clauses = [(Recordings.start_time > after) & (Recordings.end_time < before)]
+    clauses.append((Recordings.motion <= 100))
 
     if cameras != "all":
         camera_list = cameras.split(",")

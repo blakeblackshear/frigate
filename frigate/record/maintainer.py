@@ -71,7 +71,7 @@ class RecordingMaintainer(threading.Thread):
         self.audio_recordings_info: dict[str, list] = defaultdict(list)
         self.end_time_cache: dict[str, Tuple[datetime.datetime, float]] = {}
 
-        self.camera_frame_area = dict[str, int]
+        self.camera_frame_area: dict[str, int] = {}
 
         for camera in self.config.cameras.values():
             self.camera_frame_area[camera.name] = (
@@ -318,10 +318,16 @@ class RecordingMaintainer(threading.Thread):
 
             total_motion_area += sum([area(box) for box in frame[2]])
 
-        normalized_motion_area = int(
-            (total_motion_area / (self.camera_frame_area[camera] * video_frame_count))
-            * 100
-        )
+        if video_frame_count > 0:
+            normalized_motion_area = int(
+                (
+                    total_motion_area
+                    / (self.camera_frame_area[camera] * video_frame_count)
+                )
+                * 100
+            )
+        else:
+            normalized_motion_area = 0
 
         audio_values = []
         for frame in self.audio_recordings_info[camera]:
