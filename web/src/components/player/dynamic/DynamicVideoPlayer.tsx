@@ -21,6 +21,7 @@ type DynamicVideoPlayerProps = {
   onControllerReady: (controller: DynamicVideoController) => void;
   onTimestampUpdate?: (timestamp: number) => void;
   onClipEnded?: () => void;
+  isScrubbing: boolean;
 };
 export default function DynamicVideoPlayer({
   className,
@@ -31,6 +32,7 @@ export default function DynamicVideoPlayer({
   onControllerReady,
   onTimestampUpdate,
   onClipEnded,
+  isScrubbing,
 }: DynamicVideoPlayerProps) {
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -53,7 +55,6 @@ export default function DynamicVideoPlayer({
   const playerRef = useRef<HTMLVideoElement | null>(null);
   const [previewController, setPreviewController] =
     useState<PreviewController | null>(null);
-  const [isScrubbing, setIsScrubbing] = useState(false);
   const [focusedItem, setFocusedItem] = useState<Timeline | undefined>(
     undefined,
   );
@@ -67,8 +68,7 @@ export default function DynamicVideoPlayer({
       playerRef.current,
       previewController,
       (config.cameras[camera]?.detect?.annotation_offset || 0) / 1000,
-      "playback",
-      setIsScrubbing,
+      isScrubbing ? "scrubbing" : "playback",
       setFocusedItem,
     );
     // we only want to fire once when players are ready
@@ -131,6 +131,10 @@ export default function DynamicVideoPlayer({
   useEffect(() => {
     if (!controller || !recordings) {
       return;
+    }
+
+    if (playerRef.current) {
+      playerRef.current.autoplay = !isScrubbing;
     }
 
     setSource(
