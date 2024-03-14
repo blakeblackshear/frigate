@@ -75,7 +75,7 @@ class RecordingMaintainer(threading.Thread):
 
         for camera in self.config.cameras.values():
             self.camera_frame_area[camera.name] = (
-                camera.detect.width * camera.detect.height
+                camera.detect.width * camera.detect.height * 0.1
             )
 
     async def move_files(self) -> None:
@@ -319,12 +319,15 @@ class RecordingMaintainer(threading.Thread):
             total_motion_area += sum([area(box) for box in frame[2]])
 
         if video_frame_count > 0:
-            normalized_motion_area = int(
-                (
-                    total_motion_area
-                    / (self.camera_frame_area[camera] * video_frame_count)
-                )
-                * 100
+            normalized_motion_area = min(
+                int(
+                    (
+                        total_motion_area
+                        / (self.camera_frame_area[camera] * video_frame_count)
+                    )
+                    * 100
+                ),
+                100,
             )
         else:
             normalized_motion_area = 0

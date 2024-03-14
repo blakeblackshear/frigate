@@ -5,12 +5,7 @@ from datetime import datetime, timedelta
 from functools import reduce
 
 import pandas as pd
-from flask import (
-    Blueprint,
-    jsonify,
-    make_response,
-    request,
-)
+from flask import Blueprint, jsonify, make_response, request
 from peewee import Case, DoesNotExist, fn, operator
 
 from frigate.models import Recordings, ReviewSegment
@@ -391,7 +386,11 @@ def motion_activity():
     df.set_index(["start_time"], inplace=True)
 
     # normalize data
-    df = df.resample(f"{scale}S").mean().fillna(0.0)
+    df = (
+        df.resample(f"{scale}S")
+        .apply(lambda x: max(x, key=abs, default=0.0))
+        .fillna(0.0)
+    )
 
     # change types for output
     df.index = df.index.astype(int) // (10**9)
