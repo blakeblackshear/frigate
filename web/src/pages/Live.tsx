@@ -1,4 +1,5 @@
-import useOverlayState, {
+import {
+  useHashState,
   usePersistedOverlayState,
 } from "@/hooks/use-overlay-state";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -10,7 +11,7 @@ import useSWR from "swr";
 function Live() {
   const { data: config } = useSWR<FrigateConfig>("config");
 
-  const [selectedCameraName, setSelectedCameraName] = useOverlayState("camera");
+  const [selectedCameraName, setSelectedCameraName] = useHashState();
   const [cameraGroup] = usePersistedOverlayState(
     "cameraGroup",
     "default" as string,

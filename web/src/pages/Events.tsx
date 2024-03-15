@@ -1,7 +1,7 @@
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import useApiFilter from "@/hooks/use-api-filter";
 import { useTimezone } from "@/hooks/use-date-utils";
-import useOverlayState from "@/hooks/use-overlay-state";
+import { useOverlayState } from "@/hooks/use-overlay-state";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
 import {
@@ -16,7 +16,7 @@ import {
   MobileRecordingView,
 } from "@/views/events/RecordingView";
 import axios from "axios";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { isMobile } from "react-device-detect";
 import useSWR from "swr";
 
@@ -103,7 +103,7 @@ export default function Events() {
   }, [updateSummary]);
 
   // preview videos
-
+  const [previewKey, setPreviewKey] = useState(0);
   const previewTimes = useMemo(() => {
     if (!reviews || reviews.length == 0) {
       return undefined;
@@ -112,19 +112,39 @@ export default function Events() {
     const startDate = new Date();
     startDate.setMinutes(0, 0, 0);
 
-    const endDate = new Date(reviews.at(-1)?.end_time || 0);
-    endDate.setHours(0, 0, 0, 0);
+    let endDate;
+    if (previewKey == 0) {
+      endDate = new Date(reviews.at(-1)?.end_time || 0);
+      endDate.setHours(0, 0, 0, 0);
+    } else {
+      endDate = new Date();
+    }
+
     return {
       start: startDate.getTime() / 1000,
       end: endDate.getTime() / 1000,
     };
-  }, [reviews]);
+  }, [reviews, previewKey]);
   const { data: allPreviews } = useSWR<Preview[]>(
     previewTimes
       ? `preview/all/start/${previewTimes.start}/end/${previewTimes.end}`
       : null,
     { revalidateOnFocus: false },
   );
+
+  // Set a timeout to update previews on the hour
+  useEffect(() => {
+    const future = new Date();
+    future.setHours(future.getHours() + 1, 0, 30, 0);
+    const timeoutId = setTimeout(
+      () => setPreviewKey(10 * Math.random()),
+      future.getTime() - Date.now(),
+    );
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, []);
 
   // review status
 

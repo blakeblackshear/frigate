@@ -1,5 +1,5 @@
 import { baseUrl } from "@/api/baseUrl";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type WebRtcPlayerProps = {
   className?: string;
@@ -7,6 +7,7 @@ type WebRtcPlayerProps = {
   playbackEnabled?: boolean;
   audioEnabled?: boolean;
   microphoneEnabled?: boolean;
+  iOSCompatFullScreen?: boolean; // ios doesn't support fullscreen divs so we must support the video element
   onPlaying?: () => void;
 };
 
@@ -16,6 +17,7 @@ export default function WebRtcPlayer({
   playbackEnabled = true,
   audioEnabled = false,
   microphoneEnabled = false,
+  iOSCompatFullScreen = false,
   onPlaying,
 }: WebRtcPlayerProps) {
   // metadata
@@ -170,14 +172,23 @@ export default function WebRtcPlayer({
     microphoneEnabled,
   ]);
 
+  // ios compat
+  const [iOSCompatControls, setiOSCompatControls] = useState(false);
+
   return (
     <video
       ref={videoRef}
       className={className}
+      controls={iOSCompatControls}
       autoPlay
       playsInline
       muted={!audioEnabled}
       onLoadedData={onPlaying}
+      onClick={
+        iOSCompatFullScreen
+          ? () => setiOSCompatControls(!iOSCompatControls)
+          : undefined
+      }
     />
   );
 }

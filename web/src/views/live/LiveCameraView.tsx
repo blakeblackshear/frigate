@@ -28,6 +28,7 @@ import React, {
 } from "react";
 import {
   isDesktop,
+  isIOS,
   isMobile,
   isSafari,
   useMobileOrientation,
@@ -189,20 +190,22 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
             <div
               className={`flex flex-row items-center gap-2 mr-1 *:rounded-lg ${isMobile ? "landscape:flex-col" : ""}`}
             >
-              <CameraFeatureToggle
-                className="p-2 md:p-0"
-                variant={fullscreen ? "overlay" : "primary"}
-                Icon={fullscreen ? FaCompress : FaExpand}
-                isActive={fullscreen}
-                title={fullscreen ? "Close" : "Fullscreen"}
-                onClick={() => {
-                  if (fullscreen) {
-                    document.exitFullscreen();
-                  } else {
-                    mainRef.current?.requestFullscreen();
-                  }
-                }}
-              />
+              {!isIOS && (
+                <CameraFeatureToggle
+                  className="p-2 md:p-0"
+                  variant={fullscreen ? "overlay" : "primary"}
+                  Icon={fullscreen ? FaCompress : FaExpand}
+                  isActive={fullscreen}
+                  title={fullscreen ? "Close" : "Fullscreen"}
+                  onClick={() => {
+                    if (fullscreen) {
+                      document.exitFullscreen();
+                    } else {
+                      mainRef.current?.requestFullscreen();
+                    }
+                  }}
+                />
+              )}
               {window.isSecureContext && (
                 <CameraFeatureToggle
                   className="p-2 md:p-0"
@@ -286,6 +289,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
               cameraConfig={camera}
               playAudio={audio}
               micEnabled={mic}
+              iOSCompatFullScreen={isIOS}
               preferredLiveMode={preferredLiveMode}
             />
           </div>

@@ -21,6 +21,7 @@ type LivePlayerProps = {
   windowVisible?: boolean;
   playAudio?: boolean;
   micEnabled?: boolean; // only webrtc supports mic
+  iOSCompatFullScreen?: boolean;
   onClick?: () => void;
 };
 
@@ -32,6 +33,7 @@ export default function LivePlayer({
   windowVisible = true,
   playAudio = false,
   micEnabled = false,
+  iOSCompatFullScreen = false,
   onClick,
 }: LivePlayerProps) {
   // camera activity
@@ -100,6 +102,7 @@ export default function LivePlayer({
         playbackEnabled={cameraActive}
         audioEnabled={playAudio}
         microphoneEnabled={micEnabled}
+        iOSCompatFullScreen={iOSCompatFullScreen}
         onPlaying={() => setLiveReady(true)}
       />
     );
