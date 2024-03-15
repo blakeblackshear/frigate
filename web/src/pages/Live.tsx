@@ -3,6 +3,7 @@ import {
   usePersistedOverlayState,
 } from "@/hooks/use-overlay-state";
 import { FrigateConfig } from "@/types/frigateConfig";
+import LiveBirdseyeView from "@/views/live/LiveBirdseyeView";
 import LiveCameraView from "@/views/live/LiveCameraView";
 import LiveDashboardView from "@/views/live/LiveDashboardView";
 import { useMemo } from "react";
@@ -46,6 +47,10 @@ function Live() {
     () => cameras.find((cam) => cam.name == selectedCameraName),
     [cameras, selectedCameraName],
   );
+
+  if (selectedCameraName == "birdseye") {
+    return <LiveBirdseyeView />;
+  }
 
   if (selectedCamera) {
     return <LiveCameraView camera={selectedCamera} />;
