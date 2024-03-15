@@ -231,10 +231,6 @@ detect:
 # Optional: Object configuration
 # NOTE: Can be overridden at the camera level
 objects:
-  # Optional: list of objects that cause an event to be marked as an alert (default: shown below)
-  alert:
-    - car
-    - person
   # Optional: list of objects to track from labelmap.txt (default: shown below)
   track:
     - person

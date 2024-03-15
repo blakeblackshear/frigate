@@ -32,7 +32,7 @@ module.exports = {
       ],
       Cameras: [
         "configuration/cameras",
-        "configuration/events",
+        "configuration/review",
         "configuration/record",
         "configuration/snapshots",
         "configuration/motion_detection",
