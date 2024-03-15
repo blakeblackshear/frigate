@@ -1,4 +1,4 @@
-"""Peewee migrations -- 004_add_bbox_region_area.py.
+"""Peewee migrations -- 023_add_regions.py.
 
 Some examples (model - class or model name)::
 
@@ -31,13 +31,9 @@ SQL = pw.SQL
 def migrate(migrator, database, fake=False, **kwargs):
     migrator.add_fields(
         Recordings,
-        objects=pw.IntegerField(null=True),
-        motion=pw.IntegerField(null=True),
-    )
-    migrator.sql(
-        'CREATE INDEX "recordings_activity" ON "recordings" ("camera", "start_time" DESC, "regions")'
+        regions=pw.IntegerField(null=True),
     )
 
 
 def rollback(migrator, database, fake=False, **kwargs):
-    migrator.remove_fields(Recordings, ["objects", "motion"])
+    migrator.remove_fields(Recordings, ["regions"])

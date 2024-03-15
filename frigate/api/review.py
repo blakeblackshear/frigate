@@ -358,7 +358,6 @@ def motion_activity():
     )
 
     clauses = [(Recordings.start_time > after) & (Recordings.end_time < before)]
-    clauses.append((Recordings.motion <= 100))
 
     if cameras != "all":
         camera_list = cameras.split(",")
@@ -367,7 +366,7 @@ def motion_activity():
     data: list[Recordings] = (
         Recordings.select(
             Recordings.start_time,
-            Recordings.motion,
+            Recordings.regions,
         )
         .where(reduce(operator.and_, clauses))
         .order_by(Recordings.start_time.asc())
@@ -379,7 +378,8 @@ def motion_activity():
     scale = request.args.get("scale", type=int, default=30)
 
     # resample data using pandas to get activity on scaled basis
-    df = pd.DataFrame(data, columns=["start_time", "motion"])
+    df = pd.DataFrame(data, columns=["start_time", "regions"])
+    df = df.rename(columns={"regions": "motion"})
 
     # set date as datetime index
     df["start_time"] = pd.to_datetime(df["start_time"], unit="s")
@@ -390,6 +390,11 @@ def motion_activity():
         df.resample(f"{scale}S")
         .apply(lambda x: max(x, key=abs, default=0.0))
         .fillna(0.0)
+    )
+    df["motion"] = (
+        (df["motion"] - df["motion"].min())
+        / (df["motion"].max() - df["motion"].min())
+        * 100
     )
 
     # change types for output

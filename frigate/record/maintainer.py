@@ -38,10 +38,15 @@ QUEUE_READ_TIMEOUT = 0.00001  # seconds
 
 class SegmentInfo:
     def __init__(
-        self, motion_area: int, active_object_count: int, average_dBFS: int
+        self,
+        motion_area: int,
+        active_object_count: int,
+        region_count: int,
+        average_dBFS: int,
     ) -> None:
         self.motion_area = motion_area
         self.active_object_count = active_object_count
+        self.region_count = region_count
         self.average_dBFS = average_dBFS
 
     def should_discard_segment(self, retain_mode: RetainModeEnum) -> bool:
@@ -298,6 +303,7 @@ class RecordingMaintainer(threading.Thread):
     ) -> SegmentInfo:
         video_frame_count = 0
         active_count = 0
+        region_count = 0
         total_motion_area = 0
         for frame in self.object_recordings_info[camera]:
             # frame is after end time of segment
@@ -315,8 +321,8 @@ class RecordingMaintainer(threading.Thread):
                     if not o["false_positive"] and o["motionless_count"] == 0
                 ]
             )
-
             total_motion_area += sum([area(box) for box in frame[2]])
+            region_count += len(frame[3])
 
         if video_frame_count > 0:
             normalized_motion_area = min(
@@ -350,7 +356,9 @@ class RecordingMaintainer(threading.Thread):
 
         average_dBFS = 0 if not audio_values else np.average(audio_values)
 
-        return SegmentInfo(normalized_motion_area, active_count, round(average_dBFS))
+        return SegmentInfo(
+            normalized_motion_area, active_count, region_count, round(average_dBFS)
+        )
 
     async def move_segment(
         self,
@@ -438,6 +446,7 @@ class RecordingMaintainer(threading.Thread):
                     Recordings.motion: segment_info.motion_area,
                     # TODO: update this to store list of active objects at some point
                     Recordings.objects: segment_info.active_object_count,
+                    Recordings.regions: segment_info.region_count,
                     Recordings.dBFS: segment_info.average_dBFS,
                     Recordings.segment_size: segment_size,
                 }
