@@ -6,6 +6,7 @@ import { useMemo, useRef, useState } from "react";
 import { isDesktop } from "react-device-detect";
 import { FaPlay } from "react-icons/fa";
 import Chip from "../indicators/Chip";
+import { Skeleton } from "../ui/skeleton";
 
 type ExportProps = {
   file: {
@@ -18,6 +19,7 @@ export default function ExportCard({ file, onDelete }: ExportProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [hovered, setHovered] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const [loading, setLoading] = useState(true);
   const inProgress = useMemo(
     () => file.name.startsWith("in_progress"),
     [file.name],
@@ -65,9 +67,13 @@ export default function ExportCard({ file, onDelete }: ExportProps) {
           preload="auto"
           muted
           controls={playing}
+          onLoadedData={() => setLoading(false)}
         >
           <source src={`${baseUrl}exports/${file.name}`} type="video/mp4" />
         </video>
+      )}
+      {loading && (
+        <Skeleton className="absolute inset-0 aspect-video rounded-2xl" />
       )}
       {!playing && (
         <div className="absolute bottom-0 inset-x-0 rounded-b-l z-10 h-[20%] bg-gradient-to-t from-black/60 to-transparent pointer-events-none rounded-2xl">
@@ -79,23 +85,3 @@ export default function ExportCard({ file, onDelete }: ExportProps) {
     </div>
   );
 }
-
-/**
- *             <Button variant="secondary" onClick={() => onSelect(file.name)}>
-            <LuPlay className="h-4 w-4 text-green-600" />
-          </Button>
-          <a
-            className="text-blue-500 hover:underline overflow-hidden"
-            href={`${baseUrl}exports/${file.name}`}
-            download
-          >
-            {file.name.substring(0, file.name.length - 4)}
-          </a>
-          <Button
-            className="ml-auto"
-            variant="secondary"
-            onClick={() => onDelete(file.name)}
-          >
-            <LuTrash className="h-4 w-4" stroke="#f87171" />
-          </Button>
- */
