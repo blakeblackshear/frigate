@@ -170,20 +170,33 @@ export function DesktopRecordingView({
       : null,
   );
 
-  const grow = useMemo(() => {
+  const mainCameraAspect = useMemo(() => {
     if (!config) {
-      return "aspect-video";
+      return "normal";
     }
 
     const aspectRatio =
       config.cameras[mainCamera].detect.width /
       config.cameras[mainCamera].detect.height;
+
     if (aspectRatio > 2) {
-      return "aspect-wide";
+      return "wide";
+    } else if (aspectRatio < 16 / 9) {
+      return "tall";
     } else {
-      return "aspect-video";
+      return "normal";
     }
   }, [config, mainCamera]);
+
+  const grow = useMemo(() => {
+    if (mainCameraAspect == "wide") {
+      return "w-full aspect-wide";
+    } else if (mainCameraAspect == "tall") {
+      return "h-full aspect-tall";
+    } else {
+      return "w-full aspect-video";
+    }
+  }, [mainCameraAspect]);
 
   return (
     <div ref={contentRef} className="relative size-full">
@@ -197,13 +210,15 @@ export function DesktopRecordingView({
 
       <div className="flex h-full justify-center overflow-hidden">
         <div className="flex flex-1 flex-wrap">
-          <div className="w-full flex flex-col h-full px-2 justify-center items-center">
+          <div
+            className={`size-full flex px-2 items-center ${mainCameraAspect == "tall" ? "flex-row justify-evenly" : "flex-col justify-center"}`}
+          >
             <div
               key={mainCamera}
-              className="w-[82%] flex justify-center items mb-5"
+              className={`flex justify-center items mb-5 ${mainCameraAspect == "tall" ? "h-[96%]" : "w-[82%]"}`}
             >
               <DynamicVideoPlayer
-                className={`w-full ${grow}`}
+                className={grow}
                 camera={mainCamera}
                 timeRange={currentTimeRange}
                 cameraPreviews={allPreviews ?? []}
@@ -222,13 +237,17 @@ export function DesktopRecordingView({
                 isScrubbing={scrubbing}
               />
             </div>
-            <div className="w-full flex justify-center gap-2 overflow-x-auto">
+            <div
+              className={`flex justify-center gap-2 ${mainCameraAspect == "tall" ? "h-full flex-col overflow-y-auto items-center" : "w-full overflow-x-auto"}`}
+            >
               {allCameras.map((cam) => {
                 if (cam !== mainCamera) {
                   return (
                     <div key={cam}>
                       <PreviewPlayer
-                        className="size-full"
+                        className={
+                          mainCameraAspect == "tall" ? "" : "size-full"
+                        }
                         camera={cam}
                         timeRange={currentTimeRange}
                         cameraPreviews={allPreviews ?? []}

@@ -26,6 +26,8 @@ import { FaList, FaVideo } from "react-icons/fa";
 import useSWR from "swr";
 
 export default function SubmitPlus() {
+  const { data: config } = useSWR<FrigateConfig>("config");
+
   // filters
 
   const [selectedCameras, setSelectedCameras] = useState<string[]>();
@@ -44,6 +46,24 @@ export default function SubmitPlus() {
     },
   ]);
   const [upload, setUpload] = useState<Event>();
+
+  const grow = useMemo(() => {
+    if (!config || !upload) {
+      return "";
+    }
+
+    const camera = config.cameras[upload.camera];
+
+    if (!camera) {
+      return "";
+    }
+
+    if (camera.detect.width / camera.detect.height < 16 / 9) {
+      return "aspect-video object-contain";
+    }
+
+    return "";
+  }, [config, upload]);
 
   const onSubmitToPlus = useCallback(
     async (falsePositive: boolean) => {
@@ -102,7 +122,7 @@ export default function SubmitPlus() {
                 </DialogDescription>
               </DialogHeader>
               <img
-                className="flex-grow-0"
+                className={`w-full ${grow} bg-black`}
                 src={`${baseUrl}api/events/${upload?.id}/snapshot.jpg`}
                 alt={`${upload?.label}`}
               />

@@ -211,7 +211,7 @@ function PreviewVideoPlayer({
       </video>
       {!loaded && <Skeleton className="absolute inset-0" />}
       {cameraPreviews && !currentPreview && (
-        <div className="absolute inset-x-0 top-1/2 -y-translate-1/2 bg-black text-white rounded-2xl align-center text-center">
+        <div className="absolute inset-0 bg-black text-white rounded-2xl flex justify-center items-center">
           No Preview Found
         </div>
       )}
