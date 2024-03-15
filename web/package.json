@@ -57,6 +57,7 @@
     "react-tracked": "^1.7.11",
     "react-transition-group": "^4.4.5",
     "react-use-websocket": "^4.7.0",
+    "react-zoom-pan-pinch": "^3.4.3",
     "recoil": "^0.7.7",
     "scroll-into-view-if-needed": "^3.1.0",
     "sonner": "^1.4.0",

@@ -55,6 +55,7 @@ import {
   MdZoomOut,
 } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import useSWR from "swr";
 
 type LiveCameraViewProps = {
@@ -263,16 +264,20 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
             aspectRatio: aspectRatio,
           }}
         >
-          <LivePlayer
-            key={camera.name}
-            className={`${fullscreen ? "*:rounded-none" : ""}`}
-            windowVisible
-            showStillWithoutActivity={false}
-            cameraConfig={camera}
-            playAudio={audio}
-            micEnabled={mic}
-            preferredLiveMode={preferredLiveMode}
-          />
+          <TransformWrapper minScale={1.0}>
+            <TransformComponent>
+              <LivePlayer
+                key={camera.name}
+                className={`m-1 ${fullscreen ? "*:rounded-none" : ""}`}
+                windowVisible
+                showStillWithoutActivity={false}
+                cameraConfig={camera}
+                playAudio={audio}
+                micEnabled={mic}
+                preferredLiveMode={preferredLiveMode}
+              />
+            </TransformComponent>
+          </TransformWrapper>
         </div>
         {camera.onvif.host != "" && <PtzControlPanel camera={camera.name} />}
       </div>
