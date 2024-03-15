@@ -42,7 +42,7 @@ export function usePersistedOverlayState<S extends string>(
   const currentLocationState = location.state;
 
   const setOverlayStateValue = useCallback(
-    (value: S | undefined, replace: boolean = false) => {
+    (value: S | undefined, replace?: boolean) => {
       setPersistedValue(value);
       const newLocationState = { ...currentLocationState };
       newLocationState[key] = value;
