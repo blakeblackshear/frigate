@@ -112,9 +112,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
                     : "text-muted-foreground bg-secondary"
                 }
                 size="xs"
-                onClick={() => {
-                  setGroup(name, group != "default");
-                }}
+                onClick={() => setGroup(name, group != "default")}
                 onMouseEnter={() => (isDesktop ? showTooltip(name) : null)}
                 onMouseLeave={() => (isDesktop ? showTooltip(undefined) : null)}
               >
