@@ -231,6 +231,10 @@ detect:
 # Optional: Object configuration
 # NOTE: Can be overridden at the camera level
 objects:
+  # Optional: list of objects that cause an event to be marked as an alert (default: shown below)
+  alert:
+    - car
+    - person
   # Optional: list of objects to track from labelmap.txt (default: shown below)
   track:
     - person
@@ -653,4 +657,19 @@ telemetry:
   # Optional: Enable the latest version outbound check (default: shown below)
   # NOTE: If you use the HomeAssistant integration, disabling this will prevent it from reporting new versions
   version_check: True
+
+# Optional: Camera groups (default: no groups are setup)
+# NOTE: It is recommended to use the UI to setup camera groups
+camera_groups:
+  # Required: Name of camera group
+  front:
+    # Required: list of cameras in the group
+    cameras:
+      - front_cam
+      - side_cam
+      - front_doorbell_cam
+    # Required: icon used for group
+    icon: car
+    # Required: index of this group
+    order: 0
 ```
