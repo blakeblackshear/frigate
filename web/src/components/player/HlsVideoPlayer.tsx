@@ -59,6 +59,7 @@ export default function HlsVideoPlayer({
 
   const hlsRef = useRef<Hls>();
   const [useHlsCompat, setUseHlsCompat] = useState(false);
+  const [loadedMetadata, setLoadedMetadata] = useState(false);
 
   useEffect(() => {
     if (!videoRef.current) {
@@ -153,7 +154,7 @@ export default function HlsVideoPlayer({
 
   return (
     <div
-      className={`relative ${className ?? ""}`}
+      className={`relative`}
       onMouseOver={
         isDesktop
           ? () => {
@@ -174,7 +175,7 @@ export default function HlsVideoPlayer({
         <TransformComponent>
           <video
             ref={videoRef}
-            className="size-full rounded-2xl"
+            className={`${className ?? ""} bg-black rounded-2xl ${loadedMetadata ? "" : "invisible"}`}
             preload="auto"
             autoPlay
             controls={false}
@@ -204,6 +205,7 @@ export default function HlsVideoPlayer({
                 : undefined
             }
             onLoadedData={onPlayerLoaded}
+            onLoadedMetadata={() => setLoadedMetadata(true)}
             onEnded={onClipEnded}
             onError={(e) => {
               if (

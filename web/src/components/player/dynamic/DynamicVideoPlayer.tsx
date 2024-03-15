@@ -38,16 +38,23 @@ export default function DynamicVideoPlayer({
   const { data: config } = useSWR<FrigateConfig>("config");
 
   // playback behavior
-  const wideVideo = useMemo(() => {
+
+  const grow = useMemo(() => {
     if (!config) {
-      return false;
+      return "aspect-video";
     }
 
-    return (
+    const aspectRatio =
       config.cameras[camera].detect.width /
-        config.cameras[camera].detect.height >
-      1.7
-    );
+      config.cameras[camera].detect.height;
+
+    if (aspectRatio > 2) {
+      return "";
+    } else if (aspectRatio < 16 / 9) {
+      return "aspect-tall";
+    } else {
+      return "aspect-video";
+    }
   }, [camera, config]);
 
   // controlling playback
@@ -163,7 +170,7 @@ export default function DynamicVideoPlayer({
         className={`w-full relative ${isScrubbing || isLoading ? "hidden" : "visible"}`}
       >
         <HlsVideoPlayer
-          className={`${wideVideo ? "" : "aspect-video"}`}
+          className={`${grow}`}
           videoRef={playerRef}
           currentSource={source}
           onTimeUpdate={onTimeUpdate}
@@ -180,7 +187,7 @@ export default function DynamicVideoPlayer({
         </HlsVideoPlayer>
       </div>
       <PreviewPlayer
-        className={`${isScrubbing || isLoading ? "visible" : "hidden"} ${className ?? ""}`}
+        className={`${isScrubbing || isLoading ? "visible" : "hidden"} ${grow}`}
         camera={camera}
         timeRange={timeRange}
         cameraPreviews={cameraPreviews}

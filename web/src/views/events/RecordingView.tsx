@@ -181,7 +181,7 @@ export function DesktopRecordingView({
 
     if (aspectRatio > 2) {
       return "wide";
-    } else if (aspectRatio < 1) {
+    } else if (aspectRatio < 16 / 9) {
       return "tall";
     } else {
       return "normal";
