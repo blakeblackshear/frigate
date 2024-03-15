@@ -118,6 +118,7 @@ export default function Events() {
       endDate.setHours(0, 0, 0, 0);
     } else {
       endDate = new Date();
+      endDate.setMilliseconds(0);
     }
 
     return {
