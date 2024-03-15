@@ -14,7 +14,7 @@ function Live() {
   const [cameraGroup] = usePersistedOverlayState("cameraGroup");
 
   const includesBirdseye = useMemo(() => {
-    if (config && cameraGroup) {
+    if (config && cameraGroup && cameraGroup != "default") {
       return config.camera_groups[cameraGroup].cameras.includes("birdseye");
     } else {
       return false;
@@ -26,7 +26,7 @@ function Live() {
       return [];
     }
 
-    if (cameraGroup) {
+    if (cameraGroup && cameraGroup != "default") {
       const group = config.camera_groups[cameraGroup];
       return Object.values(config.cameras)
         .filter((conf) => conf.enabled && group.cameras.includes(conf.name))
