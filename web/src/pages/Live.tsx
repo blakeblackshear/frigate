@@ -11,7 +11,10 @@ function Live() {
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const [selectedCameraName, setSelectedCameraName] = useOverlayState("camera");
-  const [cameraGroup] = usePersistedOverlayState("cameraGroup", "default");
+  const [cameraGroup] = usePersistedOverlayState(
+    "cameraGroup",
+    "default" as string,
+  );
 
   const includesBirdseye = useMemo(() => {
     if (config && cameraGroup && cameraGroup != "default") {
