@@ -28,7 +28,6 @@ from frigate.const import (
     RECORD_DIR,
 )
 from frigate.models import Event, Recordings
-from frigate.util.image import area
 from frigate.util.services import get_video_properties
 
 logger = logging.getLogger(__name__)
@@ -39,12 +38,12 @@ QUEUE_READ_TIMEOUT = 0.00001  # seconds
 class SegmentInfo:
     def __init__(
         self,
-        motion_area: int,
+        motion_count: int,
         active_object_count: int,
         region_count: int,
         average_dBFS: int,
     ) -> None:
-        self.motion_area = motion_area
+        self.motion_count = motion_count
         self.active_object_count = active_object_count
         self.region_count = region_count
         self.average_dBFS = average_dBFS
@@ -52,7 +51,7 @@ class SegmentInfo:
     def should_discard_segment(self, retain_mode: RetainModeEnum) -> bool:
         return (
             retain_mode == RetainModeEnum.motion
-            and self.motion_area == 0
+            and self.motion_count == 0
             and self.average_dBFS == 0
         ) or (
             retain_mode == RetainModeEnum.active_objects
@@ -75,13 +74,6 @@ class RecordingMaintainer(threading.Thread):
         self.object_recordings_info: dict[str, list] = defaultdict(list)
         self.audio_recordings_info: dict[str, list] = defaultdict(list)
         self.end_time_cache: dict[str, Tuple[datetime.datetime, float]] = {}
-
-        self.camera_frame_area: dict[str, int] = {}
-
-        for camera in self.config.cameras.values():
-            self.camera_frame_area[camera.name] = (
-                camera.detect.width * camera.detect.height * 0.1
-            )
 
     async def move_files(self) -> None:
         cache_files = [
@@ -304,7 +296,7 @@ class RecordingMaintainer(threading.Thread):
         video_frame_count = 0
         active_count = 0
         region_count = 0
-        total_motion_area = 0
+        motion_count = 0
         for frame in self.object_recordings_info[camera]:
             # frame is after end time of segment
             if frame[0] > end_time.timestamp():
@@ -321,22 +313,8 @@ class RecordingMaintainer(threading.Thread):
                     if not o["false_positive"] and o["motionless_count"] == 0
                 ]
             )
-            total_motion_area += sum([area(box) for box in frame[2]])
+            motion_count += len(frame[2])
             region_count += len(frame[3])
-
-        if video_frame_count > 0:
-            normalized_motion_area = min(
-                int(
-                    (
-                        total_motion_area
-                        / (self.camera_frame_area[camera] * video_frame_count)
-                    )
-                    * 100
-                ),
-                100,
-            )
-        else:
-            normalized_motion_area = 0
 
         audio_values = []
         for frame in self.audio_recordings_info[camera]:
@@ -357,7 +335,7 @@ class RecordingMaintainer(threading.Thread):
         average_dBFS = 0 if not audio_values else np.average(audio_values)
 
         return SegmentInfo(
-            normalized_motion_area, active_count, region_count, round(average_dBFS)
+            motion_count, active_count, region_count, round(average_dBFS)
         )
 
     async def move_segment(
@@ -443,7 +421,7 @@ class RecordingMaintainer(threading.Thread):
                     Recordings.start_time: start_time.timestamp(),
                     Recordings.end_time: end_time.timestamp(),
                     Recordings.duration: duration,
-                    Recordings.motion: segment_info.motion_area,
+                    Recordings.motion: segment_info.motion_count,
                     # TODO: update this to store list of active objects at some point
                     Recordings.objects: segment_info.active_object_count,
                     Recordings.regions: segment_info.region_count,
