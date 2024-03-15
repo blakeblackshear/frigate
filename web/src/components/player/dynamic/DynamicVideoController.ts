@@ -81,11 +81,25 @@ export class DynamicVideoController {
       this.playerController.currentTime = seekSeconds;
 
       if (play) {
-        this.playerController.play();
+        this.waitAndPlay();
       } else {
         this.playerController.pause();
       }
     }
+  }
+
+  waitAndPlay() {
+    return new Promise((resolve) => {
+      const onSeekedHandler = () => {
+        this.playerController.removeEventListener("seeked", onSeekedHandler);
+        this.playerController.play();
+        resolve(undefined);
+      };
+
+      this.playerController.addEventListener("seeked", onSeekedHandler, {
+        once: true,
+      });
+    });
   }
 
   seekToTimelineItem(timeline: Timeline) {

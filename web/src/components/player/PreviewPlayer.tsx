@@ -272,26 +272,25 @@ class PreviewVideoController extends PreviewController {
     }
 
     if (this.timeToSeek) {
-      if (
-        Math.round(this.previewRef.current.currentTime + this.preview.start) !=
-        Math.round(this.timeToSeek)
-      ) {
-        if (isAndroid) {
-          const currentTs =
-            this.previewRef.current.currentTime + this.preview.start;
-          const diff = this.timeToSeek - currentTs;
+      const diff =
+        Math.round(this.timeToSeek) -
+        Math.round(this.previewRef.current.currentTime + this.preview.start);
 
+      if (Math.abs(diff) > 1) {
+        let seekTime;
+        if (isAndroid) {
           if (diff < 30) {
-            this.previewRef.current.currentTime =
-              this.previewRef.current.currentTime + diff / 2;
+            seekTime = Math.round(
+              this.previewRef.current.currentTime + diff / 2,
+            );
           } else {
-            this.previewRef.current.currentTime =
-              this.timeToSeek - this.preview.start;
+            seekTime = Math.round(this.timeToSeek - this.preview.start);
           }
         } else {
-          this.previewRef.current.currentTime =
-            this.timeToSeek - this.preview.start;
+          seekTime = this.timeToSeek - this.preview.start;
         }
+
+        this.previewRef.current.currentTime = seekTime;
       } else {
         this.seeking = false;
         this.timeToSeek = undefined;

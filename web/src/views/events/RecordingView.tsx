@@ -301,6 +301,7 @@ export function MobileRecordingView({
   relevantPreviews,
   allCameras,
 }: MobileRecordingViewProps) {
+  const { data: config } = useSWR<FrigateConfig>("config");
   const navigate = useNavigate();
   const contentRef = useRef<HTMLDivElement | null>(null);
 
@@ -309,6 +310,21 @@ export function MobileRecordingView({
   const controllerRef = useRef<DynamicVideoController | undefined>(undefined);
   const [playbackCamera, setPlaybackCamera] = useState(startCamera);
   const [playbackStart, setPlaybackStart] = useState(startTime);
+
+  const grow = useMemo(() => {
+    if (!config) {
+      return "aspect-video";
+    }
+
+    const aspectRatio =
+      config.cameras[playbackCamera].detect.width /
+      config.cameras[playbackCamera].detect.height;
+    if (aspectRatio > 2) {
+      return "aspect-wide";
+    } else {
+      return "aspect-video";
+    }
+  }, [config, playbackCamera]);
 
   // timeline time
 
@@ -453,6 +469,7 @@ export function MobileRecordingView({
 
       <div>
         <DynamicVideoPlayer
+          className={`w-full ${grow}`}
           camera={playbackCamera}
           timeRange={currentTimeRange}
           cameraPreviews={relevantPreviews || []}

@@ -90,11 +90,18 @@ export default function DynamicVideoPlayer({
 
   // initial state
 
+  const [isLoading, setIsLoading] = useState(false);
   const [source, setSource] = useState(
     `${apiHost}vod/${camera}/start/${timeRange.start}/end/${timeRange.end}/master.m3u8`,
   );
 
   // start at correct time
+
+  useEffect(() => {
+    if (isScrubbing) {
+      setIsLoading(true);
+    }
+  }, [isScrubbing]);
 
   const onPlayerLoaded = useCallback(() => {
     if (!controller || !startTimestamp) {
@@ -140,6 +147,7 @@ export default function DynamicVideoPlayer({
     setSource(
       `${apiHost}vod/${camera}/start/${timeRange.start}/end/${timeRange.end}/master.m3u8`,
     );
+    setIsLoading(true);
 
     controller.newPlayback({
       recordings: recordings ?? [],
@@ -151,14 +159,17 @@ export default function DynamicVideoPlayer({
 
   return (
     <div className={`relative ${className ?? ""} cursor-pointer`}>
-      <div className={`w-full relative ${isScrubbing ? "hidden" : "visible"}`}>
+      <div
+        className={`w-full relative ${isScrubbing || isLoading ? "hidden" : "visible"}`}
+      >
         <HlsVideoPlayer
-          className={`  ${wideVideo ? "" : "aspect-video"}`}
+          className={`${wideVideo ? "" : "aspect-video"}`}
           videoRef={playerRef}
           currentSource={source}
           onTimeUpdate={onTimeUpdate}
           onPlayerLoaded={onPlayerLoaded}
           onClipEnded={onClipEnded}
+          onPlaying={() => setIsLoading(false)}
         >
           {config && focusedItem && (
             <TimelineEventOverlay
@@ -169,10 +180,11 @@ export default function DynamicVideoPlayer({
         </HlsVideoPlayer>
       </div>
       <PreviewPlayer
-        className={`${isScrubbing ? "visible" : "hidden"} ${className ?? ""}`}
+        className={`${isScrubbing || isLoading ? "visible" : "hidden"} ${className ?? ""}`}
         camera={camera}
         timeRange={timeRange}
         cameraPreviews={cameraPreviews}
+        startTime={startTimestamp}
         onControllerReady={(previewController) => {
           setPreviewController(previewController);
         }}
