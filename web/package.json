@@ -38,7 +38,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "copy-to-clipboard": "^3.3.3",
-    "date-fns": "^2.30.0",
+    "date-fns": "^3.5.0",
     "hls.js": "^1.5.7",
     "idb-keyval": "^6.2.1",
     "immer": "^10.0.3",
