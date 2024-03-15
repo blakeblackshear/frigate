@@ -366,7 +366,7 @@ def motion_activity():
     data: list[Recordings] = (
         Recordings.select(
             Recordings.start_time,
-            Recordings.regions,
+            Recordings.motion,
         )
         .where(reduce(operator.and_, clauses))
         .order_by(Recordings.start_time.asc())
@@ -378,8 +378,7 @@ def motion_activity():
     scale = request.args.get("scale", type=int, default=30)
 
     # resample data using pandas to get activity on scaled basis
-    df = pd.DataFrame(data, columns=["start_time", "regions"])
-    df = df.rename(columns={"regions": "motion"})
+    df = pd.DataFrame(data, columns=["start_time", "motion"])
 
     # set date as datetime index
     df["start_time"] = pd.to_datetime(df["start_time"], unit="s")
