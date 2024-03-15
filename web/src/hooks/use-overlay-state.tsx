@@ -64,12 +64,15 @@ export function usePersistedOverlayState<S extends string>(
   ];
 }
 
-export function useHashState(): [string | undefined, (value: string) => void] {
+export function useHashState<S extends string>(): [
+  S | undefined,
+  (value: S) => void,
+] {
   const location = useLocation();
   const navigate = useNavigate();
 
   const setHash = useCallback(
-    (value: string | undefined) => {
+    (value: S | undefined) => {
       if (!value) {
         navigate(location.pathname);
       } else {
@@ -81,7 +84,10 @@ export function useHashState(): [string | undefined, (value: string) => void] {
     [location, navigate],
   );
 
-  const hash = useMemo(() => location.hash.substring(1), [location.hash]);
+  const hash = useMemo(
+    () => location.hash.substring(1) as unknown as S,
+    [location.hash],
+  );
 
   return [hash, setHash];
 }
