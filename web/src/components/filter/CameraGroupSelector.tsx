@@ -52,7 +52,10 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
 
   // groups
 
-  const [group, setGroup] = usePersistedOverlayState("cameraGroup");
+  const [group, setGroup] = usePersistedOverlayState(
+    "cameraGroup",
+    "default" as string,
+  );
 
   const groups = useMemo(() => {
     if (!config) {
@@ -78,24 +81,24 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
         currentGroups={groups}
       />
 
-      <Tooltip open={tooltip == "home"}>
+      <Tooltip open={tooltip == "default"}>
         <TooltipTrigger asChild>
           <Button
             className={
-              group == undefined
+              group == "default"
                 ? "text-selected bg-blue-900 focus:bg-blue-900 bg-opacity-60 focus:bg-opacity-60"
                 : "text-muted-foreground bg-secondary focus:text-muted-foreground focus:bg-secondary"
             }
             size="xs"
-            onClick={() => (group ? setGroup(undefined, true) : null)}
-            onMouseEnter={() => (isDesktop ? showTooltip("home") : null)}
+            onClick={() => (group ? setGroup("default", true) : null)}
+            onMouseEnter={() => (isDesktop ? showTooltip("default") : null)}
             onMouseLeave={() => (isDesktop ? showTooltip(undefined) : null)}
           >
             <MdHome className="size-4" />
           </Button>
         </TooltipTrigger>
         <TooltipContent className="capitalize" side="right">
-          Home
+          All Cameras
         </TooltipContent>
       </Tooltip>
       {groups.map(([name, config]) => {
@@ -109,7 +112,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
                     : "text-muted-foreground bg-secondary"
                 }
                 size="xs"
-                onClick={() => setGroup(name, group != undefined)}
+                onClick={() => setGroup(name, group != "default")}
                 onMouseEnter={() => (isDesktop ? showTooltip(name) : null)}
                 onMouseLeave={() => (isDesktop ? showTooltip(undefined) : null)}
               >
