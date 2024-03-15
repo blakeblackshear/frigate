@@ -265,20 +265,18 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
           }}
         >
           <TransformWrapper minScale={1.0}>
-            <div className="p-2">
-              <TransformComponent>
-                <LivePlayer
-                  key={camera.name}
-                  className={`${fullscreen ? "*:rounded-none" : ""}`}
-                  windowVisible
-                  showStillWithoutActivity={false}
-                  cameraConfig={camera}
-                  playAudio={audio}
-                  micEnabled={mic}
-                  preferredLiveMode={preferredLiveMode}
-                />
-              </TransformComponent>
-            </div>
+            <TransformComponent>
+              <LivePlayer
+                key={camera.name}
+                className={`m-1 ${fullscreen ? "*:rounded-none" : ""}`}
+                windowVisible
+                showStillWithoutActivity={false}
+                cameraConfig={camera}
+                playAudio={audio}
+                micEnabled={mic}
+                preferredLiveMode={preferredLiveMode}
+              />
+            </TransformComponent>
           </TransformWrapper>
         </div>
         {camera.onvif.host != "" && <PtzControlPanel camera={camera.name} />}

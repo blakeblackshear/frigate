@@ -27,6 +27,7 @@ import {
 } from "react-icons/md";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { Slider } from "../ui/slider-volume";
+import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 
 const HLS_MIME_TYPE = "application/vnd.apple.mpegurl" as const;
 const unsupportedErrorCodes = [
@@ -169,48 +170,54 @@ export default function HlsVideoPlayer({
       }
       onClick={isDesktop ? undefined : () => setControls(!controls)}
     >
-      <video
-        ref={videoRef}
-        className="size-full rounded-2xl"
-        preload="auto"
-        autoPlay
-        controls={false}
-        playsInline
-        muted
-        onPlay={() => {
-          setIsPlaying(true);
+      <TransformWrapper minScale={1.0}>
+        <TransformComponent>
+          <video
+            ref={videoRef}
+            className="size-full rounded-2xl"
+            preload="auto"
+            autoPlay
+            controls={false}
+            playsInline
+            muted
+            onPlay={() => {
+              setIsPlaying(true);
 
-          if (isMobile) {
-            setControls(true);
-            setMobileCtrlTimeout(setTimeout(() => setControls(false), 4000));
-          }
-        }}
-        onPlaying={onPlaying}
-        onPause={() => {
-          setIsPlaying(false);
+              if (isMobile) {
+                setControls(true);
+                setMobileCtrlTimeout(
+                  setTimeout(() => setControls(false), 4000),
+                );
+              }
+            }}
+            onPlaying={onPlaying}
+            onPause={() => {
+              setIsPlaying(false);
 
-          if (isMobile && mobileCtrlTimeout) {
-            clearTimeout(mobileCtrlTimeout);
-          }
-        }}
-        onTimeUpdate={() =>
-          onTimeUpdate && videoRef.current
-            ? onTimeUpdate(videoRef.current.currentTime)
-            : undefined
-        }
-        onLoadedData={onPlayerLoaded}
-        onEnded={onClipEnded}
-        onError={(e) => {
-          if (
-            !hlsRef.current &&
-            // @ts-expect-error code does exist
-            unsupportedErrorCodes.includes(e.target.error.code) &&
-            videoRef.current
-          ) {
-            setUseHlsCompat(true);
-          }
-        }}
-      />
+              if (isMobile && mobileCtrlTimeout) {
+                clearTimeout(mobileCtrlTimeout);
+              }
+            }}
+            onTimeUpdate={() =>
+              onTimeUpdate && videoRef.current
+                ? onTimeUpdate(videoRef.current.currentTime)
+                : undefined
+            }
+            onLoadedData={onPlayerLoaded}
+            onEnded={onClipEnded}
+            onError={(e) => {
+              if (
+                !hlsRef.current &&
+                // @ts-expect-error code does exist
+                unsupportedErrorCodes.includes(e.target.error.code) &&
+                videoRef.current
+              ) {
+                setUseHlsCompat(true);
+              }
+            }}
+          />
+        </TransformComponent>
+      </TransformWrapper>
       <VideoControls
         video={videoRef.current}
         isPlaying={isPlaying}
