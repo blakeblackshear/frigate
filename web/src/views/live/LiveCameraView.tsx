@@ -157,131 +157,142 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
   }, [cameraAspectRatio, windowAspectRatio, fullscreen]);
 
   return (
-    <div
-      ref={mainRef}
-      className={
-        fullscreen
-          ? `fixed inset-0 bg-black z-30`
-          : `size-full flex flex-col ${isMobile ? "landscape:flex-row" : ""}`
-      }
-    >
+    <TransformWrapper minScale={1.0}>
       <div
+        ref={mainRef}
         className={
           fullscreen
-            ? `absolute right-32 top-1 z-40 ${isMobile ? "landscape:left-2 landscape:right-auto landscape:bottom-1 landscape:top-auto" : ""}`
-            : `w-full h-12 flex flex-row items-center justify-between ${isMobile ? "landscape:w-min landscape:h-full landscape:flex-col" : ""}`
+            ? `fixed inset-0 bg-black z-30`
+            : `size-full flex flex-col ${isMobile ? "landscape:flex-row" : ""}`
         }
       >
-        {!fullscreen ? (
-          <Button
-            className={`rounded-lg ${isMobile ? "ml-2" : "ml-0"}`}
-            size={isMobile ? "icon" : "default"}
-            onClick={() => navigate(-1)}
-          >
-            <IoMdArrowBack className="size-5 lg:mr-[10px]" />
-            {isDesktop && "Back"}
-          </Button>
-        ) : (
-          <div />
-        )}
-        <TooltipProvider>
-          <div
-            className={`flex flex-row items-center gap-2 mr-1 *:rounded-lg ${isMobile ? "landscape:flex-col" : ""}`}
-          >
-            <CameraFeatureToggle
-              className="p-2 md:p-0"
-              variant={fullscreen ? "overlay" : "primary"}
-              Icon={fullscreen ? FaCompress : FaExpand}
-              isActive={fullscreen}
-              title={fullscreen ? "Close" : "Fullscreen"}
-              onClick={() => {
-                if (fullscreen) {
-                  document.exitFullscreen();
-                } else {
-                  mainRef.current?.requestFullscreen();
-                }
-              }}
-            />
-            {window.isSecureContext && (
-              <CameraFeatureToggle
-                className="p-2 md:p-0"
-                variant={fullscreen ? "overlay" : "primary"}
-                Icon={mic ? FaMicrophone : FaMicrophoneSlash}
-                isActive={mic}
-                title={`${mic ? "Disable" : "Enable"} Two Way Talk`}
-                onClick={() => setMic(!mic)}
-              />
-            )}
-            <CameraFeatureToggle
-              className="p-2 md:p-0"
-              variant={fullscreen ? "overlay" : "primary"}
-              Icon={audio ? GiSpeaker : GiSpeakerOff}
-              isActive={audio}
-              title={`${audio ? "Disable" : "Enable"} Camera Audio`}
-              onClick={() => setAudio(!audio)}
-            />
-            <CameraFeatureToggle
-              className="p-2 md:p-0"
-              variant={fullscreen ? "overlay" : "primary"}
-              Icon={detectState == "ON" ? MdPersonSearch : MdPersonOff}
-              isActive={detectState == "ON"}
-              title={`${detectState == "ON" ? "Disable" : "Enable"} Detect`}
-              onClick={() => sendDetect(detectState == "ON" ? "OFF" : "ON")}
-            />
-            <CameraFeatureToggle
-              className="p-2 md:p-0"
-              variant={fullscreen ? "overlay" : "primary"}
-              Icon={recordState == "ON" ? LuVideo : LuVideoOff}
-              isActive={recordState == "ON"}
-              title={`${recordState == "ON" ? "Disable" : "Enable"} Recording`}
-              onClick={() => sendRecord(recordState == "ON" ? "OFF" : "ON")}
-            />
-            <CameraFeatureToggle
-              className="p-2 md:p-0"
-              variant={fullscreen ? "overlay" : "primary"}
-              Icon={snapshotState == "ON" ? MdPhotoCamera : MdNoPhotography}
-              isActive={snapshotState == "ON"}
-              title={`${snapshotState == "ON" ? "Disable" : "Enable"} Snapshots`}
-              onClick={() => sendSnapshot(snapshotState == "ON" ? "OFF" : "ON")}
-            />
-            {camera.audio.enabled_in_config && (
-              <CameraFeatureToggle
-                className="p-2 md:p-0"
-                variant={fullscreen ? "overlay" : "primary"}
-                Icon={audioState == "ON" ? LuEar : LuEarOff}
-                isActive={audioState == "ON"}
-                title={`${audioState == "ON" ? "Disable" : "Enable"} Audio Detect`}
-                onClick={() => sendAudio(audioState == "ON" ? "OFF" : "ON")}
-              />
-            )}
-          </div>
-        </TooltipProvider>
-      </div>
-      <div className="relative size-full p-2">
         <div
-          className={growClassName}
-          style={{
-            aspectRatio: aspectRatio,
+          className={
+            fullscreen
+              ? `absolute right-32 top-1 z-40 ${isMobile ? "landscape:left-2 landscape:right-auto landscape:bottom-1 landscape:top-auto" : ""}`
+              : `w-full h-12 flex flex-row items-center justify-between ${isMobile ? "landscape:w-min landscape:h-full landscape:flex-col" : ""}`
+          }
+        >
+          {!fullscreen ? (
+            <Button
+              className={`rounded-lg ${isMobile ? "ml-2" : "ml-0"}`}
+              size={isMobile ? "icon" : "default"}
+              onClick={() => navigate(-1)}
+            >
+              <IoMdArrowBack className="size-5 lg:mr-[10px]" />
+              {isDesktop && "Back"}
+            </Button>
+          ) : (
+            <div />
+          )}
+          <TooltipProvider>
+            <div
+              className={`flex flex-row items-center gap-2 mr-1 *:rounded-lg ${isMobile ? "landscape:flex-col" : ""}`}
+            >
+              <CameraFeatureToggle
+                className="p-2 md:p-0"
+                variant={fullscreen ? "overlay" : "primary"}
+                Icon={fullscreen ? FaCompress : FaExpand}
+                isActive={fullscreen}
+                title={fullscreen ? "Close" : "Fullscreen"}
+                onClick={() => {
+                  if (fullscreen) {
+                    document.exitFullscreen();
+                  } else {
+                    mainRef.current?.requestFullscreen();
+                  }
+                }}
+              />
+              {window.isSecureContext && (
+                <CameraFeatureToggle
+                  className="p-2 md:p-0"
+                  variant={fullscreen ? "overlay" : "primary"}
+                  Icon={mic ? FaMicrophone : FaMicrophoneSlash}
+                  isActive={mic}
+                  title={`${mic ? "Disable" : "Enable"} Two Way Talk`}
+                  onClick={() => setMic(!mic)}
+                />
+              )}
+              <CameraFeatureToggle
+                className="p-2 md:p-0"
+                variant={fullscreen ? "overlay" : "primary"}
+                Icon={audio ? GiSpeaker : GiSpeakerOff}
+                isActive={audio}
+                title={`${audio ? "Disable" : "Enable"} Camera Audio`}
+                onClick={() => setAudio(!audio)}
+              />
+              <CameraFeatureToggle
+                className="p-2 md:p-0"
+                variant={fullscreen ? "overlay" : "primary"}
+                Icon={detectState == "ON" ? MdPersonSearch : MdPersonOff}
+                isActive={detectState == "ON"}
+                title={`${detectState == "ON" ? "Disable" : "Enable"} Detect`}
+                onClick={() => sendDetect(detectState == "ON" ? "OFF" : "ON")}
+              />
+              <CameraFeatureToggle
+                className="p-2 md:p-0"
+                variant={fullscreen ? "overlay" : "primary"}
+                Icon={recordState == "ON" ? LuVideo : LuVideoOff}
+                isActive={recordState == "ON"}
+                title={`${recordState == "ON" ? "Disable" : "Enable"} Recording`}
+                onClick={() => sendRecord(recordState == "ON" ? "OFF" : "ON")}
+              />
+              <CameraFeatureToggle
+                className="p-2 md:p-0"
+                variant={fullscreen ? "overlay" : "primary"}
+                Icon={snapshotState == "ON" ? MdPhotoCamera : MdNoPhotography}
+                isActive={snapshotState == "ON"}
+                title={`${snapshotState == "ON" ? "Disable" : "Enable"} Snapshots`}
+                onClick={() =>
+                  sendSnapshot(snapshotState == "ON" ? "OFF" : "ON")
+                }
+              />
+              {camera.audio.enabled_in_config && (
+                <CameraFeatureToggle
+                  className="p-2 md:p-0"
+                  variant={fullscreen ? "overlay" : "primary"}
+                  Icon={audioState == "ON" ? LuEar : LuEarOff}
+                  isActive={audioState == "ON"}
+                  title={`${audioState == "ON" ? "Disable" : "Enable"} Audio Detect`}
+                  onClick={() => sendAudio(audioState == "ON" ? "OFF" : "ON")}
+                />
+              )}
+            </div>
+          </TooltipProvider>
+        </div>
+        <TransformComponent
+          wrapperStyle={{
+            width: "100%",
+            height: "100%",
+          }}
+          contentStyle={{
+            position: "relative",
+            width: "100%",
+            height: "100%",
+            padding: "8px",
           }}
         >
-          <TransformWrapper minScale={1.0}>
-            <TransformComponent>
-              <LivePlayer
-                key={camera.name}
-                className={`m-1 ${fullscreen ? "*:rounded-none" : ""}`}
-                windowVisible
-                showStillWithoutActivity={false}
-                cameraConfig={camera}
-                playAudio={audio}
-                micEnabled={mic}
-                preferredLiveMode={preferredLiveMode}
-              />
-            </TransformComponent>
-          </TransformWrapper>
-        </div>
-        {camera.onvif.host != "" && <PtzControlPanel camera={camera.name} />}
+          <div
+            className={`flex flex-col justify-center items-center ${growClassName}`}
+            style={{
+              aspectRatio: aspectRatio,
+            }}
+          >
+            <LivePlayer
+              key={camera.name}
+              className={`m-1 ${fullscreen ? "*:rounded-none" : ""}`}
+              windowVisible
+              showStillWithoutActivity={false}
+              cameraConfig={camera}
+              playAudio={audio}
+              micEnabled={mic}
+              preferredLiveMode={preferredLiveMode}
+            />
+          </div>
+          {camera.onvif.host != "" && <PtzControlPanel camera={camera.name} />}
+        </TransformComponent>
       </div>
-    </div>
+    </TransformWrapper>
   );
 }
 
