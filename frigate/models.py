@@ -74,6 +74,7 @@ class Recordings(Model):  # type: ignore[misc]
     objects = IntegerField(null=True)
     dBFS = IntegerField(null=True)
     segment_size = FloatField(default=0)  # this should be stored as MB
+    regions = IntegerField(null=True)
 
 
 class ReviewSegment(Model):  # type: ignore[misc]
