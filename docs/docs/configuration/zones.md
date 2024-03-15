@@ -14,9 +14,9 @@ During testing, enable the Zones option for the debug feed so you can adjust as 
 
 To create a zone, follow [the steps for a "Motion mask"](masks.md), but use the section of the web UI for creating a zone instead.
 
-### Restricting events to specific zones
+### Restricting alerts to specific zones
 
-Often you will only want events to be created when an object enters areas of interest. This is done using zones along with setting required_zones. Let's say you only want to be notified when an object enters your entire_yard zone, the config would be:
+Often you will only want alerts to be created when an object enters areas of interest. This is done using zones along with setting required_zones. Let's say you only want to have an alert created when an object enters your entire_yard zone, the config would be:
 
 ```yaml
 cameras:
