@@ -81,7 +81,8 @@ export class DynamicVideoController {
       this.playerController.currentTime = seekSeconds;
 
       if (play) {
-        this.playerController.play();
+        // use timeout to avoid race condition with other data loading
+        setTimeout(() => this.playerController.play()), 1;
       } else {
         this.playerController.pause();
       }
