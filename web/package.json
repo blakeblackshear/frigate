@@ -54,7 +54,7 @@
     "react-icons": "^4.12.0",
     "react-router-dom": "^6.22.2",
     "react-swipeable": "^7.0.1",
-    "react-tracked": "^1.7.11",
+    "react-tracked": "^1.7.14",
     "react-transition-group": "^4.4.5",
     "react-use-websocket": "^4.7.0",
     "react-zoom-pan-pinch": "^3.4.3",
