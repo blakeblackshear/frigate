@@ -1,18 +1,8 @@
 import logging
 import os.path
 import urllib.request
-from typing import Literal
-
 import numpy as np
-
-try:
-    from hide_warnings import hide_warnings
-except:  # noqa: E722
-
-    def hide_warnings(func):
-        pass
-
-
+from typing import Literal
 from pydantic import Field
 
 from frigate.detectors.detection_api import DetectionApi
@@ -24,14 +14,6 @@ DETECTOR_KEY = "rknn"
 
 supported_socs = ["rk3562", "rk3566", "rk3568", "rk3588"]
 
-yolov8_suffix = {
-    "default-yolov8n": "n",
-    "default-yolov8s": "s",
-    "default-yolov8m": "m",
-    "default-yolov8l": "l",
-    "default-yolov8x": "x",
-}
-
 
 class RknnDetectorConfig(BaseDetectorConfig):
     type: Literal[DETECTOR_KEY]
@@ -42,7 +24,35 @@ class Rknn(DetectionApi):
     type_key = DETECTOR_KEY
 
     def __init__(self, config: RknnDetectorConfig):
-        # find out SoC
+        self.height = config.model.height
+        self.width = config.model.width
+
+        soc = self.get_soc()
+        core_mask = config.core_mask
+
+        model_properties = self.get_model_properties(
+            config.model.path or "default-yolov8n", soc
+        )
+
+        if model_properties["supplied"] and not os.path.isfile(
+            model_properties["path"]
+        ):
+            self.download_model(model_properties["filename"])
+
+        from rknnlite.api import RKNNLite
+
+        self.rknn = RKNNLite(verbose=False)
+        if self.rknn.load_rknn(model_properties["path"]) != 0:
+            logger.error("Error initializing rknn model.")
+        if self.rknn.init_runtime(core_mask=core_mask) != 0:
+            logger.error(
+                "Error initializing rknn runtime. Do you run docker in privileged mode?"
+            )
+
+    def __del__(self):
+        self.rknn.release()
+
+    def get_soc(self):
         try:
             with open("/proc/device-tree/compatible") as file:
                 soc = file.read().split(",")[-1].strip("\x00")
@@ -62,78 +72,64 @@ class Rknn(DetectionApi):
                 )
             )
 
-        if not os.path.isfile("/usr/lib/librknnrt.so"):
-            if "rk356" in soc:
-                os.rename("/usr/lib/librknnrt_rk356x.so", "/usr/lib/librknnrt.so")
-            elif "rk3588" in soc:
-                os.rename("/usr/lib/librknnrt_rk3588.so", "/usr/lib/librknnrt.so")
+        return soc
 
-        self.model_path = config.model.path or "default-yolov8n"
-        self.core_mask = config.core_mask
-        self.height = config.model.height
-        self.width = config.model.width
+    def get_model_properties(self, path, soc):
+        model_properties = {
+            "supplied": False,
+            "path": path,
+            "suffix": None,
+            "quant": None,
+            "filename": None,
+        }
 
-        if self.model_path in yolov8_suffix:
-            if self.model_path == "default-yolov8n":
-                self.model_path = "/models/rknn/yolov8n-320x320-{soc}.rknn".format(
-                    soc=soc
-                )
-            else:
-                model_suffix = yolov8_suffix[self.model_path]
-                self.model_path = (
-                    "/config/model_cache/rknn/yolov8{suffix}-320x320-{soc}.rknn".format(
-                        suffix=model_suffix, soc=soc
-                    )
-                )
+        if path[:-1] in ["default-yolov8", "quant_i8"] and path[-1] in "nsmlx":
+            model_properties["supplied"] = True
+            model_properties["suffix"] = path[-1]
+            model_properties["quant"] = path[7:9] if path.startswith("quant") else None
 
-                os.makedirs("/config/model_cache/rknn", exist_ok=True)
-                if not os.path.isfile(self.model_path):
-                    logger.info(
-                        "Downloading yolov8{suffix} model.".format(suffix=model_suffix)
-                    )
-                    urllib.request.urlretrieve(
-                        "https://github.com/MarcA711/rknn-models/releases/download/v1.5.2-{soc}/yolov8{suffix}-320x320-{soc}.rknn".format(
-                            soc=soc, suffix=model_suffix
-                        ),
-                        self.model_path,
-                    )
+            prefix = "/config/model_cache/rknn/"
+            if model_properties["suffix"] == "n" and model_properties["quant"] == None:
+                prefix = "/models/rknn/"
 
-            if (config.model.width != 320) or (config.model.height != 320):
-                logger.error(
-                    "Make sure to set the model width and height to 320 in your config.yml."
-                )
-                raise Exception(
-                    "Make sure to set the model width and height to 320 in your config.yml."
-                )
+            model_properties["filename"] = "{}-{}.rknn".format(path, soc)
+            model_properties["path"] = prefix + model_properties["filename"]
 
-            if config.model.input_pixel_format != "bgr":
-                logger.error(
-                    'Make sure to set the model input_pixel_format to "bgr" in your config.yml.'
-                )
-                raise Exception(
-                    'Make sure to set the model input_pixel_format to "bgr" in your config.yml.'
-                )
+        return model_properties
 
-            if config.model.input_tensor != "nhwc":
-                logger.error(
-                    'Make sure to set the model input_tensor to "nhwc" in your config.yml.'
-                )
-                raise Exception(
-                    'Make sure to set the model input_tensor to "nhwc" in your config.yml.'
-                )
+    def download_model(self, name):
+        os.makedirs("/config/model_cache/rknn", exist_ok=True)
+        logger.info("Downloading yolov8 model.")
+        urllib.request.urlretrieve(
+            "https://github.com/MarcA711/rknn-models/releases/download/v1.6.0-yolov8-default/"
+            + name,
+            "/config/model_cache/rknn/" + name,
+        )
 
-        from rknnlite.api import RKNNLite
-
-        self.rknn = RKNNLite(verbose=False)
-        if self.rknn.load_rknn(self.model_path) != 0:
-            logger.error("Error initializing rknn model.")
-        if self.rknn.init_runtime(core_mask=self.core_mask) != 0:
+    def check_config(self, config):
+        if (config.model.width != 320) or (config.model.height != 320):
             logger.error(
-                "Error initializing rknn runtime. Do you run docker in privileged mode?"
+                "Make sure to set the model width and height to 320 in your config.yml."
+            )
+            raise Exception(
+                "Make sure to set the model width and height to 320 in your config.yml."
             )
 
-    def __del__(self):
-        self.rknn.release()
+        if config.model.input_pixel_format != "bgr":
+            logger.error(
+                'Make sure to set the model input_pixel_format to "bgr" in your config.yml.'
+            )
+            raise Exception(
+                'Make sure to set the model input_pixel_format to "bgr" in your config.yml.'
+            )
+
+        if config.model.input_tensor != "nhwc":
+            logger.error(
+                'Make sure to set the model input_tensor to "nhwc" in your config.yml.'
+            )
+            raise Exception(
+                'Make sure to set the model input_tensor to "nhwc" in your config.yml.'
+            )
 
     def postprocess(self, results):
         """
@@ -146,7 +142,7 @@ class Rknn(DetectionApi):
         detections: array with shape (20, 6) with 20 rows of (class, confidence, y_min, x_min, y_max, x_max)
         """
 
-        results = np.transpose(results[0, :, :, 0])  # array shape (2100, 84)
+        results = np.transpose(results[0, 0, :, :])  # array shape (2100, 84)
         scores = np.max(
             results[:, 4:], axis=1
         )  # array shape (2100,); max confidence of each row
@@ -187,14 +183,10 @@ class Rknn(DetectionApi):
 
         return detections
 
-    @hide_warnings
-    def inference(self, tensor_input):
-        return self.rknn.inference(inputs=tensor_input)
-
     def detect_raw(self, tensor_input):
-        output = self.inference(
+        output = self.rknn.inference(
             [
                 tensor_input,
             ]
         )
-        return self.postprocess(output[0])
+        return self.postprocess(np.array(output))
