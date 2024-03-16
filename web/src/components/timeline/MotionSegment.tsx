@@ -179,19 +179,10 @@ export function MotionSegment({
   };
 
   const segmentClick = useCallback(() => {
-    if (
-      startTimestamp &&
-      setHandlebarTime &&
-      (firstHalfSegmentWidth > 1 || secondHalfSegmentWidth > 1)
-    ) {
-      setHandlebarTime(startTimestamp);
+    if (setHandlebarTime) {
+      setHandlebarTime(segmentTime);
     }
-  }, [
-    startTimestamp,
-    setHandlebarTime,
-    firstHalfSegmentWidth,
-    secondHalfSegmentWidth,
-  ]);
+  }, [segmentTime, setHandlebarTime]);
 
   return (
     <div
