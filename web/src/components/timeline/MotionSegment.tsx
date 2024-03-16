@@ -39,7 +39,7 @@ export function MotionSegment({
     shouldShowRoundedCorners,
   } = useEventSegmentUtils(segmentDuration, events, severityType);
 
-  const { getMotionSegmentValue, interpolateMotionAudioData, getMotionStart } =
+  const { getMotionSegmentValue, interpolateMotionAudioData } =
     useMotionSegmentUtils(segmentDuration, motion_events);
 
   const { alignStartDateToTimeline, alignEndDateToTimeline } = useEventUtils(
