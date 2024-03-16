@@ -66,15 +66,6 @@ export function MotionSegment({
     [shouldShowRoundedCorners, segmentTime],
   );
 
-  const startTimestamp = useMemo(() => {
-    const eventStart = getMotionStart(segmentTime);
-    if (eventStart) {
-      return alignStartDateToTimeline(eventStart);
-    }
-    // we know that these deps are correct
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getMotionStart, segmentTime]);
-
   const timestamp = useMemo(() => new Date(segmentTime * 1000), [segmentTime]);
   const segmentKey = useMemo(() => segmentTime, [segmentTime]);
 
