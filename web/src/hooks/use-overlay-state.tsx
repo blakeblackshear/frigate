@@ -76,7 +76,7 @@ export function useHashState<S extends string>(): [
       if (!value) {
         navigate(location.pathname);
       } else {
-        navigate(`${location.pathname}#${value}`);
+        navigate(`${location.pathname}#${value}`, { state: location.state });
       }
     },
     // we know that these deps are correct
