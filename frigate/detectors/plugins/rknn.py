@@ -1,8 +1,9 @@
 import logging
 import os.path
 import urllib.request
-import numpy as np
 from typing import Literal
+
+import numpy as np
 from pydantic import Field
 
 from frigate.detectors.detection_api import DetectionApi
