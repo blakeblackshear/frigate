@@ -39,7 +39,7 @@ export function MotionSegment({
     shouldShowRoundedCorners,
   } = useEventSegmentUtils(segmentDuration, events, severityType);
 
-  const { getMotionSegmentValue, interpolateMotionAudioData, getMotionStart } =
+  const { getMotionSegmentValue, interpolateMotionAudioData } =
     useMotionSegmentUtils(segmentDuration, motion_events);
 
   const { alignStartDateToTimeline, alignEndDateToTimeline } = useEventUtils(
@@ -65,15 +65,6 @@ export function MotionSegment({
     () => shouldShowRoundedCorners(segmentTime),
     [shouldShowRoundedCorners, segmentTime],
   );
-
-  const startTimestamp = useMemo(() => {
-    const eventStart = getMotionStart(segmentTime);
-    if (eventStart) {
-      return alignStartDateToTimeline(eventStart);
-    }
-    // we know that these deps are correct
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getMotionStart, segmentTime]);
 
   const timestamp = useMemo(() => new Date(segmentTime * 1000), [segmentTime]);
   const segmentKey = useMemo(() => segmentTime, [segmentTime]);
@@ -179,19 +170,10 @@ export function MotionSegment({
   };
 
   const segmentClick = useCallback(() => {
-    if (
-      startTimestamp &&
-      setHandlebarTime &&
-      (firstHalfSegmentWidth > 1 || secondHalfSegmentWidth > 1)
-    ) {
-      setHandlebarTime(startTimestamp);
+    if (setHandlebarTime) {
+      setHandlebarTime(segmentTime);
     }
-  }, [
-    startTimestamp,
-    setHandlebarTime,
-    firstHalfSegmentWidth,
-    secondHalfSegmentWidth,
-  ]);
+  }, [segmentTime, setHandlebarTime]);
 
   return (
     <div
