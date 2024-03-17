@@ -1,4 +1,5 @@
 import { ReactNode, RefObject } from "react";
+import { isIOS, isMobile } from "react-device-detect";
 
 export type ReviewTimelineProps = {
   timelineRef: RefObject<HTMLDivElement>;
@@ -55,7 +56,7 @@ export function ReviewTimeline({
       </div>
       {showHandlebar && (
         <div
-          className="absolute left-0 top-0 z-20 w-full"
+          className={`absolute left-0 top-0 ${isDragging && isIOS ? "" : "z-20"} w-full`}
           role="scrollbar"
           ref={handlebarRef}
         >
@@ -72,14 +73,16 @@ export function ReviewTimeline({
               <div
                 className={`bg-destructive rounded-full mx-auto ${
                   segmentDuration < 60 ? "w-12 md:w-20" : "w-12 md:w-16"
-                } h-5 flex items-center justify-center`}
+                } h-5 ${isDragging && isMobile ? "fixed top-[18px] left-1/2 transform -translate-x-1/2 z-20 w-[30%] h-[30px] bg-destructive/80" : "static"} flex items-center justify-center`}
               >
                 <div
                   ref={handlebarTimeRef}
-                  className="text-white text-[8px] md:text-xs z-10"
+                  className={`text-white ${isDragging && isMobile ? "text-lg" : "text-[8px] md:text-xs"} z-10`}
                 ></div>
               </div>
-              <div className="absolute h-1 w-full bg-destructive top-1/2 transform -translate-y-1/2"></div>
+              <div
+                className={`absolute h-1 w-full bg-destructive ${isDragging && isMobile ? "top-1" : "top-1/2 transform -translate-y-1/2"}`}
+              ></div>
             </div>
           </div>
         </div>
