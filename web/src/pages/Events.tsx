@@ -11,13 +11,9 @@ import {
   ReviewSummary,
 } from "@/types/review";
 import EventView from "@/views/events/EventView";
-import {
-  DesktopRecordingView,
-  MobileRecordingView,
-} from "@/views/events/RecordingView";
+import { RecordingView } from "@/views/events/RecordingView";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { isMobile } from "react-device-detect";
 import useSWR from "swr";
 
 export default function Events() {
@@ -319,21 +315,8 @@ export default function Events() {
   }
 
   if (selectedReviewData) {
-    if (isMobile) {
-      return (
-        <MobileRecordingView
-          reviewItems={selectedReviewData.cameraSegments}
-          startCamera={selectedReviewData.camera}
-          startTime={selectedReviewData.start_time}
-          allCameras={selectedReviewData.allCameras}
-          severity={selectedReviewData.severity}
-          relevantPreviews={allPreviews}
-        />
-      );
-    }
-
     return (
-      <DesktopRecordingView
+      <RecordingView
         startCamera={selectedReviewData.camera}
         startTime={selectedReviewData.start_time}
         allCameras={selectedReviewData.allCameras}
