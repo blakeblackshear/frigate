@@ -28,13 +28,21 @@ FOLDER_PREVIEW_FRAMES = "preview_frames"
 PREVIEW_CACHE_DIR = os.path.join(CACHE_DIR, FOLDER_PREVIEW_FRAMES)
 PREVIEW_SEGMENT_DURATION = 3600  # one hour
 # important to have lower keyframe to maintain scrubbing performance
-PREVIEW_KEYFRAME_INTERVAL = 60
-PREVIEW_BIT_RATES = {
-    RecordQualityEnum.very_low: 5120,
-    RecordQualityEnum.low: 7168,
+PREVIEW_KEYFRAME_INTERVAL = 40
+PREVIEW_HEIGHT = 180
+PREVIEW_QUALITY_WEBP = {
+    RecordQualityEnum.very_low: 70,
+    RecordQualityEnum.low: 80,
+    RecordQualityEnum.medium: 80,
+    RecordQualityEnum.high: 80,
+    RecordQualityEnum.very_high: 86,
+}
+PREVIEW_QUALITY_BIT_RATES = {
+    RecordQualityEnum.very_low: 7168,
+    RecordQualityEnum.low: 8196,
     RecordQualityEnum.medium: 9216,
-    RecordQualityEnum.high: 13312,
-    RecordQualityEnum.very_high: 17408,
+    RecordQualityEnum.high: 9864,
+    RecordQualityEnum.very_high: 10096,
 }
 
 
@@ -69,7 +77,7 @@ class FFMpegConverter(threading.Thread):
         self.ffmpeg_cmd = parse_preset_hardware_acceleration_encode(
             config.ffmpeg.hwaccel_args,
             input="-f concat -y -protocol_whitelist pipe,file -safe 0 -i /dev/stdin",
-            output=f"-g {PREVIEW_KEYFRAME_INTERVAL} -fpsmax 2 -bf 0 -b:v {PREVIEW_BIT_RATES[self.config.record.preview.quality]} {FPS_VFR_PARAM} -movflags +faststart -pix_fmt yuv420p {self.path}",
+            output=f"-g {PREVIEW_KEYFRAME_INTERVAL} -fpsmax 2 -bf 0 -b:v {PREVIEW_QUALITY_BIT_RATES[self.config.record.preview.quality]} {FPS_VFR_PARAM} -movflags +faststart -pix_fmt yuv420p {self.path}",
             type=EncodeTypeEnum.preview,
         )
 
@@ -131,7 +139,7 @@ class PreviewRecorder:
         self.start_time = 0
         self.last_output_time = 0
         self.output_frames = []
-        self.out_height = 180
+        self.out_height = PREVIEW_HEIGHT
         self.out_width = (
             int((config.detect.width / config.detect.height) * self.out_height) // 4 * 4
         )
@@ -245,7 +253,10 @@ class PreviewRecorder:
         cv2.imwrite(
             get_cache_image_name(self.config.name, frame_time),
             small_frame,
-            [int(cv2.IMWRITE_WEBP_QUALITY), 80],
+            [
+                int(cv2.IMWRITE_WEBP_QUALITY),
+                PREVIEW_QUALITY_WEBP[self.config.record.preview.quality],
+            ],
         )
 
     def write_data(
