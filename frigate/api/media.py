@@ -977,9 +977,9 @@ def event_snapshot_clean(id):
     response.headers["Content-Type"] = "image/png"
     response.headers["Cache-Control"] = "private, max-age=31536000"
     if download:
-        response.headers[
-            "Content-Disposition"
-        ] = f"attachment; filename=snapshot-{id}-clean.png"
+        response.headers["Content-Disposition"] = (
+            f"attachment; filename=snapshot-{id}-clean.png"
+        )
     return response
 
 
