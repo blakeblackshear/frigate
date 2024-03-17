@@ -292,7 +292,7 @@ Returns the clip for the event id. Works after the event has ended.
 
 ### `GET /api/events/<id>/snapshot-clean.png`
 
-Returns the clean snapshot image for the event id. Only works after an event has completed and if `snapshots` and `clean_copy` are enabled in the config.
+Returns the clean snapshot image for the event id. Only works if `snapshots` and `clean_copy` are enabled in the config.
 
 | param      | Type | Description        |
 | ---------- | ---- | ------------------ |
