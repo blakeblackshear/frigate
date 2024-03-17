@@ -29,13 +29,7 @@ PREVIEW_CACHE_DIR = os.path.join(CACHE_DIR, FOLDER_PREVIEW_FRAMES)
 PREVIEW_SEGMENT_DURATION = 3600  # one hour
 # important to have lower keyframe to maintain scrubbing performance
 PREVIEW_KEYFRAME_INTERVAL = 40
-PREVIEW_QUALITY_HEIGHT = {
-    RecordQualityEnum.very_low: 146,
-    RecordQualityEnum.low: 146,
-    RecordQualityEnum.medium: 180,
-    RecordQualityEnum.high: 180,
-    RecordQualityEnum.very_high: 200,
-}
+PREVIEW_HEIGHT = 180
 PREVIEW_QUALITY_WEBP = {
     RecordQualityEnum.very_low: 70,
     RecordQualityEnum.low: 80,
@@ -145,7 +139,7 @@ class PreviewRecorder:
         self.start_time = 0
         self.last_output_time = 0
         self.output_frames = []
-        self.out_height = PREVIEW_QUALITY_HEIGHT[config.record.preview.quality]
+        self.out_height = PREVIEW_HEIGHT
         self.out_width = (
             int((config.detect.width / config.detect.height) * self.out_height) // 4 * 4
         )
