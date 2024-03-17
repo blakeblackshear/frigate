@@ -433,10 +433,17 @@ function VideoPreview({
         setIgnoreClick(true);
       }
 
+      if (setReviewed && !review.has_been_reviewed) {
+        setReviewed();
+      }
+
       setProgress(value);
       playerRef.current.currentTime =
         playerStartTime + (value / 100.0) * playerDuration;
     },
+
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       manualPlayback,
       playerDuration,
@@ -585,8 +592,15 @@ function InProgressPreview({
         setIgnoreClick(true);
       }
 
+      if (!review.has_been_reviewed) {
+        setReviewed(review.id);
+      }
+
       setKey(value);
     },
+
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [manualFrame, setIgnoreClick, setManualFrame, setKey],
   );
 
