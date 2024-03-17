@@ -215,15 +215,18 @@ def calculate_16_9_crop(frame_shape, xmin, ymin, xmax, ymax, multiplier=1.25):
     min_size = 200
 
     # size is the longest edge and divisible by 4
-    x_size = int(xmax - xmin * multiplier)
+    x_size = int((xmax - xmin) * multiplier)
 
     if x_size < min_size:
         x_size = min_size
 
-    y_size = int(ymax - ymin * multiplier)
+    y_size = int((ymax - ymin) * multiplier)
 
     if y_size < min_size:
         y_size = min_size
+
+    if frame_shape[1] / frame_shape[0] > 16 / 9 and x_size / y_size > 4:
+        return None
 
     # calculate 16x9 using height
     aspect_y_size = int(9 / 16 * x_size)
