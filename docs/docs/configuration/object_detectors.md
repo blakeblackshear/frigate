@@ -369,6 +369,7 @@ These SoCs come with a NPU that will highly speed up detection.
 ### Setup
 
 Make sure that you use a linux distribution that comes with the rockchip BSP kernel 5.10 or 6.1, supports rknpu (and also vpu, if you want to use hardware video processing) and rknpu driver version 0.9.2 or higher. To check, enter the following commands:
+
 ```
 $ uname -r
 5.10.xxx-rockchip # or 6.1.xxx; the -rockchip suffix is important
@@ -385,6 +386,7 @@ Follow Frigate's default installation instructions, but use a docker image with 
 Next, you need to grant docker permissions to access your hardware:
 - During the configuration process, you should run docker in privileged mode to avoid any errors due to insufficient permissions. To do so, add `privileged: true` to your `docker-compose.yml` file or the `--privileged` flag to your docker run command.
 - After everything works, you should only grant necessary permissions to increase security. Add the lines below to your `docker-compose.yml` file or the following options to your docker run command: `--security-opt systempaths=unconfined --security-opt apparmor=unconfined --device /dev/dri:/dev/dri --device /dev/dma_heap:/dev/dma_heap --device /dev/rga:/dev/rga --device /dev/mpp_service:/dev/mpp_service`:
+
 ```yaml
     security_opt:
       - apparmor=unconfined
@@ -395,7 +397,6 @@ Next, you need to grant docker permissions to access your hardware:
       - /dev/rga:/dev/rga # only needed, if you also use VPU
       - /dev/mpp_service:/dev/mpp_service # only needed, if you also use VPU
 ```
-
 
 ### Configuration
 
