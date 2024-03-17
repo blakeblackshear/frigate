@@ -935,6 +935,54 @@ def grid_snapshot(camera_name):
         )
 
 
+@MediaBp.route("/events/<id>/snapshot-clean.png")
+def event_snapshot_clean(id):
+    download = request.args.get("download", type=bool)
+    try:
+        event = Event.get(Event.id == id)
+        if event.end_time is None:
+            return make_response(
+                jsonify({"success": False, "message": "Event not complete"}), 404
+            )
+        if not event.has_snapshot:
+            return make_response(
+                jsonify({"success": False, "message": "Snapshot not available"}), 404
+            )
+    except DoesNotExist:
+        return make_response(
+            jsonify({"success": False, "message": "Event not found"}), 404
+        )
+    try:
+        clean_snapshot_path = os.path.join(
+            CLIPS_DIR, f"{event.camera}-{event.id}-clean.png"
+        )
+        if not os.path.exists(clean_snapshot_path):
+            return make_response(
+                jsonify({"success": False, "message": "Clean snapshot not available"}),
+                404,
+            )
+        with open(
+            os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}-clean.png"), "rb"
+        ) as image_file:
+            png_bytes = image_file.read()
+    except Exception:
+        logger.error(f"Unable to load clean png for event: {event.id}")
+        return make_response(
+            jsonify(
+                {"success": False, "message": "Unable to load clean png for event"}
+            ),
+            400,
+        )
+    response = make_response(png_bytes)
+    response.headers["Content-Type"] = "image/png"
+    response.headers["Cache-Control"] = "private, max-age=31536000"
+    if download:
+        response.headers[
+            "Content-Disposition"
+        ] = f"attachment; filename=snapshot-{id}-clean.png"
+    return response
+
+
 @MediaBp.route("/events/<id>/snapshot.jpg")
 def event_snapshot(id):
     download = request.args.get("download", type=bool)
