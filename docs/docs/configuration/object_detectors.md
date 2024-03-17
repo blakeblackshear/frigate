@@ -383,7 +383,7 @@ I recommend [Joshua Riek's Ubuntu for Rockchip](https://github.com/Joshua-Riek/u
 Follow Frigate's default installation instructions, but use a docker image with `-rk` suffix for example `ghcr.io/blakeblackshear/frigate:stable-rk`.
 
 Next, you need to grant docker permissions to access your hardware:
-- During the configuration process, you should run docker in privileged mode to avoid any errors due to insufficient permissions. To do so,add `privileged: true` to your `docker-compose.yml` file or the `--privileged` flag to your docker run command.
+- During the configuration process, you should run docker in privileged mode to avoid any errors due to insufficient permissions. To do so, add `privileged: true` to your `docker-compose.yml` file or the `--privileged` flag to your docker run command.
 - After everything works, you should only grant necessary permissions to increase security. Add the lines below to your `docker-compose.yml` file or the following options to your docker run command: `--security-opt systempaths=unconfined --security-opt apparmor=unconfined --device /dev/dri:/dev/dri --device /dev/dma_heap:/dev/dma_heap --device /dev/rga:/dev/rga --device /dev/mpp_service:/dev/mpp_service`:
 ```yaml
     security_opt:
