@@ -368,7 +368,34 @@ These SoCs come with a NPU that will highly speed up detection.
 
 ### Setup
 
-Use a frigate docker image with `-rk` suffix and enable privileged mode by adding the `--privileged` flag to your docker run command or `privileged: true` to your `docker-compose.yml` file.
+Make sure that you use a linux distribution that comes with the rockchip BSP kernel 5.10 or 6.1, supports rknpu (and also vpu, if you want to use hardware video processing) and rknpu driver version 0.9.2 or higher. To check, enter the following commands:
+```
+$ uname -r
+5.10.xxx-rockchip # or 6.1.xxx; the -rockchip suffix is important
+$ ls /dev/dri
+by-path  card0  card1  renderD128  renderD129 # should list renderD129 for NPU (and renderD128 for VPU)
+$ sudo cat /sys/kernel/debug/rknpu/version
+RKNPU driver: v0.9.2
+```
+
+I recommend [Joshua Riek's Ubuntu for Rockchip](https://github.com/Joshua-Riek/ubuntu-rockchip), if your board is supported.
+
+Follow Frigate's default installation instructions, but use a docker image with `-rk` suffix for example `ghcr.io/blakeblackshear/frigate:stable-rk`.
+
+Next, you need to grant docker permissions to access your hardware:
+- During the configuration process, you should run docker in privileged mode to avoid any errors due to insufficient permissions. To do so,add `privileged: true` to your `docker-compose.yml` file or the `--privileged` flag to your docker run command.
+- After everything works, you should only grant necessary permissions to increase security. Add the lines below to your `docker-compose.yml` file or the following options to your docker run command: `--security-opt systempaths=unconfined --security-opt apparmor=unconfined --device /dev/dri:/dev/dri --device /dev/dma_heap:/dev/dma_heap --device /dev/rga:/dev/rga --device /dev/mpp_service:/dev/mpp_service`:
+```yaml
+    security_opt:
+      - apparmor=unconfined
+      - systempaths=unconfined
+    devices:
+      - /dev/dri:/dev/dri
+      - /dev/dma_heap:/dev/dma_heap # only needed, if you also use VPU
+      - /dev/rga:/dev/rga # only needed, if you also use VPU
+      - /dev/mpp_service:/dev/mpp_service # only needed, if you also use VPU
+```
+
 
 ### Configuration
 
@@ -379,7 +406,7 @@ detectors: # required
   rknn: # required
     type: rknn # required
     # core mask for npu
-    core_mask: 0
+    core_mask: 0b111
 
 model: # required
   # name of yolov8 model or path to your own .rknn model file
@@ -404,9 +431,9 @@ model: # required
 Explanation for rknn specific options:
 
 - **core mask** controls which cores of your NPU should be used. This option applies only to SoCs with a multicore NPU (at the time of writing this in only the RK3588/S). The easiest way is to pass the value as a binary number. To do so, use the prefix `0b` and write a `0` to disable a core and a `1` to enable a core, whereas the last digit corresponds to core0, the second last to core1, etc. You also have to use the cores in ascending order (so you can't use core0 and core2; but you can use core0 and core1). Enabling more cores can reduce the inference speed, especially when using bigger models (see section below). Examples:
-  - `core_mask: 0b000` or just `core_mask: 0` let the NPU decide which cores should be used. Default and recommended value.
+  - `core_mask: 0b000` or just `core_mask: 0` let the NPU decide which cores should be used.
   - `core_mask: 0b001` use only core0.
-  - `core_mask: 0b011` use core0 and core1.
+  - `core_mask: 0b111` use core0, core1 and core2. Fastest and default value.
   - `core_mask: 0b110` use core1 and core2. **This does not** work, since core0 is disabled.
 
 ### Choosing a model
@@ -442,19 +469,6 @@ $ cat /sys/kernel/debug/rknpu/load
 model:
   path: /config/model_cache/rknn/my-rknn-model.rknn
 ```
-
-:::tip
-
-When you have a multicore NPU, you can enable all cores to reduce inference times. You should consider activating all cores if you use a larger model like yolov8l. If your NPU has 3 cores (like rk3588/S SoCs), you can enable all 3 cores using:
-
-```yaml
-detectors:
-  rknn:
-    type: rknn
-    core_mask: 0b111
-```
-
-:::
 
 ## AMD/ROCm GPU detector
 
