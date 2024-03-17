@@ -28,27 +28,27 @@ FOLDER_PREVIEW_FRAMES = "preview_frames"
 PREVIEW_CACHE_DIR = os.path.join(CACHE_DIR, FOLDER_PREVIEW_FRAMES)
 PREVIEW_SEGMENT_DURATION = 3600  # one hour
 # important to have lower keyframe to maintain scrubbing performance
-PREVIEW_KEYFRAME_INTERVAL = 60
+PREVIEW_KEYFRAME_INTERVAL = 40
 PREVIEW_QUALITY_HEIGHT = {
-    RecordQualityEnum.very_low: 144,
-    RecordQualityEnum.low: 160,
-    RecordQualityEnum.medium: 160,
-    RecordQualityEnum.high: 160,
-    RecordQualityEnum.very_high: 252,
+    RecordQualityEnum.very_low: 146,
+    RecordQualityEnum.low: 146,
+    RecordQualityEnum.medium: 180,
+    RecordQualityEnum.high: 180,
+    RecordQualityEnum.very_high: 200,
 }
 PREVIEW_QUALITY_WEBP = {
-    RecordQualityEnum.very_low: 40,
-    RecordQualityEnum.low: 60,
+    RecordQualityEnum.very_low: 70,
+    RecordQualityEnum.low: 80,
     RecordQualityEnum.medium: 80,
-    RecordQualityEnum.high: 90,
-    RecordQualityEnum.very_high: 96,
+    RecordQualityEnum.high: 80,
+    RecordQualityEnum.very_high: 86,
 }
 PREVIEW_QUALITY_BIT_RATES = {
-    RecordQualityEnum.very_low: 5120,
-    RecordQualityEnum.low: 7168,
+    RecordQualityEnum.very_low: 7168,
+    RecordQualityEnum.low: 8196,
     RecordQualityEnum.medium: 9216,
-    RecordQualityEnum.high: 13312,
-    RecordQualityEnum.very_high: 17408,
+    RecordQualityEnum.high: 9864,
+    RecordQualityEnum.very_high: 10096,
 }
 
 
