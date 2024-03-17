@@ -390,11 +390,17 @@ def motion_activity():
         .apply(lambda x: max(x, key=abs, default=0.0))
         .fillna(0.0)
     )
-    df["motion"] = (
-        (df["motion"] - df["motion"].min())
-        / (df["motion"].max() - df["motion"].min())
-        * 100
-    )
+
+    length = df.shape[0]
+    chunk = int(60 * (60 / scale))
+
+    for i in range(0, length, chunk):
+        part = df.iloc[i : i + chunk]
+        df.iloc[i : i + chunk, 0] = (
+            (part["motion"] - part["motion"].min())
+            / (part["motion"].max() - part["motion"].min())
+            * 100
+        )
 
     # change types for output
     df.index = df.index.astype(int) // (10**9)
