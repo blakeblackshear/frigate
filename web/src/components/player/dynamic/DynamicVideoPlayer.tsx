@@ -18,10 +18,10 @@ type DynamicVideoPlayerProps = {
   timeRange: { start: number; end: number };
   cameraPreviews: Preview[];
   startTimestamp?: number;
+  isScrubbing: boolean;
   onControllerReady: (controller: DynamicVideoController) => void;
   onTimestampUpdate?: (timestamp: number) => void;
   onClipEnded?: () => void;
-  isScrubbing: boolean;
 };
 export default function DynamicVideoPlayer({
   className,
@@ -29,10 +29,10 @@ export default function DynamicVideoPlayer({
   timeRange,
   cameraPreviews,
   startTimestamp,
+  isScrubbing,
   onControllerReady,
   onTimestampUpdate,
   onClipEnded,
-  isScrubbing,
 }: DynamicVideoPlayerProps) {
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -192,6 +192,7 @@ export default function DynamicVideoPlayer({
         timeRange={timeRange}
         cameraPreviews={cameraPreviews}
         startTime={startTimestamp}
+        isScrubbing={isScrubbing}
         onControllerReady={(previewController) => {
           setPreviewController(previewController);
         }}

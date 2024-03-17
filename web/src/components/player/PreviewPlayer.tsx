@@ -12,7 +12,7 @@ import { Preview } from "@/types/preview";
 import { PreviewPlayback } from "@/types/playback";
 import { isCurrentHour } from "@/utils/dateUtil";
 import { baseUrl } from "@/api/baseUrl";
-import { isAndroid } from "react-device-detect";
+import { isAndroid, isChrome, isMobile } from "react-device-detect";
 import { Skeleton } from "../ui/skeleton";
 
 type PreviewPlayerProps = {
@@ -21,6 +21,7 @@ type PreviewPlayerProps = {
   timeRange: { start: number; end: number };
   cameraPreviews: Preview[];
   startTime?: number;
+  isScrubbing: boolean;
   onControllerReady: (controller: PreviewController) => void;
   onClick?: () => void;
 };
@@ -30,6 +31,7 @@ export default function PreviewPlayer({
   timeRange,
   cameraPreviews,
   startTime,
+  isScrubbing,
   onControllerReady,
   onClick,
 }: PreviewPlayerProps) {
@@ -53,6 +55,7 @@ export default function PreviewPlayer({
       timeRange={timeRange}
       cameraPreviews={cameraPreviews}
       startTime={startTime}
+      isScrubbing={isScrubbing}
       onControllerReady={onControllerReady}
       onClick={onClick}
     />
@@ -79,6 +82,7 @@ type PreviewVideoPlayerProps = {
   timeRange: { start: number; end: number };
   cameraPreviews: Preview[];
   startTime?: number;
+  isScrubbing: boolean;
   onControllerReady: (controller: PreviewVideoController) => void;
   onClick?: () => void;
 };
@@ -88,6 +92,7 @@ function PreviewVideoPlayer({
   timeRange,
   cameraPreviews,
   startTime,
+  isScrubbing,
   onControllerReady,
   onClick,
 }: PreviewVideoPlayerProps) {
@@ -118,6 +123,14 @@ function PreviewVideoPlayer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controller]);
 
+  useEffect(() => {
+    if (!controller) {
+      return;
+    }
+
+    controller.scrubbing = isScrubbing;
+  }, [controller, isScrubbing]);
+
   // initial state
 
   const [loaded, setLoaded] = useState(false);
@@ -140,7 +153,12 @@ function PreviewVideoPlayer({
       return;
     }
 
-    controller.finishedSeeking();
+    if (isAndroid && isChrome) {
+      // android/chrome glitches when setting currentTime at the same time as onSeeked
+      setTimeout(() => controller.finishedSeeking(), 25);
+    } else {
+      controller.finishedSeeking();
+    }
   }, [controller]);
 
   useEffect(() => {
@@ -227,6 +245,7 @@ class PreviewVideoController extends PreviewController {
   // preview
   private preview: Preview | undefined = undefined;
   private timeToSeek: number | undefined = undefined;
+  public scrubbing = false;
   private seeking = false;
 
   constructor(
@@ -253,6 +272,18 @@ class PreviewVideoController extends PreviewController {
       return false;
     }
 
+    const seekTime = time - this.preview.start;
+
+    if (
+      isAndroid &&
+      isChrome &&
+      this.scrubbing &&
+      Math.abs(seekTime - this.previewRef.current.currentTime) > 400
+    ) {
+      // android/chrome has incorrect timestamps sent that are before the expected seek time
+      return false;
+    }
+
     if (this.seeking) {
       this.timeToSeek = time;
     } else {
@@ -276,21 +307,12 @@ class PreviewVideoController extends PreviewController {
         Math.round(this.timeToSeek) -
         Math.round(this.previewRef.current.currentTime + this.preview.start);
 
-      if (Math.abs(diff) > 1) {
-        let seekTime;
-        if (isAndroid) {
-          if (diff < 30) {
-            seekTime = Math.round(
-              this.previewRef.current.currentTime + diff / 2,
-            );
-          } else {
-            seekTime = Math.round(this.timeToSeek - this.preview.start);
-          }
-        } else {
-          seekTime = this.timeToSeek - this.preview.start;
-        }
+      const scrubLimit = isMobile ? 1 : 0.5;
 
-        this.previewRef.current.currentTime = seekTime;
+      if (Math.abs(diff) >= scrubLimit) {
+        // only seek if there is an appropriate amount of time difference
+        this.previewRef.current.currentTime =
+          this.timeToSeek - this.preview.start;
       } else {
         this.seeking = false;
         this.timeToSeek = undefined;
