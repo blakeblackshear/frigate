@@ -1,4 +1,4 @@
-import { useEventUtils } from "@/hooks/use-event-utils";
+import { useTimelineUtils } from "@/hooks/use-timeline-utils";
 import { useEventSegmentUtils } from "@/hooks/use-event-segment-utils";
 import { MotionData, ReviewSegment } from "@/types/review";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
@@ -42,10 +42,8 @@ export function MotionSegment({
   const { getMotionSegmentValue, interpolateMotionAudioData } =
     useMotionSegmentUtils(segmentDuration, motion_events);
 
-  const { alignStartDateToTimeline, alignEndDateToTimeline } = useEventUtils(
-    events,
-    segmentDuration,
-  );
+  const { alignStartDateToTimeline, alignEndDateToTimeline } =
+    useTimelineUtils(segmentDuration);
 
   const { handleTouchStart } = useTapUtils();
 
@@ -180,7 +178,7 @@ export function MotionSegment({
       key={segmentKey}
       className={segmentClasses}
       onClick={segmentClick}
-      onTouchStart={(event) => handleTouchStart(event, segmentClick)}
+      onTouchEnd={(event) => handleTouchStart(event, segmentClick)}
     >
       <MinimapBounds
         isFirstSegmentInMinimap={isFirstSegmentInMinimap}

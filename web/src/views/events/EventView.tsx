@@ -6,7 +6,7 @@ import PreviewThumbnailPlayer from "@/components/player/PreviewThumbnailPlayer";
 import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { useEventUtils } from "@/hooks/use-event-utils";
+import { useTimelineUtils } from "@/hooks/use-timeline-utils";
 import { useScrollLockout } from "@/hooks/use-mouse-listener";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
@@ -355,10 +355,7 @@ function DetectionReview({
 
   // timeline interaction
 
-  const { alignStartDateToTimeline } = useEventUtils(
-    reviewItems?.all ?? [],
-    segmentDuration,
-  );
+  const { alignStartDateToTimeline } = useTimelineUtils(segmentDuration);
 
   const scrollLock = useScrollLockout(contentRef);
 

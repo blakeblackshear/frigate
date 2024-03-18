@@ -23,7 +23,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import BirdseyeLivePlayer from "@/components/player/BirdseyeLivePlayer";
-import HlsVideoPlayer from "@/components/player/HlsVideoPlayer";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { useNavigate } from "react-router-dom";
 
 // Color data
 const colors = [
@@ -129,6 +131,18 @@ function UIPlayground() {
     Math.round((Date.now() / 1000 - 15 * 60) / 60) * 60,
   );
 
+  const [exportStartTime, setExportStartTime] = useState(
+    Math.round((Date.now() / 1000 - 45 * 60) / 60) * 60,
+  );
+
+  const [exportEndTime, setExportEndTime] = useState(
+    Math.round((Date.now() / 1000 - 43 * 60) / 60) * 60,
+  );
+
+  const [showExportHandles, setShowExportHandles] = useState(false);
+
+  const navigate = useNavigate();
+
   useMemo(() => {
     const initialEvents = Array.from({ length: 50 }, generateRandomEvent);
     setMockEvents(initialEvents);
@@ -157,8 +171,6 @@ function UIPlayground() {
     segmentDuration: 60,
     timestampSpread: 15,
   });
-
-  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const possibleZoomLevels = [
     { segmentDuration: 60, timestampSpread: 15 },
@@ -223,6 +235,26 @@ function UIPlayground() {
               <p className="text-small">
                 Handlebar is dragging: {isDragging ? "yes" : "no"}
               </p>
+              <p className="text-small">
+                Export start timestamp: {exportStartTime} -&nbsp;
+                {new Date(exportStartTime * 1000).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  month: "short",
+                  day: "2-digit",
+                  second: "2-digit",
+                })}
+              </p>
+              <p className="text-small">
+                Export end timestamp: {exportEndTime} -&nbsp;
+                {new Date(exportEndTime * 1000).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  month: "short",
+                  day: "2-digit",
+                  second: "2-digit",
+                })}
+              </p>
               <div className="my-4">
                 <Heading as="h4">Timeline type</Heading>
                 <Select
@@ -245,16 +277,40 @@ function UIPlayground() {
                   </SelectContent>
                 </Select>
               </div>
+              <div className="flex p-2 justify-start items-center">
+                <Switch
+                  id="exporthandles"
+                  checked={showExportHandles}
+                  onCheckedChange={() => {
+                    setShowExportHandles(!showExportHandles);
+                    if (showExportHandles) {
+                      setExportEndTime(
+                        Math.round((Date.now() / 1000 - 43 * 60) / 60) * 60,
+                      );
+                      setExportStartTime(
+                        Math.round((Date.now() / 1000 - 45 * 60) / 60) * 60,
+                      );
+                    }
+                  }}
+                />
+                <Label className="ml-2" htmlFor="exporthandles">
+                  Show Export Handles
+                </Label>
+              </div>
+              <div>
+                <Button
+                  onClick={() => {
+                    navigate("/export", {
+                      state: { start: exportStartTime, end: exportEndTime },
+                    });
+                  }}
+                  disabled={!showExportHandles}
+                >
+                  Export
+                </Button>
+              </div>
               <div className="w-[40px] my-4">
                 <CameraActivityIndicator />
-              </div>
-              <div className="">
-                {birdseyeConfig && (
-                  <BirdseyeLivePlayer
-                    birdseyeConfig={birdseyeConfig}
-                    liveMode={birdseyeConfig.restream ? "mse" : "jsmpeg"}
-                  />
-                )}
               </div>
               <p>
                 <Button onClick={handleZoomOut} disabled={zoomLevel === 0}>
@@ -267,6 +323,14 @@ function UIPlayground() {
                   Zoom In
                 </Button>
               </p>
+              <div className="">
+                {birdseyeConfig && (
+                  <BirdseyeLivePlayer
+                    birdseyeConfig={birdseyeConfig}
+                    liveMode={birdseyeConfig.restream ? "mse" : "jsmpeg"}
+                  />
+                )}
+              </div>
               <Heading as="h4" className="my-5">
                 Color scheme
               </Heading>
@@ -293,14 +357,6 @@ function UIPlayground() {
             </div>
           </div>
 
-          <div className="absolute left-96 top-96 bottom-96 right-96">
-            <HlsVideoPlayer
-              className="size-full"
-              videoRef={videoRef}
-              currentSource="http://localhost:5173/vod/side_cam/start/1710345600/end/1710349200/master.m3u8"
-            />
-          </div>
-
           <div className="w-[55px] md:w-[100px] overflow-y-auto no-scrollbar">
             {!isEventsReviewTimeline && (
               <MotionReviewTimeline
@@ -315,6 +371,11 @@ function UIPlayground() {
                 showMinimap // show / hide the minimap
                 minimapStartTime={minimapStartTime} // start time of the minimap - the earlier time (eg 1:00pm)
                 minimapEndTime={minimapEndTime} // end of the minimap - the later time (eg 3:00pm)
+                showExportHandles={showExportHandles}
+                exportStartTime={exportStartTime}
+                setExportStartTime={setExportStartTime}
+                exportEndTime={exportEndTime}
+                setExportEndTime={setExportEndTime}
                 events={mockEvents} // events, including new has_been_reviewed and severity properties
                 motion_events={mockMotionData}
                 severityType={"alert"} // choose the severity type for the middle line - all other severity types are to the right
@@ -334,6 +395,11 @@ function UIPlayground() {
                 showMinimap // show / hide the minimap
                 minimapStartTime={minimapStartTime} // start time of the minimap - the earlier time (eg 1:00pm)
                 minimapEndTime={minimapEndTime} // end of the minimap - the later time (eg 3:00pm)
+                showExportHandles={showExportHandles}
+                exportStartTime={exportStartTime}
+                setExportStartTime={setExportStartTime}
+                exportEndTime={exportEndTime}
+                setExportEndTime={setExportEndTime}
                 events={mockEvents} // events, including new has_been_reviewed and severity properties
                 severityType={"alert"} // choose the severity type for the middle line - all other severity types are to the right
                 contentRef={contentRef} // optional content ref where previews are, can be used for observing/scrolling later
