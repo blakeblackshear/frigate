@@ -288,6 +288,7 @@ export function RecordingView({
                           timeRange={currentTimeRange}
                           cameraPreviews={allPreviews ?? []}
                           startTime={startTime}
+                          isScrubbing={scrubbing}
                           onControllerReady={(controller) => {
                             previewRefs.current[cam] = controller;
                             controller.scrubToTimestamp(startTime);

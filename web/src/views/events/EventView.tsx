@@ -616,6 +616,8 @@ function MotionReview({
     [selectedRangeIdx, timeRangeSegments],
   );
 
+  const [scrubbing, setScrubbing] = useState(false);
+
   // move to next clip
 
   useEffect(() => {
@@ -670,6 +672,7 @@ function MotionReview({
                 timeRange={currentTimeRange}
                 startTime={startTime}
                 cameraPreviews={relevantPreviews || []}
+                isScrubbing={scrubbing}
                 onControllerReady={(controller) => {
                   videoPlayersRef.current[camera.name] = controller;
                 }}
@@ -694,6 +697,7 @@ function MotionReview({
           motion_events={motionData ?? []}
           severityType="significant_motion"
           contentRef={contentRef}
+          onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
         />
       </div>
     </>
