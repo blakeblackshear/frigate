@@ -61,7 +61,7 @@
     --ring: 222.2 84% 4.9%;
 
     --selected: hsl(228, 89%, 63%);
-    --selected: 228, 89%, 63%;
+    --selected: 228 89% 63%;
 
     --radius: 0.5rem;
 
@@ -75,13 +75,13 @@
     --severity_motion_dimmed: var(--yellow-200);
 
     --motion_review: hsl(44, 94%, 50%);
-    --motion_review: 44, 94%, 50%;
+    --motion_review: 44 94% 50%;
 
     --motion_review_dimmed: hsl(44, 60%, 40%);
-    --motion_review_dimmed: 44, 60%, 40%;
+    --motion_review_dimmed: 44 60% 40%;
 
     --audio_review: hsl(228, 94%, 67%);
-    --audio_review: 228, 94%, 67%;
+    --audio_review: 228 94% 67%;
   }
 
   .dark {
@@ -146,6 +146,6 @@
     --ring: 212.7 26.8% 83.9%;
 
     --selected: hsl(228, 89%, 63%);
-    --selected: 228, 89%, 63%;
+    --selected: 228 89% 63%;
   }
 }

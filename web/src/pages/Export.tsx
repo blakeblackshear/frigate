@@ -26,9 +26,10 @@ import { Toaster } from "@/components/ui/sonner";
 import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
 import { format } from "date-fns";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { DateRange } from "react-day-picker";
 import { isDesktop } from "react-device-detect";
+import { useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
 
@@ -42,6 +43,8 @@ function Export() {
     "exports/",
     (url: string) => axios({ baseURL: baseUrl, url }).then((res) => res.data),
   );
+  const location = useLocation();
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   // Export States
   const [camera, setCamera] = useState<string | undefined>();
@@ -142,6 +145,23 @@ function Export() {
   const Trigger = isDesktop ? DialogTrigger : DrawerTrigger;
   const Content = isDesktop ? DialogContent : DrawerContent;
 
+  useEffect(() => {
+    if (location.state && location.state.start && location.state.end) {
+      const startTimeString = format(
+        new Date(location.state.start * 1000),
+        "HH:mm:ss",
+      );
+      const endTimeString = format(
+        new Date(location.state.end * 1000),
+        "HH:mm:ss",
+      );
+      setStartTime(startTimeString);
+      setEndTime(endTimeString);
+
+      setDialogOpen(true);
+    }
+  }, [location.state]);
+
   return (
     <div className="size-full p-2 overflow-hidden flex flex-col">
       <Toaster />
@@ -167,7 +187,7 @@ function Export() {
       </AlertDialog>
 
       <div className="w-full h-14">
-        <Create>
+        <Create open={dialogOpen} onOpenChange={setDialogOpen}>
           <Trigger>
             <Button variant="select">New Export</Button>
           </Trigger>

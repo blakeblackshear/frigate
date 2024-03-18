@@ -1,5 +1,5 @@
 import { useApiHost } from "@/api";
-import { useEventUtils } from "@/hooks/use-event-utils";
+import { useTimelineUtils } from "@/hooks/use-timeline-utils";
 import { useEventSegmentUtils } from "@/hooks/use-event-segment-utils";
 import { ReviewSegment, ReviewSeverity } from "@/types/review";
 import React, {
@@ -53,10 +53,8 @@ export function EventSegment({
     getEventThumbnail,
   } = useEventSegmentUtils(segmentDuration, events, severityType);
 
-  const { alignStartDateToTimeline, alignEndDateToTimeline } = useEventUtils(
-    events,
-    segmentDuration,
-  );
+  const { alignStartDateToTimeline, alignEndDateToTimeline } =
+    useTimelineUtils(segmentDuration);
 
   const severity = useMemo(
     () => getSeverity(segmentTime, displaySeverityType),
@@ -155,7 +153,7 @@ export function EventSegment({
       : ""
   } ${
     isFirstSegmentInMinimap || isLastSegmentInMinimap
-      ? "relative h-2 border-b-2 border-gray-500"
+      ? "relative h-2 border-b-2 border-neutral-600"
       : ""
   }`;
 
@@ -236,7 +234,7 @@ export function EventSegment({
                     key={`${segmentKey}_${index}_primary_data`}
                     className={`w-full h-2 bg-gradient-to-r ${roundBottomPrimary ? "rounded-bl-full rounded-br-full" : ""} ${roundTopPrimary ? "rounded-tl-full rounded-tr-full" : ""} ${severityColors[severityValue]}`}
                     onClick={segmentClick}
-                    onTouchStart={(event) =>
+                    onTouchEnd={(event) =>
                       handleTouchStart(event, segmentClick)
                     }
                   ></div>

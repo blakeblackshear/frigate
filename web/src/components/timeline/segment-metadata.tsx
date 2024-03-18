@@ -32,7 +32,7 @@ export function MinimapBounds({
     <>
       {isFirstSegmentInMinimap && (
         <div
-          className="absolute inset-0 -bottom-7 w-full flex items-center justify-center text-primary-foreground font-medium z-20 text-center text-[10px] scroll-mt-8"
+          className="absolute inset-0 -bottom-7 w-full flex items-center justify-center text-primary-foreground font-medium z-20 text-center text-[10px] scroll-mt-8 pointer-events-none"
           ref={firstMinimapSegmentRef}
         >
           {new Date(alignedMinimapStartTime * 1000).toLocaleTimeString([], {
@@ -44,7 +44,7 @@ export function MinimapBounds({
       )}
 
       {isLastSegmentInMinimap && (
-        <div className="absolute inset-0 -top-3 w-full flex items-center justify-center text-primary-foreground font-medium z-20 text-center text-[10px]">
+        <div className="absolute inset-0 -top-3 w-full flex items-center justify-center text-primary-foreground font-medium z-20 text-center text-[10px] pointer-events-none">
           {new Date(alignedMinimapEndTime * 1000).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
@@ -61,14 +61,14 @@ export function Tick({ timestamp, timestampSpread }: TickSegmentProps) {
     <div className="absolute">
       <div className="flex items-end content-end w-[12px] h-2">
         <div
-          className={`h-0.5 ${
+          className={`pointer-events-none h-0.5 ${
             timestamp.getMinutes() % timestampSpread === 0 &&
             timestamp.getSeconds() === 0
               ? "w-[12px] bg-neutral-600 dark:bg-neutral-500"
               : timestamp.getMinutes() % (timestampSpread == 15 ? 5 : 1) ===
                     0 && timestamp.getSeconds() === 0
-                ? "w-[8px] bg-neutral-500 dark:bg-neutral-600" // Minor tick mark
-                : "w-[5px] bg-neutral-400 dark:bg-neutral-700"
+                ? "w-[8px] bg-neutral-500" // Minor tick mark
+                : "w-[5px] bg-neutral-400 dark:bg-neutral-600"
           }`}
         ></div>
       </div>
@@ -88,7 +88,7 @@ export function Timestamp({
       {!isFirstSegmentInMinimap && !isLastSegmentInMinimap && (
         <div
           key={`${segmentKey}_timestamp`}
-          className="text-[8px] text-neutral-600 dark:text-neutral-500"
+          className="pointer-events-none text-[8px] text-neutral-600 dark:text-neutral-500"
         >
           {timestamp.getMinutes() % timestampSpread === 0 &&
             timestamp.getSeconds() === 0 &&
