@@ -192,7 +192,7 @@ export function RecordingView({
   const grow = useMemo(() => {
     if (mainCameraAspect == "wide") {
       return "w-full aspect-wide";
-    } else if (mainCameraAspect == "tall") {
+    } else if (isDesktop && mainCameraAspect == "tall") {
       return "h-full aspect-tall";
     } else {
       return "w-full aspect-video";
@@ -288,6 +288,7 @@ export function RecordingView({
                           timeRange={currentTimeRange}
                           cameraPreviews={allPreviews ?? []}
                           startTime={startTime}
+                          isScrubbing={scrubbing}
                           onControllerReady={(controller) => {
                             previewRefs.current[cam] = controller;
                             controller.scrubToTimestamp(startTime);
