@@ -248,7 +248,6 @@ export function ReviewTimeline({
       {showHandlebar && (
         <div
           className={`absolute left-0 top-0 ${isDragging && isIOS ? "" : "z-20"} w-full`}
-          className={`absolute left-0 top-0 ${isDragging && isIOS ? "" : "z-20"} w-full`}
           role="scrollbar"
           ref={handlebarRef}
         >
@@ -337,7 +336,7 @@ export function ReviewTimeline({
                 <div
                   className={`bg-selected mt-4 mx-auto ${
                     segmentDuration < 60 ? "w-12 md:w-20" : "w-12 md:w-16"
-                  } h-5 ${isDragging && isMobile && draggableElementType == "export_start" ? "fixed mt-0 rounded-full top-[2px] left-1/2 transform -translate-x-1/2 z-20 w-[30%] h-[30px] bg-selected/80" : "rounded-br-lg rounded-bl-lg static"} flex items-center justify-center`}
+                  } h-5 ${isDragging && isMobile && draggableElementType == "export_start" ? "fixed mt-0 rounded-full top-[4px] left-1/2 transform -translate-x-1/2 z-20 w-[30%] h-[30px] bg-selected/80" : "rounded-br-lg rounded-bl-lg static"} flex items-center justify-center`}
                 >
                   <div
                     ref={exportStartTimeRef}
