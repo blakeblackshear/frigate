@@ -274,15 +274,6 @@ class PreviewVideoController extends PreviewController {
 
     const seekTime = time - this.preview.start;
 
-    if (
-      isAndroid &&
-      isChrome &&
-      this.scrubbing &&
-      Math.abs(seekTime - this.previewRef.current.currentTime) > 400
-    ) {
-      // android/chrome has incorrect timestamps sent that are before the expected seek time
-    }
-
     if (this.seeking) {
       this.timeToSeek = seekTime;
     } else {
