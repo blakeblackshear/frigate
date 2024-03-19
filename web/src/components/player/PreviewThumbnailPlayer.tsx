@@ -26,7 +26,7 @@ type PreviewPlayerProps = {
   scrollLock?: boolean;
   onTimeUpdate?: (time: number | undefined) => void;
   setReviewed: (review: ReviewSegment) => void;
-  onClick: (reviewId: string, ctrl: boolean) => void;
+  onClick: (review: ReviewSegment, ctrl: boolean) => void;
 };
 
 type Preview = {
@@ -55,7 +55,7 @@ export default function PreviewThumbnailPlayer({
   const handleOnClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (!ignoreClick) {
-        onClick(review.id, e.metaKey);
+        onClick(review, e.metaKey);
       }
     },
     [ignoreClick, review, onClick],
@@ -165,7 +165,7 @@ export default function PreviewThumbnailPlayer({
       onMouseLeave={isMobile ? undefined : () => setIsHovered(false)}
       onContextMenu={(e) => {
         e.preventDefault();
-        onClick(review.id, true);
+        onClick(review, true);
       }}
       onClick={handleOnClick}
       {...swipeHandlers}

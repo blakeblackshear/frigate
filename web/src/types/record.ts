@@ -1,3 +1,5 @@
+import { ReviewSeverity } from "./review";
+
 export type Recording = {
   id: string;
   camera: string;
@@ -29,4 +31,10 @@ type RecordingSegmentActivity = {
   date: number;
   count: number;
   hasObjects: boolean;
+};
+
+export type RecordingStartingPoint = {
+  camera: string;
+  startTime: number;
+  severity: ReviewSeverity;
 };

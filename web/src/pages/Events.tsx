@@ -4,6 +4,7 @@ import { useTimezone } from "@/hooks/use-date-utils";
 import { useOverlayState } from "@/hooks/use-overlay-state";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
+import { RecordingStartingPoint } from "@/types/record";
 import {
   ReviewFilter,
   ReviewSegment,
@@ -26,7 +27,8 @@ export default function Events() {
     "severity",
     "alert",
   );
-  const [selectedReviewId, setSelectedReviewId] = useOverlayState("review");
+  const [recording, setRecording] =
+    useOverlayState<RecordingStartingPoint>("recording");
   const [startTime, setStartTime] = useState<number>();
 
   // review filter
@@ -257,6 +259,10 @@ export default function Events() {
   // selected items
 
   const selectedReviewData = useMemo(() => {
+    if (!recording) {
+      return undefined;
+    }
+
     if (!config) {
       return undefined;
     }
@@ -265,50 +271,20 @@ export default function Events() {
       return undefined;
     }
 
-    if (!selectedReviewId) {
-      return undefined;
-    }
-
+    setStartTime(recording.startTime);
     const allCameras = reviewFilter?.cameras ?? Object.keys(config.cameras);
 
-    if (selectedReviewId.startsWith("motion")) {
-      const motionData = selectedReviewId.split(",");
-      const motionStart = parseFloat(motionData[2]);
-      setStartTime(motionStart);
-      // format is motion,camera,start_time
-      return {
-        camera: motionData[1],
-        severity: "significant_motion" as ReviewSeverity,
-        start_time: motionStart,
-        allCameras: allCameras,
-        cameraSegments: reviews.filter((seg) =>
-          allCameras.includes(seg.camera),
-        ),
-      };
-    }
-
-    const selectedReview = reviews.find((item) => item.id == selectedReviewId);
-
-    if (!selectedReview) {
-      return undefined;
-    }
-
-    // mark item as reviewed since it has been opened
-    if (!selectedReview?.has_been_reviewed) {
-      markItemAsReviewed(selectedReview);
-    }
-
     return {
-      camera: selectedReview.camera,
-      severity: selectedReview.severity,
-      start_time: selectedReview.start_time,
+      camera: recording.camera,
+      severity: recording.severity,
+      start_time: recording.startTime,
       allCameras: allCameras,
       cameraSegments: reviews.filter((seg) => allCameras.includes(seg.camera)),
     };
 
     // previews will not update after item is selected
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedReviewId, reviews]);
+  }, [recording, reviews]);
 
   if (!timezone) {
     return <ActivityIndicator />;
@@ -338,7 +314,7 @@ export default function Events() {
         setSeverity={setSeverity}
         markItemAsReviewed={markItemAsReviewed}
         markAllItemsAsReviewed={markAllItemsAsReviewed}
-        onOpenReview={setSelectedReviewId}
+        onOpenRecording={setRecording}
         pullLatestData={reloadData}
         updateFilter={onUpdateFilter}
       />

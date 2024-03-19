@@ -36,6 +36,7 @@ import { Button } from "@/components/ui/button";
 import PreviewPlayer, {
   PreviewController,
 } from "@/components/player/PreviewPlayer";
+import { RecordingStartingPoint } from "@/types/record";
 
 type EventViewProps = {
   reviews?: ReviewSegment[];
@@ -48,7 +49,7 @@ type EventViewProps = {
   setSeverity: (severity: ReviewSeverity) => void;
   markItemAsReviewed: (review: ReviewSegment) => void;
   markAllItemsAsReviewed: (currentItems: ReviewSegment[]) => void;
-  onOpenReview: (reviewId: string) => void;
+  onOpenRecording: (recordingInfo: RecordingStartingPoint) => void;
   pullLatestData: () => void;
   updateFilter: (filter: ReviewFilter) => void;
 };
@@ -63,7 +64,7 @@ export default function EventView({
   setSeverity,
   markItemAsReviewed,
   markAllItemsAsReviewed,
-  onOpenReview,
+  onOpenRecording,
   pullLatestData,
   updateFilter,
 }: EventViewProps) {
@@ -145,9 +146,9 @@ export default function EventView({
 
   const [selectedReviews, setSelectedReviews] = useState<string[]>([]);
   const onSelectReview = useCallback(
-    (reviewId: string, ctrl: boolean) => {
+    (review: ReviewSegment, ctrl: boolean) => {
       if (selectedReviews.length > 0 || ctrl) {
-        const index = selectedReviews.indexOf(reviewId);
+        const index = selectedReviews.indexOf(review.id);
 
         if (index != -1) {
           if (selectedReviews.length == 1) {
@@ -161,14 +162,20 @@ export default function EventView({
           }
         } else {
           const copy = [...selectedReviews];
-          copy.push(reviewId);
+          copy.push(review.id);
           setSelectedReviews(copy);
         }
       } else {
-        onOpenReview(reviewId);
+        onOpenRecording({
+          camera: review.camera,
+          startTime: review.start_time,
+          severity: review.severity,
+        });
+
+        markItemAsReviewed(review);
       }
     },
-    [selectedReviews, setSelectedReviews, onOpenReview],
+    [selectedReviews, setSelectedReviews, onOpenRecording, markItemAsReviewed],
   );
 
   const exportReview = useCallback(
@@ -281,7 +288,7 @@ export default function EventView({
             timeRange={timeRange}
             startTime={startTime}
             filter={filter}
-            onSelectReview={onSelectReview}
+            onOpenRecording={onOpenRecording}
           />
         )}
       </div>
@@ -305,7 +312,7 @@ type DetectionReviewProps = {
   timeRange: { before: number; after: number };
   markItemAsReviewed: (review: ReviewSegment) => void;
   markAllItemsAsReviewed: (currentItems: ReviewSegment[]) => void;
-  onSelectReview: (id: string, ctrl: boolean) => void;
+  onSelectReview: (review: ReviewSegment, ctrl: boolean) => void;
   pullLatestData: () => void;
 };
 function DetectionReview({
@@ -552,7 +559,7 @@ type MotionReviewProps = {
   timeRange: { before: number; after: number };
   startTime?: number;
   filter?: ReviewFilter;
-  onSelectReview: (data: string, ctrl: boolean) => void;
+  onOpenRecording: (data: RecordingStartingPoint) => void;
 };
 function MotionReview({
   contentRef,
@@ -561,7 +568,7 @@ function MotionReview({
   timeRange,
   startTime,
   filter,
-  onSelectReview,
+  onOpenRecording,
 }: MotionReviewProps) {
   const segmentDuration = 30;
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -688,7 +695,11 @@ function MotionReview({
                   videoPlayersRef.current[camera.name] = controller;
                 }}
                 onClick={() =>
-                  onSelectReview(`motion,${camera.name},${currentTime}`, false)
+                  onOpenRecording({
+                    camera: camera.name,
+                    startTime: currentTime,
+                    severity: "significant_motion",
+                  })
                 }
               />
             );
