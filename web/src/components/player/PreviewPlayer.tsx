@@ -272,25 +272,12 @@ class PreviewVideoController extends PreviewController {
       return false;
     }
 
-    const seekTime = time - this.preview.start;
-
-    if (
-      isAndroid &&
-      isChrome &&
-      this.scrubbing &&
-      Math.abs(seekTime - this.previewRef.current.currentTime) > 400
-    ) {
-      // android/chrome has incorrect timestamps sent that are before the expected seek time
-      return false;
-    }
+    const seekTime = Math.max(0, time - this.preview.start);
 
     if (this.seeking) {
-      this.timeToSeek = time;
+      this.timeToSeek = seekTime;
     } else {
-      this.previewRef.current.currentTime = Math.max(
-        0,
-        time - this.preview.start,
-      );
+      this.previewRef.current.currentTime = seekTime;
       this.seeking = true;
     }
 
@@ -303,16 +290,15 @@ class PreviewVideoController extends PreviewController {
     }
 
     if (this.timeToSeek) {
-      const diff =
-        Math.round(this.timeToSeek) -
-        Math.round(this.previewRef.current.currentTime + this.preview.start);
+      const diff = Math.round(
+        this.timeToSeek - this.previewRef.current.currentTime,
+      );
 
       const scrubLimit = isMobile ? 1 : 0.5;
 
       if (Math.abs(diff) >= scrubLimit) {
         // only seek if there is an appropriate amount of time difference
-        this.previewRef.current.currentTime =
-          this.timeToSeek - this.preview.start;
+        this.previewRef.current.currentTime = this.timeToSeek;
       } else {
         this.seeking = false;
         this.timeToSeek = undefined;

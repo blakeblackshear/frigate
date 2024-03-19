@@ -349,6 +349,20 @@ function DetectionReview({
 
   const [previewTime, setPreviewTime] = useState<number>();
 
+  const onPreviewTimeUpdate = useCallback(
+    (time: number | undefined) => {
+      if (!time) {
+        setPreviewTime(time);
+        return;
+      }
+
+      if (!previewTime || time > previewTime) {
+        setPreviewTime(time);
+      }
+    },
+    [previewTime, setPreviewTime],
+  );
+
   // review interaction
 
   const [hasUpdate, setHasUpdate] = useState(false);
@@ -483,7 +497,7 @@ function DetectionReview({
                       allPreviews={relevantPreviews}
                       setReviewed={markItemAsReviewed}
                       scrollLock={scrollLock}
-                      onTimeUpdate={setPreviewTime}
+                      onTimeUpdate={onPreviewTimeUpdate}
                       onClick={onSelectReview}
                     />
                   </div>
