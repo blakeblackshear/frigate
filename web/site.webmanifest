@@ -16,7 +16,7 @@
       "purpose": "any"
     },
     {
-      "src": "/images/apple-touch-icon.png",
+      "src": "/images/maskable.png",
       "sizes": "180x180",
       "type": "image/png",
       "purpose": "maskable"
