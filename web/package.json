@@ -93,7 +93,7 @@
     "eslint-plugin-vitest-globals": "^1.4.0",
     "fake-indexeddb": "^5.0.1",
     "jest-websocket-mock": "^2.5.0",
-    "jsdom": "^23.0.1",
+    "jsdom": "^24.0.0",
     "msw": "^2.2.1",
     "postcss": "^8.4.32",
     "prettier": "^3.2.5",
