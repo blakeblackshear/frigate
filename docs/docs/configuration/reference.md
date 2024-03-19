@@ -57,6 +57,7 @@ detectors:
     # Detectors may require additional configuration.
     # Refer to the Detectors configuration page for more information.
     type: cpu
+    enable_cpu_fallback: false
 
 # Optional: Database configuration
 database:

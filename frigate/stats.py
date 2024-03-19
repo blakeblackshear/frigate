@@ -284,6 +284,7 @@ def stats_snapshot(
             # issue https://github.com/python/typeshed/issues/8799
             # from mypy 0.981 onwards
             "pid": pid,
+            "using_fallback_detector": bool(detector.using_fallback_detector.value),
         }
     stats["detection_fps"] = round(total_detection_fps, 2)
 

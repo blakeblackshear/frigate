@@ -232,7 +232,7 @@ export default function System() {
           <div data-testid="detectors" className="grid grid-cols-1 3xl:grid-cols-3 md:grid-cols-2 gap-4">
             {detectorNames.map((detector) => (
               <div key={detector} className="dark:bg-gray-800 shadow-md hover:shadow-lg rounded-lg transition-shadow">
-                <div className="text-lg flex justify-between p-4">{detector}</div>
+                <div className="text-lg flex justify-between p-4" style={{ color: detectors[detector]['using_fallback_detector'] ? "red" : null}}>{detector}{detectors[detector]['using_fallback_detector'] ? " - CPU FALLBACK MODE" : ""}</div>
                 <div className="p-2">
                   <Table className="w-full">
                     <Thead>
