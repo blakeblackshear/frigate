@@ -81,7 +81,7 @@ This list of working and non-working PTZ cameras is based on user feedback.
 
 | Brand or specific camera | PTZ Controls | Autotracking | Notes                                                                                                                                           |
 | ------------------------ | :----------: | :----------: | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| Amcrest                  |      ✅      |      ✅      | ⛔️ Generally, Amcrest should work, but some older models (like the common IP2M-841) don't support autotracking                                  |
+| Amcrest                  |      ✅      |      ✅      | ⛔️ Generally, Amcrest should work, but some older models (like the common IP2M-841) don't support auto tracking                                  |
 | Amcrest ASH21            |      ❌      |      ❌      | No ONVIF support                                                                                                                                |
 | Ctronics PTZ             |      ✅      |      ❌      |                                                                                                                                                 |
 | Dahua                    |      ✅      |      ✅      |                                                                                                                                                 |
@@ -94,8 +94,9 @@ This list of working and non-working PTZ cameras is based on user feedback.
 | Reolink RLC-823A 16x     |      ✅      |      ❌      |                                                                                                                                                 |
 | Sunba 405-D20X           |      ✅      |      ❌      |                                                                                                                                                 |
 | Tapo C200                |      ✅      |      ❌      | Incomplete ONVIF support                                                                                                                        |
-| Tapo C210                |      ❌      |      ❌      | Incomplete ONVIF support                                                                                                                        |
-| Tapo C220                |      ✅      |      ❌      | Incomeplete ONVIF support, ONVIF Service Port: 2020                                                                                             |
-| Tapo C225                |      ✅      |      ❌      | Incomeplete ONVIF support, ONVIF Service Port: 2020                                                                                             |
+| Tapo C210                |      ✅      |      ❌      | Incomplete ONVIF support, ONVIF Service Port: 2020                                                                                              |
+| Tapo C220                |      ✅      |      ❌      | Incomplete ONVIF support, ONVIF Service Port: 2020                                                                                              |
+| Tapo C225                |      ✅      |      ❌      | Incomplete ONVIF support, ONVIF Service Port: 2020                                                                                              |
+| Tapo C520WS              |      ✅      |      ❌      | Incomplete ONVIF support, ONVIF Service Port: 2020                                                                                              |
 | Uniview IPC672LR-AX4DUPK |      ✅      |      ❌      | Firmware says FOV relative movement is supported, but camera doesn't actually move when sending ONVIF commands                                  |
 | Vikylin PTZ-2804X-I2     |      ❌      |      ❌      | Incomplete ONVIF support                                                                                                                        |
