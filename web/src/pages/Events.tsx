@@ -80,6 +80,7 @@ export default function Events() {
     reviewSegmentFetcher,
     {
       revalidateOnFocus: false,
+      revalidateOnReconnect: false,
     },
   );
 
@@ -92,7 +93,7 @@ export default function Events() {
       cameras: reviewSearchParams["cameras"] ?? null,
       labels: reviewSearchParams["labels"] ?? null,
     },
-    { revalidateOnFocus: false },
+    { revalidateOnFocus: false, revalidateOnReconnect: false },
   ]);
 
   const reloadData = useCallback(() => {
@@ -128,22 +129,31 @@ export default function Events() {
     previewTimes
       ? `preview/all/start/${previewTimes.start}/end/${previewTimes.end}`
       : null,
-    { revalidateOnFocus: false },
+    { revalidateOnFocus: false, revalidateOnReconnect: false },
   );
 
   // Set a timeout to update previews on the hour
   useEffect(() => {
-    const future = new Date();
-    future.setHours(future.getHours() + 1, 0, 30, 0);
-    const timeoutId = setTimeout(
-      () => setPreviewKey(10 * Math.random()),
-      future.getTime() - Date.now(),
-    );
+    if (!allPreviews || allPreviews.length == 0) {
+      return;
+    }
+
+    const callback = () => {
+      const nextPreviewStart = new Date(
+        allPreviews[allPreviews.length - 1].end * 1000,
+      );
+      nextPreviewStart.setHours(nextPreviewStart.getHours() + 1);
+
+      if (Date.now() > nextPreviewStart.getTime()) {
+        setPreviewKey(10 * Math.random());
+      }
+    };
+    document.addEventListener("focusin", callback);
 
     return () => {
-      clearTimeout(timeoutId);
+      document.removeEventListener("focusin", callback);
     };
-  }, []);
+  }, [allPreviews]);
 
   // review status
 
