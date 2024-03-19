@@ -116,7 +116,8 @@ class TrackedObject:
         self.colormap = colormap
         self.camera_config = camera_config
         self.frame_cache = frame_cache
-        self.zone_presence = {}
+        self.zone_presence: dict[str, int] = {}
+        self.zone_loitering: dict[str, int] = {}
         self.current_zones = []
         self.entered_zones = []
         self.attributes = defaultdict(float)
@@ -189,19 +190,28 @@ class TrackedObject:
             if len(zone.objects) > 0 and obj_data["label"] not in zone.objects:
                 continue
             contour = zone.contour
-            zone_score = self.zone_presence.get(name, 0)
+            zone_score = self.zone_presence.get(name, 0) + 1
             # check if the object is in the zone
             if cv2.pointPolygonTest(contour, bottom_center, False) >= 0:
                 # if the object passed the filters once, dont apply again
                 if name in self.current_zones or not zone_filtered(self, zone.filters):
-                    self.zone_presence[name] = zone_score + 1
-
                     # an object is only considered present in a zone if it has a zone inertia of 3+
-                    if self.zone_presence[name] >= zone.inertia:
-                        current_zones.append(name)
+                    if zone_score >= zone.inertia:
+                        loitering_score = self.zone_loitering.get(name, 0) + 1
 
-                        if name not in self.entered_zones:
-                            self.entered_zones.append(name)
+                        # loitering time is configured as seconds, convert to count of frames
+                        if loitering_score >= (
+                            self.camera_config.zones[name].loitering_time
+                            * self.camera_config.detect.fps
+                        ):
+                            current_zones.append(name)
+
+                            if name not in self.entered_zones:
+                                self.entered_zones.append(name)
+                        else:
+                            self.zone_loitering[name] = loitering_score
+                    else:
+                        self.zone_presence[name] = zone_score
             else:
                 # once an object has a zone inertia of 3+ it is not checked anymore
                 if 0 < zone_score < zone.inertia:

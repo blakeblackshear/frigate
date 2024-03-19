@@ -515,6 +515,11 @@ class ZoneConfig(BaseModel):
         title="Number of consecutive frames required for object to be considered present in the zone.",
         gt=0,
     )
+    loitering_time: int = Field(
+        default=0,
+        ge=0,
+        title="Number of seconds that an object must loiter to be considered in the zone.",
+    )
     objects: List[str] = Field(
         default_factory=list,
         title="List of objects that can trigger the zone.",

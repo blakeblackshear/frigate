@@ -60,6 +60,19 @@ camera:
 
 Only car objects can trigger the `front_yard_street` zone and only person can trigger the `entire_yard`. You will get events for person objects that enter anywhere in the yard, and events for cars only if they enter the street.
 
+### Zone Loitering
+
+Sometimes objects are expected to be passing through a zone, but an object loitering in an area is unexpected. Zones can be configured to have a minimum loitering time before the object will be considered in the zone.
+
+```yaml
+camera:
+  zones:
+    sidewalk:
+      loitering_time: 4 # unit is in seconds
+      objects:
+        - person
+```
+
 ### Zone Inertia
 
 Sometimes an objects bounding box may be slightly incorrect and the bottom center of the bounding box is inside the zone while the object is not actually in the zone. Zone inertia helps guard against this by requiring an object's bounding box to be within the zone for multiple consecutive frames. This value can be configured:
