@@ -2,7 +2,7 @@ import { useCallback, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { usePersistence } from "./use-persistence";
 
-export function useOverlayState<S extends string>(
+export function useOverlayState<S>(
   key: string,
   defaultValue: S | undefined = undefined,
 ): [S | undefined, (value: S, replace?: boolean) => void] {
