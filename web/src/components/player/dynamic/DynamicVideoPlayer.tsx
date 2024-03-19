@@ -120,13 +120,13 @@ export default function DynamicVideoPlayer({
 
   const onTimeUpdate = useCallback(
     (time: number) => {
-      if (!controller || !onTimestampUpdate || time == 0) {
+      if (isScrubbing || !controller || !onTimestampUpdate || time == 0) {
         return;
       }
 
       onTimestampUpdate(controller.getProgress(time));
     },
-    [controller, onTimestampUpdate],
+    [controller, onTimestampUpdate, isScrubbing],
   );
 
   // state of playback player
@@ -176,7 +176,13 @@ export default function DynamicVideoPlayer({
           onTimeUpdate={onTimeUpdate}
           onPlayerLoaded={onPlayerLoaded}
           onClipEnded={onClipEnded}
-          onPlaying={() => setIsLoading(false)}
+          onPlaying={() => {
+            if (isScrubbing) {
+              playerRef.current?.pause();
+            }
+
+            setIsLoading(false);
+          }}
         >
           {config && focusedItem && (
             <TimelineEventOverlay
