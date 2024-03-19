@@ -116,7 +116,8 @@ class TrackedObject:
         self.colormap = colormap
         self.camera_config = camera_config
         self.frame_cache = frame_cache
-        self.zone_presence = {}
+        self.zone_presence: dict[str, int] = {}
+        self.zone_loitering: dict[str, int] = {}
         self.current_zones = []
         self.entered_zones = []
         self.attributes = defaultdict(float)
@@ -198,10 +199,15 @@ class TrackedObject:
 
                     # an object is only considered present in a zone if it has a zone inertia of 3+
                     if self.zone_presence[name] >= zone.inertia:
-                        current_zones.append(name)
+                        loitering_score =  self.zone_loitering.get(name, 0)
+                        self.zone_loitering[name] = loitering_score + 1
 
-                        if name not in self.entered_zones:
-                            self.entered_zones.append(name)
+                        # loitering time is configured as seconds, convert to count of frames
+                        if self.zone_loitering[name] >= (self.camera_config.zones[name].loitering_time  * self.camera_config.detect.fps):
+                            current_zones.append(name)
+
+                            if name not in self.entered_zones:
+                                self.entered_zones.append(name)
             else:
                 # once an object has a zone inertia of 3+ it is not checked anymore
                 if 0 < zone_score < zone.inertia:
