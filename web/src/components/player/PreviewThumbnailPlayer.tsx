@@ -24,7 +24,7 @@ type PreviewPlayerProps = {
   review: ReviewSegment;
   allPreviews?: Preview[];
   scrollLock?: boolean;
-  onTimeUpdate?: React.Dispatch<React.SetStateAction<number | undefined>>;
+  onTimeUpdate?: (time: number | undefined) => void;
   setReviewed: (review: ReviewSegment) => void;
   onClick: (reviewId: string, ctrl: boolean) => void;
 };

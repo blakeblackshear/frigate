@@ -350,7 +350,12 @@ function DetectionReview({
   const [previewTime, setPreviewTime] = useState<number>();
 
   const onPreviewTimeUpdate = useCallback(
-    (time: number) => {
+    (time: number | undefined) => {
+      if (!time) {
+        setPreviewTime(time);
+        return;
+      }
+
       if (!previewTime || time > previewTime) {
         setPreviewTime(time);
       }
