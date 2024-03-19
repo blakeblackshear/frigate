@@ -62,12 +62,12 @@ Only car objects can trigger the `front_yard_street` zone and only person can tr
 
 ### Zone Loitering
 
-Sometimes objects are expected to be passing through a zone, but there an object loitering in an area is unexpected. Zones can be configured to have a minimum loitering time before the object will be considered in the zone.
+Sometimes objects are expected to be passing through a zone, but an object loitering in an area is unexpected. Zones can be configured to have a minimum loitering time before the object will be considered in the zone.
 
 ```yaml
 camera:
   zones:
-    front_yard:
+    sidewalk:
       loitering_time: 4 # unit is in seconds
       objects:
         - person
