@@ -488,6 +488,8 @@ cameras:
         coordinates: 545,1077,747,939,788,805
         # Optional: Number of consecutive frames required for object to be considered present in the zone (default: shown below).
         inertia: 3
+        # Optional: Number of seconds that an object must loiter to be considered in the zone (default: shown below)
+        loitering_time: 0
         # Optional: List of objects that can trigger this zone (default: all tracked objects)
         objects:
           - person
