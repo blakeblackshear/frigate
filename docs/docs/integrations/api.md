@@ -290,6 +290,14 @@ Returns a thumbnail for the event id optimized for notifications. Works while th
 
 Returns the clip for the event id. Works after the event has ended.
 
+### `GET /api/events/<id>/snapshot-clean.png`
+
+Returns the clean snapshot image for the event id. Only works if `snapshots` and `clean_copy` are enabled in the config.
+
+| param      | Type | Description        |
+| ---------- | ---- | ------------------ |
+| `download` | bool | Download the image |
+
 ### `GET /api/events/<id>/snapshot.jpg`
 
 Returns the snapshot image for the event id. Works while the event is in progress and after completion.
@@ -303,6 +311,7 @@ Accepts the following query string parameters, but they are only applied when an
 | `timestamp` | int  | Print the timestamp in the upper left (0 or 1)    |
 | `crop`      | int  | Crop the snapshot to the (0 or 1)                 |
 | `quality`   | int  | Jpeg encoding quality (0-100). Defaults to 70.    |
+| `download`  | bool | Download the image                                |
 
 ### `POST /api/events/<camera_name>/<label>/create`
 
