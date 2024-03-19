@@ -202,7 +202,7 @@ To install make sure you have the [community app plugin here](https://forums.unr
 
 ## Proxmox
 
-It is recommended to run Frigate in LXC for maximum performance. See [this discussion](https://github.com/blakeblackshear/frigate/discussions/1111) for more information.
+It is recommended to run Frigate in LXC for maximum performance. See [this discussion](https://github.com/blakeblackshear/frigate/discussions/5773) for more information.
 
 ## ESXi
 
