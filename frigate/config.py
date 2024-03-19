@@ -518,7 +518,7 @@ class ZoneConfig(BaseModel):
     loitering_time: int = Field(
         default=0,
         ge=0,
-        title="Number of seconds that an object must loiter to be considered in the zone."
+        title="Number of seconds that an object must loiter to be considered in the zone.",
     )
     objects: List[str] = Field(
         default_factory=list,
