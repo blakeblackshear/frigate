@@ -272,12 +272,12 @@ class PreviewVideoController extends PreviewController {
       return false;
     }
 
-    const seekTime = time - this.preview.start;
+    const seekTime = Math.max(0, time - this.preview.start);
 
     if (this.seeking) {
       this.timeToSeek = seekTime;
     } else {
-      this.previewRef.current.currentTime = Math.max(0, seekTime);
+      this.previewRef.current.currentTime = seekTime;
       this.seeking = true;
     }
 
