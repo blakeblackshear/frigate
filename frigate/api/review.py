@@ -400,7 +400,7 @@ def motion_activity():
             (part["motion"] - part["motion"].min())
             / (part["motion"].max() - part["motion"].min())
             * 100
-        )
+        ).fillna(0.0)
 
     # change types for output
     df.index = df.index.astype(int) // (10**9)
