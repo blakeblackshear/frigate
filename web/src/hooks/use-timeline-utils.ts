@@ -19,8 +19,18 @@ export const useTimelineUtils = (segmentDuration: number) => {
     [segmentDuration],
   );
 
+  const getCumulativeScrollTop = useCallback((element: HTMLElement | null) => {
+    let scrollTop = 0;
+    while (element) {
+      scrollTop += element.scrollTop;
+      element = element.parentElement;
+    }
+    return scrollTop;
+  }, []);
+
   return {
     alignEndDateToTimeline,
     alignStartDateToTimeline,
+    getCumulativeScrollTop,
   };
 };

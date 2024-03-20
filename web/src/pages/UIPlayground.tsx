@@ -26,6 +26,7 @@ import BirdseyeLivePlayer from "@/components/player/BirdseyeLivePlayer";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
+import SummaryTimeline from "@/components/timeline/SummaryTimeline";
 
 // Color data
 const colors = [
@@ -125,6 +126,7 @@ const generateRandomEvent = (): ReviewSegment => {
 function UIPlayground() {
   const { data: config } = useSWR<FrigateConfig>("config");
   const contentRef = useRef<HTMLDivElement>(null);
+  const reviewTimelineRef = useRef<HTMLDivElement>(null);
   const [mockEvents, setMockEvents] = useState<ReviewSegment[]>([]);
   const [mockMotionData, setMockMotionData] = useState<MotionData[]>([]);
   const [handlebarTime, setHandlebarTime] = useState(
@@ -144,7 +146,7 @@ function UIPlayground() {
   const navigate = useNavigate();
 
   useMemo(() => {
-    const initialEvents = Array.from({ length: 50 }, generateRandomEvent);
+    const initialEvents = Array.from({ length: 10 }, generateRandomEvent);
     setMockEvents(initialEvents);
     setMockMotionData(generateRandomMotionAudioData());
   }, []);
@@ -403,9 +405,21 @@ function UIPlayground() {
                 events={mockEvents} // events, including new has_been_reviewed and severity properties
                 severityType={"alert"} // choose the severity type for the middle line - all other severity types are to the right
                 contentRef={contentRef} // optional content ref where previews are, can be used for observing/scrolling later
+                timelineRef={reviewTimelineRef}
               />
             )}
           </div>
+          {isEventsReviewTimeline && (
+            <div className="w-[10px]">
+              <SummaryTimeline
+                reviewTimelineRef={reviewTimelineRef}
+                timelineStart={Math.floor(Date.now() / 1000)} // timestamp start of the timeline - the earlier time
+                timelineEnd={Math.floor(Date.now() / 1000) - 6 * 60 * 60} // end of timeline - the later time
+                segmentDuration={zoomSettings.segmentDuration}
+                events={mockEvents}
+              />
+            </div>
+          )}
         </div>
       </div>
     </>

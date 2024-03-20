@@ -234,7 +234,7 @@ export function ReviewTimeline({
       onTouchMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onTouchEnd={handleMouseUp}
-      className={`relative h-full overflow-y-auto no-scrollbar bg-secondary ${
+      className={`relative h-full overflow-y-auto no-scrollbar select-none bg-secondary ${
         isDragging && (showHandlebar || showExportHandles)
           ? "cursor-grabbing"
           : "cursor-auto"

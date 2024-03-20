@@ -176,7 +176,8 @@ export function MotionSegment({
   return (
     <div
       key={segmentKey}
-      className={segmentClasses}
+      data-segment-id={segmentKey}
+      className={`segment ${firstHalfSegmentWidth > 1 || secondHalfSegmentWidth > 1 ? "has-data" : ""} ${segmentClasses}`}
       onClick={segmentClick}
       onTouchEnd={(event) => handleTouchStart(event, segmentClick)}
     >
@@ -203,7 +204,7 @@ export function MotionSegment({
           <div className="flex justify-center">
             <div
               key={`${segmentKey}_motion_data_1`}
-              className={`h-[2px] rounded-full ${severity[0] != 0 ? "bg-motion_review-dimmed" : "bg-motion_review"}`}
+              className={`motion-segment ${secondHalfSegmentWidth > 1 ? "hidden" : ""} zoom-in-[0.2] ${secondHalfSegmentWidth < 5 ? "duration-200" : "duration-1000"} h-[2px] rounded-full ${severity[0] != 0 ? "bg-motion_review-dimmed" : "bg-motion_review"}`}
               style={{
                 width: secondHalfSegmentWidth,
               }}
@@ -215,7 +216,7 @@ export function MotionSegment({
           <div className="flex justify-center">
             <div
               key={`${segmentKey}_motion_data_2`}
-              className={`h-[2px] rounded-full ${severity[0] != 0 ? "bg-motion_review-dimmed" : "bg-motion_review"}`}
+              className={`motion-segment ${firstHalfSegmentWidth > 1 ? "hidden" : ""} zoom-in-[0.2] ${firstHalfSegmentWidth < 5 ? "duration-200" : "duration-1000"} h-[2px] rounded-full ${severity[0] != 0 ? "bg-motion_review-dimmed" : "bg-motion_review"}`}
               style={{
                 width: firstHalfSegmentWidth,
               }}
