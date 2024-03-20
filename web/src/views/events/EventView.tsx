@@ -36,6 +36,7 @@ import { Button } from "@/components/ui/button";
 import PreviewPlayer, {
   PreviewController,
 } from "@/components/player/PreviewPlayer";
+import SummaryTimeline from "@/components/timeline/SummaryTimeline";
 import { RecordingStartingPoint } from "@/types/record";
 
 type EventViewProps = {
@@ -329,6 +330,8 @@ function DetectionReview({
   onSelectReview,
   pullLatestData,
 }: DetectionReviewProps) {
+  const reviewTimelineRef = useRef<HTMLDivElement>(null);
+
   const segmentDuration = 60;
 
   // review data
@@ -458,7 +461,7 @@ function DetectionReview({
       >
         {filter?.before == undefined && (
           <NewReviewData
-            className="absolute w-full z-30"
+            className="absolute w-full z-30 pointer-events-none"
             contentRef={contentRef}
             severity={severity}
             hasUpdate={hasUpdate}
@@ -527,21 +530,33 @@ function DetectionReview({
           )}
         </div>
       </div>
-      <div className="w-[55px] md:w-[100px] mt-2 overflow-y-auto no-scrollbar">
-        <EventReviewTimeline
-          segmentDuration={segmentDuration}
-          timestampSpread={15}
-          timelineStart={timeRange.before}
-          timelineEnd={timeRange.after}
-          showMinimap={showMinimap && !previewTime}
-          minimapStartTime={minimapBounds.start}
-          minimapEndTime={minimapBounds.end}
-          showHandlebar={previewTime != undefined}
-          handlebarTime={previewTime}
-          events={reviewItems?.all ?? []}
-          severityType={severity}
-          contentRef={contentRef}
-        />
+      <div className="w-[65px] md:w-[110px] mt-2 flex flex-row">
+        <div className="w-[55px] md:w-[100px] overflow-y-auto no-scrollbar">
+          <EventReviewTimeline
+            segmentDuration={segmentDuration}
+            timestampSpread={15}
+            timelineStart={timeRange.before}
+            timelineEnd={timeRange.after}
+            showMinimap={showMinimap && !previewTime}
+            minimapStartTime={minimapBounds.start}
+            minimapEndTime={minimapBounds.end}
+            showHandlebar={previewTime != undefined}
+            handlebarTime={previewTime}
+            events={reviewItems?.all ?? []}
+            severityType={severity}
+            contentRef={contentRef}
+            timelineRef={reviewTimelineRef}
+          />
+        </div>
+        <div className="w-[10px]">
+          <SummaryTimeline
+            reviewTimelineRef={reviewTimelineRef}
+            timelineStart={timeRange.before}
+            timelineEnd={timeRange.after}
+            segmentDuration={segmentDuration}
+            events={reviewItems?.all ?? []}
+          />
+        </div>
       </div>
     </>
   );

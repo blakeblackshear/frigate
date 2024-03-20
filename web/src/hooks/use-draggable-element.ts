@@ -40,7 +40,8 @@ function useDraggableElement({
 }: DraggableElementProps) {
   const [clientYPosition, setClientYPosition] = useState<number | null>(null);
   const [initialClickAdjustment, setInitialClickAdjustment] = useState(0);
-  const { alignStartDateToTimeline } = useTimelineUtils(segmentDuration);
+  const { alignStartDateToTimeline, getCumulativeScrollTop } =
+    useTimelineUtils(segmentDuration);
 
   const draggingAtTopEdge = useMemo(() => {
     if (clientYPosition && timelineRef.current) {
@@ -124,15 +125,6 @@ function useDraggableElement({
     },
     [isDragging, setIsDragging],
   );
-
-  const getCumulativeScrollTop = useCallback((element: HTMLElement | null) => {
-    let scrollTop = 0;
-    while (element) {
-      scrollTop += element.scrollTop;
-      element = element.parentElement;
-    }
-    return scrollTop;
-  }, []);
 
   const timestampToPixels = useCallback(
     (time: number) => {

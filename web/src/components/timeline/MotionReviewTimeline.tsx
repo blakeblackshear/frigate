@@ -32,6 +32,7 @@ export type MotionReviewTimelineProps = {
   motion_events: MotionData[];
   severityType: ReviewSeverity;
   contentRef: RefObject<HTMLDivElement>;
+  timelineRef?: RefObject<HTMLDivElement>;
   onHandlebarDraggingChange?: (isDragging: boolean) => void;
 };
 
@@ -54,13 +55,14 @@ export function MotionReviewTimeline({
   events,
   motion_events,
   contentRef,
+  timelineRef,
   onHandlebarDraggingChange,
 }: MotionReviewTimelineProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [exportStartPosition, setExportStartPosition] = useState(0);
   const [exportEndPosition, setExportEndPosition] = useState(0);
 
-  const timelineRef = useRef<HTMLDivElement>(null);
+  const internalTimelineRef = useRef<HTMLDivElement>(null);
   const handlebarRef = useRef<HTMLDivElement>(null);
   const handlebarTimeRef = useRef<HTMLDivElement>(null);
   const exportStartRef = useRef<HTMLDivElement>(null);
@@ -99,7 +101,7 @@ export function MotionReviewTimeline({
     handleMouseMove: handlebarMouseMove,
   } = useDraggableElement({
     contentRef,
-    timelineRef,
+    timelineRef: timelineRef || internalTimelineRef,
     draggableElementRef: handlebarRef,
     segmentDuration,
     showDraggableElement: showHandlebar,
@@ -118,7 +120,7 @@ export function MotionReviewTimeline({
     handleMouseMove: exportStartMouseMove,
   } = useDraggableElement({
     contentRef,
-    timelineRef,
+    timelineRef: timelineRef || internalTimelineRef,
     draggableElementRef: exportStartRef,
     segmentDuration,
     showDraggableElement: showExportHandles,
@@ -139,7 +141,7 @@ export function MotionReviewTimeline({
     handleMouseMove: exportEndMouseMove,
   } = useDraggableElement({
     contentRef,
-    timelineRef,
+    timelineRef: timelineRef || internalTimelineRef,
     draggableElementRef: exportEndRef,
     segmentDuration,
     showDraggableElement: showExportHandles,
@@ -213,9 +215,46 @@ export function MotionReviewTimeline({
     }
   }, [isDragging, onHandlebarDraggingChange]);
 
+  const segmentsObserver = useRef<IntersectionObserver | null>(null);
+  const selectedTimelineRef = timelineRef || internalTimelineRef;
+  useEffect(() => {
+    if (selectedTimelineRef.current && segments) {
+      segmentsObserver.current = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const segmentId = entry.target.getAttribute("data-segment-id");
+
+              const segmentElements =
+                internalTimelineRef.current?.querySelectorAll(
+                  `[data-segment-id="${segmentId}"] .motion-segment`,
+                );
+              segmentElements?.forEach((segmentElement) => {
+                segmentElement.classList.remove("hidden");
+                segmentElement.classList.add("animate-in");
+              });
+            }
+          });
+        },
+        { threshold: 0 },
+      );
+
+      // Get all segment divs and observe each one
+      const segmentDivs =
+        selectedTimelineRef.current.querySelectorAll(".segment.has-data");
+      segmentDivs.forEach((segmentDiv) => {
+        segmentsObserver.current?.observe(segmentDiv);
+      });
+    }
+
+    return () => {
+      segmentsObserver.current?.disconnect();
+    };
+  }, [selectedTimelineRef, segments]);
+
   return (
     <ReviewTimeline
-      timelineRef={timelineRef}
+      timelineRef={timelineRef || internalTimelineRef}
       handlebarRef={handlebarRef}
       handlebarTimeRef={handlebarTimeRef}
       handlebarMouseMove={handlebarMouseMove}

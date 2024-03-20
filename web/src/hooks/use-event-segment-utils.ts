@@ -58,11 +58,12 @@ export const useEventSegmentUtils = (
       );
       const highestSeverityValue = Math.max(...severityValues);
 
-      if (
-        severityValues.includes(displaySeverityType) &&
-        displaySeverityType !== highestSeverityValue
-      ) {
-        return [displaySeverityType, highestSeverityValue];
+      if (severityValues.includes(displaySeverityType)) {
+        const otherSeverityValues = severityValues.filter(
+          (severity) => severity !== displaySeverityType,
+        );
+        const highestOtherSeverityValue = Math.max(...otherSeverityValues);
+        return [displaySeverityType, highestOtherSeverityValue];
       } else {
         return [highestSeverityValue];
       }

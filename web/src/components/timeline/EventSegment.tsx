@@ -68,12 +68,7 @@ export function EventSegment({
     [getReviewed, segmentTime],
   );
 
-  const {
-    roundTopPrimary,
-    roundBottomPrimary,
-    roundTopSecondary,
-    roundBottomSecondary,
-  } = useMemo(
+  const { roundTopPrimary, roundBottomPrimary } = useMemo(
     () => shouldShowRoundedCorners(segmentTime),
     [shouldShowRoundedCorners, segmentTime],
   );
@@ -252,20 +247,6 @@ export function EventSegment({
                 </HoverCardPortal>
               </div>
             </HoverCard>
-          )}
-
-          {severityValue !== displaySeverityType && (
-            <div className="absolute right-0 h-2 z-10">
-              <div
-                key={`${segmentKey}_${index}_secondary_data`}
-                className={`
-                  w-1 h-2 bg-gradient-to-r
-                  ${roundBottomSecondary ? "rounded-bl-full rounded-br-full" : ""}
-                  ${roundTopSecondary ? "rounded-tl-full rounded-tr-full" : ""}
-                  ${severityColors[severityValue]}
-                `}
-              ></div>
-            </div>
           )}
         </React.Fragment>
       ))}
