@@ -1,8 +1,10 @@
-import { LuCheckSquare, LuFileUp, LuTrash } from "react-icons/lu";
+import { FaCircleCheck } from "react-icons/fa6";
 import { useCallback } from "react";
 import axios from "axios";
 import { Button } from "../ui/button";
 import { isDesktop } from "react-device-detect";
+import { FaCompactDisc } from "react-icons/fa";
+import { HiTrash } from "react-icons/hi";
 
 type ReviewActionGroupProps = {
   selectedReviews: string[];
@@ -49,7 +51,7 @@ export default function ReviewActionGroup({
       <div className="flex items-center gap-1 md:gap-2">
         {selectedReviews.length == 1 && (
           <Button
-            className="flex items-center"
+            className="p-2 flex items-center gap-2"
             variant="secondary"
             size="sm"
             onClick={() => {
@@ -57,26 +59,26 @@ export default function ReviewActionGroup({
               onClearSelected();
             }}
           >
-            <LuFileUp className="mr-1" />
+            <FaCompactDisc />
             {isDesktop && "Export"}
           </Button>
         )}
         <Button
-          className="flex items-center"
+          className="p-2 flex items-center gap-2"
           variant="secondary"
           size="sm"
           onClick={onMarkAsReviewed}
         >
-          <LuCheckSquare className="mr-1" />
+          <FaCircleCheck />
           {isDesktop && "Mark as reviewed"}
         </Button>
         <Button
-          className="flex items-center"
+          className="p-2 flex items-center gap-1"
           variant="secondary"
           size="sm"
           onClick={onDelete}
         >
-          <LuTrash className="mr-1" />
+          <HiTrash />
           {isDesktop && "Delete"}
         </Button>
       </div>
