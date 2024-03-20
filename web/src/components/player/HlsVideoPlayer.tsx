@@ -255,7 +255,7 @@ function VideoControls({
   }, []);
 
   const onReplay = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
+    (e: React.MouseEvent<SVGElement>) => {
       e.stopPropagation();
 
       const currentTime = video?.currentTime;
@@ -270,7 +270,7 @@ function VideoControls({
   );
 
   const onSkip = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
+    (e: React.MouseEvent<SVGElement>) => {
       e.stopPropagation();
 
       const currentTime = video?.currentTime;
