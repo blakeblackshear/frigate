@@ -19,7 +19,7 @@ To create a zone, follow [the steps for a "Motion mask"](masks.md), but use the 
 Often you will only want events to be created when an object enters areas of interest. This is done using zones along with setting required_zones. Let's say you only want to be notified when an object enters your entire_yard zone, the config would be:
 
 ```yaml
-camera:
+cameras:
   record:
     events:
       required_zones:
@@ -37,7 +37,7 @@ camera:
 Sometimes you want to limit a zone to specific object types to have more granular control of when events/snapshots are saved. The following example will limit one zone to person objects and the other to cars.
 
 ```yaml
-camera:
+cameras:
   record:
     events:
       required_zones:
@@ -65,7 +65,7 @@ Only car objects can trigger the `front_yard_street` zone and only person can tr
 Sometimes objects are expected to be passing through a zone, but an object loitering in an area is unexpected. Zones can be configured to have a minimum loitering time before the object will be considered in the zone.
 
 ```yaml
-camera:
+cameras:
   zones:
     sidewalk:
       loitering_time: 4 # unit is in seconds
@@ -78,7 +78,7 @@ camera:
 Sometimes an objects bounding box may be slightly incorrect and the bottom center of the bounding box is inside the zone while the object is not actually in the zone. Zone inertia helps guard against this by requiring an object's bounding box to be within the zone for multiple consecutive frames. This value can be configured:
 
 ```yaml
-camera:
+cameras:
   zones:
     front_yard:
       inertia: 3
@@ -89,7 +89,7 @@ camera:
 There may also be cases where you expect an object to quickly enter and exit a zone, like when a car is pulling into the driveway, and you may want to have the object be considered present in the zone immediately:
 
 ```yaml
-camera:
+cameras:
   zones:
     driveway_entrance:
       inertia: 1
