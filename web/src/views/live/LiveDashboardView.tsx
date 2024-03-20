@@ -1,6 +1,7 @@
 import { useFrigateReviews } from "@/api/ws";
 import Logo from "@/components/Logo";
 import { CameraGroupSelector } from "@/components/filter/CameraGroupSelector";
+import { LiveGridIcon, LiveListIcon } from "@/components/icons/LiveIcons";
 import { AnimatedEventThumbnail } from "@/components/image/AnimatedEventThumbnail";
 import BirdseyeLivePlayer from "@/components/player/BirdseyeLivePlayer";
 import LivePlayer from "@/components/player/LivePlayer";
@@ -12,7 +13,6 @@ import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import { ReviewSegment } from "@/types/review";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { isDesktop, isMobile, isSafari } from "react-device-detect";
-import { CiGrid2H, CiGrid31 } from "react-icons/ci";
 import useSWR from "swr";
 
 type LiveDashboardViewProps = {
@@ -89,26 +89,26 @@ export default function LiveDashboardView({
           <CameraGroupSelector />
           <div className="flex items-center gap-1">
             <Button
-              className={
+              className={`p-1 ${
                 layout == "grid"
-                  ? "text-selected bg-blue-900 focus:bg-blue-900 bg-opacity-60 focus:bg-opacity-60"
-                  : "text-muted-foreground bg-muted"
-              }
+                  ? "bg-blue-900 focus:bg-blue-900 bg-opacity-60 focus:bg-opacity-60"
+                  : "bg-muted"
+              }`}
               size="xs"
               onClick={() => setLayout("grid")}
             >
-              <CiGrid31 className="m-1" />
+              <LiveGridIcon layout={layout} />
             </Button>
             <Button
-              className={
+              className={`p-1 ${
                 layout == "list"
-                  ? "text-selected bg-blue-900 focus:bg-blue-900 bg-opacity-60 focus:bg-opacity-60"
-                  : "text-muted-foreground bg-muted"
-              }
+                  ? "bg-blue-900 focus:bg-blue-900 bg-opacity-60 focus:bg-opacity-60"
+                  : "bg-muted"
+              }`}
               size="xs"
               onClick={() => setLayout("list")}
             >
-              <CiGrid2H className="m-1" />
+              <LiveListIcon layout={layout} />
             </Button>
           </div>
         </div>
