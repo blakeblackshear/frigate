@@ -36,11 +36,15 @@ export default function ReviewActionGroup({
 
   return (
     <div className="absolute inset-x-2 inset-y-0 md:left-auto md:right-2 p-2 flex gap-2 justify-between items-center bg-background">
-      <div className="flex items-center">
-        <div className="text-sm text-gray-500 mr-2">{`${selectedReviews.length} selected | `}</div>
-        <Button size="xs" variant="link" onClick={onClearSelected}>
+      <div className="mx-1 flex justify-center items-center text-sm text-muted-foreground">
+        <div className="p-1">{`${selectedReviews.length} selected`}</div>
+        <div className="p-1">{"|"}</div>
+        <div
+          className="p-2 text-primary-foreground cursor-pointer hover:bg-secondary hover:rounded-lg"
+          onClick={onClearSelected}
+        >
           Unselect
-        </Button>
+        </div>
       </div>
       <div className="flex items-center gap-1 md:gap-2">
         {selectedReviews.length == 1 && (
