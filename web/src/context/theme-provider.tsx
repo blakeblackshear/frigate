@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 type Theme = "dark" | "light" | "system";
 type ColorScheme =
@@ -41,6 +41,7 @@ type ThemeProviderProps = {
 
 type ThemeProviderState = {
   theme: Theme;
+  systemTheme?: Theme;
   colorScheme: ColorScheme;
   setTheme: (theme: Theme) => void;
   setColorScheme: (colorScheme: ColorScheme) => void;
@@ -48,6 +49,7 @@ type ThemeProviderState = {
 
 const initialState: ThemeProviderState = {
   theme: "system",
+  systemTheme: undefined,
   colorScheme: "theme-default",
   setTheme: () => null,
   setColorScheme: () => null,
@@ -86,6 +88,16 @@ export function ThemeProvider({
     }
   });
 
+  const systemTheme = useMemo<Theme | undefined>(() => {
+    if (theme != "system") {
+      return undefined;
+    }
+
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
+  }, [theme]);
+
   useEffect(() => {
     //localStorage.removeItem(storageKey);
     //console.log(localStorage.getItem(storageKey));
@@ -95,21 +107,17 @@ export function ThemeProvider({
 
     root.classList.add(theme, colorScheme);
 
-    if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light";
-
+    if (systemTheme) {
       root.classList.add(systemTheme);
       return;
     }
 
     root.classList.add(theme);
-  }, [theme, colorScheme]);
+  }, [theme, colorScheme, systemTheme]);
 
   const value = {
     theme,
+    systemTheme,
     colorScheme,
     setTheme: (theme: Theme) => {
       localStorage.setItem(storageKey, JSON.stringify({ theme, colorScheme }));
