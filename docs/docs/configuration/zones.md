@@ -20,16 +20,17 @@ Often you will only want events to be created when an object enters areas of int
 
 ```yaml
 cameras:
-  record:
-    events:
+  name_of_your_camera:
+    record:
+      events:
+        required_zones:
+          - entire_yard
+    snapshots:
       required_zones:
         - entire_yard
-  snapshots:
-    required_zones:
-      - entire_yard
-  zones:
-    entire_yard:
-      coordinates: ...
+    zones:
+      entire_yard:
+        coordinates: ...
 ```
 
 ### Restricting zones to specific objects
@@ -38,24 +39,25 @@ Sometimes you want to limit a zone to specific object types to have more granula
 
 ```yaml
 cameras:
-  record:
-    events:
+  name_of_your_camera:
+    record:
+      events:
+        required_zones:
+          - entire_yard
+          - front_yard_street
+    snapshots:
       required_zones:
         - entire_yard
         - front_yard_street
-  snapshots:
-    required_zones:
-      - entire_yard
-      - front_yard_street
-  zones:
-    entire_yard:
-      coordinates: ... (everywhere you want a person)
-      objects:
-        - person
-    front_yard_street:
-      coordinates: ... (just the street)
-      objects:
-        - car
+    zones:
+      entire_yard:
+        coordinates: ... (everywhere you want a person)
+        objects:
+          - person
+      front_yard_street:
+        coordinates: ... (just the street)
+        objects:
+          - car
 ```
 
 Only car objects can trigger the `front_yard_street` zone and only person can trigger the `entire_yard`. You will get events for person objects that enter anywhere in the yard, and events for cars only if they enter the street.
@@ -66,11 +68,12 @@ Sometimes objects are expected to be passing through a zone, but an object loite
 
 ```yaml
 cameras:
-  zones:
-    sidewalk:
-      loitering_time: 4 # unit is in seconds
-      objects:
-        - person
+  name_of_your_camera:
+    zones:
+      sidewalk:
+        loitering_time: 4 # unit is in seconds
+        objects:
+          - person
 ```
 
 ### Zone Inertia
@@ -79,20 +82,22 @@ Sometimes an objects bounding box may be slightly incorrect and the bottom cente
 
 ```yaml
 cameras:
-  zones:
-    front_yard:
-      inertia: 3
-      objects:
-        - person
+  name_of_your_camera:
+    zones:
+      front_yard:
+        inertia: 3
+        objects:
+          - person
 ```
 
 There may also be cases where you expect an object to quickly enter and exit a zone, like when a car is pulling into the driveway, and you may want to have the object be considered present in the zone immediately:
 
 ```yaml
 cameras:
-  zones:
-    driveway_entrance:
-      inertia: 1
-      objects:
-        - car
+  name_of_your_camera:
+    zones:
+      driveway_entrance:
+        inertia: 1
+        objects:
+          - car
 ```
