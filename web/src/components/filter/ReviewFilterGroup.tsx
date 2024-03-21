@@ -280,7 +280,7 @@ type CalendarFilterButtonProps = {
   day?: Date;
   updateSelectedDay: (day?: Date) => void;
 };
-function CalendarFilterButton({
+export function CalendarFilterButton({
   reviewSummary,
   day,
   updateSelectedDay,
