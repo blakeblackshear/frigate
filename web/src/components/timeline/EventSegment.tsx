@@ -54,8 +54,7 @@ export function EventSegment({
   } = useEventSegmentUtils(segmentDuration, events, severityType);
 
   const { alignStartDateToTimeline, alignEndDateToTimeline } = useTimelineUtils(
-    segmentDuration,
-    0,
+    { segmentDuration },
   );
 
   const severity = useMemo(

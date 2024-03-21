@@ -385,7 +385,11 @@ function DetectionReview({
   );
 
   const { alignStartDateToTimeline, getVisibleTimelineDuration } =
-    useTimelineUtils(segmentDuration, timelineDuration, reviewTimelineRef);
+    useTimelineUtils({
+      segmentDuration,
+      timelineDuration,
+      timelineRef: reviewTimelineRef,
+    });
 
   const scrollLock = useScrollLockout(contentRef);
 

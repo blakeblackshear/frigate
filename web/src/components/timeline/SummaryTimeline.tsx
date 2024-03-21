@@ -44,11 +44,11 @@ export function SummaryTimeline({
     [timelineEnd, timelineStart, segmentDuration],
   );
 
-  const { alignStartDateToTimeline } = useTimelineUtils(
+  const { alignStartDateToTimeline } = useTimelineUtils({
     segmentDuration,
-    reviewTimelineDuration,
-    reviewTimelineRef,
-  );
+    timelineDuration: reviewTimelineDuration,
+    timelineRef: reviewTimelineRef,
+  });
 
   const timelineStartAligned = useMemo(
     () => alignStartDateToTimeline(timelineStart) + 2 * segmentDuration,

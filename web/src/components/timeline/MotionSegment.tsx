@@ -43,8 +43,7 @@ export function MotionSegment({
     useMotionSegmentUtils(segmentDuration, motion_events);
 
   const { alignStartDateToTimeline, alignEndDateToTimeline } = useTimelineUtils(
-    segmentDuration,
-    0,
+    { segmentDuration },
   );
 
   const { handleTouchStart } = useTapUtils();
