@@ -339,6 +339,12 @@ def average_boxes(boxes: list[list[int, int, int, int]]) -> list[int, int, int, 
     return [np.mean(x_mins), np.mean(y_mins), np.mean(x_max), np.mean(y_max)]
 
 
+def median_of_boxes(boxes: list[list[int, int, int, int]]) -> list[int, int, int, int]:
+    """Return a box that is the median of a list of boxes."""
+    sorted_boxes = sorted(boxes, key=lambda x: area(x))
+    return sorted_boxes[int(len(sorted_boxes) / 2.0)]
+
+
 def intersects_any(box_a, boxes):
     for box in boxes:
         if box_overlaps(box_a, box):
