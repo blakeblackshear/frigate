@@ -555,6 +555,7 @@ function DetectionReview({
             timelineEnd={timeRange.after}
             segmentDuration={segmentDuration}
             events={reviewItems?.all ?? []}
+            severityType={severity}
           />
         </div>
       </div>

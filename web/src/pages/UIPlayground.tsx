@@ -405,18 +405,19 @@ function UIPlayground() {
                 events={mockEvents} // events, including new has_been_reviewed and severity properties
                 severityType={"alert"} // choose the severity type for the middle line - all other severity types are to the right
                 contentRef={contentRef} // optional content ref where previews are, can be used for observing/scrolling later
-                timelineRef={reviewTimelineRef}
+                timelineRef={reviewTimelineRef} // save a ref to this timeline to connect with the summary timeline
               />
             )}
           </div>
           {isEventsReviewTimeline && (
             <div className="w-[10px]">
               <SummaryTimeline
-                reviewTimelineRef={reviewTimelineRef}
+                reviewTimelineRef={reviewTimelineRef} // the ref to the review timeline
                 timelineStart={Math.floor(Date.now() / 1000)} // timestamp start of the timeline - the earlier time
                 timelineEnd={Math.floor(Date.now() / 1000) - 6 * 60 * 60} // end of timeline - the later time
                 segmentDuration={zoomSettings.segmentDuration}
                 events={mockEvents}
+                severityType={"alert"} // show only events of this severity on the summary timeline
               />
             </div>
           )}
