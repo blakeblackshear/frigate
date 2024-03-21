@@ -379,7 +379,16 @@ function DetectionReview({
 
   // timeline interaction
 
-  const { alignStartDateToTimeline } = useTimelineUtils(segmentDuration);
+  const timelineDuration = useMemo(
+    () => timeRange.before - timeRange.after,
+    [timeRange],
+  );
+
+  const { alignStartDateToTimeline } = useTimelineUtils(
+    segmentDuration,
+    timelineDuration,
+    reviewTimelineRef,
+  );
 
   const scrollLock = useScrollLockout(contentRef);
 

@@ -74,8 +74,11 @@ export function EventReviewTimeline({
     [timelineEnd, timelineStart],
   );
 
-  const { alignStartDateToTimeline, alignEndDateToTimeline } =
-    useTimelineUtils(segmentDuration);
+  const { alignStartDateToTimeline, alignEndDateToTimeline } = useTimelineUtils(
+    segmentDuration,
+    timelineDuration,
+    timelineRef || internalTimelineRef,
+  );
 
   const timelineStartAligned = useMemo(
     () => alignStartDateToTimeline(timelineStart),
