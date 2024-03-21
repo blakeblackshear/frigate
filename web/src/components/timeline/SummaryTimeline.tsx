@@ -266,23 +266,26 @@ export function SummaryTimeline({
     ],
   );
 
+  const documentRef = useRef<Document | null>(document);
   useEffect(() => {
+    const documentInstance = documentRef.current;
+
     if (isDragging) {
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("touchmove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
-      document.addEventListener("touchend", handleMouseUp);
+      documentInstance?.addEventListener("mousemove", handleMouseMove);
+      documentInstance?.addEventListener("touchmove", handleMouseMove);
+      documentInstance?.addEventListener("mouseup", handleMouseUp);
+      documentInstance?.addEventListener("touchend", handleMouseUp);
     } else {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("touchmove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-      document.removeEventListener("touchend", handleMouseUp);
+      documentInstance?.removeEventListener("mousemove", handleMouseMove);
+      documentInstance?.removeEventListener("touchmove", handleMouseMove);
+      documentInstance?.removeEventListener("mouseup", handleMouseUp);
+      documentInstance?.removeEventListener("touchend", handleMouseUp);
     }
     return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("touchmove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-      document.removeEventListener("touchend", handleMouseUp);
+      documentInstance?.removeEventListener("mousemove", handleMouseMove);
+      documentInstance?.removeEventListener("touchmove", handleMouseMove);
+      documentInstance?.removeEventListener("mouseup", handleMouseUp);
+      documentInstance?.removeEventListener("touchend", handleMouseUp);
     };
   }, [handleMouseMove, handleMouseUp, isDragging]);
 
