@@ -38,6 +38,7 @@ import PreviewPlayer, {
 } from "@/components/player/PreviewPlayer";
 import SummaryTimeline from "@/components/timeline/SummaryTimeline";
 import { RecordingStartingPoint } from "@/types/record";
+import SummaryTimeline from "@/components/timeline/SummaryTimeline";
 
 type EventViewProps = {
   reviews?: ReviewSegment[];
@@ -332,6 +333,8 @@ function DetectionReview({
 }: DetectionReviewProps) {
   const reviewTimelineRef = useRef<HTMLDivElement>(null);
 
+  const reviewTimelineRef = useRef<HTMLDivElement>(null);
+
   const segmentDuration = 60;
 
   // review data
@@ -461,6 +464,7 @@ function DetectionReview({
       >
         {filter?.before == undefined && (
           <NewReviewData
+            className="absolute w-full z-30 pointer-events-none"
             className="absolute w-full z-30 pointer-events-none"
             contentRef={contentRef}
             severity={severity}
