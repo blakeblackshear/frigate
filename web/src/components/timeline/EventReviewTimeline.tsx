@@ -30,6 +30,7 @@ export type EventReviewTimelineProps = {
   setExportStartTime?: React.Dispatch<React.SetStateAction<number>>;
   setExportEndTime?: React.Dispatch<React.SetStateAction<number>>;
   events: ReviewSegment[];
+  visibleTimestamps?: number[];
   severityType: ReviewSeverity;
   timelineRef?: RefObject<HTMLDivElement>;
   contentRef: RefObject<HTMLDivElement>;
@@ -53,6 +54,7 @@ export function EventReviewTimeline({
   setExportStartTime,
   setExportEndTime,
   events,
+  visibleTimestamps,
   severityType,
   timelineRef,
   contentRef,
@@ -61,7 +63,6 @@ export function EventReviewTimeline({
   const [isDragging, setIsDragging] = useState(false);
   const [exportStartPosition, setExportStartPosition] = useState(0);
   const [exportEndPosition, setExportEndPosition] = useState(0);
-  const [visibleThumbnails, setVisibleThumbnails] = useState<number[]>([]);
 
   const internalTimelineRef = useRef<HTMLDivElement>(null);
   const handlebarRef = useRef<HTMLDivElement>(null);
@@ -71,8 +72,6 @@ export function EventReviewTimeline({
   const exportEndRef = useRef<HTMLDivElement>(null);
   const exportEndTimeRef = useRef<HTMLDivElement>(null);
   const selectedTimelineRef = timelineRef || internalTimelineRef;
-
-  const observer = useRef<IntersectionObserver | null>(null);
 
   const timelineDuration = useMemo(
     () => timelineStart - timelineEnd,
@@ -222,62 +221,31 @@ export function EventReviewTimeline({
   }, [isDragging, onHandlebarDraggingChange]);
 
   useEffect(() => {
-    if (contentRef.current && segments && !showMinimap) {
-      observer.current = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              const segmentStartId =
-                entry.target.getAttribute("data-segment-start");
-              if (segmentStartId) {
-                setVisibleThumbnails((prevState) => [
-                  ...prevState,
-                  parseInt(segmentStartId),
-                ]);
-              }
-            } else {
-              const segmentStartId =
-                entry.target.getAttribute("data-segment-start");
-              if (segmentStartId) {
-                setVisibleThumbnails((prevState) =>
-                  prevState.filter(
-                    (timestamp) => timestamp !== parseInt(segmentStartId),
-                  ),
-                );
-              }
-            }
-          });
-        },
-        { threshold: 0.5 },
-      );
-
-      const reviewItems = contentRef.current.querySelectorAll(".review-item");
-      reviewItems.forEach((item) => {
-        observer.current?.observe(item);
-      });
-    }
-
-    return () => {
-      observer.current?.disconnect();
-    };
-  }, [contentRef, segments, showMinimap]);
-
-  useEffect(() => {
     if (
       selectedTimelineRef.current &&
       segments &&
-      visibleThumbnails?.length > 0 &&
+      visibleTimestamps &&
+      visibleTimestamps?.length > 0 &&
       !showMinimap
     ) {
+      const alignedVisibleTimestamps = visibleTimestamps.map(
+        alignStartDateToTimeline,
+      );
       const element = selectedTimelineRef.current?.querySelector(
-        `[data-segment-id="${Math.max(...visibleThumbnails)}"]`,
+        `[data-segment-id="${Math.max(...alignedVisibleTimestamps)}"]`,
       );
       scrollIntoView(element as HTMLDivElement, {
         scrollMode: "if-needed",
         behavior: "smooth",
       });
     }
-  }, [visibleThumbnails, selectedTimelineRef, segments, showMinimap]);
+  }, [
+    selectedTimelineRef,
+    segments,
+    showMinimap,
+    alignStartDateToTimeline,
+    visibleTimestamps,
+  ]);
 
   return (
     <ReviewTimeline

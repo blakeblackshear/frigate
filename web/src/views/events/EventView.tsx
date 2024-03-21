@@ -470,6 +470,11 @@ function DetectionReview({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contentRef.current?.scrollHeight, minimapBounds]);
 
+  const visibleTimestamps = useMemo(
+    () => minimap.map((str) => parseFloat(str)),
+    [minimap],
+  );
+
   return (
     <>
       <div
@@ -559,6 +564,7 @@ function DetectionReview({
             minimapEndTime={minimapBounds.end}
             showHandlebar={previewTime != undefined}
             handlebarTime={previewTime}
+            visibleTimestamps={visibleTimestamps}
             events={reviewItems?.all ?? []}
             severityType={severity}
             contentRef={contentRef}
