@@ -13,7 +13,7 @@ The suggested steps are:
 - **Encrypt** content from the proxy webserver by installing SSL (such as with [Let's Encrypt](https://letsencrypt.org/)). Note that SSL is then not required on your Frigate webserver as the proxy encrypts all requests for you
 - **Restrict** access to your Frigate instance at the proxy using, for example, password authentication
 
-:::caution
+:::warning
 A reverse proxy can be used to secure access to an internal webserver but the user will be entirely reliant
 on the steps they have taken. You must ensure you are following security best practices.
 This page does not attempt to outline the specific steps needed to secure your internal website.
@@ -91,7 +91,7 @@ This method shows a working example for subdomain type reverse proxy with SSL en
 
 ### Setup server and port to reverse proxy
 
-This is set in `$server` and `$port` this should match your ports you have exposed to your docker container.  Optionally you listen on port `443` and enable `SSL`
+This is set in `$server` and `$port` this should match your ports you have exposed to your docker container. Optionally you listen on port `443` and enable `SSL`
 
 ```
 # ------------------------------------------------------------
@@ -112,7 +112,7 @@ server {
 
 ### Setup SSL (optional)
 
-This section points to your SSL files, the example below shows locations to a default Lets Encrypt SSL certificate. 
+This section points to your SSL files, the example below shows locations to a default Lets Encrypt SSL certificate.
 
 ```
   # Let's Encrypt SSL
@@ -121,7 +121,6 @@ This section points to your SSL files, the example below shows locations to a de
   ssl_certificate /etc/letsencrypt/live/npm-1/fullchain.pem;
   ssl_certificate_key /etc/letsencrypt/live/npm-1/privkey.pem;
 ```
-
 
 ### Setup reverse proxy settings
 

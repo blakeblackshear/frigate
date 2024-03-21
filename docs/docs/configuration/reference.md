@@ -5,7 +5,7 @@ title: Full Reference Config
 
 ### Full configuration reference:
 
-:::caution
+:::warning
 
 It is not recommended to copy this full configuration file. Only specify values that are different from the defaults. Configuration options and default values may change in future versions.
 

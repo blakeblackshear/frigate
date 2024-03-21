@@ -29,8 +29,8 @@ Sample response:
       /***************
        * Frames per second being consumed from your camera. If this is higher
        * than it is supposed to be, you should set -r FPS in your input_args.
-      * camera_fps = process_fps + skipped_fps
-      ***************/
+       * camera_fps = process_fps + skipped_fps
+       ***************/
       "camera_fps": 5.0,
       /***************
        * Number of times detection is run per second. This can be higher than
@@ -40,19 +40,19 @@ Sample response:
       "detection_fps": 1.5,
       /***************
        * PID for the ffmpeg process that consumes this camera
-      ***************/
+       ***************/
       "capture_pid": 27,
       /***************
-      * PID for the process that runs detection for this camera
-      ***************/
+       * PID for the process that runs detection for this camera
+       ***************/
       "pid": 34,
       /***************
-      * Frames per second being processed by Frigate.
-      ***************/
+       * Frames per second being processed by Frigate.
+       ***************/
       "process_fps": 5.1,
       /***************
-      * Frames per second skip for processing by Frigate.
-      ***************/
+       * Frames per second skip for processing by Frigate.
+       ***************/
       "skipped_fps": 0.0
     }
   },
@@ -117,15 +117,15 @@ Sample response:
       "cmdline": "ffmpeg...",
       "cpu": "5.0",
       "cpu_average": "3.0",
-      "mem": "0.5",
+      "mem": "0.5"
     }
   },
   "gpu_usages": {
     "gpu-type": {
       "gpu": "17%",
-      "mem": "18%",
-    },
-  },
+      "mem": "18%"
+    }
+  }
 }
 ```
 
@@ -278,7 +278,7 @@ Sub labels must be 100 characters or shorter.
 ```json
 {
   "subLabel": "some_string",
-  "subLabelScore": 0.79,
+  "subLabelScore": 0.79
 }
 ```
 
@@ -317,7 +317,7 @@ Accepts the following query string parameters, but they are only applied when an
 
 Create a manual event with a given `label` (ex: doorbell press) to capture a specific event besides an object being detected.
 
-:::caution
+:::warning
 
 Recording retention config still applies to manual events, if frigate is configured with `mode: motion` then the manual event will only keep recording segments when motion occurred.
 
@@ -409,7 +409,7 @@ It is also possible to export this recording as a time-lapse.
 
 ```json
 {
-  "playback": "realtime", // playback factor: realtime or timelapse_25x
+  "playback": "realtime" // playback factor: realtime or timelapse_25x
 }
 ```
 
@@ -444,25 +444,25 @@ Returns the snapshot image from the specific point in that cameras recordings.
 
 Reviews from the database. Accepts the following query string parameters:
 
-| param                | Type  | Description                                                            |
-| -------------------- | ----- | ---------------------------------------------------------------------- |
-| `before`             | int   | Epoch time                                                             |
-| `after`              | int   | Epoch time                                                             |
-| `cameras`            | str   | , separated list of cameras                                            |
-| `labels`             | str   | , separated list of labels                                             |
-| `reviewed`           | int   | Include items that have been reviewed (0 or 1)                         |
-| `limit`              | int   | Limit the number of events returned                                    |
-| `severity`           | str   | Limit items to severity (alert, detection, significant_motion)         |
+| param      | Type | Description                                                    |
+| ---------- | ---- | -------------------------------------------------------------- |
+| `before`   | int  | Epoch time                                                     |
+| `after`    | int  | Epoch time                                                     |
+| `cameras`  | str  | , separated list of cameras                                    |
+| `labels`   | str  | , separated list of labels                                     |
+| `reviewed` | int  | Include items that have been reviewed (0 or 1)                 |
+| `limit`    | int  | Limit the number of events returned                            |
+| `severity` | str  | Limit items to severity (alert, detection, significant_motion) |
 
 ### `GET /api/review/summary`
 
 Summary of reviews for the last 30 days. Accepts the following query string parameters:
 
-| param                | Type  | Description                                                            |
-| -------------------- | ----- | ---------------------------------------------------------------------- |
-| `cameras`            | str   | , separated list of cameras                                            |
-| `labels`             | str   | , separated list of labels                                             |
-| `timezone`           | str   | Timezone name                                                          |
+| param      | Type | Description                 |
+| ---------- | ---- | --------------------------- |
+| `cameras`  | str  | , separated list of cameras |
+| `labels`   | str  | , separated list of labels  |
+| `timezone` | str  | Timezone name               |
 
 ### `POST /api/review/<id>/viewed`
 

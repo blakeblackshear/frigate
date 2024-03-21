@@ -11,11 +11,11 @@ A camera is enabled by default but can be temporarily disabled by using `enabled
 
 Each role can only be assigned to one input per camera. The options for roles are as follows:
 
-| Role     | Description                                                                              |
-| -------- | ---------------------------------------------------------------------------------------- |
-| `detect` | Main feed for object detection. [docs](object_detectors.md)                              |
-| `record` | Saves segments of the video feed based on configuration settings. [docs](record.md)      |
-| `audio`  | Feed for audio based detection. [docs](audio_detectors.md)                               |
+| Role     | Description                                                                         |
+| -------- | ----------------------------------------------------------------------------------- |
+| `detect` | Main feed for object detection. [docs](object_detectors.md)                         |
+| `record` | Saves segments of the video feed based on configuration settings. [docs](record.md) |
+| `audio`  | Feed for audio based detection. [docs](audio_detectors.md)                          |
 
 ```yaml
 mqtt:
@@ -50,7 +50,7 @@ For camera model specific settings check the [camera specific](camera_specific.m
 
 ## Setting up camera PTZ controls
 
-:::caution
+:::warning
 
 Not every PTZ supports ONVIF, which is the standard protocol Frigate uses to communicate with your camera. Check the [official list of ONVIF conformant products](https://www.onvif.org/conformant-products/), your camera documentation, or camera manufacturer's website to ensure your PTZ supports ONVIF. Also, ensure your camera is running the latest firmware.
 

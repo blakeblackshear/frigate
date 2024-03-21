@@ -47,7 +47,7 @@ services:
     ...
 ```
 
-:::caution
+:::warning
 
 Users of the Snapcraft build of Docker cannot use storage locations outside your $HOME folder.
 
@@ -98,9 +98,9 @@ services:
     image: ghcr.io/blakeblackshear/frigate:stable
     shm_size: "64mb" # update for your cameras based on calculation above
     devices:
-      - /dev/bus/usb:/dev/bus/usb  # Passes the USB Coral, needs to be modified for other versions
-      - /dev/apex_0:/dev/apex_0    # Passes a PCIe Coral, follow driver instructions here https://coral.ai/docs/m2/get-started/#2a-on-linux
-      - /dev/video11:/dev/video11  # For Raspberry Pi 4B
+      - /dev/bus/usb:/dev/bus/usb # Passes the USB Coral, needs to be modified for other versions
+      - /dev/apex_0:/dev/apex_0 # Passes a PCIe Coral, follow driver instructions here https://coral.ai/docs/m2/get-started/#2a-on-linux
+      - /dev/video11:/dev/video11 # For Raspberry Pi 4B
       - /dev/dri/renderD128:/dev/dri/renderD128 # For intel hwaccel, needs to be updated for your hardware
     volumes:
       - /etc/localtime:/etc/localtime:ro
@@ -158,7 +158,7 @@ The community supported docker image tags for the current stable version are:
 
 ## Home Assistant Addon
 
-:::caution
+:::warning
 
 As of HomeAssistant OS 10.2 and Core 2023.6 defining separate network storage for media is supported.
 
