@@ -384,11 +384,8 @@ function DetectionReview({
     [timeRange],
   );
 
-  const { alignStartDateToTimeline } = useTimelineUtils(
-    segmentDuration,
-    timelineDuration,
-    reviewTimelineRef,
-  );
+  const { alignStartDateToTimeline, getVisibleTimelineDuration } =
+    useTimelineUtils(segmentDuration, timelineDuration, reviewTimelineRef);
 
   const scrollLock = useScrollLockout(contentRef);
 
@@ -457,10 +454,21 @@ function DetectionReview({
       return false;
     }
 
-    return contentRef.current.scrollHeight > contentRef.current.clientHeight;
+    // don't show minimap if the view is not scrollable
+    if (contentRef.current.scrollHeight < contentRef.current.clientHeight) {
+      return false;
+    }
+
+    const visibleTime = getVisibleTimelineDuration();
+    const minimapTime = minimapBounds.end - minimapBounds.start;
+    if (visibleTime && minimapTime >= visibleTime * 0.75) {
+      return false;
+    }
+
+    return true;
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [contentRef.current?.scrollHeight, severity]);
+  }, [contentRef.current?.scrollHeight, minimapBounds]);
 
   return (
     <>
