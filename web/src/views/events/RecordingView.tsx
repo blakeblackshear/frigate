@@ -1,24 +1,26 @@
+import FilterCheckBox from "@/components/filter/FilterCheckBox";
+import { CalendarFilterButton } from "@/components/filter/ReviewFilterGroup";
 import PreviewPlayer, {
   PreviewController,
 } from "@/components/player/PreviewPlayer";
 import { DynamicVideoController } from "@/components/player/dynamic/DynamicVideoController";
 import DynamicVideoPlayer from "@/components/player/dynamic/DynamicVideoPlayer";
-import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
 import MotionReviewTimeline from "@/components/timeline/MotionReviewTimeline";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
-import { MotionData, ReviewSegment, ReviewSeverity } from "@/types/review";
+import {
+  MotionData,
+  ReviewFilter,
+  ReviewSegment,
+  ReviewSummary,
+} from "@/types/review";
+import { getEndOfDayTimestamp } from "@/utils/dateUtil";
 import { getChunkedTimeDay } from "@/utils/timelineUtil";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isDesktop, isMobile } from "react-device-detect";
+import { FaCircle, FaVideo } from "react-icons/fa";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import useSWR from "swr";
@@ -28,18 +30,22 @@ const SEGMENT_DURATION = 30;
 type RecordingViewProps = {
   startCamera: string;
   startTime: number;
-  severity: ReviewSeverity;
-  reviewItems: ReviewSegment[];
+  reviewItems?: ReviewSegment[];
+  reviewSummary?: ReviewSummary;
   allCameras: string[];
   allPreviews?: Preview[];
+  filter?: ReviewFilter;
+  updateFilter: (newFilter: ReviewFilter) => void;
 };
 export function RecordingView({
   startCamera,
   startTime,
-  severity,
   reviewItems,
+  reviewSummary,
   allCameras,
   allPreviews,
+  filter,
+  updateFilter,
 }: RecordingViewProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
   const navigate = useNavigate();
@@ -54,7 +60,7 @@ export function RecordingView({
   const [playbackStart, setPlaybackStart] = useState(startTime);
 
   const mainCameraReviewItems = useMemo(
-    () => reviewItems.filter((cam) => cam.camera == mainCamera),
+    () => reviewItems?.filter((cam) => cam.camera == mainCamera) ?? [],
     [reviewItems, mainCamera],
   );
 
@@ -157,19 +163,15 @@ export function RecordingView({
 
   // motion timeline data
 
-  const { data: motionData } = useSWR<MotionData[]>(
-    severity == "significant_motion"
-      ? [
-          "review/activity/motion",
-          {
-            before: timeRange.end,
-            after: timeRange.start,
-            scale: SEGMENT_DURATION / 2,
-            cameras: mainCamera,
-          },
-        ]
-      : null,
-  );
+  const { data: motionData } = useSWR<MotionData[]>([
+    "review/activity/motion",
+    {
+      before: timeRange.end,
+      after: timeRange.start,
+      scale: SEGMENT_DURATION / 2,
+      cameras: mainCamera,
+    },
+  ]);
 
   const mainCameraAspect = useMemo(() => {
     if (!config) {
@@ -201,41 +203,61 @@ export function RecordingView({
 
   return (
     <div ref={contentRef} className="relative size-full">
-      <Button
-        className="absolute top-0 left-0 rounded-lg"
-        onClick={() => navigate(-1)}
+      <div
+        className={`absolute left-0  top-0 mr-2 flex items-center justify-between ${isMobile ? "right-0" : "right-24"}`}
       >
-        <IoMdArrowRoundBack className="size-5 mr-[10px]" />
-        Back
-      </Button>
-      {isMobile && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button className="absolute top-0 right-0 rounded-lg capitalize">
-              {mainCamera.replaceAll("_", " ")}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuRadioGroup
-              value={mainCamera}
-              onValueChange={(cam) => {
-                setPlaybackStart(currentTime);
-                setMainCamera(cam);
-              }}
-            >
-              {allCameras.map((cam) => (
-                <DropdownMenuRadioItem
-                  key={cam}
-                  className="capitalize"
-                  value={cam}
+        <Button className="rounded-lg" onClick={() => navigate(-1)}>
+          <IoMdArrowRoundBack className="size-5 mr-[10px]" />
+          Back
+        </Button>
+        <div className="flex items-center justify-end">
+          <CalendarFilterButton
+            day={
+              filter?.after == undefined
+                ? undefined
+                : new Date(filter.after * 1000)
+            }
+            reviewSummary={reviewSummary}
+            updateSelectedDay={(day) => {
+              updateFilter({
+                ...filter,
+                after: day == undefined ? undefined : day.getTime() / 1000,
+                before:
+                  day == undefined ? undefined : getEndOfDayTimestamp(day),
+              });
+            }}
+          />
+          {isMobile && (
+            <Drawer>
+              <DrawerTrigger asChild>
+                <Button
+                  className="rounded-lg capitalize flex items-center gap-2"
+                  size="sm"
+                  variant="secondary"
                 >
-                  {cam.replaceAll("_", " ")}
-                </DropdownMenuRadioItem>
-              ))}
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
+                  <FaVideo className="text-muted-foreground" />
+                  {mainCamera.replaceAll("_", " ")}
+                </Button>
+              </DrawerTrigger>
+              <DrawerContent className="max-h-[75dvh] overflow-hidden">
+                {allCameras.map((cam) => (
+                  <FilterCheckBox
+                    key={cam}
+                    CheckIcon={FaCircle}
+                    iconClassName="size-2"
+                    label={cam.replaceAll("_", " ")}
+                    isChecked={cam == mainCamera}
+                    onCheckedChange={() => {
+                      setPlaybackStart(currentTime);
+                      setMainCamera(cam);
+                    }}
+                  />
+                ))}
+              </DrawerContent>
+            </Drawer>
+          )}
+        </div>
+      </div>
 
       <div
         className={`flex h-full justify-center overflow-hidden ${isDesktop ? "" : "flex-col pt-12"}`}
@@ -312,36 +334,20 @@ export function RecordingView({
               : "flex-grow overflow-hidden"
           }
         >
-          {severity != "significant_motion" ? (
-            <EventReviewTimeline
-              segmentDuration={30}
-              timestampSpread={15}
-              timelineStart={timeRange.end}
-              timelineEnd={timeRange.start}
-              showHandlebar
-              handlebarTime={currentTime}
-              setHandlebarTime={setCurrentTime}
-              events={mainCameraReviewItems}
-              severityType={severity}
-              contentRef={contentRef}
-              onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
-            />
-          ) : (
-            <MotionReviewTimeline
-              segmentDuration={30}
-              timestampSpread={15}
-              timelineStart={timeRange.end}
-              timelineEnd={timeRange.start}
-              showHandlebar
-              handlebarTime={currentTime}
-              setHandlebarTime={setCurrentTime}
-              events={mainCameraReviewItems}
-              motion_events={motionData ?? []}
-              severityType={severity}
-              contentRef={contentRef}
-              onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
-            />
-          )}
+          <MotionReviewTimeline
+            segmentDuration={30}
+            timestampSpread={15}
+            timelineStart={timeRange.end}
+            timelineEnd={timeRange.start}
+            showHandlebar
+            handlebarTime={currentTime}
+            setHandlebarTime={setCurrentTime}
+            events={mainCameraReviewItems}
+            motion_events={motionData ?? []}
+            severityType="significant_motion"
+            contentRef={contentRef}
+            onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
+          />
         </div>
       </div>
     </div>

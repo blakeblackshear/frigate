@@ -7,6 +7,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { ReviewSegment } from "@/types/review";
 import { useNavigate } from "react-router-dom";
 import { Skeleton } from "../ui/skeleton";
+import { RecordingStartingPoint } from "@/types/record";
 
 type AnimatedEventThumbnailProps = {
   event: ReviewSegment;
@@ -18,7 +19,13 @@ export function AnimatedEventThumbnail({ event }: AnimatedEventThumbnailProps) {
 
   const navigate = useNavigate();
   const onOpenReview = useCallback(() => {
-    navigate("events", { state: { review: event.id } });
+    navigate("events", {
+      state: {
+        camera: event.camera,
+        startTime: event.start_time,
+        severity: event.severity,
+      } as RecordingStartingPoint,
+    });
   }, [navigate, event]);
 
   // image behavior

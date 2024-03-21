@@ -36,11 +36,18 @@ export default function Events() {
   const [reviewFilter, setReviewFilter, reviewSearchParams] =
     useApiFilter<ReviewFilter>();
 
-  const onUpdateFilter = useCallback((newFilter: ReviewFilter) => {
-    setReviewFilter(newFilter);
-    // we don't want this updating
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const onUpdateFilter = useCallback(
+    (newFilter: ReviewFilter) => {
+      setReviewFilter(newFilter);
+
+      // update recording start time if filter
+      // was changed on recording page
+      if (recording != undefined && newFilter.after != undefined) {
+        setRecording({ ...recording, startTime: newFilter.after }, true);
+      }
+    },
+    [recording, setRecording, setReviewFilter],
+  );
 
   // review paging
 
@@ -286,10 +293,8 @@ export default function Events() {
 
     return {
       camera: recording.camera,
-      severity: recording.severity,
       start_time: recording.startTime,
       allCameras: allCameras,
-      cameraSegments: reviews.filter((seg) => allCameras.includes(seg.camera)),
     };
 
     // previews will not update after item is selected
@@ -306,9 +311,11 @@ export default function Events() {
         startCamera={selectedReviewData.camera}
         startTime={selectedReviewData.start_time}
         allCameras={selectedReviewData.allCameras}
-        severity={selectedReviewData.severity}
-        reviewItems={selectedReviewData.cameraSegments}
+        reviewItems={reviews}
+        reviewSummary={reviewSummary}
         allPreviews={allPreviews}
+        filter={reviewFilter}
+        updateFilter={onUpdateFilter}
       />
     );
   } else {

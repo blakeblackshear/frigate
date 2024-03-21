@@ -5,6 +5,7 @@ import { IconType } from "react-icons";
 type FilterCheckBoxProps = {
   label: string;
   CheckIcon?: IconType;
+  iconClassName?: string;
   isChecked: boolean;
   onCheckedChange: (isChecked: boolean) => void;
 };
@@ -12,6 +13,7 @@ type FilterCheckBoxProps = {
 export default function FilterCheckBox({
   label,
   CheckIcon = LuCheck,
+  iconClassName = "size-6",
   isChecked,
   onCheckedChange,
 }: FilterCheckBoxProps) {
@@ -22,9 +24,9 @@ export default function FilterCheckBox({
       onClick={() => onCheckedChange(!isChecked)}
     >
       {isChecked ? (
-        <CheckIcon className="w-6 h-6" />
+        <CheckIcon className={iconClassName} />
       ) : (
-        <div className="w-6 h-6" />
+        <div className={iconClassName} />
       )}
       <div className="ml-1 w-full flex justify-start">{label}</div>
     </Button>
