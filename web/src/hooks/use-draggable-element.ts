@@ -41,8 +41,8 @@ function useDraggableElement({
   const [clientYPosition, setClientYPosition] = useState<number | null>(null);
   const [initialClickAdjustment, setInitialClickAdjustment] = useState(0);
   const { alignStartDateToTimeline, getCumulativeScrollTop } = useTimelineUtils(
-    timelineDuration,
     segmentDuration,
+    timelineDuration,
     timelineRef,
   );
 
