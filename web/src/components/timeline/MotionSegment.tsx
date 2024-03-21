@@ -42,8 +42,9 @@ export function MotionSegment({
   const { getMotionSegmentValue, interpolateMotionAudioData } =
     useMotionSegmentUtils(segmentDuration, motion_events);
 
-  const { alignStartDateToTimeline, alignEndDateToTimeline } =
-    useTimelineUtils(segmentDuration);
+  const { alignStartDateToTimeline, alignEndDateToTimeline } = useTimelineUtils(
+    { segmentDuration },
+  );
 
   const { handleTouchStart } = useTapUtils();
 

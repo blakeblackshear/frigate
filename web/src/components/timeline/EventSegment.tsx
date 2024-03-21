@@ -53,8 +53,9 @@ export function EventSegment({
     getEventThumbnail,
   } = useEventSegmentUtils(segmentDuration, events, severityType);
 
-  const { alignStartDateToTimeline, alignEndDateToTimeline } =
-    useTimelineUtils(segmentDuration);
+  const { alignStartDateToTimeline, alignEndDateToTimeline } = useTimelineUtils(
+    { segmentDuration },
+  );
 
   const severity = useMemo(
     () => getSeverity(segmentTime, displaySeverityType),
@@ -199,6 +200,7 @@ export function EventSegment({
   return (
     <div
       key={segmentKey}
+      data-segment-id={segmentKey}
       className={segmentClasses}
       onClick={segmentClick}
       onTouchEnd={(event) => handleTouchStart(event, segmentClick)}

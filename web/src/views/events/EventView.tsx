@@ -379,7 +379,17 @@ function DetectionReview({
 
   // timeline interaction
 
-  const { alignStartDateToTimeline } = useTimelineUtils(segmentDuration);
+  const timelineDuration = useMemo(
+    () => timeRange.before - timeRange.after,
+    [timeRange],
+  );
+
+  const { alignStartDateToTimeline, getVisibleTimelineDuration } =
+    useTimelineUtils({
+      segmentDuration,
+      timelineDuration,
+      timelineRef: reviewTimelineRef,
+    });
 
   const scrollLock = useScrollLockout(contentRef);
 
@@ -448,10 +458,26 @@ function DetectionReview({
       return false;
     }
 
-    return contentRef.current.scrollHeight > contentRef.current.clientHeight;
+    // don't show minimap if the view is not scrollable
+    if (contentRef.current.scrollHeight < contentRef.current.clientHeight) {
+      return false;
+    }
+
+    const visibleTime = getVisibleTimelineDuration();
+    const minimapTime = minimapBounds.end - minimapBounds.start;
+    if (visibleTime && minimapTime >= visibleTime * 0.75) {
+      return false;
+    }
+
+    return true;
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [contentRef.current?.scrollHeight, severity]);
+  }, [contentRef.current?.scrollHeight, minimapBounds]);
+
+  const visibleTimestamps = useMemo(
+    () => minimap.map((str) => parseFloat(str)),
+    [minimap],
+  );
 
   return (
     <>
@@ -499,7 +525,7 @@ function DetectionReview({
                   data-segment-start={
                     alignStartDateToTimeline(value.start_time) - segmentDuration
                   }
-                  className={`outline outline-offset-1 rounded-lg shadow-none transition-all my-1 md:my-0 ${selected ? `outline-4 shadow-[0_0_6px_1px] outline-severity_${value.severity} shadow-severity_${value.severity}` : "outline-0 duration-500"}`}
+                  className={`review-item outline outline-offset-1 rounded-lg shadow-none transition-all my-1 md:my-0 ${selected ? `outline-4 shadow-[0_0_6px_1px] outline-severity_${value.severity} shadow-severity_${value.severity}` : "outline-0 duration-500"}`}
                 >
                   <div className="aspect-video rounded-lg overflow-hidden">
                     <PreviewThumbnailPlayer
@@ -542,6 +568,7 @@ function DetectionReview({
             minimapEndTime={minimapBounds.end}
             showHandlebar={previewTime != undefined}
             handlebarTime={previewTime}
+            visibleTimestamps={visibleTimestamps}
             events={reviewItems?.all ?? []}
             severityType={severity}
             contentRef={contentRef}

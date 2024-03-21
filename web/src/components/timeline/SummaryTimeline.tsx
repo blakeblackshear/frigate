@@ -39,16 +39,20 @@ export function SummaryTimeline({
 
   const observer = useRef<ResizeObserver | null>(null);
 
-  const { alignStartDateToTimeline } = useTimelineUtils(segmentDuration);
+  const reviewTimelineDuration = useMemo(
+    () => timelineStart - timelineEnd + 4 * segmentDuration,
+    [timelineEnd, timelineStart, segmentDuration],
+  );
+
+  const { alignStartDateToTimeline } = useTimelineUtils({
+    segmentDuration,
+    timelineDuration: reviewTimelineDuration,
+    timelineRef: reviewTimelineRef,
+  });
 
   const timelineStartAligned = useMemo(
     () => alignStartDateToTimeline(timelineStart) + 2 * segmentDuration,
     [timelineStart, alignStartDateToTimeline, segmentDuration],
-  );
-
-  const reviewTimelineDuration = useMemo(
-    () => timelineStart - timelineEnd + 4 * segmentDuration,
-    [timelineEnd, timelineStart, segmentDuration],
   );
 
   // Generate segments for the timeline

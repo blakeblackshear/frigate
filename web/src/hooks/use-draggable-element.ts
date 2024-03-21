@@ -40,8 +40,13 @@ function useDraggableElement({
 }: DraggableElementProps) {
   const [clientYPosition, setClientYPosition] = useState<number | null>(null);
   const [initialClickAdjustment, setInitialClickAdjustment] = useState(0);
-  const { alignStartDateToTimeline, getCumulativeScrollTop } =
-    useTimelineUtils(segmentDuration);
+  const { alignStartDateToTimeline, getCumulativeScrollTop } = useTimelineUtils(
+    {
+      segmentDuration: segmentDuration,
+      timelineDuration: timelineDuration,
+      timelineRef,
+    },
+  );
 
   const draggingAtTopEdge = useMemo(() => {
     if (clientYPosition && timelineRef.current) {

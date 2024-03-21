@@ -11,6 +11,7 @@ import EventSegment from "./EventSegment";
 import { useTimelineUtils } from "@/hooks/use-timeline-utils";
 import { ReviewSegment, ReviewSeverity } from "@/types/review";
 import ReviewTimeline from "./ReviewTimeline";
+import scrollIntoView from "scroll-into-view-if-needed";
 
 export type EventReviewTimelineProps = {
   segmentDuration: number;
@@ -29,6 +30,7 @@ export type EventReviewTimelineProps = {
   setExportStartTime?: React.Dispatch<React.SetStateAction<number>>;
   setExportEndTime?: React.Dispatch<React.SetStateAction<number>>;
   events: ReviewSegment[];
+  visibleTimestamps?: number[];
   severityType: ReviewSeverity;
   timelineRef?: RefObject<HTMLDivElement>;
   contentRef: RefObject<HTMLDivElement>;
@@ -52,6 +54,7 @@ export function EventReviewTimeline({
   setExportStartTime,
   setExportEndTime,
   events,
+  visibleTimestamps,
   severityType,
   timelineRef,
   contentRef,
@@ -68,14 +71,20 @@ export function EventReviewTimeline({
   const exportStartTimeRef = useRef<HTMLDivElement>(null);
   const exportEndRef = useRef<HTMLDivElement>(null);
   const exportEndTimeRef = useRef<HTMLDivElement>(null);
+  const selectedTimelineRef = timelineRef || internalTimelineRef;
 
   const timelineDuration = useMemo(
     () => timelineStart - timelineEnd,
     [timelineEnd, timelineStart],
   );
 
-  const { alignStartDateToTimeline, alignEndDateToTimeline } =
-    useTimelineUtils(segmentDuration);
+  const { alignStartDateToTimeline, alignEndDateToTimeline } = useTimelineUtils(
+    {
+      segmentDuration,
+      timelineDuration,
+      timelineRef: selectedTimelineRef,
+    },
+  );
 
   const timelineStartAligned = useMemo(
     () => alignStartDateToTimeline(timelineStart),
@@ -100,7 +109,7 @@ export function EventReviewTimeline({
     handleMouseMove: handlebarMouseMove,
   } = useDraggableElement({
     contentRef,
-    timelineRef: timelineRef || internalTimelineRef,
+    timelineRef: selectedTimelineRef,
     draggableElementRef: handlebarRef,
     segmentDuration,
     showDraggableElement: showHandlebar,
@@ -119,7 +128,7 @@ export function EventReviewTimeline({
     handleMouseMove: exportStartMouseMove,
   } = useDraggableElement({
     contentRef,
-    timelineRef: timelineRef || internalTimelineRef,
+    timelineRef: selectedTimelineRef,
     draggableElementRef: exportStartRef,
     segmentDuration,
     showDraggableElement: showExportHandles,
@@ -140,7 +149,7 @@ export function EventReviewTimeline({
     handleMouseMove: exportEndMouseMove,
   } = useDraggableElement({
     contentRef,
-    timelineRef: timelineRef || internalTimelineRef,
+    timelineRef: selectedTimelineRef,
     draggableElementRef: exportEndRef,
     segmentDuration,
     showDraggableElement: showExportHandles,
@@ -213,9 +222,36 @@ export function EventReviewTimeline({
     }
   }, [isDragging, onHandlebarDraggingChange]);
 
+  useEffect(() => {
+    if (
+      selectedTimelineRef.current &&
+      segments &&
+      visibleTimestamps &&
+      visibleTimestamps?.length > 0 &&
+      !showMinimap
+    ) {
+      const alignedVisibleTimestamps = visibleTimestamps.map(
+        alignStartDateToTimeline,
+      );
+      const element = selectedTimelineRef.current?.querySelector(
+        `[data-segment-id="${Math.max(...alignedVisibleTimestamps)}"]`,
+      );
+      scrollIntoView(element as HTMLDivElement, {
+        scrollMode: "if-needed",
+        behavior: "smooth",
+      });
+    }
+  }, [
+    selectedTimelineRef,
+    segments,
+    showMinimap,
+    alignStartDateToTimeline,
+    visibleTimestamps,
+  ]);
+
   return (
     <ReviewTimeline
-      timelineRef={timelineRef || internalTimelineRef}
+      timelineRef={selectedTimelineRef}
       handlebarRef={handlebarRef}
       handlebarTimeRef={handlebarTimeRef}
       handlebarMouseMove={handlebarMouseMove}

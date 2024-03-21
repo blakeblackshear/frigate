@@ -76,8 +76,12 @@ export function MotionReviewTimeline({
     [timelineEnd, timelineStart, segmentDuration],
   );
 
-  const { alignStartDateToTimeline, alignEndDateToTimeline } =
-    useTimelineUtils(segmentDuration);
+  const { alignStartDateToTimeline, alignEndDateToTimeline } = useTimelineUtils(
+    {
+      segmentDuration,
+      timelineDuration,
+    },
+  );
 
   const timelineStartAligned = useMemo(
     () => alignStartDateToTimeline(timelineStart) + 2 * segmentDuration,

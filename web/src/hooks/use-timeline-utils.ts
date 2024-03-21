@@ -1,6 +1,16 @@
 import { useCallback } from "react";
 
-export const useTimelineUtils = (segmentDuration: number) => {
+export type TimelineUtilsProps = {
+  segmentDuration: number;
+  timelineDuration?: number;
+  timelineRef?: React.RefObject<HTMLElement>;
+};
+
+export function useTimelineUtils({
+  segmentDuration,
+  timelineDuration,
+  timelineRef,
+}: TimelineUtilsProps) {
   const alignEndDateToTimeline = useCallback(
     (time: number): number => {
       const remainder = time % segmentDuration;
@@ -28,9 +38,27 @@ export const useTimelineUtils = (segmentDuration: number) => {
     return scrollTop;
   }, []);
 
+  const getVisibleTimelineDuration = useCallback(() => {
+    if (timelineRef?.current && timelineDuration) {
+      const {
+        scrollHeight: timelineHeight,
+        clientHeight: visibleTimelineHeight,
+      } = timelineRef.current;
+
+      const segmentHeight =
+        timelineHeight / (timelineDuration / segmentDuration);
+
+      const visibleTime =
+        (visibleTimelineHeight / segmentHeight) * segmentDuration;
+
+      return visibleTime;
+    }
+  }, [segmentDuration, timelineDuration, timelineRef]);
+
   return {
     alignEndDateToTimeline,
     alignStartDateToTimeline,
     getCumulativeScrollTop,
+    getVisibleTimelineDuration,
   };
-};
+}
