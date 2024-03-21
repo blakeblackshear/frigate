@@ -19,7 +19,7 @@ function ConfigEditor() {
 
   const { data: config } = useSWR<string>("config/raw");
 
-  const { theme } = useTheme();
+  const { theme, systemTheme } = useTheme();
   const [error, setError] = useState<string | undefined>();
 
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -107,7 +107,7 @@ function ConfigEditor() {
         language: "yaml",
         model: modelRef.current,
         scrollBeyondLastLine: false,
-        theme: theme == "dark" ? "vs-dark" : "vs-light",
+        theme: (systemTheme || theme) == "dark" ? "vs-dark" : "vs-light",
       });
     }
 

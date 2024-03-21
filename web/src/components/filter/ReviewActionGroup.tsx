@@ -1,8 +1,10 @@
-import { LuCheckSquare, LuFileUp, LuTrash } from "react-icons/lu";
+import { FaCircleCheck } from "react-icons/fa6";
 import { useCallback } from "react";
 import axios from "axios";
 import { Button } from "../ui/button";
 import { isDesktop } from "react-device-detect";
+import { FaCompactDisc } from "react-icons/fa";
+import { HiTrash } from "react-icons/hi";
 
 type ReviewActionGroupProps = {
   selectedReviews: string[];
@@ -21,8 +23,7 @@ export default function ReviewActionGroup({
   }, [setSelectedReviews]);
 
   const onMarkAsReviewed = useCallback(async () => {
-    const idList = selectedReviews.join(",");
-    await axios.post(`reviews/viewed`, { ids: idList });
+    await axios.post(`reviews/viewed`, { ids: selectedReviews });
     setSelectedReviews([]);
     pullLatestData();
   }, [selectedReviews, setSelectedReviews, pullLatestData]);
@@ -36,16 +37,20 @@ export default function ReviewActionGroup({
 
   return (
     <div className="absolute inset-x-2 inset-y-0 md:left-auto md:right-2 p-2 flex gap-2 justify-between items-center bg-background">
-      <div className="flex items-center">
-        <div className="text-sm text-gray-500 mr-2">{`${selectedReviews.length} selected | `}</div>
-        <Button size="xs" variant="link" onClick={onClearSelected}>
+      <div className="mx-1 flex justify-center items-center text-sm text-muted-foreground">
+        <div className="p-1">{`${selectedReviews.length} selected`}</div>
+        <div className="p-1">{"|"}</div>
+        <div
+          className="p-2 text-primary-foreground cursor-pointer hover:bg-secondary hover:rounded-lg"
+          onClick={onClearSelected}
+        >
           Unselect
-        </Button>
+        </div>
       </div>
       <div className="flex items-center gap-1 md:gap-2">
         {selectedReviews.length == 1 && (
           <Button
-            className="flex items-center"
+            className="p-2 flex items-center gap-2"
             variant="secondary"
             size="sm"
             onClick={() => {
@@ -53,26 +58,26 @@ export default function ReviewActionGroup({
               onClearSelected();
             }}
           >
-            <LuFileUp className="mr-1" />
+            <FaCompactDisc />
             {isDesktop && "Export"}
           </Button>
         )}
         <Button
-          className="flex items-center"
+          className="p-2 flex items-center gap-2"
           variant="secondary"
           size="sm"
           onClick={onMarkAsReviewed}
         >
-          <LuCheckSquare className="mr-1" />
+          <FaCircleCheck />
           {isDesktop && "Mark as reviewed"}
         </Button>
         <Button
-          className="flex items-center"
+          className="p-2 flex items-center gap-1"
           variant="secondary"
           size="sm"
           onClick={onDelete}
         >
-          <LuTrash className="mr-1" />
+          <HiTrash />
           {isDesktop && "Delete"}
         </Button>
       </div>
