@@ -30,6 +30,7 @@ export type EventReviewTimelineProps = {
   setExportEndTime?: React.Dispatch<React.SetStateAction<number>>;
   events: ReviewSegment[];
   severityType: ReviewSeverity;
+  timelineRef?: RefObject<HTMLDivElement>;
   contentRef: RefObject<HTMLDivElement>;
   onHandlebarDraggingChange?: (isDragging: boolean) => void;
 };
@@ -52,6 +53,7 @@ export function EventReviewTimeline({
   setExportEndTime,
   events,
   severityType,
+  timelineRef,
   contentRef,
   onHandlebarDraggingChange,
 }: EventReviewTimelineProps) {
@@ -59,7 +61,7 @@ export function EventReviewTimeline({
   const [exportStartPosition, setExportStartPosition] = useState(0);
   const [exportEndPosition, setExportEndPosition] = useState(0);
 
-  const timelineRef = useRef<HTMLDivElement>(null);
+  const internalTimelineRef = useRef<HTMLDivElement>(null);
   const handlebarRef = useRef<HTMLDivElement>(null);
   const handlebarTimeRef = useRef<HTMLDivElement>(null);
   const exportStartRef = useRef<HTMLDivElement>(null);
@@ -98,7 +100,7 @@ export function EventReviewTimeline({
     handleMouseMove: handlebarMouseMove,
   } = useDraggableElement({
     contentRef,
-    timelineRef,
+    timelineRef: timelineRef || internalTimelineRef,
     draggableElementRef: handlebarRef,
     segmentDuration,
     showDraggableElement: showHandlebar,
@@ -117,7 +119,7 @@ export function EventReviewTimeline({
     handleMouseMove: exportStartMouseMove,
   } = useDraggableElement({
     contentRef,
-    timelineRef,
+    timelineRef: timelineRef || internalTimelineRef,
     draggableElementRef: exportStartRef,
     segmentDuration,
     showDraggableElement: showExportHandles,
@@ -138,7 +140,7 @@ export function EventReviewTimeline({
     handleMouseMove: exportEndMouseMove,
   } = useDraggableElement({
     contentRef,
-    timelineRef,
+    timelineRef: timelineRef || internalTimelineRef,
     draggableElementRef: exportEndRef,
     segmentDuration,
     showDraggableElement: showExportHandles,
@@ -213,7 +215,7 @@ export function EventReviewTimeline({
 
   return (
     <ReviewTimeline
-      timelineRef={timelineRef}
+      timelineRef={timelineRef || internalTimelineRef}
       handlebarRef={handlebarRef}
       handlebarTimeRef={handlebarTimeRef}
       handlebarMouseMove={handlebarMouseMove}
