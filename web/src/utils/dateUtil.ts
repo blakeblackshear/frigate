@@ -197,12 +197,6 @@ export const formatUnixTimestampToDateTime = (
   }
 };
 
-interface DurationToken {
-  xSeconds: string;
-  xMinutes: string;
-  xHours: string;
-}
-
 /**
  * This function takes in start and end time in unix timestamp,
  * and returns the duration between start and end time in hours, minutes and seconds.
@@ -225,19 +219,12 @@ export const getDurationFromTimestamps = (
     }
     const start = fromUnixTime(start_time);
     const end = fromUnixTime(end_time);
-    const formatDistanceLocale: DurationToken = {
-      xSeconds: "{{count}}s",
-      xMinutes: "{{count}}m",
-      xHours: "{{count}}h",
-    };
-    const shortEnLocale = {
-      formatDistance: (token: keyof DurationToken, count: number) =>
-        formatDistanceLocale[token].replace("{{count}}", count.toString()),
-    };
     duration = formatDuration(intervalToDuration({ start, end }), {
       format: ["hours", "minutes", "seconds"],
-      locale: shortEnLocale,
-    });
+    })
+      .replace("hours", "h")
+      .replace("minutes", "m")
+      .replace("seconds", "s");
   }
   return duration;
 };
