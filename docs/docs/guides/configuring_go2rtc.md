@@ -74,7 +74,7 @@ go2rtc:
       - "ffmpeg:rtsp://user:password@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2#video=copy#audio=copy#audio=aac"
 ```
 
-:::caution
+:::warning
 
 To access the go2rtc stream externally when utilizing the Frigate Add-On (for instance through VLC), you must first enable the RTSP Restream port. You can do this by visiting the Frigate Add-On configuration page within Home Assistant and revealing the hidden options under the "Show disabled ports" section.
 

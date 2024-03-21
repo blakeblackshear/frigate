@@ -96,7 +96,7 @@ model:
 
 Note that if you rename objects in the labelmap, you will also need to update your `objects -> track` list as well.
 
-:::caution
+:::warning
 
 Some labels have special handling and modifications can disable functionality.
 

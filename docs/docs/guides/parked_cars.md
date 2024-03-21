@@ -11,7 +11,7 @@ This is an area targeted for improvement in future releases.
 
 Many people use Frigate to detect cars entering their driveway, and they often run into an issue with repeated events of parked cars and/or long running events after the car parks. This can cause Frigate to store more video than desired.
 
-:::caution
+:::warning
 
 It is not recommended to use motion masks to try and eliminate parked cars in your driveway. Motion masks are designed to prevent motion from triggering object detection and will not prevent objects from being detected in the area if motion is detected outside of the motion mask.
 

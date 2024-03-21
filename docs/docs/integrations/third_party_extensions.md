@@ -6,7 +6,7 @@ title: Third Party Extensions
 Being open source, others have the possibility to modify and extend the rich functionality Frigate already offers.
 This page is meant to be an overview over additions one can make to the home NVR setup. The list is not exhaustive and can be extended via PR to the Frigate docs.
 
-:::caution
+:::warning
 
 This page does not recommend or rate the presented projects.
 Please use your own knowledge to assess and vet them before you install anything on your system.

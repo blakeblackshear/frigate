@@ -104,7 +104,7 @@ According to [this discussion](https://github.com/blakeblackshear/frigate/issues
 Cameras connected via a Reolink NVR can be connected with the http stream, use `channel[0..15]` in the stream url for the additional channels.
 The setup of main stream can be also done via RTSP, but isn't always reliable on all hardware versions. The example configuration is working with the oldest HW version RLN16-410 device with multiple types of cameras.
 
-:::caution
+:::warning
 
 The below configuration only works for reolink cameras with stream resolution of 5MP or lower, 8MP+ cameras need to use RTSP as http-flv is not supported in this case.
 
@@ -145,7 +145,7 @@ cameras:
         - path: rtsp://127.0.0.1:8554/your_reolink_camera_via_nvr_sub?video=copy
           input_args: preset-rtsp-restream
           roles:
-            - detect   
+            - detect
 ```
 
 #### Reolink Doorbell
