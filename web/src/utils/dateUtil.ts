@@ -1,5 +1,10 @@
 import strftime from "strftime";
-import { fromUnixTime, intervalToDuration, formatDuration } from "date-fns";
+import {
+  fromUnixTime,
+  intervalToDuration,
+  formatDuration,
+  Locale,
+} from "date-fns";
 export const longToDate = (long: number): Date => new Date(long * 1000);
 export const epochToLong = (date: number): number => date / 1000;
 export const dateToLong = (date: Date): number => epochToLong(date.getTime());
@@ -211,6 +216,7 @@ interface DurationToken {
  * @param end_time: number|null - Unix timestamp for end time
  * @returns string - duration or 'In Progress' if end time is not provided
  */
+type tokens = "xSeconds" | "xMinutes" | "xHours";
 export const getDurationFromTimestamps = (
   start_time: number,
   end_time: number | null,
@@ -225,19 +231,12 @@ export const getDurationFromTimestamps = (
     }
     const start = fromUnixTime(start_time);
     const end = fromUnixTime(end_time);
-    const formatDistanceLocale: DurationToken = {
-      xSeconds: "{{count}}s",
-      xMinutes: "{{count}}m",
-      xHours: "{{count}}h",
-    };
-    const shortEnLocale = {
-      formatDistance: (token: keyof DurationToken, count: number) =>
-        formatDistanceLocale[token].replace("{{count}}", count.toString()),
-    };
     duration = formatDuration(intervalToDuration({ start, end }), {
       format: ["hours", "minutes", "seconds"],
-      locale: shortEnLocale,
-    });
+    })
+      .replace("hours", "h")
+      .replace("minutes", "m")
+      .replace("seconds", "s");
   }
   return duration;
 };
