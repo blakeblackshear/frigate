@@ -1,10 +1,5 @@
 import strftime from "strftime";
-import {
-  fromUnixTime,
-  intervalToDuration,
-  formatDuration,
-  Locale,
-} from "date-fns";
+import { fromUnixTime, intervalToDuration, formatDuration } from "date-fns";
 export const longToDate = (long: number): Date => new Date(long * 1000);
 export const epochToLong = (date: number): number => date / 1000;
 export const dateToLong = (date: Date): number => epochToLong(date.getTime());
@@ -202,12 +197,6 @@ export const formatUnixTimestampToDateTime = (
   }
 };
 
-interface DurationToken {
-  xSeconds: string;
-  xMinutes: string;
-  xHours: string;
-}
-
 /**
  * This function takes in start and end time in unix timestamp,
  * and returns the duration between start and end time in hours, minutes and seconds.
@@ -216,7 +205,6 @@ interface DurationToken {
  * @param end_time: number|null - Unix timestamp for end time
  * @returns string - duration or 'In Progress' if end time is not provided
  */
-type tokens = "xSeconds" | "xMinutes" | "xHours";
 export const getDurationFromTimestamps = (
   start_time: number,
   end_time: number | null,
