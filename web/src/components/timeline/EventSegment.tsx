@@ -197,7 +197,12 @@ export function EventSegment({
   }, [startTimestamp]);
 
   return (
-    <div key={segmentKey} className={segmentClasses}>
+    <div
+      key={segmentKey}
+      className={segmentClasses}
+      onClick={segmentClick}
+      onTouchEnd={(event) => handleTouchStart(event, segmentClick)}
+    >
       <MinimapBounds
         isFirstSegmentInMinimap={isFirstSegmentInMinimap}
         isLastSegmentInMinimap={isLastSegmentInMinimap}
@@ -219,34 +224,36 @@ export function EventSegment({
       {severity.map((severityValue: number, index: number) => (
         <React.Fragment key={index}>
           {severityValue === displaySeverityType && (
-            <HoverCard openDelay={200} closeDelay={100}>
-              <div
-                className="absolute left-1/2 transform -translate-x-1/2 w-[8px] h-2 ml-[2px] z-10 cursor-pointer"
-                data-severity={severityValue}
-              >
-                <HoverCardTrigger asChild>
-                  <div
-                    key={`${segmentKey}_${index}_primary_data`}
-                    className={`w-full h-2 bg-gradient-to-r ${roundBottomPrimary ? "rounded-bl-full rounded-br-full" : ""} ${roundTopPrimary ? "rounded-tl-full rounded-tr-full" : ""} ${severityColors[severityValue]}`}
-                    onClick={segmentClick}
-                    onTouchEnd={(event) =>
-                      handleTouchStart(event, segmentClick)
-                    }
-                  ></div>
-                </HoverCardTrigger>
-                <HoverCardPortal>
-                  <HoverCardContent
-                    className="rounded-2xl w-[250px] p-2"
-                    side="left"
-                  >
-                    <img
-                      className="rounded-lg"
-                      src={`${apiHost}${eventThumbnail.replace("/media/frigate/", "")}`}
-                    />
-                  </HoverCardContent>
-                </HoverCardPortal>
+            <div className="absolute left-1/2 transform -translate-x-1/2 w-[20px] md:w-[40px] h-2 z-10 cursor-pointer">
+              <div className="flex flex-row justify-center w-[20px] md:w-[40px]">
+                <div className="flex justify-center">
+                  <HoverCard openDelay={200} closeDelay={100}>
+                    <div
+                      className="absolute left-1/2 transform -translate-x-1/2 w-[8px] h-2 ml-[2px] z-10 cursor-pointer"
+                      data-severity={severityValue}
+                    >
+                      <HoverCardTrigger asChild>
+                        <div
+                          key={`${segmentKey}_${index}_primary_data`}
+                          className={`w-full h-2 bg-gradient-to-r ${roundBottomPrimary ? "rounded-bl-full rounded-br-full" : ""} ${roundTopPrimary ? "rounded-tl-full rounded-tr-full" : ""} ${severityColors[severityValue]}`}
+                        ></div>
+                      </HoverCardTrigger>
+                      <HoverCardPortal>
+                        <HoverCardContent
+                          className="rounded-2xl w-[250px] p-2"
+                          side="left"
+                        >
+                          <img
+                            className="rounded-lg"
+                            src={`${apiHost}${eventThumbnail.replace("/media/frigate/", "")}`}
+                          />
+                        </HoverCardContent>
+                      </HoverCardPortal>
+                    </div>
+                  </HoverCard>
+                </div>
               </div>
-            </HoverCard>
+            </div>
           )}
         </React.Fragment>
       ))}

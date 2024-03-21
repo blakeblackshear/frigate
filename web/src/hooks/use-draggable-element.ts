@@ -63,14 +63,12 @@ function useDraggableElement({
   }, [clientYPosition, timelineRef, isDragging]);
 
   const getClientYPosition = useCallback(
-    (
-      e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>,
-    ) => {
+    (e: MouseEvent | TouchEvent) => {
       let clientY;
-      if (isMobile && e.nativeEvent instanceof TouchEvent) {
-        clientY = e.nativeEvent.touches[0].clientY;
-      } else if (e.nativeEvent instanceof MouseEvent) {
-        clientY = e.nativeEvent.clientY;
+      if (isMobile && e instanceof TouchEvent) {
+        clientY = e.touches[0].clientY;
+      } else if (e instanceof MouseEvent) {
+        clientY = e.clientY;
       }
 
       if (clientY) {
@@ -113,9 +111,7 @@ function useDraggableElement({
   );
 
   const handleMouseUp = useCallback(
-    (
-      e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>,
-    ) => {
+    (e: MouseEvent | TouchEvent) => {
       e.preventDefault();
       e.stopPropagation();
       if (isDragging) {
@@ -187,9 +183,7 @@ function useDraggableElement({
   );
 
   const handleMouseMove = useCallback(
-    (
-      e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>,
-    ) => {
+    (e: MouseEvent | TouchEvent) => {
       if (
         !contentRef.current ||
         !timelineRef.current ||

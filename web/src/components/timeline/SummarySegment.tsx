@@ -1,5 +1,5 @@
 import { useEventSegmentUtils } from "@/hooks/use-event-segment-utils";
-import { ReviewSegment } from "@/types/review";
+import { ReviewSegment, ReviewSeverity } from "@/types/review";
 import React, { useMemo } from "react";
 // import useTapUtils from "@/hooks/use-tap-utils";
 
@@ -8,6 +8,7 @@ type SummarySegmentProps = {
   segmentTime: number;
   segmentDuration: number;
   segmentHeight: number;
+  severityType: ReviewSeverity;
 };
 
 export function SummarySegment({
@@ -15,8 +16,8 @@ export function SummarySegment({
   segmentTime,
   segmentDuration,
   segmentHeight,
+  severityType,
 }: SummarySegmentProps) {
-  const severityType = "all";
   const { getSeverity, getReviewed, displaySeverityType } =
     useEventSegmentUtils(segmentDuration, events, severityType);
 
@@ -44,9 +45,9 @@ export function SummarySegment({
       className="relative w-full"
       style={{ height: segmentHeight }}
     >
-      {severity.map((severityValue: number, index: number) => {
-        return (
-          <React.Fragment key={index}>
+      {severity.map((severityValue: number, index: number) => (
+        <React.Fragment key={index}>
+          {severityValue === displaySeverityType && (
             <div
               className="flex justify-end cursor-pointer"
               style={{ height: segmentHeight }}
@@ -57,9 +58,9 @@ export function SummarySegment({
                 className={`w-[10px] ${severityColors[severityValue]}`}
               ></div>
             </div>
-          </React.Fragment>
-        );
-      })}
+          )}
+        </React.Fragment>
+      ))}
     </div>
   );
 }

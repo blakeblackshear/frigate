@@ -14,16 +14,8 @@ export type ReviewTimelineProps = {
   timelineRef: RefObject<HTMLDivElement>;
   handlebarRef: RefObject<HTMLDivElement>;
   handlebarTimeRef: RefObject<HTMLDivElement>;
-  handlebarMouseMove: (
-    e:
-      | React.MouseEvent<HTMLDivElement, MouseEvent>
-      | React.TouchEvent<HTMLDivElement>,
-  ) => void;
-  handlebarMouseUp: (
-    e:
-      | React.MouseEvent<HTMLDivElement, MouseEvent>
-      | React.TouchEvent<HTMLDivElement>,
-  ) => void;
+  handlebarMouseMove: (e: MouseEvent | TouchEvent) => void;
+  handlebarMouseUp: (e: MouseEvent | TouchEvent) => void;
   handlebarMouseDown: (
     e:
       | React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -37,31 +29,15 @@ export type ReviewTimelineProps = {
   exportStartTimeRef: RefObject<HTMLDivElement>;
   exportEndRef: RefObject<HTMLDivElement>;
   exportEndTimeRef: RefObject<HTMLDivElement>;
-  exportStartMouseMove: (
-    e:
-      | React.MouseEvent<HTMLDivElement, MouseEvent>
-      | React.TouchEvent<HTMLDivElement>,
-  ) => void;
-  exportStartMouseUp: (
-    e:
-      | React.MouseEvent<HTMLDivElement, MouseEvent>
-      | React.TouchEvent<HTMLDivElement>,
-  ) => void;
+  exportStartMouseMove: (e: MouseEvent | TouchEvent) => void;
+  exportStartMouseUp: (e: MouseEvent | TouchEvent) => void;
   exportStartMouseDown: (
     e:
       | React.MouseEvent<HTMLDivElement, MouseEvent>
       | React.TouchEvent<HTMLDivElement>,
   ) => void;
-  exportEndMouseMove: (
-    e:
-      | React.MouseEvent<HTMLDivElement, MouseEvent>
-      | React.TouchEvent<HTMLDivElement>,
-  ) => void;
-  exportEndMouseUp: (
-    e:
-      | React.MouseEvent<HTMLDivElement, MouseEvent>
-      | React.TouchEvent<HTMLDivElement>,
-  ) => void;
+  exportEndMouseMove: (e: MouseEvent | TouchEvent) => void;
+  exportEndMouseUp: (e: MouseEvent | TouchEvent) => void;
   exportEndMouseDown: (
     e:
       | React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -152,11 +128,7 @@ export function ReviewTimeline({
   );
 
   const handleMouseMove = useCallback(
-    (
-      e:
-        | React.MouseEvent<HTMLDivElement, MouseEvent>
-        | React.TouchEvent<HTMLDivElement>,
-    ) => {
+    (e: MouseEvent | TouchEvent) => {
       switch (draggableElementType) {
         case "export_start":
           exportStartMouseMove(e);
@@ -181,11 +153,7 @@ export function ReviewTimeline({
   );
 
   const handleMouseUp = useCallback(
-    (
-      e:
-        | React.MouseEvent<HTMLDivElement, MouseEvent>
-        | React.TouchEvent<HTMLDivElement>,
-    ) => {
+    (e: MouseEvent | TouchEvent) => {
       switch (draggableElementType) {
         case "export_start":
           exportStartMouseUp(e);
@@ -227,13 +195,32 @@ export function ReviewTimeline({
     exportEndPosition,
   ]);
 
+  const documentRef = useRef<Document | null>(document);
+  useEffect(() => {
+    const documentInstance = documentRef.current;
+
+    if (isDragging) {
+      documentInstance?.addEventListener("mousemove", handleMouseMove);
+      documentInstance?.addEventListener("touchmove", handleMouseMove);
+      documentInstance?.addEventListener("mouseup", handleMouseUp);
+      documentInstance?.addEventListener("touchend", handleMouseUp);
+    } else {
+      documentInstance?.removeEventListener("mousemove", handleMouseMove);
+      documentInstance?.removeEventListener("touchmove", handleMouseMove);
+      documentInstance?.removeEventListener("mouseup", handleMouseUp);
+      documentInstance?.removeEventListener("touchend", handleMouseUp);
+    }
+    return () => {
+      documentInstance?.removeEventListener("mousemove", handleMouseMove);
+      documentInstance?.removeEventListener("touchmove", handleMouseMove);
+      documentInstance?.removeEventListener("mouseup", handleMouseUp);
+      documentInstance?.removeEventListener("touchend", handleMouseUp);
+    };
+  }, [handleMouseMove, handleMouseUp, isDragging]);
+
   return (
     <div
       ref={timelineRef}
-      onMouseMove={handleMouseMove}
-      onTouchMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onTouchEnd={handleMouseUp}
       className={`relative h-full overflow-y-auto no-scrollbar select-none bg-secondary ${
         isDragging && (showHandlebar || showExportHandles)
           ? "cursor-grabbing"

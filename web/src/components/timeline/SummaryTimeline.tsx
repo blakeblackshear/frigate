@@ -8,7 +8,7 @@ import {
 } from "react";
 import { SummarySegment } from "./SummarySegment";
 import { useTimelineUtils } from "@/hooks/use-timeline-utils";
-import { ReviewSegment } from "@/types/review";
+import { ReviewSegment, ReviewSeverity } from "@/types/review";
 import { isMobile } from "react-device-detect";
 
 export type SummaryTimelineProps = {
@@ -17,6 +17,7 @@ export type SummaryTimelineProps = {
   timelineEnd: number;
   segmentDuration: number;
   events: ReviewSegment[];
+  severityType: ReviewSeverity;
 };
 
 export function SummaryTimeline({
@@ -25,6 +26,7 @@ export function SummaryTimeline({
   timelineEnd,
   segmentDuration,
   events,
+  severityType,
 }: SummaryTimelineProps) {
   const summaryTimelineRef = useRef<HTMLDivElement>(null);
   const visibleSectionRef = useRef<HTMLDivElement>(null);
@@ -34,6 +36,8 @@ export function SummaryTimeline({
   const [scrollStartPosition, setScrollStartPosition] = useState<number>(0);
   const [initialReviewTimelineScrollTop, setInitialReviewTimelineScrollTop] =
     useState<number>(0);
+
+  const observer = useRef<ResizeObserver | null>(null);
 
   const { alignStartDateToTimeline } = useTimelineUtils(segmentDuration);
 
@@ -62,6 +66,7 @@ export function SummaryTimeline({
             segmentDuration={segmentDuration}
             segmentTime={segmentTime}
             segmentHeight={segmentHeight}
+            severityType={severityType}
           />
         );
       });
@@ -72,6 +77,7 @@ export function SummaryTimeline({
     events,
     reviewTimelineDuration,
     segmentHeight,
+    severityType,
   ]);
 
   const segments = useMemo(
@@ -86,34 +92,73 @@ export function SummaryTimeline({
       reviewTimelineDuration,
       segmentHeight,
       generateSegments,
+      severityType,
     ],
   );
+
+  const setVisibleSectionStyles = useCallback(() => {
+    if (
+      reviewTimelineRef.current &&
+      summaryTimelineRef.current &&
+      visibleSectionRef.current
+    ) {
+      const content = reviewTimelineRef.current;
+      const summary = summaryTimelineRef.current;
+      const {
+        clientHeight: reviewTimelineVisibleHeight,
+        scrollHeight: reviewTimelineFullHeight,
+        scrollTop: scrolled,
+      } = content;
+      const { clientHeight: summaryTimelineVisibleHeight } = summary;
+
+      visibleSectionRef.current.style.top = `${
+        summaryTimelineVisibleHeight * (scrolled / reviewTimelineFullHeight)
+      }px`;
+      visibleSectionRef.current.style.height = `${
+        reviewTimelineVisibleHeight *
+        (reviewTimelineVisibleHeight / reviewTimelineFullHeight)
+      }px`;
+    }
+  }, [reviewTimelineRef, summaryTimelineRef, visibleSectionRef]);
 
   useEffect(() => {
     if (reviewTimelineRef.current && summaryTimelineRef.current) {
       const content = reviewTimelineRef.current;
-      const summary = summaryTimelineRef.current;
 
       const handleScroll = () => {
-        const {
-          clientHeight: reviewTimelineVisibleHeight,
-          scrollHeight: reviewTimelineFullHeight,
-          scrollTop: scrolled,
-        } = content;
-        const { clientHeight: summaryTimelineVisibleHeight } = summary;
-
-        if (visibleSectionRef.current) {
-          visibleSectionRef.current.style.top = `${summaryTimelineVisibleHeight * (scrolled / reviewTimelineFullHeight)}px`;
-          visibleSectionRef.current.style.height = `${reviewTimelineVisibleHeight * (reviewTimelineVisibleHeight / reviewTimelineFullHeight)}px`;
-        }
+        setVisibleSectionStyles();
       };
 
+      // Set initial styles
+      setVisibleSectionStyles();
+
+      observer.current = new ResizeObserver(() => {
+        setVisibleSectionStyles();
+        if (summaryTimelineRef.current) {
+          const { clientHeight: summaryTimelineVisibleHeight } =
+            summaryTimelineRef.current;
+
+          setSegmentHeight(
+            summaryTimelineVisibleHeight /
+              (reviewTimelineDuration / segmentDuration),
+          );
+        }
+      });
+      observer.current.observe(content);
+
       content.addEventListener("scroll", handleScroll);
+
       return () => {
         content.removeEventListener("scroll", handleScroll);
       };
     }
-  }, [reviewTimelineRef, summaryTimelineRef]);
+  }, [
+    reviewTimelineRef,
+    summaryTimelineRef,
+    setVisibleSectionStyles,
+    reviewTimelineDuration,
+    segmentDuration,
+  ]);
 
   useEffect(() => {
     if (summaryTimelineRef.current) {

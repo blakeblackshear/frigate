@@ -11,6 +11,7 @@ import MotionSegment from "./MotionSegment";
 import { useTimelineUtils } from "@/hooks/use-timeline-utils";
 import { MotionData, ReviewSegment, ReviewSeverity } from "@/types/review";
 import ReviewTimeline from "./ReviewTimeline";
+import { isDesktop } from "react-device-detect";
 
 export type MotionReviewTimelineProps = {
   segmentDuration: number;
@@ -218,7 +219,7 @@ export function MotionReviewTimeline({
   const segmentsObserver = useRef<IntersectionObserver | null>(null);
   const selectedTimelineRef = timelineRef || internalTimelineRef;
   useEffect(() => {
-    if (selectedTimelineRef.current && segments) {
+    if (selectedTimelineRef.current && segments && isDesktop) {
       segmentsObserver.current = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {

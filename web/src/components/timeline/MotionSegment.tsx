@@ -5,7 +5,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import scrollIntoView from "scroll-into-view-if-needed";
 import { MinimapBounds, Tick, Timestamp } from "./segment-metadata";
 import { useMotionSegmentUtils } from "@/hooks/use-motion-segment-utils";
-import { isMobile } from "react-device-detect";
+import { isDesktop, isMobile } from "react-device-detect";
 import useTapUtils from "@/hooks/use-tap-utils";
 
 type MotionSegmentProps = {
@@ -155,6 +155,11 @@ export function MotionSegment({
       : ""
   }`;
 
+  const animationClassesSecondHalf = `motion-segment ${secondHalfSegmentWidth > 1 ? "hidden" : ""}
+    zoom-in-[0.2] ${secondHalfSegmentWidth < 5 ? "duration-200" : "duration-1000"}`;
+  const animationClassesFirstHalf = `motion-segment ${firstHalfSegmentWidth > 1 ? "hidden" : ""}
+    zoom-in-[0.2] ${firstHalfSegmentWidth < 5 ? "duration-200" : "duration-1000"}`;
+
   const severityColors: { [key: number]: string } = {
     1: reviewed
       ? "from-severity_motion-dimmed/50 to-severity_motion/50"
@@ -204,7 +209,7 @@ export function MotionSegment({
           <div className="flex justify-center">
             <div
               key={`${segmentKey}_motion_data_1`}
-              className={`motion-segment ${secondHalfSegmentWidth > 1 ? "hidden" : ""} zoom-in-[0.2] ${secondHalfSegmentWidth < 5 ? "duration-200" : "duration-1000"} h-[2px] rounded-full ${severity[0] != 0 ? "bg-motion_review-dimmed" : "bg-motion_review"}`}
+              className={`${isDesktop && animationClassesSecondHalf} h-[2px] rounded-full ${severity[0] != 0 ? "bg-motion_review-dimmed" : "bg-motion_review"}`}
               style={{
                 width: secondHalfSegmentWidth,
               }}
@@ -216,7 +221,7 @@ export function MotionSegment({
           <div className="flex justify-center">
             <div
               key={`${segmentKey}_motion_data_2`}
-              className={`motion-segment ${firstHalfSegmentWidth > 1 ? "hidden" : ""} zoom-in-[0.2] ${firstHalfSegmentWidth < 5 ? "duration-200" : "duration-1000"} h-[2px] rounded-full ${severity[0] != 0 ? "bg-motion_review-dimmed" : "bg-motion_review"}`}
+              className={`${isDesktop && animationClassesFirstHalf} h-[2px] rounded-full ${severity[0] != 0 ? "bg-motion_review-dimmed" : "bg-motion_review"}`}
               style={{
                 width: firstHalfSegmentWidth,
               }}
