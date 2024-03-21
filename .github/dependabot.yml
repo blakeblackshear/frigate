@@ -35,6 +35,6 @@ updates:
     schedule:
       interval: daily
     allow:
-      dependency-name: "@docusaurus/*"
+      - dependency-name: "@docusaurus/*"
     open-pull-requests-limit: 10
     target-branch: dev
