@@ -11,6 +11,7 @@ import EventSegment from "./EventSegment";
 import { useTimelineUtils } from "@/hooks/use-timeline-utils";
 import { ReviewSegment, ReviewSeverity } from "@/types/review";
 import ReviewTimeline from "./ReviewTimeline";
+import scrollIntoView from "scroll-into-view-if-needed";
 
 export type EventReviewTimelineProps = {
   segmentDuration: number;
@@ -60,6 +61,7 @@ export function EventReviewTimeline({
   const [isDragging, setIsDragging] = useState(false);
   const [exportStartPosition, setExportStartPosition] = useState(0);
   const [exportEndPosition, setExportEndPosition] = useState(0);
+  const [visibleThumbnails, setVisibleThumbnails] = useState<number[]>([]);
 
   const internalTimelineRef = useRef<HTMLDivElement>(null);
   const handlebarRef = useRef<HTMLDivElement>(null);
@@ -68,6 +70,9 @@ export function EventReviewTimeline({
   const exportStartTimeRef = useRef<HTMLDivElement>(null);
   const exportEndRef = useRef<HTMLDivElement>(null);
   const exportEndTimeRef = useRef<HTMLDivElement>(null);
+  const selectedTimelineRef = timelineRef || internalTimelineRef;
+
+  const observer = useRef<IntersectionObserver | null>(null);
 
   const timelineDuration = useMemo(
     () => timelineStart - timelineEnd,
@@ -77,7 +82,7 @@ export function EventReviewTimeline({
   const { alignStartDateToTimeline, alignEndDateToTimeline } = useTimelineUtils(
     segmentDuration,
     timelineDuration,
-    timelineRef || internalTimelineRef,
+    selectedTimelineRef,
   );
 
   const timelineStartAligned = useMemo(
@@ -103,7 +108,7 @@ export function EventReviewTimeline({
     handleMouseMove: handlebarMouseMove,
   } = useDraggableElement({
     contentRef,
-    timelineRef: timelineRef || internalTimelineRef,
+    timelineRef: selectedTimelineRef,
     draggableElementRef: handlebarRef,
     segmentDuration,
     showDraggableElement: showHandlebar,
@@ -122,7 +127,7 @@ export function EventReviewTimeline({
     handleMouseMove: exportStartMouseMove,
   } = useDraggableElement({
     contentRef,
-    timelineRef: timelineRef || internalTimelineRef,
+    timelineRef: selectedTimelineRef,
     draggableElementRef: exportStartRef,
     segmentDuration,
     showDraggableElement: showExportHandles,
@@ -143,7 +148,7 @@ export function EventReviewTimeline({
     handleMouseMove: exportEndMouseMove,
   } = useDraggableElement({
     contentRef,
-    timelineRef: timelineRef || internalTimelineRef,
+    timelineRef: selectedTimelineRef,
     draggableElementRef: exportEndRef,
     segmentDuration,
     showDraggableElement: showExportHandles,
@@ -216,9 +221,67 @@ export function EventReviewTimeline({
     }
   }, [isDragging, onHandlebarDraggingChange]);
 
+  useEffect(() => {
+    if (contentRef.current && segments) {
+      observer.current = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const segmentStartId =
+                entry.target.getAttribute("data-segment-start");
+              if (segmentStartId) {
+                setVisibleThumbnails((prevState) => [
+                  ...prevState,
+                  parseInt(segmentStartId),
+                ]);
+              }
+            } else {
+              const segmentStartId =
+                entry.target.getAttribute("data-segment-start");
+              if (segmentStartId) {
+                setVisibleThumbnails((prevState) =>
+                  prevState.filter(
+                    (timestamp) => timestamp !== parseInt(segmentStartId),
+                  ),
+                );
+              }
+            }
+          });
+        },
+        { threshold: 0.5 },
+      );
+
+      const reviewItems = contentRef.current.querySelectorAll(".review-item");
+      reviewItems.forEach((item) => {
+        observer.current?.observe(item);
+      });
+    }
+
+    return () => {
+      observer.current?.disconnect();
+    };
+  }, [contentRef, segments]);
+
+  useEffect(() => {
+    if (
+      selectedTimelineRef.current &&
+      segments &&
+      visibleThumbnails?.length > 0 &&
+      !showMinimap
+    ) {
+      const element = selectedTimelineRef.current?.querySelector(
+        `[data-segment-id="${Math.max(...visibleThumbnails)}"]`,
+      );
+      scrollIntoView(element as HTMLDivElement, {
+        scrollMode: "if-needed",
+        behavior: "smooth",
+      });
+    }
+  }, [visibleThumbnails, selectedTimelineRef, segments, showMinimap]);
+
   return (
     <ReviewTimeline
-      timelineRef={timelineRef || internalTimelineRef}
+      timelineRef={selectedTimelineRef}
       handlebarRef={handlebarRef}
       handlebarTimeRef={handlebarTimeRef}
       handlebarMouseMove={handlebarMouseMove}

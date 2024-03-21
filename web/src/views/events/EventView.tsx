@@ -508,7 +508,7 @@ function DetectionReview({
                   data-segment-start={
                     alignStartDateToTimeline(value.start_time) - segmentDuration
                   }
-                  className={`outline outline-offset-1 rounded-lg shadow-none transition-all my-1 md:my-0 ${selected ? `outline-4 shadow-[0_0_6px_1px] outline-severity_${value.severity} shadow-severity_${value.severity}` : "outline-0 duration-500"}`}
+                  className={`review-item outline outline-offset-1 rounded-lg shadow-none transition-all my-1 md:my-0 ${selected ? `outline-4 shadow-[0_0_6px_1px] outline-severity_${value.severity} shadow-severity_${value.severity}` : "outline-0 duration-500"}`}
                 >
                   <div className="aspect-video rounded-lg overflow-hidden">
                     <PreviewThumbnailPlayer
