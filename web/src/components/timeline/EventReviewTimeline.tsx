@@ -222,7 +222,7 @@ export function EventReviewTimeline({
   }, [isDragging, onHandlebarDraggingChange]);
 
   useEffect(() => {
-    if (contentRef.current && segments) {
+    if (contentRef.current && segments && !showMinimap) {
       observer.current = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
@@ -260,7 +260,7 @@ export function EventReviewTimeline({
     return () => {
       observer.current?.disconnect();
     };
-  }, [contentRef, segments]);
+  }, [contentRef, segments, showMinimap]);
 
   useEffect(() => {
     if (
