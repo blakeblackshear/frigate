@@ -147,6 +147,8 @@ export function RecordingView({
         } else {
           updateSelectedSegment(currentTime, true);
         }
+      } else {
+        mainControllerRef.current?.play();
       }
     }
     // we only want to seek when current time doesn't match the player update time
