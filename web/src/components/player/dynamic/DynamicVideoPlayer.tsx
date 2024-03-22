@@ -165,33 +165,29 @@ export default function DynamicVideoPlayer({
   }, [controller, recordings]);
 
   return (
-    <div className={`relative ${className ?? ""} cursor-pointer`}>
-      <div
-        className={`w-full relative ${isScrubbing || isLoading ? "hidden" : "visible"}`}
-      >
-        <HlsVideoPlayer
-          className={`${grow}`}
-          videoRef={playerRef}
-          currentSource={source}
-          onTimeUpdate={onTimeUpdate}
-          onPlayerLoaded={onPlayerLoaded}
-          onClipEnded={onClipEnded}
-          onPlaying={() => {
-            if (isScrubbing) {
-              playerRef.current?.pause();
-            }
+    <div className={`relative ${className ?? ""}`}>
+      <HlsVideoPlayer
+        className={`w-full ${isScrubbing || isLoading ? "hidden" : "visible"} ${grow ?? ""}`}
+        videoRef={playerRef}
+        currentSource={source}
+        onTimeUpdate={onTimeUpdate}
+        onPlayerLoaded={onPlayerLoaded}
+        onClipEnded={onClipEnded}
+        onPlaying={() => {
+          if (isScrubbing) {
+            playerRef.current?.pause();
+          }
 
-            setIsLoading(false);
-          }}
-        >
-          {config && focusedItem && (
-            <TimelineEventOverlay
-              timeline={focusedItem}
-              cameraConfig={config.cameras[camera]}
-            />
-          )}
-        </HlsVideoPlayer>
-      </div>
+          setIsLoading(false);
+        }}
+      >
+        {config && focusedItem && (
+          <TimelineEventOverlay
+            timeline={focusedItem}
+            cameraConfig={config.cameras[camera]}
+          />
+        )}
+      </HlsVideoPlayer>
       <PreviewPlayer
         className={`${isScrubbing || isLoading ? "visible" : "hidden"} ${grow}`}
         camera={camera}
