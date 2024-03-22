@@ -10,7 +10,7 @@ import Hls from "hls.js";
 import { isDesktop, isMobile } from "react-device-detect";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
-import VideoControls from "./PlayerControls";
+import VideoControls from "./VideoControls";
 
 const HLS_MIME_TYPE = "application/vnd.apple.mpegurl" as const;
 const unsupportedErrorCodes = [
@@ -210,6 +210,26 @@ export default function HlsVideoPlayer({
         show={controls}
         controlsOpen={controlsOpen}
         setControlsOpen={setControlsOpen}
+        onPlayPause={(play) => {
+          if (!videoRef.current) {
+            return;
+          }
+
+          if (play) {
+            videoRef.current.play();
+          } else {
+            videoRef.current.pause();
+          }
+        }}
+        onSeek={(diff) => {
+          const currentTime = videoRef.current?.currentTime;
+
+          if (!videoRef.current || !currentTime) {
+            return;
+          }
+
+          videoRef.current.currentTime = Math.max(0, currentTime + diff);
+        }}
       />
       {children}
     </div>

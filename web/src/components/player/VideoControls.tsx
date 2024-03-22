@@ -32,12 +32,14 @@ const CONTROLS_DEFAULT: VideoControls = {
 
 type VideoControlsProps = {
   className?: string;
-  video: HTMLVideoElement | null;
+  video?: HTMLVideoElement | null;
   features?: VideoControls;
   isPlaying: boolean;
   show: boolean;
-  controlsOpen: boolean;
-  setControlsOpen: (open: boolean) => void;
+  controlsOpen?: boolean;
+  setControlsOpen?: (open: boolean) => void;
+  onPlayPause: (play: boolean) => void;
+  onSeek: (diff: number) => void;
 };
 export default function VideoControls({
   className,
@@ -47,6 +49,8 @@ export default function VideoControls({
   show,
   controlsOpen,
   setControlsOpen,
+  onPlayPause,
+  onSeek,
 }: VideoControlsProps) {
   const playbackRates = useMemo(() => {
     if (isSafari) {
@@ -59,48 +63,25 @@ export default function VideoControls({
   const onReplay = useCallback(
     (e: React.MouseEvent<SVGElement>) => {
       e.stopPropagation();
-
-      const currentTime = video?.currentTime;
-
-      if (!video || !currentTime) {
-        return;
-      }
-
-      video.currentTime = Math.max(0, currentTime - 10);
+      onSeek(-10);
     },
-    [video],
+    [onSeek],
   );
 
   const onSkip = useCallback(
     (e: React.MouseEvent<SVGElement>) => {
       e.stopPropagation();
-
-      const currentTime = video?.currentTime;
-
-      if (!video || !currentTime) {
-        return;
-      }
-
-      video.currentTime = currentTime + 10;
+      onSeek(10);
     },
-    [video],
+    [onSeek],
   );
 
   const onTogglePlay = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       e.stopPropagation();
-
-      if (!video) {
-        return;
-      }
-
-      if (isPlaying) {
-        video.pause();
-      } else {
-        video.play();
-      }
+      onPlayPause(!isPlaying);
     },
-    [isPlaying, video],
+    [isPlaying, onPlayPause],
   );
 
   // volume control
@@ -119,7 +100,7 @@ export default function VideoControls({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [video?.volume, video?.muted]);
 
-  if (!video || !show) {
+  if (!show) {
     return;
   }
 
@@ -127,7 +108,7 @@ export default function VideoControls({
     <div
       className={`px-4 py-2 flex justify-between items-center gap-8 text-white z-50 bg-black bg-opacity-60 rounded-lg ${className ?? ""}`}
     >
-      {features.volume && (
+      {video && features.volume && (
         <div className="flex justify-normal items-center gap-2">
           <VolumeIcon
             className="size-5"
@@ -161,17 +142,19 @@ export default function VideoControls({
       {features.seek && (
         <MdForward10 className="size-5 cursor-pointer" onClick={onSkip} />
       )}
-      {features.playbackRate && (
+      {video && features.playbackRate && (
         <DropdownMenu
-          open={controlsOpen}
+          open={controlsOpen == true}
           onOpenChange={(open) => {
-            setControlsOpen(open);
+            if (setControlsOpen) {
+              setControlsOpen(open);
+            }
           }}
         >
           <DropdownMenuTrigger>{`${video.playbackRate}x`}</DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuRadioGroup
-              onValueChange={(rate) => (video.playbackRate = parseInt(rate))}
+              onValueChange={(rate) => (video.playbackRate = parseFloat(rate))}
             >
               {playbackRates.map((rate) => (
                 <DropdownMenuRadioItem key={rate} value={rate.toString()}>
