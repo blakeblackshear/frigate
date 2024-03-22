@@ -42,6 +42,10 @@ export class DynamicVideoController {
     }
   }
 
+  play() {
+    this.playerController.play();
+  }
+
   pause() {
     this.playerController.pause();
   }
