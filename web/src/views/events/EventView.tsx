@@ -802,7 +802,7 @@ function MotionReview({
       </div>
 
       <VideoControls
-        className="absolute bottom-16 left-1/2 -translate-x-1/2 bg-secondary"
+        className="absolute bottom-16 left-1/2 -translate-x-1/2"
         features={{
           volume: false,
           seek: true,
