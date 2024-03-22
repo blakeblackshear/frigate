@@ -171,7 +171,7 @@ export default function PreviewThumbnailPlayer({
       {...swipeHandlers}
     >
       {playingBack && (
-        <div className="absolute inset-0 animate-in fade-in">
+        <div className="absolute inset-0 animate-in fade-in pointer-events-none">
           <PreviewContent
             review={review}
             relevantPreview={relevantPreview}
@@ -486,10 +486,10 @@ function VideoPreview({
   );
 
   return (
-    <div className="relative size-full aspect-video bg-black">
+    <div className="relative size-full aspect-video bg-black pointer-events-none">
       <video
         ref={playerRef}
-        className="size-full aspect-video bg-black"
+        className="size-full aspect-video bg-black pointer-events-none"
         autoPlay
         playsInline
         preload="auto"
@@ -500,7 +500,7 @@ function VideoPreview({
       </video>
       <Slider
         ref={sliderRef}
-        className="absolute inset-x-0 bottom-0 z-30"
+        className="absolute inset-x-0 bottom-0 z-30 pointer-events-none"
         value={[progress]}
         onValueChange={onManualSeek}
         onValueCommit={onStopManualSeek}
@@ -654,7 +654,7 @@ function InProgressPreview({
   }
 
   return (
-    <div className="relative size-full flex items-center bg-black">
+    <div className="relative size-full flex items-center bg-black pointer-events-none">
       <img
         className="size-full object-contain"
         src={`${apiHost}api/preview/${previewFrames[key]}/thumbnail.webp`}
@@ -681,8 +681,8 @@ function PreviewPlaceholder({ imgLoaded }: { imgLoaded: boolean }) {
   }
 
   return isSafari ? (
-    <div className={`absolute inset-0 bg-gray-300`} />
+    <div className={`absolute inset-0 bg-gray-300 pointer-events-none`} />
   ) : (
-    <Skeleton className={`absolute inset-0`} />
+    <Skeleton className={`absolute inset-0 pointer-events-none`} />
   );
 }
