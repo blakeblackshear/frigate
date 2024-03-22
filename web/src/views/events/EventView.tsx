@@ -811,7 +811,17 @@ function MotionReview({
         isPlaying={playing}
         onPlayPause={setPlaying}
         onSeek={(diff) => {
+          const wasPlaying = playing;
+
+          if (wasPlaying) {
+            setPlaying(false);
+          }
+
           setCurrentTime(currentTime + diff);
+
+          if (wasPlaying) {
+            setTimeout(() => setPlaying(true), 100);
+          }
         }}
         show={currentTime < timeRange.before - 4}
       />

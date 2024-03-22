@@ -500,7 +500,7 @@ function VideoPreview({
       </video>
       <Slider
         ref={sliderRef}
-        className="absolute inset-x-0 bottom-0 z-30 pointer-events-none"
+        className="absolute inset-x-0 bottom-0 z-30"
         value={[progress]}
         onValueChange={onManualSeek}
         onValueCommit={onStopManualSeek}
