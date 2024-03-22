@@ -147,7 +147,7 @@ export function RecordingView({
         } else {
           updateSelectedSegment(currentTime, true);
         }
-      } else {
+      } else if (playerTime != currentTime) {
         mainControllerRef.current?.play();
       }
     }

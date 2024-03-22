@@ -353,7 +353,7 @@ function PreviewFramesPlayer({
 
     return previewFrames.map((frame) =>
       // @ts-expect-error we know this item will exist
-      parseFloat(frame.split("-").slice(undefined, -5)),
+      parseFloat(frame.split("-").at(-1).slice(undefined, -5)),
     );
   }, [previewFrames]);
 

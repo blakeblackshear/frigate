@@ -38,6 +38,7 @@ import PreviewPlayer, {
 } from "@/components/player/PreviewPlayer";
 import SummaryTimeline from "@/components/timeline/SummaryTimeline";
 import { RecordingStartingPoint } from "@/types/record";
+import VideoControls from "@/components/player/VideoControls";
 
 type EventViewProps = {
   reviews?: ReviewSegment[];
@@ -678,6 +679,7 @@ function MotionReview({
   );
 
   const [scrubbing, setScrubbing] = useState(false);
+  const [playing, setPlaying] = useState(false);
 
   // move to next clip
 
@@ -703,6 +705,33 @@ function MotionReview({
       controller.scrubToTimestamp(currentTime);
     });
   }, [currentTime, currentTimeRange, timeRangeSegments]);
+
+  // playback
+
+  useEffect(() => {
+    if (!playing) {
+      return;
+    }
+
+    const startTime = currentTime;
+    let counter = 0;
+    const intervalId = setInterval(() => {
+      counter += 0.5;
+
+      if (startTime + counter >= timeRange.before) {
+        setPlaying(false);
+        return;
+      }
+
+      setCurrentTime(startTime + counter);
+    }, 60);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+    // do not render when current time changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playing]);
 
   if (!relevantPreviews) {
     return <ActivityIndicator />;
@@ -762,9 +791,40 @@ function MotionReview({
           motion_events={motionData ?? []}
           severityType="significant_motion"
           contentRef={contentRef}
-          onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
+          onHandlebarDraggingChange={(scrubbing) => {
+            if (playing && scrubbing) {
+              setPlaying(false);
+            }
+
+            setScrubbing(scrubbing);
+          }}
         />
       </div>
+
+      <VideoControls
+        className="absolute bottom-16 left-1/2 -translate-x-1/2"
+        features={{
+          volume: false,
+          seek: true,
+          playbackRate: false,
+        }}
+        isPlaying={playing}
+        onPlayPause={setPlaying}
+        onSeek={(diff) => {
+          const wasPlaying = playing;
+
+          if (wasPlaying) {
+            setPlaying(false);
+          }
+
+          setCurrentTime(currentTime + diff);
+
+          if (wasPlaying) {
+            setTimeout(() => setPlaying(true), 100);
+          }
+        }}
+        show={currentTime < timeRange.before - 4}
+      />
     </>
   );
 }

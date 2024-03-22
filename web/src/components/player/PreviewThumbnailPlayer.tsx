@@ -171,7 +171,7 @@ export default function PreviewThumbnailPlayer({
       {...swipeHandlers}
     >
       {playingBack && (
-        <div className="absolute inset-0 animate-in fade-in pointer-events-none">
+        <div className="absolute inset-0 animate-in fade-in">
           <PreviewContent
             review={review}
             relevantPreview={relevantPreview}
@@ -486,7 +486,7 @@ function VideoPreview({
   );
 
   return (
-    <div className="relative size-full aspect-video bg-black pointer-events-none">
+    <div className="relative size-full aspect-video bg-black">
       <video
         ref={playerRef}
         className="size-full aspect-video bg-black pointer-events-none"
@@ -500,7 +500,7 @@ function VideoPreview({
       </video>
       <Slider
         ref={sliderRef}
-        className="absolute inset-x-0 bottom-0 z-30 pointer-events-none"
+        className="absolute inset-x-0 bottom-0 z-30"
         value={[progress]}
         onValueChange={onManualSeek}
         onValueCommit={onStopManualSeek}
@@ -654,9 +654,9 @@ function InProgressPreview({
   }
 
   return (
-    <div className="relative size-full flex items-center bg-black pointer-events-none">
+    <div className="relative size-full flex items-center bg-black">
       <img
-        className="size-full object-contain"
+        className="size-full object-contain pointer-events-none"
         src={`${apiHost}api/preview/${previewFrames[key]}/thumbnail.webp`}
         onLoad={handleLoad}
       />
