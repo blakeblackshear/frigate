@@ -22,6 +22,7 @@ type HlsVideoPlayerProps = {
   className: string;
   children?: ReactNode;
   videoRef: MutableRefObject<HTMLVideoElement | null>;
+  visible: boolean;
   currentSource: string;
   onClipEnded?: () => void;
   onPlayerLoaded?: () => void;
@@ -32,6 +33,7 @@ export default function HlsVideoPlayer({
   className,
   children,
   videoRef,
+  visible,
   currentSource,
   onClipEnded,
   onPlayerLoaded,
@@ -137,7 +139,7 @@ export default function HlsVideoPlayer({
 
   return (
     <div
-      className={`relative`}
+      className={`relative ${visible ? "visible" : "hidden"}`}
       onMouseOver={
         isDesktop
           ? () => {

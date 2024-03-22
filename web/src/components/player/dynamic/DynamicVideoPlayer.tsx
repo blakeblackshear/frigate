@@ -167,8 +167,9 @@ export default function DynamicVideoPlayer({
   return (
     <div className={`relative ${className ?? ""}`}>
       <HlsVideoPlayer
-        className={`w-full ${isScrubbing || isLoading ? "hidden" : "visible"} ${grow ?? ""}`}
+        className={`w-full ${grow ?? ""}`}
         videoRef={playerRef}
+        visible={!(isScrubbing || isLoading)}
         currentSource={source}
         onTimeUpdate={onTimeUpdate}
         onPlayerLoaded={onPlayerLoaded}
