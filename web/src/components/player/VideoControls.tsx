@@ -17,6 +17,7 @@ import {
   MdVolumeUp,
 } from "react-icons/md";
 import { Slider } from "../ui/slider-volume";
+import useKeyboardListener from "@/hooks/use-keyboard-listener";
 
 type VideoControls = {
   volume?: boolean;
@@ -99,6 +100,40 @@ export default function VideoControls({
     // only update when specific fields change
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [video?.volume, video?.muted]);
+
+  const onKeyboardShortcut = useCallback(
+    (key: string, down: boolean, repeat: boolean) => {
+      switch (key) {
+        case "ArrowLeft":
+          if (down) {
+            onSeek(-10);
+          }
+          break;
+        case "ArrowRight":
+          if (down) {
+            onSeek(10);
+          }
+          break;
+        case "m":
+          if (down && !repeat && video) {
+            video.muted = !video.muted;
+          }
+          break;
+        case " ":
+          if (down) {
+            onPlayPause(!isPlaying);
+          }
+          break;
+      }
+    },
+    // only update when preview only changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [video, isPlaying, onSeek],
+  );
+  useKeyboardListener(
+    ["ArrowLeft", "ArrowRight", "m", " "],
+    onKeyboardShortcut,
+  );
 
   if (!show) {
     return;
