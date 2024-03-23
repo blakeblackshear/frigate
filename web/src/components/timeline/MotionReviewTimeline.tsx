@@ -21,6 +21,7 @@ export type MotionReviewTimelineProps = {
   showHandlebar?: boolean;
   handlebarTime?: number;
   setHandlebarTime?: React.Dispatch<React.SetStateAction<number>>;
+  motionOnly?: boolean;
   showMinimap?: boolean;
   minimapStartTime?: number;
   minimapEndTime?: number;
@@ -45,6 +46,7 @@ export function MotionReviewTimeline({
   showHandlebar = false,
   handlebarTime,
   setHandlebarTime,
+  motionOnly = false,
   showMinimap = false,
   minimapStartTime,
   minimapEndTime,
@@ -113,6 +115,7 @@ export function MotionReviewTimeline({
     draggableElementTime: handlebarTime,
     setDraggableElementTime: setHandlebarTime,
     timelineDuration,
+    timelineCollapsed: motionOnly,
     timelineStartAligned,
     isDragging,
     setIsDragging,
@@ -176,6 +179,7 @@ export function MotionReviewTimeline({
           segmentDuration={segmentDuration}
           segmentTime={segmentTime}
           timestampSpread={timestampSpread}
+          motionOnly={motionOnly}
           showMinimap={showMinimap}
           minimapStartTime={minimapStartTime}
           minimapEndTime={minimapEndTime}
@@ -195,6 +199,7 @@ export function MotionReviewTimeline({
     minimapEndTime,
     events,
     motion_events,
+    motionOnly,
   ]);
 
   const segments = useMemo(
@@ -211,6 +216,7 @@ export function MotionReviewTimeline({
       minimapEndTime,
       events,
       motion_events,
+      motionOnly,
     ],
   );
 

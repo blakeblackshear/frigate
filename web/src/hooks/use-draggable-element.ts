@@ -15,6 +15,7 @@ type DraggableElementProps = {
   setDraggableElementTime?: React.Dispatch<React.SetStateAction<number>>;
   draggableElementTimeRef: React.MutableRefObject<HTMLDivElement | null>;
   timelineDuration: number;
+  timelineCollapsed?: boolean;
   timelineStartAligned: number;
   isDragging: boolean;
   setIsDragging: React.Dispatch<React.SetStateAction<boolean>>;
@@ -33,6 +34,7 @@ function useDraggableElement({
   setDraggableElementTime,
   draggableElementTimeRef,
   timelineDuration,
+  timelineCollapsed,
   timelineStartAligned,
   isDragging,
   setIsDragging,
@@ -40,6 +42,7 @@ function useDraggableElement({
 }: DraggableElementProps) {
   const [clientYPosition, setClientYPosition] = useState<number | null>(null);
   const [initialClickAdjustment, setInitialClickAdjustment] = useState(0);
+  const [segments, setSegments] = useState<HTMLDivElement[]>([]);
   const { alignStartDateToTimeline, getCumulativeScrollTop } = useTimelineUtils(
     {
       segmentDuration: segmentDuration,
@@ -101,7 +104,7 @@ function useDraggableElement({
       } else if (e.nativeEvent instanceof MouseEvent) {
         clientY = e.nativeEvent.clientY;
       }
-      if (clientY && draggableElementRef.current && isDesktop) {
+      if (clientY && draggableElementRef.current) {
         const draggableElementRect =
           draggableElementRef.current.getBoundingClientRect();
         if (!isDragging) {
@@ -204,6 +207,12 @@ function useDraggableElement({
   );
 
   useEffect(() => {
+    if (timelineRef.current) {
+      setSegments(Array.from(timelineRef.current.querySelectorAll(".segment")));
+    }
+  }, [timelineRef, segmentDuration, timelineDuration, timelineCollapsed]);
+
+  useEffect(() => {
     let animationFrameId: number | null = null;
 
     const handleScroll = () => {
@@ -211,13 +220,11 @@ function useDraggableElement({
         timelineRef.current &&
         showDraggableElement &&
         isDragging &&
-        clientYPosition
+        clientYPosition &&
+        segments
       ) {
-        const {
-          scrollHeight: timelineHeight,
-          scrollTop: scrolled,
-          offsetTop: timelineTop,
-        } = timelineRef.current;
+        const { scrollHeight: timelineHeight, scrollTop: scrolled } =
+          timelineRef.current;
 
         const segmentHeight =
           timelineHeight / (timelineDuration / segmentDuration);
@@ -235,22 +242,53 @@ function useDraggableElement({
           ? timestampToPixels(draggableElementLatestTime)
           : segmentHeight * 2 + scrolled;
 
+        const timelineRect = timelineRef.current.getBoundingClientRect();
+        const timelineTopAbsolute = timelineRect.top;
+
         const newElementPosition = Math.min(
           elementEarliest,
           Math.max(
             elementLatest,
             // current Y position
             clientYPosition -
-              timelineTop +
+              timelineTopAbsolute +
               parentScrollTop -
               initialClickAdjustment,
           ),
         );
 
-        const segmentIndex = Math.floor(newElementPosition / segmentHeight);
-        const segmentStartTime = alignStartDateToTimeline(
-          timelineStartAligned - segmentIndex * segmentDuration,
-        );
+        if (
+          newElementPosition >= elementEarliest ||
+          newElementPosition <= elementLatest
+        ) {
+          return;
+        }
+
+        let targetSegmentId = 0;
+        let offset = 0;
+
+        segments.forEach((segmentElement: HTMLDivElement) => {
+          const rect = segmentElement.getBoundingClientRect();
+          const segmentTop =
+            rect.top + scrolled - timelineTopAbsolute - segmentHeight;
+          const segmentBottom =
+            rect.bottom + scrolled - timelineTopAbsolute - segmentHeight;
+
+          // Check if handlebar position falls within the segment bounds
+          if (
+            newElementPosition >= segmentTop &&
+            newElementPosition <= segmentBottom
+          ) {
+            targetSegmentId = parseFloat(
+              segmentElement.getAttribute("data-segment-id") || "0",
+            );
+            offset = Math.min(
+              segmentBottom - newElementPosition,
+              segmentHeight,
+            );
+            return;
+          }
+        });
 
         if (draggingAtTopEdge || draggingAtBottomEdge) {
           let newPosition = clientYPosition;
@@ -267,17 +305,15 @@ function useDraggableElement({
         }
 
         updateDraggableElementPosition(
-          newElementPosition - segmentHeight,
-          segmentStartTime,
+          newElementPosition,
+          targetSegmentId,
           false,
           false,
         );
 
         if (setDraggableElementTime) {
           setDraggableElementTime(
-            timelineStartAligned -
-              ((newElementPosition - segmentHeight / 2 - 2) / segmentHeight) *
-                segmentDuration,
+            targetSegmentId + segmentDuration * (offset / segmentHeight),
           );
         }
 
@@ -321,7 +357,8 @@ function useDraggableElement({
       draggableElementRef.current &&
       showDraggableElement &&
       draggableElementTime &&
-      !isDragging
+      !isDragging &&
+      segments.length > 0
     ) {
       const { scrollHeight: timelineHeight, scrollTop: scrolled } =
         timelineRef.current;
@@ -329,29 +366,60 @@ function useDraggableElement({
       const segmentHeight =
         timelineHeight / (timelineDuration / segmentDuration);
 
-      const parentScrollTop = getCumulativeScrollTop(timelineRef.current);
+      const alignedSegmentTime = alignStartDateToTimeline(draggableElementTime);
 
-      const newElementPosition =
-        ((timelineStartAligned - draggableElementTime) / segmentDuration) *
-          segmentHeight +
-        parentScrollTop -
-        scrolled -
-        2; // height of draggableElement horizontal line
-
-      updateDraggableElementPosition(
-        newElementPosition,
-        draggableElementTime,
-        true,
-        true,
+      let segmentElement = timelineRef.current.querySelector(
+        `[data-segment-id="${alignedSegmentTime}"]`,
       );
+
+      if (!segmentElement) {
+        // segment not found, maybe we collapsed over a collapsible segment
+        let searchTime = alignedSegmentTime;
+        while (searchTime >= timelineStartAligned - timelineDuration) {
+          // Decrement currentTime by segmentDuration
+          searchTime -= segmentDuration;
+          segmentElement = timelineRef.current.querySelector(
+            `[data-segment-id="${searchTime}"]`,
+          );
+
+          if (segmentElement) {
+            // segmentElement found
+            break;
+          }
+        }
+      }
+
+      if (segmentElement) {
+        const timelineRect = timelineRef.current.getBoundingClientRect();
+        const timelineTopAbsolute = timelineRect.top;
+        const rect = segmentElement.getBoundingClientRect();
+        const segmentTop =
+          rect.top + scrolled - timelineTopAbsolute - segmentHeight / 2;
+        const offset =
+          ((draggableElementTime - alignedSegmentTime) / segmentDuration) *
+          segmentHeight;
+        const newElementPosition = segmentTop - offset;
+
+        updateDraggableElementPosition(
+          newElementPosition,
+          draggableElementTime,
+          true,
+          true,
+        );
+      }
     }
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     draggableElementTime,
+    timelineDuration,
+    segmentDuration,
     showDraggableElement,
     draggableElementRef,
     timelineStartAligned,
+    timelineRef,
+    timelineCollapsed,
+    segments,
   ]);
 
   return { handleMouseDown, handleMouseUp, handleMouseMove };

@@ -196,6 +196,8 @@ export default function EventView({
     [reviewItems],
   );
 
+  const [motionOnly, setMotionOnly] = useState(false);
+
   if (!config) {
     return <ActivityIndicator />;
   }
@@ -253,6 +255,9 @@ export default function EventView({
             reviewSummary={reviewSummary}
             filter={filter}
             onUpdateFilter={updateFilter}
+            severity={severity}
+            motionOnly={motionOnly}
+            setMotionOnly={setMotionOnly}
           />
         ) : (
           <ReviewActionGroup
@@ -290,6 +295,7 @@ export default function EventView({
             timeRange={timeRange}
             startTime={startTime}
             filter={filter}
+            motionOnly={motionOnly}
             onOpenRecording={onOpenRecording}
           />
         )}
@@ -603,6 +609,7 @@ type MotionReviewProps = {
   timeRange: { before: number; after: number };
   startTime?: number;
   filter?: ReviewFilter;
+  motionOnly?: boolean;
   onOpenRecording: (data: RecordingStartingPoint) => void;
 };
 function MotionReview({
@@ -612,6 +619,7 @@ function MotionReview({
   timeRange,
   startTime,
   filter,
+  motionOnly = false,
   onOpenRecording,
 }: MotionReviewProps) {
   const segmentDuration = 30;
@@ -784,6 +792,7 @@ function MotionReview({
           timestampSpread={15}
           timelineStart={timeRangeSegments.end}
           timelineEnd={timeRangeSegments.start}
+          motionOnly={motionOnly}
           showHandlebar
           handlebarTime={currentTime}
           setHandlebarTime={setCurrentTime}

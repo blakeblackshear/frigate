@@ -236,10 +236,12 @@ export function EventReviewTimeline({
       const element = selectedTimelineRef.current?.querySelector(
         `[data-segment-id="${Math.max(...alignedVisibleTimestamps)}"]`,
       );
-      scrollIntoView(element as HTMLDivElement, {
-        scrollMode: "if-needed",
-        behavior: "smooth",
-      });
+      if (element) {
+        scrollIntoView(element, {
+          scrollMode: "if-needed",
+          behavior: "smooth",
+        });
+      }
     }
   }, [
     selectedTimelineRef,
