@@ -8,6 +8,7 @@ import { Preview } from "@/types/preview";
 import PreviewPlayer, { PreviewController } from "../PreviewPlayer";
 import { DynamicVideoController } from "./DynamicVideoController";
 import HlsVideoPlayer from "../HlsVideoPlayer";
+import { Timeline } from "@/types/timeline";
 
 /**
  * Dynamically switches between video playback and scrubbing preview player.

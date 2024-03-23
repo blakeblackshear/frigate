@@ -1,4 +1,4 @@
-type Timeline = {
+export type Timeline = {
   camera: string;
   timestamp: number;
   data: {
