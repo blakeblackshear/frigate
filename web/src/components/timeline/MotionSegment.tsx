@@ -14,6 +14,7 @@ type MotionSegmentProps = {
   segmentTime: number;
   segmentDuration: number;
   timestampSpread: number;
+  motionOnly: boolean;
   showMinimap: boolean;
   minimapStartTime?: number;
   minimapEndTime?: number;
@@ -26,6 +27,7 @@ export function MotionSegment({
   segmentTime,
   segmentDuration,
   timestampSpread,
+  motionOnly,
   showMinimap,
   minimapStartTime,
   minimapEndTime,
@@ -180,79 +182,96 @@ export function MotionSegment({
   }, [segmentTime, setHandlebarTime]);
 
   return (
-    <div
-      key={segmentKey}
-      data-segment-id={segmentKey}
-      className={`segment ${firstHalfSegmentWidth > 1 || secondHalfSegmentWidth > 1 ? "has-data" : ""} ${segmentClasses}`}
-      onClick={segmentClick}
-      onTouchEnd={(event) => handleTouchStart(event, segmentClick)}
-    >
-      <MinimapBounds
-        isFirstSegmentInMinimap={isFirstSegmentInMinimap}
-        isLastSegmentInMinimap={isLastSegmentInMinimap}
-        alignedMinimapStartTime={alignedMinimapStartTime}
-        alignedMinimapEndTime={alignedMinimapEndTime}
-        firstMinimapSegmentRef={firstMinimapSegmentRef}
-      />
+    <>
+      {(((firstHalfSegmentWidth > 1 || secondHalfSegmentWidth > 1) &&
+        motionOnly &&
+        severity[0] < 2) ||
+        !motionOnly) && (
+        <div
+          key={segmentKey}
+          data-segment-id={segmentKey}
+          className={`segment ${firstHalfSegmentWidth > 1 || secondHalfSegmentWidth > 1 ? "has-data" : ""} ${segmentClasses}`}
+          onClick={segmentClick}
+          onTouchEnd={(event) => handleTouchStart(event, segmentClick)}
+        >
+          {!motionOnly && (
+            <>
+              <MinimapBounds
+                isFirstSegmentInMinimap={isFirstSegmentInMinimap}
+                isLastSegmentInMinimap={isLastSegmentInMinimap}
+                alignedMinimapStartTime={alignedMinimapStartTime}
+                alignedMinimapEndTime={alignedMinimapEndTime}
+                firstMinimapSegmentRef={firstMinimapSegmentRef}
+              />
 
-      <Tick timestamp={timestamp} timestampSpread={timestampSpread} />
+              <Tick
+                key={`${segmentKey}_tick`}
+                timestamp={timestamp}
+                timestampSpread={timestampSpread}
+              />
 
-      <Timestamp
-        isFirstSegmentInMinimap={isFirstSegmentInMinimap}
-        isLastSegmentInMinimap={isLastSegmentInMinimap}
-        timestamp={timestamp}
-        timestampSpread={timestampSpread}
-        segmentKey={segmentKey}
-      />
+              <Timestamp
+                key={`${segmentKey}_timestamp`}
+                isFirstSegmentInMinimap={isFirstSegmentInMinimap}
+                isLastSegmentInMinimap={isLastSegmentInMinimap}
+                timestamp={timestamp}
+                timestampSpread={timestampSpread}
+                segmentKey={segmentKey}
+              />
+            </>
+          )}
 
-      <div className="absolute left-1/2 transform -translate-x-1/2 w-[20px] md:w-[40px] h-2 z-10 cursor-pointer">
-        <div className="flex flex-row justify-center w-[20px] md:w-[40px] mb-[1px]">
-          <div className="flex justify-center">
-            <div
-              key={`${segmentKey}_motion_data_1`}
-              className={`${isDesktop && animationClassesSecondHalf} h-[2px] rounded-full ${severity[0] != 0 ? "bg-motion_review-dimmed" : "bg-motion_review"}`}
-              style={{
-                width: secondHalfSegmentWidth,
-              }}
-            ></div>
-          </div>
-        </div>
-
-        <div className="flex flex-row justify-center w-[20px] md:w-[40px]">
-          <div className="flex justify-center">
-            <div
-              key={`${segmentKey}_motion_data_2`}
-              className={`${isDesktop && animationClassesFirstHalf} h-[2px] rounded-full ${severity[0] != 0 ? "bg-motion_review-dimmed" : "bg-motion_review"}`}
-              style={{
-                width: firstHalfSegmentWidth,
-              }}
-            ></div>
-          </div>
-        </div>
-      </div>
-
-      {severity.map((severityValue: number, index: number) => {
-        if (severityValue > 1) {
-          return (
-            <React.Fragment key={index}>
-              <div className="absolute right-0 h-2 z-10">
+          <div className="absolute left-1/2 transform -translate-x-1/2 w-[20px] md:w-[40px] h-2 z-10 cursor-pointer">
+            <div className="flex flex-row justify-center w-[20px] md:w-[40px] mb-[1px]">
+              <div className="flex justify-center">
                 <div
-                  key={`${segmentKey}_${index}_secondary_data`}
-                  className={`
-              w-1 h-2 bg-gradient-to-r
-              ${roundBottomSecondary ? "rounded-bl-full rounded-br-full" : ""}
-              ${roundTopSecondary ? "rounded-tl-full rounded-tr-full" : ""}
-              ${severityColors[severityValue]}
-            `}
+                  key={`${segmentKey}_motion_data_1`}
+                  className={`${isDesktop && animationClassesSecondHalf} h-[2px] rounded-full ${severity[0] != 0 ? "bg-motion_review-dimmed" : "bg-motion_review"}`}
+                  style={{
+                    width: secondHalfSegmentWidth,
+                  }}
                 ></div>
               </div>
-            </React.Fragment>
-          );
-        } else {
-          return null;
-        }
-      })}
-    </div>
+            </div>
+
+            <div className="flex flex-row justify-center w-[20px] md:w-[40px]">
+              <div className="flex justify-center">
+                <div
+                  key={`${segmentKey}_motion_data_2`}
+                  className={`${isDesktop && animationClassesFirstHalf} h-[2px] rounded-full ${severity[0] != 0 ? "bg-motion_review-dimmed" : "bg-motion_review"}`}
+                  style={{
+                    width: firstHalfSegmentWidth,
+                  }}
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          {!motionOnly &&
+            severity.map((severityValue: number, index: number) => {
+              if (severityValue > 1) {
+                return (
+                  <React.Fragment key={index}>
+                    <div className="absolute right-0 h-2 z-10">
+                      <div
+                        key={`${segmentKey}_${index}_secondary_data`}
+                        className={`
+                          w-1 h-2 bg-gradient-to-r
+                          ${roundBottomSecondary ? "rounded-bl-full rounded-br-full" : ""}
+                          ${roundTopSecondary ? "rounded-tl-full rounded-tr-full" : ""}
+                          ${severityColors[severityValue]}
+                        `}
+                      ></div>
+                    </div>
+                  </React.Fragment>
+                );
+              } else {
+                return null;
+              }
+            })}
+        </div>
+      )}
+    </>
   );
 }
 

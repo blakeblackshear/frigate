@@ -201,7 +201,7 @@ export function EventSegment({
     <div
       key={segmentKey}
       data-segment-id={segmentKey}
-      className={segmentClasses}
+      className={`segment ${segmentClasses}`}
       onClick={segmentClick}
       onTouchEnd={(event) => handleTouchStart(event, segmentClick)}
     >

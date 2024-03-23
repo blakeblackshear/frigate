@@ -10,10 +10,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { ReviewFilter, ReviewSummary } from "@/types/review";
+import { ReviewFilter, ReviewSeverity, ReviewSummary } from "@/types/review";
 import { getEndOfDayTimestamp } from "@/utils/dateUtil";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
-import { FaCalendarAlt, FaFilter, FaVideo } from "react-icons/fa";
+import { FaCalendarAlt, FaFilter, FaRunning, FaVideo } from "react-icons/fa";
 import { isMobile } from "react-device-detect";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { Switch } from "../ui/switch";
@@ -27,12 +27,18 @@ type ReviewFilterGroupProps = {
   reviewSummary?: ReviewSummary;
   filter?: ReviewFilter;
   onUpdateFilter: (filter: ReviewFilter) => void;
+  severity: ReviewSeverity;
+  motionOnly: boolean;
+  setMotionOnly: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export default function ReviewFilterGroup({
   reviewSummary,
   filter,
   onUpdateFilter,
+  severity,
+  motionOnly,
+  setMotionOnly,
 }: ReviewFilterGroupProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -94,7 +100,7 @@ export default function ReviewFilterGroup({
   );
 
   return (
-    <div>
+    <div className="flex justify-center">
       <CamerasFilterButton
         allCameras={filterValues.cameras}
         groups={groups}
@@ -110,17 +116,24 @@ export default function ReviewFilterGroup({
         }
         updateSelectedDay={onUpdateSelectedDay}
       />
-      <GeneralFilterButton
-        allLabels={filterValues.labels}
-        selectedLabels={filter?.labels}
-        updateLabelFilter={(newLabels) => {
-          onUpdateFilter({ ...filter, labels: newLabels });
-        }}
-        showReviewed={filter?.showReviewed || 0}
-        setShowReviewed={(reviewed) =>
-          onUpdateFilter({ ...filter, showReviewed: reviewed })
-        }
-      />
+      {severity == "significant_motion" ? (
+        <ShowMotionOnlyButton
+          motionOnly={motionOnly}
+          setMotionOnly={setMotionOnly}
+        />
+      ) : (
+        <GeneralFilterButton
+          allLabels={filterValues.labels}
+          selectedLabels={filter?.labels}
+          updateLabelFilter={(newLabels) => {
+            onUpdateFilter({ ...filter, labels: newLabels });
+          }}
+          showReviewed={filter?.showReviewed || 0}
+          setShowReviewed={(reviewed) =>
+            onUpdateFilter({ ...filter, showReviewed: reviewed })
+          }
+        />
+      )}
     </div>
   );
 }
@@ -483,5 +496,48 @@ function GeneralFilterButton({
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
       <PopoverContent side="left">{content}</PopoverContent>
     </Popover>
+  );
+}
+
+type ShowMotionOnlyButtonProps = {
+  motionOnly: boolean;
+  setMotionOnly: React.Dispatch<React.SetStateAction<boolean>>;
+};
+function ShowMotionOnlyButton({
+  motionOnly,
+  setMotionOnly,
+}: ShowMotionOnlyButtonProps) {
+  return (
+    <>
+      <div className="hidden md:inline-flex items-center justify-center whitespace-nowrap text-sm bg-secondary text-secondary-foreground h-9 rounded-md md:px-3 md:mx-1">
+        <Switch
+          className="ml-1"
+          id="collapse-motion"
+          checked={motionOnly}
+          onCheckedChange={() => {
+            setMotionOnly(!motionOnly);
+          }}
+        />
+        <Label
+          className="mx-2 text-secondary-foreground"
+          htmlFor="collapse-motion"
+        >
+          Motion only
+        </Label>
+      </div>
+
+      <div className="block md:hidden">
+        <Button
+          size="sm"
+          className="ml-1"
+          variant="secondary"
+          onClick={() => setMotionOnly(!motionOnly)}
+        >
+          <FaRunning
+            className={`${motionOnly ? "text-selected" : "text-muted-foreground"}`}
+          />
+        </Button>
+      </div>
+    </>
   );
 }
