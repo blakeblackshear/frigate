@@ -536,9 +536,7 @@ class CameraState:
                     ):
                         max_target_box = self.ptz_autotracker_thread.ptz_autotracker.tracked_object_metrics[
                             self.name
-                        ][
-                            "max_target_box"
-                        ]
+                        ]["max_target_box"]
                         side_length = max_target_box * (
                             max(
                                 self.camera_config.detect.width,

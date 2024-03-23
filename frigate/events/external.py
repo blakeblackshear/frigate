@@ -78,7 +78,12 @@ class ExternalEventProcessor:
     def finish_manual_event(self, event_id: str, end_time: float) -> None:
         """Finish external event with indeterminate duration."""
         self.event_sender.publish(
-            (EventTypeEnum.api, EventStateEnum.end, None, {"id": event_id, "end_time": end_time})
+            (
+                EventTypeEnum.api,
+                EventStateEnum.end,
+                None,
+                {"id": event_id, "end_time": end_time},
+            )
         )
 
     def _write_images(
