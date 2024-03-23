@@ -14,6 +14,7 @@ import numpy as np
 
 from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
 from frigate.comms.dispatcher import Dispatcher
+from frigate.comms.events_updater import EventUpdatePublisher
 from frigate.config import (
     CameraConfig,
     FrigateConfig,
@@ -23,7 +24,7 @@ from frigate.config import (
     ZoomingModeEnum,
 )
 from frigate.const import CLIPS_DIR
-from frigate.events.maintainer import EventTypeEnum
+from frigate.events.types import EventStateEnum, EventTypeEnum
 from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.util.image import (
     SharedMemoryFrameManager,
@@ -826,7 +827,6 @@ class TrackedObjectProcessor(threading.Thread):
         config: FrigateConfig,
         dispatcher: Dispatcher,
         tracked_objects_queue,
-        event_queue,
         event_processed_queue,
         ptz_autotracker_thread,
         stop_event,
@@ -836,7 +836,6 @@ class TrackedObjectProcessor(threading.Thread):
         self.config = config
         self.dispatcher = dispatcher
         self.tracked_objects_queue = tracked_objects_queue
-        self.event_queue = event_queue
         self.event_processed_queue = event_processed_queue
         self.stop_event = stop_event
         self.camera_states: dict[str, CameraState] = {}
@@ -844,10 +843,16 @@ class TrackedObjectProcessor(threading.Thread):
         self.last_motion_detected: dict[str, float] = {}
         self.ptz_autotracker_thread = ptz_autotracker_thread
         self.detection_publisher = DetectionPublisher(DetectionTypeEnum.video)
+        self.event_sender = EventUpdatePublisher()
 
         def start(camera, obj: TrackedObject, current_frame_time):
-            self.event_queue.put(
-                (EventTypeEnum.tracked_object, "start", camera, obj.to_dict())
+            self.event_sender.publish(
+                (
+                    EventTypeEnum.tracked_object,
+                    EventStateEnum.start,
+                    camera,
+                    obj.to_dict(),
+                )
             )
 
         def update(camera, obj: TrackedObject, current_frame_time):
@@ -861,10 +866,10 @@ class TrackedObjectProcessor(threading.Thread):
             }
             self.dispatcher.publish("events", json.dumps(message), retain=False)
             obj.previous = after
-            self.event_queue.put(
+            self.event_sender.publish(
                 (
                     EventTypeEnum.tracked_object,
-                    "update",
+                    EventStateEnum.update,
                     camera,
                     obj.to_dict(include_thumbnail=True),
                 )
@@ -923,10 +928,10 @@ class TrackedObjectProcessor(threading.Thread):
                 self.dispatcher.publish("events", json.dumps(message), retain=False)
                 self.ptz_autotracker_thread.ptz_autotracker.end_object(camera, obj)
 
-            self.event_queue.put(
+            self.event_sender.publish(
                 (
                     EventTypeEnum.tracked_object,
-                    "end",
+                    EventStateEnum.end,
                     camera,
                     obj.to_dict(include_thumbnail=True),
                 )
@@ -1215,4 +1220,5 @@ class TrackedObjectProcessor(threading.Thread):
                 self.camera_states[camera].finished(event_id)
 
         self.detection_publisher.stop()
+        self.event_sender.stop()
         logger.info("Exiting object processor...")

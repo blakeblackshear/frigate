@@ -195,7 +195,6 @@ class FrigateApp:
 
     def init_queues(self) -> None:
         # Queues for clip processing
-        self.event_queue: Queue = mp.Queue()
         self.event_processed_queue: Queue = mp.Queue()
 
         # Queue for cameras to push tracked objects to
@@ -324,9 +323,7 @@ class FrigateApp:
         self.db.bind(models)
 
     def init_external_event_processor(self) -> None:
-        self.external_event_processor = ExternalEventProcessor(
-            self.config, self.event_queue
-        )
+        self.external_event_processor = ExternalEventProcessor(self.config)
 
     def init_inter_process_communicator(self) -> None:
         self.inter_process_communicator = InterProcessCommunicator()
@@ -417,7 +414,6 @@ class FrigateApp:
             self.config,
             self.dispatcher,
             self.detected_frames_queue,
-            self.event_queue,
             self.event_processed_queue,
             self.ptz_autotracker_thread,
             self.stop_event,
@@ -515,8 +511,6 @@ class FrigateApp:
     def start_event_processor(self) -> None:
         self.event_processor = EventProcessor(
             self.config,
-            self.camera_metrics,
-            self.event_queue,
             self.event_processed_queue,
             self.timeline_queue,
             self.stop_event,
@@ -682,6 +676,7 @@ class FrigateApp:
         self.detection_queue.close()
         self.detection_queue.join_thread()
 
+        self.external_event_processor.stop()
         self.dispatcher.stop()
         self.detected_frames_processor.join()
         self.ptz_autotracker_thread.join()
@@ -698,7 +693,6 @@ class FrigateApp:
             shm.unlink()
 
         for queue in [
-            self.event_queue,
             self.event_processed_queue,
             self.detected_frames_queue,
             self.log_queue,
