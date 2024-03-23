@@ -6,24 +6,24 @@ import logging
 import os
 import random
 import string
-from multiprocessing import Queue
 from typing import Optional
 
 import cv2
 
+from frigate.comms.events_updater import EventUpdatePublisher
 from frigate.config import CameraConfig, FrigateConfig
 from frigate.const import CLIPS_DIR
-from frigate.events.maintainer import EventTypeEnum
+from frigate.events.types import EventStateEnum, EventTypeEnum
 from frigate.util.image import draw_box_with_label
 
 logger = logging.getLogger(__name__)
 
 
 class ExternalEventProcessor:
-    def __init__(self, config: FrigateConfig, queue: Queue) -> None:
+    def __init__(self, config: FrigateConfig) -> None:
         self.config = config
-        self.queue = queue
         self.default_thumbnail = None
+        self.event_sender = EventUpdatePublisher()
 
     def create_manual_event(
         self,
@@ -48,10 +48,10 @@ class ExternalEventProcessor:
             camera_config, label, event_id, draw, snapshot_frame
         )
 
-        self.queue.put(
+        self.event_sender.publish(
             (
                 EventTypeEnum.api,
-                "new",
+                EventStateEnum.start,
                 camera,
                 {
                     "id": event_id,
@@ -77,8 +77,8 @@ class ExternalEventProcessor:
 
     def finish_manual_event(self, event_id: str, end_time: float) -> None:
         """Finish external event with indeterminate duration."""
-        self.queue.put(
-            (EventTypeEnum.api, "end", None, {"id": event_id, "end_time": end_time})
+        self.event_sender.publish(
+            (EventTypeEnum.api, EventStateEnum.end, None, {"id": event_id, "end_time": end_time})
         )
 
     def _write_images(
