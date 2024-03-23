@@ -12,7 +12,7 @@ import { Preview } from "@/types/preview";
 import { PreviewPlayback } from "@/types/playback";
 import { isCurrentHour } from "@/utils/dateUtil";
 import { baseUrl } from "@/api/baseUrl";
-import { isAndroid, isChrome, isMobile } from "react-device-detect";
+import { isAndroid, isChrome, isMobile, isSafari } from "react-device-detect";
 import { Skeleton } from "../ui/skeleton";
 
 type PreviewPlayerProps = {
@@ -223,7 +223,11 @@ function PreviewVideoPlayer({
       setHasCanvas(true);
     }
 
-    previewRef.current.load();
+    if (isSafari) {
+      setTimeout(() => previewRef.current?.load(), 100);
+    } else {
+      previewRef.current.load();
+    }
     // we only want this to change when current preview changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPreview, previewRef]);
