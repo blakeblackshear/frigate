@@ -716,6 +716,9 @@ function MotionReview({
 
   // playback
 
+  const [playbackRate, setPlaybackRate] = useState(8);
+  const [controlsOpen, setControlsOpen] = useState(false);
+
   useEffect(() => {
     if (!playing) {
       return;
@@ -815,9 +818,13 @@ function MotionReview({
         features={{
           volume: false,
           seek: true,
-          playbackRate: false,
+          playbackRate: true,
         }}
         isPlaying={playing}
+        playbackRates={[4, 8, 12, 16]}
+        playbackRate={playbackRate}
+        controlsOpen={controlsOpen}
+        setControlsOpen={setControlsOpen}
         onPlayPause={setPlaying}
         onSeek={(diff) => {
           const wasPlaying = playing;
@@ -832,6 +839,7 @@ function MotionReview({
             setTimeout(() => setPlaying(true), 100);
           }
         }}
+        onSetPlaybackRate={setPlaybackRate}
         show={currentTime < timeRange.before - 4}
       />
     </>
