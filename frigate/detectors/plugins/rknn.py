@@ -18,7 +18,7 @@ supported_socs = ["rk3562", "rk3566", "rk3568", "rk3588"]
 
 class RknnDetectorConfig(BaseDetectorConfig):
     type: Literal[DETECTOR_KEY]
-    core_mask: int = Field(default=7, ge=0, le=7, title="Core mask for NPU.")
+    num_cores: int = Field(default=0, ge=0, le=3, title="Number of NPU cores.")
 
 
 class Rknn(DetectionApi):
@@ -29,7 +29,7 @@ class Rknn(DetectionApi):
         self.width = config.model.width
 
         soc = self.get_soc()
-        core_mask = config.core_mask
+        core_mask = 2**config.num_cores - 1
 
         model_properties = self.get_model_properties(
             config.model.path or "default-yolov8n", soc

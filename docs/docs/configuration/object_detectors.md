@@ -406,8 +406,11 @@ This `config.yml` shows all relevant options to configure the detector and expla
 detectors: # required
   rknn: # required
     type: rknn # required
-    # core mask for npu
-    core_mask: 0b111
+    # number of NPU cores used for detection
+    # 0 means automatic selection, 1 is one core etc
+    # only relevant for SoCs with multicore NPU like rk3588/s
+    # increase to 3 on rk3588 SoC for best performance
+    num_cores: 0
 
 model: # required
   # name of yolov8 model or path to your own .rknn model file
@@ -429,13 +432,6 @@ model: # required
   input_tensor: nhwc
 ```
 
-Explanation for rknn specific options:
-
-- **core mask** controls which cores of your NPU should be used. This option applies only to SoCs with a multicore NPU (at the time of writing this in only the RK3588/S). The easiest way is to pass the value as a binary number. To do so, use the prefix `0b` and write a `0` to disable a core and a `1` to enable a core, whereas the last digit corresponds to core0, the second last to core1, etc. You also have to use the cores in ascending order (so you can't use core0 and core2; but you can use core0 and core1). Enabling more cores can reduce the inference speed, especially when using bigger models (see section below). Examples:
-  - `core_mask: 0b000` or just `core_mask: 0` let the NPU decide which cores should be used.
-  - `core_mask: 0b001` use only core0.
-  - `core_mask: 0b111` use core0, core1 and core2. Fastest and default value.
-  - `core_mask: 0b110` use core1 and core2. **This does not** work, since core0 is disabled.
 
 ### Choosing a model
 
