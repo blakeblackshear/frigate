@@ -45,6 +45,7 @@ import {
   FaMicrophoneSlash,
 } from "react-icons/fa";
 import { GiSpeaker, GiSpeakerOff } from "react-icons/gi";
+import { HiViewfinderCircle } from "react-icons/hi2";
 import { IoMdArrowBack } from "react-icons/io";
 import { LuEar, LuEarOff, LuVideo, LuVideoOff } from "react-icons/lu";
 import {
@@ -81,6 +82,45 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
     camera.name,
   );
   const { payload: audioState, send: sendAudio } = useAudioState(camera.name);
+
+  // click overlay for ptzs
+
+  const [clickOverlay, setClickOverlay] = useState(false);
+  const clickOverlayRef = useRef<HTMLDivElement>(null);
+  const { send: sendPtz } = usePtzCommand(camera.name);
+
+  const handleOverlayClick = useCallback(
+    (
+      e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>,
+    ) => {
+      if (!clickOverlay) {
+        return;
+      }
+
+      let clientX;
+      let clientY;
+      if (isMobile && e.nativeEvent instanceof TouchEvent) {
+        clientX = e.nativeEvent.touches[0].clientX;
+        clientY = e.nativeEvent.touches[0].clientY;
+      } else if (e.nativeEvent instanceof MouseEvent) {
+        clientX = e.nativeEvent.clientX;
+        clientY = e.nativeEvent.clientY;
+      }
+
+      if (clickOverlayRef.current && clientX && clientY) {
+        const rect = clickOverlayRef.current.getBoundingClientRect();
+
+        const normalizedX = (clientX - rect.left) / rect.width;
+        const normalizedY = (clientY - rect.top) / rect.height;
+
+        const pan = (normalizedX - 0.5) * 2;
+        const tilt = (0.5 - normalizedY) * 2;
+
+        sendPtz(`move_relative_${pan}_${tilt}`);
+      }
+    },
+    [clickOverlayRef, clickOverlay, sendPtz],
+  );
 
   // fullscreen state
 
@@ -277,6 +317,8 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
         >
           <div
             className={`flex flex-col justify-center items-center ${growClassName}`}
+            ref={clickOverlayRef}
+            onClick={handleOverlayClick}
             style={{
               aspectRatio: aspectRatio,
             }}
@@ -293,14 +335,28 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
               preferredLiveMode={preferredLiveMode}
             />
           </div>
-          {camera.onvif.host != "" && <PtzControlPanel camera={camera.name} />}
+          {camera.onvif.host != "" && (
+            <PtzControlPanel
+              camera={camera.name}
+              clickOverlay={clickOverlay}
+              setClickOverlay={setClickOverlay}
+            />
+          )}
         </TransformComponent>
       </div>
     </TransformWrapper>
   );
 }
 
-function PtzControlPanel({ camera }: { camera: string }) {
+function PtzControlPanel({
+  camera,
+  clickOverlay,
+  setClickOverlay,
+}: {
+  camera: string;
+  clickOverlay: boolean;
+  setClickOverlay: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
   const { data: ptz } = useSWR<CameraPtzInfo>(`${camera}/ptz/info`);
 
   const { send: sendPtz } = usePtzCommand(camera);
@@ -439,6 +495,16 @@ function PtzControlPanel({ camera }: { camera: string }) {
             onTouchEnd={onStop}
           >
             <MdZoomOut />
+          </Button>
+        </>
+      )}
+      {ptz?.features?.includes("pt-r-fov") && (
+        <>
+          <Button
+            className={`${clickOverlay ? "text-selected" : "text-primary-foreground"}`}
+            onClick={() => setClickOverlay(!clickOverlay)}
+          >
+            <HiViewfinderCircle />
           </Button>
         </>
       )}
