@@ -35,6 +35,8 @@ export default function PreviewPlayer({
   onControllerReady,
   onClick,
 }: PreviewPlayerProps) {
+  const [currentHourFrame, setCurrentHourFrame] = useState<string>();
+
   if (isCurrentHour(timeRange.end)) {
     return (
       <PreviewFramesPlayer
@@ -44,6 +46,7 @@ export default function PreviewPlayer({
         startTime={startTime}
         onControllerReady={onControllerReady}
         onClick={onClick}
+        setCurrentHourFrame={setCurrentHourFrame}
       />
     );
   }
@@ -56,8 +59,10 @@ export default function PreviewPlayer({
       cameraPreviews={cameraPreviews}
       startTime={startTime}
       isScrubbing={isScrubbing}
+      currentHourFrame={currentHourFrame}
       onControllerReady={onControllerReady}
       onClick={onClick}
+      setCurrentHourFrame={setCurrentHourFrame}
     />
   );
 }
@@ -83,8 +88,10 @@ type PreviewVideoPlayerProps = {
   cameraPreviews: Preview[];
   startTime?: number;
   isScrubbing: boolean;
+  currentHourFrame?: string;
   onControllerReady: (controller: PreviewVideoController) => void;
   onClick?: () => void;
+  setCurrentHourFrame: (src: string | undefined) => void;
 };
 function PreviewVideoPlayer({
   className,
@@ -93,8 +100,10 @@ function PreviewVideoPlayer({
   cameraPreviews,
   startTime,
   isScrubbing,
+  currentHourFrame,
   onControllerReady,
   onClick,
+  setCurrentHourFrame,
 }: PreviewVideoPlayerProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -134,6 +143,7 @@ function PreviewVideoPlayer({
   // initial state
 
   const [loaded, setLoaded] = useState(false);
+  const [hasCanvas, setHasCanvas] = useState(false);
   const initialPreview = useMemo(() => {
     return cameraPreviews.find(
       (preview) =>
@@ -187,22 +197,57 @@ function PreviewVideoPlayer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controller, timeRange]);
 
+  // canvas to cover preview transition
+
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [videoWidth, videoHeight] = useMemo(() => {
+    if (!previewRef.current) {
+      return [0, 0];
+    }
+
+    return [previewRef.current.videoWidth, previewRef.current.videoHeight];
+    // we know the video size will be known on load
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loaded]);
+  // handle switching sources
+
   useEffect(() => {
     if (!currentPreview || !previewRef.current) {
       return;
     }
 
+    if (canvasRef.current) {
+      canvasRef.current
+        .getContext("2d")
+        ?.drawImage(previewRef.current, 0, 0, videoWidth, videoHeight);
+      setHasCanvas(true);
+    }
+
     previewRef.current.load();
+    // we only want this to change when current preview changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPreview, previewRef]);
 
   return (
     <div
-      className={`relative w-full ${className ?? ""} ${onClick ? "cursor-pointer" : ""}`}
+      className={`relative w-full rounded-2xl overflow-hidden ${className ?? ""} ${onClick ? "cursor-pointer" : ""}`}
       onClick={onClick}
     >
+      {currentHourFrame && (
+        <img
+          className="absolute size-full object-contain"
+          src={currentHourFrame}
+        />
+      )}
+      <canvas
+        ref={canvasRef}
+        width={videoWidth}
+        height={videoHeight}
+        className={`absolute h-full left-1/2 -translate-x-1/2 bg-black ${!loaded && hasCanvas ? "" : "hidden"}`}
+      />
       <video
         ref={previewRef}
-        className={`size-full rounded-2xl bg-black`}
+        className="size-full"
         preload="auto"
         autoPlay
         playsInline
@@ -210,6 +255,7 @@ function PreviewVideoPlayer({
         disableRemotePlayback
         onSeeked={onPreviewSeeked}
         onLoadedData={() => {
+          setCurrentHourFrame(undefined);
           setLoaded(true);
 
           if (controller) {
@@ -227,7 +273,9 @@ function PreviewVideoPlayer({
           <source src={currentPreview.src} type={currentPreview.type} />
         )}
       </video>
-      {!loaded && <Skeleton className="absolute inset-0" />}
+      {!loaded && !hasCanvas && !currentHourFrame && (
+        <Skeleton className="absolute inset-0" />
+      )}
       {cameraPreviews && !currentPreview && (
         <div className="absolute inset-0 bg-black text-white rounded-2xl flex justify-center items-center">
           No Preview Found
@@ -329,12 +377,14 @@ type PreviewFramesPlayerProps = {
   startTime?: number;
   onControllerReady: (controller: PreviewController) => void;
   onClick?: () => void;
+  setCurrentHourFrame: (src: string) => void;
 };
 function PreviewFramesPlayer({
   className,
   camera,
   timeRange,
   startTime,
+  setCurrentHourFrame,
   onControllerReady,
   onClick,
 }: PreviewFramesPlayerProps) {
@@ -365,7 +415,12 @@ function PreviewFramesPlayer({
       return undefined;
     }
 
-    return new PreviewFramesController(camera, imgRef, frameTimes);
+    return new PreviewFramesController(
+      camera,
+      imgRef,
+      frameTimes,
+      setCurrentHourFrame,
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [imgRef, frameTimes, imgRef.current]);
 
@@ -430,15 +485,18 @@ class PreviewFramesController extends PreviewController {
   frameTimes: number[];
   seeking: boolean = false;
   private timeToSeek: number | undefined = undefined;
+  private setCurrentFrame: (src: string) => void;
 
   constructor(
     camera: string,
     imgController: MutableRefObject<HTMLImageElement | null>,
     frameTimes: number[],
+    setCurrentFrame: (src: string) => void,
   ) {
     super(camera);
     this.imgController = imgController;
     this.frameTimes = frameTimes;
+    this.setCurrentFrame = setCurrentFrame;
   }
 
   override scrubToTimestamp(time: number): boolean {
@@ -478,6 +536,7 @@ class PreviewFramesController extends PreviewController {
 
       if (this.imgController.current.src != newSrc) {
         this.imgController.current.src = newSrc;
+        this.setCurrentFrame(newSrc);
       } else {
         this.timeToSeek = undefined;
         this.seeking = false;
