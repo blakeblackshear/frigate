@@ -77,22 +77,39 @@ export function useCameraMotionTimestamps(
 ) {
   const timestamps = useMemo(() => {
     const seekableTimestamps = [];
+    let lastEventIdx = 0;
+    let lastMotionIdx = 0;
+
     for (let i = timeRange.after; i <= timeRange.before; i += 0.5) {
       if (!motionOnly) {
         seekableTimestamps.push(i);
       } else {
-        if (
-          events.find((seg) => seg.start_time <= i && seg.end_time >= i) !=
-          undefined
-        ) {
+        const relevantEventIdx = events.findIndex((seg, segIdx) => {
+          if (segIdx < lastEventIdx) {
+            return false;
+          }
+
+          return seg.start_time <= i && seg.end_time >= i;
+        });
+
+        if (relevantEventIdx != -1) {
+          lastEventIdx = relevantEventIdx;
           continue;
         }
 
-        const relevantMotion = motion.find(
-          (mot) => mot.start_time <= i && mot.start_time + 15 >= i,
-        );
+        const relevantMotionIdx = motion.findIndex((mot, motIdx) => {
+          if (motIdx < lastMotionIdx) {
+            return false;
+          }
 
-        if (!relevantMotion || relevantMotion.motion == 0) {
+          return mot.start_time <= i && mot.start_time + 15 >= i;
+        });
+
+        if (relevantMotionIdx == -1 || motion[relevantMotionIdx].motion == 0) {
+          if (relevantMotionIdx != -1) {
+            lastMotionIdx = relevantMotionIdx;
+          }
+
           continue;
         }
 
