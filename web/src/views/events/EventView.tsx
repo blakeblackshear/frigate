@@ -716,11 +716,15 @@ function MotionReview({
 
   // playback
 
+  const [playbackRate, setPlaybackRate] = useState(8);
+  const [controlsOpen, setControlsOpen] = useState(false);
+
   useEffect(() => {
     if (!playing) {
       return;
     }
 
+    const interval = 500 / playbackRate;
     const startTime = currentTime;
     let counter = 0;
     const intervalId = setInterval(() => {
@@ -732,14 +736,14 @@ function MotionReview({
       }
 
       setCurrentTime(startTime + counter);
-    }, 60);
+    }, interval);
 
     return () => {
       clearInterval(intervalId);
     };
     // do not render when current time changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playing]);
+  }, [playing, playbackRate]);
 
   if (!relevantPreviews) {
     return <ActivityIndicator />;
@@ -815,9 +819,13 @@ function MotionReview({
         features={{
           volume: false,
           seek: true,
-          playbackRate: false,
+          playbackRate: true,
         }}
         isPlaying={playing}
+        playbackRates={[4, 8, 12, 16]}
+        playbackRate={playbackRate}
+        controlsOpen={controlsOpen}
+        setControlsOpen={setControlsOpen}
         onPlayPause={setPlaying}
         onSeek={(diff) => {
           const wasPlaying = playing;
@@ -832,6 +840,7 @@ function MotionReview({
             setTimeout(() => setPlaying(true), 100);
           }
         }}
+        onSetPlaybackRate={setPlaybackRate}
         show={currentTime < timeRange.before - 4}
       />
     </>

@@ -160,6 +160,7 @@ export default function HlsVideoPlayer({
         show={controls}
         controlsOpen={controlsOpen}
         setControlsOpen={setControlsOpen}
+        playbackRate={videoRef.current?.playbackRate ?? 1}
         onPlayPause={(play) => {
           if (!videoRef.current) {
             return;
@@ -180,6 +181,9 @@ export default function HlsVideoPlayer({
 
           videoRef.current.currentTime = Math.max(0, currentTime + diff);
         }}
+        onSetPlaybackRate={(rate) =>
+          videoRef.current ? (videoRef.current.playbackRate = rate) : null
+        }
       />
       {children}
     </div>

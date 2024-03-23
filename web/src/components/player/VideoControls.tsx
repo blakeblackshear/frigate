@@ -30,6 +30,7 @@ const CONTROLS_DEFAULT: VideoControls = {
   seek: true,
   playbackRate: true,
 };
+const PLAYBACK_RATE_DEFAULT = isSafari ? [0.5, 1, 2] : [0.5, 1, 2, 4, 8, 16];
 
 type VideoControlsProps = {
   className?: string;
@@ -38,9 +39,12 @@ type VideoControlsProps = {
   isPlaying: boolean;
   show: boolean;
   controlsOpen?: boolean;
+  playbackRates?: number[];
+  playbackRate: number;
   setControlsOpen?: (open: boolean) => void;
   onPlayPause: (play: boolean) => void;
   onSeek: (diff: number) => void;
+  onSetPlaybackRate: (rate: number) => void;
 };
 export default function VideoControls({
   className,
@@ -49,18 +53,13 @@ export default function VideoControls({
   isPlaying,
   show,
   controlsOpen,
+  playbackRates = PLAYBACK_RATE_DEFAULT,
+  playbackRate,
   setControlsOpen,
   onPlayPause,
   onSeek,
+  onSetPlaybackRate,
 }: VideoControlsProps) {
-  const playbackRates = useMemo(() => {
-    if (isSafari) {
-      return [0.5, 1, 2];
-    } else {
-      return [0.5, 1, 2, 4, 8, 16];
-    }
-  }, []);
-
   const onReplay = useCallback(
     (e: React.MouseEvent<SVGElement>) => {
       e.stopPropagation();
@@ -177,7 +176,7 @@ export default function VideoControls({
       {features.seek && (
         <MdForward10 className="size-5 cursor-pointer" onClick={onSkip} />
       )}
-      {video && features.playbackRate && (
+      {features.playbackRate && (
         <DropdownMenu
           open={controlsOpen == true}
           onOpenChange={(open) => {
@@ -186,10 +185,10 @@ export default function VideoControls({
             }
           }}
         >
-          <DropdownMenuTrigger>{`${video.playbackRate}x`}</DropdownMenuTrigger>
+          <DropdownMenuTrigger>{`${playbackRate}x`}</DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuRadioGroup
-              onValueChange={(rate) => (video.playbackRate = parseFloat(rate))}
+              onValueChange={(rate) => onSetPlaybackRate(parseFloat(rate))}
             >
               {playbackRates.map((rate) => (
                 <DropdownMenuRadioItem key={rate} value={rate.toString()}>
