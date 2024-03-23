@@ -135,3 +135,6 @@ class ExternalEventProcessor:
         thumb = cv2.resize(img_frame, dsize=(width, 175), interpolation=cv2.INTER_AREA)
         ret, jpg = cv2.imencode(".jpg", thumb)
         return base64.b64encode(jpg.tobytes()).decode("utf-8")
+
+    def stop(self):
+        self.event_sender.stop()

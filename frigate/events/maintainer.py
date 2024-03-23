@@ -80,7 +80,7 @@ class EventProcessor(threading.Thread):
 
             source_type, event_type, camera, event_data = update
 
-            logger.error(
+            logger.debug(
                 f"Event received: {source_type} {event_type} {camera} {event_data['id']}"
             )
 
