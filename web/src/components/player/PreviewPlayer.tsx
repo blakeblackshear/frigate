@@ -134,6 +134,7 @@ function PreviewVideoPlayer({
   // initial state
 
   const [loaded, setLoaded] = useState(false);
+  const [hasCanvas, setHasCanvas] = useState(false);
   const initialPreview = useMemo(() => {
     return cameraPreviews.find(
       (preview) =>
@@ -187,22 +188,51 @@ function PreviewVideoPlayer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controller, timeRange]);
 
+  // canvas to cover preview transition
+
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [videoWidth, videoHeight] = useMemo(() => {
+    if (!previewRef.current) {
+      return [0, 0];
+    }
+
+    return [previewRef.current.videoWidth, previewRef.current.videoHeight];
+    // we know the video size will be known on load
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loaded]);
+  // handle switching sources
+
   useEffect(() => {
     if (!currentPreview || !previewRef.current) {
       return;
     }
 
+    if (canvasRef.current) {
+      canvasRef.current
+        .getContext("2d")
+        ?.drawImage(previewRef.current, 0, 0, videoWidth, videoHeight);
+      setHasCanvas(true);
+    }
+
     previewRef.current.load();
+    // we only want this to change when current preview changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPreview, previewRef]);
 
   return (
     <div
-      className={`relative w-full ${className ?? ""} ${onClick ? "cursor-pointer" : ""}`}
+      className={`relative w-full rounded-2xl overflow-hidden ${className ?? ""} ${onClick ? "cursor-pointer" : ""}`}
       onClick={onClick}
     >
+      <canvas
+        ref={canvasRef}
+        width={videoWidth}
+        height={videoHeight}
+        className={`absolute h-full left-1/2 -translate-x-1/2 bg-black ${!loaded && hasCanvas ? "" : "hidden"}`}
+      />
       <video
         ref={previewRef}
-        className={`size-full rounded-2xl bg-black`}
+        className="size-full"
         preload="auto"
         autoPlay
         playsInline
@@ -227,7 +257,7 @@ function PreviewVideoPlayer({
           <source src={currentPreview.src} type={currentPreview.type} />
         )}
       </video>
-      {!loaded && <Skeleton className="absolute inset-0" />}
+      {!loaded && !hasCanvas && <Skeleton className="absolute inset-0" />}
       {cameraPreviews && !currentPreview && (
         <div className="absolute inset-0 bg-black text-white rounded-2xl flex justify-center items-center">
           No Preview Found
