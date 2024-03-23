@@ -130,6 +130,8 @@ def output_frames(
 
         previous_frames[camera] = frame_time
 
+    move_preview_frames("clips")
+
     while True:
         (topic, data) = detection_subscriber.get_data(timeout=0)
 
@@ -155,8 +157,6 @@ def output_frames(
 
     for preview in preview_recorders.values():
         preview.stop()
-
-    move_preview_frames("clips")
 
     if birdseye is not None:
         birdseye.stop()
