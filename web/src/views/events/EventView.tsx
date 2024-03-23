@@ -39,6 +39,8 @@ import PreviewPlayer, {
 import SummaryTimeline from "@/components/timeline/SummaryTimeline";
 import { RecordingStartingPoint } from "@/types/record";
 import VideoControls from "@/components/player/VideoControls";
+import { TimeRange } from "@/types/timeline";
+import { useCameraMotionTimestamps } from "@/hooks/use-camera-activity";
 
 type EventViewProps = {
   reviews?: ReviewSegment[];
@@ -606,7 +608,7 @@ type MotionReviewProps = {
     significant_motion: ReviewSegment[];
   };
   relevantPreviews?: Preview[];
-  timeRange: { before: number; after: number };
+  timeRange: TimeRange;
   startTime?: number;
   filter?: ReviewFilter;
   motionOnly?: boolean;
@@ -718,6 +720,12 @@ function MotionReview({
 
   const [playbackRate, setPlaybackRate] = useState(8);
   const [controlsOpen, setControlsOpen] = useState(false);
+  const seekTimestamps = useCameraMotionTimestamps(
+    timeRange,
+    motionOnly,
+    reviewItems?.all ?? [],
+    motionData ?? [],
+  );
 
   useEffect(() => {
     if (!playing) {
@@ -725,17 +733,22 @@ function MotionReview({
     }
 
     const interval = 500 / playbackRate;
-    const startTime = currentTime;
+    const startIdx = seekTimestamps.findIndex((time) => time > currentTime);
+
+    if (!startIdx) {
+      return;
+    }
+
     let counter = 0;
     const intervalId = setInterval(() => {
-      counter += 0.5;
+      counter += 1;
 
-      if (startTime + counter >= timeRange.before) {
+      if (startIdx + counter >= seekTimestamps.length) {
         setPlaying(false);
         return;
       }
 
-      setCurrentTime(startTime + counter);
+      setCurrentTime(seekTimestamps[startIdx + counter]);
     }, interval);
 
     return () => {

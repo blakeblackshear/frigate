@@ -1,3 +1,4 @@
+import { Timeline } from "@/types/timeline";
 import { useState } from "react";
 
 type TimelineEventOverlayProps = {

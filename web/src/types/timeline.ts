@@ -1,4 +1,4 @@
-type Timeline = {
+export type Timeline = {
   camera: string;
   timestamp: number;
   data: {
@@ -23,11 +23,4 @@ type Timeline = {
   source: string;
 };
 
-// may be used in the future, keep for now for reference
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-type HourlyTimeline = {
-  start: number;
-  end: number;
-  count: number;
-  hours: { [key: string]: Timeline[] };
-};
+export type TimeRange = { before: number; after: number };

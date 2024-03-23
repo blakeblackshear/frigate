@@ -21,6 +21,7 @@ import {
 } from "react-icons/md";
 import { FaBicycle } from "react-icons/fa";
 import { endOfHourOrCurrentTime } from "./dateUtil";
+import { Timeline } from "@/types/timeline";
 
 export function getTimelineIcon(timelineItem: Timeline) {
   switch (timelineItem.class_type) {

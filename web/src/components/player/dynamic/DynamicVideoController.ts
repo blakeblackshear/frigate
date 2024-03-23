@@ -1,6 +1,7 @@
 import { Recording } from "@/types/record";
 import { DynamicPlayback } from "@/types/playback";
 import { PreviewController } from "../PreviewPlayer";
+import { Timeline } from "@/types/timeline";
 
 type PlayerMode = "playback" | "scrubbing";
 
