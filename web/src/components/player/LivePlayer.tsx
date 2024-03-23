@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import MSEPlayer from "./MsePlayer";
 import JSMpegPlayer from "./JSMpegPlayer";
 import { MdCircle } from "react-icons/md";
-import useCameraActivity from "@/hooks/use-camera-activity";
+import { useCameraActivity } from "@/hooks/use-camera-activity";
 import { useRecordingsState } from "@/api/ws";
 import { LivePlayerMode } from "@/types/live";
 import useCameraLiveMode from "@/hooks/use-camera-live-mode";

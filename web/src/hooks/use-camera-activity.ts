@@ -4,6 +4,8 @@ import {
   useMotionActivity,
 } from "@/api/ws";
 import { CameraConfig } from "@/types/frigateConfig";
+import { MotionData, ReviewSegment } from "@/types/review";
+import { TimeRange } from "@/types/timeline";
 import { useEffect, useMemo, useState } from "react";
 
 type useCameraActivityReturn = {
@@ -12,7 +14,7 @@ type useCameraActivityReturn = {
   activeAudio: boolean;
 };
 
-export default function useCameraActivity(
+export function useCameraActivity(
   camera: CameraConfig,
 ): useCameraActivityReturn {
   const [activeObjects, setActiveObjects] = useState<string[]>([]);
@@ -65,4 +67,41 @@ export default function useCameraActivity(
       ? audioRms >= camera.audio.min_volume
       : false,
   };
+}
+
+export function useCameraMotionTimestamps(
+  timeRange: TimeRange,
+  motionOnly: boolean,
+  events: ReviewSegment[],
+  motion: MotionData[],
+) {
+  const timestamps = useMemo(() => {
+    const seekableTimestamps = [];
+    for (let i = timeRange.after; i <= timeRange.before; i += 0.5) {
+      if (!motionOnly) {
+        seekableTimestamps.push(i);
+      } else {
+        if (
+          events.find((seg) => seg.start_time <= i && seg.end_time >= i) !=
+          undefined
+        ) {
+          continue;
+        }
+
+        const relevantMotion = motion.find(
+          (mot) => mot.start_time <= i && mot.start_time + 15 >= i,
+        );
+
+        if (!relevantMotion || relevantMotion.motion == 0) {
+          continue;
+        }
+
+        seekableTimestamps.push(i);
+      }
+    }
+
+    return seekableTimestamps;
+  }, [timeRange, motionOnly, events, motion]);
+
+  return timestamps;
 }
