@@ -7,6 +7,7 @@ import os
 import random
 import string
 import threading
+import time
 from collections import defaultdict
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
@@ -440,7 +441,12 @@ class RecordingMaintainer(threading.Thread):
     def run(self) -> None:
         # Check for new files every 5 seconds
         wait_time = 0.0
-        while not self.stop_event.wait(wait_time):
+        while not self.stop_event.is_set():
+            time.sleep(wait_time)
+
+            if self.stop_event.is_set():
+                break
+
             run_start = datetime.datetime.now().timestamp()
 
             # check if there is an updated config
