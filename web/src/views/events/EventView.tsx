@@ -724,6 +724,7 @@ function MotionReview({
       return;
     }
 
+    const interval = 500 / playbackRate;
     const startTime = currentTime;
     let counter = 0;
     const intervalId = setInterval(() => {
@@ -735,14 +736,14 @@ function MotionReview({
       }
 
       setCurrentTime(startTime + counter);
-    }, 60);
+    }, interval);
 
     return () => {
       clearInterval(intervalId);
     };
     // do not render when current time changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playing]);
+  }, [playing, playbackRate]);
 
   if (!relevantPreviews) {
     return <ActivityIndicator />;
