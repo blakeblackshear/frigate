@@ -1,14 +1,12 @@
 import {
   MutableRefObject,
   ReactNode,
-  useCallback,
   useEffect,
   useRef,
   useState,
 } from "react";
 import Hls from "hls.js";
 import { isDesktop, isMobile } from "react-device-detect";
-import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import VideoControls from "./VideoControls";
 
@@ -86,56 +84,6 @@ export default function HlsVideoPlayer({
   const [mobileCtrlTimeout, setMobileCtrlTimeout] = useState<NodeJS.Timeout>();
   const [controls, setControls] = useState(isMobile);
   const [controlsOpen, setControlsOpen] = useState(false);
-
-  const onKeyboardShortcut = useCallback(
-    (key: string, down: boolean, repeat: boolean) => {
-      if (!videoRef.current) {
-        return;
-      }
-
-      switch (key) {
-        case "ArrowLeft":
-          if (down) {
-            const currentTime = videoRef.current.currentTime;
-
-            if (currentTime) {
-              videoRef.current.currentTime = Math.max(0, currentTime - 5);
-            }
-          }
-          break;
-        case "ArrowRight":
-          if (down) {
-            const currentTime = videoRef.current.currentTime;
-
-            if (currentTime) {
-              videoRef.current.currentTime = currentTime + 5;
-            }
-          }
-          break;
-        case "m":
-          if (down && !repeat && videoRef.current) {
-            videoRef.current.muted = !videoRef.current.muted;
-          }
-          break;
-        case " ":
-          if (down && videoRef.current) {
-            if (videoRef.current.paused) {
-              videoRef.current.play();
-            } else {
-              videoRef.current.pause();
-            }
-          }
-          break;
-      }
-    },
-    // only update when preview only changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [videoRef.current],
-  );
-  useKeyboardListener(
-    ["ArrowLeft", "ArrowRight", "m", " "],
-    onKeyboardShortcut,
-  );
 
   return (
     <div
