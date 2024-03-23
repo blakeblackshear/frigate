@@ -315,6 +315,9 @@ class Dispatcher:
             if "preset" in payload.lower():
                 command = OnvifCommandEnum.preset
                 param = payload.lower()[payload.index("_") + 1 :]
+            elif "move_relative" in payload.lower():
+                command = OnvifCommandEnum.move_relative
+                param = payload.lower()[payload.index("_") + 1 :]
             else:
                 command = OnvifCommandEnum[payload.lower()]
                 param = ""
