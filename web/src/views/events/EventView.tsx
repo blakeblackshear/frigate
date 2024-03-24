@@ -758,21 +758,26 @@ function MotionReview({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playing, playbackRate]);
 
+  const { alignStartDateToTimeline } = useTimelineUtils({
+    segmentDuration,
+  });
+
   const getDetectionType = useCallback(
     (cameraName: string) => {
       if (motionOnly) {
         return null;
       }
+      const segmentTime = alignStartDateToTimeline(currentTime);
       const matchingItem = reviewItems?.all.find(
         (item) =>
-          currentTime >= item.start_time &&
-          currentTime <= item.end_time &&
+          item.start_time >= segmentTime &&
+          item.end_time <= segmentTime + segmentDuration &&
           item.camera === cameraName,
       );
 
       return matchingItem ? matchingItem.severity : null;
     },
-    [reviewItems, currentTime, motionOnly],
+    [reviewItems, currentTime, motionOnly, alignStartDateToTimeline],
   );
 
   if (!relevantPreviews) {

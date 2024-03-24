@@ -89,7 +89,7 @@ function generateRandomMotionAudioData(): MotionData[] {
 
 const generateRandomEvent = (): ReviewSegment => {
   const start_time =
-    Math.floor(Date.now() / 1000) - 10800 - Math.random() * 60 * 60;
+    Math.floor(Date.now() / 1000) - 60 * 30 - Math.random() * 60 * 60;
   const end_time = Math.floor(start_time + Math.random() * 60 * 10);
   const severities: ReviewSeverity[] = [
     "significant_motion",
@@ -365,12 +365,12 @@ function UIPlayground() {
                 segmentDuration={zoomSettings.segmentDuration} // seconds per segment
                 timestampSpread={zoomSettings.timestampSpread} // minutes between each major timestamp
                 timelineStart={Math.floor(Date.now() / 1000)} // timestamp start of the timeline - the earlier time
-                timelineEnd={Math.floor(Date.now() / 1000) - 6 * 60 * 60} // end of timeline - the later time
+                timelineEnd={Math.floor(Date.now() / 1000) - 24 * 60 * 60} // end of timeline - the later time
                 showHandlebar // show / hide the handlebar
                 handlebarTime={handlebarTime} // set the time of the handlebar
                 setHandlebarTime={setHandlebarTime} // expose handler to set the handlebar time
                 onHandlebarDraggingChange={handleDraggingChange} // function for state of handlebar dragging
-                showMinimap // show / hide the minimap
+                showMinimap={false} // show / hide the minimap
                 minimapStartTime={minimapStartTime} // start time of the minimap - the earlier time (eg 1:00pm)
                 minimapEndTime={minimapEndTime} // end of the minimap - the later time (eg 3:00pm)
                 showExportHandles={showExportHandles}
@@ -389,7 +389,7 @@ function UIPlayground() {
                 segmentDuration={zoomSettings.segmentDuration} // seconds per segment
                 timestampSpread={zoomSettings.timestampSpread} // minutes between each major timestamp
                 timelineStart={Math.floor(Date.now() / 1000)} // timestamp start of the timeline - the earlier time
-                timelineEnd={Math.floor(Date.now() / 1000) - 6 * 60 * 60} // end of timeline - the later time
+                timelineEnd={Math.floor(Date.now() / 1000) - 24 * 60 * 60} // end of timeline - the later time
                 showHandlebar // show / hide the handlebar
                 handlebarTime={handlebarTime} // set the time of the handlebar
                 setHandlebarTime={setHandlebarTime} // expose handler to set the handlebar time
@@ -414,7 +414,7 @@ function UIPlayground() {
               <SummaryTimeline
                 reviewTimelineRef={reviewTimelineRef} // the ref to the review timeline
                 timelineStart={Math.floor(Date.now() / 1000)} // timestamp start of the timeline - the earlier time
-                timelineEnd={Math.floor(Date.now() / 1000) - 6 * 60 * 60} // end of timeline - the later time
+                timelineEnd={Math.floor(Date.now() / 1000) - 24 * 60 * 60} // end of timeline - the later time
                 segmentDuration={zoomSettings.segmentDuration}
                 events={mockEvents}
                 severityType={"alert"} // show only events of this severity on the summary timeline
