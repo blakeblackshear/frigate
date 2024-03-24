@@ -1,3 +1,4 @@
+import Logo from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Heading from "@/components/ui/heading";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import copy from "copy-to-clipboard";
 import { useCallback, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
@@ -61,37 +63,29 @@ function Logs() {
   );
 
   return (
-    <div className="relative w-full h-full overflow-hidden">
+    <div className="size-full flex flex-col pr-2">
       <div className="flex justify-between items-center">
-        <Heading className="first:mt-2" as="h2">
-          Logs
-        </Heading>
+        <ToggleGroup
+          className="*:px-3 *:py-4 *:rounded-2xl"
+          type="single"
+          size="sm"
+          value={logService}
+          onValueChange={(value: LogType) =>
+            value ? setLogService(value) : null
+          } // don't allow the severity to be unselected
+        >
+          {Object.values(logTypes).map((item) => (
+            <ToggleGroupItem
+              key={item}
+              className={`flex items-center justify-between gap-2 ${logService == item ? "" : "text-gray-500"}`}
+              value={item}
+              aria-label={`Select ${item}`}
+            >
+              <div className="capitalize">{`${item} Logs`}</div>
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
         <div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button className="mx-2 capitalize" variant="outline">
-                {logService} Logs
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuLabel>Select Logs To View</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuRadioGroup
-                value={logService}
-                onValueChange={(type) => setLogService(type as LogType)}
-              >
-                {Object.values(logTypes).map((item) => (
-                  <DropdownMenuRadioItem
-                    className="capitalize"
-                    key={item}
-                    value={item}
-                  >
-                    {item} Logs
-                  </DropdownMenuRadioItem>
-                ))}
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
           <Button onClick={handleCopyLogs}>Copy to Clipboard</Button>
         </div>
       </div>
@@ -113,7 +107,7 @@ function Logs() {
 
       <div
         ref={contentRef}
-        className="absolute left-0 top-16 bottom-2 right-2 overflow-auto font-mono text-sm bg-secondary rounded p-2 whitespace-pre-wrap"
+        className="w-full h-min my-2 font-mono text-sm bg-secondary rounded p-2 whitespace-pre-wrap overflow-auto"
       >
         {logs}
         <div ref={endLogRef} />
