@@ -205,13 +205,15 @@ export function EventSegment({
       onClick={segmentClick}
       onTouchEnd={(event) => handleTouchStart(event, segmentClick)}
     >
-      <MinimapBounds
-        isFirstSegmentInMinimap={isFirstSegmentInMinimap}
-        isLastSegmentInMinimap={isLastSegmentInMinimap}
-        alignedMinimapStartTime={alignedMinimapStartTime}
-        alignedMinimapEndTime={alignedMinimapEndTime}
-        firstMinimapSegmentRef={firstMinimapSegmentRef}
-      />
+      {showMinimap && (
+        <MinimapBounds
+          isFirstSegmentInMinimap={isFirstSegmentInMinimap}
+          isLastSegmentInMinimap={isLastSegmentInMinimap}
+          alignedMinimapStartTime={alignedMinimapStartTime}
+          alignedMinimapEndTime={alignedMinimapEndTime}
+          firstMinimapSegmentRef={firstMinimapSegmentRef}
+        />
+      )}
 
       <Tick timestamp={timestamp} timestampSpread={timestampSpread} />
 
