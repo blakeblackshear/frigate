@@ -1,18 +1,9 @@
-import Logo from "@/components/Logo";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import Heading from "@/components/ui/heading";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import copy from "copy-to-clipboard";
 import { useCallback, useMemo, useRef, useState } from "react";
+import { FaRegClipboard } from "react-icons/fa6";
+import { LuCopy } from "react-icons/lu";
 import useSWR from "swr";
 
 const logTypes = ["frigate", "go2rtc", "nginx"] as const;
@@ -86,7 +77,14 @@ function Logs() {
           ))}
         </ToggleGroup>
         <div>
-          <Button onClick={handleCopyLogs}>Copy to Clipboard</Button>
+          <Button
+            className="flex justify-between items-center gap-2"
+            size="sm"
+            onClick={handleCopyLogs}
+          >
+            <LuCopy />
+            <div className="hidden md:block">Copy to Clipboard</div>
+          </Button>
         </div>
       </div>
 
