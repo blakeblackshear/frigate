@@ -202,7 +202,9 @@ export default function PreviewThumbnailPlayer({
               <div className="flex h-full justify-between items-start mx-3 pb-1 text-white text-sm ">
                 {(review.severity == "alert" ||
                   review.severity == "detection") && (
-                  <Chip className="absolute top-2 left-2 flex gap-1 bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 z-0">
+                  <Chip
+                    className={`absolute top-2 left-2 flex gap-1 bg-gradient-to-br ${review.has_been_reviewed ? "from-green-600 to-green-700 bg-green-600" : "from-gray-400 to-gray-500 bg-gray-500"} z-0`}
+                  >
                     {review.data.objects.map((object) => {
                       return getIconForLabel(object, "size-3 text-white");
                     })}
@@ -225,9 +227,6 @@ export default function PreviewThumbnailPlayer({
           </>
         )}
       </div>
-      {!playingBack && imgLoaded && review.has_been_reviewed && (
-        <div className="absolute inset-0 z-10 bg-black bg-opacity-60" />
-      )}
     </div>
   );
 }
