@@ -196,13 +196,15 @@ export function MotionSegment({
         >
           {!motionOnly && (
             <>
-              <MinimapBounds
-                isFirstSegmentInMinimap={isFirstSegmentInMinimap}
-                isLastSegmentInMinimap={isLastSegmentInMinimap}
-                alignedMinimapStartTime={alignedMinimapStartTime}
-                alignedMinimapEndTime={alignedMinimapEndTime}
-                firstMinimapSegmentRef={firstMinimapSegmentRef}
-              />
+              {showMinimap && (
+                <MinimapBounds
+                  isFirstSegmentInMinimap={isFirstSegmentInMinimap}
+                  isLastSegmentInMinimap={isLastSegmentInMinimap}
+                  alignedMinimapStartTime={alignedMinimapStartTime}
+                  alignedMinimapEndTime={alignedMinimapEndTime}
+                  firstMinimapSegmentRef={firstMinimapSegmentRef}
+                />
+              )}
 
               <Tick
                 key={`${segmentKey}_tick`}

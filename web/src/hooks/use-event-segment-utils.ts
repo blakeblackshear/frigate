@@ -46,24 +46,33 @@ export const useEventSegmentUtils = (
 
   const getSeverity = useCallback(
     (time: number, displaySeverityType: number): number[] => {
-      const activeEvents = events?.filter((event) => {
+      let highestSeverityValue = 0;
+      let highestOtherSeverityValue = 0;
+      let hasDisplaySeverityType = false;
+
+      for (const event of events || []) {
         const segmentStart = getSegmentStart(event.start_time);
         const segmentEnd = getSegmentEnd(event.end_time);
-        return time >= segmentStart && time < segmentEnd;
-      });
 
-      if (activeEvents?.length === 0) return [0];
-      const severityValues = activeEvents.map((event) =>
-        mapSeverityToNumber(event.severity),
-      );
-      const highestSeverityValue = Math.max(...severityValues);
+        if (time >= segmentStart && time < segmentEnd) {
+          const severity = mapSeverityToNumber(event.severity);
 
-      if (severityValues.includes(displaySeverityType)) {
-        const otherSeverityValues = severityValues.filter(
-          (severity) => severity !== displaySeverityType,
-        );
-        const highestOtherSeverityValue = Math.max(...otherSeverityValues);
+          if (severity === displaySeverityType) {
+            hasDisplaySeverityType = true;
+            highestOtherSeverityValue = Math.max(
+              highestOtherSeverityValue,
+              highestSeverityValue,
+            );
+          } else {
+            highestSeverityValue = Math.max(highestSeverityValue, severity);
+          }
+        }
+      }
+
+      if (hasDisplaySeverityType) {
         return [displaySeverityType, highestOtherSeverityValue];
+      } else if (highestSeverityValue === 0) {
+        return [0];
       } else {
         return [highestSeverityValue];
       }
