@@ -519,7 +519,7 @@ function DetectionReview({
         )}
 
         <div
-          className="w-full m-2 grid sm:grid-cols-2 md:grid-cols-3 3xl:grid-cols-4 gap-2 md:gap-4"
+          className="w-full m-2 p-1 grid sm:grid-cols-2 md:grid-cols-3 3xl:grid-cols-4 gap-2 md:gap-4"
           ref={contentRef}
         >
           {currentItems &&
@@ -534,7 +534,7 @@ function DetectionReview({
                   data-segment-start={
                     alignStartDateToTimeline(value.start_time) - segmentDuration
                   }
-                  className={`review-item outline outline-offset-1 rounded-lg shadow-none transition-all my-1 md:my-0 ${selected ? `outline-4 shadow-[0_0_6px_1px] outline-severity_${value.severity} shadow-severity_${value.severity}` : "outline-0 duration-500"}`}
+                  className={`review-item outline outline-offset-1 rounded-lg shadow-none transition-all my-1 md:my-0 ${selected ? `outline-3 outline-severity_${value.severity} shadow-severity_${value.severity}` : "outline-0 duration-500"}`}
                 >
                   <div className="aspect-video rounded-lg overflow-hidden">
                     <PreviewThumbnailPlayer
@@ -758,6 +758,23 @@ function MotionReview({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playing, playbackRate]);
 
+  const getDetectionType = useCallback(
+    (cameraName: string) => {
+      if (motionOnly) {
+        return null;
+      }
+      const matchingItem = reviewItems?.all.find(
+        (item) =>
+          currentTime >= item.start_time &&
+          currentTime <= item.end_time &&
+          item.camera === cameraName,
+      );
+
+      return matchingItem ? matchingItem.severity : null;
+    },
+    [reviewItems, currentTime, motionOnly],
+  );
+
   if (!relevantPreviews) {
     return <ActivityIndicator />;
   }
@@ -767,7 +784,7 @@ function MotionReview({
       <div className="flex flex-1 flex-wrap content-start gap-2 md:gap-4 overflow-y-auto no-scrollbar">
         <div
           ref={contentRef}
-          className="w-full m-2 grid sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 gap-2 md:gap-4 overflow-auto no-scrollbar"
+          className="w-full m-2 p-1 grid sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 gap-2 md:gap-4 overflow-auto no-scrollbar"
         >
           {reviewCameras.map((camera) => {
             let grow;
@@ -779,10 +796,11 @@ function MotionReview({
             } else {
               grow = "aspect-video";
             }
+            const detectionType = getDetectionType(camera.name);
             return (
               <PreviewPlayer
                 key={camera.name}
-                className={`${grow}`}
+                className={`${detectionType ? `outline outline-3 outline-offset-1 outline-severity_${detectionType}` : "outline-0 shadow-none"} rounded-2xl ${grow}`}
                 camera={camera.name}
                 timeRange={currentTimeRange}
                 startTime={startTime}

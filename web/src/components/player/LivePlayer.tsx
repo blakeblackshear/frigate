@@ -142,7 +142,7 @@ export default function LivePlayer({
     <div
       className={`relative flex justify-center ${liveMode == "jsmpeg" ? "size-full" : "w-full"} outline cursor-pointer ${
         activeTracking
-          ? "outline-severity_alert outline-1 rounded-2xl shadow-[0_0_6px_2px] shadow-severity_alert"
+          ? "outline-severity_alert outline-3 rounded-2xl shadow-severity_alert"
           : "outline-0 outline-background"
       } transition-all duration-500 ${className}`}
       onClick={onClick}

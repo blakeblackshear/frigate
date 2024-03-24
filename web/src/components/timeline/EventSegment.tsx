@@ -179,13 +179,13 @@ export function EventSegment({
           `outline-severity_${severityType}`,
           `shadow-severity_${severityType}`,
         );
-        element.classList.add("outline-4", "shadow-[0_0_6px_1px]");
-        element.classList.remove("outline-0", "shadow-none");
+        element.classList.add("outline-3");
+        element.classList.remove("outline-0");
 
         // Remove the classes after a short timeout
         setTimeout(() => {
-          element.classList.remove("outline-4", "shadow-[0_0_6px_1px]");
-          element.classList.add("outline-0", "shadow-none");
+          element.classList.remove("outline-3");
+          element.classList.add("outline-0");
         }, 3000);
       }
 
@@ -226,36 +226,36 @@ export function EventSegment({
       {severity.map((severityValue: number, index: number) => (
         <React.Fragment key={index}>
           {severityValue === displaySeverityType && (
-            <div className="absolute left-1/2 transform -translate-x-1/2 w-[20px] md:w-[40px] h-2 z-10 cursor-pointer">
-              <div className="flex flex-row justify-center w-[20px] md:w-[40px]">
-                <div className="flex justify-center">
-                  <HoverCard openDelay={200} closeDelay={100}>
-                    <div
-                      className="absolute left-1/2 transform -translate-x-1/2 w-[8px] h-2 ml-[2px] z-10 cursor-pointer"
-                      data-severity={severityValue}
-                    >
-                      <HoverCardTrigger asChild>
+            <HoverCard openDelay={200} closeDelay={100}>
+              <HoverCardTrigger asChild>
+                <div className="absolute left-1/2 transform -translate-x-1/2 w-[20px] md:w-[40px] h-2 z-10 cursor-pointer">
+                  <div className="flex flex-row justify-center w-[20px] md:w-[40px]">
+                    <div className="flex justify-center">
+                      <div
+                        className="absolute left-1/2 transform -translate-x-1/2 w-[8px] h-2 ml-[2px] z-10 cursor-pointer"
+                        data-severity={severityValue}
+                      >
                         <div
                           key={`${segmentKey}_${index}_primary_data`}
                           className={`w-full h-2 bg-gradient-to-r ${roundBottomPrimary ? "rounded-bl-full rounded-br-full" : ""} ${roundTopPrimary ? "rounded-tl-full rounded-tr-full" : ""} ${severityColors[severityValue]}`}
                         ></div>
-                      </HoverCardTrigger>
-                      <HoverCardPortal>
-                        <HoverCardContent
-                          className="rounded-2xl w-[250px] p-2"
-                          side="left"
-                        >
-                          <img
-                            className="rounded-lg"
-                            src={`${apiHost}${eventThumbnail.replace("/media/frigate/", "")}`}
-                          />
-                        </HoverCardContent>
-                      </HoverCardPortal>
+                      </div>
                     </div>
-                  </HoverCard>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </HoverCardTrigger>
+              <HoverCardPortal>
+                <HoverCardContent
+                  className="rounded-2xl w-[250px] p-2"
+                  side="left"
+                >
+                  <img
+                    className="rounded-lg"
+                    src={`${apiHost}${eventThumbnail.replace("/media/frigate/", "")}`}
+                  />
+                </HoverCardContent>
+              </HoverCardPortal>
+            </HoverCard>
           )}
         </React.Fragment>
       ))}
