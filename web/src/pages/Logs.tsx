@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import copy from "copy-to-clipboard";
 import { useCallback, useMemo, useRef, useState } from "react";
-import { FaRegClipboard } from "react-icons/fa6";
 import { LuCopy } from "react-icons/lu";
 import useSWR from "swr";
 
