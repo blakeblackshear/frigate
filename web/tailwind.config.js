@@ -9,7 +9,7 @@ module.exports = {
   ],
   safelist: [
     {
-      pattern: /(outline|shadow)-severity_(alert|detection|motion)/,
+      pattern: /(outline|shadow)-severity_(alert|detection|significant_motion)/,
     },
   ],
   theme: {
@@ -87,9 +87,9 @@ module.exports = {
           DEFAULT: "hsl(var(--severity_detection))",
           dimmed: "hsl(var(--severity_detection_dimmed))",
         },
-        severity_motion: {
-          DEFAULT: "hsl(var(--severity_motion))",
-          dimmed: "hsl(var(--severity_motion_dimmed))",
+        severity_significant_motion: {
+          DEFAULT: "hsl(var(--severity_significant_motion))",
+          dimmed: "hsl(var(--severity_significant_motion_dimmed))",
         },
         motion_review: {
           DEFAULT: "hsl(var(--motion_review))",

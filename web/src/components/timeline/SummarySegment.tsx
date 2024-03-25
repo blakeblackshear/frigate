@@ -34,7 +34,9 @@ export function SummarySegment({
   const segmentKey = useMemo(() => segmentTime, [segmentTime]);
 
   const severityColors: { [key: number]: string } = {
-    1: reviewed ? "bg-severity_motion/50" : "bg-severity_motion",
+    1: reviewed
+      ? "bg-severity_significant_motion/50"
+      : "bg-severity_significant_motion",
     2: reviewed ? "bg-severity_detection/50" : "bg-severity_detection",
     3: reviewed ? "bg-severity_alert/50" : "bg-severity_alert",
   };

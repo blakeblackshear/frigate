@@ -33,7 +33,7 @@ export const useMotionSegmentUtils = (
 
   const interpolateMotionAudioData = useCallback(
     (value: number, newMax: number): number => {
-      return Math.ceil((Math.abs(value) / 100.0) * newMax) || 1;
+      return Math.ceil((Math.abs(value) / 100.0) * newMax) || 0;
     },
     [],
   );

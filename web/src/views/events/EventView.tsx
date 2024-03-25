@@ -40,7 +40,6 @@ import SummaryTimeline from "@/components/timeline/SummaryTimeline";
 import { RecordingStartingPoint } from "@/types/record";
 import VideoControls from "@/components/player/VideoControls";
 import { TimeRange } from "@/types/timeline";
-import { useCameraMotionTimestamps } from "@/hooks/use-camera-activity";
 
 type EventViewProps = {
   reviews?: ReviewSegment[];
@@ -247,7 +246,7 @@ export default function EventView({
             value="significant_motion"
             aria-label="Select motion"
           >
-            <MdCircle className="size-2 md:mr-[10px] text-severity_motion" />
+            <MdCircle className="size-2 md:mr-[10px] text-severity_significant_motion" />
             <div className="hidden md:block">Motion</div>
           </ToggleGroupItem>
         </ToggleGroup>
@@ -720,43 +719,111 @@ function MotionReview({
 
   const [playbackRate, setPlaybackRate] = useState(8);
   const [controlsOpen, setControlsOpen] = useState(false);
-  const seekTimestamps = useCameraMotionTimestamps(
-    timeRange,
-    motionOnly,
-    reviewItems?.all ?? [],
-    motionData ?? [],
-  );
+
+  const noMotionRanges = useMemo(() => {
+    if (!motionData || !reviewItems) {
+      return;
+    }
+
+    if (!motionOnly) {
+      return [];
+    }
+
+    const ranges = [];
+    let currentSegmentStart = null;
+    let currentSegmentEnd = null;
+
+    for (let i = 0; i < motionData.length; i = i + segmentDuration / 15) {
+      const motionStart = motionData[i].start_time;
+      const motionEnd = motionStart + segmentDuration;
+
+      const segmentMotion = motionData
+        .slice(i, i + segmentDuration / 15)
+        .some(({ motion }) => motion !== undefined && motion > 0);
+      const overlappingReviewItems = reviewItems.all.some(
+        (item) =>
+          (item.start_time >= motionStart && item.start_time < motionEnd) ||
+          (item.end_time > motionStart && item.end_time <= motionEnd) ||
+          (item.start_time <= motionStart && item.end_time >= motionEnd),
+      );
+
+      if (!segmentMotion || overlappingReviewItems) {
+        if (currentSegmentStart === null) {
+          currentSegmentStart = motionStart;
+        }
+        currentSegmentEnd = motionEnd;
+      } else {
+        if (currentSegmentStart !== null) {
+          ranges.push([currentSegmentStart, currentSegmentEnd]);
+          currentSegmentStart = null;
+          currentSegmentEnd = null;
+        }
+      }
+    }
+
+    if (currentSegmentStart !== null) {
+      ranges.push([currentSegmentStart, currentSegmentEnd]);
+    }
+
+    return ranges;
+  }, [motionData, reviewItems, motionOnly]);
+
+  const nextTimestamp = useMemo(() => {
+    if (!noMotionRanges) {
+      return;
+    }
+    let currentRange = 0;
+    let nextTimestamp = currentTime + 0.5;
+
+    while (currentRange < noMotionRanges.length) {
+      const [start, end] = noMotionRanges[currentRange];
+
+      if (start && end) {
+        // If the current time is before the start of the current range
+        if (currentTime < start) {
+          // The next timestamp is either the start of the current range or currentTime + 0.5, whichever is smaller
+          nextTimestamp = Math.min(start, nextTimestamp);
+          break;
+        }
+        // If the current time is within the current range
+        else if (currentTime >= start && currentTime < end) {
+          // The next timestamp is the end of the current range
+          nextTimestamp = end;
+          currentRange++;
+        }
+        // If the current time is past the end of the current range
+        else {
+          currentRange++;
+        }
+      }
+    }
+
+    return nextTimestamp;
+  }, [currentTime, noMotionRanges]);
+
+  const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (!playing) {
-      return;
-    }
-
-    const interval = 500 / playbackRate;
-    const startIdx = seekTimestamps.findIndex((time) => time > currentTime);
-
-    if (!startIdx) {
-      return;
-    }
-
-    let counter = 0;
-    const intervalId = setInterval(() => {
-      counter += 1;
-
-      if (startIdx + counter >= seekTimestamps.length) {
-        setPlaying(false);
+    if (nextTimestamp) {
+      if (!playing && timeoutIdRef.current != null) {
+        clearTimeout(timeoutIdRef.current);
         return;
       }
 
-      setCurrentTime(seekTimestamps[startIdx + counter]);
-    }, interval);
+      const handleTimeout = () => {
+        setCurrentTime(nextTimestamp);
+        timeoutIdRef.current = setTimeout(handleTimeout, 500 / playbackRate);
+      };
 
-    return () => {
-      clearInterval(intervalId);
-    };
-    // do not render when current time changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playing, playbackRate]);
+      timeoutIdRef.current = setTimeout(handleTimeout, 500 / playbackRate);
+
+      return () => {
+        if (timeoutIdRef.current) {
+          clearTimeout(timeoutIdRef.current);
+        }
+      };
+    }
+  }, [playing, playbackRate, nextTimestamp]);
 
   const { alignStartDateToTimeline } = useTimelineUtils({
     segmentDuration,
@@ -767,11 +834,16 @@ function MotionReview({
       if (motionOnly) {
         return null;
       }
-      const segmentTime = alignStartDateToTimeline(currentTime);
+      const segmentStartTime = alignStartDateToTimeline(currentTime);
+      const segmentEndTime = segmentStartTime + segmentDuration;
       const matchingItem = reviewItems?.all.find(
         (item) =>
-          item.start_time >= segmentTime &&
-          item.end_time <= segmentTime + segmentDuration &&
+          ((item.start_time >= segmentStartTime &&
+            item.start_time < segmentEndTime) ||
+            (item.end_time > segmentStartTime &&
+              item.end_time <= segmentEndTime) ||
+            (item.start_time <= segmentStartTime &&
+              item.end_time >= segmentEndTime)) &&
           item.camera === cameraName,
       );
 

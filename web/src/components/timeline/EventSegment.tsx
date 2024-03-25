@@ -155,8 +155,8 @@ export function EventSegment({
 
   const severityColors: { [key: number]: string } = {
     1: reviewed
-      ? "from-severity_motion-dimmed/50 to-severity_motion/50"
-      : "from-severity_motion-dimmed to-severity_motion",
+      ? "from-severity_significant_motion-dimmed/50 to-severity_significant_motion/50"
+      : "from-severity_significant_motion-dimmed to-severity_significant_motion",
     2: reviewed
       ? "from-severity_detection-dimmed/50 to-severity_detection/50"
       : "from-severity_detection-dimmed to-severity_detection",

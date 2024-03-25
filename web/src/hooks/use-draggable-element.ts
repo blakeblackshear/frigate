@@ -368,26 +368,9 @@ function useDraggableElement({
 
       const alignedSegmentTime = alignStartDateToTimeline(draggableElementTime);
 
-      let segmentElement = timelineRef.current.querySelector(
+      const segmentElement = timelineRef.current.querySelector(
         `[data-segment-id="${alignedSegmentTime}"]`,
       );
-
-      if (!segmentElement) {
-        // segment not found, maybe we collapsed over a collapsible segment
-        let searchTime = alignedSegmentTime;
-        while (searchTime >= timelineStartAligned - timelineDuration) {
-          // Decrement currentTime by segmentDuration
-          searchTime -= segmentDuration;
-          segmentElement = timelineRef.current.querySelector(
-            `[data-segment-id="${searchTime}"]`,
-          );
-
-          if (segmentElement) {
-            // segmentElement found
-            break;
-          }
-        }
-      }
 
       if (segmentElement) {
         const timelineRect = timelineRef.current.getBoundingClientRect();
@@ -421,6 +404,37 @@ function useDraggableElement({
     timelineCollapsed,
     segments,
   ]);
+
+  useEffect(() => {
+    if (timelineRef.current && draggableElementTime && timelineCollapsed) {
+      const alignedSegmentTime = alignStartDateToTimeline(draggableElementTime);
+
+      let segmentElement = timelineRef.current.querySelector(
+        `[data-segment-id="${alignedSegmentTime}"]`,
+      );
+
+      if (!segmentElement) {
+        // segment not found, maybe we collapsed over a collapsible segment
+        let searchTime = alignedSegmentTime;
+        while (searchTime >= timelineStartAligned - timelineDuration) {
+          searchTime -= segmentDuration;
+          segmentElement = timelineRef.current.querySelector(
+            `[data-segment-id="${searchTime}"]`,
+          );
+
+          if (segmentElement) {
+            // found, set time
+            if (setDraggableElementTime) {
+              setDraggableElementTime(searchTime);
+            }
+            break;
+          }
+        }
+      }
+    }
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timelineCollapsed]);
 
   return { handleMouseDown, handleMouseUp, handleMouseMove };
 }
