@@ -8,7 +8,7 @@ from enum import Enum
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
 
-from frigate.config import FrigateConfig
+from frigate.config import FrigateConfig, SnapshotsConfig
 from frigate.const import CLIPS_DIR
 from frigate.models import Event, Timeline
 
@@ -64,10 +64,12 @@ class EventCleanup(threading.Thread):
     def expire(self, media_type: EventCleanupType) -> list[str]:
         ## Expire events from unlisted cameras based on the global config
         if media_type == EventCleanupType.clips:
+            base_dir = CLIPS_DIR
             retain_config = self.config.record.events.retain
             file_extension = None  # mp4 clips are no longer stored in /clips
             update_params = {"has_clip": False}
         else:
+            base_dir = self.config.snapshots.path
             retain_config = self.config.snapshots.retain
             file_extension = "jpg"
             update_params = {"has_snapshot": False}
@@ -101,12 +103,12 @@ class EventCleanup(threading.Thread):
             for expired in expired_events:
                 media_name = f"{expired.camera}-{expired.id}"
                 media_path = Path(
-                    f"{os.path.join(CLIPS_DIR, media_name)}.{file_extension}"
+                    f"{os.path.join(base_dir, media_name)}.{file_extension}"
                 )
                 media_path.unlink(missing_ok=True)
                 if file_extension == "jpg":
                     media_path = Path(
-                        f"{os.path.join(CLIPS_DIR, media_name)}-clean.png"
+                        f"{os.path.join(base_dir, media_name)}-clean.png"
                     )
                     media_path.unlink(missing_ok=True)
 
@@ -124,8 +126,10 @@ class EventCleanup(threading.Thread):
         ## Expire events from cameras based on the camera config
         for name, camera in self.config.cameras.items():
             if media_type == EventCleanupType.clips:
+                base_dir = CLIPS_DIR
                 retain_config = camera.record.events.retain
             else:
+                base_dir = camera.snapshots.path
                 retain_config = camera.snapshots.retain
 
             # get distinct objects in database for this camera
@@ -165,11 +169,11 @@ class EventCleanup(threading.Thread):
                     if media_type == EventCleanupType.snapshots:
                         media_name = f"{event.camera}-{event.id}"
                         media_path = Path(
-                            f"{os.path.join(CLIPS_DIR, media_name)}.{file_extension}"
+                            f"{os.path.join(base_dir, media_name)}.{file_extension}"
                         )
                         media_path.unlink(missing_ok=True)
                         media_path = Path(
-                            f"{os.path.join(CLIPS_DIR, media_name)}-clean.png"
+                            f"{os.path.join(base_dir, media_name)}-clean.png"
                         )
                         media_path.unlink(missing_ok=True)
 
@@ -198,10 +202,11 @@ class EventCleanup(threading.Thread):
         duplicate_events = Event.raw(duplicate_query)
         for event in duplicate_events:
             logger.debug(f"Removing duplicate: {event.id}")
+            snapshot_config: SnapshotsConfig = self.config.cameras[event.camera].snapshots
             media_name = f"{event.camera}-{event.id}"
-            media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}.jpg")
+            media_path = Path(f"{os.path.join(snapshot_config.path, media_name)}.jpg")
             media_path.unlink(missing_ok=True)
-            media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}-clean.png")
+            media_path = Path(f"{os.path.join(snapshot_config.path, media_name)}-clean.png")
             media_path.unlink(missing_ok=True)
 
         (

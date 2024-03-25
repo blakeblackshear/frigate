@@ -26,6 +26,7 @@ from frigate.const import (
     AUDIO_MIN_CONFIDENCE,
     CACHE_DIR,
     CACHE_SEGMENT_FORMAT,
+    CLIPS_DIR,
     DEFAULT_DB_PATH,
     MAX_PRE_CAPTURE,
     REGEX_CAMERA_NAME,
@@ -722,6 +723,7 @@ class CameraFfmpegConfig(FfmpegConfig):
 
 class SnapshotsConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Snapshots enabled.")
+    path: str = Field(default=CLIPS_DIR, title="Snapshots path.")
     clean_copy: bool = Field(
         default=True, title="Create a clean copy of the snapshot image."
     )

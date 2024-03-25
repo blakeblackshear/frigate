@@ -25,6 +25,7 @@ from peewee import DoesNotExist, fn
 from tzlocal import get_localzone_name
 from werkzeug.utils import secure_filename
 
+from frigate.config import SnapshotsConfig
 from frigate.const import (
     CACHE_DIR,
     CLIPS_DIR,
@@ -978,8 +979,9 @@ def event_snapshot_clean(id):
         )
     if png_bytes is None:
         try:
+            snapshot_config: SnapshotsConfig = current_app.frigate_config.cameras[event.camera].snapshots
             clean_snapshot_path = os.path.join(
-                CLIPS_DIR, f"{event.camera}-{event.id}-clean.png"
+                snapshot_config.path, f"{event.camera}-{event.id}-clean.png"
             )
             if not os.path.exists(clean_snapshot_path):
                 return make_response(
@@ -989,7 +991,7 @@ def event_snapshot_clean(id):
                     404,
                 )
             with open(
-                os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}-clean.png"), "rb"
+                os.path.join(snapshot_config.path, f"{event.camera}-{event.id}-clean.png"), "rb"
             ) as image_file:
                 png_bytes = image_file.read()
         except Exception:
@@ -1023,8 +1025,9 @@ def event_snapshot(id):
                 jsonify({"success": False, "message": "Snapshot not available"}), 404
             )
         # read snapshot from disk
+        snapshot_config: SnapshotsConfig = current_app.frigate_config.cameras[event.camera].snapshots
         with open(
-            os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}.jpg"), "rb"
+            os.path.join(snapshot_config.path, f"{event.camera}-{event.id}.jpg"), "rb"
         ) as image_file:
             jpg_bytes = image_file.read()
     except DoesNotExist:

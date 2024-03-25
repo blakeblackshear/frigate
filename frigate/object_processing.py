@@ -23,7 +23,6 @@ from frigate.config import (
     SnapshotsConfig,
     ZoomingModeEnum,
 )
-from frigate.const import CLIPS_DIR
 from frigate.events.types import EventStateEnum, EventTypeEnum
 from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.util.image import (
@@ -897,7 +896,7 @@ class TrackedObjectProcessor(threading.Thread):
                     logger.warning(f"Unable to save snapshot for {obj.obj_data['id']}.")
                 else:
                     with open(
-                        os.path.join(CLIPS_DIR, f"{camera}-{obj.obj_data['id']}.jpg"),
+                        os.path.join(snapshot_config.path, f"{camera}-{obj.obj_data['id']}.jpg"),
                         "wb",
                     ) as j:
                         j.write(jpg_bytes)
@@ -912,7 +911,7 @@ class TrackedObjectProcessor(threading.Thread):
                     else:
                         with open(
                             os.path.join(
-                                CLIPS_DIR,
+                                snapshot_config.path,
                                 f"{camera}-{obj.obj_data['id']}-clean.png",
                             ),
                             "wb",

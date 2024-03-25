@@ -11,8 +11,7 @@ from typing import Optional
 import cv2
 
 from frigate.comms.events_updater import EventUpdatePublisher
-from frigate.config import CameraConfig, FrigateConfig
-from frigate.const import CLIPS_DIR
+from frigate.config import CameraConfig, FrigateConfig, SnapshotsConfig
 from frigate.events.types import EventStateEnum, EventTypeEnum
 from frigate.util.image import draw_box_with_label
 
@@ -94,6 +93,8 @@ class ExternalEventProcessor:
         draw: dict[str, any],
         img_frame: any,
     ) -> str:
+        snapshot_config: SnapshotsConfig = camera_config.snapshots
+
         # write clean snapshot if enabled
         if camera_config.snapshots.clean_copy:
             ret, png = cv2.imencode(".png", img_frame)
@@ -101,7 +102,7 @@ class ExternalEventProcessor:
             if ret:
                 with open(
                     os.path.join(
-                        CLIPS_DIR,
+                        snapshot_config.path,
                         f"{camera_config.name}-{event_id}-clean.png",
                     ),
                     "wb",
@@ -130,7 +131,7 @@ class ExternalEventProcessor:
 
         ret, jpg = cv2.imencode(".jpg", img_frame)
         with open(
-            os.path.join(CLIPS_DIR, f"{camera_config.name}-{event_id}.jpg"),
+            os.path.join(snapshot_config.path, f"{camera_config.name}-{event_id}.jpg"),
             "wb",
         ) as j:
             j.write(jpg.tobytes())
