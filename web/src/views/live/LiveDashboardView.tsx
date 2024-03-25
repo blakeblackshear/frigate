@@ -11,7 +11,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { usePersistence } from "@/hooks/use-persistence";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import { ReviewSegment } from "@/types/review";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isDesktop, isMobile, isSafari } from "react-device-detect";
 import useSWR from "swr";
 
@@ -78,6 +78,53 @@ export default function LiveDashboardView({
       removeEventListener("visibilitychange", visibilityListener);
     };
   }, [visibilityListener]);
+
+  const [visibleCameras, setVisibleCameras] = useState<string[]>([]);
+  const visibleCameraObserver = useRef<IntersectionObserver | null>(null);
+  useEffect(() => {
+    const visibleCameras = new Set<string>();
+    visibleCameraObserver.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const camera = (entry.target as HTMLElement).dataset.camera;
+
+          if (!camera) {
+            return;
+          }
+
+          if (entry.isIntersecting) {
+            visibleCameras.add(camera);
+          } else {
+            visibleCameras.delete(camera);
+          }
+
+          setVisibleCameras([...visibleCameras]);
+        });
+      },
+      { threshold: 0.5 },
+    );
+
+    return () => {
+      visibleCameraObserver.current?.disconnect();
+    };
+  }, []);
+
+  const cameraRef = useCallback(
+    (node: HTMLElement | null) => {
+      if (!visibleCameraObserver.current) {
+        return;
+      }
+
+      try {
+        if (node) visibleCameraObserver.current.observe(node);
+      } catch (e) {
+        // no op
+      }
+    },
+    // we need to listen on the value of the ref
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [visibleCameraObserver.current],
+  );
 
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
 
@@ -149,9 +196,12 @@ export default function LiveDashboardView({
           }
           return (
             <LivePlayer
+              cameraRef={cameraRef}
               key={camera.name}
               className={grow}
-              windowVisible={windowVisible}
+              windowVisible={
+                windowVisible && visibleCameras.includes(camera.name)
+              }
               cameraConfig={camera}
               preferredLiveMode={isSafari ? "webrtc" : "mse"}
               onClick={() => onSelectCamera(camera.name)}
