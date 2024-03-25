@@ -358,6 +358,7 @@ def motion_activity():
     )
 
     clauses = [(Recordings.start_time > after) & (Recordings.end_time < before)]
+    clauses.append((Recordings.motion > 0))
 
     if cameras != "all":
         camera_list = cameras.split(",")
@@ -365,6 +366,7 @@ def motion_activity():
 
     data: list[Recordings] = (
         Recordings.select(
+            Recordings.camera,
             Recordings.start_time,
             Recordings.motion,
         )
@@ -378,18 +380,22 @@ def motion_activity():
     scale = request.args.get("scale", type=int, default=30)
 
     # resample data using pandas to get activity on scaled basis
-    df = pd.DataFrame(data, columns=["start_time", "motion"])
+    df = pd.DataFrame(data, columns=["start_time", "motion", "camera"])
 
     # set date as datetime index
     df["start_time"] = pd.to_datetime(df["start_time"], unit="s")
     df.set_index(["start_time"], inplace=True)
 
     # normalize data
-    df = (
-        df.resample(f"{scale}S")
+    motion = (
+        df["motion"]
+        .resample(f"{scale}S")
         .apply(lambda x: max(x, key=abs, default=0.0))
         .fillna(0.0)
+        .to_frame()
     )
+    cameras = df["camera"].resample(f"{scale}S").agg(lambda x: ",".join(set(x)))
+    df = motion.join(cameras)
 
     length = df.shape[0]
     chunk = int(60 * (60 / scale))
