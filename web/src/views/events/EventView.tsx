@@ -720,7 +720,7 @@ function MotionReview({
   const [playbackRate, setPlaybackRate] = useState(8);
   const [controlsOpen, setControlsOpen] = useState(false);
 
-  const ranges = useMemo(() => {
+  const noMotionRanges = useMemo(() => {
     if (!motionData || !reviewItems) {
       return;
     }
@@ -769,14 +769,14 @@ function MotionReview({
   }, [motionData, reviewItems, motionOnly]);
 
   const nextTimestamp = useMemo(() => {
-    if (!ranges) {
+    if (!noMotionRanges) {
       return;
     }
     let currentRange = 0;
     let nextTimestamp = currentTime + 0.5;
 
-    while (currentRange < ranges.length) {
-      const [start, end] = ranges[currentRange];
+    while (currentRange < noMotionRanges.length) {
+      const [start, end] = noMotionRanges[currentRange];
 
       if (start && end) {
         // If the current time is before the start of the current range
@@ -799,26 +799,30 @@ function MotionReview({
     }
 
     return nextTimestamp;
-  }, [currentTime, ranges]);
+  }, [currentTime, noMotionRanges]);
+
+  const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (!playing) {
-      return;
-    }
-
-    const interval = 500 / playbackRate;
-
-    const intervalId = setInterval(() => {
-      if (nextTimestamp) {
-        setCurrentTime(nextTimestamp);
+    if (nextTimestamp) {
+      if (!playing && timeoutIdRef.current != null) {
+        clearTimeout(timeoutIdRef.current);
+        return;
       }
-    }, interval);
 
-    return () => {
-      clearInterval(intervalId);
-    };
-    // do not render when current time changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+      const handleTimeout = () => {
+        setCurrentTime(nextTimestamp);
+        timeoutIdRef.current = setTimeout(handleTimeout, 500 / playbackRate);
+      };
+
+      timeoutIdRef.current = setTimeout(handleTimeout, 500 / playbackRate);
+
+      return () => {
+        if (timeoutIdRef.current) {
+          clearTimeout(timeoutIdRef.current);
+        }
+      };
+    }
   }, [playing, playbackRate, nextTimestamp]);
 
   const { alignStartDateToTimeline } = useTimelineUtils({
