@@ -4,6 +4,7 @@ import base64
 import glob
 import logging
 import os
+from pathlib import Path
 import re
 import subprocess as sp
 import time
@@ -980,9 +981,8 @@ def event_snapshot_clean(id):
     if png_bytes is None:
         try:
             snapshot_config: SnapshotsConfig = current_app.frigate_config.cameras[event.camera].snapshots
-            clean_snapshot_path = os.path.join(
-                snapshot_config.path, f"{event.camera}-{event.id}-clean.png"
-            )
+            snapshot_dir = Path(snapshot_config.path)
+            clean_snapshot_path = snapshot_dir / f"{event.camera}-{event.id}-clean.png"
             if not os.path.exists(clean_snapshot_path):
                 return make_response(
                     jsonify(
@@ -990,10 +990,7 @@ def event_snapshot_clean(id):
                     ),
                     404,
                 )
-            with open(
-                os.path.join(snapshot_config.path, f"{event.camera}-{event.id}-clean.png"), "rb"
-            ) as image_file:
-                png_bytes = image_file.read()
+            png_bytes = (snapshot_dir / f"{event.camera}-{event.id}-clean.png").read_bytes()
         except Exception:
             logger.error(f"Unable to load clean png for event: {event.id}")
             return make_response(
@@ -1026,10 +1023,7 @@ def event_snapshot(id):
             )
         # read snapshot from disk
         snapshot_config: SnapshotsConfig = current_app.frigate_config.cameras[event.camera].snapshots
-        with open(
-            os.path.join(snapshot_config.path, f"{event.camera}-{event.id}.jpg"), "rb"
-        ) as image_file:
-            jpg_bytes = image_file.read()
+        jpg_bytes = (Path(snapshot_config.path) / f"{event.camera}-{event.id}.jpg").read_bytes()
     except DoesNotExist:
         # see if the object is currently being tracked
         try:

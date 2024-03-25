@@ -4,6 +4,7 @@ import base64
 import datetime
 import logging
 import os
+from pathlib import Path
 import random
 import string
 from typing import Optional
@@ -94,20 +95,16 @@ class ExternalEventProcessor:
         img_frame: any,
     ) -> str:
         snapshot_config: SnapshotsConfig = camera_config.snapshots
+        snapshot_dir = Path(snapshot_config.path)
 
         # write clean snapshot if enabled
         if camera_config.snapshots.clean_copy:
             ret, png = cv2.imencode(".png", img_frame)
 
             if ret:
-                with open(
-                    os.path.join(
-                        snapshot_config.path,
-                        f"{camera_config.name}-{event_id}-clean.png",
-                    ),
-                    "wb",
-                ) as p:
-                    p.write(png.tobytes())
+                (
+                    snapshot_dir / "{camera_config.name}-{event_id}-clean.png"
+                ).write_bytes(png.to_bytes())
 
         # write jpg snapshot with optional annotations
         if draw.get("boxes") and isinstance(draw.get("boxes"), list):
@@ -130,11 +127,7 @@ class ExternalEventProcessor:
                 )
 
         ret, jpg = cv2.imencode(".jpg", img_frame)
-        with open(
-            os.path.join(snapshot_config.path, f"{camera_config.name}-{event_id}.jpg"),
-            "wb",
-        ) as j:
-            j.write(jpg.tobytes())
+        (snapshot_dir / f"{camera_config.name}-{event_id}.jpg").write_bytes(jpg.to_bytes())
 
         # create thumbnail with max height of 175 and save
         width = int(175 * img_frame.shape[1] / img_frame.shape[0])

@@ -351,7 +351,7 @@ def send_to_plus(id):
     try:
         snapshot_config: SnapshotsConfig = current_app.frigate_config.cameras[event.camera]
         filename = f"{event.camera}-{event.id}-clean.png"
-        image = cv2.imread(os.path.join(snapshot_config.path, filename))
+        image = cv2.imread(Path(snapshot_config.path) / filename)
     except Exception:
         logger.error(f"Unable to load clean png for event: {event.id}")
         return make_response(
@@ -602,12 +602,13 @@ def delete_event(id):
     media_name = f"{event.camera}-{event.id}"
     if event.has_snapshot:
         snapshot_config: SnapshotsConfig = current_app.frigate_config.cameras[event.camera].snapshots
-        media = Path(f"{os.path.join(snapshot_config.path, media_name)}.jpg")
+        snapshot_dir = Path(snapshot_config.path)
+        media = snapshot_dir / f"{media_name}.jpg"
         media.unlink(missing_ok=True)
-        media = Path(f"{os.path.join(snapshot_config.path, media_name)}-clean.png")
+        media = snapshot_dir / f"{media_name}-clean.png"
         media.unlink(missing_ok=True)
     if event.has_clip:
-        media = Path(f"{os.path.join(CLIPS_DIR, media_name)}.mp4")
+        media = Path(CLIPS_DIR) / f"{media_name}.mp4"
         media.unlink(missing_ok=True)
 
     event.delete_instance()

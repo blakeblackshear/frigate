@@ -3,6 +3,7 @@ import datetime
 import json
 import logging
 import os
+from pathlib import Path
 import queue
 import threading
 from collections import Counter, defaultdict
@@ -885,6 +886,7 @@ class TrackedObjectProcessor(threading.Thread):
             # write the snapshot to disk
             if obj.has_snapshot:
                 snapshot_config: SnapshotsConfig = self.config.cameras[camera].snapshots
+                snapshot_dir = Path(snapshot_config)
                 jpg_bytes = obj.get_jpg_bytes(
                     timestamp=snapshot_config.timestamp,
                     bounding_box=snapshot_config.bounding_box,
@@ -895,11 +897,9 @@ class TrackedObjectProcessor(threading.Thread):
                 if jpg_bytes is None:
                     logger.warning(f"Unable to save snapshot for {obj.obj_data['id']}.")
                 else:
-                    with open(
-                        os.path.join(snapshot_config.path, f"{camera}-{obj.obj_data['id']}.jpg"),
-                        "wb",
-                    ) as j:
-                        j.write(jpg_bytes)
+                    (
+                        snapshot_dir / f"{camera}-{obj.obj_data['id']}.jpg"
+                    ).write_bytes(jpg_bytes)
 
                 # write clean snapshot if enabled
                 if snapshot_config.clean_copy:
@@ -909,14 +909,9 @@ class TrackedObjectProcessor(threading.Thread):
                             f"Unable to save clean snapshot for {obj.obj_data['id']}."
                         )
                     else:
-                        with open(
-                            os.path.join(
-                                snapshot_config.path,
-                                f"{camera}-{obj.obj_data['id']}-clean.png",
-                            ),
-                            "wb",
-                        ) as p:
-                            p.write(png_bytes)
+                        (
+                            snapshot_dir / f"{camera}-{obj.obj_data['id']}-clean.png"
+                        ).write_bytes(png_bytes)
 
             if not obj.false_positive:
                 message = {
