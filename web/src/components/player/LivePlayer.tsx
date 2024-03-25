@@ -10,7 +10,6 @@ import { useCameraActivity } from "@/hooks/use-camera-activity";
 import { useRecordingsState } from "@/api/ws";
 import { LivePlayerMode } from "@/types/live";
 import useCameraLiveMode from "@/hooks/use-camera-live-mode";
-import { isDesktop } from "react-device-detect";
 import CameraActivityIndicator from "../indicators/CameraActivityIndicator";
 
 type LivePlayerProps = {
