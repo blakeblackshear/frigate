@@ -234,7 +234,7 @@ function PreviewVideoPlayer({
 
   return (
     <div
-      className={`relative w-full rounded-2xl overflow-hidden ${className ?? ""} ${onClick ? "cursor-pointer" : ""}`}
+      className={`relative w-full rounded-2xl bg-black overflow-hidden ${className ?? ""} ${onClick ? "cursor-pointer" : ""}`}
       onClick={onClick}
     >
       {currentHourFrame && (
@@ -247,7 +247,7 @@ function PreviewVideoPlayer({
         ref={canvasRef}
         width={videoWidth}
         height={videoHeight}
-        className={`absolute h-full left-1/2 -translate-x-1/2 bg-black ${!loaded && hasCanvas ? "" : "hidden"}`}
+        className={`absolute h-full left-1/2 -translate-x-1/2 ${!loaded && hasCanvas ? "" : "hidden"}`}
       />
       <video
         ref={previewRef}
@@ -281,7 +281,7 @@ function PreviewVideoPlayer({
         <Skeleton className="absolute inset-0" />
       )}
       {cameraPreviews && !currentPreview && (
-        <div className="absolute inset-0 bg-black text-white rounded-2xl flex justify-center items-center">
+        <div className="absolute inset-0 text-white rounded-2xl flex justify-center items-center">
           No Preview Found
         </div>
       )}
