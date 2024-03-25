@@ -382,10 +382,6 @@ function DetectionReview({
     [previewTime, setPreviewTime],
   );
 
-  // review interaction
-
-  const [hasUpdate, setHasUpdate] = useState(false);
-
   // timeline interaction
 
   const timelineDuration = useMemo(
@@ -498,9 +494,8 @@ function DetectionReview({
           <NewReviewData
             className="absolute w-full z-30 pointer-events-none"
             contentRef={contentRef}
-            severity={severity}
-            hasUpdate={hasUpdate}
-            setHasUpdate={setHasUpdate}
+            reviewItems={currentItems}
+            itemsToReview={itemsToReview}
             pullLatestData={pullLatestData}
           />
         )}
@@ -555,7 +550,6 @@ function DetectionReview({
                 className="text-white"
                 variant="select"
                 onClick={() => {
-                  setHasUpdate(false);
                   markAllItemsAsReviewed(currentItems ?? []);
                 }}
               >

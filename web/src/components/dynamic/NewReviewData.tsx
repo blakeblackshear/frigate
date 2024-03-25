@@ -1,45 +1,29 @@
-import { useFrigateReviews } from "@/api/ws";
-import { ReviewSeverity } from "@/types/review";
+import { ReviewSegment } from "@/types/review";
 import { Button } from "../ui/button";
 import { LuRefreshCcw } from "react-icons/lu";
-import { MutableRefObject, useEffect, useMemo, useState } from "react";
+import { MutableRefObject, useMemo } from "react";
 
 type NewReviewDataProps = {
   className: string;
   contentRef: MutableRefObject<HTMLDivElement | null>;
-  severity: ReviewSeverity;
-  hasUpdate: boolean;
-  setHasUpdate: (update: boolean) => void;
+  reviewItems?: ReviewSegment[] | null;
+  itemsToReview?: number;
   pullLatestData: () => void;
 };
 export default function NewReviewData({
   className,
   contentRef,
-  severity,
-  hasUpdate,
-  setHasUpdate,
+  reviewItems,
+  itemsToReview,
   pullLatestData,
 }: NewReviewDataProps) {
-  const { payload: review } = useFrigateReviews();
-
-  const startCheckTs = useMemo(() => Date.now() / 1000, []);
-  const [reviewTs, setReviewTs] = useState(startCheckTs);
-
-  useEffect(() => {
-    if (!review) {
-      return;
+  const hasUpdate = useMemo(() => {
+    if (!reviewItems || !itemsToReview) {
+      return false;
     }
 
-    if (review.type == "end" && review.review.severity == severity) {
-      setReviewTs(review.review.start_time);
-    }
-  }, [review, severity]);
-
-  useEffect(() => {
-    if (reviewTs > startCheckTs) {
-      setHasUpdate(true);
-    }
-  }, [startCheckTs, reviewTs, setHasUpdate]);
+    return reviewItems.length != itemsToReview;
+  }, [reviewItems, itemsToReview]);
 
   return (
     <div className={className}>
@@ -52,7 +36,6 @@ export default function NewReviewData({
           }  text-center mt-5 mx-auto bg-gray-400 text-white`}
           variant="secondary"
           onClick={() => {
-            setHasUpdate(false);
             pullLatestData();
             if (contentRef.current) {
               contentRef.current.scrollTo({
