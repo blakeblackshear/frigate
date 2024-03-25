@@ -240,7 +240,7 @@ function useDraggableElement({
         // top of timeline - default 2 segments added for draggableElement visibility
         const elementLatest = draggableElementLatestTime
           ? timestampToPixels(draggableElementLatestTime)
-          : segmentHeight * 2 + scrolled;
+          : segmentHeight * 1.5;
 
         const timelineRect = timelineRef.current.getBoundingClientRect();
         const timelineTopAbsolute = timelineRect.top;
