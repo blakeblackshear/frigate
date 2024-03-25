@@ -77,10 +77,12 @@ function generateRandomMotionAudioData(): MotionData[] {
   ) {
     const motion = Math.floor(Math.random() * 101); // Random number between 0 and 100
     const audio = Math.random() * -100; // Random negative value between -100 and 0
+    const camera = "test_camera";
     data.push({
       start_time: startTimestamp,
       motion,
       audio,
+      camera,
     });
   }
 

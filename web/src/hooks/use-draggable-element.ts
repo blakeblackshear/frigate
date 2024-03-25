@@ -235,7 +235,7 @@ function useDraggableElement({
         const elementEarliest = draggableElementEarliestTime
           ? timestampToPixels(draggableElementEarliestTime)
           : segmentHeight * (timelineDuration / segmentDuration) -
-            segmentHeight * 3;
+            segmentHeight * 3.5;
 
         // top of timeline - default 2 segments added for draggableElement visibility
         const elementLatest = draggableElementLatestTime

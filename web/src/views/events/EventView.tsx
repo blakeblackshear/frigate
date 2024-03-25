@@ -40,6 +40,7 @@ import SummaryTimeline from "@/components/timeline/SummaryTimeline";
 import { RecordingStartingPoint } from "@/types/record";
 import VideoControls from "@/components/player/VideoControls";
 import { TimeRange } from "@/types/timeline";
+import { useCameraMotionNextTimestamp } from "@/hooks/use-camera-activity";
 
 type EventViewProps = {
   reviews?: ReviewSegment[];
@@ -720,86 +721,14 @@ function MotionReview({
   const [playbackRate, setPlaybackRate] = useState(8);
   const [controlsOpen, setControlsOpen] = useState(false);
 
-  const noMotionRanges = useMemo(() => {
-    if (!motionData || !reviewItems) {
-      return;
-    }
-
-    if (!motionOnly) {
-      return [];
-    }
-
-    const ranges = [];
-    let currentSegmentStart = null;
-    let currentSegmentEnd = null;
-
-    for (let i = 0; i < motionData.length; i = i + segmentDuration / 15) {
-      const motionStart = motionData[i].start_time;
-      const motionEnd = motionStart + segmentDuration;
-
-      const segmentMotion = motionData
-        .slice(i, i + segmentDuration / 15)
-        .some(({ motion }) => motion !== undefined && motion > 0);
-      const overlappingReviewItems = reviewItems.all.some(
-        (item) =>
-          (item.start_time >= motionStart && item.start_time < motionEnd) ||
-          (item.end_time > motionStart && item.end_time <= motionEnd) ||
-          (item.start_time <= motionStart && item.end_time >= motionEnd),
-      );
-
-      if (!segmentMotion || overlappingReviewItems) {
-        if (currentSegmentStart === null) {
-          currentSegmentStart = motionStart;
-        }
-        currentSegmentEnd = motionEnd;
-      } else {
-        if (currentSegmentStart !== null) {
-          ranges.push([currentSegmentStart, currentSegmentEnd]);
-          currentSegmentStart = null;
-          currentSegmentEnd = null;
-        }
-      }
-    }
-
-    if (currentSegmentStart !== null) {
-      ranges.push([currentSegmentStart, currentSegmentEnd]);
-    }
-
-    return ranges;
-  }, [motionData, reviewItems, motionOnly]);
-
-  const nextTimestamp = useMemo(() => {
-    if (!noMotionRanges) {
-      return;
-    }
-    let currentRange = 0;
-    let nextTimestamp = currentTime + 0.5;
-
-    while (currentRange < noMotionRanges.length) {
-      const [start, end] = noMotionRanges[currentRange];
-
-      if (start && end) {
-        // If the current time is before the start of the current range
-        if (currentTime < start) {
-          // The next timestamp is either the start of the current range or currentTime + 0.5, whichever is smaller
-          nextTimestamp = Math.min(start, nextTimestamp);
-          break;
-        }
-        // If the current time is within the current range
-        else if (currentTime >= start && currentTime < end) {
-          // The next timestamp is the end of the current range
-          nextTimestamp = end;
-          currentRange++;
-        }
-        // If the current time is past the end of the current range
-        else {
-          currentRange++;
-        }
-      }
-    }
-
-    return nextTimestamp;
-  }, [currentTime, noMotionRanges]);
+  const nextTimestamp = useCameraMotionNextTimestamp(
+    timeRangeSegments.end,
+    segmentDuration,
+    motionOnly,
+    reviewItems?.all ?? [],
+    motionData ?? [],
+    currentTime,
+  );
 
   const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -832,24 +761,42 @@ function MotionReview({
   const getDetectionType = useCallback(
     (cameraName: string) => {
       if (motionOnly) {
-        return null;
-      }
-      const segmentStartTime = alignStartDateToTimeline(currentTime);
-      const segmentEndTime = segmentStartTime + segmentDuration;
-      const matchingItem = reviewItems?.all.find(
-        (item) =>
-          ((item.start_time >= segmentStartTime &&
-            item.start_time < segmentEndTime) ||
-            (item.end_time > segmentStartTime &&
-              item.end_time <= segmentEndTime) ||
-            (item.start_time <= segmentStartTime &&
-              item.end_time >= segmentEndTime)) &&
-          item.camera === cameraName,
-      );
+        const segmentStartTime = alignStartDateToTimeline(currentTime);
+        const segmentEndTime = segmentStartTime + segmentDuration;
+        const matchingItem = motionData?.find((item) => {
+          const cameras = item.camera.split(",").map((camera) => camera.trim());
+          return (
+            item.start_time >= segmentStartTime &&
+            item.start_time < segmentEndTime &&
+            cameras.includes(cameraName)
+          );
+        });
 
-      return matchingItem ? matchingItem.severity : null;
+        return matchingItem ? "significant_motion" : null;
+      } else {
+        const segmentStartTime = alignStartDateToTimeline(currentTime);
+        const segmentEndTime = segmentStartTime + segmentDuration;
+        const matchingItem = reviewItems?.all.find(
+          (item) =>
+            ((item.start_time >= segmentStartTime &&
+              item.start_time < segmentEndTime) ||
+              (item.end_time > segmentStartTime &&
+                item.end_time <= segmentEndTime) ||
+              (item.start_time <= segmentStartTime &&
+                item.end_time >= segmentEndTime)) &&
+            item.camera === cameraName,
+        );
+
+        return matchingItem ? matchingItem.severity : null;
+      }
     },
-    [reviewItems, currentTime, motionOnly, alignStartDateToTimeline],
+    [
+      reviewItems,
+      motionData,
+      currentTime,
+      motionOnly,
+      alignStartDateToTimeline,
+    ],
   );
 
   if (!relevantPreviews) {
