@@ -253,7 +253,7 @@ export function MotionSegment({
 
           {!motionOnly &&
             severity.map((severityValue: number, index: number) => {
-              if (severityValue > 1) {
+              if (severityValue > 0) {
                 return (
                   <React.Fragment key={index}>
                     <div className="absolute right-0 h-2 z-10">

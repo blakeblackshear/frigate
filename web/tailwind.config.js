@@ -9,7 +9,7 @@ module.exports = {
   ],
   safelist: [
     {
-      pattern: /(outline|shadow)-severity_(alert|detection|motion)/,
+      pattern: /(outline|shadow)-severity_(alert|detection|significant_motion)/,
     },
   ],
   theme: {
