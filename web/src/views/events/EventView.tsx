@@ -246,7 +246,7 @@ export default function EventView({
             value="significant_motion"
             aria-label="Select motion"
           >
-            <MdCircle className="size-2 md:mr-[10px] text-severity_motion" />
+            <MdCircle className="size-2 md:mr-[10px] text-severity_significant_motion" />
             <div className="hidden md:block">Motion</div>
           </ToggleGroupItem>
         </ToggleGroup>

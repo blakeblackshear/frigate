@@ -71,8 +71,8 @@
     --severity_detection: var(--orange-600);
     --severity_detection_dimmed: var(--orange-400);
 
-    --severity_motion: var(--yellow-400);
-    --severity_motion_dimmed: var(--yellow-200);
+    --severity_significant_motion: var(--yellow-400);
+    --severity_significant_motion_dimmed: var(--yellow-200);
 
     --motion_review: hsl(44, 94%, 50%);
     --motion_review: 44 94% 50%;
