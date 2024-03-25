@@ -158,9 +158,9 @@ export function MotionSegment({
       : ""
   }`;
 
-  const animationClassesSecondHalf = `motion-segment ${secondHalfSegmentWidth > 1 ? "hidden" : ""}
+  const animationClassesSecondHalf = `motion-segment ${secondHalfSegmentWidth > 0 ? "hidden" : ""}
     zoom-in-[0.2] ${secondHalfSegmentWidth < 5 ? "duration-200" : "duration-1000"}`;
-  const animationClassesFirstHalf = `motion-segment ${firstHalfSegmentWidth > 1 ? "hidden" : ""}
+  const animationClassesFirstHalf = `motion-segment ${firstHalfSegmentWidth > 0 ? "hidden" : ""}
     zoom-in-[0.2] ${firstHalfSegmentWidth < 5 ? "duration-200" : "duration-1000"}`;
 
   const severityColors: { [key: number]: string } = {
@@ -183,14 +183,14 @@ export function MotionSegment({
 
   return (
     <>
-      {(((firstHalfSegmentWidth > 1 || secondHalfSegmentWidth > 1) &&
+      {(((firstHalfSegmentWidth > 0 || secondHalfSegmentWidth > 0) &&
         motionOnly &&
         severity[0] < 2) ||
         !motionOnly) && (
         <div
           key={segmentKey}
           data-segment-id={segmentKey}
-          className={`segment ${firstHalfSegmentWidth > 1 || secondHalfSegmentWidth > 1 ? "has-data" : ""} ${segmentClasses}`}
+          className={`segment ${firstHalfSegmentWidth > 0 || secondHalfSegmentWidth > 0 ? "has-data" : ""} ${segmentClasses}`}
           onClick={segmentClick}
           onTouchEnd={(event) => handleTouchStart(event, segmentClick)}
         >
@@ -228,9 +228,10 @@ export function MotionSegment({
               <div className="flex justify-center">
                 <div
                   key={`${segmentKey}_motion_data_1`}
+                  data-motion-value={secondHalfSegmentWidth}
                   className={`${isDesktop && animationClassesSecondHalf} h-[2px] rounded-full ${severity[0] != 0 ? "bg-motion_review-dimmed" : "bg-motion_review"}`}
                   style={{
-                    width: secondHalfSegmentWidth,
+                    width: secondHalfSegmentWidth || 1,
                   }}
                 ></div>
               </div>
@@ -240,9 +241,10 @@ export function MotionSegment({
               <div className="flex justify-center">
                 <div
                   key={`${segmentKey}_motion_data_2`}
+                  data-motion-value={firstHalfSegmentWidth}
                   className={`${isDesktop && animationClassesFirstHalf} h-[2px] rounded-full ${severity[0] != 0 ? "bg-motion_review-dimmed" : "bg-motion_review"}`}
                   style={{
-                    width: firstHalfSegmentWidth,
+                    width: firstHalfSegmentWidth || 1,
                   }}
                 ></div>
               </div>

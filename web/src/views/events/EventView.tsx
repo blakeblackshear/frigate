@@ -40,7 +40,6 @@ import SummaryTimeline from "@/components/timeline/SummaryTimeline";
 import { RecordingStartingPoint } from "@/types/record";
 import VideoControls from "@/components/player/VideoControls";
 import { TimeRange } from "@/types/timeline";
-import { useCameraMotionTimestamps } from "@/hooks/use-camera-activity";
 
 type EventViewProps = {
   reviews?: ReviewSegment[];
@@ -720,12 +719,87 @@ function MotionReview({
 
   const [playbackRate, setPlaybackRate] = useState(8);
   const [controlsOpen, setControlsOpen] = useState(false);
-  const seekTimestamps = useCameraMotionTimestamps(
-    timeRange,
-    motionOnly,
-    reviewItems?.all ?? [],
-    motionData ?? [],
-  );
+
+  const ranges = useMemo(() => {
+    if (!motionData || !reviewItems) {
+      return;
+    }
+
+    if (!motionOnly) {
+      return [];
+    }
+
+    const ranges = [];
+    let currentSegmentStart = null;
+    let currentSegmentEnd = null;
+
+    for (let i = 0; i < motionData.length; i = i + segmentDuration / 15) {
+      const motionStart = motionData[i].start_time;
+      const motionEnd = motionStart + segmentDuration;
+
+      const segmentMotion = motionData
+        .slice(i, i + segmentDuration / 15)
+        .some(({ motion }) => motion !== undefined && motion > 0);
+      const overlappingReviewItems = reviewItems.all.some(
+        (item) =>
+          (item.start_time >= motionStart && item.start_time < motionEnd) ||
+          (item.end_time > motionStart && item.end_time <= motionEnd) ||
+          (item.start_time <= motionStart && item.end_time >= motionEnd),
+      );
+
+      if (!segmentMotion || overlappingReviewItems) {
+        if (currentSegmentStart === null) {
+          currentSegmentStart = motionStart;
+        }
+        currentSegmentEnd = motionEnd;
+      } else {
+        if (currentSegmentStart !== null) {
+          ranges.push([currentSegmentStart, currentSegmentEnd]);
+          currentSegmentStart = null;
+          currentSegmentEnd = null;
+        }
+      }
+    }
+
+    if (currentSegmentStart !== null) {
+      ranges.push([currentSegmentStart, currentSegmentEnd]);
+    }
+
+    return ranges;
+  }, [motionData, reviewItems, motionOnly]);
+
+  const nextTimestamp = useMemo(() => {
+    if (!ranges) {
+      return;
+    }
+    let currentRange = 0;
+    let nextTimestamp = currentTime + 0.5;
+
+    while (currentRange < ranges.length) {
+      const [start, end] = ranges[currentRange];
+
+      if (start && end) {
+        // If the current time is before the start of the current range
+        if (currentTime < start) {
+          // The next timestamp is either the start of the current range or currentTime + 0.5, whichever is smaller
+          nextTimestamp = Math.min(start, nextTimestamp);
+          break;
+        }
+        // If the current time is within the current range
+        else if (currentTime >= start && currentTime < end) {
+          // The next timestamp is the end of the current range
+          nextTimestamp = end;
+          currentRange++;
+        }
+        // If the current time is past the end of the current range
+        else {
+          currentRange++;
+        }
+      }
+    }
+
+    return nextTimestamp;
+  }, [currentTime, ranges]);
 
   useEffect(() => {
     if (!playing) {
@@ -733,22 +807,11 @@ function MotionReview({
     }
 
     const interval = 500 / playbackRate;
-    const startIdx = seekTimestamps.findIndex((time) => time > currentTime);
 
-    if (!startIdx) {
-      return;
-    }
-
-    let counter = 0;
     const intervalId = setInterval(() => {
-      counter += 1;
-
-      if (startIdx + counter >= seekTimestamps.length) {
-        setPlaying(false);
-        return;
+      if (nextTimestamp) {
+        setCurrentTime(nextTimestamp);
       }
-
-      setCurrentTime(seekTimestamps[startIdx + counter]);
     }, interval);
 
     return () => {
@@ -756,7 +819,7 @@ function MotionReview({
     };
     // do not render when current time changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playing, playbackRate]);
+  }, [playing, playbackRate, nextTimestamp]);
 
   const { alignStartDateToTimeline } = useTimelineUtils({
     segmentDuration,
