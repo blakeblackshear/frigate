@@ -14,6 +14,7 @@ import { isDesktop } from "react-device-detect";
 import CameraActivityIndicator from "../indicators/CameraActivityIndicator";
 
 type LivePlayerProps = {
+  cameraRef?: (ref: HTMLDivElement | null) => void;
   className?: string;
   cameraConfig: CameraConfig;
   preferredLiveMode?: LivePlayerMode;
@@ -26,6 +27,7 @@ type LivePlayerProps = {
 };
 
 export default function LivePlayer({
+  cameraRef = undefined,
   className,
   cameraConfig,
   preferredLiveMode,
@@ -140,6 +142,8 @@ export default function LivePlayer({
 
   return (
     <div
+      ref={cameraRef}
+      data-camera={cameraConfig.name}
       className={`relative flex justify-center ${liveMode == "jsmpeg" ? "size-full" : "w-full"} outline cursor-pointer ${
         activeTracking
           ? "outline-severity_alert outline-3 rounded-2xl shadow-severity_alert"
@@ -171,13 +175,11 @@ export default function LivePlayer({
         )}
       </div>
 
-      {isDesktop && (
-        <div className="absolute right-2 top-2 size-4">
-          {recording == "ON" && (
-            <MdCircle className="size-2 drop-shadow-md shadow-danger text-danger animate-pulse" />
-          )}
-        </div>
-      )}
+      <div className="absolute right-2 top-2 size-4">
+        {recording == "ON" && (
+          <MdCircle className="size-2 drop-shadow-md shadow-danger text-danger animate-pulse" />
+        )}
+      </div>
     </div>
   );
 }
