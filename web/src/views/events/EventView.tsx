@@ -830,11 +830,16 @@ function MotionReview({
       if (motionOnly) {
         return null;
       }
-      const segmentTime = alignStartDateToTimeline(currentTime);
+      const segmentStartTime = alignStartDateToTimeline(currentTime);
+      const segmentEndTime = segmentStartTime + segmentDuration;
       const matchingItem = reviewItems?.all.find(
         (item) =>
-          item.start_time >= segmentTime &&
-          item.end_time <= segmentTime + segmentDuration &&
+          ((item.start_time >= segmentStartTime &&
+            item.start_time < segmentEndTime) ||
+            (item.end_time > segmentStartTime &&
+              item.end_time <= segmentEndTime) ||
+            (item.start_time <= segmentStartTime &&
+              item.end_time >= segmentEndTime)) &&
           item.camera === cameraName,
       );
 
