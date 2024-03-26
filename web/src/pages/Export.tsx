@@ -10,7 +10,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Toaster } from "@/components/ui/sonner";
 import axios from "axios";
 import { useCallback, useState } from "react";
 import useSWR from "swr";
@@ -42,8 +41,6 @@ function Export() {
 
   return (
     <div className="size-full p-2 overflow-hidden flex flex-col">
-      <Toaster />
-
       <AlertDialog
         open={deleteClip != undefined}
         onOpenChange={() => setDeleteClip(undefined)}

@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useOverlayState } from "@/hooks/use-overlay-state";
+import { ExportMode } from "@/types/filter";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
 import {
@@ -33,6 +34,7 @@ import { isDesktop, isMobile } from "react-device-detect";
 import { FaCircle, FaVideo } from "react-icons/fa";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
+import { Toaster } from "@/components/ui/sonner";
 import useSWR from "swr";
 
 const SEGMENT_DURATION = 30;
@@ -74,6 +76,10 @@ export function RecordingView({
     () => reviewItems?.filter((cam) => cam.camera == mainCamera) ?? [],
     [reviewItems, mainCamera],
   );
+
+  // export
+
+  const [exportMode, setExportMode] = useState<ExportMode>("none");
 
   // timeline
 
@@ -211,6 +217,7 @@ export function RecordingView({
 
   return (
     <div ref={contentRef} className="size-full flex flex-col">
+      <Toaster />
       <div className={`w-full h-10 flex items-center justify-between pr-1`}>
         <Button className="rounded-lg" onClick={() => navigate(-1)}>
           <IoMdArrowRoundBack className="size-5 mr-[10px]" />
@@ -246,7 +253,11 @@ export function RecordingView({
               </DrawerContent>
             </Drawer>
           )}
-          <ExportDialog />
+          <ExportDialog
+            camera={mainCamera}
+            mode={exportMode}
+            setMode={setExportMode}
+          />
           <ReviewFilterGroup
             filters={["date", "general"]}
             reviewSummary={reviewSummary}
@@ -285,7 +296,7 @@ export function RecordingView({
       </div>
 
       <div
-        className={`flex h-full mb-2 justify-center overflow-hidden ${isDesktop ? "" : "flex-col"}`}
+        className={`flex h-full my-2 justify-center overflow-hidden ${isDesktop ? "" : "flex-col"}`}
       >
         <div className="flex flex-1 flex-wrap">
           <div
