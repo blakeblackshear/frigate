@@ -134,7 +134,14 @@ export default function ExportDialog({
           className="flex items-center gap-2"
           variant="secondary"
           size="sm"
-          onClick={() => setMode("select")}
+          onClick={() => {
+            if (mode == "none") {
+              setMode("select");
+            } else if (mode == "timeline") {
+              onStartExport();
+              setMode("none");
+            }
+          }}
         >
           <FaArrowDown className="p-1 fill-secondary bg-muted-foreground rounded-md" />
           {mode != "timeline" ? "Export" : "Save"}
