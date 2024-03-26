@@ -69,7 +69,21 @@ export default function Events() {
   }, [last24Hours, reviewSearchParams]);
 
   // we want to update the items whenever the severity changes
-  useEffect(() => setBeforeTs(Date.now() / 1000), [severity]);
+  useEffect(() => {
+    if (recording) {
+      return;
+    }
+
+    const now = Date.now() / 1000;
+
+    console.log(`${now} - ${beforeTs} :: ${now - beforeTs}`);
+    if (now - beforeTs > 60) {
+      setBeforeTs(now);
+    }
+
+    // only refresh when severity changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [severity]);
 
   const reviewSegmentFetcher = useCallback((key: Array<string> | string) => {
     const [path, params] = Array.isArray(key) ? key : [key, undefined];

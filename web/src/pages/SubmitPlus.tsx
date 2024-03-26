@@ -151,6 +151,7 @@ export default function SubmitPlus() {
 
             return (
               <div
+                key={event.id}
                 className="w-full rounded-2xl aspect-video flex justify-center items-center bg-black cursor-pointer"
                 onClick={() => setUpload(event)}
               >

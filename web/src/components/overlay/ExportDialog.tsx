@@ -167,14 +167,13 @@ export default function ExportDialog({
         >
           {EXPORT_OPTIONS.map((opt) => {
             return (
-              <div className="flex items-center gap-2">
+              <div key={opt} className="flex items-center gap-2">
                 <RadioGroupItem
                   className={
                     opt == selectedOption
                       ? "from-selected/50 to-selected/90 text-selected bg-selected"
                       : "from-secondary/50 to-secondary/90 text-secondary bg-secondary"
                   }
-                  key={opt}
                   id={opt}
                   value={opt}
                 />
