@@ -73,7 +73,7 @@ logger = logging.getLogger(__name__)
 class FrigateApp:
     def __init__(self) -> None:
         self.stop_event: MpEvent = mp.Event()
-        self.detection_queue: Queue = mp.Queue()
+        self.detection_queues: Dict[str, Queue] = {}
         self.detectors: dict[str, ObjectDetectProcess] = {}
         self.detection_out_events: dict[str, MpEvent] = {}
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
@@ -392,9 +392,14 @@ class FrigateApp:
             self.detection_shms.append(shm_out)
 
         for name, detector_config in self.config.detectors.items():
+            queue_name = detector_config.queue
+            if queue_name not in self.detection_queues:
+                self.detection_queues[queue_name] = mp.Queue()
+            detection_queue = self.detection_queues[queue_name]
+
             self.detectors[name] = ObjectDetectProcess(
                 name,
-                self.detection_queue,
+                detection_queue,
                 self.detection_out_events,
                 detector_config,
             )
@@ -450,6 +455,9 @@ class FrigateApp:
                 logger.info(f"Camera processor not started for disabled camera {name}")
                 continue
 
+            queue_name = config.detect.queue
+            detection_queue = self.detection_queues[queue_name]
+
             camera_process = mp.Process(
                 target=track_camera,
                 name=f"camera_processor:{name}",
@@ -458,7 +466,7 @@ class FrigateApp:
                     config,
                     self.config.model,
                     self.config.model.merged_labelmap,
-                    self.detection_queue,
+                    detection_queue,
                     self.detection_out_events[name],
                     self.detected_frames_queue,
                     self.camera_metrics[name],
@@ -669,12 +677,13 @@ class FrigateApp:
         for detector in self.detectors.values():
             detector.stop()
 
-        # Empty the detection queue and set the events for all requests
-        while not self.detection_queue.empty():
-            connection_id = self.detection_queue.get(timeout=1)
-            self.detection_out_events[connection_id].set()
-        self.detection_queue.close()
-        self.detection_queue.join_thread()
+        # Empty the detection queues and set the events for all requests
+        for detection_queue in self.detection_queues.values():
+            while not detection_queue.empty():
+                connection_id = detection_queue.get(timeout=1)
+                self.detection_out_events[connection_id].set()
+            detection_queue.close()
+            detection_queue.join_thread()
 
         self.external_event_processor.stop()
         self.dispatcher.stop()
