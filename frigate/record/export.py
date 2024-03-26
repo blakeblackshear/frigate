@@ -38,6 +38,7 @@ class RecordingExporter(threading.Thread):
         self,
         config: FrigateConfig,
         camera: str,
+        name: str,
         start_time: int,
         end_time: int,
         playback_factor: PlaybackFactorEnum,
@@ -45,6 +46,7 @@ class RecordingExporter(threading.Thread):
         threading.Thread.__init__(self)
         self.config = config
         self.camera = camera
+        self.user_provided_name = name
         self.start_time = start_time
         self.end_time = end_time
         self.playback_factor = playback_factor
@@ -57,8 +59,12 @@ class RecordingExporter(threading.Thread):
         logger.debug(
             f"Beginning export for {self.camera} from {self.start_time} to {self.end_time}"
         )
-        file_name = f"{EXPORT_DIR}/in_progress.{self.camera}@{self.get_datetime_from_timestamp(self.start_time)}__{self.get_datetime_from_timestamp(self.end_time)}.mp4"
-        final_file_name = f"{EXPORT_DIR}/{self.camera}_{self.get_datetime_from_timestamp(self.start_time)}__{self.get_datetime_from_timestamp(self.end_time)}.mp4"
+        file_name = (
+            self.user_provided_name
+            or f"{self.camera}@{self.get_datetime_from_timestamp(self.start_time)}__{self.get_datetime_from_timestamp(self.end_time)}"
+        )
+        file_path = f"{EXPORT_DIR}/in_progress.{file_name}.mp4"
+        final_file_path = f"{EXPORT_DIR}/{file_name}.mp4"
 
         if (self.end_time - self.start_time) <= MAX_PLAYLIST_SECONDS:
             playlist_lines = f"http://127.0.0.1:5000/vod/{self.camera}/start/{self.start_time}/end/{self.end_time}/index.m3u8"
@@ -97,14 +103,14 @@ class RecordingExporter(threading.Thread):
 
         if self.playback_factor == PlaybackFactorEnum.realtime:
             ffmpeg_cmd = (
-                f"ffmpeg -hide_banner {ffmpeg_input} -c copy {file_name}"
+                f"ffmpeg -hide_banner {ffmpeg_input} -c copy {file_path}"
             ).split(" ")
         elif self.playback_factor == PlaybackFactorEnum.timelapse_25x:
             ffmpeg_cmd = (
                 parse_preset_hardware_acceleration_encode(
                     self.config.ffmpeg.hwaccel_args,
                     f"{TIMELAPSE_DATA_INPUT_ARGS} {ffmpeg_input}",
-                    f"{self.config.cameras[self.camera].record.export.timelapse_args} {file_name}",
+                    f"{self.config.cameras[self.camera].record.export.timelapse_args} {file_path}",
                     EncodeTypeEnum.timelapse,
                 )
             ).split(" ")
@@ -122,9 +128,9 @@ class RecordingExporter(threading.Thread):
                 f"Failed to export recording for command {' '.join(ffmpeg_cmd)}"
             )
             logger.error(p.stderr)
-            Path(file_name).unlink(missing_ok=True)
+            Path(file_path).unlink(missing_ok=True)
             return
 
-        logger.debug(f"Updating finalized export {file_name}")
-        os.rename(file_name, final_file_name)
-        logger.debug(f"Finished exporting {file_name}")
+        logger.debug(f"Updating finalized export {file_path}")
+        os.rename(file_path, final_file_path)
+        logger.debug(f"Finished exporting {file_path}")

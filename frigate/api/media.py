@@ -8,6 +8,7 @@ import re
 import subprocess as sp
 import time
 from datetime import datetime, timedelta, timezone
+from typing import Optional
 from urllib.parse import unquote
 
 import cv2
@@ -618,6 +619,7 @@ def export_recording(camera_name: str, start_time, end_time):
 
     json: dict[str, any] = request.get_json(silent=True) or {}
     playback_factor = json.get("playback", "realtime")
+    name: Optional[str] = json.get("name")
 
     recordings_count = (
         Recordings.select()
@@ -641,6 +643,7 @@ def export_recording(camera_name: str, start_time, end_time):
     exporter = RecordingExporter(
         current_app.frigate_config,
         camera_name,
+        secure_filename(name.replace(" ", "_")) if name else None,
         int(start_time),
         int(end_time),
         (

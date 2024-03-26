@@ -15,6 +15,7 @@ import { ExportMode } from "@/types/filter";
 import { FaArrowDown } from "react-icons/fa";
 import axios from "axios";
 import { toast } from "sonner";
+import { Input } from "../ui/input";
 
 const EXPORT_OPTIONS = [
   "1",
@@ -38,6 +39,7 @@ export default function ExportDialog({
   setMode,
 }: ExportDialogProps) {
   const [selectedOption, setSelectedOption] = useState<ExportOption>("1");
+  const [name, setName] = useState("");
 
   const onStartExport = useCallback(() => {
     const now = new Date();
@@ -73,6 +75,7 @@ export default function ExportDialog({
     axios
       .post(`export/${camera}/start/${start}/end/${end}`, {
         playback: "realtime",
+        name,
       })
       .then((response) => {
         if (response.status == 200) {
@@ -94,7 +97,7 @@ export default function ExportDialog({
           });
         }
       });
-  }, [camera, selectedOption]);
+  }, [camera, name, selectedOption]);
 
   return (
     <Dialog open={mode == "select"}>
@@ -138,6 +141,12 @@ export default function ExportDialog({
             );
           })}
         </RadioGroup>
+        <Input
+          type="search"
+          placeholder="Name the Export"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
         <DialogFooter>
           <DialogClose onClick={() => setMode("none")}>Cancel</DialogClose>
           <Button
