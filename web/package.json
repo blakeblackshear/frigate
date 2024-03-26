@@ -79,7 +79,7 @@
     "@types/react-icons": "^3.0.0",
     "@types/react-transition-group": "^4.4.10",
     "@types/strftime": "^0.9.8",
-    "@typescript-eslint/eslint-plugin": "^7.3.1",
+    "@typescript-eslint/eslint-plugin": "^7.4.0",
     "@typescript-eslint/parser": "^7.3.1",
     "@vitejs/plugin-react-swc": "^3.6.0",
     "@vitest/coverage-v8": "^1.4.0",
