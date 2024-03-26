@@ -94,7 +94,7 @@
     "fake-indexeddb": "^5.0.2",
     "jest-websocket-mock": "^2.5.0",
     "jsdom": "^24.0.0",
-    "msw": "^2.2.9",
+    "msw": "^2.2.11",
     "postcss": "^8.4.38",
     "prettier": "^3.2.5",
     "tailwindcss": "^3.4.1",
