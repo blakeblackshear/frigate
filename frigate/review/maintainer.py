@@ -265,7 +265,14 @@ class ReviewSegmentMaintainer(threading.Thread):
             self.frame_manager.close(frame_id)
         elif len(motion) >= 20:
             self.active_review_segments[camera] = PendingReviewSegment(
-                camera, frame_time, SeverityEnum.signification_motion, motion=motion
+                camera,
+                frame_time,
+                SeverityEnum.signification_motion,
+                detections=set(),
+                objects=set(),
+                sub_labels=set(),
+                motion=motion,
+                zones=set(),
             )
 
     def run(self) -> None:
