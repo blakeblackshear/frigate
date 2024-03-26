@@ -204,7 +204,7 @@ export default function PreviewThumbnailPlayer({
         <div className="absolute left-0 top-2 z-40">
           <Tooltip>
             <div
-              className={`flex items-start`}
+              className="flex"
               onMouseEnter={() => setTooltipHovering(true)}
               onMouseLeave={() => setTooltipHovering(false)}
             >
@@ -214,25 +214,16 @@ export default function PreviewThumbnailPlayer({
                     review.severity == "detection") && (
                     <>
                       <Chip
-                        className={`${playingBack ? "hidden" : ""} bg-gradient-to-br ${review.has_been_reviewed ? "from-green-600 to-green-700 bg-green-600" : "from-gray-400 to-gray-500 bg-gray-500"} z-0`}
+                        className={`flex items-start justify-between space-x-1 ${playingBack ? "hidden" : ""} bg-gradient-to-br ${review.has_been_reviewed ? "from-green-600 to-green-700 bg-green-600" : "from-gray-400 to-gray-500 bg-gray-500"} z-0`}
                       >
                         {review.data.objects.map((object) => {
-                          return getIconForLabel(
-                            object,
-                            "size-3 text-white mx-0.5",
-                          );
+                          return getIconForLabel(object, "size-3 text-white");
                         })}
                         {review.data.audio.map((audio) => {
-                          return getIconForLabel(
-                            audio,
-                            "size-3 text-white mx-0.5",
-                          );
+                          return getIconForLabel(audio, "size-3 text-white");
                         })}
                         {review.data.sub_labels?.map((sub) => {
-                          return getIconForSubLabel(
-                            sub,
-                            "size-3 text-white mx-0.5",
-                          );
+                          return getIconForSubLabel(sub, "size-3 text-white");
                         })}
                       </Chip>
                     </>
