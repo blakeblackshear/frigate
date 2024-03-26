@@ -21,7 +21,7 @@ import {
 } from "react-icons/md";
 import { FaBicycle } from "react-icons/fa";
 import { endOfHourOrCurrentTime } from "./dateUtil";
-import { Timeline } from "@/types/timeline";
+import { TimeRange, Timeline } from "@/types/timeline";
 
 export function getTimelineIcon(timelineItem: Timeline) {
   switch (timelineItem.class_type) {
@@ -124,7 +124,7 @@ export function getTimelineItemDescription(timelineItem: Timeline) {
 export function getChunkedTimeDay(timestamp: number) {
   const endOfThisHour = new Date();
   endOfThisHour.setHours(endOfThisHour.getHours() + 1, 0, 0, 0);
-  const data: { start: number; end: number }[] = [];
+  const data: TimeRange[] = [];
   const startDay = new Date(timestamp * 1000);
   startDay.setHours(0, 0, 0, 0);
   const startTimestamp = startDay.getTime() / 1000;
@@ -140,8 +140,8 @@ export function getChunkedTimeDay(timestamp: number) {
 
     end = endOfHourOrCurrentTime(startDay.getTime() / 1000);
     data.push({
-      start,
-      end,
+      after: start,
+      before: end,
     });
     start = startDay.getTime() / 1000;
   }
@@ -155,7 +155,7 @@ export function getChunkedTimeRange(
 ) {
   const endOfThisHour = new Date();
   endOfThisHour.setHours(endOfThisHour.getHours() + 1, 0, 0, 0);
-  const data: { start: number; end: number }[] = [];
+  const data: TimeRange[] = [];
   const startDay = new Date(startTimestamp * 1000);
   startDay.setMinutes(0, 0, 0);
   let start = startDay.getTime() / 1000;
@@ -170,8 +170,8 @@ export function getChunkedTimeRange(
 
     end = endOfHourOrCurrentTime(startDay.getTime() / 1000);
     data.push({
-      start,
-      end,
+      after: start,
+      before: end,
     });
     start = startDay.getTime() / 1000;
   }

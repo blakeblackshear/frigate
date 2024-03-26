@@ -68,7 +68,7 @@ export function RecordingView({
   const timeRange = useMemo(() => getChunkedTimeDay(startTime), [startTime]);
   const [selectedRangeIdx, setSelectedRangeIdx] = useState(
     timeRange.ranges.findIndex((chunk) => {
-      return chunk.start <= startTime && chunk.end >= startTime;
+      return chunk.after <= startTime && chunk.before >= startTime;
     }),
   );
   const currentTimeRange = useMemo(
@@ -97,7 +97,7 @@ export function RecordingView({
   const updateSelectedSegment = useCallback(
     (currentTime: number, updateStartTime: boolean) => {
       const index = timeRange.ranges.findIndex(
-        (seg) => seg.start <= currentTime && seg.end >= currentTime,
+        (seg) => seg.after <= currentTime && seg.before >= currentTime,
       );
 
       if (index != -1) {
@@ -114,8 +114,8 @@ export function RecordingView({
   useEffect(() => {
     if (scrubbing) {
       if (
-        currentTime > currentTimeRange.end + 60 ||
-        currentTime < currentTimeRange.start - 60
+        currentTime > currentTimeRange.before + 60 ||
+        currentTime < currentTimeRange.after - 60
       ) {
         updateSelectedSegment(currentTime, false);
         return;
@@ -139,8 +139,8 @@ export function RecordingView({
     if (!scrubbing) {
       if (Math.abs(currentTime - playerTime) > 10) {
         if (
-          currentTimeRange.start <= currentTime &&
-          currentTimeRange.end >= currentTime
+          currentTimeRange.after <= currentTime &&
+          currentTimeRange.before >= currentTime
         ) {
           mainControllerRef.current?.seekToTimestamp(currentTime, true);
         } else {
@@ -244,7 +244,6 @@ export function RecordingView({
             reviewSummary={reviewSummary}
             filter={filter}
             onUpdateFilter={updateFilter}
-            severity={"alert"}
             motionOnly={false}
             setMotionOnly={() => {}}
           />
