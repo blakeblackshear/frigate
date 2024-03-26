@@ -260,7 +260,7 @@ export function RecordingView({
               size="sm"
               value={timelineType}
               onValueChange={(value: TimelineType) =>
-                value ? setTimelineType(value) : null
+                value ? setTimelineType(value, true) : null
               } // don't allow the severity to be unselected
             >
               <ToggleGroupItem
