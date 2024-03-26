@@ -1,5 +1,5 @@
 import FilterCheckBox from "@/components/filter/FilterCheckBox";
-import { CalendarFilterButton } from "@/components/filter/ReviewFilterGroup";
+import ReviewFilterGroup from "@/components/filter/ReviewFilterGroup";
 import PreviewPlayer, {
   PreviewController,
 } from "@/components/player/PreviewPlayer";
@@ -16,7 +16,6 @@ import {
   ReviewSegment,
   ReviewSummary,
 } from "@/types/review";
-import { getEndOfDayTimestamp } from "@/utils/dateUtil";
 import { getChunkedTimeDay } from "@/utils/timelineUtil";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isDesktop, isMobile } from "react-device-detect";
@@ -205,30 +204,12 @@ export function RecordingView({
 
   return (
     <div ref={contentRef} className="size-full flex flex-col">
-      <div
-        className={`w-full h-10 flex items-center justify-between ${isMobile ? "right-0" : "right-24"}`}
-      >
+      <div className={`w-full h-10 flex items-center justify-between pr-1`}>
         <Button className="rounded-lg" onClick={() => navigate(-1)}>
           <IoMdArrowRoundBack className="size-5 mr-[10px]" />
           Back
         </Button>
         <div className="flex items-center justify-end">
-          <CalendarFilterButton
-            day={
-              filter?.after == undefined
-                ? undefined
-                : new Date(filter.after * 1000)
-            }
-            reviewSummary={reviewSummary}
-            updateSelectedDay={(day) => {
-              updateFilter({
-                ...filter,
-                after: day == undefined ? undefined : day.getTime() / 1000,
-                before:
-                  day == undefined ? undefined : getEndOfDayTimestamp(day),
-              });
-            }}
-          />
           {isMobile && (
             <Drawer>
               <DrawerTrigger asChild>
@@ -258,11 +239,20 @@ export function RecordingView({
               </DrawerContent>
             </Drawer>
           )}
+          <ReviewFilterGroup
+            filters={["date", "general"]}
+            reviewSummary={reviewSummary}
+            filter={filter}
+            onUpdateFilter={updateFilter}
+            severity={"alert"}
+            motionOnly={false}
+            setMotionOnly={() => {}}
+          />
         </div>
       </div>
 
       <div
-        className={`flex h-full justify-center overflow-hidden ${isDesktop ? "" : "flex-col pt-12"}`}
+        className={`flex h-full justify-center overflow-hidden ${isDesktop ? "" : "flex-col"}`}
       >
         <div className="flex flex-1 flex-wrap">
           <div

@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { ReviewFilter, ReviewSeverity, ReviewSummary } from "@/types/review";
+import { ReviewFilter, ReviewSummary } from "@/types/review";
 import { getEndOfDayTimestamp } from "@/utils/dateUtil";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import { FaCalendarAlt, FaFilter, FaRunning, FaVideo } from "react-icons/fa";
@@ -22,21 +22,29 @@ import FilterCheckBox from "./FilterCheckBox";
 import ReviewActivityCalendar from "../overlay/ReviewActivityCalendar";
 
 const ATTRIBUTES = ["amazon", "face", "fedex", "license_plate", "ups"];
+const REVIEW_FILTERS = ["cameras", "date", "general", "motionOnly"] as const;
+type ReviewFilters = (typeof REVIEW_FILTERS)[number];
+const DEFAULT_REVIEW_FILTERS: ReviewFilters[] = [
+  "cameras",
+  "date",
+  "general",
+  "motionOnly",
+];
 
 type ReviewFilterGroupProps = {
+  filters?: ReviewFilters[];
   reviewSummary?: ReviewSummary;
   filter?: ReviewFilter;
   onUpdateFilter: (filter: ReviewFilter) => void;
-  severity: ReviewSeverity;
   motionOnly: boolean;
   setMotionOnly: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export default function ReviewFilterGroup({
+  filters = DEFAULT_REVIEW_FILTERS,
   reviewSummary,
   filter,
   onUpdateFilter,
-  severity,
   motionOnly,
   setMotionOnly,
 }: ReviewFilterGroupProps) {
@@ -101,27 +109,34 @@ export default function ReviewFilterGroup({
 
   return (
     <div className="flex justify-center">
-      <CamerasFilterButton
-        allCameras={filterValues.cameras}
-        groups={groups}
-        selectedCameras={filter?.cameras}
-        updateCameraFilter={(newCameras) => {
-          onUpdateFilter({ ...filter, cameras: newCameras });
-        }}
-      />
-      <CalendarFilterButton
-        reviewSummary={reviewSummary}
-        day={
-          filter?.after == undefined ? undefined : new Date(filter.after * 1000)
-        }
-        updateSelectedDay={onUpdateSelectedDay}
-      />
-      {severity == "significant_motion" ? (
+      {filters.includes("cameras") && (
+        <CamerasFilterButton
+          allCameras={filterValues.cameras}
+          groups={groups}
+          selectedCameras={filter?.cameras}
+          updateCameraFilter={(newCameras) => {
+            onUpdateFilter({ ...filter, cameras: newCameras });
+          }}
+        />
+      )}
+      {filters.includes("date") && (
+        <CalendarFilterButton
+          reviewSummary={reviewSummary}
+          day={
+            filter?.after == undefined
+              ? undefined
+              : new Date(filter.after * 1000)
+          }
+          updateSelectedDay={onUpdateSelectedDay}
+        />
+      )}
+      {filters.includes("motionOnly") && (
         <ShowMotionOnlyButton
           motionOnly={motionOnly}
           setMotionOnly={setMotionOnly}
         />
-      ) : (
+      )}
+      {filters.includes("general") && (
         <GeneralFilterButton
           allLabels={filterValues.labels}
           selectedLabels={filter?.labels}
@@ -293,7 +308,7 @@ type CalendarFilterButtonProps = {
   day?: Date;
   updateSelectedDay: (day?: Date) => void;
 };
-export function CalendarFilterButton({
+function CalendarFilterButton({
   reviewSummary,
   day,
   updateSelectedDay,

@@ -254,10 +254,14 @@ export default function EventView({
 
         {selectedReviews.length <= 0 ? (
           <ReviewFilterGroup
+            filters={
+              severity == "significant_motion"
+                ? ["cameras", "date", "motionOnly"]
+                : ["cameras", "date", "general"]
+            }
             reviewSummary={reviewSummary}
             filter={filter}
             onUpdateFilter={updateFilter}
-            severity={severity}
             motionOnly={motionOnly}
             setMotionOnly={setMotionOnly}
           />
