@@ -197,6 +197,7 @@ export default function ExportDialog({
           />
         )}
         <Input
+          className="mt-2"
           type="search"
           placeholder="Name the Export"
           value={name}
