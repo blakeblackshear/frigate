@@ -2,7 +2,7 @@ import { useFrigateReviews } from "@/api/ws";
 import Logo from "@/components/Logo";
 import { CameraGroupSelector } from "@/components/filter/CameraGroupSelector";
 import { LiveGridIcon, LiveListIcon } from "@/components/icons/LiveIcons";
-import { AnimatedEventThumbnail } from "@/components/image/AnimatedEventThumbnail";
+import { AnimatedEventCard } from "@/components/card/AnimatedEventCard";
 import BirdseyeLivePlayer from "@/components/player/BirdseyeLivePlayer";
 import LivePlayer from "@/components/player/LivePlayer";
 import { Button } from "@/components/ui/button";
@@ -166,7 +166,7 @@ export default function LiveDashboardView({
           <TooltipProvider>
             <div className="flex gap-2 items-center">
               {events.map((event) => {
-                return <AnimatedEventThumbnail key={event.id} event={event} />;
+                return <AnimatedEventCard key={event.id} event={event} />;
               })}
             </div>
           </TooltipProvider>
