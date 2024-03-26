@@ -82,7 +82,7 @@ export function useCameraMotionNextTimestamp(
   });
 
   const noMotionRanges = useMemo(() => {
-    if (!motionData || !reviewItems) {
+    if (!motionData || !reviewItems || !motionData) {
       return;
     }
 

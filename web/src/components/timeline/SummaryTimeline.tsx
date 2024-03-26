@@ -57,7 +57,7 @@ export function SummaryTimeline({
 
   // Generate segments for the timeline
   const generateSegments = useCallback(() => {
-    const segmentCount = reviewTimelineDuration / segmentDuration;
+    const segmentCount = Math.ceil(reviewTimelineDuration / segmentDuration);
 
     if (segmentHeight) {
       return Array.from({ length: segmentCount }, (_, index) => {
