@@ -169,7 +169,7 @@ export function MotionReviewTimeline({
 
   // Generate segments for the timeline
   const generateSegments = useCallback(() => {
-    const segmentCount = timelineDuration / segmentDuration;
+    const segmentCount = Math.ceil(timelineDuration / segmentDuration);
 
     return Array.from({ length: segmentCount }, (_, index) => {
       const segmentTime = timelineStartAligned - index * segmentDuration;

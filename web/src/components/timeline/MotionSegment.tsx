@@ -144,7 +144,7 @@ export function MotionSegment({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showMinimap, isFirstSegmentInMinimap, events, segmentDuration]);
 
-  const segmentClasses = `h-2 relative w-full ${
+  const segmentClasses = `h-[8px] relative w-full ${
     showMinimap
       ? isInMinimapRange
         ? "bg-secondary-highlight"
@@ -154,7 +154,7 @@ export function MotionSegment({
       : ""
   } ${
     isFirstSegmentInMinimap || isLastSegmentInMinimap
-      ? "relative h-2 border-b-2 border-gray-500"
+      ? "relative h-[8px] border-b-2 border-gray-500"
       : ""
   }`;
 
@@ -223,9 +223,9 @@ export function MotionSegment({
             </>
           )}
 
-          <div className="absolute left-1/2 transform -translate-x-1/2 w-[20px] md:w-[40px] h-2 z-10 cursor-pointer">
-            <div className="flex flex-row justify-center w-[20px] md:w-[40px] mb-[1px]">
-              <div className="flex justify-center">
+          <div className="absolute left-1/2 transform -translate-x-1/2 w-[20px] md:w-[40px] h-[8px] z-10 cursor-pointer">
+            <div className="flex flex-row justify-center w-[20px] md:w-[40px] pt-[1px] mb-[1px]">
+              <div className="flex justify-center mb-[1px]">
                 <div
                   key={`${segmentKey}_motion_data_1`}
                   data-motion-value={secondHalfSegmentWidth}
@@ -237,7 +237,7 @@ export function MotionSegment({
               </div>
             </div>
 
-            <div className="flex flex-row justify-center w-[20px] md:w-[40px]">
+            <div className="flex flex-row justify-center pb-[1px] w-[20px] md:w-[40px]">
               <div className="flex justify-center">
                 <div
                   key={`${segmentKey}_motion_data_2`}
@@ -256,11 +256,11 @@ export function MotionSegment({
               if (severityValue > 0) {
                 return (
                   <React.Fragment key={index}>
-                    <div className="absolute right-0 h-2 z-10">
+                    <div className="absolute right-0 h-[8px] z-10">
                       <div
                         key={`${segmentKey}_${index}_secondary_data`}
                         className={`
-                          w-1 h-2 bg-gradient-to-r
+                          w-1 h-[8px] bg-gradient-to-r
                           ${roundBottomSecondary ? "rounded-bl-full rounded-br-full" : ""}
                           ${roundTopSecondary ? "rounded-tl-full rounded-tr-full" : ""}
                           ${severityColors[severityValue]}
