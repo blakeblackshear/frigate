@@ -204,9 +204,9 @@ export function RecordingView({
   }, [mainCameraAspect]);
 
   return (
-    <div ref={contentRef} className="relative size-full">
+    <div ref={contentRef} className="size-full flex flex-col">
       <div
-        className={`absolute left-0  top-0 mr-2 flex items-center justify-between ${isMobile ? "right-0" : "right-24"}`}
+        className={`w-full h-10 flex items-center justify-between ${isMobile ? "right-0" : "right-24"}`}
       >
         <Button className="rounded-lg" onClick={() => navigate(-1)}>
           <IoMdArrowRoundBack className="size-5 mr-[10px]" />
