@@ -40,7 +40,10 @@ export default function ReviewCard({
       className="w-full flex flex-col gap-1.5 cursor-pointer"
       onClick={onClick}
     >
-      <ImageLoadingIndicator className="size-full" imgLoaded={imgLoaded} />
+      <ImageLoadingIndicator
+        className="size-full aspect-video"
+        imgLoaded={imgLoaded}
+      />
       <img
         ref={imgRef}
         className={`size-full rounded-lg ${isSelected ? "outline outline-3 outline-offset-1 outline-selected" : ""} ${imgLoaded ? "visible" : "invisible"}`}

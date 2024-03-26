@@ -253,30 +253,32 @@ export function RecordingView({
             motionOnly={false}
             setMotionOnly={() => {}}
           />
-          <ToggleGroup
-            className="*:px-3 *:py-4 *:rounded-md"
-            type="single"
-            size="sm"
-            value={timelineType}
-            onValueChange={(value: TimelineType) =>
-              value ? setTimelineType(value) : null
-            } // don't allow the severity to be unselected
-          >
-            <ToggleGroupItem
-              className={`${timelineType == "timeline" ? "" : "text-gray-500"}`}
-              value="timeline"
-              aria-label="Select timeline"
+          {isDesktop && (
+            <ToggleGroup
+              className="*:px-3 *:py-4 *:rounded-md"
+              type="single"
+              size="sm"
+              value={timelineType}
+              onValueChange={(value: TimelineType) =>
+                value ? setTimelineType(value) : null
+              } // don't allow the severity to be unselected
             >
-              <div className="">Timeline</div>
-            </ToggleGroupItem>
-            <ToggleGroupItem
-              className={`${timelineType == "events" ? "" : "text-gray-500"}`}
-              value="events"
-              aria-label="Select events"
-            >
-              <div className="hidden md:block">Events</div>
-            </ToggleGroupItem>
-          </ToggleGroup>
+              <ToggleGroupItem
+                className={`${timelineType == "timeline" ? "" : "text-gray-500"}`}
+                value="timeline"
+                aria-label="Select timeline"
+              >
+                <div className="">Timeline</div>
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                className={`${timelineType == "events" ? "" : "text-gray-500"}`}
+                value="events"
+                aria-label="Select events"
+              >
+                <div className="">Events</div>
+              </ToggleGroupItem>
+            </ToggleGroup>
+          )}
         </div>
       </div>
 
@@ -347,10 +349,36 @@ export function RecordingView({
             )}
           </div>
         </div>
+        {isMobile && (
+          <ToggleGroup
+            className="py-2 *:px-3 *:py-4 *:rounded-md"
+            type="single"
+            size="sm"
+            value={timelineType}
+            onValueChange={(value: TimelineType) =>
+              value ? setTimelineType(value) : null
+            } // don't allow the severity to be unselected
+          >
+            <ToggleGroupItem
+              className={`${timelineType == "timeline" ? "" : "text-gray-500"}`}
+              value="timeline"
+              aria-label="Select timeline"
+            >
+              <div className="">Timeline</div>
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              className={`${timelineType == "events" ? "" : "text-gray-500"}`}
+              value="events"
+              aria-label="Select events"
+            >
+              <div className="">Events</div>
+            </ToggleGroupItem>
+          </ToggleGroup>
+        )}
         <Timeline
           contentRef={contentRef}
           mainCamera={mainCamera}
-          timelineType={timelineType}
+          timelineType={timelineType ?? "timeline"}
           timeRange={timeRange}
           mainCameraReviewItems={mainCameraReviewItems}
           currentTime={currentTime}
@@ -421,7 +449,9 @@ function Timeline({
   }
 
   return (
-    <div className="w-60 h-full p-4 flex flex-col gap-4 bg-secondary overflow-auto">
+    <div
+      className={`${isDesktop ? "w-60" : "w-full"} h-full p-4 flex flex-col gap-4 bg-secondary overflow-auto`}
+    >
       {mainCameraReviewItems.map((review) => {
         if (review.severity == "significant_motion") {
           return;
