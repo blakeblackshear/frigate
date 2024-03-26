@@ -160,7 +160,9 @@ export default function ExportDialog({
         <DialogHeader>
           <DialogTitle>Export</DialogTitle>
         </DialogHeader>
+        <SelectSeparator className="bg-secondary" />
         <RadioGroup
+          className="flex flex-col gap-3"
           onValueChange={(value) => onSelectTime(value as ExportOption)}
         >
           {EXPORT_OPTIONS.map((opt) => {
@@ -169,8 +171,8 @@ export default function ExportDialog({
                 <RadioGroupItem
                   className={
                     opt == selectedOption
-                      ? "bg-selected border-selected text-selected"
-                      : "bg-muted-foreground border-muted-foreground"
+                      ? "from-selected/50 to-selected/90 text-selected bg-selected"
+                      : "from-secondary/50 to-secondary/90 text-secondary bg-secondary"
                   }
                   key={opt}
                   id={opt}
@@ -178,7 +180,9 @@ export default function ExportDialog({
                 />
                 <Label className="cursor-pointer capitalize" htmlFor={opt}>
                   {isNaN(parseInt(opt))
-                    ? `${opt}`
+                    ? opt == "timeline"
+                      ? "Select from Timeline"
+                      : `${opt}`
                     : `Last ${opt > "1" ? `${opt} Hours` : "Hour"}`}
                 </Label>
               </div>
@@ -198,6 +202,7 @@ export default function ExportDialog({
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
+        <SelectSeparator className="bg-secondary" />
         <DialogFooter>
           <DialogClose onClick={() => setMode("none")}>Cancel</DialogClose>
           <Button
@@ -306,7 +311,7 @@ function CustomTimeSelector({
               });
             }}
           />
-          <SelectSeparator />
+          <SelectSeparator className="bg-secondary" />
           <input
             className="w-full mx-4 p-1 border border-input bg-background text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
             id="startTime"
@@ -365,7 +370,7 @@ function CustomTimeSelector({
               });
             }}
           />
-          <SelectSeparator />
+          <SelectSeparator className="bg-secondary" />
           <input
             className="w-full mx-4 p-1 border border-input bg-background text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
             id="startTime"
