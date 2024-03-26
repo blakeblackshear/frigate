@@ -1,6 +1,7 @@
 import ReviewCard from "@/components/card/ReviewCard";
 import FilterCheckBox from "@/components/filter/FilterCheckBox";
 import ReviewFilterGroup from "@/components/filter/ReviewFilterGroup";
+import ExportDialog from "@/components/overlay/ExportDialog";
 import PreviewPlayer, {
   PreviewController,
 } from "@/components/player/PreviewPlayer";
@@ -11,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useOverlayState } from "@/hooks/use-overlay-state";
+import { ExportMode } from "@/types/filter";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
 import {
@@ -32,7 +34,9 @@ import { isDesktop, isMobile } from "react-device-detect";
 import { FaCircle, FaVideo } from "react-icons/fa";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
+import { Toaster } from "@/components/ui/sonner";
 import useSWR from "swr";
+import { TimeRange } from "@/types/timeline";
 
 const SEGMENT_DURATION = 30;
 type TimelineType = "timeline" | "events";
@@ -91,6 +95,11 @@ export function RecordingView({
     () => timeRange.ranges[selectedRangeIdx],
     [selectedRangeIdx, timeRange],
   );
+
+  // export
+
+  const [exportMode, setExportMode] = useState<ExportMode>("none");
+  const [exportRange, setExportRange] = useState<TimeRange>();
 
   // move to next clip
 
@@ -210,6 +219,7 @@ export function RecordingView({
 
   return (
     <div ref={contentRef} className="size-full flex flex-col">
+      <Toaster />
       <div className={`w-full h-10 flex items-center justify-between pr-1`}>
         <Button className="rounded-lg" onClick={() => navigate(-1)}>
           <IoMdArrowRoundBack className="size-5 mr-[10px]" />
@@ -245,6 +255,15 @@ export function RecordingView({
               </DrawerContent>
             </Drawer>
           )}
+          <ExportDialog
+            camera={mainCamera}
+            currentTime={currentTime}
+            latestTime={timeRange.end}
+            mode={exportMode}
+            range={exportRange}
+            setRange={setExportRange}
+            setMode={setExportMode}
+          />
           <ReviewFilterGroup
             filters={["date", "general"]}
             reviewSummary={reviewSummary}
@@ -283,7 +302,7 @@ export function RecordingView({
       </div>
 
       <div
-        className={`flex h-full mb-2 justify-center overflow-hidden ${isDesktop ? "" : "flex-col"}`}
+        className={`flex h-full my-2 justify-center overflow-hidden ${isDesktop ? "" : "flex-col"}`}
       >
         <div className="flex flex-1 flex-wrap">
           <div
@@ -303,6 +322,7 @@ export function RecordingView({
                 timeRange={currentTimeRange}
                 cameraPreviews={allPreviews ?? []}
                 startTimestamp={playbackStart}
+                hotKeys={exportMode != "select"}
                 onTimestampUpdate={(timestamp) => {
                   setPlayerTime(timestamp);
                   setCurrentTime(timestamp);
@@ -314,7 +334,7 @@ export function RecordingView({
                 onControllerReady={(controller) => {
                   mainControllerRef.current = controller;
                 }}
-                isScrubbing={scrubbing}
+                isScrubbing={scrubbing || exportMode == "timeline"}
               />
             </div>
             {isDesktop && (
@@ -382,8 +402,10 @@ export function RecordingView({
           timeRange={timeRange}
           mainCameraReviewItems={mainCameraReviewItems}
           currentTime={currentTime}
+          exportRange={exportMode == "timeline" ? exportRange : undefined}
           setCurrentTime={setCurrentTime}
           setScrubbing={setScrubbing}
+          setExportRange={setExportRange}
         />
       </div>
     </div>
@@ -397,8 +419,10 @@ type TimelineProps = {
   timeRange: { start: number; end: number };
   mainCameraReviewItems: ReviewSegment[];
   currentTime: number;
+  exportRange?: TimeRange;
   setCurrentTime: React.Dispatch<React.SetStateAction<number>>;
   setScrubbing: React.Dispatch<React.SetStateAction<boolean>>;
+  setExportRange: (range: TimeRange) => void;
 };
 function Timeline({
   contentRef,
@@ -407,8 +431,10 @@ function Timeline({
   timeRange,
   mainCameraReviewItems,
   currentTime,
+  exportRange,
   setCurrentTime,
   setScrubbing,
+  setExportRange,
 }: TimelineProps) {
   const { data: motionData } = useSWR<MotionData[]>([
     "review/activity/motion",
@@ -420,7 +446,22 @@ function Timeline({
     },
   ]);
 
-  if (timelineType == "timeline") {
+  const [exportStart, setExportStartTime] = useState<number>(0);
+  const [exportEnd, setExportEndTime] = useState<number>(0);
+
+  useEffect(() => {
+    if (exportRange && exportStart != 0 && exportEnd != 0) {
+      if (exportRange.after != exportStart) {
+        setCurrentTime(exportStart);
+      } else if (exportRange?.before != exportEnd) {
+        setCurrentTime(exportEnd);
+      }
+
+      setExportRange({ after: exportStart, before: exportEnd });
+    }
+  }, [exportRange, exportStart, exportEnd, setExportRange, setCurrentTime]);
+
+  if (exportRange != undefined || timelineType == "timeline") {
     return (
       <div
         className={
@@ -434,7 +475,12 @@ function Timeline({
           timestampSpread={15}
           timelineStart={timeRange.end}
           timelineEnd={timeRange.start}
-          showHandlebar
+          showHandlebar={exportRange == undefined}
+          showExportHandles={exportRange != undefined}
+          exportStartTime={exportRange?.after}
+          exportEndTime={exportRange?.before}
+          setExportStartTime={setExportStartTime}
+          setExportEndTime={setExportEndTime}
           handlebarTime={currentTime}
           setHandlebarTime={setCurrentTime}
           onlyInitialHandlebarScroll={true}
@@ -450,8 +496,10 @@ function Timeline({
 
   return (
     <div
-      className={`${isDesktop ? "w-60" : "w-full"} h-full p-4 flex flex-col gap-4 bg-secondary overflow-auto`}
+      className={`${isDesktop ? "w-60" : "w-full"} h-full relative p-4 flex flex-col gap-4 bg-secondary overflow-auto`}
     >
+      <div className="absolute top-0 inset-x-0 z-20 w-full h-[30px] bg-gradient-to-b from-secondary to-transparent pointer-events-none"></div>
+      <div className="absolute bottom-0 inset-x-0 z-20 w-full h-[30px] bg-gradient-to-t from-secondary to-transparent pointer-events-none"></div>
       {mainCameraReviewItems.map((review) => {
         if (review.severity == "significant_motion") {
           return;
