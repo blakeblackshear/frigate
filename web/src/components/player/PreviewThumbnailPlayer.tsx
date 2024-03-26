@@ -17,9 +17,9 @@ import { isFirefox, isMobile, isSafari } from "react-device-detect";
 import Chip from "@/components/indicators/Chip";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import useImageLoaded from "@/hooks/use-image-loaded";
-import { Skeleton } from "../ui/skeleton";
 import { useSwipeable } from "react-swipeable";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import ImageLoadingIndicator from "../indicators/ImageLoadingIndicator";
 
 type PreviewPlayerProps = {
   review: ReviewSegment;
@@ -187,11 +187,14 @@ export default function PreviewThumbnailPlayer({
           />
         </div>
       )}
-      <PreviewPlaceholder imgLoaded={imgLoaded} />
+      <ImageLoadingIndicator
+        className="absolute inset-0"
+        imgLoaded={imgLoaded}
+      />
       <div className={`${imgLoaded ? "visible" : "invisible"}`}>
         <img
           ref={imgRef}
-          className={`w-full h-full transition-opacity ${
+          className={`size-full transition-opacity ${
             playingBack ? "opacity-0" : "opacity-100"
           }`}
           src={`${apiHost}${review.thumb_path.replace("/media/frigate/", "")}`}
@@ -698,17 +701,5 @@ function InProgressPreview({
         onMouseMove={isMobile ? undefined : onProgressHover}
       />
     </div>
-  );
-}
-
-function PreviewPlaceholder({ imgLoaded }: { imgLoaded: boolean }) {
-  if (imgLoaded) {
-    return;
-  }
-
-  return isSafari ? (
-    <div className={`absolute inset-0 bg-gray-300 pointer-events-none`} />
-  ) : (
-    <Skeleton className={`absolute inset-0 pointer-events-none`} />
   );
 }

@@ -14,11 +14,12 @@ import { isCurrentHour } from "@/utils/dateUtil";
 import { baseUrl } from "@/api/baseUrl";
 import { isAndroid, isChrome, isMobile, isSafari } from "react-device-detect";
 import { Skeleton } from "../ui/skeleton";
+import { TimeRange } from "@/types/timeline";
 
 type PreviewPlayerProps = {
   className?: string;
   camera: string;
-  timeRange: { start: number; end: number };
+  timeRange: TimeRange;
   cameraPreviews: Preview[];
   startTime?: number;
   isScrubbing: boolean;
@@ -37,7 +38,7 @@ export default function PreviewPlayer({
 }: PreviewPlayerProps) {
   const [currentHourFrame, setCurrentHourFrame] = useState<string>();
 
-  if (isCurrentHour(timeRange.end)) {
+  if (isCurrentHour(timeRange.before)) {
     return (
       <PreviewFramesPlayer
         className={className}
@@ -84,7 +85,7 @@ export abstract class PreviewController {
 type PreviewVideoPlayerProps = {
   className?: string;
   camera: string;
-  timeRange: { start: number; end: number };
+  timeRange: TimeRange;
   cameraPreviews: Preview[];
   startTime?: number;
   isScrubbing: boolean;
@@ -148,8 +149,8 @@ function PreviewVideoPlayer({
     return cameraPreviews.find(
       (preview) =>
         preview.camera == camera &&
-        Math.round(preview.start) >= timeRange.start &&
-        Math.floor(preview.end) <= timeRange.end,
+        Math.round(preview.start) >= timeRange.after &&
+        Math.floor(preview.end) <= timeRange.before,
     );
 
     // we only want to calculate this once
@@ -179,8 +180,8 @@ function PreviewVideoPlayer({
     const preview = cameraPreviews.find(
       (preview) =>
         preview.camera == camera &&
-        Math.round(preview.start) >= timeRange.start &&
-        Math.floor(preview.end) <= timeRange.end,
+        Math.round(preview.start) >= timeRange.after &&
+        Math.floor(preview.end) <= timeRange.before,
     );
 
     if (preview != currentPreview) {
@@ -292,7 +293,7 @@ function PreviewVideoPlayer({
 class PreviewVideoController extends PreviewController {
   // main state
   private previewRef: MutableRefObject<HTMLVideoElement | null>;
-  private timeRange: { start: number; end: number } | undefined = undefined;
+  private timeRange: TimeRange | undefined = undefined;
 
   // preview
   private preview: Preview | undefined = undefined;
@@ -377,7 +378,7 @@ class PreviewVideoController extends PreviewController {
 type PreviewFramesPlayerProps = {
   className?: string;
   camera: string;
-  timeRange: { start: number; end: number };
+  timeRange: TimeRange;
   startTime?: number;
   onControllerReady: (controller: PreviewController) => void;
   onClick?: () => void;
@@ -395,8 +396,8 @@ function PreviewFramesPlayer({
   // frames data
 
   const { data: previewFrames } = useSWR<string[]>(
-    `preview/${camera}/start/${Math.floor(timeRange.start)}/end/${Math.ceil(
-      timeRange.end,
+    `preview/${camera}/start/${Math.floor(timeRange.after)}/end/${Math.ceil(
+      timeRange.before,
     )}/frames`,
     { revalidateOnFocus: false },
   );
@@ -457,7 +458,7 @@ function PreviewFramesPlayer({
     }
 
     if (!startTime) {
-      controller.scrubToTimestamp(frameTimes?.at(-1) ?? timeRange.start);
+      controller.scrubToTimestamp(frameTimes?.at(-1) ?? timeRange.after);
     } else {
       controller.scrubToTimestamp(startTime);
     }

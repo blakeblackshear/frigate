@@ -1,6 +1,8 @@
 import { FunctionComponent, useEffect, useMemo, useState } from "react";
 
 interface IProp {
+  /** OPTIONAL: classname */
+  className?: string;
   /** The time to calculate time-ago from */
   time: number;
   /** OPTIONAL: overwrite current time */
@@ -73,6 +75,7 @@ const timeAgo = ({
 };
 
 const TimeAgo: FunctionComponent<IProp> = ({
+  className,
   time,
   manualRefreshInterval,
   ...rest
@@ -105,6 +108,6 @@ const TimeAgo: FunctionComponent<IProp> = ({
     [currentTime, rest, time],
   );
 
-  return <span>{timeAgoValue}</span>;
+  return <span className={className}>{timeAgoValue}</span>;
 };
 export default TimeAgo;

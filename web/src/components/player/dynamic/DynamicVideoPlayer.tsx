@@ -8,7 +8,7 @@ import { Preview } from "@/types/preview";
 import PreviewPlayer, { PreviewController } from "../PreviewPlayer";
 import { DynamicVideoController } from "./DynamicVideoController";
 import HlsVideoPlayer from "../HlsVideoPlayer";
-import { Timeline } from "@/types/timeline";
+import { TimeRange, Timeline } from "@/types/timeline";
 
 /**
  * Dynamically switches between video playback and scrubbing preview player.
@@ -16,7 +16,7 @@ import { Timeline } from "@/types/timeline";
 type DynamicVideoPlayerProps = {
   className?: string;
   camera: string;
-  timeRange: { start: number; end: number };
+  timeRange: TimeRange;
   cameraPreviews: Preview[];
   startTimestamp?: number;
   isScrubbing: boolean;
@@ -100,7 +100,7 @@ export default function DynamicVideoPlayer({
 
   const [isLoading, setIsLoading] = useState(false);
   const [source, setSource] = useState(
-    `${apiHost}vod/${camera}/start/${timeRange.start}/end/${timeRange.end}/master.m3u8`,
+    `${apiHost}vod/${camera}/start/${timeRange.after}/end/${timeRange.before}/master.m3u8`,
   );
 
   // start at correct time
@@ -134,8 +134,8 @@ export default function DynamicVideoPlayer({
 
   const recordingParams = useMemo(() => {
     return {
-      before: timeRange.end,
-      after: timeRange.start,
+      before: timeRange.before,
+      after: timeRange.after,
     };
   }, [timeRange]);
   const { data: recordings } = useSWR<Recording[]>(
@@ -153,7 +153,7 @@ export default function DynamicVideoPlayer({
     }
 
     setSource(
-      `${apiHost}vod/${camera}/start/${timeRange.start}/end/${timeRange.end}/master.m3u8`,
+      `${apiHost}vod/${camera}/start/${timeRange.after}/end/${timeRange.before}/master.m3u8`,
     );
     setIsLoading(true);
 

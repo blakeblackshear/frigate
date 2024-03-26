@@ -1,5 +1,6 @@
+import ReviewCard from "@/components/card/ReviewCard";
 import FilterCheckBox from "@/components/filter/FilterCheckBox";
-import { CalendarFilterButton } from "@/components/filter/ReviewFilterGroup";
+import ReviewFilterGroup from "@/components/filter/ReviewFilterGroup";
 import PreviewPlayer, {
   PreviewController,
 } from "@/components/player/PreviewPlayer";
@@ -8,6 +9,8 @@ import DynamicVideoPlayer from "@/components/player/dynamic/DynamicVideoPlayer";
 import MotionReviewTimeline from "@/components/timeline/MotionReviewTimeline";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { useOverlayState } from "@/hooks/use-overlay-state";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
 import {
@@ -16,9 +19,15 @@ import {
   ReviewSegment,
   ReviewSummary,
 } from "@/types/review";
-import { getEndOfDayTimestamp } from "@/utils/dateUtil";
 import { getChunkedTimeDay } from "@/utils/timelineUtil";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  MutableRefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { isDesktop, isMobile } from "react-device-detect";
 import { FaCircle, FaVideo } from "react-icons/fa";
 import { IoMdArrowRoundBack } from "react-icons/io";
@@ -26,6 +35,7 @@ import { useNavigate } from "react-router-dom";
 import useSWR from "swr";
 
 const SEGMENT_DURATION = 30;
+type TimelineType = "timeline" | "events";
 
 type RecordingViewProps = {
   startCamera: string;
@@ -64,12 +74,17 @@ export function RecordingView({
     [reviewItems, mainCamera],
   );
 
-  // timeline time
+  // timeline
+
+  const [timelineType, setTimelineType] = useOverlayState<TimelineType>(
+    "timelineType",
+    "timeline",
+  );
 
   const timeRange = useMemo(() => getChunkedTimeDay(startTime), [startTime]);
   const [selectedRangeIdx, setSelectedRangeIdx] = useState(
     timeRange.ranges.findIndex((chunk) => {
-      return chunk.start <= startTime && chunk.end >= startTime;
+      return chunk.after <= startTime && chunk.before >= startTime;
     }),
   );
   const currentTimeRange = useMemo(
@@ -98,7 +113,7 @@ export function RecordingView({
   const updateSelectedSegment = useCallback(
     (currentTime: number, updateStartTime: boolean) => {
       const index = timeRange.ranges.findIndex(
-        (seg) => seg.start <= currentTime && seg.end >= currentTime,
+        (seg) => seg.after <= currentTime && seg.before >= currentTime,
       );
 
       if (index != -1) {
@@ -115,8 +130,8 @@ export function RecordingView({
   useEffect(() => {
     if (scrubbing) {
       if (
-        currentTime > currentTimeRange.end + 60 ||
-        currentTime < currentTimeRange.start - 60
+        currentTime > currentTimeRange.before + 60 ||
+        currentTime < currentTimeRange.after - 60
       ) {
         updateSelectedSegment(currentTime, false);
         return;
@@ -140,8 +155,8 @@ export function RecordingView({
     if (!scrubbing) {
       if (Math.abs(currentTime - playerTime) > 10) {
         if (
-          currentTimeRange.start <= currentTime &&
-          currentTimeRange.end >= currentTime
+          currentTimeRange.after <= currentTime &&
+          currentTimeRange.before >= currentTime
         ) {
           mainControllerRef.current?.seekToTimestamp(currentTime, true);
         } else {
@@ -164,16 +179,6 @@ export function RecordingView({
   );
 
   // motion timeline data
-
-  const { data: motionData } = useSWR<MotionData[]>([
-    "review/activity/motion",
-    {
-      before: timeRange.end,
-      after: timeRange.start,
-      scale: SEGMENT_DURATION / 2,
-      cameras: mainCamera,
-    },
-  ]);
 
   const mainCameraAspect = useMemo(() => {
     if (!config) {
@@ -204,31 +209,13 @@ export function RecordingView({
   }, [mainCameraAspect]);
 
   return (
-    <div ref={contentRef} className="relative size-full">
-      <div
-        className={`absolute left-0  top-0 mr-2 flex items-center justify-between ${isMobile ? "right-0" : "right-24"}`}
-      >
+    <div ref={contentRef} className="size-full flex flex-col">
+      <div className={`w-full h-10 flex items-center justify-between pr-1`}>
         <Button className="rounded-lg" onClick={() => navigate(-1)}>
           <IoMdArrowRoundBack className="size-5 mr-[10px]" />
           Back
         </Button>
-        <div className="flex items-center justify-end">
-          <CalendarFilterButton
-            day={
-              filter?.after == undefined
-                ? undefined
-                : new Date(filter.after * 1000)
-            }
-            reviewSummary={reviewSummary}
-            updateSelectedDay={(day) => {
-              updateFilter({
-                ...filter,
-                after: day == undefined ? undefined : day.getTime() / 1000,
-                before:
-                  day == undefined ? undefined : getEndOfDayTimestamp(day),
-              });
-            }}
-          />
+        <div className="flex items-center justify-end gap-2">
           {isMobile && (
             <Drawer>
               <DrawerTrigger asChild>
@@ -258,11 +245,45 @@ export function RecordingView({
               </DrawerContent>
             </Drawer>
           )}
+          <ReviewFilterGroup
+            filters={["date", "general"]}
+            reviewSummary={reviewSummary}
+            filter={filter}
+            onUpdateFilter={updateFilter}
+            motionOnly={false}
+            setMotionOnly={() => {}}
+          />
+          {isDesktop && (
+            <ToggleGroup
+              className="*:px-3 *:py-4 *:rounded-md"
+              type="single"
+              size="sm"
+              value={timelineType}
+              onValueChange={(value: TimelineType) =>
+                value ? setTimelineType(value, true) : null
+              } // don't allow the severity to be unselected
+            >
+              <ToggleGroupItem
+                className={`${timelineType == "timeline" ? "" : "text-gray-500"}`}
+                value="timeline"
+                aria-label="Select timeline"
+              >
+                <div className="">Timeline</div>
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                className={`${timelineType == "events" ? "" : "text-gray-500"}`}
+                value="events"
+                aria-label="Select events"
+              >
+                <div className="">Events</div>
+              </ToggleGroupItem>
+            </ToggleGroup>
+          )}
         </div>
       </div>
 
       <div
-        className={`flex h-full justify-center overflow-hidden ${isDesktop ? "" : "flex-col pt-12"}`}
+        className={`flex h-full mb-2 justify-center overflow-hidden ${isDesktop ? "" : "flex-col"}`}
       >
         <div className="flex flex-1 flex-wrap">
           <div
@@ -328,31 +349,123 @@ export function RecordingView({
             )}
           </div>
         </div>
-
-        <div
-          className={
-            isDesktop
-              ? "w-[100px] mt-2 overflow-y-auto no-scrollbar"
-              : "flex-grow overflow-hidden"
-          }
-        >
-          <MotionReviewTimeline
-            segmentDuration={30}
-            timestampSpread={15}
-            timelineStart={timeRange.end}
-            timelineEnd={timeRange.start}
-            showHandlebar
-            handlebarTime={currentTime}
-            setHandlebarTime={setCurrentTime}
-            onlyInitialHandlebarScroll={true}
-            events={mainCameraReviewItems}
-            motion_events={motionData ?? []}
-            severityType="significant_motion"
-            contentRef={contentRef}
-            onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
-          />
-        </div>
+        {isMobile && (
+          <ToggleGroup
+            className="py-2 *:px-3 *:py-4 *:rounded-md"
+            type="single"
+            size="sm"
+            value={timelineType}
+            onValueChange={(value: TimelineType) =>
+              value ? setTimelineType(value) : null
+            } // don't allow the severity to be unselected
+          >
+            <ToggleGroupItem
+              className={`${timelineType == "timeline" ? "" : "text-gray-500"}`}
+              value="timeline"
+              aria-label="Select timeline"
+            >
+              <div className="">Timeline</div>
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              className={`${timelineType == "events" ? "" : "text-gray-500"}`}
+              value="events"
+              aria-label="Select events"
+            >
+              <div className="">Events</div>
+            </ToggleGroupItem>
+          </ToggleGroup>
+        )}
+        <Timeline
+          contentRef={contentRef}
+          mainCamera={mainCamera}
+          timelineType={timelineType ?? "timeline"}
+          timeRange={timeRange}
+          mainCameraReviewItems={mainCameraReviewItems}
+          currentTime={currentTime}
+          setCurrentTime={setCurrentTime}
+          setScrubbing={setScrubbing}
+        />
       </div>
+    </div>
+  );
+}
+
+type TimelineProps = {
+  contentRef: MutableRefObject<HTMLDivElement | null>;
+  mainCamera: string;
+  timelineType: TimelineType;
+  timeRange: { start: number; end: number };
+  mainCameraReviewItems: ReviewSegment[];
+  currentTime: number;
+  setCurrentTime: React.Dispatch<React.SetStateAction<number>>;
+  setScrubbing: React.Dispatch<React.SetStateAction<boolean>>;
+};
+function Timeline({
+  contentRef,
+  mainCamera,
+  timelineType,
+  timeRange,
+  mainCameraReviewItems,
+  currentTime,
+  setCurrentTime,
+  setScrubbing,
+}: TimelineProps) {
+  const { data: motionData } = useSWR<MotionData[]>([
+    "review/activity/motion",
+    {
+      before: timeRange.end,
+      after: timeRange.start,
+      scale: SEGMENT_DURATION / 2,
+      cameras: mainCamera,
+    },
+  ]);
+
+  if (timelineType == "timeline") {
+    return (
+      <div
+        className={
+          isDesktop
+            ? "w-[100px] mt-2 overflow-y-auto no-scrollbar"
+            : "flex-grow overflow-hidden"
+        }
+      >
+        <MotionReviewTimeline
+          segmentDuration={30}
+          timestampSpread={15}
+          timelineStart={timeRange.end}
+          timelineEnd={timeRange.start}
+          showHandlebar
+          handlebarTime={currentTime}
+          setHandlebarTime={setCurrentTime}
+          onlyInitialHandlebarScroll={true}
+          events={mainCameraReviewItems}
+          motion_events={motionData ?? []}
+          severityType="significant_motion"
+          contentRef={contentRef}
+          onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`${isDesktop ? "w-60" : "w-full"} h-full p-4 flex flex-col gap-4 bg-secondary overflow-auto`}
+    >
+      {mainCameraReviewItems.map((review) => {
+        if (review.severity == "significant_motion") {
+          return;
+        }
+
+        return (
+          <ReviewCard
+            key={review.id}
+            event={review}
+            currentTime={currentTime}
+            onClick={() => setCurrentTime(review.start_time)}
+          />
+        );
+      })}
     </div>
   );
 }

@@ -8,11 +8,12 @@ import { ReviewSegment } from "@/types/review";
 import { useNavigate } from "react-router-dom";
 import { Skeleton } from "../ui/skeleton";
 import { RecordingStartingPoint } from "@/types/record";
+import axios from "axios";
 
-type AnimatedEventThumbnailProps = {
+type AnimatedEventCardProps = {
   event: ReviewSegment;
 };
-export function AnimatedEventThumbnail({ event }: AnimatedEventThumbnailProps) {
+export function AnimatedEventCard({ event }: AnimatedEventCardProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
   // interaction
@@ -21,11 +22,15 @@ export function AnimatedEventThumbnail({ event }: AnimatedEventThumbnailProps) {
   const onOpenReview = useCallback(() => {
     navigate("events", {
       state: {
-        camera: event.camera,
-        startTime: event.start_time,
         severity: event.severity,
-      } as RecordingStartingPoint,
+        recording: {
+          camera: event.camera,
+          startTime: event.start_time,
+          severity: event.severity,
+        } as RecordingStartingPoint,
+      },
     });
+    axios.post(`reviews/viewed`, { ids: [event.id] });
   }, [navigate, event]);
 
   // image behavior
