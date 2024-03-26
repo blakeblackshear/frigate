@@ -31,10 +31,6 @@ export default function ReviewCard({
     [event, currentTime],
   );
 
-  if (event.data.objects.includes("car")) {
-    //console.log(`failed to load ${JSON.stringify(event)}`);
-  }
-
   return (
     <div
       className="w-full flex flex-col gap-1.5 cursor-pointer"
