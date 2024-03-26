@@ -21,6 +21,7 @@ export type MotionReviewTimelineProps = {
   showHandlebar?: boolean;
   handlebarTime?: number;
   setHandlebarTime?: React.Dispatch<React.SetStateAction<number>>;
+  onlyInitialHandlebarScroll?: boolean;
   motionOnly?: boolean;
   showMinimap?: boolean;
   minimapStartTime?: number;
@@ -46,6 +47,7 @@ export function MotionReviewTimeline({
   showHandlebar = false,
   handlebarTime,
   setHandlebarTime,
+  onlyInitialHandlebarScroll = false,
   motionOnly = false,
   showMinimap = false,
   minimapStartTime,
@@ -114,6 +116,7 @@ export function MotionReviewTimeline({
     showDraggableElement: showHandlebar,
     draggableElementTime: handlebarTime,
     setDraggableElementTime: setHandlebarTime,
+    initialScrollIntoViewOnly: onlyInitialHandlebarScroll,
     timelineDuration,
     timelineCollapsed: motionOnly,
     timelineStartAligned,
