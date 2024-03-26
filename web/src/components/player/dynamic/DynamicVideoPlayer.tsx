@@ -20,6 +20,7 @@ type DynamicVideoPlayerProps = {
   cameraPreviews: Preview[];
   startTimestamp?: number;
   isScrubbing: boolean;
+  hotKeys: boolean;
   onControllerReady: (controller: DynamicVideoController) => void;
   onTimestampUpdate?: (timestamp: number) => void;
   onClipEnded?: () => void;
@@ -31,6 +32,7 @@ export default function DynamicVideoPlayer({
   cameraPreviews,
   startTimestamp,
   isScrubbing,
+  hotKeys,
   onControllerReady,
   onTimestampUpdate,
   onClipEnded,
@@ -172,6 +174,7 @@ export default function DynamicVideoPlayer({
         videoRef={playerRef}
         visible={!(isScrubbing || isLoading)}
         currentSource={source}
+        hotKeys={hotKeys}
         onTimeUpdate={onTimeUpdate}
         onPlayerLoaded={onPlayerLoaded}
         onClipEnded={onClipEnded}

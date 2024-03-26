@@ -322,6 +322,7 @@ export function RecordingView({
                 timeRange={currentTimeRange}
                 cameraPreviews={allPreviews ?? []}
                 startTimestamp={playbackStart}
+                hotKeys={exportMode != "select"}
                 onTimestampUpdate={(timestamp) => {
                   setPlayerTime(timestamp);
                   setCurrentTime(timestamp);

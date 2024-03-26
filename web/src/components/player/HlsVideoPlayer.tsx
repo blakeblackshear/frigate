@@ -22,6 +22,7 @@ type HlsVideoPlayerProps = {
   videoRef: MutableRefObject<HTMLVideoElement | null>;
   visible: boolean;
   currentSource: string;
+  hotKeys: boolean;
   onClipEnded?: () => void;
   onPlayerLoaded?: () => void;
   onTimeUpdate?: (time: number) => void;
@@ -33,6 +34,7 @@ export default function HlsVideoPlayer({
   videoRef,
   visible,
   currentSource,
+  hotKeys,
   onClipEnded,
   onPlayerLoaded,
   onTimeUpdate,
@@ -161,6 +163,7 @@ export default function HlsVideoPlayer({
         controlsOpen={controlsOpen}
         setControlsOpen={setControlsOpen}
         playbackRate={videoRef.current?.playbackRate ?? 1}
+        hotKeys={hotKeys}
         onPlayPause={(play) => {
           if (!videoRef.current) {
             return;

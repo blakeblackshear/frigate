@@ -41,6 +41,7 @@ type VideoControlsProps = {
   controlsOpen?: boolean;
   playbackRates?: number[];
   playbackRate: number;
+  hotKeys?: boolean;
   setControlsOpen?: (open: boolean) => void;
   onPlayPause: (play: boolean) => void;
   onSeek: (diff: number) => void;
@@ -55,6 +56,7 @@ export default function VideoControls({
   controlsOpen,
   playbackRates = PLAYBACK_RATE_DEFAULT,
   playbackRate,
+  hotKeys = true,
   setControlsOpen,
   onPlayPause,
   onSeek,
@@ -130,7 +132,7 @@ export default function VideoControls({
     [video, isPlaying, onSeek],
   );
   useKeyboardListener(
-    ["ArrowLeft", "ArrowRight", "m", " "],
+    hotKeys ? ["ArrowLeft", "ArrowRight", "m", " "] : [],
     onKeyboardShortcut,
   );
 

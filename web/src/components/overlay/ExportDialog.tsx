@@ -112,6 +112,7 @@ export default function ExportDialog({
           );
           setName("");
           setRange(undefined);
+          setSelectedOption("1");
         }
       })
       .catch((error) => {
