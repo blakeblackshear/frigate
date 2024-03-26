@@ -344,6 +344,7 @@ export function RecordingView({
             showHandlebar
             handlebarTime={currentTime}
             setHandlebarTime={setCurrentTime}
+            onlyInitialHandlebarScroll={true}
             events={mainCameraReviewItems}
             motion_events={motionData ?? []}
             severityType="significant_motion"

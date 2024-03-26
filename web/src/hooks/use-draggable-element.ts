@@ -13,6 +13,7 @@ type DraggableElementProps = {
   draggableElementEarliestTime?: number;
   draggableElementLatestTime?: number;
   setDraggableElementTime?: React.Dispatch<React.SetStateAction<number>>;
+  initialScrollIntoViewOnly?: boolean;
   draggableElementTimeRef: React.MutableRefObject<HTMLDivElement | null>;
   timelineDuration: number;
   timelineCollapsed?: boolean;
@@ -32,6 +33,7 @@ function useDraggableElement({
   draggableElementEarliestTime,
   draggableElementLatestTime,
   setDraggableElementTime,
+  initialScrollIntoViewOnly,
   draggableElementTimeRef,
   timelineDuration,
   timelineCollapsed,
@@ -42,6 +44,7 @@ function useDraggableElement({
 }: DraggableElementProps) {
   const [clientYPosition, setClientYPosition] = useState<number | null>(null);
   const [initialClickAdjustment, setInitialClickAdjustment] = useState(0);
+  const [elementScrollIntoView, setElementScrollIntoView] = useState(true);
   const [scrollEdgeSize, setScrollEdgeSize] = useState<number>();
   const [segments, setSegments] = useState<HTMLDivElement[]>([]);
   const { alignStartDateToTimeline, getCumulativeScrollTop } = useTimelineUtils(
@@ -397,9 +400,13 @@ function useDraggableElement({
         updateDraggableElementPosition(
           newElementPosition,
           draggableElementTime,
-          true,
+          elementScrollIntoView,
           true,
         );
+
+        if (initialScrollIntoViewOnly) {
+          setElementScrollIntoView(false);
+        }
       }
     }
     // we know that these deps are correct
@@ -413,6 +420,7 @@ function useDraggableElement({
     timelineStartAligned,
     timelineRef,
     timelineCollapsed,
+    initialScrollIntoViewOnly,
     segments,
   ]);
 
