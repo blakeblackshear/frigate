@@ -18,7 +18,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 
 export default function Events() {
-  const { data: config } = useSWR<FrigateConfig>("config");
+  const { data: config } = useSWR<FrigateConfig>("config", {
+    revalidateOnFocus: false,
+  });
   const timezone = useTimezone(config);
 
   // recordings viewer
@@ -66,6 +68,9 @@ export default function Events() {
     };
   }, [last24Hours, reviewSearchParams]);
 
+  // we want to update the items whenever the severity changes
+  useEffect(() => setBeforeTs(Date.now() / 1000), [severity]);
+
   const reviewSegmentFetcher = useCallback((key: Array<string> | string) => {
     const [path, params] = Array.isArray(key) ? key : [key, undefined];
     return axios.get(path, { params }).then((res) => res.data);
@@ -93,15 +98,21 @@ export default function Events() {
 
   // review summary
 
-  const { data: reviewSummary, mutate: updateSummary } = useSWR<ReviewSummary>([
-    "review/summary",
+  const { data: reviewSummary, mutate: updateSummary } = useSWR<ReviewSummary>(
+    [
+      "review/summary",
+      {
+        timezone: timezone,
+        cameras: reviewSearchParams["cameras"] ?? null,
+        labels: reviewSearchParams["labels"] ?? null,
+      },
+    ],
     {
-      timezone: timezone,
-      cameras: reviewSearchParams["cameras"] ?? null,
-      labels: reviewSearchParams["labels"] ?? null,
+      revalidateOnFocus: true,
+      refreshInterval: 30000,
+      revalidateOnReconnect: false,
     },
-    { revalidateOnFocus: false, revalidateOnReconnect: false },
-  ]);
+  );
 
   const reloadData = useCallback(() => {
     setBeforeTs(Date.now() / 1000);
