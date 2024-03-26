@@ -10,6 +10,7 @@ import MotionReviewTimeline from "@/components/timeline/MotionReviewTimeline";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { useOverlayState } from "@/hooks/use-overlay-state";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
 import {
@@ -75,7 +76,10 @@ export function RecordingView({
 
   // timeline
 
-  const [timelineType, setTimelineType] = useState<TimelineType>("timeline");
+  const [timelineType, setTimelineType] = useOverlayState<TimelineType>(
+    "timelineType",
+    "timeline",
+  );
 
   const timeRange = useMemo(() => getChunkedTimeDay(startTime), [startTime]);
   const [selectedRangeIdx, setSelectedRangeIdx] = useState(
