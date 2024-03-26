@@ -137,7 +137,7 @@ cameras:
             - detect
 ```
 
-Now you should be able to start Frigate by running `docker compose up -d` from within the folder containing `docker-compose.yml`. Frigate should now be accessible at `server_ip:5000` and you can finish the configuration using the built-in configuration editor.
+Now you should be able to start Frigate by running `docker compose up -d` from within the folder containing `docker-compose.yml`. Frigate should now be accessible for browsing at `http://server_ip:5000` and you can finish the configuration using the built-in configuration editor.
 
 ## Configuring Frigate
 
