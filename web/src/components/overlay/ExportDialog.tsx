@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   Dialog,
   DialogClose,
@@ -12,11 +12,17 @@ import { Label } from "../ui/label";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Button } from "../ui/button";
 import { ExportMode } from "@/types/filter";
-import { FaArrowDown } from "react-icons/fa";
+import { FaArrowDown, FaArrowRight, FaCalendarAlt } from "react-icons/fa";
 import axios from "axios";
 import { toast } from "sonner";
 import { Input } from "../ui/input";
 import { TimeRange } from "@/types/timeline";
+import { useFormattedTimestamp } from "@/hooks/use-date-utils";
+import useSWR from "swr";
+import { FrigateConfig } from "@/types/frigateConfig";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import ReviewActivityCalendar from "./ReviewActivityCalendar";
+import { SelectSeparator } from "../ui/select";
 
 const EXPORT_OPTIONS = [
   "1",
@@ -24,8 +30,8 @@ const EXPORT_OPTIONS = [
   "8",
   "12",
   "24",
-  "custom",
   "timeline",
+  "custom",
 ] as const;
 type ExportOption = (typeof EXPORT_OPTIONS)[number];
 
@@ -35,7 +41,7 @@ type ExportDialogProps = {
   currentTime: number;
   range?: TimeRange;
   mode: ExportMode;
-  setRange: (range: TimeRange) => void;
+  setRange: (range: TimeRange | undefined) => void;
   setMode: (mode: ExportMode) => void;
 };
 export default function ExportDialog({
@@ -104,6 +110,8 @@ export default function ExportDialog({
             "Successfully started export. View the file in the /exports folder.",
             { position: "top-center" },
           );
+          setName("");
+          setRange(undefined);
         }
       })
       .catch((error) => {
@@ -118,7 +126,7 @@ export default function ExportDialog({
           });
         }
       });
-  }, [camera, name, range]);
+  }, [camera, name, range, setRange]);
 
   return (
     <Dialog
@@ -176,6 +184,13 @@ export default function ExportDialog({
             );
           })}
         </RadioGroup>
+        {selectedOption == "custom" && (
+          <CustomTimeSelector
+            latestTime={latestTime}
+            range={range}
+            setRange={setRange}
+          />
+        )}
         <Input
           type="search"
           placeholder="Name the Export"
@@ -202,5 +217,178 @@ export default function ExportDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+type CustomTimeSelectorProps = {
+  latestTime: number;
+  range?: TimeRange;
+  setRange: (range: TimeRange | undefined) => void;
+};
+function CustomTimeSelector({
+  latestTime,
+  range,
+  setRange,
+}: CustomTimeSelectorProps) {
+  const { data: config } = useSWR<FrigateConfig>("config");
+
+  // times
+
+  const startTime = useMemo(
+    () => range?.after || latestTime - 3600,
+    [range, latestTime],
+  );
+  const endTime = useMemo(
+    () => range?.before || latestTime,
+    [range, latestTime],
+  );
+  const formattedStart = useFormattedTimestamp(
+    startTime,
+    config?.ui.time_format == "24hour"
+      ? "%b %-d, %H:%M:%S"
+      : "%b %-d, %I:%M:%S %p",
+  );
+  const formattedEnd = useFormattedTimestamp(
+    endTime,
+    config?.ui.time_format == "24hour"
+      ? "%b %-d, %H:%M:%S"
+      : "%b %-d, %I:%M:%S %p",
+  );
+
+  const startClock = useMemo(() => {
+    const date = new Date(startTime * 1000);
+    return `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}:${date.getSeconds().toString().padStart(2, "0")}`;
+  }, [startTime]);
+  const endClock = useMemo(() => {
+    const date = new Date(endTime * 1000);
+    return `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}:${date.getSeconds().toString().padStart(2, "0")}`;
+  }, [endTime]);
+
+  // calendars
+
+  const [startOpen, setStartOpen] = useState(false);
+  const [endOpen, setEndOpen] = useState(false);
+
+  return (
+    <div className="mx-8 px-2 flex items-center gap-2 bg-secondary rounded-lg">
+      <FaCalendarAlt />
+      <Popover
+        open={startOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setStartOpen(false);
+          }
+        }}
+      >
+        <PopoverTrigger asChild>
+          <Button
+            variant={startOpen ? "select" : "secondary"}
+            onClick={() => {
+              setStartOpen(true);
+              setEndOpen(false);
+            }}
+          >
+            {formattedStart}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="flex flex-col items-center">
+          <ReviewActivityCalendar
+            selectedDay={new Date(startTime * 1000)}
+            onSelect={(day) => {
+              if (!day) {
+                return;
+              }
+
+              setRange({
+                before: endTime,
+                after: day.getTime() / 1000 + 1,
+              });
+            }}
+          />
+          <SelectSeparator />
+          <input
+            className="w-full mx-4 p-1 border border-input bg-background text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+            id="startTime"
+            type="time"
+            value={startClock}
+            step="1"
+            onChange={(e) => {
+              const clock = e.target.value;
+              const [hour, minute, second] = clock.split(":");
+              const start = new Date(startTime * 1000);
+              start.setHours(
+                parseInt(hour),
+                parseInt(minute),
+                parseInt(second),
+                0,
+              );
+              setRange({
+                before: endTime,
+                after: start.getTime() / 1000,
+              });
+            }}
+          />
+        </PopoverContent>
+      </Popover>
+      <FaArrowRight className="size-4" />
+      <Popover
+        open={endOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEndOpen(false);
+          }
+        }}
+      >
+        <PopoverTrigger asChild>
+          <Button
+            variant={endOpen ? "select" : "secondary"}
+            onClick={() => {
+              setEndOpen(true);
+              setStartOpen(false);
+            }}
+          >
+            {formattedEnd}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="flex flex-col items-center">
+          <ReviewActivityCalendar
+            selectedDay={new Date(endTime * 1000)}
+            onSelect={(day) => {
+              if (!day) {
+                return;
+              }
+
+              setRange({
+                after: startTime,
+                before: day.getTime() / 1000,
+              });
+            }}
+          />
+          <SelectSeparator />
+          <input
+            className="w-full mx-4 p-1 border border-input bg-background text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+            id="startTime"
+            type="time"
+            value={endClock}
+            step="1"
+            onChange={(e) => {
+              const clock = e.target.value;
+              const [hour, minute, second] = clock.split(":");
+              const end = new Date(endTime * 1000);
+              end.setHours(
+                parseInt(hour),
+                parseInt(minute),
+                parseInt(second),
+                0,
+              );
+              setRange({
+                before: end.getTime() / 1000,
+                after: startTime,
+              });
+            }}
+          />
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 }
