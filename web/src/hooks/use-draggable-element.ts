@@ -44,6 +44,7 @@ function useDraggableElement({
   const [clientYPosition, setClientYPosition] = useState<number | null>(null);
   const [initialClickAdjustment, setInitialClickAdjustment] = useState(0);
   const [scrollEdgeSize, setScrollEdgeSize] = useState<number>();
+  const [fullTimelineHeight, setFullTimelineHeight] = useState<number>();
   const [segments, setSegments] = useState<HTMLDivElement[]>([]);
   const { alignStartDateToTimeline, getCumulativeScrollTop } = useTimelineUtils(
     {
@@ -218,7 +219,8 @@ function useDraggableElement({
         showDraggableElement &&
         isDragging &&
         clientYPosition &&
-        segments
+        segments &&
+        fullTimelineHeight
       ) {
         const { scrollTop: scrolled } = timelineRef.current;
 
@@ -227,8 +229,7 @@ function useDraggableElement({
         // bottom of timeline
         const elementEarliest = draggableElementEarliestTime
           ? timestampToPixels(draggableElementEarliestTime)
-          : segmentHeight * (timelineDuration / segmentDuration) -
-            segmentHeight * 3.5;
+          : fullTimelineHeight - segmentHeight * 1.5;
 
         // top of timeline - default 2 segments added for draggableElement visibility
         const elementLatest = draggableElementLatestTime
@@ -302,7 +303,11 @@ function useDraggableElement({
                   scrollEdgeSize)) /
                 scrollEdgeSize,
             );
-            timelineRef.current.scrollTop += segmentHeight * intensity;
+            const newScrollTop = Math.min(
+              fullTimelineHeight - segmentHeight,
+              timelineRef.current.scrollTop + segmentHeight * intensity,
+            );
+            timelineRef.current.scrollTop = newScrollTop;
           }
         }
 
@@ -405,6 +410,7 @@ function useDraggableElement({
 
   useEffect(() => {
     if (timelineRef.current && draggableElementTime && timelineCollapsed) {
+      setFullTimelineHeight(timelineRef.current.scrollHeight);
       const alignedSegmentTime = alignStartDateToTimeline(draggableElementTime);
 
       let segmentElement = timelineRef.current.querySelector(
@@ -414,8 +420,12 @@ function useDraggableElement({
       if (!segmentElement) {
         // segment not found, maybe we collapsed over a collapsible segment
         let searchTime = alignedSegmentTime;
-        while (searchTime >= timelineStartAligned - timelineDuration) {
-          searchTime -= segmentDuration;
+
+        while (
+          searchTime < timelineStartAligned &&
+          searchTime < timelineStartAligned + timelineDuration
+        ) {
+          searchTime += segmentDuration;
           segmentElement = timelineRef.current.querySelector(
             `[data-segment-id="${searchTime}"]`,
           );
@@ -435,10 +445,11 @@ function useDraggableElement({
   }, [timelineCollapsed]);
 
   useEffect(() => {
-    if (timelineRef.current) {
+    if (timelineRef.current && segments) {
       setScrollEdgeSize(timelineRef.current.clientHeight * 0.03);
+      setFullTimelineHeight(timelineRef.current.scrollHeight);
     }
-  }, [timelineRef]);
+  }, [timelineRef, segments]);
 
   return { handleMouseDown, handleMouseUp, handleMouseMove };
 }
