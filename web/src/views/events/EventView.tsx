@@ -671,7 +671,7 @@ function MotionReview({
     }
 
     return timeRangeSegments.ranges.findIndex(
-      (seg) => seg.start <= startTime && seg.end >= startTime,
+      (seg) => seg.after <= startTime && seg.before >= startTime,
     );
     // only render once
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -679,7 +679,7 @@ function MotionReview({
 
   const [selectedRangeIdx, setSelectedRangeIdx] = useState(initialIndex);
   const [currentTime, setCurrentTime] = useState<number>(
-    startTime ?? timeRangeSegments.ranges[selectedRangeIdx]?.end,
+    startTime ?? timeRangeSegments.ranges[selectedRangeIdx]?.before,
   );
   const currentTimeRange = useMemo(
     () => timeRangeSegments.ranges[selectedRangeIdx],
@@ -693,11 +693,11 @@ function MotionReview({
 
   useEffect(() => {
     if (
-      currentTime > currentTimeRange.end + 60 ||
-      currentTime < currentTimeRange.start - 60
+      currentTime > currentTimeRange.before + 60 ||
+      currentTime < currentTimeRange.after - 60
     ) {
       const index = timeRangeSegments.ranges.findIndex(
-        (seg) => seg.start <= currentTime && seg.end >= currentTime,
+        (seg) => seg.after <= currentTime && seg.before >= currentTime,
       );
 
       if (index != -1) {

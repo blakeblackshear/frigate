@@ -191,7 +191,7 @@ export default function PreviewThumbnailPlayer({
       <div className={`${imgLoaded ? "visible" : "invisible"}`}>
         <img
           ref={imgRef}
-          className={`w-full h-full transition-opacity ${
+          className={`size-full transition-opacity ${
             playingBack ? "opacity-0" : "opacity-100"
           }`}
           src={`${apiHost}${review.thumb_path.replace("/media/frigate/", "")}`}

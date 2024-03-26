@@ -1,3 +1,4 @@
+import ReviewCard from "@/components/card/ReviewCard";
 import FilterCheckBox from "@/components/filter/FilterCheckBox";
 import ReviewFilterGroup from "@/components/filter/ReviewFilterGroup";
 import PreviewPlayer, {
@@ -414,4 +415,17 @@ function Timeline({
       </div>
     );
   }
+
+  return (
+    <div className="w-60 h-full p-4 flex flex-col gap-4 bg-secondary overflow-auto">
+      {mainCameraReviewItems.map((review) => (
+        <ReviewCard
+          key={review.id}
+          event={review}
+          currentTime={currentTime}
+          onClick={() => setCurrentTime(review.start_time)}
+        />
+      ))}
+    </div>
+  );
 }
