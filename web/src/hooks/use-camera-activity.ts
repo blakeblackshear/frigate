@@ -100,8 +100,7 @@ export function useCameraMotionNextTimestamp(
         alignStartDateToTimeline(timeRangeSegmentEnd)) %
       segmentDuration;
 
-    const startIndex =
-      offset > 0 ? Math.floor(offset / (segmentDuration / 15)) : 0;
+    const startIndex = Math.abs(Math.floor(offset / 15));
 
     for (
       let i = startIndex;

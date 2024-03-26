@@ -40,13 +40,9 @@ export function useTimelineUtils({
 
   const getVisibleTimelineDuration = useCallback(() => {
     if (timelineRef?.current && timelineDuration) {
-      const {
-        scrollHeight: timelineHeight,
-        clientHeight: visibleTimelineHeight,
-      } = timelineRef.current;
+      const { clientHeight: visibleTimelineHeight } = timelineRef.current;
 
-      const segmentHeight =
-        timelineHeight / (timelineDuration / segmentDuration);
+      const segmentHeight = 8;
 
       const visibleTime =
         (visibleTimelineHeight / segmentHeight) * segmentDuration;

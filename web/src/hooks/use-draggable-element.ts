@@ -40,6 +40,7 @@ function useDraggableElement({
   setIsDragging,
   setDraggableElementPosition,
 }: DraggableElementProps) {
+  const segmentHeight = 8;
   const [clientYPosition, setClientYPosition] = useState<number | null>(null);
   const [initialClickAdjustment, setInitialClickAdjustment] = useState(0);
   const [scrollEdgeSize, setScrollEdgeSize] = useState<number>();
@@ -134,15 +135,9 @@ function useDraggableElement({
 
   const timestampToPixels = useCallback(
     (time: number) => {
-      const { scrollHeight: timelineHeight } =
-        timelineRef.current as HTMLDivElement;
-
-      const segmentHeight =
-        timelineHeight / (timelineDuration / segmentDuration);
-
       return ((timelineStartAligned - time) / segmentDuration) * segmentHeight;
     },
-    [segmentDuration, timelineRef, timelineStartAligned, timelineDuration],
+    [segmentDuration, timelineStartAligned],
   );
 
   const updateDraggableElementPosition = useCallback(
@@ -225,11 +220,7 @@ function useDraggableElement({
         clientYPosition &&
         segments
       ) {
-        const { scrollHeight: timelineHeight, scrollTop: scrolled } =
-          timelineRef.current;
-
-        const segmentHeight =
-          timelineHeight / (timelineDuration / segmentDuration);
+        const { scrollTop: scrolled } = timelineRef.current;
 
         const parentScrollTop = getCumulativeScrollTop(timelineRef.current);
 
@@ -371,11 +362,7 @@ function useDraggableElement({
       !isDragging &&
       segments.length > 0
     ) {
-      const { scrollHeight: timelineHeight, scrollTop: scrolled } =
-        timelineRef.current;
-
-      const segmentHeight =
-        timelineHeight / (timelineDuration / segmentDuration);
+      const { scrollTop: scrolled } = timelineRef.current;
 
       const alignedSegmentTime = alignStartDateToTimeline(draggableElementTime);
 
