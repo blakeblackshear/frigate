@@ -156,7 +156,7 @@ export default function ExportDialog({
           {mode != "timeline" ? "Export" : "Save"}
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="sm:rounded-2xl">
         <DialogHeader>
           <DialogTitle>Export</DialogTitle>
         </DialogHeader>
