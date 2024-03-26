@@ -16,6 +16,7 @@ import { FaArrowDown } from "react-icons/fa";
 import axios from "axios";
 import { toast } from "sonner";
 import { Input } from "../ui/input";
+import { TimeRange } from "@/types/timeline";
 
 const EXPORT_OPTIONS = [
   "1",
@@ -30,50 +31,70 @@ type ExportOption = (typeof EXPORT_OPTIONS)[number];
 
 type ExportDialogProps = {
   camera: string;
+  latestTime: number;
+  currentTime: number;
+  range?: TimeRange;
   mode: ExportMode;
+  setRange: (range: TimeRange) => void;
   setMode: (mode: ExportMode) => void;
 };
 export default function ExportDialog({
   camera,
+  latestTime,
+  currentTime,
+  range,
   mode,
+  setRange,
   setMode,
 }: ExportDialogProps) {
   const [selectedOption, setSelectedOption] = useState<ExportOption>("1");
   const [name, setName] = useState("");
 
-  const onStartExport = useCallback(() => {
-    const now = new Date();
-    let end = now.getTime() / 1000;
+  const onSelectTime = useCallback(
+    (option: ExportOption) => {
+      setSelectedOption(option);
 
-    let start;
-    switch (selectedOption) {
-      case "1":
-        now.setHours(now.getHours() - 1);
-        start = now.getTime() / 1000;
-        break;
-      case "4":
-        now.setHours(now.getHours() - 4);
-        start = now.getTime() / 1000;
-        break;
-      case "8":
-        now.setHours(now.getHours() - 8);
-        start = now.getTime() / 1000;
-        break;
-      case "12":
-        now.setHours(now.getHours() - 12);
-        start = now.getTime() / 1000;
-        break;
-      case "24":
-        now.setHours(now.getHours() - 24);
-        start = now.getTime() / 1000;
-        break;
-      case "custom":
-        end = 0;
-        break;
+      const now = new Date(latestTime * 1000);
+      let start = 0;
+      switch (option) {
+        case "1":
+          now.setHours(now.getHours() - 1);
+          start = now.getTime() / 1000;
+          break;
+        case "4":
+          now.setHours(now.getHours() - 4);
+          start = now.getTime() / 1000;
+          break;
+        case "8":
+          now.setHours(now.getHours() - 8);
+          start = now.getTime() / 1000;
+          break;
+        case "12":
+          now.setHours(now.getHours() - 12);
+          start = now.getTime() / 1000;
+          break;
+        case "24":
+          now.setHours(now.getHours() - 24);
+          start = now.getTime() / 1000;
+          break;
+      }
+
+      setRange({
+        before: latestTime,
+        after: start,
+      });
+    },
+    [latestTime, setRange],
+  );
+
+  const onStartExport = useCallback(() => {
+    if (!range) {
+      toast.error("No valid time range selected", { position: "top-center" });
+      return;
     }
 
     axios
-      .post(`export/${camera}/start/${start}/end/${end}`, {
+      .post(`export/${camera}/start/${range.after}/end/${range.before}`, {
         playback: "realtime",
         name,
       })
@@ -97,10 +118,17 @@ export default function ExportDialog({
           });
         }
       });
-  }, [camera, name, selectedOption]);
+  }, [camera, name, range]);
 
   return (
-    <Dialog open={mode == "select"}>
+    <Dialog
+      open={mode == "select"}
+      onOpenChange={(open) => {
+        if (!open) {
+          setMode("none");
+        }
+      }}
+    >
       <DialogTrigger asChild>
         <Button
           className="flex items-center gap-2"
@@ -109,7 +137,7 @@ export default function ExportDialog({
           onClick={() => setMode("select")}
         >
           <FaArrowDown className="p-1 fill-secondary bg-muted-foreground rounded-md" />
-          Export
+          {mode != "timeline" ? "Export" : "Save"}
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -117,7 +145,7 @@ export default function ExportDialog({
           <DialogTitle>Export</DialogTitle>
         </DialogHeader>
         <RadioGroup
-          onValueChange={(value) => setSelectedOption(value as ExportOption)}
+          onValueChange={(value) => onSelectTime(value as ExportOption)}
         >
           {EXPORT_OPTIONS.map((opt) => {
             return (
@@ -154,6 +182,7 @@ export default function ExportDialog({
             size="sm"
             onClick={() => {
               if (selectedOption == "timeline") {
+                setRange({ before: currentTime + 30, after: currentTime - 30 });
                 setMode("timeline");
               } else {
                 onStartExport();

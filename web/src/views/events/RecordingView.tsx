@@ -36,6 +36,7 @@ import { IoMdArrowRoundBack } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import useSWR from "swr";
+import { TimeRange } from "@/types/timeline";
 
 const SEGMENT_DURATION = 30;
 type TimelineType = "timeline" | "events";
@@ -77,10 +78,6 @@ export function RecordingView({
     [reviewItems, mainCamera],
   );
 
-  // export
-
-  const [exportMode, setExportMode] = useState<ExportMode>("none");
-
   // timeline
 
   const [timelineType, setTimelineType] = useOverlayState<TimelineType>(
@@ -98,6 +95,11 @@ export function RecordingView({
     () => timeRange.ranges[selectedRangeIdx],
     [selectedRangeIdx, timeRange],
   );
+
+  // export
+
+  const [exportMode, setExportMode] = useState<ExportMode>("none");
+  const [exportRange, setExportRange] = useState<TimeRange>();
 
   // move to next clip
 
@@ -255,7 +257,11 @@ export function RecordingView({
           )}
           <ExportDialog
             camera={mainCamera}
+            currentTime={currentTime}
+            latestTime={timeRange.end}
             mode={exportMode}
+            range={exportRange}
+            setRange={setExportRange}
             setMode={setExportMode}
           />
           <ReviewFilterGroup
@@ -327,7 +333,7 @@ export function RecordingView({
                 onControllerReady={(controller) => {
                   mainControllerRef.current = controller;
                 }}
-                isScrubbing={scrubbing}
+                isScrubbing={scrubbing || exportMode == "timeline"}
               />
             </div>
             {isDesktop && (
@@ -395,8 +401,10 @@ export function RecordingView({
           timeRange={timeRange}
           mainCameraReviewItems={mainCameraReviewItems}
           currentTime={currentTime}
+          exportRange={exportMode == "timeline" ? exportRange : undefined}
           setCurrentTime={setCurrentTime}
           setScrubbing={setScrubbing}
+          setExportRange={setExportRange}
         />
       </div>
     </div>
@@ -410,8 +418,10 @@ type TimelineProps = {
   timeRange: { start: number; end: number };
   mainCameraReviewItems: ReviewSegment[];
   currentTime: number;
+  exportRange?: TimeRange;
   setCurrentTime: React.Dispatch<React.SetStateAction<number>>;
   setScrubbing: React.Dispatch<React.SetStateAction<boolean>>;
+  setExportRange: (range: TimeRange) => void;
 };
 function Timeline({
   contentRef,
@@ -420,8 +430,10 @@ function Timeline({
   timeRange,
   mainCameraReviewItems,
   currentTime,
+  exportRange,
   setCurrentTime,
   setScrubbing,
+  setExportRange,
 }: TimelineProps) {
   const { data: motionData } = useSWR<MotionData[]>([
     "review/activity/motion",
@@ -433,7 +445,22 @@ function Timeline({
     },
   ]);
 
-  if (timelineType == "timeline") {
+  const [exportStart, setExportStartTime] = useState<number>(0);
+  const [exportEnd, setExportEndTime] = useState<number>(0);
+
+  useEffect(() => {
+    if (exportRange && exportStart != 0 && exportEnd != 0) {
+      if (exportRange.after != exportStart) {
+        setCurrentTime(exportStart);
+      } else if (exportRange?.before != exportEnd) {
+        setCurrentTime(exportEnd);
+      }
+
+      setExportRange({ after: exportStart, before: exportEnd });
+    }
+  }, [exportRange, exportStart, exportEnd, setExportRange, setCurrentTime]);
+
+  if (exportRange != undefined || timelineType == "timeline") {
     return (
       <div
         className={
@@ -447,7 +474,12 @@ function Timeline({
           timestampSpread={15}
           timelineStart={timeRange.end}
           timelineEnd={timeRange.start}
-          showHandlebar
+          showHandlebar={exportRange == undefined}
+          showExportHandles={exportRange != undefined}
+          exportStartTime={exportRange?.after}
+          exportEndTime={exportRange?.before}
+          setExportStartTime={setExportStartTime}
+          setExportEndTime={setExportEndTime}
           handlebarTime={currentTime}
           setHandlebarTime={setCurrentTime}
           onlyInitialHandlebarScroll={true}
