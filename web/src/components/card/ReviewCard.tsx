@@ -7,6 +7,8 @@ import { isSafari } from "react-device-detect";
 import useSWR from "swr";
 import TimeAgo from "../dynamic/TimeAgo";
 import { useMemo } from "react";
+import useImageLoaded from "@/hooks/use-image-loaded";
+import ImageLoadingIndicator from "../indicators/ImageLoadingIndicator";
 
 type ReviewCardProps = {
   event: ReviewSegment;
@@ -19,6 +21,7 @@ export default function ReviewCard({
   onClick,
 }: ReviewCardProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
+  const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
   const formattedDate = useFormattedTimestamp(
     event.start_time,
     config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p",
@@ -28,17 +31,23 @@ export default function ReviewCard({
     [event, currentTime],
   );
 
+  if (event.data.objects.includes("car")) {
+    //console.log(`failed to load ${JSON.stringify(event)}`);
+  }
+
   return (
     <div
       className="w-full flex flex-col gap-1.5 cursor-pointer"
       onClick={onClick}
     >
+      <ImageLoadingIndicator className="size-full" imgLoaded={imgLoaded} />
       <img
-        className={`size-full rounded-lg ${isSelected ? "outline outline-3 outline-offset-1 outline-selected" : ""}`}
+        ref={imgRef}
+        className={`size-full rounded-lg ${isSelected ? "outline outline-3 outline-offset-1 outline-selected" : ""} ${imgLoaded ? "visible" : "invisible"}`}
         src={`${baseUrl}${event.thumb_path.replace("/media/frigate/", "")}`}
         loading={isSafari ? "eager" : "lazy"}
         onLoad={() => {
-          //onImgLoad();
+          onImgLoad();
         }}
       />
       <div className="flex justify-between items-center">

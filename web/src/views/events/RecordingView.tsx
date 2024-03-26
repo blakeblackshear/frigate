@@ -277,7 +277,7 @@ export function RecordingView({
       </div>
 
       <div
-        className={`flex h-full justify-center overflow-hidden ${isDesktop ? "" : "flex-col"}`}
+        className={`flex h-full mb-2 justify-center overflow-hidden ${isDesktop ? "" : "flex-col"}`}
       >
         <div className="flex flex-1 flex-wrap">
           <div
@@ -418,14 +418,20 @@ function Timeline({
 
   return (
     <div className="w-60 h-full p-4 flex flex-col gap-4 bg-secondary overflow-auto">
-      {mainCameraReviewItems.map((review) => (
-        <ReviewCard
-          key={review.id}
-          event={review}
-          currentTime={currentTime}
-          onClick={() => setCurrentTime(review.start_time)}
-        />
-      ))}
+      {mainCameraReviewItems.map((review) => {
+        if (review.severity == "significant_motion") {
+          return;
+        }
+
+        return (
+          <ReviewCard
+            key={review.id}
+            event={review}
+            currentTime={currentTime}
+            onClick={() => setCurrentTime(review.start_time)}
+          />
+        );
+      })}
     </div>
   );
 }
