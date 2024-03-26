@@ -1,6 +1,7 @@
 import ReviewCard from "@/components/card/ReviewCard";
 import FilterCheckBox from "@/components/filter/FilterCheckBox";
 import ReviewFilterGroup from "@/components/filter/ReviewFilterGroup";
+import ExportDialog from "@/components/overlay/ExportDialog";
 import PreviewPlayer, {
   PreviewController,
 } from "@/components/player/PreviewPlayer";
@@ -245,6 +246,7 @@ export function RecordingView({
               </DrawerContent>
             </Drawer>
           )}
+          <ExportDialog />
           <ReviewFilterGroup
             filters={["date", "general"]}
             reviewSummary={reviewSummary}
