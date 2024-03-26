@@ -22,7 +22,7 @@ export default function NewReviewData({
       return false;
     }
 
-    return reviewItems.length != itemsToReview;
+    return reviewItems.length < itemsToReview;
   }, [reviewItems, itemsToReview]);
 
   return (
