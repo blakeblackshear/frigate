@@ -8,6 +8,7 @@ import DynamicVideoPlayer from "@/components/player/dynamic/DynamicVideoPlayer";
 import MotionReviewTimeline from "@/components/timeline/MotionReviewTimeline";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
 import {
@@ -17,7 +18,14 @@ import {
   ReviewSummary,
 } from "@/types/review";
 import { getChunkedTimeDay } from "@/utils/timelineUtil";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  MutableRefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { isDesktop, isMobile } from "react-device-detect";
 import { FaCircle, FaVideo } from "react-icons/fa";
 import { IoMdArrowRoundBack } from "react-icons/io";
@@ -25,6 +33,7 @@ import { useNavigate } from "react-router-dom";
 import useSWR from "swr";
 
 const SEGMENT_DURATION = 30;
+type TimelineType = "timeline" | "events";
 
 type RecordingViewProps = {
   startCamera: string;
@@ -63,7 +72,9 @@ export function RecordingView({
     [reviewItems, mainCamera],
   );
 
-  // timeline time
+  // timeline
+
+  const [timelineType, setTimelineType] = useState<TimelineType>("timeline");
 
   const timeRange = useMemo(() => getChunkedTimeDay(startTime), [startTime]);
   const [selectedRangeIdx, setSelectedRangeIdx] = useState(
@@ -164,16 +175,6 @@ export function RecordingView({
 
   // motion timeline data
 
-  const { data: motionData } = useSWR<MotionData[]>([
-    "review/activity/motion",
-    {
-      before: timeRange.end,
-      after: timeRange.start,
-      scale: SEGMENT_DURATION / 2,
-      cameras: mainCamera,
-    },
-  ]);
-
   const mainCameraAspect = useMemo(() => {
     if (!config) {
       return "normal";
@@ -209,7 +210,7 @@ export function RecordingView({
           <IoMdArrowRoundBack className="size-5 mr-[10px]" />
           Back
         </Button>
-        <div className="flex items-center justify-end">
+        <div className="flex items-center justify-end gap-2">
           {isMobile && (
             <Drawer>
               <DrawerTrigger asChild>
@@ -247,6 +248,30 @@ export function RecordingView({
             motionOnly={false}
             setMotionOnly={() => {}}
           />
+          <ToggleGroup
+            className="*:px-3 *:py-4 *:rounded-md"
+            type="single"
+            size="sm"
+            value={timelineType}
+            onValueChange={(value: TimelineType) =>
+              value ? setTimelineType(value) : null
+            } // don't allow the severity to be unselected
+          >
+            <ToggleGroupItem
+              className={`${timelineType == "timeline" ? "" : "text-gray-500"}`}
+              value="timeline"
+              aria-label="Select timeline"
+            >
+              <div className="">Timeline</div>
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              className={`${timelineType == "events" ? "" : "text-gray-500"}`}
+              value="events"
+              aria-label="Select events"
+            >
+              <div className="hidden md:block">Events</div>
+            </ToggleGroupItem>
+          </ToggleGroup>
         </div>
       </div>
 
@@ -317,31 +342,76 @@ export function RecordingView({
             )}
           </div>
         </div>
-
-        <div
-          className={
-            isDesktop
-              ? "w-[100px] mt-2 overflow-y-auto no-scrollbar"
-              : "flex-grow overflow-hidden"
-          }
-        >
-          <MotionReviewTimeline
-            segmentDuration={30}
-            timestampSpread={15}
-            timelineStart={timeRange.end}
-            timelineEnd={timeRange.start}
-            showHandlebar
-            handlebarTime={currentTime}
-            setHandlebarTime={setCurrentTime}
-            onlyInitialHandlebarScroll={true}
-            events={mainCameraReviewItems}
-            motion_events={motionData ?? []}
-            severityType="significant_motion"
-            contentRef={contentRef}
-            onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
-          />
-        </div>
+        <Timeline
+          contentRef={contentRef}
+          mainCamera={mainCamera}
+          timelineType={timelineType}
+          timeRange={timeRange}
+          mainCameraReviewItems={mainCameraReviewItems}
+          currentTime={currentTime}
+          setCurrentTime={setCurrentTime}
+          setScrubbing={setScrubbing}
+        />
       </div>
     </div>
   );
+}
+
+type TimelineProps = {
+  contentRef: MutableRefObject<HTMLDivElement | null>;
+  mainCamera: string;
+  timelineType: TimelineType;
+  timeRange: { start: number; end: number };
+  mainCameraReviewItems: ReviewSegment[];
+  currentTime: number;
+  setCurrentTime: React.Dispatch<React.SetStateAction<number>>;
+  setScrubbing: React.Dispatch<React.SetStateAction<boolean>>;
+};
+function Timeline({
+  contentRef,
+  mainCamera,
+  timelineType,
+  timeRange,
+  mainCameraReviewItems,
+  currentTime,
+  setCurrentTime,
+  setScrubbing,
+}: TimelineProps) {
+  const { data: motionData } = useSWR<MotionData[]>([
+    "review/activity/motion",
+    {
+      before: timeRange.end,
+      after: timeRange.start,
+      scale: SEGMENT_DURATION / 2,
+      cameras: mainCamera,
+    },
+  ]);
+
+  if (timelineType == "timeline") {
+    return (
+      <div
+        className={
+          isDesktop
+            ? "w-[100px] mt-2 overflow-y-auto no-scrollbar"
+            : "flex-grow overflow-hidden"
+        }
+      >
+        <MotionReviewTimeline
+          segmentDuration={30}
+          timestampSpread={15}
+          timelineStart={timeRange.end}
+          timelineEnd={timeRange.start}
+          showHandlebar
+          handlebarTime={currentTime}
+          setHandlebarTime={setCurrentTime}
+          onlyInitialHandlebarScroll={true}
+          events={mainCameraReviewItems}
+          motion_events={motionData ?? []}
+          severityType="significant_motion"
+          contentRef={contentRef}
+          onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
+        />
+      </div>
+    );
+  }
 }
