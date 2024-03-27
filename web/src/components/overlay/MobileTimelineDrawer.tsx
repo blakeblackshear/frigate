@@ -3,6 +3,7 @@ import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { Button } from "../ui/button";
 import { FaFlag } from "react-icons/fa";
 import { TimelineType } from "@/types/timeline";
+import { isMobile } from "react-device-detect";
 
 type MobileTimelineDrawerProps = {
   selected: TimelineType;
@@ -13,6 +14,10 @@ export default function MobileTimelineDrawer({
   onSelect,
 }: MobileTimelineDrawerProps) {
   const [drawer, setDrawer] = useState(false);
+
+  if (!isMobile) {
+    return;
+  }
 
   return (
     <Drawer open={drawer} onOpenChange={setDrawer}>

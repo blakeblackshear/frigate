@@ -238,16 +238,14 @@ export function RecordingView({
           {isDesktop && "Back"}
         </Button>
         <div className="flex items-center justify-end gap-2">
-          {isMobile && (
-            <MobileCameraDrawer
-              allCameras={allCameras}
-              selected={mainCamera}
-              onSelectCamera={(cam) => {
-                setPlaybackStart(currentTime);
-                setMainCamera(cam);
-              }}
-            />
-          )}
+          <MobileCameraDrawer
+            allCameras={allCameras}
+            selected={mainCamera}
+            onSelectCamera={(cam) => {
+              setPlaybackStart(currentTime);
+              setMainCamera(cam);
+            }}
+          />
           {isDesktop && (
             <ExportDialog
               camera={mainCamera}
@@ -300,19 +298,17 @@ export function RecordingView({
               onSelect={setTimelineType}
             />
           )}
-          {isMobile && (
-            <MobileReviewSettingsDrawer
-              camera={mainCamera}
-              filter={filter}
-              currentTime={currentTime}
-              latestTime={timeRange.end}
-              mode={exportMode}
-              range={exportRange}
-              onUpdateFilter={updateFilter}
-              setRange={setExportRange}
-              setMode={setExportMode}
-            />
-          )}
+          <MobileReviewSettingsDrawer
+            camera={mainCamera}
+            filter={filter}
+            currentTime={currentTime}
+            latestTime={timeRange.end}
+            mode={exportMode}
+            range={exportRange}
+            onUpdateFilter={updateFilter}
+            setRange={setExportRange}
+            setMode={setExportMode}
+          />
         </div>
       </div>
 

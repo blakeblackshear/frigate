@@ -15,6 +15,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { toast } from "sonner";
 import axios from "axios";
 import SaveExportOverlay from "./SaveExportOverlay";
+import { isMobile } from "react-device-detect";
 
 const ATTRIBUTES = ["amazon", "face", "fedex", "license_plate", "ups"];
 type DrawerMode = "none" | "select" | "export" | "calendar" | "filter";
@@ -113,6 +114,10 @@ export default function MobileReviewSettingsDrawer({
   const [currentLabels, setCurrentLabels] = useState<string[] | undefined>(
     filter?.labels,
   );
+
+  if (!isMobile) {
+    return;
+  }
 
   let content;
   if (drawerMode == "select") {

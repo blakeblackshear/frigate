@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { Button } from "../ui/button";
 import { FaVideo } from "react-icons/fa";
+import { isMobile } from "react-device-detect";
 
 type MobileCameraDrawerProps = {
   allCameras: string[];
@@ -14,6 +15,10 @@ export default function MobileCameraDrawer({
   onSelectCamera,
 }: MobileCameraDrawerProps) {
   const [cameraDrawer, setCameraDrawer] = useState(false);
+
+  if (!isMobile) {
+    return;
+  }
 
   return (
     <Drawer open={cameraDrawer} onOpenChange={setCameraDrawer}>
