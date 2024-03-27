@@ -111,7 +111,9 @@ export default function PreviewThumbnailPlayer({
     } else {
       // the second preview is longer, return the second if it exists
       if (firstIndex < allPreviews.length - 1) {
-        return allPreviews[firstIndex + 1];
+        return allPreviews.find(
+          (preview, idx) => idx > firstIndex && preview.camera == review.camera,
+        );
       }
 
       return undefined;

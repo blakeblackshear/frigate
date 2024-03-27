@@ -3,6 +3,7 @@
 import logging
 from datetime import datetime, timedelta
 from functools import reduce
+from pathlib import Path
 
 import pandas as pd
 from flask import Blueprint, jsonify, make_response, request
@@ -62,6 +63,7 @@ def review():
         .order_by(ReviewSegment.start_time.desc())
         .limit(limit)
         .dicts()
+        .iterator()
     )
 
     return jsonify([r for r in review])
@@ -334,15 +336,53 @@ def set_not_reviewed(id):
     )
 
 
-@ReviewBp.route("/reviews/<ids>", methods=("DELETE",))
-def delete_reviews(ids: str):
-    list_of_ids = ids.split(",")
+@ReviewBp.route("/reviews/delete", methods=("POST",))
+def delete_reviews():
+    json: dict[str, any] = request.get_json(silent=True) or {}
+    list_of_ids = json.get("ids", "")
 
     if not list_of_ids or len(list_of_ids) == 0:
         return make_response(
             jsonify({"success": False, "message": "Not a valid list of ids"}), 404
         )
 
+    reviews = (
+        ReviewSegment.select(
+            ReviewSegment.camera,
+            ReviewSegment.start_time,
+            ReviewSegment.end_time,
+        )
+        .where(ReviewSegment.id << list_of_ids)
+        .dicts()
+        .iterator()
+    )
+    recording_ids = []
+
+    for review in reviews:
+        start_time = review["start_time"]
+        end_time = review["end_time"]
+        camera_name = review["camera"]
+        recordings = (
+            Recordings.select(Recordings.id, Recordings.path)
+            .where(
+                Recordings.start_time.between(start_time, end_time)
+                | Recordings.end_time.between(start_time, end_time)
+                | (
+                    (start_time > Recordings.start_time)
+                    & (end_time < Recordings.end_time)
+                )
+            )
+            .where(Recordings.camera == camera_name)
+            .dicts()
+            .iterator()
+        )
+
+        for recording in recordings:
+            Path(recording["path"]).unlink(missing_ok=True)
+            recording_ids.append(recording["id"])
+
+    # delete recordings and review segments
+    Recordings.delete().where(Recordings.id << recording_ids).execute()
     ReviewSegment.delete().where(ReviewSegment.id << list_of_ids).execute()
 
     return make_response(jsonify({"success": True, "message": "Delete reviews"}), 200)
