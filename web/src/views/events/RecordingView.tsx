@@ -70,6 +70,7 @@ export function RecordingView({
   const [mainCamera, setMainCamera] = useState(startCamera);
   const mainControllerRef = useRef<DynamicVideoController | null>(null);
   const previewRefs = useRef<{ [camera: string]: PreviewController }>({});
+  const [cameraDrawer, setCameraDrawer] = useState(false);
 
   const [playbackStart, setPlaybackStart] = useState(startTime);
 
@@ -220,37 +221,39 @@ export function RecordingView({
   return (
     <div ref={contentRef} className="size-full flex flex-col">
       <Toaster />
-      <div className={`w-full h-10 flex items-center justify-between pr-1`}>
-        <Button className="rounded-lg" onClick={() => navigate(-1)}>
-          <IoMdArrowRoundBack className="size-5 mr-[10px]" />
-          Back
+      <div className={`w-full h-10 px-1 flex items-center justify-between`}>
+        <Button
+          className="flex items-center gap-2 rounded-lg"
+          onClick={() => navigate(-1)}
+        >
+          <IoMdArrowRoundBack className="size-5" size="small" />
+          {isDesktop && "Back"}
         </Button>
         <div className="flex items-center justify-end gap-2">
           {isMobile && (
-            <Drawer>
+            <Drawer open={cameraDrawer} onOpenChange={setCameraDrawer}>
               <DrawerTrigger asChild>
                 <Button
-                  className="rounded-lg capitalize flex items-center gap-2"
+                  className="rounded-lg capitalize"
                   size="sm"
                   variant="secondary"
                 >
                   <FaVideo className="text-muted-foreground" />
-                  {mainCamera.replaceAll("_", " ")}
                 </Button>
               </DrawerTrigger>
-              <DrawerContent className="max-h-[75dvh] overflow-hidden">
+              <DrawerContent className="max-h-[75dvh] overflow-hidden flex flex-col items-center gap-2">
                 {allCameras.map((cam) => (
-                  <FilterCheckBox
+                  <div
                     key={cam}
-                    CheckIcon={FaCircle}
-                    iconClassName="size-2"
-                    label={cam.replaceAll("_", " ")}
-                    isChecked={cam == mainCamera}
-                    onCheckedChange={() => {
+                    className={`w-full mx-4 py-2 text-center capitalize ${cam == mainCamera ? "bg-secondary rounded-lg" : ""}`}
+                    onClick={() => {
                       setPlaybackStart(currentTime);
                       setMainCamera(cam);
+                      setCameraDrawer(false);
                     }}
-                  />
+                  >
+                    {cam.replaceAll("_", " ")}
+                  </div>
                 ))}
               </DrawerContent>
             </Drawer>
