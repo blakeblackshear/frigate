@@ -1,4 +1,6 @@
+import { LuDisc, LuDisc2, LuDisc3, LuX } from "react-icons/lu";
 import { Button } from "../ui/button";
+import { FaCompactDisc } from "react-icons/fa";
 
 type SaveExportOverlayProps = {
   className: string;
@@ -19,10 +21,22 @@ export default function SaveExportOverlay({
           show ? "animate-in slide-in-from-top duration-500" : "invisible"
         }  text-center mt-5 mx-auto`}
       >
-        <Button variant="select" size="sm" onClick={onSave}>
+        <Button
+          className="flex items-center gap-1"
+          variant="select"
+          size="sm"
+          onClick={onSave}
+        >
+          <FaCompactDisc />
           Save Export
         </Button>
-        <Button size="sm" variant="secondary" onClick={onCancel}>
+        <Button
+          className="flex items-center gap-1"
+          size="sm"
+          variant="secondary"
+          onClick={onCancel}
+        >
+          <LuX />
           Cancel
         </Button>
       </div>
