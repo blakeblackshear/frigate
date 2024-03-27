@@ -27,7 +27,7 @@ export default function MobileCameraDrawer({
           <FaVideo className="text-muted-foreground" />
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="max-h-[75dvh] overflow-hidden flex flex-col items-center gap-2 px-4 pb-4 mx-1 rounded-t-2xl">
+      <DrawerContent className="max-h-[75dvh] overflow-y-auto flex flex-col items-center gap-2 px-4 pb-4 mx-1 rounded-t-2xl">
         {allCameras.map((cam) => (
           <div
             key={cam}
