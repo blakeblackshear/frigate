@@ -317,7 +317,7 @@ export function RecordingView({
       </div>
 
       <div
-        className={`flex h-full my-2 justify-center overflow-hidden ${isDesktop ? "" : "flex-col gap-2"}`}
+        className={`h-full flex my-2 justify-center overflow-hidden ${isDesktop ? "" : "flex-col gap-2"}`}
       >
         <div className="flex flex-1 flex-wrap">
           <div
@@ -327,7 +327,7 @@ export function RecordingView({
               key={mainCamera}
               className={
                 isDesktop
-                  ? `flex justify-center mb-5 ${mainCameraAspect == "tall" ? "h-full" : "w-[82%]"}`
+                  ? `flex justify-center mb-5 ${mainCameraAspect == "tall" ? "h-full" : "w-[78%]"}`
                   : `w-full ${mainCameraAspect == "wide" ? "" : "aspect-video"}`
               }
             >
@@ -354,7 +354,7 @@ export function RecordingView({
             </div>
             {isDesktop && (
               <div
-                className={`flex justify-center gap-2 ${mainCameraAspect == "tall" ? "h-full flex-col overflow-y-auto items-center" : "w-full overflow-x-auto"}`}
+                className={`flex gap-2 ${mainCameraAspect == "tall" ? "h-full w-[16%] flex-col overflow-y-auto" : "w-full justify-center overflow-x-auto"}`}
               >
                 {allCameras.map((cam) => {
                   if (cam !== mainCamera) {
@@ -362,7 +362,9 @@ export function RecordingView({
                       <div key={cam}>
                         <PreviewPlayer
                           className={
-                            mainCameraAspect == "tall" ? "" : "size-full"
+                            mainCameraAspect == "tall"
+                              ? "size-full"
+                              : "size-full"
                           }
                           camera={cam}
                           timeRange={currentTimeRange}
