@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { Button } from "../ui/button";
 import { FaArrowDown, FaCalendarAlt, FaCog, FaFilter } from "react-icons/fa";
@@ -12,6 +12,9 @@ import { getEndOfDayTimestamp } from "@/utils/dateUtil";
 import { GeneralFilterContent } from "../filter/ReviewFilterGroup";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
+import { toast } from "sonner";
+import axios from "axios";
+import SaveExportOverlay from "./SaveExportOverlay";
 
 const ATTRIBUTES = ["amazon", "face", "fedex", "license_plate", "ups"];
 type DrawerMode = "none" | "select" | "export" | "calendar" | "filter";
@@ -40,6 +43,47 @@ export default function MobileReviewSettingsDrawer({
 }: MobileReviewSettingsDrawerProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
   const [drawerMode, setDrawerMode] = useState<DrawerMode>("none");
+
+  // exports
+
+  const [name, setName] = useState("");
+  const onStartExport = useCallback(() => {
+    if (!range) {
+      toast.error("No valid time range selected", { position: "top-center" });
+      return;
+    }
+
+    axios
+      .post(`export/${camera}/start/${range.after}/end/${range.before}`, {
+        playback: "realtime",
+        name,
+      })
+      .then((response) => {
+        if (response.status == 200) {
+          toast.success(
+            "Successfully started export. View the file in the /exports folder.",
+            { position: "top-center" },
+          );
+          setName("");
+          setRange(undefined);
+          setMode("none");
+        }
+      })
+      .catch((error) => {
+        if (error.response?.data?.message) {
+          toast.error(
+            `Failed to start export: ${error.response.data.message}`,
+            { position: "top-center" },
+          );
+        } else {
+          toast.error(`Failed to start export: ${error.message}`, {
+            position: "top-center",
+          });
+        }
+      });
+  }, [camera, name, range, setRange, setName, setMode]);
+
+  // filters
 
   const allLabels = useMemo<string[]>(() => {
     if (!config) {
@@ -100,11 +144,12 @@ export default function MobileReviewSettingsDrawer({
   } else if (drawerMode == "export") {
     content = (
       <ExportContent
-        camera={camera}
         latestTime={latestTime}
         currentTime={currentTime}
         range={range}
-        mode={mode}
+        name={name}
+        onStartExport={onStartExport}
+        setName={setName}
         setRange={setRange}
         setMode={(mode) => {
           setMode(mode);
@@ -198,28 +243,36 @@ export default function MobileReviewSettingsDrawer({
   }
 
   return (
-    <Drawer
-      open={drawerMode != "none"}
-      onOpenChange={(open) => {
-        if (!open) {
-          setDrawerMode("none");
-        }
-      }}
-    >
-      <DrawerTrigger asChild>
-        <Button
-          className="rounded-lg capitalize"
-          size="sm"
-          variant="secondary"
-          onClick={() => setDrawerMode("select")}
-        >
-          <FaCog className="text-muted-foreground" />
-        </Button>
-      </DrawerTrigger>
-      <DrawerContent className="max-h-[75dvh] overflow-hidden flex flex-col items-center gap-2 px-4 pb-4 mx-4 rounded-2xl">
-        {content}
-      </DrawerContent>
-    </Drawer>
+    <>
+      <SaveExportOverlay
+        className="absolute top-8 left-1/2 -translate-x-1/2 z-50 pointer-events-none"
+        show={mode == "timeline"}
+        onSave={() => onStartExport()}
+        onCancel={() => setMode("none")}
+      />
+      <Drawer
+        open={drawerMode != "none"}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDrawerMode("none");
+          }
+        }}
+      >
+        <DrawerTrigger asChild>
+          <Button
+            className="rounded-lg capitalize"
+            size="sm"
+            variant="secondary"
+            onClick={() => setDrawerMode("select")}
+          >
+            <FaCog className="text-muted-foreground" />
+          </Button>
+        </DrawerTrigger>
+        <DrawerContent className="max-h-[75dvh] overflow-hidden flex flex-col items-center gap-2 px-4 pb-4 mx-4 rounded-2xl">
+          {content}
+        </DrawerContent>
+      </Drawer>
+    </>
   );
 }
 

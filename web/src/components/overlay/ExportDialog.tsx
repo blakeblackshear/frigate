@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogFooter,
   DialogHeader,
@@ -25,6 +24,7 @@ import ReviewActivityCalendar from "./ReviewActivityCalendar";
 import { SelectSeparator } from "../ui/select";
 import { isDesktop } from "react-device-detect";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
+import SaveExportOverlay from "./SaveExportOverlay";
 
 const EXPORT_OPTIONS = [
   "1",
@@ -55,74 +55,121 @@ export default function ExportDialog({
   setRange,
   setMode,
 }: ExportDialogProps) {
+  const [name, setName] = useState("");
+  const onStartExport = useCallback(() => {
+    if (!range) {
+      toast.error("No valid time range selected", { position: "top-center" });
+      return;
+    }
+
+    axios
+      .post(`export/${camera}/start/${range.after}/end/${range.before}`, {
+        playback: "realtime",
+        name,
+      })
+      .then((response) => {
+        if (response.status == 200) {
+          toast.success(
+            "Successfully started export. View the file in the /exports folder.",
+            { position: "top-center" },
+          );
+          setName("");
+          setRange(undefined);
+          setMode("none");
+        }
+      })
+      .catch((error) => {
+        if (error.response?.data?.message) {
+          toast.error(
+            `Failed to start export: ${error.response.data.message}`,
+            { position: "top-center" },
+          );
+        } else {
+          toast.error(`Failed to start export: ${error.message}`, {
+            position: "top-center",
+          });
+        }
+      });
+  }, [camera, name, range, setRange, setName, setMode]);
+
   const Overlay = isDesktop ? Dialog : Drawer;
   const Trigger = isDesktop ? DialogTrigger : DrawerTrigger;
   const Content = isDesktop ? DialogContent : DrawerContent;
 
   return (
-    <Overlay
-      open={mode == "select"}
-      onOpenChange={(open) => {
-        if (!open) {
-          setMode("none");
-        }
-      }}
-    >
-      <Trigger asChild>
-        <Button
-          className="flex items-center gap-2"
-          variant="secondary"
-          size="sm"
-          onClick={() => {
-            if (mode == "none") {
-              setMode("select");
-            }
-          }}
-        >
-          <FaArrowDown className="p-1 fill-secondary bg-muted-foreground rounded-md" />
-          {isDesktop ? (mode != "timeline" ? "Export" : "Save") : null}
-        </Button>
-      </Trigger>
-      <Content
-        className={isDesktop ? "sm:rounded-2xl" : "px-4 pb-4 mx-4 rounded-2xl"}
+    <>
+      <SaveExportOverlay
+        className="absolute top-8 left-1/2 -translate-x-1/2 z-50 pointer-events-none"
+        show={mode == "timeline"}
+        onSave={() => onStartExport()}
+        onCancel={() => setMode("none")}
+      />
+      <Overlay
+        open={mode == "select"}
+        onOpenChange={(open) => {
+          if (!open) {
+            setMode("none");
+          }
+        }}
       >
-        <ExportContent
-          camera={camera}
-          latestTime={latestTime}
-          currentTime={currentTime}
-          range={range}
-          mode={mode}
-          setRange={setRange}
-          setMode={setMode}
-          onCancel={() => setMode("none")}
-        />
-      </Content>
-    </Overlay>
+        <Trigger asChild>
+          <Button
+            className="flex items-center gap-2"
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              setMode("select");
+            }}
+          >
+            <FaArrowDown className="p-1 fill-secondary bg-muted-foreground rounded-md" />
+            {isDesktop && "Export"}
+          </Button>
+        </Trigger>
+        <Content
+          className={
+            isDesktop ? "sm:rounded-2xl" : "px-4 pb-4 mx-4 rounded-2xl"
+          }
+        >
+          <ExportContent
+            latestTime={latestTime}
+            currentTime={currentTime}
+            range={range}
+            name={name}
+            onStartExport={onStartExport}
+            setName={setName}
+            setRange={setRange}
+            setMode={setMode}
+            onCancel={() => setMode("none")}
+          />
+        </Content>
+      </Overlay>
+    </>
   );
 }
 
 type ExportContentProps = {
-  camera: string;
   latestTime: number;
   currentTime: number;
   range?: TimeRange;
-  mode: ExportMode;
+  name: string;
+  onStartExport: () => void;
+  setName: (name: string) => void;
   setRange: (range: TimeRange | undefined) => void;
   setMode: (mode: ExportMode) => void;
   onCancel: () => void;
 };
 export function ExportContent({
-  camera,
   latestTime,
   currentTime,
   range,
-  mode,
+  name,
+  onStartExport,
+  setName,
   setRange,
   setMode,
   onCancel,
 }: ExportContentProps) {
   const [selectedOption, setSelectedOption] = useState<ExportOption>("1");
-  const [name, setName] = useState("");
 
   const onSelectTime = useCallback(
     (option: ExportOption) => {
@@ -160,51 +207,6 @@ export function ExportContent({
     },
     [latestTime, setRange],
   );
-
-  const onStartExport = useCallback(() => {
-    if (!range) {
-      toast.error("No valid time range selected", { position: "top-center" });
-      return;
-    }
-
-    axios
-      .post(`export/${camera}/start/${range.after}/end/${range.before}`, {
-        playback: "realtime",
-        name,
-      })
-      .then((response) => {
-        if (response.status == 200) {
-          toast.success(
-            "Successfully started export. View the file in the /exports folder.",
-            { position: "top-center" },
-          );
-          setName("");
-          setRange(undefined);
-          setSelectedOption("1");
-        }
-      })
-      .catch((error) => {
-        if (error.response?.data?.message) {
-          toast.error(
-            `Failed to start export: ${error.response.data.message}`,
-            { position: "top-center" },
-          );
-        } else {
-          toast.error(`Failed to start export: ${error.message}`, {
-            position: "top-center",
-          });
-        }
-      });
-  }, [camera, name, range, setRange]);
-
-  useEffect(() => {
-    if (mode != "timeline_save") {
-      return;
-    }
-
-    onStartExport();
-    setMode("none");
-  }, [mode, onStartExport, setMode]);
 
   return (
     <>
@@ -273,6 +275,7 @@ export function ExportContent({
               setMode("timeline");
             } else {
               onStartExport();
+              setSelectedOption("1");
               setMode("none");
             }
           }}
