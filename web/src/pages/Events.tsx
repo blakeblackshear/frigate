@@ -76,7 +76,6 @@ export default function Events() {
 
     const now = Date.now() / 1000;
 
-    console.log(`${now} - ${beforeTs} :: ${now - beforeTs}`);
     if (now - beforeTs > 60) {
       setBeforeTs(now);
     }
