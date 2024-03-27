@@ -79,7 +79,7 @@ def output_frames(
     websocket_thread.start()
 
     while not stop_event.is_set():
-        (topic, data) = detection_subscriber.get_data(timeout=10)
+        (topic, data) = detection_subscriber.get_data(timeout=1)
 
         if not topic:
             continue
