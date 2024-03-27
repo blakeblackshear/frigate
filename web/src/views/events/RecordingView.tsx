@@ -208,6 +208,10 @@ export function RecordingView({
   }, [config, mainCamera]);
 
   const grow = useMemo(() => {
+    if (isMobile) {
+      return "";
+    }
+
     if (mainCameraAspect == "wide") {
       return "w-full aspect-wide";
     } else if (isDesktop && mainCameraAspect == "tall") {
@@ -313,7 +317,7 @@ export function RecordingView({
       </div>
 
       <div
-        className={`flex h-full my-2 justify-center overflow-hidden ${isDesktop ? "" : "flex-col"}`}
+        className={`flex h-full my-2 justify-center overflow-hidden ${isDesktop ? "" : "flex-col gap-2"}`}
       >
         <div className="flex flex-1 flex-wrap">
           <div

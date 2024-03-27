@@ -89,7 +89,7 @@ export default function HlsVideoPlayer({
 
   return (
     <div
-      className={`relative ${visible ? "visible" : "hidden"}`}
+      className={`relative ${className ?? ""} ${visible ? "visible" : "hidden"}`}
       onMouseOver={
         isDesktop
           ? () => {
@@ -110,7 +110,7 @@ export default function HlsVideoPlayer({
         <TransformComponent>
           <video
             ref={videoRef}
-            className={`${className ?? ""} bg-black rounded-2xl ${loadedMetadata ? "" : "invisible"}`}
+            className={`size-full bg-black rounded-2xl ${loadedMetadata ? "" : "invisible"}`}
             preload="auto"
             autoPlay
             controls={false}
