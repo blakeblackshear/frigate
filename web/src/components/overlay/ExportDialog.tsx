@@ -209,7 +209,7 @@ export function ExportContent({
   );
 
   return (
-    <>
+    <div className="w-full">
       {isDesktop && (
         <>
           <DialogHeader>
@@ -263,10 +263,14 @@ export function ExportContent({
       <DialogFooter
         className={isDesktop ? "" : "mt-3 flex flex-col-reverse gap-4"}
       >
-        <div className="p-2 cursor-pointer" onClick={onCancel}>
+        <div
+          className={`p-2 cursor-pointer text-center ${isDesktop ? "" : "w-full"}`}
+          onClick={onCancel}
+        >
           Cancel
         </div>
         <Button
+          className={isDesktop ? "" : "w-full"}
           variant="select"
           size="sm"
           onClick={() => {
@@ -283,7 +287,7 @@ export function ExportContent({
           {selectedOption == "timeline" ? "Select" : "Export"}
         </Button>
       </DialogFooter>
-    </>
+    </div>
   );
 }
 
