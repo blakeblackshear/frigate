@@ -212,8 +212,8 @@ export default function MobileReviewSettingsDrawer({
     );
   } else if (drawerMode == "filter") {
     content = (
-      <div className="w-full flex flex-col">
-        <div className="w-full h-8 relative">
+      <div className="w-full h-auto overflow-y-auto flex flex-col">
+        <div className="w-full h-8 mb-2 relative">
           <div
             className="absolute left-0 text-selected"
             onClick={() => setDrawerMode("select")}
@@ -225,7 +225,7 @@ export default function MobileReviewSettingsDrawer({
           </div>
         </div>
         <GeneralFilterContent
-          allLabels={allLabels}
+          allLabels={allLabels.concat(allLabels)}
           selectedLabels={filter?.labels}
           currentLabels={currentLabels}
           showReviewed={0}
