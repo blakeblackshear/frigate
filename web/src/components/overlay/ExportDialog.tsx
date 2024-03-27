@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogFooter,
   DialogHeader,
@@ -23,6 +22,9 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import ReviewActivityCalendar from "./ReviewActivityCalendar";
 import { SelectSeparator } from "../ui/select";
+import { isDesktop } from "react-device-detect";
+import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
+import SaveExportOverlay from "./SaveExportOverlay";
 
 const EXPORT_OPTIONS = [
   "1",
@@ -53,8 +55,121 @@ export default function ExportDialog({
   setRange,
   setMode,
 }: ExportDialogProps) {
-  const [selectedOption, setSelectedOption] = useState<ExportOption>("1");
   const [name, setName] = useState("");
+  const onStartExport = useCallback(() => {
+    if (!range) {
+      toast.error("No valid time range selected", { position: "top-center" });
+      return;
+    }
+
+    axios
+      .post(`export/${camera}/start/${range.after}/end/${range.before}`, {
+        playback: "realtime",
+        name,
+      })
+      .then((response) => {
+        if (response.status == 200) {
+          toast.success(
+            "Successfully started export. View the file in the /exports folder.",
+            { position: "top-center" },
+          );
+          setName("");
+          setRange(undefined);
+          setMode("none");
+        }
+      })
+      .catch((error) => {
+        if (error.response?.data?.message) {
+          toast.error(
+            `Failed to start export: ${error.response.data.message}`,
+            { position: "top-center" },
+          );
+        } else {
+          toast.error(`Failed to start export: ${error.message}`, {
+            position: "top-center",
+          });
+        }
+      });
+  }, [camera, name, range, setRange, setName, setMode]);
+
+  const Overlay = isDesktop ? Dialog : Drawer;
+  const Trigger = isDesktop ? DialogTrigger : DrawerTrigger;
+  const Content = isDesktop ? DialogContent : DrawerContent;
+
+  return (
+    <>
+      <SaveExportOverlay
+        className="absolute top-8 left-1/2 -translate-x-1/2 z-50 pointer-events-none"
+        show={mode == "timeline"}
+        onSave={() => onStartExport()}
+        onCancel={() => setMode("none")}
+      />
+      <Overlay
+        open={mode == "select"}
+        onOpenChange={(open) => {
+          if (!open) {
+            setMode("none");
+          }
+        }}
+      >
+        <Trigger asChild>
+          <Button
+            className="flex items-center gap-2"
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              setMode("select");
+            }}
+          >
+            <FaArrowDown className="p-1 fill-secondary bg-muted-foreground rounded-md" />
+            {isDesktop && "Export"}
+          </Button>
+        </Trigger>
+        <Content
+          className={
+            isDesktop ? "sm:rounded-2xl" : "px-4 pb-4 mx-4 rounded-2xl"
+          }
+        >
+          <ExportContent
+            latestTime={latestTime}
+            currentTime={currentTime}
+            range={range}
+            name={name}
+            onStartExport={onStartExport}
+            setName={setName}
+            setRange={setRange}
+            setMode={setMode}
+            onCancel={() => setMode("none")}
+          />
+        </Content>
+      </Overlay>
+    </>
+  );
+}
+
+type ExportContentProps = {
+  latestTime: number;
+  currentTime: number;
+  range?: TimeRange;
+  name: string;
+  onStartExport: () => void;
+  setName: (name: string) => void;
+  setRange: (range: TimeRange | undefined) => void;
+  setMode: (mode: ExportMode) => void;
+  onCancel: () => void;
+};
+export function ExportContent({
+  latestTime,
+  currentTime,
+  range,
+  name,
+  onStartExport,
+  setName,
+  setRange,
+  setMode,
+  onCancel,
+}: ExportContentProps) {
+  const [selectedOption, setSelectedOption] = useState<ExportOption>("1");
 
   const onSelectTime = useCallback(
     (option: ExportOption) => {
@@ -93,136 +208,86 @@ export default function ExportDialog({
     [latestTime, setRange],
   );
 
-  const onStartExport = useCallback(() => {
-    if (!range) {
-      toast.error("No valid time range selected", { position: "top-center" });
-      return;
-    }
-
-    axios
-      .post(`export/${camera}/start/${range.after}/end/${range.before}`, {
-        playback: "realtime",
-        name,
-      })
-      .then((response) => {
-        if (response.status == 200) {
-          toast.success(
-            "Successfully started export. View the file in the /exports folder.",
-            { position: "top-center" },
-          );
-          setName("");
-          setRange(undefined);
-          setSelectedOption("1");
-        }
-      })
-      .catch((error) => {
-        if (error.response?.data?.message) {
-          toast.error(
-            `Failed to start export: ${error.response.data.message}`,
-            { position: "top-center" },
-          );
-        } else {
-          toast.error(`Failed to start export: ${error.message}`, {
-            position: "top-center",
-          });
-        }
-      });
-  }, [camera, name, range, setRange]);
-
   return (
-    <Dialog
-      open={mode == "select"}
-      onOpenChange={(open) => {
-        if (!open) {
-          setMode("none");
-        }
-      }}
-    >
-      <DialogTrigger asChild>
+    <div className="w-full">
+      {isDesktop && (
+        <>
+          <DialogHeader>
+            <DialogTitle>Export</DialogTitle>
+          </DialogHeader>
+          <SelectSeparator className="bg-secondary" />
+        </>
+      )}
+      <RadioGroup
+        className={`flex flex-col gap-3 ${isDesktop ? "" : "mt-4"}`}
+        onValueChange={(value) => onSelectTime(value as ExportOption)}
+      >
+        {EXPORT_OPTIONS.map((opt) => {
+          return (
+            <div key={opt} className="flex items-center gap-2">
+              <RadioGroupItem
+                className={
+                  opt == selectedOption
+                    ? "from-selected/50 to-selected/90 text-selected bg-selected"
+                    : "from-secondary/50 to-secondary/90 text-secondary bg-secondary"
+                }
+                id={opt}
+                value={opt}
+              />
+              <Label className="cursor-pointer capitalize" htmlFor={opt}>
+                {isNaN(parseInt(opt))
+                  ? opt == "timeline"
+                    ? "Select from Timeline"
+                    : `${opt}`
+                  : `Last ${opt > "1" ? `${opt} Hours` : "Hour"}`}
+              </Label>
+            </div>
+          );
+        })}
+      </RadioGroup>
+      {selectedOption == "custom" && (
+        <CustomTimeSelector
+          latestTime={latestTime}
+          range={range}
+          setRange={setRange}
+        />
+      )}
+      <Input
+        className="mt-3"
+        type="search"
+        placeholder="Name the Export"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+      {isDesktop && <SelectSeparator className="bg-secondary" />}
+      <DialogFooter
+        className={isDesktop ? "" : "mt-3 flex flex-col-reverse gap-4"}
+      >
+        <div
+          className={`p-2 cursor-pointer text-center ${isDesktop ? "" : "w-full"}`}
+          onClick={onCancel}
+        >
+          Cancel
+        </div>
         <Button
-          className="flex items-center gap-2"
-          variant="secondary"
+          className={isDesktop ? "" : "w-full"}
+          variant="select"
           size="sm"
           onClick={() => {
-            if (mode == "none") {
-              setMode("select");
-            } else if (mode == "timeline") {
+            if (selectedOption == "timeline") {
+              setRange({ before: currentTime + 30, after: currentTime - 30 });
+              setMode("timeline");
+            } else {
               onStartExport();
+              setSelectedOption("1");
               setMode("none");
             }
           }}
         >
-          <FaArrowDown className="p-1 fill-secondary bg-muted-foreground rounded-md" />
-          {mode != "timeline" ? "Export" : "Save"}
+          {selectedOption == "timeline" ? "Select" : "Export"}
         </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:rounded-2xl">
-        <DialogHeader>
-          <DialogTitle>Export</DialogTitle>
-        </DialogHeader>
-        <SelectSeparator className="bg-secondary" />
-        <RadioGroup
-          className="flex flex-col gap-3"
-          onValueChange={(value) => onSelectTime(value as ExportOption)}
-        >
-          {EXPORT_OPTIONS.map((opt) => {
-            return (
-              <div key={opt} className="flex items-center gap-2">
-                <RadioGroupItem
-                  className={
-                    opt == selectedOption
-                      ? "from-selected/50 to-selected/90 text-selected bg-selected"
-                      : "from-secondary/50 to-secondary/90 text-secondary bg-secondary"
-                  }
-                  id={opt}
-                  value={opt}
-                />
-                <Label className="cursor-pointer capitalize" htmlFor={opt}>
-                  {isNaN(parseInt(opt))
-                    ? opt == "timeline"
-                      ? "Select from Timeline"
-                      : `${opt}`
-                    : `Last ${opt > "1" ? `${opt} Hours` : "Hour"}`}
-                </Label>
-              </div>
-            );
-          })}
-        </RadioGroup>
-        {selectedOption == "custom" && (
-          <CustomTimeSelector
-            latestTime={latestTime}
-            range={range}
-            setRange={setRange}
-          />
-        )}
-        <Input
-          className="mt-2"
-          type="search"
-          placeholder="Name the Export"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <SelectSeparator className="bg-secondary" />
-        <DialogFooter>
-          <DialogClose onClick={() => setMode("none")}>Cancel</DialogClose>
-          <Button
-            variant="select"
-            size="sm"
-            onClick={() => {
-              if (selectedOption == "timeline") {
-                setRange({ before: currentTime + 30, after: currentTime - 30 });
-                setMode("timeline");
-              } else {
-                onStartExport();
-                setMode("none");
-              }
-            }}
-          >
-            {selectedOption == "timeline" ? "Select" : "Export"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      </DialogFooter>
+    </div>
   );
 }
 
@@ -276,7 +341,9 @@ function CustomTimeSelector({
   const [endOpen, setEndOpen] = useState(false);
 
   return (
-    <div className="mx-8 px-2 flex items-center gap-2 bg-secondary rounded-lg">
+    <div
+      className={`flex items-center bg-secondary rounded-lg ${isDesktop ? "mx-8 px-2 gap-2" : "pl-2 mt-3"}`}
+    >
       <FaCalendarAlt />
       <Popover
         open={startOpen}
@@ -288,7 +355,9 @@ function CustomTimeSelector({
       >
         <PopoverTrigger asChild>
           <Button
+            className={isDesktop ? "" : "text-xs"}
             variant={startOpen ? "select" : "secondary"}
+            size="sm"
             onClick={() => {
               setStartOpen(true);
               setEndOpen(false);
@@ -347,7 +416,9 @@ function CustomTimeSelector({
       >
         <PopoverTrigger asChild>
           <Button
+            className={isDesktop ? "" : "text-xs"}
             variant={endOpen ? "select" : "secondary"}
+            size="sm"
             onClick={() => {
               setEndOpen(true);
               setStartOpen(false);
