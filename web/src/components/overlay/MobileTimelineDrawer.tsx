@@ -26,7 +26,7 @@ export default function MobileTimelineDrawer({
           <FaFlag className="text-muted-foreground" />
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="max-h-[75dvh] overflow-hidden flex flex-col items-center gap-2">
+      <DrawerContent className="max-h-[75dvh] overflow-hidden flex flex-col items-center gap-2 mx-1 rounded-t-2xl">
         <div
           className={`w-full mx-4 py-2 text-center capitalize ${selected == "timeline" ? "bg-secondary rounded-lg" : ""}`}
           onClick={() => {
