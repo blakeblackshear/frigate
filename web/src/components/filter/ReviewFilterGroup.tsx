@@ -108,7 +108,7 @@ export default function ReviewFilterGroup({
   );
 
   return (
-    <div className="flex justify-center">
+    <div className="flex justify-center gap-2">
       {filters.includes("cameras") && (
         <CamerasFilterButton
           allCameras={filterValues.cameras}
@@ -171,8 +171,12 @@ function CamerasFilterButton({
   );
 
   const trigger = (
-    <Button size="sm" className="mx-1 capitalize" variant="secondary">
-      <FaVideo className="md:mr-[10px] text-muted-foreground" />
+    <Button
+      className="flex items-center gap-2 capitalize"
+      variant="secondary"
+      size="sm"
+    >
+      <FaVideo className="text-muted-foreground" />
       <div className="hidden md:block">
         {selectedCameras == undefined
           ? "All Cameras"
@@ -319,8 +323,8 @@ function CalendarFilterButton({
   );
 
   const trigger = (
-    <Button size="sm" className="mx-1" variant="secondary">
-      <FaCalendarAlt className="md:mr-[10px] text-muted-foreground" />
+    <Button size="sm" className="flex items-center gap-2" variant="secondary">
+      <FaCalendarAlt className="text-muted-foreground" />
       <div className="hidden md:block">
         {day == undefined ? "Last 24 Hours" : selectedDate}
       </div>
@@ -385,8 +389,8 @@ function GeneralFilterButton({
   );
 
   const trigger = (
-    <Button size="sm" className="ml-1" variant="secondary">
-      <FaFilter className="md:mr-[10px] text-muted-foreground" />
+    <Button size="sm" className="flex items-center gap-2" variant="secondary">
+      <FaFilter className="text-muted-foreground" />
       <div className="hidden md:block">Filter</div>
     </Button>
   );

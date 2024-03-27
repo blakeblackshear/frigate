@@ -23,6 +23,8 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import ReviewActivityCalendar from "./ReviewActivityCalendar";
 import { SelectSeparator } from "../ui/select";
+import { isDesktop } from "react-device-detect";
+import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 
 const EXPORT_OPTIONS = [
   "1",
@@ -129,8 +131,12 @@ export default function ExportDialog({
       });
   }, [camera, name, range, setRange]);
 
+  const Overlay = isDesktop ? Dialog : Drawer;
+  const Trigger = isDesktop ? DialogTrigger : DrawerTrigger;
+  const Content = isDesktop ? DialogContent : DrawerContent;
+
   return (
-    <Dialog
+    <Overlay
       open={mode == "select"}
       onOpenChange={(open) => {
         if (!open) {
@@ -138,7 +144,7 @@ export default function ExportDialog({
         }
       }}
     >
-      <DialogTrigger asChild>
+      <Trigger asChild>
         <Button
           className="flex items-center gap-2"
           variant="secondary"
@@ -153,16 +159,22 @@ export default function ExportDialog({
           }}
         >
           <FaArrowDown className="p-1 fill-secondary bg-muted-foreground rounded-md" />
-          {mode != "timeline" ? "Export" : "Save"}
+          {isDesktop ? (mode != "timeline" ? "Export" : "Save") : null}
         </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:rounded-2xl">
-        <DialogHeader>
-          <DialogTitle>Export</DialogTitle>
-        </DialogHeader>
-        <SelectSeparator className="bg-secondary" />
+      </Trigger>
+      <Content
+        className={isDesktop ? "sm:rounded-2xl" : "px-4 pb-4 mx-4 rounded-2xl"}
+      >
+        {isDesktop && (
+          <>
+            <DialogHeader>
+              <DialogTitle>Export</DialogTitle>
+            </DialogHeader>
+            <SelectSeparator className="bg-secondary" />
+          </>
+        )}
         <RadioGroup
-          className="flex flex-col gap-3"
+          className={`flex flex-col gap-3 ${isDesktop ? "" : "mt-4"}`}
           onValueChange={(value) => onSelectTime(value as ExportOption)}
         >
           {EXPORT_OPTIONS.map((opt) => {
@@ -196,14 +208,16 @@ export default function ExportDialog({
           />
         )}
         <Input
-          className="mt-2"
+          className="mt-3"
           type="search"
           placeholder="Name the Export"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
-        <SelectSeparator className="bg-secondary" />
-        <DialogFooter>
+        {isDesktop && <SelectSeparator className="bg-secondary" />}
+        <DialogFooter
+          className={isDesktop ? "" : "mt-3 flex flex-col-reverse gap-4"}
+        >
           <DialogClose onClick={() => setMode("none")}>Cancel</DialogClose>
           <Button
             variant="select"
@@ -221,8 +235,8 @@ export default function ExportDialog({
             {selectedOption == "timeline" ? "Select" : "Export"}
           </Button>
         </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      </Content>
+    </Overlay>
   );
 }
 
@@ -276,7 +290,9 @@ function CustomTimeSelector({
   const [endOpen, setEndOpen] = useState(false);
 
   return (
-    <div className="mx-8 px-2 flex items-center gap-2 bg-secondary rounded-lg">
+    <div
+      className={`flex items-center bg-secondary rounded-lg ${isDesktop ? "mx-8 px-2 gap-2" : "pl-2 mt-3"}`}
+    >
       <FaCalendarAlt />
       <Popover
         open={startOpen}
@@ -288,7 +304,9 @@ function CustomTimeSelector({
       >
         <PopoverTrigger asChild>
           <Button
+            className={isDesktop ? "" : "text-xs"}
             variant={startOpen ? "select" : "secondary"}
+            size="sm"
             onClick={() => {
               setStartOpen(true);
               setEndOpen(false);
@@ -347,7 +365,9 @@ function CustomTimeSelector({
       >
         <PopoverTrigger asChild>
           <Button
+            className={isDesktop ? "" : "text-xs"}
             variant={endOpen ? "select" : "secondary"}
+            size="sm"
             onClick={() => {
               setEndOpen(true);
               setStartOpen(false);
