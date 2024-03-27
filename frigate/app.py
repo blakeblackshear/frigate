@@ -666,6 +666,11 @@ class FrigateApp:
         logger.info("Stopping...")
         self.stop_event.set()
 
+        # Stop Communicators
+        self.inter_process_communicator.stop()
+        self.inter_config_updater.stop()
+        self.inter_detection_proxy.stop()
+
         for detector in self.detectors.values():
             detector.stop()
 
@@ -702,8 +707,3 @@ class FrigateApp:
                     queue.get_nowait()
                 queue.close()
                 queue.join_thread()
-
-        # Stop Communicators
-        self.inter_process_communicator.stop()
-        self.inter_config_updater.stop()
-        self.inter_detection_proxy.stop()
