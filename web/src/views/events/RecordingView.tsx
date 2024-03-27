@@ -483,24 +483,26 @@ function Timeline({
 
   return (
     <div
-      className={`${isDesktop ? "w-60" : "w-full"} h-full relative p-4 flex flex-col gap-4 bg-secondary overflow-auto`}
+      className={`${isDesktop ? "w-60" : "w-full"} h-full relative p-4 flex flex-col gap-4 bg-secondary`}
     >
       <div className="absolute top-0 inset-x-0 z-20 w-full h-[30px] bg-gradient-to-b from-secondary to-transparent pointer-events-none"></div>
       <div className="absolute bottom-0 inset-x-0 z-20 w-full h-[30px] bg-gradient-to-t from-secondary to-transparent pointer-events-none"></div>
-      {mainCameraReviewItems.map((review) => {
-        if (review.severity == "significant_motion") {
-          return;
-        }
+      <div className="h-full overflow-auto">
+        {mainCameraReviewItems.map((review) => {
+          if (review.severity == "significant_motion") {
+            return;
+          }
 
-        return (
-          <ReviewCard
-            key={review.id}
-            event={review}
-            currentTime={currentTime}
-            onClick={() => setCurrentTime(review.start_time)}
-          />
-        );
-      })}
+          return (
+            <ReviewCard
+              key={review.id}
+              event={review}
+              currentTime={currentTime}
+              onClick={() => setCurrentTime(review.start_time)}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 }
