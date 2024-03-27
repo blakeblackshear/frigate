@@ -382,12 +382,12 @@ function useDraggableElement({
         const timelineRect = timelineRef.current.getBoundingClientRect();
         const timelineTopAbsolute = timelineRect.top;
         const rect = segmentElement.getBoundingClientRect();
-        const segmentTop =
-          rect.top + scrolled - timelineTopAbsolute - segmentHeight / 2;
+        const segmentTop = rect.top + scrolled - timelineTopAbsolute;
         const offset =
           ((draggableElementTime - alignedSegmentTime) / segmentDuration) *
           segmentHeight;
-        const newElementPosition = segmentTop - offset;
+        // subtract half the height of the handlebar cross bar (4px) for pixel perfection
+        const newElementPosition = segmentTop - offset - 2;
 
         updateDraggableElementPosition(
           newElementPosition,
