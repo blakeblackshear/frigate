@@ -259,7 +259,7 @@ export function ReviewTimeline({
                 ></div>
               </div>
               <div
-                className={`absolute h-1 w-full bg-destructive ${isDragging && isMobile && draggableElementType == "handlebar" ? "top-1" : "top-1/2 transform -translate-y-1/2"}`}
+                className={`absolute h-[4px] w-full bg-destructive ${isDragging && isMobile && draggableElementType == "handlebar" ? "top-1" : "top-1/2 transform -translate-y-1/2"}`}
               ></div>
             </div>
           </div>
@@ -293,7 +293,7 @@ export function ReviewTimeline({
                   ></div>
                 </div>
                 <div
-                  className={`absolute h-1 w-full bg-selected ${isDragging && isMobile && draggableElementType == "export_end" ? "top-0" : "top-1/2 transform -translate-y-1/2"}`}
+                  className={`absolute h-[4px] w-full bg-selected ${isDragging && isMobile && draggableElementType == "export_end" ? "top-0" : "top-1/2 transform -translate-y-1/2"}`}
                 ></div>
               </div>
             </div>
@@ -318,7 +318,7 @@ export function ReviewTimeline({
                 }`}
               >
                 <div
-                  className={`absolute h-1 w-full bg-selected ${isDragging && isMobile && draggableElementType == "export_start" ? "top-[12px]" : "top-1/2 transform -translate-y-1/2"}`}
+                  className={`absolute h-[4px] w-full bg-selected ${isDragging && isMobile && draggableElementType == "export_start" ? "top-[12px]" : "top-1/2 transform -translate-y-1/2"}`}
                 ></div>
                 <div
                   className={`bg-selected mt-4 mx-auto ${
