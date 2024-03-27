@@ -88,26 +88,33 @@ export default function HlsVideoPlayer({
   const [controlsOpen, setControlsOpen] = useState(false);
 
   return (
-    <div
-      className={`relative ${className ?? ""} ${visible ? "visible" : "hidden"}`}
-      onMouseOver={
-        isDesktop
-          ? () => {
-              setControls(true);
-            }
-          : undefined
-      }
-      onMouseOut={
-        isDesktop
-          ? () => {
-              setControls(controlsOpen);
-            }
-          : undefined
-      }
-      onClick={isDesktop ? undefined : () => setControls(!controls)}
-    >
-      <TransformWrapper minScale={1.0}>
-        <TransformComponent>
+    <TransformWrapper minScale={1.0}>
+      <div
+        className={`relative w-full ${className ?? ""} ${visible ? "visible" : "hidden"}`}
+        onMouseOver={
+          isDesktop
+            ? () => {
+                setControls(true);
+              }
+            : undefined
+        }
+        onMouseOut={
+          isDesktop
+            ? () => {
+                setControls(controlsOpen);
+              }
+            : undefined
+        }
+        onClick={isDesktop ? undefined : () => setControls(!controls)}
+      >
+        <TransformComponent
+          wrapperStyle={{
+            width: "100%",
+          }}
+          contentStyle={{
+            width: "100%",
+          }}
+        >
           <video
             ref={videoRef}
             className={`size-full bg-black rounded-2xl ${loadedMetadata ? "" : "invisible"}`}
@@ -154,41 +161,41 @@ export default function HlsVideoPlayer({
             }}
           />
         </TransformComponent>
-      </TransformWrapper>
-      <VideoControls
-        className="absolute bottom-5 left-1/2 -translate-x-1/2"
-        video={videoRef.current}
-        isPlaying={isPlaying}
-        show={controls}
-        controlsOpen={controlsOpen}
-        setControlsOpen={setControlsOpen}
-        playbackRate={videoRef.current?.playbackRate ?? 1}
-        hotKeys={hotKeys}
-        onPlayPause={(play) => {
-          if (!videoRef.current) {
-            return;
-          }
+        <VideoControls
+          className="absolute bottom-5 left-1/2 -translate-x-1/2"
+          video={videoRef.current}
+          isPlaying={isPlaying}
+          show={controls}
+          controlsOpen={controlsOpen}
+          setControlsOpen={setControlsOpen}
+          playbackRate={videoRef.current?.playbackRate ?? 1}
+          hotKeys={hotKeys}
+          onPlayPause={(play) => {
+            if (!videoRef.current) {
+              return;
+            }
 
-          if (play) {
-            videoRef.current.play();
-          } else {
-            videoRef.current.pause();
-          }
-        }}
-        onSeek={(diff) => {
-          const currentTime = videoRef.current?.currentTime;
+            if (play) {
+              videoRef.current.play();
+            } else {
+              videoRef.current.pause();
+            }
+          }}
+          onSeek={(diff) => {
+            const currentTime = videoRef.current?.currentTime;
 
-          if (!videoRef.current || !currentTime) {
-            return;
-          }
+            if (!videoRef.current || !currentTime) {
+              return;
+            }
 
-          videoRef.current.currentTime = Math.max(0, currentTime + diff);
-        }}
-        onSetPlaybackRate={(rate) =>
-          videoRef.current ? (videoRef.current.playbackRate = rate) : null
-        }
-      />
-      {children}
-    </div>
+            videoRef.current.currentTime = Math.max(0, currentTime + diff);
+          }}
+          onSetPlaybackRate={(rate) =>
+            videoRef.current ? (videoRef.current.playbackRate = rate) : null
+          }
+        />
+        {children}
+      </div>
+    </TransformWrapper>
   );
 }

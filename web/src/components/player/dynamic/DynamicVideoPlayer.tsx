@@ -55,7 +55,7 @@ export default function DynamicVideoPlayer({
     if (aspectRatio > 2) {
       return "";
     } else if (aspectRatio < 16 / 9) {
-      return "aspect-tall";
+      return isDesktop ? "" : "aspect-tall";
     } else {
       return "aspect-video";
     }
@@ -169,7 +169,7 @@ export default function DynamicVideoPlayer({
   }, [controller, recordings]);
 
   return (
-    <div className={`relative ${className ?? ""}`}>
+    <div className={`w-full relative ${className ?? ""}`}>
       <HlsVideoPlayer
         className={isDesktop ? `w-full ${grow}` : "max-h-[50dvh]"}
         videoRef={playerRef}

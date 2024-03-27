@@ -215,7 +215,7 @@ export function RecordingView({
     if (mainCameraAspect == "wide") {
       return "w-full aspect-wide";
     } else if (isDesktop && mainCameraAspect == "tall") {
-      return "h-full aspect-tall";
+      return "h-full aspect-tall flex flex-col justify-center";
     } else {
       return "w-full aspect-video";
     }
@@ -327,7 +327,7 @@ export function RecordingView({
               key={mainCamera}
               className={
                 isDesktop
-                  ? `flex justify-center items mb-5 ${mainCameraAspect == "tall" ? "h-[96%]" : "w-[82%]"}`
+                  ? `flex justify-center mb-5 ${mainCameraAspect == "tall" ? "h-full" : "w-[82%]"}`
                   : `w-full ${mainCameraAspect == "wide" ? "" : "aspect-video"}`
               }
             >
