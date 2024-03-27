@@ -23,7 +23,7 @@ type MobileReviewSettingsDrawerProps = {
   currentTime: number;
   range?: TimeRange;
   mode: ExportMode;
-  onUpdateFilter: (filter: ReviewFilter | undefined) => void;
+  onUpdateFilter: (filter: ReviewFilter) => void;
   setRange: (range: TimeRange | undefined) => void;
   setMode: (mode: ExportMode) => void;
 };
