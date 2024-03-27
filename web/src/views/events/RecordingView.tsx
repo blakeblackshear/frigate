@@ -33,11 +33,13 @@ import { IoMdArrowRoundBack } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import useSWR from "swr";
-import { TimeRange } from "@/types/timeline";
+import { TimeRange, TimelineType } from "@/types/timeline";
 import MobileCameraDrawer from "@/components/overlay/MobileCameraDrawer";
+import MobileTimelineDrawer from "@/components/overlay/MobileTimelineDrawer";
+import MobileReviewSettingsDrawer from "@/components/overlay/MobileReviewSettingsDrawer";
+import Logo from "@/components/Logo";
 
 const SEGMENT_DURATION = 30;
-type TimelineType = "timeline" | "events";
 
 type RecordingViewProps = {
   startCamera: string;
@@ -218,7 +220,12 @@ export function RecordingView({
   return (
     <div ref={contentRef} className="size-full flex flex-col">
       <Toaster />
-      <div className={`w-full h-10 px-1 flex items-center justify-between`}>
+      <div
+        className={`w-full h-10 px-2 relative flex items-center justify-between`}
+      >
+        {isMobile && (
+          <Logo className="absolute top-1 inset-x-1/2 -translate-x-1/2 h-8" />
+        )}
         <Button
           className="flex items-center gap-2 rounded-lg"
           onClick={() => navigate(-1)}
@@ -237,24 +244,28 @@ export function RecordingView({
               }}
             />
           )}
-          <ExportDialog
-            camera={mainCamera}
-            currentTime={currentTime}
-            latestTime={timeRange.end}
-            mode={exportMode}
-            range={exportRange}
-            setRange={setExportRange}
-            setMode={setExportMode}
-          />
-          <ReviewFilterGroup
-            filters={["date", "general"]}
-            reviewSummary={reviewSummary}
-            filter={filter}
-            onUpdateFilter={updateFilter}
-            motionOnly={false}
-            setMotionOnly={() => {}}
-          />
           {isDesktop && (
+            <ExportDialog
+              camera={mainCamera}
+              currentTime={currentTime}
+              latestTime={timeRange.end}
+              mode={exportMode}
+              range={exportRange}
+              setRange={setExportRange}
+              setMode={setExportMode}
+            />
+          )}
+          {isDesktop && (
+            <ReviewFilterGroup
+              filters={["date", "general"]}
+              reviewSummary={reviewSummary}
+              filter={filter}
+              onUpdateFilter={updateFilter}
+              motionOnly={false}
+              setMotionOnly={() => {}}
+            />
+          )}
+          {isDesktop ? (
             <ToggleGroup
               className="*:px-3 *:py-4 *:rounded-md"
               type="single"
@@ -279,6 +290,24 @@ export function RecordingView({
                 <div className="">Events</div>
               </ToggleGroupItem>
             </ToggleGroup>
+          ) : (
+            <MobileTimelineDrawer
+              selected={timelineType ?? "timeline"}
+              onSelect={setTimelineType}
+            />
+          )}
+          {isMobile && (
+            <MobileReviewSettingsDrawer
+              camera={mainCamera}
+              filter={filter}
+              currentTime={currentTime}
+              latestTime={timeRange.end}
+              mode={exportMode}
+              range={exportRange}
+              onUpdateFilter={updateFilter}
+              setRange={setExportRange}
+              setMode={setExportMode}
+            />
           )}
         </div>
       </div>
@@ -351,32 +380,6 @@ export function RecordingView({
             )}
           </div>
         </div>
-        {isMobile && (
-          <ToggleGroup
-            className="py-2 *:px-3 *:py-4 *:rounded-md"
-            type="single"
-            size="sm"
-            value={timelineType}
-            onValueChange={(value: TimelineType) =>
-              value ? setTimelineType(value) : null
-            } // don't allow the severity to be unselected
-          >
-            <ToggleGroupItem
-              className={`${timelineType == "timeline" ? "" : "text-gray-500"}`}
-              value="timeline"
-              aria-label="Select timeline"
-            >
-              <div className="">Timeline</div>
-            </ToggleGroupItem>
-            <ToggleGroupItem
-              className={`${timelineType == "events" ? "" : "text-gray-500"}`}
-              value="events"
-              aria-label="Select events"
-            >
-              <div className="">Events</div>
-            </ToggleGroupItem>
-          </ToggleGroup>
-        )}
         <Timeline
           contentRef={contentRef}
           mainCamera={mainCamera}

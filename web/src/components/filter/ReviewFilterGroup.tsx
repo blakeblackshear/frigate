@@ -371,15 +371,15 @@ function CalendarFilterButton({
 type GeneralFilterButtonProps = {
   allLabels: string[];
   selectedLabels: string[] | undefined;
-  updateLabelFilter: (labels: string[] | undefined) => void;
   showReviewed?: 0 | 1;
+  updateLabelFilter: (labels: string[] | undefined) => void;
   setShowReviewed: (reviewed?: 0 | 1) => void;
 };
 function GeneralFilterButton({
   allLabels,
   selectedLabels,
-  updateLabelFilter,
   showReviewed,
+  updateLabelFilter,
   setShowReviewed,
 }: GeneralFilterButtonProps) {
   const [open, setOpen] = useState(false);
@@ -395,6 +395,84 @@ function GeneralFilterButton({
     </Button>
   );
   const content = (
+    <GeneralFilterContent
+      allLabels={allLabels}
+      selectedLabels={selectedLabels}
+      currentLabels={currentLabels}
+      showReviewed={showReviewed}
+      reviewed={reviewed}
+      updateLabelFilter={updateLabelFilter}
+      setShowReviewed={setShowReviewed}
+      setCurrentLabels={setCurrentLabels}
+      setReviewed={setReviewed}
+      onClose={() => setOpen(false)}
+    />
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer
+        open={open}
+        onOpenChange={(open) => {
+          if (!open) {
+            setReviewed(showReviewed ?? 0);
+            setCurrentLabels(selectedLabels);
+          }
+
+          setOpen(open);
+        }}
+      >
+        <DrawerTrigger asChild>{trigger}</DrawerTrigger>
+        <DrawerContent className="max-h-[75dvh] overflow-hidden">
+          {content}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  return (
+    <Popover
+      open={open}
+      onOpenChange={(open) => {
+        if (!open) {
+          setReviewed(showReviewed ?? 0);
+          setCurrentLabels(selectedLabels);
+        }
+
+        setOpen(open);
+      }}
+    >
+      <PopoverTrigger asChild>{trigger}</PopoverTrigger>
+      <PopoverContent side="left">{content}</PopoverContent>
+    </Popover>
+  );
+}
+
+type GeneralFilterContentProps = {
+  allLabels: string[];
+  selectedLabels: string[] | undefined;
+  currentLabels: string[] | undefined;
+  showReviewed?: 0 | 1;
+  reviewed: 0 | 1;
+  updateLabelFilter: (labels: string[] | undefined) => void;
+  setCurrentLabels: (labels: string[] | undefined) => void;
+  setShowReviewed: (reviewed?: 0 | 1) => void;
+  setReviewed: (reviewed: 0 | 1) => void;
+  onClose: () => void;
+};
+export function GeneralFilterContent({
+  allLabels,
+  selectedLabels,
+  currentLabels,
+  showReviewed,
+  reviewed,
+  updateLabelFilter,
+  setCurrentLabels,
+  setShowReviewed,
+  setReviewed,
+  onClose,
+}: GeneralFilterContentProps) {
+  return (
     <>
       <div className="flex p-2 justify-start items-center">
         <Switch
@@ -459,7 +537,7 @@ function GeneralFilterButton({
               updateLabelFilter(currentLabels);
             }
 
-            setOpen(false);
+            onClose();
           }}
         >
           Apply
@@ -477,44 +555,6 @@ function GeneralFilterButton({
         </Button>
       </div>
     </>
-  );
-
-  if (isMobile) {
-    return (
-      <Drawer
-        open={open}
-        onOpenChange={(open) => {
-          if (!open) {
-            setReviewed(showReviewed ?? 0);
-            setCurrentLabels(selectedLabels);
-          }
-
-          setOpen(open);
-        }}
-      >
-        <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-        <DrawerContent className="max-h-[75dvh] overflow-hidden">
-          {content}
-        </DrawerContent>
-      </Drawer>
-    );
-  }
-
-  return (
-    <Popover
-      open={open}
-      onOpenChange={(open) => {
-        if (!open) {
-          setReviewed(showReviewed ?? 0);
-          setCurrentLabels(selectedLabels);
-        }
-
-        setOpen(open);
-      }}
-    >
-      <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-      <PopoverContent side="left">{content}</PopoverContent>
-    </Popover>
   );
 }
 

@@ -24,3 +24,5 @@ export type Timeline = {
 };
 
 export type TimeRange = { before: number; after: number };
+
+export type TimelineType = "timeline" | "events";

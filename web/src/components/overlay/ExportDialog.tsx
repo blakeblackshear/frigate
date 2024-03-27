@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Dialog,
   DialogClose,
@@ -55,6 +55,72 @@ export default function ExportDialog({
   setRange,
   setMode,
 }: ExportDialogProps) {
+  const Overlay = isDesktop ? Dialog : Drawer;
+  const Trigger = isDesktop ? DialogTrigger : DrawerTrigger;
+  const Content = isDesktop ? DialogContent : DrawerContent;
+
+  return (
+    <Overlay
+      open={mode == "select"}
+      onOpenChange={(open) => {
+        if (!open) {
+          setMode("none");
+        }
+      }}
+    >
+      <Trigger asChild>
+        <Button
+          className="flex items-center gap-2"
+          variant="secondary"
+          size="sm"
+          onClick={() => {
+            if (mode == "none") {
+              setMode("select");
+            }
+          }}
+        >
+          <FaArrowDown className="p-1 fill-secondary bg-muted-foreground rounded-md" />
+          {isDesktop ? (mode != "timeline" ? "Export" : "Save") : null}
+        </Button>
+      </Trigger>
+      <Content
+        className={isDesktop ? "sm:rounded-2xl" : "px-4 pb-4 mx-4 rounded-2xl"}
+      >
+        <ExportContent
+          camera={camera}
+          latestTime={latestTime}
+          currentTime={currentTime}
+          range={range}
+          mode={mode}
+          setRange={setRange}
+          setMode={setMode}
+          onCancel={() => setMode("none")}
+        />
+      </Content>
+    </Overlay>
+  );
+}
+
+type ExportContentProps = {
+  camera: string;
+  latestTime: number;
+  currentTime: number;
+  range?: TimeRange;
+  mode: ExportMode;
+  setRange: (range: TimeRange | undefined) => void;
+  setMode: (mode: ExportMode) => void;
+  onCancel: () => void;
+};
+export function ExportContent({
+  camera,
+  latestTime,
+  currentTime,
+  range,
+  mode,
+  setRange,
+  setMode,
+  onCancel,
+}: ExportContentProps) {
   const [selectedOption, setSelectedOption] = useState<ExportOption>("1");
   const [name, setName] = useState("");
 
@@ -131,112 +197,90 @@ export default function ExportDialog({
       });
   }, [camera, name, range, setRange]);
 
-  const Overlay = isDesktop ? Dialog : Drawer;
-  const Trigger = isDesktop ? DialogTrigger : DrawerTrigger;
-  const Content = isDesktop ? DialogContent : DrawerContent;
+  useEffect(() => {
+    if (mode != "timeline_save") {
+      return;
+    }
+
+    onStartExport();
+    setMode("none");
+  }, [mode, onStartExport, setMode]);
 
   return (
-    <Overlay
-      open={mode == "select"}
-      onOpenChange={(open) => {
-        if (!open) {
-          setMode("none");
-        }
-      }}
-    >
-      <Trigger asChild>
+    <>
+      {isDesktop && (
+        <>
+          <DialogHeader>
+            <DialogTitle>Export</DialogTitle>
+          </DialogHeader>
+          <SelectSeparator className="bg-secondary" />
+        </>
+      )}
+      <RadioGroup
+        className={`flex flex-col gap-3 ${isDesktop ? "" : "mt-4"}`}
+        onValueChange={(value) => onSelectTime(value as ExportOption)}
+      >
+        {EXPORT_OPTIONS.map((opt) => {
+          return (
+            <div key={opt} className="flex items-center gap-2">
+              <RadioGroupItem
+                className={
+                  opt == selectedOption
+                    ? "from-selected/50 to-selected/90 text-selected bg-selected"
+                    : "from-secondary/50 to-secondary/90 text-secondary bg-secondary"
+                }
+                id={opt}
+                value={opt}
+              />
+              <Label className="cursor-pointer capitalize" htmlFor={opt}>
+                {isNaN(parseInt(opt))
+                  ? opt == "timeline"
+                    ? "Select from Timeline"
+                    : `${opt}`
+                  : `Last ${opt > "1" ? `${opt} Hours` : "Hour"}`}
+              </Label>
+            </div>
+          );
+        })}
+      </RadioGroup>
+      {selectedOption == "custom" && (
+        <CustomTimeSelector
+          latestTime={latestTime}
+          range={range}
+          setRange={setRange}
+        />
+      )}
+      <Input
+        className="mt-3"
+        type="search"
+        placeholder="Name the Export"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+      {isDesktop && <SelectSeparator className="bg-secondary" />}
+      <DialogFooter
+        className={isDesktop ? "" : "mt-3 flex flex-col-reverse gap-4"}
+      >
+        <div className="p-2 cursor-pointer" onClick={onCancel}>
+          Cancel
+        </div>
         <Button
-          className="flex items-center gap-2"
-          variant="secondary"
+          variant="select"
           size="sm"
           onClick={() => {
-            if (mode == "none") {
-              setMode("select");
-            } else if (mode == "timeline") {
+            if (selectedOption == "timeline") {
+              setRange({ before: currentTime + 30, after: currentTime - 30 });
+              setMode("timeline");
+            } else {
               onStartExport();
               setMode("none");
             }
           }}
         >
-          <FaArrowDown className="p-1 fill-secondary bg-muted-foreground rounded-md" />
-          {isDesktop ? (mode != "timeline" ? "Export" : "Save") : null}
+          {selectedOption == "timeline" ? "Select" : "Export"}
         </Button>
-      </Trigger>
-      <Content
-        className={isDesktop ? "sm:rounded-2xl" : "px-4 pb-4 mx-4 rounded-2xl"}
-      >
-        {isDesktop && (
-          <>
-            <DialogHeader>
-              <DialogTitle>Export</DialogTitle>
-            </DialogHeader>
-            <SelectSeparator className="bg-secondary" />
-          </>
-        )}
-        <RadioGroup
-          className={`flex flex-col gap-3 ${isDesktop ? "" : "mt-4"}`}
-          onValueChange={(value) => onSelectTime(value as ExportOption)}
-        >
-          {EXPORT_OPTIONS.map((opt) => {
-            return (
-              <div key={opt} className="flex items-center gap-2">
-                <RadioGroupItem
-                  className={
-                    opt == selectedOption
-                      ? "from-selected/50 to-selected/90 text-selected bg-selected"
-                      : "from-secondary/50 to-secondary/90 text-secondary bg-secondary"
-                  }
-                  id={opt}
-                  value={opt}
-                />
-                <Label className="cursor-pointer capitalize" htmlFor={opt}>
-                  {isNaN(parseInt(opt))
-                    ? opt == "timeline"
-                      ? "Select from Timeline"
-                      : `${opt}`
-                    : `Last ${opt > "1" ? `${opt} Hours` : "Hour"}`}
-                </Label>
-              </div>
-            );
-          })}
-        </RadioGroup>
-        {selectedOption == "custom" && (
-          <CustomTimeSelector
-            latestTime={latestTime}
-            range={range}
-            setRange={setRange}
-          />
-        )}
-        <Input
-          className="mt-3"
-          type="search"
-          placeholder="Name the Export"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        {isDesktop && <SelectSeparator className="bg-secondary" />}
-        <DialogFooter
-          className={isDesktop ? "" : "mt-3 flex flex-col-reverse gap-4"}
-        >
-          <DialogClose onClick={() => setMode("none")}>Cancel</DialogClose>
-          <Button
-            variant="select"
-            size="sm"
-            onClick={() => {
-              if (selectedOption == "timeline") {
-                setRange({ before: currentTime + 30, after: currentTime - 30 });
-                setMode("timeline");
-              } else {
-                onStartExport();
-                setMode("none");
-              }
-            }}
-          >
-            {selectedOption == "timeline" ? "Select" : "Export"}
-          </Button>
-        </DialogFooter>
-      </Content>
-    </Overlay>
+      </DialogFooter>
+    </>
   );
 }
 
