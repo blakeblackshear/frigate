@@ -1,5 +1,4 @@
 import ReviewCard from "@/components/card/ReviewCard";
-import FilterCheckBox from "@/components/filter/FilterCheckBox";
 import ReviewFilterGroup from "@/components/filter/ReviewFilterGroup";
 import ExportDialog from "@/components/overlay/ExportDialog";
 import PreviewPlayer, {
@@ -9,7 +8,6 @@ import { DynamicVideoController } from "@/components/player/dynamic/DynamicVideo
 import DynamicVideoPlayer from "@/components/player/dynamic/DynamicVideoPlayer";
 import MotionReviewTimeline from "@/components/timeline/MotionReviewTimeline";
 import { Button } from "@/components/ui/button";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useOverlayState } from "@/hooks/use-overlay-state";
 import { ExportMode } from "@/types/filter";
@@ -31,12 +29,12 @@ import {
   useState,
 } from "react";
 import { isDesktop, isMobile } from "react-device-detect";
-import { FaCircle, FaVideo } from "react-icons/fa";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import useSWR from "swr";
 import { TimeRange } from "@/types/timeline";
+import MobileCameraDrawer from "@/components/overlay/MobileCameraDrawer";
 
 const SEGMENT_DURATION = 30;
 type TimelineType = "timeline" | "events";
@@ -70,7 +68,6 @@ export function RecordingView({
   const [mainCamera, setMainCamera] = useState(startCamera);
   const mainControllerRef = useRef<DynamicVideoController | null>(null);
   const previewRefs = useRef<{ [camera: string]: PreviewController }>({});
-  const [cameraDrawer, setCameraDrawer] = useState(false);
 
   const [playbackStart, setPlaybackStart] = useState(startTime);
 
@@ -231,32 +228,14 @@ export function RecordingView({
         </Button>
         <div className="flex items-center justify-end gap-2">
           {isMobile && (
-            <Drawer open={cameraDrawer} onOpenChange={setCameraDrawer}>
-              <DrawerTrigger asChild>
-                <Button
-                  className="rounded-lg capitalize"
-                  size="sm"
-                  variant="secondary"
-                >
-                  <FaVideo className="text-muted-foreground" />
-                </Button>
-              </DrawerTrigger>
-              <DrawerContent className="max-h-[75dvh] overflow-hidden flex flex-col items-center gap-2">
-                {allCameras.map((cam) => (
-                  <div
-                    key={cam}
-                    className={`w-full mx-4 py-2 text-center capitalize ${cam == mainCamera ? "bg-secondary rounded-lg" : ""}`}
-                    onClick={() => {
-                      setPlaybackStart(currentTime);
-                      setMainCamera(cam);
-                      setCameraDrawer(false);
-                    }}
-                  >
-                    {cam.replaceAll("_", " ")}
-                  </div>
-                ))}
-              </DrawerContent>
-            </Drawer>
+            <MobileCameraDrawer
+              allCameras={allCameras}
+              selected={mainCamera}
+              onSelectCamera={(cam) => {
+                setPlaybackStart(currentTime);
+                setMainCamera(cam);
+              }}
+            />
           )}
           <ExportDialog
             camera={mainCamera}
