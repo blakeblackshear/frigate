@@ -48,6 +48,8 @@ if go2rtc_config.get("api") is None:
 elif go2rtc_config["api"].get("origin") is None:
     go2rtc_config["api"]["origin"] = "*"
 
+go2rtc_config["api"]["unix_listen"] = "/tmp/go2rtc.sock"
+
 # Need to set default location for HA config
 if go2rtc_config.get("hass") is None:
     go2rtc_config["hass"] = {"config": "/config"}
