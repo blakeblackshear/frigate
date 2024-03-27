@@ -1,4 +1,4 @@
-import { LuDisc, LuDisc2, LuDisc3, LuX } from "react-icons/lu";
+import { LuX } from "react-icons/lu";
 import { Button } from "../ui/button";
 import { FaCompactDisc } from "react-icons/fa";
 
