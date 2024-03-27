@@ -273,7 +273,7 @@ export default function MobileReviewSettingsDrawer({
             <FaCog className="text-muted-foreground" />
           </Button>
         </DrawerTrigger>
-        <DrawerContent className="max-h-[75dvh] overflow-hidden flex flex-col items-center gap-2 px-4 pb-4 mx-1 rounded-t-2xl">
+        <DrawerContent className="max-h-[80dvh] overflow-hidden flex flex-col items-center gap-2 px-4 pb-4 mx-1 rounded-t-2xl">
           {content}
         </DrawerContent>
       </Drawer>
