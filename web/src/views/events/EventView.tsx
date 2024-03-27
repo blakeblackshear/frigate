@@ -496,7 +496,7 @@ function DetectionReview({
       >
         {filter?.before == undefined && (
           <NewReviewData
-            className="absolute w-full z-50 pointer-events-none"
+            className="absolute left-1/2 -translate-x-1/2 z-50 pointer-events-none"
             contentRef={contentRef}
             reviewItems={currentItems}
             itemsToReview={itemsToReview}
