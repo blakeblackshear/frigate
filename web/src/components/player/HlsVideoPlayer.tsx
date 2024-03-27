@@ -10,6 +10,7 @@ import { isDesktop, isMobile } from "react-device-detect";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import VideoControls from "./VideoControls";
 
+const USE_NATIVE_HLS = false;
 const HLS_MIME_TYPE = "application/vnd.apple.mpegurl" as const;
 const unsupportedErrorCodes = [
   MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED,
@@ -51,7 +52,7 @@ export default function HlsVideoPlayer({
       return;
     }
 
-    if (videoRef.current.canPlayType(HLS_MIME_TYPE)) {
+    if (USE_NATIVE_HLS && videoRef.current.canPlayType(HLS_MIME_TYPE)) {
       return;
     } else if (Hls.isSupported()) {
       setUseHlsCompat(true);
