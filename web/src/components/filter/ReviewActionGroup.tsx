@@ -29,8 +29,7 @@ export default function ReviewActionGroup({
   }, [selectedReviews, setSelectedReviews, pullLatestData]);
 
   const onDelete = useCallback(async () => {
-    const idList = selectedReviews.join(",");
-    await axios.delete(`reviews/${idList}`);
+    await axios.post(`reviews/delete`, { ids: selectedReviews });
     setSelectedReviews([]);
     pullLatestData();
   }, [selectedReviews, setSelectedReviews, pullLatestData]);
