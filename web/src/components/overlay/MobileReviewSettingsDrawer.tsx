@@ -7,7 +7,7 @@ import { ExportContent } from "./ExportDialog";
 import { ExportMode } from "@/types/filter";
 import ReviewActivityCalendar from "./ReviewActivityCalendar";
 import { SelectSeparator } from "../ui/select";
-import { ReviewFilter } from "@/types/review";
+import { ReviewFilter, ReviewSummary } from "@/types/review";
 import { getEndOfDayTimestamp } from "@/utils/dateUtil";
 import { GeneralFilterContent } from "../filter/ReviewFilterGroup";
 import useSWR from "swr";
@@ -36,6 +36,7 @@ type MobileReviewSettingsDrawerProps = {
   currentTime: number;
   range?: TimeRange;
   mode: ExportMode;
+  reviewSummary?: ReviewSummary;
   onUpdateFilter: (filter: ReviewFilter) => void;
   setRange: (range: TimeRange | undefined) => void;
   setMode: (mode: ExportMode) => void;
@@ -48,6 +49,7 @@ export default function MobileReviewSettingsDrawer({
   currentTime,
   range,
   mode,
+  reviewSummary,
   onUpdateFilter,
   setRange,
   setMode,
@@ -201,6 +203,7 @@ export default function MobileReviewSettingsDrawer({
           </div>
         </div>
         <ReviewActivityCalendar
+          reviewSummary={reviewSummary}
           selectedDay={
             filter?.after == undefined
               ? undefined
