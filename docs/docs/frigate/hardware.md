@@ -95,23 +95,6 @@ Frigate supports all Jetson boards, from the inexpensive Jetson Nano to the powe
 
 Inference speed will vary depending on the YOLO model, jetson platform and jetson nvpmodel (GPU/DLA/EMC clock speed). It is typically 20-40 ms for most models. The DLA is more efficient than the GPU, but not faster, so using the DLA will reduce power consumption but will slightly increase inference time.
 
-#### Rockchip SoC
-
-Frigate supports SBCs with the following Rockchip SoCs:
-
-- RK3566/RK3568
-- RK3588/RK3588S
-- RV1103/RV1106
-- RK3562
-
-Using the yolov8n model and an Orange Pi 5 Plus with RK3588 SoC inference speeds vary between 20 - 25 ms.
-
-#### AMD GPUs and iGPUs
-
-With the [rocm](../configuration/object_detectors.md#amdrocm-gpu-detector) detector Frigate can take advantage of many AMD GPUs and iGPUs.
-
-An AMD Ryzen mini PC with AMD Ryzen 3 5400U iGPU takes about 9 ms to evaluate yolov8n.
-
 ## What does Frigate use the CPU for and what does it use a detector for? (ELI5 Version)
 
 This is taken from a [user question on reddit](https://www.reddit.com/r/homeassistant/comments/q8mgau/comment/hgqbxh5/?utm_source=share&utm_medium=web2x&context=3). Modified slightly for clarity.
