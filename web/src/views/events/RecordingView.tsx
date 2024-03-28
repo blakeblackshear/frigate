@@ -507,7 +507,11 @@ function Timeline({
                 key={review.id}
                 event={review}
                 currentTime={currentTime}
-                onClick={() => setCurrentTime(review.start_time)}
+                onClick={() => {
+                  setScrubbing(true);
+                  setCurrentTime(review.start_time);
+                  setScrubbing(false);
+                }}
               />
             );
           })}
