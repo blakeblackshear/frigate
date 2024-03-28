@@ -129,10 +129,10 @@ export default function LiveDashboardView({
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
 
   return (
-    <div className="size-full overflow-y-auto px-2">
+    <div className="size-full overflow-y-auto">
       {isMobile && (
-        <div className="relative h-9 flex items-center justify-between">
-          <Logo className="absolute inset-y-0 inset-x-1/2 -translate-x-1/2 h-8" />
+        <div className="h-11 px-2 relative flex items-center justify-between">
+          <Logo className="absolute inset-x-1/2 -translate-x-1/2 h-8" />
           <CameraGroupSelector />
           <div className="flex items-center gap-1">
             <Button
@@ -175,7 +175,7 @@ export default function LiveDashboardView({
       )}
 
       <div
-        className={`my-4 grid ${layout == "grid" ? "grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4" : ""} gap-2 md:gap-4  *:rounded-2xl *:bg-black`}
+        className={`mt-2 px-2 grid ${layout == "grid" ? "grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4" : ""} gap-2 md:gap-4 *:rounded-2xl *:bg-black`}
       >
         {includeBirdseye && birdseyeConfig?.enabled && (
           <BirdseyeLivePlayer
