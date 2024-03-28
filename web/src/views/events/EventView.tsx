@@ -206,9 +206,9 @@ export default function EventView({
 
   return (
     <div className="flex flex-col size-full">
-      <div className="h-10 relative flex justify-between items-center mx-2">
+      <div className="h-11 px-2 relative flex justify-between items-center">
         {isMobile && (
-          <Logo className="absolute inset-y-0 inset-x-1/2 -translate-x-1/2 h-8" />
+          <Logo className="absolute inset-x-1/2 -translate-x-1/2 h-8" />
         )}
         <ToggleGroup
           className="*:px-3 *:py-4 *:rounded-2xl"
@@ -492,7 +492,7 @@ function DetectionReview({
     <>
       <div
         ref={contentRef}
-        className="flex flex-1 flex-wrap content-start gap-2 md:gap-4 overflow-y-auto no-scrollbar"
+        className="mt-2 flex flex-1 flex-wrap content-start gap-2 md:gap-4 overflow-y-auto no-scrollbar"
       >
         {filter?.before == undefined && (
           <NewReviewData

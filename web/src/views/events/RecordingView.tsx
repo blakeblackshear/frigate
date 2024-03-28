@@ -225,13 +225,14 @@ export function RecordingView({
     <div ref={contentRef} className="size-full flex flex-col">
       <Toaster />
       <div
-        className={`w-full h-10 px-2 relative flex items-center justify-between`}
+        className={`w-full h-11 px-2 relative flex items-center justify-between`}
       >
         {isMobile && (
-          <Logo className="absolute top-1 inset-x-1/2 -translate-x-1/2 h-8" />
+          <Logo className="absolute inset-x-1/2 -translate-x-1/2 h-8" />
         )}
         <Button
           className="flex items-center gap-2 rounded-lg"
+          size="sm"
           onClick={() => navigate(-1)}
         >
           <IoMdArrowRoundBack className="size-5" size="small" />
@@ -482,7 +483,9 @@ function Timeline({
           onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
         />
       ) : (
-        <div className="h-full flex flex-col gap-4 overflow-auto p-4 bg-secondary">
+        <div
+          className={`h-full grid grid-cols-1 gap-4 overflow-auto p-4 bg-secondary ${isDesktop ? "" : "sm:grid-cols-2"}`}
+        >
           {mainCameraReviewItems.map((review) => {
             if (review.severity == "significant_motion") {
               return;

@@ -27,19 +27,21 @@ export default function MobileCameraDrawer({
           <FaVideo className="text-muted-foreground" />
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="max-h-[75dvh] overflow-y-auto flex flex-col items-center gap-2 px-4 pb-4 mx-1 rounded-t-2xl">
-        {allCameras.map((cam) => (
-          <div
-            key={cam}
-            className={`w-full mx-4 py-2 text-center capitalize ${cam == selected ? "bg-secondary rounded-lg" : ""}`}
-            onClick={() => {
-              onSelectCamera(cam);
-              setCameraDrawer(false);
-            }}
-          >
-            {cam.replaceAll("_", " ")}
-          </div>
-        ))}
+      <DrawerContent className="max-h-[75dvh] px-4 mx-1 rounded-t-2xl overflow-hidden">
+        <div className="w-full h-auto py-4 overflow-y-auto overflow-x-hidden flex flex-col items-center gap-2">
+          {allCameras.map((cam) => (
+            <div
+              key={cam}
+              className={`w-full mx-4 py-2 text-center capitalize ${cam == selected ? "bg-secondary rounded-lg" : ""}`}
+              onClick={() => {
+                onSelectCamera(cam);
+                setCameraDrawer(false);
+              }}
+            >
+              {cam.replaceAll("_", " ")}
+            </div>
+          ))}
+        </div>
       </DrawerContent>
     </Drawer>
   );

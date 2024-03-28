@@ -187,6 +187,7 @@ export default function ReviewFilterGroup({
         <MobileReviewSettingsDrawer
           features={mobileSettingsFeatures}
           filter={filter}
+          reviewSummary={reviewSummary}
           onUpdateFilter={onUpdateFilter}
           // not applicable as exports are not used
           camera=""
@@ -377,7 +378,7 @@ function ShowReviewFilter({
       </div>
 
       <Button
-        className="block md:hidden ml-1"
+        className="block md:hidden"
         size="sm"
         variant="secondary"
         onClick={() => setShowReviewed(showReviewed == 0 ? 1 : 0)}
