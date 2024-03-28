@@ -201,15 +201,8 @@ function PreviewVideoPlayer({
   // canvas to cover preview transition
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [videoWidth, videoHeight] = useMemo(() => {
-    if (!previewRef.current) {
-      return [0, 0];
-    }
+  const [videoSize, setVideoSize] = useState<number[]>([0, 0]);
 
-    return [previewRef.current.videoWidth, previewRef.current.videoHeight];
-    // we know the video size will be known on load
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loaded]);
   // handle switching sources
 
   useEffect(() => {
@@ -218,9 +211,12 @@ function PreviewVideoPlayer({
     }
 
     if (canvasRef.current) {
-      canvasRef.current
-        .getContext("2d")
-        ?.drawImage(previewRef.current, 0, 0, videoWidth, videoHeight);
+      const context = canvasRef.current.getContext("2d");
+
+      if (context) {
+        context.drawImage(previewRef.current, 0, 0, videoSize[0], videoSize[1]);
+      }
+
       setHasCanvas(true);
     }
 
@@ -235,7 +231,7 @@ function PreviewVideoPlayer({
 
   return (
     <div
-      className={`relative w-full rounded-2xl bg-black overflow-hidden ${className ?? ""} ${onClick ? "cursor-pointer" : ""}`}
+      className={`relative rounded-2xl bg-black overflow-hidden ${onClick ? "cursor-pointer" : ""} ${className ?? ""}`}
       onClick={onClick}
     >
       {currentHourFrame && (
@@ -246,9 +242,9 @@ function PreviewVideoPlayer({
       )}
       <canvas
         ref={canvasRef}
-        width={videoWidth}
-        height={videoHeight}
-        className={`absolute h-full left-1/2 -translate-x-1/2 ${!loaded && hasCanvas ? "" : "hidden"}`}
+        width={videoSize[0]}
+        height={videoSize[1]}
+        className={`h-full absolute left-1/2 -translate-x-1/2 ${!loaded && hasCanvas ? "" : "hidden"}`}
       />
       <video
         ref={previewRef}
@@ -269,8 +265,15 @@ function PreviewVideoPlayer({
             previewRef.current?.pause();
           }
 
-          if (previewRef.current && startTime && currentPreview) {
-            previewRef.current.currentTime = startTime - currentPreview.start;
+          if (previewRef.current) {
+            setVideoSize([
+              previewRef.current.videoWidth,
+              previewRef.current.videoHeight,
+            ]);
+
+            if (startTime && currentPreview) {
+              previewRef.current.currentTime = startTime - currentPreview.start;
+            }
           }
         }}
       >

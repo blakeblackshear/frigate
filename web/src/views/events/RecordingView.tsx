@@ -194,23 +194,36 @@ export function RecordingView({
 
   // motion timeline data
 
+  const getCameraAspect = useCallback(
+    (cam: string) => {
+      if (!config) {
+        return undefined;
+      }
+
+      const camera = config.cameras[cam];
+
+      if (!camera) {
+        return undefined;
+      }
+
+      return camera.detect.width / camera.detect.height;
+    },
+    [config],
+  );
+
   const mainCameraAspect = useMemo(() => {
-    if (!config) {
+    const aspectRatio = getCameraAspect(mainCamera);
+
+    if (!aspectRatio) {
       return "normal";
-    }
-
-    const aspectRatio =
-      config.cameras[mainCamera].detect.width /
-      config.cameras[mainCamera].detect.height;
-
-    if (aspectRatio > 2) {
+    } else if (aspectRatio > 2) {
       return "wide";
     } else if (aspectRatio < 16 / 9) {
       return "tall";
     } else {
       return "normal";
     }
-  }, [config, mainCamera]);
+  }, [getCameraAspect, mainCamera]);
 
   const grow = useMemo(() => {
     if (isMobile) {
@@ -335,8 +348,8 @@ export function RecordingView({
               key={mainCamera}
               className={
                 isDesktop
-                  ? `flex justify-center mb-5 ${mainCameraAspect == "tall" ? "h-full" : "w-[78%]"}`
-                  : `w-full ${mainCameraAspect == "wide" ? "" : "aspect-video"}`
+                  ? `flex justify-center mb-5 ${mainCameraAspect == "tall" ? "h-[90%]" : mainCameraAspect == "wide" ? "w-full" : "w-[78%]"}`
+                  : `w-full ${mainCameraAspect == "wide" ? "aspect-wide" : "aspect-video"}`
               }
             >
               <DynamicVideoPlayer
@@ -367,13 +380,18 @@ export function RecordingView({
                 {allCameras.map((cam) => {
                   if (cam !== mainCamera) {
                     return (
-                      <div key={cam}>
+                      <div
+                        key={cam}
+                        className={`${mainCameraAspect == "wide" ? "h-full flex-grow" : ""}`}
+                        style={{
+                          aspectRatio:
+                            mainCameraAspect == "wide"
+                              ? undefined
+                              : getCameraAspect(cam),
+                        }}
+                      >
                         <PreviewPlayer
-                          className={
-                            mainCameraAspect == "tall"
-                              ? "size-full"
-                              : "size-full"
-                          }
+                          className="h-full"
                           camera={cam}
                           timeRange={currentTimeRange}
                           cameraPreviews={allPreviews ?? []}

@@ -41,26 +41,6 @@ export default function DynamicVideoPlayer({
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
 
-  // playback behavior
-
-  const grow = useMemo(() => {
-    if (!config) {
-      return "aspect-video";
-    }
-
-    const aspectRatio =
-      config.cameras[camera].detect.width /
-      config.cameras[camera].detect.height;
-
-    if (aspectRatio > 2) {
-      return "";
-    } else if (aspectRatio < 16 / 9) {
-      return isDesktop ? "" : "aspect-tall";
-    } else {
-      return "aspect-video";
-    }
-  }, [camera, config]);
-
   // controlling playback
 
   const playerRef = useRef<HTMLVideoElement | null>(null);
@@ -169,9 +149,9 @@ export default function DynamicVideoPlayer({
   }, [controller, recordings]);
 
   return (
-    <div className={`w-full relative ${className ?? ""}`}>
+    <>
       <HlsVideoPlayer
-        className={isDesktop ? `w-full ${grow}` : "max-h-[50dvh]"}
+        className={isDesktop ? `w-full ${className}` : "max-h-[50dvh]"}
         videoRef={playerRef}
         visible={!(isScrubbing || isLoading)}
         currentSource={source}
@@ -195,7 +175,7 @@ export default function DynamicVideoPlayer({
         )}
       </HlsVideoPlayer>
       <PreviewPlayer
-        className={`${isScrubbing || isLoading ? "visible" : "hidden"} ${isDesktop ? `w-full ${grow}` : "max-h-[50dvh]"}`}
+        className={`${isScrubbing || isLoading ? "visible" : "hidden"} ${isDesktop ? `w-full ${className}` : "max-h-[50dvh]"}`}
         camera={camera}
         timeRange={timeRange}
         cameraPreviews={cameraPreviews}
@@ -205,6 +185,6 @@ export default function DynamicVideoPlayer({
           setPreviewController(previewController);
         }}
       />
-    </div>
+    </>
   );
 }
