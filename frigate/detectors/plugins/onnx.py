@@ -1,4 +1,3 @@
-import glob
 import logging
 
 import numpy as np
@@ -39,9 +38,8 @@ class ONNXDetector(DetectionApi):
     def detect_raw(self, tensor_input):
         model_input_name = self.model.get_inputs()[0].name
         model_input_shape = self.model.get_inputs()[0].shape
-
         tensor_input = preprocess(tensor_input, model_input_shape, np.float32)
-
+        # ruff: noqa: F841
         tensor_output = self.model.run(None, {model_input_name: tensor_input})[0]
 
         raise Exception(

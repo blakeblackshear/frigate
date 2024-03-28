@@ -114,6 +114,7 @@ class ROCmDetector(DetectionApi):
         detector_result = self.model.run({model_input_name: tensor_input})[0]
 
         addr = ctypes.cast(detector_result.data_ptr(), ctypes.POINTER(ctypes.c_float))
+        # ruff: noqa: F841
         tensor_output = np.ctypeslib.as_array(
             addr, shape=detector_result.get_shape().lens()
         )
