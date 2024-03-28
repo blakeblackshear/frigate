@@ -588,7 +588,6 @@ function ShowMotionOnlyButton({
       <div className="block md:hidden">
         <Button
           size="sm"
-          className="ml-1"
           variant="secondary"
           onClick={() => setMotionOnly(!motionOnly)}
         >
