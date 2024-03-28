@@ -46,6 +46,7 @@ type RecordingViewProps = {
   startTime: number;
   reviewItems?: ReviewSegment[];
   reviewSummary?: ReviewSummary;
+  timeRange: TimeRange;
   allCameras: string[];
   allPreviews?: Preview[];
   filter?: ReviewFilter;
@@ -56,6 +57,7 @@ export function RecordingView({
   startTime,
   reviewItems,
   reviewSummary,
+  timeRange,
   allCameras,
   allPreviews,
   filter,
@@ -85,15 +87,18 @@ export function RecordingView({
     "timeline",
   );
 
-  const timeRange = useMemo(() => getChunkedTimeDay(startTime), [startTime]);
+  const chunkedTimeRange = useMemo(
+    () => getChunkedTimeDay(timeRange),
+    [timeRange],
+  );
   const [selectedRangeIdx, setSelectedRangeIdx] = useState(
-    timeRange.ranges.findIndex((chunk) => {
+    chunkedTimeRange.findIndex((chunk) => {
       return chunk.after <= startTime && chunk.before >= startTime;
     }),
   );
   const currentTimeRange = useMemo(
-    () => timeRange.ranges[selectedRangeIdx],
-    [selectedRangeIdx, timeRange],
+    () => chunkedTimeRange[selectedRangeIdx],
+    [selectedRangeIdx, chunkedTimeRange],
   );
 
   // export
@@ -108,10 +113,10 @@ export function RecordingView({
       return;
     }
 
-    if (selectedRangeIdx < timeRange.ranges.length - 1) {
+    if (selectedRangeIdx < chunkedTimeRange.length - 1) {
       setSelectedRangeIdx(selectedRangeIdx + 1);
     }
-  }, [selectedRangeIdx, timeRange]);
+  }, [selectedRangeIdx, chunkedTimeRange]);
 
   // scrubbing and timeline state
 
@@ -121,7 +126,7 @@ export function RecordingView({
 
   const updateSelectedSegment = useCallback(
     (currentTime: number, updateStartTime: boolean) => {
-      const index = timeRange.ranges.findIndex(
+      const index = chunkedTimeRange.findIndex(
         (seg) => seg.after <= currentTime && seg.before >= currentTime,
       );
 
@@ -133,7 +138,7 @@ export function RecordingView({
         setSelectedRangeIdx(index);
       }
     },
-    [timeRange],
+    [chunkedTimeRange],
   );
 
   useEffect(() => {
@@ -251,7 +256,7 @@ export function RecordingView({
             <ExportDialog
               camera={mainCamera}
               currentTime={currentTime}
-              latestTime={timeRange.end}
+              latestTime={timeRange.before}
               mode={exportMode}
               range={exportRange}
               setRange={setExportRange}
@@ -303,7 +308,7 @@ export function RecordingView({
             camera={mainCamera}
             filter={filter}
             currentTime={currentTime}
-            latestTime={timeRange.end}
+            latestTime={timeRange.before}
             mode={exportMode}
             range={exportRange}
             onUpdateFilter={updateFilter}
@@ -406,7 +411,7 @@ type TimelineProps = {
   contentRef: MutableRefObject<HTMLDivElement | null>;
   mainCamera: string;
   timelineType: TimelineType;
-  timeRange: { start: number; end: number };
+  timeRange: TimeRange;
   mainCameraReviewItems: ReviewSegment[];
   currentTime: number;
   exportRange?: TimeRange;
@@ -429,8 +434,8 @@ function Timeline({
   const { data: motionData } = useSWR<MotionData[]>([
     "review/activity/motion",
     {
-      before: timeRange.end,
-      after: timeRange.start,
+      before: timeRange.before,
+      after: timeRange.after,
       scale: SEGMENT_DURATION / 2,
       cameras: mainCamera,
     },
@@ -465,8 +470,8 @@ function Timeline({
         <MotionReviewTimeline
           segmentDuration={30}
           timestampSpread={15}
-          timelineStart={timeRange.end}
-          timelineEnd={timeRange.start}
+          timelineStart={timeRange.before}
+          timelineEnd={timeRange.after}
           showHandlebar={exportRange == undefined}
           showExportHandles={exportRange != undefined}
           exportStartTime={exportRange?.after}

@@ -338,6 +338,7 @@ export default function Events() {
         reviewItems={reviews}
         reviewSummary={reviewSummary}
         allPreviews={allPreviews}
+        timeRange={selectedTimeRange}
         filter={reviewFilter}
         updateFilter={onUpdateFilter}
       />

@@ -46,7 +46,7 @@ type EventViewProps = {
   reviews?: ReviewSegment[];
   reviewSummary?: ReviewSummary;
   relevantPreviews?: Preview[];
-  timeRange: { before: number; after: number };
+  timeRange: TimeRange;
   filter?: ReviewFilter;
   severity: ReviewSeverity;
   startTime?: number;

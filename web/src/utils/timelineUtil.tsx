@@ -121,13 +121,17 @@ export function getTimelineItemDescription(timelineItem: Timeline) {
   }
 }
 
-export function getChunkedTimeDay(timestamp: number) {
+/**
+ *
+ * @param timeRange
+ * @returns timeRange chunked into individual hours
+ */
+export function getChunkedTimeDay(timeRange: TimeRange): TimeRange[] {
   const endOfThisHour = new Date();
   endOfThisHour.setHours(endOfThisHour.getHours() + 1, 0, 0, 0);
   const data: TimeRange[] = [];
-  const startDay = new Date(timestamp * 1000);
-  startDay.setHours(0, 0, 0, 0);
-  const startTimestamp = startDay.getTime() / 1000;
+  const startDay = new Date(timeRange.after * 1000);
+  startDay.setMinutes(0, 0, 0);
   let start = startDay.getTime() / 1000;
   let end = 0;
 
@@ -146,7 +150,7 @@ export function getChunkedTimeDay(timestamp: number) {
     start = startDay.getTime() / 1000;
   }
 
-  return { start: startTimestamp, end, ranges: data };
+  return data;
 }
 
 export function getChunkedTimeRange(
