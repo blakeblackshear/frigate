@@ -297,12 +297,12 @@ class PtzAutoTracker:
                     self.ptz_metrics[camera][
                         "ptz_max_zoom"
                     ].value = camera_config.onvif.autotracking.movement_weights[1]
-                    self.intercept[
-                        camera
-                    ] = camera_config.onvif.autotracking.movement_weights[2]
-                    self.move_coefficients[
-                        camera
-                    ] = camera_config.onvif.autotracking.movement_weights[3:]
+                    self.intercept[camera] = (
+                        camera_config.onvif.autotracking.movement_weights[2]
+                    )
+                    self.move_coefficients[camera] = (
+                        camera_config.onvif.autotracking.movement_weights[3:]
+                    )
                 else:
                     camera_config.onvif.autotracking.enabled = False
                     self.ptz_metrics[camera]["ptz_autotracker_enabled"].value = False
@@ -566,9 +566,9 @@ class PtzAutoTracker:
         ) ** self.zoom_factor[camera]
 
         if "original_target_box" not in self.tracked_object_metrics[camera]:
-            self.tracked_object_metrics[camera][
-                "original_target_box"
-            ] = self.tracked_object_metrics[camera]["target_box"]
+            self.tracked_object_metrics[camera]["original_target_box"] = (
+                self.tracked_object_metrics[camera]["target_box"]
+            )
 
         (
             self.tracked_object_metrics[camera]["valid_velocity"],
