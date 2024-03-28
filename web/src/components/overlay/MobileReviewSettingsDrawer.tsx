@@ -292,10 +292,3 @@ export default function MobileReviewSettingsDrawer({
     </>
   );
 }
-
-/**
- * <MobileTimelineDrawer
-              selected={timelineType ?? "timeline"}
-              onSelect={setTimelineType}
-            />
- */

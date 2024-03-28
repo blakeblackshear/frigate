@@ -515,7 +515,7 @@ function GeneralFilterButton({
       }}
     >
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-      <PopoverContent side="left">{content}</PopoverContent>
+      <PopoverContent>{content}</PopoverContent>
     </Popover>
   );
 }
@@ -538,45 +538,64 @@ export function GeneralFilterContent({
 }: GeneralFilterContentProps) {
   return (
     <>
-      <DropdownMenuSeparator />
-      <DropdownMenuLabel className="flex justify-center items-center">
-        Filter Labels
-      </DropdownMenuLabel>
-      <DropdownMenuSeparator />
       <div className="h-auto overflow-y-auto overflow-x-hidden">
-        <FilterCheckBox
-          isChecked={currentLabels == undefined}
-          label="All Labels"
-          onCheckedChange={(isChecked) => {
-            if (isChecked) {
-              setCurrentLabels(undefined);
-            }
-          }}
-        />
-        <DropdownMenuSeparator />
-        {allLabels.map((item) => (
-          <FilterCheckBox
-            key={item}
-            isChecked={currentLabels?.includes(item) ?? false}
-            label={item.replaceAll("_", " ")}
+        <div className="flex justify-between items-center my-2.5">
+          <Label
+            className="mx-2 text-secondary-foreground cursor-pointer"
+            htmlFor="allLabels"
+          >
+            All Labels
+          </Label>
+          <Switch
+            className="ml-1"
+            id="allLabels"
+            checked={currentLabels == undefined}
             onCheckedChange={(isChecked) => {
               if (isChecked) {
-                const updatedLabels = currentLabels ? [...currentLabels] : [];
-
-                updatedLabels.push(item);
-                setCurrentLabels(updatedLabels);
-              } else {
-                const updatedLabels = currentLabels ? [...currentLabels] : [];
-
-                // can not deselect the last item
-                if (updatedLabels.length > 1) {
-                  updatedLabels.splice(updatedLabels.indexOf(item), 1);
-                  setCurrentLabels(updatedLabels);
-                }
+                setCurrentLabels(undefined);
               }
             }}
           />
-        ))}
+        </div>
+        <DropdownMenuSeparator />
+        <div className="my-2.5 flex flex-col gap-2.5">
+          {allLabels.map((item) => (
+            <div className="flex justify-between items-center">
+              <Label
+                className="w-full mx-2 text-secondary-foreground capitalize cursor-pointer"
+                htmlFor={item}
+              >
+                {item.replaceAll("_", " ")}
+              </Label>
+              <Switch
+                key={item}
+                className="ml-1"
+                id={item}
+                checked={currentLabels?.includes(item) ?? false}
+                onCheckedChange={(isChecked) => {
+                  if (isChecked) {
+                    const updatedLabels = currentLabels
+                      ? [...currentLabels]
+                      : [];
+
+                    updatedLabels.push(item);
+                    setCurrentLabels(updatedLabels);
+                  } else {
+                    const updatedLabels = currentLabels
+                      ? [...currentLabels]
+                      : [];
+
+                    // can not deselect the last item
+                    if (updatedLabels.length > 1) {
+                      updatedLabels.splice(updatedLabels.indexOf(item), 1);
+                      setCurrentLabels(updatedLabels);
+                    }
+                  }
+                }}
+              />
+            </div>
+          ))}
+        </div>
       </div>
       <DropdownMenuSeparator />
       <div className="p-2 flex justify-evenly items-center">
