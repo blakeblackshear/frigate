@@ -9,7 +9,6 @@ import PreviewPlayer, { PreviewController } from "../PreviewPlayer";
 import { DynamicVideoController } from "./DynamicVideoController";
 import HlsVideoPlayer from "../HlsVideoPlayer";
 import { TimeRange, Timeline } from "@/types/timeline";
-import { isDesktop } from "react-device-detect";
 
 /**
  * Dynamically switches between video playback and scrubbing preview player.
@@ -151,7 +150,7 @@ export default function DynamicVideoPlayer({
   return (
     <>
       <HlsVideoPlayer
-        className={isDesktop ? `w-full ${className}` : "max-h-[50dvh]"}
+        className={className ?? ""}
         videoRef={playerRef}
         visible={!(isScrubbing || isLoading)}
         currentSource={source}
@@ -175,7 +174,7 @@ export default function DynamicVideoPlayer({
         )}
       </HlsVideoPlayer>
       <PreviewPlayer
-        className={`${isScrubbing || isLoading ? "visible" : "hidden"} ${isDesktop ? `w-full ${className}` : "max-h-[50dvh]"}`}
+        className={`${isScrubbing || isLoading ? "visible" : "hidden"} ${className}`}
         camera={camera}
         timeRange={timeRange}
         cameraPreviews={cameraPreviews}

@@ -226,14 +226,14 @@ export function RecordingView({
   }, [getCameraAspect, mainCamera]);
 
   const grow = useMemo(() => {
-    if (isMobile) {
-      return "";
-    }
-
     if (mainCameraAspect == "wide") {
       return "w-full aspect-wide";
-    } else if (isDesktop && mainCameraAspect == "tall") {
-      return "h-full aspect-tall flex flex-col justify-center";
+    } else if (mainCameraAspect == "tall") {
+      if (isDesktop) {
+        return "h-full aspect-tall flex flex-col justify-center";
+      } else {
+        return "size-full";
+      }
     } else {
       return "w-full aspect-video";
     }
@@ -352,10 +352,11 @@ export function RecordingView({
                   : `w-full ${mainCameraAspect == "wide" ? "aspect-wide" : "aspect-video"}`
               }
               style={{
-                aspectRatio:
-                  mainCameraAspect == "tall"
+                aspectRatio: isDesktop
+                  ? mainCameraAspect == "tall"
                     ? getCameraAspect(mainCamera)
-                    : undefined,
+                    : undefined
+                  : Math.max(1, getCameraAspect(mainCamera) ?? 0),
               }}
             >
               <DynamicVideoPlayer
@@ -381,35 +382,38 @@ export function RecordingView({
             </div>
             {isDesktop && (
               <div
-                className={`flex gap-2 ${mainCameraAspect == "tall" ? "h-full w-[16%] flex-col overflow-y-auto" : "w-full justify-center overflow-x-auto"}`}
+                className={`flex gap-2 ${mainCameraAspect == "tall" ? "h-full w-[12%] flex-col justify-center overflow-y-auto" : "w-full h-[14%] justify-center items-center overflow-x-auto"} `}
               >
                 {allCameras.map((cam) => {
-                  if (cam !== mainCamera) {
-                    const preview = (
+                  if (cam == mainCamera) {
+                    return;
+                  }
+
+                  return (
+                    <div
+                      key={cam}
+                      className={
+                        mainCameraAspect == "tall" ? undefined : "h-full"
+                      }
+                      style={{
+                        aspectRatio: getCameraAspect(cam),
+                      }}
+                    >
                       <PreviewPlayer
-                        key={cam}
-                        className={`${mainCameraAspect == "wide" ? "flex-grow" : ""}`}
+                        className="size-full"
                         camera={cam}
                         timeRange={currentTimeRange}
                         cameraPreviews={allPreviews ?? []}
                         startTime={startTime}
                         isScrubbing={scrubbing}
-                        forceAspect={getCameraAspect(cam)}
                         onControllerReady={(controller) => {
                           previewRefs.current[cam] = controller;
                           controller.scrubToTimestamp(startTime);
                         }}
                         onClick={() => onSelectCamera(cam)}
                       />
-                    );
-
-                    if (mainCameraAspect == "tall") {
-                      return <div key={`${cam}-t`}>{preview}</div>;
-                    }
-
-                    return preview;
-                  }
-                  return null;
+                    </div>
+                  );
                 })}
               </div>
             )}
