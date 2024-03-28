@@ -368,7 +368,7 @@ function UIPlayground() {
                 segmentDuration={zoomSettings.segmentDuration} // seconds per segment
                 timestampSpread={zoomSettings.timestampSpread} // minutes between each major timestamp
                 timelineStart={Math.floor(Date.now() / 1000)} // timestamp start of the timeline - the earlier time
-                timelineEnd={Math.floor(Date.now() / 1000) - 24 * 60 * 60} // end of timeline - the later time
+                timelineEnd={Math.floor(Date.now() / 1000) - 4 * 60 * 60} // end of timeline - the later time
                 showHandlebar // show / hide the handlebar
                 handlebarTime={handlebarTime} // set the time of the handlebar
                 setHandlebarTime={setHandlebarTime} // expose handler to set the handlebar time
