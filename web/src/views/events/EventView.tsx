@@ -492,7 +492,7 @@ function DetectionReview({
     <>
       <div
         ref={contentRef}
-        className="flex flex-1 flex-wrap content-start gap-2 md:gap-4 overflow-y-auto no-scrollbar"
+        className="mt-2 flex flex-1 flex-wrap content-start gap-2 md:gap-4 overflow-y-auto no-scrollbar"
       >
         {filter?.before == undefined && (
           <NewReviewData
