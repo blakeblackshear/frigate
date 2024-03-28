@@ -23,6 +23,7 @@ type PreviewPlayerProps = {
   cameraPreviews: Preview[];
   startTime?: number;
   isScrubbing: boolean;
+  forceAspect?: number;
   onControllerReady: (controller: PreviewController) => void;
   onClick?: () => void;
 };
@@ -33,6 +34,7 @@ export default function PreviewPlayer({
   cameraPreviews,
   startTime,
   isScrubbing,
+  forceAspect,
   onControllerReady,
   onClick,
 }: PreviewPlayerProps) {
@@ -60,6 +62,7 @@ export default function PreviewPlayer({
       cameraPreviews={cameraPreviews}
       startTime={startTime}
       isScrubbing={isScrubbing}
+      forceAspect={forceAspect}
       currentHourFrame={currentHourFrame}
       onControllerReady={onControllerReady}
       onClick={onClick}
@@ -89,6 +92,7 @@ type PreviewVideoPlayerProps = {
   cameraPreviews: Preview[];
   startTime?: number;
   isScrubbing: boolean;
+  forceAspect?: number;
   currentHourFrame?: string;
   onControllerReady: (controller: PreviewVideoController) => void;
   onClick?: () => void;
@@ -101,6 +105,7 @@ function PreviewVideoPlayer({
   cameraPreviews,
   startTime,
   isScrubbing,
+  forceAspect,
   currentHourFrame,
   onControllerReady,
   onClick,
@@ -232,6 +237,9 @@ function PreviewVideoPlayer({
   return (
     <div
       className={`relative rounded-2xl bg-black overflow-hidden ${onClick ? "cursor-pointer" : ""} ${className ?? ""}`}
+      style={{
+        aspectRatio: forceAspect,
+      }}
       onClick={onClick}
     >
       {currentHourFrame && (

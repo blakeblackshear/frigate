@@ -351,6 +351,12 @@ export function RecordingView({
                   ? `flex justify-center mb-5 ${mainCameraAspect == "tall" ? "h-[90%]" : mainCameraAspect == "wide" ? "w-full" : "w-[78%]"}`
                   : `w-full ${mainCameraAspect == "wide" ? "aspect-wide" : "aspect-video"}`
               }
+              style={{
+                aspectRatio:
+                  mainCameraAspect == "tall"
+                    ? getCameraAspect(mainCamera)
+                    : undefined,
+              }}
             >
               <DynamicVideoPlayer
                 className={grow}
@@ -379,32 +385,29 @@ export function RecordingView({
               >
                 {allCameras.map((cam) => {
                   if (cam !== mainCamera) {
-                    return (
-                      <div
+                    const preview = (
+                      <PreviewPlayer
                         key={cam}
-                        className={`${mainCameraAspect == "wide" ? "h-full flex-grow" : ""}`}
-                        style={{
-                          aspectRatio:
-                            mainCameraAspect == "wide"
-                              ? undefined
-                              : getCameraAspect(cam),
+                        className={`${mainCameraAspect == "wide" ? "flex-grow" : ""}`}
+                        camera={cam}
+                        timeRange={currentTimeRange}
+                        cameraPreviews={allPreviews ?? []}
+                        startTime={startTime}
+                        isScrubbing={scrubbing}
+                        forceAspect={getCameraAspect(cam)}
+                        onControllerReady={(controller) => {
+                          previewRefs.current[cam] = controller;
+                          controller.scrubToTimestamp(startTime);
                         }}
-                      >
-                        <PreviewPlayer
-                          className="h-full"
-                          camera={cam}
-                          timeRange={currentTimeRange}
-                          cameraPreviews={allPreviews ?? []}
-                          startTime={startTime}
-                          isScrubbing={scrubbing}
-                          onControllerReady={(controller) => {
-                            previewRefs.current[cam] = controller;
-                            controller.scrubToTimestamp(startTime);
-                          }}
-                          onClick={() => onSelectCamera(cam)}
-                        />
-                      </div>
+                        onClick={() => onSelectCamera(cam)}
+                      />
                     );
+
+                    if (mainCameraAspect == "tall") {
+                      return <div key={`${cam}-t`}>{preview}</div>;
+                    }
+
+                    return preview;
                   }
                   return null;
                 })}
