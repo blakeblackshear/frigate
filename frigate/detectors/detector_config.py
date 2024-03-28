@@ -140,6 +140,7 @@ class ModelConfig(BaseModel):
 class BaseDetectorConfig(BaseModel):
     # the type field must be defined in all subclasses
     type: str = Field(default="cpu", title="Detector Type")
+    queue: str = Field(default="default", title="Detection queue")
     model: Optional[ModelConfig] = Field(
         default=None, title="Detector specific model configuration."
     )

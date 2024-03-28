@@ -431,6 +431,7 @@ class DetectConfig(FrigateBaseModel):
     annotation_offset: int = Field(
         default=0, title="Milliseconds to offset detect annotations by."
     )
+    queue: str = Field(default="default", title="Detection queue to use.")
 
 
 class FilterConfig(FrigateBaseModel):
