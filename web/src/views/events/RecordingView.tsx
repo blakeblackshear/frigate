@@ -482,7 +482,9 @@ function Timeline({
           onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
         />
       ) : (
-        <div className="h-full flex flex-col gap-4 overflow-auto p-4 bg-secondary">
+        <div
+          className={`h-full grid grid-cols-1 gap-4 overflow-auto p-4 bg-secondary ${isDesktop ? "" : "sm:grid-cols-2"}`}
+        >
           {mainCameraReviewItems.map((review) => {
             if (review.severity == "significant_motion") {
               return;
