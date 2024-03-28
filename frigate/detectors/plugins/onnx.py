@@ -31,7 +31,6 @@ class ONNXDetector(DetectionApi):
             )
             raise
 
-
         path = detector_config.model.path
         logger.info(f"ONNX: loading {detector_config.model.path}")
         self.model = onnxruntime.InferenceSession(path)
@@ -45,4 +44,6 @@ class ONNXDetector(DetectionApi):
 
         tensor_output = self.model.run(None, {model_input_name: tensor_input})[0]
 
-        raise Exception("No models are currently supported via onnx. See the docs for more info.")
+        raise Exception(
+            "No models are currently supported via onnx. See the docs for more info."
+        )

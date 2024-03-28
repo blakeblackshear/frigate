@@ -98,7 +98,9 @@ class Rknn(DetectionApi):
                 "Error initializing rknn runtime. Do you run docker in privileged mode?"
             )
 
-        raise Exception("RKNN does not currently support any models. Please see the docs for more info.")
+        raise Exception(
+            "RKNN does not currently support any models. Please see the docs for more info."
+        )
 
     def __del__(self):
         self.rknn.release()

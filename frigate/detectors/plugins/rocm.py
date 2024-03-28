@@ -118,4 +118,6 @@ class ROCmDetector(DetectionApi):
             addr, shape=detector_result.get_shape().lens()
         )
 
-        raise Exception("No models are currently supported for rocm. See the docs for more info.")
+        raise Exception(
+            "No models are currently supported for rocm. See the docs for more info."
+        )

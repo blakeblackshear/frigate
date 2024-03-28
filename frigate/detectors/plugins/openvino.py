@@ -131,21 +131,3 @@ class OvDetector(DetectionApi):
                     object_detected[6], object_detected[5], object_detected[:4]
                 )
             return detections
-        elif self.ov_model_type == ModelTypeEnum.yolov5:
-            out_tensor = infer_request.get_output_tensor()
-            output_data = out_tensor.data[0]
-            # filter out lines with scores below threshold
-            conf_mask = (output_data[:, 4] >= 0.5).squeeze()
-            output_data = output_data[conf_mask]
-            # limit to top 20 scores, descending order
-            ordered = output_data[output_data[:, 4].argsort()[::-1]][:20]
-
-            detections = np.zeros((20, 6), np.float32)
-
-            for i, object_detected in enumerate(ordered):
-                detections[i] = self.process_yolo(
-                    np.argmax(object_detected[5:]),
-                    object_detected[4],
-                    object_detected[:4],
-                )
-            return detections
