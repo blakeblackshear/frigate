@@ -1,12 +1,4 @@
-import useDraggableElement from "@/hooks/use-draggable-element";
-import {
-  useEffect,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-  RefObject,
-} from "react";
+import { useEffect, useCallback, useMemo, useRef, RefObject } from "react";
 import MotionSegment from "./MotionSegment";
 import { useTimelineUtils } from "@/hooks/use-timeline-utils";
 import { MotionData, ReviewSegment, ReviewSeverity } from "@/types/review";
@@ -37,6 +29,7 @@ export type MotionReviewTimelineProps = {
   contentRef: RefObject<HTMLDivElement>;
   timelineRef?: RefObject<HTMLDivElement>;
   onHandlebarDraggingChange?: (isDragging: boolean) => void;
+  dense?: boolean;
 };
 
 export function MotionReviewTimeline({
@@ -62,110 +55,25 @@ export function MotionReviewTimeline({
   contentRef,
   timelineRef,
   onHandlebarDraggingChange,
+  dense = false,
 }: MotionReviewTimelineProps) {
-  const [isDragging, setIsDragging] = useState(false);
-  const [exportStartPosition, setExportStartPosition] = useState(0);
-  const [exportEndPosition, setExportEndPosition] = useState(0);
-
   const internalTimelineRef = useRef<HTMLDivElement>(null);
-  const handlebarRef = useRef<HTMLDivElement>(null);
-  const handlebarTimeRef = useRef<HTMLDivElement>(null);
-  const exportStartRef = useRef<HTMLDivElement>(null);
-  const exportStartTimeRef = useRef<HTMLDivElement>(null);
-  const exportEndRef = useRef<HTMLDivElement>(null);
-  const exportEndTimeRef = useRef<HTMLDivElement>(null);
+  const selectedTimelineRef = timelineRef || internalTimelineRef;
 
   const timelineDuration = useMemo(
     () => timelineStart - timelineEnd + 4 * segmentDuration,
     [timelineEnd, timelineStart, segmentDuration],
   );
 
-  const { alignStartDateToTimeline, alignEndDateToTimeline } = useTimelineUtils(
-    {
-      segmentDuration,
-      timelineDuration,
-    },
-  );
+  const { alignStartDateToTimeline } = useTimelineUtils({
+    segmentDuration,
+    timelineDuration,
+  });
 
   const timelineStartAligned = useMemo(
     () => alignStartDateToTimeline(timelineStart) + 2 * segmentDuration,
     [timelineStart, alignStartDateToTimeline, segmentDuration],
   );
-
-  const paddedExportStartTime = useMemo(() => {
-    if (exportStartTime) {
-      return alignStartDateToTimeline(exportStartTime) + segmentDuration;
-    }
-  }, [exportStartTime, segmentDuration, alignStartDateToTimeline]);
-
-  const paddedExportEndTime = useMemo(() => {
-    if (exportEndTime) {
-      return alignEndDateToTimeline(exportEndTime) - segmentDuration * 2;
-    }
-  }, [exportEndTime, segmentDuration, alignEndDateToTimeline]);
-
-  const {
-    handleMouseDown: handlebarMouseDown,
-    handleMouseUp: handlebarMouseUp,
-    handleMouseMove: handlebarMouseMove,
-  } = useDraggableElement({
-    contentRef,
-    timelineRef: timelineRef || internalTimelineRef,
-    draggableElementRef: handlebarRef,
-    segmentDuration,
-    showDraggableElement: showHandlebar,
-    draggableElementTime: handlebarTime,
-    setDraggableElementTime: setHandlebarTime,
-    initialScrollIntoViewOnly: onlyInitialHandlebarScroll,
-    timelineDuration,
-    timelineCollapsed: motionOnly,
-    timelineStartAligned,
-    isDragging,
-    setIsDragging,
-    draggableElementTimeRef: handlebarTimeRef,
-  });
-
-  const {
-    handleMouseDown: exportStartMouseDown,
-    handleMouseUp: exportStartMouseUp,
-    handleMouseMove: exportStartMouseMove,
-  } = useDraggableElement({
-    contentRef,
-    timelineRef: timelineRef || internalTimelineRef,
-    draggableElementRef: exportStartRef,
-    segmentDuration,
-    showDraggableElement: showExportHandles,
-    draggableElementTime: exportStartTime,
-    draggableElementLatestTime: paddedExportEndTime,
-    setDraggableElementTime: setExportStartTime,
-    timelineDuration,
-    timelineStartAligned,
-    isDragging,
-    setIsDragging,
-    draggableElementTimeRef: exportStartTimeRef,
-    setDraggableElementPosition: setExportStartPosition,
-  });
-
-  const {
-    handleMouseDown: exportEndMouseDown,
-    handleMouseUp: exportEndMouseUp,
-    handleMouseMove: exportEndMouseMove,
-  } = useDraggableElement({
-    contentRef,
-    timelineRef: timelineRef || internalTimelineRef,
-    draggableElementRef: exportEndRef,
-    segmentDuration,
-    showDraggableElement: showExportHandles,
-    draggableElementTime: exportEndTime,
-    draggableElementEarliestTime: paddedExportStartTime,
-    setDraggableElementTime: setExportEndTime,
-    timelineDuration,
-    timelineStartAligned,
-    isDragging,
-    setIsDragging,
-    draggableElementTimeRef: exportEndTimeRef,
-    setDraggableElementPosition: setExportEndPosition,
-  });
 
   // Generate segments for the timeline
   const generateSegments = useCallback(() => {
@@ -187,6 +95,7 @@ export function MotionReviewTimeline({
           minimapStartTime={minimapStartTime}
           minimapEndTime={minimapEndTime}
           setHandlebarTime={setHandlebarTime}
+          dense={dense}
         />
       );
     });
@@ -223,14 +132,7 @@ export function MotionReviewTimeline({
     ],
   );
 
-  useEffect(() => {
-    if (onHandlebarDraggingChange) {
-      onHandlebarDraggingChange(isDragging);
-    }
-  }, [isDragging, onHandlebarDraggingChange]);
-
   const segmentsObserver = useRef<IntersectionObserver | null>(null);
-  const selectedTimelineRef = timelineRef || internalTimelineRef;
   useEffect(() => {
     if (selectedTimelineRef.current && segments && isDesktop) {
       segmentsObserver.current = new IntersectionObserver(
@@ -268,29 +170,22 @@ export function MotionReviewTimeline({
 
   return (
     <ReviewTimeline
-      timelineRef={timelineRef || internalTimelineRef}
-      handlebarRef={handlebarRef}
-      handlebarTimeRef={handlebarTimeRef}
-      handlebarMouseMove={handlebarMouseMove}
-      handlebarMouseUp={handlebarMouseUp}
-      handlebarMouseDown={handlebarMouseDown}
+      timelineRef={selectedTimelineRef}
+      contentRef={contentRef}
       segmentDuration={segmentDuration}
       timelineDuration={timelineDuration}
+      timelineStartAligned={timelineStartAligned}
       showHandlebar={showHandlebar}
-      isDragging={isDragging}
-      exportStartMouseMove={exportStartMouseMove}
-      exportStartMouseUp={exportStartMouseUp}
-      exportStartMouseDown={exportStartMouseDown}
-      exportEndMouseMove={exportEndMouseMove}
-      exportEndMouseUp={exportEndMouseUp}
-      exportEndMouseDown={exportEndMouseDown}
+      onHandlebarDraggingChange={onHandlebarDraggingChange}
+      onlyInitialHandlebarScroll={onlyInitialHandlebarScroll}
       showExportHandles={showExportHandles}
-      exportStartRef={exportStartRef}
-      exportStartTimeRef={exportStartTimeRef}
-      exportEndRef={exportEndRef}
-      exportEndTimeRef={exportEndTimeRef}
-      exportStartPosition={exportStartPosition}
-      exportEndPosition={exportEndPosition}
+      handlebarTime={handlebarTime}
+      setHandlebarTime={setHandlebarTime}
+      exportStartTime={exportStartTime}
+      exportEndTime={exportEndTime}
+      setExportStartTime={setExportStartTime}
+      setExportEndTime={setExportEndTime}
+      dense={dense}
     >
       {segments}
     </ReviewTimeline>
