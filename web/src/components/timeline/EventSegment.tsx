@@ -30,6 +30,7 @@ type EventSegmentProps = {
   severityType: ReviewSeverity;
   contentRef: RefObject<HTMLDivElement>;
   setHandlebarTime?: React.Dispatch<React.SetStateAction<number>>;
+  dense: boolean;
 };
 
 export function EventSegment({
@@ -43,6 +44,7 @@ export function EventSegment({
   severityType,
   contentRef,
   setHandlebarTime,
+  dense,
 }: EventSegmentProps) {
   const {
     getSeverity,
@@ -212,6 +214,7 @@ export function EventSegment({
           alignedMinimapStartTime={alignedMinimapStartTime}
           alignedMinimapEndTime={alignedMinimapEndTime}
           firstMinimapSegmentRef={firstMinimapSegmentRef}
+          dense={dense}
         />
       )}
 

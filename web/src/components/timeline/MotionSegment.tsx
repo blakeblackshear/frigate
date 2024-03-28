@@ -19,6 +19,7 @@ type MotionSegmentProps = {
   minimapStartTime?: number;
   minimapEndTime?: number;
   setHandlebarTime?: React.Dispatch<React.SetStateAction<number>>;
+  dense: boolean;
 };
 
 export function MotionSegment({
@@ -32,6 +33,7 @@ export function MotionSegment({
   minimapStartTime,
   minimapEndTime,
   setHandlebarTime,
+  dense,
 }: MotionSegmentProps) {
   const severityType = "all";
   const {
@@ -203,6 +205,7 @@ export function MotionSegment({
                   alignedMinimapStartTime={alignedMinimapStartTime}
                   alignedMinimapEndTime={alignedMinimapEndTime}
                   firstMinimapSegmentRef={firstMinimapSegmentRef}
+                  dense={dense}
                 />
               )}
 

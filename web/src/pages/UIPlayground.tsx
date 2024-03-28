@@ -27,6 +27,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
 import SummaryTimeline from "@/components/timeline/SummaryTimeline";
+import { isMobile } from "react-device-detect";
 
 // Color data
 const colors = [
@@ -384,6 +385,7 @@ function UIPlayground() {
                 motion_events={mockMotionData}
                 severityType={"alert"} // choose the severity type for the middle line - all other severity types are to the right
                 contentRef={contentRef} // optional content ref where previews are, can be used for observing/scrolling later
+                dense={isMobile} // dense will produce a smaller handlebar and only minute resolution on timestamps
               />
             )}
             {isEventsReviewTimeline && (
@@ -408,6 +410,7 @@ function UIPlayground() {
                 severityType={"alert"} // choose the severity type for the middle line - all other severity types are to the right
                 contentRef={contentRef} // optional content ref where previews are, can be used for observing/scrolling later
                 timelineRef={reviewTimelineRef} // save a ref to this timeline to connect with the summary timeline
+                dense // dense will produce a smaller handlebar and only minute resolution on timestamps
               />
             )}
           </div>

@@ -1,11 +1,10 @@
-import { isDesktop } from "react-device-detect";
-
 type MinimapSegmentProps = {
   isFirstSegmentInMinimap: boolean;
   isLastSegmentInMinimap: boolean;
   alignedMinimapStartTime: number;
   alignedMinimapEndTime: number;
   firstMinimapSegmentRef: React.MutableRefObject<HTMLDivElement | null>;
+  dense: boolean;
 };
 
 type TickSegmentProps = {
@@ -27,6 +26,7 @@ export function MinimapBounds({
   alignedMinimapStartTime,
   alignedMinimapEndTime,
   firstMinimapSegmentRef,
+  dense,
 }: MinimapSegmentProps) {
   return (
     <>
@@ -38,7 +38,7 @@ export function MinimapBounds({
           {new Date(alignedMinimapStartTime * 1000).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
-            ...(isDesktop && { month: "short", day: "2-digit" }),
+            ...(!dense && { month: "short", day: "2-digit" }),
           })}
         </div>
       )}
@@ -48,7 +48,7 @@ export function MinimapBounds({
           {new Date(alignedMinimapEndTime * 1000).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
-            ...(isDesktop && { month: "short", day: "2-digit" }),
+            ...(!dense && { month: "short", day: "2-digit" }),
           })}
         </div>
       )}

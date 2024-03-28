@@ -580,6 +580,7 @@ function DetectionReview({
             severityType={severity}
             contentRef={contentRef}
             timelineRef={reviewTimelineRef}
+            dense={isMobile}
           />
         </div>
         <div className="w-[10px]">
@@ -864,6 +865,7 @@ function MotionReview({
 
             setScrubbing(scrubbing);
           }}
+          dense={isMobile}
         />
       </div>
 

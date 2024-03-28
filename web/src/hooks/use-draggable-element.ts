@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { isDesktop, isMobile } from "react-device-detect";
+import { isMobile } from "react-device-detect";
 import scrollIntoView from "scroll-into-view-if-needed";
 import { useTimelineUtils } from "./use-timeline-utils";
 
@@ -13,6 +13,7 @@ type DraggableElementProps = {
   draggableElementEarliestTime?: number;
   draggableElementLatestTime?: number;
   setDraggableElementTime?: React.Dispatch<React.SetStateAction<number>>;
+  alignSetTimeToSegment?: boolean;
   initialScrollIntoViewOnly?: boolean;
   draggableElementTimeRef: React.MutableRefObject<HTMLDivElement | null>;
   timelineDuration: number;
@@ -21,6 +22,7 @@ type DraggableElementProps = {
   isDragging: boolean;
   setIsDragging: React.Dispatch<React.SetStateAction<boolean>>;
   setDraggableElementPosition?: React.Dispatch<React.SetStateAction<number>>;
+  dense: boolean;
 };
 
 function useDraggableElement({
@@ -33,6 +35,7 @@ function useDraggableElement({
   draggableElementEarliestTime,
   draggableElementLatestTime,
   setDraggableElementTime,
+  alignSetTimeToSegment = false,
   initialScrollIntoViewOnly,
   draggableElementTimeRef,
   timelineDuration,
@@ -41,38 +44,39 @@ function useDraggableElement({
   isDragging,
   setIsDragging,
   setDraggableElementPosition,
+  dense,
 }: DraggableElementProps) {
-  const segmentHeight = 8;
   const [clientYPosition, setClientYPosition] = useState<number | null>(null);
   const [initialClickAdjustment, setInitialClickAdjustment] = useState(0);
   const [elementScrollIntoView, setElementScrollIntoView] = useState(true);
   const [scrollEdgeSize, setScrollEdgeSize] = useState<number>();
   const [fullTimelineHeight, setFullTimelineHeight] = useState<number>();
   const [segments, setSegments] = useState<HTMLDivElement[]>([]);
-  const { alignStartDateToTimeline, getCumulativeScrollTop } = useTimelineUtils(
-    {
+  const { alignStartDateToTimeline, getCumulativeScrollTop, segmentHeight } =
+    useTimelineUtils({
       segmentDuration: segmentDuration,
       timelineDuration: timelineDuration,
       timelineRef,
-    },
-  );
+    });
 
   const draggingAtTopEdge = useMemo(() => {
     if (clientYPosition && timelineRef.current && scrollEdgeSize) {
+      const timelineRect = timelineRef.current.getBoundingClientRect();
+      const timelineTopAbsolute = timelineRect.top;
       return (
-        clientYPosition - timelineRef.current.offsetTop < scrollEdgeSize &&
-        isDragging
+        clientYPosition - timelineTopAbsolute < scrollEdgeSize && isDragging
       );
     }
   }, [clientYPosition, timelineRef, isDragging, scrollEdgeSize]);
 
   const draggingAtBottomEdge = useMemo(() => {
     if (clientYPosition && timelineRef.current && scrollEdgeSize) {
+      const timelineRect = timelineRef.current.getBoundingClientRect();
+      const timelineTopAbsolute = timelineRect.top;
+      const timelineHeightAbsolute = timelineRect.height;
       return (
-        clientYPosition >
-          timelineRef.current.clientHeight +
-            timelineRef.current.offsetTop -
-            scrollEdgeSize && isDragging
+        timelineTopAbsolute + timelineHeightAbsolute - clientYPosition <
+          scrollEdgeSize && isDragging
       );
     }
   }, [clientYPosition, timelineRef, isDragging, scrollEdgeSize]);
@@ -141,7 +145,7 @@ function useDraggableElement({
     (time: number) => {
       return ((timelineStartAligned - time) / segmentDuration) * segmentHeight;
     },
-    [segmentDuration, timelineStartAligned],
+    [segmentDuration, timelineStartAligned, segmentHeight],
   );
 
   const updateDraggableElementPosition = useCallback(
@@ -165,7 +169,7 @@ function useDraggableElement({
             ).toLocaleTimeString([], {
               hour: "2-digit",
               minute: "2-digit",
-              ...(segmentDuration < 60 && isDesktop && { second: "2-digit" }),
+              ...(segmentDuration < 60 && !dense && { second: "2-digit" }),
             });
             if (scrollTimeline) {
               scrollIntoView(thumb, {
@@ -188,6 +192,7 @@ function useDraggableElement({
       draggableElementRef,
       setDraggableElementTime,
       setDraggableElementPosition,
+      dense,
     ],
   );
 
@@ -322,9 +327,13 @@ function useDraggableElement({
         );
 
         if (setDraggableElementTime) {
-          setDraggableElementTime(
-            targetSegmentId + segmentDuration * (offset / segmentHeight),
-          );
+          if (alignSetTimeToSegment) {
+            setDraggableElementTime(targetSegmentId);
+          } else {
+            setDraggableElementTime(
+              targetSegmentId + segmentDuration * (offset / segmentHeight),
+            );
+          }
         }
 
         if (draggingAtTopEdge || draggingAtBottomEdge) {
