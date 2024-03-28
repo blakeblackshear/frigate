@@ -46,20 +46,18 @@ function useDraggableElement({
   setDraggableElementPosition,
   dense,
 }: DraggableElementProps) {
-  const segmentHeight = 8;
   const [clientYPosition, setClientYPosition] = useState<number | null>(null);
   const [initialClickAdjustment, setInitialClickAdjustment] = useState(0);
   const [elementScrollIntoView, setElementScrollIntoView] = useState(true);
   const [scrollEdgeSize, setScrollEdgeSize] = useState<number>();
   const [fullTimelineHeight, setFullTimelineHeight] = useState<number>();
   const [segments, setSegments] = useState<HTMLDivElement[]>([]);
-  const { alignStartDateToTimeline, getCumulativeScrollTop } = useTimelineUtils(
-    {
+  const { alignStartDateToTimeline, getCumulativeScrollTop, segmentHeight } =
+    useTimelineUtils({
       segmentDuration: segmentDuration,
       timelineDuration: timelineDuration,
       timelineRef,
-    },
-  );
+    });
 
   const draggingAtTopEdge = useMemo(() => {
     if (clientYPosition && timelineRef.current && scrollEdgeSize) {
@@ -147,7 +145,7 @@ function useDraggableElement({
     (time: number) => {
       return ((timelineStartAligned - time) / segmentDuration) * segmentHeight;
     },
-    [segmentDuration, timelineStartAligned],
+    [segmentDuration, timelineStartAligned, segmentHeight],
   );
 
   const updateDraggableElementPosition = useCallback(

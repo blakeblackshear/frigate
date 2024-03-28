@@ -11,6 +11,8 @@ export function useTimelineUtils({
   timelineDuration,
   timelineRef,
 }: TimelineUtilsProps) {
+  const segmentHeight = 8;
+
   const alignEndDateToTimeline = useCallback(
     (time: number): number => {
       const remainder = time % segmentDuration;
@@ -42,8 +44,6 @@ export function useTimelineUtils({
     if (timelineRef?.current && timelineDuration) {
       const { clientHeight: visibleTimelineHeight } = timelineRef.current;
 
-      const segmentHeight = 8;
-
       const visibleTime =
         (visibleTimelineHeight / segmentHeight) * segmentDuration;
 
@@ -56,5 +56,6 @@ export function useTimelineUtils({
     alignStartDateToTimeline,
     getCumulativeScrollTop,
     getVisibleTimelineDuration,
+    segmentHeight,
   };
 }

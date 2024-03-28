@@ -69,18 +69,15 @@ export function ReviewTimeline({
   );
   const exportSectionRef = useRef<HTMLDivElement>(null);
 
-  const segmentHeight = 8;
-
   const [draggableElementType, setDraggableElementType] =
     useState<DraggableElement>();
 
-  const { alignStartDateToTimeline, alignEndDateToTimeline } = useTimelineUtils(
-    {
+  const { alignStartDateToTimeline, alignEndDateToTimeline, segmentHeight } =
+    useTimelineUtils({
       segmentDuration,
       timelineDuration,
       timelineRef,
-    },
-  );
+    });
 
   const paddedExportStartTime = useMemo(() => {
     if (exportStartTime) {
