@@ -13,19 +13,35 @@ import {
 import { ReviewFilter, ReviewSummary } from "@/types/review";
 import { getEndOfDayTimestamp } from "@/utils/dateUtil";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
-import { FaCalendarAlt, FaFilter, FaRunning, FaVideo } from "react-icons/fa";
-import { isMobile } from "react-device-detect";
+import {
+  FaCalendarAlt,
+  FaCheckCircle,
+  FaFilter,
+  FaRunning,
+  FaVideo,
+} from "react-icons/fa";
+import { isDesktop, isMobile } from "react-device-detect";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
 import FilterCheckBox from "./FilterCheckBox";
 import ReviewActivityCalendar from "../overlay/ReviewActivityCalendar";
+import MobileReviewSettingsDrawer, {
+  DrawerFeatures,
+} from "../overlay/MobileReviewSettingsDrawer";
 
 const ATTRIBUTES = ["amazon", "face", "fedex", "license_plate", "ups"];
-const REVIEW_FILTERS = ["cameras", "date", "general", "motionOnly"] as const;
+const REVIEW_FILTERS = [
+  "cameras",
+  "reviewed",
+  "date",
+  "general",
+  "motionOnly",
+] as const;
 type ReviewFilters = (typeof REVIEW_FILTERS)[number];
 const DEFAULT_REVIEW_FILTERS: ReviewFilters[] = [
   "cameras",
+  "reviewed",
   "date",
   "general",
   "motionOnly",
@@ -94,6 +110,20 @@ export default function ReviewFilterGroup({
     );
   }, [config]);
 
+  const mobileSettingsFeatures = useMemo<DrawerFeatures[]>(() => {
+    const features: DrawerFeatures[] = [];
+
+    if (filters.includes("date")) {
+      features.push("calendar");
+    }
+
+    if (filters.includes("general")) {
+      features.push("filter");
+    }
+
+    return features;
+  }, [filters]);
+
   // handle updating filters
 
   const onUpdateSelectedDay = useCallback(
@@ -119,7 +149,15 @@ export default function ReviewFilterGroup({
           }}
         />
       )}
-      {filters.includes("date") && (
+      {filters.includes("reviewed") && (
+        <ShowReviewFilter
+          showReviewed={filter?.showReviewed || 0}
+          setShowReviewed={(reviewed) =>
+            onUpdateFilter({ ...filter, showReviewed: reviewed })
+          }
+        />
+      )}
+      {isDesktop && filters.includes("date") && (
         <CalendarFilterButton
           reviewSummary={reviewSummary}
           day={
@@ -136,17 +174,27 @@ export default function ReviewFilterGroup({
           setMotionOnly={setMotionOnly}
         />
       )}
-      {filters.includes("general") && (
+      {isDesktop && filters.includes("general") && (
         <GeneralFilterButton
           allLabels={filterValues.labels}
           selectedLabels={filter?.labels}
           updateLabelFilter={(newLabels) => {
             onUpdateFilter({ ...filter, labels: newLabels });
           }}
-          showReviewed={filter?.showReviewed || 0}
-          setShowReviewed={(reviewed) =>
-            onUpdateFilter({ ...filter, showReviewed: reviewed })
-          }
+        />
+      )}
+      {isMobile && mobileSettingsFeatures.length > 0 && (
+        <MobileReviewSettingsDrawer
+          features={mobileSettingsFeatures}
+          filter={filter}
+          onUpdateFilter={onUpdateFilter}
+          // not applicable as exports are not used
+          camera=""
+          latestTime={0}
+          currentTime={0}
+          mode="none"
+          setMode={() => {}}
+          setRange={() => {}}
         />
       )}
     </div>
@@ -307,6 +355,41 @@ function CamerasFilterButton({
   );
 }
 
+type ShowReviewedFilterProps = {
+  showReviewed?: 0 | 1;
+  setShowReviewed: (reviewed?: 0 | 1) => void;
+};
+function ShowReviewFilter({
+  showReviewed,
+  setShowReviewed,
+}: ShowReviewedFilterProps) {
+  return (
+    <>
+      <div className="hidden h-9 md:flex p-2 justify-start items-center text-sm bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-md cursor-pointer">
+        <Switch
+          id="reviewed"
+          checked={showReviewed == 1}
+          onCheckedChange={() => setShowReviewed(showReviewed == 0 ? 1 : 0)}
+        />
+        <Label className="ml-2 cursor-pointer" htmlFor="reviewed">
+          Show Reviewed
+        </Label>
+      </div>
+
+      <Button
+        className="block md:hidden ml-1"
+        size="sm"
+        variant="secondary"
+        onClick={() => setShowReviewed(showReviewed == 0 ? 1 : 0)}
+      >
+        <FaCheckCircle
+          className={`${showReviewed == 1 ? "text-selected" : "text-muted-foreground"}`}
+        />
+      </Button>
+    </>
+  );
+}
+
 type CalendarFilterButtonProps = {
   reviewSummary?: ReviewSummary;
   day?: Date;
@@ -371,19 +454,14 @@ function CalendarFilterButton({
 type GeneralFilterButtonProps = {
   allLabels: string[];
   selectedLabels: string[] | undefined;
-  showReviewed?: 0 | 1;
   updateLabelFilter: (labels: string[] | undefined) => void;
-  setShowReviewed: (reviewed?: 0 | 1) => void;
 };
 function GeneralFilterButton({
   allLabels,
   selectedLabels,
-  showReviewed,
   updateLabelFilter,
-  setShowReviewed,
 }: GeneralFilterButtonProps) {
   const [open, setOpen] = useState(false);
-  const [reviewed, setReviewed] = useState(showReviewed ?? 0);
   const [currentLabels, setCurrentLabels] = useState<string[] | undefined>(
     selectedLabels,
   );
@@ -399,12 +477,8 @@ function GeneralFilterButton({
       allLabels={allLabels}
       selectedLabels={selectedLabels}
       currentLabels={currentLabels}
-      showReviewed={showReviewed}
-      reviewed={reviewed}
       updateLabelFilter={updateLabelFilter}
-      setShowReviewed={setShowReviewed}
       setCurrentLabels={setCurrentLabels}
-      setReviewed={setReviewed}
       onClose={() => setOpen(false)}
     />
   );
@@ -415,7 +489,6 @@ function GeneralFilterButton({
         open={open}
         onOpenChange={(open) => {
           if (!open) {
-            setReviewed(showReviewed ?? 0);
             setCurrentLabels(selectedLabels);
           }
 
@@ -435,7 +508,6 @@ function GeneralFilterButton({
       open={open}
       onOpenChange={(open) => {
         if (!open) {
-          setReviewed(showReviewed ?? 0);
           setCurrentLabels(selectedLabels);
         }
 
@@ -443,7 +515,7 @@ function GeneralFilterButton({
       }}
     >
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-      <PopoverContent side="left">{content}</PopoverContent>
+      <PopoverContent>{content}</PopoverContent>
     </Popover>
   );
 }
@@ -452,87 +524,84 @@ type GeneralFilterContentProps = {
   allLabels: string[];
   selectedLabels: string[] | undefined;
   currentLabels: string[] | undefined;
-  showReviewed?: 0 | 1;
-  reviewed: 0 | 1;
   updateLabelFilter: (labels: string[] | undefined) => void;
   setCurrentLabels: (labels: string[] | undefined) => void;
-  setShowReviewed: (reviewed?: 0 | 1) => void;
-  setReviewed: (reviewed: 0 | 1) => void;
   onClose: () => void;
 };
 export function GeneralFilterContent({
   allLabels,
   selectedLabels,
   currentLabels,
-  showReviewed,
-  reviewed,
   updateLabelFilter,
   setCurrentLabels,
-  setShowReviewed,
-  setReviewed,
   onClose,
 }: GeneralFilterContentProps) {
   return (
     <>
-      <div className="flex p-2 justify-start items-center">
-        <Switch
-          id="reviewed"
-          checked={reviewed == 1}
-          onCheckedChange={() => setReviewed(reviewed == 0 ? 1 : 0)}
-        />
-        <Label className="ml-2" htmlFor="reviewed">
-          Show Reviewed
-        </Label>
-      </div>
-      <DropdownMenuSeparator />
-      <DropdownMenuLabel className="flex justify-center items-center">
-        Filter Labels
-      </DropdownMenuLabel>
-      <DropdownMenuSeparator />
       <div className="h-auto overflow-y-auto overflow-x-hidden">
-        <FilterCheckBox
-          isChecked={currentLabels == undefined}
-          label="All Labels"
-          onCheckedChange={(isChecked) => {
-            if (isChecked) {
-              setCurrentLabels(undefined);
-            }
-          }}
-        />
-        <DropdownMenuSeparator />
-        {allLabels.map((item) => (
-          <FilterCheckBox
-            key={item}
-            isChecked={currentLabels?.includes(item) ?? false}
-            label={item.replaceAll("_", " ")}
+        <div className="flex justify-between items-center my-2.5">
+          <Label
+            className="mx-2 text-secondary-foreground cursor-pointer"
+            htmlFor="allLabels"
+          >
+            All Labels
+          </Label>
+          <Switch
+            className="ml-1"
+            id="allLabels"
+            checked={currentLabels == undefined}
             onCheckedChange={(isChecked) => {
               if (isChecked) {
-                const updatedLabels = currentLabels ? [...currentLabels] : [];
-
-                updatedLabels.push(item);
-                setCurrentLabels(updatedLabels);
-              } else {
-                const updatedLabels = currentLabels ? [...currentLabels] : [];
-
-                // can not deselect the last item
-                if (updatedLabels.length > 1) {
-                  updatedLabels.splice(updatedLabels.indexOf(item), 1);
-                  setCurrentLabels(updatedLabels);
-                }
+                setCurrentLabels(undefined);
               }
             }}
           />
-        ))}
+        </div>
+        <DropdownMenuSeparator />
+        <div className="my-2.5 flex flex-col gap-2.5">
+          {allLabels.map((item) => (
+            <div className="flex justify-between items-center">
+              <Label
+                className="w-full mx-2 text-secondary-foreground capitalize cursor-pointer"
+                htmlFor={item}
+              >
+                {item.replaceAll("_", " ")}
+              </Label>
+              <Switch
+                key={item}
+                className="ml-1"
+                id={item}
+                checked={currentLabels?.includes(item) ?? false}
+                onCheckedChange={(isChecked) => {
+                  if (isChecked) {
+                    const updatedLabels = currentLabels
+                      ? [...currentLabels]
+                      : [];
+
+                    updatedLabels.push(item);
+                    setCurrentLabels(updatedLabels);
+                  } else {
+                    const updatedLabels = currentLabels
+                      ? [...currentLabels]
+                      : [];
+
+                    // can not deselect the last item
+                    if (updatedLabels.length > 1) {
+                      updatedLabels.splice(updatedLabels.indexOf(item), 1);
+                      setCurrentLabels(updatedLabels);
+                    }
+                  }
+                }}
+              />
+            </div>
+          ))}
+        </div>
       </div>
       <DropdownMenuSeparator />
       <div className="p-2 flex justify-evenly items-center">
         <Button
           variant="select"
           onClick={() => {
-            if (reviewed != showReviewed) {
-              setShowReviewed(reviewed);
-            }
-
             if (selectedLabels != currentLabels) {
               updateLabelFilter(currentLabels);
             }
@@ -545,8 +614,6 @@ export function GeneralFilterContent({
         <Button
           variant="secondary"
           onClick={() => {
-            setReviewed(0);
-            setShowReviewed(undefined);
             setCurrentLabels(undefined);
             updateLabelFilter(undefined);
           }}
@@ -568,7 +635,7 @@ function ShowMotionOnlyButton({
 }: ShowMotionOnlyButtonProps) {
   return (
     <>
-      <div className="hidden md:inline-flex items-center justify-center whitespace-nowrap text-sm bg-secondary text-secondary-foreground h-9 rounded-md md:px-3 md:mx-1">
+      <div className="hidden md:inline-flex items-center justify-center whitespace-nowrap text-sm bg-secondary hover:bg-secondary/80 text-secondary-foreground h-9 rounded-md px-3 mx-1 cursor-pointer">
         <Switch
           className="ml-1"
           id="collapse-motion"
@@ -578,7 +645,7 @@ function ShowMotionOnlyButton({
           }}
         />
         <Label
-          className="mx-2 text-secondary-foreground"
+          className="mx-2 text-secondary-foreground cursor-pointer"
           htmlFor="collapse-motion"
         >
           Motion only

@@ -257,7 +257,7 @@ export default function EventView({
             filters={
               severity == "significant_motion"
                 ? ["cameras", "date", "motionOnly"]
-                : ["cameras", "date", "general"]
+                : ["cameras", "reviewed", "date", "general"]
             }
             reviewSummary={reviewSummary}
             filter={filter}
