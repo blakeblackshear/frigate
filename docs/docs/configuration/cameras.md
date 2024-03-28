@@ -94,3 +94,23 @@ This list of working and non-working PTZ cameras is based on user feedback.
 | Tapo C210                |      ❌      |      ❌      | Incomplete ONVIF support                                                                                                                        |
 | Uniview IPC672LR-AX4DUPK |      ✅      |      ❌      | Firmware says FOV relative movement is supported, but camera doesn't actually move when sending ONVIF commands                                  |
 | Vikylin PTZ-2804X-I2     |      ❌      |      ❌      | Incomplete ONVIF support                                                                                                                        |
+
+## Setting up camera groups
+
+:::tip
+
+It is recommended to set up camera groups using the UI.
+
+:::
+
+Cameras can be grouped together and assigned a name and icon, this allows them to be reviewed and filtered together. There will always be the default group for all cameras.
+
+```yaml
+camera_groups:
+  front:
+    cameras:
+      - driveway_cam
+      - garage_cam
+    icon: car
+    order: 0
+```
