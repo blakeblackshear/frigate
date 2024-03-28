@@ -259,7 +259,13 @@ export function RecordingView({
               latestTime={timeRange.before}
               mode={exportMode}
               range={exportRange}
-              setRange={setExportRange}
+              setRange={(range) => {
+                setExportRange(range);
+
+                if (range != undefined) {
+                  mainControllerRef.current?.pause();
+                }
+              }}
               setMode={setExportMode}
             />
           )}
