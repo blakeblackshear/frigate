@@ -230,7 +230,7 @@ export function RecordingView({
       return "w-full aspect-wide";
     } else if (mainCameraAspect == "tall") {
       if (isDesktop) {
-        return "h-full aspect-tall flex flex-col justify-center";
+        return "size-full aspect-tall flex flex-col justify-center";
       } else {
         return "size-full";
       }
@@ -240,7 +240,7 @@ export function RecordingView({
   }, [mainCameraAspect]);
 
   return (
-    <div ref={contentRef} className="size-full flex flex-col">
+    <div ref={contentRef} className="size-full pt-2 flex flex-col">
       <Toaster />
       <div
         className={`w-full h-11 px-2 relative flex items-center justify-between`}
@@ -338,17 +338,17 @@ export function RecordingView({
       </div>
 
       <div
-        className={`h-full flex my-2 justify-center overflow-hidden ${isDesktop ? "" : "flex-col gap-2"}`}
+        className={`h-full flex justify-center overflow-hidden ${isDesktop ? "" : "flex-col gap-2"}`}
       >
         <div className="flex flex-1 flex-wrap">
           <div
-            className={`size-full flex px-2 items-center ${mainCameraAspect == "tall" ? "flex-row justify-evenly" : "flex-col justify-center"}`}
+            className={`size-full flex px-4 items-center ${mainCameraAspect == "tall" ? "flex-row justify-evenly" : "flex-col justify-center gap-2"}`}
           >
             <div
               key={mainCamera}
               className={
                 isDesktop
-                  ? `flex justify-center mb-5 ${mainCameraAspect == "tall" ? "h-[90%]" : mainCameraAspect == "wide" ? "w-full" : "w-[78%]"}`
+                  ? `flex justify-center ${mainCameraAspect == "tall" ? "h-[90%]" : mainCameraAspect == "wide" ? "w-full" : "w-[78%]"}`
                   : `w-full ${mainCameraAspect == "wide" ? "aspect-wide" : "aspect-video"}`
               }
               style={{
@@ -491,7 +491,7 @@ function Timeline({
     <div
       className={`${
         isDesktop
-          ? `${timelineType == "timeline" ? "w-[100px]" : "w-60"} mt-2 overflow-y-auto no-scrollbar`
+          ? `${timelineType == "timeline" ? "w-[100px]" : "w-60"} overflow-y-auto no-scrollbar`
           : "flex-grow overflow-hidden"
       } relative`}
     >

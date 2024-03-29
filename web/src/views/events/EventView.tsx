@@ -205,7 +205,7 @@ export default function EventView({
   }
 
   return (
-    <div className="flex flex-col size-full">
+    <div className="py-2 flex flex-col size-full">
       <div className="h-11 px-2 relative flex justify-between items-center">
         {isMobile && (
           <Logo className="absolute inset-x-1/2 -translate-x-1/2 h-8" />
@@ -492,7 +492,7 @@ function DetectionReview({
     <>
       <div
         ref={contentRef}
-        className="mt-2 flex flex-1 flex-wrap content-start gap-2 md:gap-4 overflow-y-auto no-scrollbar"
+        className="flex flex-1 flex-wrap content-start gap-2 md:gap-4 overflow-y-auto no-scrollbar"
       >
         {filter?.before == undefined && (
           <NewReviewData

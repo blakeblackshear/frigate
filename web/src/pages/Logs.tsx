@@ -53,7 +53,7 @@ function Logs() {
   );
 
   return (
-    <div className="size-full flex flex-col pr-2">
+    <div className="size-full p-2 flex flex-col">
       <div className="flex justify-between items-center">
         <ToggleGroup
           className="*:px-3 *:py-4 *:rounded-2xl"
