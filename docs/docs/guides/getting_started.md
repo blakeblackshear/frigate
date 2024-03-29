@@ -165,7 +165,7 @@ cameras:
 
 ### Step 2: Start Frigate
 
-At this point you should be able to start Frigate and see the the video feed in the UI.
+At this point you should be able to start Frigate and see the video feed in the UI.
 
 If you get an error image from the camera, this means ffmpeg was not able to get the video feed from your camera. Check the logs for error messages from ffmpeg. The default ffmpeg arguments are designed to work with H264 RTSP cameras that support TCP connections.
 
