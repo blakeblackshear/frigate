@@ -30,7 +30,6 @@ import MobileReviewSettingsDrawer, {
   DrawerFeatures,
 } from "../overlay/MobileReviewSettingsDrawer";
 
-const ATTRIBUTES = ["amazon", "face", "fedex", "license_plate", "ups"];
 const REVIEW_FILTERS = [
   "cameras",
   "reviewed",
