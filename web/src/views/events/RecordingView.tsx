@@ -340,16 +340,16 @@ export function RecordingView({
       <div
         className={`h-full flex justify-center overflow-hidden ${isDesktop ? "" : "flex-col gap-2"}`}
       >
-        <div className="flex flex-1 flex-wrap">
+        <div className={`${isDesktop ? "w-[80%]" : ""} flex flex-1 flex-wrap`}>
           <div
-            className={`size-full flex px-4 items-center ${mainCameraAspect == "tall" ? "flex-row justify-evenly" : "flex-col justify-center gap-2"}`}
+            className={`size-full flex items-center ${mainCameraAspect == "tall" ? "flex-row justify-evenly" : "flex-col justify-center gap-2"}`}
           >
             <div
               key={mainCamera}
               className={
                 isDesktop
-                  ? `flex justify-center ${mainCameraAspect == "tall" ? "h-[90%]" : mainCameraAspect == "wide" ? "w-full" : "w-[78%]"}`
-                  : `w-full ${mainCameraAspect == "wide" ? "aspect-wide" : "aspect-video"}`
+                  ? `${mainCameraAspect == "tall" ? "h-[90%]" : mainCameraAspect == "wide" ? "w-full" : "w-[78%]"} px-4 flex justify-center`
+                  : `w-full pt-2 ${mainCameraAspect == "wide" ? "aspect-wide" : "aspect-video"}`
               }
               style={{
                 aspectRatio: isDesktop
