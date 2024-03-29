@@ -9,7 +9,7 @@ import { useApiHost } from "@/api";
 import { isCurrentHour } from "@/utils/dateUtil";
 import { ReviewSegment } from "@/types/review";
 import { Slider } from "../ui/slider-no-thumb";
-import { getIconForLabel, getIconForSubLabel } from "@/utils/iconUtil";
+import { getIconForLabel } from "@/utils/iconUtil";
 import TimeAgo from "../dynamic/TimeAgo";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";

@@ -2,7 +2,7 @@ import { baseUrl } from "@/api/baseUrl";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { ReviewSegment } from "@/types/review";
-import { getIconForLabel, getIconForSubLabel } from "@/utils/iconUtil";
+import { getIconForLabel } from "@/utils/iconUtil";
 import { isSafari } from "react-device-detect";
 import useSWR from "swr";
 import TimeAgo from "../dynamic/TimeAgo";
