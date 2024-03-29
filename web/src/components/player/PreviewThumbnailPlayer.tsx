@@ -227,9 +227,6 @@ export default function PreviewThumbnailPlayer({
                         {review.data.audio.map((audio) => {
                           return getIconForLabel(audio, "size-3 text-white");
                         })}
-                        {review.data.sub_labels?.map((sub) => {
-                          return getIconForSubLabel(sub, "size-3 text-white");
-                        })}
                       </Chip>
                     </>
                   )}
