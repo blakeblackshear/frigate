@@ -129,7 +129,7 @@ export default function LiveBirdseyeView() {
           {!fullscreen ? (
             <Button
               className={`rounded-lg flex items-center gap-2 ${isMobile ? "ml-2" : "ml-0"}`}
-              size={isMobile ? "icon" : "default"}
+              size={isMobile ? "icon" : "sm"}
               onClick={() => navigate(-1)}
             >
               <IoMdArrowBack className="size-5" />

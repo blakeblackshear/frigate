@@ -217,7 +217,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
           {!fullscreen ? (
             <Button
               className={`rounded-lg ${isMobile ? "ml-2" : "ml-0"}`}
-              size={isMobile ? "icon" : "default"}
+              size={isMobile ? "icon" : "sm"}
               onClick={() => navigate(-1)}
             >
               <IoMdArrowBack className="size-5 lg:mr-[10px]" />
