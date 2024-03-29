@@ -177,8 +177,8 @@ class ReviewSegmentMaintainer(threading.Thread):
             for object in active_objects:
                 if not object["sub_label"]:
                     segment.detections[object["id"]] = object["label"]
-                elif object["sub_label"] in ALL_ATTRIBUTE_LABELS:
-                    segment.detections[object["id"]] = object["sub_label"]
+                elif object["sub_label"][0] in ALL_ATTRIBUTE_LABELS:
+                    segment.detections[object["id"]] = object["sub_label"][0]
                 else:
                     segment.detections[object["id"]] = f'{object["label"]}-verified'
 
@@ -233,8 +233,8 @@ class ReviewSegmentMaintainer(threading.Thread):
 
                 if not object["sub_label"]:
                     detections[object["id"]] = object["label"]
-                elif object["sub_label"] in ALL_ATTRIBUTE_LABELS:
-                    detections[object["id"]] = object["sub_label"]
+                elif object["sub_label"][0] in ALL_ATTRIBUTE_LABELS:
+                    detections[object["id"]] = object["sub_label"][0]
                 else:
                     detections[object["id"]] = f'{object["label"]}-verified'
 
