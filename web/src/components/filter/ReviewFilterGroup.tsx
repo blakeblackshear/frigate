@@ -77,9 +77,7 @@ export default function ReviewFilterGroup({
     cameras.forEach((camera) => {
       const cameraConfig = config.cameras[camera];
       cameraConfig.objects.track.forEach((label) => {
-        if (!ATTRIBUTES.includes(label)) {
-          labels.add(label);
-        }
+        labels.add(label);
       });
 
       if (cameraConfig.audio.enabled_in_config) {
