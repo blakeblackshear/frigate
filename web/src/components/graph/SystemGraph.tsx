@@ -1,54 +1,92 @@
+import { Threshold } from "@/types/graph";
+import { useMemo } from "react";
 import Chart from "react-apexcharts";
 
 type SystemGraphProps = {
   graphId: string;
-  title?: string;
+  name: string;
   unit: string;
+  threshold: Threshold;
   data: ApexAxisChartSeries;
 };
 export default function SystemGraph({
   graphId,
-  title,
+  name,
   unit,
+  threshold,
   data,
 }: SystemGraphProps) {
+  const lastValue = useMemo<number>(
+    // @ts-expect-error y is valid
+    () => data[0].data[data[0].data.length - 1]?.y ?? 0,
+    [data],
+  );
+
   return (
-    <Chart
-      type="bar"
-      options={{
-        chart: {
-          id: graphId,
-          selection: {
-            enabled: false,
+    <div className="w-full flex flex-col">
+      <div className="flex items-center gap-1">
+        <div className="text-xs text-muted-foreground">{name}</div>
+        <div className="text-xs text-primary-foreground">
+          {lastValue}
+          {unit}
+        </div>
+      </div>
+      <Chart
+        type="bar"
+        options={{
+          chart: {
+            id: graphId,
+            selection: {
+              enabled: false,
+            },
+            toolbar: {
+              show: false,
+            },
+            zoom: {
+              enabled: false,
+            },
           },
-          toolbar: {
+          colors: [
+            ({ value }: { value: number }) => {
+              if (value >= threshold.error) {
+                return "#FA5252";
+              } else if (value >= threshold.warning) {
+                return "#aa00aa";
+              } else {
+                return "#404040";
+              }
+            },
+          ],
+          grid: {
             show: false,
           },
-          zoom: {
+          legend: {
+            show: false,
+          },
+          dataLabels: {
             enabled: false,
           },
-        },
-        legend: {
-          show: true,
-          showForSingleSeries: true,
-          position: "top",
-          horizontalAlign: "left",
-          onItemClick: {
-            toggleDataSeries: true,
+          xaxis: {
+            type: "datetime",
+            axisBorder: {
+              show: false,
+            },
+            axisTicks: {
+              show: false,
+            },
+            labels: {
+              format: "h:mm",
+              datetimeUTC: false,
+            },
           },
-        },
-        dataLabels: {
-          enabled: false,
-        },
-        xaxis: {
-          type: "datetime",
-        },
-        yaxis: {
-          show: false,
-        },
-      }}
-      series={data}
-      height="120"
-    />
+          yaxis: {
+            show: false,
+            max: lastValue * 2,
+          },
+        }}
+        series={data}
+        height="120"
+      />
+    </div>
   );
 }

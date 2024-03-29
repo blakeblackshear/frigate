@@ -1,4 +1,3 @@
-import Heading from "@/components/ui/heading";
 import useSWR from "swr";
 import { FrigateStats } from "@/types/stats";
 import { useEffect, useMemo, useState } from "react";
@@ -6,11 +5,17 @@ import SystemGraph from "@/components/graph/SystemGraph";
 import { useFrigateStats } from "@/api/ws";
 import TimeAgo from "@/components/dynamic/TimeAgo";
 import { FrigateConfig } from "@/types/frigateConfig";
+import {
+  DetectorCpuThreshold,
+  DetectorMemThreshold,
+  InferenceThreshold,
+} from "@/types/graph";
 
 function System() {
   const { data: config } = useSWR<FrigateConfig>("config");
 
   // stats
+
   const { data: initialStats } = useSWR<FrigateStats[]>("stats/history", {
     revalidateOnFocus: false,
   });
@@ -42,9 +47,10 @@ function System() {
     }
 
     setStatsHistory([...statsHistory, updatedStats]);
-  }, [initialStats, updatedStats, statsHistory]);
+  }, [initialStats, updatedStats]);
 
   // stats data pieces
+
   const detInferenceTimeSeries = useMemo(() => {
     if (!statsHistory) {
       return [];
@@ -200,6 +206,10 @@ function System() {
       const statTime = new Date(stats.service.last_updated * 1000);
 
       Object.entries(stats.cameras).forEach(([key, camStats]) => {
+        if (!config?.cameras[key].enabled) {
+          return;
+        }
+
         if (!(key in series)) {
           const camName = key.replaceAll("_", " ");
           series[key] = {};
@@ -210,11 +220,11 @@ function System() {
 
         series[key]["ffmpeg"].data.push({
           x: statTime,
-          y: stats.cpu_usages[camStats.ffmpeg_pid.toString()].cpu,
+          y: stats.cpu_usages[camStats.ffmpeg_pid.toString()]?.cpu ?? 0.0,
         });
         series[key]["capture"].data.push({
           x: statTime,
-          y: stats.cpu_usages[camStats.capture_pid.toString()].cpu,
+          y: stats.cpu_usages[camStats.capture_pid?.toString()]?.cpu ?? 0,
         });
         series[key]["detect"].data.push({
           x: statTime,
@@ -348,32 +358,45 @@ function System() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
         <div className="p-2.5 bg-primary rounded-2xl flex-col">
-          <div>Inference Speed</div>
+          <div className="mb-5">Detector Inference Speed</div>
           {detInferenceTimeSeries.map((series) => (
             <SystemGraph
+              key={series.name}
               graphId="detector-inference"
+              name={series.name}
               unit="ms"
+              threshold={InferenceThreshold}
               data={[series]}
             />
           ))}
         </div>
-        <div className="bg-primary rounded-2xl flex-col">
-          <SystemGraph
-            graphId="detector-usages"
-            title="CPU"
-            unit="%"
-            data={detCpuSeries}
-          />
+        <div className="p-2.5 bg-primary rounded-2xl flex-col">
+          <div className="mb-5">Detector CPU Usage</div>
+          {detCpuSeries.map((series) => (
+            <SystemGraph
+              key={series.name}
+              graphId="detector-cpu-usages"
+              unit="%"
+              name={series.name}
+              threshold={DetectorCpuThreshold}
+              data={[series]}
+            />
+          ))}
         </div>
-        <div className="bg-primary rounded-2xl flex-col">
-          <SystemGraph
-            graphId="detector-usages"
-            title="Memory"
-            unit="%"
-            data={detMemSeries}
-          />
+        <div className="p-2.5 bg-primary rounded-2xl flex-col">
+          <div className="mb-5">Detector Memory Usage</div>
+          {detMemSeries.map((series) => (
+            <SystemGraph
+              key={series.name}
+              graphId="detector-mem-usages"
+              unit="%"
+              name={series.name}
+              threshold={DetectorMemThreshold}
+              data={[series]}
+            />
+          ))}
         </div>
       </div>
     </div>
@@ -383,6 +406,19 @@ function System() {
 export default System;
 
 /**
+ *  <div className="bg-primary rounded-2xl flex-col">
+
+        </div>
+        <div className="bg-primary rounded-2xl flex-col">
+          <SystemGraph
+            graphId="detector-usages"
+            unit="%"
+            name={""}
+            threshold={InferenceThreshold}
+            data={detMemSeries}
+          />
+        </div>
+ *
  *  <Heading as="h4">Detectors</Heading>
       <div className="grid grid-cols-1 sm:grid-cols-3">
         <SystemGraph

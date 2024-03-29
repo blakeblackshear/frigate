@@ -14,6 +14,9 @@ from frigate.types import StatsTrackingTypes
 logger = logging.getLogger(__name__)
 
 
+MAX_STATS_POINTS = 120
+
+
 class StatsEmitter(threading.Thread):
     def __init__(
         self,
@@ -55,7 +58,7 @@ class StatsEmitter(threading.Thread):
                 self.config, self.stats_tracking, self.hwaccel_errors
             )
             self.stats_history.append(stats)
-            self.stats_history = self.stats_history[-10:]
+            self.stats_history = self.stats_history[-MAX_STATS_POINTS:]
             self.requestor.send_data("stats", json.dumps(stats))
             logger.debug("Finished stats collection")
         logger.info("Exiting stats emitter...")
