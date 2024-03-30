@@ -185,6 +185,7 @@ export function MotionReviewTimeline({
       exportEndTime={exportEndTime}
       setExportStartTime={setExportStartTime}
       setExportEndTime={setExportEndTime}
+      timelineCollapsed={motionOnly}
       dense={dense}
     >
       {segments}
