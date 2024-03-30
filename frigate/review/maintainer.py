@@ -17,7 +17,7 @@ from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionSubscriber, DetectionTypeEnum
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, FrigateConfig
-from frigate.const import CLIPS_DIR, UPSERT_REVIEW_SEGMENT
+from frigate.const import ALL_ATTRIBUTE_LABELS, CLIPS_DIR, UPSERT_REVIEW_SEGMENT
 from frigate.models import ReviewSegment
 from frigate.object_processing import TrackedObject
 from frigate.util.image import SharedMemoryFrameManager, calculate_16_9_crop
@@ -45,9 +45,7 @@ class PendingReviewSegment:
         camera: str,
         frame_time: float,
         severity: SeverityEnum,
-        detections: set[str] = set(),
-        objects: set[str] = set(),
-        sub_labels: set[str] = set(),
+        detections: dict[str, str],
         zones: set[str] = set(),
         audio: set[str] = set(),
         motion: list[int] = [],
@@ -58,8 +56,6 @@ class PendingReviewSegment:
         self.start_time = frame_time
         self.severity = severity
         self.detections = detections
-        self.objects = objects
-        self.sub_labels = sub_labels
         self.zones = zones
         self.audio = audio
         self.sig_motion_areas = motion
@@ -114,9 +110,8 @@ class PendingReviewSegment:
             ReviewSegment.severity: self.severity.value,
             ReviewSegment.thumb_path: path,
             ReviewSegment.data: {
-                "detections": list(self.detections),
-                "objects": list(self.objects),
-                "sub_labels": list(self.sub_labels),
+                "detections": list(set(self.detections.keys())),
+                "objects": list(set(self.detections.values())),
                 "zones": list(self.zones),
                 "audio": list(self.audio),
                 "significant_motion_areas": self.sig_motion_areas,
@@ -180,11 +175,12 @@ class ReviewSegmentMaintainer(threading.Thread):
                 self.frame_manager.close(frame_id)
 
             for object in active_objects:
-                segment.detections.add(object["id"])
-                segment.objects.add(object["label"])
-
-                if object["sub_label"]:
-                    segment.sub_labels.add(object["sub_label"][0])
+                if not object["sub_label"]:
+                    segment.detections[object["id"]] = object["label"]
+                elif object["sub_label"][0] in ALL_ATTRIBUTE_LABELS:
+                    segment.detections[object["id"]] = object["sub_label"][0]
+                else:
+                    segment.detections[object["id"]] = f'{object["label"]}-verified'
 
                 # if object is alert label and has qualified for recording
                 # mark this review as alert
@@ -224,9 +220,7 @@ class ReviewSegmentMaintainer(threading.Thread):
 
         if len(active_objects) > 0:
             has_sig_object = False
-            detections: set = set()
-            objects: set = set()
-            sub_labels: set = set()
+            detections: dict[str, str] = {}
             zones: set = set()
 
             for object in active_objects:
@@ -237,11 +231,12 @@ class ReviewSegmentMaintainer(threading.Thread):
                 ):
                     has_sig_object = True
 
-                detections.add(object["id"])
-                objects.add(object["label"])
-
-                if object["sub_label"]:
-                    sub_labels.add(object["sub_label"][0])
+                if not object["sub_label"]:
+                    detections[object["id"]] = object["label"]
+                elif object["sub_label"][0] in ALL_ATTRIBUTE_LABELS:
+                    detections[object["id"]] = object["sub_label"][0]
+                else:
+                    detections[object["id"]] = f'{object["label"]}-verified'
 
                 zones.update(object["current_zones"])
 
@@ -250,8 +245,6 @@ class ReviewSegmentMaintainer(threading.Thread):
                 frame_time,
                 SeverityEnum.alert if has_sig_object else SeverityEnum.detection,
                 detections,
-                objects=objects,
-                sub_labels=sub_labels,
                 audio=set(),
                 zones=zones,
                 motion=[],
@@ -268,9 +261,8 @@ class ReviewSegmentMaintainer(threading.Thread):
                 camera,
                 frame_time,
                 SeverityEnum.signification_motion,
-                detections=set(),
-                objects=set(),
-                sub_labels=set(),
+                detections={},
+                audio=set(),
                 motion=motion,
                 zones=set(),
             )
@@ -340,9 +332,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                         camera,
                         frame_time,
                         SeverityEnum.detection,
-                        set(),
-                        set(),
-                        set(),
+                        {},
                         set(),
                         set(audio_detections),
                         [],

@@ -9,7 +9,7 @@ import { useApiHost } from "@/api";
 import { isCurrentHour } from "@/utils/dateUtil";
 import { ReviewSegment } from "@/types/review";
 import { Slider } from "../ui/slider-no-thumb";
-import { getIconForLabel, getIconForSubLabel } from "@/utils/iconUtil";
+import { getIconForLabel } from "@/utils/iconUtil";
 import TimeAgo from "../dynamic/TimeAgo";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -227,9 +227,6 @@ export default function PreviewThumbnailPlayer({
                         {review.data.audio.map((audio) => {
                           return getIconForLabel(audio, "size-3 text-white");
                         })}
-                        {review.data.sub_labels?.map((sub) => {
-                          return getIconForSubLabel(sub, "size-3 text-white");
-                        })}
                       </Chip>
                     </>
                   )}
@@ -237,13 +234,10 @@ export default function PreviewThumbnailPlayer({
               </TooltipTrigger>
             </div>
             <TooltipContent className="capitalize">
-              {[
-                ...(review.data.objects || []),
-                ...(review.data.audio || []),
-                ...(review.data.sub_labels || []),
-              ]
+              {[...(review.data.objects || []), ...(review.data.audio || [])]
                 .filter((item) => item !== undefined)
-                .join(", ")}
+                .join(", ")
+                .replaceAll("-verified", "")}
             </TooltipContent>
           </Tooltip>
         </div>

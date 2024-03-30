@@ -2,7 +2,7 @@ import { baseUrl } from "@/api/baseUrl";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { ReviewSegment } from "@/types/review";
-import { getIconForLabel, getIconForSubLabel } from "@/utils/iconUtil";
+import { getIconForLabel } from "@/utils/iconUtil";
 import { isSafari } from "react-device-detect";
 import useSWR from "swr";
 import TimeAgo from "../dynamic/TimeAgo";
@@ -56,9 +56,6 @@ export default function ReviewCard({
           })}
           {event.data.audio.map((audio) => {
             return getIconForLabel(audio, "size-3 text-white");
-          })}
-          {event.data.sub_labels?.map((sub) => {
-            return getIconForSubLabel(sub, "size-3 text-white");
           })}
           <div className="font-extra-light text-xs">{formattedDate}</div>
         </div>
