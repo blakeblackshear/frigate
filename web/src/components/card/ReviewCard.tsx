@@ -33,11 +33,11 @@ export default function ReviewCard({
 
   return (
     <div
-      className="w-full flex flex-col gap-1.5 cursor-pointer"
+      className="w-full relative flex flex-col gap-1.5 cursor-pointer"
       onClick={onClick}
     >
       <ImageLoadingIndicator
-        className="size-full aspect-video"
+        className="absolute inset-0"
         imgLoaded={imgLoaded}
       />
       <img

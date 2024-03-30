@@ -129,9 +129,9 @@ export default function LiveDashboardView({
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
 
   return (
-    <div className="size-full overflow-y-auto">
+    <div className="size-full p-2 overflow-y-auto">
       {isMobile && (
-        <div className="h-11 px-2 relative flex items-center justify-between">
+        <div className="h-11 relative flex items-center justify-between">
           <Logo className="absolute inset-x-1/2 -translate-x-1/2 h-8" />
           <CameraGroupSelector />
           <div className="flex items-center gap-1">
@@ -164,7 +164,7 @@ export default function LiveDashboardView({
       {events && events.length > 0 && (
         <ScrollArea>
           <TooltipProvider>
-            <div className="flex gap-2 items-center">
+            <div className="px-1 flex gap-2 items-center">
               {events.map((event) => {
                 return <AnimatedEventCard key={event.id} event={event} />;
               })}

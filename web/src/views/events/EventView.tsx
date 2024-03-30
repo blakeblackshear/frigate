@@ -46,7 +46,7 @@ type EventViewProps = {
   reviews?: ReviewSegment[];
   reviewSummary?: ReviewSummary;
   relevantPreviews?: Preview[];
-  timeRange: { before: number; after: number };
+  timeRange: TimeRange;
   filter?: ReviewFilter;
   severity: ReviewSeverity;
   startTime?: number;
@@ -205,7 +205,7 @@ export default function EventView({
   }
 
   return (
-    <div className="flex flex-col size-full">
+    <div className="py-2 flex flex-col size-full">
       <div className="h-11 px-2 relative flex justify-between items-center">
         {isMobile && (
           <Logo className="absolute inset-x-1/2 -translate-x-1/2 h-8" />
@@ -492,7 +492,7 @@ function DetectionReview({
     <>
       <div
         ref={contentRef}
-        className="mt-2 flex flex-1 flex-wrap content-start gap-2 md:gap-4 overflow-y-auto no-scrollbar"
+        className="flex flex-1 flex-wrap content-start gap-2 md:gap-4 overflow-y-auto no-scrollbar"
       >
         {filter?.before == undefined && (
           <NewReviewData
@@ -687,6 +687,8 @@ function MotionReview({
     [selectedRangeIdx, timeRangeSegments],
   );
 
+  const [previewStart, setPreviewStart] = useState(startTime);
+
   const [scrubbing, setScrubbing] = useState(false);
   const [playing, setPlaying] = useState(false);
 
@@ -702,9 +704,7 @@ function MotionReview({
       );
 
       if (index != -1) {
-        Object.values(videoPlayersRef.current).forEach((controller) => {
-          controller.setNewPreviewStartTime(currentTime);
-        });
+        setPreviewStart(currentTime);
         setSelectedRangeIdx(index);
       }
       return;
@@ -713,7 +713,9 @@ function MotionReview({
     Object.values(videoPlayersRef.current).forEach((controller) => {
       controller.scrubToTimestamp(currentTime);
     });
-  }, [currentTime, currentTimeRange, timeRangeSegments]);
+    // only refresh when current time or available segments changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentTime, timeRangeSegments]);
 
   // playback
 
@@ -826,7 +828,7 @@ function MotionReview({
                 className={`${detectionType ? `outline outline-3 outline-offset-1 outline-severity_${detectionType}` : "outline-0 shadow-none"} rounded-2xl ${grow}`}
                 camera={camera.name}
                 timeRange={currentTimeRange}
-                startTime={startTime}
+                startTime={previewStart}
                 cameraPreviews={relevantPreviews || []}
                 isScrubbing={scrubbing}
                 onControllerReady={(controller) => {

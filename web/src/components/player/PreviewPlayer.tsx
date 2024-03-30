@@ -12,8 +12,7 @@ import { Preview } from "@/types/preview";
 import { PreviewPlayback } from "@/types/playback";
 import { isCurrentHour } from "@/utils/dateUtil";
 import { baseUrl } from "@/api/baseUrl";
-import { isAndroid, isChrome, isMobile, isSafari } from "react-device-detect";
-import { Skeleton } from "../ui/skeleton";
+import { isAndroid, isChrome, isMobile } from "react-device-detect";
 import { TimeRange } from "@/types/timeline";
 
 type PreviewPlayerProps = {
@@ -23,6 +22,7 @@ type PreviewPlayerProps = {
   cameraPreviews: Preview[];
   startTime?: number;
   isScrubbing: boolean;
+  forceAspect?: number;
   onControllerReady: (controller: PreviewController) => void;
   onClick?: () => void;
 };
@@ -143,8 +143,6 @@ function PreviewVideoPlayer({
 
   // initial state
 
-  const [loaded, setLoaded] = useState(false);
-  const [hasCanvas, setHasCanvas] = useState(false);
   const initialPreview = useMemo(() => {
     return cameraPreviews.find(
       (preview) =>
@@ -164,13 +162,51 @@ function PreviewVideoPlayer({
       return;
     }
 
+    setCurrentHourFrame(undefined);
+
     if (isAndroid && isChrome) {
       // android/chrome glitches when setting currentTime at the same time as onSeeked
       setTimeout(() => controller.finishedSeeking(), 25);
     } else {
       controller.finishedSeeking();
     }
+    // we only want to update on controller change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controller]);
+
+  // canvas to cover preview transition
+
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [videoSize, setVideoSize] = useState<number[]>([0, 0]);
+
+  const changeSource = useCallback(
+    (newPreview: Preview | undefined, video: HTMLVideoElement | null) => {
+      if (!newPreview || !video) {
+        setCurrentPreview(newPreview);
+        return;
+      }
+
+      if (!canvasRef.current && videoSize[0] > 0) {
+        const canvas = document.createElement("canvas");
+        canvas.width = videoSize[0];
+        canvas.height = videoSize[1];
+        canvasRef.current = canvas;
+      }
+
+      const context = canvasRef.current?.getContext("2d");
+
+      if (context) {
+        context.drawImage(video, 0, 0, videoSize[0], videoSize[1]);
+        setCurrentHourFrame(canvasRef.current?.toDataURL("image/webp"));
+      }
+
+      setCurrentPreview(newPreview);
+
+      // we only want this to change when current preview changes
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    },
+    [setCurrentHourFrame, videoSize],
+  );
 
   useEffect(() => {
     if (!controller) {
@@ -185,8 +221,7 @@ function PreviewVideoPlayer({
     );
 
     if (preview != currentPreview) {
-      setCurrentPreview(preview);
-      setLoaded(false);
+      changeSource(preview, previewRef.current);
     }
 
     controller.newPlayback({
@@ -196,63 +231,21 @@ function PreviewVideoPlayer({
 
     // we only want this to change when recordings update
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [controller, timeRange]);
-
-  // canvas to cover preview transition
-
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [videoWidth, videoHeight] = useMemo(() => {
-    if (!previewRef.current) {
-      return [0, 0];
-    }
-
-    return [previewRef.current.videoWidth, previewRef.current.videoHeight];
-    // we know the video size will be known on load
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loaded]);
-  // handle switching sources
-
-  useEffect(() => {
-    if (!currentPreview || !previewRef.current) {
-      return;
-    }
-
-    if (canvasRef.current) {
-      canvasRef.current
-        .getContext("2d")
-        ?.drawImage(previewRef.current, 0, 0, videoWidth, videoHeight);
-      setHasCanvas(true);
-    }
-
-    if (isSafari) {
-      setTimeout(() => previewRef.current?.load(), 100);
-    } else {
-      previewRef.current.load();
-    }
-    // we only want this to change when current preview changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPreview, previewRef]);
+  }, [controller, timeRange, changeSource]);
 
   return (
     <div
-      className={`relative w-full rounded-2xl bg-black overflow-hidden ${className ?? ""} ${onClick ? "cursor-pointer" : ""}`}
+      className={`relative rounded-2xl bg-black overflow-hidden ${onClick ? "cursor-pointer" : ""} ${className ?? ""}`}
       onClick={onClick}
     >
-      {currentHourFrame && (
-        <img
-          className="absolute size-full object-contain"
-          src={currentHourFrame}
-        />
-      )}
-      <canvas
-        ref={canvasRef}
-        width={videoWidth}
-        height={videoHeight}
-        className={`absolute h-full left-1/2 -translate-x-1/2 ${!loaded && hasCanvas ? "" : "hidden"}`}
+      <img
+        className={`absolute size-full object-contain ${currentHourFrame ? "visible" : "invisible"}`}
+        src={currentHourFrame}
+        onLoad={() => previewRef.current?.load()}
       />
       <video
         ref={previewRef}
-        className="size-full"
+        className={`absolute size-full ${currentHourFrame ? "invisible" : "visible"}`}
         preload="auto"
         autoPlay
         playsInline
@@ -260,17 +253,21 @@ function PreviewVideoPlayer({
         disableRemotePlayback
         onSeeked={onPreviewSeeked}
         onLoadedData={() => {
-          setCurrentHourFrame(undefined);
-          setLoaded(true);
-
           if (controller) {
             controller.previewReady();
           } else {
             previewRef.current?.pause();
           }
 
-          if (previewRef.current && startTime && currentPreview) {
-            previewRef.current.currentTime = startTime - currentPreview.start;
+          if (previewRef.current) {
+            setVideoSize([
+              previewRef.current.videoWidth,
+              previewRef.current.videoHeight,
+            ]);
+
+            if (startTime && currentPreview) {
+              previewRef.current.currentTime = startTime - currentPreview.start;
+            }
           }
         }}
       >
@@ -278,9 +275,6 @@ function PreviewVideoPlayer({
           <source src={currentPreview.src} type={currentPreview.type} />
         )}
       </video>
-      {!loaded && !hasCanvas && !currentHourFrame && (
-        <Skeleton className="absolute inset-0" />
-      )}
       {cameraPreviews && !currentPreview && (
         <div className="absolute inset-0 text-white rounded-2xl flex justify-center items-center">
           No Preview Found
@@ -362,7 +356,9 @@ class PreviewVideoController extends PreviewController {
   }
 
   override setNewPreviewStartTime(time: number) {
-    this.timeToSeek = time;
+    if (this.preview) {
+      this.timeToSeek = time - this.preview.start;
+    }
   }
 
   previewReady() {
@@ -468,7 +464,7 @@ function PreviewFramesPlayer({
 
   return (
     <div
-      className={`relative w-full ${className ?? ""} ${onClick ? "cursor-pointer" : ""}`}
+      className={`relative ${className ?? ""} ${onClick ? "cursor-pointer" : ""}`}
       onClick={onClick}
     >
       <img

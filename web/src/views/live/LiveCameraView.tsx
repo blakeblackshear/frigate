@@ -204,7 +204,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
         className={
           fullscreen
             ? `fixed inset-0 bg-black z-30`
-            : `size-full flex flex-col ${isMobile ? "landscape:flex-row" : ""}`
+            : `size-full p-2 flex flex-col ${isMobile ? "landscape:flex-row" : ""}`
         }
       >
         <div
@@ -217,7 +217,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
           {!fullscreen ? (
             <Button
               className={`rounded-lg ${isMobile ? "ml-2" : "ml-0"}`}
-              size={isMobile ? "icon" : "default"}
+              size={isMobile ? "icon" : "sm"}
               onClick={() => navigate(-1)}
             >
               <IoMdArrowBack className="size-5 lg:mr-[10px]" />
@@ -228,7 +228,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
           )}
           <TooltipProvider>
             <div
-              className={`flex flex-row items-center gap-2 mr-1 *:rounded-lg ${isMobile ? "landscape:flex-col" : ""}`}
+              className={`flex flex-row items-center gap-2 *:rounded-lg ${isMobile ? "landscape:flex-col" : ""}`}
             >
               {!isIOS && (
                 <CameraFeatureToggle

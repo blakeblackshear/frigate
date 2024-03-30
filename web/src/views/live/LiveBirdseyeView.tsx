@@ -116,7 +116,7 @@ export default function LiveBirdseyeView() {
         className={
           fullscreen
             ? `fixed inset-0 bg-black z-30`
-            : `size-full flex flex-col ${isMobile ? "landscape:flex-row" : ""}`
+            : `size-full p-2 flex flex-col ${isMobile ? "landscape:flex-row" : ""}`
         }
       >
         <div
@@ -128,11 +128,11 @@ export default function LiveBirdseyeView() {
         >
           {!fullscreen ? (
             <Button
-              className={`rounded-lg ${isMobile ? "ml-2" : "ml-0"}`}
-              size={isMobile ? "icon" : "default"}
+              className={`rounded-lg flex items-center gap-2 ${isMobile ? "ml-2" : "ml-0"}`}
+              size={isMobile ? "icon" : "sm"}
               onClick={() => navigate(-1)}
             >
-              <IoMdArrowBack className="size-5 lg:mr-[10px]" />
+              <IoMdArrowBack className="size-5" />
               {isDesktop && "Back"}
             </Button>
           ) : (

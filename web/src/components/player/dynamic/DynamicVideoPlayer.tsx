@@ -9,7 +9,6 @@ import PreviewPlayer, { PreviewController } from "../PreviewPlayer";
 import { DynamicVideoController } from "./DynamicVideoController";
 import HlsVideoPlayer from "../HlsVideoPlayer";
 import { TimeRange, Timeline } from "@/types/timeline";
-import { isDesktop } from "react-device-detect";
 
 /**
  * Dynamically switches between video playback and scrubbing preview player.
@@ -40,26 +39,6 @@ export default function DynamicVideoPlayer({
 }: DynamicVideoPlayerProps) {
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
-
-  // playback behavior
-
-  const grow = useMemo(() => {
-    if (!config) {
-      return "aspect-video";
-    }
-
-    const aspectRatio =
-      config.cameras[camera].detect.width /
-      config.cameras[camera].detect.height;
-
-    if (aspectRatio > 2) {
-      return "";
-    } else if (aspectRatio < 16 / 9) {
-      return isDesktop ? "" : "aspect-tall";
-    } else {
-      return "aspect-video";
-    }
-  }, [camera, config]);
 
   // controlling playback
 
@@ -169,9 +148,9 @@ export default function DynamicVideoPlayer({
   }, [controller, recordings]);
 
   return (
-    <div className={`w-full relative ${className ?? ""}`}>
+    <>
       <HlsVideoPlayer
-        className={isDesktop ? `w-full ${grow}` : "max-h-[50dvh]"}
+        className={className ?? ""}
         videoRef={playerRef}
         visible={!(isScrubbing || isLoading)}
         currentSource={source}
@@ -195,7 +174,7 @@ export default function DynamicVideoPlayer({
         )}
       </HlsVideoPlayer>
       <PreviewPlayer
-        className={`${isScrubbing || isLoading ? "visible" : "hidden"} ${isDesktop ? `w-full ${grow}` : "max-h-[50dvh]"}`}
+        className={`${isScrubbing || isLoading ? "visible" : "hidden"} ${className}`}
         camera={camera}
         timeRange={timeRange}
         cameraPreviews={cameraPreviews}
@@ -205,6 +184,6 @@ export default function DynamicVideoPlayer({
           setPreviewController(previewController);
         }}
       />
-    </div>
+    </>
   );
 }
