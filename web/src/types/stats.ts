@@ -58,3 +58,8 @@ export type StorageStats = {
   used: number;
   mount_type: string;
 };
+
+export type PotentialProblem = {
+  text: string;
+  color: string;
+};
