@@ -1,5 +1,4 @@
 import ctypes
-import glob
 import logging
 import os
 import subprocess
@@ -11,7 +10,7 @@ from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
-from frigate.detectors.util import preprocess, yolov8_postprocess
+from frigate.detectors.util import preprocess
 
 logger = logging.getLogger(__name__)
 
@@ -75,27 +74,6 @@ class ROCmDetector(DetectionApi):
             logger.error("AMD/ROCm: module loading failed, missing ROCm environment?")
             raise
 
-        if detector_config.conserve_cpu:
-            logger.info("AMD/ROCm: switching HIP to blocking mode to conserve CPU")
-            ctypes.CDLL("/opt/rocm/lib/libamdhip64.so").hipSetDeviceFlags(4)
-        assert (
-            detector_config.model.model_type == "yolov8"
-        ), "AMD/ROCm: detector_config.model.model_type: only yolov8 supported"
-        assert (
-            detector_config.model.input_tensor == "nhwc"
-        ), "AMD/ROCm: detector_config.model.input_tensor: only nhwc supported"
-        if detector_config.model.input_pixel_format != "rgb":
-            logger.warn(
-                "AMD/ROCm: detector_config.model.input_pixel_format: should be 'rgb' for yolov8, but '{detector_config.model.input_pixel_format}' specified!"
-            )
-
-        assert detector_config.model.path is not None, (
-            "No model.path configured, please configure model.path and model.labelmap_path; some suggestions: "
-            + ", ".join(glob.glob("/config/model_cache/yolov8/*.onnx"))
-            + " and "
-            + ", ".join(glob.glob("/config/model_cache/yolov8/*_labels.txt"))
-        )
-
         path = detector_config.model.path
         mxr_path = os.path.splitext(path)[0] + ".mxr"
         if path.endswith(".mxr"):
@@ -136,8 +114,11 @@ class ROCmDetector(DetectionApi):
         detector_result = self.model.run({model_input_name: tensor_input})[0]
 
         addr = ctypes.cast(detector_result.data_ptr(), ctypes.POINTER(ctypes.c_float))
+        # ruff: noqa: F841
         tensor_output = np.ctypeslib.as_array(
             addr, shape=detector_result.get_shape().lens()
         )
 
-        return yolov8_postprocess(model_input_shape, tensor_output)
+        raise Exception(
+            "No models are currently supported for rocm. See the docs for more info."
+        )

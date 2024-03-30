@@ -80,7 +80,7 @@ model:
   # Valid values are nhwc or nchw (default: shown below)
   input_tensor: nhwc
   # Optional: Object detection model type, currently only used with the OpenVINO detector
-  # Valid values are ssd, yolox, yolov5, or yolov8 (default: shown below)
+  # Valid values are ssd, yolox (default: shown below)
   model_type: ssd
   # Optional: Label name modifications. These are merged into the standard labelmap.
   labelmap:
