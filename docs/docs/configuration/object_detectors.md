@@ -13,7 +13,7 @@ The CPU detector type runs a TensorFlow Lite model utilizing the CPU without har
 
 :::tip
 
-If you do not have GPU or Edge TPU hardware, using the [OpenVINO Detector](#openvino-detector) is often more efficient than using the CPU detector. 
+If you do not have GPU or Edge TPU hardware, using the [OpenVINO Detector](#openvino-detector) is often more efficient than using the CPU detector.
 
 :::
 
@@ -131,7 +131,7 @@ model:
   labelmap_path: /openvino-model/coco_91cl_bkgr.txt
 ```
 
-This detector also supports some YOLO variants: YOLOX, YOLOv5, and YOLOv8 specifically. Other YOLO variants are not officially supported/tested. Frigate does not come with any yolo models preloaded, so you will need to supply your own models. This detector has been verified to work with the [yolox_tiny](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/yolox-tiny) model from Intel's Open Model Zoo. You can follow [these instructions](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/yolox-tiny#download-a-model-and-convert-it-into-openvino-ir-format) to retrieve the OpenVINO-compatible `yolox_tiny` model. Make sure that the model input dimensions match the `width` and `height` parameters, and `model_type` is set accordingly. See [Full Configuration Reference](/configuration/reference.md) for a list of possible `model_type` options. Below is an example of how `yolox_tiny` can be used in Frigate:
+This detector also supports YOLOX. Other YOLO variants are not officially supported/tested. Frigate does not come with any yolo models preloaded, so you will need to supply your own models. This detector has been verified to work with the [yolox_tiny](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/yolox-tiny) model from Intel's Open Model Zoo. You can follow [these instructions](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/yolox-tiny#download-a-model-and-convert-it-into-openvino-ir-format) to retrieve the OpenVINO-compatible `yolox_tiny` model. Make sure that the model input dimensions match the `width` and `height` parameters, and `model_type` is set accordingly. See [Full Configuration Reference](/configuration/reference.md) for a list of possible `model_type` options. Below is an example of how `yolox_tiny` can be used in Frigate:
 
 ```yaml
 detectors:
@@ -302,104 +302,3 @@ Replace `<your_codeproject_ai_server_ip>` and `<port>` with the IP address and p
 To verify that the integration is working correctly, start Frigate and observe the logs for any error messages related to CodeProject.AI. Additionally, you can check the Frigate web interface to see if the objects detected by CodeProject.AI are being displayed and tracked properly.
 
 # Community Supported Detectors
-
-## Rockchip RKNN-Toolkit-Lite2
-
-This detector is only available if one of the following Rockchip SoCs is used:
-
-- RK3588/RK3588S
-- RK3568
-- RK3566
-- RK3562
-
-These SoCs come with a NPU that will highly speed up detection.
-
-### Setup
-
-Use a frigate docker image with `-rk` suffix and enable privileged mode by adding the `--privileged` flag to your docker run command or `privileged: true` to your `docker-compose.yml` file.
-
-### Configuration
-
-This `config.yml` shows all relevant options to configure the detector and explains them. All values shown are the default values (except for one). Lines that are required at least to use the detector are labeled as required, all other lines are optional.
-
-```yaml
-detectors: # required
-  rknn: # required
-    type: rknn # required
-    # core mask for npu
-    core_mask: 0
-
-model: # required
-  # name of yolov8 model or path to your own .rknn model file
-  # possible values are:
-  # - default-yolov8n
-  # - default-yolov8s
-  # - default-yolov8m
-  # - default-yolov8l
-  # - default-yolov8x
-  # - /config/model_cache/rknn/your_custom_model.rknn
-  path: default-yolov8n
-  # width and height of detection frames
-  width: 320
-  height: 320
-  # pixel format of detection frame
-  # default value is rgb but yolov models usually use bgr format
-  input_pixel_format: bgr # required
-  # shape of detection frame
-  input_tensor: nhwc
-```
-
-Explanation for rknn specific options:
-
-- **core mask** controls which cores of your NPU should be used. This option applies only to SoCs with a multicore NPU (at the time of writing this in only the RK3588/S). The easiest way is to pass the value as a binary number. To do so, use the prefix `0b` and write a `0` to disable a core and a `1` to enable a core, whereas the last digit coresponds to core0, the second last to core1, etc. You also have to use the cores in ascending order (so you can't use core0 and core2; but you can use core0 and core1). Enabling more cores can reduce the inference speed, especially when using bigger models (see section below). Examples:
-  - `core_mask: 0b000` or just `core_mask: 0` let the NPU decide which cores should be used. Default and recommended value.
-  - `core_mask: 0b001` use only core0.
-  - `core_mask: 0b011` use core0 and core1.
-  - `core_mask: 0b110` use core1 and core2. **This does not** work, since core0 is disabled.
-
-### Choosing a model
-
-There are 5 default yolov8 models that differ in size and therefore load the NPU more or less. In ascending order, with the top one being the smallest and least computationally intensive model:
-
-| Model   | Size in mb |
-| ------- | ---------- |
-| yolov8n | 9          |
-| yolov8s | 25         |
-| yolov8m | 54         |
-| yolov8l | 90         |
-| yolov8x | 136        |
-
-:::tip
-
-You can get the load of your NPU with the following command:
-
-```bash
-$ cat /sys/kernel/debug/rknpu/load
->> NPU load:  Core0:  0%, Core1:  0%, Core2:  0%,
-```
-
-:::
-
-- By default the rknn detector uses the yolov8n model (`model: path: default-yolov8n`). This model comes with the image, so no further steps than those mentioned above are necessary.
-- If you want to use a more precise model, you can pass `default-yolov8s`, `default-yolov8m`, `default-yolov8l` or `default-yolov8x` as `model: path:` option.
-  - If the model does not exist, it will be automatically downloaded to `/config/model_cache/rknn`.
-  - If your server has no internet connection, you can download the model from [this Github repository](https://github.com/MarcA711/rknn-models/releases) using another device and place it in the `config/model_cache/rknn` on your system.
-- Finally, you can also provide your own model. Note that only yolov8 models are currently supported. Moreover, you will need to convert your model to the rknn format using `rknn-toolkit2` on a x86 machine. Afterwards, you can place your `.rknn` model file in the `config/model_cache/rknn` directory on your system. Then you need to pass the path to your model using the `path` option of your `model` block like this:
-
-```yaml
-model:
-  path: /config/model_cache/rknn/my-rknn-model.rknn
-```
-
-:::tip
-
-When you have a multicore NPU, you can enable all cores to reduce inference times. You should consider activating all cores if you use a larger model like yolov8l. If your NPU has 3 cores (like rk3588/S SoCs), you can enable all 3 cores using:
-
-```yaml
-detectors:
-  rknn:
-    type: rknn
-    core_mask: 0b111
-```
-
-:::
