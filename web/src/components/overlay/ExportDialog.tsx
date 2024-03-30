@@ -20,11 +20,12 @@ import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import ReviewActivityCalendar from "./ReviewActivityCalendar";
+import { TimezoneAwareCalendar } from "./ReviewActivityCalendar";
 import { SelectSeparator } from "../ui/select";
 import { isDesktop } from "react-device-detect";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import SaveExportOverlay from "./SaveExportOverlay";
+import { getUTCOffset } from "@/utils/dateUtil";
 
 const EXPORT_OPTIONS = [
   "1",
@@ -305,14 +306,43 @@ function CustomTimeSelector({
 
   // times
 
-  const startTime = useMemo(
-    () => range?.after || latestTime - 3600,
-    [range, latestTime],
+  const timezoneOffset = useMemo(
+    () =>
+      /*
+       config?.ui.timezone
+        ? getUTCOffset(new Date(), config.ui.timezone)
+        : undefined
+      */
+      getUTCOffset(new Date(), "Australia/Darwin"),
+    [],
   );
-  const endTime = useMemo(
-    () => range?.before || latestTime,
-    [range, latestTime],
+  const localTimeOffset = useMemo(
+    () =>
+      getUTCOffset(
+        new Date(),
+        Intl.DateTimeFormat().resolvedOptions().timeZone,
+      ),
+    [],
   );
+
+  const startTime = useMemo(() => {
+    let time = range?.after || latestTime - 3600;
+
+    if (timezoneOffset) {
+      time = time + (timezoneOffset - localTimeOffset) * 60;
+    }
+
+    return time;
+  }, [range, latestTime, timezoneOffset, localTimeOffset]);
+  const endTime = useMemo(() => {
+    let time = range?.before || latestTime;
+
+    if (timezoneOffset) {
+      time = time + (timezoneOffset - localTimeOffset) * 60;
+    }
+
+    return time;
+  }, [range, latestTime, timezoneOffset, localTimeOffset]);
   const formattedStart = useFormattedTimestamp(
     startTime,
     config?.ui.time_format == "24hour"
@@ -367,7 +397,8 @@ function CustomTimeSelector({
           </Button>
         </PopoverTrigger>
         <PopoverContent className="flex flex-col items-center">
-          <ReviewActivityCalendar
+          <TimezoneAwareCalendar
+            timezone={"Australia/Darwin"}
             selectedDay={new Date(startTime * 1000)}
             onSelect={(day) => {
               if (!day) {
@@ -428,7 +459,8 @@ function CustomTimeSelector({
           </Button>
         </PopoverTrigger>
         <PopoverContent className="flex flex-col items-center">
-          <ReviewActivityCalendar
+          <TimezoneAwareCalendar
+            timezone={"Australia/Darwin"}
             selectedDay={new Date(endTime * 1000)}
             onSelect={(day) => {
               if (!day) {
