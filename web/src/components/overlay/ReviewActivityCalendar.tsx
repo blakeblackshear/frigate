@@ -2,6 +2,7 @@ import { ReviewSummary } from "@/types/review";
 import { Calendar } from "../ui/calendar";
 import { useMemo } from "react";
 import { FaCircle } from "react-icons/fa";
+import { getUTCOffset } from "@/utils/dateUtil";
 
 type ReviewActivityCalendarProps = {
   reviewSummary?: ReviewSummary;
@@ -74,5 +75,70 @@ function ReviewActivityDay({ reviewSummary, day }: ReviewActivityDayProps) {
         />
       )}
     </div>
+  );
+}
+
+type TimezoneAwareCalendarProps = {
+  timezone?: string;
+  selectedDay?: Date;
+  onSelect: (day?: Date) => void;
+};
+export function TimezoneAwareCalendar({
+  timezone,
+  selectedDay,
+  onSelect,
+}: TimezoneAwareCalendarProps) {
+  const timezoneOffset = useMemo(
+    () =>
+      timezone ? Math.round(getUTCOffset(new Date(), timezone)) : undefined,
+    [timezone],
+  );
+  const disabledDates = useMemo(() => {
+    const tomorrow = new Date();
+
+    if (timezoneOffset) {
+      tomorrow.setHours(
+        tomorrow.getHours() + 24,
+        tomorrow.getMinutes() + timezoneOffset,
+        0,
+        0,
+      );
+    } else {
+      tomorrow.setHours(tomorrow.getHours() + 24, -1, 0, 0);
+    }
+
+    const future = new Date();
+    future.setFullYear(tomorrow.getFullYear() + 10);
+    return { from: tomorrow, to: future };
+  }, [timezoneOffset]);
+
+  const today = useMemo(() => {
+    if (!timezoneOffset) {
+      return undefined;
+    }
+
+    const date = new Date();
+    const utc = Date.UTC(
+      date.getUTCFullYear(),
+      date.getUTCMonth(),
+      date.getUTCDate(),
+      date.getUTCHours(),
+      date.getUTCMinutes(),
+      date.getUTCSeconds(),
+    );
+    const todayUtc = new Date(utc);
+    todayUtc.setMinutes(todayUtc.getMinutes() + timezoneOffset, 0, 0);
+    return todayUtc;
+  }, [timezoneOffset]);
+
+  return (
+    <Calendar
+      mode="single"
+      disabled={disabledDates}
+      showOutsideDays={false}
+      today={today}
+      selected={selectedDay}
+      onSelect={onSelect}
+    />
   );
 }
