@@ -28,6 +28,7 @@ export type ReviewTimelineProps = {
   exportEndTime?: number;
   setExportStartTime?: React.Dispatch<React.SetStateAction<number>>;
   setExportEndTime?: React.Dispatch<React.SetStateAction<number>>;
+  timelineCollapsed?: boolean;
   dense: boolean;
   children: ReactNode;
 };
@@ -48,6 +49,7 @@ export function ReviewTimeline({
   setExportStartTime,
   exportEndTime,
   setExportEndTime,
+  timelineCollapsed = false,
   dense,
   children,
 }: ReviewTimelineProps) {
@@ -105,6 +107,7 @@ export function ReviewTimeline({
     setDraggableElementTime: setHandlebarTime,
     initialScrollIntoViewOnly: onlyInitialHandlebarScroll,
     timelineDuration,
+    timelineCollapsed: timelineCollapsed,
     timelineStartAligned,
     isDragging: isDraggingHandlebar,
     setIsDragging: setIsDraggingHandlebar,
