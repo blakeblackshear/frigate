@@ -308,19 +308,18 @@ function CustomTimeSelector({
 
   const timezoneOffset = useMemo(
     () =>
-      /*
-       config?.ui.timezone
-        ? getUTCOffset(new Date(), config.ui.timezone)
-        : undefined
-      */
-      getUTCOffset(new Date(), "Australia/Darwin"),
-    [],
+      config?.ui.timezone
+        ? Math.round(getUTCOffset(new Date(), config.ui.timezone))
+        : undefined,
+    [config?.ui.timezone],
   );
   const localTimeOffset = useMemo(
     () =>
-      getUTCOffset(
-        new Date(),
-        Intl.DateTimeFormat().resolvedOptions().timeZone,
+      Math.round(
+        getUTCOffset(
+          new Date(),
+          Intl.DateTimeFormat().resolvedOptions().timeZone,
+        ),
       ),
     [],
   );
@@ -398,7 +397,7 @@ function CustomTimeSelector({
         </PopoverTrigger>
         <PopoverContent className="flex flex-col items-center">
           <TimezoneAwareCalendar
-            timezone={"Australia/Darwin"}
+            timezone={config?.ui.timezone}
             selectedDay={new Date(startTime * 1000)}
             onSelect={(day) => {
               if (!day) {
@@ -460,7 +459,7 @@ function CustomTimeSelector({
         </PopoverTrigger>
         <PopoverContent className="flex flex-col items-center">
           <TimezoneAwareCalendar
-            timezone={"Australia/Darwin"}
+            timezone={config?.ui.timezone}
             selectedDay={new Date(endTime * 1000)}
             onSelect={(day) => {
               if (!day) {

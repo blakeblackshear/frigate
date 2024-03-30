@@ -89,7 +89,8 @@ export function TimezoneAwareCalendar({
   onSelect,
 }: TimezoneAwareCalendarProps) {
   const timezoneOffset = useMemo(
-    () => (timezone ? getUTCOffset(new Date(), timezone) : undefined),
+    () =>
+      timezone ? Math.round(getUTCOffset(new Date(), timezone)) : undefined,
     [timezone],
   );
   const disabledDates = useMemo(() => {
@@ -102,7 +103,6 @@ export function TimezoneAwareCalendar({
         0,
         0,
       );
-      tomorrow.setHours(25);
     } else {
       tomorrow.setHours(tomorrow.getHours() + 24, -1, 0, 0);
     }
@@ -127,7 +127,7 @@ export function TimezoneAwareCalendar({
       date.getUTCSeconds(),
     );
     const todayUtc = new Date(utc);
-    todayUtc.setHours(25, todayUtc.getMinutes() + timezoneOffset, 0, 0);
+    todayUtc.setMinutes(todayUtc.getMinutes() + timezoneOffset, 0, 0);
     return todayUtc;
   }, [timezoneOffset]);
 
