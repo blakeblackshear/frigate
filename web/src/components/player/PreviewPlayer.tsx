@@ -350,7 +350,9 @@ class PreviewVideoController extends PreviewController {
   }
 
   override setNewPreviewStartTime(time: number) {
-    this.timeToSeek = time;
+    if (this.preview) {
+      this.timeToSeek = time - this.preview.start;
+    }
   }
 
   previewReady() {

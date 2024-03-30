@@ -687,6 +687,8 @@ function MotionReview({
     [selectedRangeIdx, timeRangeSegments],
   );
 
+  const [previewStart, setPreviewStart] = useState(startTime);
+
   const [scrubbing, setScrubbing] = useState(false);
   const [playing, setPlaying] = useState(false);
 
@@ -702,9 +704,7 @@ function MotionReview({
       );
 
       if (index != -1) {
-        Object.values(videoPlayersRef.current).forEach((controller) => {
-          controller.setNewPreviewStartTime(currentTime);
-        });
+        setPreviewStart(currentTime);
         setSelectedRangeIdx(index);
       }
       return;
@@ -826,7 +826,7 @@ function MotionReview({
                 className={`${detectionType ? `outline outline-3 outline-offset-1 outline-severity_${detectionType}` : "outline-0 shadow-none"} rounded-2xl ${grow}`}
                 camera={camera.name}
                 timeRange={currentTimeRange}
-                startTime={startTime}
+                startTime={previewStart}
                 cameraPreviews={relevantPreviews || []}
                 isScrubbing={scrubbing}
                 onControllerReady={(controller) => {
