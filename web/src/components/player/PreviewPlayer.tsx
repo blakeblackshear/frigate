@@ -170,6 +170,39 @@ function PreviewVideoPlayer({
     }
   }, [controller]);
 
+  // canvas to cover preview transition
+
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [videoSize, setVideoSize] = useState<number[]>([0, 0]);
+
+  const changeSource = useCallback(
+    (newPreview: Preview | undefined, video: HTMLVideoElement | null) => {
+      setCurrentPreview(newPreview);
+
+      if (!newPreview || !video) {
+        return;
+      }
+
+      if (!canvasRef.current && videoSize[0] > 0) {
+        const canvas = document.createElement("canvas");
+        canvas.width = videoSize[0];
+        canvas.height = videoSize[1];
+        canvasRef.current = canvas;
+      }
+
+      const context = canvasRef.current?.getContext("2d");
+
+      if (context) {
+        context.drawImage(video, 0, 0, videoSize[0], videoSize[1]);
+        setCurrentHourFrame(canvasRef.current?.toDataURL("image/webp"));
+      }
+
+      // we only want this to change when current preview changes
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    },
+    [setCurrentHourFrame, videoSize],
+  );
+
   useEffect(() => {
     if (!controller) {
       return;
@@ -183,7 +216,7 @@ function PreviewVideoPlayer({
     );
 
     if (preview != currentPreview) {
-      setCurrentPreview(preview);
+      changeSource(preview, previewRef.current);
     }
 
     controller.newPlayback({
@@ -193,37 +226,7 @@ function PreviewVideoPlayer({
 
     // we only want this to change when recordings update
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [controller, timeRange]);
-
-  // canvas to cover preview transition
-
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [videoSize, setVideoSize] = useState<number[]>([0, 0]);
-
-  // handle switching sources
-
-  useEffect(() => {
-    if (!currentPreview || !previewRef.current) {
-      return;
-    }
-
-    if (!canvasRef.current && videoSize[0] > 0) {
-      const canvas = document.createElement("canvas");
-      canvas.width = videoSize[0];
-      canvas.height = videoSize[1];
-      canvasRef.current = canvas;
-    }
-
-    const context = canvasRef.current?.getContext("2d");
-
-    if (context) {
-      context.drawImage(previewRef.current, 0, 0, videoSize[0], videoSize[1]);
-      setCurrentHourFrame(canvasRef.current?.toDataURL("image/webp"));
-    }
-
-    // we only want this to change when current preview changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPreview, previewRef]);
+  }, [controller, timeRange, changeSource]);
 
   return (
     <div
