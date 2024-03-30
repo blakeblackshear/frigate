@@ -713,7 +713,9 @@ function MotionReview({
     Object.values(videoPlayersRef.current).forEach((controller) => {
       controller.scrubToTimestamp(currentTime);
     });
-  }, [currentTime, currentTimeRange, timeRangeSegments]);
+    // only refresh when current time or available segments changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentTime, timeRangeSegments]);
 
   // playback
 
