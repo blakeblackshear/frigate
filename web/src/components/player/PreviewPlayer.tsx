@@ -162,12 +162,16 @@ function PreviewVideoPlayer({
       return;
     }
 
+    setCurrentHourFrame(undefined);
+
     if (isAndroid && isChrome) {
       // android/chrome glitches when setting currentTime at the same time as onSeeked
       setTimeout(() => controller.finishedSeeking(), 25);
     } else {
       controller.finishedSeeking();
     }
+    // we only want to update on controller change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controller]);
 
   // canvas to cover preview transition
@@ -177,9 +181,8 @@ function PreviewVideoPlayer({
 
   const changeSource = useCallback(
     (newPreview: Preview | undefined, video: HTMLVideoElement | null) => {
-      setCurrentPreview(newPreview);
-
       if (!newPreview || !video) {
+        setCurrentPreview(newPreview);
         return;
       }
 
@@ -196,6 +199,8 @@ function PreviewVideoPlayer({
         context.drawImage(video, 0, 0, videoSize[0], videoSize[1]);
         setCurrentHourFrame(canvasRef.current?.toDataURL("image/webp"));
       }
+
+      setCurrentPreview(newPreview);
 
       // we only want this to change when current preview changes
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -240,7 +245,7 @@ function PreviewVideoPlayer({
       />
       <video
         ref={previewRef}
-        className="absolute size-full"
+        className={`absolute size-full ${currentHourFrame ? "invisible" : "visible"}`}
         preload="auto"
         autoPlay
         playsInline
@@ -248,8 +253,6 @@ function PreviewVideoPlayer({
         disableRemotePlayback
         onSeeked={onPreviewSeeked}
         onLoadedData={() => {
-          setCurrentHourFrame(undefined);
-
           if (controller) {
             controller.previewReady();
           } else {
