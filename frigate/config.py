@@ -422,7 +422,7 @@ class DetectConfig(FrigateBaseModel):
     )
     max_disappeared: Optional[int] = Field(
         None,
-        title="Maximum number of frames the object can dissapear before detection ends.",
+        title="Maximum number of frames the object can disappear before detection ends.",
     )
     stationary: StationaryConfig = Field(
         default_factory=StationaryConfig,
