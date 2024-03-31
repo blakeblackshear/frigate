@@ -211,7 +211,7 @@ It is recommended to run Frigate in LXC, rather than in a VM, for maximum perfor
 - Successfully passing hardware devices through multiple levels of containerization (LXC then Docker) can be difficult. Many people make devices like `/dev/dri/renderD128` world-readable in the host or run Frigate in a privileged LXC container.
 - The virtualization layer often introduces a sizable amount of overhead for communication with Coral devices, but [not in all circumstances](https://github.com/blakeblackshear/frigate/discussions/1837).
 
-See the [Proxmox LXC discussion](https://github.com/blakeblackshear/frigate/discussions/1111) for more general information.
+See the [Proxmox LXC discussion](https://github.com/blakeblackshear/frigate/discussions/5773) for more general information.
 
 ## ESXi
 
