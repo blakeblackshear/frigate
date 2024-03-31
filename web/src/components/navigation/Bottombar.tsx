@@ -1,6 +1,5 @@
 import { navbarLinks } from "@/pages/site-navigation";
 import NavItem from "./NavItem";
-import SettingsNavItems from "../settings/SettingsNavItems";
 import { IoIosWarning } from "react-icons/io";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import useSWR from "swr";
@@ -8,6 +7,8 @@ import { FrigateStats } from "@/types/stats";
 import { useFrigateStats } from "@/api/ws";
 import { useMemo } from "react";
 import useStats from "@/hooks/use-stats";
+import GeneralSettings from "../settings/GeneralSettings";
+import AccountSettings from "../settings/AccountSettings";
 
 function Bottombar() {
   return (
@@ -23,7 +24,8 @@ function Bottombar() {
           dev={item.dev}
         />
       ))}
-      <SettingsNavItems className="flex flex-shrink-0 justify-between gap-4" />
+      <GeneralSettings />
+      <AccountSettings />
       <StatusAlertNav />
     </div>
   );

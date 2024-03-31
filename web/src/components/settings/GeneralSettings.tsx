@@ -27,7 +27,6 @@ import {
 import { Button } from "../ui/button";
 import { Link } from "react-router-dom";
 import { CgDarkMode } from "react-icons/cg";
-import { VscAccount } from "react-icons/vsc";
 import {
   colorSchemes,
   friendlyColorSchemeName,
@@ -59,10 +58,10 @@ import {
 } from "@/components/ui/tooltip";
 import ActivityIndicator from "../indicators/activity-indicator";
 
-type SettingsNavItemsProps = {
+type GeneralSettings = {
   className?: string;
 };
-export default function SettingsNavItems({ className }: SettingsNavItemsProps) {
+export default function GeneralSettings({ className }: GeneralSettings) {
   const { theme, colorScheme, setTheme, setColorScheme } = useTheme();
   const [restartDialogOpen, setRestartDialogOpen] = useState(false);
   const [restartingSheetOpen, setRestartingSheetOpen] = useState(false);
@@ -243,16 +242,6 @@ export default function SettingsNavItems({ className }: SettingsNavItemsProps) {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button size="icon" variant="ghost">
-              <VscAccount />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="right">
-            <p>Account</p>
-          </TooltipContent>
-        </Tooltip>
       </div>
       {restartDialogOpen && (
         <AlertDialog
