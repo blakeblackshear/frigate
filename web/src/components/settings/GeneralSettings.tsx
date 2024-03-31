@@ -57,6 +57,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import ActivityIndicator from "../indicators/activity-indicator";
+import { isDesktop } from "react-device-detect";
+import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { PopoverPortal } from "@radix-ui/react-popover";
+import { DialogClose } from "../ui/dialog";
 
 type GeneralSettings = {
   className?: string;
@@ -93,11 +98,20 @@ export default function GeneralSettings({ className }: GeneralSettings) {
     window.location.href = "/";
   };
 
+  const Container = isDesktop ? DropdownMenu : Drawer;
+  const Trigger = isDesktop ? DropdownMenuTrigger : DrawerTrigger;
+  const Content = isDesktop ? DropdownMenuContent : DrawerContent;
+  const MenuItem = isDesktop ? DropdownMenuItem : DialogClose;
+  const SubItem = isDesktop ? DropdownMenuSub : Popover;
+  const SubItemTrigger = isDesktop ? DropdownMenuSubTrigger : PopoverTrigger;
+  const SubItemContent = isDesktop ? DropdownMenuSubContent : PopoverContent;
+  const Portal = isDesktop ? DropdownMenuPortal : PopoverPortal;
+
   return (
     <>
       <div className={className}>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+        <Container>
+          <Trigger asChild>
             <a href="#">
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -110,28 +124,40 @@ export default function GeneralSettings({ className }: GeneralSettings) {
                 </TooltipContent>
               </Tooltip>
             </a>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="md:w-72 mr-5">
+          </Trigger>
+          <Content className={isDesktop ? "w-72 mr-5" : "max-h-[75dvh]"}>
             <DropdownMenuLabel>System</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
+            <DropdownMenuGroup className={isDesktop ? "" : "flex flex-col"}>
               <Link to="/storage">
-                <DropdownMenuItem>
-                  <LuHardDrive className="mr-2 h-4 w-4" />
+                <MenuItem
+                  className={
+                    isDesktop ? "cursor-pointer" : "p-2 flex items-center"
+                  }
+                >
+                  <LuHardDrive className="mr-2 size-4" />
                   <span>Storage</span>
-                </DropdownMenuItem>
+                </MenuItem>
               </Link>
               <Link to="/system">
-                <DropdownMenuItem>
-                  <LuActivity className="mr-2 h-4 w-4" />
+                <MenuItem
+                  className={
+                    isDesktop ? "cursor-pointer" : "p-2 flex items-center"
+                  }
+                >
+                  <LuActivity className="mr-2 size-4" />
                   <span>System metrics</span>
-                </DropdownMenuItem>
+                </MenuItem>
               </Link>
               <Link to="/logs">
-                <DropdownMenuItem>
-                  <LuList className="mr-2 h-4 w-4" />
+                <MenuItem
+                  className={
+                    isDesktop ? "cursor-pointer" : "p-2 flex items-center"
+                  }
+                >
+                  <LuList className="mr-2 size-4" />
                   <span>System logs</span>
-                </DropdownMenuItem>
+                </MenuItem>
               </Link>
             </DropdownMenuGroup>
             <DropdownMenuLabel className="mt-3">
@@ -140,74 +166,108 @@ export default function GeneralSettings({ className }: GeneralSettings) {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <Link to="/settings">
-                <DropdownMenuItem>
-                  <LuSettings className="mr-2 h-4 w-4" />
+                <MenuItem
+                  className={
+                    isDesktop ? "cursor-pointer" : "p-2 flex items-center"
+                  }
+                >
+                  <LuSettings className="mr-2 size-4" />
                   <span>Settings</span>
-                </DropdownMenuItem>
+                </MenuItem>
               </Link>
               <Link to="/config">
-                <DropdownMenuItem>
-                  <LuPenSquare className="mr-2 h-4 w-4" />
+                <MenuItem
+                  className={
+                    isDesktop ? "cursor-pointer" : "p-2 flex items-center"
+                  }
+                >
+                  <LuPenSquare className="mr-2 size-4" />
                   <span>Configuration editor</span>
-                </DropdownMenuItem>
+                </MenuItem>
               </Link>
               <DropdownMenuLabel className="mt-3">Appearance</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
-                  <LuSunMoon className="mr-2 h-4 w-4" />
+              <SubItem>
+                <SubItemTrigger
+                  className={
+                    isDesktop ? "cursor-pointer" : "p-2 flex items-center"
+                  }
+                >
+                  <LuSunMoon className="mr-2 size-4" />
                   <span>Dark Mode</span>
-                </DropdownMenuSubTrigger>
-                <DropdownMenuPortal>
-                  <DropdownMenuSubContent>
-                    <DropdownMenuItem onClick={() => setTheme("light")}>
+                </SubItemTrigger>
+                <Portal>
+                  <SubItemContent>
+                    <MenuItem
+                      className={
+                        isDesktop ? "cursor-pointer" : "p-2 flex items-center"
+                      }
+                      onClick={() => setTheme("light")}
+                    >
                       {theme === "light" ? (
                         <>
-                          <LuSun className="mr-2 h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                          <LuSun className="mr-2 size-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                           Light
                         </>
                       ) : (
                         <span className="mr-2 ml-6">Light</span>
                       )}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setTheme("dark")}>
+                    </MenuItem>
+                    <MenuItem
+                      className={
+                        isDesktop ? "cursor-pointer" : "p-2 flex items-center"
+                      }
+                      onClick={() => setTheme("dark")}
+                    >
                       {theme === "dark" ? (
                         <>
-                          <LuMoon className="mr-2 h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                          <LuMoon className="mr-2 size-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
                           Dark
                         </>
                       ) : (
                         <span className="mr-2 ml-6">Dark</span>
                       )}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setTheme("system")}>
+                    </MenuItem>
+                    <MenuItem
+                      className={
+                        isDesktop ? "cursor-pointer" : "p-2 flex items-center"
+                      }
+                      onClick={() => setTheme("system")}
+                    >
                       {theme === "system" ? (
                         <>
-                          <CgDarkMode className="mr-2 h-4 w-4 scale-100 transition-all" />
+                          <CgDarkMode className="mr-2 size-4 scale-100 transition-all" />
                           System
                         </>
                       ) : (
                         <span className="mr-2 ml-6">System</span>
                       )}
-                    </DropdownMenuItem>
-                  </DropdownMenuSubContent>
-                </DropdownMenuPortal>
-              </DropdownMenuSub>
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
-                  <LuSunMoon className="mr-2 h-4 w-4" />
+                    </MenuItem>
+                  </SubItemContent>
+                </Portal>
+              </SubItem>
+              <SubItem>
+                <SubItemTrigger
+                  className={
+                    isDesktop ? "cursor-pointer" : "p-2 flex items-center"
+                  }
+                >
+                  <LuSunMoon className="mr-2 size-4" />
                   <span>Theme</span>
-                </DropdownMenuSubTrigger>
-                <DropdownMenuPortal>
-                  <DropdownMenuSubContent>
+                </SubItemTrigger>
+                <Portal>
+                  <SubItemContent>
                     {colorSchemes.map((scheme) => (
-                      <DropdownMenuItem
+                      <MenuItem
                         key={scheme}
+                        className={
+                          isDesktop ? "cursor-pointer" : "p-2 flex items-center"
+                        }
                         onClick={() => setColorScheme(scheme)}
                       >
                         {scheme === colorScheme ? (
                           <>
-                            <IoColorPalette className="mr-2 h-4 w-4 rotate-0 scale-100 transition-all" />
+                            <IoColorPalette className="mr-2 size-4 rotate-0 scale-100 transition-all" />
                             {friendlyColorSchemeName(scheme)}
                           </>
                         ) : (
@@ -215,33 +275,44 @@ export default function GeneralSettings({ className }: GeneralSettings) {
                             {friendlyColorSchemeName(scheme)}
                           </span>
                         )}
-                      </DropdownMenuItem>
+                      </MenuItem>
                     ))}
-                  </DropdownMenuSubContent>
-                </DropdownMenuPortal>
-              </DropdownMenuSub>
+                  </SubItemContent>
+                </Portal>
+              </SubItem>
             </DropdownMenuGroup>
             <DropdownMenuLabel className="mt-3">Help</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <a href="https://docs.frigate.video">
-              <DropdownMenuItem>
-                <LuLifeBuoy className="mr-2 h-4 w-4" />
+              <MenuItem
+                className={
+                  isDesktop ? "cursor-pointer" : "p-2 flex items-center"
+                }
+              >
+                <LuLifeBuoy className="mr-2 size-4" />
                 <span>Documentation</span>
-              </DropdownMenuItem>
+              </MenuItem>
             </a>
             <a href="https://github.com/blakeblackshear/frigate">
-              <DropdownMenuItem>
-                <LuGithub className="mr-2 h-4 w-4" />
+              <MenuItem
+                className={
+                  isDesktop ? "cursor-pointer" : "p-2 flex items-center"
+                }
+              >
+                <LuGithub className="mr-2 size-4" />
                 <span>GitHub</span>
-              </DropdownMenuItem>
+              </MenuItem>
             </a>
             <DropdownMenuSeparator className="mt-3" />
-            <DropdownMenuItem onClick={() => setRestartDialogOpen(true)}>
-              <LuRotateCw className="mr-2 h-4 w-4" />
+            <MenuItem
+              className={isDesktop ? "cursor-pointer" : "p-2 flex items-center"}
+              onClick={() => setRestartDialogOpen(true)}
+            >
+              <LuRotateCw className="mr-2 size-4" />
               <span>Restart Frigate</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+            </MenuItem>
+          </Content>
+        </Container>
       </div>
       {restartDialogOpen && (
         <AlertDialog

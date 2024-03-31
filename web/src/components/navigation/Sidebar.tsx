@@ -1,6 +1,5 @@
 import Logo from "../Logo";
 import { navbarLinks } from "@/pages/site-navigation";
-import SettingsNavItems from "../settings/SettingsNavItems";
 import NavItem from "./NavItem";
 import { CameraGroupSelector } from "../filter/CameraGroupSelector";
 import { useLocation } from "react-router-dom";
