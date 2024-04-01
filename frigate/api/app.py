@@ -127,7 +127,9 @@ def stats():
 
 @bp.route("/stats/history")
 def stats_history():
-    return jsonify(current_app.stats_emitter.get_stats_history())
+    json: dict[str, any] = request.get_json(silent=True) or {}
+    keys = json.get("keys")
+    return jsonify(current_app.stats_emitter.get_stats_history(keys))
 
 
 @bp.route("/config")

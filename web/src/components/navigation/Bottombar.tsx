@@ -57,7 +57,10 @@ function StatusAlertNav() {
       <DrawerContent className="max-h-[75dvh] px-2 mx-1 rounded-t-2xl overflow-hidden">
         <div className="w-full h-auto py-4 overflow-y-auto overflow-x-hidden flex flex-col items-center gap-2">
           {potentialProblems.map((prob) => (
-            <div className="w-full flex items-center text-xs gap-2 capitalize">
+            <div
+              key={prob.text}
+              className="w-full flex items-center text-xs gap-2 capitalize"
+            >
               <IoIosWarning className={`size-5 ${prob.color}`} />
               {prob.text}
             </div>

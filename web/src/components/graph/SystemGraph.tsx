@@ -51,7 +51,7 @@ export default function SystemGraph({
               if (value >= threshold.error) {
                 return "#FA5252";
               } else if (value >= threshold.warning) {
-                return "#aa00aa";
+                return "#FF9966";
               } else {
                 return "#404040";
               }

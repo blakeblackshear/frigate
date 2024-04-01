@@ -67,7 +67,7 @@ class StatsEmitter(threading.Thread):
 
     def run(self) -> None:
         time.sleep(10)
-        for counter in itertools.cycle(range(self.config.record.expire_interval)):
+        for counter in itertools.cycle(range(int(self.config.record.expire_interval / 10))):
             if self.stop_event.wait(10):
                 break
 

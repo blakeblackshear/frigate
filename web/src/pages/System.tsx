@@ -14,7 +14,9 @@ import {
 function System() {
   const { data: config } = useSWR<FrigateConfig>("config");
 
-  // stats
+  // stats chunks
+
+  // stats collection
 
   const { data: initialStats } = useSWR<FrigateStats[]>("stats/history", {
     revalidateOnFocus: false,
