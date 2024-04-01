@@ -1,5 +1,6 @@
 """Emit stats to listeners."""
 
+import itertools
 import json
 import logging
 import threading
@@ -52,13 +53,20 @@ class StatsEmitter(threading.Thread):
 
     def run(self) -> None:
         time.sleep(10)
-        while not self.stop_event.wait(self.config.mqtt.stats_interval):
+        for counter in itertools.cycle(range(self.config.record.expire_interval)):
+            if self.stop_event.wait(5):
+                break
+
             logger.debug("Starting stats collection")
             stats = stats_snapshot(
                 self.config, self.stats_tracking, self.hwaccel_errors
             )
             self.stats_history.append(stats)
             self.stats_history = self.stats_history[-MAX_STATS_POINTS:]
-            self.requestor.send_data("stats", json.dumps(stats))
+
+            if counter == 0:
+                self.requestor.send_data("stats", json.dumps(stats))
+
             logger.debug("Finished stats collection")
+
         logger.info("Exiting stats emitter...")
