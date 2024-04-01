@@ -59,9 +59,13 @@ import {
 import ActivityIndicator from "../indicators/activity-indicator";
 import { isDesktop } from "react-device-detect";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { PopoverPortal } from "@radix-ui/react-popover";
-import { DialogClose } from "../ui/dialog";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogPortal,
+  DialogTrigger,
+} from "../ui/dialog";
 
 type GeneralSettings = {
   className?: string;
@@ -102,10 +106,10 @@ export default function GeneralSettings({ className }: GeneralSettings) {
   const Trigger = isDesktop ? DropdownMenuTrigger : DrawerTrigger;
   const Content = isDesktop ? DropdownMenuContent : DrawerContent;
   const MenuItem = isDesktop ? DropdownMenuItem : DialogClose;
-  const SubItem = isDesktop ? DropdownMenuSub : Popover;
-  const SubItemTrigger = isDesktop ? DropdownMenuSubTrigger : PopoverTrigger;
-  const SubItemContent = isDesktop ? DropdownMenuSubContent : PopoverContent;
-  const Portal = isDesktop ? DropdownMenuPortal : PopoverPortal;
+  const SubItem = isDesktop ? DropdownMenuSub : Dialog;
+  const SubItemTrigger = isDesktop ? DropdownMenuSubTrigger : DialogTrigger;
+  const SubItemContent = isDesktop ? DropdownMenuSubContent : DialogContent;
+  const Portal = isDesktop ? DropdownMenuPortal : DialogPortal;
 
   return (
     <>
@@ -216,7 +220,9 @@ export default function GeneralSettings({ className }: GeneralSettings) {
                     <span>Dark Mode</span>
                   </SubItemTrigger>
                   <Portal>
-                    <SubItemContent>
+                    <SubItemContent
+                      className={isDesktop ? "" : "w-[92%] rounded-2xl"}
+                    >
                       <MenuItem
                         className={
                           isDesktop
@@ -283,7 +289,9 @@ export default function GeneralSettings({ className }: GeneralSettings) {
                     <span>Theme</span>
                   </SubItemTrigger>
                   <Portal>
-                    <SubItemContent>
+                    <SubItemContent
+                      className={isDesktop ? "" : "w-[92%] rounded-2xl"}
+                    >
                       {colorSchemes.map((scheme) => (
                         <MenuItem
                           key={scheme}
