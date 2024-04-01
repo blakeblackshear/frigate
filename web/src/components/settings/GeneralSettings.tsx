@@ -125,192 +125,230 @@ export default function GeneralSettings({ className }: GeneralSettings) {
               </Tooltip>
             </a>
           </Trigger>
-          <Content className={isDesktop ? "w-72 mr-5" : "max-h-[75dvh]"}>
-            <DropdownMenuLabel>System</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup className={isDesktop ? "" : "flex flex-col"}>
-              <Link to="/storage">
-                <MenuItem
-                  className={
-                    isDesktop ? "cursor-pointer" : "p-2 flex items-center"
-                  }
-                >
-                  <LuHardDrive className="mr-2 size-4" />
-                  <span>Storage</span>
-                </MenuItem>
-              </Link>
-              <Link to="/system">
-                <MenuItem
-                  className={
-                    isDesktop ? "cursor-pointer" : "p-2 flex items-center"
-                  }
-                >
-                  <LuActivity className="mr-2 size-4" />
-                  <span>System metrics</span>
-                </MenuItem>
-              </Link>
-              <Link to="/logs">
-                <MenuItem
-                  className={
-                    isDesktop ? "cursor-pointer" : "p-2 flex items-center"
-                  }
-                >
-                  <LuList className="mr-2 size-4" />
-                  <span>System logs</span>
-                </MenuItem>
-              </Link>
-            </DropdownMenuGroup>
-            <DropdownMenuLabel className="mt-3">
-              Configuration
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <Link to="/settings">
-                <MenuItem
-                  className={
-                    isDesktop ? "cursor-pointer" : "p-2 flex items-center"
-                  }
-                >
-                  <LuSettings className="mr-2 size-4" />
-                  <span>Settings</span>
-                </MenuItem>
-              </Link>
-              <Link to="/config">
-                <MenuItem
-                  className={
-                    isDesktop ? "cursor-pointer" : "p-2 flex items-center"
-                  }
-                >
-                  <LuPenSquare className="mr-2 size-4" />
-                  <span>Configuration editor</span>
-                </MenuItem>
-              </Link>
-              <DropdownMenuLabel className="mt-3">Appearance</DropdownMenuLabel>
+          <Content
+            className={
+              isDesktop ? "w-72 mr-5" : "max-h-[75dvh] p-2 overflow-hidden"
+            }
+          >
+            <div className="w-full flex-col overflow-y-auto overflow-x-hidden">
+              <DropdownMenuLabel>System</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <SubItem>
-                <SubItemTrigger
-                  className={
-                    isDesktop ? "cursor-pointer" : "p-2 flex items-center"
-                  }
-                >
-                  <LuSunMoon className="mr-2 size-4" />
-                  <span>Dark Mode</span>
-                </SubItemTrigger>
-                <Portal>
-                  <SubItemContent>
-                    <MenuItem
-                      className={
-                        isDesktop ? "cursor-pointer" : "p-2 flex items-center"
-                      }
-                      onClick={() => setTheme("light")}
-                    >
-                      {theme === "light" ? (
-                        <>
-                          <LuSun className="mr-2 size-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                          Light
-                        </>
-                      ) : (
-                        <span className="mr-2 ml-6">Light</span>
-                      )}
-                    </MenuItem>
-                    <MenuItem
-                      className={
-                        isDesktop ? "cursor-pointer" : "p-2 flex items-center"
-                      }
-                      onClick={() => setTheme("dark")}
-                    >
-                      {theme === "dark" ? (
-                        <>
-                          <LuMoon className="mr-2 size-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                          Dark
-                        </>
-                      ) : (
-                        <span className="mr-2 ml-6">Dark</span>
-                      )}
-                    </MenuItem>
-                    <MenuItem
-                      className={
-                        isDesktop ? "cursor-pointer" : "p-2 flex items-center"
-                      }
-                      onClick={() => setTheme("system")}
-                    >
-                      {theme === "system" ? (
-                        <>
-                          <CgDarkMode className="mr-2 size-4 scale-100 transition-all" />
-                          System
-                        </>
-                      ) : (
-                        <span className="mr-2 ml-6">System</span>
-                      )}
-                    </MenuItem>
-                  </SubItemContent>
-                </Portal>
-              </SubItem>
-              <SubItem>
-                <SubItemTrigger
-                  className={
-                    isDesktop ? "cursor-pointer" : "p-2 flex items-center"
-                  }
-                >
-                  <LuSunMoon className="mr-2 size-4" />
-                  <span>Theme</span>
-                </SubItemTrigger>
-                <Portal>
-                  <SubItemContent>
-                    {colorSchemes.map((scheme) => (
+              <DropdownMenuGroup className={isDesktop ? "" : "flex flex-col"}>
+                <Link to="/storage">
+                  <MenuItem
+                    className={
+                      isDesktop
+                        ? "cursor-pointer"
+                        : "p-2 flex items-center text-sm"
+                    }
+                  >
+                    <LuHardDrive className="mr-2 size-4" />
+                    <span>Storage</span>
+                  </MenuItem>
+                </Link>
+                <Link to="/system">
+                  <MenuItem
+                    className={
+                      isDesktop
+                        ? "cursor-pointer"
+                        : "p-2 flex items-center text-sm"
+                    }
+                  >
+                    <LuActivity className="mr-2 size-4" />
+                    <span>System metrics</span>
+                  </MenuItem>
+                </Link>
+                <Link to="/logs">
+                  <MenuItem
+                    className={
+                      isDesktop
+                        ? "cursor-pointer"
+                        : "p-2 flex items-center text-sm"
+                    }
+                  >
+                    <LuList className="mr-2 size-4" />
+                    <span>System logs</span>
+                  </MenuItem>
+                </Link>
+              </DropdownMenuGroup>
+              <DropdownMenuLabel className={isDesktop ? "mt-3" : "mt-1"}>
+                Configuration
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <Link to="/settings">
+                  <MenuItem
+                    className={
+                      isDesktop
+                        ? "cursor-pointer"
+                        : "p-2 flex items-center text-sm"
+                    }
+                  >
+                    <LuSettings className="mr-2 size-4" />
+                    <span>Settings</span>
+                  </MenuItem>
+                </Link>
+                <Link to="/config">
+                  <MenuItem
+                    className={
+                      isDesktop
+                        ? "cursor-pointer"
+                        : "p-2 flex items-center text-sm"
+                    }
+                  >
+                    <LuPenSquare className="mr-2 size-4" />
+                    <span>Configuration editor</span>
+                  </MenuItem>
+                </Link>
+                <DropdownMenuLabel className={isDesktop ? "mt-3" : "mt-1"}>
+                  Appearance
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <SubItem>
+                  <SubItemTrigger
+                    className={
+                      isDesktop
+                        ? "cursor-pointer"
+                        : "p-2 flex items-center text-sm"
+                    }
+                  >
+                    <LuSunMoon className="mr-2 size-4" />
+                    <span>Dark Mode</span>
+                  </SubItemTrigger>
+                  <Portal>
+                    <SubItemContent>
                       <MenuItem
-                        key={scheme}
                         className={
-                          isDesktop ? "cursor-pointer" : "p-2 flex items-center"
+                          isDesktop
+                            ? "cursor-pointer"
+                            : "p-2 flex items-center text-sm"
                         }
-                        onClick={() => setColorScheme(scheme)}
+                        onClick={() => setTheme("light")}
                       >
-                        {scheme === colorScheme ? (
+                        {theme === "light" ? (
                           <>
-                            <IoColorPalette className="mr-2 size-4 rotate-0 scale-100 transition-all" />
-                            {friendlyColorSchemeName(scheme)}
+                            <LuSun className="mr-2 size-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                            Light
                           </>
                         ) : (
-                          <span className="mr-2 ml-6">
-                            {friendlyColorSchemeName(scheme)}
-                          </span>
+                          <span className="mr-2 ml-6">Light</span>
                         )}
                       </MenuItem>
-                    ))}
-                  </SubItemContent>
-                </Portal>
-              </SubItem>
-            </DropdownMenuGroup>
-            <DropdownMenuLabel className="mt-3">Help</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <a href="https://docs.frigate.video">
+                      <MenuItem
+                        className={
+                          isDesktop
+                            ? "cursor-pointer"
+                            : "p-2 flex items-center text-sm"
+                        }
+                        onClick={() => setTheme("dark")}
+                      >
+                        {theme === "dark" ? (
+                          <>
+                            <LuMoon className="mr-2 size-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                            Dark
+                          </>
+                        ) : (
+                          <span className="mr-2 ml-6">Dark</span>
+                        )}
+                      </MenuItem>
+                      <MenuItem
+                        className={
+                          isDesktop
+                            ? "cursor-pointer"
+                            : "p-2 flex items-center text-sm"
+                        }
+                        onClick={() => setTheme("system")}
+                      >
+                        {theme === "system" ? (
+                          <>
+                            <CgDarkMode className="mr-2 size-4 scale-100 transition-all" />
+                            System
+                          </>
+                        ) : (
+                          <span className="mr-2 ml-6">System</span>
+                        )}
+                      </MenuItem>
+                    </SubItemContent>
+                  </Portal>
+                </SubItem>
+                <SubItem>
+                  <SubItemTrigger
+                    className={
+                      isDesktop
+                        ? "cursor-pointer"
+                        : "p-2 flex items-center text-sm"
+                    }
+                  >
+                    <LuSunMoon className="mr-2 size-4" />
+                    <span>Theme</span>
+                  </SubItemTrigger>
+                  <Portal>
+                    <SubItemContent>
+                      {colorSchemes.map((scheme) => (
+                        <MenuItem
+                          key={scheme}
+                          className={
+                            isDesktop
+                              ? "cursor-pointer"
+                              : "p-2 flex items-center text-sm"
+                          }
+                          onClick={() => setColorScheme(scheme)}
+                        >
+                          {scheme === colorScheme ? (
+                            <>
+                              <IoColorPalette className="mr-2 size-4 rotate-0 scale-100 transition-all" />
+                              {friendlyColorSchemeName(scheme)}
+                            </>
+                          ) : (
+                            <span className="mr-2 ml-6">
+                              {friendlyColorSchemeName(scheme)}
+                            </span>
+                          )}
+                        </MenuItem>
+                      ))}
+                    </SubItemContent>
+                  </Portal>
+                </SubItem>
+              </DropdownMenuGroup>
+              <DropdownMenuLabel className={isDesktop ? "mt-3" : "mt-1"}>
+                Help
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <a href="https://docs.frigate.video">
+                <MenuItem
+                  className={
+                    isDesktop
+                      ? "cursor-pointer"
+                      : "p-2 flex items-center text-sm"
+                  }
+                >
+                  <LuLifeBuoy className="mr-2 size-4" />
+                  <span>Documentation</span>
+                </MenuItem>
+              </a>
+              <a href="https://github.com/blakeblackshear/frigate">
+                <MenuItem
+                  className={
+                    isDesktop
+                      ? "cursor-pointer"
+                      : "p-2 flex items-center text-sm"
+                  }
+                >
+                  <LuGithub className="mr-2 size-4" />
+                  <span>GitHub</span>
+                </MenuItem>
+              </a>
+              <DropdownMenuSeparator className={isDesktop ? "mt-3" : "mt-1"} />
               <MenuItem
                 className={
-                  isDesktop ? "cursor-pointer" : "p-2 flex items-center"
+                  isDesktop ? "cursor-pointer" : "p-2 flex items-center text-sm"
                 }
+                onClick={() => setRestartDialogOpen(true)}
               >
-                <LuLifeBuoy className="mr-2 size-4" />
-                <span>Documentation</span>
+                <LuRotateCw className="mr-2 size-4" />
+                <span>Restart Frigate</span>
               </MenuItem>
-            </a>
-            <a href="https://github.com/blakeblackshear/frigate">
-              <MenuItem
-                className={
-                  isDesktop ? "cursor-pointer" : "p-2 flex items-center"
-                }
-              >
-                <LuGithub className="mr-2 size-4" />
-                <span>GitHub</span>
-              </MenuItem>
-            </a>
-            <DropdownMenuSeparator className="mt-3" />
-            <MenuItem
-              className={isDesktop ? "cursor-pointer" : "p-2 flex items-center"}
-              onClick={() => setRestartDialogOpen(true)}
-            >
-              <LuRotateCw className="mr-2 size-4" />
-              <span>Restart Frigate</span>
-            </MenuItem>
+            </div>
           </Content>
         </Container>
       </div>
