@@ -6,6 +6,7 @@ import logging
 import threading
 import time
 from multiprocessing.synchronize import Event as MpEvent
+from typing import Optional
 
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
@@ -47,14 +48,27 @@ class StatsEmitter(threading.Thread):
             self.stats_history.append(stats)
             return stats
 
-    def get_stats_history(self) -> list[dict[str, any]]:
+    def get_stats_history(self, keys: Optional[list[str]] = None) -> list[dict[str, any]]:
         """Get stats history."""
-        return self.stats_history
+        if not keys:
+            return self.stats_history
+
+        selected_stats: list[dict[str, any]] = []
+
+        for s in self.stats_history:
+            selected = {}
+
+            for k in keys:
+                selected[k] = selected_stats[k]
+
+            selected_stats.append(selected)
+
+        return selected_stats
 
     def run(self) -> None:
         time.sleep(10)
         for counter in itertools.cycle(range(self.config.record.expire_interval)):
-            if self.stop_event.wait(5):
+            if self.stop_event.wait(10):
                 break
 
             logger.debug("Starting stats collection")

@@ -1,4 +1,9 @@
 import { FrigateConfig } from "@/types/frigateConfig";
+import {
+  CameraDetectThreshold,
+  CameraFfmpegThreshold,
+  InferenceThreshold,
+} from "@/types/graph";
 import { FrigateStats, PotentialProblem } from "@/types/stats";
 import { useMemo } from "react";
 import useSWR from "swr";
@@ -15,12 +20,12 @@ export default function useStats(stats: FrigateStats | undefined) {
 
     // check detectors for high inference speeds
     Object.entries(stats["detectors"]).forEach(([key, det]) => {
-      if (det["inference_speed"] > 100) {
+      if (det["inference_speed"] > InferenceThreshold.error) {
         problems.push({
           text: `${key} is very slow (${det["inference_speed"]} ms)`,
           color: "text-danger",
         });
-      } else if (det["inference_speed"] > 50) {
+      } else if (det["inference_speed"] > InferenceThreshold.warning) {
         problems.push({
           text: `${key} is slow (${det["inference_speed"]} ms)`,
           color: "text-orange-400",
@@ -51,14 +56,14 @@ export default function useStats(stats: FrigateStats | undefined) {
         stats["cpu_usages"][cam["pid"]]?.cpu_average,
       );
 
-      if (!isNaN(ffmpegAvg) && ffmpegAvg >= 20.0) {
+      if (!isNaN(ffmpegAvg) && ffmpegAvg >= CameraFfmpegThreshold.error) {
         problems.push({
           text: `${name.replaceAll("_", " ")} has high FFMPEG CPU usage (${ffmpegAvg}%)`,
           color: "text-danger",
         });
       }
 
-      if (!isNaN(detectAvg) && detectAvg >= 40.0) {
+      if (!isNaN(detectAvg) && detectAvg >= CameraDetectThreshold.error) {
         problems.push({
           text: `${name.replaceAll("_", " ")} has high detect CPU usage (${detectAvg}%)`,
           color: "text-danger",

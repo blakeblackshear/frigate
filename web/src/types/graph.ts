@@ -27,3 +27,13 @@ export const DetectorMemThreshold = {
   warning: 20,
   error: 50,
 } as Threshold;
+
+export const CameraFfmpegThreshold = {
+  warning: 20,
+  error: 20,
+} as Threshold;
+
+export const CameraDetectThreshold = {
+  warning: 20,
+  error: 40,
+} as Threshold;
