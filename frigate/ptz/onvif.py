@@ -349,7 +349,10 @@ class OnvifController:
                 }
             }
 
-        onvif.get_service("ptz").ContinuousMove(move_request)
+        try:
+            onvif.get_service("ptz").ContinuousMove(move_request)
+        except ONVIFError as e:
+            logger.warning(f"Onvif sending move request to {camera_name} failed: {e}")
 
     def _move_relative(self, camera_name: str, pan, tilt, zoom, speed) -> None:
         if "pt-r-fov" not in self.cams[camera_name]["features"]:
