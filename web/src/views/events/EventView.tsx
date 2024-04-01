@@ -206,12 +206,12 @@ export default function EventView({
 
   return (
     <div className="py-2 flex flex-col size-full">
-      <div className="h-11 px-2 relative flex justify-between items-center">
+      <div className="h-11 mb-2 pl-3 pr-2 relative flex justify-between items-center">
         {isMobile && (
           <Logo className="absolute inset-x-1/2 -translate-x-1/2 h-8" />
         )}
         <ToggleGroup
-          className="*:px-3 *:py-4 *:rounded-2xl"
+          className="*:px-3 *:py-4 *:rounded-md"
           type="single"
           size="sm"
           value={severity}
@@ -518,7 +518,7 @@ function DetectionReview({
         )}
 
         <div
-          className="w-full m-2 p-1 grid sm:grid-cols-2 md:grid-cols-3 3xl:grid-cols-4 gap-2 md:gap-4"
+          className="w-full mx-2 px-1 grid sm:grid-cols-2 md:grid-cols-3 3xl:grid-cols-4 gap-2 md:gap-4"
           ref={contentRef}
         >
           {currentItems &&
@@ -533,7 +533,7 @@ function DetectionReview({
                   data-segment-start={
                     alignStartDateToTimeline(value.start_time) - segmentDuration
                   }
-                  className={`review-item outline outline-offset-1 rounded-lg shadow-none transition-all my-1 md:my-0 ${selected ? `outline-3 outline-severity_${value.severity} shadow-severity_${value.severity}` : "outline-0 duration-500"}`}
+                  className="review-item relative rounded-lg"
                 >
                   <div className="aspect-video rounded-lg overflow-hidden">
                     <PreviewThumbnailPlayer
@@ -545,6 +545,9 @@ function DetectionReview({
                       onClick={onSelectReview}
                     />
                   </div>
+                  <div
+                    className={`review-item-ring pointer-events-none z-10 absolute rounded-lg inset-0 size-full -outline-offset-[2.8px] outline outline-3 ${selected ? `outline-severity_${value.severity} shadow-severity_${value.severity}` : "outline-transparent duration-500"}`}
+                  />
                 </div>
               );
             })}
@@ -563,7 +566,7 @@ function DetectionReview({
           )}
         </div>
       </div>
-      <div className="w-[65px] md:w-[110px] mt-2 flex flex-row">
+      <div className="w-[65px] md:w-[110px] flex flex-row">
         <div className="w-[55px] md:w-[100px] overflow-y-auto no-scrollbar">
           <EventReviewTimeline
             segmentDuration={segmentDuration}
@@ -809,44 +812,53 @@ function MotionReview({
       <div className="flex flex-1 flex-wrap content-start gap-2 md:gap-4 overflow-y-auto no-scrollbar">
         <div
           ref={contentRef}
-          className="w-full m-2 p-1 grid sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 gap-2 md:gap-4 overflow-auto no-scrollbar"
+          className="w-full mx-2 px-1 grid sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 gap-2 md:gap-4 overflow-auto no-scrollbar"
         >
           {reviewCameras.map((camera) => {
             let grow;
+            let spans;
             const aspectRatio = camera.detect.width / camera.detect.height;
             if (aspectRatio > 2) {
-              grow = "sm:col-span-2 aspect-wide";
+              grow = "aspect-wide";
+              spans = "sm:col-span-2";
             } else if (aspectRatio < 1) {
-              grow = "md:row-span-2 md:h-full aspect-tall";
+              grow = "md:h-full aspect-tall";
+              spans = "md:row-span-2";
             } else {
               grow = "aspect-video";
+              spans = "";
             }
             const detectionType = getDetectionType(camera.name);
             return (
-              <PreviewPlayer
-                key={camera.name}
-                className={`${detectionType ? `outline outline-3 outline-offset-1 outline-severity_${detectionType}` : "outline-0 shadow-none"} rounded-2xl ${grow}`}
-                camera={camera.name}
-                timeRange={currentTimeRange}
-                startTime={previewStart}
-                cameraPreviews={relevantPreviews || []}
-                isScrubbing={scrubbing}
-                onControllerReady={(controller) => {
-                  videoPlayersRef.current[camera.name] = controller;
-                }}
-                onClick={() =>
-                  onOpenRecording({
-                    camera: camera.name,
-                    startTime: currentTime,
-                    severity: "significant_motion",
-                  })
-                }
-              />
+              <div className={`relative ${spans}`}>
+                <PreviewPlayer
+                  key={camera.name}
+                  className={`rounded-2xl ${spans} ${grow}`}
+                  camera={camera.name}
+                  timeRange={currentTimeRange}
+                  startTime={previewStart}
+                  cameraPreviews={relevantPreviews || []}
+                  isScrubbing={scrubbing}
+                  onControllerReady={(controller) => {
+                    videoPlayersRef.current[camera.name] = controller;
+                  }}
+                  onClick={() =>
+                    onOpenRecording({
+                      camera: camera.name,
+                      startTime: currentTime,
+                      severity: "significant_motion",
+                    })
+                  }
+                />
+                <div
+                  className={`review-item-ring pointer-events-none z-10 absolute rounded-lg inset-0 size-full -outline-offset-[2.8px] outline outline-3 ${detectionType ? `outline-severity_${detectionType} shadow-severity_${detectionType}` : "outline-transparent duration-500"}`}
+                />
+              </div>
             );
           })}
         </div>
       </div>
-      <div className="w-[55px] md:w-[100px] mt-2 overflow-y-auto no-scrollbar">
+      <div className="w-[55px] md:w-[100px] overflow-y-auto no-scrollbar">
         <MotionReviewTimeline
           segmentDuration={segmentDuration}
           timestampSpread={15}

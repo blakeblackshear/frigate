@@ -243,7 +243,7 @@ export function RecordingView({
     <div ref={contentRef} className="size-full pt-2 flex flex-col">
       <Toaster />
       <div
-        className={`w-full h-11 px-2 relative flex items-center justify-between`}
+        className={`w-full h-11 mb-2 px-2 relative flex items-center justify-between`}
       >
         {isMobile && (
           <Logo className="absolute inset-x-1/2 -translate-x-1/2 h-8" />

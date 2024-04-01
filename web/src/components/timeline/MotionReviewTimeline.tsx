@@ -4,6 +4,7 @@ import { useTimelineUtils } from "@/hooks/use-timeline-utils";
 import { MotionData, ReviewSegment, ReviewSeverity } from "@/types/review";
 import ReviewTimeline from "./ReviewTimeline";
 import { isDesktop } from "react-device-detect";
+import { useMotionSegmentUtils } from "@/hooks/use-motion-segment-utils";
 
 export type MotionReviewTimelineProps = {
   segmentDuration: number;
@@ -75,14 +76,37 @@ export function MotionReviewTimeline({
     [timelineStart, alignStartDateToTimeline, segmentDuration],
   );
 
+  const { getMotionSegmentValue } = useMotionSegmentUtils(
+    segmentDuration,
+    motion_events,
+  );
+
   // Generate segments for the timeline
   const generateSegments = useCallback(() => {
-    const segmentCount = Math.ceil(timelineDuration / segmentDuration);
+    const segments = [];
+    let segmentTime = timelineStartAligned;
 
-    return Array.from({ length: segmentCount }, (_, index) => {
-      const segmentTime = timelineStartAligned - index * segmentDuration;
+    while (segmentTime >= timelineStartAligned - timelineDuration) {
+      const motionStart = segmentTime;
+      const motionEnd = motionStart + segmentDuration;
 
-      return (
+      const segmentMotion =
+        getMotionSegmentValue(motionStart) > 0 ||
+        getMotionSegmentValue(motionStart + segmentDuration / 2) > 0;
+      const overlappingReviewItems = events.some(
+        (item) =>
+          (item.start_time >= motionStart && item.start_time < motionEnd) ||
+          (item.end_time > motionStart && item.end_time <= motionEnd) ||
+          (item.start_time <= motionStart && item.end_time >= motionEnd),
+      );
+
+      if ((!segmentMotion || overlappingReviewItems) && motionOnly) {
+        // exclude segment if necessary when in motion only mode
+        segmentTime -= segmentDuration;
+        continue;
+      }
+
+      segments.push(
         <MotionSegment
           key={segmentTime}
           events={events}
@@ -96,9 +120,11 @@ export function MotionReviewTimeline({
           minimapEndTime={minimapEndTime}
           setHandlebarTime={setHandlebarTime}
           dense={dense}
-        />
+        />,
       );
-    });
+      segmentTime -= segmentDuration;
+    }
+    return segments;
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [

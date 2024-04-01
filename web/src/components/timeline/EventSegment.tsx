@@ -170,24 +170,20 @@ export function EventSegment({
   const segmentClick = useCallback(() => {
     if (contentRef.current && startTimestamp) {
       const element = contentRef.current.querySelector(
-        `[data-segment-start="${startTimestamp - segmentDuration}"]`,
+        `[data-segment-start="${startTimestamp - segmentDuration}"] .review-item-ring`,
       );
       if (element instanceof HTMLElement) {
         scrollIntoView(element, {
           scrollMode: "if-needed",
           behavior: "smooth",
         });
-        element.classList.add(
-          `outline-severity_${severityType}`,
-          `shadow-severity_${severityType}`,
-        );
-        element.classList.add("outline-3");
-        element.classList.remove("outline-0");
+        element.classList.add(`outline-severity_${severityType}`);
+        element.classList.remove("outline-transparent");
 
         // Remove the classes after a short timeout
         setTimeout(() => {
-          element.classList.remove("outline-3");
-          element.classList.add("outline-0");
+          element.classList.remove(`outline-severity_${severityType}`);
+          element.classList.add("outline-transparent");
         }, 3000);
       }
 

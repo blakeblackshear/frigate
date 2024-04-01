@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { isMobile } from "react-device-detect";
 import scrollIntoView from "scroll-into-view-if-needed";
 import { useTimelineUtils } from "./use-timeline-utils";
@@ -23,6 +23,7 @@ type DraggableElementProps = {
   setIsDragging: React.Dispatch<React.SetStateAction<boolean>>;
   setDraggableElementPosition?: React.Dispatch<React.SetStateAction<number>>;
   dense: boolean;
+  timelineSegments: ReactNode[];
 };
 
 function useDraggableElement({
@@ -45,6 +46,7 @@ function useDraggableElement({
   setIsDragging,
   setDraggableElementPosition,
   dense,
+  timelineSegments,
 }: DraggableElementProps) {
   const [clientYPosition, setClientYPosition] = useState<number | null>(null);
   const [initialClickAdjustment, setInitialClickAdjustment] = useState(0);
@@ -213,10 +215,10 @@ function useDraggableElement({
   );
 
   useEffect(() => {
-    if (timelineRef.current) {
+    if (timelineRef.current && timelineSegments.length) {
       setSegments(Array.from(timelineRef.current.querySelectorAll(".segment")));
     }
-  }, [timelineRef, segmentDuration, timelineDuration, timelineCollapsed]);
+  }, [timelineRef, timelineCollapsed, timelineSegments]);
 
   useEffect(() => {
     let animationFrameId: number | null = null;
@@ -426,7 +428,13 @@ function useDraggableElement({
   ]);
 
   useEffect(() => {
-    if (timelineRef.current && draggableElementTime && timelineCollapsed) {
+    if (
+      timelineRef.current &&
+      draggableElementTime &&
+      timelineCollapsed &&
+      timelineSegments &&
+      segments
+    ) {
       setFullTimelineHeight(timelineRef.current.scrollHeight);
       const alignedSegmentTime = alignStartDateToTimeline(draggableElementTime);
 
@@ -452,14 +460,30 @@ function useDraggableElement({
             if (setDraggableElementTime) {
               setDraggableElementTime(searchTime);
             }
-            break;
+            return;
+          }
+        }
+      }
+      if (!segmentElement) {
+        // segment still not found, just start at the beginning of the timeline or at now()
+        if (segments?.length) {
+          const searchTime = parseInt(
+            segments[0].getAttribute("data-segment-id") || "0",
+            10,
+          );
+          if (setDraggableElementTime) {
+            setDraggableElementTime(searchTime);
+          }
+        } else {
+          if (setDraggableElementTime) {
+            setDraggableElementTime(timelineStartAligned);
           }
         }
       }
     }
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timelineCollapsed]);
+  }, [timelineCollapsed, segments]);
 
   useEffect(() => {
     if (timelineRef.current && segments) {

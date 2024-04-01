@@ -30,7 +30,7 @@ export type ReviewTimelineProps = {
   setExportEndTime?: React.Dispatch<React.SetStateAction<number>>;
   timelineCollapsed?: boolean;
   dense: boolean;
-  children: ReactNode;
+  children: ReactNode[];
 };
 
 export function ReviewTimeline({
@@ -113,6 +113,7 @@ export function ReviewTimeline({
     setIsDragging: setIsDraggingHandlebar,
     draggableElementTimeRef: handlebarTimeRef,
     dense,
+    timelineSegments: children,
   });
 
   const {
@@ -136,6 +137,7 @@ export function ReviewTimeline({
     draggableElementTimeRef: exportStartTimeRef,
     setDraggableElementPosition: setExportStartPosition,
     dense,
+    timelineSegments: children,
   });
 
   const {
@@ -159,6 +161,7 @@ export function ReviewTimeline({
     draggableElementTimeRef: exportEndTimeRef,
     setDraggableElementPosition: setExportEndPosition,
     dense,
+    timelineSegments: children,
   });
 
   const handleHandlebar = useCallback(
@@ -321,119 +324,123 @@ export function ReviewTimeline({
         <div className="absolute bottom-0 inset-x-0 z-20 w-full h-[30px] bg-gradient-to-t from-secondary to-transparent pointer-events-none"></div>
         {children}
       </div>
-      {showHandlebar && (
-        <div
-          className={`absolute left-0 top-0 ${isDraggingHandlebar && isIOS ? "" : "z-20"} w-full`}
-          role="scrollbar"
-          ref={handlebarRef}
-        >
-          <div
-            className="flex items-center justify-center touch-none select-none"
-            onMouseDown={handleHandlebar}
-            onTouchStart={handleHandlebar}
-          >
-            <div
-              className={`relative w-full ${
-                isDraggingHandlebar ? "cursor-grabbing" : "cursor-grab"
-              }`}
-            >
-              <div
-                className={`bg-destructive rounded-full mx-auto ${
-                  dense
-                    ? "w-12 md:w-20"
-                    : segmentDuration < 60
-                      ? "w-24"
-                      : "w-20"
-                } h-5 ${isDraggingHandlebar && isMobile ? "fixed top-[18px] left-1/2 transform -translate-x-1/2 z-20 w-32 h-[30px] bg-destructive/80" : "static"} flex items-center justify-center`}
-              >
-                <div
-                  ref={handlebarTimeRef}
-                  className={`text-white pointer-events-none ${textSizeClasses("handlebar")} z-10`}
-                ></div>
-              </div>
-              <div
-                className={`absolute h-[4px] w-full bg-destructive ${isDraggingHandlebar && isMobile ? "top-1" : "top-1/2 transform -translate-y-1/2"}`}
-              ></div>
-            </div>
-          </div>
-        </div>
-      )}
-      {showExportHandles && (
+      {children.length > 0 && (
         <>
-          <div
-            className={`export-end absolute left-0 top-0 ${isDraggingExportEnd && isIOS ? "" : "z-20"} w-full`}
-            role="scrollbar"
-            ref={exportEndRef}
-          >
+          {showHandlebar && (
             <div
-              className="flex items-center justify-center touch-none select-none"
-              onMouseDown={handleExportEnd}
-              onTouchStart={handleExportEnd}
+              className={`absolute left-0 top-0 ${isDraggingHandlebar && isIOS ? "" : "z-20"} w-full`}
+              role="scrollbar"
+              ref={handlebarRef}
             >
               <div
-                className={`relative mt-[6.5px] w-full ${
-                  isDraggingExportEnd ? "cursor-grabbing" : "cursor-grab"
-                }`}
+                className="flex items-center justify-center touch-none select-none"
+                onMouseDown={handleHandlebar}
+                onTouchStart={handleHandlebar}
               >
                 <div
-                  className={`bg-selected -mt-4 mx-auto ${
-                    dense
-                      ? "w-12 md:w-20"
-                      : segmentDuration < 60
-                        ? "w-24"
-                        : "w-20"
-                  } h-5 ${isDraggingExportEnd && isMobile ? "fixed mt-0 rounded-full top-[18px] left-1/2 transform -translate-x-1/2 z-20 w-32 h-[30px] bg-selected/80" : "rounded-tr-lg rounded-tl-lg static"} flex items-center justify-center`}
+                  className={`relative w-full ${
+                    isDraggingHandlebar ? "cursor-grabbing" : "cursor-grab"
+                  }`}
                 >
                   <div
-                    ref={exportEndTimeRef}
-                    className={`text-white pointer-events-none ${isDraggingExportEnd && isMobile ? "mt-0" : ""} ${textSizeClasses("export_end")} z-10`}
-                  ></div>
-                </div>
-                <div
-                  className={`absolute h-[4px] w-full bg-selected ${isDraggingExportEnd && isMobile ? "top-0" : "top-1/2 transform -translate-y-1/2"}`}
-                ></div>
-              </div>
-            </div>
-          </div>
-          <div
-            ref={exportSectionRef}
-            className="bg-selected/50 absolute w-full"
-          ></div>
-          <div
-            className={`export-start absolute left-0 top-0 ${isDraggingExportStart && isIOS ? "" : "z-20"} w-full`}
-            role="scrollbar"
-            ref={exportStartRef}
-          >
-            <div
-              className="flex items-center justify-center touch-none select-none"
-              onMouseDown={handleExportStart}
-              onTouchStart={handleExportStart}
-            >
-              <div
-                className={`relative -mt-[6.5px] w-full ${
-                  isDragging ? "cursor-grabbing" : "cursor-grab"
-                }`}
-              >
-                <div
-                  className={`absolute h-[4px] w-full bg-selected ${isDraggingExportStart && isMobile ? "top-[12px]" : "top-1/2 transform -translate-y-1/2"}`}
-                ></div>
-                <div
-                  className={`bg-selected mt-4 mx-auto ${
-                    dense
-                      ? "w-12 md:w-20"
-                      : segmentDuration < 60
-                        ? "w-24"
-                        : "w-20"
-                  } h-5 ${isDraggingExportStart && isMobile ? "fixed mt-0 rounded-full top-[4px] left-1/2 transform -translate-x-1/2 z-20 w-32 h-[30px] bg-selected/80" : "rounded-br-lg rounded-bl-lg static"} flex items-center justify-center`}
-                >
+                    className={`bg-destructive rounded-full mx-auto ${
+                      dense
+                        ? "w-12 md:w-20"
+                        : segmentDuration < 60
+                          ? "w-24"
+                          : "w-20"
+                    } h-5 ${isDraggingHandlebar && isMobile ? "fixed top-[18px] left-1/2 transform -translate-x-1/2 z-20 w-32 h-[30px] bg-destructive/80" : "static"} flex items-center justify-center`}
+                  >
+                    <div
+                      ref={handlebarTimeRef}
+                      className={`text-white pointer-events-none ${textSizeClasses("handlebar")} z-10`}
+                    ></div>
+                  </div>
                   <div
-                    ref={exportStartTimeRef}
-                    className={`text-white pointer-events-none ${isDraggingExportStart && isMobile ? "mt-0" : ""} ${textSizeClasses("export_start")} z-10`}
+                    className={`absolute h-[4px] w-full bg-destructive ${isDraggingHandlebar && isMobile ? "top-1" : "top-1/2 transform -translate-y-1/2"}`}
                   ></div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
+          {showExportHandles && (
+            <>
+              <div
+                className={`export-end absolute left-0 top-0 ${isDraggingExportEnd && isIOS ? "" : "z-20"} w-full`}
+                role="scrollbar"
+                ref={exportEndRef}
+              >
+                <div
+                  className="flex items-center justify-center touch-none select-none"
+                  onMouseDown={handleExportEnd}
+                  onTouchStart={handleExportEnd}
+                >
+                  <div
+                    className={`relative mt-[6.5px] w-full ${
+                      isDraggingExportEnd ? "cursor-grabbing" : "cursor-grab"
+                    }`}
+                  >
+                    <div
+                      className={`bg-selected -mt-4 mx-auto ${
+                        dense
+                          ? "w-12 md:w-20"
+                          : segmentDuration < 60
+                            ? "w-24"
+                            : "w-20"
+                      } h-5 ${isDraggingExportEnd && isMobile ? "fixed mt-0 rounded-full top-[18px] left-1/2 transform -translate-x-1/2 z-20 w-32 h-[30px] bg-selected/80" : "rounded-tr-lg rounded-tl-lg static"} flex items-center justify-center`}
+                    >
+                      <div
+                        ref={exportEndTimeRef}
+                        className={`text-white pointer-events-none ${isDraggingExportEnd && isMobile ? "mt-0" : ""} ${textSizeClasses("export_end")} z-10`}
+                      ></div>
+                    </div>
+                    <div
+                      className={`absolute h-[4px] w-full bg-selected ${isDraggingExportEnd && isMobile ? "top-0" : "top-1/2 transform -translate-y-1/2"}`}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+              <div
+                ref={exportSectionRef}
+                className="bg-selected/50 absolute w-full"
+              ></div>
+              <div
+                className={`export-start absolute left-0 top-0 ${isDraggingExportStart && isIOS ? "" : "z-20"} w-full`}
+                role="scrollbar"
+                ref={exportStartRef}
+              >
+                <div
+                  className="flex items-center justify-center touch-none select-none"
+                  onMouseDown={handleExportStart}
+                  onTouchStart={handleExportStart}
+                >
+                  <div
+                    className={`relative -mt-[6.5px] w-full ${
+                      isDragging ? "cursor-grabbing" : "cursor-grab"
+                    }`}
+                  >
+                    <div
+                      className={`absolute h-[4px] w-full bg-selected ${isDraggingExportStart && isMobile ? "top-[12px]" : "top-1/2 transform -translate-y-1/2"}`}
+                    ></div>
+                    <div
+                      className={`bg-selected mt-4 mx-auto ${
+                        dense
+                          ? "w-12 md:w-20"
+                          : segmentDuration < 60
+                            ? "w-24"
+                            : "w-20"
+                      } h-5 ${isDraggingExportStart && isMobile ? "fixed mt-0 rounded-full top-[4px] left-1/2 transform -translate-x-1/2 z-20 w-32 h-[30px] bg-selected/80" : "rounded-br-lg rounded-bl-lg static"} flex items-center justify-center`}
+                    >
+                      <div
+                        ref={exportStartTimeRef}
+                        className={`text-white pointer-events-none ${isDraggingExportStart && isMobile ? "mt-0" : ""} ${textSizeClasses("export_start")} z-10`}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </>
       )}
     </div>

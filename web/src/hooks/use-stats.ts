@@ -37,9 +37,11 @@ export default function useStats(stats: FrigateStats | undefined) {
     // check camera cpu usages
     Object.entries(stats["cameras"]).forEach(([name, cam]) => {
       const ffmpegAvg = parseFloat(
-        stats["cpu_usages"][cam["ffmpeg_pid"]].cpu_average,
+        stats["cpu_usages"][cam["ffmpeg_pid"]]?.cpu_average,
       );
-      const detectAvg = parseFloat(stats["cpu_usages"][cam["pid"]].cpu_average);
+      const detectAvg = parseFloat(
+        stats["cpu_usages"][cam["pid"]]?.cpu_average,
+      );
 
       if (!isNaN(ffmpegAvg) && ffmpegAvg >= 20.0) {
         problems.push({
