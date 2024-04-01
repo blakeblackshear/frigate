@@ -13,6 +13,7 @@ SOCKET_SUB = "ipc:///tmp/cache/detect_sun"
 
 class DetectionTypeEnum(str, Enum):
     all = ""
+    api = "api"
     video = "video"
     audio = "audio"
 

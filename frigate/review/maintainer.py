@@ -5,6 +5,7 @@ import logging
 import os
 import random
 import string
+import sys
 import threading
 from enum import Enum
 from multiprocessing.synchronize import Event as MpEvent
@@ -18,6 +19,7 @@ from frigate.comms.detections_updater import DetectionSubscriber, DetectionTypeE
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, FrigateConfig
 from frigate.const import ALL_ATTRIBUTE_LABELS, CLIPS_DIR, UPSERT_REVIEW_SEGMENT
+from frigate.events.external import ManualEventState
 from frigate.models import ReviewSegment
 from frigate.object_processing import TrackedObject
 from frigate.util.image import SharedMemoryFrameManager, calculate_16_9_crop
@@ -133,6 +135,9 @@ class ReviewSegmentMaintainer(threading.Thread):
         self.requestor = InterProcessRequestor()
         self.config_subscriber = ConfigSubscriber("config/record/")
         self.detection_subscriber = DetectionSubscriber(DetectionTypeEnum.all)
+
+        # manual events
+        self.indefinite_events: dict[str, dict[str, any]] = {}
 
         self.stop_event = stop_event
 
@@ -304,6 +309,15 @@ class ReviewSegmentMaintainer(threading.Thread):
                     dBFS,
                     audio_detections,
                 ) = data
+            elif topic == DetectionTypeEnum.api:
+                (
+                    camera,
+                    frame_time,
+                    manual_info,
+                ) = data
+
+                if camera not in self.indefinite_events:
+                    self.indefinite_events[camera] = {}
 
             if not self.config.cameras[camera].record.enabled:
                 continue
@@ -323,6 +337,27 @@ class ReviewSegmentMaintainer(threading.Thread):
                         current_segment.last_update = frame_time
 
                     current_segment.audio.update(audio_detections)
+                elif topic == DetectionTypeEnum.api:
+                    if manual_info["state"] == ManualEventState.complete:
+                        current_segment.detections[manual_info["event_id"]] = (
+                            manual_info["label"]
+                        )
+                        current_segment.severity = SeverityEnum.alert
+                        current_segment.last_update = manual_info["end_time"]
+                    elif manual_info["state"] == ManualEventState.start:
+                        self.indefinite_events[camera][manual_info["event_id"]] = (
+                            manual_info["label"]
+                        )
+                        current_segment.detections[manual_info["event_id"]] = (
+                            manual_info["label"]
+                        )
+                        current_segment.severity = SeverityEnum.alert
+
+                        # temporarily make it so this event can not end
+                        current_segment.last_update = sys.maxsize
+                    elif manual_info["state"] == ManualEventState.end:
+                        self.indefinite_events[camera].pop(manual_info["event_id"])
+                        current_segment.last_update = manual_info["end_time"]
             else:
                 if topic == DetectionTypeEnum.video:
                     self.check_if_new_segment(
@@ -341,6 +376,27 @@ class ReviewSegmentMaintainer(threading.Thread):
                         set(audio_detections),
                         [],
                     )
+                elif topic == DetectionTypeEnum.api:
+                    self.active_review_segments[camera] = PendingReviewSegment(
+                        camera,
+                        frame_time,
+                        SeverityEnum.alert,
+                        {manual_info["event_id"]: manual_info["label"]},
+                        set(),
+                        set(),
+                        [],
+                    )
+
+                    if manual_info["state"] == ManualEventState.start:
+                        self.indefinite_events[camera][manual_info["event_id"]] = (
+                            manual_info["label"]
+                        )
+                        # temporarily make it so this event can not end
+                        self.active_review_segments[camera] = sys.maxsize
+                    elif manual_info["state"] == ManualEventState.complete:
+                        self.active_review_segments[camera].last_update = manual_info[
+                            "end_time"
+                        ]
 
 
 def get_active_objects(
