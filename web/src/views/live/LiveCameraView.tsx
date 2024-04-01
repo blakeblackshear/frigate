@@ -55,7 +55,6 @@ import {
   LuEar,
   LuEarOff,
   LuPictureInPicture,
-  LuPictureInPicture2,
   LuVideo,
   LuVideoOff,
 } from "react-icons/lu";
