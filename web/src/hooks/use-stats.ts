@@ -36,33 +36,23 @@ export default function useStats(stats: FrigateStats | undefined) {
 
     // check camera cpu usages
     Object.entries(stats["cameras"]).forEach(([name, cam]) => {
-      if (
-        stats["cpu_usages"][cam["ffmpeg_pid"]] &&
-        stats["cpu_usages"][cam["pid"]]
-      ) {
-        const ffmpegAvg = parseFloat(
-          stats["cpu_usages"][cam["ffmpeg_pid"]].cpu_average,
-        );
-        const detectAvg = parseFloat(
-          stats["cpu_usages"][cam["pid"]].cpu_average,
-        );
+      const ffmpegAvg = parseFloat(
+        stats["cpu_usages"][cam["ffmpeg_pid"]]?.cpu_average,
+      );
+      const detectAvg = parseFloat(
+        stats["cpu_usages"][cam["pid"]]?.cpu_average,
+      );
 
-        if (!isNaN(ffmpegAvg) && ffmpegAvg >= 20.0) {
-          problems.push({
-            text: `${name.replaceAll("_", " ")} has high FFMPEG CPU usage (${ffmpegAvg}%)`,
-            color: "text-danger",
-          });
-        }
-
-        if (!isNaN(detectAvg) && detectAvg >= 40.0) {
-          problems.push({
-            text: `${name.replaceAll("_", " ")} has high detect CPU usage (${detectAvg}%)`,
-            color: "text-danger",
-          });
-        }
-      } else {
+      if (!isNaN(ffmpegAvg) && ffmpegAvg >= 20.0) {
         problems.push({
-          text: `${name.replaceAll("_", " ")} is offline.`,
+          text: `${name.replaceAll("_", " ")} has high FFMPEG CPU usage (${ffmpegAvg}%)`,
+          color: "text-danger",
+        });
+      }
+
+      if (!isNaN(detectAvg) && detectAvg >= 40.0) {
+        problems.push({
+          text: `${name.replaceAll("_", " ")} has high detect CPU usage (${detectAvg}%)`,
           color: "text-danger",
         });
       }
