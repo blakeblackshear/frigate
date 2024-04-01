@@ -546,7 +546,7 @@ function DetectionReview({
                     />
                   </div>
                   <div
-                    className={`review-item-ring pointer-events-none z-10 absolute rounded-lg inset-0 size-full -outline-offset-[2.8px] outline outline-3 ${selected ? `outline-severity_${value.severity} shadow-severity_${value.severity}` : "outline-transparent duration-500"}`}
+                    className={`review-item-ring pointer-events-none z-10 absolute rounded-lg inset-0 size-full -outline-offset-[2.8px] outline outline-[3px] ${selected ? `outline-severity_${value.severity} shadow-severity_${value.severity}` : "outline-transparent duration-500"}`}
                   />
                 </div>
               );
@@ -851,7 +851,7 @@ function MotionReview({
                   }
                 />
                 <div
-                  className={`review-item-ring pointer-events-none z-10 absolute rounded-lg inset-0 size-full -outline-offset-[2.8px] outline outline-3 ${detectionType ? `outline-severity_${detectionType} shadow-severity_${detectionType}` : "outline-transparent duration-500"}`}
+                  className={`review-item-ring pointer-events-none z-10 absolute rounded-lg inset-0 size-full -outline-offset-[2.8px] outline outline-[3px] ${detectionType ? `outline-severity_${detectionType} shadow-severity_${detectionType}` : "outline-transparent duration-500"}`}
                 />
               </div>
             );
