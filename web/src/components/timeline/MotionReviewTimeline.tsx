@@ -90,9 +90,13 @@ export function MotionReviewTimeline({
       const motionStart = segmentTime;
       const motionEnd = motionStart + segmentDuration;
 
+      const firstHalfMotionValue = getMotionSegmentValue(motionStart);
+      const secondHalfMotionValue = getMotionSegmentValue(
+        motionStart + segmentDuration / 2,
+      );
+
       const segmentMotion =
-        getMotionSegmentValue(motionStart) > 0 ||
-        getMotionSegmentValue(motionStart + segmentDuration / 2) > 0;
+        firstHalfMotionValue > 0 || secondHalfMotionValue > 0;
       const overlappingReviewItems = events.some(
         (item) =>
           (item.start_time >= motionStart && item.start_time < motionEnd) ||
@@ -110,7 +114,8 @@ export function MotionReviewTimeline({
         <MotionSegment
           key={segmentTime}
           events={events}
-          motion_events={motion_events}
+          firstHalfMotionValue={firstHalfMotionValue}
+          secondHalfMotionValue={secondHalfMotionValue}
           segmentDuration={segmentDuration}
           segmentTime={segmentTime}
           timestampSpread={timestampSpread}

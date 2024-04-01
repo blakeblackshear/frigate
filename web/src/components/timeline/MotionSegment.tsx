@@ -1,6 +1,6 @@
 import { useTimelineUtils } from "@/hooks/use-timeline-utils";
 import { useEventSegmentUtils } from "@/hooks/use-event-segment-utils";
-import { MotionData, ReviewSegment } from "@/types/review";
+import { ReviewSegment } from "@/types/review";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import scrollIntoView from "scroll-into-view-if-needed";
 import { MinimapBounds, Tick, Timestamp } from "./segment-metadata";
@@ -10,10 +10,11 @@ import useTapUtils from "@/hooks/use-tap-utils";
 
 type MotionSegmentProps = {
   events: ReviewSegment[];
-  motion_events: MotionData[];
   segmentTime: number;
   segmentDuration: number;
   timestampSpread: number;
+  firstHalfMotionValue: number;
+  secondHalfMotionValue: number;
   motionOnly: boolean;
   showMinimap: boolean;
   minimapStartTime?: number;
@@ -24,10 +25,11 @@ type MotionSegmentProps = {
 
 export function MotionSegment({
   events,
-  motion_events,
   segmentTime,
   segmentDuration,
   timestampSpread,
+  firstHalfMotionValue,
+  secondHalfMotionValue,
   motionOnly,
   showMinimap,
   minimapStartTime,
@@ -43,8 +45,10 @@ export function MotionSegment({
     shouldShowRoundedCorners,
   } = useEventSegmentUtils(segmentDuration, events, severityType);
 
-  const { getMotionSegmentValue, interpolateMotionAudioData } =
-    useMotionSegmentUtils(segmentDuration, motion_events);
+  const { interpolateMotionAudioData } = useMotionSegmentUtils(
+    segmentDuration,
+    [],
+  );
 
   const { alignStartDateToTimeline, alignEndDateToTimeline } = useTimelineUtils(
     { segmentDuration },
@@ -77,29 +81,12 @@ export function MotionSegment({
   }, []);
 
   const firstHalfSegmentWidth = useMemo(() => {
-    return interpolateMotionAudioData(
-      getMotionSegmentValue(segmentTime),
-      maxSegmentWidth,
-    );
-  }, [
-    segmentTime,
-    maxSegmentWidth,
-    getMotionSegmentValue,
-    interpolateMotionAudioData,
-  ]);
+    return interpolateMotionAudioData(firstHalfMotionValue, maxSegmentWidth);
+  }, [maxSegmentWidth, firstHalfMotionValue, interpolateMotionAudioData]);
 
   const secondHalfSegmentWidth = useMemo(() => {
-    return interpolateMotionAudioData(
-      getMotionSegmentValue(segmentTime + segmentDuration / 2),
-      maxSegmentWidth,
-    );
-  }, [
-    segmentTime,
-    segmentDuration,
-    maxSegmentWidth,
-    getMotionSegmentValue,
-    interpolateMotionAudioData,
-  ]);
+    return interpolateMotionAudioData(secondHalfMotionValue, maxSegmentWidth);
+  }, [maxSegmentWidth, secondHalfMotionValue, interpolateMotionAudioData]);
 
   const alignedMinimapStartTime = useMemo(
     () => alignStartDateToTimeline(minimapStartTime ?? 0),
