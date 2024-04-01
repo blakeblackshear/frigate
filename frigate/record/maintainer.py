@@ -507,6 +507,8 @@ class RecordingMaintainer(threading.Thread):
                                 audio_detections,
                             )
                         )
+                elif topic == DetectionTypeEnum.api:
+                    continue
 
                 if frame_time < run_start - stale_frame_count_threshold:
                     stale_frame_count += 1
