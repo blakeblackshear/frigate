@@ -57,7 +57,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import ActivityIndicator from "../indicators/activity-indicator";
-import { isDesktop, isMobile } from "react-device-detect";
+import { isDesktop } from "react-device-detect";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import {
   Dialog,
@@ -220,7 +220,7 @@ export default function GeneralSettings({ className }: GeneralSettings) {
                     <span>Dark Mode</span>
                   </SubItemTrigger>
                   <Portal>
-                    {isMobile && <div tabIndex={0} />}
+                    <span tabIndex={0} className="sr-only" />
                     <SubItemContent
                       className={isDesktop ? "" : "w-[92%] rounded-2xl"}
                     >
@@ -293,7 +293,7 @@ export default function GeneralSettings({ className }: GeneralSettings) {
                     <SubItemContent
                       className={isDesktop ? "" : "w-[92%] rounded-2xl"}
                     >
-                      {isMobile && <div tabIndex={0} />}
+                      <span tabIndex={0} className="sr-only" />
                       {colorSchemes.map((scheme) => (
                         <MenuItem
                           key={scheme}
