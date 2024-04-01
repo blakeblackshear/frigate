@@ -1,9 +1,10 @@
 import Logo from "../Logo";
 import { navbarLinks } from "@/pages/site-navigation";
-import SettingsNavItems from "../settings/SettingsNavItems";
 import NavItem from "./NavItem";
 import { CameraGroupSelector } from "../filter/CameraGroupSelector";
 import { useLocation } from "react-router-dom";
+import GeneralSettings from "../settings/GeneralSettings";
+import AccountSettings from "../settings/AccountSettings";
 
 function Sidebar() {
   const location = useLocation();
@@ -31,7 +32,10 @@ function Sidebar() {
           );
         })}
       </div>
-      <SettingsNavItems className="hidden md:flex flex-col items-center mb-8" />
+      <div className="flex flex-col items-center mb-8">
+        <GeneralSettings />
+        <AccountSettings />
+      </div>
     </aside>
   );
 }

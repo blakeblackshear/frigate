@@ -25,7 +25,7 @@ function App() {
     <Providers>
       <BrowserRouter>
         <Wrapper>
-          <div className="size-full pt-2 overflow-hidden">
+          <div className="size-full overflow-hidden">
             {isDesktop && <Sidebar />}
             {isDesktop && <Statusbar />}
             {isMobile && <Bottombar />}
