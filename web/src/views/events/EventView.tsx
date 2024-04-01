@@ -826,6 +826,7 @@ function MotionReview({
               spans = "md:row-span-2";
             } else {
               grow = "aspect-video";
+              spans = "";
             }
             const detectionType = getDetectionType(camera.name);
             return (
