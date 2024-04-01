@@ -816,20 +816,23 @@ function MotionReview({
         >
           {reviewCameras.map((camera) => {
             let grow;
+            let spans;
             const aspectRatio = camera.detect.width / camera.detect.height;
             if (aspectRatio > 2) {
-              grow = "sm:col-span-2 aspect-wide";
+              grow = "aspect-wide";
+              spans = "sm:col-span-2";
             } else if (aspectRatio < 1) {
-              grow = "md:row-span-2 md:h-full aspect-tall";
+              grow = "md:h-full aspect-tall";
+              spans = "md:row-span-2";
             } else {
               grow = "aspect-video";
             }
             const detectionType = getDetectionType(camera.name);
             return (
-              <div className={`relative ${grow}`}>
+              <div className={`relative ${spans}`}>
                 <PreviewPlayer
                   key={camera.name}
-                  className={`rounded-2xl ${grow}`}
+                  className={`rounded-2xl ${spans} ${grow}`}
                   camera={camera.name}
                   timeRange={currentTimeRange}
                   startTime={previewStart}
