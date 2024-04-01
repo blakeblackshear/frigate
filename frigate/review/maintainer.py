@@ -160,7 +160,8 @@ class ReviewSegmentMaintainer(threading.Thread):
         active_objects = get_active_objects(frame_time, camera_config, objects)
 
         if len(active_objects) > 0:
-            segment.last_update = frame_time
+            if frame_time > segment.last_update:
+                segment.last_update = frame_time
 
             # update type for this segment now that active objects are detected
             if segment.severity == SeverityEnum.signification_motion:
@@ -198,7 +199,8 @@ class ReviewSegmentMaintainer(threading.Thread):
             segment.severity == SeverityEnum.signification_motion
             and len(motion) >= THRESHOLD_MOTION_ACTIVITY
         ):
-            segment.last_update = frame_time
+            if frame_time > segment.last_update:
+                segment.last_update = frame_time
         else:
             if segment.severity == SeverityEnum.alert and frame_time > (
                 segment.last_update + THRESHOLD_ALERT_ACTIVITY
@@ -317,7 +319,9 @@ class ReviewSegmentMaintainer(threading.Thread):
                         motion_boxes,
                     )
                 elif topic == DetectionTypeEnum.audio and len(audio_detections) > 0:
-                    current_segment.last_update = frame_time
+                    if frame_time > current_segment.last_update:
+                        current_segment.last_update = frame_time
+
                     current_segment.audio.update(audio_detections)
             else:
                 if topic == DetectionTypeEnum.video:
