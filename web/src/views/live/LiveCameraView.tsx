@@ -365,7 +365,7 @@ function PtzControlPanel({
   );
 
   return (
-    <div className="absolute left-[50%] -translate-x-[50%] bottom-[10%] flex items-center gap-1">
+    <div className="absolute inset-x-2 md:left-[50%] md:-translate-x-[50%] bottom-[10%] flex flex-wrap md:flex-nowrap justify-center items-center gap-1">
       {ptz?.features?.includes("pt") && (
         <>
           <Button
