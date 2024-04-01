@@ -51,7 +51,14 @@ import {
 import { GiSpeaker, GiSpeakerOff } from "react-icons/gi";
 import { HiViewfinderCircle } from "react-icons/hi2";
 import { IoMdArrowBack } from "react-icons/io";
-import { LuEar, LuEarOff, LuVideo, LuVideoOff } from "react-icons/lu";
+import {
+  LuEar,
+  LuEarOff,
+  LuPictureInPicture,
+  LuPictureInPicture2,
+  LuVideo,
+  LuVideoOff,
+} from "react-icons/lu";
 import {
   MdNoPhotography,
   MdPersonOff,
@@ -113,20 +120,25 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
     [clickOverlayRef, clickOverlay, sendPtz],
   );
 
-  // fullscreen state
+  // fullscreen / pip state
 
   useEffect(() => {
     if (mainRef.current == null) {
       return;
     }
 
-    const listener = () => {
+    const fsListener = () => {
       setFullscreen(document.fullscreenElement != null);
     };
-    document.addEventListener("fullscreenchange", listener);
+    const pipListener = () => {
+      setPip(document.pictureInPictureElement != null);
+    };
+    document.addEventListener("fullscreenchange", fsListener);
+    document.addEventListener("focusin", pipListener);
 
     return () => {
-      document.removeEventListener("fullscreenchange", listener);
+      document.removeEventListener("fullscreenchange", fsListener);
+      document.removeEventListener("focusin", pipListener);
     };
   }, [mainRef]);
 
@@ -135,6 +147,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
   const [audio, setAudio] = useState(false);
   const [mic, setMic] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
+  const [pip, setPip] = useState(false);
 
   const growClassName = useMemo(() => {
     const aspect = camera.detect.width / camera.detect.height;
@@ -237,6 +250,23 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
                   }}
                 />
               )}
+              {!isIOS && (
+                <CameraFeatureToggle
+                  className="p-2 md:p-0"
+                  variant={fullscreen ? "overlay" : "primary"}
+                  Icon={LuPictureInPicture}
+                  isActive={pip}
+                  title={pip ? "Close" : "Picture in Picture"}
+                  onClick={() => {
+                    if (!pip) {
+                      setPip(true);
+                    } else {
+                      document.exitPictureInPicture();
+                      setPip(false);
+                    }
+                  }}
+                />
+              )}
               {window.isSecureContext && (
                 <CameraFeatureToggle
                   className="p-2 md:p-0"
@@ -293,6 +323,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
               micEnabled={mic}
               iOSCompatFullScreen={isIOS}
               preferredLiveMode={preferredLiveMode}
+              pip={pip}
             />
           </div>
           {camera.onvif.host != "" && (
