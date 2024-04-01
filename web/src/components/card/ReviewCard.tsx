@@ -42,7 +42,7 @@ export default function ReviewCard({
       />
       <img
         ref={imgRef}
-        className={`size-full rounded-lg ${isSelected ? "outline outline-3 outline-offset-1 outline-selected" : ""} ${imgLoaded ? "visible" : "invisible"}`}
+        className={`size-full rounded-lg ${isSelected ? "outline outline-[3px] outline-offset-1 outline-selected" : ""} ${imgLoaded ? "visible" : "invisible"}`}
         src={`${baseUrl}${event.thumb_path.replace("/media/frigate/", "")}`}
         loading={isSafari ? "eager" : "lazy"}
         onLoad={() => {
