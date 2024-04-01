@@ -76,7 +76,7 @@ function getVerifiedIcon(label: string, className?: string) {
   const simpleLabel = label.substring(0, label.lastIndexOf("-"));
 
   return (
-    <div className="flex items-center">
+    <div key={label} className="flex items-center">
       {getIconForLabel(simpleLabel, className)}
       <FaCheckCircle className="absolute size-2 translate-x-[80%] translate-y-3/4" />
     </div>
