@@ -58,6 +58,7 @@ export function ReviewTimeline({
   const [isDraggingExportEnd, setIsDraggingExportEnd] = useState(false);
   const [exportStartPosition, setExportStartPosition] = useState(0);
   const [exportEndPosition, setExportEndPosition] = useState(0);
+  const segmentsRef = useRef<HTMLDivElement>(null);
   const handlebarRef = useRef<HTMLDivElement>(null);
   const handlebarTimeRef = useRef<HTMLDivElement>(null);
   const exportStartRef = useRef<HTMLDivElement>(null);
@@ -100,6 +101,7 @@ export function ReviewTimeline({
   } = useDraggableElement({
     contentRef,
     timelineRef,
+    segmentsRef,
     draggableElementRef: handlebarRef,
     segmentDuration,
     showDraggableElement: showHandlebar,
@@ -123,6 +125,7 @@ export function ReviewTimeline({
   } = useDraggableElement({
     contentRef,
     timelineRef,
+    segmentsRef,
     draggableElementRef: exportStartRef,
     segmentDuration,
     showDraggableElement: showExportHandles,
@@ -147,6 +150,7 @@ export function ReviewTimeline({
   } = useDraggableElement({
     contentRef,
     timelineRef,
+    segmentsRef,
     draggableElementRef: exportEndRef,
     segmentDuration,
     showDraggableElement: showExportHandles,
@@ -319,7 +323,7 @@ export function ReviewTimeline({
           : "cursor-auto"
       }`}
     >
-      <div className="flex flex-col relative">
+      <div ref={segmentsRef} className="flex flex-col relative">
         <div className="absolute top-0 inset-x-0 z-20 w-full h-[30px] bg-gradient-to-b from-secondary to-transparent pointer-events-none"></div>
         <div className="absolute bottom-0 inset-x-0 z-20 w-full h-[30px] bg-gradient-to-t from-secondary to-transparent pointer-events-none"></div>
         {children}
