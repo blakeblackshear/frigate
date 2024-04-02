@@ -220,10 +220,10 @@ export default function GeneralSettings({ className }: GeneralSettings) {
                     <span>Dark Mode</span>
                   </SubItemTrigger>
                   <Portal>
-                    <span tabIndex={0} className="sr-only" />
                     <SubItemContent
                       className={isDesktop ? "" : "w-[92%] rounded-2xl"}
                     >
+                      <span tabIndex={0} className="sr-only" />
                       <MenuItem
                         className={
                           isDesktop
