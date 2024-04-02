@@ -9,6 +9,7 @@ import Chip from "../indicators/Chip";
 import { Skeleton } from "../ui/skeleton";
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from "../ui/dialog";
 import { Input } from "../ui/input";
+import useKeyboardListener from "@/hooks/use-keyboard-listener";
 
 type ExportProps = {
   file: {
@@ -34,6 +35,16 @@ export default function ExportCard({ file, onRename, onDelete }: ExportProps) {
     original: string;
     update: string;
   }>();
+
+  useKeyboardListener(
+    editName != undefined ? ["Enter"] : [],
+    (_, down, repeat) => {
+      if (down && !repeat && editName && editName.update.length > 0) {
+        onRename(editName.original, editName.update.replaceAll(" ", "_"));
+        setEditName(undefined);
+      }
+    },
+  );
 
   return (
     <>
@@ -94,9 +105,11 @@ export default function ExportCard({ file, onRename, onDelete }: ExportProps) {
           isDesktop || inProgress ? undefined : () => setHovered(!hovered)
         }
       >
-        {!playing && hovered && (
+        {hovered && (
           <>
-            <div className="absolute inset-0 z-10 bg-black bg-opacity-60 rounded-2xl" />
+            {!playing && (
+              <div className="absolute inset-0 z-10 bg-black bg-opacity-60 rounded-2xl" />
+            )}
             <div className="absolute top-1 right-1 flex items-center gap-2">
               <Chip
                 className="bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 rounded-md cursor-pointer"
@@ -111,16 +124,18 @@ export default function ExportCard({ file, onRename, onDelete }: ExportProps) {
                 <LuTrash className="size-4 text-destructive fill-destructive" />
               </Chip>
             </div>
-            <Button
-              className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-20 h-20 z-20 text-white hover:text-white hover:bg-transparent"
-              variant="ghost"
-              onClick={() => {
-                setPlaying(true);
-                videoRef.current?.play();
-              }}
-            >
-              <FaPlay />
-            </Button>
+            {!playing && (
+              <Button
+                className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-20 h-20 z-20 text-white hover:text-white hover:bg-transparent"
+                variant="ghost"
+                onClick={() => {
+                  setPlaying(true);
+                  videoRef.current?.play();
+                }}
+              >
+                <FaPlay />
+              </Button>
+            )}
           </>
         )}
         {inProgress ? (
