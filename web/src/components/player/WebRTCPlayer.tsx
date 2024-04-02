@@ -8,6 +8,7 @@ type WebRtcPlayerProps = {
   audioEnabled?: boolean;
   microphoneEnabled?: boolean;
   iOSCompatFullScreen?: boolean; // ios doesn't support fullscreen divs so we must support the video element
+  pip?: boolean;
   onPlaying?: () => void;
 };
 
@@ -18,6 +19,7 @@ export default function WebRtcPlayer({
   audioEnabled = false,
   microphoneEnabled = false,
   iOSCompatFullScreen = false,
+  pip = false,
   onPlaying,
 }: WebRtcPlayerProps) {
   // metadata
@@ -173,7 +175,18 @@ export default function WebRtcPlayer({
   ]);
 
   // ios compat
+
   const [iOSCompatControls, setiOSCompatControls] = useState(false);
+
+  // control pip
+
+  useEffect(() => {
+    if (!videoRef.current || !pip) {
+      return;
+    }
+
+    videoRef.current.requestPictureInPicture();
+  }, [pip, videoRef]);
 
   return (
     <video

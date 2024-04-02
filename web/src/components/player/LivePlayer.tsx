@@ -22,6 +22,7 @@ type LivePlayerProps = {
   playAudio?: boolean;
   micEnabled?: boolean; // only webrtc supports mic
   iOSCompatFullScreen?: boolean;
+  pip?: boolean;
   onClick?: () => void;
 };
 
@@ -35,6 +36,7 @@ export default function LivePlayer({
   playAudio = false,
   micEnabled = false,
   iOSCompatFullScreen = false,
+  pip,
   onClick,
 }: LivePlayerProps) {
   // camera activity
@@ -105,6 +107,7 @@ export default function LivePlayer({
         microphoneEnabled={micEnabled}
         iOSCompatFullScreen={iOSCompatFullScreen}
         onPlaying={() => setLiveReady(true)}
+        pip={pip}
       />
     );
   } else if (liveMode == "mse") {
@@ -116,6 +119,7 @@ export default function LivePlayer({
           playbackEnabled={cameraActive}
           audioEnabled={playAudio}
           onPlaying={() => setLiveReady(true)}
+          pip={pip}
         />
       );
     } else {

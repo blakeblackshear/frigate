@@ -8,12 +8,15 @@ import {
 import CameraFeatureToggle from "@/components/dynamic/CameraFeatureToggle";
 import LivePlayer from "@/components/player/LivePlayer";
 import { Button } from "@/components/ui/button";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
@@ -39,6 +42,7 @@ import {
   FaAngleLeft,
   FaAngleRight,
   FaAngleUp,
+  FaCog,
   FaCompress,
   FaExpand,
   FaMicrophone,
@@ -47,7 +51,13 @@ import {
 import { GiSpeaker, GiSpeakerOff } from "react-icons/gi";
 import { HiViewfinderCircle } from "react-icons/hi2";
 import { IoMdArrowBack } from "react-icons/io";
-import { LuEar, LuEarOff, LuVideo, LuVideoOff } from "react-icons/lu";
+import {
+  LuEar,
+  LuEarOff,
+  LuPictureInPicture,
+  LuVideo,
+  LuVideoOff,
+} from "react-icons/lu";
 import {
   MdNoPhotography,
   MdPersonOff,
@@ -69,19 +79,6 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
   const mainRef = useRef<HTMLDivElement | null>(null);
   const [{ width: windowWidth, height: windowHeight }] =
     useResizeObserver(window);
-
-  // camera features
-
-  const { payload: detectState, send: sendDetect } = useDetectState(
-    camera.name,
-  );
-  const { payload: recordState, send: sendRecord } = useRecordingsState(
-    camera.name,
-  );
-  const { payload: snapshotState, send: sendSnapshot } = useSnapshotsState(
-    camera.name,
-  );
-  const { payload: audioState, send: sendAudio } = useAudioState(camera.name);
 
   // click overlay for ptzs
 
@@ -122,20 +119,25 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
     [clickOverlayRef, clickOverlay, sendPtz],
   );
 
-  // fullscreen state
+  // fullscreen / pip state
 
   useEffect(() => {
     if (mainRef.current == null) {
       return;
     }
 
-    const listener = () => {
+    const fsListener = () => {
       setFullscreen(document.fullscreenElement != null);
     };
-    document.addEventListener("fullscreenchange", listener);
+    const pipListener = () => {
+      setPip(document.pictureInPictureElement != null);
+    };
+    document.addEventListener("fullscreenchange", fsListener);
+    document.addEventListener("focusin", pipListener);
 
     return () => {
-      document.removeEventListener("fullscreenchange", listener);
+      document.removeEventListener("fullscreenchange", fsListener);
+      document.removeEventListener("focusin", pipListener);
     };
   }, [mainRef]);
 
@@ -144,6 +146,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
   const [audio, setAudio] = useState(false);
   const [mic, setMic] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
+  const [pip, setPip] = useState(false);
 
   const growClassName = useMemo(() => {
     const aspect = camera.detect.width / camera.detect.height;
@@ -246,6 +249,23 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
                   }}
                 />
               )}
+              {!isIOS && (
+                <CameraFeatureToggle
+                  className="p-2 md:p-0"
+                  variant={fullscreen ? "overlay" : "primary"}
+                  Icon={LuPictureInPicture}
+                  isActive={pip}
+                  title={pip ? "Close" : "Picture in Picture"}
+                  onClick={() => {
+                    if (!pip) {
+                      setPip(true);
+                    } else {
+                      document.exitPictureInPicture();
+                      setPip(false);
+                    }
+                  }}
+                />
+              )}
               {window.isSecureContext && (
                 <CameraFeatureToggle
                   className="p-2 md:p-0"
@@ -264,42 +284,11 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
                 title={`${audio ? "Disable" : "Enable"} Camera Audio`}
                 onClick={() => setAudio(!audio)}
               />
-              <CameraFeatureToggle
-                className="p-2 md:p-0"
-                variant={fullscreen ? "overlay" : "primary"}
-                Icon={detectState == "ON" ? MdPersonSearch : MdPersonOff}
-                isActive={detectState == "ON"}
-                title={`${detectState == "ON" ? "Disable" : "Enable"} Detect`}
-                onClick={() => sendDetect(detectState == "ON" ? "OFF" : "ON")}
+              <FrigateCameraFeatures
+                camera={camera.name}
+                audioDetectEnabled={camera.audio.enabled_in_config}
+                fullscreen={fullscreen}
               />
-              <CameraFeatureToggle
-                className="p-2 md:p-0"
-                variant={fullscreen ? "overlay" : "primary"}
-                Icon={recordState == "ON" ? LuVideo : LuVideoOff}
-                isActive={recordState == "ON"}
-                title={`${recordState == "ON" ? "Disable" : "Enable"} Recording`}
-                onClick={() => sendRecord(recordState == "ON" ? "OFF" : "ON")}
-              />
-              <CameraFeatureToggle
-                className="p-2 md:p-0"
-                variant={fullscreen ? "overlay" : "primary"}
-                Icon={snapshotState == "ON" ? MdPhotoCamera : MdNoPhotography}
-                isActive={snapshotState == "ON"}
-                title={`${snapshotState == "ON" ? "Disable" : "Enable"} Snapshots`}
-                onClick={() =>
-                  sendSnapshot(snapshotState == "ON" ? "OFF" : "ON")
-                }
-              />
-              {camera.audio.enabled_in_config && (
-                <CameraFeatureToggle
-                  className="p-2 md:p-0"
-                  variant={fullscreen ? "overlay" : "primary"}
-                  Icon={audioState == "ON" ? LuEar : LuEarOff}
-                  isActive={audioState == "ON"}
-                  title={`${audioState == "ON" ? "Disable" : "Enable"} Audio Detect`}
-                  onClick={() => sendAudio(audioState == "ON" ? "OFF" : "ON")}
-                />
-              )}
             </div>
           </TooltipProvider>
         </div>
@@ -333,6 +322,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
               micEnabled={mic}
               iOSCompatFullScreen={isIOS}
               preferredLiveMode={preferredLiveMode}
+              pip={pip}
             />
           </div>
           {camera.onvif.host != "" && (
@@ -405,7 +395,7 @@ function PtzControlPanel({
   );
 
   return (
-    <div className="absolute left-[50%] -translate-x-[50%] bottom-[10%] flex items-center gap-1">
+    <div className="absolute inset-x-2 md:left-[50%] md:-translate-x-[50%] bottom-[10%] flex flex-wrap md:flex-nowrap justify-center items-center gap-1">
       {ptz?.features?.includes("pt") && (
         <>
           <Button
@@ -530,5 +520,147 @@ function PtzControlPanel({
         </DropdownMenu>
       )}
     </div>
+  );
+}
+
+type FrigateCameraFeaturesProps = {
+  camera: string;
+  audioDetectEnabled: boolean;
+  fullscreen: boolean;
+};
+function FrigateCameraFeatures({
+  camera,
+  audioDetectEnabled,
+  fullscreen,
+}: FrigateCameraFeaturesProps) {
+  const { payload: detectState, send: sendDetect } = useDetectState(camera);
+  const { payload: recordState, send: sendRecord } = useRecordingsState(camera);
+  const { payload: snapshotState, send: sendSnapshot } =
+    useSnapshotsState(camera);
+  const { payload: audioState, send: sendAudio } = useAudioState(camera);
+
+  // desktop shows icons part of row
+  if (isDesktop) {
+    return (
+      <>
+        <CameraFeatureToggle
+          className="p-2 md:p-0"
+          variant={fullscreen ? "overlay" : "primary"}
+          Icon={detectState == "ON" ? MdPersonSearch : MdPersonOff}
+          isActive={detectState == "ON"}
+          title={`${detectState == "ON" ? "Disable" : "Enable"} Detect`}
+          onClick={() => sendDetect(detectState == "ON" ? "OFF" : "ON")}
+        />
+        <CameraFeatureToggle
+          className="p-2 md:p-0"
+          variant={fullscreen ? "overlay" : "primary"}
+          Icon={recordState == "ON" ? LuVideo : LuVideoOff}
+          isActive={recordState == "ON"}
+          title={`${recordState == "ON" ? "Disable" : "Enable"} Recording`}
+          onClick={() => sendRecord(recordState == "ON" ? "OFF" : "ON")}
+        />
+        <CameraFeatureToggle
+          className="p-2 md:p-0"
+          variant={fullscreen ? "overlay" : "primary"}
+          Icon={snapshotState == "ON" ? MdPhotoCamera : MdNoPhotography}
+          isActive={snapshotState == "ON"}
+          title={`${snapshotState == "ON" ? "Disable" : "Enable"} Snapshots`}
+          onClick={() => sendSnapshot(snapshotState == "ON" ? "OFF" : "ON")}
+        />
+        {audioDetectEnabled && (
+          <CameraFeatureToggle
+            className="p-2 md:p-0"
+            variant={fullscreen ? "overlay" : "primary"}
+            Icon={audioState == "ON" ? LuEar : LuEarOff}
+            isActive={audioState == "ON"}
+            title={`${audioState == "ON" ? "Disable" : "Enable"} Audio Detect`}
+            onClick={() => sendAudio(audioState == "ON" ? "OFF" : "ON")}
+          />
+        )}
+      </>
+    );
+  }
+
+  // mobile doesn't show settings in fullscreen view
+  if (fullscreen) {
+    return;
+  }
+
+  return (
+    <Drawer>
+      <DrawerTrigger>
+        <CameraFeatureToggle
+          className="p-2"
+          variant="primary"
+          Icon={FaCog}
+          isActive={false}
+          title={`${camera} Settings`}
+        />
+      </DrawerTrigger>
+      <DrawerContent className="px-2 py-4 flex flex-col gap-3 rounded-2xl">
+        <div className="flex justify-between items-center gap-1">
+          <Label
+            className="w-full mx-2 text-secondary-foreground capitalize cursor-pointer"
+            htmlFor={"camera-detect"}
+          >
+            Object Detection
+          </Label>
+          <Switch
+            id={"camera-detect"}
+            checked={detectState == "ON"}
+            onCheckedChange={() =>
+              sendDetect(detectState == "ON" ? "OFF" : "ON")
+            }
+          />
+        </div>
+        <div className="flex justify-between items-center gap-1">
+          <Label
+            className="w-full mx-2 text-secondary-foreground capitalize cursor-pointer"
+            htmlFor={"camera-record"}
+          >
+            Recording
+          </Label>
+          <Switch
+            id={"camera-record"}
+            checked={recordState == "ON"}
+            onCheckedChange={() =>
+              sendRecord(recordState == "ON" ? "OFF" : "ON")
+            }
+          />
+        </div>
+        <div className="flex justify-between items-center gap-1">
+          <Label
+            className="w-full mx-2 text-secondary-foreground capitalize cursor-pointer"
+            htmlFor={"camera-snapshot"}
+          >
+            Snapshots
+          </Label>
+          <Switch
+            id={"camera-snapshot"}
+            checked={snapshotState == "ON"}
+            onCheckedChange={() =>
+              sendSnapshot(snapshotState == "ON" ? "OFF" : "ON")
+            }
+          />
+        </div>
+        {audioDetectEnabled && (
+          <div className="flex justify-between items-center gap-1">
+            <Label
+              className="w-full mx-2 text-secondary-foreground capitalize cursor-pointer"
+              htmlFor={"camera-audio-detect"}
+            >
+              Audio Detection
+            </Label>
+            <Switch
+              id={"camera-audio-detect"}
+              checked={audioState == "ON"}
+              onCheckedChange={() =>
+                sendAudio(audioState == "ON" ? "OFF" : "ON")
+              }
+            />
+          </div>
+        )}
+      </DrawerContent>
+    </Drawer>
   );
 }

@@ -6,6 +6,7 @@ type MSEPlayerProps = {
   className?: string;
   playbackEnabled?: boolean;
   audioEnabled?: boolean;
+  pip?: boolean;
   onPlaying?: () => void;
 };
 
@@ -14,6 +15,7 @@ function MSEPlayer({
   className,
   playbackEnabled = true,
   audioEnabled = false,
+  pip = false,
   onPlaying,
 }: MSEPlayerProps) {
   let connectTS: number = 0;
@@ -267,6 +269,16 @@ function MSEPlayer({
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playbackEnabled, onDisconnect, onConnect]);
+
+  // control pip
+
+  useEffect(() => {
+    if (!videoRef.current || !pip) {
+      return;
+    }
+
+    videoRef.current.requestPictureInPicture();
+  }, [pip, videoRef]);
 
   return (
     <video
