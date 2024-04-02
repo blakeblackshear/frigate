@@ -352,7 +352,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
             }}
           >
             <IoMdArrowDown />
-            {isDesktop && "Recordings"}
+            History
           </Button>
         </div>
       </div>
