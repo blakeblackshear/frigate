@@ -51,10 +51,11 @@ import {
 } from "react-icons/fa";
 import { GiSpeaker, GiSpeakerOff } from "react-icons/gi";
 import { HiViewfinderCircle } from "react-icons/hi2";
-import { IoMdArrowBack, IoMdArrowDown } from "react-icons/io";
+import { IoMdArrowBack } from "react-icons/io";
 import {
   LuEar,
   LuEarOff,
+  LuHistory,
   LuPictureInPicture,
   LuVideo,
   LuVideoOff,
@@ -219,14 +220,35 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
           }
         >
           {!fullscreen ? (
-            <Button
-              className={`flex items-center gap-2.5 rounded-lg ${isMobile ? "ml-2" : "ml-0"}`}
-              size={isMobile ? "icon" : "sm"}
-              onClick={() => navigate(-1)}
-            >
-              <IoMdArrowBack className="size-5" />
-              {isDesktop && "Back"}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                className={`flex items-center gap-2.5 rounded-lg ${isMobile ? "ml-2" : "ml-0"}`}
+                size="sm"
+                onClick={() => navigate(-1)}
+              >
+                <IoMdArrowBack className="size-5" />
+                {isDesktop && "Back"}
+              </Button>
+              <Button
+                className="flex items-center gap-2.5 rounded-lg"
+                size="sm"
+                onClick={() => {
+                  navigate("events", {
+                    state: {
+                      severity: "alert",
+                      recording: {
+                        camera: camera.name,
+                        startTime: Date.now() / 1000 - 30,
+                        severity: "alert",
+                      } as RecordingStartingPoint,
+                    },
+                  });
+                }}
+              >
+                <LuHistory className="size-5" />
+                {isDesktop && "History"}
+              </Button>
+            </div>
           ) : (
             <div />
           )}
@@ -334,27 +356,6 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
             />
           )}
         </TransformComponent>
-        <div className="flex justify-center items-center">
-          <Button
-            className="flex items-center gap-2.5 rounded-lg"
-            size="sm"
-            onClick={() => {
-              navigate("events", {
-                state: {
-                  severity: "alert",
-                  recording: {
-                    camera: camera.name,
-                    startTime: Date.now() / 1000 - 30,
-                    severity: "alert",
-                  } as RecordingStartingPoint,
-                },
-              });
-            }}
-          >
-            <IoMdArrowDown />
-            History
-          </Button>
-        </div>
       </div>
     </TransformWrapper>
   );
