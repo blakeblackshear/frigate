@@ -2,7 +2,7 @@ import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import useSWR from "swr";
 import { CameraGroupConfig, FrigateConfig } from "@/types/frigateConfig";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -631,16 +631,21 @@ function ShowMotionOnlyButton({
   motionOnly,
   setMotionOnly,
 }: ShowMotionOnlyButtonProps) {
+  const [motionOnlyButton, setMotionOnlyButton] = useState(motionOnly);
+
+  useEffect(
+    () => setMotionOnly(motionOnlyButton),
+    [motionOnlyButton, setMotionOnly],
+  );
+
   return (
     <>
       <div className="hidden md:inline-flex items-center justify-center whitespace-nowrap text-sm bg-secondary hover:bg-secondary/80 text-secondary-foreground h-9 rounded-md px-3 mx-1 cursor-pointer">
         <Switch
           className="ml-1"
           id="collapse-motion"
-          checked={motionOnly}
-          onCheckedChange={() => {
-            setMotionOnly(!motionOnly);
-          }}
+          checked={motionOnlyButton}
+          onCheckedChange={setMotionOnlyButton}
         />
         <Label
           className="mx-2 text-secondary-foreground cursor-pointer"
