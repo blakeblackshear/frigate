@@ -251,6 +251,7 @@ export function RecordingView({
         <Button
           className="flex items-center gap-2 rounded-lg"
           size="sm"
+          variant="secondary"
           onClick={() => navigate(-1)}
         >
           <IoMdArrowRoundBack className="size-5" size="small" />

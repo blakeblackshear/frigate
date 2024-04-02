@@ -51,7 +51,7 @@ import {
 } from "react-icons/fa";
 import { GiSpeaker, GiSpeakerOff } from "react-icons/gi";
 import { HiViewfinderCircle } from "react-icons/hi2";
-import { IoMdArrowBack } from "react-icons/io";
+import { IoMdArrowRoundBack } from "react-icons/io";
 import {
   LuEar,
   LuEarOff,
@@ -222,16 +222,18 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
           {!fullscreen ? (
             <div className="flex items-center gap-2">
               <Button
-                className={`flex items-center gap-2.5 rounded-lg ${isMobile ? "ml-2" : "ml-0"}`}
+                className={`flex items-center gap-2.5 rounded-lg`}
                 size="sm"
+                variant="secondary"
                 onClick={() => navigate(-1)}
               >
-                <IoMdArrowBack className="size-5" />
+                <IoMdArrowRoundBack className="size-5" />
                 {isDesktop && "Back"}
               </Button>
               <Button
                 className="flex items-center gap-2.5 rounded-lg"
                 size="sm"
+                variant="secondary"
                 onClick={() => {
                   navigate("events", {
                     state: {

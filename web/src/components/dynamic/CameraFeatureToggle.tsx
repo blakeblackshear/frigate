@@ -43,7 +43,7 @@ export default function CameraFeatureToggle({
       }`}
     >
       <Icon
-        className={`size-5 md:m-[6px] ${isActive ? "text-white" : "text-muted-foreground"}`}
+        className={`size-5 md:m-[6px] ${isActive ? "text-white" : "text-secondary-foreground"}`}
       />
     </div>
   );
