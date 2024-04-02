@@ -329,20 +329,22 @@ export default function Events() {
     return <ActivityIndicator />;
   }
 
-  if (selectedReviewData) {
-    return (
-      <RecordingView
-        startCamera={selectedReviewData.camera}
-        startTime={selectedReviewData.start_time}
-        allCameras={selectedReviewData.allCameras}
-        reviewItems={reviews}
-        reviewSummary={reviewSummary}
-        allPreviews={allPreviews}
-        timeRange={selectedTimeRange}
-        filter={reviewFilter}
-        updateFilter={onUpdateFilter}
-      />
-    );
+  if (recording) {
+    if (selectedReviewData) {
+      return (
+        <RecordingView
+          startCamera={selectedReviewData.camera}
+          startTime={selectedReviewData.start_time}
+          allCameras={selectedReviewData.allCameras}
+          reviewItems={reviews}
+          reviewSummary={reviewSummary}
+          allPreviews={allPreviews}
+          timeRange={selectedTimeRange}
+          filter={reviewFilter}
+          updateFilter={onUpdateFilter}
+        />
+      );
+    }
   } else {
     return (
       <EventView
