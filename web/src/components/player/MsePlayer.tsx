@@ -33,8 +33,7 @@ function MSEPlayer({
     "opus", // OPUS Chrome, Firefox
   ];
 
-  const visibilityThreshold: number = 0;
-  const visibilityCheck: boolean = true;
+  const visibilityCheck: boolean = !pip;
 
   const [wsState, setWsState] = useState<number>(WebSocket.CLOSED);
 
@@ -235,6 +234,22 @@ function MSEPlayer({
     // @ts-expect-error for typing
     msRef.current = new MediaSourceConstructor();
 
+    onConnect();
+
+    return () => {
+      onDisconnect();
+    };
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playbackEnabled, onDisconnect, onConnect]);
+
+  // check visibility
+
+  useEffect(() => {
+    if (!playbackEnabled) {
+      return;
+    }
+
     if ("hidden" in document && visibilityCheck) {
       document.addEventListener("visibilitychange", () => {
         if (document.hidden) {
@@ -244,31 +259,7 @@ function MSEPlayer({
         }
       });
     }
-
-    if ("IntersectionObserver" in window && visibilityThreshold) {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (!entry.isIntersecting) {
-              onDisconnect();
-            } else if (videoRef.current?.isConnected) {
-              onConnect();
-            }
-          });
-        },
-        { threshold: visibilityThreshold },
-      );
-      observer.observe(videoRef.current!);
-    }
-
-    onConnect();
-
-    return () => {
-      onDisconnect();
-    };
-    // we know that these deps are correct
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playbackEnabled, onDisconnect, onConnect]);
+  }, [playbackEnabled, visibilityCheck, onConnect, onDisconnect]);
 
   // control pip
 
