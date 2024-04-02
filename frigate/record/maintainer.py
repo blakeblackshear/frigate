@@ -165,6 +165,7 @@ class RecordingMaintainer(threading.Thread):
                 Event.select(
                     Event.start_time,
                     Event.end_time,
+                    Event.data,
                 )
                 .where(
                     Event.camera == camera,
@@ -188,7 +189,7 @@ class RecordingMaintainer(threading.Thread):
         )
 
     async def validate_and_move_segment(
-        self, camera: str, events: Event, recording: dict[str, any]
+        self, camera: str, events: list[Event], recording: dict[str, any]
     ) -> None:
         cache_path = recording["cache_path"]
         start_time = recording["start_time"]
@@ -256,6 +257,7 @@ class RecordingMaintainer(threading.Thread):
                     duration,
                     cache_path,
                     record_mode,
+                    event.data["type"] == "api",
                 )
             # if it doesn't overlap with an event, go ahead and drop the segment
             # if it ends more than the configured pre_capture for the camera
@@ -347,11 +349,12 @@ class RecordingMaintainer(threading.Thread):
         duration: float,
         cache_path: str,
         store_mode: RetainModeEnum,
+        manual_event: bool = False,  # if this segment is being moved due to a manual event
     ) -> Optional[Recordings]:
         segment_info = self.segment_stats(camera, start_time, end_time)
 
         # check if the segment shouldn't be stored
-        if segment_info.should_discard_segment(store_mode):
+        if not manual_event and segment_info.should_discard_segment(store_mode):
             Path(cache_path).unlink(missing_ok=True)
             self.end_time_cache.pop(cache_path, None)
             return
@@ -424,7 +427,8 @@ class RecordingMaintainer(threading.Thread):
                     Recordings.duration: duration,
                     Recordings.motion: segment_info.motion_count,
                     # TODO: update this to store list of active objects at some point
-                    Recordings.objects: segment_info.active_object_count,
+                    Recordings.objects: segment_info.active_object_count
+                    + (1 if manual_event else 0),
                     Recordings.regions: segment_info.region_count,
                     Recordings.dBFS: segment_info.average_dBFS,
                     Recordings.segment_size: segment_size,
@@ -507,6 +511,8 @@ class RecordingMaintainer(threading.Thread):
                                 audio_detections,
                             )
                         )
+                elif topic == DetectionTypeEnum.api:
+                    continue
 
                 if frame_time < run_start - stale_frame_count_threshold:
                     stale_frame_count += 1
