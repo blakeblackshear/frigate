@@ -288,7 +288,7 @@ function LogLineData({ line, offset }: LogLineDataProps) {
 
   return (
     <div
-      className={`py-2 grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 gap-2 ${offset % 2 == 0 ? "bg-secondary" : "bg-secondary/80"} border-t border-l`}
+      className={`py-2 grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 gap-2 ${offset % 2 == 0 ? "bg-secondary" : "bg-secondary/80"} border-t border-x`}
     >
       <div
         className={`h-full p-1 flex items-center gap-2 capitalize ${severityClassName}`}
