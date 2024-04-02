@@ -11,9 +11,14 @@ import useSWR from "swr";
 const logTypes = ["frigate", "go2rtc", "nginx"] as const;
 type LogType = (typeof logTypes)[number];
 
-const datestamp = /\[[\d\s-:]*]/;
-const severity = /(DEBUG)|(INFO)|(WARNING)|(ERROR)/;
-const section = /[\w.]*/;
+const frigateDateStamp = /\[[\d\s-:]*]/;
+const frigateSeverity = /(DEBUG)|(INFO)|(WARNING)|(ERROR)/;
+const frigateSection = /[\w.]*/;
+
+const goSeverity = /(DEB )|(INF )|(WARN )|(ERR )/;
+const goSection = /\[[\w]*]/;
+
+const ngSeverity = /(GET)|(POST)|(PATCH)|(DELETE)/;
 
 function Logs() {
   const [logService, setLogService] = useState<LogType>("frigate");
@@ -21,8 +26,12 @@ function Logs() {
   const { data: frigateLogs } = useSWR<string>("logs/frigate", {
     refreshInterval: 1000,
   });
-  const { data: go2rtcLogs } = useSWR("logs/go2rtc", { refreshInterval: 1000 });
-  const { data: nginxLogs } = useSWR("logs/nginx", { refreshInterval: 1000 });
+  const { data: go2rtcLogs } = useSWR<string>("logs/go2rtc", {
+    refreshInterval: 1000,
+  });
+  const { data: nginxLogs } = useSWR<string>("logs/nginx", {
+    refreshInterval: 1000,
+  });
 
   // convert to log data
 
@@ -47,13 +56,13 @@ function Logs() {
       return frigateLogs
         .split("\n")
         .map((line) => {
-          const match = datestamp.exec(line);
+          const match = frigateDateStamp.exec(line);
 
           if (!match) {
             return null;
           }
 
-          const sectionMatch = section.exec(
+          const sectionMatch = frigateSection.exec(
             line.substring(match.index + match[0].length).trim(),
           );
 
@@ -63,7 +72,7 @@ function Logs() {
 
           return {
             dateStamp: match.toString().slice(1, -1),
-            severity: severity
+            severity: frigateSeverity
               .exec(line)
               ?.at(0)
               ?.toString()
@@ -76,18 +85,75 @@ function Logs() {
         })
         .filter((value) => value != null) as LogLine[];
     } else if (logService == "go2rtc") {
-      return [];
+      if (!go2rtcLogs) {
+        return [];
+      }
+
+      return go2rtcLogs
+        .split("\n")
+        .map((line) => {
+          if (line.length == 0) {
+            return null;
+          }
+
+          const severity = goSeverity.exec(line);
+
+          let section =
+            goSection.exec(line)?.toString()?.slice(1, -1) ?? "startup";
+
+          if (frigateSeverity.exec(section)) {
+            section = "startup";
+          }
+
+          let contentStart;
+
+          if (section == "startup") {
+            if (severity) {
+              contentStart = severity.index + severity[0].length;
+            } else {
+              contentStart = line.lastIndexOf("]") + 1;
+            }
+          } else {
+            contentStart = line.indexOf(section) + section.length + 2;
+          }
+
+          return {
+            dateStamp: line.substring(0, 19),
+            severity: "INFO",
+            section: section,
+            content: line.substring(contentStart).trim(),
+          };
+        })
+        .filter((value) => value != null) as LogLine[];
     } else if (logService == "nginx") {
-      return [];
+      if (!nginxLogs) {
+        return [];
+      }
+
+      return nginxLogs
+        .split("\n")
+        .map((line) => {
+          if (line.length == 0) {
+            return null;
+          }
+
+          return {
+            dateStamp: line.substring(0, 19),
+            severity: "INFO",
+            section: ngSeverity.exec(line)?.at(0)?.toString() ?? "META",
+            content: line.substring(line.indexOf(" ", 20)).trim(),
+          };
+        })
+        .filter((value) => value != null) as LogLine[];
     } else {
       return [];
     }
   }, [logService, frigateLogs, go2rtcLogs, nginxLogs]);
 
-  //console.log(`the logs are ${JSON.stringify(logLines)}`);
-
   const handleCopyLogs = useCallback(() => {
-    copy(logs);
+    if (logs) {
+      copy(logs);
+    }
   }, [logs]);
 
   // scroll to bottom button
@@ -166,7 +232,7 @@ function Logs() {
       >
         <div className="py-2 sticky top-0 -translate-y-1/4 grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 bg-background *:p-2">
           <div className="p-1 flex items-center capitalize border-y border-l">
-            Severity
+            Type
           </div>
           <div className="col-span-2 sm:col-span-1 flex items-center border-y border-l">
             Timestamp
@@ -179,7 +245,7 @@ function Logs() {
           </div>
         </div>
         {logLines.map((log, idx) => (
-          <LogLineData key={idx} offset={idx} line={log} />
+          <LogLineData key={`${idx}-${log.content}`} offset={idx} line={log} />
         ))}
         <div ref={endLogRef} />
       </div>
