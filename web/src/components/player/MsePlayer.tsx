@@ -246,19 +246,27 @@ function MSEPlayer({
   // check visibility
 
   useEffect(() => {
-    if (!playbackEnabled) {
+    if (!playbackEnabled || !visibilityCheck) {
       return;
     }
 
-    if ("hidden" in document && visibilityCheck) {
-      document.addEventListener("visibilitychange", () => {
-        if (document.hidden) {
-          onDisconnect();
-        } else if (videoRef.current?.isConnected) {
-          onConnect();
-        }
-      });
+    if (!("hidden" in document)) {
+      return;
     }
+
+    const listener = () => {
+      if (document.hidden) {
+        onDisconnect();
+      } else if (videoRef.current?.isConnected) {
+        onConnect();
+      }
+    };
+
+    document.addEventListener("visibilitychange", listener);
+
+    return () => {
+      document.removeEventListener("visibilitychange", listener);
+    };
   }, [playbackEnabled, visibilityCheck, onConnect, onDisconnect]);
 
   // control pip
