@@ -209,7 +209,7 @@ function Logs() {
 
       try {
         startObserver.current = new IntersectionObserver((entries) => {
-          if (entries[0].isIntersecting) {
+          if (entries[0].isIntersecting && logRange.start > 0) {
             const start = Math.max(0, logRange.start - 100);
 
             axios
