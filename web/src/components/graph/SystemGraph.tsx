@@ -1,3 +1,4 @@
+import { useTheme } from "@/context/theme-provider";
 import { Threshold } from "@/types/graph";
 import { useCallback, useEffect, useMemo } from "react";
 import Chart from "react-apexcharts";
@@ -23,6 +24,8 @@ export default function SystemGraph({
     () => data[0].data[data[0].data.length - 1]?.y ?? 0,
     [data],
   );
+
+  const { theme, systemTheme } = useTheme();
 
   const formatTime = useCallback(
     (val: unknown) => {
@@ -71,6 +74,9 @@ export default function SystemGraph({
           distributed: true,
         },
       },
+      tooltip: {
+        theme: systemTheme || theme,
+      },
       xaxis: {
         tickAmount: 6,
         labels: {
@@ -88,7 +94,7 @@ export default function SystemGraph({
         max: lastValue * 2,
       },
     };
-  }, [graphId, lastValue, threshold, formatTime]);
+  }, [graphId, lastValue, threshold, systemTheme, theme, formatTime]);
 
   useEffect(() => {
     ApexCharts.exec(graphId, "updateOptions", options, true, true);
