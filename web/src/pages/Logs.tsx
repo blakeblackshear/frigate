@@ -20,7 +20,7 @@ const frigateSection = /[\w.]*/;
 const goSeverity = /(DEB )|(INF )|(WARN )|(ERR )/;
 const goSection = /\[[\w]*]/;
 
-const ngSeverity = /(GET)|(POST)|(PATCH)|(DELETE)/;
+const ngSeverity = /(GET)|(POST)|(PUT)|(PATCH)|(DELETE)/;
 
 function Logs() {
   const [logService, setLogService] = useState<LogType>("frigate");
@@ -246,6 +246,15 @@ function Logs() {
       return;
     }
 
+    if (logLines.length < 100) {
+      setAtBottom(true);
+      return;
+    }
+
+    if (atBottom) {
+      return;
+    }
+
     if (!contentRef.current) {
       return;
     }
@@ -255,6 +264,8 @@ function Logs() {
       behavior: "instant",
     });
     setTimeout(() => setAtBottom(true), 300);
+    // we need to listen on the current range of visible items
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [logLines, logService]);
 
   return (
@@ -328,15 +339,20 @@ function Logs() {
             Message
           </div>
         </div>
-        {logLines.length > 0 && logRange.start > 0 && <div ref={startLogRef} />}
-        {logLines.map((log, idx) => (
-          <LogLineData
-            key={`${idx}-${log.content}`}
-            className={atBottom ? "" : "invisible"}
-            offset={idx}
-            line={log}
-          />
-        ))}
+        {logLines.length > 0 &&
+          [...Array(logRange.end - 1).keys()].map((idx) =>
+            idx >= logRange.start ? (
+              <LogLineData
+                key={`${idx}-${logService}`}
+                startRef={idx == logRange.start ? startLogRef : undefined}
+                className={atBottom ? "" : "invisible"}
+                offset={idx}
+                line={logLines[idx - logRange.start]}
+              />
+            ) : (
+              <div key={`${idx}-${logService}`} className="h-12" />
+            ),
+          )}
         {logLines.length > 0 && <div id="page-bottom" ref={endLogRef} />}
       </div>
     </div>
@@ -344,11 +360,12 @@ function Logs() {
 }
 
 type LogLineDataProps = {
+  startRef?: (node: HTMLDivElement | null) => void;
   className: string;
   line: LogLine;
   offset: number;
 };
-function LogLineData({ className, line, offset }: LogLineDataProps) {
+function LogLineData({ startRef, className, line, offset }: LogLineDataProps) {
   // long log message
 
   const contentRef = useRef<HTMLDivElement | null>(null);
@@ -379,6 +396,7 @@ function LogLineData({ className, line, offset }: LogLineDataProps) {
 
   return (
     <div
+      ref={startRef}
       className={`py-2 grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 gap-2 ${offset % 2 == 0 ? "bg-secondary" : "bg-secondary/80"} border-t border-x ${className}`}
     >
       <div
