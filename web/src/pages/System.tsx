@@ -512,7 +512,7 @@ function GeneralMetrics({ lastUpdated, setLastUpdated }: GeneralMetricsProps) {
           <>
             <div className="mt-4 flex items-center justify-between">
               <div className="text-muted-foreground text-sm font-medium">
-                Detectors
+                GPUs
               </div>
               {Object.keys(statsHistory[0].gpu_usages).filter(
                 (key) =>
