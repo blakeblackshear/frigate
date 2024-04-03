@@ -1,7 +1,11 @@
+import { FrigateConfig } from "@/types/frigateConfig";
 import { FrigateStats, PotentialProblem } from "@/types/stats";
 import { useMemo } from "react";
+import useSWR from "swr";
 
 export default function useStats(stats: FrigateStats | undefined) {
+  const { data: config } = useSWR<FrigateConfig>("config");
+
   const potentialProblems = useMemo<PotentialProblem[]>(() => {
     const problems: PotentialProblem[] = [];
 
@@ -26,7 +30,11 @@ export default function useStats(stats: FrigateStats | undefined) {
 
     // check for offline cameras
     Object.entries(stats["cameras"]).forEach(([name, cam]) => {
-      if (cam["camera_fps"] == 0) {
+      if (!config) {
+        return;
+      }
+
+      if (config.cameras[name].enabled && cam["camera_fps"] == 0) {
         problems.push({
           text: `${name.replaceAll("_", " ")} is offline`,
           color: "text-danger",
@@ -59,7 +67,7 @@ export default function useStats(stats: FrigateStats | undefined) {
     });
 
     return problems;
-  }, [stats]);
+  }, [config, stats]);
 
   return { potentialProblems };
 }
