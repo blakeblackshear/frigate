@@ -96,7 +96,7 @@ function Logs() {
               return {
                 dateStamp: line.substring(0, 19),
                 severity: "info",
-                section: "starutp",
+                section: "startup",
                 content: line.substring(infoIndex + 6).trim(),
               };
             }
