@@ -127,8 +127,11 @@ def stats():
 
 @bp.route("/stats/history")
 def stats_history():
-    json: dict[str, any] = request.get_json(silent=True) or {}
-    keys = json.get("keys")
+    keys = request.args.get("keys", default=None)
+
+    if keys:
+        keys = keys.split(",")
+
     return jsonify(current_app.stats_emitter.get_stats_history(keys))
 
 
@@ -154,9 +157,9 @@ def config():
     config["plus"] = {"enabled": current_app.plus_api.is_active()}
 
     for detector, detector_config in config["detectors"].items():
-        detector_config["model"]["labelmap"] = (
-            current_app.frigate_config.model.merged_labelmap
-        )
+        detector_config["model"][
+            "labelmap"
+        ] = current_app.frigate_config.model.merged_labelmap
 
     return jsonify(config)
 

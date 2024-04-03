@@ -10,11 +10,18 @@ import {
   DetectorMemThreshold,
   InferenceThreshold,
 } from "@/types/graph";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Button } from "@/components/ui/button";
+
+const metrics = ["general", "storage", "cameras"] as const;
+type SystemMetric = (typeof metrics)[number];
 
 function System() {
   const { data: config } = useSWR<FrigateConfig>("config");
 
-  // stats chunks
+  // stats page
+
+  const [page, setPage] = useState<SystemMetric>("general");
 
   // stats collection
 
@@ -53,90 +60,6 @@ function System() {
 
   // stats data pieces
 
-  const detInferenceTimeSeries = useMemo(() => {
-    if (!statsHistory) {
-      return [];
-    }
-
-    const series: {
-      [key: string]: { name: string; data: { x: object; y: number }[] };
-    } = {};
-
-    statsHistory.forEach((stats) => {
-      if (!stats) {
-        return;
-      }
-
-      const statTime = new Date(stats.service.last_updated * 1000);
-
-      Object.entries(stats.detectors).forEach(([key, stats]) => {
-        if (!(key in series)) {
-          series[key] = { name: `${key} (${stats.pid})`, data: [] };
-        }
-
-        series[key].data.push({ x: statTime, y: stats.inference_speed });
-      });
-    });
-    return Object.values(series);
-  }, [statsHistory]);
-  const detCpuSeries = useMemo(() => {
-    if (!statsHistory) {
-      return [];
-    }
-
-    const series: {
-      [key: string]: { name: string; data: { x: object; y: string }[] };
-    } = {};
-
-    statsHistory.forEach((stats) => {
-      if (!stats) {
-        return;
-      }
-
-      const statTime = new Date(stats.service.last_updated * 1000);
-
-      Object.entries(stats.detectors).forEach(([key, detStats]) => {
-        if (!(key in series)) {
-          series[key] = { name: key, data: [] };
-        }
-
-        series[key].data.push({
-          x: statTime,
-          y: stats.cpu_usages[detStats.pid.toString()].cpu,
-        });
-      });
-    });
-    return Object.values(series);
-  }, [statsHistory]);
-  const detMemSeries = useMemo(() => {
-    if (!statsHistory) {
-      return [];
-    }
-
-    const series: {
-      [key: string]: { name: string; data: { x: object; y: string }[] };
-    } = {};
-
-    statsHistory.forEach((stats) => {
-      if (!stats) {
-        return;
-      }
-
-      const statTime = new Date(stats.service.last_updated * 1000);
-
-      Object.entries(stats.detectors).forEach(([key, detStats]) => {
-        if (!(key in series)) {
-          series[key] = { name: key, data: [] };
-        }
-
-        series[key].data.push({
-          x: statTime,
-          y: stats.cpu_usages[detStats.pid.toString()].mem,
-        });
-      });
-    });
-    return Object.values(series);
-  }, [statsHistory]);
   const gpuSeries = useMemo(() => {
     if (!statsHistory) {
       return [];
@@ -343,14 +266,29 @@ function System() {
   return (
     <div className="size-full p-2">
       <div className="w-full h-8 flex justify-between items-center">
-        <div className="h-full flex items-center gap-2">
-          <div className="h-full font-medium content-center">System</div>
-          {initialStats && (
-            <div className="h-full text-muted-foreground text-sm content-center">
-              {initialStats[0].service.version}
-            </div>
-          )}
-        </div>
+        <ToggleGroup
+          className="*:px-3 *:py-4 *:rounded-2xl"
+          type="single"
+          size="sm"
+          value={page}
+          onValueChange={(value: SystemMetric) => {
+            if (value) {
+              setPage(value);
+            }
+          }} // don't allow the severity to be unselected
+        >
+          {Object.values(metrics).map((item) => (
+            <ToggleGroupItem
+              key={item}
+              className={`flex items-center justify-between gap-2 ${page == item ? "" : "text-gray-500"}`}
+              value={item}
+              aria-label={`Select ${item}`}
+            >
+              <div className="capitalize">{item}</div>
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
+
         <div className="h-full flex items-center">
           {lastUpdated && (
             <div className="h-full text-muted-foreground text-sm content-center">
@@ -359,48 +297,15 @@ function System() {
           )}
         </div>
       </div>
-
-      <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
-        <div className="p-2.5 bg-primary rounded-2xl flex-col">
-          <div className="mb-5">Detector Inference Speed</div>
-          {detInferenceTimeSeries.map((series) => (
-            <SystemGraph
-              key={series.name}
-              graphId="detector-inference"
-              name={series.name}
-              unit="ms"
-              threshold={InferenceThreshold}
-              data={[series]}
-            />
-          ))}
-        </div>
-        <div className="p-2.5 bg-primary rounded-2xl flex-col">
-          <div className="mb-5">Detector CPU Usage</div>
-          {detCpuSeries.map((series) => (
-            <SystemGraph
-              key={series.name}
-              graphId="detector-cpu-usages"
-              unit="%"
-              name={series.name}
-              threshold={DetectorCpuThreshold}
-              data={[series]}
-            />
-          ))}
-        </div>
-        <div className="p-2.5 bg-primary rounded-2xl flex-col">
-          <div className="mb-5">Detector Memory Usage</div>
-          {detMemSeries.map((series) => (
-            <SystemGraph
-              key={series.name}
-              graphId="detector-mem-usages"
-              unit="%"
-              name={series.name}
-              threshold={DetectorMemThreshold}
-              data={[series]}
-            />
-          ))}
-        </div>
+      <div className="mt-2 flex items-end gap-2">
+        <div className="h-full font-medium content-center">System</div>
+        {initialStats && (
+          <div className="h-full text-muted-foreground text-sm content-center">
+            {initialStats[0].service.version}
+          </div>
+        )}
       </div>
+      {page == "general" && <GeneralMetrics />}
     </div>
   );
 }
@@ -503,3 +408,222 @@ export default System;
         />
       </div>
  */
+
+function GeneralMetrics() {
+  // stats
+
+  const { data: initialStats } = useSWR<FrigateStats[]>(
+    ["stats/history", { keys: "cpu_usages,detectors,service" }],
+    {
+      revalidateOnFocus: false,
+    },
+  );
+
+  const [statsHistory, setStatsHistory] = useState<FrigateStats[]>([]);
+  const { payload: updatedStats } = useFrigateStats();
+
+  useEffect(() => {
+    if (initialStats == undefined) {
+      return;
+    }
+
+    if (statsHistory.length < initialStats.length) {
+      setStatsHistory(initialStats);
+      return;
+    }
+
+    setStatsHistory([...statsHistory, updatedStats]);
+  }, [initialStats, updatedStats]);
+
+  // stats data pieces
+
+  const detInferenceTimeSeries = useMemo(() => {
+    if (!statsHistory) {
+      return [];
+    }
+
+    const series: {
+      [key: string]: { name: string; data: { x: object; y: number }[] };
+    } = {};
+
+    statsHistory.forEach((stats) => {
+      if (!stats) {
+        return;
+      }
+
+      const statTime = new Date(stats.service.last_updated * 1000);
+
+      Object.entries(stats.detectors).forEach(([key, stats]) => {
+        if (!(key in series)) {
+          series[key] = { name: `${key} (${stats.pid})`, data: [] };
+        }
+
+        series[key].data.push({ x: statTime, y: stats.inference_speed });
+      });
+    });
+    return Object.values(series);
+  }, [statsHistory]);
+  const detCpuSeries = useMemo(() => {
+    if (!statsHistory) {
+      return [];
+    }
+
+    const series: {
+      [key: string]: { name: string; data: { x: object; y: string }[] };
+    } = {};
+
+    statsHistory.forEach((stats) => {
+      if (!stats) {
+        return;
+      }
+
+      const statTime = new Date(stats.service.last_updated * 1000);
+
+      Object.entries(stats.detectors).forEach(([key, detStats]) => {
+        if (!(key in series)) {
+          series[key] = { name: key, data: [] };
+        }
+
+        series[key].data.push({
+          x: statTime,
+          y: stats.cpu_usages[detStats.pid.toString()].cpu,
+        });
+      });
+    });
+    return Object.values(series);
+  }, [statsHistory]);
+  const detMemSeries = useMemo(() => {
+    if (!statsHistory) {
+      return [];
+    }
+
+    const series: {
+      [key: string]: { name: string; data: { x: object; y: string }[] };
+    } = {};
+
+    statsHistory.forEach((stats) => {
+      if (!stats) {
+        return;
+      }
+
+      const statTime = new Date(stats.service.last_updated * 1000);
+
+      Object.entries(stats.detectors).forEach(([key, detStats]) => {
+        if (!(key in series)) {
+          series[key] = { name: key, data: [] };
+        }
+
+        series[key].data.push({
+          x: statTime,
+          y: stats.cpu_usages[detStats.pid.toString()].mem,
+        });
+      });
+    });
+    return Object.values(series);
+  }, [statsHistory]);
+
+  return (
+    <div className="size-full mt-4 flex flex-col">
+      <div className="text-muted-foreground text-sm font-medium">Detectors</div>
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <div className="p-2.5 bg-primary rounded-2xl flex-col">
+          <div className="mb-5">Detector Inference Speed</div>
+          {detInferenceTimeSeries.map((series) => (
+            <SystemGraph
+              key={series.name}
+              graphId="detector-inference"
+              name={series.name}
+              unit="ms"
+              threshold={InferenceThreshold}
+              data={[series]}
+            />
+          ))}
+        </div>
+        <div className="p-2.5 bg-primary rounded-2xl flex-col">
+          <div className="mb-5">Detector CPU Usage</div>
+          {detCpuSeries.map((series) => (
+            <SystemGraph
+              key={series.name}
+              graphId="detector-cpu-usages"
+              unit="%"
+              name={series.name}
+              threshold={DetectorCpuThreshold}
+              data={[series]}
+            />
+          ))}
+        </div>
+        <div className="p-2.5 bg-primary rounded-2xl flex-col">
+          <div className="mb-5">Detector Memory Usage</div>
+          {detMemSeries.map((series) => (
+            <SystemGraph
+              key={series.name}
+              graphId="detector-mem-usages"
+              unit="%"
+              name={series.name}
+              threshold={DetectorMemThreshold}
+              data={[series]}
+            />
+          ))}
+        </div>
+      </div>
+
+      {statsHistory.length > 0 && statsHistory[0].gpu_usages && (
+        <>
+          <div className="flex items-center justify-between">
+            <div className="text-muted-foreground text-sm font-medium">
+              Detectors
+            </div>
+            {Object.keys(statsHistory[0].gpu_usages).filter(
+              (key) =>
+                key == "amd-vaapi" ||
+                key == "intel-vaapi" ||
+                key == "intel-qsv",
+            ).length > 0 && <Button>Hardware Info</Button>}
+          </div>
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div className="p-2.5 bg-primary rounded-2xl flex-col">
+              <div className="mb-5">Detector Inference Speed</div>
+              {detInferenceTimeSeries.map((series) => (
+                <SystemGraph
+                  key={series.name}
+                  graphId="detector-inference"
+                  name={series.name}
+                  unit="ms"
+                  threshold={InferenceThreshold}
+                  data={[series]}
+                />
+              ))}
+            </div>
+
+            <div className="p-2.5 bg-primary rounded-2xl flex-col">
+              <div className="mb-5">Detector CPU Usage</div>
+              {detCpuSeries.map((series) => (
+                <SystemGraph
+                  key={series.name}
+                  graphId="detector-cpu-usages"
+                  unit="%"
+                  name={series.name}
+                  threshold={DetectorCpuThreshold}
+                  data={[series]}
+                />
+              ))}
+            </div>
+            <div className="p-2.5 bg-primary rounded-2xl flex-col">
+              <div className="mb-5">Detector Memory Usage</div>
+              {detMemSeries.map((series) => (
+                <SystemGraph
+                  key={series.name}
+                  graphId="detector-mem-usages"
+                  unit="%"
+                  name={series.name}
+                  threshold={DetectorMemThreshold}
+                  data={[series]}
+                />
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}

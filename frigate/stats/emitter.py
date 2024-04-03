@@ -59,7 +59,7 @@ class StatsEmitter(threading.Thread):
             selected = {}
 
             for k in keys:
-                selected[k] = selected_stats[k]
+                selected[k] = s[k]
 
             selected_stats.append(selected)
 
