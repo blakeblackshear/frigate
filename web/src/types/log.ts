@@ -1,5 +1,5 @@
 export type LogData = {
-  lineCount: number;
+  totalLines: number;
   lines: string[];
 };
 

@@ -27,15 +27,23 @@ function Logs() {
 
   // log data handling
 
+  const [logRange, setLogRange] = useState<LogRange>({ start: 0, end: 0 });
   const [logs, setLogs] = useState<string[]>([]);
 
   useEffect(() => {
-    axios.get(`logs/${logService}`).then((resp) => {
-      if (resp.status == 200) {
-        const data = resp.data as LogData;
-        setLogs(data.lines);
-      }
-    });
+    axios
+      .get(`logs/${logService}?start=-100`)
+      .then((resp) => {
+        if (resp.status == 200) {
+          const data = resp.data as LogData;
+          setLogRange({
+            start: Math.max(0, data.totalLines - 100),
+            end: data.totalLines,
+          });
+          setLogs(data.lines);
+        }
+      })
+      .catch(() => {});
   }, [logService]);
 
   useEffect(() => {
@@ -44,20 +52,30 @@ function Logs() {
     }
 
     const id = setTimeout(() => {
-      axios.get(`logs/${logService}?start=${logs.length}`).then((resp) => {
-        if (resp.status == 200) {
-          const data = resp.data as LogData;
-          setLogs([...logs, ...data.lines]);
-        }
-      });
-    }, 1000);
+      axios
+        .get(`logs/${logService}?start=${logRange.end}`)
+        .then((resp) => {
+          if (resp.status == 200) {
+            const data = resp.data as LogData;
+
+            if (data.lines.length > 0) {
+              setLogRange({
+                start: logRange.start,
+                end: data.totalLines,
+              });
+              setLogs([...logs, ...data.lines]);
+            }
+          }
+        })
+        .catch(() => {});
+    }, 5000);
 
     return () => {
       if (id) {
         clearTimeout(id);
       }
     };
-  }, [logs, logService]);
+  }, [logs, logService, logRange]);
 
   // convert to log data
 
@@ -161,23 +179,81 @@ function Logs() {
 
   // scroll to bottom
 
+  const [atBottom, setAtBottom] = useState(false);
+
   const contentRef = useRef<HTMLDivElement | null>(null);
   const [endVisible, setEndVisible] = useState(true);
-  const observer = useRef<IntersectionObserver | null>(null);
+  const endObserver = useRef<IntersectionObserver | null>(null);
   const endLogRef = useCallback(
     (node: HTMLElement | null) => {
-      if (observer.current) observer.current.disconnect();
+      if (endObserver.current) endObserver.current.disconnect();
       try {
-        observer.current = new IntersectionObserver((entries) => {
+        endObserver.current = new IntersectionObserver((entries) => {
           setEndVisible(entries[0].isIntersecting);
         });
-        if (node) observer.current.observe(node);
+        if (node) endObserver.current.observe(node);
       } catch (e) {
         // no op
       }
     },
     [setEndVisible],
   );
+  const startObserver = useRef<IntersectionObserver | null>(null);
+  const startLogRef = useCallback(
+    (node: HTMLElement | null) => {
+      if (startObserver.current) startObserver.current.disconnect();
+
+      if (logs.length == 0 || !atBottom) {
+        return;
+      }
+
+      try {
+        startObserver.current = new IntersectionObserver((entries) => {
+          if (entries[0].isIntersecting) {
+            const start = Math.max(0, logRange.start - 100);
+
+            axios
+              .get(`logs/${logService}?start=${start}&end=${logRange.start}`)
+              .then((resp) => {
+                if (resp.status == 200) {
+                  const data = resp.data as LogData;
+
+                  if (data.lines.length > 0) {
+                    setLogRange({
+                      start: start,
+                      end: logRange.end,
+                    });
+                    setLogs([...data.lines, ...logs]);
+                  }
+                }
+              })
+              .catch(() => {});
+          }
+        });
+        if (node) startObserver.current.observe(node);
+      } catch (e) {
+        // no op
+      }
+    },
+    [logRange],
+  );
+
+  useEffect(() => {
+    if (logLines.length == 0) {
+      setAtBottom(false);
+      return;
+    }
+
+    if (!contentRef.current) {
+      return;
+    }
+
+    contentRef.current?.scrollTo({
+      top: contentRef.current?.scrollHeight,
+      behavior: "instant",
+    });
+    setTimeout(() => setAtBottom(true), 300);
+  }, [logLines, logService]);
 
   return (
     <div className="size-full p-2 flex flex-col">
@@ -187,9 +263,12 @@ function Logs() {
           type="single"
           size="sm"
           value={logService}
-          onValueChange={(value: LogType) =>
-            value ? setLogService(value) : null
-          } // don't allow the severity to be unselected
+          onValueChange={(value: LogType) => {
+            if (value) {
+              setLogs([]);
+              setLogService(value);
+            }
+          }} // don't allow the severity to be unselected
         >
           {Object.values(logTypes).map((item) => (
             <ToggleGroupItem
@@ -247,20 +326,27 @@ function Logs() {
             Message
           </div>
         </div>
+        {logLines.length > 0 && logRange.start > 0 && <div ref={startLogRef} />}
         {logLines.map((log, idx) => (
-          <LogLineData key={`${idx}-${log.content}`} offset={idx} line={log} />
+          <LogLineData
+            key={`${idx}-${log.content}`}
+            className={atBottom ? "" : "invisible"}
+            offset={idx}
+            line={log}
+          />
         ))}
-        <div id="page-bottom" ref={endLogRef} />
+        {logLines.length > 0 && <div id="page-bottom" ref={endLogRef} />}
       </div>
     </div>
   );
 }
 
 type LogLineDataProps = {
+  className: string;
   line: LogLine;
   offset: number;
 };
-function LogLineData({ line, offset }: LogLineDataProps) {
+function LogLineData({ className, line, offset }: LogLineDataProps) {
   // long log message
 
   const contentRef = useRef<HTMLDivElement | null>(null);
@@ -291,7 +377,7 @@ function LogLineData({ line, offset }: LogLineDataProps) {
 
   return (
     <div
-      className={`py-2 grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 gap-2 ${offset % 2 == 0 ? "bg-secondary" : "bg-secondary/80"} border-t border-x`}
+      className={`py-2 grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 gap-2 ${offset % 2 == 0 ? "bg-secondary" : "bg-secondary/80"} border-t border-x ${className}`}
     >
       <div
         className={`h-full p-1 flex items-center gap-2 capitalize ${severityClassName}`}
