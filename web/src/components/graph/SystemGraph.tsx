@@ -26,9 +26,6 @@ export default function SystemGraph({
 
   const formatTime = useCallback(
     (val: unknown) => {
-      console.log(
-        `inside the check we have ${updateTimes.length} times and we are looking for ${val}`,
-      );
       const date = new Date(updateTimes[Math.round(val as number)] * 1000);
       return `${date.getHours() > 12 ? date.getHours() - 12 : date.getHours()}:${date.getMinutes()}`;
     },

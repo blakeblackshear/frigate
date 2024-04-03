@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import SystemGraph from "@/components/graph/SystemGraph";
 import { useFrigateStats } from "@/api/ws";
 import TimeAgo from "@/components/dynamic/TimeAgo";
-import { FrigateConfig } from "@/types/frigateConfig";
 import {
   DetectorCpuThreshold,
   DetectorMemThreshold,
@@ -597,8 +596,4 @@ function GeneralMetrics({ lastUpdated, setLastUpdated }: GeneralMetricsProps) {
       </div>
     </>
   );
-}
-
-function CameraMetrics() {
-  const { data: config } = useSWR<FrigateConfig>("config");
 }
