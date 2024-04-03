@@ -215,7 +215,10 @@ function GeneralMetrics({ lastUpdated, setLastUpdated }: GeneralMetricsProps) {
   // stats
 
   const { data: initialStats } = useSWR<FrigateStats[]>(
-    ["stats/history", { keys: "cpu_usages,detectors,processes,service" }],
+    [
+      "stats/history",
+      { keys: "cpu_usages,detectors,gpu_usages,processes,service" },
+    ],
     {
       revalidateOnFocus: false,
     },
