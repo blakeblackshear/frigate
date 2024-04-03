@@ -2,14 +2,16 @@ import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { LogData, LogLine, LogSeverity } from "@/types/log";
 import copy from "copy-to-clipboard";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { IoIosAlert } from "react-icons/io";
 import { GoAlertFill } from "react-icons/go";
 import { LuCopy } from "react-icons/lu";
-import useSWR from "swr";
+import axios from "axios";
 
 const logTypes = ["frigate", "go2rtc", "nginx"] as const;
 type LogType = (typeof logTypes)[number];
+
+type LogRange = { start: number; end: number };
 
 const frigateDateStamp = /\[[\d\s-:]*]/;
 const frigateSeverity = /(DEBUG)|(INFO)|(WARNING)|(ERROR)/;
@@ -23,37 +25,49 @@ const ngSeverity = /(GET)|(POST)|(PATCH)|(DELETE)/;
 function Logs() {
   const [logService, setLogService] = useState<LogType>("frigate");
 
-  const { data: frigateLogs } = useSWR<LogData>("logs/frigate", {
-    refreshInterval: 1000,
-  });
-  const { data: go2rtcLogs } = useSWR<LogData>("logs/go2rtc", {
-    refreshInterval: 1000,
-  });
-  const { data: nginxLogs } = useSWR<LogData>("logs/nginx", {
-    refreshInterval: 1000,
-  });
+  // log data handling
+
+  const [logs, setLogs] = useState<string[]>([]);
+
+  useEffect(() => {
+    axios.get(`logs/${logService}`).then((resp) => {
+      if (resp.status == 200) {
+        const data = resp.data as LogData;
+        setLogs(data.lines);
+      }
+    });
+  }, [logService]);
+
+  useEffect(() => {
+    if (!logs || logs.length == 0) {
+      return;
+    }
+
+    const id = setTimeout(() => {
+      axios.get(`logs/${logService}?start=${logs.length}`).then((resp) => {
+        if (resp.status == 200) {
+          const data = resp.data as LogData;
+          setLogs([...logs, ...data.lines]);
+        }
+      });
+    }, 1000);
+
+    return () => {
+      if (id) {
+        clearTimeout(id);
+      }
+    };
+  }, [logs, logService]);
 
   // convert to log data
 
-  const logs = useMemo(() => {
-    if (logService == "frigate") {
-      return frigateLogs;
-    } else if (logService == "go2rtc") {
-      return go2rtcLogs;
-    } else if (logService == "nginx") {
-      return nginxLogs;
-    } else {
-      return undefined;
-    }
-  }, [logService, frigateLogs, go2rtcLogs, nginxLogs]);
-
   const logLines = useMemo<LogLine[]>(() => {
-    if (logService == "frigate") {
-      if (!frigateLogs) {
-        return [];
-      }
+    if (!logs) {
+      return [];
+    }
 
-      return frigateLogs.lines
+    if (logService == "frigate") {
+      return logs
         .map((line) => {
           const match = frigateDateStamp.exec(line);
 
@@ -84,11 +98,7 @@ function Logs() {
         })
         .filter((value) => value != null) as LogLine[];
     } else if (logService == "go2rtc") {
-      if (!go2rtcLogs) {
-        return [];
-      }
-
-      return go2rtcLogs.lines
+      return logs
         .map((line) => {
           if (line.length == 0) {
             return null;
@@ -124,11 +134,7 @@ function Logs() {
         })
         .filter((value) => value != null) as LogLine[];
     } else if (logService == "nginx") {
-      if (!nginxLogs) {
-        return [];
-      }
-
-      return nginxLogs.lines
+      return logs
         .map((line) => {
           if (line.length == 0) {
             return null;
@@ -145,15 +151,15 @@ function Logs() {
     } else {
       return [];
     }
-  }, [logService, frigateLogs, go2rtcLogs, nginxLogs]);
+  }, [logs, logService]);
 
   const handleCopyLogs = useCallback(() => {
     if (logs) {
-      copy(logs.lines.join("\n"));
+      copy(logs.join("\n"));
     }
   }, [logs]);
 
-  // scroll to bottom button
+  // scroll to bottom
 
   const contentRef = useRef<HTMLDivElement | null>(null);
   const [endVisible, setEndVisible] = useState(true);
@@ -244,7 +250,7 @@ function Logs() {
         {logLines.map((log, idx) => (
           <LogLineData key={`${idx}-${log.content}`} offset={idx} line={log} />
         ))}
-        <div ref={endLogRef} />
+        <div id="page-bottom" ref={endLogRef} />
       </div>
     </div>
   );

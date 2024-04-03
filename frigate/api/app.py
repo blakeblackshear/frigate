@@ -426,7 +426,7 @@ def logs(service: str):
         )
 
     start = request.args.get("start", type=int, default=0)
-    end = request.args.get("start", type=int)
+    end = request.args.get("end", type=int)
 
     try:
         file = open(service_location, "r")
