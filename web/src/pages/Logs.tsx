@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { LogLine, LogSeverity } from "@/types/log";
+import { LogData, LogLine, LogSeverity } from "@/types/log";
 import copy from "copy-to-clipboard";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { IoIosAlert } from "react-icons/io";
@@ -23,13 +23,13 @@ const ngSeverity = /(GET)|(POST)|(PATCH)|(DELETE)/;
 function Logs() {
   const [logService, setLogService] = useState<LogType>("frigate");
 
-  const { data: frigateLogs } = useSWR<string>("logs/frigate", {
+  const { data: frigateLogs } = useSWR<LogData>("logs/frigate", {
     refreshInterval: 1000,
   });
-  const { data: go2rtcLogs } = useSWR<string>("logs/go2rtc", {
+  const { data: go2rtcLogs } = useSWR<LogData>("logs/go2rtc", {
     refreshInterval: 1000,
   });
-  const { data: nginxLogs } = useSWR<string>("logs/nginx", {
+  const { data: nginxLogs } = useSWR<LogData>("logs/nginx", {
     refreshInterval: 1000,
   });
 
@@ -43,7 +43,7 @@ function Logs() {
     } else if (logService == "nginx") {
       return nginxLogs;
     } else {
-      return "unknown logs";
+      return undefined;
     }
   }, [logService, frigateLogs, go2rtcLogs, nginxLogs]);
 
@@ -53,8 +53,7 @@ function Logs() {
         return [];
       }
 
-      return frigateLogs
-        .split("\n")
+      return frigateLogs.lines
         .map((line) => {
           const match = frigateDateStamp.exec(line);
 
@@ -89,8 +88,7 @@ function Logs() {
         return [];
       }
 
-      return go2rtcLogs
-        .split("\n")
+      return go2rtcLogs.lines
         .map((line) => {
           if (line.length == 0) {
             return null;
@@ -130,8 +128,7 @@ function Logs() {
         return [];
       }
 
-      return nginxLogs
-        .split("\n")
+      return nginxLogs.lines
         .map((line) => {
           if (line.length == 0) {
             return null;
@@ -152,7 +149,7 @@ function Logs() {
 
   const handleCopyLogs = useCallback(() => {
     if (logs) {
-      copy(logs);
+      copy(logs.lines.join("\n"));
     }
   }, [logs]);
 

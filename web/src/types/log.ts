@@ -1,3 +1,8 @@
+export type LogData = {
+  lineCount: number;
+  lines: string[];
+};
+
 export type LogSeverity = "info" | "warning" | "error" | "debug";
 
 export type LogLine = {

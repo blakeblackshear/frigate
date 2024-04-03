@@ -159,9 +159,9 @@ def config():
     config["plus"] = {"enabled": current_app.plus_api.is_active()}
 
     for detector, detector_config in config["detectors"].items():
-        detector_config["model"]["labelmap"] = (
-            current_app.frigate_config.model.merged_labelmap
-        )
+        detector_config["model"][
+            "labelmap"
+        ] = current_app.frigate_config.model.merged_labelmap
 
     return jsonify(config)
 
@@ -425,11 +425,19 @@ def logs(service: str):
             404,
         )
 
+    start = request.args.get("start", type=int, default=0)
+    end = request.args.get("start", type=int)
+
     try:
         file = open(service_location, "r")
         contents = file.read()
         file.close()
-        return contents, 200
+
+        lines = contents.splitlines()
+        return make_response(
+            jsonify({"totalLines": len(lines), "lines": lines[start:end]}),
+            200,
+        )
     except FileNotFoundError as e:
         logger.error(e)
         return make_response(
