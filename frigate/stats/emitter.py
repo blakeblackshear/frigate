@@ -48,7 +48,9 @@ class StatsEmitter(threading.Thread):
             self.stats_history.append(stats)
             return stats
 
-    def get_stats_history(self, keys: Optional[list[str]] = None) -> list[dict[str, any]]:
+    def get_stats_history(
+        self, keys: Optional[list[str]] = None
+    ) -> list[dict[str, any]]:
         """Get stats history."""
         if not keys:
             return self.stats_history
@@ -67,7 +69,9 @@ class StatsEmitter(threading.Thread):
 
     def run(self) -> None:
         time.sleep(10)
-        for counter in itertools.cycle(range(int(self.config.mqtt.stats_interval / 10))):
+        for counter in itertools.cycle(
+            range(int(self.config.mqtt.stats_interval / 10))
+        ):
             if self.stop_event.wait(10):
                 break
 
