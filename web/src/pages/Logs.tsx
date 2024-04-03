@@ -237,7 +237,7 @@ function Logs() {
     },
     // we need to listen on the current range of visible items
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [logRange],
+    [logRange, initialScroll],
   );
 
   useEffect(() => {
