@@ -9,14 +9,7 @@ from datetime import datetime, timedelta
 from functools import reduce
 
 import requests
-from flask import (
-    Blueprint,
-    Flask,
-    current_app,
-    jsonify,
-    make_response,
-    request,
-)
+from flask import Blueprint, Flask, current_app, jsonify, make_response, request
 from markupsafe import escape
 from peewee import operator
 from playhouse.sqliteq import SqliteQueueDatabase
@@ -159,9 +152,9 @@ def config():
     config["plus"] = {"enabled": current_app.plus_api.is_active()}
 
     for detector, detector_config in config["detectors"].items():
-        detector_config["model"]["labelmap"] = (
-            current_app.frigate_config.model.merged_labelmap
-        )
+        detector_config["model"][
+            "labelmap"
+        ] = current_app.frigate_config.model.merged_labelmap
 
     return jsonify(config)
 
@@ -433,9 +426,37 @@ def logs(service: str):
         contents = file.read()
         file.close()
 
-        lines = contents.splitlines()
+        # use the start timestamp to group logs together``
+        logLines = []
+        keyLength = 0
+        dateEnd = 0
+        currentKey = ""
+        currentLine = ""
+
+        for rawLine in contents.splitlines():
+            cleanLine = rawLine.strip()
+
+            if len(cleanLine) < 10:
+                continue
+
+            if dateEnd == 0:
+                dateEnd = cleanLine.index("  ")
+                keyLength = dateEnd - (6 if service_location == "frigate" else 0)
+
+            newKey = cleanLine[0:keyLength]
+
+            if newKey == currentKey:
+                currentLine += f"\n{cleanLine[dateEnd:].strip()}"
+                continue
+            else:
+                logLines.append(currentLine)
+                currentKey = newKey
+                currentLine = cleanLine
+
+        logLines.append(currentLine)
+
         return make_response(
-            jsonify({"totalLines": len(lines), "lines": lines[start:end]}),
+            jsonify({"totalLines": len(logLines), "lines": logLines[start:end]}),
             200,
         )
     except FileNotFoundError as e:

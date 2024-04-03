@@ -246,16 +246,16 @@ function Logs() {
       return;
     }
 
-    if (logLines.length < 100) {
-      setInitialScroll(true);
-      return;
-    }
-
     if (initialScroll) {
       return;
     }
 
     if (!contentRef.current) {
+      return;
+    }
+
+    if (contentRef.current.scrollHeight <= contentRef.current.clientHeight) {
+      setInitialScroll(true);
       return;
     }
 
