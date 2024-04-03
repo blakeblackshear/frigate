@@ -323,7 +323,7 @@ function Logs() {
 
       <div
         ref={contentRef}
-        className="w-full h-min my-2 font-mono text-sm rounded py-4 sm:py-2 whitespace-pre-wrap overflow-auto"
+        className="w-full h-min my-2 font-mono text-sm rounded py-4 sm:py-2 whitespace-pre-wrap overflow-auto no-scrollbar"
       >
         <div className="py-2 sticky top-0 -translate-y-1/4 grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 bg-background *:p-2">
           <div className="p-1 flex items-center capitalize border-y border-l">
