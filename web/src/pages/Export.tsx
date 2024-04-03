@@ -26,6 +26,18 @@ function Export() {
 
   const [deleteClip, setDeleteClip] = useState<string | undefined>();
 
+  const onHandleRename = useCallback(
+    (original: string, update: string) => {
+      axios.patch(`export/${original}/${update}`).then((response) => {
+        if (response.status == 200) {
+          setDeleteClip(undefined);
+          mutate();
+        }
+      });
+    },
+    [mutate],
+  );
+
   const onHandleDelete = useCallback(() => {
     if (!deleteClip) {
       return;
@@ -61,13 +73,14 @@ function Export() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <div className="size-full overflow-hidden">
+      <div className="w-full overflow-hidden">
         {exports && (
           <div className="size-full grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 overflow-y-auto">
             {Object.values(exports).map((item) => (
               <ExportCard
                 key={item.name}
                 file={item}
+                onRename={onHandleRename}
                 onDelete={(file) => setDeleteClip(file)}
               />
             ))}

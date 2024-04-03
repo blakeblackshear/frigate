@@ -61,7 +61,7 @@ class RecordingExporter(threading.Thread):
         )
         file_name = (
             self.user_provided_name
-            or f"{self.camera}@{self.get_datetime_from_timestamp(self.start_time)}__{self.get_datetime_from_timestamp(self.end_time)}"
+            or f"{self.camera}_{self.get_datetime_from_timestamp(self.start_time)}__{self.get_datetime_from_timestamp(self.end_time)}"
         )
         file_path = f"{EXPORT_DIR}/in_progress.{file_name}.mp4"
         final_file_path = f"{EXPORT_DIR}/{file_name}.mp4"
