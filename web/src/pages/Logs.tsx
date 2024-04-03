@@ -90,6 +90,17 @@ function Logs() {
           const match = frigateDateStamp.exec(line);
 
           if (!match) {
+            const infoIndex = line.indexOf("[INFO]");
+
+            if (infoIndex != -1) {
+              return {
+                dateStamp: line.substring(0, 19),
+                severity: "info",
+                section: "starutp",
+                content: line.substring(infoIndex + 6).trim(),
+              };
+            }
+
             return null;
           }
 
@@ -340,7 +351,7 @@ function Logs() {
           </div>
         </div>
         {logLines.length > 0 &&
-          [...Array(logRange.end - 1).keys()].map((idx) => {
+          [...Array(logRange.end).keys()].map((idx) => {
             const logLine =
               idx >= logRange.start
                 ? logLines[idx - logRange.start]

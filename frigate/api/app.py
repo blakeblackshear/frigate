@@ -446,10 +446,12 @@ def logs(service: str):
             newKey = cleanLine[0:keyLength]
 
             if newKey == currentKey:
-                currentLine += f"{cleanLine[dateEnd:].strip()}\n"
+                currentLine += f"\n{cleanLine[dateEnd:].strip()}"
                 continue
             else:
-                logLines.append(currentLine)
+                if len(currentLine) > 0:
+                    logLines.append(currentLine)
+
                 currentKey = newKey
                 currentLine = cleanLine
 
