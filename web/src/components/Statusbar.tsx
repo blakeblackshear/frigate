@@ -87,7 +87,10 @@ export default function Statusbar() {
       </div>
       <div className="h-full flex items-center gap-2">
         {potentialProblems.map((prob) => (
-          <div className="flex items-center text-sm gap-2 capitalize">
+          <div
+            key={prob.text}
+            className="flex items-center text-sm gap-2 capitalize"
+          >
             <IoIosWarning className={`size-5 ${prob.color}`} />
             {prob.text}
           </div>
