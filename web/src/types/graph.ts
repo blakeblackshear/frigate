@@ -28,6 +28,16 @@ export const DetectorMemThreshold = {
   error: 50,
 } as Threshold;
 
+export const GPUUsageThreshold = {
+  warning: 75,
+  error: 95,
+} as Threshold;
+
+export const GPUMemThreshold = {
+  warning: 75,
+  error: 95,
+} as Threshold;
+
 export const CameraFfmpegThreshold = {
   warning: 20,
   error: 20,

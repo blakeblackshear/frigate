@@ -59,7 +59,7 @@ class StatsEmitter(threading.Thread):
             selected = {}
 
             for k in keys:
-                selected[k] = s[k]
+                selected[k] = s.get(k)
 
             selected_stats.append(selected)
 
@@ -67,7 +67,7 @@ class StatsEmitter(threading.Thread):
 
     def run(self) -> None:
         time.sleep(10)
-        for counter in itertools.cycle(range(int(self.config.record.expire_interval / 10))):
+        for counter in itertools.cycle(range(int(self.config.mqtt.stats_interval / 10))):
             if self.stop_event.wait(10):
                 break
 

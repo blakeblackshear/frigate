@@ -1,5 +1,5 @@
 import { Threshold } from "@/types/graph";
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import Chart from "react-apexcharts";
 
 type SystemGraphProps = {
@@ -7,6 +7,7 @@ type SystemGraphProps = {
   name: string;
   unit: string;
   threshold: Threshold;
+  updateTimes: number[];
   data: ApexAxisChartSeries;
 };
 export default function SystemGraph({
@@ -14,6 +15,7 @@ export default function SystemGraph({
   name,
   unit,
   threshold,
+  updateTimes,
   data,
 }: SystemGraphProps) {
   const lastValue = useMemo<number>(
@@ -21,6 +23,79 @@ export default function SystemGraph({
     () => data[0].data[data[0].data.length - 1]?.y ?? 0,
     [data],
   );
+
+  const formatTime = useCallback(
+    (val: unknown) => {
+      console.log(
+        `inside the check we have ${updateTimes.length} times and we are looking for ${val}`,
+      );
+      const date = new Date(updateTimes[Math.round(val as number)] * 1000);
+      return `${date.getHours() > 12 ? date.getHours() - 12 : date.getHours()}:${date.getMinutes()}`;
+    },
+    [updateTimes],
+  );
+
+  const options = useMemo(() => {
+    return {
+      chart: {
+        id: graphId,
+        selection: {
+          enabled: false,
+        },
+        toolbar: {
+          show: false,
+        },
+        zoom: {
+          enabled: false,
+        },
+      },
+      colors: [
+        ({ value }: { value: number }) => {
+          if (value >= threshold.error) {
+            return "#FA5252";
+          } else if (value >= threshold.warning) {
+            return "#FF9966";
+          } else {
+            return "#404040";
+          }
+        },
+      ],
+      grid: {
+        show: false,
+      },
+      legend: {
+        show: false,
+      },
+      dataLabels: {
+        enabled: false,
+      },
+      plotOptions: {
+        bar: {
+          distributed: true,
+        },
+      },
+      xaxis: {
+        tickAmount: 6,
+        labels: {
+          formatter: formatTime,
+        },
+        axisBorder: {
+          show: false,
+        },
+        axisTicks: {
+          show: false,
+        },
+      },
+      yaxis: {
+        show: false,
+        max: lastValue * 2,
+      },
+    };
+  }, [graphId, lastValue, threshold, formatTime]);
+
+  useEffect(() => {
+    ApexCharts.exec(graphId, "updateOptions", options, true, true);
+  }, [graphId, options]);
 
   return (
     <div className="w-full flex flex-col">
@@ -31,62 +106,7 @@ export default function SystemGraph({
           {unit}
         </div>
       </div>
-      <Chart
-        type="bar"
-        options={{
-          chart: {
-            id: graphId,
-            selection: {
-              enabled: false,
-            },
-            toolbar: {
-              show: false,
-            },
-            zoom: {
-              enabled: false,
-            },
-          },
-          colors: [
-            ({ value }: { value: number }) => {
-              if (value >= threshold.error) {
-                return "#FA5252";
-              } else if (value >= threshold.warning) {
-                return "#FF9966";
-              } else {
-                return "#404040";
-              }
-            },
-          ],
-          grid: {
-            show: false,
-          },
-          legend: {
-            show: false,
-          },
-          dataLabels: {
-            enabled: false,
-          },
-          xaxis: {
-            type: "datetime",
-            axisBorder: {
-              show: false,
-            },
-            axisTicks: {
-              show: false,
-            },
-            labels: {
-              format: "h:mm",
-              datetimeUTC: false,
-            },
-          },
-          yaxis: {
-            show: false,
-            max: lastValue * 2,
-          },
-        }}
-        series={data}
-        height="120"
-      />
+      <Chart type="bar" options={options} series={data} height="120" />
     </div>
   );
 }

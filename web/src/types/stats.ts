@@ -63,3 +63,9 @@ export type PotentialProblem = {
   text: string;
   color: string;
 };
+
+export type Vainfo = {
+  return_code: number;
+  stdout: string;
+  stderr: string;
+};
