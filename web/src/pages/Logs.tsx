@@ -340,19 +340,28 @@ function Logs() {
           </div>
         </div>
         {logLines.length > 0 &&
-          [...Array(logRange.end - 1).keys()].map((idx) =>
-            idx >= logRange.start ? (
-              <LogLineData
-                key={`${idx}-${logService}`}
-                startRef={idx == logRange.start + 10 ? startLogRef : undefined}
-                className={initialScroll ? "" : "invisible"}
-                offset={idx}
-                line={logLines[idx - logRange.start]}
-              />
-            ) : (
-              <div key={`${idx}-${logService}`} className="h-12" />
-            ),
-          )}
+          [...Array(logRange.end - 1).keys()].map((idx) => {
+            const logLine =
+              idx >= logRange.start
+                ? logLines[idx - logRange.start]
+                : undefined;
+
+            if (logLine) {
+              return (
+                <LogLineData
+                  key={`${idx}-${logService}`}
+                  startRef={
+                    idx == logRange.start + 10 ? startLogRef : undefined
+                  }
+                  className={initialScroll ? "" : "invisible"}
+                  offset={idx}
+                  line={logLines[idx - logRange.start]}
+                />
+              );
+            }
+
+            return <div key={`${idx}-${logService}`} className="h-12" />;
+          })}
         {logLines.length > 0 && <div id="page-bottom" ref={endLogRef} />}
       </div>
     </div>
