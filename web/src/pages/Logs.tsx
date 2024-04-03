@@ -179,7 +179,7 @@ function Logs() {
 
   // scroll to bottom
 
-  const [atBottom, setAtBottom] = useState(false);
+  const [initialScroll, setInitialScroll] = useState(false);
 
   const contentRef = useRef<HTMLDivElement | null>(null);
   const [endVisible, setEndVisible] = useState(true);
@@ -203,7 +203,7 @@ function Logs() {
     (node: HTMLElement | null) => {
       if (startObserver.current) startObserver.current.disconnect();
 
-      if (logs.length == 0 || !atBottom) {
+      if (logs.length == 0 || !initialScroll) {
         return;
       }
 
@@ -242,16 +242,16 @@ function Logs() {
 
   useEffect(() => {
     if (logLines.length == 0) {
-      setAtBottom(false);
+      setInitialScroll(false);
       return;
     }
 
     if (logLines.length < 100) {
-      setAtBottom(true);
+      setInitialScroll(true);
       return;
     }
 
-    if (atBottom) {
+    if (initialScroll) {
       return;
     }
 
@@ -263,7 +263,7 @@ function Logs() {
       top: contentRef.current?.scrollHeight,
       behavior: "instant",
     });
-    setTimeout(() => setAtBottom(true), 300);
+    setTimeout(() => setInitialScroll(true), 300);
     // we need to listen on the current range of visible items
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [logLines, logService]);
@@ -306,7 +306,7 @@ function Logs() {
         </div>
       </div>
 
-      {!endVisible && (
+      {initialScroll && !endVisible && (
         <Button
           className="absolute bottom-8 left-[50%] -translate-x-[50%] rounded-xl bg-accent-foreground text-white bg-gray-400 z-20 p-2"
           variant="secondary"
@@ -344,8 +344,8 @@ function Logs() {
             idx >= logRange.start ? (
               <LogLineData
                 key={`${idx}-${logService}`}
-                startRef={idx == logRange.start ? startLogRef : undefined}
-                className={atBottom ? "" : "invisible"}
+                startRef={idx == logRange.start + 10 ? startLogRef : undefined}
+                className={initialScroll ? "" : "invisible"}
                 offset={idx}
                 line={logLines[idx - logRange.start]}
               />
