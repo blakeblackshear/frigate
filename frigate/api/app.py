@@ -9,14 +9,7 @@ from datetime import datetime, timedelta
 from functools import reduce
 
 import requests
-from flask import (
-    Blueprint,
-    Flask,
-    current_app,
-    jsonify,
-    make_response,
-    request,
-)
+from flask import Blueprint, Flask, current_app, jsonify, make_response, request
 from markupsafe import escape
 from peewee import operator
 from playhouse.sqliteq import SqliteQueueDatabase
@@ -425,11 +418,49 @@ def logs(service: str):
             404,
         )
 
+    start = request.args.get("start", type=int, default=0)
+    end = request.args.get("end", type=int)
+
     try:
         file = open(service_location, "r")
         contents = file.read()
         file.close()
-        return contents, 200
+
+        # use the start timestamp to group logs together``
+        logLines = []
+        keyLength = 0
+        dateEnd = 0
+        currentKey = ""
+        currentLine = ""
+
+        for rawLine in contents.splitlines():
+            cleanLine = rawLine.strip()
+
+            if len(cleanLine) < 10:
+                continue
+
+            if dateEnd == 0:
+                dateEnd = cleanLine.index("  ")
+                keyLength = dateEnd - (6 if service_location == "frigate" else 0)
+
+            newKey = cleanLine[0:keyLength]
+
+            if newKey == currentKey:
+                currentLine += f"\n{cleanLine[dateEnd:].strip()}"
+                continue
+            else:
+                if len(currentLine) > 0:
+                    logLines.append(currentLine)
+
+                currentKey = newKey
+                currentLine = cleanLine
+
+        logLines.append(currentLine)
+
+        return make_response(
+            jsonify({"totalLines": len(logLines), "lines": logLines[start:end]}),
+            200,
+        )
     except FileNotFoundError as e:
         logger.error(e)
         return make_response(
