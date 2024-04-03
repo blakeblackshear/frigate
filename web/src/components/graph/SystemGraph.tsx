@@ -91,10 +91,11 @@ export default function SystemGraph({
       },
       yaxis: {
         show: false,
-        max: lastValue * 2,
+        min: 0,
+        max: threshold.warning + 10,
       },
     };
-  }, [graphId, lastValue, threshold, systemTheme, theme, formatTime]);
+  }, [graphId, threshold, systemTheme, theme, formatTime]);
 
   useEffect(() => {
     ApexCharts.exec(graphId, "updateOptions", options, true, true);

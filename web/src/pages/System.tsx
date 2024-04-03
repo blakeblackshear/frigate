@@ -575,7 +575,7 @@ function GeneralMetrics({ lastUpdated, setLastUpdated }: GeneralMetricsProps) {
                 graphId={`${series.name}-cpu`}
                 name={series.name.replaceAll("_", " ")}
                 unit="%"
-                threshold={InferenceThreshold}
+                threshold={DetectorCpuThreshold}
                 updateTimes={updateTimes}
                 data={[series]}
               />
