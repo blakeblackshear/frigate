@@ -56,7 +56,7 @@ export default function SystemGraph({
           } else if (value >= threshold.warning) {
             return "#FF9966";
           } else {
-            return "#404040";
+            return (systemTheme || theme) == "dark" ? "#404040" : "#E5E5E5";
           }
         },
       ],
