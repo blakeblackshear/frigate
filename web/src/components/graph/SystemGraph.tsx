@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo } from "react";
 import Chart from "react-apexcharts";
 import useSWR from "swr";
 
-type SystemGraphProps = {
+type ThresholdBarGraphProps = {
   graphId: string;
   name: string;
   unit: string;
@@ -13,14 +13,14 @@ type SystemGraphProps = {
   updateTimes: number[];
   data: ApexAxisChartSeries;
 };
-export default function SystemGraph({
+export function ThresholdBarGraph({
   graphId,
   name,
   unit,
   threshold,
   updateTimes,
   data,
-}: SystemGraphProps) {
+}: ThresholdBarGraphProps) {
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
@@ -87,8 +87,12 @@ export default function SystemGraph({
       tooltip: {
         theme: systemTheme || theme,
       },
+      markers: {
+        size: 0,
+      },
       xaxis: {
-        tickAmount: 6,
+        tickAmount: 4,
+        tickPlacement: "on",
         labels: {
           formatter: formatTime,
         },
@@ -104,7 +108,7 @@ export default function SystemGraph({
         min: 0,
         max: threshold.warning + 10,
       },
-    };
+    } as ApexCharts.ApexOptions;
   }, [graphId, threshold, systemTheme, theme, formatTime]);
 
   useEffect(() => {
@@ -121,6 +125,113 @@ export default function SystemGraph({
         </div>
       </div>
       <Chart type="bar" options={options} series={data} height="120" />
+    </div>
+  );
+}
+
+const getUnitSize = (MB: number) => {
+  if (isNaN(MB) || MB < 0) return "Invalid number";
+  if (MB < 1024) return `${MB} MiB`;
+  if (MB < 1048576) return `${(MB / 1024).toFixed(2)} GiB`;
+
+  return `${(MB / 1048576).toFixed(2)} TiB`;
+};
+
+type StorageGraphProps = {
+  graphId: string;
+  used: number;
+  total: number;
+};
+export function StorageGraph({ graphId, used, total }: StorageGraphProps) {
+  const { theme, systemTheme } = useTheme();
+
+  const options = useMemo(() => {
+    return {
+      chart: {
+        id: graphId,
+        background: (systemTheme || theme) == "dark" ? "#404040" : "#E5E5E5",
+        selection: {
+          enabled: false,
+        },
+        toolbar: {
+          show: false,
+        },
+        zoom: {
+          enabled: false,
+        },
+      },
+      grid: {
+        show: false,
+        padding: {
+          bottom: -40,
+          top: -60,
+          left: -20,
+          right: 0,
+        },
+      },
+      legend: {
+        show: false,
+      },
+      dataLabels: {
+        enabled: false,
+      },
+      plotOptions: {
+        bar: {
+          horizontal: true,
+        },
+      },
+      tooltip: {
+        theme: systemTheme || theme,
+      },
+      xaxis: {
+        axisBorder: {
+          show: false,
+        },
+        axisTicks: {
+          show: false,
+        },
+        labels: {
+          show: false,
+        },
+      },
+      yaxis: {
+        show: false,
+        min: 0,
+        max: 100,
+      },
+    };
+  }, [graphId, systemTheme, theme]);
+
+  useEffect(() => {
+    ApexCharts.exec(graphId, "updateOptions", options, true, true);
+  }, [graphId, options]);
+
+  return (
+    <div className="w-full flex flex-col gap-2.5">
+      <div className="w-full flex justify-between items-center gap-1">
+        <div className="flex items-center gap-1">
+          <div className="text-xs text-primary-foreground">
+            {getUnitSize(used)}
+          </div>
+          <div className="text-xs text-primary-foreground">/</div>
+          <div className="text-xs text-muted-foreground">
+            {getUnitSize(total)}
+          </div>
+        </div>
+        <div className="text-xs text-primary-foreground">
+          {Math.round((used / total) * 100)}%
+        </div>
+      </div>
+      <div className="h-5 rounded-md overflow-hidden">
+        <Chart
+          type="bar"
+          options={options}
+          series={[
+            { data: [{ x: "storage", y: Math.round((used / total) * 100) }] },
+          ]}
+          height="100%"
+        />
+      </div>
     </div>
   );
 }
