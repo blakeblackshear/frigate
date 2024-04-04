@@ -385,10 +385,10 @@ function ShowReviewFilter({
         className="block md:hidden"
         size="sm"
         variant="secondary"
-        onClick={() => setShowReviewed(showReviewed == 0 ? 1 : 0)}
+        onClick={() => setShowReviewedSwitch(showReviewedSwitch == 0 ? 1 : 0)}
       >
         <FaCheckCircle
-          className={`${showReviewed == 1 ? "text-selected" : "text-muted-foreground"}`}
+          className={`${showReviewedSwitch == 1 ? "text-selected" : "text-muted-foreground"}`}
         />
       </Button>
     </>
@@ -664,10 +664,10 @@ function ShowMotionOnlyButton({
         <Button
           size="sm"
           variant="secondary"
-          onClick={() => setMotionOnly(!motionOnly)}
+          onClick={() => setMotionOnlyButton(!motionOnlyButton)}
         >
           <FaRunning
-            className={`${motionOnly ? "text-selected" : "text-muted-foreground"}`}
+            className={`${motionOnlyButton ? "text-selected" : "text-muted-foreground"}`}
           />
         </Button>
       </div>
