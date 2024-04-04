@@ -1,5 +1,6 @@
 import { useFrigateStats } from "@/api/ws";
 import { CameraLineGraph } from "@/components/graph/SystemGraph";
+import { Skeleton } from "@/components/ui/skeleton";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { FrigateStats } from "@/types/stats";
 import { useEffect, useMemo, useState } from "react";
@@ -148,36 +149,44 @@ export default function CameraMetrics({
   return (
     <div className="size-full mt-4 flex flex-col overflow-y-auto">
       <div className="mb-5">Cameras</div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         {config &&
           Object.values(config.cameras).map((camera) => {
             if (camera.enabled) {
               return (
-                <div key={camera.name} className="grid grid-cols-2 gap-2">
-                  <div className="p-2.5 bg-primary rounded-2xl flex-col">
-                    <div className="mb-5 capitalize">
-                      {camera.name.replaceAll("_", " ")} CPU
+                <div key={camera.name} className="grid sm:grid-cols-2 gap-2">
+                  {Object.keys(cameraCpuSeries).includes(camera.name) ? (
+                    <div className="p-2.5 bg-primary rounded-2xl flex-col">
+                      <div className="mb-5 capitalize">
+                        {camera.name.replaceAll("_", " ")} CPU
+                      </div>
+                      <CameraLineGraph
+                        graphId={`${camera.name}-cpu`}
+                        unit="%"
+                        dataLabels={["ffmpeg", "capture", "detect"]}
+                        updateTimes={updateTimes}
+                        data={Object.values(cameraCpuSeries[camera.name] || {})}
+                      />
                     </div>
-                    <CameraLineGraph
-                      graphId={`${camera.name}-cpu`}
-                      unit="%"
-                      dataLabels={["ffmpeg", "capture", "detect"]}
-                      updateTimes={updateTimes}
-                      data={Object.values(cameraCpuSeries[camera.name] || {})}
-                    />
-                  </div>
-                  <div className="p-2.5 bg-primary rounded-2xl flex-col">
-                    <div className="mb-5 capitalize">
-                      {camera.name.replaceAll("_", " ")} DPS
+                  ) : (
+                    <Skeleton className="size-full aspect-video" />
+                  )}
+                  {Object.keys(cameraFpsSeries).includes(camera.name) ? (
+                    <div className="p-2.5 bg-primary rounded-2xl flex-col">
+                      <div className="mb-5 capitalize">
+                        {camera.name.replaceAll("_", " ")} DPS
+                      </div>
+                      <CameraLineGraph
+                        graphId={`${camera.name}-dps`}
+                        unit=" DPS"
+                        dataLabels={["detect", "skipped"]}
+                        updateTimes={updateTimes}
+                        data={Object.values(cameraFpsSeries[camera.name] || {})}
+                      />
                     </div>
-                    <CameraLineGraph
-                      graphId={`${camera.name}-dps`}
-                      unit=" DPS"
-                      dataLabels={["detect", "skipped"]}
-                      updateTimes={updateTimes}
-                      data={Object.values(cameraFpsSeries[camera.name] || {})}
-                    />
-                  </div>
+                  ) : (
+                    <Skeleton className="size-full aspect-video" />
+                  )}
                 </div>
               );
             }
