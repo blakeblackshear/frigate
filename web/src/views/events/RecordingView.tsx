@@ -142,7 +142,7 @@ export function RecordingView({
   );
 
   useEffect(() => {
-    if (scrubbing) {
+    if (scrubbing || exportRange) {
       if (
         currentTime > currentTimeRange.before + 60 ||
         currentTime < currentTimeRange.after - 60
@@ -157,6 +157,8 @@ export function RecordingView({
         controller.scrubToTimestamp(currentTime);
       });
     }
+    // we only want to seek when current time updates
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     currentTime,
     scrubbing,
@@ -486,7 +488,9 @@ function Timeline({
 
       setExportRange({ after: exportStart, before: exportEnd });
     }
-  }, [exportRange, exportStart, exportEnd, setExportRange, setCurrentTime]);
+    // we only want to update when the export parts change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [exportStart, exportEnd, setExportRange, setCurrentTime]);
 
   return (
     <div
