@@ -870,28 +870,32 @@ function MotionReview({
         </div>
       </div>
       <div className="w-[55px] md:w-[100px] overflow-y-auto no-scrollbar">
-        <MotionReviewTimeline
-          segmentDuration={segmentDuration}
-          timestampSpread={15}
-          timelineStart={timeRangeSegments.end}
-          timelineEnd={timeRangeSegments.start}
-          motionOnly={motionOnly}
-          showHandlebar
-          handlebarTime={currentTime}
-          setHandlebarTime={setCurrentTime}
-          events={reviewItems?.all ?? []}
-          motion_events={motionData ?? []}
-          severityType="significant_motion"
-          contentRef={contentRef}
-          onHandlebarDraggingChange={(scrubbing) => {
-            if (playing && scrubbing) {
-              setPlaying(false);
-            }
+        {motionData ? (
+          <MotionReviewTimeline
+            segmentDuration={segmentDuration}
+            timestampSpread={15}
+            timelineStart={timeRangeSegments.end}
+            timelineEnd={timeRangeSegments.start}
+            motionOnly={motionOnly}
+            showHandlebar
+            handlebarTime={currentTime}
+            setHandlebarTime={setCurrentTime}
+            events={reviewItems?.all ?? []}
+            motion_events={motionData ?? []}
+            severityType="significant_motion"
+            contentRef={contentRef}
+            onHandlebarDraggingChange={(scrubbing) => {
+              if (playing && scrubbing) {
+                setPlaying(false);
+              }
 
-            setScrubbing(scrubbing);
-          }}
-          dense={isMobile}
-        />
+              setScrubbing(scrubbing);
+            }}
+            dense={isMobile}
+          />
+        ) : (
+          <Skeleton className="rounded-2xl size-full" />
+        )}
       </div>
 
       <VideoControls
