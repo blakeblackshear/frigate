@@ -9,6 +9,7 @@ import StorageMetrics from "@/views/system/StorageMetrics";
 import { LuActivity, LuHardDrive } from "react-icons/lu";
 import { FaVideo } from "react-icons/fa";
 import Logo from "@/components/Logo";
+import useOptimisticState from "@/hooks/use-optimistic-state";
 
 const metrics = ["general", "storage", "cameras"] as const;
 type SystemMetric = (typeof metrics)[number];
@@ -17,6 +18,7 @@ function System() {
   // stats page
 
   const [page, setPage] = useState<SystemMetric>("general");
+  const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
   const [lastUpdated, setLastUpdated] = useState<number>(Date.now() / 1000);
 
   // stats collection
@@ -35,17 +37,17 @@ function System() {
           className="*:px-3 *:py-4 *:rounded-md"
           type="single"
           size="sm"
-          value={page}
+          value={pageToggle}
           onValueChange={(value: SystemMetric) => {
             if (value) {
-              setPage(value);
+              setPageToggle(value);
             }
           }} // don't allow the severity to be unselected
         >
           {Object.values(metrics).map((item) => (
             <ToggleGroupItem
               key={item}
-              className={`flex items-center justify-between gap-2 ${page == item ? "" : "*:text-gray-500"}`}
+              className={`flex items-center justify-between gap-2 ${pageToggle == item ? "" : "*:text-gray-500"}`}
               value={item}
               aria-label={`Select ${item}`}
             >
