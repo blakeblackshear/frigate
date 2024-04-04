@@ -293,6 +293,7 @@ export function CameraLineGraph({
   );
 
   const options = useMemo(() => {
+    console.log(`new options`);
     return {
       chart: {
         id: graphId,
