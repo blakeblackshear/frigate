@@ -216,7 +216,7 @@ export function ExportContent({
           <DialogHeader>
             <DialogTitle>Export</DialogTitle>
           </DialogHeader>
-          <SelectSeparator className="my-3 bg-secondary" />
+          <SelectSeparator className="my-4 bg-secondary" />
         </>
       )}
       <RadioGroup
@@ -254,13 +254,13 @@ export function ExportContent({
         />
       )}
       <Input
-        className="mt-3"
+        className="my-6"
         type="search"
         placeholder="Name the Export"
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
-      {isDesktop && <SelectSeparator className="my-3 bg-secondary" />}
+      {isDesktop && <SelectSeparator className="my-4 bg-secondary" />}
       <DialogFooter
         className={isDesktop ? "" : "mt-3 flex flex-col-reverse gap-4"}
       >
