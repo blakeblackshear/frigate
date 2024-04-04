@@ -11,7 +11,6 @@ import { Suspense, lazy } from "react";
 const Live = lazy(() => import("@/pages/Live"));
 const Events = lazy(() => import("@/pages/Events"));
 const Export = lazy(() => import("@/pages/Export"));
-const Storage = lazy(() => import("@/pages/Storage"));
 const SubmitPlus = lazy(() => import("@/pages/SubmitPlus"));
 const ConfigEditor = lazy(() => import("@/pages/ConfigEditor"));
 const System = lazy(() => import("@/pages/System"));
@@ -38,7 +37,6 @@ function App() {
                   <Route path="/" element={<Live />} />
                   <Route path="/events" element={<Events />} />
                   <Route path="/export" element={<Export />} />
-                  <Route path="/storage" element={<Storage />} />
                   <Route path="/plus" element={<SubmitPlus />} />
                   <Route path="/system" element={<System />} />
                   <Route path="/settings" element={<Settings />} />

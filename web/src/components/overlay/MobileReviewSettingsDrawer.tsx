@@ -17,7 +17,6 @@ import axios from "axios";
 import SaveExportOverlay from "./SaveExportOverlay";
 import { isMobile } from "react-device-detect";
 
-const ATTRIBUTES = ["amazon", "face", "fedex", "license_plate", "ups"];
 type DrawerMode = "none" | "select" | "export" | "calendar" | "filter";
 
 const DRAWER_FEATURES = ["export", "calendar", "filter"] as const;
@@ -109,9 +108,7 @@ export default function MobileReviewSettingsDrawer({
     cameras.forEach((camera) => {
       const cameraConfig = config.cameras[camera];
       cameraConfig.objects.track.forEach((label) => {
-        if (!ATTRIBUTES.includes(label)) {
-          labels.add(label);
-        }
+        labels.add(label);
       });
 
       if (cameraConfig.audio.enabled_in_config) {
