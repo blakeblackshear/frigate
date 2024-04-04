@@ -100,3 +100,4 @@ This list of working and non-working PTZ cameras is based on user feedback.
 | Tapo C520WS              |      ✅      |      ❌      | Incomplete ONVIF support, ONVIF Service Port: 2020                                                                                              |
 | Uniview IPC672LR-AX4DUPK |      ✅      |      ❌      | Firmware says FOV relative movement is supported, but camera doesn't actually move when sending ONVIF commands                                  |
 | Vikylin PTZ-2804X-I2     |      ❌      |      ❌      | Incomplete ONVIF support                                                                                                                        |
+| Imou Cruiser 2           |      ✅      |      ✅      | Imou (life) is a consumer brand of Dahua.
