@@ -124,3 +124,7 @@ export function ThresholdBarGraph({
     </div>
   );
 }
+
+export function StorageGraph() {
+  
+}
