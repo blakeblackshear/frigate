@@ -633,10 +633,10 @@ function ShowMotionOnlyButton({
 }: ShowMotionOnlyButtonProps) {
   const [motionOnlyButton, setMotionOnlyButton] = useState(motionOnly);
 
-  useEffect(
-    () => setMotionOnly(motionOnlyButton),
-    [motionOnlyButton, setMotionOnly],
-  );
+  useEffect(() => {
+    const timeoutId = setTimeout(() => setMotionOnly(motionOnlyButton), 10);
+    return () => clearTimeout(timeoutId);
+  }, [motionOnlyButton, setMotionOnly]);
 
   return (
     <>
