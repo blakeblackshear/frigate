@@ -362,13 +362,19 @@ function ShowReviewFilter({
   showReviewed,
   setShowReviewed,
 }: ShowReviewedFilterProps) {
+  const [showReviewedSwitch, setShowReviewedSwitch] = useOptimisticState(
+    showReviewed,
+    setShowReviewed,
+  );
   return (
     <>
       <div className="hidden h-9 md:flex p-2 justify-start items-center text-sm bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-md cursor-pointer">
         <Switch
           id="reviewed"
-          checked={showReviewed == 1}
-          onCheckedChange={() => setShowReviewed(showReviewed == 0 ? 1 : 0)}
+          checked={showReviewedSwitch == 1}
+          onCheckedChange={() =>
+            setShowReviewedSwitch(showReviewedSwitch == 0 ? 1 : 0)
+          }
         />
         <Label className="ml-2 cursor-pointer" htmlFor="reviewed">
           Show Reviewed
