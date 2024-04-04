@@ -1,4 +1,5 @@
 import { StorageGraph } from "@/components/graph/SystemGraph";
+import { FrigateStats } from "@/types/stats";
 import { useMemo } from "react";
 import useSWR from "swr";
 
@@ -11,30 +12,32 @@ type CameraStorage = {
 };
 
 type StorageMetricsProps = {
-  lastUpdated: number;
   setLastUpdated: (last: number) => void;
 };
 export default function StorageMetrics({
-  lastUpdated,
   setLastUpdated,
 }: StorageMetricsProps) {
-  const { data: storage } = useSWR<CameraStorage>("recordings/storage");
+  const { data: cameraStorage } = useSWR<CameraStorage>("recordings/storage");
+  const { data: stats } = useSWR<FrigateStats>("stats");
 
   const totalStorage = useMemo(() => {
-    if (!storage) {
+    if (!cameraStorage || !stats) {
       return undefined;
     }
 
     const totalStorage = {
-      total: 0,
+      used: 0,
+      total: stats.service.storage["/media/frigate/recordings"]["total"],
     };
 
-    Object.values(storage).forEach((cam) => (totalStorage.total += cam.usage));
-
+    Object.values(cameraStorage).forEach(
+      (cam) => (totalStorage.used += cam.usage),
+    );
+    setLastUpdated(Date.now() / 1000);
     return totalStorage;
-  }, [storage]);
+  }, [cameraStorage, stats, setLastUpdated]);
 
-  if (!totalStorage) {
+  if (!cameraStorage || !stats || !totalStorage) {
     return;
   }
 
@@ -48,11 +51,41 @@ export default function StorageMetrics({
           <div className="mb-5">Recordings</div>
           <StorageGraph
             graphId="general-recordings"
-            used={1000000}
-            total={5000000}
-            data={[{ name: "Recordings", data: [{ x: "Recordings", y: 25 }] }]}
+            used={totalStorage.used}
+            total={totalStorage.total}
           />
         </div>
+        <div className="p-2.5 bg-primary rounded-2xl flex-col">
+          <div className="mb-5">/tmp/cache</div>
+          <StorageGraph
+            graphId="general-cache"
+            used={stats.service.storage["/tmp/cache"]["used"]}
+            total={stats.service.storage["/tmp/cache"]["total"]}
+          />
+        </div>
+        <div className="p-2.5 bg-primary rounded-2xl flex-col">
+          <div className="mb-5">/dev/shm</div>
+          <StorageGraph
+            graphId="general-shared-memory"
+            used={stats.service.storage["/dev/shm"]["used"]}
+            total={stats.service.storage["/dev/shm"]["total"]}
+          />
+        </div>
+      </div>
+      <div className="mt-4 text-muted-foreground text-sm font-medium">
+        Camera Storage
+      </div>
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
+        {Object.keys(cameraStorage).map((camera) => (
+          <div className="p-2.5 bg-primary rounded-2xl flex-col">
+            <div className="mb-5 capitalize">{camera.replaceAll("_", " ")}</div>
+            <StorageGraph
+              graphId={`${camera}-storage`}
+              used={cameraStorage[camera].usage}
+              total={totalStorage.used}
+            />
+          </div>
+        ))}
       </div>
     </div>
   );

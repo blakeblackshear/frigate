@@ -137,14 +137,8 @@ type StorageGraphProps = {
   graphId: string;
   used: number;
   total: number;
-  data: ApexAxisChartSeries;
 };
-export function StorageGraph({
-  graphId,
-  used,
-  total,
-  data,
-}: StorageGraphProps) {
+export function StorageGraph({ graphId, used, total }: StorageGraphProps) {
   const { theme, systemTheme } = useTheme();
 
   const options = useMemo(() => {
@@ -225,7 +219,14 @@ export function StorageGraph({
         </div>
       </div>
       <div className="h-5 rounded-md overflow-hidden">
-        <Chart type="bar" options={options} series={data} height="100%" />
+        <Chart
+          type="bar"
+          options={options}
+          series={[
+            { data: [{ x: "storage", y: Math.round((used / total) * 100) }] },
+          ]}
+          height="100%"
+        />
       </div>
     </div>
   );

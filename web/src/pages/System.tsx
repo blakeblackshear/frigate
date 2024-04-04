@@ -71,12 +71,7 @@ function System() {
           setLastUpdated={setLastUpdated}
         />
       )}
-      {page == "storage" && (
-        <StorageMetrics
-          lastUpdated={lastUpdated}
-          setLastUpdated={setLastUpdated}
-        />
-      )}
+      {page == "storage" && <StorageMetrics setLastUpdated={setLastUpdated} />}
     </div>
   );
 }
