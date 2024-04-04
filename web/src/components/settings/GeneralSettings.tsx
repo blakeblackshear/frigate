@@ -1,5 +1,4 @@
 import {
-  LuActivity,
   LuGithub,
   LuHardDrive,
   LuLifeBuoy,
@@ -148,18 +147,6 @@ export default function GeneralSettings({ className }: GeneralSettings) {
                   >
                     <LuHardDrive className="mr-2 size-4" />
                     <span>Storage</span>
-                  </MenuItem>
-                </Link>
-                <Link to="/system">
-                  <MenuItem
-                    className={
-                      isDesktop
-                        ? "cursor-pointer"
-                        : "p-2 flex items-center text-sm"
-                    }
-                  >
-                    <LuActivity className="mr-2 size-4" />
-                    <span>System metrics</span>
                   </MenuItem>
                 </Link>
                 <Link to="/logs">
