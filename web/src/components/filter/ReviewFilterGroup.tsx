@@ -2,7 +2,7 @@ import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import useSWR from "swr";
 import { CameraGroupConfig, FrigateConfig } from "@/types/frigateConfig";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,6 +29,7 @@ import ReviewActivityCalendar from "../overlay/ReviewActivityCalendar";
 import MobileReviewSettingsDrawer, {
   DrawerFeatures,
 } from "../overlay/MobileReviewSettingsDrawer";
+import useOptimisticState from "@/hooks/use-optimistic-state";
 
 const REVIEW_FILTERS = [
   "cameras",
@@ -631,12 +632,10 @@ function ShowMotionOnlyButton({
   motionOnly,
   setMotionOnly,
 }: ShowMotionOnlyButtonProps) {
-  const [motionOnlyButton, setMotionOnlyButton] = useState(motionOnly);
-
-  useEffect(() => {
-    const timeoutId = setTimeout(() => setMotionOnly(motionOnlyButton), 10);
-    return () => clearTimeout(timeoutId);
-  }, [motionOnlyButton, setMotionOnly]);
+  const [motionOnlyButton, setMotionOnlyButton] = useOptimisticState(
+    motionOnly,
+    setMotionOnly,
+  );
 
   return (
     <>

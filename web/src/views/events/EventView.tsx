@@ -41,6 +41,7 @@ import { RecordingStartingPoint } from "@/types/record";
 import VideoControls from "@/components/player/VideoControls";
 import { TimeRange } from "@/types/timeline";
 import { useCameraMotionNextTimestamp } from "@/hooks/use-camera-activity";
+import useOptimisticState from "@/hooks/use-optimistic-state";
 
 type EventViewProps = {
   reviews?: ReviewSegment[];
@@ -199,6 +200,10 @@ export default function EventView({
   );
 
   const [motionOnly, setMotionOnly] = useState(false);
+  const [severityToggle, setSeverityToggle] = useOptimisticState(
+    severity,
+    setSeverity,
+  );
 
   if (!config) {
     return <ActivityIndicator />;
@@ -214,9 +219,9 @@ export default function EventView({
           className="*:px-3 *:py-4 *:rounded-md"
           type="single"
           size="sm"
-          value={severity}
+          value={severityToggle}
           onValueChange={(value: ReviewSeverity) =>
-            value ? setSeverity(value) : null
+            value ? setSeverityToggle(value) : null
           } // don't allow the severity to be unselected
         >
           <ToggleGroupItem
