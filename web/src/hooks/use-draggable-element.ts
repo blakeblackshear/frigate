@@ -6,6 +6,7 @@ import { useTimelineUtils } from "./use-timeline-utils";
 type DraggableElementProps = {
   contentRef: React.RefObject<HTMLElement>;
   timelineRef: React.RefObject<HTMLDivElement>;
+  segmentsRef: React.RefObject<HTMLDivElement>;
   draggableElementRef: React.RefObject<HTMLDivElement>;
   segmentDuration: number;
   showDraggableElement: boolean;
@@ -29,6 +30,7 @@ type DraggableElementProps = {
 function useDraggableElement({
   contentRef,
   timelineRef,
+  segmentsRef,
   draggableElementRef,
   segmentDuration,
   showDraggableElement,
@@ -430,12 +432,18 @@ function useDraggableElement({
   useEffect(() => {
     if (
       timelineRef.current &&
+      segmentsRef.current &&
       draggableElementTime &&
       timelineCollapsed &&
       timelineSegments &&
       segments
     ) {
-      setFullTimelineHeight(timelineRef.current.scrollHeight);
+      setFullTimelineHeight(
+        Math.min(
+          timelineRef.current.scrollHeight,
+          segmentsRef.current.scrollHeight,
+        ),
+      );
       const alignedSegmentTime = alignStartDateToTimeline(draggableElementTime);
 
       let segmentElement = timelineRef.current.querySelector(
@@ -486,11 +494,16 @@ function useDraggableElement({
   }, [timelineCollapsed, segments]);
 
   useEffect(() => {
-    if (timelineRef.current && segments) {
+    if (timelineRef.current && segments && segmentsRef.current) {
       setScrollEdgeSize(timelineRef.current.clientHeight * 0.03);
-      setFullTimelineHeight(timelineRef.current.scrollHeight);
+      setFullTimelineHeight(
+        Math.min(
+          timelineRef.current.scrollHeight,
+          segmentsRef.current.scrollHeight,
+        ),
+      );
     }
-  }, [timelineRef, segments]);
+  }, [timelineRef, segmentsRef, segments]);
 
   return { handleMouseDown, handleMouseUp, handleMouseMove };
 }

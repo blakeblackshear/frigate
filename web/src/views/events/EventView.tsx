@@ -830,7 +830,7 @@ function MotionReview({
             }
             const detectionType = getDetectionType(camera.name);
             return (
-              <div className={`relative ${spans}`}>
+              <div key={camera.name} className={`relative ${spans}`}>
                 <PreviewPlayer
                   key={camera.name}
                   className={`rounded-2xl ${spans} ${grow}`}
