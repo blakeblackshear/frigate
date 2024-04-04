@@ -3,9 +3,12 @@ import { FrigateStats } from "@/types/stats";
 import { useState } from "react";
 import TimeAgo from "@/components/dynamic/TimeAgo";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { isDesktop } from "react-device-detect";
+import { isDesktop, isMobile } from "react-device-detect";
 import GeneralMetrics from "@/views/system/GeneralMetrics";
 import StorageMetrics from "@/views/system/StorageMetrics";
+import { LuActivity, LuHardDrive } from "react-icons/lu";
+import { FaVideo } from "react-icons/fa";
+import Logo from "@/components/Logo";
 
 const metrics = ["general", "storage", "cameras"] as const;
 type SystemMetric = (typeof metrics)[number];
@@ -24,7 +27,10 @@ function System() {
 
   return (
     <div className="size-full p-2 flex flex-col">
-      <div className="w-full h-8 flex justify-between items-center">
+      <div className="w-full h-11 relative flex justify-between items-center">
+        {isMobile && (
+          <Logo className="absolute inset-x-1/2 -translate-x-1/2 h-8" />
+        )}
         <ToggleGroup
           className="*:px-3 *:py-4 *:rounded-md"
           type="single"
@@ -39,11 +45,14 @@ function System() {
           {Object.values(metrics).map((item) => (
             <ToggleGroupItem
               key={item}
-              className={`flex items-center justify-between gap-2 ${page == item ? "" : "text-gray-500"}`}
+              className={`flex items-center justify-between gap-2 ${page == item ? "" : "*:text-gray-500"}`}
               value={item}
               aria-label={`Select ${item}`}
             >
-              <div className="capitalize">{item}</div>
+              {item == "general" && <LuActivity className="size-4" />}
+              {item == "storage" && <LuHardDrive className="size-4" />}
+              {item == "cameras" && <FaVideo className="size-4" />}
+              {isDesktop && <div className="capitalize">{item}</div>}
             </ToggleGroupItem>
           ))}
         </ToggleGroup>

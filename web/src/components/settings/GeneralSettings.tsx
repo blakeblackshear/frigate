@@ -1,6 +1,6 @@
 import {
+  LuActivity,
   LuGithub,
-  LuHardDrive,
   LuLifeBuoy,
   LuList,
   LuMoon,
@@ -137,7 +137,7 @@ export default function GeneralSettings({ className }: GeneralSettings) {
               <DropdownMenuLabel>System</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup className={isDesktop ? "" : "flex flex-col"}>
-                <Link to="/storage">
+                <Link to="/system">
                   <MenuItem
                     className={
                       isDesktop
@@ -145,8 +145,8 @@ export default function GeneralSettings({ className }: GeneralSettings) {
                         : "p-2 flex items-center text-sm"
                     }
                   >
-                    <LuHardDrive className="mr-2 size-4" />
-                    <span>Storage</span>
+                    <LuActivity className="mr-2 size-4" />
+                    <span>System metrics</span>
                   </MenuItem>
                 </Link>
                 <Link to="/logs">
