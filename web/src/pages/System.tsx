@@ -1,7 +1,6 @@
 import useSWR from "swr";
 import { FrigateStats } from "@/types/stats";
 import { useEffect, useMemo, useState } from "react";
-import SystemGraph from "@/components/graph/SystemGraph";
 import { useFrigateStats } from "@/api/ws";
 import TimeAgo from "@/components/dynamic/TimeAgo";
 import {
@@ -14,6 +13,8 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Button } from "@/components/ui/button";
 import VainfoDialog from "@/components/overlay/VainfoDialog";
+import { isDesktop } from "react-device-detect";
+import { ThresholdBarGraph } from "@/components/graph/SystemGraph";
 
 const metrics = ["general", "storage", "cameras"] as const;
 type SystemMetric = (typeof metrics)[number];
@@ -59,7 +60,8 @@ function System() {
         <div className="h-full flex items-center">
           {lastUpdated && (
             <div className="h-full text-muted-foreground text-sm content-center">
-              Last refreshed: <TimeAgo time={lastUpdated * 1000} dense />
+              {isDesktop && "Last refreshed: "}
+              <TimeAgo time={lastUpdated * 1000} dense />
             </div>
           )}
         </div>
@@ -182,13 +184,13 @@ export default System;
             if (camera.enabled) {
               return (
                 <div key={camera.name} className="grid grid-cols-2">
-                  <SystemGraph
+                  <ThresholdBarGraph
                     graphId={`${camera.name}-cpu`}
                     title={`${camera.name.replaceAll("_", " ")} CPU`}
                     unit="%"
                     data={Object.values(cameraCpuSeries[camera.name] || {})}
                   />
-                  <SystemGraph
+                  <ThresholdBarGraph
                     graphId={`${camera.name}-fps`}
                     title={`${camera.name.replaceAll("_", " ")} FPS`}
                     unit=""
@@ -467,7 +469,7 @@ function GeneralMetrics({ lastUpdated, setLastUpdated }: GeneralMetricsProps) {
           <div className="p-2.5 bg-primary rounded-2xl flex-col">
             <div className="mb-5">Detector Inference Speed</div>
             {detInferenceTimeSeries.map((series) => (
-              <SystemGraph
+              <ThresholdBarGraph
                 key={series.name}
                 graphId={`${series.name}-inference`}
                 name={series.name}
@@ -481,7 +483,7 @@ function GeneralMetrics({ lastUpdated, setLastUpdated }: GeneralMetricsProps) {
           <div className="p-2.5 bg-primary rounded-2xl flex-col">
             <div className="mb-5">Detector CPU Usage</div>
             {detCpuSeries.map((series) => (
-              <SystemGraph
+              <ThresholdBarGraph
                 key={series.name}
                 graphId={`${series.name}-cpu`}
                 unit="%"
@@ -495,7 +497,7 @@ function GeneralMetrics({ lastUpdated, setLastUpdated }: GeneralMetricsProps) {
           <div className="p-2.5 bg-primary rounded-2xl flex-col">
             <div className="mb-5">Detector Memory Usage</div>
             {detMemSeries.map((series) => (
-              <SystemGraph
+              <ThresholdBarGraph
                 key={series.name}
                 graphId={`${series.name}-mem`}
                 unit="%"
@@ -534,7 +536,7 @@ function GeneralMetrics({ lastUpdated, setLastUpdated }: GeneralMetricsProps) {
               <div className="p-2.5 bg-primary rounded-2xl flex-col">
                 <div className="mb-5">GPU Usage</div>
                 {gpuSeries.map((series) => (
-                  <SystemGraph
+                  <ThresholdBarGraph
                     key={series.name}
                     graphId={`${series.name}-gpu`}
                     name={series.name}
@@ -548,7 +550,7 @@ function GeneralMetrics({ lastUpdated, setLastUpdated }: GeneralMetricsProps) {
               <div className="p-2.5 bg-primary rounded-2xl flex-col">
                 <div className="mb-5">GPU Memory</div>
                 {gpuMemSeries.map((series) => (
-                  <SystemGraph
+                  <ThresholdBarGraph
                     key={series.name}
                     graphId={`${series.name}-mem`}
                     unit=""
@@ -570,7 +572,7 @@ function GeneralMetrics({ lastUpdated, setLastUpdated }: GeneralMetricsProps) {
           <div className="p-2.5 bg-primary rounded-2xl flex-col">
             <div className="mb-5">Process CPU Usage</div>
             {otherProcessCpuSeries.map((series) => (
-              <SystemGraph
+              <ThresholdBarGraph
                 key={series.name}
                 graphId={`${series.name}-cpu`}
                 name={series.name.replaceAll("_", " ")}
@@ -584,7 +586,7 @@ function GeneralMetrics({ lastUpdated, setLastUpdated }: GeneralMetricsProps) {
           <div className="p-2.5 bg-primary rounded-2xl flex-col">
             <div className="mb-5">Process Memory Usage</div>
             {otherProcessMemSeries.map((series) => (
-              <SystemGraph
+              <ThresholdBarGraph
                 key={series.name}
                 graphId={`${series.name}-mem`}
                 unit="%"

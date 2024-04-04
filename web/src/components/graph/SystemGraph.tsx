@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo } from "react";
 import Chart from "react-apexcharts";
 import useSWR from "swr";
 
-type SystemGraphProps = {
+type ThresholdBarGraphProps = {
   graphId: string;
   name: string;
   unit: string;
@@ -13,14 +13,14 @@ type SystemGraphProps = {
   updateTimes: number[];
   data: ApexAxisChartSeries;
 };
-export default function SystemGraph({
+export function ThresholdBarGraph({
   graphId,
   name,
   unit,
   threshold,
   updateTimes,
   data,
-}: SystemGraphProps) {
+}: ThresholdBarGraphProps) {
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
