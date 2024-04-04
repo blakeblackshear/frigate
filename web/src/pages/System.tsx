@@ -60,8 +60,7 @@ function System() {
         <div className="h-full flex items-center">
           {lastUpdated && (
             <div className="h-full text-muted-foreground text-sm content-center">
-              {isDesktop && "Last refreshed: "}
-              <TimeAgo time={lastUpdated * 1000} dense />
+              Last refreshed: <TimeAgo time={lastUpdated * 1000} dense />
             </div>
           )}
         </div>
