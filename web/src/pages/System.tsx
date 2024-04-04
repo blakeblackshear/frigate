@@ -5,6 +5,7 @@ import TimeAgo from "@/components/dynamic/TimeAgo";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { isDesktop } from "react-device-detect";
 import GeneralMetrics from "@/views/system/GeneralMetrics";
+import StorageMetrics from "@/views/system/StorageMetrics";
 
 const metrics = ["general", "storage", "cameras"] as const;
 type SystemMetric = (typeof metrics)[number];
@@ -66,6 +67,12 @@ function System() {
       </div>
       {page == "general" && (
         <GeneralMetrics
+          lastUpdated={lastUpdated}
+          setLastUpdated={setLastUpdated}
+        />
+      )}
+      {page == "storage" && (
+        <StorageMetrics
           lastUpdated={lastUpdated}
           setLastUpdated={setLastUpdated}
         />
