@@ -87,7 +87,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
             className={
               group == "default"
                 ? "text-selected bg-blue-900 focus:bg-blue-900 bg-opacity-60 focus:bg-opacity-60"
-                : "text-muted-foreground bg-secondary focus:text-muted-foreground focus:bg-secondary"
+                : "text-secondary-foreground bg-secondary focus:text-secondary-foreground focus:bg-secondary"
             }
             size="xs"
             onClick={() => (group ? setGroup("default", true) : null)}
@@ -109,7 +109,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
                 className={
                   group == name
                     ? "text-selected bg-blue-900 focus:bg-blue-900 bg-opacity-60 focus:bg-opacity-60"
-                    : "text-muted-foreground bg-secondary"
+                    : "text-secondary-foreground bg-secondary"
                 }
                 size="xs"
                 onClick={() => setGroup(name, group != "default")}

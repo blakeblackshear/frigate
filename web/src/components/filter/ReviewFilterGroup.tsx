@@ -223,8 +223,8 @@ function CamerasFilterButton({
       variant="secondary"
       size="sm"
     >
-      <FaVideo className="text-muted-foreground" />
-      <div className="hidden md:block">
+      <FaVideo className="text-secondary-foreground" />
+      <div className="hidden md:block text-primary-foreground">
         {selectedCameras == undefined
           ? "All Cameras"
           : `${selectedCameras.length} Cameras`}
@@ -368,7 +368,7 @@ function ShowReviewFilter({
   );
   return (
     <>
-      <div className="hidden h-9 md:flex p-2 justify-start items-center text-sm bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-md cursor-pointer">
+      <div className="hidden h-9 md:flex p-2 justify-start items-center text-sm bg-secondary hover:bg-secondary/80 text-primary-foreground rounded-md cursor-pointer">
         <Switch
           id="reviewed"
           checked={showReviewedSwitch == 1}
@@ -412,8 +412,8 @@ function CalendarFilterButton({
 
   const trigger = (
     <Button size="sm" className="flex items-center gap-2" variant="secondary">
-      <FaCalendarAlt className="text-muted-foreground" />
-      <div className="hidden md:block">
+      <FaCalendarAlt className="text-secondary-foreground" />
+      <div className="hidden md:block text-primary-foreground">
         {day == undefined ? "Last 24 Hours" : selectedDate}
       </div>
     </Button>
@@ -473,8 +473,8 @@ function GeneralFilterButton({
 
   const trigger = (
     <Button size="sm" className="flex items-center gap-2" variant="secondary">
-      <FaFilter className="text-muted-foreground" />
-      <div className="hidden md:block">Filter</div>
+      <FaFilter className="text-secondary-foreground" />
+      <div className="hidden md:block text-primary-foreground">Filter</div>
     </Button>
   );
   const content = (
@@ -546,7 +546,7 @@ export function GeneralFilterContent({
       <div className="h-auto overflow-y-auto overflow-x-hidden">
         <div className="flex justify-between items-center my-2.5">
           <Label
-            className="mx-2 text-secondary-foreground cursor-pointer"
+            className="mx-2 text-primary-foreground cursor-pointer"
             htmlFor="allLabels"
           >
             All Labels
@@ -653,7 +653,7 @@ function ShowMotionOnlyButton({
           onCheckedChange={setMotionOnlyButton}
         />
         <Label
-          className="mx-2 text-secondary-foreground cursor-pointer"
+          className="mx-2 text-primary-foreground cursor-pointer"
           htmlFor="collapse-motion"
         >
           Motion only

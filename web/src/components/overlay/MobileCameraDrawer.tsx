@@ -24,7 +24,7 @@ export default function MobileCameraDrawer({
     <Drawer open={cameraDrawer} onOpenChange={setCameraDrawer}>
       <DrawerTrigger asChild>
         <Button className="rounded-lg capitalize" size="sm" variant="secondary">
-          <FaVideo className="text-muted-foreground" />
+          <FaVideo className="text-secondary-foreground" />
         </Button>
       </DrawerTrigger>
       <DrawerContent className="max-h-[75dvh] px-4 mx-1 rounded-t-2xl overflow-hidden">

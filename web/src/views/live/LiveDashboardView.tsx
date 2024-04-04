@@ -139,7 +139,7 @@ export default function LiveDashboardView({
               className={`p-1 ${
                 layout == "grid"
                   ? "bg-blue-900 focus:bg-blue-900 bg-opacity-60 focus:bg-opacity-60"
-                  : "bg-muted"
+                  : "bg-secondary"
               }`}
               size="xs"
               onClick={() => setLayout("grid")}
@@ -150,7 +150,7 @@ export default function LiveDashboardView({
               className={`p-1 ${
                 layout == "list"
                   ? "bg-blue-900 focus:bg-blue-900 bg-opacity-60 focus:bg-opacity-60"
-                  : "bg-muted"
+                  : "bg-secondary"
               }`}
               size="xs"
               onClick={() => setLayout("list")}

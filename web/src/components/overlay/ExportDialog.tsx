@@ -122,8 +122,8 @@ export default function ExportDialog({
               setMode("select");
             }}
           >
-            <FaArrowDown className="p-1 fill-secondary bg-muted-foreground rounded-md" />
-            {isDesktop && "Export"}
+            <FaArrowDown className="p-1 fill-secondary bg-secondary-foreground rounded-md" />
+            {isDesktop && <div className="text-primary-foreground">Export</div>}
           </Button>
         </Trigger>
         <Content
