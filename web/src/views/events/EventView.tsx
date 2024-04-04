@@ -42,6 +42,7 @@ import VideoControls from "@/components/player/VideoControls";
 import { TimeRange } from "@/types/timeline";
 import { useCameraMotionNextTimestamp } from "@/hooks/use-camera-activity";
 import useOptimisticState from "@/hooks/use-optimistic-state";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type EventViewProps = {
   reviews?: ReviewSegment[];
@@ -837,25 +838,29 @@ function MotionReview({
             const detectionType = getDetectionType(camera.name);
             return (
               <div key={camera.name} className={`relative ${spans}`}>
-                <PreviewPlayer
-                  key={camera.name}
-                  className={`rounded-2xl ${spans} ${grow}`}
-                  camera={camera.name}
-                  timeRange={currentTimeRange}
-                  startTime={previewStart}
-                  cameraPreviews={relevantPreviews || []}
-                  isScrubbing={scrubbing}
-                  onControllerReady={(controller) => {
-                    videoPlayersRef.current[camera.name] = controller;
-                  }}
-                  onClick={() =>
-                    onOpenRecording({
-                      camera: camera.name,
-                      startTime: Math.min(currentTime, Date.now() / 1000 - 10),
-                      severity: "significant_motion",
-                    })
-                  }
-                />
+                {motionData ? (
+                  <PreviewPlayer
+                    key={camera.name}
+                    className={`rounded-2xl ${spans} ${grow}`}
+                    camera={camera.name}
+                    timeRange={currentTimeRange}
+                    startTime={previewStart}
+                    cameraPreviews={relevantPreviews || []}
+                    isScrubbing={scrubbing}
+                    onControllerReady={(controller) => {
+                      videoPlayersRef.current[camera.name] = controller;
+                    }}
+                    onClick={() =>
+                      onOpenRecording({
+                        camera: camera.name,
+                        startTime: currentTime,
+                        severity: "significant_motion",
+                      })
+                    }
+                  />
+                ) : (
+                  <Skeleton className={`rounded-2xl ${spans} ${grow}`} />
+                )}
                 <div
                   className={`review-item-ring pointer-events-none z-10 absolute rounded-lg inset-0 size-full -outline-offset-[2.8px] outline outline-[3px] ${detectionType ? `outline-severity_${detectionType} shadow-severity_${detectionType}` : "outline-transparent duration-500"}`}
                 />
@@ -865,28 +870,32 @@ function MotionReview({
         </div>
       </div>
       <div className="w-[55px] md:w-[100px] overflow-y-auto no-scrollbar">
-        <MotionReviewTimeline
-          segmentDuration={segmentDuration}
-          timestampSpread={15}
-          timelineStart={timeRangeSegments.end}
-          timelineEnd={timeRangeSegments.start}
-          motionOnly={motionOnly}
-          showHandlebar
-          handlebarTime={currentTime}
-          setHandlebarTime={setCurrentTime}
-          events={reviewItems?.all ?? []}
-          motion_events={motionData ?? []}
-          severityType="significant_motion"
-          contentRef={contentRef}
-          onHandlebarDraggingChange={(scrubbing) => {
-            if (playing && scrubbing) {
-              setPlaying(false);
-            }
+        {motionData ? (
+          <MotionReviewTimeline
+            segmentDuration={segmentDuration}
+            timestampSpread={15}
+            timelineStart={timeRangeSegments.end}
+            timelineEnd={timeRangeSegments.start}
+            motionOnly={motionOnly}
+            showHandlebar
+            handlebarTime={currentTime}
+            setHandlebarTime={setCurrentTime}
+            events={reviewItems?.all ?? []}
+            motion_events={motionData ?? []}
+            severityType="significant_motion"
+            contentRef={contentRef}
+            onHandlebarDraggingChange={(scrubbing) => {
+              if (playing && scrubbing) {
+                setPlaying(false);
+              }
 
-            setScrubbing(scrubbing);
-          }}
-          dense={isMobile}
-        />
+              setScrubbing(scrubbing);
+            }}
+            dense={isMobile}
+          />
+        ) : (
+          <Skeleton className="rounded-2xl size-full" />
+        )}
       </div>
 
       <VideoControls
