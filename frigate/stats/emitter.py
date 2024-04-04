@@ -16,7 +16,8 @@ from frigate.types import StatsTrackingTypes
 logger = logging.getLogger(__name__)
 
 
-MAX_STATS_POINTS = 120
+MAX_STATS_POINTS = 80
+FREQUENCY_STATS_POINTS = 15
 
 
 class StatsEmitter(threading.Thread):
@@ -70,9 +71,9 @@ class StatsEmitter(threading.Thread):
     def run(self) -> None:
         time.sleep(10)
         for counter in itertools.cycle(
-            range(int(self.config.mqtt.stats_interval / 10))
+            range(int(self.config.mqtt.stats_interval / FREQUENCY_STATS_POINTS))
         ):
-            if self.stop_event.wait(10):
+            if self.stop_event.wait(FREQUENCY_STATS_POINTS):
                 break
 
             logger.debug("Starting stats collection")

@@ -87,6 +87,9 @@ export function ThresholdBarGraph({
       tooltip: {
         theme: systemTheme || theme,
       },
+      markers: {
+        size: 0,
+      },
       xaxis: {
         tickAmount: 4,
         tickPlacement: "on",
@@ -105,7 +108,7 @@ export function ThresholdBarGraph({
         min: 0,
         max: threshold.warning + 10,
       },
-    };
+    } as ApexCharts.ApexOptions;
   }, [graphId, threshold, systemTheme, theme, formatTime]);
 
   useEffect(() => {

@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import VainfoDialog from "@/components/overlay/VainfoDialog";
 import { ThresholdBarGraph } from "@/components/graph/SystemGraph";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type GeneralMetricsProps = {
   lastUpdated: number;
@@ -264,10 +265,6 @@ export default function GeneralMetrics({
     return Object.values(series);
   }, [statsHistory]);
 
-  if (statsHistory.length == 0) {
-    return;
-  }
-
   return (
     <>
       <VainfoDialog showVainfo={showVainfo} setShowVainfo={setShowVainfo} />
@@ -276,102 +273,123 @@ export default function GeneralMetrics({
         <div className="text-muted-foreground text-sm font-medium">
           Detectors
         </div>
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
-          <div className="p-2.5 bg-primary rounded-2xl flex-col">
-            <div className="mb-5">Detector Inference Speed</div>
-            {detInferenceTimeSeries.map((series) => (
-              <ThresholdBarGraph
-                key={series.name}
-                graphId={`${series.name}-inference`}
-                name={series.name}
-                unit="ms"
-                threshold={InferenceThreshold}
-                updateTimes={updateTimes}
-                data={[series]}
-              />
-            ))}
-          </div>
-          <div className="p-2.5 bg-primary rounded-2xl flex-col">
-            <div className="mb-5">Detector CPU Usage</div>
-            {detCpuSeries.map((series) => (
-              <ThresholdBarGraph
-                key={series.name}
-                graphId={`${series.name}-cpu`}
-                unit="%"
-                name={series.name}
-                threshold={DetectorCpuThreshold}
-                updateTimes={updateTimes}
-                data={[series]}
-              />
-            ))}
-          </div>
-          <div className="p-2.5 bg-primary rounded-2xl flex-col">
-            <div className="mb-5">Detector Memory Usage</div>
-            {detMemSeries.map((series) => (
-              <ThresholdBarGraph
-                key={series.name}
-                graphId={`${series.name}-mem`}
-                unit="%"
-                name={series.name}
-                threshold={DetectorMemThreshold}
-                updateTimes={updateTimes}
-                data={[series]}
-              />
-            ))}
-          </div>
+        <div className="w-full mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
+          {detInferenceTimeSeries.length != 0 ? (
+            <div className="p-2.5 bg-primary rounded-2xl flex-col">
+              <div className="mb-5">Detector Inference Speed</div>
+              {detInferenceTimeSeries.map((series) => (
+                <ThresholdBarGraph
+                  key={series.name}
+                  graphId={`${series.name}-inference`}
+                  name={series.name}
+                  unit="ms"
+                  threshold={InferenceThreshold}
+                  updateTimes={updateTimes}
+                  data={[series]}
+                />
+              ))}
+            </div>
+          ) : (
+            <Skeleton className="w-full aspect-video" />
+          )}
+          {statsHistory.length != 0 ? (
+            <div className="p-2.5 bg-primary rounded-2xl flex-col">
+              <div className="mb-5">Detector CPU Usage</div>
+              {detCpuSeries.map((series) => (
+                <ThresholdBarGraph
+                  key={series.name}
+                  graphId={`${series.name}-cpu`}
+                  unit="%"
+                  name={series.name}
+                  threshold={DetectorCpuThreshold}
+                  updateTimes={updateTimes}
+                  data={[series]}
+                />
+              ))}
+            </div>
+          ) : (
+            <Skeleton className="w-full aspect-video" />
+          )}
+          {statsHistory.length != 0 ? (
+            <div className="p-2.5 bg-primary rounded-2xl flex-col">
+              <div className="mb-5">Detector Memory Usage</div>
+              {detMemSeries.map((series) => (
+                <ThresholdBarGraph
+                  key={series.name}
+                  graphId={`${series.name}-mem`}
+                  unit="%"
+                  name={series.name}
+                  threshold={DetectorMemThreshold}
+                  updateTimes={updateTimes}
+                  data={[series]}
+                />
+              ))}
+            </div>
+          ) : (
+            <Skeleton className="w-full aspect-video" />
+          )}
         </div>
 
-        {statsHistory.length > 0 && statsHistory[0].gpu_usages && (
+        {(statsHistory.length == 0 || statsHistory[0].gpu_usages) && (
           <>
             <div className="mt-4 flex items-center justify-between">
               <div className="text-muted-foreground text-sm font-medium">
                 GPUs
               </div>
-              {Object.keys(statsHistory[0].gpu_usages).filter(
-                (key) =>
-                  key == "amd-vaapi" ||
-                  key == "intel-vaapi" ||
-                  key == "intel-qsv",
-              ).length > 0 && (
-                <Button
-                  className="cursor-pointer"
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setShowVainfo(true)}
-                >
-                  Hardware Info
-                </Button>
-              )}
+              {statsHistory.length > 0 &&
+                Object.keys(statsHistory[0].gpu_usages ?? {}).filter(
+                  (key) =>
+                    key == "amd-vaapi" ||
+                    key == "intel-vaapi" ||
+                    key == "intel-qsv",
+                ).length > 0 && (
+                  <Button
+                    className="cursor-pointer"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setShowVainfo(true)}
+                  >
+                    Hardware Info
+                  </Button>
+                )}
             </div>
             <div className=" mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <div className="p-2.5 bg-primary rounded-2xl flex-col">
-                <div className="mb-5">GPU Usage</div>
-                {gpuSeries.map((series) => (
-                  <ThresholdBarGraph
-                    key={series.name}
-                    graphId={`${series.name}-gpu`}
-                    name={series.name}
-                    unit=""
-                    threshold={GPUUsageThreshold}
-                    updateTimes={updateTimes}
-                    data={[series]}
-                  />
-                ))}
-              </div>
-              <div className="p-2.5 bg-primary rounded-2xl flex-col">
-                <div className="mb-5">GPU Memory</div>
-                {gpuMemSeries.map((series) => (
-                  <ThresholdBarGraph
-                    key={series.name}
-                    graphId={`${series.name}-mem`}
-                    unit=""
-                    name={series.name}
-                    threshold={GPUMemThreshold}
-                    updateTimes={updateTimes}
-                    data={[series]}
-                  />
-                ))}
-              </div>
+              {statsHistory.length != 0 ? (
+                <div className="p-2.5 bg-primary rounded-2xl flex-col">
+                  <div className="mb-5">GPU Usage</div>
+                  {gpuSeries.map((series) => (
+                    <ThresholdBarGraph
+                      key={series.name}
+                      graphId={`${series.name}-gpu`}
+                      name={series.name}
+                      unit=""
+                      threshold={GPUUsageThreshold}
+                      updateTimes={updateTimes}
+                      data={[series]}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <Skeleton className="w-full aspect-video" />
+              )}
+              {statsHistory.length != 0 ? (
+                <div className="p-2.5 bg-primary rounded-2xl flex-col">
+                  <div className="mb-5">GPU Memory</div>
+                  {gpuMemSeries.map((series) => (
+                    <ThresholdBarGraph
+                      key={series.name}
+                      graphId={`${series.name}-mem`}
+                      unit=""
+                      name={series.name}
+                      threshold={GPUMemThreshold}
+                      updateTimes={updateTimes}
+                      data={[series]}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <Skeleton className="w-full aspect-video" />
+              )}
             </div>
           </>
         )}
@@ -380,34 +398,42 @@ export default function GeneralMetrics({
           Other Processes
         </div>
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <div className="p-2.5 bg-primary rounded-2xl flex-col">
-            <div className="mb-5">Process CPU Usage</div>
-            {otherProcessCpuSeries.map((series) => (
-              <ThresholdBarGraph
-                key={series.name}
-                graphId={`${series.name}-cpu`}
-                name={series.name.replaceAll("_", " ")}
-                unit="%"
-                threshold={DetectorCpuThreshold}
-                updateTimes={updateTimes}
-                data={[series]}
-              />
-            ))}
-          </div>
-          <div className="p-2.5 bg-primary rounded-2xl flex-col">
-            <div className="mb-5">Process Memory Usage</div>
-            {otherProcessMemSeries.map((series) => (
-              <ThresholdBarGraph
-                key={series.name}
-                graphId={`${series.name}-mem`}
-                unit="%"
-                name={series.name.replaceAll("_", " ")}
-                threshold={DetectorMemThreshold}
-                updateTimes={updateTimes}
-                data={[series]}
-              />
-            ))}
-          </div>
+          {statsHistory.length != 0 ? (
+            <div className="p-2.5 bg-primary rounded-2xl flex-col">
+              <div className="mb-5">Process CPU Usage</div>
+              {otherProcessCpuSeries.map((series) => (
+                <ThresholdBarGraph
+                  key={series.name}
+                  graphId={`${series.name}-cpu`}
+                  name={series.name.replaceAll("_", " ")}
+                  unit="%"
+                  threshold={DetectorCpuThreshold}
+                  updateTimes={updateTimes}
+                  data={[series]}
+                />
+              ))}
+            </div>
+          ) : (
+            <Skeleton className="w-full aspect-tall" />
+          )}
+          {statsHistory.length != 0 ? (
+            <div className="p-2.5 bg-primary rounded-2xl flex-col">
+              <div className="mb-5">Process Memory Usage</div>
+              {otherProcessMemSeries.map((series) => (
+                <ThresholdBarGraph
+                  key={series.name}
+                  graphId={`${series.name}-mem`}
+                  unit="%"
+                  name={series.name.replaceAll("_", " ")}
+                  threshold={DetectorMemThreshold}
+                  updateTimes={updateTimes}
+                  data={[series]}
+                />
+              ))}
+            </div>
+          ) : (
+            <Skeleton className="w-full aspect-tall" />
+          )}
         </div>
       </div>
     </>
