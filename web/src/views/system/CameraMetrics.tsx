@@ -122,9 +122,12 @@ export default function CameraMetrics({
         if (!(key in series)) {
           const camName = key.replaceAll("_", " ");
           series[key] = {};
-          series[key]["det"] = { name: `${camName} detections`, data: [] };
+          series[key]["det"] = {
+            name: `${camName} detections per second`,
+            data: [],
+          };
           series[key]["skip"] = {
-            name: `${camName} skipped detections`,
+            name: `${camName} skipped detections per second`,
             data: [],
           };
         }
@@ -165,11 +168,11 @@ export default function CameraMetrics({
                   </div>
                   <div className="p-2.5 bg-primary rounded-2xl flex-col">
                     <div className="mb-5 capitalize">
-                      {camera.name.replaceAll("_", " ")} FPS
+                      {camera.name.replaceAll("_", " ")} DPS
                     </div>
                     <CameraLineGraph
-                      graphId={`${camera.name}-fps`}
-                      unit=" FPS"
+                      graphId={`${camera.name}-dps`}
+                      unit=" DPS"
                       dataLabels={["detect", "skipped"]}
                       updateTimes={updateTimes}
                       data={Object.values(cameraFpsSeries[camera.name] || {})}
