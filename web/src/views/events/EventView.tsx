@@ -41,6 +41,7 @@ import { RecordingStartingPoint } from "@/types/record";
 import VideoControls from "@/components/player/VideoControls";
 import { TimeRange } from "@/types/timeline";
 import { useCameraMotionNextTimestamp } from "@/hooks/use-camera-activity";
+import useOptimisticState from "@/hooks/use-optimistic-state";
 
 type EventViewProps = {
   reviews?: ReviewSegment[];
@@ -199,6 +200,11 @@ export default function EventView({
   );
 
   const [motionOnly, setMotionOnly] = useState(false);
+  const [severityToggle, setSeverityToggle] = useOptimisticState(
+    severity,
+    setSeverity,
+    100,
+  );
 
   if (!config) {
     return <ActivityIndicator />;
@@ -214,13 +220,13 @@ export default function EventView({
           className="*:px-3 *:py-4 *:rounded-md"
           type="single"
           size="sm"
-          value={severity}
+          value={severityToggle}
           onValueChange={(value: ReviewSeverity) =>
-            value ? setSeverity(value) : null
+            value ? setSeverityToggle(value) : null
           } // don't allow the severity to be unselected
         >
           <ToggleGroupItem
-            className={`${severity == "alert" ? "" : "text-gray-500"}`}
+            className={`${severityToggle == "alert" ? "" : "text-gray-500"}`}
             value="alert"
             aria-label="Select alerts"
           >
@@ -230,7 +236,7 @@ export default function EventView({
             </div>
           </ToggleGroupItem>
           <ToggleGroupItem
-            className={`${severity == "detection" ? "" : "text-gray-500"}`}
+            className={`${severityToggle == "detection" ? "" : "text-gray-500"}`}
             value="detection"
             aria-label="Select detections"
           >
@@ -242,7 +248,7 @@ export default function EventView({
           </ToggleGroupItem>
           <ToggleGroupItem
             className={`px-3 py-4 rounded-2xl ${
-              severity == "significant_motion" ? "" : "text-gray-500"
+              severityToggle == "significant_motion" ? "" : "text-gray-500"
             }`}
             value="significant_motion"
             aria-label="Select motion"

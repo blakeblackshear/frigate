@@ -2,7 +2,7 @@ import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import useSWR from "swr";
 import { CameraGroupConfig, FrigateConfig } from "@/types/frigateConfig";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,6 +29,7 @@ import ReviewActivityCalendar from "../overlay/ReviewActivityCalendar";
 import MobileReviewSettingsDrawer, {
   DrawerFeatures,
 } from "../overlay/MobileReviewSettingsDrawer";
+import useOptimisticState from "@/hooks/use-optimistic-state";
 
 const REVIEW_FILTERS = [
   "cameras",
@@ -361,13 +362,19 @@ function ShowReviewFilter({
   showReviewed,
   setShowReviewed,
 }: ShowReviewedFilterProps) {
+  const [showReviewedSwitch, setShowReviewedSwitch] = useOptimisticState(
+    showReviewed,
+    setShowReviewed,
+  );
   return (
     <>
       <div className="hidden h-9 md:flex p-2 justify-start items-center text-sm bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-md cursor-pointer">
         <Switch
           id="reviewed"
-          checked={showReviewed == 1}
-          onCheckedChange={() => setShowReviewed(showReviewed == 0 ? 1 : 0)}
+          checked={showReviewedSwitch == 1}
+          onCheckedChange={() =>
+            setShowReviewedSwitch(showReviewedSwitch == 0 ? 1 : 0)
+          }
         />
         <Label className="ml-2 cursor-pointer" htmlFor="reviewed">
           Show Reviewed
@@ -631,11 +638,9 @@ function ShowMotionOnlyButton({
   motionOnly,
   setMotionOnly,
 }: ShowMotionOnlyButtonProps) {
-  const [motionOnlyButton, setMotionOnlyButton] = useState(motionOnly);
-
-  useEffect(
-    () => setMotionOnly(motionOnlyButton),
-    [motionOnlyButton, setMotionOnly],
+  const [motionOnlyButton, setMotionOnlyButton] = useOptimisticState(
+    motionOnly,
+    setMotionOnly,
   );
 
   return (
