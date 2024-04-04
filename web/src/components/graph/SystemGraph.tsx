@@ -1,7 +1,9 @@
 import { useTheme } from "@/context/theme-provider";
+import { FrigateConfig } from "@/types/frigateConfig";
 import { Threshold } from "@/types/graph";
 import { useCallback, useEffect, useMemo } from "react";
 import Chart from "react-apexcharts";
+import useSWR from "swr";
 
 type SystemGraphProps = {
   graphId: string;
@@ -19,6 +21,10 @@ export default function SystemGraph({
   updateTimes,
   data,
 }: SystemGraphProps) {
+  const { data: config } = useSWR<FrigateConfig>("config", {
+    revalidateOnFocus: false,
+  });
+
   const lastValue = useMemo<number>(
     // @ts-expect-error y is valid
     () => data[0].data[data[0].data.length - 1]?.y ?? 0,
@@ -30,9 +36,13 @@ export default function SystemGraph({
   const formatTime = useCallback(
     (val: unknown) => {
       const date = new Date(updateTimes[Math.round(val as number)] * 1000);
-      return `${date.getHours() > 12 ? date.getHours() - 12 : date.getHours()}:${date.getMinutes()}`;
+      return date.toLocaleTimeString([], {
+        hour12: config?.ui.time_format != "24hour",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
     },
-    [updateTimes],
+    [config, updateTimes],
   );
 
   const options = useMemo(() => {

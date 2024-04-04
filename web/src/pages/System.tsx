@@ -34,7 +34,7 @@ function System() {
     <div className="size-full p-2 flex flex-col">
       <div className="w-full h-8 flex justify-between items-center">
         <ToggleGroup
-          className="*:px-3 *:py-4 *:rounded-2xl"
+          className="*:px-3 *:py-4 *:rounded-md"
           type="single"
           size="sm"
           value={page}
