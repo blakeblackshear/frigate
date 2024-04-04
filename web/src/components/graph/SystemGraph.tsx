@@ -88,7 +88,8 @@ export function ThresholdBarGraph({
         theme: systemTheme || theme,
       },
       xaxis: {
-        tickAmount: 6,
+        tickAmount: 4,
+        tickPlacement: "on",
         labels: {
           formatter: formatTime,
         },
