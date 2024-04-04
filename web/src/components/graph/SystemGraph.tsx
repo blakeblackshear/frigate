@@ -187,7 +187,7 @@ export function StorageGraph({ graphId, used, total }: StorageGraphProps) {
         },
       },
       tooltip: {
-        theme: systemTheme || theme,
+        show: false,
       },
       xaxis: {
         axisBorder: {
@@ -205,7 +205,7 @@ export function StorageGraph({ graphId, used, total }: StorageGraphProps) {
         min: 0,
         max: 100,
       },
-    };
+    } as ApexCharts.ApexOptions;
   }, [graphId, systemTheme, theme]);
 
   useEffect(() => {
@@ -293,7 +293,6 @@ export function CameraLineGraph({
   );
 
   const options = useMemo(() => {
-    console.log(`new options`);
     return {
       chart: {
         id: graphId,
