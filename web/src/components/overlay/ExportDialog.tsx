@@ -216,11 +216,11 @@ export function ExportContent({
           <DialogHeader>
             <DialogTitle>Export</DialogTitle>
           </DialogHeader>
-          <SelectSeparator className="bg-secondary" />
+          <SelectSeparator className="my-4 bg-secondary" />
         </>
       )}
       <RadioGroup
-        className={`flex flex-col gap-3 ${isDesktop ? "" : "mt-4"}`}
+        className={`flex flex-col gap-4 ${isDesktop ? "" : "mt-4"}`}
         onValueChange={(value) => onSelectTime(value as ExportOption)}
       >
         {EXPORT_OPTIONS.map((opt) => {
@@ -254,13 +254,13 @@ export function ExportContent({
         />
       )}
       <Input
-        className="mt-3"
+        className="my-6"
         type="search"
         placeholder="Name the Export"
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
-      {isDesktop && <SelectSeparator className="bg-secondary" />}
+      {isDesktop && <SelectSeparator className="my-4 bg-secondary" />}
       <DialogFooter
         className={isDesktop ? "" : "mt-3 flex flex-col-reverse gap-4"}
       >
@@ -371,7 +371,7 @@ function CustomTimeSelector({
 
   return (
     <div
-      className={`flex items-center bg-secondary rounded-lg ${isDesktop ? "mx-8 px-2 gap-2" : "pl-2 mt-3"}`}
+      className={`mt-3 flex items-center bg-secondary rounded-lg ${isDesktop ? "mx-8 px-2 gap-2" : "pl-2"}`}
     >
       <FaCalendarAlt />
       <Popover

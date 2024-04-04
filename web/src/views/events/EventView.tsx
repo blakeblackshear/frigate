@@ -851,7 +851,7 @@ function MotionReview({
                   onClick={() =>
                     onOpenRecording({
                       camera: camera.name,
-                      startTime: currentTime,
+                      startTime: Math.min(currentTime, Date.now() / 1000 - 10),
                       severity: "significant_motion",
                     })
                   }
