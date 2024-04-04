@@ -203,6 +203,7 @@ export default function EventView({
   const [severityToggle, setSeverityToggle] = useOptimisticState(
     severity,
     setSeverity,
+    100,
   );
 
   if (!config) {
@@ -225,7 +226,7 @@ export default function EventView({
           } // don't allow the severity to be unselected
         >
           <ToggleGroupItem
-            className={`${severity == "alert" ? "" : "text-gray-500"}`}
+            className={`${severityToggle == "alert" ? "" : "text-gray-500"}`}
             value="alert"
             aria-label="Select alerts"
           >
@@ -235,7 +236,7 @@ export default function EventView({
             </div>
           </ToggleGroupItem>
           <ToggleGroupItem
-            className={`${severity == "detection" ? "" : "text-gray-500"}`}
+            className={`${severityToggle == "detection" ? "" : "text-gray-500"}`}
             value="detection"
             aria-label="Select detections"
           >
@@ -247,7 +248,7 @@ export default function EventView({
           </ToggleGroupItem>
           <ToggleGroupItem
             className={`px-3 py-4 rounded-2xl ${
-              severity == "significant_motion" ? "" : "text-gray-500"
+              severityToggle == "significant_motion" ? "" : "text-gray-500"
             }`}
             value="significant_motion"
             aria-label="Select motion"
