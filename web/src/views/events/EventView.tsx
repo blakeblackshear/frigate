@@ -898,35 +898,37 @@ function MotionReview({
         )}
       </div>
 
-      <VideoControls
-        className="absolute bottom-16 left-1/2 -translate-x-1/2"
-        features={{
-          volume: false,
-          seek: true,
-          playbackRate: true,
-        }}
-        isPlaying={playing}
-        playbackRates={[4, 8, 12, 16]}
-        playbackRate={playbackRate}
-        controlsOpen={controlsOpen}
-        setControlsOpen={setControlsOpen}
-        onPlayPause={setPlaying}
-        onSeek={(diff) => {
-          const wasPlaying = playing;
+      {!scrubbing && (
+        <VideoControls
+          className="absolute bottom-16 left-1/2 -translate-x-1/2"
+          features={{
+            volume: false,
+            seek: true,
+            playbackRate: true,
+          }}
+          isPlaying={playing}
+          playbackRates={[4, 8, 12, 16]}
+          playbackRate={playbackRate}
+          controlsOpen={controlsOpen}
+          setControlsOpen={setControlsOpen}
+          onPlayPause={setPlaying}
+          onSeek={(diff) => {
+            const wasPlaying = playing;
 
-          if (wasPlaying) {
-            setPlaying(false);
-          }
+            if (wasPlaying) {
+              setPlaying(false);
+            }
 
-          setCurrentTime(currentTime + diff);
+            setCurrentTime(currentTime + diff);
 
-          if (wasPlaying) {
-            setTimeout(() => setPlaying(true), 100);
-          }
-        }}
-        onSetPlaybackRate={setPlaybackRate}
-        show={currentTime < timeRange.before - 4}
-      />
+            if (wasPlaying) {
+              setTimeout(() => setPlaying(true), 100);
+            }
+          }}
+          onSetPlaybackRate={setPlaybackRate}
+          show={currentTime < timeRange.before - 4}
+        />
+      )}
     </>
   );
 }
