@@ -863,7 +863,9 @@ function MotionReview({
                     />
                   </>
                 ) : (
-                  <Skeleton className={`rounded-2xl ${spans} ${grow}`} />
+                  <Skeleton
+                    className={`rounded-2xl size-full ${spans} ${grow}`}
+                  />
                 )}
               </div>
             );
