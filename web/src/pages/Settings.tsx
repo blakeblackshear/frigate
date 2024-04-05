@@ -10,8 +10,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import MotionTuner from "@/components/settings/MotionTuner";
+import SettingsZones from "@/components/settings/Zones";
 
-function Settings() {
+function General() {
   return (
     <>
       <Heading as="h2">Settings</Heading>
@@ -41,4 +44,29 @@ function Settings() {
   );
 }
 
-export default Settings;
+export default function Settings() {
+  return (
+    <>
+      <Tabs defaultValue="account" className="w-auto">
+        <TabsList>
+          <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="objects">Objects</TabsTrigger>
+          <TabsTrigger value="zones">Zones</TabsTrigger>
+          <TabsTrigger value="masks">Masks</TabsTrigger>
+          <TabsTrigger value="motion">Motion</TabsTrigger>
+        </TabsList>
+        <TabsContent value="general">
+          <General />
+        </TabsContent>
+        <TabsContent value="objects">Objects</TabsContent>
+        <TabsContent value="zones">
+          <SettingsZones />
+        </TabsContent>
+        <TabsContent value="masks">Masks</TabsContent>
+        <TabsContent value="motion">
+          <MotionTuner />
+        </TabsContent>
+      </Tabs>
+    </>
+  );
+}
