@@ -15,7 +15,7 @@ const frigateDateStamp = /\[[\d\s-:]*]/;
 const frigateSeverity = /(DEBUG)|(INFO)|(WARNING)|(ERROR)/;
 const frigateSection = /[\w.]*/;
 
-const goSeverity = /(DEB )|(INF )|(WARN )|(ERR )/;
+const goSeverity = /(DEB )|(INF )|(WRN )|(ERR )/;
 const goSection = /\[[\w]*]/;
 
 const ngSeverity = /(GET)|(POST)|(PUT)|(PATCH)|(DELETE)/;
@@ -152,9 +152,28 @@ function Logs() {
             contentStart = line.indexOf(section) + section.length + 2;
           }
 
+          let severityCat: LogSeverity;
+          switch (severity?.at(0)?.toString().trim()) {
+            case "INF":
+              severityCat = "info";
+              break;
+            case "WRN":
+              severityCat = "warning";
+              break;
+            case "ERR":
+              severityCat = "error";
+              break;
+            case "DBG":
+            case "TRC":
+              severityCat = "debug";
+              break;
+            default:
+              severityCat = "info";
+          }
+
           return {
             dateStamp: line.substring(0, 19),
-            severity: "INFO",
+            severity: severityCat,
             section: section,
             content: line.substring(contentStart).trim(),
           };
@@ -169,7 +188,7 @@ function Logs() {
 
           return {
             dateStamp: line.substring(0, 19),
-            severity: "INFO",
+            severity: "info",
             section: ngSeverity.exec(line)?.at(0)?.toString() ?? "META",
             content: line.substring(line.indexOf(" ", 20)).trim(),
           };
@@ -299,7 +318,7 @@ function Logs() {
               value={item}
               aria-label={`Select ${item}`}
             >
-              <div className="capitalize">{`${item} Logs`}</div>
+              <div className="capitalize">{item}</div>
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
@@ -334,7 +353,7 @@ function Logs() {
         ref={contentRef}
         className="w-full h-min my-2 font-mono text-sm sm:py-2 whitespace-pre-wrap overflow-auto no-scrollbar bg-primary border border-secondary rounded-md"
       >
-        <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 *:p-2 *:text-sm *:text-secondary-foreground">
+        <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 *:p-2 *:text-sm *:text-primary-foreground/40">
           <div className="p-1 flex items-center capitalize">Type</div>
           <div className="col-span-2 sm:col-span-1 flex items-center">
             Timestamp
@@ -387,11 +406,11 @@ function LogLineData({ startRef, className, line }: LogLineDataProps) {
   const severityClassName = useMemo(() => {
     switch (line.severity) {
       case "info":
-        return "text-primary-foreground/40 bg-muted";
+        return "text-primary-foreground/60 bg-secondary hover:bg-secondary/60";
       case "warning":
-        return "text-warning-foreground bg-warning";
+        return "text-warning-foreground bg-warning hover:bg-warning/80";
       case "error":
-        return "text-destructive-foreground bg-destructive";
+        return "text-destructive-foreground bg-destructive hover:bg-destructive/80";
     }
   }, [line]);
 
@@ -402,7 +421,7 @@ function LogLineData({ startRef, className, line }: LogLineDataProps) {
     >
       <div className="h-full p-1 flex items-center gap-2">
         <div
-          className={`py-[1px] px-1 capitalize text-xs rounded-md ${severityClassName}`}
+          className={`py-[1px] px-1 capitalize text-xs rounded-md cursor-pointer ${severityClassName}`}
         >
           {line.severity}
         </div>
