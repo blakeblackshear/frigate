@@ -3,10 +3,13 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { LogData, LogLine, LogSeverity } from "@/types/log";
 import copy from "copy-to-clipboard";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { LuCopy } from "react-icons/lu";
 import axios from "axios";
 import LogInfoDialog from "@/components/overlay/LogInfoDialog";
 import { LogChip } from "@/components/indicators/Chip";
+import { LogLevelFilterButton } from "@/components/filter/LogLevelFilter";
+import { FaCopy } from "react-icons/fa6";
+import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 const logTypes = ["frigate", "go2rtc", "nginx"] as const;
 type LogType = (typeof logTypes)[number];
@@ -204,8 +207,15 @@ function Logs() {
   const handleCopyLogs = useCallback(() => {
     if (logs) {
       copy(logs.join("\n"));
+      toast.success(
+        logRange.start == 0
+          ? "Coplied logs to clipboard"
+          : "Copied visible logs to clipboard",
+      );
+    } else {
+      toast.error("Could not copy logs to clipboard");
     }
-  }, [logs]);
+  }, [logs, logRange]);
 
   // scroll to bottom
 
@@ -300,7 +310,7 @@ function Logs() {
 
   // log filtering
 
-  const [filterSeverity, setFilterSeverity] = useState<LogSeverity>();
+  const [filterSeverity, setFilterSeverity] = useState<LogSeverity[]>();
 
   // log selection
 
@@ -308,6 +318,7 @@ function Logs() {
 
   return (
     <div className="size-full p-2 flex flex-col">
+      <Toaster position="top-center" />
       <LogInfoDialog logLine={selectedLog} setLogLine={setSelectedLog} />
 
       <div className="flex justify-between items-center">
@@ -335,21 +346,28 @@ function Logs() {
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
-        <div>
+        <div className="flex items-center gap-2">
           <Button
             className="flex justify-between items-center gap-2"
             size="sm"
+            variant="secondary"
             onClick={handleCopyLogs}
           >
-            <LuCopy />
-            <div className="hidden md:block">Copy to Clipboard</div>
+            <FaCopy />
+            <div className="hidden md:block text-primary-foreground">
+              Copy to Clipboard
+            </div>
           </Button>
+          <LogLevelFilterButton
+            selectedLabels={filterSeverity}
+            updateLabelFilter={setFilterSeverity}
+          />
         </div>
       </div>
 
       {initialScroll && !endVisible && (
         <Button
-          className="absolute bottom-8 left-[50%] -translate-x-[50%] rounded-xl bg-accent-foreground text-white bg-gray-400 z-20 p-2"
+          className="absolute bottom-8 left-[50%] -translate-x-[50%] rounded-md text-primary-foreground bg-secondary-foreground z-20 p-2"
           variant="secondary"
           onClick={() =>
             contentRef.current?.scrollTo({
@@ -364,7 +382,7 @@ function Logs() {
 
       <div
         ref={contentRef}
-        className="w-full h-min my-2 font-mono text-sm sm:py-2 whitespace-pre-wrap overflow-auto no-scrollbar bg-primary border border-secondary rounded-md"
+        className="w-full h-min my-2 font-mono text-sm sm:p-2 whitespace-pre-wrap overflow-auto no-scrollbar bg-primary border border-secondary rounded-md"
       >
         <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 *:p-2 *:text-sm *:text-primary-foreground/40">
           <div className="p-1 flex items-center capitalize">Type</div>
@@ -385,7 +403,7 @@ function Logs() {
 
             if (logLine) {
               const line = logLines[idx - logRange.start];
-              if (filterSeverity && line.severity != filterSeverity) {
+              if (filterSeverity && !filterSeverity.includes(line.severity)) {
                 return (
                   <div
                     ref={idx == logRange.start + 10 ? startLogRef : undefined}
@@ -401,7 +419,7 @@ function Logs() {
                   }
                   className={initialScroll ? "" : "invisible"}
                   line={line}
-                  onClickSeverity={() => setFilterSeverity(line.severity)}
+                  onClickSeverity={() => setFilterSeverity([line.severity])}
                   onSelect={() => setSelectedLog(line)}
                 />
               );
