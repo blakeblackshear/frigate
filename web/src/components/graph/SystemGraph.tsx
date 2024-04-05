@@ -340,7 +340,10 @@ export function CameraLineGraph({
         },
       },
       yaxis: {
-        show: false,
+        show: true,
+        labels: {
+          formatter: (val: number) => Math.ceil(val).toString(),
+        },
         min: 0,
       },
     } as ApexCharts.ApexOptions;
