@@ -33,7 +33,7 @@ export function LogLevelFilterButton({
     return (
       <Drawer>
         <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-        <DrawerContent className="max-h-[75dvh] overflow-hidden">
+        <DrawerContent className="max-h-[75dvh] p-3 mx-1 overflow-hidden">
           {content}
         </DrawerContent>
       </Drawer>
