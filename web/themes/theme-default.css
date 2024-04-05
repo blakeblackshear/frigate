@@ -63,8 +63,8 @@
     --input: hsl(0 0% 85%);
     --input: 0 0% 85%;
 
-    --ring: hsl(222.2 84% 4.9%);
-    --ring: 222.2 84% 4.9%;
+    --ring: hsla(0 0% 25% 0%);
+    --ring: 0 0% 25% 0%
 
     --selected: hsl(228, 89%, 63%);
     --selected: 228 89% 63%;
@@ -154,8 +154,8 @@
     --input: hsl(0 0% 5%);
     --input: 0 0% 25%;
 
-    --ring: hsl(0 0% 25%);
-    --ring: 0 0% 25%;
+    --ring: hsla(0 0% 25% 0%);
+    --ring: 0 0% 25% 0%
 
     --selected: hsl(228, 89%, 63%);
     --selected: 228 89% 63%;
