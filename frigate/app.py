@@ -62,6 +62,7 @@ from frigate.stats.util import stats_init
 from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
 from frigate.types import CameraMetricsTypes, PTZMetricsTypes
+from frigate.util.builtin import save_default_config
 from frigate.util.object import get_camera_regions_grid
 from frigate.version import VERSION
 from frigate.video import capture_camera, track_camera
@@ -119,6 +120,11 @@ class FrigateApp:
         config_file_yaml = config_file.replace(".yml", ".yaml")
         if os.path.isfile(config_file_yaml):
             config_file = config_file_yaml
+
+        if not os.path.isfile(config_file):
+            print("No config file found, saving default config")
+            config_file = config_file_yaml
+            save_default_config(config_file)
 
         user_config = FrigateConfig.parse_file(config_file)
         self.config = user_config.runtime_config(self.plus_api)
