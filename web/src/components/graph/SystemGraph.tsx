@@ -40,7 +40,7 @@ export function ThresholdBarGraph({
         return;
       }
 
-      const date = new Date(updateTimes[Math.round(val as number)] * 1000);
+      const date = new Date(updateTimes[Math.round(val as number) - 1] * 1000);
       return date.toLocaleTimeString([], {
         hour12: config?.ui.time_format != "24hour",
         hour: "2-digit",
@@ -110,9 +110,11 @@ export function ThresholdBarGraph({
         },
       },
       yaxis: {
-        show: false,
+        show: true,
+        labels: {
+          formatter: (val: number) => Math.ceil(val).toString(),
+        },
         min: 0,
-        max: threshold.warning + 10,
       },
     } as ApexCharts.ApexOptions;
   }, [graphId, threshold, systemTheme, theme, formatTime]);
