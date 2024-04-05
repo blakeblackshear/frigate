@@ -5,6 +5,8 @@ import copy from "copy-to-clipboard";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LuCopy } from "react-icons/lu";
 import axios from "axios";
+import LogInfoDialog from "@/components/overlay/LogInfoDialog";
+import { LogChip } from "@/components/indicators/Chip";
 
 const logTypes = ["frigate", "go2rtc", "nginx"] as const;
 type LogType = (typeof logTypes)[number];
@@ -300,8 +302,14 @@ function Logs() {
 
   const [filterSeverity, setFilterSeverity] = useState<LogSeverity>();
 
+  // log selection
+
+  const [selectedLog, setSelectedLog] = useState<LogLine>();
+
   return (
     <div className="size-full p-2 flex flex-col">
+      <LogInfoDialog logLine={selectedLog} setLogLine={setSelectedLog} />
+
       <div className="flex justify-between items-center">
         <ToggleGroup
           className="*:px-3 *:py-4 *:rounded-md"
@@ -394,6 +402,7 @@ function Logs() {
                   className={initialScroll ? "" : "invisible"}
                   line={line}
                   onClickSeverity={() => setFilterSeverity(line.severity)}
+                  onSelect={() => setSelectedLog(line)}
                 />
               );
             }
@@ -411,54 +420,34 @@ type LogLineDataProps = {
   className: string;
   line: LogLine;
   onClickSeverity: () => void;
+  onSelect: () => void;
 };
 function LogLineData({
   startRef,
   className,
   line,
   onClickSeverity,
+  onSelect,
 }: LogLineDataProps) {
-  // long log message
-
-  const contentRef = useRef<HTMLDivElement | null>(null);
-
-  // severity coloring
-
-  const severityClassName = useMemo(() => {
-    switch (line.severity) {
-      case "info":
-        return "text-primary-foreground/60 bg-secondary hover:bg-secondary/60";
-      case "warning":
-        return "text-warning-foreground bg-warning hover:bg-warning/80";
-      case "error":
-        return "text-destructive-foreground bg-destructive hover:bg-destructive/80";
-    }
-  }, [line]);
-
   return (
     <div
       ref={startRef}
-      className={`py-2 grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 gap-2 border-secondary border-t ${className} *:text-sm`}
+      className={`py-2 grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 gap-2 border-secondary border-t cursor-pointer hover:bg-muted ${className} *:text-sm`}
+      onClick={onSelect}
     >
       <div className="h-full p-1 flex items-center gap-2">
-        <div
-          className={`py-[1px] px-1 capitalize text-xs rounded-md cursor-pointer ${severityClassName}`}
-          onClick={onClickSeverity}
-        >
-          {line.severity}
-        </div>
+        <LogChip severity={line.severity} onClickSeverity={onClickSeverity} />
       </div>
       <div className="h-full col-span-2 sm:col-span-1 flex items-center">
         {line.dateStamp}
       </div>
-      <div className="s-full col-span-2 overflow-hidden whitespace-nowrap text-ellipsis">
-        {line.section}
+      <div className="size-full pr-2 col-span-2 flex items-center">
+        <div className="w-full overflow-hidden whitespace-nowrap text-ellipsis">
+          {line.section}
+        </div>
       </div>
-      <div className="w-full col-span-5 sm:col-span-4 md:col-span-8 flex justify-between items-center">
-        <div
-          ref={contentRef}
-          className="w-[94%] flex items-center overflow-hidden whitespace-nowrap text-ellipsis"
-        >
+      <div className="size-full pr-2 col-span-5 sm:col-span-4 md:col-span-8 flex justify-between items-center">
+        <div className="w-full overflow-hidden whitespace-nowrap text-ellipsis">
           {line.content}
         </div>
       </div>

@@ -1,4 +1,5 @@
-import { ReactNode, useRef } from "react";
+import { LogSeverity } from "@/types/log";
+import { ReactNode, useMemo, useRef } from "react";
 import { CSSTransition } from "react-transition-group";
 
 type ChipProps = {
@@ -37,5 +38,37 @@ export default function Chip({
         {children}
       </div>
     </CSSTransition>
+  );
+}
+
+type LogChipProps = {
+  severity: LogSeverity;
+  onClickSeverity?: () => void;
+};
+export function LogChip({ severity, onClickSeverity }: LogChipProps) {
+  const severityClassName = useMemo(() => {
+    switch (severity) {
+      case "info":
+        return "text-primary-foreground/60 bg-secondary hover:bg-secondary/60";
+      case "warning":
+        return "text-warning-foreground bg-warning hover:bg-warning/80";
+      case "error":
+        return "text-destructive-foreground bg-destructive hover:bg-destructive/80";
+    }
+  }, [severity]);
+
+  return (
+    <div
+      className={`py-[1px] px-1 capitalize text-xs rounded-md ${onClickSeverity ? "cursor-pointer" : ""} ${severityClassName}`}
+      onClick={(e) => {
+        e.stopPropagation();
+
+        if (onClickSeverity) {
+          onClickSeverity();
+        }
+      }}
+    >
+      {severity}
+    </div>
   );
 }
