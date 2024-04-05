@@ -334,19 +334,15 @@ function Logs() {
 
       <div
         ref={contentRef}
-        className="w-full h-min my-2 font-mono text-sm rounded py-4 sm:py-2 whitespace-pre-wrap overflow-auto no-scrollbar"
+        className="w-full h-min my-2 font-mono text-sm sm:py-2 whitespace-pre-wrap overflow-auto no-scrollbar bg-secondary border rounded-md"
       >
-        <div className="py-2 sticky top-0 -translate-y-1/4 grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 bg-background *:p-2">
-          <div className="p-1 flex items-center capitalize border-y border-l">
-            Type
-          </div>
-          <div className="col-span-2 sm:col-span-1 flex items-center border-y border-l">
+        <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 *:p-2 *:text-sm *:text-secondary-foreground bg-secondary">
+          <div className="p-1 flex items-center capitalize">Type</div>
+          <div className="col-span-2 sm:col-span-1 flex items-center">
             Timestamp
           </div>
-          <div className="col-span-2 flex items-center border-y border-l border-r sm:border-r-0">
-            Tag
-          </div>
-          <div className="col-span-5 sm:col-span-4 md:col-span-8 flex items-center border">
+          <div className="col-span-2 flex items-center">Tag</div>
+          <div className="col-span-5 sm:col-span-4 md:col-span-8 flex items-center">
             Message
           </div>
         </div>
@@ -417,7 +413,7 @@ function LogLineData({ startRef, className, line, offset }: LogLineDataProps) {
   return (
     <div
       ref={startRef}
-      className={`py-2 grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 gap-2 ${offset % 2 == 0 ? "bg-secondary" : "bg-secondary/80"} border-t border-x ${className}`}
+      className={`py-2 grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 gap-2 ${offset % 2 == 0 ? "bg-secondary" : "bg-secondary/80"} border-t ${className} *:text-sm`}
     >
       <div
         className={`h-full p-1 flex items-center gap-2 capitalize ${severityClassName}`}
