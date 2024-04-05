@@ -48,8 +48,14 @@
     --destructive: hsl(0 84.2% 60.2%);
     --destructive: 0 84.2% 60.2%;
 
-    --destructive-foreground: hsl(210 40% 98%);
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: hsl(0 100% 83%);
+    --destructive-foreground: 0 100% 83%;
+
+    --warning: hsl(17 87% 18%);
+    --warning: 17 87% 18%;
+
+    --warning-foreground: hsl(32 100% 74%);
+    --warning-foreground: 32 100% 74%;
 
     --border: hsl(214.3 31.8% 91.4%);
     --border: 214.3 31.8% 91.4%;
@@ -133,8 +139,14 @@
     --destructive: hsl(0 62.8% 30.6%);
     --destructive: 0 62.8% 30.6%;
 
-    --destructive-foreground: hsl(210 40% 98%);
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: hsl(0 100% 83%);
+    --destructive-foreground: 0 100% 83%;
+
+    --warning: hsl(17 87% 18%);
+    --warning: 17 87% 18%;
+
+    --warning-foreground: hsl(32 100% 74%);
+    --warning-foreground: 32 100% 74%;
 
     --border: hsl(0, 0%, 32%);
     --border: 0 0% 32%;

@@ -3,8 +3,6 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { LogData, LogLine, LogSeverity } from "@/types/log";
 import copy from "copy-to-clipboard";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { IoIosAlert } from "react-icons/io";
-import { GoAlertFill } from "react-icons/go";
 import { LuCopy } from "react-icons/lu";
 import axios from "axios";
 
@@ -334,9 +332,9 @@ function Logs() {
 
       <div
         ref={contentRef}
-        className="w-full h-min my-2 font-mono text-sm sm:py-2 whitespace-pre-wrap overflow-auto no-scrollbar bg-secondary border rounded-md"
+        className="w-full h-min my-2 font-mono text-sm sm:py-2 whitespace-pre-wrap overflow-auto no-scrollbar bg-primary border border-secondary rounded-md"
       >
-        <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 *:p-2 *:text-sm *:text-secondary-foreground bg-secondary">
+        <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 *:p-2 *:text-sm *:text-secondary-foreground">
           <div className="p-1 flex items-center capitalize">Type</div>
           <div className="col-span-2 sm:col-span-1 flex items-center">
             Timestamp
@@ -361,7 +359,6 @@ function Logs() {
                     idx == logRange.start + 10 ? startLogRef : undefined
                   }
                   className={initialScroll ? "" : "invisible"}
-                  offset={idx}
                   line={logLines[idx - logRange.start]}
                 />
               );
@@ -379,70 +376,50 @@ type LogLineDataProps = {
   startRef?: (node: HTMLDivElement | null) => void;
   className: string;
   line: LogLine;
-  offset: number;
 };
-function LogLineData({ startRef, className, line, offset }: LogLineDataProps) {
+function LogLineData({ startRef, className, line }: LogLineDataProps) {
   // long log message
 
   const contentRef = useRef<HTMLDivElement | null>(null);
-  const [expanded, setExpanded] = useState(false);
-
-  const contentOverflows = useMemo(() => {
-    if (!contentRef.current) {
-      return false;
-    }
-
-    return contentRef.current.scrollWidth > contentRef.current.clientWidth;
-    // update on ref change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [contentRef.current]);
 
   // severity coloring
 
   const severityClassName = useMemo(() => {
     switch (line.severity) {
       case "info":
-        return "text-secondary-foreground rounded-md";
+        return "text-primary-foreground/40 bg-muted";
       case "warning":
-        return "text-yellow-400 rounded-md";
+        return "text-warning-foreground bg-warning";
       case "error":
-        return "text-danger rounded-md";
+        return "text-destructive-foreground bg-destructive";
     }
   }, [line]);
 
   return (
     <div
       ref={startRef}
-      className={`py-2 grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 gap-2 ${offset % 2 == 0 ? "bg-secondary" : "bg-secondary/80"} border-t ${className} *:text-sm`}
+      className={`py-2 grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 gap-2 border-secondary border-t ${className} *:text-sm`}
     >
-      <div
-        className={`h-full p-1 flex items-center gap-2 capitalize ${severityClassName}`}
-      >
-        {line.severity == "error" ? (
-          <GoAlertFill className="size-5" />
-        ) : (
-          <IoIosAlert className="size-5" />
-        )}
-        {line.severity}
+      <div className="h-full p-1 flex items-center gap-2">
+        <div
+          className={`py-[1px] px-1 capitalize text-xs rounded-md ${severityClassName}`}
+        >
+          {line.severity}
+        </div>
       </div>
       <div className="h-full col-span-2 sm:col-span-1 flex items-center">
         {line.dateStamp}
       </div>
-      <div className="h-full col-span-2 flex items-center overflow-hidden text-ellipsis">
+      <div className="s-full col-span-2 overflow-hidden whitespace-nowrap text-ellipsis">
         {line.section}
       </div>
       <div className="w-full col-span-5 sm:col-span-4 md:col-span-8 flex justify-between items-center">
         <div
           ref={contentRef}
-          className={`w-[94%] flex items-center" ${expanded ? "" : "overflow-hidden whitespace-nowrap text-ellipsis"}`}
+          className="w-[94%] flex items-center overflow-hidden whitespace-nowrap text-ellipsis"
         >
           {line.content}
         </div>
-        {contentOverflows && (
-          <Button className="mr-4" onClick={() => setExpanded(!expanded)}>
-            ...
-          </Button>
-        )}
       </div>
     </div>
   );
