@@ -64,10 +64,13 @@ export default function ExportDialog({
     }
 
     axios
-      .post(`export/${camera}/start/${range.after}/end/${range.before}`, {
-        playback: "realtime",
-        name,
-      })
+      .post(
+        `export/${camera}/start/${Math.round(range.after)}/end/${Math.round(range.before)}`,
+        {
+          playback: "realtime",
+          name,
+        },
+      )
       .then((response) => {
         if (response.status == 200) {
           toast.success(
