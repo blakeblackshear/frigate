@@ -10,6 +10,7 @@ import { LogLevelFilterButton } from "@/components/filter/LogLevelFilter";
 import { FaCopy } from "react-icons/fa6";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
+import { isDesktop } from "react-device-detect";
 
 const logTypes = ["frigate", "go2rtc", "nginx"] as const;
 type LogType = (typeof logTypes)[number];
@@ -425,7 +426,12 @@ function Logs() {
               );
             }
 
-            return <div key={`${idx}-${logService}`} className="h-12" />;
+            return (
+              <div
+                key={`${idx}-${logService}`}
+                className={isDesktop ? "h-12" : "h-16"}
+              />
+            );
           })}
         {logLines.length > 0 && <div id="page-bottom" ref={endLogRef} />}
       </div>
