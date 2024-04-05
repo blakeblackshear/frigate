@@ -381,11 +381,8 @@ function Logs() {
         </Button>
       )}
 
-      <div
-        ref={contentRef}
-        className="w-full h-min my-2 font-mono text-sm sm:p-2 whitespace-pre-wrap overflow-auto no-scrollbar bg-primary border border-secondary rounded-md"
-      >
-        <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 *:p-2 *:text-sm *:text-primary-foreground/40">
+      <div className="size-full flex flex-col my-2 font-mono text-sm sm:p-2 whitespace-pre-wrap bg-primary border border-secondary rounded-md overflow-hidden">
+        <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 *:px-2 *:py-3 *:text-sm *:text-primary-foreground/40">
           <div className="p-1 flex items-center capitalize">Type</div>
           <div className="col-span-2 sm:col-span-1 flex items-center">
             Timestamp
@@ -395,45 +392,50 @@ function Logs() {
             Message
           </div>
         </div>
-        {logLines.length > 0 &&
-          [...Array(logRange.end).keys()].map((idx) => {
-            const logLine =
-              idx >= logRange.start
-                ? logLines[idx - logRange.start]
-                : undefined;
+        <div
+          ref={contentRef}
+          className="w-full flex flex-col overflow-y-auto no-scrollbar"
+        >
+          {logLines.length > 0 &&
+            [...Array(logRange.end).keys()].map((idx) => {
+              const logLine =
+                idx >= logRange.start
+                  ? logLines[idx - logRange.start]
+                  : undefined;
 
-            if (logLine) {
-              const line = logLines[idx - logRange.start];
-              if (filterSeverity && !filterSeverity.includes(line.severity)) {
+              if (logLine) {
+                const line = logLines[idx - logRange.start];
+                if (filterSeverity && !filterSeverity.includes(line.severity)) {
+                  return (
+                    <div
+                      ref={idx == logRange.start + 10 ? startLogRef : undefined}
+                    />
+                  );
+                }
+
                 return (
-                  <div
-                    ref={idx == logRange.start + 10 ? startLogRef : undefined}
+                  <LogLineData
+                    key={`${idx}-${logService}`}
+                    startRef={
+                      idx == logRange.start + 10 ? startLogRef : undefined
+                    }
+                    className={initialScroll ? "" : "invisible"}
+                    line={line}
+                    onClickSeverity={() => setFilterSeverity([line.severity])}
+                    onSelect={() => setSelectedLog(line)}
                   />
                 );
               }
 
               return (
-                <LogLineData
+                <div
                   key={`${idx}-${logService}`}
-                  startRef={
-                    idx == logRange.start + 10 ? startLogRef : undefined
-                  }
-                  className={initialScroll ? "" : "invisible"}
-                  line={line}
-                  onClickSeverity={() => setFilterSeverity([line.severity])}
-                  onSelect={() => setSelectedLog(line)}
+                  className={isDesktop ? "h-12" : "h-16"}
                 />
               );
-            }
-
-            return (
-              <div
-                key={`${idx}-${logService}`}
-                className={isDesktop ? "h-12" : "h-16"}
-              />
-            );
-          })}
-        {logLines.length > 0 && <div id="page-bottom" ref={endLogRef} />}
+            })}
+          {logLines.length > 0 && <div id="page-bottom" ref={endLogRef} />}
+        </div>
       </div>
     </div>
   );
@@ -456,7 +458,7 @@ function LogLineData({
   return (
     <div
       ref={startRef}
-      className={`py-2 grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 gap-2 border-secondary border-t cursor-pointer hover:bg-muted ${className} *:text-sm`}
+      className={`w-full py-2 grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 gap-2 border-secondary border-t cursor-pointer hover:bg-muted ${className} *:text-sm`}
       onClick={onSelect}
     >
       <div className="h-full p-1 flex items-center gap-2">
@@ -470,7 +472,7 @@ function LogLineData({
           {line.section}
         </div>
       </div>
-      <div className="size-full pr-2 col-span-5 sm:col-span-4 md:col-span-8 flex justify-between items-center">
+      <div className="size-full pl-2 sm:pl-0 pr-2 col-span-5 sm:col-span-4 md:col-span-8 flex justify-between items-center">
         <div className="w-full overflow-hidden whitespace-nowrap text-ellipsis">
           {line.content}
         </div>
