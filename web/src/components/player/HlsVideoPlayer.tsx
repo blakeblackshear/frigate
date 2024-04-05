@@ -116,7 +116,7 @@ export default function HlsVideoPlayer({
           }}
           contentStyle={{
             width: "100%",
-            height: "100%",
+            height: isMobile ? "100%" : undefined,
           }}
         >
           <video
