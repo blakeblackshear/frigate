@@ -296,6 +296,10 @@ function Logs() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [logLines, logService]);
 
+  // log filtering
+
+  const [filterSeverity, setFilterSeverity] = useState<LogSeverity>();
+
   return (
     <div className="size-full p-2 flex flex-col">
       <div className="flex justify-between items-center">
@@ -307,6 +311,7 @@ function Logs() {
           onValueChange={(value: LogType) => {
             if (value) {
               setLogs([]);
+              setFilterSeverity(undefined);
               setLogService(value);
             }
           }} // don't allow the severity to be unselected
@@ -371,6 +376,15 @@ function Logs() {
                 : undefined;
 
             if (logLine) {
+              const line = logLines[idx - logRange.start];
+              if (filterSeverity && line.severity != filterSeverity) {
+                return (
+                  <div
+                    ref={idx == logRange.start + 10 ? startLogRef : undefined}
+                  />
+                );
+              }
+
               return (
                 <LogLineData
                   key={`${idx}-${logService}`}
@@ -378,7 +392,8 @@ function Logs() {
                     idx == logRange.start + 10 ? startLogRef : undefined
                   }
                   className={initialScroll ? "" : "invisible"}
-                  line={logLines[idx - logRange.start]}
+                  line={line}
+                  onClickSeverity={() => setFilterSeverity(line.severity)}
                 />
               );
             }
@@ -395,8 +410,14 @@ type LogLineDataProps = {
   startRef?: (node: HTMLDivElement | null) => void;
   className: string;
   line: LogLine;
+  onClickSeverity: () => void;
 };
-function LogLineData({ startRef, className, line }: LogLineDataProps) {
+function LogLineData({
+  startRef,
+  className,
+  line,
+  onClickSeverity,
+}: LogLineDataProps) {
   // long log message
 
   const contentRef = useRef<HTMLDivElement | null>(null);
@@ -422,6 +443,7 @@ function LogLineData({ startRef, className, line }: LogLineDataProps) {
       <div className="h-full p-1 flex items-center gap-2">
         <div
           className={`py-[1px] px-1 capitalize text-xs rounded-md cursor-pointer ${severityClassName}`}
+          onClick={onClickSeverity}
         >
           {line.severity}
         </div>
