@@ -839,31 +839,34 @@ function MotionReview({
             return (
               <div key={camera.name} className={`relative ${spans}`}>
                 {motionData ? (
-                  <PreviewPlayer
-                    key={camera.name}
-                    className={`rounded-2xl ${spans} ${grow}`}
-                    camera={camera.name}
-                    timeRange={currentTimeRange}
-                    startTime={previewStart}
-                    cameraPreviews={relevantPreviews || []}
-                    isScrubbing={scrubbing}
-                    onControllerReady={(controller) => {
-                      videoPlayersRef.current[camera.name] = controller;
-                    }}
-                    onClick={() =>
-                      onOpenRecording({
-                        camera: camera.name,
-                        startTime: currentTime,
-                        severity: "significant_motion",
-                      })
-                    }
-                  />
+                  <>
+                    <PreviewPlayer
+                      className={`rounded-2xl ${spans} ${grow}`}
+                      camera={camera.name}
+                      timeRange={currentTimeRange}
+                      startTime={previewStart}
+                      cameraPreviews={relevantPreviews || []}
+                      isScrubbing={scrubbing}
+                      onControllerReady={(controller) => {
+                        videoPlayersRef.current[camera.name] = controller;
+                      }}
+                      onClick={() =>
+                        onOpenRecording({
+                          camera: camera.name,
+                          startTime: currentTime,
+                          severity: "significant_motion",
+                        })
+                      }
+                    />
+                    <div
+                      className={`review-item-ring pointer-events-none z-20 absolute rounded-lg inset-0 size-full -outline-offset-[2.8px] outline outline-[3px] ${detectionType ? `outline-severity_${detectionType} shadow-severity_${detectionType}` : "outline-transparent duration-500"}`}
+                    />
+                  </>
                 ) : (
-                  <Skeleton className={`rounded-2xl ${spans} ${grow}`} />
+                  <Skeleton
+                    className={`rounded-2xl size-full ${spans} ${grow}`}
+                  />
                 )}
-                <div
-                  className={`review-item-ring pointer-events-none z-10 absolute rounded-lg inset-0 size-full -outline-offset-[2.8px] outline outline-[3px] ${detectionType ? `outline-severity_${detectionType} shadow-severity_${detectionType}` : "outline-transparent duration-500"}`}
-                />
               </div>
             );
           })}
@@ -894,7 +897,7 @@ function MotionReview({
             dense={isMobile}
           />
         ) : (
-          <Skeleton className="rounded-2xl size-full" />
+          <Skeleton className="size-full" />
         )}
       </div>
 
