@@ -3,7 +3,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { Threshold } from "@/types/graph";
 import { useCallback, useEffect, useMemo } from "react";
 import Chart from "react-apexcharts";
-import { isMobile, isMobileOnly } from "react-device-detect";
+import { isMobileOnly } from "react-device-detect";
 import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
 
