@@ -137,7 +137,7 @@ export default function MobileReviewSettingsDrawer({
             className="w-full flex justify-center items-center gap-2"
             onClick={() => setDrawerMode("export")}
           >
-            <FaArrowDown className="p-1 fill-secondary bg-muted-foreground rounded-md" />
+            <FaArrowDown className="p-1 fill-secondary bg-secondary-foreground rounded-md" />
             Export
           </Button>
         )}
@@ -146,7 +146,7 @@ export default function MobileReviewSettingsDrawer({
             className="w-full flex justify-center items-center gap-2"
             onClick={() => setDrawerMode("calendar")}
           >
-            <FaCalendarAlt className="fill-muted-foreground" />
+            <FaCalendarAlt className="fill-secondary-foreground" />
             Calendar
           </Button>
         )}
@@ -155,7 +155,7 @@ export default function MobileReviewSettingsDrawer({
             className="w-full flex justify-center items-center gap-2"
             onClick={() => setDrawerMode("filter")}
           >
-            <FaFilter className="fill-muted-foreground" />
+            <FaFilter className="fill-secondary-foreground" />
             Filter
           </Button>
         )}
@@ -282,7 +282,7 @@ export default function MobileReviewSettingsDrawer({
             variant="secondary"
             onClick={() => setDrawerMode("select")}
           >
-            <FaCog className="text-muted-foreground" />
+            <FaCog className="text-secondary-foreground" />
           </Button>
         </DrawerTrigger>
         <DrawerContent className="max-h-[80dvh] overflow-hidden flex flex-col items-center gap-2 px-4 pb-4 mx-1 rounded-t-2xl">

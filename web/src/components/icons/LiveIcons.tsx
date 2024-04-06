@@ -32,10 +32,10 @@ export function LiveListIcon({ layout }: LiveIconProps) {
   return (
     <div className="size-full flex flex-col gap-0.5 rounded-md overflow-hidden">
       <div
-        className={`size-full ${layout == "list" ? "bg-selected" : "bg-muted-foreground"}`}
+        className={`size-full ${layout == "list" ? "bg-selected" : "bg-secondary-foreground"}`}
       />
       <div
-        className={`size-full ${layout == "list" ? "bg-selected" : "bg-muted-foreground"}`}
+        className={`size-full ${layout == "list" ? "bg-selected" : "bg-secondary-foreground"}`}
       />
     </div>
   );

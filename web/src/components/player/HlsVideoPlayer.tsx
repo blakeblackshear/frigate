@@ -92,7 +92,7 @@ export default function HlsVideoPlayer({
   return (
     <TransformWrapper minScale={1.0}>
       <div
-        className={`relative w-full ${className ?? ""} ${visible ? "visible" : "hidden"}`}
+        className={`relative ${className ?? ""} ${visible ? "visible" : "hidden"}`}
         onMouseOver={
           isDesktop
             ? () => {
@@ -112,9 +112,11 @@ export default function HlsVideoPlayer({
         <TransformComponent
           wrapperStyle={{
             width: "100%",
+            height: "100%",
           }}
           contentStyle={{
             width: "100%",
+            height: isMobile ? "100%" : undefined,
           }}
         >
           <video
