@@ -46,7 +46,9 @@ class RecordingCleanup(threading.Thread):
 
         # with auto checkpoint most users should never hit this
 
-        if (os.stat(f"{self.config.database.path}-wal").st_size / (1024 * 1024)) > MAX_WAL_SIZE:
+        if (
+            os.stat(f"{self.config.database.path}-wal").st_size / (1024 * 1024)
+        ) > MAX_WAL_SIZE:
             db = SqliteExtDatabase(self.config.database.path)
             db.execute_sql("PRAGMA wal_checkpoint(TRUNCATE);")
             db.close()
