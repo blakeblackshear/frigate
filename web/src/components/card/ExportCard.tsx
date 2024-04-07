@@ -12,6 +12,7 @@ import { Input } from "../ui/input";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 
 type ExportProps = {
+  className: string;
   file: {
     name: string;
   };
@@ -19,7 +20,12 @@ type ExportProps = {
   onDelete: (file: string) => void;
 };
 
-export default function ExportCard({ file, onRename, onDelete }: ExportProps) {
+export default function ExportCard({
+  className,
+  file,
+  onRename,
+  onDelete,
+}: ExportProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [hovered, setHovered] = useState(false);
   const [playing, setPlaying] = useState(false);
@@ -94,7 +100,7 @@ export default function ExportCard({ file, onRename, onDelete }: ExportProps) {
       </Dialog>
 
       <div
-        className="relative aspect-video bg-black rounded-2xl flex justify-center items-center"
+        className={`relative aspect-video bg-black rounded-2xl flex justify-center items-center ${className}`}
         onMouseEnter={
           isDesktop && !inProgress ? () => setHovered(true) : undefined
         }
