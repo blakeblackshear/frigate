@@ -341,7 +341,7 @@ export function RecordingView({
       </div>
 
       <div
-        className={`h-full flex justify-center overflow-hidden ${isDesktop ? "" : "flex-col gap-2"}`}
+        className={`h-full flex justify-center overflow-hidden ${isDesktop ? "" : "flex-col landscape:flex-row gap-2"}`}
       >
         <div className={`${isDesktop ? "w-[80%]" : ""} flex flex-1 flex-wrap`}>
           <div
@@ -352,7 +352,7 @@ export function RecordingView({
               className={
                 isDesktop
                   ? `${mainCameraAspect == "tall" ? "h-[90%]" : mainCameraAspect == "wide" ? "w-full" : "w-[78%]"} px-4 flex justify-center`
-                  : `w-full pt-2 ${mainCameraAspect == "wide" ? "aspect-wide" : "aspect-video"}`
+                  : `portrait:w-full pt-2 ${mainCameraAspect == "wide" ? "landscape:w-full aspect-wide" : "landscape:h-[94%] aspect-video"}`
               }
               style={{
                 aspectRatio: isDesktop
@@ -497,7 +497,7 @@ function Timeline({
       className={`${
         isDesktop
           ? `${timelineType == "timeline" ? "w-[100px]" : "w-60"} overflow-y-auto no-scrollbar`
-          : "flex-grow overflow-hidden"
+          : "portrait:flex-grow landscape:w-[20%] overflow-hidden"
       } relative`}
     >
       <div className="absolute top-0 inset-x-0 z-20 w-full h-[30px] bg-gradient-to-b from-secondary to-transparent pointer-events-none"></div>
