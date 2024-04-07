@@ -3,12 +3,15 @@
 import datetime
 import itertools
 import logging
+import os
 import threading
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
 
+from playhouse.sqlite_ext import SqliteExtDatabase
+
 from frigate.config import CameraConfig, FrigateConfig, RetainModeEnum
-from frigate.const import CACHE_DIR, RECORD_DIR
+from frigate.const import CACHE_DIR, MAX_WAL_SIZE, RECORD_DIR
 from frigate.models import Event, Previews, Recordings, ReviewSegment
 from frigate.record.util import remove_empty_directories, sync_recordings
 from frigate.util.builtin import clear_and_unlink, get_tomorrow_at_time
@@ -32,6 +35,23 @@ class RecordingCleanup(threading.Thread):
             if p.stat().st_mtime < (datetime.datetime.now().timestamp() - 60 * 1):
                 logger.debug("Deleting tmp clip.")
                 clear_and_unlink(p)
+
+    def truncate_wal(self) -> None:
+        """check if the WAL needs to be manually truncated."""
+
+        # by default the WAL should be check-pointed automatically
+        # however, high levels of activity can prevent an opportunity
+        # for the checkpoint to be finished which means the WAL will grow
+        # without bound
+
+        # with auto checkpoint most users should never hit this
+
+        if (
+            os.stat(f"{self.config.database.path}-wal").st_size / (1024 * 1024)
+        ) > MAX_WAL_SIZE:
+            db = SqliteExtDatabase(self.config.database.path)
+            db.execute_sql("PRAGMA wal_checkpoint(TRUNCATE);")
+            db.close()
 
     def expire_existing_camera_recordings(
         self, expire_date: float, config: CameraConfig, events: Event
@@ -328,3 +348,4 @@ class RecordingCleanup(threading.Thread):
             if counter == 0:
                 self.expire_recordings()
                 remove_empty_directories(RECORD_DIR)
+                self.truncate_wal()
