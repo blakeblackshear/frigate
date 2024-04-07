@@ -99,7 +99,7 @@ export default function GeneralMetrics({
           series[key] = { name: key, data: [] };
         }
 
-        series[key].data.push({ x: statsIdx, y: stats.inference_speed });
+        series[key].data.push({ x: statsIdx + 1, y: stats.inference_speed });
       });
     });
     return Object.values(series);
@@ -125,7 +125,7 @@ export default function GeneralMetrics({
         }
 
         series[key].data.push({
-          x: statsIdx,
+          x: statsIdx + 1,
           y: stats.cpu_usages[detStats.pid.toString()].cpu,
         });
       });
@@ -153,7 +153,7 @@ export default function GeneralMetrics({
         }
 
         series[key].data.push({
-          x: statsIdx,
+          x: statsIdx + 1,
           y: stats.cpu_usages[detStats.pid.toString()].mem,
         });
       });
@@ -182,7 +182,7 @@ export default function GeneralMetrics({
           series[key] = { name: key, data: [] };
         }
 
-        series[key].data.push({ x: statsIdx, y: stats.gpu });
+        series[key].data.push({ x: statsIdx + 1, y: stats.gpu });
       });
     });
     return Object.keys(series).length > 0 ? Object.values(series) : [];
@@ -207,7 +207,7 @@ export default function GeneralMetrics({
           series[key] = { name: key, data: [] };
         }
 
-        series[key].data.push({ x: statsIdx, y: stats.mem });
+        series[key].data.push({ x: statsIdx + 1, y: stats.mem });
       });
     });
     return Object.values(series);
@@ -236,7 +236,7 @@ export default function GeneralMetrics({
           }
 
           series[key].data.push({
-            x: statsIdx,
+            x: statsIdx + 1,
             y: stats.cpu_usages[procStats.pid.toString()].cpu,
           });
         }
@@ -266,7 +266,7 @@ export default function GeneralMetrics({
           }
 
           series[key].data.push({
-            x: statsIdx,
+            x: statsIdx + 1,
             y: stats.cpu_usages[procStats.pid.toString()].mem,
           });
         }
