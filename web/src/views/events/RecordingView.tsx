@@ -352,7 +352,7 @@ export function RecordingView({
               className={
                 isDesktop
                   ? `${mainCameraAspect == "tall" ? "h-[90%]" : mainCameraAspect == "wide" ? "w-full" : "w-[78%]"} px-4 flex justify-center`
-                  : `portrait:w-full pt-2 ${mainCameraAspect == "wide" ? "landscape:w-full aspect-wide" : "landscape:h-full aspect-video"}`
+                  : `portrait:w-full pt-2 ${mainCameraAspect == "wide" ? "landscape:w-full aspect-wide" : "landscape:h-[94%] aspect-video"}`
               }
               style={{
                 aspectRatio: isDesktop
