@@ -135,6 +135,7 @@ export default function SubmitPlus() {
                   This is a {upload?.label}
                 </Button>
                 <Button
+                  className="text-white"
                   variant="destructive"
                   onClick={() => onSubmitToPlus(true)}
                 >

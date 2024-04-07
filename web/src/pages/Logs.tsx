@@ -3,10 +3,14 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { LogData, LogLine, LogSeverity } from "@/types/log";
 import copy from "copy-to-clipboard";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { IoIosAlert } from "react-icons/io";
-import { GoAlertFill } from "react-icons/go";
-import { LuCopy } from "react-icons/lu";
 import axios from "axios";
+import LogInfoDialog from "@/components/overlay/LogInfoDialog";
+import { LogChip } from "@/components/indicators/Chip";
+import { LogLevelFilterButton } from "@/components/filter/LogLevelFilter";
+import { FaCopy } from "react-icons/fa6";
+import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
+import { isDesktop } from "react-device-detect";
 
 const logTypes = ["frigate", "go2rtc", "nginx"] as const;
 type LogType = (typeof logTypes)[number];
@@ -17,7 +21,7 @@ const frigateDateStamp = /\[[\d\s-:]*]/;
 const frigateSeverity = /(DEBUG)|(INFO)|(WARNING)|(ERROR)/;
 const frigateSection = /[\w.]*/;
 
-const goSeverity = /(DEB )|(INF )|(WARN )|(ERR )/;
+const goSeverity = /(DEB )|(INF )|(WRN )|(ERR )/;
 const goSection = /\[[\w]*]/;
 
 const ngSeverity = /(GET)|(POST)|(PUT)|(PATCH)|(DELETE)/;
@@ -154,9 +158,28 @@ function Logs() {
             contentStart = line.indexOf(section) + section.length + 2;
           }
 
+          let severityCat: LogSeverity;
+          switch (severity?.at(0)?.toString().trim()) {
+            case "INF":
+              severityCat = "info";
+              break;
+            case "WRN":
+              severityCat = "warning";
+              break;
+            case "ERR":
+              severityCat = "error";
+              break;
+            case "DBG":
+            case "TRC":
+              severityCat = "debug";
+              break;
+            default:
+              severityCat = "info";
+          }
+
           return {
             dateStamp: line.substring(0, 19),
-            severity: "INFO",
+            severity: severityCat,
             section: section,
             content: line.substring(contentStart).trim(),
           };
@@ -171,7 +194,7 @@ function Logs() {
 
           return {
             dateStamp: line.substring(0, 19),
-            severity: "INFO",
+            severity: "info",
             section: ngSeverity.exec(line)?.at(0)?.toString() ?? "META",
             content: line.substring(line.indexOf(" ", 20)).trim(),
           };
@@ -185,8 +208,15 @@ function Logs() {
   const handleCopyLogs = useCallback(() => {
     if (logs) {
       copy(logs.join("\n"));
+      toast.success(
+        logRange.start == 0
+          ? "Coplied logs to clipboard"
+          : "Copied visible logs to clipboard",
+      );
+    } else {
+      toast.error("Could not copy logs to clipboard");
     }
-  }, [logs]);
+  }, [logs, logRange]);
 
   // scroll to bottom
 
@@ -279,8 +309,19 @@ function Logs() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [logLines, logService]);
 
+  // log filtering
+
+  const [filterSeverity, setFilterSeverity] = useState<LogSeverity[]>();
+
+  // log selection
+
+  const [selectedLog, setSelectedLog] = useState<LogLine>();
+
   return (
     <div className="size-full p-2 flex flex-col">
+      <Toaster position="top-center" />
+      <LogInfoDialog logLine={selectedLog} setLogLine={setSelectedLog} />
+
       <div className="flex justify-between items-center">
         <ToggleGroup
           className="*:px-3 *:py-4 *:rounded-md"
@@ -290,6 +331,7 @@ function Logs() {
           onValueChange={(value: LogType) => {
             if (value) {
               setLogs([]);
+              setFilterSeverity(undefined);
               setLogService(value);
             }
           }} // don't allow the severity to be unselected
@@ -301,25 +343,32 @@ function Logs() {
               value={item}
               aria-label={`Select ${item}`}
             >
-              <div className="capitalize">{`${item} Logs`}</div>
+              <div className="capitalize">{item}</div>
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
-        <div>
+        <div className="flex items-center gap-2">
           <Button
             className="flex justify-between items-center gap-2"
             size="sm"
+            variant="secondary"
             onClick={handleCopyLogs}
           >
-            <LuCopy />
-            <div className="hidden md:block">Copy to Clipboard</div>
+            <FaCopy />
+            <div className="hidden md:block text-primary-foreground">
+              Copy to Clipboard
+            </div>
           </Button>
+          <LogLevelFilterButton
+            selectedLabels={filterSeverity}
+            updateLabelFilter={setFilterSeverity}
+          />
         </div>
       </div>
 
       {initialScroll && !endVisible && (
         <Button
-          className="absolute bottom-8 left-[50%] -translate-x-[50%] rounded-xl bg-accent-foreground text-white bg-gray-400 z-20 p-2"
+          className="absolute bottom-8 left-[50%] -translate-x-[50%] rounded-md text-primary-foreground bg-secondary-foreground z-20 p-2"
           variant="secondary"
           onClick={() =>
             contentRef.current?.scrollTo({
@@ -332,48 +381,61 @@ function Logs() {
         </Button>
       )}
 
-      <div
-        ref={contentRef}
-        className="w-full h-min my-2 font-mono text-sm rounded py-4 sm:py-2 whitespace-pre-wrap overflow-auto no-scrollbar"
-      >
-        <div className="py-2 sticky top-0 -translate-y-1/4 grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 bg-background *:p-2">
-          <div className="p-1 flex items-center capitalize border-y border-l">
-            Type
-          </div>
-          <div className="col-span-2 sm:col-span-1 flex items-center border-y border-l">
+      <div className="size-full flex flex-col my-2 font-mono text-sm sm:p-2 whitespace-pre-wrap bg-primary border border-secondary rounded-md overflow-hidden">
+        <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 *:px-2 *:py-3 *:text-sm *:text-primary-foreground/40">
+          <div className="p-1 flex items-center capitalize">Type</div>
+          <div className="col-span-2 sm:col-span-1 flex items-center">
             Timestamp
           </div>
-          <div className="col-span-2 flex items-center border-y border-l border-r sm:border-r-0">
-            Tag
-          </div>
-          <div className="col-span-5 sm:col-span-4 md:col-span-8 flex items-center border">
+          <div className="col-span-2 flex items-center">Tag</div>
+          <div className="col-span-5 sm:col-span-4 md:col-span-8 flex items-center">
             Message
           </div>
         </div>
-        {logLines.length > 0 &&
-          [...Array(logRange.end).keys()].map((idx) => {
-            const logLine =
-              idx >= logRange.start
-                ? logLines[idx - logRange.start]
-                : undefined;
+        <div
+          ref={contentRef}
+          className="w-full flex flex-col overflow-y-auto no-scrollbar"
+        >
+          {logLines.length > 0 &&
+            [...Array(logRange.end).keys()].map((idx) => {
+              const logLine =
+                idx >= logRange.start
+                  ? logLines[idx - logRange.start]
+                  : undefined;
 
-            if (logLine) {
+              if (logLine) {
+                const line = logLines[idx - logRange.start];
+                if (filterSeverity && !filterSeverity.includes(line.severity)) {
+                  return (
+                    <div
+                      ref={idx == logRange.start + 10 ? startLogRef : undefined}
+                    />
+                  );
+                }
+
+                return (
+                  <LogLineData
+                    key={`${idx}-${logService}`}
+                    startRef={
+                      idx == logRange.start + 10 ? startLogRef : undefined
+                    }
+                    className={initialScroll ? "" : "invisible"}
+                    line={line}
+                    onClickSeverity={() => setFilterSeverity([line.severity])}
+                    onSelect={() => setSelectedLog(line)}
+                  />
+                );
+              }
+
               return (
-                <LogLineData
+                <div
                   key={`${idx}-${logService}`}
-                  startRef={
-                    idx == logRange.start + 10 ? startLogRef : undefined
-                  }
-                  className={initialScroll ? "" : "invisible"}
-                  offset={idx}
-                  line={logLines[idx - logRange.start]}
+                  className={isDesktop ? "h-12" : "h-16"}
                 />
               );
-            }
-
-            return <div key={`${idx}-${logService}`} className="h-12" />;
-          })}
-        {logLines.length > 0 && <div id="page-bottom" ref={endLogRef} />}
+            })}
+          {logLines.length > 0 && <div id="page-bottom" ref={endLogRef} />}
+        </div>
       </div>
     </div>
   );
@@ -383,70 +445,37 @@ type LogLineDataProps = {
   startRef?: (node: HTMLDivElement | null) => void;
   className: string;
   line: LogLine;
-  offset: number;
+  onClickSeverity: () => void;
+  onSelect: () => void;
 };
-function LogLineData({ startRef, className, line, offset }: LogLineDataProps) {
-  // long log message
-
-  const contentRef = useRef<HTMLDivElement | null>(null);
-  const [expanded, setExpanded] = useState(false);
-
-  const contentOverflows = useMemo(() => {
-    if (!contentRef.current) {
-      return false;
-    }
-
-    return contentRef.current.scrollWidth > contentRef.current.clientWidth;
-    // update on ref change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [contentRef.current]);
-
-  // severity coloring
-
-  const severityClassName = useMemo(() => {
-    switch (line.severity) {
-      case "info":
-        return "text-secondary-foreground rounded-md";
-      case "warning":
-        return "text-yellow-400 rounded-md";
-      case "error":
-        return "text-danger rounded-md";
-    }
-  }, [line]);
-
+function LogLineData({
+  startRef,
+  className,
+  line,
+  onClickSeverity,
+  onSelect,
+}: LogLineDataProps) {
   return (
     <div
       ref={startRef}
-      className={`py-2 grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 gap-2 ${offset % 2 == 0 ? "bg-secondary" : "bg-secondary/80"} border-t border-x ${className}`}
+      className={`w-full py-2 grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 gap-2 border-secondary border-t cursor-pointer hover:bg-muted ${className} *:text-sm`}
+      onClick={onSelect}
     >
-      <div
-        className={`h-full p-1 flex items-center gap-2 capitalize ${severityClassName}`}
-      >
-        {line.severity == "error" ? (
-          <GoAlertFill className="size-5" />
-        ) : (
-          <IoIosAlert className="size-5" />
-        )}
-        {line.severity}
+      <div className="h-full p-1 flex items-center gap-2">
+        <LogChip severity={line.severity} onClickSeverity={onClickSeverity} />
       </div>
       <div className="h-full col-span-2 sm:col-span-1 flex items-center">
         {line.dateStamp}
       </div>
-      <div className="h-full col-span-2 flex items-center overflow-hidden text-ellipsis">
-        {line.section}
+      <div className="size-full pr-2 col-span-2 flex items-center">
+        <div className="w-full overflow-hidden whitespace-nowrap text-ellipsis">
+          {line.section}
+        </div>
       </div>
-      <div className="w-full col-span-5 sm:col-span-4 md:col-span-8 flex justify-between items-center">
-        <div
-          ref={contentRef}
-          className={`w-[94%] flex items-center" ${expanded ? "" : "overflow-hidden whitespace-nowrap text-ellipsis"}`}
-        >
+      <div className="size-full pl-2 sm:pl-0 pr-2 col-span-5 sm:col-span-4 md:col-span-8 flex justify-between items-center">
+        <div className="w-full overflow-hidden whitespace-nowrap text-ellipsis">
           {line.content}
         </div>
-        {contentOverflows && (
-          <Button className="mr-4" onClick={() => setExpanded(!expanded)}>
-            ...
-          </Button>
-        )}
       </div>
     </div>
   );

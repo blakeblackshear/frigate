@@ -567,7 +567,7 @@ export function GeneralFilterContent({
           {allLabels.map((item) => (
             <div className="flex justify-between items-center">
               <Label
-                className="w-full mx-2 text-secondary-foreground capitalize cursor-pointer"
+                className="w-full mx-2 text-primary-foreground capitalize cursor-pointer"
                 htmlFor={item}
               >
                 {item.replaceAll("_", " ")}
@@ -645,7 +645,7 @@ function ShowMotionOnlyButton({
 
   return (
     <>
-      <div className="hidden md:inline-flex items-center justify-center whitespace-nowrap text-sm bg-secondary hover:bg-secondary/80 text-secondary-foreground h-9 rounded-md px-3 mx-1 cursor-pointer">
+      <div className="hidden md:inline-flex items-center justify-center whitespace-nowrap text-sm bg-secondary hover:bg-secondary/80 text-primary-foreground h-9 rounded-md px-3 mx-1 cursor-pointer">
         <Switch
           className="ml-1"
           id="collapse-motion"

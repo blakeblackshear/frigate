@@ -142,7 +142,7 @@ export default function GeneralSettings({ className }: GeneralSettings) {
                     className={
                       isDesktop
                         ? "cursor-pointer"
-                        : "p-2 flex items-center text-sm"
+                        : "w-full p-2 flex items-center text-sm"
                     }
                   >
                     <LuActivity className="mr-2 size-4" />
@@ -154,7 +154,7 @@ export default function GeneralSettings({ className }: GeneralSettings) {
                     className={
                       isDesktop
                         ? "cursor-pointer"
-                        : "p-2 flex items-center text-sm"
+                        : "w-full p-2 flex items-center text-sm"
                     }
                   >
                     <LuList className="mr-2 size-4" />
@@ -172,7 +172,7 @@ export default function GeneralSettings({ className }: GeneralSettings) {
                     className={
                       isDesktop
                         ? "cursor-pointer"
-                        : "p-2 flex items-center text-sm"
+                        : "w-full p-2 flex items-center text-sm"
                     }
                   >
                     <LuSettings className="mr-2 size-4" />
@@ -184,7 +184,7 @@ export default function GeneralSettings({ className }: GeneralSettings) {
                     className={
                       isDesktop
                         ? "cursor-pointer"
-                        : "p-2 flex items-center text-sm"
+                        : "w-full p-2 flex items-center text-sm"
                     }
                   >
                     <LuPenSquare className="mr-2 size-4" />
