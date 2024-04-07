@@ -41,7 +41,7 @@ AUDIO_MIN_CONFIDENCE = 0.5
 
 # DB Consts
 
-MAX_WAL_SIZE = 20  # MB
+MAX_WAL_SIZE = 10  # MB
 
 # Ffmpeg Presets
 
