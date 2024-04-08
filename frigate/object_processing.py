@@ -6,6 +6,7 @@ import os
 import queue
 import threading
 from collections import Counter, defaultdict
+from multiprocessing.synchronize import Event as MpEvent
 from statistics import median
 from typing import Callable
 
@@ -14,7 +15,7 @@ import numpy as np
 
 from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
 from frigate.comms.dispatcher import Dispatcher
-from frigate.comms.events_updater import EventUpdatePublisher
+from frigate.comms.events_updater import EventEndSubscriber, EventUpdatePublisher
 from frigate.config import (
     CameraConfig,
     FrigateConfig,
@@ -536,7 +537,9 @@ class CameraState:
                     ):
                         max_target_box = self.ptz_autotracker_thread.ptz_autotracker.tracked_object_metrics[
                             self.name
-                        ]["max_target_box"]
+                        ][
+                            "max_target_box"
+                        ]
                         side_length = max_target_box * (
                             max(
                                 self.camera_config.detect.width,
@@ -827,7 +830,6 @@ class TrackedObjectProcessor(threading.Thread):
         config: FrigateConfig,
         dispatcher: Dispatcher,
         tracked_objects_queue,
-        event_processed_queue,
         ptz_autotracker_thread,
         stop_event,
     ):
@@ -836,14 +838,14 @@ class TrackedObjectProcessor(threading.Thread):
         self.config = config
         self.dispatcher = dispatcher
         self.tracked_objects_queue = tracked_objects_queue
-        self.event_processed_queue = event_processed_queue
-        self.stop_event = stop_event
+        self.stop_event: MpEvent = stop_event
         self.camera_states: dict[str, CameraState] = {}
         self.frame_manager = SharedMemoryFrameManager()
         self.last_motion_detected: dict[str, float] = {}
         self.ptz_autotracker_thread = ptz_autotracker_thread
         self.detection_publisher = DetectionPublisher(DetectionTypeEnum.video)
         self.event_sender = EventUpdatePublisher()
+        self.event_end_subscriber = EventEndSubscriber()
 
         def start(camera, obj: TrackedObject, current_frame_time):
             self.event_sender.publish(
@@ -1215,10 +1217,17 @@ class TrackedObjectProcessor(threading.Thread):
                     )
 
             # cleanup event finished queue
-            while not self.event_processed_queue.empty():
-                event_id, camera = self.event_processed_queue.get()
+            while not self.stop_event.is_set():
+                update = self.event_end_subscriber.check_for_update(timeout=0.01)
+
+                if not update:
+                    break
+
+                event_id, camera = update
+                logger.error(f"got {camera} has finished {event_id}")
                 self.camera_states[camera].finished(event_id)
 
         self.detection_publisher.stop()
         self.event_sender.stop()
+        self.event_end_subscriber.stop()
         logger.info("Exiting object processor...")

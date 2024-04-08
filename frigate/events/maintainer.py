@@ -5,7 +5,7 @@ from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Dict
 
-from frigate.comms.events_updater import EventUpdateSubscriber
+from frigate.comms.events_updater import EventEndPublisher, EventUpdateSubscriber
 from frigate.config import EventsConfig, FrigateConfig
 from frigate.events.types import EventStateEnum, EventTypeEnum
 from frigate.models import Event
@@ -52,19 +52,18 @@ class EventProcessor(threading.Thread):
     def __init__(
         self,
         config: FrigateConfig,
-        event_processed_queue: Queue,
         timeline_queue: Queue,
         stop_event: MpEvent,
     ):
         threading.Thread.__init__(self)
         self.name = "event_processor"
         self.config = config
-        self.event_processed_queue = event_processed_queue
         self.timeline_queue = timeline_queue
         self.events_in_process: Dict[str, Event] = {}
         self.stop_event = stop_event
 
         self.event_receiver = EventUpdateSubscriber()
+        self.event_end_publisher = EventEndPublisher()
 
     def run(self) -> None:
         # set an end_time on events without an end_time on startup
@@ -118,6 +117,7 @@ class EventProcessor(threading.Thread):
             Event.end_time == None
         ).execute()
         self.event_receiver.stop()
+        self.event_end_publisher.stop()
         logger.info("Exiting event processor...")
 
     def handle_object_detection(
@@ -242,7 +242,7 @@ class EventProcessor(threading.Thread):
 
         if event_type == EventStateEnum.end:
             del self.events_in_process[event_data["id"]]
-            self.event_processed_queue.put((event_data["id"], camera))
+            self.event_end_publisher.publish((event_data["id"], camera))
 
     def handle_external_detection(
         self, event_type: EventStateEnum, event_data: Event
