@@ -72,6 +72,7 @@ export function PolygonCanvas({
     };
     videoElement.addEventListener("load", onload);
     return () => {
+      console.log("unloading");
       videoElement.removeEventListener("load", onload);
     };
   }, [videoElement]);
@@ -112,53 +113,53 @@ export function PolygonCanvas({
   };
 
   const handleMouseDown = (e: KonvaEventObject<MouseEvent>) => {
-    if (activePolygonIndex === null || !polygons) {
+    if (!activePolygonIndex || !polygons) {
       return;
     }
     console.log("mouse down polygons", polygons);
     console.log(activePolygonIndex);
 
-    if (!polygons[activePolygonIndex].points.length) {
-      // Start a new polygon
-      const stage = e.target.getStage()!;
-      const mousePos = getMousePos(stage);
-      setPolygons([
-        ...polygons,
-        {
-          name: "foo",
-          points: [mousePos],
-          isFinished: false,
-        },
-      ]);
-      setActivePolygonIndex(polygons.length);
-    } else {
-      const updatedPolygons = [...polygons];
-      const activePolygon = updatedPolygons[activePolygonIndex];
-      const stage = e.target.getStage()!;
-      const mousePos = getMousePos(stage);
+    // if (!polygons[activePolygonIndex].points.length) {
+    //   // Start a new polygon
+    //   const stage = e.target.getStage()!;
+    //   const mousePos = getMousePos(stage);
+    //   setPolygons([
+    //     ...polygons,
+    //     {
+    //       name: "foo",
+    //       points: [mousePos],
+    //       isFinished: false,
+    //     },
+    //   ]);
+    //   setActivePolygonIndex(polygons.length);
+    // } else {
+    const updatedPolygons = [...polygons];
+    const activePolygon = updatedPolygons[activePolygonIndex];
+    const stage = e.target.getStage()!;
+    const mousePos = getMousePos(stage);
 
-      if (
-        isMouseOverPoint(activePolygon, mousePos) &&
-        activePolygon.points.length >= 3
-      ) {
-        // Close the polygon
+    if (
+      activePolygon.points.length >= 3 &&
+      isMouseOverPoint(activePolygon, mousePos)
+    ) {
+      // Close the polygon
+      updatedPolygons[activePolygonIndex] = {
+        ...activePolygon,
+        isFinished: true,
+      };
+      setPolygons(updatedPolygons);
+      // setActivePolygonIndex(null);
+    } else {
+      if (!activePolygon.isFinished) {
+        // Add a new point to the active polygon
         updatedPolygons[activePolygonIndex] = {
           ...activePolygon,
-          isFinished: true,
+          points: [...activePolygon.points, mousePos],
         };
         setPolygons(updatedPolygons);
-        // setActivePolygonIndex(null);
-      } else {
-        if (!activePolygon.isFinished) {
-          // Add a new point to the active polygon
-          updatedPolygons[activePolygonIndex] = {
-            ...activePolygon,
-            points: [...activePolygon.points, mousePos],
-          };
-          setPolygons(updatedPolygons);
-        }
       }
     }
+    // }
   };
 
   const handleMouseMove = (e: KonvaEventObject<MouseEvent>) => {
@@ -177,16 +178,16 @@ export function PolygonCanvas({
   };
 
   const handleMouseOutStartPoint = (e: KonvaEventObject<MouseEvent>) => {
-    console.log("active index:", activePolygonIndex);
+    // console.log("active index:", activePolygonIndex);
     e.currentTarget.scale({ x: 1, y: 1 });
     if (activePolygonIndex !== null && polygons) {
       const activePolygon = polygons[activePolygonIndex];
-      console.log(activePolygon);
+      // console.log(activePolygon);
       if (
         (!activePolygon.isFinished && activePolygon.points.length >= 3) ||
         activePolygon.isFinished
       ) {
-        console.log(e.currentTarget);
+        // console.log(e.currentTarget);
         e.currentTarget.scale({ x: 1, y: 1 });
       }
     }
@@ -237,13 +238,14 @@ export function PolygonCanvas({
       setPolygons(updatedPolygons);
     }
   };
+  // console.log("rendering canvas", Date.now());
 
   return (
     <Stage
       ref={stageRef}
       width={width}
       height={height}
-      onMouseMove={handleMouseMove}
+      // onMouseMove={handleMouseMove}
       onMouseDown={handleMouseDown}
     >
       <Layer>
@@ -255,20 +257,19 @@ export function PolygonCanvas({
           width={width}
           height={height}
         />
-        {polygons &&
-          polygons.map((polygon, index) => (
-            <PolygonDrawer
-              key={index}
-              points={polygon.points}
-              flattenedPoints={flattenPoints(polygon.points)}
-              isActive={index === activePolygonIndex}
-              isFinished={polygon.isFinished}
-              handlePointDragMove={handlePointDragMove}
-              handleGroupDragEnd={handleGroupDragEnd}
-              handleMouseOverStartPoint={handleMouseOverStartPoint}
-              handleMouseOutStartPoint={handleMouseOutStartPoint}
-            />
-          ))}
+        {polygons?.map((polygon, index) => (
+          <PolygonDrawer
+            key={index}
+            points={polygon.points}
+            flattenedPoints={flattenPoints(polygon.points)}
+            isActive={index === activePolygonIndex}
+            isFinished={polygon.isFinished}
+            handlePointDragMove={handlePointDragMove}
+            handleGroupDragEnd={handleGroupDragEnd}
+            handleMouseOverStartPoint={handleMouseOverStartPoint}
+            handleMouseOutStartPoint={handleMouseOutStartPoint}
+          />
+        ))}
       </Layer>
     </Stage>
   );

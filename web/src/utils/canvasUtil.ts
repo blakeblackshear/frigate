@@ -58,7 +58,7 @@ export const interpolatePoints = (
   for (const [x, y] of points) {
     const newX = (x * newWidth) / width;
     const newY = (y * newHeight) / height;
-    newPoints.push([Math.floor(newX), Math.floor(newY)]);
+    newPoints.push([newX, newY]);
   }
 
   return newPoints;

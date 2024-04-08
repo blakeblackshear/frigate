@@ -8,6 +8,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
@@ -21,6 +29,7 @@ import { isDesktop } from "react-device-detect";
 import PolygonControls from "./PolygonControls";
 import { Skeleton } from "../ui/skeleton";
 import { useResizeObserver } from "@/hooks/resize-observer";
+import { LuPencil } from "react-icons/lu";
 
 const parseCoordinates = (coordinatesString: string) => {
   const coordinates = coordinatesString.split(",");
@@ -97,26 +106,30 @@ export default function SettingsZones() {
     }
   }, [cameraAspect]);
 
-  const [{ width: containerWidth, height: containerHeight }] =
-    useResizeObserver(containerRef);
+  // const [{ width: containerWidth, height: containerHeight }] =
+  //   useResizeObserver(containerRef);
+  const containerWidth = containerRef.current?.clientWidth;
+  const containerHeight = containerRef.current?.clientHeight;
 
   // Add scrollbar width (when visible) to the available observer width to eliminate screen juddering.
   // https://github.com/blakeblackshear/frigate/issues/1657
   let scrollBarWidth = 0;
-  if (window.innerWidth && document.body.offsetWidth) {
-    scrollBarWidth = window.innerWidth - document.body.offsetWidth;
-  }
-  const availableWidth = scrollBarWidth
-    ? containerWidth + scrollBarWidth
-    : containerWidth;
+  // if (window.innerWidth && document.body.offsetWidth) {
+  //   scrollBarWidth = window.innerWidth - document.body.offsetWidth;
+  // }
+  // const availableWidth = scrollBarWidth
+  //   ? containerWidth + scrollBarWidth
+  //   : containerWidth;
+
+  const availableWidth = containerWidth;
 
   const { width, height } = cameraConfig
     ? cameraConfig.detect
     : { width: 1, height: 1 };
   const aspectRatio = width / height;
 
-  const stretch = true;
-  const fitAspect = 1.8;
+  const stretch = false;
+  const fitAspect = 1;
   const scaledHeight = useMemo(() => {
     const scaledHeight =
       aspectRatio < (fitAspect ?? 0)
@@ -158,7 +171,9 @@ export default function SettingsZones() {
         })),
       );
     }
-  }, [cameraConfig, containerRef, scaledWidth, scaledHeight]);
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cameraConfig, containerRef]);
 
   // const image = useMemo(() => {
   //   if (cameraConfig && containerRef && containerRef.current) {
@@ -193,7 +208,7 @@ export default function SettingsZones() {
 
   return (
     <>
-      <Heading as="h2">Motion Detection Tuner</Heading>
+      <Heading as="h2">Zones</Heading>
       <div className="flex items-center space-x-2 mt-5">
         <Select value={selectedCamera} onValueChange={setSelectedCamera}>
           <SelectTrigger className="w-[180px]">
@@ -238,6 +253,48 @@ export default function SettingsZones() {
             </div>
           </div>
           <div className="w-[30%]">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[100px]">Name</TableHead>
+                  <TableHead className="max-w-[200px]">Coordinates</TableHead>
+                  <TableHead>Edit</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {zonePolygons.map((polygon, index) => (
+                  <TableRow key={index}>
+                    <TableCell className="font-medium">
+                      {polygon.name}
+                    </TableCell>
+                    <TableCell className="max-w-[200px] text-wrap">
+                      <code>
+                        {JSON.stringify(
+                          interpolatePoints(
+                            polygon.points,
+                            scaledWidth,
+                            scaledHeight,
+                            cameraConfig.detect.width,
+                            cameraConfig.detect.height,
+                          ),
+                          null,
+                          0,
+                        )}
+                      </code>
+                    </TableCell>
+                    <TableCell>
+                      {" "}
+                      <div
+                        className="cursor-pointer"
+                        onClick={() => setActivePolygonIndex(index)}
+                      >
+                        <LuPencil className="size-4 text-white" />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
             <PolygonControls
               camera={cameraConfig.name}
               width={scaledWidth}
@@ -256,8 +313,8 @@ export default function SettingsZones() {
                         polygon.points,
                         scaledWidth,
                         scaledHeight,
-                        cameraConfig.detect.width,
-                        cameraConfig.detect.height,
+                        1,
+                        1,
                       ),
                     ),
                   null,
