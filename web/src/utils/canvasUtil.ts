@@ -1,4 +1,6 @@
-export const getAveragePoint = (points: number[]): number => {
+import { Vector2d } from "konva/lib/types";
+
+export const getAveragePoint = (points: number[]): Vector2d => {
   let totalX = 0;
   let totalY = 0;
   for (let i = 0; i < points.length; i += 2) {
@@ -22,8 +24,8 @@ export const dragBoundFunc = (
   stageWidth: number,
   stageHeight: number,
   vertexRadius: number,
-  pos: Point,
-): Point => {
+  pos: Vector2d,
+): Vector2d => {
   let x = pos.x;
   let y = pos.y;
   if (pos.x + vertexRadius > stageWidth) x = stageWidth;
@@ -42,4 +44,22 @@ export const minMax = (points: number[]): [number, number] => {
     },
     [undefined, undefined],
   ) as [number, number];
+};
+
+export const interpolatePoints = (
+  points: number[][],
+  width: number,
+  height: number,
+  newWidth: number,
+  newHeight: number,
+): number[][] => {
+  const newPoints: number[][] = [];
+
+  for (const [x, y] of points) {
+    const newX = (x * newWidth) / width;
+    const newY = (y * newHeight) / height;
+    newPoints.push([Math.floor(newX), Math.floor(newY)]);
+  }
+
+  return newPoints;
 };

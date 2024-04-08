@@ -47,7 +47,7 @@ function General() {
 export default function Settings() {
   return (
     <>
-      <Tabs defaultValue="account" className="w-auto">
+      <Tabs defaultValue="general" className="w-auto">
         <TabsList>
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="objects">Objects</TabsTrigger>

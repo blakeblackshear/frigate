@@ -8,10 +8,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import DebugCameraImage from "@/components/camera/DebugCameraImage";
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import AutoUpdatingCameraImage from "@/components/camera/AutoUpdatingCameraImage";
 import { useCallback, useMemo, useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
@@ -105,7 +105,11 @@ export default function MotionTuner() {
           </SelectContent>
         </Select>
       </div>
-      <DebugCameraImage cameraConfig={cameraConfig} className="w-[50%]" />
+      <AutoUpdatingCameraImage
+        camera={cameraConfig.name}
+        searchParams={new URLSearchParams([["motion", "1"]])}
+        className="w-[50%]"
+      />
       <div className="flex flex-col justify-evenly w-full">
         <div className="flex flex-row mb-5">
           <Slider
