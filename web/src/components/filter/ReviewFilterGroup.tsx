@@ -422,9 +422,17 @@ function CalendarFilterButton({
   );
 
   const trigger = (
-    <Button size="sm" className="flex items-center gap-2" variant="secondary">
-      <FaCalendarAlt className="text-secondary-foreground" />
-      <div className="hidden md:block text-primary-foreground">
+    <Button
+      size="sm"
+      className={`flex items-center gap-2 ${day == undefined ? "bg-secondary hover:bg-secondary/80" : "bg-selected hover:bg-selected"}`}
+      variant="secondary"
+    >
+      <FaCalendarAlt
+        className={`${day == undefined ? "text-secondary-foreground" : "text-primary dark:text-primary-foreground"}`}
+      />
+      <div
+        className={`hidden md:block ${day == undefined ? "text-primary-foreground" : "text-primary dark:text-primary-foreground"}`}
+      >
         {day == undefined ? "Last 24 Hours" : selectedDate}
       </div>
     </Button>
