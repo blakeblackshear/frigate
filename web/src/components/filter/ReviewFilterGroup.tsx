@@ -229,7 +229,9 @@ function CamerasFilterButton({
       <FaVideo
         className={`${selectedCameras?.length ? "text-primary dark:text-primary-foreground" : "text-secondary-foreground"}`}
       />
-      <div className="hidden md:block text-primary-foreground">
+      <div
+        className={`hidden md:block ${selectedCameras?.length ? "text-primary dark:text-primary-foreground" : "text-primary-foreground"}`}
+      >
         {selectedCameras == undefined
           ? "All Cameras"
           : `${selectedCameras.includes("birdseye") ? selectedCameras.length - 1 : selectedCameras.length} Camera${selectedCameras.length !== 1 ? "s" : ""}`}
@@ -391,13 +393,13 @@ function ShowReviewFilter({
       </div>
 
       <Button
-        className={`block md:hidden ${showReviewedSwitch == 0 ? "bg-selected hover:bg-selected" : "bg-secondary hover:bg-secondary/80"}`}
+        className={`block md:hidden duration-0 ${showReviewedSwitch == 1 ? "bg-selected hover:bg-selected" : "bg-secondary hover:bg-secondary/80"}`}
         size="sm"
         variant="secondary"
         onClick={() => setShowReviewedSwitch(showReviewedSwitch == 0 ? 1 : 0)}
       >
         <FaCheckCircle
-          className={`${showReviewedSwitch == 0 ? "fill-primary-foreground" : "text-muted-foreground"}`}
+          className={`${showReviewedSwitch == 1 ? "fill-primary dark:fill-primary-foreground" : "text-muted-foreground"}`}
         />
       </Button>
     </>
@@ -673,11 +675,11 @@ function ShowMotionOnlyButton({
         <Button
           size="sm"
           variant="secondary"
-          className={`${motionOnlyButton ? "bg-selected hover:bg-selected" : "bg-secondary hover:bg-secondary/80"}`}
+          className={`duration-0 ${motionOnlyButton ? "bg-selected hover:bg-selected" : "bg-secondary hover:bg-secondary/80"}`}
           onClick={() => setMotionOnlyButton(!motionOnlyButton)}
         >
           <FaRunning
-            className={`${motionOnlyButton ? "fill-primary-foreground" : "text-muted-foreground"}`}
+            className={`${motionOnlyButton ? "fill-primary dark:fill-primary-foreground" : "text-muted-foreground"}`}
           />
         </Button>
       </div>
