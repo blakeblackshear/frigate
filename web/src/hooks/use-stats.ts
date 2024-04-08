@@ -18,6 +18,12 @@ export default function useStats(stats: FrigateStats | undefined) {
       return problems;
     }
 
+    // if frigate has just started
+    // don't look for issues
+    if (stats.service.uptime < 120) {
+      return problems;
+    }
+
     // check detectors for high inference speeds
     Object.entries(stats["detectors"]).forEach(([key, det]) => {
       if (det["inference_speed"] > InferenceThreshold.error) {
