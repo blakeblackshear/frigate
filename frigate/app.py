@@ -200,9 +200,6 @@ class FrigateApp:
             logging.getLogger("ws4py").setLevel("ERROR")
 
     def init_queues(self) -> None:
-        # Queues for clip processing
-        self.event_processed_queue: Queue = mp.Queue()
-
         # Queue for cameras to push tracked objects to
         self.detected_frames_queue: Queue = mp.Queue(
             maxsize=sum(camera.enabled for camera in self.config.cameras.values()) * 2
@@ -420,7 +417,6 @@ class FrigateApp:
             self.config,
             self.dispatcher,
             self.detected_frames_queue,
-            self.event_processed_queue,
             self.ptz_autotracker_thread,
             self.stop_event,
         )
@@ -517,7 +513,6 @@ class FrigateApp:
     def start_event_processor(self) -> None:
         self.event_processor = EventProcessor(
             self.config,
-            self.event_processed_queue,
             self.timeline_queue,
             self.stop_event,
         )
@@ -704,7 +699,6 @@ class FrigateApp:
             shm.unlink()
 
         for queue in [
-            self.event_processed_queue,
             self.detected_frames_queue,
             self.log_queue,
         ]:
