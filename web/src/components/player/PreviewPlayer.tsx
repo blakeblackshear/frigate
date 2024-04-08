@@ -235,7 +235,7 @@ function PreviewVideoPlayer({
 
   return (
     <div
-      className={`relative rounded-2xl bg-black overflow-hidden ${onClick ? "cursor-pointer" : ""} ${className ?? ""}`}
+      className={`relative rounded-2xl w-full flex justify-center bg-black overflow-hidden ${onClick ? "cursor-pointer" : ""} ${className ?? ""}`}
       onClick={onClick}
     >
       <img
@@ -464,7 +464,7 @@ function PreviewFramesPlayer({
 
   return (
     <div
-      className={`relative ${className ?? ""} ${onClick ? "cursor-pointer" : ""}`}
+      className={`relative w-full flex justify-center ${className ?? ""} ${onClick ? "cursor-pointer" : ""}`}
       onClick={onClick}
     >
       <img
