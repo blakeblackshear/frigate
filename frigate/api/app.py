@@ -154,6 +154,11 @@ def config():
         for cmd in camera_dict["ffmpeg_cmds"]:
             cmd["cmd"] = clean_camera_user_pass(" ".join(cmd["cmd"]))
 
+        # ensure that zones are relative
+        for zone in camera_dict.get("zones", []):
+            
+
+
     config["plus"] = {"enabled": current_app.plus_api.is_active()}
 
     for detector, detector_config in config["detectors"].items():

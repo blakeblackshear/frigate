@@ -360,14 +360,17 @@ def yuv_crop_and_resize(frame, region, height=None):
     # copy u2
     yuv_cropped_frame[
         size + uv_channel_y_offset : size + uv_channel_y_offset + uv_crop_height,
-        size // 2 + uv_channel_x_offset : size // 2
+        size // 2
+        + uv_channel_x_offset : size // 2
         + uv_channel_x_offset
         + uv_crop_width,
     ] = frame[u2[1] : u2[3], u2[0] : u2[2]]
 
     # copy v1
     yuv_cropped_frame[
-        size + size // 4 + uv_channel_y_offset : size
+        size
+        + size // 4
+        + uv_channel_y_offset : size
         + size // 4
         + uv_channel_y_offset
         + uv_crop_height,
@@ -376,11 +379,14 @@ def yuv_crop_and_resize(frame, region, height=None):
 
     # copy v2
     yuv_cropped_frame[
-        size + size // 4 + uv_channel_y_offset : size
+        size
+        + size // 4
+        + uv_channel_y_offset : size
         + size // 4
         + uv_channel_y_offset
         + uv_crop_height,
-        size // 2 + uv_channel_x_offset : size // 2
+        size // 2
+        + uv_channel_x_offset : size // 2
         + uv_channel_x_offset
         + uv_crop_width,
     ] = frame[v2[1] : v2[3], v2[0] : v2[2]]
@@ -727,9 +733,26 @@ def create_mask(frame_shape, mask):
     return mask_img
 
 
-def add_mask(mask, mask_img):
+def add_mask(mask: str, mask_img: np.ndarray):
     points = mask.split(",")
+
+    # masks and zones are saved as relative coordinates
+    # we know if any points are > 1 then it is using the
+    # old native resolution coordinates
+    explicit = any(x > "1.0" for x in points)
+
     contour = np.array(
-        [[int(points[i]), int(points[i + 1])] for i in range(0, len(points), 2)]
+        [
+            (
+                [int(points[i]), int(points[i + 1])]
+                if explicit
+                else [
+                    int(float(points[i]) * mask_img.shape[1]),
+                    int(float(points[i + 1]) * mask_img.shape[0]),
+                ]
+            )
+            for i in range(0, len(points), 2)
+        ]
     )
+    logger.error(f"the mask is {contour} from {mask} and explicit {explicit}")
     cv2.fillPoly(mask_img, pts=[contour], color=(0))

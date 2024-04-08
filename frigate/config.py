@@ -539,16 +539,41 @@ class ZoneConfig(BaseModel):
         super().__init__(**config)
 
         self._color = config.get("color", (0, 0, 0))
-        coordinates = config["coordinates"]
+        self._contour = config.get("contour", np.array([]))
+
+    def generate_contour(self, frame_shape: tuple[int, int]):
+        coordinates = self.coordinates
 
         if isinstance(coordinates, list):
+            explicit = any(p.split(",")[0] > "1.0" for p in coordinates)
             self._contour = np.array(
-                [[int(p.split(",")[0]), int(p.split(",")[1])] for p in coordinates]
+                [
+                    (
+                        [int(p.split(",")[0]), int(p.split(",")[1])]
+                        if explicit
+                        else [
+                            int(float(p.split(",")[0]) * frame_shape[1]),
+                            int(float(p.split(",")[1]) * frame_shape[0]),
+                        ]
+                    )
+                    for p in coordinates
+                ]
             )
         elif isinstance(coordinates, str):
             points = coordinates.split(",")
+            explicit = any(p > "1.0" for p in points)
             self._contour = np.array(
-                [[int(points[i]), int(points[i + 1])] for i in range(0, len(points), 2)]
+                [
+                    (
+                        [int(points[i]), int(points[i + 1])]
+                        if explicit
+                        else [
+                            int(float(points[i]) * frame_shape[1]),
+                            int(float(points[i + 1]) * frame_shape[0]),
+                        ]
+                    )
+                    for i in range(0, len(points), 2)
+                ]
             )
         else:
             self._contour = np.array([])
@@ -1345,6 +1370,11 @@ class FrigateConfig(FrigateBaseModel):
                     **camera_config.motion.model_dump(exclude_unset=True),
                 )
             camera_config.motion.enabled_in_config = camera_config.motion.enabled
+
+            # generate zone contours
+            if len(camera_config.zones) > 0:
+                for zone in camera_config.zones.values():
+                    zone.generate_contour(camera_config.frame_shape)
 
             # Set live view stream if none is set
             if not camera_config.live.stream_name:
