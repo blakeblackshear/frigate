@@ -75,6 +75,9 @@ export default function ReviewFilterGroup({
     const cameras = filter?.cameras || Object.keys(config.cameras);
 
     cameras.forEach((camera) => {
+      if (camera == "birdseye") {
+        return;
+      }
       const cameraConfig = config.cameras[camera];
       cameraConfig.objects.track.forEach((label) => {
         labels.add(label);
@@ -219,24 +222,30 @@ function CamerasFilterButton({
 
   const trigger = (
     <Button
-      className="flex items-center gap-2 capitalize"
+      className={`flex items-center gap-2 capitalize ${selectedCameras?.length ? "bg-selected hover:bg-selected" : ""}`}
       variant="secondary"
       size="sm"
     >
-      <FaVideo className="text-secondary-foreground" />
+      <FaVideo
+        className={`${selectedCameras?.length ? "text-primary dark:text-primary-foreground" : "text-secondary-foreground"}`}
+      />
       <div className="hidden md:block text-primary-foreground">
         {selectedCameras == undefined
           ? "All Cameras"
-          : `${selectedCameras.length} Cameras`}
+          : `${selectedCameras.includes("birdseye") ? selectedCameras.length - 1 : selectedCameras.length} Camera${selectedCameras.length !== 1 ? "s" : ""}`}
       </div>
     </Button>
   );
   const content = (
     <>
-      <DropdownMenuLabel className="flex justify-center">
-        Filter Cameras
-      </DropdownMenuLabel>
-      <DropdownMenuSeparator />
+      {isMobile && (
+        <>
+          <DropdownMenuLabel className="flex justify-center">
+            Cameras
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+        </>
+      )}
       <div className="h-auto overflow-y-auto overflow-x-hidden">
         <FilterCheckBox
           isChecked={currentCameras == undefined}
@@ -382,13 +391,13 @@ function ShowReviewFilter({
       </div>
 
       <Button
-        className="block md:hidden"
+        className={`block md:hidden ${showReviewedSwitch == 0 ? "bg-selected hover:bg-selected" : "bg-secondary hover:bg-secondary/80"}`}
         size="sm"
         variant="secondary"
         onClick={() => setShowReviewedSwitch(showReviewedSwitch == 0 ? 1 : 0)}
       >
         <FaCheckCircle
-          className={`${showReviewedSwitch == 1 ? "text-selected" : "text-muted-foreground"}`}
+          className={`${showReviewedSwitch == 0 ? "fill-primary-foreground" : "text-muted-foreground"}`}
         />
       </Button>
     </>
@@ -664,10 +673,11 @@ function ShowMotionOnlyButton({
         <Button
           size="sm"
           variant="secondary"
+          className={`${motionOnlyButton ? "bg-selected hover:bg-selected" : "bg-secondary hover:bg-secondary/80"}`}
           onClick={() => setMotionOnlyButton(!motionOnlyButton)}
         >
           <FaRunning
-            className={`${motionOnlyButton ? "text-selected" : "text-muted-foreground"}`}
+            className={`${motionOnlyButton ? "fill-primary-foreground" : "text-muted-foreground"}`}
           />
         </Button>
       </div>

@@ -38,6 +38,7 @@ import MobileCameraDrawer from "@/components/overlay/MobileCameraDrawer";
 import MobileTimelineDrawer from "@/components/overlay/MobileTimelineDrawer";
 import MobileReviewSettingsDrawer from "@/components/overlay/MobileReviewSettingsDrawer";
 import Logo from "@/components/Logo";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const SEGMENT_DURATION = 30;
 
@@ -503,26 +504,30 @@ function Timeline({
       <div className="absolute top-0 inset-x-0 z-20 w-full h-[30px] bg-gradient-to-b from-secondary to-transparent pointer-events-none"></div>
       <div className="absolute bottom-0 inset-x-0 z-20 w-full h-[30px] bg-gradient-to-t from-secondary to-transparent pointer-events-none"></div>
       {timelineType == "timeline" ? (
-        <MotionReviewTimeline
-          segmentDuration={30}
-          timestampSpread={15}
-          timelineStart={timeRange.before}
-          timelineEnd={timeRange.after}
-          showHandlebar={exportRange == undefined}
-          showExportHandles={exportRange != undefined}
-          exportStartTime={exportRange?.after}
-          exportEndTime={exportRange?.before}
-          setExportStartTime={setExportStartTime}
-          setExportEndTime={setExportEndTime}
-          handlebarTime={currentTime}
-          setHandlebarTime={setCurrentTime}
-          onlyInitialHandlebarScroll={true}
-          events={mainCameraReviewItems}
-          motion_events={motionData ?? []}
-          severityType="significant_motion"
-          contentRef={contentRef}
-          onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
-        />
+        motionData ? (
+          <MotionReviewTimeline
+            segmentDuration={30}
+            timestampSpread={15}
+            timelineStart={timeRange.before}
+            timelineEnd={timeRange.after}
+            showHandlebar={exportRange == undefined}
+            showExportHandles={exportRange != undefined}
+            exportStartTime={exportRange?.after}
+            exportEndTime={exportRange?.before}
+            setExportStartTime={setExportStartTime}
+            setExportEndTime={setExportEndTime}
+            handlebarTime={currentTime}
+            setHandlebarTime={setCurrentTime}
+            onlyInitialHandlebarScroll={true}
+            events={mainCameraReviewItems}
+            motion_events={motionData ?? []}
+            severityType="significant_motion"
+            contentRef={contentRef}
+            onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
+          />
+        ) : (
+          <Skeleton className="size-full" />
+        )
       ) : (
         <div
           className={`h-full grid grid-cols-1 gap-4 overflow-auto p-4 bg-secondary ${isDesktop ? "" : "sm:grid-cols-2"}`}

@@ -32,7 +32,7 @@ export default function Statusbar() {
   const { potentialProblems } = useStats(stats);
 
   return (
-    <div className="absolute left-0 bottom-0 right-0 w-full h-8 flex justify-between items-center px-4 bg-primary z-10 text-secondary-foreground border-t border-secondary-highlight">
+    <div className="absolute left-0 bottom-0 right-0 w-full h-8 flex justify-between items-center px-4 bg-primary z-10 dark:text-secondary-foreground border-t border-secondary-highlight">
       <div className="h-full flex items-center gap-2">
         {cpuPercent && (
           <div className="flex items-center text-sm gap-2">

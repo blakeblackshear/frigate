@@ -27,8 +27,8 @@
     --secondary: hsl(0, 0%, 96%);
     --secondary: 0 0% 96%;
 
-    --secondary-foreground: hsl(0, 0%, 83%);
-    --secondary-foreground: 0 0% 83%;
+    --secondary-foreground: hsl(0, 0%, 70%);
+    --secondary-foreground: 0 0% 70%;
 
     --secondary-highlight: hsl(0, 0%, 94%);
     --secondary-highlight: 0 0% 94%;
@@ -64,7 +64,7 @@
     --input: 0 0% 85%;
 
     --ring: hsla(0 0% 25% 0%);
-    --ring: 0 0% 25% 0%
+    --ring: 0 0% 25% 0%;
 
     --selected: hsl(228, 89%, 63%);
     --selected: 228 89% 63%;
@@ -155,7 +155,7 @@
     --input: 0 0% 25%;
 
     --ring: hsla(0 0% 25% 0%);
-    --ring: 0 0% 25% 0%
+    --ring: 0 0% 25% 0%;
 
     --selected: hsl(228, 89%, 63%);
     --selected: 228 89% 63%;
