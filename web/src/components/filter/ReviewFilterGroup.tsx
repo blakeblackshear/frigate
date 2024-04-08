@@ -222,12 +222,12 @@ function CamerasFilterButton({
 
   const trigger = (
     <Button
-      className={`flex items-center gap-2 capitalize ${selectedCameras && selectedCameras.length ? "bg-selected hover:bg-selected" : ""}`}
+      className={`flex items-center gap-2 capitalize ${selectedCameras?.length ? "bg-selected hover:bg-selected" : ""}`}
       variant="secondary"
       size="sm"
     >
       <FaVideo
-        className={`${selectedCameras && selectedCameras.length ? "text-primary dark:text-primary-foreground" : "text-secondary-foreground"}`}
+        className={`${selectedCameras?.length ? "text-primary dark:text-primary-foreground" : "text-secondary-foreground"}`}
       />
       <div className="hidden md:block text-primary-foreground">
         {selectedCameras == undefined
