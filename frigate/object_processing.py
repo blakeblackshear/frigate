@@ -1224,7 +1224,6 @@ class TrackedObjectProcessor(threading.Thread):
                     break
 
                 event_id, camera = update
-                logger.error(f"got {camera} has finished {event_id}")
                 self.camera_states[camera].finished(event_id)
 
         self.detection_publisher.stop()
