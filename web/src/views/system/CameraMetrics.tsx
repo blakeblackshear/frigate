@@ -19,7 +19,7 @@ export default function CameraMetrics({
   // stats
 
   const { data: initialStats } = useSWR<FrigateStats[]>(
-    ["stats/history", { keys: "cpu_usages,cameras,service" }],
+    ["stats/history", { keys: "cpu_usages,cameras,detection_fps,service" }],
     {
       revalidateOnFocus: false,
     },
@@ -56,6 +56,44 @@ export default function CameraMetrics({
   );
 
   // stats data
+
+  const overallFpsSeries = useMemo(() => {
+    if (!statsHistory) {
+      return [];
+    }
+
+    const series: {
+      [key: string]: { name: string; data: { x: number; y: number }[] };
+    } = {};
+
+    series["overall_dps"] = { name: "overall detections per second", data: [] };
+    series["overall_skipped_dps"] = {
+      name: "overall skipped detections per second",
+      data: [],
+    };
+
+    statsHistory.forEach((stats, statsIdx) => {
+      if (!stats) {
+        return;
+      }
+
+      series["overall_dps"].data.push({
+        x: statsIdx,
+        y: stats.detection_fps,
+      });
+
+      let skipped = 0;
+      Object.values(stats.cameras).forEach(
+        (camStat) => (skipped += camStat.skipped_fps),
+      );
+
+      series["overall_skipped_dps"].data.push({
+        x: statsIdx,
+        y: skipped,
+      });
+    });
+    return Object.values(series);
+  }, [statsHistory]);
 
   const cameraCpuSeries = useMemo(() => {
     if (!statsHistory || statsHistory.length == 0) {
@@ -147,19 +185,36 @@ export default function CameraMetrics({
   }, [statsHistory]);
 
   return (
-    <div className="size-full mt-4 flex flex-col overflow-y-auto">
+    <div className="size-full mt-4 flex flex-col gap-3 overflow-y-auto">
+      <div className="text-muted-foreground text-sm font-medium">Overview</div>
+      <div className="grid grid-cols-1 md:grid-cols-3">
+        {statsHistory.length != 0 ? (
+          <div className="p-2.5 bg-background_alt rounded-2xl">
+            <div className="mb-5">DPS</div>
+            <CameraLineGraph
+              graphId="overall-stats"
+              unit=" DPS"
+              dataLabels={["detect", "skipped"]}
+              updateTimes={updateTimes}
+              data={overallFpsSeries}
+            />
+          </div>
+        ) : (
+          <Skeleton className="w-full h-32" />
+        )}
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {config &&
           Object.values(config.cameras).map((camera) => {
             if (camera.enabled) {
               return (
-                <div className="w-full flex flex-col">
-                  <div className="mb-6 capitalize">
+                <div className="w-full flex flex-col gap-3">
+                  <div className="capitalize text-muted-foreground text-sm font-medium">
                     {camera.name.replaceAll("_", " ")}
                   </div>
                   <div key={camera.name} className="grid sm:grid-cols-2 gap-2">
                     {Object.keys(cameraCpuSeries).includes(camera.name) ? (
-                      <div className="p-2.5 bg-background_alt rounded-2xl flex-col">
+                      <div className="p-2.5 bg-background_alt rounded-2xl">
                         <div className="mb-5">CPU</div>
                         <CameraLineGraph
                           graphId={`${camera.name}-cpu`}
@@ -175,7 +230,7 @@ export default function CameraMetrics({
                       <Skeleton className="size-full aspect-video" />
                     )}
                     {Object.keys(cameraFpsSeries).includes(camera.name) ? (
-                      <div className="p-2.5 bg-background_alt rounded-2xl flex-col">
+                      <div className="p-2.5 bg-background_alt rounded-2xl">
                         <div className="mb-5">DPS</div>
                         <CameraLineGraph
                           graphId={`${camera.name}-dps`}

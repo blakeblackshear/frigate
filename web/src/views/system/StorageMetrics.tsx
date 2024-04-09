@@ -43,9 +43,7 @@ export default function StorageMetrics({
 
   return (
     <div className="size-full mt-4 flex flex-col overflow-y-auto">
-      <div className="text-muted-foreground text-sm font-medium">
-        General Storage
-      </div>
+      <div className="text-muted-foreground text-sm font-medium">Overview</div>
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
         <div className="p-2.5 bg-background_alt rounded-2xl flex-col">
           <div className="mb-5">Recordings</div>

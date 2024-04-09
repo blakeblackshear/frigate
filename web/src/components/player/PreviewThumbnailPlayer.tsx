@@ -13,13 +13,14 @@ import { getIconForLabel } from "@/utils/iconUtil";
 import TimeAgo from "../dynamic/TimeAgo";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { isFirefox, isMobile, isSafari } from "react-device-detect";
+import { isFirefox, isIOS, isMobile, isSafari } from "react-device-detect";
 import Chip from "@/components/indicators/Chip";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import useImageLoaded from "@/hooks/use-image-loaded";
 import { useSwipeable } from "react-swipeable";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import ImageLoadingIndicator from "../indicators/ImageLoadingIndicator";
+import useContextMenu from "@/hooks/use-contextmenu";
 
 type PreviewPlayerProps = {
   review: ReviewSegment;
@@ -72,6 +73,10 @@ export default function PreviewThumbnailPlayer({
     review.has_been_reviewed = true;
     setReviewed(review);
   }, [review, setReviewed]);
+
+  useContextMenu(imgRef, () => {
+    onClick(review, true);
+  });
 
   // playback
 
@@ -170,10 +175,6 @@ export default function PreviewThumbnailPlayer({
       className="relative size-full cursor-pointer"
       onMouseOver={isMobile ? undefined : () => setIsHovered(true)}
       onMouseLeave={isMobile ? undefined : () => setIsHovered(false)}
-      onContextMenu={(e) => {
-        e.preventDefault();
-        onClick(review, true);
-      }}
       onClick={handleOnClick}
       {...swipeHandlers}
     >
@@ -196,9 +197,18 @@ export default function PreviewThumbnailPlayer({
       <div className={`${imgLoaded ? "visible" : "invisible"}`}>
         <img
           ref={imgRef}
-          className={`size-full transition-opacity ${
+          className={`size-full transition-opacity select-none ${
             playingBack ? "opacity-0" : "opacity-100"
           }`}
+          style={
+            isIOS
+              ? {
+                  WebkitUserSelect: "none",
+                  WebkitTouchCallout: "none",
+                }
+              : undefined
+          }
+          draggable={false}
           src={`${apiHost}${review.thumb_path.replace("/media/frigate/", "")}`}
           loading={isSafari ? "eager" : "lazy"}
           onLoad={() => {
