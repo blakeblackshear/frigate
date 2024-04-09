@@ -32,28 +32,24 @@ export default function LogInfoDialog({
         {logLine && (
           <div className="size-full flex flex-col gap-5">
             <div className="w-min flex flex-col gap-1.5">
-              <div className="text-sm text-primary-foreground/40">Type</div>
+              <div className="text-sm text-primary/40">Type</div>
               <LogChip severity={logLine.severity} />
             </div>
             <div className="flex flex-col gap-1.5">
-              <div className="text-sm text-primary-foreground/40">
-                Timestamp
-              </div>
+              <div className="text-sm text-primary/40">Timestamp</div>
               <div className="text-sm">{logLine.dateStamp}</div>
             </div>
             <div className="flex flex-col gap-1.5">
-              <div className="text-sm text-primary-foreground/40">Tag</div>
+              <div className="text-sm text-primary/40">Tag</div>
               <div className="text-sm">{logLine.section}</div>
             </div>
             <div className="flex flex-col gap-1.5">
-              <div className="text-sm text-primary-foreground/40">Message</div>
+              <div className="text-sm text-primary/40">Message</div>
               <div className="text-sm">{logLine.content}</div>
             </div>
             {helpfulLinks.length > 0 && (
               <div className="flex flex-col gap-1.5">
-                <div className="text-sm text-primary-foreground/40">
-                  Helpful Links
-                </div>
+                <div className="text-sm text-primary/40">Helpful Links</div>
                 {helpfulLinks.map((tip) => (
                   <Link to={tip.link} target="_blank" rel="noopener noreferrer">
                     <div className="text-sm text-selected hover:underline">

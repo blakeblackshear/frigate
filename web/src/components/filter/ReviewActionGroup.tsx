@@ -40,7 +40,7 @@ export default function ReviewActionGroup({
         <div className="p-1">{`${selectedReviews.length} selected`}</div>
         <div className="p-1">{"|"}</div>
         <div
-          className="p-2 text-primary-foreground cursor-pointer hover:bg-secondary hover:rounded-lg"
+          className="p-2 text-primary cursor-pointer hover:bg-secondary hover:rounded-lg"
           onClick={onClearSelected}
         >
           Unselect
@@ -58,7 +58,7 @@ export default function ReviewActionGroup({
             }}
           >
             <FaCompactDisc />
-            {isDesktop && <div className="text-primary-foreground">Export</div>}
+            {isDesktop && <div className="text-primary">Export</div>}
           </Button>
         )}
         <Button
@@ -68,9 +68,7 @@ export default function ReviewActionGroup({
           onClick={onMarkAsReviewed}
         >
           <FaCircleCheck />
-          {isDesktop && (
-            <div className="text-primary-foreground">Mark as reviewed</div>
-          )}
+          {isDesktop && <div className="text-primary">Mark as reviewed</div>}
         </Button>
         <Button
           className="p-2 flex items-center gap-1"
@@ -79,7 +77,7 @@ export default function ReviewActionGroup({
           onClick={onDelete}
         >
           <HiTrash />
-          {isDesktop && <div className="text-primary-foreground">Delete</div>}
+          {isDesktop && <div className="text-primary">Delete</div>}
         </Button>
       </div>
     </div>

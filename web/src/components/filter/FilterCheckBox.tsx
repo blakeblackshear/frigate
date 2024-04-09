@@ -19,7 +19,7 @@ export default function FilterCheckBox({
 }: FilterCheckBoxProps) {
   return (
     <Button
-      className="capitalize flex justify-between items-center cursor-pointer w-full text-primary-foreground"
+      className="capitalize flex justify-between items-center cursor-pointer w-full text-primary"
       variant="ghost"
       onClick={() => onCheckedChange(!isChecked)}
     >

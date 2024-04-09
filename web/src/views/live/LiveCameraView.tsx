@@ -230,9 +230,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
                 onClick={() => navigate(-1)}
               >
                 <IoMdArrowRoundBack className="size-5" />
-                {isDesktop && (
-                  <div className="text-primary-foreground">Back</div>
-                )}
+                {isDesktop && <div className="text-primary">Back</div>}
               </Button>
               <Button
                 className="flex items-center gap-2.5 rounded-lg"
@@ -252,9 +250,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
                 }}
               >
                 <LuHistory className="size-5" />
-                {isDesktop && (
-                  <div className="text-primary-foreground">History</div>
-                )}
+                {isDesktop && <div className="text-primary">History</div>}
               </Button>
             </div>
           ) : (
@@ -522,7 +518,7 @@ function PtzControlPanel({
       {ptz?.features?.includes("pt-r-fov") && (
         <>
           <Button
-            className={`${clickOverlay ? "text-selected" : "text-primary-foreground"}`}
+            className={`${clickOverlay ? "text-selected" : "text-primary"}`}
             onClick={() => setClickOverlay(!clickOverlay)}
           >
             <HiViewfinderCircle />

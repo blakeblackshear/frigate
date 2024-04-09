@@ -360,7 +360,7 @@ function Logs() {
             onClick={handleCopyLogs}
           >
             <FaCopy />
-            <div className="hidden md:block text-primary-foreground">
+            <div className="hidden md:block text-primary">
               Copy to Clipboard
             </div>
           </Button>
@@ -386,8 +386,8 @@ function Logs() {
         </Button>
       )}
 
-      <div className="size-full flex flex-col my-2 font-mono text-sm sm:p-2 whitespace-pre-wrap bg-primary border border-secondary rounded-md overflow-hidden">
-        <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 *:px-2 *:py-3 *:text-sm *:text-primary-foreground/40">
+      <div className="size-full flex flex-col my-2 font-mono text-sm sm:p-2 whitespace-pre-wrap bg-background_alt border border-secondary rounded-md overflow-hidden">
+        <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 *:px-2 *:py-3 *:text-sm *:text-primary/40">
           <div className="p-1 flex items-center capitalize">Type</div>
           <div className="col-span-2 sm:col-span-1 flex items-center">
             Timestamp

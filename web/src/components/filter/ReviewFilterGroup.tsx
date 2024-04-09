@@ -227,10 +227,10 @@ function CamerasFilterButton({
       size="sm"
     >
       <FaVideo
-        className={`${selectedCameras?.length ? "text-primary dark:text-primary-foreground" : "text-secondary-foreground"}`}
+        className={`${selectedCameras?.length ? "text-primary dark:text-primary" : "text-secondary-foreground"}`}
       />
       <div
-        className={`hidden md:block ${selectedCameras?.length ? "text-primary dark:text-primary-foreground" : "text-primary-foreground"}`}
+        className={`hidden md:block ${selectedCameras?.length ? "text-primary dark:text-primary" : "text-primary"}`}
       >
         {selectedCameras == undefined
           ? "All Cameras"
@@ -379,7 +379,7 @@ function ShowReviewFilter({
   );
   return (
     <>
-      <div className="hidden h-9 md:flex p-2 justify-start items-center text-sm bg-secondary hover:bg-secondary/80 text-primary-foreground rounded-md cursor-pointer">
+      <div className="hidden h-9 md:flex p-2 justify-start items-center text-sm bg-secondary hover:bg-secondary/80 rounded-md cursor-pointer">
         <Switch
           id="reviewed"
           checked={showReviewedSwitch == 1}
@@ -387,7 +387,7 @@ function ShowReviewFilter({
             setShowReviewedSwitch(showReviewedSwitch == 0 ? 1 : 0)
           }
         />
-        <Label className="ml-2 cursor-pointer" htmlFor="reviewed">
+        <Label className="ml-2 cursor-pointer text-primary" htmlFor="reviewed">
           Show Reviewed
         </Label>
       </div>
@@ -428,10 +428,10 @@ function CalendarFilterButton({
       variant="secondary"
     >
       <FaCalendarAlt
-        className={`${day == undefined ? "text-secondary-foreground" : "text-primary dark:text-primary-foreground"}`}
+        className={`${day == undefined ? "text-secondary-foreground" : "text-primary dark:text-primary"}`}
       />
       <div
-        className={`hidden md:block ${day == undefined ? "text-primary-foreground" : "text-primary dark:text-primary-foreground"}`}
+        className={`hidden md:block ${day == undefined ? "text-primary" : "text-primary dark:text-primary"}`}
       >
         {day == undefined ? "Last 24 Hours" : selectedDate}
       </div>
@@ -493,7 +493,7 @@ function GeneralFilterButton({
   const trigger = (
     <Button size="sm" className="flex items-center gap-2" variant="secondary">
       <FaFilter className="text-secondary-foreground" />
-      <div className="hidden md:block text-primary-foreground">Filter</div>
+      <div className="hidden md:block text-primary">Filter</div>
     </Button>
   );
   const content = (
@@ -565,7 +565,7 @@ export function GeneralFilterContent({
       <div className="h-auto overflow-y-auto overflow-x-hidden">
         <div className="flex justify-between items-center my-2.5">
           <Label
-            className="mx-2 text-primary-foreground cursor-pointer"
+            className="mx-2 text-primary cursor-pointer"
             htmlFor="allLabels"
           >
             All Labels
@@ -586,7 +586,7 @@ export function GeneralFilterContent({
           {allLabels.map((item) => (
             <div className="flex justify-between items-center">
               <Label
-                className="w-full mx-2 text-primary-foreground capitalize cursor-pointer"
+                className="w-full mx-2 text-primary capitalize cursor-pointer"
                 htmlFor={item}
               >
                 {item.replaceAll("_", " ")}
@@ -664,7 +664,7 @@ function ShowMotionOnlyButton({
 
   return (
     <>
-      <div className="hidden md:inline-flex items-center justify-center whitespace-nowrap text-sm bg-secondary hover:bg-secondary/80 text-primary-foreground h-9 rounded-md px-3 mx-1 cursor-pointer">
+      <div className="hidden md:inline-flex items-center justify-center whitespace-nowrap text-sm bg-secondary hover:bg-secondary/80 text-primary h-9 rounded-md px-3 mx-1 cursor-pointer">
         <Switch
           className="ml-1"
           id="collapse-motion"
@@ -672,7 +672,7 @@ function ShowMotionOnlyButton({
           onCheckedChange={setMotionOnlyButton}
         />
         <Label
-          className="mx-2 text-primary-foreground cursor-pointer"
+          className="mx-2 text-primary cursor-pointer"
           htmlFor="collapse-motion"
         >
           Motion only

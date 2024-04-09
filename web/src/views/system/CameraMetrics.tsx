@@ -159,7 +159,7 @@ export default function CameraMetrics({
                   </div>
                   <div key={camera.name} className="grid sm:grid-cols-2 gap-2">
                     {Object.keys(cameraCpuSeries).includes(camera.name) ? (
-                      <div className="p-2.5 bg-secondary dark:bg-primary rounded-2xl flex-col">
+                      <div className="p-2.5 bg-background_alt rounded-2xl flex-col">
                         <div className="mb-5">CPU</div>
                         <CameraLineGraph
                           graphId={`${camera.name}-cpu`}
@@ -175,7 +175,7 @@ export default function CameraMetrics({
                       <Skeleton className="size-full aspect-video" />
                     )}
                     {Object.keys(cameraFpsSeries).includes(camera.name) ? (
-                      <div className="p-2.5 bg-secondary dark:bg-primary rounded-2xl flex-col">
+                      <div className="p-2.5 bg-background_alt rounded-2xl flex-col">
                         <div className="mb-5">DPS</div>
                         <CameraLineGraph
                           graphId={`${camera.name}-dps`}

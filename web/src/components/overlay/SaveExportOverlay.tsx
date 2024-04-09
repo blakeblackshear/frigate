@@ -31,7 +31,7 @@ export default function SaveExportOverlay({
           Save Export
         </Button>
         <Button
-          className="flex items-center gap-1 text-primary-foreground"
+          className="flex items-center gap-1 text-primary"
           size="sm"
           variant="secondary"
           onClick={onCancel}
