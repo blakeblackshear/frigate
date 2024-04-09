@@ -147,20 +147,24 @@ export default function MobileReviewSettingsDrawer({
         {features.includes("calendar") && (
           <Button
             className="w-full flex justify-center items-center gap-2"
-            variant={filter?.after ? "select" : "secondary"}
+            variant={filter?.after ? "select" : "default"}
             onClick={() => setDrawerMode("calendar")}
           >
-            <FaCalendarAlt />
+            <FaCalendarAlt
+              className={`${filter?.after ? "text-selected-foreground" : "text-secondary-foreground"}`}
+            />
             Calendar
           </Button>
         )}
         {features.includes("filter") && (
           <Button
             className="w-full flex justify-center items-center gap-2"
-            variant={filter?.labels ? "select" : "secondary"}
+            variant={filter?.labels ? "select" : "default"}
             onClick={() => setDrawerMode("filter")}
           >
-            <FaFilter />
+            <FaFilter
+              className={`${filter?.labels ? "text-selected-foreground" : "text-secondary-foreground"}`}
+            />
             Filter
           </Button>
         )}
@@ -282,11 +286,13 @@ export default function MobileReviewSettingsDrawer({
         <DrawerTrigger asChild>
           <Button
             className="rounded-lg capitalize"
-            variant={filter?.labels || filter?.after ? "select" : "secondary"}
+            variant={filter?.labels || filter?.after ? "select" : "default"}
             size="sm"
             onClick={() => setDrawerMode("select")}
           >
-            <FaCog />
+            <FaCog
+              className={`${filter?.labels || filter?.after ? "text-selected-foreground" : "text-secondary-foreground"}`}
+            />
           </Button>
         </DrawerTrigger>
         <DrawerContent className="max-h-[80dvh] overflow-hidden flex flex-col items-center gap-2 px-4 pb-4 mx-1 rounded-t-2xl">

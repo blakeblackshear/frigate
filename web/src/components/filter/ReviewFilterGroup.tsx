@@ -223,10 +223,12 @@ function CamerasFilterButton({
   const trigger = (
     <Button
       className="flex items-center gap-2 capitalize"
-      variant={selectedCameras?.length == undefined ? "secondary" : "select"}
+      variant={selectedCameras?.length == undefined ? "default" : "select"}
       size="sm"
     >
-      <FaVideo />
+      <FaVideo
+        className={`${selectedCameras?.length == 1 ? "text-selected-foreground" : "text-secondary-foreground"}`}
+      />
       <div
         className={`hidden md:block ${selectedCameras?.length ? "text-selected-foreground" : "text-primary"}`}
       >
@@ -391,11 +393,13 @@ function ShowReviewFilter({
 
       <Button
         className="block md:hidden duration-0"
-        variant={showReviewedSwitch == 1 ? "select" : "secondary"}
+        variant={showReviewedSwitch == 1 ? "select" : "default"}
         size="sm"
         onClick={() => setShowReviewedSwitch(showReviewedSwitch == 0 ? 1 : 0)}
       >
-        <FaCheckCircle />
+        <FaCheckCircle
+          className={`${showReviewedSwitch == 1 ? "text-selected-foreground" : "text-secondary-foreground"}`}
+        />
       </Button>
     </>
   );
@@ -419,10 +423,12 @@ function CalendarFilterButton({
   const trigger = (
     <Button
       className="flex items-center gap-2"
-      variant={day == undefined ? "secondary" : "select"}
+      variant={day == undefined ? "default" : "select"}
       size="sm"
     >
-      <FaCalendarAlt />
+      <FaCalendarAlt
+        className={`${day == undefined ? "text-secondary-foreground" : "text-selected-foreground"}`}
+      />
       <div
         className={`hidden md:block ${day == undefined ? "text-primary" : "text-selected-foreground"}`}
       >
@@ -485,10 +491,12 @@ function GeneralFilterButton({
   const trigger = (
     <Button
       size="sm"
-      variant={selectedLabels?.length ? "select" : "secondary"}
+      variant={selectedLabels?.length ? "select" : "default"}
       className="flex items-center gap-2 capitalize"
     >
-      <FaFilter />
+      <FaFilter
+        className={`${selectedLabels?.length ? "text-selected-foreground" : "text-secondary-foreground"}`}
+      />
       <div
         className={`hidden md:block ${selectedLabels?.length ? "text-selected-foreground" : "text-primary"}`}
       >
@@ -682,7 +690,7 @@ function ShowMotionOnlyButton({
         <Button
           size="sm"
           className="duration-0"
-          variant={motionOnlyButton ? "select" : "secondary"}
+          variant={motionOnlyButton ? "select" : "default"}
           onClick={() => setMotionOnlyButton(!motionOnlyButton)}
         >
           <FaRunning />
