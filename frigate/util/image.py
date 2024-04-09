@@ -739,7 +739,6 @@ def add_mask(mask: str, mask_img: np.ndarray):
     # masks and zones are saved as relative coordinates
     # we know if any points are > 1 then it is using the
     # old native resolution coordinates
-    logger.error(f"received points as {points}")
     if any(x > "1.0" for x in points):
         raise Exception("add mask expects relative coordinates only")
 

@@ -364,12 +364,12 @@ class RuntimeMotionConfig(MotionConfig):
                 for m in mask:
                     points = m.split(",")
                     relative_masks.append(
-                       ",".join(
-                    [
-                        f"{round(int(points[i]) / frame_shape[1], 2)},{round(int(points[i + 1]) / frame_shape[0], 2)}"
-                        for i in range(0, len(points), 2)
-                    ]
-                )
+                        ",".join(
+                            [
+                                f"{round(int(points[i]) / frame_shape[1], 3)},{round(int(points[i + 1]) / frame_shape[0], 3)}"
+                                for i in range(0, len(points), 2)
+                            ]
+                        )
                     )
 
                 mask = relative_masks
@@ -377,7 +377,7 @@ class RuntimeMotionConfig(MotionConfig):
                 points = mask.split(",")
                 mask = ",".join(
                     [
-                        f"{round(int(points[i]) / frame_shape[1], 2)},{round(int(points[i + 1]) / frame_shape[0], 2)}"
+                        f"{round(int(points[i]) / frame_shape[1], 3)},{round(int(points[i + 1]) / frame_shape[0], 3)}"
                         for i in range(0, len(points), 2)
                     ]
                 )
@@ -512,11 +512,40 @@ class RuntimeFilterConfig(FilterConfig):
     raw_mask: Optional[Union[str, List[str]]] = None
 
     def __init__(self, **config):
+        frame_shape = config.get("frame_shape", (1, 1))
         mask = config.get("mask")
+
+        # masks and zones are saved as relative coordinates
+        # we know if any points are > 1 then it is using the
+        # old native resolution coordinates
+        if mask:
+            if isinstance(mask, list):
+                relative_masks = []
+                for m in mask:
+                    points = m.split(",")
+                    relative_masks.append(
+                        ",".join(
+                            [
+                                f"{round(int(points[i]) / frame_shape[1], 3)},{round(int(points[i + 1]) / frame_shape[0], 3)}"
+                                for i in range(0, len(points), 2)
+                            ]
+                        )
+                    )
+
+                mask = relative_masks
+            elif isinstance(mask, str):
+                points = mask.split(",")
+                mask = ",".join(
+                    [
+                        f"{round(int(points[i]) / frame_shape[1], 3)},{round(int(points[i + 1]) / frame_shape[0], 3)}"
+                        for i in range(0, len(points), 2)
+                    ]
+                )
+
         config["raw_mask"] = mask
 
         if mask is not None:
-            config["mask"] = create_mask(config.get("frame_shape", (1, 1)), mask)
+            config["mask"] = create_mask(frame_shape, mask)
 
         super().__init__(**config)
 
@@ -594,7 +623,7 @@ class ZoneConfig(BaseModel):
             if explicit:
                 self.coordinates = ",".join(
                     [
-                        f'{round(int(p.split(",")[0]) / frame_shape[1], 2)},{round(int(p.split(",")[1]) / frame_shape[0], 2)}'
+                        f'{round(int(p.split(",")[0]) / frame_shape[1], 3)},{round(int(p.split(",")[1]) / frame_shape[0], 3)}'
                         for p in coordinates
                     ]
                 )
@@ -618,7 +647,7 @@ class ZoneConfig(BaseModel):
             if explicit:
                 self.coordinates = ",".join(
                     [
-                        f"{round(int(points[i]) / frame_shape[1], 2)},{round(int(points[i + 1]) / frame_shape[0], 2)}"
+                        f"{round(int(points[i]) / frame_shape[1], 3)},{round(int(points[i + 1]) / frame_shape[0], 3)}"
                         for i in range(0, len(points), 2)
                     ]
                 )
