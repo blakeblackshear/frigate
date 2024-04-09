@@ -226,7 +226,6 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
               <Button
                 className={`flex items-center gap-2.5 rounded-lg`}
                 size="sm"
-                variant="secondary"
                 onClick={() => navigate(-1)}
               >
                 <IoMdArrowRoundBack className="size-5" />
@@ -235,7 +234,6 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
               <Button
                 className="flex items-center gap-2.5 rounded-lg"
                 size="sm"
-                variant="secondary"
                 onClick={() => {
                   navigate("events", {
                     state: {

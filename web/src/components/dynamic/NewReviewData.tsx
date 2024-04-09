@@ -34,7 +34,6 @@ export default function NewReviewData({
               ? "animate-in slide-in-from-top duration-500"
               : "invisible"
           }  text-center mt-5 mx-auto bg-gray-400 text-white`}
-          variant="secondary"
           onClick={() => {
             pullLatestData();
             if (contentRef.current) {

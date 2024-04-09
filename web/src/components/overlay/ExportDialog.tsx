@@ -119,7 +119,6 @@ export default function ExportDialog({
         <Trigger asChild>
           <Button
             className="flex items-center gap-2"
-            variant="secondary"
             size="sm"
             onClick={() => {
               setMode("select");
@@ -388,7 +387,7 @@ function CustomTimeSelector({
         <PopoverTrigger asChild>
           <Button
             className={`text-primary ${isDesktop ? "" : "text-xs"}`}
-            variant={startOpen ? "select" : "secondary"}
+            variant={startOpen ? "select" : "default"}
             size="sm"
             onClick={() => {
               setStartOpen(true);
@@ -450,7 +449,7 @@ function CustomTimeSelector({
         <PopoverTrigger asChild>
           <Button
             className={`text-primary ${isDesktop ? "" : "text-xs"}`}
-            variant={endOpen ? "select" : "secondary"}
+            variant={endOpen ? "select" : "default"}
             size="sm"
             onClick={() => {
               setEndOpen(true);

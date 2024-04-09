@@ -44,9 +44,7 @@ export default function VainfoDialog({
           <ActivityIndicator />
         )}
         <DialogFooter>
-          <Button variant="secondary" onClick={() => setShowVainfo(false)}>
-            Close
-          </Button>
+          <Button onClick={() => setShowVainfo(false)}>Close</Button>
           <Button variant="select" onClick={() => onCopyVainfo()}>
             Copy
           </Button>

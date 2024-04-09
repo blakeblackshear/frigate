@@ -17,7 +17,7 @@ export function LogLevelFilterButton({
   updateLabelFilter,
 }: LogLevelFilterButtonProps) {
   const trigger = (
-    <Button size="sm" className="flex items-center gap-2" variant="secondary">
+    <Button size="sm" className="flex items-center gap-2">
       <FaFilter className="text-secondary-foreground" />
       <div className="hidden md:block text-primary">Filter</div>
     </Button>

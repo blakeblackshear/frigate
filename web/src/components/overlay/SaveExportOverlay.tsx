@@ -33,7 +33,6 @@ export default function SaveExportOverlay({
         <Button
           className="flex items-center gap-1 text-primary"
           size="sm"
-          variant="secondary"
           onClick={onCancel}
         >
           <LuX />

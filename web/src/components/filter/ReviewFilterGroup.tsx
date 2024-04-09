@@ -223,7 +223,6 @@ function CamerasFilterButton({
   const trigger = (
     <Button
       className={`flex items-center gap-2 capitalize ${selectedCameras?.length ? "bg-selected hover:bg-selected" : ""}`}
-      variant="secondary"
       size="sm"
     >
       <FaVideo
@@ -314,7 +313,6 @@ function CamerasFilterButton({
           Apply
         </Button>
         <Button
-          variant="secondary"
           onClick={() => {
             setCurrentCameras(undefined);
             updateCameraFilter(undefined);
@@ -393,7 +391,6 @@ function ShowReviewFilter({
       <Button
         className={`block md:hidden duration-0 ${showReviewedSwitch == 1 ? "bg-selected hover:bg-selected" : "bg-secondary hover:bg-secondary/80"}`}
         size="sm"
-        variant="secondary"
         onClick={() => setShowReviewedSwitch(showReviewedSwitch == 0 ? 1 : 0)}
       >
         <FaCheckCircle
@@ -423,7 +420,6 @@ function CalendarFilterButton({
     <Button
       size="sm"
       className={`flex items-center gap-2 ${day == undefined ? "bg-secondary hover:bg-secondary/80" : "bg-selected hover:bg-selected"}`}
-      variant="secondary"
     >
       <FaCalendarAlt
         className={`${day == undefined ? "text-secondary-foreground" : "text-primary"}`}
@@ -443,7 +439,6 @@ function CalendarFilterButton({
       <DropdownMenuSeparator />
       <div className="p-2 flex justify-center items-center">
         <Button
-          variant="secondary"
           onClick={() => {
             updateSelectedDay(undefined);
           }}
@@ -487,7 +482,7 @@ function GeneralFilterButton({
   );
 
   const trigger = (
-    <Button size="sm" className="flex items-center gap-2" variant="secondary">
+    <Button size="sm" className="flex items-center gap-2">
       <FaFilter className="text-secondary-foreground" />
       <div className="hidden md:block text-primary">Filter</div>
     </Button>
@@ -632,7 +627,6 @@ export function GeneralFilterContent({
           Apply
         </Button>
         <Button
-          variant="secondary"
           onClick={() => {
             setCurrentLabels(undefined);
             updateLabelFilter(undefined);
@@ -678,7 +672,6 @@ function ShowMotionOnlyButton({
       <div className="block md:hidden">
         <Button
           size="sm"
-          variant="secondary"
           className={`duration-0 ${motionOnlyButton ? "bg-selected hover:bg-selected" : "bg-secondary hover:bg-secondary/80"}`}
           onClick={() => setMotionOnlyButton(!motionOnlyButton)}
         >

@@ -50,7 +50,6 @@ export default function ReviewActionGroup({
         {selectedReviews.length == 1 && (
           <Button
             className="p-2 flex items-center gap-2"
-            variant="secondary"
             size="sm"
             onClick={() => {
               onExport(selectedReviews[0]);
@@ -63,7 +62,6 @@ export default function ReviewActionGroup({
         )}
         <Button
           className="p-2 flex items-center gap-2"
-          variant="secondary"
           size="sm"
           onClick={onMarkAsReviewed}
         >
@@ -72,7 +70,6 @@ export default function ReviewActionGroup({
         </Button>
         <Button
           className="p-2 flex items-center gap-1"
-          variant="secondary"
           size="sm"
           onClick={onDelete}
         >

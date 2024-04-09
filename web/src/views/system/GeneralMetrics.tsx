@@ -349,7 +349,6 @@ export default function GeneralMetrics({
               {canGetGpuInfo && (
                 <Button
                   className="cursor-pointer"
-                  variant="secondary"
                   size="sm"
                   onClick={() => setShowVainfo(true)}
                 >

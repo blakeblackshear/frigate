@@ -138,7 +138,6 @@ export default function MobileReviewSettingsDrawer({
         {features.includes("export") && (
           <Button
             className="w-full flex justify-center items-center gap-2"
-            variant="secondary"
             onClick={() => setDrawerMode("export")}
           >
             <FaArrowDown className="p-1 fill-secondary bg-secondary-foreground rounded-md" />
@@ -148,7 +147,6 @@ export default function MobileReviewSettingsDrawer({
         {features.includes("calendar") && (
           <Button
             className="w-full flex justify-center items-center gap-2"
-            variant="secondary"
             onClick={() => setDrawerMode("calendar")}
           >
             <FaCalendarAlt className="fill-secondary-foreground" />
@@ -158,7 +156,6 @@ export default function MobileReviewSettingsDrawer({
         {features.includes("filter") && (
           <Button
             className="w-full flex justify-center items-center gap-2"
-            variant="secondary"
             onClick={() => setDrawerMode("filter")}
           >
             <FaFilter className="fill-secondary-foreground" />
@@ -223,7 +220,6 @@ export default function MobileReviewSettingsDrawer({
         <SelectSeparator />
         <div className="p-2 flex justify-center items-center">
           <Button
-            variant="secondary"
             onClick={() => {
               onUpdateFilter({
                 ...filter,
@@ -285,7 +281,6 @@ export default function MobileReviewSettingsDrawer({
           <Button
             className="rounded-lg capitalize"
             size="sm"
-            variant="secondary"
             onClick={() => setDrawerMode("select")}
           >
             <FaCog className="text-secondary-foreground" />
