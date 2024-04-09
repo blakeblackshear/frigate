@@ -227,11 +227,9 @@ function CamerasFilterButton({
       size="sm"
     >
       <FaVideo
-        className={`${selectedCameras?.length ? "text-primary dark:text-primary" : "text-secondary-foreground"}`}
+        className={`${selectedCameras?.length ? "text-primary" : "text-secondary-foreground"}`}
       />
-      <div
-        className={`hidden md:block ${selectedCameras?.length ? "text-primary dark:text-primary" : "text-primary"}`}
-      >
+      <div className="hidden md:block">
         {selectedCameras == undefined
           ? "All Cameras"
           : `${selectedCameras.includes("birdseye") ? selectedCameras.length - 1 : selectedCameras.length} Camera${selectedCameras.length !== 1 ? "s" : ""}`}
@@ -428,11 +426,9 @@ function CalendarFilterButton({
       variant="secondary"
     >
       <FaCalendarAlt
-        className={`${day == undefined ? "text-secondary-foreground" : "text-primary dark:text-primary"}`}
+        className={`${day == undefined ? "text-secondary-foreground" : "text-primary"}`}
       />
-      <div
-        className={`hidden md:block ${day == undefined ? "text-primary" : "text-primary dark:text-primary"}`}
-      >
+      <div className="hidden md:block">
         {day == undefined ? "Last 24 Hours" : selectedDate}
       </div>
     </Button>
