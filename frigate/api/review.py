@@ -434,7 +434,7 @@ def motion_activity():
         .fillna(0.0)
         .to_frame()
     )
-    cameras = df["camera"].resample(f"{scale}S").agg(lambda x: ",".join(set(x)))
+    cameras = df["camera"].resample(f"{scale}s").agg(lambda x: ",".join(set(x)))
     df = motion.join(cameras)
 
     length = df.shape[0]

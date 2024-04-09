@@ -354,6 +354,34 @@ class RuntimeMotionConfig(MotionConfig):
         frame_shape = config.get("frame_shape", (1, 1))
 
         mask = config.get("mask", "")
+
+        # masks and zones are saved as relative coordinates
+        # we know if any points are > 1 then it is using the
+        # old native resolution coordinates
+        if mask:
+            if isinstance(mask, list) and any(x > "1.0" for x in mask[0].split(",")):
+                relative_masks = []
+                for m in mask:
+                    points = m.split(",")
+                    relative_masks.append(
+                        ",".join(
+                            [
+                                f"{round(int(points[i]) / frame_shape[1], 3)},{round(int(points[i + 1]) / frame_shape[0], 3)}"
+                                for i in range(0, len(points), 2)
+                            ]
+                        )
+                    )
+
+                mask = relative_masks
+            elif isinstance(mask, str) and any(x > "1.0" for x in mask.split(",")):
+                points = mask.split(",")
+                mask = ",".join(
+                    [
+                        f"{round(int(points[i]) / frame_shape[1], 3)},{round(int(points[i + 1]) / frame_shape[0], 3)}"
+                        for i in range(0, len(points), 2)
+                    ]
+                )
+
         config["raw_mask"] = mask
 
         if mask:
@@ -484,11 +512,40 @@ class RuntimeFilterConfig(FilterConfig):
     raw_mask: Optional[Union[str, List[str]]] = None
 
     def __init__(self, **config):
+        frame_shape = config.get("frame_shape", (1, 1))
         mask = config.get("mask")
+
+        # masks and zones are saved as relative coordinates
+        # we know if any points are > 1 then it is using the
+        # old native resolution coordinates
+        if mask:
+            if isinstance(mask, list) and any(x > "1.0" for x in mask[0].split(",")):
+                relative_masks = []
+                for m in mask:
+                    points = m.split(",")
+                    relative_masks.append(
+                        ",".join(
+                            [
+                                f"{round(int(points[i]) / frame_shape[1], 3)},{round(int(points[i + 1]) / frame_shape[0], 3)}"
+                                for i in range(0, len(points), 2)
+                            ]
+                        )
+                    )
+
+                mask = relative_masks
+            elif isinstance(mask, str) and any(x > "1.0" for x in mask.split(",")):
+                points = mask.split(",")
+                mask = ",".join(
+                    [
+                        f"{round(int(points[i]) / frame_shape[1], 3)},{round(int(points[i + 1]) / frame_shape[0], 3)}"
+                        for i in range(0, len(points), 2)
+                    ]
+                )
+
         config["raw_mask"] = mask
 
         if mask is not None:
-            config["mask"] = create_mask(config.get("frame_shape", (1, 1)), mask)
+            config["mask"] = create_mask(frame_shape, mask)
 
         super().__init__(**config)
 
@@ -539,17 +596,61 @@ class ZoneConfig(BaseModel):
         super().__init__(**config)
 
         self._color = config.get("color", (0, 0, 0))
-        coordinates = config["coordinates"]
+        self._contour = config.get("contour", np.array([]))
 
+    def generate_contour(self, frame_shape: tuple[int, int]):
+        coordinates = self.coordinates
+
+        # masks and zones are saved as relative coordinates
+        # we know if any points are > 1 then it is using the
+        # old native resolution coordinates
         if isinstance(coordinates, list):
+            explicit = any(p.split(",")[0] > "1.0" for p in coordinates)
             self._contour = np.array(
-                [[int(p.split(",")[0]), int(p.split(",")[1])] for p in coordinates]
+                [
+                    (
+                        [int(p.split(",")[0]), int(p.split(",")[1])]
+                        if explicit
+                        else [
+                            int(float(p.split(",")[0]) * frame_shape[1]),
+                            int(float(p.split(",")[1]) * frame_shape[0]),
+                        ]
+                    )
+                    for p in coordinates
+                ]
             )
+
+            if explicit:
+                self.coordinates = ",".join(
+                    [
+                        f'{round(int(p.split(",")[0]) / frame_shape[1], 3)},{round(int(p.split(",")[1]) / frame_shape[0], 3)}'
+                        for p in coordinates
+                    ]
+                )
         elif isinstance(coordinates, str):
             points = coordinates.split(",")
+            explicit = any(p > "1.0" for p in points)
             self._contour = np.array(
-                [[int(points[i]), int(points[i + 1])] for i in range(0, len(points), 2)]
+                [
+                    (
+                        [int(points[i]), int(points[i + 1])]
+                        if explicit
+                        else [
+                            int(float(points[i]) * frame_shape[1]),
+                            int(float(points[i + 1]) * frame_shape[0]),
+                        ]
+                    )
+                    for i in range(0, len(points), 2)
+                ]
             )
+
+            if explicit:
+                self.coordinates = ",".join(
+                    [
+                        f"{round(int(points[i]) / frame_shape[1], 3)},{round(int(points[i + 1]) / frame_shape[0], 3)}"
+                        for i in range(0, len(points), 2)
+                    ]
+                )
         else:
             self._contour = np.array([])
 
@@ -1345,6 +1446,11 @@ class FrigateConfig(FrigateBaseModel):
                     **camera_config.motion.model_dump(exclude_unset=True),
                 )
             camera_config.motion.enabled_in_config = camera_config.motion.enabled
+
+            # generate zone contours
+            if len(camera_config.zones) > 0:
+                for zone in camera_config.zones.values():
+                    zone.generate_contour(camera_config.frame_shape)
 
             # Set live view stream if none is set
             if not camera_config.live.stream_name:
