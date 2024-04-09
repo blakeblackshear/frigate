@@ -146,22 +146,24 @@ export default function MobileReviewSettingsDrawer({
         )}
         {features.includes("calendar") && (
           <Button
-            className={`w-full flex justify-center items-center gap-2 ${filter?.after ? "bg-selected text-background dark:text-primary" : ""}`}
+            className="w-full flex justify-center items-center gap-2"
+            variant={filter?.after ? "select" : "default"}
             onClick={() => setDrawerMode("calendar")}
           >
             <FaCalendarAlt
-              className={`${filter?.after ? "text-background dark:text-primary" : "text-secondary-foreground"}`}
+              className={`${filter?.after ? "text-selected-foreground" : "text-secondary-foreground"}`}
             />
             Calendar
           </Button>
         )}
         {features.includes("filter") && (
           <Button
-            className={`w-full flex justify-center items-center gap-2 ${filter?.labels ? "bg-selected text-background dark:text-primary" : ""}`}
+            className="w-full flex justify-center items-center gap-2"
+            variant={filter?.labels ? "select" : "default"}
             onClick={() => setDrawerMode("filter")}
           >
             <FaFilter
-              className={`${filter?.labels ? "text-background dark:text-primary" : "text-secondary-foreground"}`}
+              className={`${filter?.labels ? "text-selected-foreground" : "text-secondary-foreground"}`}
             />
             Filter
           </Button>
@@ -283,12 +285,13 @@ export default function MobileReviewSettingsDrawer({
       >
         <DrawerTrigger asChild>
           <Button
-            className={`rounded-lg capitalize ${filter?.labels || filter?.after ? "bg-selected hover:bg-selected" : "bg-secondary hover:bg-secondary/80"}`}
+            className="rounded-lg capitalize"
+            variant={filter?.labels || filter?.after ? "select" : "default"}
             size="sm"
             onClick={() => setDrawerMode("select")}
           >
             <FaCog
-              className={`${filter?.labels || filter?.after ? "text-background dark:text-primary" : "text-secondary-foreground"}`}
+              className={`${filter?.labels || filter?.after ? "text-selected-foreground" : "text-secondary-foreground"}`}
             />
           </Button>
         </DrawerTrigger>

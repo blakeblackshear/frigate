@@ -46,7 +46,10 @@ module.exports = {
         background: "hsl(var(--background))",
         background_alt: "hsl(var(--background-alt))",
         foreground: "hsl(var(--foreground))",
-        selected: "hsl(var(--selected))",
+        selected: {
+          DEFAULT: "hsl(var(--selected))",
+          foreground: "hsl(var(--selected-foreground))",
+        },
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",

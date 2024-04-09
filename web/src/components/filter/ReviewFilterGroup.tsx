@@ -222,14 +222,15 @@ function CamerasFilterButton({
 
   const trigger = (
     <Button
-      className={`flex items-center gap-2 capitalize ${selectedCameras?.length ? "bg-selected hover:bg-selected" : ""}`}
+      className="flex items-center gap-2 capitalize"
+      variant={selectedCameras?.length == undefined ? "default" : "select"}
       size="sm"
     >
       <FaVideo
-        className={`${selectedCameras?.length ? "text-background dark:text-primary" : "text-secondary-foreground"}`}
+        className={`${selectedCameras?.length == 1 ? "text-selected-foreground" : "text-secondary-foreground"}`}
       />
       <div
-        className={`hidden md:block ${selectedCameras?.length ? "text-background dark:text-primary" : "text-primary"}`}
+        className={`hidden md:block ${selectedCameras?.length ? "text-selected-foreground" : "text-primary"}`}
       >
         {selectedCameras == undefined
           ? "All Cameras"
@@ -391,12 +392,13 @@ function ShowReviewFilter({
       </div>
 
       <Button
-        className={`block md:hidden duration-0 ${showReviewedSwitch == 1 ? "bg-selected hover:bg-selected" : "bg-secondary hover:bg-secondary/80"}`}
+        className="block md:hidden duration-0"
+        variant={showReviewedSwitch == 1 ? "select" : "default"}
         size="sm"
         onClick={() => setShowReviewedSwitch(showReviewedSwitch == 0 ? 1 : 0)}
       >
         <FaCheckCircle
-          className={`${showReviewedSwitch == 1 ? "text-background dark:text-primary" : "text-secondary-foreground"}`}
+          className={`${showReviewedSwitch == 1 ? "text-selected-foreground" : "text-secondary-foreground"}`}
         />
       </Button>
     </>
@@ -420,14 +422,15 @@ function CalendarFilterButton({
 
   const trigger = (
     <Button
+      className="flex items-center gap-2"
+      variant={day == undefined ? "default" : "select"}
       size="sm"
-      className={`flex items-center gap-2 ${day == undefined ? "bg-secondary hover:bg-secondary/80" : "bg-selected hover:bg-selected"}`}
     >
       <FaCalendarAlt
-        className={`${day == undefined ? "text-secondary-foreground" : "text-background dark:text-primary"}`}
+        className={`${day == undefined ? "text-secondary-foreground" : "text-selected-foreground"}`}
       />
       <div
-        className={`hidden md:block ${day == undefined ? "text-primary" : "text-background dark:text-primary"}`}
+        className={`hidden md:block ${day == undefined ? "text-primary" : "text-selected-foreground"}`}
       >
         {day == undefined ? "Last 24 Hours" : selectedDate}
       </div>
@@ -488,13 +491,14 @@ function GeneralFilterButton({
   const trigger = (
     <Button
       size="sm"
-      className={`flex items-center gap-2 capitalize ${selectedLabels?.length ? "bg-selected hover:bg-selected" : ""}`}
+      variant={selectedLabels?.length ? "select" : "default"}
+      className="flex items-center gap-2 capitalize"
     >
       <FaFilter
-        className={`${selectedLabels?.length ? "text-background dark:text-primary" : "text-secondary-foreground"}`}
+        className={`${selectedLabels?.length ? "text-selected-foreground" : "text-secondary-foreground"}`}
       />
       <div
-        className={`hidden md:block ${selectedLabels?.length ? "text-background dark:text-primary" : "text-primary"}`}
+        className={`hidden md:block ${selectedLabels?.length ? "text-selected-foreground" : "text-primary"}`}
       >
         Filter
       </div>
@@ -685,12 +689,11 @@ function ShowMotionOnlyButton({
       <div className="block md:hidden">
         <Button
           size="sm"
-          className={`duration-0 ${motionOnlyButton ? "bg-selected hover:bg-selected" : "bg-secondary hover:bg-secondary/80"}`}
+          className="duration-0"
+          variant={motionOnlyButton ? "select" : "default"}
           onClick={() => setMotionOnlyButton(!motionOnlyButton)}
         >
-          <FaRunning
-            className={`${motionOnlyButton ? "text-background dark:text-primary" : "text-secondary-foreground"}`}
-          />
+          <FaRunning />
         </Button>
       </div>
     </>

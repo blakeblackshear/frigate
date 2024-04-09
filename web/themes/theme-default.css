@@ -1,76 +1,79 @@
 @layer base {
   :root {
-    --background-hsl: hsl(0 0% 100%);
+    --background: hsl(0, 0%, 100%);
     --background: 0 0% 100%;
 
-    --background-alt-hsl: hsl(0 0% 98.5%);
+    --background-alt: hsl(0, 0%, 98.5%);
     --background-alt: 0 0% 98.5%;
 
-    --foreground: hsl(222.2 84% 4.9%);
+    --foreground: hsl(222.2, 84%, 4.9%);
     --foreground: 222.2 84% 4.9%;
 
-    --card: hsl(0 0% 100%);
+    --card: hsl(0, 0%, 100%);
     --card: 0 0% 100%;
 
-    --card-foreground: hsl(222.2 84% 4.9%);
+    --card-foreground: hsl(222.2, 84%, 4.9%);
     --card-foreground: 222.2 84% 4.9%;
 
-    --popover: hsl(0 0% 100%);
+    --popover: hsl(0, 0%, 100%);
     --popover: 0 0% 100%;
 
-    --popover-foreground: hsl(222.2 84% 4.9%);
+    --popover-foreground: hsl(222.2, 84%, 4.9%);
     --popover-foreground: 222.2 84% 4.9%;
 
     --primary: hsl(222.2, 37.4%, 11.2%);
     --primary: 222.2 47.4% 11.2%;
 
-    --primary-foreground: hsl(210 40% 98%);
+    --primary-foreground: hsl(210, 40%, 98%);
     --primary-foreground: 210 40% 98%;
 
-    --secondary: hsl(210 20% 94.1%);
+    --secondary: hsl(210, 20%, 94.1%);
     --secondary: 210 20% 94.1%;
 
-    --secondary-foreground: hsl(222.2 17.4% 36.2%);
+    --secondary-foreground: hsl(222.2, 17.4%, 36.2%);
     --secondary-foreground: 222.2 17.4% 36.2%;
 
     --secondary-highlight: hsl(0, 0%, 94%);
     --secondary-highlight: 0 0% 94%;
 
-    --muted: hsl(210 40% 96.1%);
+    --muted: hsl(210, 40%, 96.1%);
     --muted: 210 40% 96.1%;
 
-    --muted-foreground: hsl(215.4 6.3% 46.9%);
+    --muted-foreground: hsl(215.4, 6.3%, 46.9%);
     --muted-foreground: 215.4 6.3% 46.9%;
 
-    --accent: hsl(210 40% 96.1%);
+    --accent: hsl(210, 40%, 96.1%);
     --accent: 210 40% 96.1%;
 
-    --accent-foreground: hsl(222.2 47.4% 11.2%);
+    --accent-foreground: hsl(222.2, 47.4%, 11.2%);
     --accent-foreground: 222.2 47.4% 11.2%;
 
-    --destructive: hsl(0 84.2% 60.2%);
+    --destructive: hsl(0, 84.2%, 60.2%);
     --destructive: 0 84.2% 60.2%;
 
-    --destructive-foreground: hsl(0 100% 83%);
+    --destructive-foreground: hsl(0, 100%, 83%);
     --destructive-foreground: 0 100% 83%;
 
-    --warning: hsl(17 87% 18%);
+    --warning: hsl(17, 87%, 18%);
     --warning: 17 87% 18%;
 
-    --warning-foreground: hsl(32 100% 74%);
+    --warning-foreground: hsl(32, 100%, 74%);
     --warning-foreground: 32 100% 74%;
 
-    --border: hsl(214.3 31.8% 91.4%);
+    --border: hsl(214.3, 31.8%, 91.4%);
     --border: 214.3 31.8% 91.4%;
 
-    --input: hsl(0 0% 85%);
+    --input: hsl(0, 0%, 85%);
     --input: 0 0% 85%;
 
-    --ring: hsla(0 0% 25% 0%);
+    --ring: hsla(0, 0%, 25%, 0%);
     --ring: 0 0% 25% 0%;
 
     --selected: hsl(228, 89%, 63%);
     --selected: 228 89% 63%;
+
+    --selected-foreground: hsl(0 0% 100%);
+    --selected-foreground: 0 0% 100%;
 
     --radius: 0.5rem;
 
@@ -94,10 +97,10 @@
   }
 
   .dark {
-    --background-hsl: hsl(0 0 0%);
+    --background: hsl(0, 0, 0%);
     --background: 0 0% 0%;
 
-    --background-alt-hsl: hsl(0 0 9%);
+    --background-alt: hsl(0, 0, 9%);
     --background-alt: 0 0% 9%;
 
     --foreground: hsl(0, 0%, 100%);
@@ -106,7 +109,7 @@
     --card: hsl(0, 0%, 15%);
     --card: 0, 0%, 15%;
 
-    --card-foreground: hsl(210 40% 98%);
+    --card-foreground: hsl(210, 40%, 98%);
     --card-foreground: 210 40% 98%;
 
     --popover: hsl(0, 0%, 15%);
@@ -139,31 +142,28 @@
     --accent: hsl(0, 0%, 15%);
     --accent: 0 0% 15%;
 
-    --accent-foreground: hsl(210 40% 98%);
+    --accent-foreground: hsl(210, 40%, 98%);
     --accent-foreground: 210 40% 98%;
 
-    --destructive: hsl(0 62.8% 30.6%);
+    --destructive: hsl(0, 62.8%, 30.6%);
     --destructive: 0 62.8% 30.6%;
 
-    --destructive-foreground: hsl(0 100% 83%);
+    --destructive-foreground: hsl(0, 100%, 83%);
     --destructive-foreground: 0 100% 83%;
 
-    --warning: hsl(17 87% 18%);
+    --warning: hsl(17, 87%, 18%);
     --warning: 17 87% 18%;
 
-    --warning-foreground: hsl(32 100% 74%);
+    --warning-foreground: hsl(32, 100%, 74%);
     --warning-foreground: 32 100% 74%;
 
     --border: hsl(0, 0%, 32%);
     --border: 0 0% 32%;
 
-    --input: hsl(0 0% 5%);
+    --input: hsl(0, 0%, 5%);
     --input: 0 0% 25%;
 
-    --ring: hsla(0 0% 25% 0%);
+    --ring: hsla(0, 0%, 25%, 0%);
     --ring: 0 0% 25% 0%;
-
-    --selected: hsl(228, 89%, 63%);
-    --selected: 228 89% 63%;
   }
 }
