@@ -72,6 +72,9 @@
     --selected: hsl(228, 89%, 63%);
     --selected: 228 89% 63%;
 
+    --selected-foreground: hsl(0 0% 100%);
+    --selected-foreground: 0 0% 100%;
+
     --radius: 0.5rem;
 
     --severity_alert: var(--red-800);
@@ -162,8 +165,5 @@
 
     --ring: hsla(0 0% 25% 0%);
     --ring: 0 0% 25% 0%;
-
-    --selected: hsl(228, 89%, 63%);
-    --selected: 228 89% 63%;
   }
 }

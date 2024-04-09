@@ -561,7 +561,6 @@ function DetectionReview({
           {(currentItems?.length ?? 0) > 0 && (itemsToReview ?? 0) > 0 && (
             <div className="col-span-full flex justify-center items-center">
               <Button
-                className="text-white"
                 variant="select"
                 onClick={() => {
                   markAllItemsAsReviewed(currentItems ?? []);

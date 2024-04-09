@@ -11,7 +11,7 @@ import { TooltipPortal } from "@radix-ui/react-tooltip";
 
 const variants = {
   primary: {
-    active: "font-bold text-white bg-selected",
+    active: "font-bold bg-selected text-selected-foreground",
     inactive: "text-secondary-foreground bg-secondary",
   },
   secondary: {
