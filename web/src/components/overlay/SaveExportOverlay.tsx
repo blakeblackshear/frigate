@@ -17,7 +17,7 @@ export default function SaveExportOverlay({
   return (
     <div className={className}>
       <div
-        className={`flex justify-center px-2 gap-2 items-center pointer-events-auto rounded-lg *:text-white ${
+        className={`flex justify-center px-2 gap-2 items-center pointer-events-auto rounded-lg ${
           show ? "animate-in slide-in-from-top duration-500" : "invisible"
         }  text-center mt-5 mx-auto`}
       >
@@ -31,7 +31,7 @@ export default function SaveExportOverlay({
           Save Export
         </Button>
         <Button
-          className="flex items-center gap-1"
+          className="flex items-center gap-1 text-primary-foreground"
           size="sm"
           variant="secondary"
           onClick={onCancel}
