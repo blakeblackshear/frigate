@@ -105,7 +105,12 @@ function Logs() {
               };
             }
 
-            return null;
+            return {
+              dateStamp: line.substring(0, 19),
+              severity: "unknown",
+              section: "unknown",
+              content: line.substring(30).trim(),
+            };
           }
 
           const sectionMatch = frigateSection.exec(
