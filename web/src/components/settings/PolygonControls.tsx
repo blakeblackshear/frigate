@@ -53,9 +53,6 @@ export function PolygonControls({
         name: "new",
       },
     ]);
-    console.log(polygons.length);
-    console.log(polygons);
-    console.log("active index", polygons.length);
     setActivePolygonIndex(polygons.length);
   };
 

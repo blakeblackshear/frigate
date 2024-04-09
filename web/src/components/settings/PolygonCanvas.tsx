@@ -5,7 +5,6 @@ import Konva from "konva";
 import type { KonvaEventObject } from "konva/lib/Node";
 import { Polygon } from "@/types/canvas";
 import { useApiHost } from "@/api";
-import { useResizeObserver } from "@/hooks/resize-observer";
 
 type PolygonCanvasProps = {
   camera: string;
@@ -14,7 +13,6 @@ type PolygonCanvasProps = {
   polygons: Polygon[];
   setPolygons: React.Dispatch<React.SetStateAction<Polygon[]>>;
   activePolygonIndex: number | null;
-  setActivePolygonIndex: React.Dispatch<React.SetStateAction<number | null>>;
 };
 
 export function PolygonCanvas({
@@ -24,42 +22,21 @@ export function PolygonCanvas({
   polygons,
   setPolygons,
   activePolygonIndex,
-  setActivePolygonIndex,
 }: PolygonCanvasProps) {
   const [image, setImage] = useState<HTMLImageElement | undefined>();
   const imageRef = useRef<Konva.Image | null>(null);
-  // const containerRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<Konva.Stage>(null);
-  // const [points, setPoints] = useState<number[][]>([]);
-  // const [activePolygonIndex, setActivePolygonIndex] = useState<number | null>(
-  //   null,
-  // );
-  // const [size, setSize] = useState<{ width: number; height: number }>({
-  //   width: width,
-  //   height: height,
-  // });
   const apiHost = useApiHost();
-  // const [position, setPosition] = useState([0, 0]);
-  // const [{ width: windowWidth }] = useResizeObserver(window);
 
   const videoElement = useMemo(() => {
     if (camera && width && height) {
-      // console.log("width:", containerRef.current.clientWidth);
-      // console.log("width:", containerRef.current.clientHeight);
       const element = new window.Image();
-      element.width = width; //containerRef.current.clientWidth;
-      element.height = height; //containerRef.current.clientHeight;
+      element.width = width;
+      element.height = height;
       element.src = `${apiHost}api/${camera}/latest.jpg`;
-      // setSize({
-      //   width: width,
-      //   height: height,
-      // });
       return element;
     }
   }, [camera, width, height, apiHost]);
-
-  // const imageScale = scaledWidth / 720;
-  // console.log("window width", windowWidth);
 
   useEffect(() => {
     if (!videoElement) {
@@ -67,33 +44,12 @@ export function PolygonCanvas({
     }
     const onload = function () {
       setImage(videoElement);
-      // if (!imageRef.current) imageRef.current = videoElement;
-      console.log(videoElement, Date.now());
     };
     videoElement.addEventListener("load", onload);
     return () => {
-      console.log("unloading");
       videoElement.removeEventListener("load", onload);
     };
   }, [videoElement]);
-
-  // use Konva.Animation to redraw a layer
-  // useEffect(() => {
-  //   //videoElement.play();
-  //   if (!videoElement && !imageRef && !imageRef.current) {
-  //     return;
-  //   }
-
-  //   const layer = imageRef.current?.getLayer();
-  //   console.log("layer", layer);
-
-  //   const anim = new Konva.Animation(() => {}, layer);
-  //   anim.start();
-
-  //   return () => {
-  //     anim.stop();
-  //   };
-  // }, [videoElement]);
 
   const getMousePos = (stage: Konva.Stage) => {
     return [stage.getPointerPosition()!.x, stage.getPointerPosition()!.y];
@@ -104,7 +60,6 @@ export function PolygonCanvas({
       return false;
     }
     const [firstPoint] = polygon.points;
-    console.log("first", firstPoint);
     const distance = Math.hypot(
       mousePos[0] - firstPoint[0],
       mousePos[1] - firstPoint[1],
@@ -116,23 +71,7 @@ export function PolygonCanvas({
     if (!activePolygonIndex || !polygons) {
       return;
     }
-    console.log("mouse down polygons", polygons);
-    console.log(activePolygonIndex);
 
-    // if (!polygons[activePolygonIndex].points.length) {
-    //   // Start a new polygon
-    //   const stage = e.target.getStage()!;
-    //   const mousePos = getMousePos(stage);
-    //   setPolygons([
-    //     ...polygons,
-    //     {
-    //       name: "foo",
-    //       points: [mousePos],
-    //       isFinished: false,
-    //     },
-    //   ]);
-    //   setActivePolygonIndex(polygons.length);
-    // } else {
     const updatedPolygons = [...polygons];
     const activePolygon = updatedPolygons[activePolygonIndex];
     const stage = e.target.getStage()!;
@@ -148,7 +87,6 @@ export function PolygonCanvas({
         isFinished: true,
       };
       setPolygons(updatedPolygons);
-      // setActivePolygonIndex(null);
     } else {
       if (!activePolygon.isFinished) {
         // Add a new point to the active polygon
@@ -162,12 +100,6 @@ export function PolygonCanvas({
     // }
   };
 
-  const handleMouseMove = (e: KonvaEventObject<MouseEvent>) => {
-    const stage = e.target.getStage()!;
-    const mousePos = getMousePos(stage);
-    // setPosition(mousePos);
-  };
-
   const handleMouseOverStartPoint = (e: KonvaEventObject<MouseEvent>) => {
     if (activePolygonIndex !== null && polygons) {
       const activePolygon = polygons[activePolygonIndex];
@@ -178,16 +110,13 @@ export function PolygonCanvas({
   };
 
   const handleMouseOutStartPoint = (e: KonvaEventObject<MouseEvent>) => {
-    // console.log("active index:", activePolygonIndex);
     e.currentTarget.scale({ x: 1, y: 1 });
     if (activePolygonIndex !== null && polygons) {
       const activePolygon = polygons[activePolygonIndex];
-      // console.log(activePolygon);
       if (
         (!activePolygon.isFinished && activePolygon.points.length >= 3) ||
         activePolygon.isFinished
       ) {
-        // console.log(e.currentTarget);
         e.currentTarget.scale({ x: 1, y: 1 });
       }
     }
@@ -238,14 +167,12 @@ export function PolygonCanvas({
       setPolygons(updatedPolygons);
     }
   };
-  // console.log("rendering canvas", Date.now());
 
   return (
     <Stage
       ref={stageRef}
       width={width}
       height={height}
-      // onMouseMove={handleMouseMove}
       onMouseDown={handleMouseDown}
     >
       <Layer>

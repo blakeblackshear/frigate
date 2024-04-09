@@ -19,12 +19,10 @@ import {
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { PolygonCanvas } from "./PolygonCanvas";
-import { useApiHost } from "@/api";
 import { Polygon } from "@/types/canvas";
 import { interpolatePoints } from "@/utils/canvasUtil";
-import AutoUpdatingCameraImage from "../camera/AutoUpdatingCameraImage";
 import { isDesktop } from "react-device-detect";
 import PolygonControls from "./PolygonControls";
 import { Skeleton } from "../ui/skeleton";
@@ -50,10 +48,7 @@ export default function SettingsZones() {
   const [activePolygonIndex, setActivePolygonIndex] = useState<number | null>(
     null,
   );
-  const imgRef = useRef<HTMLImageElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const apiHost = useApiHost();
-  // const videoSource = `${apiHost}api/ptzcam/latest.jpg`;
 
   const cameras = useMemo(() => {
     if (!config) {
@@ -73,55 +68,28 @@ export default function SettingsZones() {
     }
   }, [config, selectedCamera]);
 
-  const cameraAspect = useMemo(() => {
+  const grow = useMemo(() => {
     if (!cameraConfig) {
       return;
     }
 
     const aspectRatio = cameraConfig.detect.width / cameraConfig.detect.height;
-    console.log("aspect", aspectRatio);
 
-    if (!aspectRatio) {
-      return "normal";
-    } else if (aspectRatio > 2) {
-      return "wide";
-    } else if (aspectRatio < 16 / 9) {
-      return "tall";
-    } else {
-      return "normal";
-    }
-  }, [cameraConfig]);
-
-  const grow = useMemo(() => {
-    if (cameraAspect == "wide") {
+    if (aspectRatio > 2) {
       return "aspect-wide";
-    } else if (cameraAspect == "tall") {
+    } else if (aspectRatio < 16 / 9) {
       if (isDesktop) {
         return "size-full aspect-tall";
       } else {
         return "size-full";
       }
     } else {
-      return "aspect-video";
+      return "size-full aspect-video";
     }
-  }, [cameraAspect]);
+  }, [cameraConfig]);
 
-  // const [{ width: containerWidth, height: containerHeight }] =
-  //   useResizeObserver(containerRef);
-  const containerWidth = containerRef.current?.clientWidth;
-  const containerHeight = containerRef.current?.clientHeight;
-
-  // Add scrollbar width (when visible) to the available observer width to eliminate screen juddering.
-  // https://github.com/blakeblackshear/frigate/issues/1657
-  let scrollBarWidth = 0;
-  // if (window.innerWidth && document.body.offsetWidth) {
-  //   scrollBarWidth = window.innerWidth - document.body.offsetWidth;
-  // }
-  // const availableWidth = scrollBarWidth
-  //   ? containerWidth + scrollBarWidth
-  //   : containerWidth;
-
-  const availableWidth = containerWidth;
+  const [{ width: containerWidth, height: containerHeight }] =
+    useResizeObserver(containerRef);
 
   const { width, height } = cameraConfig
     ? cameraConfig.detect
@@ -129,12 +97,13 @@ export default function SettingsZones() {
   const aspectRatio = width / height;
 
   const stretch = false;
-  const fitAspect = 1;
+  const fitAspect = 0.75;
+
   const scaledHeight = useMemo(() => {
     const scaledHeight =
       aspectRatio < (fitAspect ?? 0)
         ? Math.floor(containerHeight)
-        : Math.floor(availableWidth / aspectRatio);
+        : Math.floor(containerWidth / aspectRatio);
     const finalHeight = stretch ? scaledHeight : Math.min(scaledHeight, height);
 
     if (finalHeight > 0) {
@@ -143,16 +112,17 @@ export default function SettingsZones() {
 
     return 100;
   }, [
-    availableWidth,
     aspectRatio,
+    containerWidth,
     containerHeight,
     fitAspect,
     height,
     stretch,
   ]);
+
   const scaledWidth = useMemo(
-    () => Math.ceil(scaledHeight * aspectRatio - scrollBarWidth),
-    [scaledHeight, aspectRatio, scrollBarWidth],
+    () => Math.ceil(scaledHeight * aspectRatio),
+    [scaledHeight, aspectRatio],
   );
 
   useEffect(() => {
@@ -175,36 +145,9 @@ export default function SettingsZones() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cameraConfig, containerRef]);
 
-  // const image = useMemo(() => {
-  //   if (cameraConfig && containerRef && containerRef.current) {
-  //     console.log("width:", containerRef.current.clientWidth);
-  //     const element = new window.Image();
-  //     element.width = containerRef.current.clientWidth;
-  //     element.height = containerRef.current.clientHeight;
-  //     element.src = `${apiHost}api/${cameraConfig.name}/latest.jpg`;
-  //     return element;
-  //   }
-  // }, [cameraConfig, apiHost, containerRef]);
-
-  // useEffect(() => {
-  //   if (image) {
-  //     imgRef.current = image;
-  //   }
-  // }, [image]);
-
   if (!cameraConfig && !selectedCamera) {
     return <ActivityIndicator />;
   }
-
-  // console.log("selected camera", selectedCamera);
-  // console.log("threshold", motionThreshold);
-  // console.log("contour area", motionContourArea);
-  // console.log("zone polygons", zonePolygons);
-
-  // console.log("width:", containerRef.current.clientWidth);
-  // const element = new window.Image();
-  // element.width = containerRef.current.clientWidth;
-  // element.height = containerRef.current.clientHeight;
 
   return (
     <>
@@ -234,7 +177,7 @@ export default function SettingsZones() {
       {cameraConfig && (
         <div className="flex flex-row justify-evenly">
           <div
-            className={`flex flex-col justify-center items-center w-[50%] ${grow}`}
+            className={`flex flex-col justify-center items-center w-[60%] ${grow}`}
           >
             <div ref={containerRef} className="size-full">
               {cameraConfig ? (
@@ -245,7 +188,6 @@ export default function SettingsZones() {
                   polygons={zonePolygons}
                   setPolygons={setZonePolygons}
                   activePolygonIndex={activePolygonIndex}
-                  setActivePolygonIndex={setActivePolygonIndex}
                 />
               ) : (
                 <Skeleton className="w-full h-full" />
@@ -295,6 +237,11 @@ export default function SettingsZones() {
                 ))}
               </TableBody>
             </Table>
+            <div>
+              scaled width: {scaledWidth}, scaled height: {scaledHeight},
+              container width: {containerWidth}, container height:
+              {containerHeight}
+            </div>
             <PolygonControls
               camera={cameraConfig.name}
               width={scaledWidth}
