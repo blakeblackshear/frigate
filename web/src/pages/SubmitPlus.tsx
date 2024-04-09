@@ -237,9 +237,9 @@ function PlusFilterGroup({
         }}
       >
         <Trigger asChild>
-          <Button size="sm" className="mx-1 capitalize" variant="secondary">
+          <Button size="sm" className="mx-1 capitalize">
             <FaVideo className="md:mr-[10px] text-secondary-foreground" />
-            <div className="hidden md:block text-primary-foreground">
+            <div className="hidden md:block text-primary">
               {selectedCameras == undefined
                 ? "All Cameras"
                 : `${selectedCameras.length} Cameras`}
@@ -314,9 +314,9 @@ function PlusFilterGroup({
         }}
       >
         <Trigger asChild>
-          <Button size="sm" className="mx-1 capitalize" variant="secondary">
+          <Button size="sm" className="mx-1 capitalize">
             <FaList className="md:mr-[10px] text-secondary-foreground" />
-            <div className="hidden md:block text-primary-foreground">
+            <div className="hidden md:block text-primary">
               {selectedLabels == undefined
                 ? "All Labels"
                 : `${selectedLabels.length} Labels`}

@@ -142,7 +142,7 @@ export default function VideoControls({
 
   return (
     <div
-      className={`px-4 py-2 flex justify-between items-center gap-8 text-primary-foreground dark:text-white z-50 bg-secondary-foreground/60 dark:bg-secondary/60 rounded-lg ${className ?? ""}`}
+      className={`px-4 py-2 flex justify-between items-center gap-8 text-primary z-50 bg-background/60 rounded-lg ${className ?? ""}`}
     >
       {video && features.volume && (
         <div className="flex justify-normal items-center gap-2">
@@ -170,9 +170,9 @@ export default function VideoControls({
       )}
       <div className="cursor-pointer" onClick={onTogglePlay}>
         {isPlaying ? (
-          <LuPause className="size-5 fill-primary-foreground dark:fill-white" />
+          <LuPause className="size-5 text-primary fill-primary" />
         ) : (
-          <LuPlay className="size-5 fill-primary-foreground dark:fill-white" />
+          <LuPlay className="size-5 text-primary fill-primary" />
         )}
       </div>
       {features.seek && (

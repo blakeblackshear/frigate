@@ -17,9 +17,9 @@ export function LogLevelFilterButton({
   updateLabelFilter,
 }: LogLevelFilterButtonProps) {
   const trigger = (
-    <Button size="sm" className="flex items-center gap-2" variant="secondary">
+    <Button size="sm" className="flex items-center gap-2">
       <FaFilter className="text-secondary-foreground" />
-      <div className="hidden md:block text-primary-foreground">Filter</div>
+      <div className="hidden md:block text-primary">Filter</div>
     </Button>
   );
   const content = (
@@ -61,7 +61,7 @@ export function GeneralFilterContent({
       <div className="h-auto overflow-y-auto overflow-x-hidden">
         <div className="flex justify-between items-center my-2.5">
           <Label
-            className="mx-2 text-primary-foreground cursor-pointer"
+            className="mx-2 text-primary cursor-pointer"
             htmlFor="allLabels"
           >
             All Logs
@@ -82,7 +82,7 @@ export function GeneralFilterContent({
           {["debug", "info", "warning", "error"].map((item) => (
             <div className="flex justify-between items-center">
               <Label
-                className="w-full mx-2 text-primary-foreground capitalize cursor-pointer"
+                className="w-full mx-2 text-primary capitalize cursor-pointer"
                 htmlFor={item}
               >
                 {item.replaceAll("_", " ")}

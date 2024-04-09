@@ -128,7 +128,7 @@ export function ThresholdBarGraph({
     <div className="w-full flex flex-col">
       <div className="flex items-center gap-1">
         <div className="text-xs text-muted-foreground">{name}</div>
-        <div className="text-xs text-primary-foreground">
+        <div className="text-xs text-primary">
           {lastValue}
           {unit}
         </div>
@@ -219,15 +219,13 @@ export function StorageGraph({ graphId, used, total }: StorageGraphProps) {
     <div className="w-full flex flex-col gap-2.5">
       <div className="w-full flex justify-between items-center gap-1">
         <div className="flex items-center gap-1">
-          <div className="text-xs text-primary-foreground">
-            {getUnitSize(used)}
-          </div>
-          <div className="text-xs text-primary-foreground">/</div>
+          <div className="text-xs text-primary">{getUnitSize(used)}</div>
+          <div className="text-xs text-primary">/</div>
           <div className="text-xs text-muted-foreground">
             {getUnitSize(total)}
           </div>
         </div>
-        <div className="text-xs text-primary-foreground">
+        <div className="text-xs text-primary">
           {Math.round((used / total) * 100)}%
         </div>
       </div>
@@ -367,7 +365,7 @@ export function CameraLineGraph({
                 style={{ color: GRAPH_COLORS[labelIdx] }}
               />
               <div className="text-xs text-muted-foreground">{label}</div>
-              <div className="text-xs text-primary-foreground">
+              <div className="text-xs text-primary">
                 {lastValues[labelIdx]}
                 {unit}
               </div>

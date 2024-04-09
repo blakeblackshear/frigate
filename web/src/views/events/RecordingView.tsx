@@ -254,11 +254,10 @@ export function RecordingView({
         <Button
           className="flex items-center gap-2 rounded-lg"
           size="sm"
-          variant="secondary"
           onClick={() => navigate(-1)}
         >
           <IoMdArrowRoundBack className="size-5" size="small" />
-          {isDesktop && <div className="text-primary-foreground">Back</div>}
+          {isDesktop && <div className="text-primary">Back</div>}
         </Button>
         <div className="flex items-center justify-end gap-2">
           <MobileCameraDrawer

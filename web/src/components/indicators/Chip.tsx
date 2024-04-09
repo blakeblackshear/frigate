@@ -49,7 +49,7 @@ export function LogChip({ severity, onClickSeverity }: LogChipProps) {
   const severityClassName = useMemo(() => {
     switch (severity) {
       case "info":
-        return "text-primary-foreground/60 bg-secondary hover:bg-secondary/60";
+        return "text-primary/60 bg-secondary hover:bg-secondary/60";
       case "warning":
         return "text-warning-foreground bg-warning hover:bg-warning/80";
       case "error":

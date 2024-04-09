@@ -355,7 +355,7 @@ export function SummaryTimeline({
         ref={visibleSectionRef}
         onMouseDown={handleMouseDown}
         onTouchStart={handleMouseDown}
-        className={`bg-primary-foreground/30 z-20 absolute w-full touch-none ${
+        className={`bg-primary/30 z-20 absolute w-full touch-none ${
           isDragging ? "cursor-grabbing" : "cursor-grab"
         }`}
       ></div>

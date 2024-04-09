@@ -3,6 +3,9 @@
     --background-hsl: hsl(0 0% 100%);
     --background: 0 0% 100%;
 
+    --background-alt-hsl: hsl(0 0% 98.5%);
+    --background-alt: 0 0% 98.5%;
+
     --foreground: hsl(222.2 84% 4.9%);
     --foreground: 222.2 84% 4.9%;
 
@@ -18,17 +21,17 @@
     --popover-foreground: hsl(222.2 84% 4.9%);
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: hsl(0 0% 100%);
-    --primary: 0 0% 100%;
+    --primary: hsl(222.2, 37.4%, 11.2%);
+    --primary: 222.2 47.4% 11.2%;
 
-    --primary-foreground: hsl(0, 0%, 0%);
-    --primary-foreground: 0 0% 0%;
+    --primary-foreground: hsl(210 40% 98%);
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: hsl(0, 0%, 96%);
-    --secondary: 0 0% 96%;
+    --secondary: hsl(210 20% 94.1%);
+    --secondary: 210 20% 94.1%;
 
-    --secondary-foreground: hsl(0, 0%, 70%);
-    --secondary-foreground: 0 0% 70%;
+    --secondary-foreground: hsl(222.2 17.4% 36.2%);
+    --secondary-foreground: 222.2 17.4% 36.2%;
 
     --secondary-highlight: hsl(0, 0%, 94%);
     --secondary-highlight: 0 0% 94%;
@@ -36,8 +39,8 @@
     --muted: hsl(210 40% 96.1%);
     --muted: 210 40% 96.1%;
 
-    --muted-foreground: hsl(0, 0%, 64%);
-    --muted-foreground: 0, 0%, 64%;
+    --muted-foreground: hsl(215.4 6.3% 46.9%);
+    --muted-foreground: 215.4 6.3% 46.9%;
 
     --accent: hsl(210 40% 96.1%);
     --accent: 210 40% 96.1%;
@@ -94,6 +97,9 @@
     --background-hsl: hsl(0 0 0%);
     --background: 0 0% 0%;
 
+    --background-alt-hsl: hsl(0 0 9%);
+    --background-alt: 0 0% 9%;
+
     --foreground: hsl(0, 0%, 100%);
     --foreground: 0, 0%, 100%;
 
@@ -109,11 +115,11 @@
     --popover-foreground: hsl(0, 0%, 100%);
     --popover-foreground: 210 40% 98%;
 
-    --primary: hsl(0, 0%, 9%);
-    --primary: 0 0% 9%;
+    --primary: hsl(0, 0%, 91%);
+    --primary: 0 0% 91%;
 
-    --primary-foreground: hsl(0, 0%, 100%);
-    --primary-foreground: 0 0% 100%;
+    --primary-foreground: hsl(0, 0%, 9%);
+    --primary-foreground: 0 0% 9%;
 
     --secondary: hsl(0, 0%, 15%);
     --secondary: 0 0% 15%;
