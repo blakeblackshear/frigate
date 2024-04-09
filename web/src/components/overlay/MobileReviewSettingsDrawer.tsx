@@ -146,23 +146,21 @@ export default function MobileReviewSettingsDrawer({
         )}
         {features.includes("calendar") && (
           <Button
-            className={`w-full flex justify-center items-center gap-2 ${filter?.after ? "bg-selected text-background dark:text-primary" : ""}`}
+            className="w-full flex justify-center items-center gap-2"
+            variant={filter?.after ? "select" : "secondary"}
             onClick={() => setDrawerMode("calendar")}
           >
-            <FaCalendarAlt
-              className={`${filter?.after ? "text-background dark:text-primary" : "text-secondary-foreground"}`}
-            />
+            <FaCalendarAlt />
             Calendar
           </Button>
         )}
         {features.includes("filter") && (
           <Button
-            className={`w-full flex justify-center items-center gap-2 ${filter?.labels ? "bg-selected text-background dark:text-primary" : ""}`}
+            className="w-full flex justify-center items-center gap-2"
+            variant={filter?.labels ? "select" : "secondary"}
             onClick={() => setDrawerMode("filter")}
           >
-            <FaFilter
-              className={`${filter?.labels ? "text-background dark:text-primary" : "text-secondary-foreground"}`}
-            />
+            <FaFilter />
             Filter
           </Button>
         )}
@@ -283,13 +281,12 @@ export default function MobileReviewSettingsDrawer({
       >
         <DrawerTrigger asChild>
           <Button
-            className={`rounded-lg capitalize ${filter?.labels || filter?.after ? "bg-selected hover:bg-selected" : "bg-secondary hover:bg-secondary/80"}`}
+            className="rounded-lg capitalize"
+            variant={filter?.labels || filter?.after ? "select" : "secondary"}
             size="sm"
             onClick={() => setDrawerMode("select")}
           >
-            <FaCog
-              className={`${filter?.labels || filter?.after ? "text-background dark:text-primary" : "text-secondary-foreground"}`}
-            />
+            <FaCog />
           </Button>
         </DrawerTrigger>
         <DrawerContent className="max-h-[80dvh] overflow-hidden flex flex-col items-center gap-2 px-4 pb-4 mx-1 rounded-t-2xl">
