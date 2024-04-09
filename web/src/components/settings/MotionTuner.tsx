@@ -16,6 +16,7 @@ import { useCallback, useMemo, useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { useMotionContourArea, useMotionThreshold } from "@/api/ws";
+import { Skeleton } from "../ui/skeleton";
 
 export default function MotionTuner() {
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -55,7 +56,6 @@ export default function MotionTuner() {
       if (cameraConfig && threshold != motionThreshold) {
         cameraConfig.motion.threshold = threshold;
         sendMotionThreshold(threshold);
-        console.log("setting motion threshold", threshold);
       }
     },
     [cameraConfig, motionThreshold, sendMotionThreshold],
@@ -66,7 +66,6 @@ export default function MotionTuner() {
       if (cameraConfig && contour_area != motionContourArea) {
         cameraConfig.motion.contour_area = contour_area;
         sendMotionContourArea(contour_area);
-        console.log("setting motion contour area", contour_area);
       }
     },
     [cameraConfig, motionContourArea, sendMotionContourArea],
@@ -75,11 +74,6 @@ export default function MotionTuner() {
   if (!cameraConfig && !selectedCamera) {
     return <ActivityIndicator />;
   }
-
-  // console.log("selected camera", selectedCamera);
-  // console.log("threshold", motionThreshold);
-  // console.log("contour area", motionContourArea);
-  // console.log(cameraConfig);
 
   return (
     <>
@@ -105,41 +99,47 @@ export default function MotionTuner() {
           </SelectContent>
         </Select>
       </div>
-      <AutoUpdatingCameraImage
-        camera={cameraConfig.name}
-        searchParams={new URLSearchParams([["motion", "1"]])}
-        className="w-[50%]"
-      />
-      <div className="flex flex-col justify-evenly w-full">
-        <div className="flex flex-row mb-5">
-          <Slider
-            id="motion-threshold"
-            className="w-[300px]"
-            value={[motionThreshold]}
-            min={10}
-            max={80}
-            step={1}
-            onValueChange={(value) => setMotionThreshold(value[0])}
+      {cameraConfig ? (
+        <div className="flex flex-col justify-start">
+          <AutoUpdatingCameraImage
+            camera={cameraConfig.name}
+            searchParams={new URLSearchParams([["motion", "1"]])}
+            className="w-[50%]"
           />
-          <Label htmlFor="motion-threshold" className="px-2">
-            Threshold: {motionThreshold}
-          </Label>
+          <div className="flex flex-row justify-evenly w-full">
+            <div className="flex flex-row mb-5">
+              <Slider
+                id="motion-threshold"
+                className="w-[300px]"
+                value={[motionThreshold]}
+                min={10}
+                max={80}
+                step={1}
+                onValueChange={(value) => setMotionThreshold(value[0])}
+              />
+              <Label htmlFor="motion-threshold" className="px-2">
+                Threshold: {motionThreshold}
+              </Label>
+            </div>
+            <div className="flex flex-row">
+              <Slider
+                id="motion-contour-area"
+                className="w-[300px]"
+                value={[motionContourArea]}
+                min={10}
+                max={200}
+                step={5}
+                onValueChange={(value) => setMotionContourArea(value[0])}
+              />
+              <Label htmlFor="motion-contour-area" className="px-2">
+                Contour Area: {motionContourArea}
+              </Label>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-row">
-          <Slider
-            id="motion-contour-area"
-            className="w-[300px]"
-            value={[motionContourArea]}
-            min={10}
-            max={200}
-            step={5}
-            onValueChange={(value) => setMotionContourArea(value[0])}
-          />
-          <Label htmlFor="motion-contour-area" className="px-2">
-            Contour Area: {motionContourArea}
-          </Label>
-        </div>
-      </div>
+      ) : (
+        <Skeleton className="size-full rounded-2xl" />
+      )}
     </>
   );
 }
