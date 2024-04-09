@@ -1,5 +1,14 @@
 import { Button } from "../ui/button";
 import { Polygon } from "@/types/canvas";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useState } from "react";
+import { Input } from "../ui/input";
+import useSWR from "swr";
 
 type PolygonCanvasProps = {
   camera: string;
@@ -17,6 +26,11 @@ export function PolygonControls({
   activePolygonIndex,
   setActivePolygonIndex,
 }: PolygonCanvasProps) {
+  const { data: config } = useSWR("config");
+  const [zoneName, setZoneName] = useState<string | null>();
+  const [invalidName, setInvalidName] = useState<boolean>();
+  const [dialogOpen, setDialogOpen] = useState(false);
+
   const undo = () => {
     if (activePolygonIndex !== null && polygons) {
       const updatedPolygons = [...polygons];
@@ -44,13 +58,13 @@ export function PolygonControls({
     }
   };
 
-  const handleNewPolygon = () => {
+  const handleNewPolygon = (zoneName: string) => {
     setPolygons([
       ...(polygons || []),
       {
         points: [],
         isFinished: false,
-        name: "new",
+        name: zoneName,
       },
     ]);
     setActivePolygonIndex(polygons.length);
@@ -65,9 +79,57 @@ export function PolygonControls({
         <Button variant="secondary" onClick={reset}>
           Reset
         </Button>
-        <Button variant="secondary" onClick={handleNewPolygon}>
-          New Polygon
+        <Button variant="secondary" onClick={() => setDialogOpen(true)}>
+          New Zone
         </Button>
+        <Dialog
+          open={dialogOpen}
+          onOpenChange={(open) => {
+            setDialogOpen(open);
+            if (!open) {
+              setZoneName("");
+            }
+          }}
+        >
+          <DialogContent>
+            <DialogTitle>New Zone</DialogTitle>
+            <>
+              <Input
+                className="mt-3"
+                type="search"
+                value={zoneName ?? ""}
+                onChange={(e) => {
+                  setInvalidName(
+                    Object.keys(config.cameras).includes(e.target.value),
+                  );
+
+                  setZoneName(e.target.value);
+                }}
+              />
+              {invalidName && (
+                <div className="text-danger text-sm">
+                  Zone names must not be the name of a camera.
+                </div>
+              )}
+              <DialogFooter>
+                <Button
+                  size="sm"
+                  variant="select"
+                  disabled={invalidName || (zoneName?.length ?? 0) == 0}
+                  onClick={() => {
+                    if (zoneName) {
+                      setDialogOpen(false);
+                      handleNewPolygon(zoneName);
+                    }
+                    setZoneName(null);
+                  }}
+                >
+                  Continue
+                </Button>
+              </DialogFooter>
+            </>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
