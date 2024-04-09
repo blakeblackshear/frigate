@@ -428,7 +428,7 @@ function CalendarFilterButton({
       <FaCalendarAlt
         className={`${day == undefined ? "text-secondary-foreground" : "text-primary"}`}
       />
-      <div className="hidden md:block">
+      <div className="hidden md:block text-primary">
         {day == undefined ? "Last 24 Hours" : selectedDate}
       </div>
     </Button>

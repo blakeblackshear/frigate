@@ -374,7 +374,7 @@ function CustomTimeSelector({
 
   return (
     <div
-      className={`mt-3 flex items-center bg-secondary rounded-lg ${isDesktop ? "mx-8 px-2 gap-2" : "pl-2"}`}
+      className={`mt-3 flex items-center bg-secondary text-secondary-foreground rounded-lg ${isDesktop ? "mx-8 px-2 gap-2" : "pl-2"}`}
     >
       <FaCalendarAlt />
       <Popover
@@ -387,7 +387,7 @@ function CustomTimeSelector({
       >
         <PopoverTrigger asChild>
           <Button
-            className={isDesktop ? "" : "text-xs"}
+            className={`text-primary ${isDesktop ? "" : "text-xs"}`}
             variant={startOpen ? "select" : "secondary"}
             size="sm"
             onClick={() => {
@@ -438,7 +438,7 @@ function CustomTimeSelector({
           />
         </PopoverContent>
       </Popover>
-      <FaArrowRight className="size-4" />
+      <FaArrowRight className="size-4 text-primary" />
       <Popover
         open={endOpen}
         onOpenChange={(open) => {
@@ -449,7 +449,7 @@ function CustomTimeSelector({
       >
         <PopoverTrigger asChild>
           <Button
-            className={isDesktop ? "" : "text-xs"}
+            className={`text-primary ${isDesktop ? "" : "text-xs"}`}
             variant={endOpen ? "select" : "secondary"}
             size="sm"
             onClick={() => {
