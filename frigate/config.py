@@ -359,7 +359,7 @@ class RuntimeMotionConfig(MotionConfig):
         # we know if any points are > 1 then it is using the
         # old native resolution coordinates
         if mask:
-            if isinstance(mask, list) and any(x > "1.0" for x in mask[0]):
+            if isinstance(mask, list) and any(x > "1.0" for x in mask[0].split(",")):
                 relative_masks = []
                 for m in mask:
                     points = m.split(",")
@@ -519,7 +519,7 @@ class RuntimeFilterConfig(FilterConfig):
         # we know if any points are > 1 then it is using the
         # old native resolution coordinates
         if mask:
-            if isinstance(mask, list) and any(x > "1.0" for x in mask[0]):
+            if isinstance(mask, list) and any(x > "1.0" for x in mask[0].split(",")):
                 relative_masks = []
                 for m in mask:
                     points = m.split(",")
