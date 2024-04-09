@@ -138,7 +138,9 @@ def stats_history():
 @bp.route("/config")
 def config():
     config_obj: FrigateConfig = current_app.frigate_config
-    config: dict[str, dict[str, any]] = config_obj.model_dump(mode="json", exclude_none=True)
+    config: dict[str, dict[str, any]] = config_obj.model_dump(
+        mode="json", exclude_none=True
+    )
 
     # remove the mqtt password
     config["mqtt"].pop("password", None)
