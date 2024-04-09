@@ -739,18 +739,16 @@ def add_mask(mask: str, mask_img: np.ndarray):
     # masks and zones are saved as relative coordinates
     # we know if any points are > 1 then it is using the
     # old native resolution coordinates
-    explicit = any(x > "1.0" for x in points)
+    logger.error(f"received points as {points}")
+    if any(x > "1.0" for x in points):
+        raise Exception("add mask expects relative coordinates only")
 
     contour = np.array(
         [
-            (
-                [int(points[i]), int(points[i + 1])]
-                if explicit
-                else [
-                    int(float(points[i]) * mask_img.shape[1]),
-                    int(float(points[i + 1]) * mask_img.shape[0]),
-                ]
-            )
+            [
+                int(float(points[i]) * mask_img.shape[1]),
+                int(float(points[i + 1]) * mask_img.shape[0]),
+            ]
             for i in range(0, len(points), 2)
         ]
     )
