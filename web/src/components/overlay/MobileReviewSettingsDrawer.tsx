@@ -137,7 +137,7 @@ export default function MobileReviewSettingsDrawer({
       <div className="w-full p-4 flex flex-col gap-2">
         {features.includes("export") && (
           <Button
-            className="w-full flex justify-center items-center gap-2 dark:text-primary-foreground"
+            className="w-full flex justify-center items-center gap-2"
             variant="secondary"
             onClick={() => setDrawerMode("export")}
           >
@@ -147,7 +147,7 @@ export default function MobileReviewSettingsDrawer({
         )}
         {features.includes("calendar") && (
           <Button
-            className="w-full flex justify-center items-center gap-2 dark:text-primary-foreground"
+            className="w-full flex justify-center items-center gap-2"
             variant="secondary"
             onClick={() => setDrawerMode("calendar")}
           >
@@ -157,7 +157,7 @@ export default function MobileReviewSettingsDrawer({
         )}
         {features.includes("filter") && (
           <Button
-            className="w-full flex justify-center items-center gap-2 dark:text-primary-foreground"
+            className="w-full flex justify-center items-center gap-2"
             variant="secondary"
             onClick={() => setDrawerMode("filter")}
           >

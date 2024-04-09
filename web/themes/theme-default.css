@@ -30,8 +30,8 @@
     --secondary: hsl(210 20% 94.1%);
     --secondary: 210 20% 94.1%;
 
-    --secondary-foreground: hsl(222.2 47.4% 21.2%);
-    --secondary-foreground: 222.2 47.4% 21.2%;
+    --secondary-foreground: hsl(222.2 17.4% 21.2%);
+    --secondary-foreground: 222.2 17.4% 21.2%;
 
     --secondary-highlight: hsl(0, 0%, 94%);
     --secondary-highlight: 0 0% 94%;
@@ -118,8 +118,8 @@
     --primary: hsl(0, 0%, 91%);
     --primary: 0 0% 91%;
 
-    --primary-foreground: hsl(0, 0%, 100%);
-    --primary-foreground: 0 0% 100%;
+    --primary-foreground: hsl(0, 0%, 9%);
+    --primary-foreground: 0 0% 9%;
 
     --secondary: hsl(0, 0%, 15%);
     --secondary: 0 0% 15%;

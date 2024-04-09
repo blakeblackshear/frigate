@@ -229,7 +229,7 @@ function CamerasFilterButton({
       <FaVideo
         className={`${selectedCameras?.length ? "text-primary" : "text-secondary-foreground"}`}
       />
-      <div className="hidden md:block">
+      <div className="hidden md:block text-primary">
         {selectedCameras == undefined
           ? "All Cameras"
           : `${selectedCameras.includes("birdseye") ? selectedCameras.length - 1 : selectedCameras.length} Camera${selectedCameras.length !== 1 ? "s" : ""}`}
@@ -397,7 +397,7 @@ function ShowReviewFilter({
         onClick={() => setShowReviewedSwitch(showReviewedSwitch == 0 ? 1 : 0)}
       >
         <FaCheckCircle
-          className={`${showReviewedSwitch == 1 ? "fill-primary dark:fill-primary-foreground" : "text-muted-foreground"}`}
+          className={`${showReviewedSwitch == 1 ? "fill-primary" : "text-muted-foreground"}`}
         />
       </Button>
     </>
@@ -683,7 +683,7 @@ function ShowMotionOnlyButton({
           onClick={() => setMotionOnlyButton(!motionOnlyButton)}
         >
           <FaRunning
-            className={`${motionOnlyButton ? "fill-primary dark:fill-primary-foreground" : "text-muted-foreground"}`}
+            className={`${motionOnlyButton ? "fill-primary" : "text-muted-foreground"}`}
           />
         </Button>
       </div>
