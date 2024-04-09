@@ -226,9 +226,11 @@ function CamerasFilterButton({
       size="sm"
     >
       <FaVideo
-        className={`${selectedCameras?.length ? "text-primary" : "text-secondary-foreground"}`}
+        className={`${selectedCameras?.length ? "text-background dark:text-primary" : "text-secondary-foreground"}`}
       />
-      <div className="hidden md:block text-primary">
+      <div
+        className={`hidden md:block ${selectedCameras?.length ? "text-background dark:text-primary" : "text-primary"}`}
+      >
         {selectedCameras == undefined
           ? "All Cameras"
           : `${selectedCameras.includes("birdseye") ? selectedCameras.length - 1 : selectedCameras.length} Camera${selectedCameras.length !== 1 ? "s" : ""}`}
@@ -394,7 +396,7 @@ function ShowReviewFilter({
         onClick={() => setShowReviewedSwitch(showReviewedSwitch == 0 ? 1 : 0)}
       >
         <FaCheckCircle
-          className={`${showReviewedSwitch == 1 ? "fill-primary" : "text-muted-foreground"}`}
+          className={`${showReviewedSwitch == 1 ? "text-background dark:text-primary" : "text-secondary-foreground"}`}
         />
       </Button>
     </>
@@ -422,9 +424,11 @@ function CalendarFilterButton({
       className={`flex items-center gap-2 ${day == undefined ? "bg-secondary hover:bg-secondary/80" : "bg-selected hover:bg-selected"}`}
     >
       <FaCalendarAlt
-        className={`${day == undefined ? "text-secondary-foreground" : "text-primary"}`}
+        className={`${day == undefined ? "text-secondary-foreground" : "text-background dark:text-primary"}`}
       />
-      <div className="hidden md:block text-primary">
+      <div
+        className={`hidden md:block ${day == undefined ? "text-primary" : "text-background dark:text-primary"}`}
+      >
         {day == undefined ? "Last 24 Hours" : selectedDate}
       </div>
     </Button>
@@ -482,9 +486,18 @@ function GeneralFilterButton({
   );
 
   const trigger = (
-    <Button size="sm" className="flex items-center gap-2">
-      <FaFilter className="text-secondary-foreground" />
-      <div className="hidden md:block text-primary">Filter</div>
+    <Button
+      size="sm"
+      className={`flex items-center gap-2 capitalize ${selectedLabels?.length ? "bg-selected hover:bg-selected" : ""}`}
+    >
+      <FaFilter
+        className={`${selectedLabels?.length ? "text-background dark:text-primary" : "text-secondary-foreground"}`}
+      />
+      <div
+        className={`hidden md:block ${selectedLabels?.length ? "text-background dark:text-primary" : "text-primary"}`}
+      >
+        Filter
+      </div>
     </Button>
   );
   const content = (

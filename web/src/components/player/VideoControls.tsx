@@ -142,7 +142,7 @@ export default function VideoControls({
 
   return (
     <div
-      className={`px-4 py-2 flex justify-between items-center gap-8 text-primary z-50 bg-secondary-foreground/60 rounded-lg ${className ?? ""}`}
+      className={`px-4 py-2 flex justify-between items-center gap-8 text-primary z-50 bg-background/60 rounded-lg ${className ?? ""}`}
     >
       {video && features.volume && (
         <div className="flex justify-normal items-center gap-2">
