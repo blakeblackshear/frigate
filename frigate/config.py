@@ -544,6 +544,9 @@ class ZoneConfig(BaseModel):
     def generate_contour(self, frame_shape: tuple[int, int]):
         coordinates = self.coordinates
 
+        # masks and zones are saved as relative coordinates
+        # we know if any points are > 1 then it is using the
+        # old native resolution coordinates
         if isinstance(coordinates, list):
             explicit = any(p.split(",")[0] > "1.0" for p in coordinates)
             self._contour = np.array(
@@ -559,6 +562,14 @@ class ZoneConfig(BaseModel):
                     for p in coordinates
                 ]
             )
+
+            if explicit:
+                self.coordinates = ",".join(
+                    [
+                        f'{round(int(p.split(",")[0]) / frame_shape[1], 2)},{round(int(p.split(",")[1]) / frame_shape[0], 2)}'
+                        for p in coordinates
+                    ]
+                )
         elif isinstance(coordinates, str):
             points = coordinates.split(",")
             explicit = any(p > "1.0" for p in points)
@@ -575,6 +586,14 @@ class ZoneConfig(BaseModel):
                     for i in range(0, len(points), 2)
                 ]
             )
+
+            if explicit:
+                self.coordinates = ",".join(
+                    [
+                        f"{round(int(points[i]) / frame_shape[1], 2)},{round(int(points[i + 1]) / frame_shape[0], 2)}"
+                        for i in range(0, len(points), 2)
+                    ]
+                )
         else:
             self._contour = np.array([])
 

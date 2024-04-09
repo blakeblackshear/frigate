@@ -754,5 +754,4 @@ def add_mask(mask: str, mask_img: np.ndarray):
             for i in range(0, len(points), 2)
         ]
     )
-    logger.error(f"the mask is {contour} from {mask} and explicit {explicit}")
     cv2.fillPoly(mask_img, pts=[contour], color=(0))
