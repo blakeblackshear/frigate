@@ -193,6 +193,14 @@ export default function GeneralMetrics({
       return [];
     }
 
+    if (
+      Object.keys(statsHistory?.at(0)?.gpu_usages ?? {}).length == 1 &&
+      Object.keys(statsHistory?.at(0)?.gpu_usages ?? {})[0].includes("intel")
+    ) {
+      // intel gpu stats do not support memory
+      return undefined;
+    }
+
     const series: {
       [key: string]: { name: string; data: { x: number; y: string }[] };
     } = {};
@@ -285,7 +293,7 @@ export default function GeneralMetrics({
         </div>
         <div className="w-full mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
           {statsHistory.length != 0 ? (
-            <div className="p-2.5 bg-background_alt rounded-2xl flex-col">
+            <div className="p-2.5 bg-background_alt rounded-2xl">
               <div className="mb-5">Detector Inference Speed</div>
               {detInferenceTimeSeries.map((series) => (
                 <ThresholdBarGraph
@@ -303,7 +311,7 @@ export default function GeneralMetrics({
             <Skeleton className="w-full aspect-video" />
           )}
           {statsHistory.length != 0 ? (
-            <div className="p-2.5 bg-background_alt rounded-2xl flex-col">
+            <div className="p-2.5 bg-background_alt rounded-2xl">
               <div className="mb-5">Detector CPU Usage</div>
               {detCpuSeries.map((series) => (
                 <ThresholdBarGraph
@@ -321,7 +329,7 @@ export default function GeneralMetrics({
             <Skeleton className="w-full aspect-video" />
           )}
           {statsHistory.length != 0 ? (
-            <div className="p-2.5 bg-background_alt rounded-2xl flex-col">
+            <div className="p-2.5 bg-background_alt rounded-2xl">
               <div className="mb-5">Detector Memory Usage</div>
               {detMemSeries.map((series) => (
                 <ThresholdBarGraph
@@ -358,7 +366,7 @@ export default function GeneralMetrics({
             </div>
             <div className=" mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
               {statsHistory.length != 0 ? (
-                <div className="p-2.5 bg-background_alt rounded-2xl flex-col">
+                <div className="p-2.5 bg-background_alt rounded-2xl">
                   <div className="mb-5">GPU Usage</div>
                   {gpuSeries.map((series) => (
                     <ThresholdBarGraph
@@ -376,20 +384,24 @@ export default function GeneralMetrics({
                 <Skeleton className="w-full aspect-video" />
               )}
               {statsHistory.length != 0 ? (
-                <div className="p-2.5 bg-background_alt rounded-2xl flex-col">
-                  <div className="mb-5">GPU Memory</div>
-                  {gpuMemSeries.map((series) => (
-                    <ThresholdBarGraph
-                      key={series.name}
-                      graphId={`${series.name}-mem`}
-                      unit=""
-                      name={series.name}
-                      threshold={GPUMemThreshold}
-                      updateTimes={updateTimes}
-                      data={[series]}
-                    />
-                  ))}
-                </div>
+                <>
+                  {gpuMemSeries && (
+                    <div className="p-2.5 bg-background_alt rounded-2xl">
+                      <div className="mb-5">GPU Memory</div>
+                      {gpuMemSeries.map((series) => (
+                        <ThresholdBarGraph
+                          key={series.name}
+                          graphId={`${series.name}-mem`}
+                          unit=""
+                          name={series.name}
+                          threshold={GPUMemThreshold}
+                          updateTimes={updateTimes}
+                          data={[series]}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </>
               ) : (
                 <Skeleton className="w-full aspect-video" />
               )}
@@ -402,7 +414,7 @@ export default function GeneralMetrics({
         </div>
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
           {statsHistory.length != 0 ? (
-            <div className="p-2.5 bg-background_alt rounded-2xl flex-col">
+            <div className="p-2.5 bg-background_alt rounded-2xl">
               <div className="mb-5">Process CPU Usage</div>
               {otherProcessCpuSeries.map((series) => (
                 <ThresholdBarGraph
@@ -420,7 +432,7 @@ export default function GeneralMetrics({
             <Skeleton className="w-full aspect-tall" />
           )}
           {statsHistory.length != 0 ? (
-            <div className="p-2.5 bg-background_alt rounded-2xl flex-col">
+            <div className="p-2.5 bg-background_alt rounded-2xl">
               <div className="mb-5">Process Memory Usage</div>
               {otherProcessMemSeries.map((series) => (
                 <ThresholdBarGraph
