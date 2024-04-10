@@ -1,5 +1,6 @@
 import Logo from "@/components/Logo";
-import { FaCompactDisc, FaFlag, FaVideo } from "react-icons/fa";
+import { FaCompactDisc, FaVideo } from "react-icons/fa";
+import { TbTimelineEventFilled } from "react-icons/tb";
 import { LuConstruction } from "react-icons/lu";
 
 export const navbarLinks = [
@@ -11,9 +12,9 @@ export const navbarLinks = [
   },
   {
     id: 2,
-    icon: FaFlag,
-    title: "Events",
-    url: "/events",
+    icon: TbTimelineEventFilled,
+    title: "Reviews",
+    url: "/reviews",
   },
   {
     id: 3,
