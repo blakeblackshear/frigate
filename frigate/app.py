@@ -667,6 +667,14 @@ class FrigateApp:
         logger.info("Stopping...")
         self.stop_event.set()
 
+        # set an end_time on entries without an end_time before exiting
+        Event.update(end_time=datetime.datetime.now().timestamp()).where(
+            Event.end_time == None
+        ).execute()
+        ReviewSegment.update(end_time=datetime.datetime.now().timestamp()).where(
+            ReviewSegment.end_time == None
+        ).execute()
+
         # Stop Communicators
         self.inter_process_communicator.stop()
         self.inter_config_updater.stop()
