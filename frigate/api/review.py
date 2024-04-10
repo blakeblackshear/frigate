@@ -53,7 +53,7 @@ def review():
         for label in filtered_labels:
             label_clauses.append(
                 (ReviewSegment.data["objects"].cast("text") % f'*"{label}"*')
-                | ((ReviewSegment.data["audio"].cast("text") % f'*"{label}"*'))
+                | (ReviewSegment.data["audio"].cast("text") % f'*"{label}"*')
             )
 
         label_clause = reduce(operator.or_, label_clauses)
@@ -103,7 +103,7 @@ def review_summary():
         for label in filtered_labels:
             label_clauses.append(
                 (ReviewSegment.data["objects"].cast("text") % f'*"{label}"*')
-                | ((ReviewSegment.data["audio"].cast("text") % f'*"{label}"*'))
+                | (ReviewSegment.data["audio"].cast("text") % f'*"{label}"*')
             )
 
         label_clause = reduce(operator.or_, label_clauses)
