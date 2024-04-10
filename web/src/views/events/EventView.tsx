@@ -43,6 +43,7 @@ import { TimeRange } from "@/types/timeline";
 import { useCameraMotionNextTimestamp } from "@/hooks/use-camera-activity";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import { Skeleton } from "@/components/ui/skeleton";
+import scrollIntoView from "scroll-into-view-if-needed";
 
 type EventViewProps = {
   reviews?: ReviewSegment[];
@@ -293,6 +294,7 @@ export default function EventView({
             severity={severity}
             filter={filter}
             timeRange={timeRange}
+            startTime={startTime}
             markItemAsReviewed={markItemAsReviewed}
             markAllItemsAsReviewed={markAllItemsAsReviewed}
             onSelectReview={onSelectReview}
@@ -331,6 +333,7 @@ type DetectionReviewProps = {
   severity: ReviewSeverity;
   filter?: ReviewFilter;
   timeRange: { before: number; after: number };
+  startTime?: number;
   markItemAsReviewed: (review: ReviewSegment) => void;
   markAllItemsAsReviewed: (currentItems: ReviewSegment[]) => void;
   onSelectReview: (review: ReviewSegment, ctrl: boolean) => void;
@@ -345,6 +348,7 @@ function DetectionReview({
   severity,
   filter,
   timeRange,
+  startTime,
   markItemAsReviewed,
   markAllItemsAsReviewed,
   onSelectReview,
@@ -494,6 +498,26 @@ function DetectionReview({
     () => minimap.map((str) => parseFloat(str)),
     [minimap],
   );
+
+  // existing review item
+
+  useEffect(() => {
+    if (!startTime || !currentItems || currentItems.length == 0) {
+      return;
+    }
+
+    const element = contentRef.current?.querySelector(
+      `[data-start="${startTime}"]`,
+    );
+    if (element) {
+      scrollIntoView(element, {
+        scrollMode: "if-needed",
+        behavior: "smooth",
+      });
+    }
+    // only run when start time changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startTime]);
 
   return (
     <>
