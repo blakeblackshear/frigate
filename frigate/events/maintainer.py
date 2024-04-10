@@ -1,4 +1,3 @@
-import datetime
 import logging
 import threading
 from multiprocessing import Queue
