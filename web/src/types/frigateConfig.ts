@@ -200,6 +200,7 @@ export interface CameraConfig {
       filters: Record<string, unknown>;
       inertia: number;
       objects: string[];
+      color: number[];
     };
   };
 }

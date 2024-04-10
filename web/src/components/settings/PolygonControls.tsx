@@ -53,6 +53,7 @@ export function PolygonControls({
         points: [],
         isFinished: false,
         name: "new",
+        color: updatedPolygons[activePolygonIndex].color ?? [220, 0, 0],
       };
       setPolygons(updatedPolygons);
     }
@@ -65,6 +66,7 @@ export function PolygonControls({
         points: [],
         isFinished: false,
         name: zoneName,
+        color: [220, 0, 0],
       },
     ]);
     setActivePolygonIndex(polygons.length);

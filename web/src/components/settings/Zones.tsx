@@ -34,8 +34,8 @@ const parseCoordinates = (coordinatesString: string) => {
   const points = [];
 
   for (let i = 0; i < coordinates.length; i += 2) {
-    const x = parseInt(coordinates[i], 10);
-    const y = parseInt(coordinates[i + 1], 10);
+    const x = parseFloat(coordinates[i]);
+    const y = parseFloat(coordinates[i + 1]);
     points.push([x, y]);
   }
 
@@ -132,12 +132,13 @@ export default function SettingsZones() {
           name,
           points: interpolatePoints(
             parseCoordinates(zoneData.coordinates),
-            cameraConfig.detect.width,
-            cameraConfig.detect.height,
+            1,
+            1,
             scaledWidth,
             scaledHeight,
           ),
           isFinished: true,
+          color: zoneData.color,
         })),
       );
     }

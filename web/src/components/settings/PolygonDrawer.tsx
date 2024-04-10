@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Line, Circle, Group } from "react-konva";
 import { minMax, dragBoundFunc } from "@/utils/canvasUtil";
 import type { KonvaEventObject } from "konva/lib/Node";
@@ -10,6 +10,7 @@ type PolygonDrawerProps = {
   flattenedPoints: number[];
   isActive: boolean;
   isFinished: boolean;
+  color: number[];
   handlePointDragMove: (e: KonvaEventObject<MouseEvent>) => void;
   handleGroupDragEnd: (e: KonvaEventObject<MouseEvent>) => void;
   handleMouseOverStartPoint: (e: KonvaEventObject<MouseEvent>) => void;
@@ -21,6 +22,7 @@ export default function PolygonDrawer({
   flattenedPoints,
   isActive,
   isFinished,
+  color,
   handlePointDragMove,
   handleGroupDragEnd,
   handleMouseOverStartPoint,
@@ -66,6 +68,17 @@ export default function PolygonDrawer({
     return { x, y };
   };
 
+  const colorString = useCallback(
+    (darkened: boolean) => {
+      if (color.length !== 3) {
+        return "rgb(220,0,0,0.5)";
+      }
+
+      return `rgb(${color[0]},${color[1]},${color[2]},${darkened ? "0.8" : "0.5"})`;
+    },
+    [color],
+  );
+
   return (
     <Group
       name="polygon"
@@ -78,10 +91,10 @@ export default function PolygonDrawer({
     >
       <Line
         points={flattenedPoints}
-        stroke="#aa0000"
+        stroke={colorString(true)}
         strokeWidth={3}
         closed={isFinished}
-        fill="rgb(220,0,0,0.5)"
+        fill={colorString(false)}
       />
       {points.map((point, index) => {
         if (!isActive) {
@@ -104,7 +117,7 @@ export default function PolygonDrawer({
             x={x}
             y={y}
             radius={vertexRadius}
-            fill="#dd0000"
+            fill={colorString(false)}
             stroke="#cccccc"
             strokeWidth={2}
             draggable={isActive}

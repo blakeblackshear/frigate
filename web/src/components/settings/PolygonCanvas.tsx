@@ -191,6 +191,7 @@ export function PolygonCanvas({
             flattenedPoints={flattenPoints(polygon.points)}
             isActive={index === activePolygonIndex}
             isFinished={polygon.isFinished}
+            color={polygon.color}
             handlePointDragMove={handlePointDragMove}
             handleGroupDragEnd={handleGroupDragEnd}
             handleMouseOverStartPoint={handleMouseOverStartPoint}
