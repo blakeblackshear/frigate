@@ -74,7 +74,7 @@ export default function PolygonDrawer({
         return "rgb(220,0,0,0.5)";
       }
 
-      return `rgb(${color[0]},${color[1]},${color[2]},${darkened ? "0.8" : "0.5"})`;
+      return `rgba(${color[2]},${color[1]},${color[0]},${darkened ? "0.8" : "0.5"})`;
     },
     [color],
   );
