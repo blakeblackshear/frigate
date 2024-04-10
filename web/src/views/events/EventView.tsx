@@ -546,6 +546,7 @@ function DetectionReview({
                     <PreviewThumbnailPlayer
                       review={value}
                       allPreviews={relevantPreviews}
+                      timeRange={timeRange}
                       setReviewed={markItemAsReviewed}
                       scrollLock={scrollLock}
                       onTimeUpdate={onPreviewTimeUpdate}
@@ -787,16 +788,16 @@ function MotionReview({
       } else {
         const segmentStartTime = alignStartDateToTimeline(currentTime);
         const segmentEndTime = segmentStartTime + segmentDuration;
-        const matchingItem = reviewItems?.all.find(
-          (item) =>
-            ((item.start_time >= segmentStartTime &&
-              item.start_time < segmentEndTime) ||
-              (item.end_time > segmentStartTime &&
-                item.end_time <= segmentEndTime) ||
-              (item.start_time <= segmentStartTime &&
-                item.end_time >= segmentEndTime)) &&
-            item.camera === cameraName,
-        );
+        const matchingItem = reviewItems?.all.find((item) => {
+          const endTime = item.end_time ?? timeRange.before;
+
+          ((item.start_time >= segmentStartTime &&
+            item.start_time < segmentEndTime) ||
+            (endTime > segmentStartTime && endTime <= segmentEndTime) ||
+            (item.start_time <= segmentStartTime &&
+              endTime >= segmentEndTime)) &&
+            item.camera === cameraName;
+        });
 
         return matchingItem ? matchingItem.severity : null;
       }
@@ -805,6 +806,7 @@ function MotionReview({
       reviewItems,
       motionData,
       currentTime,
+      timeRange,
       motionOnly,
       alignStartDateToTimeline,
     ],
