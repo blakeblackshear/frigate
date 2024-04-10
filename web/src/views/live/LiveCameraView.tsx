@@ -235,7 +235,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
                 className="flex items-center gap-2.5 rounded-lg"
                 size="sm"
                 onClick={() => {
-                  navigate("events", {
+                  navigate("reviews", {
                     state: {
                       severity: "alert",
                       recording: {
