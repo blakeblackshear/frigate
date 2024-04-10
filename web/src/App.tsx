@@ -36,8 +36,8 @@ function App() {
               <Suspense>
                 <Routes>
                   <Route path="/" element={<Live />} />
-                  <Route path="/events" element={<Redirect to="/reviews" />} />
-                  <Route path="/reviews" element={<Events />} />
+                  <Route path="/events" element={<Redirect to="/review" />} />
+                  <Route path="/review" element={<Events />} />
                   <Route path="/export" element={<Export />} />
                   <Route path="/plus" element={<SubmitPlus />} />
                   <Route path="/system" element={<System />} />

@@ -20,7 +20,7 @@ export function AnimatedEventCard({ event }: AnimatedEventCardProps) {
 
   const navigate = useNavigate();
   const onOpenReview = useCallback(() => {
-    navigate("reviews", {
+    navigate("review", {
       state: {
         severity: event.severity,
         recording: {

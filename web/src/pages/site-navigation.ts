@@ -13,8 +13,8 @@ export const navbarLinks = [
   {
     id: 2,
     icon: TbTimelineEventFilled,
-    title: "Reviews",
-    url: "/reviews",
+    title: "Review",
+    url: "/review",
   },
   {
     id: 3,
