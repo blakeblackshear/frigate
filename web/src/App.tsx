@@ -7,6 +7,7 @@ import { isDesktop, isMobile } from "react-device-detect";
 import Statusbar from "./components/Statusbar";
 import Bottombar from "./components/navigation/Bottombar";
 import { Suspense, lazy } from "react";
+import { Redirect } from "./components/navigation/Redirect";
 
 const Live = lazy(() => import("@/pages/Live"));
 const Events = lazy(() => import("@/pages/Events"));
@@ -35,7 +36,8 @@ function App() {
               <Suspense>
                 <Routes>
                   <Route path="/" element={<Live />} />
-                  <Route path="/events" element={<Events />} />
+                  <Route path="/events" element={<Redirect to="/review" />} />
+                  <Route path="/review" element={<Events />} />
                   <Route path="/export" element={<Export />} />
                   <Route path="/plus" element={<SubmitPlus />} />
                   <Route path="/system" element={<System />} />

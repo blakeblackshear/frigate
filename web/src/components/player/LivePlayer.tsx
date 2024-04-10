@@ -7,10 +7,8 @@ import MSEPlayer from "./MsePlayer";
 import JSMpegPlayer from "./JSMpegPlayer";
 import { MdCircle } from "react-icons/md";
 import { useCameraActivity } from "@/hooks/use-camera-activity";
-import { useRecordingsState } from "@/api/ws";
 import { LivePlayerMode } from "@/types/live";
 import useCameraLiveMode from "@/hooks/use-camera-live-mode";
-import CameraActivityIndicator from "../indicators/CameraActivityIndicator";
 
 type LivePlayerProps = {
   cameraRef?: (ref: HTMLDivElement | null) => void;
@@ -41,8 +39,7 @@ export default function LivePlayer({
 }: LivePlayerProps) {
   // camera activity
 
-  const { activeMotion, activeAudio, activeTracking } =
-    useCameraActivity(cameraConfig);
+  const { activeMotion, activeTracking } = useCameraActivity(cameraConfig);
 
   const cameraActive = useMemo(
     () =>
@@ -71,8 +68,6 @@ export default function LivePlayer({
     // live mode won't change
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cameraActive, liveReady]);
-
-  const { payload: recording } = useRecordingsState(cameraConfig.name);
 
   // camera still state
 
@@ -171,15 +166,8 @@ export default function LivePlayer({
         />
       </div>
 
-      <div className="absolute right-2 bottom-2 w-[40px]">
-        {(activeMotion ||
-          (cameraConfig.audio.enabled_in_config && activeAudio)) && (
-          <CameraActivityIndicator />
-        )}
-      </div>
-
       <div className="absolute right-2 top-2 size-4">
-        {recording == "ON" && (
+        {activeMotion && (
           <MdCircle className="size-2 drop-shadow-md shadow-danger text-danger animate-pulse" />
         )}
       </div>

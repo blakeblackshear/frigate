@@ -1,6 +1,7 @@
 import Logo from "@/components/Logo";
-import { FaCompactDisc, FaFlag, FaVideo } from "react-icons/fa";
+import { FaCompactDisc, FaVideo } from "react-icons/fa";
 import { LuConstruction } from "react-icons/lu";
+import { MdVideoLibrary } from "react-icons/md";
 
 export const navbarLinks = [
   {
@@ -11,9 +12,9 @@ export const navbarLinks = [
   },
   {
     id: 2,
-    icon: FaFlag,
-    title: "Events",
-    url: "/events",
+    icon: MdVideoLibrary,
+    title: "Review",
+    url: "/review",
   },
   {
     id: 3,

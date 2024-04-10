@@ -1,8 +1,4 @@
-import {
-  useAudioActivity,
-  useFrigateEvents,
-  useMotionActivity,
-} from "@/api/ws";
+import { useFrigateEvents, useMotionActivity } from "@/api/ws";
 import { CameraConfig } from "@/types/frigateConfig";
 import { MotionData, ReviewSegment } from "@/types/review";
 import { useEffect, useMemo, useState } from "react";
@@ -11,7 +7,6 @@ import { useTimelineUtils } from "./use-timeline-utils";
 type useCameraActivityReturn = {
   activeTracking: boolean;
   activeMotion: boolean;
-  activeAudio: boolean;
 };
 
 export function useCameraActivity(
@@ -25,7 +20,6 @@ export function useCameraActivity(
 
   const { payload: detectingMotion } = useMotionActivity(camera.name);
   const { payload: event } = useFrigateEvents();
-  const { payload: audioRms } = useAudioActivity(camera.name);
 
   useEffect(() => {
     if (!event) {
@@ -63,9 +57,6 @@ export function useCameraActivity(
   return {
     activeTracking: hasActiveObjects,
     activeMotion: detectingMotion == "ON",
-    activeAudio: camera.audio.enabled_in_config
-      ? audioRms >= camera.audio.min_volume
-      : false,
   };
 }
 
