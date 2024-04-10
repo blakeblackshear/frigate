@@ -8,18 +8,47 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../ui/alert-dialog";
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
+import axios from "axios";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import AutoUpdatingCameraImage from "@/components/camera/AutoUpdatingCameraImage";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
-import { useMotionContourArea, useMotionThreshold } from "@/api/ws";
+import {
+  useImproveContrast,
+  useMotionContourArea,
+  useMotionThreshold,
+} from "@/api/ws";
 import { Skeleton } from "../ui/skeleton";
+import { Button } from "../ui/button";
+import { Switch } from "../ui/switch";
+import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
+
+type MotionSettings = {
+  threshold?: number;
+  contour_area?: number;
+  improve_contrast?: boolean;
+};
 
 export default function MotionTuner() {
-  const { data: config } = useSWR<FrigateConfig>("config");
+  const { data: config, mutate: updateConfig } =
+    useSWR<FrigateConfig>("config");
+  const [changedValue, setChangedValue] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
 
   const cameras = useMemo(() => {
     if (!config) {
@@ -31,7 +60,18 @@ export default function MotionTuner() {
       .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
   }, [config]);
 
-  const [selectedCamera, setSelectedCamera] = useState(cameras[0].name);
+  const [selectedCamera, setSelectedCamera] = useState(cameras[0]?.name);
+  const [nextSelectedCamera, setNextSelectedCamera] = useState("");
+
+  const { send: sendMotionThreshold } = useMotionThreshold(selectedCamera);
+  const { send: sendMotionContourArea } = useMotionContourArea(selectedCamera);
+  const { send: sendImproveContrast } = useImproveContrast(selectedCamera);
+
+  const [motionSettings, setMotionSettings] = useState<MotionSettings>({
+    threshold: undefined,
+    contour_area: undefined,
+    improve_contrast: undefined,
+  });
 
   const cameraConfig = useMemo(() => {
     if (config && selectedCamera) {
@@ -39,36 +79,114 @@ export default function MotionTuner() {
     }
   }, [config, selectedCamera]);
 
-  const motionThreshold = useMemo(() => {
-    return cameraConfig?.motion.threshold ?? 0;
-  }, [cameraConfig?.motion.threshold]);
+  useEffect(() => {
+    if (cameraConfig) {
+      setMotionSettings({
+        threshold: cameraConfig.motion.threshold,
+        contour_area: cameraConfig.motion.contour_area,
+        improve_contrast: cameraConfig.motion.improve_contrast,
+      });
+    }
+  }, [cameraConfig]);
 
-  const motionContourArea = useMemo(
-    () => cameraConfig?.motion.contour_area ?? 0,
-    [cameraConfig?.motion.contour_area],
-  );
+  useEffect(() => {
+    if (cameraConfig) {
+      const { threshold, contour_area, improve_contrast } = motionSettings;
 
-  const { send: sendMotionThreshold } = useMotionThreshold(selectedCamera);
-  const { send: sendMotionContourArea } = useMotionContourArea(selectedCamera);
-
-  const setMotionThreshold = useCallback(
-    (threshold: number) => {
-      if (cameraConfig && threshold != motionThreshold) {
-        cameraConfig.motion.threshold = threshold;
+      if (
+        threshold !== undefined &&
+        cameraConfig.motion.threshold !== threshold
+      ) {
         sendMotionThreshold(threshold);
       }
-    },
-    [cameraConfig, motionThreshold, sendMotionThreshold],
-  );
 
-  const setMotionContourArea = useCallback(
-    (contour_area: number) => {
-      if (cameraConfig && contour_area != motionContourArea) {
-        cameraConfig.motion.contour_area = contour_area;
+      if (
+        contour_area !== undefined &&
+        cameraConfig.motion.contour_area !== contour_area
+      ) {
         sendMotionContourArea(contour_area);
       }
+
+      if (
+        improve_contrast !== undefined &&
+        cameraConfig.motion.improve_contrast !== improve_contrast
+      ) {
+        sendImproveContrast(improve_contrast ? "ON" : "OFF");
+      }
+    }
+  }, [
+    cameraConfig,
+    motionSettings,
+    sendMotionThreshold,
+    sendMotionContourArea,
+    sendImproveContrast,
+  ]);
+
+  const handleMotionConfigChange = (newConfig: Partial<MotionSettings>) => {
+    setMotionSettings((prevConfig) => ({ ...prevConfig, ...newConfig }));
+    setChangedValue(true);
+  };
+
+  const saveToConfig = useCallback(async () => {
+    setIsLoading(true);
+
+    axios
+      .put(
+        `config/set?cameras.${selectedCamera}.motion.threshold=${motionSettings.threshold}&cameras.${selectedCamera}.motion.contour_area=${motionSettings.contour_area}&cameras.${selectedCamera}.motion.improve_contrast=${motionSettings.improve_contrast}`,
+        { requires_restart: 0 },
+      )
+      .then((res) => {
+        if (res.status === 200) {
+          toast.success("Motion settings saved.", { position: "top-center" });
+          setChangedValue(false);
+          updateConfig();
+        } else {
+          toast.error(`Failed to save config changes: ${res.statusText}`, {
+            position: "top-center",
+          });
+        }
+      })
+      .catch((error) => {
+        toast.error(
+          `Failed to save config changes: ${error.response.data.message}`,
+          { position: "top-center" },
+        );
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [
+    updateConfig,
+    motionSettings.threshold,
+    motionSettings.contour_area,
+    motionSettings.improve_contrast,
+    selectedCamera,
+  ]);
+
+  const handleSelectedCameraChange = useCallback(
+    (camera: string) => {
+      if (changedValue) {
+        setNextSelectedCamera(camera);
+        setConfirmationDialogOpen(true);
+      } else {
+        setSelectedCamera(camera);
+        setNextSelectedCamera("");
+      }
     },
-    [cameraConfig, motionContourArea, sendMotionContourArea],
+    [setSelectedCamera, changedValue],
+  );
+
+  const handleDialog = useCallback(
+    (save: boolean) => {
+      if (save) {
+        saveToConfig();
+      }
+      setSelectedCamera(nextSelectedCamera);
+      setNextSelectedCamera("");
+      setConfirmationDialogOpen(false);
+      setChangedValue(false);
+    },
+    [saveToConfig, setSelectedCamera, nextSelectedCamera],
   );
 
   if (!cameraConfig && !selectedCamera) {
@@ -78,8 +196,12 @@ export default function MotionTuner() {
   return (
     <>
       <Heading as="h2">Motion Detection Tuner</Heading>
+      <Toaster />
       <div className="flex items-center space-x-2 mt-5">
-        <Select value={selectedCamera} onValueChange={setSelectedCamera}>
+        <Select
+          value={selectedCamera}
+          onValueChange={handleSelectedCameraChange}
+        >
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Camera" />
           </SelectTrigger>
@@ -89,7 +211,7 @@ export default function MotionTuner() {
               {cameras.map((camera) => (
                 <SelectItem
                   key={camera.name}
-                  value={`${camera.name}`}
+                  value={camera.name}
                   className="capitalize"
                 >
                   {camera.name}
@@ -111,31 +233,84 @@ export default function MotionTuner() {
               <Slider
                 id="motion-threshold"
                 className="w-[300px]"
-                value={[motionThreshold]}
+                disabled={motionSettings.threshold === undefined}
+                value={[motionSettings.threshold ?? 0]}
                 min={10}
                 max={80}
                 step={1}
-                onValueChange={(value) => setMotionThreshold(value[0])}
+                onValueChange={(value) => {
+                  handleMotionConfigChange({ threshold: value[0] });
+                }}
               />
               <Label htmlFor="motion-threshold" className="px-2">
-                Threshold: {motionThreshold}
+                Threshold: {motionSettings.threshold}
               </Label>
             </div>
             <div className="flex flex-row">
               <Slider
                 id="motion-contour-area"
                 className="w-[300px]"
-                value={[motionContourArea]}
+                disabled={motionSettings.contour_area === undefined}
+                value={[motionSettings.contour_area ?? 0]}
                 min={10}
                 max={200}
                 step={5}
-                onValueChange={(value) => setMotionContourArea(value[0])}
+                onValueChange={(value) => {
+                  handleMotionConfigChange({ contour_area: value[0] });
+                }}
               />
               <Label htmlFor="motion-contour-area" className="px-2">
-                Contour Area: {motionContourArea}
+                Contour Area: {motionSettings.contour_area}
               </Label>
             </div>
+            <div className="flex flex-row">
+              <Switch
+                id="improve-contrast"
+                disabled={motionSettings.improve_contrast === undefined}
+                checked={motionSettings.improve_contrast === true}
+                onCheckedChange={(isChecked) => {
+                  handleMotionConfigChange({ improve_contrast: isChecked });
+                }}
+              />
+              <Label htmlFor="improve-contrast">Improve Contrast</Label>
+            </div>
+
+            <div className="flex">
+              <Button
+                size="sm"
+                variant={isLoading ? "ghost" : "select"}
+                disabled={!changedValue || isLoading}
+                onClick={saveToConfig}
+              >
+                {isLoading ? "Saving..." : "Save to Config"}
+              </Button>
+            </div>
           </div>
+          {confirmationDialogOpen && (
+            <AlertDialog
+              open={confirmationDialogOpen}
+              onOpenChange={() => setConfirmationDialogOpen(false)}
+            >
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    You have unsaved changes on this camera.
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Do you want to save your changes before continuing?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel onClick={() => handleDialog(false)}>
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction onClick={() => handleDialog(true)}>
+                    Save
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
         </div>
       ) : (
         <Skeleton className="size-full rounded-2xl" />

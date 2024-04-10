@@ -234,3 +234,17 @@ export function useMotionContourArea(camera: string): {
   );
   return { payload: payload as string, send };
 }
+
+export function useImproveContrast(camera: string): {
+  payload: string;
+  send: (payload: string, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(
+    `${camera}/improve_contrast/state`,
+    `${camera}/improve_contrast/set`,
+  );
+  return { payload: payload as string, send };
+}

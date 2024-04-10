@@ -226,7 +226,6 @@ export default function SettingsZones() {
                       </code>
                     </TableCell>
                     <TableCell>
-                      {" "}
                       <div
                         className="cursor-pointer"
                         onClick={() => setActivePolygonIndex(index)}
