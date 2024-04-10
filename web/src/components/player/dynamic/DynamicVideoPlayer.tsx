@@ -150,7 +150,6 @@ export default function DynamicVideoPlayer({
   return (
     <>
       <HlsVideoPlayer
-        className={className ?? ""}
         videoRef={playerRef}
         visible={!(isScrubbing || isLoading)}
         currentSource={source}
