@@ -21,6 +21,14 @@ export interface BirdseyeConfig {
   width: number;
 }
 
+export const ATTRIBUTES = [
+  "amazon",
+  "face",
+  "fedex",
+  "license_plate",
+  "ups",
+] as const;
+
 export interface CameraConfig {
   audio: {
     enabled: boolean;

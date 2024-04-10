@@ -1,31 +1,145 @@
-import { Button } from "../ui/button";
 import { Polygon } from "@/types/canvas";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useState } from "react";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
+import { useMemo, useState } from "react";
 import { Input } from "../ui/input";
+import { GeneralFilterContent } from "../filter/ReviewFilterGroup";
+import { FaObjectGroup } from "react-icons/fa";
+import { Button } from "../ui/button";
+import { ATTRIBUTES, FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
+import { isMobile } from "react-device-detect";
 
-type PolygonCanvasProps = {
+type ZoneObjectSelectorProps = {
   camera: string;
-  width: number;
-  height: number;
+  zoneName: string;
+  allLabels: string[];
+  updateLabelFilter: (labels: string[] | undefined) => void;
+};
+
+export function ZoneObjectSelector({
+  camera,
+  zoneName,
+  allLabels,
+  updateLabelFilter,
+}: ZoneObjectSelectorProps) {
+  const { data: config } = useSWR<FrigateConfig>("config");
+  const [open, setOpen] = useState(false);
+
+  const cameraConfig = useMemo(() => {
+    if (config && camera) {
+      return config.cameras[camera];
+    }
+  }, [config, camera]);
+
+  const zoneLabels = useMemo<string[]>(() => {
+    if (!cameraConfig || !zoneName) {
+      return [];
+    }
+    console.log(zoneName);
+
+    const labels = new Set<string>();
+    // console.log("zone name", zoneName);
+    // console.log(cameraConfig.zones[zoneName].objects);
+
+    cameraConfig.objects.track.forEach((label) => {
+      if (!ATTRIBUTES.includes(label)) {
+        labels.add(label);
+      }
+    });
+
+    cameraConfig.zones[zoneName].objects.forEach((label) => {
+      labels.add(label);
+    });
+
+    return [...labels].sort() || [];
+  }, [cameraConfig, zoneName]);
+
+  const [currentLabels, setCurrentLabels] = useState<string[] | undefined>(
+    zoneLabels,
+  );
+
+  const trigger = (
+    <Button
+      className={`flex items-center gap-2 capitalize ${false ? "bg-selected hover:bg-selected" : ""}`}
+      size="sm"
+    >
+      <FaObjectGroup
+        className={`${false ? "text-background dark:text-primary" : "text-secondary-foreground"}`}
+      />
+    </Button>
+  );
+
+  const content = (
+    <GeneralFilterContent
+      allLabels={allLabels}
+      selectedLabels={zoneLabels}
+      currentLabels={currentLabels}
+      updateLabelFilter={updateLabelFilter}
+      setCurrentLabels={setCurrentLabels}
+      onClose={() => setOpen(false)}
+    />
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer
+        open={open}
+        onOpenChange={(open) => {
+          if (!open) {
+            setCurrentLabels(zoneLabels);
+          }
+
+          setOpen(open);
+        }}
+      >
+        <DrawerTrigger asChild>{trigger}</DrawerTrigger>
+        <DrawerContent className="max-h-[75dvh] overflow-hidden">
+          {content}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  return (
+    <Popover
+      open={open}
+      onOpenChange={(open) => {
+        if (!open) {
+          setCurrentLabels(zoneLabels);
+        }
+
+        setOpen(open);
+      }}
+    >
+      <PopoverTrigger asChild>{trigger}</PopoverTrigger>
+      <PopoverContent>{content}</PopoverContent>
+    </Popover>
+  );
+}
+
+type ZoneControlsProps = {
+  camera: string;
   polygons: Polygon[];
   setPolygons: React.Dispatch<React.SetStateAction<Polygon[]>>;
   activePolygonIndex: number | null;
   setActivePolygonIndex: React.Dispatch<React.SetStateAction<number | null>>;
 };
 
-export function PolygonControls({
+export function ZoneControls({
+  camera,
   polygons,
   setPolygons,
   activePolygonIndex,
   setActivePolygonIndex,
-}: PolygonCanvasProps) {
+}: ZoneControlsProps) {
   const { data: config } = useSWR("config");
   const [zoneName, setZoneName] = useState<string | null>();
   const [invalidName, setInvalidName] = useState<boolean>();
@@ -53,6 +167,7 @@ export function PolygonControls({
         points: [],
         isFinished: false,
         name: "new",
+        camera: camera,
         color: updatedPolygons[activePolygonIndex].color ?? [220, 0, 0],
       };
       setPolygons(updatedPolygons);
@@ -66,6 +181,7 @@ export function PolygonControls({
         points: [],
         isFinished: false,
         name: zoneName,
+        camera: camera,
         color: [220, 0, 0],
       },
     ]);
@@ -95,6 +211,10 @@ export function PolygonControls({
         >
           <DialogContent>
             <DialogTitle>New Zone</DialogTitle>
+            <DialogDescription>
+              Enter a label for your zone. Do not include spaces, and don't use
+              the name of a camera.
+            </DialogDescription>
             <>
               <Input
                 className="mt-3"
@@ -102,7 +222,8 @@ export function PolygonControls({
                 value={zoneName ?? ""}
                 onChange={(e) => {
                   setInvalidName(
-                    Object.keys(config.cameras).includes(e.target.value),
+                    Object.keys(config.cameras).includes(e.target.value) ||
+                      e.target.value.includes(" "),
                   );
 
                   setZoneName(e.target.value);
@@ -110,7 +231,7 @@ export function PolygonControls({
               />
               {invalidName && (
                 <div className="text-danger text-sm">
-                  Zone names must not be the name of a camera.
+                  Zone name is not valid.
                 </div>
               )}
               <DialogFooter>
@@ -137,4 +258,4 @@ export function PolygonControls({
   );
 }
 
-export default PolygonControls;
+export default ZoneControls;

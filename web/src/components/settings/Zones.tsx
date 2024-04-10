@@ -16,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
@@ -24,7 +25,7 @@ import { PolygonCanvas } from "./PolygonCanvas";
 import { Polygon } from "@/types/canvas";
 import { interpolatePoints } from "@/utils/canvasUtil";
 import { isDesktop } from "react-device-detect";
-import PolygonControls from "./PolygonControls";
+import ZoneControls, { ZoneObjectSelector } from "./ZoneControls";
 import { Skeleton } from "../ui/skeleton";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { LuPencil } from "react-icons/lu";
@@ -67,6 +68,22 @@ export default function SettingsZones() {
       return config.cameras[selectedCamera];
     }
   }, [config, selectedCamera]);
+
+  const allLabels = useMemo<string[]>(() => {
+    if (!cameras) {
+      return [];
+    }
+
+    const labels = new Set<string>();
+
+    cameras.forEach((camera) => {
+      camera.objects.track.forEach((label) => {
+        labels.add(label);
+      });
+    });
+
+    return [...labels].sort();
+  }, [cameras]);
 
   const grow = useMemo(() => {
     if (!cameraConfig) {
@@ -129,6 +146,7 @@ export default function SettingsZones() {
     if (cameraConfig && containerRef.current) {
       setZonePolygons(
         Object.entries(cameraConfig.zones).map(([name, zoneData]) => ({
+          camera: cameraConfig.name,
           name,
           points: interpolatePoints(
             parseCoordinates(zoneData.coordinates),
@@ -232,6 +250,12 @@ export default function SettingsZones() {
                       >
                         <LuPencil className="size-4 text-white" />
                       </div>
+                      <ZoneObjectSelector
+                        camera={polygon.camera}
+                        zoneName={polygon.name}
+                        allLabels={allLabels}
+                        updateLabelFilter={(objects) => console.log(objects)}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}
@@ -242,10 +266,8 @@ export default function SettingsZones() {
               container width: {containerWidth}, container height:
               {containerHeight}
             </div>
-            <PolygonControls
+            <ZoneControls
               camera={cameraConfig.name}
-              width={scaledWidth}
-              height={scaledHeight}
               polygons={zonePolygons}
               setPolygons={setZonePolygons}
               activePolygonIndex={activePolygonIndex}
