@@ -100,8 +100,10 @@ export function MotionReviewTimeline({
       const overlappingReviewItems = events.some(
         (item) =>
           (item.start_time >= motionStart && item.start_time < motionEnd) ||
-          (item.end_time > motionStart && item.end_time <= motionEnd) ||
-          (item.start_time <= motionStart && item.end_time >= motionEnd),
+          ((item.end_time ?? timelineStart) > motionStart &&
+            (item.end_time ?? timelineStart) <= motionEnd) ||
+          (item.start_time <= motionStart &&
+            (item.end_time ?? timelineStart) >= motionEnd),
       );
 
       if ((!segmentMotion || overlappingReviewItems) && motionOnly) {
