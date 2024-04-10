@@ -1,7 +1,7 @@
 import Logo from "@/components/Logo";
 import { FaCompactDisc, FaVideo } from "react-icons/fa";
-import { TbTimelineEventFilled } from "react-icons/tb";
 import { LuConstruction } from "react-icons/lu";
+import { MdVideoLibrary } from "react-icons/md";
 
 export const navbarLinks = [
   {
@@ -12,7 +12,7 @@ export const navbarLinks = [
   },
   {
     id: 2,
-    icon: TbTimelineEventFilled,
+    icon: MdVideoLibrary,
     title: "Review",
     url: "/review",
   },

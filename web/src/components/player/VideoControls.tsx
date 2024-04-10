@@ -145,7 +145,7 @@ export default function VideoControls({
       className={`px-4 py-2 flex justify-between items-center gap-8 text-primary z-50 bg-background/60 rounded-lg ${className ?? ""}`}
     >
       {video && features.volume && (
-        <div className="flex justify-normal items-center gap-2">
+        <div className="flex justify-normal items-center gap-2 cursor-pointer">
           <VolumeIcon
             className="size-5"
             onClick={(e: React.MouseEvent) => {
