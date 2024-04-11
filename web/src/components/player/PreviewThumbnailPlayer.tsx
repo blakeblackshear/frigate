@@ -74,7 +74,7 @@ export default function PreviewThumbnailPlayer({
   });
 
   const handleSetReviewed = useCallback(() => {
-    if (review.end_time) {
+    if (review.end_time && !review.has_been_reviewed) {
       review.has_been_reviewed = true;
       setReviewed(review);
     }
@@ -304,8 +304,9 @@ function PreviewContent({
   if (relevantPreview) {
     return (
       <VideoPreview
-        review={review}
         relevantPreview={relevantPreview}
+        startTime={review.start_time}
+        endTime={review.end_time}
         setReviewed={setReviewed}
         setIgnoreClick={setIgnoreClick}
         isPlayingBack={isPlayingBack}
@@ -328,16 +329,18 @@ function PreviewContent({
 
 const PREVIEW_PADDING = 16;
 type VideoPreviewProps = {
-  review: ReviewSegment;
   relevantPreview: Preview;
+  startTime: number;
+  endTime?: number;
   setReviewed: () => void;
   setIgnoreClick: (ignore: boolean) => void;
   isPlayingBack: (ended: boolean) => void;
   onTimeUpdate?: (time: number | undefined) => void;
 };
 function VideoPreview({
-  review,
   relevantPreview,
+  startTime,
+  endTime,
   setReviewed,
   setIgnoreClick,
   isPlayingBack,
@@ -356,19 +359,13 @@ function VideoPreview({
     }
 
     // start with a bit of padding
-    return Math.max(
-      0,
-      review.start_time - relevantPreview.start - PREVIEW_PADDING,
-    );
+    return Math.max(0, startTime - relevantPreview.start - PREVIEW_PADDING);
 
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const playerDuration = useMemo(
-    () =>
-      (review.end_time ?? relevantPreview.end) -
-      review.start_time +
-      PREVIEW_PADDING,
+    () => (endTime ?? relevantPreview.end) - startTime + PREVIEW_PADDING,
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
@@ -409,21 +406,14 @@ function VideoPreview({
     // end with a bit of padding
     const playerPercent = (playerProgress / playerDuration) * 100;
 
-    if (
-      setReviewed &&
-      !review.has_been_reviewed &&
-      lastPercent < 50 &&
-      playerPercent > 50
-    ) {
+    if (setReviewed && lastPercent < 50 && playerPercent > 50) {
       setReviewed();
     }
 
     setLastPercent(playerPercent);
 
     if (playerPercent > 100) {
-      if (!review.has_been_reviewed) {
-        setReviewed();
-      }
+      setReviewed();
 
       if (isMobile) {
         isPlayingBack(false);
@@ -488,7 +478,7 @@ function VideoPreview({
         setIgnoreClick(true);
       }
 
-      if (setReviewed && !review.has_been_reviewed) {
+      if (setReviewed) {
         setReviewed();
       }
 
