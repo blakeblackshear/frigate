@@ -323,21 +323,21 @@ function useDraggableElement({
           }
         }
 
+        const setTime = alignSetTimeToSegment
+          ? targetSegmentId
+          : targetSegmentId + segmentDuration * (offset / segmentHeight);
+
         updateDraggableElementPosition(
           newElementPosition,
-          targetSegmentId,
+          setTime,
           false,
           false,
         );
 
         if (setDraggableElementTime) {
-          if (alignSetTimeToSegment) {
-            setDraggableElementTime(targetSegmentId);
-          } else {
-            setDraggableElementTime(
-              targetSegmentId + segmentDuration * (offset / segmentHeight),
-            );
-          }
+          setDraggableElementTime(
+            targetSegmentId + segmentDuration * (offset / segmentHeight),
+          );
         }
 
         if (draggingAtTopEdge || draggingAtBottomEdge) {

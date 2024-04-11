@@ -107,6 +107,7 @@ export function ReviewTimeline({
     showDraggableElement: showHandlebar,
     draggableElementTime: handlebarTime,
     setDraggableElementTime: setHandlebarTime,
+    alignSetTimeToSegment: true,
     initialScrollIntoViewOnly: onlyInitialHandlebarScroll,
     timelineDuration,
     timelineCollapsed: timelineCollapsed,
