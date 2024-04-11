@@ -815,7 +815,14 @@ function MotionReview({
         const matchingItem = reviewItems?.all.find((item) => {
           const endTime = item.end_time ?? timeRange.before;
 
-          ((item.start_time >= segmentStartTime &&
+          return (
+            ((item.start_time >= segmentStartTime &&
+              item.start_time < segmentEndTime) ||
+              (endTime > segmentStartTime && endTime <= segmentEndTime) ||
+              (item.start_time <= segmentStartTime &&
+                endTime >= segmentEndTime)) &&
+            item.camera === cameraName
+          );
             item.start_time < segmentEndTime) ||
             (endTime > segmentStartTime && endTime <= segmentEndTime) ||
             (item.start_time <= segmentStartTime &&
