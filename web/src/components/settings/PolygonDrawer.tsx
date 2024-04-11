@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { Line, Circle, Group } from "react-konva";
-import { minMax, dragBoundFunc } from "@/utils/canvasUtil";
+import { minMax, toRGBColorString, dragBoundFunc } from "@/utils/canvasUtil";
 import type { KonvaEventObject } from "konva/lib/Node";
 import Konva from "konva";
 import { Vector2d } from "konva/lib/types";
@@ -78,11 +78,7 @@ export default function PolygonDrawer({
 
   const colorString = useCallback(
     (darkened: boolean) => {
-      if (color.length !== 3) {
-        return "rgb(220,0,0,0.5)";
-      }
-
-      return `rgba(${color[2]},${color[1]},${color[0]},${darkened ? "0.8" : "0.5"})`;
+      return toRGBColorString(color, darkened);
     },
     [color],
   );

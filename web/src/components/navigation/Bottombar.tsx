@@ -6,8 +6,8 @@ import { FrigateStats } from "@/types/stats";
 import { useFrigateStats } from "@/api/ws";
 import { useMemo } from "react";
 import useStats from "@/hooks/use-stats";
-import GeneralSettings from "../settings/GeneralSettings";
-import AccountSettings from "../settings/AccountSettings";
+import GeneralSettings from "../menu/GeneralSettings";
+import AccountSettings from "../menu/AccountSettings";
 import useNavigation from "@/hooks/use-navigation";
 
 function Bottombar() {

@@ -63,3 +63,11 @@ export const interpolatePoints = (
 
   return newPoints;
 };
+
+export const toRGBColorString = (color: number[], darkened: boolean) => {
+  if (color.length !== 3) {
+    return "rgb(220,0,0,0.5)";
+  }
+
+  return `rgba(${color[2]},${color[1]},${color[0]},${darkened ? "0.9" : "0.5"})`;
+};

@@ -1,75 +1,191 @@
-import Heading from "@/components/ui/heading";
-import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import MotionTuner from "@/components/settings/MotionTuner";
-import SettingsZones from "@/components/settings/Zones";
+import MasksAndZones from "@/components/settings/MasksAndZones";
+import { Button } from "@/components/ui/button";
+import { useMemo, useState } from "react";
+import useOptimisticState from "@/hooks/use-optimistic-state";
+import Logo from "@/components/Logo";
+import { isMobile } from "react-device-detect";
+import { FaVideo } from "react-icons/fa";
+import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
+import useSWR from "swr";
+import General from "@/components/settings/General";
+import FilterCheckBox from "@/components/filter/FilterCheckBox";
 
-function General() {
-  return (
-    <>
-      <Heading as="h2">Settings</Heading>
-      <div className="flex items-center space-x-2 mt-5">
-        <Switch id="detect" checked={false} onCheckedChange={() => {}} />
-        <Label htmlFor="detect">
-          Always show PTZ controls for ONVIF cameras
-        </Label>
+type CameraSelectButtonProps = {
+  allCameras: CameraConfig[];
+  selectedCamera: string;
+  setSelectedCamera: React.Dispatch<React.SetStateAction<string>>;
+};
+
+function CameraSelectButton({
+  allCameras,
+  selectedCamera,
+  setSelectedCamera,
+}: CameraSelectButtonProps) {
+  const [open, setOpen] = useState(false);
+
+  const trigger = (
+    <Button
+      className="flex items-center gap-2 capitalize bg-selected hover:bg-selected"
+      size="sm"
+    >
+      <FaVideo className="text-background dark:text-primary" />
+      <div className="hidden md:block text-background dark:text-primary">
+        {selectedCamera == undefined ? "No Camera" : selectedCamera}
       </div>
-
-      <div className="flex items-center space-x-2 mt-5">
-        <Select>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Default Live Mode" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Live Mode</SelectLabel>
-              <SelectItem value="jsmpeg">JSMpeg</SelectItem>
-              <SelectItem value="mse">MSE</SelectItem>
-              <SelectItem value="webrtc">WebRTC</SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+    </Button>
+  );
+  const content = (
+    <>
+      {isMobile && (
+        <>
+          <DropdownMenuLabel className="flex justify-center">
+            Camera
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+        </>
+      )}
+      <div className="h-auto overflow-y-auto overflow-x-hidden pb-4 md:pb-0">
+        {allCameras.map((item) => (
+          <FilterCheckBox
+            key={item.name}
+            isChecked={item.name === selectedCamera}
+            label={item.name}
+            onCheckedChange={(isChecked) => {
+              if (isChecked) {
+                setSelectedCamera(item.name);
+                setOpen(false);
+              }
+            }}
+          />
+        ))}
       </div>
     </>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer
+        open={open}
+        onOpenChange={(open: boolean) => {
+          if (!open) {
+            setSelectedCamera(selectedCamera);
+          }
+
+          setOpen(open);
+        }}
+      >
+        <DrawerTrigger asChild>{trigger}</DrawerTrigger>
+        <DrawerContent className="max-h-[75dvh] overflow-hidden">
+          {content}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  return (
+    <DropdownMenu
+      open={open}
+      onOpenChange={(open: boolean) => {
+        if (!open) {
+          setSelectedCamera(selectedCamera);
+        }
+
+        setOpen(open);
+      }}
+    >
+      <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+      <DropdownMenuContent>{content}</DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
 export default function Settings() {
+  const settingsViews = [
+    "general",
+    "objects",
+    "masks / zones",
+    "motion tuner",
+  ] as const;
+
+  type SettingsType = (typeof settingsViews)[number];
+  const [page, setPage] = useState<SettingsType>("general");
+  const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
+
+  const { data: config } = useSWR<FrigateConfig>("config");
+
+  const cameras = useMemo(() => {
+    if (!config) {
+      return [];
+    }
+
+    return Object.values(config.cameras)
+      .filter((conf) => conf.ui.dashboard && conf.enabled)
+      .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
+  }, [config]);
+
+  const [selectedCamera, setSelectedCamera] = useState(cameras[0].name);
+
   return (
-    <div className="w-full h-full">
-      <div className="flex h-full">
-        <div className="flex-1 content-start gap-2 overflow-y-auto no-scrollbar mt-4 mr-5">
-          <Tabs defaultValue="general" className="w-auto">
-            <TabsList>
-              <TabsTrigger value="general">General</TabsTrigger>
-              <TabsTrigger value="objects">Objects</TabsTrigger>
-              <TabsTrigger value="zones">Zones</TabsTrigger>
-              <TabsTrigger value="masks">Masks</TabsTrigger>
-              <TabsTrigger value="motion">Motion</TabsTrigger>
-            </TabsList>
-            <TabsContent value="general">
-              <General />
-            </TabsContent>
-            <TabsContent value="objects">Objects</TabsContent>
-            <TabsContent value="zones">
-              <SettingsZones />
-            </TabsContent>
-            <TabsContent value="masks">Masks</TabsContent>
-            <TabsContent value="motion">
-              <MotionTuner />
-            </TabsContent>
-          </Tabs>
-        </div>
+    <div className="size-full p-2 flex flex-col">
+      <div className="w-full h-11 relative flex justify-between items-center">
+        {isMobile && (
+          <Logo className="absolute inset-x-1/2 -translate-x-1/2 h-8" />
+        )}
+        <ToggleGroup
+          className="*:px-3 *:py-4 *:rounded-md"
+          type="single"
+          size="sm"
+          value={pageToggle}
+          onValueChange={(value: SettingsType) => {
+            if (value) {
+              setPageToggle(value);
+            }
+          }}
+        >
+          {Object.values(settingsViews).map((item) => (
+            <ToggleGroupItem
+              key={item}
+              className={`flex items-center justify-between gap-2 ${pageToggle == item ? "" : "*:text-gray-500"}`}
+              value={item}
+              aria-label={`Select ${item}`}
+            >
+              <div className="capitalize">{item}</div>
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
+        {(page == "objects" ||
+          page == "masks / zones" ||
+          page == "motion tuner") && (
+          <div className="flex items-center gap-2">
+            <CameraSelectButton
+              allCameras={cameras}
+              selectedCamera={selectedCamera}
+              setSelectedCamera={setSelectedCamera}
+            />
+          </div>
+        )}
+      </div>
+      <div className="mt-2 flex flex-col items-start">
+        {page == "general" && <General />}
+        {page == "objects" && <></>}
+        {page == "masks / zones" && (
+          <MasksAndZones
+            selectedCamera={selectedCamera}
+            setSelectedCamera={setSelectedCamera}
+          />
+        )}
+        {page == "motion tuner" && <MotionTuner />}
       </div>
     </div>
   );

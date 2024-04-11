@@ -1,13 +1,4 @@
-import Heading from "@/components/ui/heading";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import {
   Table,
   TableBody,
@@ -23,12 +14,16 @@ import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PolygonCanvas } from "./PolygonCanvas";
 import { Polygon } from "@/types/canvas";
-import { interpolatePoints } from "@/utils/canvasUtil";
+import { interpolatePoints, toRGBColorString } from "@/utils/canvasUtil";
 import { isDesktop } from "react-device-detect";
-import ZoneControls, { ZoneObjectSelector } from "./ZoneControls";
+import ZoneControls, {
+  NewZoneButton,
+  ZoneObjectSelector,
+} from "./NewZoneButton";
 import { Skeleton } from "../ui/skeleton";
 import { useResizeObserver } from "@/hooks/resize-observer";
-import { LuPencil } from "react-icons/lu";
+import { LuCopy, LuPencil, LuPlusSquare, LuTrash } from "react-icons/lu";
+import { FaDrawPolygon } from "react-icons/fa";
 
 const parseCoordinates = (coordinatesString: string) => {
   const coordinates = coordinatesString.split(",");
@@ -49,7 +44,15 @@ export type ZoneObjects = {
   objects: string[];
 };
 
-export default function SettingsZones() {
+type MasksAndZoneProps = {
+  selectedCamera: string;
+  setSelectedCamera: React.Dispatch<React.SetStateAction<string>>;
+};
+
+export default function MasksAndZones({
+  selectedCamera,
+  setSelectedCamera,
+}: MasksAndZoneProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
   const [zonePolygons, setZonePolygons] = useState<Polygon[]>([]);
   const [zoneObjects, setZoneObjects] = useState<ZoneObjects[]>([]);
@@ -67,8 +70,6 @@ export default function SettingsZones() {
       .filter((conf) => conf.ui.dashboard && conf.enabled)
       .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
   }, [config]);
-
-  const [selectedCamera, setSelectedCamera] = useState(cameras[0].name);
 
   const cameraConfig = useMemo(() => {
     if (config && selectedCamera) {
@@ -137,7 +138,7 @@ export default function SettingsZones() {
     [setZoneObjects],
   );
 
-  const grow = useMemo(() => {
+  const growe = useMemo(() => {
     if (!cameraConfig) {
       return;
     }
@@ -157,13 +158,50 @@ export default function SettingsZones() {
     }
   }, [cameraConfig]);
 
-  const handleCameraChange = useCallback(
-    (camera: string) => {
-      setSelectedCamera(camera);
-      setActivePolygonIndex(null);
+  const getCameraAspect = useCallback(
+    (cam: string) => {
+      if (!config) {
+        return undefined;
+      }
+
+      const camera = config.cameras[cam];
+
+      if (!camera) {
+        return undefined;
+      }
+
+      return camera.detect.width / camera.detect.height;
     },
-    [setSelectedCamera, setActivePolygonIndex],
+    [config],
   );
+
+  const mainCameraAspect = useMemo(() => {
+    const aspectRatio = getCameraAspect(selectedCamera);
+
+    if (!aspectRatio) {
+      return "normal";
+    } else if (aspectRatio > 2) {
+      return "wide";
+    } else if (aspectRatio < 16 / 9) {
+      return "tall";
+    } else {
+      return "normal";
+    }
+  }, [getCameraAspect, selectedCamera]);
+
+  const grow = useMemo(() => {
+    if (mainCameraAspect == "wide") {
+      return "w-full aspect-wide";
+    } else if (mainCameraAspect == "tall") {
+      if (isDesktop) {
+        return "size-full aspect-tall flex flex-col justify-center";
+      } else {
+        return "size-full";
+      }
+    } else {
+      return "w-full aspect-video";
+    }
+  }, [mainCameraAspect]);
 
   const [{ width: containerWidth, height: containerHeight }] =
     useResizeObserver(containerRef);
@@ -173,13 +211,16 @@ export default function SettingsZones() {
     : { width: 1, height: 1 };
   const aspectRatio = width / height;
 
-  const stretch = false;
-  const fitAspect = 0.75;
+  const stretch = true;
+  const fitAspect = 16 / 9;
+  // console.log(containerRef.current?.clientHeight);
 
   const scaledHeight = useMemo(() => {
     const scaledHeight =
       aspectRatio < (fitAspect ?? 0)
-        ? Math.floor(containerHeight)
+        ? Math.floor(
+            Math.min(containerHeight, containerRef.current?.clientHeight),
+          )
         : Math.floor(containerWidth / aspectRatio);
     const finalHeight = stretch ? scaledHeight : Math.min(scaledHeight, height);
 
@@ -244,57 +285,86 @@ export default function SettingsZones() {
     console.log("component zone objects", zoneObjects);
   }, [zoneObjects]);
 
+  useEffect(() => {
+    if (selectedCamera) {
+      setActivePolygonIndex(null);
+    }
+  }, [selectedCamera]);
+
   if (!cameraConfig && !selectedCamera) {
     return <ActivityIndicator />;
   }
 
   return (
-    <div className="overflow-auto">
-      <Heading as="h2">Zones</Heading>
-      <div className="flex items-center space-x-2 mt-5">
-        <Select value={selectedCamera} onValueChange={handleCameraChange}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Camera" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Choose a camera</SelectLabel>
-              {cameras.map((camera) => (
-                <SelectItem
-                  key={camera.name}
-                  value={`${camera.name}`}
-                  className="capitalize"
-                >
-                  {camera.name}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      </div>
-
+    <>
       {cameraConfig && (
-        <div className="flex flex-col justify-evenly">
-          <div
-            className={`flex flex-col justify-center items-center w-full md:w-[60%] ${grow}`}
-          >
-            <div ref={containerRef} className="size-full">
-              {cameraConfig ? (
-                <PolygonCanvas
-                  camera={cameraConfig.name}
-                  width={scaledWidth}
-                  height={scaledHeight}
-                  polygons={zonePolygons}
-                  setPolygons={setZonePolygons}
-                  activePolygonIndex={activePolygonIndex}
-                />
-              ) : (
-                <Skeleton className="w-full h-full" />
-              )}
+        <div className="flex flex-col md:flex-row size-full">
+          <div className="flex flex-col order-last w-full md:w-3/12 md:order-none md:mr-2">
+            <div className="flex mb-3">
+              <Separator />
             </div>
-          </div>
-          <div className="w-full md:w-[30%]">
-            <Table>
+            <div className="flex flex-row justify-between items-center mb-3">
+              <div className="text-md">Zones</div>
+              <NewZoneButton
+                camera={cameraConfig.name}
+                polygons={zonePolygons}
+                setPolygons={setZonePolygons}
+                activePolygonIndex={activePolygonIndex}
+                setActivePolygonIndex={setActivePolygonIndex}
+              />
+            </div>
+            {zonePolygons.map((polygon, index) => (
+              <div
+                key={index}
+                className="flex p-1 rounded-lg flex-row items-center justify-between mx-2 mb-1"
+                style={{
+                  backgroundColor:
+                    activePolygonIndex === index
+                      ? toRGBColorString(polygon.color, false)
+                      : "",
+                }}
+              >
+                <div
+                  className={`flex items-center ${activePolygonIndex === index ? "text-primary" : "text-secondary-foreground"}`}
+                >
+                  <FaDrawPolygon
+                    className="size-4 mr-2"
+                    style={{
+                      fill: toRGBColorString(polygon.color, true),
+                      color: toRGBColorString(polygon.color, true),
+                    }}
+                  />
+                  {polygon.name}
+                </div>
+                <div className="flex flex-row gap-2">
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => setActivePolygonIndex(index)}
+                  >
+                    <LuPencil
+                      className={`size-4 ${activePolygonIndex === index ? "text-primary" : "text-secondary-foreground"}`}
+                    />
+                  </div>
+                  <LuCopy
+                    className={`size-4 ${activePolygonIndex === index ? "text-primary" : "text-secondary-foreground"}`}
+                  />
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => {
+                      setZonePolygons((oldPolygons) => {
+                        return oldPolygons.filter((_, i) => i !== index);
+                      });
+                      setActivePolygonIndex(null);
+                    }}
+                  >
+                    <LuTrash
+                      className={`size-4 ${activePolygonIndex === index ? "text-primary fill-primary" : "text-secondary-foreground fill-secondary-foreground"}`}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+            {/* <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[100px]">Name</TableHead>
@@ -372,10 +442,29 @@ export default function SettingsZones() {
                   0,
                 )}
               </pre>
+            </div> */}
+          </div>
+          <div
+            ref={containerRef}
+            className="flex md:w-7/12 md:grow md:h-dvh md:max-h-[90%]"
+          >
+            <div className="size-full">
+              {cameraConfig ? (
+                <PolygonCanvas
+                  camera={cameraConfig.name}
+                  width={scaledWidth}
+                  height={scaledHeight}
+                  polygons={zonePolygons}
+                  setPolygons={setZonePolygons}
+                  activePolygonIndex={activePolygonIndex}
+                />
+              ) : (
+                <Skeleton className="w-full h-full" />
+              )}
             </div>
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
