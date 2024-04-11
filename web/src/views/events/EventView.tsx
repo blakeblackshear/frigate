@@ -823,11 +823,6 @@ function MotionReview({
                 endTime >= segmentEndTime)) &&
             item.camera === cameraName
           );
-            item.start_time < segmentEndTime) ||
-            (endTime > segmentStartTime && endTime <= segmentEndTime) ||
-            (item.start_time <= segmentStartTime &&
-              endTime >= segmentEndTime)) &&
-            item.camera === cameraName;
         });
 
         return matchingItem ? matchingItem.severity : null;
