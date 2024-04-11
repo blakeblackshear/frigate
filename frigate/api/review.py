@@ -27,10 +27,18 @@ def review():
 
     before = request.args.get("before", type=float, default=datetime.now().timestamp())
     after = request.args.get(
-        "after", type=float, default=(datetime.now() - timedelta(hours=18)).timestamp()
+        "after", type=float, default=(datetime.now() - timedelta(hours=24)).timestamp()
     )
 
-    clauses = [((ReviewSegment.start_time > after) & (ReviewSegment.end_time < before))]
+    clauses = [
+        (
+            (ReviewSegment.start_time > after)
+            & (
+                (ReviewSegment.end_time.is_null(True))
+                | (ReviewSegment.end_time < before)
+            )
+        )
+    ]
 
     if cameras != "all":
         camera_list = cameras.split(",")
@@ -45,6 +53,7 @@ def review():
         for label in filtered_labels:
             label_clauses.append(
                 (ReviewSegment.data["objects"].cast("text") % f'*"{label}"*')
+                | (ReviewSegment.data["audio"].cast("text") % f'*"{label}"*')
             )
 
         label_clause = reduce(operator.or_, label_clauses)
@@ -94,6 +103,7 @@ def review_summary():
         for label in filtered_labels:
             label_clauses.append(
                 (ReviewSegment.data["objects"].cast("text") % f'*"{label}"*')
+                | (ReviewSegment.data["audio"].cast("text") % f'*"{label}"*')
             )
 
         label_clause = reduce(operator.or_, label_clauses)

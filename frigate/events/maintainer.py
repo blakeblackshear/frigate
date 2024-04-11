@@ -1,4 +1,3 @@
-import datetime
 import logging
 import threading
 from multiprocessing import Queue
@@ -112,10 +111,6 @@ class EventProcessor(threading.Thread):
 
                 self.handle_external_detection(event_type, event_data)
 
-        # set an end_time on events without an end_time before exiting
-        Event.update(end_time=datetime.datetime.now().timestamp()).where(
-            Event.end_time == None
-        ).execute()
         self.event_receiver.stop()
         self.event_end_publisher.stop()
         logger.info("Exiting event processor...")

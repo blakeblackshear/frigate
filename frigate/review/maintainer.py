@@ -66,6 +66,7 @@ class PendingReviewSegment:
         # thumbnail
         self.frame = np.zeros((THUMB_HEIGHT * 3 // 2, THUMB_WIDTH), np.uint8)
         self.frame_active_count = 0
+        self.frame_path = os.path.join(CLIPS_DIR, f"thumb-{self.camera}-{self.id}.jpg")
 
     def update_frame(
         self, camera_config: CameraConfig, frame, objects: list[TrackedObject]
@@ -98,19 +99,19 @@ class PendingReviewSegment:
             color_frame, dsize=(width, THUMB_HEIGHT), interpolation=cv2.INTER_AREA
         )
 
-    def end(self) -> dict:
-        path = os.path.join(CLIPS_DIR, f"thumb-{self.camera}-{self.id}.jpg")
-
         if self.frame is not None:
-            cv2.imwrite(path, self.frame, [int(cv2.IMWRITE_WEBP_QUALITY), 60])
+            cv2.imwrite(
+                self.frame_path, self.frame, [int(cv2.IMWRITE_WEBP_QUALITY), 60]
+            )
 
+    def get_data(self, ended: bool) -> dict:
         return {
             ReviewSegment.id: self.id,
             ReviewSegment.camera: self.camera,
             ReviewSegment.start_time: self.start_time,
-            ReviewSegment.end_time: self.last_update,
+            ReviewSegment.end_time: self.last_update if ended else None,
             ReviewSegment.severity: self.severity.value,
-            ReviewSegment.thumb_path: path,
+            ReviewSegment.thumb_path: self.frame_path,
             ReviewSegment.data: {
                 "detections": list(set(self.detections.keys())),
                 "objects": list(set(self.detections.values())),
@@ -141,9 +142,20 @@ class ReviewSegmentMaintainer(threading.Thread):
 
         self.stop_event = stop_event
 
+    def update_segment(self, segment: PendingReviewSegment) -> None:
+        """Update segment."""
+        seg_data = segment.get_data(ended=False)
+        self.requestor.send_data(UPSERT_REVIEW_SEGMENT, seg_data)
+        self.requestor.send_data(
+            "reviews",
+            json.dumps(
+                {"type": "update", "review": {k.name: v for k, v in seg_data.items()}}
+            ),
+        )
+
     def end_segment(self, segment: PendingReviewSegment) -> None:
         """End segment."""
-        seg_data = segment.end()
+        seg_data = segment.get_data(ended=True)
         self.requestor.send_data(UPSERT_REVIEW_SEGMENT, seg_data)
         self.requestor.send_data(
             "reviews",
@@ -179,6 +191,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                 )
                 segment.update_frame(camera_config, yuv_frame, active_objects)
                 self.frame_manager.close(frame_id)
+                self.update_segment(segment)
 
             for object in active_objects:
                 if not object["sub_label"]:
@@ -263,6 +276,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                 camera_config, yuv_frame, active_objects
             )
             self.frame_manager.close(frame_id)
+            self.update_segment(self.active_review_segments[camera])
         elif len(motion) >= 20:
             self.active_review_segments[camera] = PendingReviewSegment(
                 camera,
@@ -397,6 +411,11 @@ class ReviewSegmentMaintainer(threading.Thread):
                         self.active_review_segments[camera].last_update = manual_info[
                             "end_time"
                         ]
+
+        self.config_subscriber.stop()
+        self.requestor.stop()
+        self.detection_subscriber.stop()
+        logger.info("Exiting review maintainer...")
 
 
 def get_active_objects(

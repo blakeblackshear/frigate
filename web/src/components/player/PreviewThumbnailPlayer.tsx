@@ -21,11 +21,14 @@ import { useSwipeable } from "react-swipeable";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import ImageLoadingIndicator from "../indicators/ImageLoadingIndicator";
 import useContextMenu from "@/hooks/use-contextmenu";
+import ActivityIndicator from "../indicators/activity-indicator";
+import { TimeRange } from "@/types/timeline";
 
 type PreviewPlayerProps = {
   review: ReviewSegment;
   allPreviews?: Preview[];
   scrollLock?: boolean;
+  timeRange: TimeRange;
   onTimeUpdate?: (time: number | undefined) => void;
   setReviewed: (review: ReviewSegment) => void;
   onClick: (review: ReviewSegment, ctrl: boolean) => void;
@@ -43,6 +46,7 @@ export default function PreviewThumbnailPlayer({
   review,
   allPreviews,
   scrollLock = false,
+  timeRange,
   setReviewed,
   onClick,
   onTimeUpdate,
@@ -70,8 +74,10 @@ export default function PreviewThumbnailPlayer({
   });
 
   const handleSetReviewed = useCallback(() => {
-    review.has_been_reviewed = true;
-    setReviewed(review);
+    if (review.end_time && !review.has_been_reviewed) {
+      review.has_been_reviewed = true;
+      setReviewed(review);
+    }
   }, [review, setReviewed]);
 
   useContextMenu(imgRef, () => {
@@ -91,7 +97,7 @@ export default function PreviewThumbnailPlayer({
         return false;
       }
 
-      if (review.end_time > preview.end) {
+      if ((review.end_time ?? timeRange.before) > preview.end) {
         multiHour = true;
       }
 
@@ -108,7 +114,8 @@ export default function PreviewThumbnailPlayer({
 
     const firstPrev = allPreviews[firstIndex];
     const firstDuration = firstPrev.end - review.start_time;
-    const secondDuration = review.end_time - firstPrev.end;
+    const secondDuration =
+      (review.end_time ?? timeRange.before) - firstPrev.end;
 
     if (firstDuration > secondDuration) {
       // the first preview is longer than the second, return the first
@@ -123,7 +130,7 @@ export default function PreviewThumbnailPlayer({
 
       return undefined;
     }
-  }, [allPreviews, review]);
+  }, [allPreviews, review, timeRange]);
 
   // Hover Playback
 
@@ -183,6 +190,7 @@ export default function PreviewThumbnailPlayer({
           <PreviewContent
             review={review}
             relevantPreview={relevantPreview}
+            timeRange={timeRange}
             setReviewed={handleSetReviewed}
             setIgnoreClick={setIgnoreClick}
             isPlayingBack={setPlayback}
@@ -256,7 +264,13 @@ export default function PreviewThumbnailPlayer({
             <div className="absolute top-0 inset-x-0 rounded-t-l z-10 w-full h-[30%] bg-gradient-to-b from-black/60 to-transparent pointer-events-none"></div>
             <div className="absolute bottom-0 inset-x-0 rounded-b-l z-10 w-full h-[20%] bg-gradient-to-t from-black/60 to-transparent pointer-events-none">
               <div className="flex h-full justify-between items-end mx-3 pb-1 text-white text-sm">
-                <TimeAgo time={review.start_time * 1000} dense />
+                {review.end_time ? (
+                  <TimeAgo time={review.start_time * 1000} dense />
+                ) : (
+                  <div>
+                    <ActivityIndicator size={24} />
+                  </div>
+                )}
                 {formattedDate}
               </div>
             </div>
@@ -270,6 +284,7 @@ export default function PreviewThumbnailPlayer({
 type PreviewContentProps = {
   review: ReviewSegment;
   relevantPreview: Preview | undefined;
+  timeRange: TimeRange;
   setReviewed: () => void;
   setIgnoreClick: (ignore: boolean) => void;
   isPlayingBack: (ended: boolean) => void;
@@ -278,6 +293,7 @@ type PreviewContentProps = {
 function PreviewContent({
   review,
   relevantPreview,
+  timeRange,
   setReviewed,
   setIgnoreClick,
   isPlayingBack,
@@ -288,8 +304,9 @@ function PreviewContent({
   if (relevantPreview) {
     return (
       <VideoPreview
-        review={review}
         relevantPreview={relevantPreview}
+        startTime={review.start_time}
+        endTime={review.end_time}
         setReviewed={setReviewed}
         setIgnoreClick={setIgnoreClick}
         isPlayingBack={isPlayingBack}
@@ -300,6 +317,7 @@ function PreviewContent({
     return (
       <InProgressPreview
         review={review}
+        timeRange={timeRange}
         setReviewed={setReviewed}
         setIgnoreClick={setIgnoreClick}
         isPlayingBack={isPlayingBack}
@@ -311,16 +329,18 @@ function PreviewContent({
 
 const PREVIEW_PADDING = 16;
 type VideoPreviewProps = {
-  review: ReviewSegment;
   relevantPreview: Preview;
+  startTime: number;
+  endTime?: number;
   setReviewed: () => void;
   setIgnoreClick: (ignore: boolean) => void;
   isPlayingBack: (ended: boolean) => void;
   onTimeUpdate?: (time: number | undefined) => void;
 };
 function VideoPreview({
-  review,
   relevantPreview,
+  startTime,
+  endTime,
   setReviewed,
   setIgnoreClick,
   isPlayingBack,
@@ -339,16 +359,13 @@ function VideoPreview({
     }
 
     // start with a bit of padding
-    return Math.max(
-      0,
-      review.start_time - relevantPreview.start - PREVIEW_PADDING,
-    );
+    return Math.max(0, startTime - relevantPreview.start - PREVIEW_PADDING);
 
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const playerDuration = useMemo(
-    () => review.end_time - review.start_time + PREVIEW_PADDING,
+    () => (endTime ?? relevantPreview.end) - startTime + PREVIEW_PADDING,
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
@@ -389,21 +406,14 @@ function VideoPreview({
     // end with a bit of padding
     const playerPercent = (playerProgress / playerDuration) * 100;
 
-    if (
-      setReviewed &&
-      !review.has_been_reviewed &&
-      lastPercent < 50 &&
-      playerPercent > 50
-    ) {
+    if (setReviewed && lastPercent < 50 && playerPercent > 50) {
       setReviewed();
     }
 
     setLastPercent(playerPercent);
 
     if (playerPercent > 100) {
-      if (!review.has_been_reviewed) {
-        setReviewed();
-      }
+      setReviewed();
 
       if (isMobile) {
         isPlayingBack(false);
@@ -468,7 +478,7 @@ function VideoPreview({
         setIgnoreClick(true);
       }
 
-      if (setReviewed && !review.has_been_reviewed) {
+      if (setReviewed) {
         setReviewed();
       }
 
@@ -551,6 +561,7 @@ function VideoPreview({
 const MIN_LOAD_TIMEOUT_MS = 200;
 type InProgressPreviewProps = {
   review: ReviewSegment;
+  timeRange: TimeRange;
   setReviewed: (reviewId: string) => void;
   setIgnoreClick: (ignore: boolean) => void;
   isPlayingBack: (ended: boolean) => void;
@@ -558,6 +569,7 @@ type InProgressPreviewProps = {
 };
 function InProgressPreview({
   review,
+  timeRange,
   setReviewed,
   setIgnoreClick,
   isPlayingBack,
@@ -567,7 +579,7 @@ function InProgressPreview({
   const sliderRef = useRef<HTMLDivElement | null>(null);
   const { data: previewFrames } = useSWR<string[]>(
     `preview/${review.camera}/start/${Math.floor(review.start_time) - PREVIEW_PADDING}/end/${
-      Math.ceil(review.end_time) + PREVIEW_PADDING
+      Math.ceil(review.end_time ?? timeRange.before) + PREVIEW_PADDING
     }/frames`,
     { revalidateOnFocus: false },
   );

@@ -107,8 +107,10 @@ export function useCameraMotionNextTimestamp(
       const overlappingReviewItems = reviewItems.some(
         (item) =>
           (item.start_time >= motionStart && item.start_time < motionEnd) ||
-          (item.end_time > motionStart && item.end_time <= motionEnd) ||
-          (item.start_time <= motionStart && item.end_time >= motionEnd),
+          ((item.end_time ?? Date.now() / 1000) > motionStart &&
+            (item.end_time ?? Date.now() / 1000) <= motionEnd) ||
+          (item.start_time <= motionStart &&
+            (item.end_time ?? Date.now() / 1000) >= motionEnd),
       );
 
       if (!segmentMotion || overlappingReviewItems) {

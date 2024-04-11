@@ -27,7 +27,9 @@ export default function ReviewCard({
     config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p",
   );
   const isSelected = useMemo(
-    () => event.start_time <= currentTime && event.end_time >= currentTime,
+    () =>
+      event.start_time <= currentTime &&
+      (event.end_time ?? Date.now() / 1000) >= currentTime,
     [event, currentTime],
   );
 
