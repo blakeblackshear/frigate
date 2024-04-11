@@ -39,7 +39,7 @@
     "clsx": "^2.1.0",
     "copy-to-clipboard": "^3.3.3",
     "date-fns": "^3.6.0",
-    "hls.js": "^1.5.7",
+    "hls.js": "^1.5.8",
     "idb-keyval": "^6.2.1",
     "immer": "^10.0.4",
     "lucide-react": "^0.365.0",
