@@ -1,13 +1,15 @@
 import Logo from "../Logo";
-import { navbarLinks } from "@/pages/site-navigation";
 import NavItem from "./NavItem";
 import { CameraGroupSelector } from "../filter/CameraGroupSelector";
 import { useLocation } from "react-router-dom";
 import GeneralSettings from "../settings/GeneralSettings";
 import AccountSettings from "../settings/AccountSettings";
+import useNavigation from "@/hooks/use-navigation";
 
 function Sidebar() {
   const location = useLocation();
+
+  const navbarLinks = useNavigation();
 
   return (
     <aside className="absolute w-[52px] z-10 left-o inset-y-0 overflow-y-auto scrollbar-hidden py-4 flex flex-col justify-between bg-background_alt border-r border-secondary-highlight">
@@ -22,10 +24,8 @@ function Sidebar() {
             <div key={item.id}>
               <NavItem
                 className={`mx-[10px] ${showCameraGroups ? "mb-2" : "mb-4"}`}
+                item={item}
                 Icon={item.icon}
-                title={item.title}
-                url={item.url}
-                dev={item.dev}
               />
               {showCameraGroups && <CameraGroupSelector className="mb-4" />}
             </div>

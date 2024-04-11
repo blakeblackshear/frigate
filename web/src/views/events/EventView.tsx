@@ -295,6 +295,7 @@ export default function EventView({
             filter={filter}
             timeRange={timeRange}
             startTime={startTime}
+            loading={severity != severityToggle}
             markItemAsReviewed={markItemAsReviewed}
             markAllItemsAsReviewed={markAllItemsAsReviewed}
             onSelectReview={onSelectReview}
@@ -334,6 +335,7 @@ type DetectionReviewProps = {
   filter?: ReviewFilter;
   timeRange: { before: number; after: number };
   startTime?: number;
+  loading: boolean;
   markItemAsReviewed: (review: ReviewSegment) => void;
   markAllItemsAsReviewed: (currentItems: ReviewSegment[]) => void;
   onSelectReview: (review: ReviewSegment, ctrl: boolean) => void;
@@ -349,6 +351,7 @@ function DetectionReview({
   filter,
   timeRange,
   startTime,
+  loading,
   markItemAsReviewed,
   markAllItemsAsReviewed,
   onSelectReview,
@@ -600,33 +603,41 @@ function DetectionReview({
       </div>
       <div className="w-[65px] md:w-[110px] flex flex-row">
         <div className="w-[55px] md:w-[100px] overflow-y-auto no-scrollbar">
-          <EventReviewTimeline
-            segmentDuration={segmentDuration}
-            timestampSpread={15}
-            timelineStart={timeRange.before}
-            timelineEnd={timeRange.after}
-            showMinimap={showMinimap && !previewTime}
-            minimapStartTime={minimapBounds.start}
-            minimapEndTime={minimapBounds.end}
-            showHandlebar={previewTime != undefined}
-            handlebarTime={previewTime}
-            visibleTimestamps={visibleTimestamps}
-            events={reviewItems?.all ?? []}
-            severityType={severity}
-            contentRef={contentRef}
-            timelineRef={reviewTimelineRef}
-            dense={isMobile}
-          />
+          {loading ? (
+            <Skeleton className="size-full" />
+          ) : (
+            <EventReviewTimeline
+              segmentDuration={segmentDuration}
+              timestampSpread={15}
+              timelineStart={timeRange.before}
+              timelineEnd={timeRange.after}
+              showMinimap={showMinimap && !previewTime}
+              minimapStartTime={minimapBounds.start}
+              minimapEndTime={minimapBounds.end}
+              showHandlebar={previewTime != undefined}
+              handlebarTime={previewTime}
+              visibleTimestamps={visibleTimestamps}
+              events={reviewItems?.all ?? []}
+              severityType={severity}
+              contentRef={contentRef}
+              timelineRef={reviewTimelineRef}
+              dense={isMobile}
+            />
+          )}
         </div>
         <div className="w-[10px]">
-          <SummaryTimeline
-            reviewTimelineRef={reviewTimelineRef}
-            timelineStart={timeRange.before}
-            timelineEnd={timeRange.after}
-            segmentDuration={segmentDuration}
-            events={reviewItems?.all ?? []}
-            severityType={severity}
-          />
+          {loading ? (
+            <Skeleton className="w-full" />
+          ) : (
+            <SummaryTimeline
+              reviewTimelineRef={reviewTimelineRef}
+              timelineStart={timeRange.before}
+              timelineEnd={timeRange.after}
+              segmentDuration={segmentDuration}
+              events={reviewItems?.all ?? []}
+              severityType={severity}
+            />
+          )}
         </div>
       </div>
     </>

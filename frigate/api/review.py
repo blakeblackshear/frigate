@@ -439,7 +439,7 @@ def motion_activity():
     # normalize data
     motion = (
         df["motion"]
-        .resample(f"{scale}S")
+        .resample(f"{scale}s")
         .apply(lambda x: max(x, key=abs, default=0.0))
         .fillna(0.0)
         .to_frame()

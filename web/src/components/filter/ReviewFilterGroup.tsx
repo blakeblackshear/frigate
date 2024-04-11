@@ -693,7 +693,9 @@ function ShowMotionOnlyButton({
           variant={motionOnlyButton ? "select" : "default"}
           onClick={() => setMotionOnlyButton(!motionOnlyButton)}
         >
-          <FaRunning />
+          <FaRunning
+            className={`${motionOnlyButton ? "text-selected-foreground" : "text-secondary-foreground"}`}
+          />
         </Button>
       </div>
     </>
