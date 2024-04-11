@@ -256,7 +256,7 @@ export function RecordingView({
           size="sm"
           onClick={() => navigate(-1)}
         >
-          <IoMdArrowRoundBack className="size-5" size="small" />
+          <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
           {isDesktop && <div className="text-primary">Back</div>}
         </Button>
         <div className="flex items-center justify-end gap-2">

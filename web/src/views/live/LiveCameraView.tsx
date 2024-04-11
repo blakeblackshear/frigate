@@ -228,7 +228,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
                 size="sm"
                 onClick={() => navigate(-1)}
               >
-                <IoMdArrowRoundBack className="size-5" />
+                <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
                 {isDesktop && <div className="text-primary">Back</div>}
               </Button>
               <Button
@@ -247,7 +247,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
                   });
                 }}
               >
-                <LuHistory className="size-5" />
+                <LuHistory className="size-5 text-secondary-foreground" />
                 {isDesktop && <div className="text-primary">History</div>}
               </Button>
             </div>
