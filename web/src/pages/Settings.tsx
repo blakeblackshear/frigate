@@ -46,27 +46,31 @@ function General() {
 
 export default function Settings() {
   return (
-    <>
-      <Tabs defaultValue="general" className="w-auto">
-        <TabsList>
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="objects">Objects</TabsTrigger>
-          <TabsTrigger value="zones">Zones</TabsTrigger>
-          <TabsTrigger value="masks">Masks</TabsTrigger>
-          <TabsTrigger value="motion">Motion</TabsTrigger>
-        </TabsList>
-        <TabsContent value="general">
-          <General />
-        </TabsContent>
-        <TabsContent value="objects">Objects</TabsContent>
-        <TabsContent value="zones">
-          <SettingsZones />
-        </TabsContent>
-        <TabsContent value="masks">Masks</TabsContent>
-        <TabsContent value="motion">
-          <MotionTuner />
-        </TabsContent>
-      </Tabs>
-    </>
+    <div className="w-full h-full">
+      <div className="flex h-full">
+        <div className="flex-1 content-start gap-2 overflow-y-auto no-scrollbar mt-4 mr-5">
+          <Tabs defaultValue="general" className="w-auto">
+            <TabsList>
+              <TabsTrigger value="general">General</TabsTrigger>
+              <TabsTrigger value="objects">Objects</TabsTrigger>
+              <TabsTrigger value="zones">Zones</TabsTrigger>
+              <TabsTrigger value="masks">Masks</TabsTrigger>
+              <TabsTrigger value="motion">Motion</TabsTrigger>
+            </TabsList>
+            <TabsContent value="general">
+              <General />
+            </TabsContent>
+            <TabsContent value="objects">Objects</TabsContent>
+            <TabsContent value="zones">
+              <SettingsZones />
+            </TabsContent>
+            <TabsContent value="masks">Masks</TabsContent>
+            <TabsContent value="motion">
+              <MotionTuner />
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -20,7 +20,7 @@ import {
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PolygonCanvas } from "./PolygonCanvas";
 import { Polygon } from "@/types/canvas";
 import { interpolatePoints } from "@/utils/canvasUtil";
@@ -43,9 +43,16 @@ const parseCoordinates = (coordinatesString: string) => {
   return points;
 };
 
+export type ZoneObjects = {
+  camera: string;
+  zoneName: string;
+  objects: string[];
+};
+
 export default function SettingsZones() {
   const { data: config } = useSWR<FrigateConfig>("config");
   const [zonePolygons, setZonePolygons] = useState<Polygon[]>([]);
+  const [zoneObjects, setZoneObjects] = useState<ZoneObjects[]>([]);
   const [activePolygonIndex, setActivePolygonIndex] = useState<number | null>(
     null,
   );
@@ -85,6 +92,51 @@ export default function SettingsZones() {
     return [...labels].sort();
   }, [cameras]);
 
+  // const saveZoneObjects = useCallback(
+  //   (camera: string, zoneName: string, newObjects?: string[]) => {
+  //     setZoneObjects((prevZoneObjects) =>
+  //       prevZoneObjects.map((zoneObject) => {
+  //         if (
+  //           zoneObject.camera === camera &&
+  //           zoneObject.zoneName === zoneName
+  //         ) {
+  //           console.log("found", camera, "with", zoneName);
+  //           console.log("new objects", newObjects);
+  //           console.log("new zoneobject", {
+  //             ...zoneObject,
+  //             objects: newObjects ?? [],
+  //           });
+  //           // Replace objects with newObjects if provided
+  //           return {
+  //             ...zoneObject,
+  //             objects: newObjects ?? [],
+  //           };
+  //         }
+  //         return zoneObject; // Keep original object
+  //       }),
+  //     );
+  //   },
+  //   [setZoneObjects],
+  // );
+
+  const saveZoneObjects = useCallback(
+    (camera: string, zoneName: string, objects?: string[]) => {
+      setZoneObjects((prevZoneObjects) => {
+        const updatedZoneObjects = prevZoneObjects.map((zoneObject) => {
+          if (
+            zoneObject.camera === camera &&
+            zoneObject.zoneName === zoneName
+          ) {
+            return { ...zoneObject, objects: objects || [] };
+          }
+          return zoneObject;
+        });
+        return updatedZoneObjects;
+      });
+    },
+    [setZoneObjects],
+  );
+
   const grow = useMemo(() => {
     if (!cameraConfig) {
       return;
@@ -104,6 +156,14 @@ export default function SettingsZones() {
       return "size-full aspect-video";
     }
   }, [cameraConfig]);
+
+  const handleCameraChange = useCallback(
+    (camera: string) => {
+      setSelectedCamera(camera);
+      setActivePolygonIndex(null);
+    },
+    [setSelectedCamera, setActivePolygonIndex],
+  );
 
   const [{ width: containerWidth, height: containerHeight }] =
     useResizeObserver(containerRef);
@@ -159,20 +219,40 @@ export default function SettingsZones() {
           color: zoneData.color,
         })),
       );
+
+      setZoneObjects(
+        Object.entries(cameraConfig.zones).map(([name, zoneData]) => ({
+          camera: cameraConfig.name,
+          zoneName: name,
+          objects: Object.keys(zoneData.filters),
+        })),
+      );
     }
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cameraConfig, containerRef]);
+
+  useEffect(() => {
+    console.log(
+      "config zone objects",
+      Object.entries(cameraConfig.zones).map(([name, zoneData]) => ({
+        camera: cameraConfig.name,
+        zoneName: name,
+        objects: Object.keys(zoneData.filters),
+      })),
+    );
+    console.log("component zone objects", zoneObjects);
+  }, [zoneObjects]);
 
   if (!cameraConfig && !selectedCamera) {
     return <ActivityIndicator />;
   }
 
   return (
-    <>
+    <div className="overflow-auto">
       <Heading as="h2">Zones</Heading>
       <div className="flex items-center space-x-2 mt-5">
-        <Select value={selectedCamera} onValueChange={setSelectedCamera}>
+        <Select value={selectedCamera} onValueChange={handleCameraChange}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Camera" />
           </SelectTrigger>
@@ -194,9 +274,9 @@ export default function SettingsZones() {
       </div>
 
       {cameraConfig && (
-        <div className="flex flex-row justify-evenly">
+        <div className="flex flex-col justify-evenly">
           <div
-            className={`flex flex-col justify-center items-center w-[60%] ${grow}`}
+            className={`flex flex-col justify-center items-center w-full md:w-[60%] ${grow}`}
           >
             <div ref={containerRef} className="size-full">
               {cameraConfig ? (
@@ -213,7 +293,7 @@ export default function SettingsZones() {
               )}
             </div>
           </div>
-          <div className="w-[30%]">
+          <div className="w-full md:w-[30%]">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -254,7 +334,9 @@ export default function SettingsZones() {
                         camera={polygon.camera}
                         zoneName={polygon.name}
                         allLabels={allLabels}
-                        updateLabelFilter={(objects) => console.log(objects)}
+                        updateLabelFilter={(objects) =>
+                          saveZoneObjects(polygon.camera, polygon.name, objects)
+                        }
                       />
                     </TableCell>
                   </TableRow>
@@ -294,6 +376,6 @@ export default function SettingsZones() {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

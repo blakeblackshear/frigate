@@ -43,11 +43,8 @@ export function ZoneObjectSelector({
     if (!cameraConfig || !zoneName) {
       return [];
     }
-    console.log(zoneName);
 
     const labels = new Set<string>();
-    // console.log("zone name", zoneName);
-    // console.log(cameraConfig.zones[zoneName].objects);
 
     cameraConfig.objects.track.forEach((label) => {
       if (!ATTRIBUTES.includes(label)) {
@@ -55,9 +52,13 @@ export function ZoneObjectSelector({
       }
     });
 
-    cameraConfig.zones[zoneName].objects.forEach((label) => {
-      labels.add(label);
-    });
+    if (cameraConfig.zones[zoneName]) {
+      cameraConfig.zones[zoneName].objects.forEach((label) => {
+        if (!ATTRIBUTES.includes(label)) {
+          labels.add(label);
+        }
+      });
+    }
 
     return [...labels].sort() || [];
   }, [cameraConfig, zoneName]);
@@ -166,7 +167,7 @@ export function ZoneControls({
       updatedPolygons[activePolygonIndex] = {
         points: [],
         isFinished: false,
-        name: "new",
+        name: updatedPolygons[activePolygonIndex].name,
         camera: camera,
         color: updatedPolygons[activePolygonIndex].color ?? [220, 0, 0],
       };
@@ -210,29 +211,31 @@ export function ZoneControls({
           }}
         >
           <DialogContent>
+            {isMobile && <span tabIndex={0} className="sr-only" />}
             <DialogTitle>New Zone</DialogTitle>
             <DialogDescription>
-              Enter a label for your zone. Do not include spaces, and don't use
-              the name of a camera.
+              Enter a unique label for your zone. Do not include spaces, and
+              don't use the name of a camera.
             </DialogDescription>
             <>
               <Input
-                className="mt-3"
+                className={`mt-3 ${isMobile && "text-md"}`}
                 type="search"
                 value={zoneName ?? ""}
                 onChange={(e) => {
                   setInvalidName(
                     Object.keys(config.cameras).includes(e.target.value) ||
-                      e.target.value.includes(" "),
+                      e.target.value.includes(" ") ||
+                      polygons
+                        .map((item) => item.name)
+                        .includes(e.target.value),
                   );
 
                   setZoneName(e.target.value);
                 }}
               />
               {invalidName && (
-                <div className="text-danger text-sm">
-                  Zone name is not valid.
-                </div>
+                <div className="text-danger text-sm">Invalid zone name.</div>
               )}
               <DialogFooter>
                 <Button

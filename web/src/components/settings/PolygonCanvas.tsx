@@ -67,8 +67,8 @@ export function PolygonCanvas({
     return distance < 15;
   };
 
-  const handleMouseDown = (e: KonvaEventObject<MouseEvent>) => {
-    if (!activePolygonIndex || !polygons) {
+  const handleMouseDown = (e: KonvaEventObject<MouseEvent | TouchEvent>) => {
+    if (activePolygonIndex == null || !polygons) {
       return;
     }
 
@@ -100,50 +100,63 @@ export function PolygonCanvas({
     // }
   };
 
-  const handleMouseOverStartPoint = (e: KonvaEventObject<MouseEvent>) => {
-    if (activePolygonIndex !== null && polygons) {
-      const activePolygon = polygons[activePolygonIndex];
-      if (!activePolygon.isFinished && activePolygon.points.length >= 3) {
-        e.currentTarget.scale({ x: 2, y: 2 });
-      }
+  const handleMouseOverStartPoint = (
+    e: KonvaEventObject<MouseEvent | TouchEvent>,
+  ) => {
+    if (activePolygonIndex == null || !polygons) {
+      return;
+    }
+
+    const activePolygon = polygons[activePolygonIndex];
+    if (!activePolygon.isFinished && activePolygon.points.length >= 3) {
+      e.currentTarget.scale({ x: 2, y: 2 });
     }
   };
 
-  const handleMouseOutStartPoint = (e: KonvaEventObject<MouseEvent>) => {
+  const handleMouseOutStartPoint = (
+    e: KonvaEventObject<MouseEvent | TouchEvent>,
+  ) => {
     e.currentTarget.scale({ x: 1, y: 1 });
-    if (activePolygonIndex !== null && polygons) {
-      const activePolygon = polygons[activePolygonIndex];
-      if (
-        (!activePolygon.isFinished && activePolygon.points.length >= 3) ||
-        activePolygon.isFinished
-      ) {
-        e.currentTarget.scale({ x: 1, y: 1 });
-      }
+
+    if (activePolygonIndex == null || !polygons) {
+      return;
+    }
+
+    const activePolygon = polygons[activePolygonIndex];
+    if (
+      (!activePolygon.isFinished && activePolygon.points.length >= 3) ||
+      activePolygon.isFinished
+    ) {
+      e.currentTarget.scale({ x: 1, y: 1 });
     }
   };
 
-  const handlePointDragMove = (e: KonvaEventObject<MouseEvent>) => {
-    if (activePolygonIndex !== null && polygons) {
-      const updatedPolygons = [...polygons];
-      const activePolygon = updatedPolygons[activePolygonIndex];
-      const stage = e.target.getStage();
-      if (stage) {
-        const index = e.target.index - 1;
-        const pos = [e.target._lastPos!.x, e.target._lastPos!.y];
-        if (pos[0] < 0) pos[0] = 0;
-        if (pos[1] < 0) pos[1] = 0;
-        if (pos[0] > stage.width()) pos[0] = stage.width();
-        if (pos[1] > stage.height()) pos[1] = stage.height();
-        updatedPolygons[activePolygonIndex] = {
-          ...activePolygon,
-          points: [
-            ...activePolygon.points.slice(0, index),
-            pos,
-            ...activePolygon.points.slice(index + 1),
-          ],
-        };
-        setPolygons(updatedPolygons);
-      }
+  const handlePointDragMove = (
+    e: KonvaEventObject<MouseEvent | TouchEvent>,
+  ) => {
+    if (activePolygonIndex == null || !polygons) {
+      return;
+    }
+
+    const updatedPolygons = [...polygons];
+    const activePolygon = updatedPolygons[activePolygonIndex];
+    const stage = e.target.getStage();
+    if (stage) {
+      const index = e.target.index - 1;
+      const pos = [e.target._lastPos!.x, e.target._lastPos!.y];
+      if (pos[0] < 0) pos[0] = 0;
+      if (pos[1] < 0) pos[1] = 0;
+      if (pos[0] > stage.width()) pos[0] = stage.width();
+      if (pos[1] > stage.height()) pos[1] = stage.height();
+      updatedPolygons[activePolygonIndex] = {
+        ...activePolygon,
+        points: [
+          ...activePolygon.points.slice(0, index),
+          pos,
+          ...activePolygon.points.slice(index + 1),
+        ],
+      };
+      setPolygons(updatedPolygons);
     }
   };
 
@@ -151,7 +164,7 @@ export function PolygonCanvas({
     return points.reduce((acc, point) => [...acc, ...point], []);
   };
 
-  const handleGroupDragEnd = (e: KonvaEventObject<MouseEvent>) => {
+  const handleGroupDragEnd = (e: KonvaEventObject<MouseEvent | TouchEvent>) => {
     if (activePolygonIndex !== null && e.target.name() === "polygon") {
       const updatedPolygons = [...polygons];
       const activePolygon = updatedPolygons[activePolygonIndex];
@@ -174,6 +187,7 @@ export function PolygonCanvas({
       width={width}
       height={height}
       onMouseDown={handleMouseDown}
+      onTouchStart={handleMouseDown}
     >
       <Layer>
         <Image

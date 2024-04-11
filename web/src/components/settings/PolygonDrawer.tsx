@@ -11,10 +11,14 @@ type PolygonDrawerProps = {
   isActive: boolean;
   isFinished: boolean;
   color: number[];
-  handlePointDragMove: (e: KonvaEventObject<MouseEvent>) => void;
-  handleGroupDragEnd: (e: KonvaEventObject<MouseEvent>) => void;
-  handleMouseOverStartPoint: (e: KonvaEventObject<MouseEvent>) => void;
-  handleMouseOutStartPoint: (e: KonvaEventObject<MouseEvent>) => void;
+  handlePointDragMove: (e: KonvaEventObject<MouseEvent | TouchEvent>) => void;
+  handleGroupDragEnd: (e: KonvaEventObject<MouseEvent | TouchEvent>) => void;
+  handleMouseOverStartPoint: (
+    e: KonvaEventObject<MouseEvent | TouchEvent>,
+  ) => void;
+  handleMouseOutStartPoint: (
+    e: KonvaEventObject<MouseEvent | TouchEvent>,
+  ) => void;
 };
 
 export default function PolygonDrawer({
@@ -33,13 +37,17 @@ export default function PolygonDrawer({
   const [minMaxX, setMinMaxX] = useState([0, 0]);
   const [minMaxY, setMinMaxY] = useState([0, 0]);
 
-  const handleGroupMouseOver = (e: Konva.KonvaEventObject<MouseEvent>) => {
+  const handleGroupMouseOver = (
+    e: Konva.KonvaEventObject<MouseEvent | TouchEvent>,
+  ) => {
     if (!isFinished) return;
     e.target.getStage()!.container().style.cursor = "move";
     setStage(e.target.getStage()!);
   };
 
-  const handleGroupMouseOut = (e: Konva.KonvaEventObject<MouseEvent>) => {
+  const handleGroupMouseOut = (
+    e: Konva.KonvaEventObject<MouseEvent | TouchEvent>,
+  ) => {
     if (!e.target) return;
     e.target.getStage()!.container().style.cursor = "default";
   };
@@ -87,6 +95,7 @@ export default function PolygonDrawer({
       onDragEnd={isActive ? handleGroupDragEnd : undefined}
       dragBoundFunc={isActive ? groupDragBound : undefined}
       onMouseOver={isActive ? handleGroupMouseOver : undefined}
+      onTouchStart={isActive ? handleGroupMouseOver : undefined}
       onMouseOut={isActive ? handleGroupMouseOut : undefined}
     >
       <Line
