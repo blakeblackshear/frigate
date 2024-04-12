@@ -29,9 +29,19 @@ export default function Events() {
     "severity",
     "alert",
   );
+
   const [recording, setRecording] =
     useOverlayState<RecordingStartingPoint>("recording");
+
   const [startTime, setStartTime] = useState<number>();
+
+  useEffect(() => {
+    if (recording) {
+      document.title = "Recordings - Frigate";
+    } else {
+      document.title = `Review - Frigate`;
+    }
+  }, [recording, severity]);
 
   // review filter
 

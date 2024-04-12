@@ -29,6 +29,10 @@ const ngSeverity = /(GET)|(POST)|(PUT)|(PATCH)|(DELETE)/;
 function Logs() {
   const [logService, setLogService] = useState<LogType>("frigate");
 
+  useEffect(() => {
+    document.title = `${logService[0].toUpperCase()}${logService.substring(1)} Stats - Frigate`;
+  }, [logService]);
+
   // log data handling
 
   const [logRange, setLogRange] = useState<LogRange>({ start: 0, end: 0 });

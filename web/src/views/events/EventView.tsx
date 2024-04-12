@@ -290,7 +290,7 @@ export default function EventView({
             reviewItems={reviewItems}
             relevantPreviews={relevantPreviews}
             selectedReviews={selectedReviews}
-            itemsToReview={reviewCounts[severity]}
+            itemsToReview={reviewCounts[severityToggle]}
             severity={severity}
             filter={filter}
             timeRange={timeRange}
@@ -533,7 +533,7 @@ function DetectionReview({
             className="absolute left-1/2 -translate-x-1/2 z-50 pointer-events-none"
             contentRef={contentRef}
             reviewItems={currentItems}
-            itemsToReview={itemsToReview}
+            itemsToReview={loading ? 0 : itemsToReview}
             pullLatestData={pullLatestData}
           />
         )}
@@ -544,7 +544,7 @@ function DetectionReview({
           </div>
         )}
 
-        {currentItems?.length === 0 && (
+        {!loading && currentItems?.length === 0 && (
           <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 flex flex-col justify-center items-center text-center">
             <LuFolderCheck className="size-16" />
             There are no {severity.replace(/_/g, " ")}s to review
@@ -555,50 +555,56 @@ function DetectionReview({
           className="w-full mx-2 px-1 grid sm:grid-cols-2 md:grid-cols-3 3xl:grid-cols-4 gap-2 md:gap-4"
           ref={contentRef}
         >
-          {currentItems &&
-            currentItems.map((value) => {
-              const selected = selectedReviews.includes(value.id);
+          {!loading && currentItems
+            ? currentItems.map((value) => {
+                const selected = selectedReviews.includes(value.id);
 
-              return (
-                <div
-                  key={value.id}
-                  ref={minimapRef}
-                  data-start={value.start_time}
-                  data-segment-start={
-                    alignStartDateToTimeline(value.start_time) - segmentDuration
-                  }
-                  className="review-item relative rounded-lg"
-                >
-                  <div className="aspect-video rounded-lg overflow-hidden">
-                    <PreviewThumbnailPlayer
-                      review={value}
-                      allPreviews={relevantPreviews}
-                      timeRange={timeRange}
-                      setReviewed={markItemAsReviewed}
-                      scrollLock={scrollLock}
-                      onTimeUpdate={onPreviewTimeUpdate}
-                      onClick={onSelectReview}
+                return (
+                  <div
+                    key={value.id}
+                    ref={minimapRef}
+                    data-start={value.start_time}
+                    data-segment-start={
+                      alignStartDateToTimeline(value.start_time) -
+                      segmentDuration
+                    }
+                    className="review-item relative rounded-lg"
+                  >
+                    <div className="aspect-video rounded-lg overflow-hidden">
+                      <PreviewThumbnailPlayer
+                        review={value}
+                        allPreviews={relevantPreviews}
+                        timeRange={timeRange}
+                        setReviewed={markItemAsReviewed}
+                        scrollLock={scrollLock}
+                        onTimeUpdate={onPreviewTimeUpdate}
+                        onClick={onSelectReview}
+                      />
+                    </div>
+                    <div
+                      className={`review-item-ring pointer-events-none z-10 absolute rounded-lg inset-0 size-full -outline-offset-[2.8px] outline outline-[3px] ${selected ? `outline-severity_${value.severity} shadow-severity_${value.severity}` : "outline-transparent duration-500"}`}
                     />
                   </div>
-                  <div
-                    className={`review-item-ring pointer-events-none z-10 absolute rounded-lg inset-0 size-full -outline-offset-[2.8px] outline outline-[3px] ${selected ? `outline-severity_${value.severity} shadow-severity_${value.severity}` : "outline-transparent duration-500"}`}
-                  />
-                </div>
-              );
-            })}
-          {(currentItems?.length ?? 0) > 0 && (itemsToReview ?? 0) > 0 && (
-            <div className="col-span-full flex justify-center items-center">
-              <Button
-                className="text-white"
-                variant="select"
-                onClick={() => {
-                  markAllItemsAsReviewed(currentItems ?? []);
-                }}
-              >
-                Mark these items as reviewed
-              </Button>
-            </div>
-          )}
+                );
+              })
+            : Array(itemsToReview)
+                .fill(0)
+                .map(() => <Skeleton className="size-full aspect-video" />)}
+          {!loading &&
+            (currentItems?.length ?? 0) > 0 &&
+            (itemsToReview ?? 0) > 0 && (
+              <div className="col-span-full flex justify-center items-center">
+                <Button
+                  className="text-white"
+                  variant="select"
+                  onClick={() => {
+                    markAllItemsAsReviewed(currentItems ?? []);
+                  }}
+                >
+                  Mark these items as reviewed
+                </Button>
+              </div>
+            )}
         </div>
       </div>
       <div className="w-[65px] md:w-[110px] flex flex-row">

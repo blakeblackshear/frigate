@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 
 type ExportItem = {
@@ -24,6 +24,10 @@ function Export() {
     "exports/",
     (url: string) => axios({ baseURL: baseUrl, url }).then((res) => res.data),
   );
+
+  useEffect(() => {
+    document.title = "Export - Frigate";
+  }, []);
 
   // Search
 
