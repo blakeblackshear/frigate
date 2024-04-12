@@ -80,6 +80,29 @@ cameras:
       height: # <- optional, by default Frigate tries to automatically detect resolution
 ```
 
+### Annke AC800
+
+If the devices you are using support H.265 then it will be able to play the video. Bellow is an example of using go2rtc to restream and repackage the stream. Make sure to login into the camera using the default username and password to change the stream configuration to include audio. This can be found in config->Vide/Audio->Video Type .
+
+```yaml
+go2rtc:
+   streams:
+    frontdriveway :
+      - rtsp://user:password@camera-ip:554/H265/ch1/main/av_stream
+      - "ffmpeg:frontdriveway#audio=aac" # make sure this matches the name of the stream if you change it
+cameras:
+  annkeac800: # <------ Name the camera
+    ffmpeg:
+      inputs:
+        - path: rtsp://127.0.0.1:8554/frontdriveway # <----- Update for your camera
+          roles:
+            - detect
+            - record
+    detect:
+      width: # <- optional, by default Frigate tries to automatically detect resolution
+      height: # <- optional, by default Frigate tries to automatically detect resolution
+```
+
 ### Blue Iris RTSP Cameras
 
 You will need to remove `nobuffer` flag for Blue Iris RTSP cameras
