@@ -174,15 +174,6 @@ class ReviewSegmentMaintainer(threading.Thread):
             if frame_time > segment.last_update:
                 segment.last_update = frame_time
 
-            if len(active_objects) > segment.frame_active_count:
-                frame_id = f"{camera_config.name}{frame_time}"
-                yuv_frame = self.frame_manager.get(
-                    frame_id, camera_config.frame_shape_yuv
-                )
-                segment.update_frame(camera_config, yuv_frame, active_objects)
-                self.frame_manager.close(frame_id)
-                self.update_segment(segment)
-
             for object in active_objects:
                 if not object["sub_label"]:
                     segment.detections[object["id"]] = object["label"]
@@ -211,6 +202,15 @@ class ReviewSegmentMaintainer(threading.Thread):
                 # keep zones up to date
                 if len(object["current_zones"]) > 0:
                     segment.zones.update(object["current_zones"])
+
+            if len(active_objects) > segment.frame_active_count:
+                frame_id = f"{camera_config.name}{frame_time}"
+                yuv_frame = self.frame_manager.get(
+                    frame_id, camera_config.frame_shape_yuv
+                )
+                segment.update_frame(camera_config, yuv_frame, active_objects)
+                self.frame_manager.close(frame_id)
+                self.update_segment(segment)
         else:
             if segment.severity == SeverityEnum.alert and frame_time > (
                 segment.last_update + THRESHOLD_ALERT_ACTIVITY
