@@ -20,13 +20,17 @@ import {
 import { Event } from "@/types/event";
 import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { isMobile } from "react-device-detect";
 import { FaList, FaVideo } from "react-icons/fa";
 import useSWR from "swr";
 
 export default function SubmitPlus() {
   const { data: config } = useSWR<FrigateConfig>("config");
+
+  useEffect(() => {
+    document.title = "Plus - Frigate";
+  }, []);
 
   // filters
 
