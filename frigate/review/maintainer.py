@@ -407,17 +407,17 @@ class ReviewSegmentMaintainer(threading.Thread):
                     severity = None
 
                     camera_config = self.config.cameras[camera]
-                    detections = []
+                    detections = set()
 
                     for audio in audio_detections:
                         if audio in camera_config.review.alerts.labels:
-                            detections.append(audio)
+                            detections.add(audio)
                             severity = SeverityEnum.alert
                         elif (
                             not camera_config.review.detections.labels
                             or audio in camera_config.review.detections.labels
                         ):
-                            detections.append(audio_detections)
+                            detections.add(audio)
 
                             if not severity:
                                 severity = SeverityEnum.detection
@@ -429,8 +429,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                             severity,
                             {},
                             set(),
-                            set(detections),
-                            [],
+                            detections,
                         )
                 elif topic == DetectionTypeEnum.api:
                     self.active_review_segments[camera] = PendingReviewSegment(
@@ -440,7 +439,6 @@ class ReviewSegmentMaintainer(threading.Thread):
                         {manual_info["event_id"]: manual_info["label"]},
                         set(),
                         set(),
-                        [],
                     )
 
                     if manual_info["state"] == ManualEventState.start:
