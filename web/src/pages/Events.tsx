@@ -35,8 +35,6 @@ export default function Events() {
 
   const [startTime, setStartTime] = useState<number>();
 
-  // Set Document Title
-
   useEffect(() => {
     if (recording) {
       document.title = "Recordings - Frigate";
