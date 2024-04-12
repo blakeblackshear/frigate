@@ -1,12 +1,4 @@
 import { Separator } from "@/components/ui/separator";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
@@ -16,14 +8,17 @@ import { PolygonCanvas } from "./PolygonCanvas";
 import { Polygon } from "@/types/canvas";
 import { interpolatePoints, toRGBColorString } from "@/utils/canvasUtil";
 import { isDesktop } from "react-device-detect";
-import ZoneControls, {
-  NewZoneButton,
-  ZoneObjectSelector,
-} from "./NewZoneButton";
+import { NewZoneButton } from "./NewZoneButton";
 import { Skeleton } from "../ui/skeleton";
 import { useResizeObserver } from "@/hooks/resize-observer";
-import { LuCopy, LuPencil, LuPlusSquare, LuTrash } from "react-icons/lu";
+import { LuCopy, LuPencil, LuTrash } from "react-icons/lu";
 import { FaDrawPolygon } from "react-icons/fa";
+import copy from "copy-to-clipboard";
+import { toast } from "sonner";
+import { Toaster } from "../ui/sonner";
+import Heading from "../ui/heading";
+import { Input } from "../ui/input";
+import { ZoneEditPane } from "./ZoneEditPane";
 
 const parseCoordinates = (coordinatesString: string) => {
   const coordinates = coordinatesString.split(",");
@@ -56,10 +51,14 @@ export default function MasksAndZones({
   const { data: config } = useSWR<FrigateConfig>("config");
   const [zonePolygons, setZonePolygons] = useState<Polygon[]>([]);
   const [zoneObjects, setZoneObjects] = useState<ZoneObjects[]>([]);
-  const [activePolygonIndex, setActivePolygonIndex] = useState<number | null>(
-    null,
-  );
+  const [activePolygonIndex, setActivePolygonIndex] = useState<
+    number | undefined
+  >(undefined);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const editViews = ["zone", "motion_mask", "object_mask", undefined] as const;
+
+  type EditPaneType = (typeof editViews)[number];
+  const [editPane, setEditPane] = useState<EditPaneType>(undefined);
 
   const cameras = useMemo(() => {
     if (!config) {
@@ -76,22 +75,6 @@ export default function MasksAndZones({
       return config.cameras[selectedCamera];
     }
   }, [config, selectedCamera]);
-
-  const allLabels = useMemo<string[]>(() => {
-    if (!cameras) {
-      return [];
-    }
-
-    const labels = new Set<string>();
-
-    cameras.forEach((camera) => {
-      camera.objects.track.forEach((label) => {
-        labels.add(label);
-      });
-    });
-
-    return [...labels].sort();
-  }, [cameras]);
 
   // const saveZoneObjects = useCallback(
   //   (camera: string, zoneName: string, newObjects?: string[]) => {
@@ -243,6 +226,23 @@ export default function MasksAndZones({
     [scaledHeight, aspectRatio],
   );
 
+  const handleCopyCoordinates = useCallback(
+    (index: number) => {
+      if (zonePolygons) {
+        const poly = zonePolygons[index];
+        copy(
+          interpolatePoints(poly.points, scaledWidth, scaledHeight, 1, 1)
+            .map((point) => `${point[0]},${point[1]}`)
+            .join(","),
+        );
+        toast.success(`Copied coordinates for ${poly.name} to clipboard.`);
+      } else {
+        toast.error("Could not copy coordinates to clipboard.");
+      }
+    },
+    [zonePolygons, scaledHeight, scaledWidth],
+  );
+
   useEffect(() => {
     if (cameraConfig && containerRef.current) {
       setZonePolygons(
@@ -273,21 +273,21 @@ export default function MasksAndZones({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cameraConfig, containerRef]);
 
-  useEffect(() => {
-    console.log(
-      "config zone objects",
-      Object.entries(cameraConfig.zones).map(([name, zoneData]) => ({
-        camera: cameraConfig.name,
-        zoneName: name,
-        objects: Object.keys(zoneData.filters),
-      })),
-    );
-    console.log("component zone objects", zoneObjects);
-  }, [zoneObjects]);
+  // useEffect(() => {
+  //   console.log(
+  //     "config zone objects",
+  //     Object.entries(cameraConfig.zones).map(([name, zoneData]) => ({
+  //       camera: cameraConfig.name,
+  //       zoneName: name,
+  //       objects: Object.keys(zoneData.filters),
+  //     })),
+  //   );
+  //   console.log("component zone objects", zoneObjects);
+  // }, [zoneObjects]);
 
   useEffect(() => {
     if (selectedCamera) {
-      setActivePolygonIndex(null);
+      setActivePolygonIndex(undefined);
     }
   }, [selectedCamera]);
 
@@ -297,73 +297,122 @@ export default function MasksAndZones({
 
   return (
     <>
-      {cameraConfig && (
+      {cameraConfig && zonePolygons && (
         <div className="flex flex-col md:flex-row size-full">
-          <div className="flex flex-col order-last w-full md:w-3/12 md:order-none md:mr-2">
-            <div className="flex mb-3">
+          <Toaster position="top-center" />
+          <div className="flex flex-col order-last w-full overflow-y-auto md:w-3/12 md:order-none md:mr-2 rounded-lg border-secondary-foreground border-[1px] p-2 bg-background_alt">
+            {/* <div className="flex mb-3">
               <Separator />
-            </div>
-            <div className="flex flex-row justify-between items-center mb-3">
-              <div className="text-md">Zones</div>
-              <NewZoneButton
-                camera={cameraConfig.name}
+            </div> */}
+            {editPane == "zone" && (
+              <ZoneEditPane
                 polygons={zonePolygons}
-                setPolygons={setZonePolygons}
                 activePolygonIndex={activePolygonIndex}
-                setActivePolygonIndex={setActivePolygonIndex}
-              />
-            </div>
-            {zonePolygons.map((polygon, index) => (
-              <div
-                key={index}
-                className="flex p-1 rounded-lg flex-row items-center justify-between mx-2 mb-1"
-                style={{
-                  backgroundColor:
-                    activePolygonIndex === index
-                      ? toRGBColorString(polygon.color, false)
-                      : "",
+                onCancel={() => {
+                  setEditPane(undefined);
+                  setActivePolygonIndex(undefined);
                 }}
-              >
-                <div
-                  className={`flex items-center ${activePolygonIndex === index ? "text-primary" : "text-secondary-foreground"}`}
-                >
-                  <FaDrawPolygon
-                    className="size-4 mr-2"
-                    style={{
-                      fill: toRGBColorString(polygon.color, true),
-                      color: toRGBColorString(polygon.color, true),
-                    }}
+              />
+            )}
+            {editPane == "motion_mask" && (
+              <ZoneEditPane
+                polygons={zonePolygons}
+                activePolygonIndex={activePolygonIndex}
+                onCancel={() => {
+                  setEditPane(undefined);
+                  setActivePolygonIndex(undefined);
+                }}
+              />
+            )}
+            {editPane == "object_mask" && (
+              <ZoneEditPane
+                polygons={zonePolygons}
+                activePolygonIndex={activePolygonIndex}
+                onCancel={() => {
+                  setEditPane(undefined);
+                  setActivePolygonIndex(undefined);
+                }}
+              />
+            )}
+            {editPane == undefined && (
+              <>
+                <div className="flex flex-row justify-between items-center mb-3">
+                  <div className="text-md">Zones</div>
+                  <NewZoneButton
+                    camera={cameraConfig.name}
+                    polygons={zonePolygons}
+                    setPolygons={setZonePolygons}
+                    activePolygonIndex={activePolygonIndex}
+                    setActivePolygonIndex={setActivePolygonIndex}
                   />
-                  {polygon.name}
                 </div>
-                <div className="flex flex-row gap-2">
+                {zonePolygons.map((polygon, index) => (
                   <div
-                    className="cursor-pointer"
-                    onClick={() => setActivePolygonIndex(index)}
+                    key={index}
+                    className="flex p-1 rounded-lg flex-row items-center justify-between mx-2 mb-1"
+                    // style={{
+                    //   backgroundColor:
+                    //     activePolygonIndex === index
+                    //       ? toRGBColorString(polygon.color, false)
+                    //       : "",
+                    // }}
                   >
-                    <LuPencil
-                      className={`size-4 ${activePolygonIndex === index ? "text-primary" : "text-secondary-foreground"}`}
-                    />
+                    <div
+                      className={`flex items-center ${activePolygonIndex === index ? "text-primary" : "text-muted-foreground"}`}
+                    >
+                      <FaDrawPolygon
+                        className="size-4 mr-2"
+                        style={{
+                          fill: toRGBColorString(polygon.color, true),
+                          color: toRGBColorString(polygon.color, true),
+                        }}
+                      />
+                      <p>{polygon.name}</p>
+                    </div>
+                    <div className="flex flex-row gap-2">
+                      <div
+                        className="cursor-pointer"
+                        onClick={() => {
+                          setActivePolygonIndex(index);
+                          setEditPane("zone");
+                          // if (activePolygonIndex == index) {
+                          //   setActivePolygonIndex(null);
+
+                          // } else {
+                          //   setActivePolygonIndex(index);
+                          // }
+                        }}
+                      >
+                        <LuPencil
+                          className={`size-4 ${activePolygonIndex === index ? "text-primary" : "text-muted-foreground"}`}
+                        />
+                      </div>
+                      <div
+                        className="cursor-pointer"
+                        onClick={() => handleCopyCoordinates(index)}
+                      >
+                        <LuCopy
+                          className={`size-4 ${activePolygonIndex === index ? "text-primary" : "text-muted-foreground"}`}
+                        />
+                      </div>
+                      <div
+                        className="cursor-pointer"
+                        onClick={() => {
+                          setZonePolygons((oldPolygons) => {
+                            return oldPolygons.filter((_, i) => i !== index);
+                          });
+                          setActivePolygonIndex(undefined);
+                        }}
+                      >
+                        <LuTrash
+                          className={`size-4 ${activePolygonIndex === index ? "text-primary fill-primary" : "text-muted-foreground fill-muted-foreground"}`}
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <LuCopy
-                    className={`size-4 ${activePolygonIndex === index ? "text-primary" : "text-secondary-foreground"}`}
-                  />
-                  <div
-                    className="cursor-pointer"
-                    onClick={() => {
-                      setZonePolygons((oldPolygons) => {
-                        return oldPolygons.filter((_, i) => i !== index);
-                      });
-                      setActivePolygonIndex(null);
-                    }}
-                  >
-                    <LuTrash
-                      className={`size-4 ${activePolygonIndex === index ? "text-primary fill-primary" : "text-secondary-foreground fill-secondary-foreground"}`}
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
+                ))}
+              </>
+            )}
             {/* <Table>
               <TableHeader>
                 <TableRow>
@@ -446,7 +495,7 @@ export default function MasksAndZones({
           </div>
           <div
             ref={containerRef}
-            className="flex md:w-7/12 md:grow md:h-dvh md:max-h-[90%]"
+            className="flex md:w-7/12 md:grow md:h-dvh md:max-h-full"
           >
             <div className="size-full">
               {cameraConfig ? (

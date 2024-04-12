@@ -99,7 +99,7 @@ export default function PolygonDrawer({
         stroke={colorString(true)}
         strokeWidth={3}
         closed={isFinished}
-        fill={colorString(false)}
+        fill={colorString(isActive ? true : false)}
       />
       {points.map((point, index) => {
         if (!isActive) {
@@ -122,9 +122,9 @@ export default function PolygonDrawer({
             x={x}
             y={y}
             radius={vertexRadius}
-            fill={colorString(false)}
-            stroke="#cccccc"
-            strokeWidth={2}
+            stroke={colorString(true)}
+            fill="#ffffff"
+            strokeWidth={3}
             draggable={isActive}
             onDragMove={isActive ? handlePointDragMove : undefined}
             dragBoundFunc={(pos) => {

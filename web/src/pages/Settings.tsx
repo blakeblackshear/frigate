@@ -176,7 +176,7 @@ export default function Settings() {
           </div>
         )}
       </div>
-      <div className="mt-2 flex flex-col items-start">
+      <div className="mt-2 flex flex-col items-start w-full h-dvh md:pb-24">
         {page == "general" && <General />}
         {page == "objects" && <></>}
         {page == "masks / zones" && (

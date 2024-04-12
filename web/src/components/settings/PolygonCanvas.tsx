@@ -12,7 +12,7 @@ type PolygonCanvasProps = {
   height: number;
   polygons: Polygon[];
   setPolygons: React.Dispatch<React.SetStateAction<Polygon[]>>;
-  activePolygonIndex: number | null;
+  activePolygonIndex: number | undefined;
 };
 
 export function PolygonCanvas({
@@ -68,7 +68,7 @@ export function PolygonCanvas({
   };
 
   const handleMouseDown = (e: KonvaEventObject<MouseEvent | TouchEvent>) => {
-    if (activePolygonIndex == null || !polygons) {
+    if (!activePolygonIndex || !polygons) {
       return;
     }
 
@@ -103,7 +103,7 @@ export function PolygonCanvas({
   const handleMouseOverStartPoint = (
     e: KonvaEventObject<MouseEvent | TouchEvent>,
   ) => {
-    if (activePolygonIndex == null || !polygons) {
+    if (!activePolygonIndex || !polygons) {
       return;
     }
 
@@ -118,7 +118,7 @@ export function PolygonCanvas({
   ) => {
     e.currentTarget.scale({ x: 1, y: 1 });
 
-    if (activePolygonIndex == null || !polygons) {
+    if (!activePolygonIndex || !polygons) {
       return;
     }
 
@@ -134,7 +134,7 @@ export function PolygonCanvas({
   const handlePointDragMove = (
     e: KonvaEventObject<MouseEvent | TouchEvent>,
   ) => {
-    if (activePolygonIndex == null || !polygons) {
+    if (!activePolygonIndex || !polygons) {
       return;
     }
 
@@ -165,7 +165,7 @@ export function PolygonCanvas({
   };
 
   const handleGroupDragEnd = (e: KonvaEventObject<MouseEvent | TouchEvent>) => {
-    if (activePolygonIndex !== null && e.target.name() === "polygon") {
+    if (activePolygonIndex && e.target.name() === "polygon") {
       const updatedPolygons = [...polygons];
       const activePolygon = updatedPolygons[activePolygonIndex];
       const result: number[][] = [];
