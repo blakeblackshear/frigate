@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 CURRENT_CONFIG_VERSION = 0.14
 
+
 def migrate_frigate_config(config_file: str):
     """handle migrating the frigate config."""
     logger.info("Checking if frigate config needs migration...")
@@ -55,7 +56,9 @@ def migrate_014(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
     """Handle migrating frigate config to 0.14"""
     # migrate record.events.required_zones to review.alerts.required_zones
     new_config = config.copy()
-    global_required_zones = config.get("record", {}).get("events", {}).get("required_zones", [])
+    global_required_zones = (
+        config.get("record", {}).get("events", {}).get("required_zones", [])
+    )
 
     if global_required_zones:
         if not new_config.get("review"):
@@ -77,7 +80,9 @@ def migrate_014(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
 
     for name, camera in config.get("cameras", {}).items():
         camera_config: dict[str, dict[str, any]] = camera.copy()
-        required_zones = camera_config.get("record", {}).get("events", {}).get("required_zones", [])
+        required_zones = (
+            camera_config.get("record", {}).get("events", {}).get("required_zones", [])
+        )
 
         if required_zones:
             if not camera_config.get("review"):
@@ -100,6 +105,3 @@ def migrate_014(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
         new_config["cameras"][name] = camera_config
 
     return new_config
-
-
-
