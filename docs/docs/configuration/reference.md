@@ -257,6 +257,28 @@ objects:
       # Checks based on the bottom center of the bounding box of the object
       mask: 0,0,1000,0,1000,200,0,200
 
+# Optional: Review configuration
+# NOTE: Can be overridden at the camera level
+review:
+  # Optional: alerts configuration
+  alerts:
+    # Optional: labels that qualify as an alert (default: shown below)
+    labels:
+      - car
+      - person
+    # Optional: required zones for an object to be marked as an alert (default: none)
+    required_zones:
+      - driveway
+  # Optional: detections configuration
+  detections:
+    # Optional: labels that qualify as a detection (default: all labels that are tracked / listened to)
+    labels:
+      - car
+      - person
+    # Optional: required zones for an object to be marked as a detection (default: none)
+    required_zones:
+      - driveway
+
 # Optional: Motion configuration
 # NOTE: Can be overridden at the camera level
 motion:
@@ -345,8 +367,6 @@ record:
     # Optional: Objects to save recordings for. (default: all tracked objects)
     objects:
       - person
-    # Optional: Restrict recordings to objects that entered any of the listed zones (default: no required zones)
-    required_zones: []
     # Optional: Retention settings for recordings of events
     retain:
       # Required: Default retention days (default: shown below)
