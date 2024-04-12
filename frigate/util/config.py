@@ -41,12 +41,12 @@ def migrate_frigate_config(config_file: str):
     if previous_version < 0.14:
         logger.info(f"Migrating frigate config from {previous_version} to 0.14...")
         new_config = migrate_014(config)
-        with open(os.path.join(CONFIG_DIR, "new_config.yaml"), "w") as f:
+        with open(config_file, "w") as f:
             yaml.dump(new_config, f)
         previous_version = 0.14
 
-    #with open(version_file, "w") as f:
-    #    f.write(str(CURRENT_CONFIG_VERSION))
+    with open(version_file, "w") as f:
+        f.write(str(CURRENT_CONFIG_VERSION))
 
     logger.info("Finished frigate config migration...")
 
