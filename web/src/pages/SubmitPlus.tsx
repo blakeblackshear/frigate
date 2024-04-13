@@ -1,5 +1,4 @@
 import { baseUrl } from "@/api/baseUrl";
-import FilterCheckBox from "@/components/filter/FilterCheckBox";
 import {
   CamerasFilterButton,
   GeneralFilterContent,
@@ -17,10 +16,11 @@ import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { DualThumbSlider } from "@/components/ui/slider";
 import { Event } from "@/types/event";
 import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
@@ -53,6 +53,8 @@ export default function SubmitPlus() {
       is_submitted: 0,
       cameras: selectedCameras ? selectedCameras.join(",") : null,
       labels: selectedLabels ? selectedLabels.join(",") : null,
+      min_score: scoreRange ? scoreRange[0] : null,
+      max_score: scoreRange ? scoreRange[1] : null,
     },
   ]);
   const [upload, setUpload] = useState<Event>();
@@ -112,9 +114,11 @@ export default function SubmitPlus() {
     <div className="size-full flex flex-col">
       <PlusFilterGroup
         selectedCameras={selectedCameras}
-        setSelectedCameras={setSelectedCameras}
         selectedLabels={selectedLabels}
+        selectedScoreRange={scoreRange}
+        setSelectedCameras={setSelectedCameras}
         setSelectedLabels={setSelectedLabels}
+        setSelectedScoreRange={setScoreRange}
       />
       <div className="size-full flex flex-1 flex-wrap content-start gap-2 md:gap-4 overflow-y-auto no-scrollbar">
         <div className="w-full p-2 grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
@@ -184,15 +188,19 @@ const ATTRIBUTES = ["amazon", "face", "fedex", "license_plate", "ups"];
 
 type PlusFilterGroupProps = {
   selectedCameras: string[] | undefined;
-  setSelectedCameras: (cameras: string[] | undefined) => void;
   selectedLabels: string[] | undefined;
+  selectedScoreRange: number[] | undefined;
+  setSelectedCameras: (cameras: string[] | undefined) => void;
   setSelectedLabels: (cameras: string[] | undefined) => void;
+  setSelectedScoreRange: (range: number[] | undefined) => void;
 };
 function PlusFilterGroup({
   selectedCameras,
-  setSelectedCameras,
   selectedLabels,
+  selectedScoreRange,
+  setSelectedCameras,
   setSelectedLabels,
+  setSelectedScoreRange,
 }: PlusFilterGroupProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -226,12 +234,12 @@ function PlusFilterGroup({
   const [open, setOpen] = useState<"none" | "camera" | "label" | "score">(
     "none",
   );
-  const [currentCameras, setCurrentCameras] = useState<string[] | undefined>(
-    undefined,
-  );
   const [currentLabels, setCurrentLabels] = useState<string[] | undefined>(
     undefined,
   );
+  const [currentScoreRange, setCurrentScoreRange] = useState<
+    number[] | undefined
+  >(undefined);
 
   const Menu = isMobile ? Drawer : DropdownMenu;
   const Trigger = isMobile ? DrawerTrigger : DropdownMenuTrigger;
@@ -284,76 +292,78 @@ function PlusFilterGroup({
       <Menu
         open={open == "score"}
         onOpenChange={(open) => {
-          if (!open) {
-            setCurrentCameras(selectedCameras);
-          }
           setOpen(open ? "score" : "none");
         }}
       >
         <Trigger asChild>
-          <Button size="sm" className="flex items-center gap-2 capitalize">
-            <PiSlidersHorizontalFill className="text-secondary-foreground" />
+          <Button
+            className="flex items-center gap-2 capitalize"
+            size="sm"
+            variant={selectedScoreRange == undefined ? "default" : "select"}
+          >
+            <PiSlidersHorizontalFill
+              className={`${selectedScoreRange == undefined ? "text-secondary-foreground" : "text-selected-foreground"}`}
+            />
             <div className="hidden md:block text-primary">
-              {selectedCameras == undefined
-                ? "All Cameras"
-                : `${selectedCameras.length} Cameras`}
+              {selectedScoreRange == undefined
+                ? "Score Range"
+                : `${selectedScoreRange[0] * 100}% - ${selectedScoreRange[1] * 100}%`}
             </div>
           </Button>
         </Trigger>
-        <Content className={isMobile ? "max-h-[75dvh]" : ""}>
-          <DropdownMenuLabel className="flex justify-center">
-            Filter Cameras
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <FilterCheckBox
-            isChecked={currentCameras == undefined}
-            label="All Cameras"
-            onCheckedChange={(isChecked) => {
-              if (isChecked) {
-                setCurrentCameras(undefined);
+        <Content
+          className={`min-w-80 p-2 flex flex-col justify-center ${isMobile ? "gap-2 *:max-h-[75dvh]" : ""}`}
+        >
+          <div className="flex items-center gap-1">
+            <Input
+              className="w-12"
+              inputMode="numeric"
+              value={Math.round((currentScoreRange?.at(0) ?? 0.5) * 100)}
+              onChange={(e) =>
+                setCurrentScoreRange([
+                  parseInt(e.target.value) / 100.0,
+                  currentScoreRange?.at(1) ?? 1.0,
+                ])
               }
-            }}
-          />
-          <DropdownMenuSeparator />
-          <div className={isMobile ? "h-auto overflow-y-auto" : ""}>
-            {allCameras.map((item) => (
-              <FilterCheckBox
-                key={item}
-                isChecked={currentCameras?.includes(item) ?? false}
-                label={item.replaceAll("_", " ")}
-                onCheckedChange={(isChecked) => {
-                  if (isChecked) {
-                    const updatedCameras = currentCameras
-                      ? [...currentCameras]
-                      : [];
-
-                    updatedCameras.push(item);
-                    setCurrentCameras(updatedCameras);
-                  } else {
-                    const updatedCameras = currentCameras
-                      ? [...currentCameras]
-                      : [];
-
-                    // can not deselect the last item
-                    if (updatedCameras.length > 1) {
-                      updatedCameras.splice(updatedCameras.indexOf(item), 1);
-                      setCurrentCameras(updatedCameras);
-                    }
-                  }
-                }}
-              />
-            ))}
+            />
+            <DualThumbSlider
+              className="w-full"
+              min={0.5}
+              max={1.0}
+              step={0.01}
+              value={currentScoreRange ?? [0.5, 1.0]}
+              onValueChange={setCurrentScoreRange}
+            />
+            <Input
+              className="w-12"
+              inputMode="numeric"
+              value={Math.round((currentScoreRange?.at(1) ?? 1.0) * 100)}
+              onChange={(e) =>
+                setCurrentScoreRange([
+                  currentScoreRange?.at(0) ?? 0.5,
+                  parseInt(e.target.value) / 100.0,
+                ])
+              }
+            />
           </div>
           <DropdownMenuSeparator />
-          <div className="flex justify-center items-center">
+          <div className="p-2 flex justify-evenly items-center">
             <Button
               variant="select"
               onClick={() => {
-                setSelectedCameras(currentCameras);
+                setSelectedScoreRange(currentScoreRange);
                 setOpen("none");
               }}
             >
               Apply
+            </Button>
+            <Button
+              onClick={() => {
+                setCurrentScoreRange(undefined);
+                setSelectedScoreRange(undefined);
+              }}
+            >
+              Reset
             </Button>
           </div>
         </Content>
