@@ -204,13 +204,16 @@ class ReviewSegmentMaintainer(threading.Thread):
                     segment.zones.update(object["current_zones"])
 
             if len(active_objects) > segment.frame_active_count:
-                frame_id = f"{camera_config.name}{frame_time}"
-                yuv_frame = self.frame_manager.get(
-                    frame_id, camera_config.frame_shape_yuv
-                )
-                segment.update_frame(camera_config, yuv_frame, active_objects)
-                self.frame_manager.close(frame_id)
-                self.update_segment(segment)
+                try:
+                    frame_id = f"{camera_config.name}{frame_time}"
+                    yuv_frame = self.frame_manager.get(
+                        frame_id, camera_config.frame_shape_yuv
+                    )
+                    segment.update_frame(camera_config, yuv_frame, active_objects)
+                    self.frame_manager.close(frame_id)
+                    self.update_segment(segment)
+                except FileNotFoundError:
+                    return
         else:
             if segment.severity == SeverityEnum.alert and frame_time > (
                 segment.last_update + THRESHOLD_ALERT_ACTIVITY
@@ -293,15 +296,18 @@ class ReviewSegmentMaintainer(threading.Thread):
                     zones=zones,
                 )
 
-                frame_id = f"{camera_config.name}{frame_time}"
-                yuv_frame = self.frame_manager.get(
-                    frame_id, camera_config.frame_shape_yuv
-                )
-                self.active_review_segments[camera].update_frame(
-                    camera_config, yuv_frame, active_objects
-                )
-                self.frame_manager.close(frame_id)
-                self.update_segment(self.active_review_segments[camera])
+                try:
+                    frame_id = f"{camera_config.name}{frame_time}"
+                    yuv_frame = self.frame_manager.get(
+                        frame_id, camera_config.frame_shape_yuv
+                    )
+                    self.active_review_segments[camera].update_frame(
+                        camera_config, yuv_frame, active_objects
+                    )
+                    self.frame_manager.close(frame_id)
+                    self.update_segment(self.active_review_segments[camera])
+                except FileNotFoundError:
+                    return
 
     def run(self) -> None:
         while not self.stop_event.is_set():
