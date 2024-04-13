@@ -1,27 +1,32 @@
 import React, { useMemo, useRef, useState, useEffect } from "react";
 import PolygonDrawer from "./PolygonDrawer";
-import { Stage, Layer, Image } from "react-konva";
+import { Stage, Layer, Image, Text } from "react-konva";
 import Konva from "konva";
 import type { KonvaEventObject } from "konva/lib/Node";
 import { Polygon } from "@/types/canvas";
 import { useApiHost } from "@/api";
+import { getAveragePoint } from "@/utils/canvasUtil";
 
 type PolygonCanvasProps = {
   camera: string;
   width: number;
   height: number;
+  scale: number;
   polygons: Polygon[];
   setPolygons: React.Dispatch<React.SetStateAction<Polygon[]>>;
   activePolygonIndex: number | undefined;
+  hoveredPolygonIndex: number | null;
 };
 
 export function PolygonCanvas({
   camera,
   width,
   height,
+  scale,
   polygons,
   setPolygons,
   activePolygonIndex,
+  hoveredPolygonIndex,
 }: PolygonCanvasProps) {
   const [image, setImage] = useState<HTMLImageElement | undefined>();
   const imageRef = useRef<Konva.Image | null>(null);
@@ -68,7 +73,7 @@ export function PolygonCanvas({
   };
 
   const handleMouseDown = (e: KonvaEventObject<MouseEvent | TouchEvent>) => {
-    if (!activePolygonIndex || !polygons) {
+    if (activePolygonIndex === undefined || !polygons) {
       return;
     }
 
@@ -103,7 +108,7 @@ export function PolygonCanvas({
   const handleMouseOverStartPoint = (
     e: KonvaEventObject<MouseEvent | TouchEvent>,
   ) => {
-    if (!activePolygonIndex || !polygons) {
+    if (activePolygonIndex === undefined || !polygons) {
       return;
     }
 
@@ -118,7 +123,7 @@ export function PolygonCanvas({
   ) => {
     e.currentTarget.scale({ x: 1, y: 1 });
 
-    if (!activePolygonIndex || !polygons) {
+    if (activePolygonIndex === undefined || !polygons) {
       return;
     }
 
@@ -134,7 +139,7 @@ export function PolygonCanvas({
   const handlePointDragMove = (
     e: KonvaEventObject<MouseEvent | TouchEvent>,
   ) => {
-    if (!activePolygonIndex || !polygons) {
+    if (activePolygonIndex === undefined || !polygons) {
       return;
     }
 
@@ -165,7 +170,7 @@ export function PolygonCanvas({
   };
 
   const handleGroupDragEnd = (e: KonvaEventObject<MouseEvent | TouchEvent>) => {
-    if (activePolygonIndex && e.target.name() === "polygon") {
+    if (activePolygonIndex !== undefined && e.target.name() === "polygon") {
       const updatedPolygons = [...polygons];
       const activePolygon = updatedPolygons[activePolygonIndex];
       const result: number[][] = [];
@@ -186,6 +191,8 @@ export function PolygonCanvas({
       ref={stageRef}
       width={width}
       height={height}
+      scaleX={scale}
+      scaleY={scale}
       onMouseDown={handleMouseDown}
       onTouchStart={handleMouseDown}
     >
@@ -199,18 +206,34 @@ export function PolygonCanvas({
           height={height}
         />
         {polygons?.map((polygon, index) => (
-          <PolygonDrawer
-            key={index}
-            points={polygon.points}
-            flattenedPoints={flattenPoints(polygon.points)}
-            isActive={index === activePolygonIndex}
-            isFinished={polygon.isFinished}
-            color={polygon.color}
-            handlePointDragMove={handlePointDragMove}
-            handleGroupDragEnd={handleGroupDragEnd}
-            handleMouseOverStartPoint={handleMouseOverStartPoint}
-            handleMouseOutStartPoint={handleMouseOutStartPoint}
-          />
+          <React.Fragment key={index}>
+            <PolygonDrawer
+              key={index}
+              points={polygon.points}
+              flattenedPoints={flattenPoints(polygon.points)}
+              isActive={index === activePolygonIndex}
+              isHovered={index === hoveredPolygonIndex}
+              isFinished={polygon.isFinished}
+              color={polygon.color}
+              handlePointDragMove={handlePointDragMove}
+              handleGroupDragEnd={handleGroupDragEnd}
+              handleMouseOverStartPoint={handleMouseOverStartPoint}
+              handleMouseOutStartPoint={handleMouseOutStartPoint}
+            />
+            {index === hoveredPolygonIndex && (
+              <Text
+                text={polygon.name}
+                align="left"
+                verticalAlign="top"
+                x={
+                  getAveragePoint(flattenPoints(polygon.points)).x
+                  // - (polygon.name.length * 16 * 0.6) / 2
+                }
+                y={getAveragePoint(flattenPoints(polygon.points)).y} //- 16 / 2}
+                fontSize={16}
+              />
+            )}
+          </React.Fragment>
         ))}
       </Layer>
     </Stage>

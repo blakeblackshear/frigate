@@ -73,6 +73,7 @@ export function NewZoneButton({
       {
         points: [],
         isFinished: false,
+        // isUnsaved: true,
         name: zoneName,
         camera: camera,
         color: [220, 0, 0],

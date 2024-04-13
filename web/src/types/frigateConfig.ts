@@ -108,7 +108,7 @@ export interface CameraConfig {
   objects: {
     filters: {
       [objectName: string]: {
-        mask: string | null;
+        mask: string[] | null;
         max_area: number;
         max_ratio: number;
         min_area: number;
@@ -201,6 +201,7 @@ export interface CameraConfig {
       coordinates: string;
       filters: Record<string, unknown>;
       inertia: number;
+      loitering_time: number;
       objects: string[];
       color: number[];
     };
@@ -330,7 +331,7 @@ export interface FrigateConfig {
   objects: {
     filters: {
       [objectName: string]: {
-        mask: string | null;
+        mask: string[] | null;
         max_area: number;
         max_ratio: number;
         min_area: number;

@@ -9,6 +9,7 @@ type PolygonDrawerProps = {
   points: number[][];
   flattenedPoints: number[];
   isActive: boolean;
+  isHovered: boolean;
   isFinished: boolean;
   color: number[];
   handlePointDragMove: (e: KonvaEventObject<MouseEvent | TouchEvent>) => void;
@@ -25,6 +26,7 @@ export default function PolygonDrawer({
   points,
   flattenedPoints,
   isActive,
+  isHovered,
   isFinished,
   color,
   handlePointDragMove,
@@ -99,7 +101,7 @@ export default function PolygonDrawer({
         stroke={colorString(true)}
         strokeWidth={3}
         closed={isFinished}
-        fill={colorString(isActive ? true : false)}
+        fill={colorString(isActive || isHovered ? true : false)}
       />
       {points.map((point, index) => {
         if (!isActive) {
