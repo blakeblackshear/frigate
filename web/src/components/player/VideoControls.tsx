@@ -16,8 +16,8 @@ import {
   MdVolumeOff,
   MdVolumeUp,
 } from "react-icons/md";
-import { Slider } from "../ui/slider-volume";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
+import { VolumeSlider } from "../ui/slider";
 
 type VideoControls = {
   volume?: boolean;
@@ -154,7 +154,7 @@ export default function VideoControls({
             }}
           />
           {video.muted == false && (
-            <Slider
+            <VolumeSlider
               className="w-20"
               value={[video.volume]}
               min={0}

@@ -8,7 +8,6 @@ import React, {
 import { useApiHost } from "@/api";
 import { isCurrentHour } from "@/utils/dateUtil";
 import { ReviewSegment } from "@/types/review";
-import { Slider } from "../ui/slider-no-thumb";
 import { getIconForLabel } from "@/utils/iconUtil";
 import TimeAgo from "../dynamic/TimeAgo";
 import useSWR from "swr";
@@ -23,6 +22,7 @@ import ImageLoadingIndicator from "../indicators/ImageLoadingIndicator";
 import useContextMenu from "@/hooks/use-contextmenu";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { TimeRange } from "@/types/timeline";
+import { NoThumbSlider } from "../ui/slider";
 
 type PreviewPlayerProps = {
   review: ReviewSegment;
@@ -543,7 +543,7 @@ function VideoPreview({
       >
         <source src={relevantPreview.src} type={relevantPreview.type} />
       </video>
-      <Slider
+      <NoThumbSlider
         ref={sliderRef}
         className="absolute inset-x-0 bottom-0 z-30"
         value={[progress]}
@@ -707,7 +707,7 @@ function InProgressPreview({
         src={`${apiHost}api/preview/${previewFrames[key]}/thumbnail.webp`}
         onLoad={handleLoad}
       />
-      <Slider
+      <NoThumbSlider
         ref={sliderRef}
         className="absolute inset-x-0 bottom-0 z-30"
         value={[key]}
