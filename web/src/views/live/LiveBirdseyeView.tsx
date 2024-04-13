@@ -133,7 +133,7 @@ export default function LiveBirdseyeView() {
               onClick={() => navigate(-1)}
             >
               <IoMdArrowBack className="size-5" />
-              {isDesktop && <div className="text-primary-foreground">Back</div>}
+              {isDesktop && <div className="text-primary">Back</div>}
             </Button>
           ) : (
             <div />

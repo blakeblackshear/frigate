@@ -66,10 +66,13 @@ export default function MobileReviewSettingsDrawer({
     }
 
     axios
-      .post(`export/${camera}/start/${range.after}/end/${range.before}`, {
-        playback: "realtime",
-        name,
-      })
+      .post(
+        `export/${camera}/start/${Math.round(range.after)}/end/${Math.round(range.before)}`,
+        {
+          playback: "realtime",
+          name,
+        },
+      )
       .then((response) => {
         if (response.status == 200) {
           toast.success(
@@ -144,18 +147,24 @@ export default function MobileReviewSettingsDrawer({
         {features.includes("calendar") && (
           <Button
             className="w-full flex justify-center items-center gap-2"
+            variant={filter?.after ? "select" : "default"}
             onClick={() => setDrawerMode("calendar")}
           >
-            <FaCalendarAlt className="fill-secondary-foreground" />
+            <FaCalendarAlt
+              className={`${filter?.after ? "text-selected-foreground" : "text-secondary-foreground"}`}
+            />
             Calendar
           </Button>
         )}
         {features.includes("filter") && (
           <Button
             className="w-full flex justify-center items-center gap-2"
+            variant={filter?.labels ? "select" : "default"}
             onClick={() => setDrawerMode("filter")}
           >
-            <FaFilter className="fill-secondary-foreground" />
+            <FaFilter
+              className={`${filter?.labels ? "text-selected-foreground" : "text-secondary-foreground"}`}
+            />
             Filter
           </Button>
         )}
@@ -217,7 +226,6 @@ export default function MobileReviewSettingsDrawer({
         <SelectSeparator />
         <div className="p-2 flex justify-center items-center">
           <Button
-            variant="secondary"
             onClick={() => {
               onUpdateFilter({
                 ...filter,
@@ -278,11 +286,13 @@ export default function MobileReviewSettingsDrawer({
         <DrawerTrigger asChild>
           <Button
             className="rounded-lg capitalize"
+            variant={filter?.labels || filter?.after ? "select" : "default"}
             size="sm"
-            variant="secondary"
             onClick={() => setDrawerMode("select")}
           >
-            <FaCog className="text-secondary-foreground" />
+            <FaCog
+              className={`${filter?.labels || filter?.after ? "text-selected-foreground" : "text-secondary-foreground"}`}
+            />
           </Button>
         </DrawerTrigger>
         <DrawerContent className="max-h-[80dvh] overflow-hidden flex flex-col items-center gap-2 px-4 pb-4 mx-1 rounded-t-2xl">

@@ -1,4 +1,3 @@
-import { navbarLinks } from "@/pages/site-navigation";
 import NavItem from "./NavItem";
 import { IoIosWarning } from "react-icons/io";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
@@ -9,20 +8,15 @@ import { useMemo } from "react";
 import useStats from "@/hooks/use-stats";
 import GeneralSettings from "../settings/GeneralSettings";
 import AccountSettings from "../settings/AccountSettings";
+import useNavigation from "@/hooks/use-navigation";
 
 function Bottombar() {
+  const navItems = useNavigation("secondary");
+
   return (
     <div className="absolute h-16 inset-x-4 bottom-0 flex flex-row items-center justify-between">
-      {navbarLinks.map((item) => (
-        <NavItem
-          className=""
-          variant="secondary"
-          key={item.id}
-          Icon={item.icon}
-          title={item.title}
-          url={item.url}
-          dev={item.dev}
-        />
+      {navItems.map((item) => (
+        <NavItem key={item.id} item={item} Icon={item.icon} />
       ))}
       <GeneralSettings />
       <AccountSettings />

@@ -1,8 +1,4 @@
-import {
-  useAudioActivity,
-  useFrigateEvents,
-  useMotionActivity,
-} from "@/api/ws";
+import { useFrigateEvents, useMotionActivity } from "@/api/ws";
 import { CameraConfig } from "@/types/frigateConfig";
 import { MotionData, ReviewSegment } from "@/types/review";
 import { useEffect, useMemo, useState } from "react";
@@ -11,7 +7,6 @@ import { useTimelineUtils } from "./use-timeline-utils";
 type useCameraActivityReturn = {
   activeTracking: boolean;
   activeMotion: boolean;
-  activeAudio: boolean;
 };
 
 export function useCameraActivity(
@@ -25,7 +20,6 @@ export function useCameraActivity(
 
   const { payload: detectingMotion } = useMotionActivity(camera.name);
   const { payload: event } = useFrigateEvents();
-  const { payload: audioRms } = useAudioActivity(camera.name);
 
   useEffect(() => {
     if (!event) {
@@ -63,9 +57,6 @@ export function useCameraActivity(
   return {
     activeTracking: hasActiveObjects,
     activeMotion: detectingMotion == "ON",
-    activeAudio: camera.audio.enabled_in_config
-      ? audioRms >= camera.audio.min_volume
-      : false,
   };
 }
 
@@ -116,8 +107,10 @@ export function useCameraMotionNextTimestamp(
       const overlappingReviewItems = reviewItems.some(
         (item) =>
           (item.start_time >= motionStart && item.start_time < motionEnd) ||
-          (item.end_time > motionStart && item.end_time <= motionEnd) ||
-          (item.start_time <= motionStart && item.end_time >= motionEnd),
+          ((item.end_time ?? Date.now() / 1000) > motionStart &&
+            (item.end_time ?? Date.now() / 1000) <= motionEnd) ||
+          (item.start_time <= motionStart &&
+            (item.end_time ?? Date.now() / 1000) >= motionEnd),
       );
 
       if (!segmentMotion || overlappingReviewItems) {

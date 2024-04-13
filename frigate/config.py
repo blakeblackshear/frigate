@@ -245,10 +245,6 @@ class EventsConfig(FrigateBaseModel):
         default=5, title="Seconds to retain before event starts.", le=MAX_PRE_CAPTURE
     )
     post_capture: int = Field(default=5, title="Seconds to retain after event ends.")
-    required_zones: List[str] = Field(
-        default_factory=list,
-        title="List of required zones to be entered in order to save the event.",
-    )
     objects: Optional[List[str]] = Field(
         None,
         title="List of objects to be detected in order to save the event.",
@@ -354,6 +350,34 @@ class RuntimeMotionConfig(MotionConfig):
         frame_shape = config.get("frame_shape", (1, 1))
 
         mask = config.get("mask", "")
+
+        # masks and zones are saved as relative coordinates
+        # we know if any points are > 1 then it is using the
+        # old native resolution coordinates
+        if mask:
+            if isinstance(mask, list) and any(x > "1.0" for x in mask[0].split(",")):
+                relative_masks = []
+                for m in mask:
+                    points = m.split(",")
+                    relative_masks.append(
+                        ",".join(
+                            [
+                                f"{round(int(points[i]) / frame_shape[1], 3)},{round(int(points[i + 1]) / frame_shape[0], 3)}"
+                                for i in range(0, len(points), 2)
+                            ]
+                        )
+                    )
+
+                mask = relative_masks
+            elif isinstance(mask, str) and any(x > "1.0" for x in mask.split(",")):
+                points = mask.split(",")
+                mask = ",".join(
+                    [
+                        f"{round(int(points[i]) / frame_shape[1], 3)},{round(int(points[i + 1]) / frame_shape[0], 3)}"
+                        for i in range(0, len(points), 2)
+                    ]
+                )
+
         config["raw_mask"] = mask
 
         if mask:
@@ -484,11 +508,40 @@ class RuntimeFilterConfig(FilterConfig):
     raw_mask: Optional[Union[str, List[str]]] = None
 
     def __init__(self, **config):
+        frame_shape = config.get("frame_shape", (1, 1))
         mask = config.get("mask")
+
+        # masks and zones are saved as relative coordinates
+        # we know if any points are > 1 then it is using the
+        # old native resolution coordinates
+        if mask:
+            if isinstance(mask, list) and any(x > "1.0" for x in mask[0].split(",")):
+                relative_masks = []
+                for m in mask:
+                    points = m.split(",")
+                    relative_masks.append(
+                        ",".join(
+                            [
+                                f"{round(int(points[i]) / frame_shape[1], 3)},{round(int(points[i + 1]) / frame_shape[0], 3)}"
+                                for i in range(0, len(points), 2)
+                            ]
+                        )
+                    )
+
+                mask = relative_masks
+            elif isinstance(mask, str) and any(x > "1.0" for x in mask.split(",")):
+                points = mask.split(",")
+                mask = ",".join(
+                    [
+                        f"{round(int(points[i]) / frame_shape[1], 3)},{round(int(points[i + 1]) / frame_shape[0], 3)}"
+                        for i in range(0, len(points), 2)
+                    ]
+                )
+
         config["raw_mask"] = mask
 
         if mask is not None:
-            config["mask"] = create_mask(config.get("frame_shape", (1, 1)), mask)
+            config["mask"] = create_mask(frame_shape, mask)
 
         super().__init__(**config)
 
@@ -539,28 +592,104 @@ class ZoneConfig(BaseModel):
         super().__init__(**config)
 
         self._color = config.get("color", (0, 0, 0))
-        coordinates = config["coordinates"]
+        self._contour = config.get("contour", np.array([]))
 
+    def generate_contour(self, frame_shape: tuple[int, int]):
+        coordinates = self.coordinates
+
+        # masks and zones are saved as relative coordinates
+        # we know if any points are > 1 then it is using the
+        # old native resolution coordinates
         if isinstance(coordinates, list):
+            explicit = any(p.split(",")[0] > "1.0" for p in coordinates)
             self._contour = np.array(
-                [[int(p.split(",")[0]), int(p.split(",")[1])] for p in coordinates]
+                [
+                    (
+                        [int(p.split(",")[0]), int(p.split(",")[1])]
+                        if explicit
+                        else [
+                            int(float(p.split(",")[0]) * frame_shape[1]),
+                            int(float(p.split(",")[1]) * frame_shape[0]),
+                        ]
+                    )
+                    for p in coordinates
+                ]
             )
+
+            if explicit:
+                self.coordinates = ",".join(
+                    [
+                        f'{round(int(p.split(",")[0]) / frame_shape[1], 3)},{round(int(p.split(",")[1]) / frame_shape[0], 3)}'
+                        for p in coordinates
+                    ]
+                )
         elif isinstance(coordinates, str):
             points = coordinates.split(",")
+            explicit = any(p > "1.0" for p in points)
             self._contour = np.array(
-                [[int(points[i]), int(points[i + 1])] for i in range(0, len(points), 2)]
+                [
+                    (
+                        [int(points[i]), int(points[i + 1])]
+                        if explicit
+                        else [
+                            int(float(points[i]) * frame_shape[1]),
+                            int(float(points[i + 1]) * frame_shape[0]),
+                        ]
+                    )
+                    for i in range(0, len(points), 2)
+                ]
             )
+
+            if explicit:
+                self.coordinates = ",".join(
+                    [
+                        f"{round(int(points[i]) / frame_shape[1], 3)},{round(int(points[i + 1]) / frame_shape[0], 3)}"
+                        for i in range(0, len(points), 2)
+                    ]
+                )
         else:
             self._contour = np.array([])
 
 
 class ObjectConfig(FrigateBaseModel):
     track: List[str] = Field(default=DEFAULT_TRACKED_OBJECTS, title="Objects to track.")
-    alert: List[str] = Field(
-        default=DEFAULT_ALERT_OBJECTS, title="Objects to create alerts for."
-    )
     filters: Dict[str, FilterConfig] = Field(default={}, title="Object filters.")
     mask: Union[str, List[str]] = Field(default="", title="Object mask.")
+
+
+class AlertsConfig(FrigateBaseModel):
+    """Configure alerts"""
+
+    labels: List[str] = Field(
+        default=DEFAULT_ALERT_OBJECTS, title="Labels to create alerts for."
+    )
+    required_zones: List[str] = Field(
+        default_factory=list,
+        title="List of required zones to be entered in order to save the event as an alert.",
+    )
+
+
+class DetectionsConfig(FrigateBaseModel):
+    """Configure detections"""
+
+    labels: Optional[List[str]] = Field(
+        default=None, title="Labels to create detections for."
+    )
+    required_zones: List[str] = Field(
+        default_factory=list,
+        title="List of required zones to be entered in order to save the event as a detection.",
+    )
+
+
+class ReviewConfig(FrigateBaseModel):
+    """Configure reviews"""
+
+    alerts: AlertsConfig = Field(
+        default_factory=AlertsConfig, title="Review alerts config."
+    )
+    detections: DetectionsConfig = Field(
+        default_factory=DetectionsConfig, title="Review detections config."
+    )
 
 
 class AudioConfig(FrigateBaseModel):
@@ -840,6 +969,9 @@ class CameraConfig(FrigateBaseModel):
     )
     objects: ObjectConfig = Field(
         default_factory=ObjectConfig, title="Object configuration."
+    )
+    review: ReviewConfig = Field(
+        default_factory=ReviewConfig, title="Review configuration."
     )
     audio: AudioConfig = Field(
         default_factory=AudioConfig, title="Audio events configuration."
@@ -1162,6 +1294,9 @@ class FrigateConfig(FrigateBaseModel):
     objects: ObjectConfig = Field(
         default_factory=ObjectConfig, title="Global object configuration."
     )
+    review: ReviewConfig = Field(
+        default_factory=ReviewConfig, title="Review configuration."
+    )
     audio: AudioConfig = Field(
         default_factory=AudioConfig, title="Global Audio events configuration."
     )
@@ -1209,6 +1344,7 @@ class FrigateConfig(FrigateBaseModel):
                 "snapshots": ...,
                 "live": ...,
                 "objects": ...,
+                "review": ...,
                 "motion": ...,
                 "detect": ...,
                 "ffmpeg": ...,
@@ -1345,6 +1481,11 @@ class FrigateConfig(FrigateBaseModel):
                     **camera_config.motion.model_dump(exclude_unset=True),
                 )
             camera_config.motion.enabled_in_config = camera_config.motion.enabled
+
+            # generate zone contours
+            if len(camera_config.zones) > 0:
+                for zone in camera_config.zones.values():
+                    zone.generate_contour(camera_config.frame_shape)
 
             # Set live view stream if none is set
             if not camera_config.live.stream_name:

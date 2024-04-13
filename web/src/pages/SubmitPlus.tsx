@@ -20,13 +20,17 @@ import {
 import { Event } from "@/types/event";
 import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { isMobile } from "react-device-detect";
 import { FaList, FaVideo } from "react-icons/fa";
 import useSWR from "swr";
 
 export default function SubmitPlus() {
   const { data: config } = useSWR<FrigateConfig>("config");
+
+  useEffect(() => {
+    document.title = "Plus - Frigate";
+  }, []);
 
   // filters
 
@@ -135,6 +139,7 @@ export default function SubmitPlus() {
                   This is a {upload?.label}
                 </Button>
                 <Button
+                  className="text-white"
                   variant="destructive"
                   onClick={() => onSubmitToPlus(true)}
                 >
@@ -236,9 +241,9 @@ function PlusFilterGroup({
         }}
       >
         <Trigger asChild>
-          <Button size="sm" className="mx-1 capitalize" variant="secondary">
+          <Button size="sm" className="mx-1 capitalize">
             <FaVideo className="md:mr-[10px] text-secondary-foreground" />
-            <div className="hidden md:block text-primary-foreground">
+            <div className="hidden md:block text-primary">
               {selectedCameras == undefined
                 ? "All Cameras"
                 : `${selectedCameras.length} Cameras`}
@@ -313,9 +318,9 @@ function PlusFilterGroup({
         }}
       >
         <Trigger asChild>
-          <Button size="sm" className="mx-1 capitalize" variant="secondary">
+          <Button size="sm" className="mx-1 capitalize">
             <FaList className="md:mr-[10px] text-secondary-foreground" />
-            <div className="hidden md:block text-primary-foreground">
+            <div className="hidden md:block text-primary">
               {selectedLabels == undefined
                 ? "All Labels"
                 : `${selectedLabels.length} Labels`}

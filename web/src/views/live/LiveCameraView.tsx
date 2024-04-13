@@ -158,9 +158,9 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
         return "absolute left-2 right-2 top-[50%] -translate-y-[50%]";
       } else {
         if (aspect > 16 / 9) {
-          return "absolute left-0 top-[50%] -translate-y-[50%]";
+          return "p-2 absolute left-0 top-[50%] -translate-y-[50%]";
         } else {
-          return "absolute top-2 bottom-2 left-[50%] -translate-x-[50%]";
+          return "p-2 absolute top-2 bottom-2 left-[50%] -translate-x-[50%]";
         }
       }
     }
@@ -209,35 +209,33 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
         className={
           fullscreen
             ? `fixed inset-0 bg-black z-30`
-            : `size-full p-2 flex flex-col ${isMobile ? "landscape:flex-row" : ""}`
+            : `size-full p-2 flex flex-col ${isMobile ? "landscape:flex-row landscape:gap-1" : ""}`
         }
       >
         <div
           className={
             fullscreen
               ? `absolute right-32 top-1 z-40 ${isMobile ? "landscape:left-2 landscape:right-auto landscape:bottom-1 landscape:top-auto" : ""}`
-              : `w-full h-12 flex flex-row items-center justify-between ${isMobile ? "landscape:w-min landscape:h-full landscape:flex-col" : ""}`
+              : `w-full h-12 flex flex-row items-center justify-between ${isMobile ? "landscape:w-12 landscape:h-full landscape:flex-col" : ""}`
           }
         >
           {!fullscreen ? (
-            <div className="flex items-center gap-2">
+            <div
+              className={`flex items-center gap-2 ${isMobile ? "landscape:flex-col" : ""}`}
+            >
               <Button
                 className={`flex items-center gap-2.5 rounded-lg`}
                 size="sm"
-                variant="secondary"
                 onClick={() => navigate(-1)}
               >
-                <IoMdArrowRoundBack className="size-5" />
-                {isDesktop && (
-                  <div className="text-primary-foreground">Back</div>
-                )}
+                <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
+                {isDesktop && <div className="text-primary">Back</div>}
               </Button>
               <Button
                 className="flex items-center gap-2.5 rounded-lg"
                 size="sm"
-                variant="secondary"
                 onClick={() => {
-                  navigate("events", {
+                  navigate("review", {
                     state: {
                       severity: "alert",
                       recording: {
@@ -249,10 +247,8 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
                   });
                 }}
               >
-                <LuHistory className="size-5" />
-                {isDesktop && (
-                  <div className="text-primary-foreground">History</div>
-                )}
+                <LuHistory className="size-5 text-secondary-foreground" />
+                {isDesktop && <div className="text-primary">History</div>}
               </Button>
             </div>
           ) : (
@@ -520,7 +516,7 @@ function PtzControlPanel({
       {ptz?.features?.includes("pt-r-fov") && (
         <>
           <Button
-            className={`${clickOverlay ? "text-selected" : "text-primary-foreground"}`}
+            className={`${clickOverlay ? "text-selected" : "text-primary"}`}
             onClick={() => setClickOverlay(!clickOverlay)}
           >
             <HiViewfinderCircle />
@@ -619,7 +615,7 @@ function FrigateCameraFeatures({
     <Drawer>
       <DrawerTrigger>
         <CameraFeatureToggle
-          className="p-2"
+          className="p-2 landscape:size-9"
           variant="primary"
           Icon={FaCog}
           isActive={false}

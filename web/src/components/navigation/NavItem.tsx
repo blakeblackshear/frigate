@@ -1,6 +1,4 @@
-import { IconType } from "react-icons";
 import { NavLink } from "react-router-dom";
-import { ENV } from "@/env";
 import {
   Tooltip,
   TooltipContent,
@@ -8,6 +6,8 @@ import {
 } from "@/components/ui/tooltip";
 import { isDesktop } from "react-device-detect";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
+import { NavData } from "@/types/navigation";
+import { IconType } from "react-icons";
 
 const variants = {
   primary: {
@@ -21,37 +21,29 @@ const variants = {
 };
 
 type NavItemProps = {
-  className: string;
-  variant?: "primary" | "secondary";
+  className?: string;
+  item: NavData;
   Icon: IconType;
-  title: string;
-  url: string;
-  dev?: boolean;
   onClick?: () => void;
 };
 
 export default function NavItem({
   className,
-  variant = "primary",
+  item,
   Icon,
-  title,
-  url,
-  dev,
   onClick,
 }: NavItemProps) {
-  const shouldRender = dev ? ENV !== "production" : true;
-
-  if (!shouldRender) {
+  if (item.enabled == false) {
     return;
   }
 
   const content = (
     <NavLink
-      to={url}
+      to={item.url}
       onClick={onClick}
       className={({ isActive }) =>
-        `${className} flex flex-col justify-center items-center rounded-lg ${
-          variants[variant][isActive ? "active" : "inactive"]
+        `flex flex-col justify-center items-center rounded-lg ${className ?? ""} ${
+          variants[item.variant ?? "primary"][isActive ? "active" : "inactive"]
         }`
       }
     >
@@ -65,7 +57,7 @@ export default function NavItem({
         <TooltipTrigger>{content}</TooltipTrigger>
         <TooltipPortal>
           <TooltipContent side="right">
-            <p>{title}</p>
+            <p>{item.title}</p>
           </TooltipContent>
         </TooltipPortal>
       </Tooltip>

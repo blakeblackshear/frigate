@@ -75,6 +75,9 @@ export default function ReviewFilterGroup({
     const cameras = filter?.cameras || Object.keys(config.cameras);
 
     cameras.forEach((camera) => {
+      if (camera == "birdseye") {
+        return;
+      }
       const cameraConfig = config.cameras[camera];
       cameraConfig.objects.track.forEach((label) => {
         labels.add(label);
@@ -220,23 +223,31 @@ function CamerasFilterButton({
   const trigger = (
     <Button
       className="flex items-center gap-2 capitalize"
-      variant="secondary"
+      variant={selectedCameras?.length == undefined ? "default" : "select"}
       size="sm"
     >
-      <FaVideo className="text-secondary-foreground" />
-      <div className="hidden md:block text-primary-foreground">
+      <FaVideo
+        className={`${selectedCameras?.length == 1 ? "text-selected-foreground" : "text-secondary-foreground"}`}
+      />
+      <div
+        className={`hidden md:block ${selectedCameras?.length ? "text-selected-foreground" : "text-primary"}`}
+      >
         {selectedCameras == undefined
           ? "All Cameras"
-          : `${selectedCameras.length} Cameras`}
+          : `${selectedCameras.includes("birdseye") ? selectedCameras.length - 1 : selectedCameras.length} Camera${selectedCameras.length !== 1 ? "s" : ""}`}
       </div>
     </Button>
   );
   const content = (
     <>
-      <DropdownMenuLabel className="flex justify-center">
-        Filter Cameras
-      </DropdownMenuLabel>
-      <DropdownMenuSeparator />
+      {isMobile && (
+        <>
+          <DropdownMenuLabel className="flex justify-center">
+            Cameras
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+        </>
+      )}
       <div className="h-auto overflow-y-auto overflow-x-hidden">
         <FilterCheckBox
           isChecked={currentCameras == undefined}
@@ -305,7 +316,6 @@ function CamerasFilterButton({
           Apply
         </Button>
         <Button
-          variant="secondary"
           onClick={() => {
             setCurrentCameras(undefined);
             updateCameraFilter(undefined);
@@ -368,7 +378,7 @@ function ShowReviewFilter({
   );
   return (
     <>
-      <div className="hidden h-9 md:flex p-2 justify-start items-center text-sm bg-secondary hover:bg-secondary/80 text-primary-foreground rounded-md cursor-pointer">
+      <div className="hidden h-9 md:flex p-2 justify-start items-center text-sm bg-secondary hover:bg-secondary/80 rounded-md cursor-pointer">
         <Switch
           id="reviewed"
           checked={showReviewedSwitch == 1}
@@ -376,19 +386,19 @@ function ShowReviewFilter({
             setShowReviewedSwitch(showReviewedSwitch == 0 ? 1 : 0)
           }
         />
-        <Label className="ml-2 cursor-pointer" htmlFor="reviewed">
+        <Label className="ml-2 cursor-pointer text-primary" htmlFor="reviewed">
           Show Reviewed
         </Label>
       </div>
 
       <Button
-        className="block md:hidden"
+        className="block md:hidden duration-0"
+        variant={showReviewedSwitch == 1 ? "select" : "default"}
         size="sm"
-        variant="secondary"
         onClick={() => setShowReviewedSwitch(showReviewedSwitch == 0 ? 1 : 0)}
       >
         <FaCheckCircle
-          className={`${showReviewedSwitch == 1 ? "text-selected" : "text-muted-foreground"}`}
+          className={`${showReviewedSwitch == 1 ? "text-selected-foreground" : "text-secondary-foreground"}`}
         />
       </Button>
     </>
@@ -411,9 +421,17 @@ function CalendarFilterButton({
   );
 
   const trigger = (
-    <Button size="sm" className="flex items-center gap-2" variant="secondary">
-      <FaCalendarAlt className="text-secondary-foreground" />
-      <div className="hidden md:block text-primary-foreground">
+    <Button
+      className="flex items-center gap-2"
+      variant={day == undefined ? "default" : "select"}
+      size="sm"
+    >
+      <FaCalendarAlt
+        className={`${day == undefined ? "text-secondary-foreground" : "text-selected-foreground"}`}
+      />
+      <div
+        className={`hidden md:block ${day == undefined ? "text-primary" : "text-selected-foreground"}`}
+      >
         {day == undefined ? "Last 24 Hours" : selectedDate}
       </div>
     </Button>
@@ -428,7 +446,6 @@ function CalendarFilterButton({
       <DropdownMenuSeparator />
       <div className="p-2 flex justify-center items-center">
         <Button
-          variant="secondary"
           onClick={() => {
             updateSelectedDay(undefined);
           }}
@@ -472,9 +489,19 @@ function GeneralFilterButton({
   );
 
   const trigger = (
-    <Button size="sm" className="flex items-center gap-2" variant="secondary">
-      <FaFilter className="text-secondary-foreground" />
-      <div className="hidden md:block text-primary-foreground">Filter</div>
+    <Button
+      size="sm"
+      variant={selectedLabels?.length ? "select" : "default"}
+      className="flex items-center gap-2 capitalize"
+    >
+      <FaFilter
+        className={`${selectedLabels?.length ? "text-selected-foreground" : "text-secondary-foreground"}`}
+      />
+      <div
+        className={`hidden md:block ${selectedLabels?.length ? "text-selected-foreground" : "text-primary"}`}
+      >
+        Filter
+      </div>
     </Button>
   );
   const content = (
@@ -546,7 +573,7 @@ export function GeneralFilterContent({
       <div className="h-auto overflow-y-auto overflow-x-hidden">
         <div className="flex justify-between items-center my-2.5">
           <Label
-            className="mx-2 text-primary-foreground cursor-pointer"
+            className="mx-2 text-primary cursor-pointer"
             htmlFor="allLabels"
           >
             All Labels
@@ -567,7 +594,7 @@ export function GeneralFilterContent({
           {allLabels.map((item) => (
             <div className="flex justify-between items-center">
               <Label
-                className="w-full mx-2 text-secondary-foreground capitalize cursor-pointer"
+                className="w-full mx-2 text-primary capitalize cursor-pointer"
                 htmlFor={item}
               >
                 {item.replaceAll("_", " ")}
@@ -617,7 +644,6 @@ export function GeneralFilterContent({
           Apply
         </Button>
         <Button
-          variant="secondary"
           onClick={() => {
             setCurrentLabels(undefined);
             updateLabelFilter(undefined);
@@ -645,7 +671,7 @@ function ShowMotionOnlyButton({
 
   return (
     <>
-      <div className="hidden md:inline-flex items-center justify-center whitespace-nowrap text-sm bg-secondary hover:bg-secondary/80 text-secondary-foreground h-9 rounded-md px-3 mx-1 cursor-pointer">
+      <div className="hidden md:inline-flex items-center justify-center whitespace-nowrap text-sm bg-secondary hover:bg-secondary/80 text-primary h-9 rounded-md px-3 mx-1 cursor-pointer">
         <Switch
           className="ml-1"
           id="collapse-motion"
@@ -653,7 +679,7 @@ function ShowMotionOnlyButton({
           onCheckedChange={setMotionOnlyButton}
         />
         <Label
-          className="mx-2 text-primary-foreground cursor-pointer"
+          className="mx-2 text-primary cursor-pointer"
           htmlFor="collapse-motion"
         >
           Motion only
@@ -663,11 +689,12 @@ function ShowMotionOnlyButton({
       <div className="block md:hidden">
         <Button
           size="sm"
-          variant="secondary"
+          className="duration-0"
+          variant={motionOnlyButton ? "select" : "default"}
           onClick={() => setMotionOnlyButton(!motionOnlyButton)}
         >
           <FaRunning
-            className={`${motionOnlyButton ? "text-selected" : "text-muted-foreground"}`}
+            className={`${motionOnlyButton ? "text-selected-foreground" : "text-secondary-foreground"}`}
           />
         </Button>
       </div>

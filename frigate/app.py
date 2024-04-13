@@ -63,6 +63,7 @@ from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
 from frigate.types import CameraMetricsTypes, PTZMetricsTypes
 from frigate.util.builtin import save_default_config
+from frigate.util.config import migrate_frigate_config
 from frigate.util.object import get_camera_regions_grid
 from frigate.version import VERSION
 from frigate.video import capture_camera, track_camera
@@ -125,6 +126,9 @@ class FrigateApp:
             print("No config file found, saving default config")
             config_file = config_file_yaml
             save_default_config(config_file)
+
+        # check if the config file needs to be migrated
+        migrate_frigate_config(config_file)
 
         user_config = FrigateConfig.parse_file(config_file)
         self.config = user_config.runtime_config(self.plus_api)
@@ -200,9 +204,6 @@ class FrigateApp:
             logging.getLogger("ws4py").setLevel("ERROR")
 
     def init_queues(self) -> None:
-        # Queues for clip processing
-        self.event_processed_queue: Queue = mp.Queue()
-
         # Queue for cameras to push tracked objects to
         self.detected_frames_queue: Queue = mp.Queue(
             maxsize=sum(camera.enabled for camera in self.config.cameras.values()) * 2
@@ -420,7 +421,6 @@ class FrigateApp:
             self.config,
             self.dispatcher,
             self.detected_frames_queue,
-            self.event_processed_queue,
             self.ptz_autotracker_thread,
             self.stop_event,
         )
@@ -517,7 +517,6 @@ class FrigateApp:
     def start_event_processor(self) -> None:
         self.event_processor = EventProcessor(
             self.config,
-            self.event_processed_queue,
             self.timeline_queue,
             self.stop_event,
         )
@@ -672,6 +671,14 @@ class FrigateApp:
         logger.info("Stopping...")
         self.stop_event.set()
 
+        # set an end_time on entries without an end_time before exiting
+        Event.update(end_time=datetime.datetime.now().timestamp()).where(
+            Event.end_time == None
+        ).execute()
+        ReviewSegment.update(end_time=datetime.datetime.now().timestamp()).where(
+            ReviewSegment.end_time == None
+        ).execute()
+
         # Stop Communicators
         self.inter_process_communicator.stop()
         self.inter_config_updater.stop()
@@ -704,7 +711,6 @@ class FrigateApp:
             shm.unlink()
 
         for queue in [
-            self.event_processed_queue,
             self.detected_frames_queue,
             self.log_queue,
         ]:

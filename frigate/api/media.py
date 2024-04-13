@@ -1333,7 +1333,9 @@ def review_preview(id: str):
 
     padding = 8
     start_ts = review.start_time - padding
-    end_ts = review.end_time + padding
+    end_ts = (
+        review.end_time + padding if review.end_time else datetime.now().timestamp()
+    )
     return preview_gif(review.camera, start_ts, end_ts)
 
 
@@ -1344,8 +1346,15 @@ def preview_thumbnail(file_name: str):
     safe_file_name_current = secure_filename(file_name)
     preview_dir = os.path.join(CACHE_DIR, "preview_frames")
 
-    with open(os.path.join(preview_dir, safe_file_name_current), "rb") as image_file:
-        jpg_bytes = image_file.read()
+    try:
+        with open(
+            os.path.join(preview_dir, safe_file_name_current), "rb"
+        ) as image_file:
+            jpg_bytes = image_file.read()
+    except FileNotFoundError:
+        return make_response(
+            jsonify({"success": False, "message": "Image file not found"}), 404
+        )
 
     response = make_response(jpg_bytes)
     response.headers["Content-Type"] = "image/jpeg"

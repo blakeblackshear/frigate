@@ -3,6 +3,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { Threshold } from "@/types/graph";
 import { useCallback, useEffect, useMemo } from "react";
 import Chart from "react-apexcharts";
+import { isMobileOnly } from "react-device-detect";
 import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
 
@@ -36,11 +37,11 @@ export function ThresholdBarGraph({
 
   const formatTime = useCallback(
     (val: unknown) => {
-      if (val == 0) {
+      if (val == 1) {
         return;
       }
 
-      const date = new Date(updateTimes[Math.round(val as number)] * 1000);
+      const date = new Date(updateTimes[Math.round(val as number) - 1] * 1000);
       return date.toLocaleTimeString([], {
         hour12: config?.ui.time_format != "24hour",
         hour: "2-digit",
@@ -96,10 +97,10 @@ export function ThresholdBarGraph({
         size: 0,
       },
       xaxis: {
-        tickAmount: 4,
+        tickAmount: isMobileOnly ? 3 : 4,
         tickPlacement: "on",
         labels: {
-          offsetX: -30,
+          offsetX: -18,
           formatter: formatTime,
         },
         axisBorder: {
@@ -110,9 +111,11 @@ export function ThresholdBarGraph({
         },
       },
       yaxis: {
-        show: false,
+        show: true,
+        labels: {
+          formatter: (val: number) => Math.ceil(val).toString(),
+        },
         min: 0,
-        max: threshold.warning + 10,
       },
     } as ApexCharts.ApexOptions;
   }, [graphId, threshold, systemTheme, theme, formatTime]);
@@ -125,7 +128,7 @@ export function ThresholdBarGraph({
     <div className="w-full flex flex-col">
       <div className="flex items-center gap-1">
         <div className="text-xs text-muted-foreground">{name}</div>
-        <div className="text-xs text-primary-foreground">
+        <div className="text-xs text-primary">
           {lastValue}
           {unit}
         </div>
@@ -216,15 +219,13 @@ export function StorageGraph({ graphId, used, total }: StorageGraphProps) {
     <div className="w-full flex flex-col gap-2.5">
       <div className="w-full flex justify-between items-center gap-1">
         <div className="flex items-center gap-1">
-          <div className="text-xs text-primary-foreground">
-            {getUnitSize(used)}
-          </div>
-          <div className="text-xs text-primary-foreground">/</div>
+          <div className="text-xs text-primary">{getUnitSize(used)}</div>
+          <div className="text-xs text-primary">/</div>
           <div className="text-xs text-muted-foreground">
             {getUnitSize(total)}
           </div>
         </div>
-        <div className="text-xs text-primary-foreground">
+        <div className="text-xs text-primary">
           {Math.round((used / total) * 100)}%
         </div>
       </div>
@@ -278,7 +279,7 @@ export function CameraLineGraph({
 
   const formatTime = useCallback(
     (val: unknown) => {
-      if (val == 0) {
+      if (val == 1) {
         return;
       }
 
@@ -326,10 +327,10 @@ export function CameraLineGraph({
         size: 0,
       },
       xaxis: {
-        tickAmount: 4,
-        tickPlacement: "between",
+        tickAmount: isMobileOnly ? 3 : 4,
+        tickPlacement: "on",
         labels: {
-          offsetX: -30,
+          offsetX: isMobileOnly ? -18 : 0,
           formatter: formatTime,
         },
         axisBorder: {
@@ -340,7 +341,10 @@ export function CameraLineGraph({
         },
       },
       yaxis: {
-        show: false,
+        show: true,
+        labels: {
+          formatter: (val: number) => Math.ceil(val).toString(),
+        },
         min: 0,
       },
     } as ApexCharts.ApexOptions;
@@ -361,7 +365,7 @@ export function CameraLineGraph({
                 style={{ color: GRAPH_COLORS[labelIdx] }}
               />
               <div className="text-xs text-muted-foreground">{label}</div>
-              <div className="text-xs text-primary-foreground">
+              <div className="text-xs text-primary">
                 {lastValues[labelIdx]}
                 {unit}
               </div>

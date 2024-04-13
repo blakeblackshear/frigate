@@ -17,6 +17,10 @@ type SaveOptions = "saveonly" | "restart";
 function ConfigEditor() {
   const apiHost = useApiHost();
 
+  useEffect(() => {
+    document.title = "Config Editor - Frigate";
+  }, []);
+
   const { data: config } = useSWR<string>("config/raw");
 
   const { theme, systemTheme } = useTheme();

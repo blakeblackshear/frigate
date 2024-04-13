@@ -43,13 +43,13 @@ module.exports = {
         ring: "hsl(var(--ring))",
         danger: "#ef4444",
         success: "#22c55e",
-        // detection colors
-        motion: "#991b1b",
-        object: "#06b6d4",
-        audio: "#ea580c",
         background: "hsl(var(--background))",
+        background_alt: "hsl(var(--background-alt))",
         foreground: "hsl(var(--foreground))",
-        selected: "hsl(var(--selected))",
+        selected: {
+          DEFAULT: "hsl(var(--selected))",
+          foreground: "hsl(var(--selected-foreground))",
+        },
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
@@ -62,6 +62,10 @@ module.exports = {
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",

@@ -727,9 +727,22 @@ def create_mask(frame_shape, mask):
     return mask_img
 
 
-def add_mask(mask, mask_img):
+def add_mask(mask: str, mask_img: np.ndarray):
     points = mask.split(",")
+
+    # masks and zones are saved as relative coordinates
+    # we know if any points are > 1 then it is using the
+    # old native resolution coordinates
+    if any(x > "1.0" for x in points):
+        raise Exception("add mask expects relative coordinates only")
+
     contour = np.array(
-        [[int(points[i]), int(points[i + 1])] for i in range(0, len(points), 2)]
+        [
+            [
+                int(float(points[i]) * mask_img.shape[1]),
+                int(float(points[i + 1]) * mask_img.shape[0]),
+            ]
+            for i in range(0, len(points), 2)
+        ]
     )
     cv2.fillPoly(mask_img, pts=[contour], color=(0))

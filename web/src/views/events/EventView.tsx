@@ -43,6 +43,7 @@ import { TimeRange } from "@/types/timeline";
 import { useCameraMotionNextTimestamp } from "@/hooks/use-camera-activity";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import { Skeleton } from "@/components/ui/skeleton";
+import scrollIntoView from "scroll-into-view-if-needed";
 
 type EventViewProps = {
   reviews?: ReviewSegment[];
@@ -289,10 +290,12 @@ export default function EventView({
             reviewItems={reviewItems}
             relevantPreviews={relevantPreviews}
             selectedReviews={selectedReviews}
-            itemsToReview={reviewCounts[severity]}
+            itemsToReview={reviewCounts[severityToggle]}
             severity={severity}
             filter={filter}
             timeRange={timeRange}
+            startTime={startTime}
+            loading={severity != severityToggle}
             markItemAsReviewed={markItemAsReviewed}
             markAllItemsAsReviewed={markAllItemsAsReviewed}
             onSelectReview={onSelectReview}
@@ -331,6 +334,8 @@ type DetectionReviewProps = {
   severity: ReviewSeverity;
   filter?: ReviewFilter;
   timeRange: { before: number; after: number };
+  startTime?: number;
+  loading: boolean;
   markItemAsReviewed: (review: ReviewSegment) => void;
   markAllItemsAsReviewed: (currentItems: ReviewSegment[]) => void;
   onSelectReview: (review: ReviewSegment, ctrl: boolean) => void;
@@ -345,6 +350,8 @@ function DetectionReview({
   severity,
   filter,
   timeRange,
+  startTime,
+  loading,
   markItemAsReviewed,
   markAllItemsAsReviewed,
   onSelectReview,
@@ -495,6 +502,26 @@ function DetectionReview({
     [minimap],
   );
 
+  // existing review item
+
+  useEffect(() => {
+    if (!startTime || !currentItems || currentItems.length == 0) {
+      return;
+    }
+
+    const element = contentRef.current?.querySelector(
+      `[data-start="${startTime}"]`,
+    );
+    if (element) {
+      scrollIntoView(element, {
+        scrollMode: "if-needed",
+        behavior: "smooth",
+      });
+    }
+    // only run when start time changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startTime]);
+
   return (
     <>
       <div
@@ -506,7 +533,7 @@ function DetectionReview({
             className="absolute left-1/2 -translate-x-1/2 z-50 pointer-events-none"
             contentRef={contentRef}
             reviewItems={currentItems}
-            itemsToReview={itemsToReview}
+            itemsToReview={loading ? 0 : itemsToReview}
             pullLatestData={pullLatestData}
           />
         )}
@@ -517,7 +544,7 @@ function DetectionReview({
           </div>
         )}
 
-        {currentItems?.length === 0 && (
+        {!loading && currentItems?.length === 0 && (
           <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 flex flex-col justify-center items-center text-center">
             <LuFolderCheck className="size-16" />
             There are no {severity.replace(/_/g, " ")}s to review
@@ -528,80 +555,95 @@ function DetectionReview({
           className="w-full mx-2 px-1 grid sm:grid-cols-2 md:grid-cols-3 3xl:grid-cols-4 gap-2 md:gap-4"
           ref={contentRef}
         >
-          {currentItems &&
-            currentItems.map((value) => {
-              const selected = selectedReviews.includes(value.id);
+          {!loading && currentItems
+            ? currentItems.map((value) => {
+                const selected = selectedReviews.includes(value.id);
 
-              return (
-                <div
-                  key={value.id}
-                  ref={minimapRef}
-                  data-start={value.start_time}
-                  data-segment-start={
-                    alignStartDateToTimeline(value.start_time) - segmentDuration
-                  }
-                  className="review-item relative rounded-lg"
-                >
-                  <div className="aspect-video rounded-lg overflow-hidden">
-                    <PreviewThumbnailPlayer
-                      review={value}
-                      allPreviews={relevantPreviews}
-                      setReviewed={markItemAsReviewed}
-                      scrollLock={scrollLock}
-                      onTimeUpdate={onPreviewTimeUpdate}
-                      onClick={onSelectReview}
+                return (
+                  <div
+                    key={value.id}
+                    ref={minimapRef}
+                    data-start={value.start_time}
+                    data-segment-start={
+                      alignStartDateToTimeline(value.start_time) -
+                      segmentDuration
+                    }
+                    className="review-item relative rounded-lg"
+                  >
+                    <div className="aspect-video rounded-lg overflow-hidden">
+                      <PreviewThumbnailPlayer
+                        review={value}
+                        allPreviews={relevantPreviews}
+                        timeRange={timeRange}
+                        setReviewed={markItemAsReviewed}
+                        scrollLock={scrollLock}
+                        onTimeUpdate={onPreviewTimeUpdate}
+                        onClick={onSelectReview}
+                      />
+                    </div>
+                    <div
+                      className={`review-item-ring pointer-events-none z-10 absolute rounded-lg inset-0 size-full -outline-offset-[2.8px] outline outline-[3px] ${selected ? `outline-severity_${value.severity} shadow-severity_${value.severity}` : "outline-transparent duration-500"}`}
                     />
                   </div>
-                  <div
-                    className={`review-item-ring pointer-events-none z-10 absolute rounded-lg inset-0 size-full -outline-offset-[2.8px] outline outline-[3px] ${selected ? `outline-severity_${value.severity} shadow-severity_${value.severity}` : "outline-transparent duration-500"}`}
-                  />
-                </div>
-              );
-            })}
-          {(currentItems?.length ?? 0) > 0 && (itemsToReview ?? 0) > 0 && (
-            <div className="col-span-full flex justify-center items-center">
-              <Button
-                className="text-white"
-                variant="select"
-                onClick={() => {
-                  markAllItemsAsReviewed(currentItems ?? []);
-                }}
-              >
-                Mark these items as reviewed
-              </Button>
-            </div>
-          )}
+                );
+              })
+            : Array(itemsToReview)
+                .fill(0)
+                .map(() => <Skeleton className="size-full aspect-video" />)}
+          {!loading &&
+            (currentItems?.length ?? 0) > 0 &&
+            (itemsToReview ?? 0) > 0 && (
+              <div className="col-span-full flex justify-center items-center">
+                <Button
+                  className="text-white"
+                  variant="select"
+                  onClick={() => {
+                    markAllItemsAsReviewed(currentItems ?? []);
+                  }}
+                >
+                  Mark these items as reviewed
+                </Button>
+              </div>
+            )}
         </div>
       </div>
       <div className="w-[65px] md:w-[110px] flex flex-row">
         <div className="w-[55px] md:w-[100px] overflow-y-auto no-scrollbar">
-          <EventReviewTimeline
-            segmentDuration={segmentDuration}
-            timestampSpread={15}
-            timelineStart={timeRange.before}
-            timelineEnd={timeRange.after}
-            showMinimap={showMinimap && !previewTime}
-            minimapStartTime={minimapBounds.start}
-            minimapEndTime={minimapBounds.end}
-            showHandlebar={previewTime != undefined}
-            handlebarTime={previewTime}
-            visibleTimestamps={visibleTimestamps}
-            events={reviewItems?.all ?? []}
-            severityType={severity}
-            contentRef={contentRef}
-            timelineRef={reviewTimelineRef}
-            dense={isMobile}
-          />
+          {loading ? (
+            <Skeleton className="size-full" />
+          ) : (
+            <EventReviewTimeline
+              segmentDuration={segmentDuration}
+              timestampSpread={15}
+              timelineStart={timeRange.before}
+              timelineEnd={timeRange.after}
+              showMinimap={showMinimap && !previewTime}
+              minimapStartTime={minimapBounds.start}
+              minimapEndTime={minimapBounds.end}
+              showHandlebar={previewTime != undefined}
+              handlebarTime={previewTime}
+              visibleTimestamps={visibleTimestamps}
+              events={reviewItems?.all ?? []}
+              severityType={severity}
+              contentRef={contentRef}
+              timelineRef={reviewTimelineRef}
+              dense={isMobile}
+            />
+          )}
         </div>
         <div className="w-[10px]">
-          <SummaryTimeline
-            reviewTimelineRef={reviewTimelineRef}
-            timelineStart={timeRange.before}
-            timelineEnd={timeRange.after}
-            segmentDuration={segmentDuration}
-            events={reviewItems?.all ?? []}
-            severityType={severity}
-          />
+          {loading ? (
+            <Skeleton className="w-full" />
+          ) : (
+            <SummaryTimeline
+              reviewTimelineRef={reviewTimelineRef}
+              timelineStart={timeRange.before}
+              timelineEnd={timeRange.after}
+              segmentDuration={segmentDuration}
+              events={reviewItems?.all ?? []}
+              severityType={severity}
+            />
+          )}
         </div>
       </div>
     </>
@@ -787,16 +829,18 @@ function MotionReview({
       } else {
         const segmentStartTime = alignStartDateToTimeline(currentTime);
         const segmentEndTime = segmentStartTime + segmentDuration;
-        const matchingItem = reviewItems?.all.find(
-          (item) =>
+        const matchingItem = reviewItems?.all.find((item) => {
+          const endTime = item.end_time ?? timeRange.before;
+
+          return (
             ((item.start_time >= segmentStartTime &&
               item.start_time < segmentEndTime) ||
-              (item.end_time > segmentStartTime &&
-                item.end_time <= segmentEndTime) ||
+              (endTime > segmentStartTime && endTime <= segmentEndTime) ||
               (item.start_time <= segmentStartTime &&
-                item.end_time >= segmentEndTime)) &&
-            item.camera === cameraName,
-        );
+                endTime >= segmentEndTime)) &&
+            item.camera === cameraName
+          );
+        });
 
         return matchingItem ? matchingItem.severity : null;
       }
@@ -805,6 +849,7 @@ function MotionReview({
       reviewItems,
       motionData,
       currentTime,
+      timeRange,
       motionOnly,
       alignStartDateToTimeline,
     ],
@@ -853,7 +898,10 @@ function MotionReview({
                       onClick={() =>
                         onOpenRecording({
                           camera: camera.name,
-                          startTime: currentTime,
+                          startTime: Math.min(
+                            currentTime,
+                            Date.now() / 1000 - 30,
+                          ),
                           severity: "significant_motion",
                         })
                       }

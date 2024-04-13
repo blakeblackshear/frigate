@@ -29,9 +29,19 @@ export default function Events() {
     "severity",
     "alert",
   );
+
   const [recording, setRecording] =
     useOverlayState<RecordingStartingPoint>("recording");
+
   const [startTime, setStartTime] = useState<number>();
+
+  useEffect(() => {
+    if (recording) {
+      document.title = "Recordings - Frigate";
+    } else {
+      document.title = `Review - Frigate`;
+    }
+  }, [recording, severity]);
 
   // review filter
 
@@ -204,7 +214,7 @@ export default function Events() {
           const newData = [...data];
 
           newData.forEach((seg) => {
-            if (seg.severity == severity) {
+            if (seg.end_time && seg.severity == severity) {
               seg.has_been_reviewed = true;
             }
           });
@@ -214,10 +224,16 @@ export default function Events() {
         { revalidate: false, populateCache: true },
       );
 
-      await axios.post(`reviews/viewed`, {
-        ids: currentItems?.map((seg) => seg.id),
-      });
-      reloadData();
+      const itemsToMarkReviewed = currentItems
+        ?.filter((seg) => seg.end_time)
+        ?.map((seg) => seg.id);
+
+      if (itemsToMarkReviewed.length > 0) {
+        await axios.post(`reviews/viewed`, {
+          ids: itemsToMarkReviewed,
+        });
+        reloadData();
+      }
     },
     [reloadData, updateSegments],
   );

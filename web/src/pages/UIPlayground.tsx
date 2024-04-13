@@ -318,7 +318,11 @@ function UIPlayground() {
                 <CameraActivityIndicator />
               </div>
               <p>
-                <Button onClick={handleZoomOut} disabled={zoomLevel === 0}>
+                <Button
+                  variant="default"
+                  onClick={handleZoomOut}
+                  disabled={zoomLevel === 0}
+                >
                   Zoom Out
                 </Button>
                 <Button

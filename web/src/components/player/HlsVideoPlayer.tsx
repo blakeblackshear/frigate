@@ -19,7 +19,6 @@ const unsupportedErrorCodes = [
 ];
 
 type HlsVideoPlayerProps = {
-  className: string;
   children?: ReactNode;
   videoRef: MutableRefObject<HTMLVideoElement | null>;
   visible: boolean;
@@ -31,7 +30,6 @@ type HlsVideoPlayerProps = {
   onPlaying?: () => void;
 };
 export default function HlsVideoPlayer({
-  className,
   children,
   videoRef,
   visible,
@@ -91,116 +89,118 @@ export default function HlsVideoPlayer({
 
   return (
     <TransformWrapper minScale={1.0}>
-      <div
-        className={`relative ${className ?? ""} ${visible ? "visible" : "hidden"}`}
-        onMouseOver={
-          isDesktop
-            ? () => {
-                setControls(true);
-              }
-            : undefined
-        }
-        onMouseOut={
-          isDesktop
-            ? () => {
-                setControls(controlsOpen);
-              }
-            : undefined
-        }
-        onClick={isDesktop ? undefined : () => setControls(!controls)}
+      <TransformComponent
+        wrapperStyle={{
+          position: "relative",
+          display: visible ? undefined : "none",
+          width: "100%",
+          height: "100%",
+        }}
+        contentStyle={{
+          width: "100%",
+          height: isMobile ? "100%" : undefined,
+        }}
       >
-        <TransformComponent
-          wrapperStyle={{
-            width: "100%",
-            height: "100%",
-          }}
-          contentStyle={{
-            width: "100%",
-            height: isMobile ? "100%" : undefined,
-          }}
-        >
-          <video
-            ref={videoRef}
-            className={`size-full bg-black rounded-2xl ${loadedMetadata ? "" : "invisible"}`}
-            preload="auto"
-            autoPlay
-            controls={false}
-            playsInline
-            muted
-            onPlay={() => {
-              setIsPlaying(true);
+        <video
+          ref={videoRef}
+          className={`size-full bg-black rounded-2xl ${loadedMetadata ? "" : "invisible"}`}
+          preload="auto"
+          autoPlay
+          controls={false}
+          playsInline
+          muted
+          onPlay={() => {
+            setIsPlaying(true);
 
-              if (isMobile) {
-                setControls(true);
-                setMobileCtrlTimeout(
-                  setTimeout(() => setControls(false), 4000),
-                );
-              }
-            }}
-            onPlaying={onPlaying}
-            onPause={() => {
-              setIsPlaying(false);
-
-              if (isMobile && mobileCtrlTimeout) {
-                clearTimeout(mobileCtrlTimeout);
-              }
-            }}
-            onTimeUpdate={() =>
-              onTimeUpdate && videoRef.current
-                ? onTimeUpdate(videoRef.current.currentTime)
-                : undefined
-            }
-            onLoadedData={onPlayerLoaded}
-            onLoadedMetadata={() => setLoadedMetadata(true)}
-            onEnded={onClipEnded}
-            onError={(e) => {
-              if (
-                !hlsRef.current &&
-                // @ts-expect-error code does exist
-                unsupportedErrorCodes.includes(e.target.error.code) &&
-                videoRef.current
-              ) {
-                setLoadedMetadata(false);
-                setUseHlsCompat(true);
-              }
-            }}
-          />
-        </TransformComponent>
-        <VideoControls
-          className="absolute bottom-5 left-1/2 -translate-x-1/2"
-          video={videoRef.current}
-          isPlaying={isPlaying}
-          show={controls}
-          controlsOpen={controlsOpen}
-          setControlsOpen={setControlsOpen}
-          playbackRate={videoRef.current?.playbackRate ?? 1}
-          hotKeys={hotKeys}
-          onPlayPause={(play) => {
-            if (!videoRef.current) {
-              return;
-            }
-
-            if (play) {
-              videoRef.current.play();
-            } else {
-              videoRef.current.pause();
+            if (isMobile) {
+              setControls(true);
+              setMobileCtrlTimeout(setTimeout(() => setControls(false), 4000));
             }
           }}
-          onSeek={(diff) => {
-            const currentTime = videoRef.current?.currentTime;
+          onPlaying={onPlaying}
+          onPause={() => {
+            setIsPlaying(false);
 
-            if (!videoRef.current || !currentTime) {
-              return;
+            if (isMobile && mobileCtrlTimeout) {
+              clearTimeout(mobileCtrlTimeout);
             }
-
-            videoRef.current.currentTime = Math.max(0, currentTime + diff);
           }}
-          onSetPlaybackRate={(rate) =>
-            videoRef.current ? (videoRef.current.playbackRate = rate) : null
+          onTimeUpdate={() =>
+            onTimeUpdate && videoRef.current
+              ? onTimeUpdate(videoRef.current.currentTime)
+              : undefined
           }
+          onLoadedData={onPlayerLoaded}
+          onLoadedMetadata={() => setLoadedMetadata(true)}
+          onEnded={onClipEnded}
+          onError={(e) => {
+            if (
+              !hlsRef.current &&
+              // @ts-expect-error code does exist
+              unsupportedErrorCodes.includes(e.target.error.code) &&
+              videoRef.current
+            ) {
+              setLoadedMetadata(false);
+              setUseHlsCompat(true);
+            }
+          }}
         />
-        {children}
-      </div>
+        <div
+          className="absolute inset-0"
+          onMouseOver={
+            isDesktop
+              ? () => {
+                  setControls(true);
+                }
+              : undefined
+          }
+          onMouseOut={
+            isDesktop
+              ? () => {
+                  setControls(controlsOpen);
+                }
+              : undefined
+          }
+          onClick={isDesktop ? undefined : () => setControls(!controls)}
+        >
+          <div className={`size-full relative ${visible ? "" : "hidden"}`}>
+            <VideoControls
+              className="absolute bottom-5 left-1/2 -translate-x-1/2"
+              video={videoRef.current}
+              isPlaying={isPlaying}
+              show={controls}
+              controlsOpen={controlsOpen}
+              setControlsOpen={setControlsOpen}
+              playbackRate={videoRef.current?.playbackRate ?? 1}
+              hotKeys={hotKeys}
+              onPlayPause={(play) => {
+                if (!videoRef.current) {
+                  return;
+                }
+
+                if (play) {
+                  videoRef.current.play();
+                } else {
+                  videoRef.current.pause();
+                }
+              }}
+              onSeek={(diff) => {
+                const currentTime = videoRef.current?.currentTime;
+
+                if (!videoRef.current || !currentTime) {
+                  return;
+                }
+
+                videoRef.current.currentTime = Math.max(0, currentTime + diff);
+              }}
+              onSetPlaybackRate={(rate) =>
+                videoRef.current ? (videoRef.current.playbackRate = rate) : null
+              }
+            />
+            {children}
+          </div>
+        </div>
+      </TransformComponent>
     </TransformWrapper>
   );
 }

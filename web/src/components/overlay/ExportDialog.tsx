@@ -64,10 +64,13 @@ export default function ExportDialog({
     }
 
     axios
-      .post(`export/${camera}/start/${range.after}/end/${range.before}`, {
-        playback: "realtime",
-        name,
-      })
+      .post(
+        `export/${camera}/start/${Math.round(range.after)}/end/${Math.round(range.before)}`,
+        {
+          playback: "realtime",
+          name,
+        },
+      )
       .then((response) => {
         if (response.status == 200) {
           toast.success(
@@ -116,14 +119,13 @@ export default function ExportDialog({
         <Trigger asChild>
           <Button
             className="flex items-center gap-2"
-            variant="secondary"
             size="sm"
             onClick={() => {
               setMode("select");
             }}
           >
             <FaArrowDown className="p-1 fill-secondary bg-secondary-foreground rounded-md" />
-            {isDesktop && <div className="text-primary-foreground">Export</div>}
+            {isDesktop && <div className="text-primary">Export</div>}
           </Button>
         </Trigger>
         <Content
@@ -371,7 +373,7 @@ function CustomTimeSelector({
 
   return (
     <div
-      className={`mt-3 flex items-center bg-secondary rounded-lg ${isDesktop ? "mx-8 px-2 gap-2" : "pl-2"}`}
+      className={`mt-3 flex items-center bg-secondary text-secondary-foreground rounded-lg ${isDesktop ? "mx-8 px-2 gap-2" : "pl-2"}`}
     >
       <FaCalendarAlt />
       <Popover
@@ -384,8 +386,8 @@ function CustomTimeSelector({
       >
         <PopoverTrigger asChild>
           <Button
-            className={isDesktop ? "" : "text-xs"}
-            variant={startOpen ? "select" : "secondary"}
+            className={`text-primary ${isDesktop ? "" : "text-xs"}`}
+            variant={startOpen ? "select" : "default"}
             size="sm"
             onClick={() => {
               setStartOpen(true);
@@ -435,7 +437,7 @@ function CustomTimeSelector({
           />
         </PopoverContent>
       </Popover>
-      <FaArrowRight className="size-4" />
+      <FaArrowRight className="size-4 text-primary" />
       <Popover
         open={endOpen}
         onOpenChange={(open) => {
@@ -446,8 +448,8 @@ function CustomTimeSelector({
       >
         <PopoverTrigger asChild>
           <Button
-            className={isDesktop ? "" : "text-xs"}
-            variant={endOpen ? "select" : "secondary"}
+            className={`text-primary ${isDesktop ? "" : "text-xs"}`}
+            variant={endOpen ? "select" : "default"}
             size="sm"
             onClick={() => {
               setEndOpen(true);
