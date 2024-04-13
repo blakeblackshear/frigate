@@ -245,10 +245,6 @@ class EventsConfig(FrigateBaseModel):
         default=5, title="Seconds to retain before event starts.", le=MAX_PRE_CAPTURE
     )
     post_capture: int = Field(default=5, title="Seconds to retain after event ends.")
-    required_zones: List[str] = Field(
-        default_factory=list,
-        title="List of required zones to be entered in order to save the event.",
-    )
     objects: Optional[List[str]] = Field(
         None,
         title="List of objects to be detected in order to save the event.",
@@ -657,11 +653,43 @@ class ZoneConfig(BaseModel):
 
 class ObjectConfig(FrigateBaseModel):
     track: List[str] = Field(default=DEFAULT_TRACKED_OBJECTS, title="Objects to track.")
-    alert: List[str] = Field(
-        default=DEFAULT_ALERT_OBJECTS, title="Objects to create alerts for."
-    )
     filters: Dict[str, FilterConfig] = Field(default={}, title="Object filters.")
     mask: Union[str, List[str]] = Field(default="", title="Object mask.")
+
+
+class AlertsConfig(FrigateBaseModel):
+    """Configure alerts"""
+
+    labels: List[str] = Field(
+        default=DEFAULT_ALERT_OBJECTS, title="Labels to create alerts for."
+    )
+    required_zones: List[str] = Field(
+        default_factory=list,
+        title="List of required zones to be entered in order to save the event as an alert.",
+    )
+
+
+class DetectionsConfig(FrigateBaseModel):
+    """Configure detections"""
+
+    labels: Optional[List[str]] = Field(
+        default=None, title="Labels to create detections for."
+    )
+    required_zones: List[str] = Field(
+        default_factory=list,
+        title="List of required zones to be entered in order to save the event as a detection.",
+    )
+
+
+class ReviewConfig(FrigateBaseModel):
+    """Configure reviews"""
+
+    alerts: AlertsConfig = Field(
+        default_factory=AlertsConfig, title="Review alerts config."
+    )
+    detections: DetectionsConfig = Field(
+        default_factory=DetectionsConfig, title="Review detections config."
+    )
 
 
 class AudioConfig(FrigateBaseModel):
@@ -941,6 +969,9 @@ class CameraConfig(FrigateBaseModel):
     )
     objects: ObjectConfig = Field(
         default_factory=ObjectConfig, title="Object configuration."
+    )
+    review: ReviewConfig = Field(
+        default_factory=ReviewConfig, title="Review configuration."
     )
     audio: AudioConfig = Field(
         default_factory=AudioConfig, title="Audio events configuration."
@@ -1263,6 +1294,9 @@ class FrigateConfig(FrigateBaseModel):
     objects: ObjectConfig = Field(
         default_factory=ObjectConfig, title="Global object configuration."
     )
+    review: ReviewConfig = Field(
+        default_factory=ReviewConfig, title="Review configuration."
+    )
     audio: AudioConfig = Field(
         default_factory=AudioConfig, title="Global Audio events configuration."
     )
@@ -1310,6 +1344,7 @@ class FrigateConfig(FrigateBaseModel):
                 "snapshots": ...,
                 "live": ...,
                 "objects": ...,
+                "review": ...,
                 "motion": ...,
                 "detect": ...,
                 "ffmpeg": ...,

@@ -32,13 +32,11 @@ THUMB_WIDTH = 320
 
 THRESHOLD_ALERT_ACTIVITY = 120
 THRESHOLD_DETECTION_ACTIVITY = 30
-THRESHOLD_MOTION_ACTIVITY = 30
 
 
 class SeverityEnum(str, Enum):
     alert = "alert"
     detection = "detection"
-    signification_motion = "significant_motion"
 
 
 class PendingReviewSegment:
@@ -50,7 +48,6 @@ class PendingReviewSegment:
         detections: dict[str, str],
         zones: set[str] = set(),
         audio: set[str] = set(),
-        motion: list[int] = [],
     ):
         rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
         self.id = f"{frame_time}-{rand_id}"
@@ -60,7 +57,6 @@ class PendingReviewSegment:
         self.detections = detections
         self.zones = zones
         self.audio = audio
-        self.sig_motion_areas = motion
         self.last_update = frame_time
 
         # thumbnail
@@ -117,7 +113,6 @@ class PendingReviewSegment:
                 "objects": list(set(self.detections.values())),
                 "zones": list(self.zones),
                 "audio": list(self.audio),
-                "significant_motion_areas": self.sig_motion_areas,
             },
         }
 
@@ -170,7 +165,6 @@ class ReviewSegmentMaintainer(threading.Thread):
         segment: PendingReviewSegment,
         frame_time: float,
         objects: list[TrackedObject],
-        motion: list,
     ) -> None:
         """Validate if existing review segment should continue."""
         camera_config = self.config.cameras[segment.camera]
@@ -180,19 +174,6 @@ class ReviewSegmentMaintainer(threading.Thread):
             if frame_time > segment.last_update:
                 segment.last_update = frame_time
 
-            # update type for this segment now that active objects are detected
-            if segment.severity == SeverityEnum.signification_motion:
-                segment.severity = SeverityEnum.detection
-
-            if len(active_objects) > segment.frame_active_count:
-                frame_id = f"{camera_config.name}{frame_time}"
-                yuv_frame = self.frame_manager.get(
-                    frame_id, camera_config.frame_shape_yuv
-                )
-                segment.update_frame(camera_config, yuv_frame, active_objects)
-                self.frame_manager.close(frame_id)
-                self.update_segment(segment)
-
             for object in active_objects:
                 if not object["sub_label"]:
                     segment.detections[object["id"]] = object["label"]
@@ -201,24 +182,38 @@ class ReviewSegmentMaintainer(threading.Thread):
                 else:
                     segment.detections[object["id"]] = f'{object["label"]}-verified'
 
-                # if object is alert label and has qualified for recording
+                # if object is alert label
+                # and has entered required zones or required zones is not set
                 # mark this review as alert
                 if (
-                    segment.severity == SeverityEnum.detection
-                    and object["has_clip"]
-                    and object["label"] in camera_config.objects.alert
+                    segment.severity != SeverityEnum.alert
+                    and object["label"] in camera_config.review.alerts.labels
+                    and (
+                        not camera_config.review.alerts.required_zones
+                        or (
+                            len(object["current_zones"]) > 0
+                            and set(object["current_zones"])
+                            & set(camera_config.review.alerts.required_zones)
+                        )
+                    )
                 ):
                     segment.severity = SeverityEnum.alert
 
                 # keep zones up to date
                 if len(object["current_zones"]) > 0:
                     segment.zones.update(object["current_zones"])
-        elif (
-            segment.severity == SeverityEnum.signification_motion
-            and len(motion) >= THRESHOLD_MOTION_ACTIVITY
-        ):
-            if frame_time > segment.last_update:
-                segment.last_update = frame_time
+
+            if len(active_objects) > segment.frame_active_count:
+                try:
+                    frame_id = f"{camera_config.name}{frame_time}"
+                    yuv_frame = self.frame_manager.get(
+                        frame_id, camera_config.frame_shape_yuv
+                    )
+                    segment.update_frame(camera_config, yuv_frame, active_objects)
+                    self.frame_manager.close(frame_id)
+                    self.update_segment(segment)
+                except FileNotFoundError:
+                    return
         else:
             if segment.severity == SeverityEnum.alert and frame_time > (
                 segment.last_update + THRESHOLD_ALERT_ACTIVITY
@@ -232,7 +227,6 @@ class ReviewSegmentMaintainer(threading.Thread):
         camera: str,
         frame_time: float,
         objects: list[TrackedObject],
-        motion: list,
     ) -> None:
         """Check if a new review segment should be created."""
         camera_config = self.config.cameras[camera]
@@ -242,15 +236,9 @@ class ReviewSegmentMaintainer(threading.Thread):
             has_sig_object = False
             detections: dict[str, str] = {}
             zones: set = set()
+            severity = None
 
             for object in active_objects:
-                if (
-                    not has_sig_object
-                    and object["has_clip"]
-                    and object["label"] in camera_config.objects.alert
-                ):
-                    has_sig_object = True
-
                 if not object["sub_label"]:
                     detections[object["id"]] = object["label"]
                 elif object["sub_label"][0] in ALL_ATTRIBUTE_LABELS:
@@ -258,35 +246,68 @@ class ReviewSegmentMaintainer(threading.Thread):
                 else:
                     detections[object["id"]] = f'{object["label"]}-verified'
 
+                # if object is alert label
+                # and has entered required zones or required zones is not set
+                # mark this review as alert
+                if (
+                    severity != SeverityEnum.alert
+                    and object["label"] in camera_config.review.alerts.labels
+                    and (
+                        not camera_config.review.alerts.required_zones
+                        or (
+                            len(object["current_zones"]) > 0
+                            and set(object["current_zones"])
+                            & set(camera_config.review.alerts.required_zones)
+                        )
+                    )
+                ):
+                    severity = SeverityEnum.alert
+
+                # if object is detection label
+                # and review is not already a detection or alert
+                # and has entered required zones or required zones is not set
+                # mark this review as alert
+                if (
+                    not severity
+                    and (
+                        not camera_config.review.detections.labels
+                        or object["label"] in (camera_config.review.detections.labels)
+                    )
+                    and (
+                        not camera_config.review.detections.required_zones
+                        or (
+                            len(object["current_zones"]) > 0
+                            and set(object["current_zones"])
+                            & set(camera_config.review.detections.required_zones)
+                        )
+                    )
+                ):
+                    severity = SeverityEnum.detection
+
                 zones.update(object["current_zones"])
 
-            self.active_review_segments[camera] = PendingReviewSegment(
-                camera,
-                frame_time,
-                SeverityEnum.alert if has_sig_object else SeverityEnum.detection,
-                detections,
-                audio=set(),
-                zones=zones,
-                motion=[],
-            )
+            if severity:
+                self.active_review_segments[camera] = PendingReviewSegment(
+                    camera,
+                    frame_time,
+                    SeverityEnum.alert if has_sig_object else SeverityEnum.detection,
+                    detections,
+                    audio=set(),
+                    zones=zones,
+                )
 
-            frame_id = f"{camera_config.name}{frame_time}"
-            yuv_frame = self.frame_manager.get(frame_id, camera_config.frame_shape_yuv)
-            self.active_review_segments[camera].update_frame(
-                camera_config, yuv_frame, active_objects
-            )
-            self.frame_manager.close(frame_id)
-            self.update_segment(self.active_review_segments[camera])
-        elif len(motion) >= 20:
-            self.active_review_segments[camera] = PendingReviewSegment(
-                camera,
-                frame_time,
-                SeverityEnum.signification_motion,
-                detections={},
-                audio=set(),
-                motion=motion,
-                zones=set(),
-            )
+                try:
+                    frame_id = f"{camera_config.name}{frame_time}"
+                    yuv_frame = self.frame_manager.get(
+                        frame_id, camera_config.frame_shape_yuv
+                    )
+                    self.active_review_segments[camera].update_frame(
+                        camera_config, yuv_frame, active_objects
+                    )
+                    self.frame_manager.close(frame_id)
+                    self.update_segment(self.active_review_segments[camera])
+                except FileNotFoundError:
+                    return
 
     def run(self) -> None:
         while not self.stop_event.is_set():
@@ -344,13 +365,22 @@ class ReviewSegmentMaintainer(threading.Thread):
                         current_segment,
                         frame_time,
                         current_tracked_objects,
-                        motion_boxes,
                     )
                 elif topic == DetectionTypeEnum.audio and len(audio_detections) > 0:
+                    camera_config = self.config.cameras[camera]
+
                     if frame_time > current_segment.last_update:
                         current_segment.last_update = frame_time
 
-                    current_segment.audio.update(audio_detections)
+                    for audio in audio_detections:
+                        if audio in camera_config.review.alerts.labels:
+                            current_segment.audio.add(audio)
+                            current_segment.severity = SeverityEnum.alert
+                        elif (
+                            not camera_config.review.detections.labels
+                            or audio in camera_config.review.detections.labels
+                        ):
+                            current_segment.audio.add(audio)
                 elif topic == DetectionTypeEnum.api:
                     if manual_info["state"] == ManualEventState.complete:
                         current_segment.detections[manual_info["event_id"]] = (
@@ -378,18 +408,35 @@ class ReviewSegmentMaintainer(threading.Thread):
                         camera,
                         frame_time,
                         current_tracked_objects,
-                        motion_boxes,
                     )
                 elif topic == DetectionTypeEnum.audio and len(audio_detections) > 0:
-                    self.active_review_segments[camera] = PendingReviewSegment(
-                        camera,
-                        frame_time,
-                        SeverityEnum.detection,
-                        {},
-                        set(),
-                        set(audio_detections),
-                        [],
-                    )
+                    severity = None
+
+                    camera_config = self.config.cameras[camera]
+                    detections = set()
+
+                    for audio in audio_detections:
+                        if audio in camera_config.review.alerts.labels:
+                            detections.add(audio)
+                            severity = SeverityEnum.alert
+                        elif (
+                            not camera_config.review.detections.labels
+                            or audio in camera_config.review.detections.labels
+                        ):
+                            detections.add(audio)
+
+                            if not severity:
+                                severity = SeverityEnum.detection
+
+                    if severity:
+                        self.active_review_segments[camera] = PendingReviewSegment(
+                            camera,
+                            frame_time,
+                            severity,
+                            {},
+                            set(),
+                            detections,
+                        )
                 elif topic == DetectionTypeEnum.api:
                     self.active_review_segments[camera] = PendingReviewSegment(
                         camera,
@@ -398,7 +445,6 @@ class ReviewSegmentMaintainer(threading.Thread):
                         {manual_info["event_id"]: manual_info["label"]},
                         set(),
                         set(),
-                        [],
                     )
 
                     if manual_info["state"] == ManualEventState.start:
@@ -425,8 +471,16 @@ def get_active_objects(
     return [
         o
         for o in all_objects
-        if o["motionless_count"] < camera_config.detect.stationary.threshold
-        and o["position_changes"] > 0
-        and o["frame_time"] == frame_time
-        and not o["false_positive"]
+        if o["motionless_count"]
+        < camera_config.detect.stationary.threshold  # no stationary objects
+        and o["position_changes"] > 0  # object must have moved at least once
+        and o["frame_time"] == frame_time  # object must be detected in this frame
+        and not o["false_positive"]  # object must not be a false positive
+        and (
+            o["label"] in camera_config.review.alerts.labels
+            or (
+                not camera_config.review.detections.labels
+                or o["label"] in camera_config.review.detections.labels
+            )
+        )  # object must be in the alerts or detections label list
     ]

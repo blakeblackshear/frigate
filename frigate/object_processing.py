@@ -1007,7 +1007,7 @@ class TrackedObjectProcessor(threading.Thread):
 
         return True
 
-    def should_retain_recording(self, camera, obj: TrackedObject):
+    def should_retain_recording(self, camera: str, obj: TrackedObject):
         if obj.false_positive:
             return False
 
@@ -1022,7 +1022,11 @@ class TrackedObjectProcessor(threading.Thread):
             return False
 
         # If there are required zones and there is no overlap
-        required_zones = record_config.events.required_zones
+        review_config = self.config.cameras[camera].review
+        required_zones = (
+            review_config.alerts.required_zones
+            + review_config.detections.required_zones
+        )
         if len(required_zones) > 0 and not set(obj.entered_zones) & set(required_zones):
             logger.debug(
                 f"Not creating clip for {obj.obj_data['id']} because it did not enter required zones"
