@@ -1,8 +1,9 @@
 """Configure and control camera via onvif."""
 
 import logging
-import site
 from enum import Enum
+from importlib.util import find_spec
+from pathlib import Path
 
 import numpy
 from onvif import ONVIFCamera, ONVIFError
@@ -50,10 +51,7 @@ class OnvifController:
                             cam.onvif.port,
                             cam.onvif.user,
                             cam.onvif.password,
-                            wsdl_dir=site.getsitepackages()[0].replace(
-                                "dist-packages", "site-packages"
-                            )
-                            + "/wsdl",
+                            wsdl_dir=Path(find_spec("onvif").origin).parent / "../wsdl",
                         ),
                         "init": False,
                         "active": False,
