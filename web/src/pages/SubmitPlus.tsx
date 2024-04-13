@@ -1,6 +1,9 @@
 import { baseUrl } from "@/api/baseUrl";
 import FilterCheckBox from "@/components/filter/FilterCheckBox";
-import { CamerasFilterButton } from "@/components/filter/ReviewFilterGroup";
+import {
+  CamerasFilterButton,
+  GeneralFilterContent,
+} from "@/components/filter/ReviewFilterGroup";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -252,8 +255,14 @@ function PlusFilterGroup({
         }}
       >
         <Trigger asChild>
-          <Button size="sm" className="flex items-center gap-2 capitalize">
-            <FaList className="text-secondary-foreground" />
+          <Button
+            className="flex items-center gap-2 capitalize"
+            size="sm"
+            variant={selectedLabels == undefined ? "default" : "select"}
+          >
+            <FaList
+              className={`${selectedLabels == undefined ? "text-secondary-foreground" : "text-selected-foreground"}`}
+            />
             <div className="hidden md:block text-primary">
               {selectedLabels == undefined
                 ? "All Labels"
@@ -262,61 +271,14 @@ function PlusFilterGroup({
           </Button>
         </Trigger>
         <Content className={isMobile ? "max-h-[75dvh]" : ""}>
-          <DropdownMenuLabel className="flex justify-center">
-            Filter Labels
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <FilterCheckBox
-            isChecked={currentLabels == undefined}
-            label="All Labels"
-            onCheckedChange={(isChecked) => {
-              if (isChecked) {
-                setCurrentLabels(undefined);
-              }
-            }}
+          <GeneralFilterContent
+            allLabels={allLabels}
+            selectedLabels={selectedLabels}
+            currentLabels={currentLabels}
+            setCurrentLabels={setCurrentLabels}
+            updateLabelFilter={setSelectedLabels}
+            onClose={() => setOpen("none")}
           />
-          <DropdownMenuSeparator />
-          <div className={isMobile ? "h-auto overflow-y-auto" : ""}>
-            {allLabels.map((item) => (
-              <FilterCheckBox
-                key={item}
-                isChecked={currentLabels?.includes(item) ?? false}
-                label={item.replaceAll("_", " ")}
-                onCheckedChange={(isChecked) => {
-                  if (isChecked) {
-                    const updatedLabels = currentLabels
-                      ? [...currentLabels]
-                      : [];
-
-                    updatedLabels.push(item);
-                    setCurrentLabels(updatedLabels);
-                  } else {
-                    const updatedLabels = currentLabels
-                      ? [...currentLabels]
-                      : [];
-
-                    // can not deselect the last item
-                    if (updatedLabels.length > 1) {
-                      updatedLabels.splice(updatedLabels.indexOf(item), 1);
-                      setCurrentLabels(updatedLabels);
-                    }
-                  }
-                }}
-              />
-            ))}
-          </div>
-          <DropdownMenuSeparator />
-          <div className="flex justify-center items-center">
-            <Button
-              variant="select"
-              onClick={() => {
-                setSelectedLabels(currentLabels);
-                setOpen("none");
-              }}
-            >
-              Apply
-            </Button>
-          </div>
         </Content>
       </Menu>
       <Menu
