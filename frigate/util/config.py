@@ -61,6 +61,7 @@ def migrate_014(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
     )
 
     if global_required_zones:
+        # migrate to new review config
         if not new_config.get("review"):
             new_config["review"] = {}
 
@@ -70,13 +71,22 @@ def migrate_014(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
         if not new_config["review"]["alerts"].get("required_zones"):
             new_config["review"]["alerts"]["required_zones"] = global_required_zones
 
+        # remove record required zones config
         del new_config["record"]["events"]["required_zones"]
 
+        # remove record altogether if there is not other config
         if not new_config["record"]["events"]:
             del new_config["record"]["events"]
 
         if not new_config["record"]:
             del new_config["record"]
+
+    # remove rtmp
+    if new_config.get("ffmpeg", {}).get("output_args", {}).get("rtmp"):
+        del new_config["ffmpeg"]["output_args"]["rtmp"]
+
+    if new_config.get("rtmp"):
+        del new_config["rtmp"]
 
     for name, camera in config.get("cameras", {}).items():
         camera_config: dict[str, dict[str, any]] = camera.copy()
@@ -85,6 +95,7 @@ def migrate_014(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
         )
 
         if required_zones:
+            # migrate to new review config
             if not camera_config.get("review"):
                 camera_config["review"] = {}
 
@@ -94,13 +105,22 @@ def migrate_014(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
             if not camera_config["review"]["alerts"].get("required_zones"):
                 camera_config["review"]["alerts"]["required_zones"] = required_zones
 
+            # remove record required zones config
             del camera_config["record"]["events"]["required_zones"]
 
+            # remove record altogether if there is not other config
             if not camera_config["record"]["events"]:
                 del camera_config["record"]["events"]
 
             if not camera_config["record"]:
                 del camera_config["record"]
+
+        # remove rtmp
+        if camera_config.get("ffmpeg", {}).get("output_args", {}).get("rtmp"):
+            del camera_config["ffmpeg"]["output_args"]["rtmp"]
+
+        if camera_config.get("rtmp"):
+            del camera_config["rtmp"]
 
         new_config["cameras"][name] = camera_config
 
