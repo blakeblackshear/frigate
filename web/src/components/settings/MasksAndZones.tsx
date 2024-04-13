@@ -180,9 +180,13 @@ export type ZoneObjects = {
 
 type MasksAndZoneProps = {
   selectedCamera: string;
+  selectedZoneMask: PolygonType;
 };
 
-export default function MasksAndZones({ selectedCamera }: MasksAndZoneProps) {
+export default function MasksAndZones({
+  selectedCamera,
+  selectedZoneMask,
+}: MasksAndZoneProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
   const [allPolygons, setAllPolygons] = useState<Polygon[]>([]);
   const [editingPolygons, setEditingPolygons] = useState<Polygon[]>();
@@ -266,23 +270,6 @@ export default function MasksAndZones({ selectedCamera }: MasksAndZoneProps) {
     [setZoneObjects],
   );
 
-  // const getCameraAspect = useCallback(
-  //   (cam: string) => {
-  //     if (!config) {
-  //       return undefined;
-  //     }
-
-  //     const camera = config.cameras[cam];
-
-  //     if (!camera) {
-  //       return undefined;
-  //     }
-
-  //     return camera.detect.width / camera.detect.height;
-  //   },
-  //   [config],
-  // );
-
   const [{ width: containerWidth, height: containerHeight }] =
     useResizeObserver(containerRef);
 
@@ -322,7 +309,6 @@ export default function MasksAndZones({ selectedCamera }: MasksAndZoneProps) {
 
   const scaledHeight = useMemo(() => {
     if (containerRef.current && aspectRatio && detectHeight) {
-      console.log("recalc", Date.now());
       const scaledHeight =
         aspectRatio < (fitAspect ?? 0)
           ? Math.floor(
@@ -405,9 +391,9 @@ export default function MasksAndZones({ selectedCamera }: MasksAndZoneProps) {
 
   useEffect(() => {
     if (cameraConfig && containerRef.current && scaledWidth) {
-      setAllPolygons([
-        ...Object.entries(cameraConfig.zones).map(([name, zoneData]) => ({
-          type: "zone" as PolygonType, // Add the type property here
+      const zones = Object.entries(cameraConfig.zones).map(
+        ([name, zoneData]) => ({
+          type: "zone" as PolygonType,
           camera: cameraConfig.name,
           name,
           points: interpolatePoints(
@@ -419,11 +405,14 @@ export default function MasksAndZones({ selectedCamera }: MasksAndZoneProps) {
           ),
           isFinished: true,
           color: zoneData.color,
-        })),
-        ...Object.entries(cameraConfig.motion.mask).map(([, maskData]) => ({
+        }),
+      );
+
+      const motionMasks = Object.entries(cameraConfig.motion.mask).map(
+        ([, maskData], index) => ({
           type: "motion_mask" as PolygonType,
           camera: cameraConfig.name,
-          name: "motion_mask",
+          name: `Motion Mask ${index + 1}`,
           points: interpolatePoints(
             parseCoordinates(maskData),
             1,
@@ -433,32 +422,59 @@ export default function MasksAndZones({ selectedCamera }: MasksAndZoneProps) {
           ),
           isFinished: true,
           color: [0, 0, 255],
-        })),
-        ...Object.entries(cameraConfig.objects.filters).flatMap(
-          ([objectName, { mask }]): Polygon[] =>
-            mask !== null && mask !== undefined
-              ? mask.flatMap((maskItem) =>
-                  maskItem !== null && maskItem !== undefined
-                    ? [
-                        {
-                          type: "object_mask" as PolygonType,
-                          camera: cameraConfig.name,
-                          name: objectName,
-                          points: interpolatePoints(
-                            parseCoordinates(maskItem),
-                            1,
-                            1,
-                            scaledWidth,
-                            scaledHeight,
-                          ),
-                          isFinished: true,
-                          color: [128, 128, 128],
-                        },
-                      ]
-                    : [],
-                )
-              : [],
-        ),
+        }),
+      );
+
+      const globalObjectMasks = Object.entries(cameraConfig.objects.mask).map(
+        ([, maskData], index) => ({
+          type: "object_mask" as PolygonType,
+          camera: cameraConfig.name,
+          name: `All Objects Object Mask ${index + 1}`,
+          points: interpolatePoints(
+            parseCoordinates(maskData),
+            1,
+            1,
+            scaledWidth,
+            scaledHeight,
+          ),
+          isFinished: true,
+          color: [0, 0, 255],
+        }),
+      );
+
+      const globalObjectMasksCount = globalObjectMasks.length;
+
+      const objectMasks = Object.entries(cameraConfig.objects.filters).flatMap(
+        ([objectName, { mask }]): Polygon[] =>
+          mask !== null && mask !== undefined
+            ? mask.flatMap((maskItem, subIndex) =>
+                maskItem !== null && maskItem !== undefined
+                  ? [
+                      {
+                        type: "object_mask" as PolygonType,
+                        camera: cameraConfig.name,
+                        name: `${objectName.charAt(0).toUpperCase() + objectName.slice(1)} Object Mask ${globalObjectMasksCount + subIndex + 1}`,
+                        points: interpolatePoints(
+                          parseCoordinates(maskItem),
+                          1,
+                          1,
+                          scaledWidth,
+                          scaledHeight,
+                        ),
+                        isFinished: true,
+                        color: [128, 128, 128],
+                      },
+                    ]
+                  : [],
+              )
+            : [],
+      );
+
+      setAllPolygons([
+        ...zones,
+        ...motionMasks,
+        ...globalObjectMasks,
+        ...objectMasks,
       ]);
 
       setZoneObjects(
@@ -502,12 +518,14 @@ export default function MasksAndZones({ selectedCamera }: MasksAndZoneProps) {
     return <ActivityIndicator />;
   }
 
+  // console.log(selectedZoneMask);
+
   return (
     <>
       {cameraConfig && allPolygons && (
         <div className="flex flex-col md:flex-row size-full">
           <Toaster position="top-center" />
-          <div className="flex flex-col order-last w-full overflow-y-auto md:w-3/12 md:order-none md:mr-2 rounded-lg border-secondary-foreground border-[1px] p-2 bg-background_alt">
+          <div className="flex flex-col w-full overflow-y-auto md:w-3/12 order-last md:order-none md:mr-2 rounded-lg border-secondary-foreground border-[1px] p-2 bg-background_alt">
             {editPane == "zone" && (
               <ZoneEditPane
                 polygons={allPolygons}
@@ -530,107 +548,126 @@ export default function MasksAndZones({ selectedCamera }: MasksAndZoneProps) {
                 onCancel={handleCancel}
               />
             )}
-            {editPane == undefined && (
+            {editPane === undefined && (
               <>
-                <div className="flex flex-row justify-between items-center mb-3">
-                  <div className="text-md">Zones</div>
-                  <Button
-                    variant="ghost"
-                    className="h-8 px-0"
-                    onClick={() => {
-                      setEditPane("zone");
-                      handleNewPolygon("zone");
-                    }}
-                  >
-                    <LuPlusSquare />
-                  </Button>
-                </div>
-                {allPolygons
-                  .flatMap((polygon, index) =>
-                    polygon.type === "zone" ? [{ polygon, index }] : [],
-                  )
-                  .map(({ polygon, index }) => (
-                    <PolygonItem
-                      key={index}
-                      polygon={polygon}
-                      index={index}
-                      activePolygonIndex={activePolygonIndex}
-                      hoveredPolygonIndex={hoveredPolygonIndex}
-                      setHoveredPolygonIndex={setHoveredPolygonIndex}
-                      deleteDialogOpen={deleteDialogOpen}
-                      setDeleteDialogOpen={setDeleteDialogOpen}
-                      setActivePolygonIndex={setActivePolygonIndex}
-                      setEditPane={setEditPane}
-                      setAllPolygons={setAllPolygons}
-                      handleCopyCoordinates={handleCopyCoordinates}
-                    />
-                  ))}
-                <div className="flex flex-row justify-between items-center my-3">
-                  <div className="text-md">Motion Masks</div>
-                  <Button
-                    variant="ghost"
-                    className="h-8 px-0"
-                    onClick={() => {
-                      setEditPane("motion_mask");
-                      handleNewPolygon("motion_mask");
-                    }}
-                  >
-                    <LuPlusSquare />
-                  </Button>
-                </div>
-                {allPolygons
-                  .flatMap((polygon, index) =>
-                    polygon.type === "motion_mask" ? [{ polygon, index }] : [],
-                  )
-                  .map(({ polygon, index }) => (
-                    <PolygonItem
-                      key={index}
-                      polygon={polygon}
-                      index={index}
-                      activePolygonIndex={activePolygonIndex}
-                      hoveredPolygonIndex={hoveredPolygonIndex}
-                      setHoveredPolygonIndex={setHoveredPolygonIndex}
-                      deleteDialogOpen={deleteDialogOpen}
-                      setDeleteDialogOpen={setDeleteDialogOpen}
-                      setActivePolygonIndex={setActivePolygonIndex}
-                      setEditPane={setEditPane}
-                      setAllPolygons={setAllPolygons}
-                      handleCopyCoordinates={handleCopyCoordinates}
-                    />
-                  ))}
-                <div className="flex flex-row justify-between items-center my-3">
-                  <div className="text-md">Object Masks</div>
-                  <Button
-                    variant="ghost"
-                    className="h-8 px-0"
-                    onClick={() => {
-                      setEditPane("motion_mask");
-                      handleNewPolygon("motion_mask");
-                    }}
-                  >
-                    <LuPlusSquare />
-                  </Button>
-                </div>
-                {allPolygons
-                  .flatMap((polygon, index) =>
-                    polygon.type === "object_mask" ? [{ polygon, index }] : [],
-                  )
-                  .map(({ polygon, index }) => (
-                    <PolygonItem
-                      key={index}
-                      polygon={polygon}
-                      index={index}
-                      activePolygonIndex={activePolygonIndex}
-                      hoveredPolygonIndex={hoveredPolygonIndex}
-                      setHoveredPolygonIndex={setHoveredPolygonIndex}
-                      deleteDialogOpen={deleteDialogOpen}
-                      setDeleteDialogOpen={setDeleteDialogOpen}
-                      setActivePolygonIndex={setActivePolygonIndex}
-                      setEditPane={setEditPane}
-                      setAllPolygons={setAllPolygons}
-                      handleCopyCoordinates={handleCopyCoordinates}
-                    />
-                  ))}
+                {(selectedZoneMask === undefined ||
+                  selectedZoneMask.includes("zone" as PolygonType)) && (
+                  <>
+                    <div className="flex flex-row justify-between items-center mb-3">
+                      <div className="text-md">Zones</div>
+                      <Button
+                        variant="ghost"
+                        className="h-8 px-0"
+                        onClick={() => {
+                          setEditPane("zone");
+                          handleNewPolygon("zone");
+                        }}
+                      >
+                        <LuPlusSquare />
+                      </Button>
+                    </div>
+                    {allPolygons
+                      .flatMap((polygon, index) =>
+                        polygon.type === "zone" ? [{ polygon, index }] : [],
+                      )
+                      .map(({ polygon, index }) => (
+                        <PolygonItem
+                          key={index}
+                          polygon={polygon}
+                          index={index}
+                          activePolygonIndex={activePolygonIndex}
+                          hoveredPolygonIndex={hoveredPolygonIndex}
+                          setHoveredPolygonIndex={setHoveredPolygonIndex}
+                          deleteDialogOpen={deleteDialogOpen}
+                          setDeleteDialogOpen={setDeleteDialogOpen}
+                          setActivePolygonIndex={setActivePolygonIndex}
+                          setEditPane={setEditPane}
+                          setAllPolygons={setAllPolygons}
+                          handleCopyCoordinates={handleCopyCoordinates}
+                        />
+                      ))}
+                  </>
+                )}
+                {(selectedZoneMask === undefined ||
+                  selectedZoneMask.includes("motion_mask" as PolygonType)) && (
+                  <>
+                    <div className="flex flex-row justify-between items-center my-3">
+                      <div className="text-md">Motion Masks</div>
+                      <Button
+                        variant="ghost"
+                        className="h-8 px-0"
+                        onClick={() => {
+                          setEditPane("motion_mask");
+                          handleNewPolygon("motion_mask");
+                        }}
+                      >
+                        <LuPlusSquare />
+                      </Button>
+                    </div>
+                    {allPolygons
+                      .flatMap((polygon, index) =>
+                        polygon.type === "motion_mask"
+                          ? [{ polygon, index }]
+                          : [],
+                      )
+                      .map(({ polygon, index }) => (
+                        <PolygonItem
+                          key={index}
+                          polygon={polygon}
+                          index={index}
+                          activePolygonIndex={activePolygonIndex}
+                          hoveredPolygonIndex={hoveredPolygonIndex}
+                          setHoveredPolygonIndex={setHoveredPolygonIndex}
+                          deleteDialogOpen={deleteDialogOpen}
+                          setDeleteDialogOpen={setDeleteDialogOpen}
+                          setActivePolygonIndex={setActivePolygonIndex}
+                          setEditPane={setEditPane}
+                          setAllPolygons={setAllPolygons}
+                          handleCopyCoordinates={handleCopyCoordinates}
+                        />
+                      ))}
+                  </>
+                )}
+                {(selectedZoneMask === undefined ||
+                  selectedZoneMask.includes("object_mask" as PolygonType)) && (
+                  <>
+                    <div className="flex flex-row justify-between items-center my-3">
+                      <div className="text-md">Object Masks</div>
+                      <Button
+                        variant="ghost"
+                        className="h-8 px-0"
+                        onClick={() => {
+                          setEditPane("motion_mask");
+                          handleNewPolygon("motion_mask");
+                        }}
+                      >
+                        <LuPlusSquare />
+                      </Button>
+                    </div>
+                    {allPolygons
+                      .flatMap((polygon, index) =>
+                        polygon.type === "object_mask"
+                          ? [{ polygon, index }]
+                          : [],
+                      )
+                      .map(({ polygon, index }) => (
+                        <PolygonItem
+                          key={index}
+                          polygon={polygon}
+                          index={index}
+                          activePolygonIndex={activePolygonIndex}
+                          hoveredPolygonIndex={hoveredPolygonIndex}
+                          setHoveredPolygonIndex={setHoveredPolygonIndex}
+                          deleteDialogOpen={deleteDialogOpen}
+                          setDeleteDialogOpen={setDeleteDialogOpen}
+                          setActivePolygonIndex={setActivePolygonIndex}
+                          setEditPane={setEditPane}
+                          setAllPolygons={setAllPolygons}
+                          handleCopyCoordinates={handleCopyCoordinates}
+                        />
+                      ))}
+                  </>
+                )}
               </>
             )}
             {/* <Table>
@@ -728,6 +765,7 @@ export default function MasksAndZones({ selectedCamera }: MasksAndZoneProps) {
                   setPolygons={setEditingPolygons}
                   activePolygonIndex={activePolygonIndex}
                   hoveredPolygonIndex={hoveredPolygonIndex}
+                  selectedZoneMask={selectedZoneMask}
                 />
               ) : (
                 <Skeleton className="w-full h-full" />

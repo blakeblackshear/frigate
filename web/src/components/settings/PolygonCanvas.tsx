@@ -3,7 +3,7 @@ import PolygonDrawer from "./PolygonDrawer";
 import { Stage, Layer, Image, Text } from "react-konva";
 import Konva from "konva";
 import type { KonvaEventObject } from "konva/lib/Node";
-import { Polygon } from "@/types/canvas";
+import { Polygon, PolygonType } from "@/types/canvas";
 import { useApiHost } from "@/api";
 import { getAveragePoint } from "@/utils/canvasUtil";
 
@@ -16,6 +16,7 @@ type PolygonCanvasProps = {
   setPolygons: React.Dispatch<React.SetStateAction<Polygon[]>>;
   activePolygonIndex: number | undefined;
   hoveredPolygonIndex: number | null;
+  selectedZoneMask: PolygonType;
 };
 
 export function PolygonCanvas({
@@ -27,6 +28,7 @@ export function PolygonCanvas({
   setPolygons,
   activePolygonIndex,
   hoveredPolygonIndex,
+  selectedZoneMask,
 }: PolygonCanvasProps) {
   const [image, setImage] = useState<HTMLImageElement | undefined>();
   const imageRef = useRef<Konva.Image | null>(null);
@@ -205,36 +207,40 @@ export function PolygonCanvas({
           width={width}
           height={height}
         />
-        {polygons?.map((polygon, index) => (
-          <React.Fragment key={index}>
-            <PolygonDrawer
-              key={index}
-              points={polygon.points}
-              flattenedPoints={flattenPoints(polygon.points)}
-              isActive={index === activePolygonIndex}
-              isHovered={index === hoveredPolygonIndex}
-              isFinished={polygon.isFinished}
-              color={polygon.color}
-              handlePointDragMove={handlePointDragMove}
-              handleGroupDragEnd={handleGroupDragEnd}
-              handleMouseOverStartPoint={handleMouseOverStartPoint}
-              handleMouseOutStartPoint={handleMouseOutStartPoint}
-            />
-            {index === hoveredPolygonIndex && (
-              <Text
-                text={polygon.name}
-                align="left"
-                verticalAlign="top"
-                x={
-                  getAveragePoint(flattenPoints(polygon.points)).x
-                  // - (polygon.name.length * 16 * 0.6) / 2
-                }
-                y={getAveragePoint(flattenPoints(polygon.points)).y} //- 16 / 2}
-                fontSize={16}
-              />
-            )}
-          </React.Fragment>
-        ))}
+        {polygons?.map(
+          (polygon, index) =>
+            (selectedZoneMask === undefined ||
+              selectedZoneMask.includes(polygon.type)) && (
+              <React.Fragment key={index}>
+                <PolygonDrawer
+                  key={index}
+                  points={polygon.points}
+                  flattenedPoints={flattenPoints(polygon.points)}
+                  isActive={index === activePolygonIndex}
+                  isHovered={index === hoveredPolygonIndex}
+                  isFinished={polygon.isFinished}
+                  color={polygon.color}
+                  handlePointDragMove={handlePointDragMove}
+                  handleGroupDragEnd={handleGroupDragEnd}
+                  handleMouseOverStartPoint={handleMouseOverStartPoint}
+                  handleMouseOutStartPoint={handleMouseOutStartPoint}
+                />
+                {index === hoveredPolygonIndex && (
+                  <Text
+                    text={polygon.name}
+                    align="left"
+                    verticalAlign="top"
+                    x={
+                      getAveragePoint(flattenPoints(polygon.points)).x
+                      // - (polygon.name.length * 16 * 0.6) / 2
+                    }
+                    y={getAveragePoint(flattenPoints(polygon.points)).y} //- 16 / 2}
+                    fontSize={16}
+                  />
+                )}
+              </React.Fragment>
+            ),
+        )}
       </Layer>
     </Stage>
   );

@@ -340,7 +340,7 @@ export interface FrigateConfig {
         threshold: number;
       };
     };
-    mask: string;
+    mask: string[];
     track: string[];
   };
 

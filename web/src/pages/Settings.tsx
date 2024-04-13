@@ -20,6 +20,8 @@ import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 import General from "@/components/settings/General";
 import FilterCheckBox from "@/components/filter/FilterCheckBox";
+import { ZoneMaskFilterButton } from "@/components/filter/ZoneMaskFilter";
+import { PolygonType } from "@/types/canvas";
 
 type CameraSelectButtonProps = {
   allCameras: CameraConfig[];
@@ -136,6 +138,8 @@ export default function Settings() {
 
   const [selectedCamera, setSelectedCamera] = useState(cameras[0].name);
 
+  const [filterZoneMask, setFilterZoneMask] = useState<PolygonType[]>();
+
   return (
     <div className="size-full p-2 flex flex-col">
       <div className="w-full h-11 relative flex justify-between items-center">
@@ -168,6 +172,10 @@ export default function Settings() {
           page == "masks / zones" ||
           page == "motion tuner") && (
           <div className="flex items-center gap-2">
+            <ZoneMaskFilterButton
+              selectedZoneMask={filterZoneMask}
+              updateZoneMaskFilter={setFilterZoneMask}
+            />
             <CameraSelectButton
               allCameras={cameras}
               selectedCamera={selectedCamera}
@@ -182,7 +190,7 @@ export default function Settings() {
         {page == "masks / zones" && (
           <MasksAndZones
             selectedCamera={selectedCamera}
-            setSelectedCamera={setSelectedCamera}
+            selectedZoneMask={filterZoneMask}
           />
         )}
         {page == "motion tuner" && <MotionTuner />}
