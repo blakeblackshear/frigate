@@ -209,7 +209,7 @@ type CameraFilterButtonProps = {
   selectedCameras: string[] | undefined;
   updateCameraFilter: (cameras: string[] | undefined) => void;
 };
-function CamerasFilterButton({
+export function CamerasFilterButton({
   allCameras,
   groups,
   selectedCameras,
@@ -227,7 +227,7 @@ function CamerasFilterButton({
       size="sm"
     >
       <FaVideo
-        className={`${selectedCameras?.length == 1 ? "text-selected-foreground" : "text-secondary-foreground"}`}
+        className={`${(selectedCameras?.length ?? 0) >= 1 ? "text-selected-foreground" : "text-secondary-foreground"}`}
       />
       <div
         className={`hidden md:block ${selectedCameras?.length ? "text-selected-foreground" : "text-primary"}`}

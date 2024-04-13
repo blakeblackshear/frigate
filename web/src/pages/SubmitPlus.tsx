@@ -1,5 +1,6 @@
 import { baseUrl } from "@/api/baseUrl";
 import FilterCheckBox from "@/components/filter/FilterCheckBox";
+import { CamerasFilterButton } from "@/components/filter/ReviewFilterGroup";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -22,7 +23,8 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { isMobile } from "react-device-detect";
-import { FaList, FaVideo } from "react-icons/fa";
+import { FaList } from "react-icons/fa";
+import { PiSlidersHorizontalFill } from "react-icons/pi";
 import useSWR from "swr";
 
 export default function SubmitPlus() {
@@ -36,6 +38,7 @@ export default function SubmitPlus() {
 
   const [selectedCameras, setSelectedCameras] = useState<string[]>();
   const [selectedLabels, setSelectedLabels] = useState<string[]>();
+  const [scoreRange, setScoreRange] = useState<number[]>();
 
   // data
 
@@ -217,7 +220,9 @@ function PlusFilterGroup({
     return [...labels].sort();
   }, [config, selectedCameras]);
 
-  const [open, setOpen] = useState<"none" | "camera" | "label">("none");
+  const [open, setOpen] = useState<"none" | "camera" | "label" | "score">(
+    "none",
+  );
   const [currentCameras, setCurrentCameras] = useState<string[] | undefined>(
     undefined,
   );
@@ -230,84 +235,13 @@ function PlusFilterGroup({
   const Content = isMobile ? DrawerContent : DropdownMenuContent;
 
   return (
-    <div className="w-full h-16 flex justify-start gap-2 items-center">
-      <Menu
-        open={open == "camera"}
-        onOpenChange={(open) => {
-          if (!open) {
-            setCurrentCameras(selectedCameras);
-          }
-          setOpen(open ? "camera" : "none");
-        }}
-      >
-        <Trigger asChild>
-          <Button size="sm" className="mx-1 capitalize">
-            <FaVideo className="md:mr-[10px] text-secondary-foreground" />
-            <div className="hidden md:block text-primary">
-              {selectedCameras == undefined
-                ? "All Cameras"
-                : `${selectedCameras.length} Cameras`}
-            </div>
-          </Button>
-        </Trigger>
-        <Content className={isMobile ? "max-h-[75dvh]" : ""}>
-          <DropdownMenuLabel className="flex justify-center">
-            Filter Cameras
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <FilterCheckBox
-            isChecked={currentCameras == undefined}
-            label="All Cameras"
-            onCheckedChange={(isChecked) => {
-              if (isChecked) {
-                setCurrentCameras(undefined);
-              }
-            }}
-          />
-          <DropdownMenuSeparator />
-          <div className={isMobile ? "h-auto overflow-y-auto" : ""}>
-            {allCameras.map((item) => (
-              <FilterCheckBox
-                key={item}
-                isChecked={currentCameras?.includes(item) ?? false}
-                label={item.replaceAll("_", " ")}
-                onCheckedChange={(isChecked) => {
-                  if (isChecked) {
-                    const updatedCameras = currentCameras
-                      ? [...currentCameras]
-                      : [];
-
-                    updatedCameras.push(item);
-                    setCurrentCameras(updatedCameras);
-                  } else {
-                    const updatedCameras = currentCameras
-                      ? [...currentCameras]
-                      : [];
-
-                    // can not deselect the last item
-                    if (updatedCameras.length > 1) {
-                      updatedCameras.splice(updatedCameras.indexOf(item), 1);
-                      setCurrentCameras(updatedCameras);
-                    }
-                  }
-                }}
-              />
-            ))}
-          </div>
-          <DropdownMenuSeparator />
-          <div className="flex justify-center items-center">
-            <Button
-              variant="select"
-              onClick={() => {
-                setSelectedCameras(currentCameras);
-                setOpen("none");
-              }}
-            >
-              Apply
-            </Button>
-          </div>
-        </Content>
-      </Menu>
+    <div className="w-full h-16 mx-2 flex justify-start gap-2 items-center">
+      <CamerasFilterButton
+        allCameras={allCameras}
+        groups={[]}
+        selectedCameras={selectedCameras}
+        updateCameraFilter={setSelectedCameras}
+      />
       <Menu
         open={open == "label"}
         onOpenChange={(open) => {
@@ -318,8 +252,8 @@ function PlusFilterGroup({
         }}
       >
         <Trigger asChild>
-          <Button size="sm" className="mx-1 capitalize">
-            <FaList className="md:mr-[10px] text-secondary-foreground" />
+          <Button size="sm" className="flex items-center gap-2 capitalize">
+            <FaList className="text-secondary-foreground" />
             <div className="hidden md:block text-primary">
               {selectedLabels == undefined
                 ? "All Labels"
@@ -377,6 +311,83 @@ function PlusFilterGroup({
               variant="select"
               onClick={() => {
                 setSelectedLabels(currentLabels);
+                setOpen("none");
+              }}
+            >
+              Apply
+            </Button>
+          </div>
+        </Content>
+      </Menu>
+      <Menu
+        open={open == "score"}
+        onOpenChange={(open) => {
+          if (!open) {
+            setCurrentCameras(selectedCameras);
+          }
+          setOpen(open ? "score" : "none");
+        }}
+      >
+        <Trigger asChild>
+          <Button size="sm" className="flex items-center gap-2 capitalize">
+            <PiSlidersHorizontalFill className="text-secondary-foreground" />
+            <div className="hidden md:block text-primary">
+              {selectedCameras == undefined
+                ? "All Cameras"
+                : `${selectedCameras.length} Cameras`}
+            </div>
+          </Button>
+        </Trigger>
+        <Content className={isMobile ? "max-h-[75dvh]" : ""}>
+          <DropdownMenuLabel className="flex justify-center">
+            Filter Cameras
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <FilterCheckBox
+            isChecked={currentCameras == undefined}
+            label="All Cameras"
+            onCheckedChange={(isChecked) => {
+              if (isChecked) {
+                setCurrentCameras(undefined);
+              }
+            }}
+          />
+          <DropdownMenuSeparator />
+          <div className={isMobile ? "h-auto overflow-y-auto" : ""}>
+            {allCameras.map((item) => (
+              <FilterCheckBox
+                key={item}
+                isChecked={currentCameras?.includes(item) ?? false}
+                label={item.replaceAll("_", " ")}
+                onCheckedChange={(isChecked) => {
+                  if (isChecked) {
+                    const updatedCameras = currentCameras
+                      ? [...currentCameras]
+                      : [];
+
+                    updatedCameras.push(item);
+                    setCurrentCameras(updatedCameras);
+                  } else {
+                    const updatedCameras = currentCameras
+                      ? [...currentCameras]
+                      : [];
+
+                    // can not deselect the last item
+                    if (updatedCameras.length > 1) {
+                      updatedCameras.splice(updatedCameras.indexOf(item), 1);
+                      setCurrentCameras(updatedCameras);
+                    }
+                  }
+                }}
+              />
+            ))}
+          </div>
+          <DropdownMenuSeparator />
+          <div className="flex justify-center items-center">
+            <Button
+              variant="select"
+              onClick={() => {
+                setSelectedCameras(currentCameras);
                 setOpen("none");
               }}
             >
