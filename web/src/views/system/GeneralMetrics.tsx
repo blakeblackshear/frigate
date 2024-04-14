@@ -182,7 +182,7 @@ export default function GeneralMetrics({
           series[key] = { name: key, data: [] };
         }
 
-        series[key].data.push({ x: statsIdx + 1, y: stats.gpu });
+        series[key].data.push({ x: statsIdx + 1, y: stats.gpu.slice(0, -1) });
       });
     });
     return Object.keys(series).length > 0 ? Object.values(series) : [];
@@ -215,7 +215,7 @@ export default function GeneralMetrics({
           series[key] = { name: key, data: [] };
         }
 
-        series[key].data.push({ x: statsIdx + 1, y: stats.mem });
+        series[key].data.push({ x: statsIdx + 1, y: stats.mem.slice(0, -1) });
       });
     });
     return Object.values(series);
@@ -373,7 +373,7 @@ export default function GeneralMetrics({
                       key={series.name}
                       graphId={`${series.name}-gpu`}
                       name={series.name}
-                      unit=""
+                      unit="%"
                       threshold={GPUUsageThreshold}
                       updateTimes={updateTimes}
                       data={[series]}
@@ -392,7 +392,7 @@ export default function GeneralMetrics({
                         <ThresholdBarGraph
                           key={series.name}
                           graphId={`${series.name}-mem`}
-                          unit=""
+                          unit="%"
                           name={series.name}
                           threshold={GPUMemThreshold}
                           updateTimes={updateTimes}

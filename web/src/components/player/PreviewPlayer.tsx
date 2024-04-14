@@ -14,6 +14,7 @@ import { isCurrentHour } from "@/utils/dateUtil";
 import { baseUrl } from "@/api/baseUrl";
 import { isAndroid, isChrome, isMobile } from "react-device-detect";
 import { TimeRange } from "@/types/timeline";
+import { Skeleton } from "../ui/skeleton";
 
 type PreviewPlayerProps = {
   className?: string;
@@ -143,6 +144,8 @@ function PreviewVideoPlayer({
 
   // initial state
 
+  const [firstLoad, setFirstLoad] = useState(true);
+
   const initialPreview = useMemo(() => {
     return cameraPreviews.find(
       (preview) =>
@@ -253,6 +256,10 @@ function PreviewVideoPlayer({
         disableRemotePlayback
         onSeeked={onPreviewSeeked}
         onLoadedData={() => {
+          if (firstLoad) {
+            setFirstLoad(false);
+          }
+
           if (controller) {
             controller.previewReady();
           } else {
@@ -280,6 +287,7 @@ function PreviewVideoPlayer({
           No Preview Found
         </div>
       )}
+      {firstLoad && <Skeleton className="absolute size-full aspect-video" />}
     </div>
   );
 }
@@ -427,6 +435,8 @@ function PreviewFramesPlayer({
 
   // initial state
 
+  const [firstLoad, setFirstLoad] = useState(true);
+
   useEffect(() => {
     if (!controller) {
       return;
@@ -441,6 +451,8 @@ function PreviewFramesPlayer({
   }, [controller]);
 
   const onImageLoaded = useCallback(() => {
+    setFirstLoad(false);
+
     if (!controller) {
       return;
     }
@@ -477,6 +489,7 @@ function PreviewFramesPlayer({
           No Preview Found
         </div>
       )}
+      {firstLoad && <Skeleton className="absolute size-full aspect-video" />}
     </div>
   );
 }

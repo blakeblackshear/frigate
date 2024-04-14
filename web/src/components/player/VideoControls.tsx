@@ -38,11 +38,14 @@ type VideoControlsProps = {
   features?: VideoControls;
   isPlaying: boolean;
   show: boolean;
+  muted?: boolean;
+  volume?: number;
   controlsOpen?: boolean;
   playbackRates?: number[];
   playbackRate: number;
   hotKeys?: boolean;
   setControlsOpen?: (open: boolean) => void;
+  setMuted?: (muted: boolean) => void;
   onPlayPause: (play: boolean) => void;
   onSeek: (diff: number) => void;
   onSetPlaybackRate: (rate: number) => void;
@@ -53,11 +56,14 @@ export default function VideoControls({
   features = CONTROLS_DEFAULT,
   isPlaying,
   show,
+  muted,
+  volume,
   controlsOpen,
   playbackRates = PLAYBACK_RATE_DEFAULT,
   playbackRate,
   hotKeys = true,
   setControlsOpen,
+  setMuted,
   onPlayPause,
   onSeek,
   onSetPlaybackRate,
@@ -89,18 +95,18 @@ export default function VideoControls({
   // volume control
 
   const VolumeIcon = useMemo(() => {
-    if (!video || video?.muted) {
+    if (!volume || volume == 0.0 || muted) {
       return MdVolumeOff;
-    } else if (video.volume <= 0.33) {
+    } else if (volume <= 0.33) {
       return MdVolumeMute;
-    } else if (video.volume <= 0.67) {
+    } else if (volume <= 0.67) {
       return MdVolumeDown;
     } else {
       return MdVolumeUp;
     }
     // only update when specific fields change
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [video?.volume, video?.muted]);
+  }, [volume, muted]);
 
   const onKeyboardShortcut = useCallback(
     (key: string, down: boolean, repeat: boolean) => {
@@ -116,8 +122,8 @@ export default function VideoControls({
           }
           break;
         case "m":
-          if (down && !repeat && video) {
-            video.muted = !video.muted;
+          if (setMuted && down && !repeat && video) {
+            setMuted(!muted);
           }
           break;
         case " ":
@@ -150,13 +156,16 @@ export default function VideoControls({
             className="size-5"
             onClick={(e: React.MouseEvent) => {
               e.stopPropagation();
-              video.muted = !video.muted;
+
+              if (setMuted) {
+                setMuted(!muted);
+              }
             }}
           />
-          {video.muted == false && (
+          {muted == false && (
             <VolumeSlider
               className="w-20"
-              value={[video.volume]}
+              value={[volume ?? 1.0]}
               min={0}
               max={1}
               step={0.02}
@@ -193,7 +202,11 @@ export default function VideoControls({
               onValueChange={(rate) => onSetPlaybackRate(parseFloat(rate))}
             >
               {playbackRates.map((rate) => (
-                <DropdownMenuRadioItem key={rate} value={rate.toString()}>
+                <DropdownMenuRadioItem
+                  key={rate}
+                  className="cursor-pointer"
+                  value={rate.toString()}
+                >
                   {rate}x
                 </DropdownMenuRadioItem>
               ))}
