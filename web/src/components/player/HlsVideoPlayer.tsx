@@ -75,6 +75,8 @@ export default function HlsVideoPlayer({
   // controls
 
   const [isPlaying, setIsPlaying] = useState(true);
+  const [muted, setMuted] = useState(true);
+  const [volume, setVolume] = useState(1.0);
   const [mobileCtrlTimeout, setMobileCtrlTimeout] = useState<NodeJS.Timeout>();
   const [controls, setControls] = useState(isMobile);
   const [controlsOpen, setControlsOpen] = useState(false);
@@ -85,9 +87,12 @@ export default function HlsVideoPlayer({
         className="absolute bottom-5 left-1/2 -translate-x-1/2 z-50"
         video={videoRef.current}
         isPlaying={isPlaying}
-        show={controls}
+        show={visible && controls}
+        muted={muted}
+        volume={volume}
         controlsOpen={controlsOpen}
         setControlsOpen={setControlsOpen}
+        setMuted={setMuted}
         playbackRate={videoRef.current?.playbackRate ?? 1}
         hotKeys={hotKeys}
         onPlayPause={(play) => {
@@ -155,7 +160,8 @@ export default function HlsVideoPlayer({
           autoPlay
           controls={false}
           playsInline
-          muted
+          muted={muted}
+          onVolumeChange={() => setVolume(videoRef.current?.volume ?? 1.0)}
           onPlay={() => {
             setIsPlaying(true);
 
