@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import TimelineEventOverlay from "../../overlay/TimelineDataOverlay";
 import { useApiHost } from "@/api";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -8,7 +7,7 @@ import { Preview } from "@/types/preview";
 import PreviewPlayer, { PreviewController } from "../PreviewPlayer";
 import { DynamicVideoController } from "./DynamicVideoController";
 import HlsVideoPlayer from "../HlsVideoPlayer";
-import { TimeRange, Timeline } from "@/types/timeline";
+import { TimeRange } from "@/types/timeline";
 
 /**
  * Dynamically switches between video playback and scrubbing preview player.
@@ -45,9 +44,6 @@ export default function DynamicVideoPlayer({
   const playerRef = useRef<HTMLVideoElement | null>(null);
   const [previewController, setPreviewController] =
     useState<PreviewController | null>(null);
-  const [focusedItem, setFocusedItem] = useState<Timeline | undefined>(
-    undefined,
-  );
   const controller = useMemo(() => {
     if (!config || !playerRef.current || !previewController) {
       return undefined;
@@ -59,7 +55,7 @@ export default function DynamicVideoPlayer({
       previewController,
       (config.cameras[camera]?.detect?.annotation_offset || 0) / 1000,
       isScrubbing ? "scrubbing" : "playback",
-      setFocusedItem,
+      () => {},
     );
     // we only want to fire once when players are ready
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -164,14 +160,7 @@ export default function DynamicVideoPlayer({
 
           setIsLoading(false);
         }}
-      >
-        {config && focusedItem && (
-          <TimelineEventOverlay
-            timeline={focusedItem}
-            cameraConfig={config.cameras[camera]}
-          />
-        )}
-      </HlsVideoPlayer>
+      />
       <PreviewPlayer
         className={`${isScrubbing || isLoading ? "visible" : "hidden"} ${className}`}
         camera={camera}
