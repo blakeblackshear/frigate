@@ -8,6 +8,7 @@ import PreviewPlayer, { PreviewController } from "../PreviewPlayer";
 import { DynamicVideoController } from "./DynamicVideoController";
 import HlsVideoPlayer from "../HlsVideoPlayer";
 import { TimeRange } from "@/types/timeline";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 
 /**
  * Dynamically switches between video playback and scrubbing preview player.
@@ -77,6 +78,7 @@ export default function DynamicVideoPlayer({
   // initial state
 
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout>();
   const [source, setSource] = useState(
     `${apiHost}vod/${camera}/start/${timeRange.after}/end/${timeRange.before}/master.m3u8`,
   );
@@ -84,8 +86,8 @@ export default function DynamicVideoPlayer({
   // start at correct time
 
   useEffect(() => {
-    if (isScrubbing) {
-      setIsLoading(true);
+    if (!isScrubbing) {
+      setLoadingTimeout(setTimeout(() => setIsLoading(true), 1000));
     }
   }, [isScrubbing]);
 
@@ -133,7 +135,7 @@ export default function DynamicVideoPlayer({
     setSource(
       `${apiHost}vod/${camera}/start/${timeRange.after}/end/${timeRange.before}/master.m3u8`,
     );
-    setIsLoading(true);
+    setLoadingTimeout(setTimeout(() => setIsLoading(true), 1000));
 
     controller.newPlayback({
       recordings: recordings ?? [],
@@ -158,6 +160,10 @@ export default function DynamicVideoPlayer({
             playerRef.current?.pause();
           }
 
+          if (loadingTimeout) {
+            clearTimeout(loadingTimeout);
+          }
+
           setIsLoading(false);
         }}
       />
@@ -172,6 +178,9 @@ export default function DynamicVideoPlayer({
           setPreviewController(previewController);
         }}
       />
+      {isLoading && (
+        <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x1/2 -translate-y-1/2" />
+      )}
     </>
   );
 }
