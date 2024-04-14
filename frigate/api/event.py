@@ -77,6 +77,8 @@ def events():
     min_length = request.args.get("min_length", type=float)
     max_length = request.args.get("max_length", type=float)
 
+    sort = request.args.get("sort", type=str)
+
     clauses = []
 
     selected_columns = [
@@ -219,10 +221,22 @@ def events():
     if len(clauses) == 0:
         clauses.append((True))
 
+    if sort:
+        if sort == "score_asc":
+            order_by = Event.data["score"].asc()
+        elif sort == "score_desc":
+            order_by = Event.data["score"].desc()
+        elif sort == "date_asc":
+            Event.start_time.asc()
+        elif sort == "date_desc":
+            Event.start_time.desc()
+    else:
+        order_by = Event.start_time.desc()
+
     events = (
         Event.select(*selected_columns)
         .where(reduce(operator.and_, clauses))
-        .order_by(Event.start_time.desc())
+        .order_by(order_by)
         .limit(limit)
         .dicts()
         .iterator()
