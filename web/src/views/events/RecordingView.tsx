@@ -364,11 +364,11 @@ export function RecordingView({
           >
             <div
               key={mainCamera}
-              className={
+              className={`relative ${
                 isDesktop
                   ? `${mainCameraAspect == "tall" ? "h-[50%] md:h-[60%] lg:h-[75%] xl:h-[90%]" : mainCameraAspect == "wide" ? "w-full" : "w-[78%]"} px-4 flex justify-center`
                   : `portrait:w-full pt-2 ${mainCameraAspect == "wide" ? "landscape:w-full aspect-wide" : "landscape:h-[94%] aspect-video"}`
-              }
+              }`}
               style={{
                 aspectRatio: isDesktop
                   ? mainCameraAspect == "tall"
