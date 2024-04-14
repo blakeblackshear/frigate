@@ -11,7 +11,6 @@ import { FaCopy } from "react-icons/fa6";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { isDesktop } from "react-device-detect";
-import { Skeleton } from "@/components/ui/skeleton";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 
 const logTypes = ["frigate", "go2rtc", "nginx"] as const;
