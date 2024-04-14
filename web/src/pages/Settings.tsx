@@ -23,6 +23,103 @@ import FilterCheckBox from "@/components/filter/FilterCheckBox";
 import { ZoneMaskFilterButton } from "@/components/filter/ZoneMaskFilter";
 import { PolygonType } from "@/types/canvas";
 
+export default function Settings() {
+  const settingsViews = [
+    "general",
+    "objects",
+    "masks / zones",
+    "motion tuner",
+  ] as const;
+
+  type SettingsType = (typeof settingsViews)[number];
+  const [page, setPage] = useState<SettingsType>("general");
+  const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
+
+  const { data: config } = useSWR<FrigateConfig>("config");
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [unsavedChanges, setUnsavedChanges] = useState(false);
+
+  const cameras = useMemo(() => {
+    if (!config) {
+      return [];
+    }
+
+    return Object.values(config.cameras)
+      .filter((conf) => conf.ui.dashboard && conf.enabled)
+      .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
+  }, [config]);
+
+  const [selectedCamera, setSelectedCamera] = useState(cameras[0].name);
+
+  const [filterZoneMask, setFilterZoneMask] = useState<PolygonType[]>();
+
+  return (
+    <div className="size-full p-2 flex flex-col">
+      <div className="w-full h-11 relative flex justify-between items-center">
+        {isMobile && (
+          <Logo className="absolute inset-x-1/2 -translate-x-1/2 h-8" />
+        )}
+        <ToggleGroup
+          className="*:px-3 *:py-4 *:rounded-md"
+          type="single"
+          size="sm"
+          value={pageToggle}
+          onValueChange={(value: SettingsType) => {
+            if (value) {
+              setPageToggle(value);
+            }
+          }}
+        >
+          {Object.values(settingsViews).map((item) => (
+            <ToggleGroupItem
+              key={item}
+              className={`flex items-center justify-between gap-2 ${pageToggle == item ? "" : "*:text-gray-500"}`}
+              value={item}
+              aria-label={`Select ${item}`}
+            >
+              <div className="capitalize">{item}</div>
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
+        {(page == "objects" ||
+          page == "masks / zones" ||
+          page == "motion tuner") && (
+          <div className="flex items-center gap-2">
+            {!isEditing && (
+              <ZoneMaskFilterButton
+                selectedZoneMask={filterZoneMask}
+                updateZoneMaskFilter={setFilterZoneMask}
+              />
+            )}
+            {/* {isEditing && page == "masks / zones" && (<PolygonEditControls /)} */}
+            <CameraSelectButton
+              allCameras={cameras}
+              selectedCamera={selectedCamera}
+              setSelectedCamera={setSelectedCamera}
+            />
+          </div>
+        )}
+      </div>
+      <div className="mt-2 flex flex-col items-start w-full h-dvh md:pb-24">
+        {page == "general" && <General />}
+        {page == "objects" && <></>}
+        {page == "masks / zones" && (
+          <MasksAndZones
+            selectedCamera={selectedCamera}
+            selectedZoneMask={filterZoneMask}
+            isEditing={isEditing}
+            setIsEditing={setIsEditing}
+            unsavedChanges={unsavedChanges}
+            setUnsavedChanges={setUnsavedChanges}
+          />
+        )}
+        {page == "motion tuner" && <MotionTuner />}
+      </div>
+    </div>
+  );
+}
+
 type CameraSelectButtonProps = {
   allCameras: CameraConfig[];
   selectedCamera: string;
@@ -109,92 +206,5 @@ function CameraSelectButton({
       <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
       <DropdownMenuContent>{content}</DropdownMenuContent>
     </DropdownMenu>
-  );
-}
-
-export default function Settings() {
-  const settingsViews = [
-    "general",
-    "objects",
-    "masks / zones",
-    "motion tuner",
-  ] as const;
-
-  type SettingsType = (typeof settingsViews)[number];
-  const [page, setPage] = useState<SettingsType>("general");
-  const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
-
-  const { data: config } = useSWR<FrigateConfig>("config");
-
-  const cameras = useMemo(() => {
-    if (!config) {
-      return [];
-    }
-
-    return Object.values(config.cameras)
-      .filter((conf) => conf.ui.dashboard && conf.enabled)
-      .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
-  }, [config]);
-
-  const [selectedCamera, setSelectedCamera] = useState(cameras[0].name);
-
-  const [filterZoneMask, setFilterZoneMask] = useState<PolygonType[]>();
-
-  return (
-    <div className="size-full p-2 flex flex-col">
-      <div className="w-full h-11 relative flex justify-between items-center">
-        {isMobile && (
-          <Logo className="absolute inset-x-1/2 -translate-x-1/2 h-8" />
-        )}
-        <ToggleGroup
-          className="*:px-3 *:py-4 *:rounded-md"
-          type="single"
-          size="sm"
-          value={pageToggle}
-          onValueChange={(value: SettingsType) => {
-            if (value) {
-              setPageToggle(value);
-            }
-          }}
-        >
-          {Object.values(settingsViews).map((item) => (
-            <ToggleGroupItem
-              key={item}
-              className={`flex items-center justify-between gap-2 ${pageToggle == item ? "" : "*:text-gray-500"}`}
-              value={item}
-              aria-label={`Select ${item}`}
-            >
-              <div className="capitalize">{item}</div>
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-        {(page == "objects" ||
-          page == "masks / zones" ||
-          page == "motion tuner") && (
-          <div className="flex items-center gap-2">
-            <ZoneMaskFilterButton
-              selectedZoneMask={filterZoneMask}
-              updateZoneMaskFilter={setFilterZoneMask}
-            />
-            <CameraSelectButton
-              allCameras={cameras}
-              selectedCamera={selectedCamera}
-              setSelectedCamera={setSelectedCamera}
-            />
-          </div>
-        )}
-      </div>
-      <div className="mt-2 flex flex-col items-start w-full h-dvh md:pb-24">
-        {page == "general" && <General />}
-        {page == "objects" && <></>}
-        {page == "masks / zones" && (
-          <MasksAndZones
-            selectedCamera={selectedCamera}
-            selectedZoneMask={filterZoneMask}
-          />
-        )}
-        {page == "motion tuner" && <MotionTuner />}
-      </div>
-    </div>
   );
 }

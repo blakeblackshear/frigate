@@ -17,9 +17,19 @@ export function ZoneMaskFilterButton({
   updateZoneMaskFilter,
 }: ZoneMaskFilterButtonProps) {
   const trigger = (
-    <Button size="sm" className="flex items-center gap-2">
-      <FaFilter className="text-secondary-foreground" />
-      <div className="hidden md:block text-primary">Filter</div>
+    <Button
+      size="sm"
+      variant={selectedZoneMask?.length ? "select" : "default"}
+      className="flex items-center gap-2 capitalize"
+    >
+      <FaFilter
+        className={`${selectedZoneMask?.length ? "text-selected-foreground" : "text-secondary-foreground"}`}
+      />
+      <div
+        className={`hidden md:block ${selectedZoneMask?.length ? "text-selected-foreground" : "text-primary"}`}
+      >
+        Filter
+      </div>
     </Button>
   );
   const content = (
@@ -80,7 +90,7 @@ export function GeneralFilterContent({
         <DropdownMenuSeparator />
         <div className="my-2.5 flex flex-col gap-2.5">
           {["zone", "motion_mask", "object_mask"].map((item) => (
-            <div className="flex justify-between items-center">
+            <div key={item} className="flex justify-between items-center">
               <Label
                 className="w-full mx-2 text-primary capitalize cursor-pointer"
                 htmlFor={item}
@@ -124,7 +134,6 @@ export function GeneralFilterContent({
           ))}
         </div>
       </div>
-      <DropdownMenuSeparator />
     </>
   );
 }

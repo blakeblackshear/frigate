@@ -120,7 +120,6 @@ export function GeneralFilterContent({
           ))}
         </div>
       </div>
-      <DropdownMenuSeparator />
     </>
   );
 }

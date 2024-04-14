@@ -11,12 +11,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { useEffect, useMemo, useState } from "react";
-import { GeneralFilterContent } from "../filter/ReviewFilterGroup";
-import { FaObjectGroup } from "react-icons/fa";
-import { ATTRIBUTES, CameraConfig, FrigateConfig } from "@/types/frigateConfig";
+import { ATTRIBUTES, FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 import { isMobile } from "react-device-detect";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,6 +21,265 @@ import { z } from "zod";
 import { Polygon } from "@/types/canvas";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
+
+type ZoneEditPaneProps = {
+  polygons?: Polygon[];
+  activePolygonIndex?: number;
+  onSave?: () => void;
+  onCancel?: () => void;
+};
+
+export function ZoneEditPane({
+  polygons,
+  activePolygonIndex,
+  onSave,
+  onCancel,
+}: ZoneEditPaneProps) {
+  const { data: config } = useSWR<FrigateConfig>("config");
+
+  const cameras = useMemo(() => {
+    if (!config) {
+      return [];
+    }
+
+    return Object.values(config.cameras)
+      .filter((conf) => conf.ui.dashboard && conf.enabled)
+      .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
+  }, [config]);
+
+  const polygon = useMemo(() => {
+    if (polygons && activePolygonIndex !== undefined) {
+      return polygons[activePolygonIndex];
+    } else {
+      return null;
+    }
+  }, [polygons, activePolygonIndex]);
+
+  const formSchema = z
+    .object({
+      name: z
+        .string()
+        .min(2, {
+          message: "Zone name must be at least 2 characters.",
+        })
+        .transform((val: string) => val.trim().replace(/\s+/g, "_"))
+        .refine(
+          (value: string) => {
+            return !cameras.map((cam) => cam.name).includes(value);
+          },
+          {
+            message: "Zone name must not be the name of a camera.",
+          },
+        )
+        .refine(
+          (value: string) => {
+            const otherPolygonNames =
+              polygons
+                ?.filter((_, index) => index !== activePolygonIndex)
+                .map((polygon) => polygon.name) || [];
+
+            return !otherPolygonNames.includes(value);
+          },
+          {
+            message: "Zone name already exists on this camera.",
+          },
+        ),
+      inertia: z.coerce.number().min(1, {
+        message: "Inertia must be above 0.",
+      }),
+      loitering_time: z.coerce.number().min(0, {
+        message: "Loitering time must be greater than or equal to 0.",
+      }),
+      polygon: z.object({ isFinished: z.boolean() }),
+    })
+    .refine(() => polygon?.isFinished === true, {
+      message: "The polygon drawing must be finished before saving.",
+      path: ["polygon.isFinished"],
+    });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    mode: "onChange",
+    defaultValues: {
+      name: polygon?.name ?? "",
+      inertia:
+        ((polygon?.camera &&
+          polygon?.name &&
+          config?.cameras[polygon.camera]?.zones[polygon.name]
+            ?.inertia) as number) || 3,
+      loitering_time:
+        ((polygon?.camera &&
+          polygon?.name &&
+          config?.cameras[polygon.camera]?.zones[polygon.name]
+            ?.loitering_time) as number) || 0,
+      polygon: { isFinished: polygon?.isFinished ?? false },
+    },
+  });
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    polygons[activePolygonIndex].name = values.name;
+    console.log("form values", values);
+    console.log("active polygon", polygons[activePolygonIndex]);
+    // make sure polygon isFinished
+    onSave();
+  }
+
+  if (!polygon) {
+    return;
+  }
+
+  return (
+    <>
+      <Heading as="h3" className="my-2">
+        Zone
+      </Heading>
+      <div className="flex my-3">
+        <Separator className="bg-secondary" />
+      </div>
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter a name..." {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className="flex my-2">
+            <Separator className="bg-secondary" />
+          </div>
+          <FormField
+            control={form.control}
+            name="inertia"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Inertia</FormLabel>
+                <FormControl>
+                  <Input placeholder="3" {...field} />
+                </FormControl>
+                <FormDescription>
+                  Specifies how many frames that an object must be in a zone
+                  before they are considered in the zone.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className="flex my-2">
+            <Separator className="bg-secondary" />
+          </div>
+          <FormField
+            control={form.control}
+            name="loitering_time"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Loitering Time</FormLabel>
+                <FormControl>
+                  <Input placeholder="0" {...field} />
+                </FormControl>
+                <FormDescription>
+                  Sets a minimum amount of time in seconds that the object must
+                  be in the zone for it to activate.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className="flex my-2">
+            <Separator className="bg-secondary" />
+          </div>
+          <FormItem>
+            <FormLabel>Objects</FormLabel>
+            <FormDescription>
+              List of objects that apply to this zone.
+            </FormDescription>
+            <ZoneObjectSelector
+              camera={polygon.camera}
+              zoneName={polygon.name}
+              updateLabelFilter={(objects) => {
+                // console.log(objects);
+              }}
+            />
+          </FormItem>
+          <div className="flex my-2">
+            <Separator className="bg-secondary" />
+          </div>
+          <FormItem>
+            <FormLabel>Alerts and Detections</FormLabel>
+            <FormDescription>
+              When an object enters this zone, ensure it is marked as an alert
+              or detection.
+            </FormDescription>
+            <FormControl>
+              <div className="flex flex-col gap-2.5">
+                <div className="flex flex-row justify-between items-center">
+                  <Label
+                    className="text-primary cursor-pointer"
+                    htmlFor="mark_alert"
+                  >
+                    Required for Alert
+                  </Label>
+                  <Switch
+                    className="ml-1"
+                    id="mark_alert"
+                    checked={false}
+                    onCheckedChange={(isChecked) => {
+                      if (isChecked) {
+                        return;
+                      }
+                    }}
+                  />
+                </div>
+                <div className="flex flex-row justify-between items-center">
+                  <Label
+                    className="text-primary cursor-pointer"
+                    htmlFor="mark_detection"
+                  >
+                    Required for Detection
+                  </Label>
+                  <Switch
+                    className="ml-1"
+                    id="mark_detection"
+                    checked={false}
+                    onCheckedChange={(isChecked) => {
+                      if (isChecked) {
+                        return;
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+            </FormControl>
+          </FormItem>
+          <FormField
+            control={form.control}
+            name="polygon.isFinished"
+            render={() => (
+              <FormItem>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className="flex flex-row gap-2 pt-5">
+            <Button className="flex flex-1" onClick={onCancel}>
+              Cancel
+            </Button>
+            <Button variant="select" className="flex flex-1" type="submit">
+              Save
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </>
+  );
+}
 
 type ZoneObjectSelectorProps = {
   camera: string;
@@ -101,10 +356,7 @@ export function ZoneObjectSelector({
     <>
       <div className="h-auto overflow-y-auto overflow-x-hidden">
         <div className="flex justify-between items-center my-2.5">
-          <Label
-            className="mx-2 text-primary cursor-pointer"
-            htmlFor="allLabels"
-          >
+          <Label className="text-primary cursor-pointer" htmlFor="allLabels">
             All Objects
           </Label>
           <Switch
@@ -123,7 +375,7 @@ export function ZoneObjectSelector({
           {allLabels.map((item) => (
             <div key={item} className="flex justify-between items-center">
               <Label
-                className="w-full mx-2 text-primary capitalize cursor-pointer"
+                className="w-full text-primary capitalize cursor-pointer"
                 htmlFor={item}
               >
                 {item.replaceAll("_", " ")}
@@ -158,244 +410,6 @@ export function ZoneObjectSelector({
           ))}
         </div>
       </div>
-    </>
-  );
-}
-
-type ZoneEditPaneProps = {
-  polygons: Polygon[];
-  activePolygonIndex?: number;
-  onSave?: () => void;
-  onCancel?: () => void;
-};
-
-export function ZoneEditPane({
-  polygons,
-  activePolygonIndex,
-  onSave,
-  onCancel,
-}: ZoneEditPaneProps) {
-  const { data: config } = useSWR<FrigateConfig>("config");
-
-  const cameras = useMemo(() => {
-    if (!config) {
-      return [];
-    }
-
-    return Object.values(config.cameras)
-      .filter((conf) => conf.ui.dashboard && conf.enabled)
-      .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
-  }, [config]);
-
-  const formSchema = z.object({
-    name: z
-      .string()
-      .min(2, {
-        message: "Zone name must be at least 2 characters.",
-      })
-      .transform((val: string) => val.trim().replace(/\s+/g, "_"))
-      .refine(
-        (value: string) => {
-          return !cameras.map((cam) => cam.name).includes(value);
-        },
-        {
-          message: "Zone name must not be the name of a camera.",
-        },
-      )
-      .refine(
-        (value: string) => {
-          return !polygons
-            .filter((polygon, index) => index !== activePolygonIndex)
-            .map((polygon) => polygon.name)
-            .includes(value);
-        },
-        {
-          message: "Zone name already exists on this camera.",
-        },
-      ),
-    inertia: z.coerce.number().min(1, {
-      message: "Inertia must be above 0.",
-    }),
-    loitering_time: z.coerce.number().min(0, {
-      message: "Loitering time must be greater than or equal to 0.",
-    }),
-  });
-
-  const polygon = useMemo(() => {
-    if (polygons && activePolygonIndex !== undefined) {
-      return polygons[activePolygonIndex];
-    } else {
-      return null;
-    }
-  }, [polygons, activePolygonIndex]);
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    mode: "onChange",
-    defaultValues: {
-      name: polygon?.name ?? "",
-      inertia:
-        ((polygon &&
-          polygon.camera &&
-          polygon.name &&
-          config?.cameras[polygon.camera]?.zones[polygon.name]
-            ?.inertia) as number) ?? 3,
-      loitering_time:
-        ((polygon &&
-          polygon.camera &&
-          polygon.name &&
-          config?.cameras[polygon.camera]?.zones[polygon.name]
-            ?.loitering_time) as number) ?? 0,
-    },
-  });
-
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values, polygons[activePolygonIndex]);
-    onSave();
-  }
-
-  if (!polygon) {
-    return;
-  }
-
-  return (
-    <>
-      <Heading as="h3">Zone</Heading>
-      <div className="flex my-3">
-        <Separator className="bg-secondary" />
-      </div>
-
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Name</FormLabel>
-                <FormControl>
-                  <Input placeholder={polygon.name} {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div className="flex my-3">
-            <Separator className="bg-secondary" />
-          </div>
-          <FormField
-            control={form.control}
-            name="inertia"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Inertia</FormLabel>
-                <FormControl>
-                  <Input placeholder="" {...field} />
-                </FormControl>
-                <FormDescription>
-                  Specifies how many frames that an object must be in a zone
-                  before they are considered in the zone.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div className="flex my-3">
-            <Separator className="bg-secondary" />
-          </div>
-          <FormField
-            control={form.control}
-            name="loitering_time"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Loitering Time</FormLabel>
-                <FormControl>
-                  <Input placeholder="" {...field} />
-                </FormControl>
-                <FormDescription>
-                  Sets a minimum amount of time in seconds that the object must
-                  be in the zone for it to activate.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div className="flex my-3">
-            <Separator className="bg-secondary" />
-          </div>
-          <FormItem>
-            <FormLabel>Objects</FormLabel>
-            <FormDescription>
-              List of objects that apply to this zone.
-            </FormDescription>
-            <ZoneObjectSelector
-              camera={polygon.camera}
-              zoneName={polygon.name}
-              updateLabelFilter={(objects) => {
-                // console.log(objects);
-              }}
-            />
-          </FormItem>
-          <div className="flex my-3">
-            <Separator className="bg-secondary" />
-          </div>
-          <FormItem>
-            <FormLabel>Alerts and Detections</FormLabel>
-            <FormDescription>
-              When an object enters this zone, ensure it is marked as an alert
-              or detection.
-            </FormDescription>
-            <FormControl>
-              <div className="flex flex-col gap-2.5">
-                <div className="flex flex-row justify-between items-center">
-                  <Label
-                    className="mx-2 text-primary cursor-pointer"
-                    htmlFor="mark_alert"
-                  >
-                    Required for Alert
-                  </Label>
-                  <Switch
-                    className="ml-1"
-                    id="mark_alert"
-                    checked={false}
-                    onCheckedChange={(isChecked) => {
-                      if (isChecked) {
-                        return;
-                      }
-                    }}
-                  />
-                </div>
-                <div className="flex flex-row justify-between items-center">
-                  <Label
-                    className="mx-2 text-primary cursor-pointer"
-                    htmlFor="mark_detection"
-                  >
-                    Required for Detection
-                  </Label>
-                  <Switch
-                    className="ml-1"
-                    id="mark_detection"
-                    checked={false}
-                    onCheckedChange={(isChecked) => {
-                      if (isChecked) {
-                        return;
-                      }
-                    }}
-                  />
-                </div>
-              </div>
-            </FormControl>
-          </FormItem>
-          <div className="flex flex-row gap-2 pt-5">
-            <Button className="flex flex-1" onClick={onCancel}>
-              Cancel
-            </Button>
-            <Button variant="select" className="flex flex-1" type="submit">
-              Save
-            </Button>
-          </div>
-        </form>
-      </Form>
     </>
   );
 }

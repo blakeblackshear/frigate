@@ -11,19 +11,17 @@ type PolygonCanvasProps = {
   camera: string;
   width: number;
   height: number;
-  scale: number;
   polygons: Polygon[];
   setPolygons: React.Dispatch<React.SetStateAction<Polygon[]>>;
   activePolygonIndex: number | undefined;
   hoveredPolygonIndex: number | null;
-  selectedZoneMask: PolygonType;
+  selectedZoneMask: PolygonType[] | undefined;
 };
 
 export function PolygonCanvas({
   camera,
   width,
   height,
-  scale,
   polygons,
   setPolygons,
   activePolygonIndex,
@@ -193,8 +191,6 @@ export function PolygonCanvas({
       ref={stageRef}
       width={width}
       height={height}
-      scaleX={scale}
-      scaleY={scale}
       onMouseDown={handleMouseDown}
       onTouchStart={handleMouseDown}
     >

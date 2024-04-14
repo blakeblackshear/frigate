@@ -4,8 +4,9 @@ export type Polygon = {
   camera: string;
   name: string;
   type: PolygonType;
+  objects: string[];
   points: number[][];
   isFinished: boolean;
-  // isUnsaved: boolean;
+  isUnsaved: boolean;
   color: number[];
 };
