@@ -279,6 +279,9 @@ function Logs() {
                 }
               })
               .catch(() => {});
+            contentRef.current?.scrollBy({
+              top: 10,
+            });
           }
         });
         if (node) startObserver.current.observe(node);
