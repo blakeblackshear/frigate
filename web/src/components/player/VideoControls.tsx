@@ -38,14 +38,14 @@ type VideoControlsProps = {
   features?: VideoControls;
   isPlaying: boolean;
   show: boolean;
-  muted: boolean;
-  volume: number;
+  muted?: boolean;
+  volume?: number;
   controlsOpen?: boolean;
   playbackRates?: number[];
   playbackRate: number;
   hotKeys?: boolean;
   setControlsOpen?: (open: boolean) => void;
-  setMuted: (muted: boolean) => void;
+  setMuted?: (muted: boolean) => void;
   onPlayPause: (play: boolean) => void;
   onSeek: (diff: number) => void;
   onSetPlaybackRate: (rate: number) => void;
@@ -95,7 +95,7 @@ export default function VideoControls({
   // volume control
 
   const VolumeIcon = useMemo(() => {
-    if (volume == 0.0 || muted) {
+    if (!volume || volume == 0.0 || muted) {
       return MdVolumeOff;
     } else if (volume <= 0.33) {
       return MdVolumeMute;
@@ -122,7 +122,7 @@ export default function VideoControls({
           }
           break;
         case "m":
-          if (down && !repeat && video) {
+          if (setMuted && down && !repeat && video) {
             setMuted(!muted);
           }
           break;
@@ -156,13 +156,16 @@ export default function VideoControls({
             className="size-5"
             onClick={(e: React.MouseEvent) => {
               e.stopPropagation();
-              setMuted(!muted);
+
+              if (setMuted) {
+                setMuted(!muted);
+              }
             }}
           />
           {muted == false && (
             <VolumeSlider
               className="w-20"
-              value={[volume]}
+              value={[volume ?? 1.0]}
               min={0}
               max={1}
               step={0.02}
