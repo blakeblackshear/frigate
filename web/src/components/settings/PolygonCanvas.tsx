@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState, useEffect } from "react";
 import PolygonDrawer from "./PolygonDrawer";
-import { Stage, Layer, Image, Text } from "react-konva";
+import { Stage, Layer, Image, Text, Circle } from "react-konva";
 import Konva from "konva";
 import type { KonvaEventObject } from "konva/lib/Node";
 import { Polygon, PolygonType } from "@/types/canvas";
@@ -216,23 +216,43 @@ export function PolygonCanvas({
                   isHovered={index === hoveredPolygonIndex}
                   isFinished={polygon.isFinished}
                   color={polygon.color}
+                  name={polygon.name}
                   handlePointDragMove={handlePointDragMove}
                   handleGroupDragEnd={handleGroupDragEnd}
                   handleMouseOverStartPoint={handleMouseOverStartPoint}
                   handleMouseOutStartPoint={handleMouseOutStartPoint}
                 />
                 {index === hoveredPolygonIndex && (
-                  <Text
-                    text={polygon.name}
-                    align="left"
-                    verticalAlign="top"
-                    x={
-                      getAveragePoint(flattenPoints(polygon.points)).x
-                      // - (polygon.name.length * 16 * 0.6) / 2
-                    }
-                    y={getAveragePoint(flattenPoints(polygon.points)).y} //- 16 / 2}
-                    fontSize={16}
-                  />
+                  <>
+                    <Circle
+                      x={
+                        getAveragePoint(flattenPoints(polygon.points)).x //-
+                        //(polygon.name.length * 16 * 0.6) / 2
+                      }
+                      y={
+                        getAveragePoint(flattenPoints(polygon.points)).y //-
+                        //16 / 2
+                      }
+                      radius={2}
+                      fill="red"
+                    />
+                    <Text
+                      text={polygon.name}
+                      // align="left"
+                      // verticalAlign="top"
+                      align="center"
+                      verticalAlign="middle"
+                      x={
+                        getAveragePoint(flattenPoints(polygon.points)).x //-
+                        //(polygon.name.length * 16 * 0.6) / 2
+                      }
+                      y={
+                        getAveragePoint(flattenPoints(polygon.points)).y //-
+                        //16 / 2
+                      }
+                      fontSize={16}
+                    />
+                  </>
                 )}
               </React.Fragment>
             ),

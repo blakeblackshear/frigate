@@ -133,8 +133,8 @@
     --secondary-highlight: hsl(0, 0%, 25%);
     --secondary-highlight: 0 0% 25%;
 
-    --muted: hsl(0, 0%, 8%);
-    --muted: 0 0% 8%;
+    --muted: hsl(0, 0%, 15%);
+    --muted: 0 0% 15%;
 
     --muted-foreground: hsl(0, 0%, 32%);
     --muted-foreground: 0 0% 32%;

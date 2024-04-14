@@ -53,6 +53,7 @@ export default function DebugCameraImage({
       <AutoUpdatingCameraImage
         camera={cameraConfig.name}
         searchParams={searchParams}
+        cameraClasses="relative w-full h-full flex justify-center"
       />
       <Button onClick={handleToggleSettings} variant="link" size="sm">
         <span className="w-5 h-5">

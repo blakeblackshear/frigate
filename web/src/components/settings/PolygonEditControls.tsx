@@ -1,10 +1,12 @@
 import { Polygon } from "@/types/canvas";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { MdOutlineRestartAlt, MdUndo } from "react-icons/md";
 import { Button } from "../ui/button";
 
 type PolygonEditControlsProps = {
   polygons: Polygon[];
   setPolygons: React.Dispatch<React.SetStateAction<Polygon[]>>;
-  activePolygonIndex: number | null;
+  activePolygonIndex: number | undefined;
 };
 
 export default function PolygonEditControls({
@@ -13,39 +15,61 @@ export default function PolygonEditControls({
   activePolygonIndex,
 }: PolygonEditControlsProps) {
   const undo = () => {
-    if (activePolygonIndex !== null && polygons) {
-      const updatedPolygons = [...polygons];
-      const activePolygon = updatedPolygons[activePolygonIndex];
-      if (activePolygon.points.length > 0) {
-        updatedPolygons[activePolygonIndex] = {
-          ...activePolygon,
-          points: activePolygon.points.slice(0, -1),
-          isFinished: false,
-        };
-        setPolygons(updatedPolygons);
-      }
+    if (activePolygonIndex === undefined || !polygons) {
+      return;
     }
+
+    const updatedPolygons = [...polygons];
+    const activePolygon = updatedPolygons[activePolygonIndex];
+    updatedPolygons[activePolygonIndex] = {
+      ...activePolygon,
+      points: [...activePolygon.points.slice(0, -1)],
+      isFinished: false,
+    };
+    setPolygons(updatedPolygons);
   };
 
   const reset = () => {
-    if (activePolygonIndex !== null) {
-      const updatedPolygons = [...polygons];
-      updatedPolygons[activePolygonIndex] = {
-        ...updatedPolygons[activePolygonIndex],
-        points: [],
-      };
-      setPolygons(updatedPolygons);
+    if (activePolygonIndex === undefined || !polygons) {
+      return;
     }
+
+    const updatedPolygons = [...polygons];
+    const activePolygon = updatedPolygons[activePolygonIndex];
+    updatedPolygons[activePolygonIndex] = {
+      ...activePolygon,
+      points: [],
+      isFinished: false,
+    };
+    setPolygons(updatedPolygons);
   };
 
   return (
-    <div className="flex">
-      <Button className="mr-5" variant="secondary" onClick={undo}>
-        Undo
-      </Button>
-      <Button variant="secondary" onClick={reset}>
-        Reset
-      </Button>
+    <div className="flex flex-row justify-center gap-2">
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="secondary"
+            className="size-6 p-1 rounded-md text-background bg-secondary-foreground"
+            onClick={undo}
+          >
+            <MdUndo />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Undo</TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="secondary"
+            className="size-6 p-1 rounded-md text-background bg-secondary-foreground"
+            onClick={reset}
+          >
+            <MdOutlineRestartAlt />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Reset</TooltipContent>
+      </Tooltip>
     </div>
   );
 }

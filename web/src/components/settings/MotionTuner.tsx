@@ -1,14 +1,5 @@
 import Heading from "@/components/ui/heading";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -37,13 +28,17 @@ import { Switch } from "../ui/switch";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 
+type MotionTunerProps = {
+  selectedCamera: string;
+};
+
 type MotionSettings = {
   threshold?: number;
   contour_area?: number;
   improve_contrast?: boolean;
 };
 
-export default function MotionTuner() {
+export default function MotionTuner({ selectedCamera }: MotionTunerProps) {
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
   const [changedValue, setChangedValue] = useState(false);
@@ -60,7 +55,7 @@ export default function MotionTuner() {
       .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
   }, [config]);
 
-  const [selectedCamera, setSelectedCamera] = useState(cameras[0]?.name);
+  // const [selectedCamera, setSelectedCamera] = useState(cameras[0]?.name);
   const [nextSelectedCamera, setNextSelectedCamera] = useState("");
 
   const { send: sendMotionThreshold } = useMotionThreshold(selectedCamera);
@@ -169,11 +164,11 @@ export default function MotionTuner() {
         setNextSelectedCamera(camera);
         setConfirmationDialogOpen(true);
       } else {
-        setSelectedCamera(camera);
+        // setSelectedCamera(camera);
         setNextSelectedCamera("");
       }
     },
-    [setSelectedCamera, changedValue],
+    [changedValue],
   );
 
   const handleDialog = useCallback(
@@ -181,12 +176,12 @@ export default function MotionTuner() {
       if (save) {
         saveToConfig();
       }
-      setSelectedCamera(nextSelectedCamera);
+      // setSelectedCamera(nextSelectedCamera);
       setNextSelectedCamera("");
       setConfirmationDialogOpen(false);
       setChangedValue(false);
     },
-    [saveToConfig, setSelectedCamera, nextSelectedCamera],
+    [saveToConfig],
   );
 
   if (!cameraConfig && !selectedCamera) {
@@ -194,127 +189,113 @@ export default function MotionTuner() {
   }
 
   return (
-    <>
-      <Heading as="h2">Motion Detection Tuner</Heading>
-      <Toaster />
-      <div className="flex items-center space-x-2 mt-5">
-        <Select
-          value={selectedCamera}
-          onValueChange={handleSelectedCameraChange}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Camera" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Choose a camera</SelectLabel>
-              {cameras.map((camera) => (
-                <SelectItem
-                  key={camera.name}
-                  value={camera.name}
-                  className="capitalize"
-                >
-                  {camera.name}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      </div>
-      {cameraConfig ? (
-        <div className="flex flex-col justify-start">
-          <AutoUpdatingCameraImage
-            camera={cameraConfig.name}
-            searchParams={new URLSearchParams([["motion", "1"]])}
-            className="w-[50%]"
-          />
-          <div className="flex flex-row justify-evenly w-full">
-            <div className="flex flex-row mb-5">
-              <Slider
-                id="motion-threshold"
-                className="w-[300px]"
-                disabled={motionSettings.threshold === undefined}
-                value={[motionSettings.threshold ?? 0]}
-                min={10}
-                max={80}
-                step={1}
-                onValueChange={(value) => {
-                  handleMotionConfigChange({ threshold: value[0] });
-                }}
-              />
-              <Label htmlFor="motion-threshold" className="px-2">
-                Threshold: {motionSettings.threshold}
-              </Label>
-            </div>
-            <div className="flex flex-row">
-              <Slider
-                id="motion-contour-area"
-                className="w-[300px]"
-                disabled={motionSettings.contour_area === undefined}
-                value={[motionSettings.contour_area ?? 0]}
-                min={10}
-                max={200}
-                step={5}
-                onValueChange={(value) => {
-                  handleMotionConfigChange({ contour_area: value[0] });
-                }}
-              />
-              <Label htmlFor="motion-contour-area" className="px-2">
-                Contour Area: {motionSettings.contour_area}
-              </Label>
-            </div>
-            <div className="flex flex-row">
-              <Switch
-                id="improve-contrast"
-                disabled={motionSettings.improve_contrast === undefined}
-                checked={motionSettings.improve_contrast === true}
-                onCheckedChange={(isChecked) => {
-                  handleMotionConfigChange({ improve_contrast: isChecked });
-                }}
-              />
-              <Label htmlFor="improve-contrast">Improve Contrast</Label>
-            </div>
+    <div className="flex flex-col md:flex-row size-full">
+      <Toaster position="top-center" />
+      <div className="flex flex-col w-full overflow-y-auto mt-2 md:mt-0 md:w-3/12 order-last md:order-none md:mr-2 rounded-lg border-secondary-foreground border-[1px] p-2 bg-background_alt">
+        <Heading as="h3" className="my-2">
+          Motion Detection Tuner
+        </Heading>
 
-            <div className="flex">
-              <Button
-                size="sm"
-                variant={isLoading ? "ghost" : "select"}
-                disabled={!changedValue || isLoading}
-                onClick={saveToConfig}
-              >
-                {isLoading ? "Saving..." : "Save to Config"}
-              </Button>
-            </div>
+        <div className="flex flex-col w-full space-y-10">
+          <div className="flex flex-row mb-5">
+            <Slider
+              id="motion-threshold"
+              className="w-[300px]"
+              disabled={motionSettings.threshold === undefined}
+              value={[motionSettings.threshold ?? 0]}
+              min={10}
+              max={80}
+              step={1}
+              onValueChange={(value) => {
+                handleMotionConfigChange({ threshold: value[0] });
+              }}
+            />
+            <Label htmlFor="motion-threshold" className="px-2">
+              Threshold: {motionSettings.threshold}
+            </Label>
           </div>
-          {confirmationDialogOpen && (
-            <AlertDialog
-              open={confirmationDialogOpen}
-              onOpenChange={() => setConfirmationDialogOpen(false)}
+          <div className="flex flex-row">
+            <Slider
+              id="motion-contour-area"
+              className="w-[300px]"
+              disabled={motionSettings.contour_area === undefined}
+              value={[motionSettings.contour_area ?? 0]}
+              min={10}
+              max={200}
+              step={5}
+              onValueChange={(value) => {
+                handleMotionConfigChange({ contour_area: value[0] });
+              }}
+            />
+            <Label htmlFor="motion-contour-area" className="px-2">
+              Contour Area: {motionSettings.contour_area}
+            </Label>
+          </div>
+          <div className="flex flex-row">
+            <Switch
+              id="improve-contrast"
+              disabled={motionSettings.improve_contrast === undefined}
+              checked={motionSettings.improve_contrast === true}
+              onCheckedChange={(isChecked) => {
+                handleMotionConfigChange({ improve_contrast: isChecked });
+              }}
+            />
+            <Label htmlFor="improve-contrast">Improve Contrast</Label>
+          </div>
+
+          <div className="flex">
+            <Button
+              size="sm"
+              variant={isLoading ? "ghost" : "select"}
+              disabled={!changedValue || isLoading}
+              onClick={saveToConfig}
             >
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>
-                    You have unsaved changes on this camera.
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Do you want to save your changes before continuing?
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel onClick={() => handleDialog(false)}>
-                    Cancel
-                  </AlertDialogCancel>
-                  <AlertDialogAction onClick={() => handleDialog(true)}>
-                    Save
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          )}
+              {isLoading ? "Saving..." : "Save to Config"}
+            </Button>
+          </div>
+        </div>
+        {confirmationDialogOpen && (
+          <AlertDialog
+            open={confirmationDialogOpen}
+            onOpenChange={() => setConfirmationDialogOpen(false)}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  You have unsaved changes on this camera.
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  Do you want to save your changes before continuing?
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => handleDialog(false)}>
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction onClick={() => handleDialog(true)}>
+                  Save
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
+      </div>
+
+      {cameraConfig ? (
+        <div className="flex md:w-7/12 md:grow md:h-dvh md:max-h-full">
+          <div className="size-full min-h-10">
+            <AutoUpdatingCameraImage
+              camera={cameraConfig.name}
+              searchParams={new URLSearchParams([["motion", "1"]])}
+              showFps={false}
+              className="size-full"
+              cameraClasses="relative w-full h-full flex flex-col justify-start"
+            />
+          </div>
         </div>
       ) : (
         <Skeleton className="size-full rounded-2xl" />
       )}
-    </>
+    </div>
   );
 }

@@ -5,16 +5,19 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PolygonCanvas } from "./PolygonCanvas";
 import { Polygon, PolygonType } from "@/types/canvas";
 import { interpolatePoints, toRGBColorString } from "@/utils/canvasUtil";
-import { isDesktop, isMobile } from "react-device-detect";
+import { isMobile } from "react-device-detect";
 import { Skeleton } from "../ui/skeleton";
 import { useResizeObserver } from "@/hooks/resize-observer";
-import { LuCopy, LuPencil, LuPlusSquare, LuTrash } from "react-icons/lu";
+import { LuCopy, LuPencil, LuPlus } from "react-icons/lu";
 import { FaDrawPolygon, FaObjectGroup } from "react-icons/fa";
+import { BsPersonBoundingBox } from "react-icons/bs";
+import { HiTrash } from "react-icons/hi";
 import copy from "copy-to-clipboard";
 import { toast } from "sonner";
 import { Toaster } from "../ui/sonner";
 import { ZoneEditPane } from "./ZoneEditPane";
 import { Button } from "../ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,8 +28,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../ui/alert-dialog";
-import { Separator } from "../ui/separator";
-import { BsPersonBoundingBox } from "react-icons/bs";
+import Heading from "../ui/heading";
 
 const parseCoordinates = (coordinatesString: string) => {
   const coordinates = coordinatesString.split(",");
@@ -196,7 +198,7 @@ export default function MasksAndZones({
   }, [config, selectedCamera]);
 
   const stretch = true;
-  const fitAspect = 1;
+  const fitAspect = 16 / 9;
 
   const scaledHeight = useMemo(() => {
     if (containerRef.current && aspectRatio && detectHeight) {
@@ -247,13 +249,18 @@ export default function MasksAndZones({
   };
 
   const handleCancel = useCallback(() => {
+    console.log("handling cancel");
     setEditPane(undefined);
-    setAllPolygons(allPolygons.filter((poly) => !poly.isUnsaved));
+    console.log("all", allPolygons);
+    console.log("editing", editingPolygons);
+    // setAllPolygons(allPolygons.filter((poly) => !poly.isUnsaved));
+    setEditingPolygons([...allPolygons]);
     setActivePolygonIndex(undefined);
     setHoveredPolygonIndex(null);
-  }, [allPolygons]);
+  }, [allPolygons, editingPolygons]);
 
   const handleSave = useCallback(() => {
+    console.log("handling save");
     setAllPolygons([...(editingPolygons ?? [])]);
     setActivePolygonIndex(undefined);
     setEditPane(undefined);
@@ -368,20 +375,27 @@ export default function MasksAndZones({
             : [],
       );
 
+      console.log("setting all and editing");
       setAllPolygons([
         ...zones,
         ...motionMasks,
         ...globalObjectMasks,
         ...objectMasks,
       ]);
+      setEditingPolygons([
+        ...zones,
+        ...motionMasks,
+        ...globalObjectMasks,
+        ...objectMasks,
+      ]);
 
-      setZoneObjects(
-        Object.entries(cameraConfig.zones).map(([name, zoneData]) => ({
-          camera: cameraConfig.name,
-          zoneName: name,
-          objects: Object.keys(zoneData.filters),
-        })),
-      );
+      // setZoneObjects(
+      //   Object.entries(cameraConfig.zones).map(([name, zoneData]) => ({
+      //     camera: cameraConfig.name,
+      //     zoneName: name,
+      //     objects: Object.keys(zoneData.filters),
+      //   })),
+      // );
     }
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -391,23 +405,25 @@ export default function MasksAndZones({
     if (editPane === undefined) {
       setEditingPolygons([...allPolygons]);
       setIsEditing(false);
-      console.log(allPolygons);
+      console.log("edit pane undefined, all", allPolygons);
     } else {
       setIsEditing(true);
     }
-  }, [setEditingPolygons, setIsEditing, allPolygons, editPane]);
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setEditingPolygons, setIsEditing, allPolygons]);
 
-  useEffect(() => {
-    console.log(
-      "config zone objects",
-      Object.entries(cameraConfig.zones).map(([name, zoneData]) => ({
-        camera: cameraConfig.name,
-        zoneName: name,
-        objects: Object.keys(zoneData.filters),
-      })),
-    );
-    console.log("component zone objects", zoneObjects);
-  }, [zoneObjects]);
+  // useEffect(() => {
+  //   console.log(
+  //     "config zone objects",
+  //     Object.entries(cameraConfig.zones).map(([name, zoneData]) => ({
+  //       camera: cameraConfig.name,
+  //       zoneName: name,
+  //       objects: Object.keys(zoneData.filters),
+  //     })),
+  //   );
+  //   console.log("component zone objects", zoneObjects);
+  // }, [zoneObjects]);
 
   useEffect(() => {
     if (selectedCamera) {
@@ -421,13 +437,14 @@ export default function MasksAndZones({
 
   return (
     <>
-      {cameraConfig && allPolygons && (
+      {cameraConfig && editingPolygons && (
         <div className="flex flex-col md:flex-row size-full">
           <Toaster position="top-center" />
-          <div className="flex flex-col w-full overflow-y-auto md:w-3/12 order-last md:order-none md:mr-2 rounded-lg border-secondary-foreground border-[1px] p-2 bg-background_alt">
+          <div className="flex flex-col h-full w-full overflow-y-auto mt-2 md:mt-0 md:w-3/12 order-last md:order-none md:mr-2 rounded-lg border-secondary-foreground border-[1px] p-2 bg-background_alt">
             {editPane == "zone" && (
               <ZoneEditPane
                 polygons={editingPolygons}
+                setPolygons={setEditingPolygons}
                 activePolygonIndex={activePolygonIndex}
                 onCancel={handleCancel}
                 onSave={handleSave}
@@ -436,6 +453,7 @@ export default function MasksAndZones({
             {editPane == "motion_mask" && (
               <ZoneEditPane
                 polygons={editingPolygons}
+                setPolygons={setEditingPolygons}
                 activePolygonIndex={activePolygonIndex}
                 onCancel={handleCancel}
                 onSave={handleSave}
@@ -444,6 +462,7 @@ export default function MasksAndZones({
             {editPane == "object_mask" && (
               <ZoneEditPane
                 polygons={editingPolygons}
+                setPolygons={setEditingPolygons}
                 activePolygonIndex={activePolygonIndex}
                 onCancel={handleCancel}
                 onSave={handleSave}
@@ -451,130 +470,148 @@ export default function MasksAndZones({
             )}
             {editPane === undefined && (
               <>
-                {(selectedZoneMask === undefined ||
-                  selectedZoneMask.includes("zone" as PolygonType)) && (
-                  <>
-                    <div className="flex flex-row justify-between items-center my-2">
-                      <div className="text-md">Zones</div>
-                      <Button
-                        variant="ghost"
-                        className="h-8 px-0"
-                        onClick={() => {
-                          setEditPane("zone");
-                          handleNewPolygon("zone");
-                        }}
-                      >
-                        <LuPlusSquare />
-                      </Button>
+                <Heading as="h3" className="my-2">
+                  Masks / Zones
+                </Heading>
+                <div className="flex flex-col w-full">
+                  {(selectedZoneMask === undefined ||
+                    selectedZoneMask.includes("zone" as PolygonType)) && (
+                    <div className="mt-0 pt-0">
+                      <div className="flex flex-row justify-between items-center my-3">
+                        <div className="text-md">Zones</div>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="secondary"
+                              className="size-6 p-1 rounded-md text-background bg-secondary-foreground"
+                              onClick={() => {
+                                setEditPane("zone");
+                                handleNewPolygon("zone");
+                              }}
+                            >
+                              <LuPlus />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Add Zone</TooltipContent>
+                        </Tooltip>
+                      </div>
+                      {allPolygons
+                        .flatMap((polygon, index) =>
+                          polygon.type === "zone" ? [{ polygon, index }] : [],
+                        )
+                        .map(({ polygon, index }) => (
+                          <PolygonItem
+                            key={index}
+                            polygon={polygon}
+                            index={index}
+                            activePolygonIndex={activePolygonIndex}
+                            hoveredPolygonIndex={hoveredPolygonIndex}
+                            setHoveredPolygonIndex={setHoveredPolygonIndex}
+                            deleteDialogOpen={deleteDialogOpen}
+                            setDeleteDialogOpen={setDeleteDialogOpen}
+                            setActivePolygonIndex={setActivePolygonIndex}
+                            setEditPane={setEditPane}
+                            setAllPolygons={setAllPolygons}
+                            handleCopyCoordinates={handleCopyCoordinates}
+                          />
+                        ))}
                     </div>
-                    {allPolygons
-                      .flatMap((polygon, index) =>
-                        polygon.type === "zone" ? [{ polygon, index }] : [],
-                      )
-                      .map(({ polygon, index }) => (
-                        <PolygonItem
-                          key={index}
-                          polygon={polygon}
-                          index={index}
-                          activePolygonIndex={activePolygonIndex}
-                          hoveredPolygonIndex={hoveredPolygonIndex}
-                          setHoveredPolygonIndex={setHoveredPolygonIndex}
-                          deleteDialogOpen={deleteDialogOpen}
-                          setDeleteDialogOpen={setDeleteDialogOpen}
-                          setActivePolygonIndex={setActivePolygonIndex}
-                          setEditPane={setEditPane}
-                          setAllPolygons={setAllPolygons}
-                          handleCopyCoordinates={handleCopyCoordinates}
-                        />
-                      ))}
-                  </>
-                )}
-                <div className="flex my-2">
-                  <Separator className="bg-secondary" />
+                  )}
+                  {(selectedZoneMask === undefined ||
+                    selectedZoneMask.includes(
+                      "motion_mask" as PolygonType,
+                    )) && (
+                    <div className="first:mt-0 mt-3 first:pt-0 pt-3 border-t-[1px] first:border-transparent border-secondary">
+                      <div className="flex flex-row justify-between items-center my-3">
+                        <div className="text-md">Motion Masks</div>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="secondary"
+                              className="size-6 p-1 rounded-md text-background bg-secondary-foreground"
+                              onClick={() => {
+                                setEditPane("motion_mask");
+                                handleNewPolygon("motion_mask");
+                              }}
+                            >
+                              <LuPlus />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Add Motion Mask</TooltipContent>
+                        </Tooltip>
+                      </div>
+                      {allPolygons
+                        .flatMap((polygon, index) =>
+                          polygon.type === "motion_mask"
+                            ? [{ polygon, index }]
+                            : [],
+                        )
+                        .map(({ polygon, index }) => (
+                          <PolygonItem
+                            key={index}
+                            polygon={polygon}
+                            index={index}
+                            activePolygonIndex={activePolygonIndex}
+                            hoveredPolygonIndex={hoveredPolygonIndex}
+                            setHoveredPolygonIndex={setHoveredPolygonIndex}
+                            deleteDialogOpen={deleteDialogOpen}
+                            setDeleteDialogOpen={setDeleteDialogOpen}
+                            setActivePolygonIndex={setActivePolygonIndex}
+                            setEditPane={setEditPane}
+                            setAllPolygons={setAllPolygons}
+                            handleCopyCoordinates={handleCopyCoordinates}
+                          />
+                        ))}
+                    </div>
+                  )}
+                  {(selectedZoneMask === undefined ||
+                    selectedZoneMask.includes(
+                      "object_mask" as PolygonType,
+                    )) && (
+                    <div className="first:mt-0 mt-3 first:pt-0 pt-3 border-t-[1px] first:border-transparent border-secondary">
+                      <div className="flex flex-row justify-between items-center my-3">
+                        <div className="text-md">Object Masks</div>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="secondary"
+                              className="size-6 p-1 rounded-md text-background bg-secondary-foreground"
+                              onClick={() => {
+                                setEditPane("object_mask");
+                                handleNewPolygon("object_mask");
+                              }}
+                            >
+                              <LuPlus />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Add Object Mask</TooltipContent>
+                        </Tooltip>
+                      </div>
+                      {allPolygons
+                        .flatMap((polygon, index) =>
+                          polygon.type === "object_mask"
+                            ? [{ polygon, index }]
+                            : [],
+                        )
+                        .map(({ polygon, index }) => (
+                          <PolygonItem
+                            key={index}
+                            polygon={polygon}
+                            index={index}
+                            activePolygonIndex={activePolygonIndex}
+                            hoveredPolygonIndex={hoveredPolygonIndex}
+                            setHoveredPolygonIndex={setHoveredPolygonIndex}
+                            deleteDialogOpen={deleteDialogOpen}
+                            setDeleteDialogOpen={setDeleteDialogOpen}
+                            setActivePolygonIndex={setActivePolygonIndex}
+                            setEditPane={setEditPane}
+                            setAllPolygons={setAllPolygons}
+                            handleCopyCoordinates={handleCopyCoordinates}
+                          />
+                        ))}
+                    </div>
+                  )}
                 </div>
-                {(selectedZoneMask === undefined ||
-                  selectedZoneMask.includes("motion_mask" as PolygonType)) && (
-                  <>
-                    <div className="flex flex-row justify-between items-center my-2">
-                      <div className="text-md">Motion Masks</div>
-                      <Button
-                        variant="ghost"
-                        className="h-8 px-0"
-                        onClick={() => {
-                          setEditPane("motion_mask");
-                          handleNewPolygon("motion_mask");
-                        }}
-                      >
-                        <LuPlusSquare />
-                      </Button>
-                    </div>
-                    {allPolygons
-                      .flatMap((polygon, index) =>
-                        polygon.type === "motion_mask"
-                          ? [{ polygon, index }]
-                          : [],
-                      )
-                      .map(({ polygon, index }) => (
-                        <PolygonItem
-                          key={index}
-                          polygon={polygon}
-                          index={index}
-                          activePolygonIndex={activePolygonIndex}
-                          hoveredPolygonIndex={hoveredPolygonIndex}
-                          setHoveredPolygonIndex={setHoveredPolygonIndex}
-                          deleteDialogOpen={deleteDialogOpen}
-                          setDeleteDialogOpen={setDeleteDialogOpen}
-                          setActivePolygonIndex={setActivePolygonIndex}
-                          setEditPane={setEditPane}
-                          setAllPolygons={setAllPolygons}
-                          handleCopyCoordinates={handleCopyCoordinates}
-                        />
-                      ))}
-                  </>
-                )}
-                <div className="flex my-2">
-                  <Separator className="bg-secondary" />
-                </div>
-                {(selectedZoneMask === undefined ||
-                  selectedZoneMask.includes("object_mask" as PolygonType)) && (
-                  <>
-                    <div className="flex flex-row justify-between items-center my-2">
-                      <div className="text-md">Object Masks</div>
-                      <Button
-                        variant="ghost"
-                        className="h-8 px-0"
-                        onClick={() => {
-                          setEditPane("object_mask");
-                          handleNewPolygon("object_mask");
-                        }}
-                      >
-                        <LuPlusSquare />
-                      </Button>
-                    </div>
-                    {allPolygons
-                      .flatMap((polygon, index) =>
-                        polygon.type === "object_mask"
-                          ? [{ polygon, index }]
-                          : [],
-                      )
-                      .map(({ polygon, index }) => (
-                        <PolygonItem
-                          key={index}
-                          polygon={polygon}
-                          index={index}
-                          activePolygonIndex={activePolygonIndex}
-                          hoveredPolygonIndex={hoveredPolygonIndex}
-                          setHoveredPolygonIndex={setHoveredPolygonIndex}
-                          deleteDialogOpen={deleteDialogOpen}
-                          setDeleteDialogOpen={setDeleteDialogOpen}
-                          setActivePolygonIndex={setActivePolygonIndex}
-                          setEditPane={setEditPane}
-                          setAllPolygons={setAllPolygons}
-                          handleCopyCoordinates={handleCopyCoordinates}
-                        />
-                      ))}
-                  </>
-                )}
               </>
             )}
             {/* <Table>
@@ -661,7 +698,7 @@ export default function MasksAndZones({
             ref={containerRef}
             className="flex md:w-7/12 md:grow md:h-dvh md:max-h-full"
           >
-            <div className="size-full">
+            <div className="flex flex-row justify-center mx-auto size-full">
               {cameraConfig &&
               scaledWidth &&
               scaledHeight &&
@@ -677,7 +714,7 @@ export default function MasksAndZones({
                   selectedZoneMask={selectedZoneMask}
                 />
               ) : (
-                <Skeleton className="w-full h-full" />
+                <Skeleton className="size-full" />
               )}
             </div>
           </div>
@@ -725,7 +762,7 @@ function PolygonItem({
       {isMobile && <></>}
       <div
         className={`flex items-center ${
-          activePolygonIndex === index
+          hoveredPolygonIndex === index
             ? "text-primary"
             : "text-muted-foreground"
         }`}
@@ -779,37 +816,52 @@ function PolygonItem({
               setEditPane(polygon.type);
             }}
           >
-            <LuPencil
-              className={`size-4 ${
-                activePolygonIndex === index
-                  ? "text-primary"
-                  : "text-muted-foreground"
-              }`}
-            />
+            <Tooltip>
+              <TooltipTrigger>
+                <LuPencil
+                  className={`size-4 ${
+                    hoveredPolygonIndex === index
+                      ? "text-primary"
+                      : "text-muted-foreground"
+                  }`}
+                />
+              </TooltipTrigger>
+              <TooltipContent>Edit</TooltipContent>
+            </Tooltip>
           </div>
           <div
             className="cursor-pointer"
             onClick={() => handleCopyCoordinates(index)}
           >
-            <LuCopy
-              className={`size-4 ${
-                activePolygonIndex === index
-                  ? "text-primary"
-                  : "text-muted-foreground"
-              }`}
-            />
+            <Tooltip>
+              <TooltipTrigger>
+                <LuCopy
+                  className={`size-4 ${
+                    hoveredPolygonIndex === index
+                      ? "text-primary"
+                      : "text-muted-foreground"
+                  }`}
+                />
+              </TooltipTrigger>
+              <TooltipContent>Copy coordinates</TooltipContent>
+            </Tooltip>
           </div>
           <div
             className="cursor-pointer"
             onClick={() => setDeleteDialogOpen(true)}
           >
-            <LuTrash
-              className={`size-4 ${
-                activePolygonIndex === index
-                  ? "text-primary fill-primary"
-                  : "text-muted-foreground fill-muted-foreground"
-              }`}
-            />
+            <Tooltip>
+              <TooltipTrigger>
+                <HiTrash
+                  className={`size-4 ${
+                    hoveredPolygonIndex === index
+                      ? "text-primary fill-primary"
+                      : "text-muted-foreground fill-muted-foreground"
+                  }`}
+                />
+              </TooltipTrigger>
+              <TooltipContent>Delete</TooltipContent>
+            </Tooltip>
           </div>
         </div>
       )}

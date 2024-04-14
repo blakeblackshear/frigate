@@ -86,7 +86,7 @@ export default function Settings() {
           page == "masks / zones" ||
           page == "motion tuner") && (
           <div className="flex items-center gap-2">
-            {!isEditing && (
+            {page == "masks / zones" && (
               <ZoneMaskFilterButton
                 selectedZoneMask={filterZoneMask}
                 updateZoneMaskFilter={setFilterZoneMask}
@@ -101,7 +101,7 @@ export default function Settings() {
           </div>
         )}
       </div>
-      <div className="mt-2 flex flex-col items-start w-full h-dvh md:pb-24">
+      <div className="mt-2 flex flex-col items-start w-full h-full md:h-dvh pb-9 md:pb-24">
         {page == "general" && <General />}
         {page == "objects" && <></>}
         {page == "masks / zones" && (
@@ -114,7 +114,9 @@ export default function Settings() {
             setUnsavedChanges={setUnsavedChanges}
           />
         )}
-        {page == "motion tuner" && <MotionTuner />}
+        {page == "motion tuner" && (
+          <MotionTuner selectedCamera={selectedCamera} />
+        )}
       </div>
     </div>
   );

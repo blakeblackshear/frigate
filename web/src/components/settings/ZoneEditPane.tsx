@@ -21,9 +21,11 @@ import { z } from "zod";
 import { Polygon } from "@/types/canvas";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
+import PolygonEditControls from "./PolygonEditControls";
 
 type ZoneEditPaneProps = {
   polygons?: Polygon[];
+  setPolygons: React.Dispatch<React.SetStateAction<Polygon[]>>;
   activePolygonIndex?: number;
   onSave?: () => void;
   onCancel?: () => void;
@@ -31,6 +33,7 @@ type ZoneEditPaneProps = {
 
 export function ZoneEditPane({
   polygons,
+  setPolygons,
   activePolygonIndex,
   onSave,
   onCancel,
@@ -133,9 +136,25 @@ export function ZoneEditPane({
       <Heading as="h3" className="my-2">
         Zone
       </Heading>
-      <div className="flex my-3">
-        <Separator className="bg-secondary" />
+      <Separator className="my-3 bg-secondary" />
+      {polygons && activePolygonIndex !== undefined && (
+        <div className="flex flex-row my-2 text-sm w-full justify-between">
+          <div className="my-1">
+            {polygons[activePolygonIndex].points.length} points
+          </div>
+          {polygons[activePolygonIndex].isFinished ? <></> : <></>}
+          <PolygonEditControls
+            polygons={polygons}
+            setPolygons={setPolygons}
+            activePolygonIndex={activePolygonIndex}
+          />
+        </div>
+      )}
+      <div className="mb-3 text-sm text-muted-foreground">
+        Click to draw a polygon on the image.
       </div>
+
+      <Separator className="my-3 bg-secondary" />
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -146,8 +165,16 @@ export function ZoneEditPane({
               <FormItem>
                 <FormLabel>Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter a name..." {...field} />
+                  <Input
+                    className="w-full p-2 border border-input bg-background text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                    placeholder="Enter a name..."
+                    {...field}
+                  />
                 </FormControl>
+                <FormDescription>
+                  Name must be at least 2 characters and must not be the name of
+                  a camera or another zone.
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -162,7 +189,11 @@ export function ZoneEditPane({
               <FormItem>
                 <FormLabel>Inertia</FormLabel>
                 <FormControl>
-                  <Input placeholder="3" {...field} />
+                  <Input
+                    className="w-full p-2 border border-input bg-background text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                    placeholder="3"
+                    {...field}
+                  />
                 </FormControl>
                 <FormDescription>
                   Specifies how many frames that an object must be in a zone
@@ -182,7 +213,11 @@ export function ZoneEditPane({
               <FormItem>
                 <FormLabel>Loitering Time</FormLabel>
                 <FormControl>
-                  <Input placeholder="0" {...field} />
+                  <Input
+                    className="w-full p-2 border border-input bg-background text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                    placeholder="0"
+                    {...field}
+                  />
                 </FormControl>
                 <FormDescription>
                   Sets a minimum amount of time in seconds that the object must
