@@ -190,7 +190,7 @@ export function StorageGraph({ graphId, used, total }: StorageGraphProps) {
         },
       },
       tooltip: {
-        show: false,
+        enabled: false,
       },
       xaxis: {
         axisBorder: {
