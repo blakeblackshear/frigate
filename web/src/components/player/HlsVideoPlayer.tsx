@@ -81,6 +81,35 @@ export default function HlsVideoPlayer({
   const [controls, setControls] = useState(isMobile);
   const [controlsOpen, setControlsOpen] = useState(false);
 
+  useEffect(() => {
+    if (!isDesktop) {
+      return;
+    }
+
+    const callback = (e: MouseEvent) => {
+      if (!videoRef.current) {
+        return;
+      }
+
+      const rect = videoRef.current.getBoundingClientRect();
+
+      if (
+        e.clientX > rect.left &&
+        e.clientX < rect.right &&
+        e.clientY > rect.top &&
+        e.clientY < rect.bottom
+      ) {
+        setControls(true);
+      } else {
+        setControls(controlsOpen);
+      }
+    };
+    window.addEventListener("mousemove", callback);
+    return () => {
+      window.removeEventListener("mousemove", callback);
+    };
+  }, [videoRef, controlsOpen]);
+
   return (
     <TransformWrapper minScale={1.0}>
       <VideoControls
@@ -126,26 +155,6 @@ export default function HlsVideoPlayer({
           height: "100%",
         }}
         wrapperProps={{
-          onMouseMove: isDesktop
-            ? (e) => {
-                if (!videoRef.current) {
-                  return;
-                }
-
-                const rect = videoRef.current.getBoundingClientRect();
-
-                if (
-                  e.clientX > rect.left &&
-                  e.clientX < rect.right &&
-                  e.clientY > rect.top &&
-                  e.clientY < rect.bottom
-                ) {
-                  setControls(true);
-                } else {
-                  setControls(controlsOpen);
-                }
-              }
-            : undefined,
           onClick: isDesktop ? undefined : () => setControls(!controls),
         }}
         contentStyle={{
