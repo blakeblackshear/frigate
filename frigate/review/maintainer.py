@@ -46,8 +46,9 @@ class PendingReviewSegment:
         frame_time: float,
         severity: SeverityEnum,
         detections: dict[str, str],
-        zones: set[str] = set(),
-        audio: set[str] = set(),
+        sub_labels: set[str],
+        zones: set[str],
+        audio: set[str],
     ):
         rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
         self.id = f"{frame_time}-{rand_id}"
@@ -55,6 +56,7 @@ class PendingReviewSegment:
         self.start_time = frame_time
         self.severity = severity
         self.detections = detections
+        self.sub_labels = sub_labels
         self.zones = zones
         self.audio = audio
         self.last_update = frame_time
@@ -111,6 +113,7 @@ class PendingReviewSegment:
             ReviewSegment.data: {
                 "detections": list(set(self.detections.keys())),
                 "objects": list(set(self.detections.values())),
+                "sub_labels": list(self.sub_labels),
                 "zones": list(self.zones),
                 "audio": list(self.audio),
             },
@@ -181,6 +184,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                     segment.detections[object["id"]] = object["sub_label"][0]
                 else:
                     segment.detections[object["id"]] = f'{object["label"]}-verified'
+                    segment.sub_labels.add(object["sub_label"][0])
 
                 # if object is alert label
                 # and has entered required zones or required zones is not set
@@ -235,6 +239,7 @@ class ReviewSegmentMaintainer(threading.Thread):
         if len(active_objects) > 0:
             has_sig_object = False
             detections: dict[str, str] = {}
+            sub_labels = set()
             zones: set = set()
             severity = None
 
@@ -245,6 +250,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                     detections[object["id"]] = object["sub_label"][0]
                 else:
                     detections[object["id"]] = f'{object["label"]}-verified'
+                    sub_labels.add(object["sub_label"][0])
 
                 # if object is alert label
                 # and has entered required zones or required zones is not set
@@ -292,6 +298,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                     frame_time,
                     SeverityEnum.alert if has_sig_object else SeverityEnum.detection,
                     detections,
+                    sub_labels=sub_labels,
                     audio=set(),
                     zones=zones,
                 )
@@ -435,6 +442,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                             severity,
                             {},
                             set(),
+                            set(),
                             detections,
                         )
                 elif topic == DetectionTypeEnum.api:
@@ -443,6 +451,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                         frame_time,
                         SeverityEnum.alert,
                         {manual_info["event_id"]: manual_info["label"]},
+                        set(),
                         set(),
                         set(),
                     )
