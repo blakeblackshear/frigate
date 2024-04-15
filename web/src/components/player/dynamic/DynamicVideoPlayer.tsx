@@ -89,7 +89,13 @@ export default function DynamicVideoPlayer({
     if (!isScrubbing) {
       setLoadingTimeout(setTimeout(() => setIsLoading(true), 1000));
     }
-  }, [isScrubbing]);
+
+    return () => {
+      if (loadingTimeout) {
+        clearTimeout(loadingTimeout)
+      }
+    }
+  }, [camera, isScrubbing]);
 
   const onPlayerLoaded = useCallback(() => {
     if (!controller || !startTimestamp) {
