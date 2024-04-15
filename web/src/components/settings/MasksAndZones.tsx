@@ -4,33 +4,26 @@ import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PolygonCanvas } from "./PolygonCanvas";
 import { Polygon, PolygonType } from "@/types/canvas";
-import { interpolatePoints, toRGBColorString } from "@/utils/canvasUtil";
-import { isMobile } from "react-device-detect";
+import { interpolatePoints } from "@/utils/canvasUtil";
 import { Skeleton } from "../ui/skeleton";
 import { useResizeObserver } from "@/hooks/resize-observer";
-import { LuCopy, LuPencil, LuPlus } from "react-icons/lu";
-import { FaDrawPolygon, FaObjectGroup } from "react-icons/fa";
-import { BsPersonBoundingBox } from "react-icons/bs";
-import { HiTrash } from "react-icons/hi";
+import { LuExternalLink, LuInfo, LuPlus } from "react-icons/lu";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 import copy from "copy-to-clipboard";
 import { toast } from "sonner";
 import { Toaster } from "../ui/sonner";
 import { Button } from "../ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "../ui/alert-dialog";
 import Heading from "../ui/heading";
 import ZoneEditPane from "./ZoneEditPane";
 import MotionMaskEditPane from "./MotionMaskEditPane";
 import ObjectMaskEditPane from "./ObjectMaskEditPane";
+import PolygonItem from "./PolygonItem";
+import { Link } from "react-router-dom";
 
 const parseCoordinates = (coordinatesString: string) => {
   const coordinates = coordinatesString.split(",");
@@ -45,25 +38,11 @@ const parseCoordinates = (coordinatesString: string) => {
   return points;
 };
 
-type PolygonItemProps = {
-  polygon: Polygon;
-  setAllPolygons: React.Dispatch<React.SetStateAction<Polygon[]>>;
-  index: number;
-  activePolygonIndex: number | undefined;
-  hoveredPolygonIndex: number | null;
-  setHoveredPolygonIndex: (index: number | null) => void;
-  deleteDialogOpen: boolean;
-  setDeleteDialogOpen: (open: boolean) => void;
-  setActivePolygonIndex: (index: number | undefined) => void;
-  setEditPane: (type: PolygonType) => void;
-  handleCopyCoordinates: (index: number) => void;
-};
-
-export type ZoneObjects = {
-  camera: string;
-  zoneName: string;
-  objects: string[];
-};
+// export type ZoneObjects = {
+//   camera: string;
+//   zoneName: string;
+//   objects: string[];
+// };
 
 type MasksAndZoneProps = {
   selectedCamera: string;
@@ -85,14 +64,14 @@ export default function MasksAndZones({
   const { data: config } = useSWR<FrigateConfig>("config");
   const [allPolygons, setAllPolygons] = useState<Polygon[]>([]);
   const [editingPolygons, setEditingPolygons] = useState<Polygon[]>([]);
-  const [zoneObjects, setZoneObjects] = useState<ZoneObjects[]>([]);
+  // const [zoneObjects, setZoneObjects] = useState<ZoneObjects[]>([]);
   const [activePolygonIndex, setActivePolygonIndex] = useState<
     number | undefined
   >(undefined);
   const [hoveredPolygonIndex, setHoveredPolygonIndex] = useState<number | null>(
     null,
   );
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
   const containerRef = useRef<HTMLDivElement | null>(null);
   // const polygonTypes = [
   //   "zone",
@@ -104,15 +83,15 @@ export default function MasksAndZones({
   // type EditPaneType = (typeof polygonTypes)[number];
   const [editPane, setEditPane] = useState<PolygonType | undefined>(undefined);
 
-  const cameras = useMemo(() => {
-    if (!config) {
-      return [];
-    }
+  // const cameras = useMemo(() => {
+  //   if (!config) {
+  //     return [];
+  //   }
 
-    return Object.values(config.cameras)
-      .filter((conf) => conf.ui.dashboard && conf.enabled)
-      .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
-  }, [config]);
+  //   return Object.values(config.cameras)
+  //     .filter((conf) => conf.ui.dashboard && conf.enabled)
+  //     .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
+  // }, [config]);
 
   const cameraConfig = useMemo(() => {
     if (config && selectedCamera) {
@@ -147,23 +126,23 @@ export default function MasksAndZones({
   //   [setZoneObjects],
   // );
 
-  const saveZoneObjects = useCallback(
-    (camera: string, zoneName: string, objects?: string[]) => {
-      setZoneObjects((prevZoneObjects) => {
-        const updatedZoneObjects = prevZoneObjects.map((zoneObject) => {
-          if (
-            zoneObject.camera === camera &&
-            zoneObject.zoneName === zoneName
-          ) {
-            return { ...zoneObject, objects: objects || [] };
-          }
-          return zoneObject;
-        });
-        return updatedZoneObjects;
-      });
-    },
-    [setZoneObjects],
-  );
+  // const saveZoneObjects = useCallback(
+  //   (camera: string, zoneName: string, objects?: string[]) => {
+  //     setZoneObjects((prevZoneObjects) => {
+  //       const updatedZoneObjects = prevZoneObjects.map((zoneObject) => {
+  //         if (
+  //           zoneObject.camera === camera &&
+  //           zoneObject.zoneName === zoneName
+  //         ) {
+  //           return { ...zoneObject, objects: objects || [] };
+  //         }
+  //         return zoneObject;
+  //       });
+  //       return updatedZoneObjects;
+  //     });
+  //   },
+  //   [setZoneObjects],
+  // );
 
   const [{ width: containerWidth, height: containerHeight }] =
     useResizeObserver(containerRef);
@@ -200,6 +179,7 @@ export default function MasksAndZones({
   }, [config, selectedCamera]);
 
   const stretch = true;
+  // TODO: mobile / portrait cams
   const fitAspect = 16 / 9;
 
   const scaledHeight = useMemo(() => {
@@ -272,18 +252,18 @@ export default function MasksAndZones({
   };
 
   const handleCancel = useCallback(() => {
-    console.log("handling cancel");
+    // console.log("handling cancel");
     setEditPane(undefined);
-    console.log("all", allPolygons);
-    console.log("editing", editingPolygons);
+    // console.log("all", allPolygons);
+    // console.log("editing", editingPolygons);
     // setAllPolygons(allPolygons.filter((poly) => !poly.isUnsaved));
     setEditingPolygons([...allPolygons]);
     setActivePolygonIndex(undefined);
     setHoveredPolygonIndex(null);
-  }, [allPolygons, editingPolygons]);
+  }, [allPolygons]);
 
   const handleSave = useCallback(() => {
-    console.log("handling save");
+    // console.log("handling save");
     setAllPolygons([...(editingPolygons ?? [])]);
     setActivePolygonIndex(undefined);
     setEditPane(undefined);
@@ -398,7 +378,7 @@ export default function MasksAndZones({
             : [],
       );
 
-      console.log("setting all and editing");
+      // console.log("setting all and editing");
       setAllPolygons([
         ...zones,
         ...motionMasks,
@@ -428,7 +408,7 @@ export default function MasksAndZones({
     if (editPane === undefined) {
       setEditingPolygons([...allPolygons]);
       setIsEditing(false);
-      console.log("edit pane undefined, all", allPolygons);
+      // console.log("edit pane undefined, all", allPolygons);
     } else {
       setIsEditing(true);
     }
@@ -463,7 +443,7 @@ export default function MasksAndZones({
       {cameraConfig && editingPolygons && (
         <div className="flex flex-col md:flex-row size-full">
           <Toaster position="top-center" />
-          <div className="flex flex-col h-full w-full overflow-y-auto mt-2 md:mt-0 md:w-3/12 order-last md:order-none md:mr-2 rounded-lg border-secondary-foreground border-[1px] p-2 bg-background_alt">
+          <div className="flex flex-col h-full w-full overflow-y-auto mt-2 md:mt-0 mb-10 md:mb-0 md:w-3/12 order-last md:order-none md:mr-2 rounded-lg border-secondary-foreground border-[1px] p-2 bg-background_alt">
             {editPane == "zone" && (
               <ZoneEditPane
                 polygons={editingPolygons}
@@ -499,9 +479,33 @@ export default function MasksAndZones({
                 <div className="flex flex-col w-full">
                   {(selectedZoneMask === undefined ||
                     selectedZoneMask.includes("zone" as PolygonType)) && (
-                    <div className="mt-0 pt-0">
+                    <div className="mt-0 pt-0 last:pb-3 last:border-b-[1px] last:border-secondary">
                       <div className="flex flex-row justify-between items-center my-3">
-                        <div className="text-md">Zones</div>
+                        <HoverCard>
+                          <HoverCardTrigger asChild>
+                            <div className="text-md cursor-default">Zones</div>
+                          </HoverCardTrigger>
+                          <HoverCardContent>
+                            <div className="flex flex-col gap-2 text-sm text-primary-variant my-2">
+                              <p>
+                                Zones allow you to define a specific area of the
+                                frame so you can determine whether or not an
+                                object is within a particular area.
+                              </p>
+                              <div className="flex items-center text-primary">
+                                <Link
+                                  to="https://docs.frigate.video/configuration/zones"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline"
+                                >
+                                  Documentation{" "}
+                                  <LuExternalLink className="size-3 ml-2 inline-flex" />
+                                </Link>
+                              </div>
+                            </div>
+                          </HoverCardContent>
+                        </HoverCard>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button
@@ -530,8 +534,6 @@ export default function MasksAndZones({
                             activePolygonIndex={activePolygonIndex}
                             hoveredPolygonIndex={hoveredPolygonIndex}
                             setHoveredPolygonIndex={setHoveredPolygonIndex}
-                            deleteDialogOpen={deleteDialogOpen}
-                            setDeleteDialogOpen={setDeleteDialogOpen}
                             setActivePolygonIndex={setActivePolygonIndex}
                             setEditPane={setEditPane}
                             setAllPolygons={setAllPolygons}
@@ -544,9 +546,36 @@ export default function MasksAndZones({
                     selectedZoneMask.includes(
                       "motion_mask" as PolygonType,
                     )) && (
-                    <div className="first:mt-0 mt-3 first:pt-0 pt-3 border-t-[1px] first:border-transparent border-secondary">
+                    <div className="first:mt-0 mt-3 first:pt-0 pt-3 last:pb-3 border-t-[1px] last:border-b-[1px] first:border-transparent border-secondary">
                       <div className="flex flex-row justify-between items-center my-3">
-                        <div className="text-md">Motion Masks</div>
+                        <HoverCard>
+                          <HoverCardTrigger asChild>
+                            <div className="text-md cursor-default">
+                              Motion Masks
+                            </div>
+                          </HoverCardTrigger>
+                          <HoverCardContent>
+                            <div className="flex flex-col gap-2 text-sm text-primary-variant my-2">
+                              <p>
+                                Motion masks are used to prevent unwanted types
+                                of motion from triggering detection. Over
+                                masking will make it more difficult for objects
+                                to be tracked.
+                              </p>
+                              <div className="flex items-center text-primary">
+                                <Link
+                                  to="https://docs.frigate.video/configuration/masks#motion-masks"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline"
+                                >
+                                  Documentation{" "}
+                                  <LuExternalLink className="size-3 ml-2 inline-flex" />
+                                </Link>
+                              </div>
+                            </div>
+                          </HoverCardContent>
+                        </HoverCard>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button
@@ -577,8 +606,6 @@ export default function MasksAndZones({
                             activePolygonIndex={activePolygonIndex}
                             hoveredPolygonIndex={hoveredPolygonIndex}
                             setHoveredPolygonIndex={setHoveredPolygonIndex}
-                            deleteDialogOpen={deleteDialogOpen}
-                            setDeleteDialogOpen={setDeleteDialogOpen}
                             setActivePolygonIndex={setActivePolygonIndex}
                             setEditPane={setEditPane}
                             setAllPolygons={setAllPolygons}
@@ -591,9 +618,35 @@ export default function MasksAndZones({
                     selectedZoneMask.includes(
                       "object_mask" as PolygonType,
                     )) && (
-                    <div className="first:mt-0 mt-3 first:pt-0 pt-3 border-t-[1px] first:border-transparent border-secondary">
+                    <div className="first:mt-0 mt-3 first:pt-0 pt-3 last:pb-3 border-t-[1px] last:border-b-[1px] first:border-transparent border-secondary">
                       <div className="flex flex-row justify-between items-center my-3">
-                        <div className="text-md">Object Masks</div>
+                        <HoverCard>
+                          <HoverCardTrigger asChild>
+                            <div className="text-md cursor-default">
+                              Object Masks
+                            </div>
+                          </HoverCardTrigger>
+                          <HoverCardContent>
+                            <div className="flex flex-col gap-2 text-sm text-primary-variant my-2">
+                              <p>
+                                Object filter masks are used to filter out false
+                                positives for a given object type based on
+                                location.
+                              </p>
+                              <div className="flex items-center text-primary">
+                                <Link
+                                  to="https://docs.frigate.video/configuration/masks#object-filter-masks"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline"
+                                >
+                                  Documentation{" "}
+                                  <LuExternalLink className="size-3 ml-2 inline-flex" />
+                                </Link>
+                              </div>
+                            </div>
+                          </HoverCardContent>
+                        </HoverCard>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button
@@ -624,8 +677,6 @@ export default function MasksAndZones({
                             activePolygonIndex={activePolygonIndex}
                             hoveredPolygonIndex={hoveredPolygonIndex}
                             setHoveredPolygonIndex={setHoveredPolygonIndex}
-                            deleteDialogOpen={deleteDialogOpen}
-                            setDeleteDialogOpen={setDeleteDialogOpen}
                             setActivePolygonIndex={setActivePolygonIndex}
                             setEditPane={setEditPane}
                             setAllPolygons={setAllPolygons}
@@ -719,7 +770,7 @@ export default function MasksAndZones({
           </div>
           <div
             ref={containerRef}
-            className="flex md:w-7/12 md:grow md:h-dvh md:max-h-full"
+            className="flex md:w-7/12 md:grow md:h-dvh max-h-[50%] md:max-h-full"
           >
             <div className="flex flex-row justify-center mx-auto size-full">
               {cameraConfig &&
@@ -744,150 +795,5 @@ export default function MasksAndZones({
         </div>
       )}
     </>
-  );
-}
-
-function PolygonItem({
-  polygon,
-  setAllPolygons,
-  index,
-  activePolygonIndex,
-  hoveredPolygonIndex,
-  setHoveredPolygonIndex,
-  deleteDialogOpen,
-  setDeleteDialogOpen,
-  setActivePolygonIndex,
-  setEditPane,
-  handleCopyCoordinates,
-}: PolygonItemProps) {
-  const polygonTypeIcons = {
-    zone: FaDrawPolygon,
-    motion_mask: FaObjectGroup,
-    object_mask: BsPersonBoundingBox,
-  };
-
-  const PolygonItemIcon = polygon ? polygonTypeIcons[polygon.type] : undefined;
-
-  return (
-    <div
-      key={index}
-      className="flex p-1 rounded-lg flex-row items-center justify-between mx-2 mb-1 transition-background duration-100"
-      data-index={index}
-      onMouseEnter={() => setHoveredPolygonIndex(index)}
-      onMouseLeave={() => setHoveredPolygonIndex(null)}
-      style={{
-        backgroundColor:
-          hoveredPolygonIndex === index
-            ? toRGBColorString(polygon.color, false)
-            : "",
-      }}
-    >
-      {isMobile && <></>}
-      <div
-        className={`flex items-center ${
-          hoveredPolygonIndex === index
-            ? "text-primary"
-            : "text-muted-foreground"
-        }`}
-      >
-        {PolygonItemIcon && (
-          <PolygonItemIcon
-            className="size-4 mr-2"
-            style={{
-              fill: toRGBColorString(polygon.color, true),
-              color: toRGBColorString(polygon.color, true),
-            }}
-          />
-        )}
-        <p className="cursor-default">{polygon.name}</p>
-      </div>
-      {deleteDialogOpen && hoveredPolygonIndex === index && (
-        <AlertDialog
-          open={deleteDialogOpen}
-          onOpenChange={() => setDeleteDialogOpen(!deleteDialogOpen)}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
-            </AlertDialogHeader>
-            <AlertDialogDescription>
-              Are you sure you want to delete the{" "}
-              {polygon.type.replace("_", " ")} <em>{polygon.name}</em>?
-            </AlertDialogDescription>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => {
-                  setAllPolygons((oldPolygons) => {
-                    return oldPolygons.filter((_, i) => i !== index);
-                  });
-                  setActivePolygonIndex(undefined);
-                }}
-              >
-                Delete
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
-      {hoveredPolygonIndex === index && (
-        <div className="flex flex-row gap-2">
-          <div
-            className="cursor-pointer"
-            onClick={() => {
-              setActivePolygonIndex(index);
-              setEditPane(polygon.type);
-            }}
-          >
-            <Tooltip>
-              <TooltipTrigger>
-                <LuPencil
-                  className={`size-4 ${
-                    hoveredPolygonIndex === index
-                      ? "text-primary"
-                      : "text-muted-foreground"
-                  }`}
-                />
-              </TooltipTrigger>
-              <TooltipContent>Edit</TooltipContent>
-            </Tooltip>
-          </div>
-          <div
-            className="cursor-pointer"
-            onClick={() => handleCopyCoordinates(index)}
-          >
-            <Tooltip>
-              <TooltipTrigger>
-                <LuCopy
-                  className={`size-4 ${
-                    hoveredPolygonIndex === index
-                      ? "text-primary"
-                      : "text-muted-foreground"
-                  }`}
-                />
-              </TooltipTrigger>
-              <TooltipContent>Copy coordinates</TooltipContent>
-            </Tooltip>
-          </div>
-          <div
-            className="cursor-pointer"
-            onClick={() => setDeleteDialogOpen(true)}
-          >
-            <Tooltip>
-              <TooltipTrigger>
-                <HiTrash
-                  className={`size-4 ${
-                    hoveredPolygonIndex === index
-                      ? "text-primary fill-primary"
-                      : "text-muted-foreground fill-muted-foreground"
-                  }`}
-                />
-              </TooltipTrigger>
-              <TooltipContent>Delete</TooltipContent>
-            </Tooltip>
-          </div>
-        </div>
-      )}
-    </div>
   );
 }

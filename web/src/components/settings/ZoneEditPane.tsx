@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useEffect, useMemo, useState } from "react";
-import { ATTRIBUTES, FrigateConfig } from "@/types/frigateConfig";
+import { ATTRIBUTE_LABELS, FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 import { isMobile } from "react-device-detect";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -344,7 +344,7 @@ export function ZoneObjectSelector({
 
     Object.values(config.cameras).forEach((camera) => {
       camera.objects.track.forEach((label) => {
-        if (!ATTRIBUTES.includes(label)) {
+        if (!ATTRIBUTE_LABELS.includes(label)) {
           labels.add(label);
         }
       });
@@ -361,14 +361,14 @@ export function ZoneObjectSelector({
     const labels = new Set<string>();
 
     cameraConfig.objects.track.forEach((label) => {
-      if (!ATTRIBUTES.includes(label)) {
+      if (!ATTRIBUTE_LABELS.includes(label)) {
         labels.add(label);
       }
     });
 
     if (cameraConfig.zones[zoneName]) {
       cameraConfig.zones[zoneName].objects.forEach((label) => {
-        if (!ATTRIBUTES.includes(label)) {
+        if (!ATTRIBUTE_LABELS.includes(label)) {
           labels.add(label);
         }
       });

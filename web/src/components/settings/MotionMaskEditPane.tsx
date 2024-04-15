@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useEffect, useMemo, useState } from "react";
-import { ATTRIBUTES, FrigateConfig } from "@/types/frigateConfig";
+import { ATTRIBUTE_LABELS, FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 import { isMobile } from "react-device-detect";
 import { zodResolver } from "@hookform/resolvers/zod";

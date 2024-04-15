@@ -20,7 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useEffect, useMemo, useState } from "react";
-import { ATTRIBUTES, FrigateConfig } from "@/types/frigateConfig";
+import { ATTRIBUTE_LABELS, FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 import { isMobile } from "react-device-detect";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -66,6 +66,7 @@ export default function ObjectMaskEditPane({
 
   const formSchema = z
     .object({
+      objects: z.string(),
       polygon: z.object({ isFinished: z.boolean() }),
     })
     .refine(() => polygon?.isFinished === true, {
@@ -77,6 +78,7 @@ export default function ObjectMaskEditPane({
     resolver: zodResolver(formSchema),
     mode: "onChange",
     defaultValues: {
+      objects: polygon?.objects[0] ?? "all_labels",
       polygon: { isFinished: polygon?.isFinished ?? false },
     },
   });
@@ -120,19 +122,37 @@ export default function ObjectMaskEditPane({
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormItem>
-            <FormLabel>Objects</FormLabel>
-            <FormDescription>
-              The object type that that applies to this object mask.
-            </FormDescription>
-            <ZoneObjectSelector
-              camera={polygon.camera}
-              zoneName={polygon.name}
-              updateLabelFilter={(objects) => {
-                // console.log(objects);
-              }}
-            />
-          </FormItem>
+          <FormField
+            control={form.control}
+            name="objects"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Objects</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select an object type" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <ZoneObjectSelector
+                      camera={polygon.camera}
+                      updateLabelFilter={(objects) => {
+                        // console.log(objects);
+                      }}
+                    />
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  The object type that that applies to this object mask.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name="polygon.isFinished"
@@ -158,13 +178,11 @@ export default function ObjectMaskEditPane({
 
 type ZoneObjectSelectorProps = {
   camera: string;
-  zoneName: string;
   updateLabelFilter: (labels: string[] | undefined) => void;
 };
 
 export function ZoneObjectSelector({
   camera,
-  zoneName,
   updateLabelFilter,
 }: ZoneObjectSelectorProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -184,7 +202,7 @@ export function ZoneObjectSelector({
 
     Object.values(config.cameras).forEach((camera) => {
       camera.objects.track.forEach((label) => {
-        if (!ATTRIBUTES.includes(label)) {
+        if (!ATTRIBUTE_LABELS.includes(label)) {
           labels.add(label);
         }
       });
@@ -201,13 +219,13 @@ export function ZoneObjectSelector({
     const labels = new Set<string>();
 
     cameraConfig.objects.track.forEach((label) => {
-      if (!ATTRIBUTES.includes(label)) {
+      if (!ATTRIBUTE_LABELS.includes(label)) {
         labels.add(label);
       }
     });
 
     return [...labels].sort() || [];
-  }, [cameraConfig, zoneName]);
+  }, [cameraConfig]);
 
   const [currentLabels, setCurrentLabels] = useState<string[] | undefined>(
     cameraLabels.every((label, index) => label === allLabels[index])
@@ -221,27 +239,15 @@ export function ZoneObjectSelector({
 
   return (
     <>
-      <div className="h-auto overflow-y-auto overflow-x-hidden">
-        <div className="my-2.5 flex flex-col gap-2.5">
-          <Select>
-            <SelectTrigger>
-              <SelectValue placeholder="Select object type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="all_labels">All object types</SelectItem>
-                <SelectSeparator className="bg-secondary" />
-                {allLabels.map((item) => (
-                  <SelectItem key={item} value={item}>
-                    {item.replaceAll("_", " ").charAt(0).toUpperCase() +
-                      item.slice(1)}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+      <SelectGroup>
+        <SelectItem value="all_labels">All object types</SelectItem>
+        <SelectSeparator className="bg-secondary" />
+        {allLabels.map((item) => (
+          <SelectItem key={item} value={item}>
+            {item.replaceAll("_", " ").charAt(0).toUpperCase() + item.slice(1)}
+          </SelectItem>
+        ))}
+      </SelectGroup>
     </>
   );
 }

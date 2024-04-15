@@ -63,9 +63,6 @@ export default function Settings() {
   return (
     <div className="size-full p-2 flex flex-col">
       <div className="w-full h-11 relative flex justify-between items-center">
-        {isMobile && (
-          <Logo className="absolute inset-x-1/2 -translate-x-1/2 h-8" />
-        )}
         <ToggleGroup
           className="*:px-3 *:py-4 *:rounded-md"
           type="single"
@@ -107,7 +104,7 @@ export default function Settings() {
           </div>
         )}
       </div>
-      <div className="mt-2 flex flex-col items-start w-full h-full md:h-dvh pb-9 md:pb-24">
+      <div className="mt-2 flex flex-col items-start w-full h-full md:h-dvh md:pb-24">
         {page == "general" && <General />}
         {page == "objects" && <></>}
         {page == "masks / zones" && (

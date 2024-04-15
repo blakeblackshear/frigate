@@ -24,7 +24,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { DualThumbSlider } from "@/components/ui/slider";
 import { Event } from "@/types/event";
-import { ATTRIBUTES, FrigateConfig } from "@/types/frigateConfig";
+import { ATTRIBUTE_LABELS, FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { isMobile } from "react-device-detect";
@@ -235,7 +235,7 @@ function PlusFilterGroup({
     cameras.forEach((camera) => {
       const cameraConfig = config.cameras[camera];
       cameraConfig.objects.track.forEach((label) => {
-        if (!ATTRIBUTES.includes(label)) {
+        if (!ATTRIBUTE_LABELS.includes(label)) {
           labels.add(label);
         }
       });

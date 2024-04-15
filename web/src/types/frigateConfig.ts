@@ -21,7 +21,13 @@ export interface BirdseyeConfig {
   width: number;
 }
 
-export const ATTRIBUTES = ["amazon", "face", "fedex", "license_plate", "ups"];
+export const ATTRIBUTE_LABELS = [
+  "amazon",
+  "face",
+  "fedex",
+  "license_plate",
+  "ups",
+];
 
 export interface CameraConfig {
   audio: {
