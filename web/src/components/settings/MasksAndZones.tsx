@@ -15,7 +15,6 @@ import { HiTrash } from "react-icons/hi";
 import copy from "copy-to-clipboard";
 import { toast } from "sonner";
 import { Toaster } from "../ui/sonner";
-import { ZoneEditPane } from "./ZoneEditPane";
 import { Button } from "../ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import {
@@ -29,6 +28,9 @@ import {
   AlertDialogTitle,
 } from "../ui/alert-dialog";
 import Heading from "../ui/heading";
+import ZoneEditPane from "./ZoneEditPane";
+import MotionMaskEditPane from "./MotionMaskEditPane";
+import ObjectMaskEditPane from "./ObjectMaskEditPane";
 
 const parseCoordinates = (coordinatesString: string) => {
   const coordinates = coordinatesString.split(",");
@@ -232,7 +234,28 @@ export default function MasksAndZones({
   }, [scaledHeight, aspectRatio]);
 
   const handleNewPolygon = (type: PolygonType) => {
+    if (!cameraConfig) {
+      return;
+    }
+
     setActivePolygonIndex(allPolygons.length);
+    let polygonName = "";
+    let polygonColor = [128, 128, 0];
+    if (type == "motion_mask") {
+      const count = allPolygons.filter(
+        (poly) => poly.type == "motion_mask",
+      ).length;
+      polygonName = `Motion Mask ${count + 1}`;
+      polygonColor = [0, 0, 220];
+    }
+    if (type == "object_mask") {
+      const count = allPolygons.filter(
+        (poly) => poly.type == "object_mask",
+      ).length;
+      polygonName = `Object Mask ${count + 1}`;
+      polygonColor = [128, 128, 128];
+      // TODO - get this from config object after mutation so label can be set
+    }
     setEditingPolygons([
       ...(allPolygons || []),
       {
@@ -240,10 +263,10 @@ export default function MasksAndZones({
         isFinished: false,
         isUnsaved: true,
         type,
-        name: "",
+        name: polygonName,
         objects: [],
         camera: selectedCamera,
-        color: [0, 0, 220],
+        color: polygonColor,
       },
     ]);
   };
@@ -330,7 +353,7 @@ export default function MasksAndZones({
         ([, maskData], index) => ({
           type: "object_mask" as PolygonType,
           camera: cameraConfig.name,
-          name: `All Objects Object Mask ${index + 1}`,
+          name: `Object Mask ${index + 1} (all objects)`,
           objects: [],
           points: interpolatePoints(
             parseCoordinates(maskData),
@@ -356,7 +379,7 @@ export default function MasksAndZones({
                       {
                         type: "object_mask" as PolygonType,
                         camera: cameraConfig.name,
-                        name: `${objectName.charAt(0).toUpperCase() + objectName.slice(1)} Object Mask ${globalObjectMasksCount + subIndex + 1}`,
+                        name: `Object Mask ${globalObjectMasksCount + subIndex + 1} (${objectName})`,
                         objects: [objectName],
                         points: interpolatePoints(
                           parseCoordinates(maskItem),
@@ -451,7 +474,7 @@ export default function MasksAndZones({
               />
             )}
             {editPane == "motion_mask" && (
-              <ZoneEditPane
+              <MotionMaskEditPane
                 polygons={editingPolygons}
                 setPolygons={setEditingPolygons}
                 activePolygonIndex={activePolygonIndex}
@@ -460,7 +483,7 @@ export default function MasksAndZones({
               />
             )}
             {editPane == "object_mask" && (
-              <ZoneEditPane
+              <ObjectMaskEditPane
                 polygons={editingPolygons}
                 setPolygons={setEditingPolygons}
                 activePolygonIndex={activePolygonIndex}

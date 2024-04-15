@@ -31,7 +31,7 @@ type ZoneEditPaneProps = {
   onCancel?: () => void;
 };
 
-export function ZoneEditPane({
+export default function ZoneEditPane({
   polygons,
   setPolygons,
   activePolygonIndex,

@@ -11,7 +11,7 @@ import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import MotionTuner from "@/components/settings/MotionTuner";
 import MasksAndZones from "@/components/settings/MasksAndZones";
 import { Button } from "@/components/ui/button";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import Logo from "@/components/Logo";
 import { isMobile } from "react-device-detect";
@@ -50,9 +50,15 @@ export default function Settings() {
       .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
   }, [config]);
 
-  const [selectedCamera, setSelectedCamera] = useState(cameras[0].name);
+  const [selectedCamera, setSelectedCamera] = useState<string>();
 
   const [filterZoneMask, setFilterZoneMask] = useState<PolygonType[]>();
+
+  useEffect(() => {
+    if (cameras) {
+      setSelectedCamera(cameras[0].name);
+    }
+  }, [cameras]);
 
   return (
     <div className="size-full p-2 flex flex-col">
@@ -134,6 +140,10 @@ function CameraSelectButton({
   setSelectedCamera,
 }: CameraSelectButtonProps) {
   const [open, setOpen] = useState(false);
+
+  if (!allCameras) {
+    return;
+  }
 
   const trigger = (
     <Button
