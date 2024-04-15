@@ -252,7 +252,13 @@ export default function PreviewThumbnailPlayer({
               </TooltipTrigger>
             </div>
             <TooltipContent className="capitalize">
-              {[...(review.data.objects || []), ...(review.data.audio || [])]
+              {[
+                ...new Set(
+                  ...(review.data.objects || []),
+                  ...(review.data.sub_labels || []),
+                  ...(review.data.audio || []),
+                ),
+              ]
                 .filter((item) => item !== undefined)
                 .join(", ")
                 .replaceAll("-verified", "")}
