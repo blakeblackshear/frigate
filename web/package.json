@@ -47,7 +47,7 @@
     "next-themes": "^0.3.0",
     "react": "^18.2.0",
     "react-apexcharts": "^1.4.1",
-    "react-day-picker": "^8.9.1",
+    "react-day-picker": "^8.10.1",
     "react-device-detect": "^2.2.3",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.51.3",
