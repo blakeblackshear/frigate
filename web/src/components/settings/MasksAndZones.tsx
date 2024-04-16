@@ -64,6 +64,7 @@ export default function MasksAndZones({
   const { data: config } = useSWR<FrigateConfig>("config");
   const [allPolygons, setAllPolygons] = useState<Polygon[]>([]);
   const [editingPolygons, setEditingPolygons] = useState<Polygon[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   // const [zoneObjects, setZoneObjects] = useState<ZoneObjects[]>([]);
   const [activePolygonIndex, setActivePolygonIndex] = useState<
     number | undefined
@@ -219,31 +220,24 @@ export default function MasksAndZones({
     }
 
     setActivePolygonIndex(allPolygons.length);
-    let polygonName = "";
+
     let polygonColor = [128, 128, 0];
     if (type == "motion_mask") {
-      const count = allPolygons.filter(
-        (poly) => poly.type == "motion_mask",
-      ).length;
-      polygonName = `Motion Mask ${count + 1}`;
       polygonColor = [0, 0, 220];
     }
     if (type == "object_mask") {
-      const count = allPolygons.filter(
-        (poly) => poly.type == "object_mask",
-      ).length;
-      polygonName = `Object Mask ${count + 1}`;
       polygonColor = [128, 128, 128];
       // TODO - get this from config object after mutation so label can be set
     }
+
     setEditingPolygons([
       ...(allPolygons || []),
       {
         points: [],
         isFinished: false,
-        isUnsaved: true,
+        // isUnsaved: true,
         type,
-        name: polygonName,
+        name: "",
         objects: [],
         camera: selectedCamera,
         color: polygonColor,
@@ -265,10 +259,23 @@ export default function MasksAndZones({
   const handleSave = useCallback(() => {
     // console.log("handling save");
     setAllPolygons([...(editingPolygons ?? [])]);
-    setActivePolygonIndex(undefined);
-    setEditPane(undefined);
+
+    // setEditPane(undefined);
     setHoveredPolygonIndex(null);
   }, [editingPolygons]);
+
+  useEffect(() => {
+    console.log(isLoading);
+    console.log("edit pane", editPane);
+    if (isLoading) {
+      return;
+    }
+    if (!isLoading && editPane !== undefined) {
+      console.log("setting");
+      setActivePolygonIndex(undefined);
+      setEditPane(undefined);
+    }
+  }, [isLoading]);
 
   const handleCopyCoordinates = useCallback(
     (index: number) => {
@@ -287,7 +294,7 @@ export default function MasksAndZones({
     [allPolygons, scaledHeight, scaledWidth],
   );
 
-  useEffect(() => {}, [editPane]);
+  // useEffect(() => {}, [editPane]);
 
   useEffect(() => {
     if (cameraConfig && containerRef.current && scaledWidth && scaledHeight) {
@@ -305,7 +312,7 @@ export default function MasksAndZones({
             scaledHeight,
           ),
           isFinished: true,
-          isUnsaved: false,
+          // isUnsaved: false,
           color: zoneData.color,
         }),
       );
@@ -324,7 +331,7 @@ export default function MasksAndZones({
             scaledHeight,
           ),
           isFinished: true,
-          isUnsaved: false,
+          // isUnsaved: false,
           color: [0, 0, 255],
         }),
       );
@@ -343,7 +350,7 @@ export default function MasksAndZones({
             scaledHeight,
           ),
           isFinished: true,
-          isUnsaved: false,
+          // isUnsaved: false,
           color: [0, 0, 255],
         }),
       );
@@ -369,7 +376,7 @@ export default function MasksAndZones({
                           scaledHeight,
                         ),
                         isFinished: true,
-                        isUnsaved: false,
+                        // isUnsaved: false,
                         color: [128, 128, 128],
                       },
                     ]
@@ -449,6 +456,10 @@ export default function MasksAndZones({
                 polygons={editingPolygons}
                 setPolygons={setEditingPolygons}
                 activePolygonIndex={activePolygonIndex}
+                scaledWidth={scaledWidth}
+                scaledHeight={scaledHeight}
+                isLoading={isLoading}
+                setIsLoading={setIsLoading}
                 onCancel={handleCancel}
                 onSave={handleSave}
               />

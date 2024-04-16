@@ -5,7 +5,7 @@ import Konva from "konva";
 import type { KonvaEventObject } from "konva/lib/Node";
 import { Polygon, PolygonType } from "@/types/canvas";
 import { useApiHost } from "@/api";
-import { getAveragePoint } from "@/utils/canvasUtil";
+import { getAveragePoint, flattenPoints } from "@/utils/canvasUtil";
 
 type PolygonCanvasProps = {
   camera: string;
@@ -163,10 +163,6 @@ export function PolygonCanvas({
       };
       setPolygons(updatedPolygons);
     }
-  };
-
-  const flattenPoints = (points: number[][]): number[] => {
-    return points.reduce((acc, point) => [...acc, ...point], []);
   };
 
   const handleGroupDragEnd = (e: KonvaEventObject<MouseEvent | TouchEvent>) => {

@@ -7,6 +7,6 @@ export type Polygon = {
   objects: string[];
   points: number[][];
   isFinished: boolean;
-  isUnsaved: boolean;
+  // isUnsaved: boolean;
   color: number[];
 };

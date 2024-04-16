@@ -171,6 +171,14 @@ export interface CameraConfig {
     };
     sync_recordings: boolean;
   };
+  review: {
+    alerts: {
+      required_zones: string[];
+    };
+    detections: {
+      required_zones: string[];
+    };
+  };
   rtmp: {
     enabled: boolean;
   };

@@ -64,6 +64,10 @@ export const interpolatePoints = (
   return newPoints;
 };
 
+export const flattenPoints = (points: number[][]): number[] => {
+  return points.reduce((acc, point) => [...acc, ...point], []);
+};
+
 export const toRGBColorString = (color: number[], darkened: boolean) => {
   if (color.length !== 3) {
     return "rgb(220,0,0,0.5)";

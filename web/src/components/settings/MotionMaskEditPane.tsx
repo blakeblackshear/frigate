@@ -1,27 +1,14 @@
 import Heading from "../ui/heading";
 import { Separator } from "../ui/separator";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { useEffect, useMemo, useState } from "react";
-import { ATTRIBUTE_LABELS, FrigateConfig } from "@/types/frigateConfig";
-import useSWR from "swr";
-import { isMobile } from "react-device-detect";
+import { Form, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import { useMemo } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Polygon } from "@/types/canvas";
-import { Switch } from "../ui/switch";
-import { Label } from "../ui/label";
 import PolygonEditControls from "./PolygonEditControls";
+import { FaCheckCircle } from "react-icons/fa";
 
 type MotionMaskEditPaneProps = {
   polygons?: Polygon[];
@@ -46,9 +33,19 @@ export default function MotionMaskEditPane({
     }
   }, [polygons, activePolygonIndex]);
 
+  const defaultName = useMemo(() => {
+    if (!polygons) {
+      return;
+    }
+
+    const count = polygons.filter((poly) => poly.type == "motion_mask").length;
+
+    return `Motion Mask ${count + 1}`;
+  }, [polygons]);
+
   const formSchema = z
     .object({
-      polygon: z.object({ isFinished: z.boolean() }),
+      polygon: z.object({ name: z.string(), isFinished: z.boolean() }),
     })
     .refine(() => polygon?.isFinished === true, {
       message: "The polygon drawing must be finished before saving.",
@@ -59,15 +56,27 @@ export default function MotionMaskEditPane({
     resolver: zodResolver(formSchema),
     mode: "onChange",
     defaultValues: {
-      polygon: { isFinished: polygon?.isFinished ?? false },
+      polygon: { isFinished: polygon?.isFinished ?? false, name: defaultName },
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("form values", values);
-    console.log("active polygon", polygons[activePolygonIndex]);
-    // make sure polygon isFinished
-    onSave();
+    // console.log("form values", values);
+    // if (activePolygonIndex === undefined || !polygons) {
+    //   return;
+    // }
+
+    // const updatedPolygons = [...polygons];
+    // const activePolygon = updatedPolygons[activePolygonIndex];
+    // updatedPolygons[activePolygonIndex] = {
+    //   ...activePolygon,
+    //   name: defaultName ?? "foo",
+    // };
+    // setPolygons(updatedPolygons);
+    // console.log("active polygon", polygons[activePolygonIndex]);
+    if (onSave) {
+      onSave();
+    }
   }
 
   if (!polygon) {
@@ -77,15 +86,28 @@ export default function MotionMaskEditPane({
   return (
     <>
       <Heading as="h3" className="my-2">
-        Motion Mask
+        {polygon.name.length ? "Edit" : "New"} Motion Mask
       </Heading>
+      <div className="text-sm text-muted-foreground my-2">
+        <p>
+          Motion masks are used to prevent unwanted types of motion from
+          triggering detection. Over masking will make it more difficult for
+          objects to be tracked.
+        </p>
+      </div>
       <Separator className="my-3 bg-secondary" />
       {polygons && activePolygonIndex !== undefined && (
         <div className="flex flex-row my-2 text-sm w-full justify-between">
-          <div className="my-1">
-            {polygons[activePolygonIndex].points.length} points
+          <div className="my-1 inline-flex">
+            {polygons[activePolygonIndex].points.length}{" "}
+            {polygons[activePolygonIndex].points.length > 1 ||
+            polygons[activePolygonIndex].points.length == 0
+              ? "points"
+              : "point"}
+            {polygons[activePolygonIndex].isFinished && (
+              <FaCheckCircle className="ml-2 size-5" />
+            )}
           </div>
-          {polygons[activePolygonIndex].isFinished ? <></> : <></>}
           <PolygonEditControls
             polygons={polygons}
             setPolygons={setPolygons}
@@ -101,6 +123,15 @@ export default function MotionMaskEditPane({
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <FormField
+            control={form.control}
+            name="polygon.name"
+            render={() => (
+              <FormItem>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name="polygon.isFinished"

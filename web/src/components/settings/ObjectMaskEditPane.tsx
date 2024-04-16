@@ -19,15 +19,15 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { ATTRIBUTE_LABELS, FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
-import { isMobile } from "react-device-detect";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Polygon } from "@/types/canvas";
 import PolygonEditControls from "./PolygonEditControls";
+import { FaCheckCircle } from "react-icons/fa";
 
 type ObjectMaskEditPaneProps = {
   polygons?: Polygon[];
@@ -44,17 +44,17 @@ export default function ObjectMaskEditPane({
   onSave,
   onCancel,
 }: ObjectMaskEditPaneProps) {
-  const { data: config } = useSWR<FrigateConfig>("config");
+  // const { data: config } = useSWR<FrigateConfig>("config");
 
-  const cameras = useMemo(() => {
-    if (!config) {
-      return [];
-    }
+  // const cameras = useMemo(() => {
+  //   if (!config) {
+  //     return [];
+  //   }
 
-    return Object.values(config.cameras)
-      .filter((conf) => conf.ui.dashboard && conf.enabled)
-      .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
-  }, [config]);
+  //   return Object.values(config.cameras)
+  //     .filter((conf) => conf.ui.dashboard && conf.enabled)
+  //     .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
+  // }, [config]);
 
   const polygon = useMemo(() => {
     if (polygons && activePolygonIndex !== undefined) {
@@ -64,10 +64,28 @@ export default function ObjectMaskEditPane({
     }
   }, [polygons, activePolygonIndex]);
 
+  const defaultName = useMemo(() => {
+    if (!polygons) {
+      return;
+    }
+
+    const count = polygons.filter((poly) => poly.type == "object_mask").length;
+
+    let objectType = "";
+    const objects = polygon?.objects[0];
+    if (objects === undefined) {
+      objectType = "all objects";
+    } else {
+      objectType = objects;
+    }
+
+    return `Object Mask ${count + 1} (${objectType})`;
+  }, [polygons, polygon]);
+
   const formSchema = z
     .object({
       objects: z.string(),
-      polygon: z.object({ isFinished: z.boolean() }),
+      polygon: z.object({ isFinished: z.boolean(), name: z.string() }),
     })
     .refine(() => polygon?.isFinished === true, {
       message: "The polygon drawing must be finished before saving.",
@@ -79,16 +97,27 @@ export default function ObjectMaskEditPane({
     mode: "onChange",
     defaultValues: {
       objects: polygon?.objects[0] ?? "all_labels",
-      polygon: { isFinished: polygon?.isFinished ?? false },
+      polygon: { isFinished: polygon?.isFinished ?? false, name: defaultName },
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // polygons[activePolygonIndex].name = values.name;
     console.log("form values", values);
-    console.log("active polygon", polygons[activePolygonIndex]);
-    // make sure polygon isFinished
-    onSave();
+    // if (activePolygonIndex === undefined || !polygons) {
+    //   return;
+    // }
+
+    // const updatedPolygons = [...polygons];
+    // const activePolygon = updatedPolygons[activePolygonIndex];
+    // updatedPolygons[activePolygonIndex] = {
+    //   ...activePolygon,
+    //   name: defaultName ?? "foo",
+    // };
+    // setPolygons(updatedPolygons);
+
+    if (onSave) {
+      onSave();
+    }
   }
 
   if (!polygon) {
@@ -98,15 +127,27 @@ export default function ObjectMaskEditPane({
   return (
     <>
       <Heading as="h3" className="my-2">
-        Object Mask
+        {polygon.name.length ? "Edit" : "New"} Object Mask
       </Heading>
+      <div className="text-sm text-muted-foreground my-2">
+        <p>
+          Object filter masks are used to filter out false positives for a given
+          object type based on location.
+        </p>
+      </div>
       <Separator className="my-3 bg-secondary" />
       {polygons && activePolygonIndex !== undefined && (
         <div className="flex flex-row my-2 text-sm w-full justify-between">
-          <div className="my-1">
-            {polygons[activePolygonIndex].points.length} points
+          <div className="my-1 inline-flex">
+            {polygons[activePolygonIndex].points.length}{" "}
+            {polygons[activePolygonIndex].points.length > 1 ||
+            polygons[activePolygonIndex].points.length == 0
+              ? "points"
+              : "point"}
+            {polygons[activePolygonIndex].isFinished && (
+              <FaCheckCircle className="ml-2 size-5" />
+            )}
           </div>
-          {polygons[activePolygonIndex].isFinished ? <></> : <></>}
           <PolygonEditControls
             polygons={polygons}
             setPolygons={setPolygons}
@@ -124,6 +165,15 @@ export default function ObjectMaskEditPane({
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField
             control={form.control}
+            name="polygon.name"
+            render={() => (
+              <FormItem>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
             name="objects"
             render={({ field }) => (
               <FormItem>
@@ -138,12 +188,7 @@ export default function ObjectMaskEditPane({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <ZoneObjectSelector
-                      camera={polygon.camera}
-                      updateLabelFilter={(objects) => {
-                        // console.log(objects);
-                      }}
-                    />
+                    <ZoneObjectSelector camera={polygon.camera} />
                   </SelectContent>
                 </Select>
                 <FormDescription>
@@ -178,13 +223,9 @@ export default function ObjectMaskEditPane({
 
 type ZoneObjectSelectorProps = {
   camera: string;
-  updateLabelFilter: (labels: string[] | undefined) => void;
 };
 
-export function ZoneObjectSelector({
-  camera,
-  updateLabelFilter,
-}: ZoneObjectSelectorProps) {
+export function ZoneObjectSelector({ camera }: ZoneObjectSelectorProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const cameraConfig = useMemo(() => {
@@ -194,7 +235,7 @@ export function ZoneObjectSelector({
   }, [config, camera]);
 
   const allLabels = useMemo<string[]>(() => {
-    if (!config) {
+    if (!config || !cameraConfig) {
       return [];
     }
 
@@ -208,34 +249,14 @@ export function ZoneObjectSelector({
       });
     });
 
-    return [...labels].sort();
-  }, [config]);
-
-  const cameraLabels = useMemo<string[]>(() => {
-    if (!cameraConfig) {
-      return [];
-    }
-
-    const labels = new Set<string>();
-
     cameraConfig.objects.track.forEach((label) => {
       if (!ATTRIBUTE_LABELS.includes(label)) {
         labels.add(label);
       }
     });
 
-    return [...labels].sort() || [];
-  }, [cameraConfig]);
-
-  const [currentLabels, setCurrentLabels] = useState<string[] | undefined>(
-    cameraLabels.every((label, index) => label === allLabels[index])
-      ? undefined
-      : cameraLabels,
-  );
-
-  useEffect(() => {
-    updateLabelFilter(currentLabels);
-  }, [currentLabels, updateLabelFilter]);
+    return [...labels].sort();
+  }, [config, cameraConfig]);
 
   return (
     <>
