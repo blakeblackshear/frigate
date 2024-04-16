@@ -237,7 +237,6 @@ class ReviewSegmentMaintainer(threading.Thread):
         active_objects = get_active_objects(frame_time, camera_config, objects)
 
         if len(active_objects) > 0:
-            has_sig_object = False
             detections: dict[str, str] = {}
             sub_labels = set()
             zones: set = set()
@@ -296,7 +295,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                 self.active_review_segments[camera] = PendingReviewSegment(
                     camera,
                     frame_time,
-                    SeverityEnum.alert if has_sig_object else SeverityEnum.detection,
+                    severity,
                     detections,
                     sub_labels=sub_labels,
                     audio=set(),
