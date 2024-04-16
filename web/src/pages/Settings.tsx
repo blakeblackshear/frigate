@@ -56,9 +56,11 @@ export default function Settings() {
 
   useEffect(() => {
     if (cameras) {
+      // TODO: fixme
       setSelectedCamera(cameras[0].name);
+      console.log("setting selected cam");
     }
-  }, [cameras]);
+  }, []);
 
   return (
     <div className="size-full p-2 flex flex-col">

@@ -20,7 +20,11 @@ import { FaDrawPolygon, FaObjectGroup } from "react-icons/fa";
 import { BsPersonBoundingBox } from "react-icons/bs";
 import { HiOutlineDotsVertical, HiTrash } from "react-icons/hi";
 import { isMobile } from "react-device-detect";
-import { toRGBColorString } from "@/utils/canvasUtil";
+import {
+  flattenPoints,
+  parseCoordinates,
+  toRGBColorString,
+} from "@/utils/canvasUtil";
 import { Polygon, PolygonType } from "@/types/canvas";
 import { useCallback, useMemo, useState } from "react";
 import axios from "axios";
@@ -33,6 +37,7 @@ import { reviewQueries } from "@/utils/zoneEdutUtil";
 type PolygonItemProps = {
   polygon: Polygon;
   setAllPolygons: React.Dispatch<React.SetStateAction<Polygon[]>>;
+  setReindexPolygons: React.Dispatch<React.SetStateAction<Polygon[]>>;
   index: number;
   activePolygonIndex: number | undefined;
   hoveredPolygonIndex: number | null;
@@ -86,13 +91,40 @@ export default function PolygonItem({
           cameraConfig?.review.alerts.required_zones || [],
           cameraConfig?.review.detections.required_zones || [],
         );
-        url = `config/set?cameras.${polygon.camera}.zones.${polygon.name}${alertQueries}${detectionQueries}`;
+        url = `cameras.${polygon.camera}.zones.${polygon.name}${alertQueries}${detectionQueries}`;
       }
       if (polygon.type == "motion_mask") {
-        url = `config/set?cameras.${polygon.camera}.motion.mask`;
+        console.log("deleting", polygon.typeIndex);
+        if (polygon.name) {
+          const match = polygon.name.match(/\d+/);
+          if (match) {
+            // index = parseInt(match[0]) - 1;
+            console.log("deleting, index", polygon.typeIndex);
+          }
+        }
+
+        const filteredMask = (
+          Array.isArray(cameraConfig.motion.mask)
+            ? cameraConfig.motion.mask
+            : [cameraConfig.motion.mask]
+        ).filter((_, currentIndex) => currentIndex !== polygon.typeIndex);
+        console.log(filteredMask);
+
+        url = filteredMask
+          .map((pointsArray) => {
+            const coordinates = flattenPoints(
+              parseCoordinates(pointsArray),
+            ).join(",");
+            return `cameras.${polygon?.camera}.motion.mask=${coordinates}&`;
+          })
+          .join("");
+        console.log(url);
+
+        // return;
+        // url = `config/set?cameras.${polygon.camera}.motion.mask`;
       }
-      axios
-        .put(url, { requires_restart: 0 })
+      await axios
+        .put(`config/set?${url}`, { requires_restart: 0 })
         .then((res) => {
           if (res.status === 200) {
             toast.success(`${polygon?.name} has been deleted.`, {
@@ -116,12 +148,35 @@ export default function PolygonItem({
           //   setIsLoading(false);
         });
     },
-    [updateConfig],
+    [updateConfig, cameraConfig],
   );
 
-  const handleDelete = (index: number) => {
+  const reindexPolygons = (arr: Polygon[]): Polygon[] => {
+    const typeCounters: { [type: string]: number } = {};
+
+    return arr.map((obj) => {
+      if (!typeCounters[obj.type]) {
+        typeCounters[obj.type] = 0;
+      }
+
+      const newObj: Polygon = {
+        ...obj,
+        typeIndex: typeCounters[obj.type],
+      };
+      typeCounters[obj.type]++;
+      return newObj;
+    });
+  };
+
+  const handleDelete = (type: string, typeIndex: number) => {
     setAllPolygons((oldPolygons) => {
-      return oldPolygons.filter((_, i) => i !== index);
+      const filteredPolygons = oldPolygons.filter(
+        (polygon) =>
+          !(polygon.type === type && polygon.typeIndex === typeIndex),
+      );
+      console.log("filtered", filteredPolygons);
+      // console.log("reindexed", reindexPolygons(filteredPolygons));
+      return filteredPolygons;
     });
     setActivePolygonIndex(undefined);
     saveToConfig(polygon);
@@ -176,7 +231,9 @@ export default function PolygonItem({
             </AlertDialogDescription>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={() => handleDelete(index)}>
+              <AlertDialogAction
+                onClick={() => handleDelete(polygon.type, polygon.typeIndex)}
+              >
                 Delete
               </AlertDialogAction>
             </AlertDialogFooter>

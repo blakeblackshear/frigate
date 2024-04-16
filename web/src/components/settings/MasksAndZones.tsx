@@ -4,7 +4,7 @@ import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PolygonCanvas } from "./PolygonCanvas";
 import { Polygon, PolygonType } from "@/types/canvas";
-import { interpolatePoints } from "@/utils/canvasUtil";
+import { interpolatePoints, parseCoordinates } from "@/utils/canvasUtil";
 import { Skeleton } from "../ui/skeleton";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { LuExternalLink, LuInfo, LuPlus } from "react-icons/lu";
@@ -24,19 +24,6 @@ import MotionMaskEditPane from "./MotionMaskEditPane";
 import ObjectMaskEditPane from "./ObjectMaskEditPane";
 import PolygonItem from "./PolygonItem";
 import { Link } from "react-router-dom";
-
-const parseCoordinates = (coordinatesString: string) => {
-  const coordinates = coordinatesString.split(",");
-  const points = [];
-
-  for (let i = 0; i < coordinates.length; i += 2) {
-    const x = parseFloat(coordinates[i]);
-    const y = parseFloat(coordinates[i + 1]);
-    points.push([x, y]);
-  }
-
-  return points;
-};
 
 // export type ZoneObjects = {
 //   camera: string;
@@ -299,8 +286,9 @@ export default function MasksAndZones({
   useEffect(() => {
     if (cameraConfig && containerRef.current && scaledWidth && scaledHeight) {
       const zones = Object.entries(cameraConfig.zones).map(
-        ([name, zoneData]) => ({
+        ([name, zoneData], index) => ({
           type: "zone" as PolygonType,
+          typeIndex: index,
           camera: cameraConfig.name,
           name,
           objects: zoneData.objects,
@@ -317,28 +305,32 @@ export default function MasksAndZones({
         }),
       );
 
-      const motionMasks = Object.entries(cameraConfig.motion.mask).map(
-        ([, maskData], index) => ({
-          type: "motion_mask" as PolygonType,
-          camera: cameraConfig.name,
-          name: `Motion Mask ${index + 1}`,
-          objects: [],
-          points: interpolatePoints(
-            parseCoordinates(maskData),
-            1,
-            1,
-            scaledWidth,
-            scaledHeight,
-          ),
-          isFinished: true,
-          // isUnsaved: false,
-          color: [0, 0, 255],
-        }),
-      );
+      // this can be an array or a string
+      const motionMasks = Object.entries(
+        Array.isArray(cameraConfig.motion.mask)
+          ? cameraConfig.motion.mask
+          : [cameraConfig.motion.mask],
+      ).map(([, maskData], index) => ({
+        type: "motion_mask" as PolygonType,
+        typeIndex: index,
+        camera: cameraConfig.name,
+        name: `Motion Mask ${index + 1}`,
+        objects: [],
+        points: interpolatePoints(
+          parseCoordinates(maskData),
+          1,
+          1,
+          scaledWidth,
+          scaledHeight,
+        ),
+        isFinished: true,
+        color: [0, 0, 255],
+      }));
 
       const globalObjectMasks = Object.entries(cameraConfig.objects.mask).map(
         ([, maskData], index) => ({
           type: "object_mask" as PolygonType,
+          typeIndex: index,
           camera: cameraConfig.name,
           name: `Object Mask ${index + 1} (all objects)`,
           objects: [],
@@ -365,6 +357,7 @@ export default function MasksAndZones({
                   ? [
                       {
                         type: "object_mask" as PolygonType,
+                        typeIndex: subIndex,
                         camera: cameraConfig.name,
                         name: `Object Mask ${globalObjectMasksCount + subIndex + 1} (${objectName})`,
                         objects: [objectName],
@@ -410,6 +403,10 @@ export default function MasksAndZones({
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cameraConfig, containerRef, scaledHeight, scaledWidth]);
+
+  useEffect(() => {
+    console.log("editing polygons changed:", editingPolygons);
+  }, [editingPolygons]);
 
   useEffect(() => {
     if (editPane === undefined) {
@@ -469,6 +466,10 @@ export default function MasksAndZones({
                 polygons={editingPolygons}
                 setPolygons={setEditingPolygons}
                 activePolygonIndex={activePolygonIndex}
+                scaledWidth={scaledWidth}
+                scaledHeight={scaledHeight}
+                isLoading={isLoading}
+                setIsLoading={setIsLoading}
                 onCancel={handleCancel}
                 onSave={handleSave}
               />
@@ -478,6 +479,10 @@ export default function MasksAndZones({
                 polygons={editingPolygons}
                 setPolygons={setEditingPolygons}
                 activePolygonIndex={activePolygonIndex}
+                scaledWidth={scaledWidth}
+                scaledHeight={scaledHeight}
+                isLoading={isLoading}
+                setIsLoading={setIsLoading}
                 onCancel={handleCancel}
                 onSave={handleSave}
               />

@@ -64,6 +64,19 @@ export const interpolatePoints = (
   return newPoints;
 };
 
+export const parseCoordinates = (coordinatesString: string) => {
+  const coordinates = coordinatesString.split(",");
+  const points = [];
+
+  for (let i = 0; i < coordinates.length; i += 2) {
+    const x = parseFloat(coordinates[i]);
+    const y = parseFloat(coordinates[i + 1]);
+    points.push([x, y]);
+  }
+
+  return points;
+};
+
 export const flattenPoints = (points: number[][]): number[] => {
   return points.reduce((acc, point) => [...acc, ...point], []);
 };

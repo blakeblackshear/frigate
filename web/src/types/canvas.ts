@@ -1,6 +1,7 @@
 export type PolygonType = "zone" | "motion_mask" | "object_mask";
 
 export type Polygon = {
+  typeIndex: number;
   camera: string;
   name: string;
   type: PolygonType;
@@ -9,4 +10,14 @@ export type Polygon = {
   isFinished: boolean;
   // isUnsaved: boolean;
   color: number[];
+};
+
+export type FormValuesType = {
+  name: string;
+  inertia: number;
+  loitering_time: number;
+  isFinished: boolean;
+  objects: string[];
+  review_alerts: boolean;
+  review_detections: boolean;
 };

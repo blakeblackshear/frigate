@@ -18,7 +18,7 @@ import { isMobile } from "react-device-detect";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Polygon } from "@/types/canvas";
+import { FormValuesType, Polygon } from "@/types/canvas";
 import { reviewQueries } from "@/utils/zoneEdutUtil";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
@@ -158,15 +158,6 @@ export default function ZoneEditPane({
   });
 
   // const [changedValue, setChangedValue] = useState(false);
-  type FormValuesType = {
-    name: string;
-    inertia: number;
-    loitering_time: number;
-    isFinished: boolean;
-    objects: string[];
-    review_alerts: boolean;
-    review_detections: boolean;
-  };
 
   // const requiredDetectionZones = useMemo(
   //   () => cameraConfig?.review.detections.required_zones,

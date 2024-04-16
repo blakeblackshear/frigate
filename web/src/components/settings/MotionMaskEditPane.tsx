@@ -2,18 +2,32 @@ import Heading from "../ui/heading";
 import { Separator } from "../ui/separator";
 import { Button } from "@/components/ui/button";
 import { Form, FormField, FormItem, FormMessage } from "@/components/ui/form";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Polygon } from "@/types/canvas";
 import PolygonEditControls from "./PolygonEditControls";
 import { FaCheckCircle } from "react-icons/fa";
+import { Polygon } from "@/types/canvas";
+import useSWR from "swr";
+import { FrigateConfig } from "@/types/frigateConfig";
+import {
+  flattenPoints,
+  interpolatePoints,
+  parseCoordinates,
+} from "@/utils/canvasUtil";
+import axios from "axios";
+import { toast } from "sonner";
+import { Toaster } from "../ui/sonner";
 
 type MotionMaskEditPaneProps = {
   polygons?: Polygon[];
   setPolygons: React.Dispatch<React.SetStateAction<Polygon[]>>;
   activePolygonIndex?: number;
+  scaledWidth?: number;
+  scaledHeight?: number;
+  isLoading: boolean;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   onSave?: () => void;
   onCancel?: () => void;
 };
@@ -22,9 +36,16 @@ export default function MotionMaskEditPane({
   polygons,
   setPolygons,
   activePolygonIndex,
+  scaledWidth,
+  scaledHeight,
+  isLoading,
+  setIsLoading,
   onSave,
   onCancel,
 }: MotionMaskEditPaneProps) {
+  const { data: config, mutate: updateConfig } =
+    useSWR<FrigateConfig>("config");
+
   const polygon = useMemo(() => {
     if (polygons && activePolygonIndex !== undefined) {
       return polygons[activePolygonIndex];
@@ -32,6 +53,12 @@ export default function MotionMaskEditPane({
       return null;
     }
   }, [polygons, activePolygonIndex]);
+
+  const cameraConfig = useMemo(() => {
+    if (polygon?.camera && config) {
+      return config.cameras[polygon.camera];
+    }
+  }, [polygon, config]);
 
   const defaultName = useMemo(() => {
     if (!polygons) {
@@ -60,20 +87,121 @@ export default function MotionMaskEditPane({
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // console.log("form values", values);
-    // if (activePolygonIndex === undefined || !polygons) {
-    //   return;
-    // }
+  const saveToConfig = useCallback(async () => {
+    if (!scaledWidth || !scaledHeight || !polygon || !cameraConfig) {
+      return;
+    }
+    // console.log("loitering time", loitering_time);
+    // const alertsZones = config?.cameras[camera]?.review.alerts.required_zones;
 
-    // const updatedPolygons = [...polygons];
-    // const activePolygon = updatedPolygons[activePolygonIndex];
-    // updatedPolygons[activePolygonIndex] = {
-    //   ...activePolygon,
-    //   name: defaultName ?? "foo",
-    // };
-    // setPolygons(updatedPolygons);
+    // const detectionsZones =
+    //   config?.cameras[camera]?.review.detections.required_zones;
+
+    // console.log("out of try except", mutatedConfig);
+
+    const coordinates = flattenPoints(
+      interpolatePoints(polygon.points, scaledWidth, scaledHeight, 1, 1),
+    ).join(",");
+
+    let index = Array.isArray(cameraConfig.motion.mask)
+      ? cameraConfig.motion.mask.length
+      : 1;
+
+    console.log("are we an array?", Array.isArray(cameraConfig.motion.mask));
+    console.log("index", index);
+    const editingMask = polygon.name.length > 0;
+
+    // editing existing mask, not creating a new one
+    if (editingMask) {
+      index = polygon.typeIndex;
+      if (polygon.name) {
+        const match = polygon.name.match(/\d+/);
+        if (match) {
+          // index = parseInt(match[0]) - 1;
+          console.log("editing, index", index);
+        }
+      }
+    }
+
+    const filteredMask = Array.isArray(cameraConfig.motion.mask)
+      ? cameraConfig.motion.mask
+      : [cameraConfig.motion.mask].filter(
+          (_, currentIndex) => currentIndex !== index,
+        );
+    console.log("filtered", filteredMask);
+
+    // if (editingMask) {
+    //   if (index != null) {
+
+    //   }
+    // }
+    filteredMask.splice(index, 0, coordinates);
+    console.log("filtered after splice", filteredMask);
+
+    const queryString = filteredMask
+      .map((pointsArray) => {
+        const coordinates = flattenPoints(parseCoordinates(pointsArray)).join(
+          ",",
+        );
+        return `cameras.${polygon?.camera}.motion.mask=${coordinates}&`;
+      })
+      .join("");
+
+    console.log("polygon", polygon);
+    console.log(queryString);
+
+    // console.log(
+    //   `config/set?cameras.${polygon?.camera}.motion.mask=${coordinates}&${queryString}`,
+    // );
+    console.log("motion masks", cameraConfig.motion.mask);
+    console.log("new coords", coordinates);
+    // return;
+
+    axios
+      .put(`config/set?${queryString}`, {
+        requires_restart: 0,
+      })
+      .then((res) => {
+        if (res.status === 200) {
+          toast.success(`Zone ${name} saved.`, {
+            position: "top-center",
+          });
+          // setChangedValue(false);
+          updateConfig();
+        } else {
+          toast.error(`Failed to save config changes: ${res.statusText}`, {
+            position: "top-center",
+          });
+        }
+      })
+      .catch((error) => {
+        toast.error(
+          `Failed to save config changes: ${error.response.data.message}`,
+          { position: "top-center" },
+        );
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [updateConfig, polygon, scaledWidth, scaledHeight, setIsLoading]);
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    if (activePolygonIndex === undefined || !values || !polygons) {
+      return;
+    }
+    setIsLoading(true);
+    // polygons[activePolygonIndex].name = values.name;
+    // console.log("form values", values);
+    // console.log(
+    //   "string",
+
+    //   flattenPoints(
+    //     interpolatePoints(polygon.points, scaledWidth, scaledHeight, 1, 1),
+    //   ).join(","),
+    // );
     // console.log("active polygon", polygons[activePolygonIndex]);
+
+    saveToConfig();
     if (onSave) {
       onSave();
     }
@@ -85,6 +213,7 @@ export default function MotionMaskEditPane({
 
   return (
     <>
+      <Toaster position="top-center" />
       <Heading as="h3" className="my-2">
         {polygon.name.length ? "Edit" : "New"} Motion Mask
       </Heading>
