@@ -92,6 +92,9 @@ export function ThresholdBarGraph({
       },
       tooltip: {
         theme: systemTheme || theme,
+        y: {
+          formatter: (val) => `${val}${unit}`,
+        },
       },
       markers: {
         size: 0,
@@ -118,7 +121,7 @@ export function ThresholdBarGraph({
         min: 0,
       },
     } as ApexCharts.ApexOptions;
-  }, [graphId, threshold, systemTheme, theme, formatTime]);
+  }, [graphId, threshold, unit, systemTheme, theme, formatTime]);
 
   useEffect(() => {
     ApexCharts.exec(graphId, "updateOptions", options, true, true);
@@ -190,7 +193,7 @@ export function StorageGraph({ graphId, used, total }: StorageGraphProps) {
         },
       },
       tooltip: {
-        show: false,
+        enabled: false,
       },
       xaxis: {
         axisBorder: {

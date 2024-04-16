@@ -1,10 +1,4 @@
-import {
-  MutableRefObject,
-  ReactNode,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { MutableRefObject, useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
 import { isAndroid, isDesktop, isMobile } from "react-device-detect";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
@@ -19,7 +13,6 @@ const unsupportedErrorCodes = [
 ];
 
 type HlsVideoPlayerProps = {
-  children?: ReactNode;
   videoRef: MutableRefObject<HTMLVideoElement | null>;
   visible: boolean;
   currentSource: string;
@@ -30,7 +23,6 @@ type HlsVideoPlayerProps = {
   onPlaying?: () => void;
 };
 export default function HlsVideoPlayer({
-  children,
   videoRef,
   visible,
   currentSource,
@@ -83,18 +75,87 @@ export default function HlsVideoPlayer({
   // controls
 
   const [isPlaying, setIsPlaying] = useState(true);
+  const [muted, setMuted] = useState(true);
+  const [volume, setVolume] = useState(1.0);
   const [mobileCtrlTimeout, setMobileCtrlTimeout] = useState<NodeJS.Timeout>();
   const [controls, setControls] = useState(isMobile);
   const [controlsOpen, setControlsOpen] = useState(false);
 
+  useEffect(() => {
+    if (!isDesktop) {
+      return;
+    }
+
+    const callback = (e: MouseEvent) => {
+      if (!videoRef.current) {
+        return;
+      }
+
+      const rect = videoRef.current.getBoundingClientRect();
+
+      if (
+        e.clientX > rect.left &&
+        e.clientX < rect.right &&
+        e.clientY > rect.top &&
+        e.clientY < rect.bottom
+      ) {
+        setControls(true);
+      } else {
+        setControls(controlsOpen);
+      }
+    };
+    window.addEventListener("mousemove", callback);
+    return () => {
+      window.removeEventListener("mousemove", callback);
+    };
+  }, [videoRef, controlsOpen]);
+
   return (
     <TransformWrapper minScale={1.0}>
+      <VideoControls
+        className="absolute bottom-5 left-1/2 -translate-x-1/2 z-50"
+        video={videoRef.current}
+        isPlaying={isPlaying}
+        show={visible && controls}
+        muted={muted}
+        volume={volume}
+        controlsOpen={controlsOpen}
+        setControlsOpen={setControlsOpen}
+        setMuted={setMuted}
+        playbackRate={videoRef.current?.playbackRate ?? 1}
+        hotKeys={hotKeys}
+        onPlayPause={(play) => {
+          if (!videoRef.current) {
+            return;
+          }
+
+          if (play) {
+            videoRef.current.play();
+          } else {
+            videoRef.current.pause();
+          }
+        }}
+        onSeek={(diff) => {
+          const currentTime = videoRef.current?.currentTime;
+
+          if (!videoRef.current || !currentTime) {
+            return;
+          }
+
+          videoRef.current.currentTime = Math.max(0, currentTime + diff);
+        }}
+        onSetPlaybackRate={(rate) =>
+          videoRef.current ? (videoRef.current.playbackRate = rate) : null
+        }
+      />
       <TransformComponent
         wrapperStyle={{
-          position: "relative",
           display: visible ? undefined : "none",
           width: "100%",
           height: "100%",
+        }}
+        wrapperProps={{
+          onClick: isDesktop ? undefined : () => setControls(!controls),
         }}
         contentStyle={{
           width: "100%",
@@ -108,7 +169,8 @@ export default function HlsVideoPlayer({
           autoPlay
           controls={false}
           playsInline
-          muted
+          muted={muted}
+          onVolumeChange={() => setVolume(videoRef.current?.volume ?? 1.0)}
           onPlay={() => {
             setIsPlaying(true);
 
@@ -145,61 +207,6 @@ export default function HlsVideoPlayer({
             }
           }}
         />
-        <div
-          className="absolute inset-0"
-          onMouseOver={
-            isDesktop
-              ? () => {
-                  setControls(true);
-                }
-              : undefined
-          }
-          onMouseOut={
-            isDesktop
-              ? () => {
-                  setControls(controlsOpen);
-                }
-              : undefined
-          }
-          onClick={isDesktop ? undefined : () => setControls(!controls)}
-        >
-          <div className={`size-full relative ${visible ? "" : "hidden"}`}>
-            <VideoControls
-              className="absolute bottom-5 left-1/2 -translate-x-1/2"
-              video={videoRef.current}
-              isPlaying={isPlaying}
-              show={controls}
-              controlsOpen={controlsOpen}
-              setControlsOpen={setControlsOpen}
-              playbackRate={videoRef.current?.playbackRate ?? 1}
-              hotKeys={hotKeys}
-              onPlayPause={(play) => {
-                if (!videoRef.current) {
-                  return;
-                }
-
-                if (play) {
-                  videoRef.current.play();
-                } else {
-                  videoRef.current.pause();
-                }
-              }}
-              onSeek={(diff) => {
-                const currentTime = videoRef.current?.currentTime;
-
-                if (!videoRef.current || !currentTime) {
-                  return;
-                }
-
-                videoRef.current.currentTime = Math.max(0, currentTime + diff);
-              }}
-              onSetPlaybackRate={(rate) =>
-                videoRef.current ? (videoRef.current.playbackRate = rate) : null
-              }
-            />
-            {children}
-          </div>
-        </div>
       </TransformComponent>
     </TransformWrapper>
   );
