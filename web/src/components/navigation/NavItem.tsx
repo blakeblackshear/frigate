@@ -11,8 +11,8 @@ import { IconType } from "react-icons";
 
 const variants = {
   primary: {
-    active: "font-bold text-white bg-selected",
-    inactive: "text-secondary-foreground bg-secondary",
+    active: "font-bold text-white bg-selected hover:bg-selected/80",
+    inactive: "text-secondary-foreground bg-secondary hover:bg-muted",
   },
   secondary: {
     active: "font-bold text-selected",
