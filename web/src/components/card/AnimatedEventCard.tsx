@@ -83,7 +83,18 @@ export function AnimatedEventCard({ event }: AnimatedEventCardProps) {
         </div>
       </TooltipTrigger>
       <TooltipContent>
-        {`${[...event.data.objects, ...event.data.audio].join(", ").replaceAll("-verified", "")} detected`}
+        {`${[
+          ...new Set([
+            ...(event.data.objects || []),
+            ...(event.data.sub_labels || []),
+            ...(event.data.audio || []),
+          ]),
+        ]
+          .filter((item) => item !== undefined && !item.includes("-verified"))
+          .map((text) => text.charAt(0).toUpperCase() + text.substring(1))
+          .sort()
+          .join(", ")
+          .replaceAll("-verified", "")} detected`}
       </TooltipContent>
     </Tooltip>
   );

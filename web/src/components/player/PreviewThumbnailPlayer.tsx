@@ -239,7 +239,7 @@ export default function PreviewThumbnailPlayer({
                       <Chip
                         className={`flex items-start justify-between space-x-1 ${playingBack ? "hidden" : ""} bg-gradient-to-br ${review.has_been_reviewed ? "from-green-600 to-green-700 bg-green-600" : "from-gray-400 to-gray-500 bg-gray-500"} z-0`}
                       >
-                        {review.data.objects.map((object) => {
+                        {review.data.objects.sort().map((object) => {
                           return getIconForLabel(object, "size-3 text-white");
                         })}
                         {review.data.audio.map((audio) => {
@@ -252,8 +252,18 @@ export default function PreviewThumbnailPlayer({
               </TooltipTrigger>
             </div>
             <TooltipContent className="capitalize">
-              {[...(review.data.objects || []), ...(review.data.audio || [])]
-                .filter((item) => item !== undefined)
+              {[
+                ...new Set([
+                  ...(review.data.objects || []),
+                  ...(review.data.sub_labels || []),
+                  ...(review.data.audio || []),
+                ]),
+              ]
+                .filter(
+                  (item) => item !== undefined && !item.includes("-verified"),
+                )
+                .map((text) => text.charAt(0).toUpperCase() + text.substring(1))
+                .sort()
                 .join(", ")
                 .replaceAll("-verified", "")}
             </TooltipContent>
