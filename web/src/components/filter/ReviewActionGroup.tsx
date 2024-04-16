@@ -56,7 +56,7 @@ export default function ReviewActionGroup({
               onClearSelected();
             }}
           >
-            <FaCompactDisc />
+            <FaCompactDisc className="text-secondary-foreground" />
             {isDesktop && <div className="text-primary">Export</div>}
           </Button>
         )}
@@ -65,15 +65,15 @@ export default function ReviewActionGroup({
           size="sm"
           onClick={onMarkAsReviewed}
         >
-          <FaCircleCheck />
+          <FaCircleCheck className="text-secondary-foreground" />
           {isDesktop && <div className="text-primary">Mark as reviewed</div>}
         </Button>
         <Button
-          className="p-2 flex items-center gap-1"
+          className="p-2 flex items-center gap-2"
           size="sm"
           onClick={onDelete}
         >
-          <HiTrash />
+          <HiTrash className="text-secondary-foreground" />
           {isDesktop && <div className="text-primary">Delete</div>}
         </Button>
       </div>
