@@ -366,7 +366,7 @@ function Logs() {
             size="sm"
             onClick={handleCopyLogs}
           >
-            <FaCopy />
+            <FaCopy className="text-secondary-foreground" />
             <div className="hidden md:block text-primary">
               Copy to Clipboard
             </div>
