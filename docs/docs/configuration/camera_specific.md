@@ -82,7 +82,7 @@ cameras:
 
 ### Annke AC800
 
-If the devices you are using support H.265 then it will be able to play the video. Bellow is an example of using go2rtc to restream and repackage the stream. Make sure to login into the camera using the default username and password to change the stream configuration to include audio. This can be found in config->Vide/Audio->Video Type .
+If the devices you are using support H.265 then it will be able to play the video. Below is an example of using go2rtc to restream and repackage the stream. Make sure to login into the camera using the default username and password to change the stream configuration to include audio. This can be found in config->Vide/Audio->Video Type .
 
 ```yaml
 go2rtc:
