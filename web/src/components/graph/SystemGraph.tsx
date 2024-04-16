@@ -72,7 +72,7 @@ export function ThresholdBarGraph({
           } else if (value >= threshold.warning) {
             return "#FF9966";
           } else {
-            return (systemTheme || theme) == "dark" ? "#404040" : "#E5E5E5";
+            return "#217930";
           }
         },
       ],
