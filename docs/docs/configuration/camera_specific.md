@@ -91,7 +91,7 @@ go2rtc:
       - rtsp://user:password@camera-ip:554/H265/ch1/main/av_stream
       - "ffmpeg:frontdriveway#audio=aac" # make sure this matches the name of the stream if you change it
 cameras:
-  annkeac800: # <------ Name the camera
+  frontdriveway: # <------ Name the camera
     ffmpeg:
       inputs:
         - path: rtsp://127.0.0.1:8554/frontdriveway # <----- Update for your camera
