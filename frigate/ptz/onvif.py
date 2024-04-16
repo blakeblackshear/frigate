@@ -51,7 +51,9 @@ class OnvifController:
                             cam.onvif.port,
                             cam.onvif.user,
                             cam.onvif.password,
-                            wsdl_dir=Path(find_spec("onvif").origin).parent / "../wsdl",
+                            wsdl_dir=str(
+                                Path(find_spec("onvif").origin).parent / "wsdl"
+                            ).replace("dist-packages/onvif", "site-packages"),
                         ),
                         "init": False,
                         "active": False,
