@@ -105,9 +105,13 @@ export default function DynamicVideoPlayer({
         return;
       }
 
+      if (isLoading) {
+        setIsLoading(false);
+      }
+
       onTimestampUpdate(controller.getProgress(time));
     },
-    [controller, onTimestampUpdate, isScrubbing],
+    [controller, onTimestampUpdate, isScrubbing, isLoading],
   );
 
   // state of playback player
