@@ -24,7 +24,6 @@ import { isDesktop, isMobile } from "react-device-detect";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
-import FilterCheckBox from "./FilterCheckBox";
 import ReviewActivityCalendar from "../overlay/ReviewActivityCalendar";
 import MobileReviewSettingsDrawer, {
   DrawerFeatures,
