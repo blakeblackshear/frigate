@@ -1,7 +1,7 @@
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import useApiFilter from "@/hooks/use-api-filter";
 import { useTimezone } from "@/hooks/use-date-utils";
-import { useOverlayState } from "@/hooks/use-overlay-state";
+import { useOverlayState, useSearchEffect } from "@/hooks/use-overlay-state";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
 import { RecordingStartingPoint } from "@/types/record";
@@ -32,6 +32,24 @@ export default function Events() {
 
   const [recording, setRecording] =
     useOverlayState<RecordingStartingPoint>("recording");
+
+  useSearchEffect("id", (reviewId: string) => {
+    axios
+      .get(`review/${reviewId}`)
+      .then((resp) => {
+        if (resp.status == 200 && resp.data) {
+          setRecording(
+            {
+              camera: resp.data.camera,
+              startTime: resp.data.start_time,
+              severity: resp.data.severity,
+            },
+            true,
+          );
+        }
+      })
+      .catch(() => {});
+  });
 
   const [startTime, setStartTime] = useState<number>();
 
