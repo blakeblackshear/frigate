@@ -98,9 +98,6 @@ cameras:
           roles:
             - detect
             - record
-    detect:
-      width: # <- optional, by default Frigate tries to automatically detect resolution
-      height: # <- optional, by default Frigate tries to automatically detect resolution
 ```
 
 ### Blue Iris RTSP Cameras
