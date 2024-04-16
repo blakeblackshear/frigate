@@ -89,7 +89,13 @@ export default function DynamicVideoPlayer({
     if (!isScrubbing) {
       setLoadingTimeout(setTimeout(() => setIsLoading(true), 1000));
     }
-  }, [isScrubbing]);
+
+    return () => {
+      if (loadingTimeout) {
+        clearTimeout(loadingTimeout)
+      }
+    }
+  }, [camera, isScrubbing]);
 
   const onPlayerLoaded = useCallback(() => {
     if (!controller || !startTimestamp) {
@@ -179,7 +185,7 @@ export default function DynamicVideoPlayer({
         }}
       />
       {isLoading && (
-        <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x1/2 -translate-y-1/2" />
+        <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
       )}
     </>
   );
