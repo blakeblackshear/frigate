@@ -1351,12 +1351,12 @@ class FrigateConfig(FrigateBaseModel):
                 "timestamp_style": ...,
             },
             exclude_unset=True,
-            warnings="error",
+            warnings="none",
         )
 
         for name, camera in config.cameras.items():
             merged_config = deep_merge(
-                camera.model_dump(exclude_unset=True, warnings="error"), global_config
+                camera.model_dump(exclude_unset=True, warnings="none"), global_config
             )
             camera_config: CameraConfig = CameraConfig.model_validate(
                 {"name": name, **merged_config}
@@ -1467,7 +1467,7 @@ class FrigateConfig(FrigateBaseModel):
                 # Set runtime filter to create masks
                 camera_config.objects.filters[object] = RuntimeFilterConfig(
                     frame_shape=camera_config.frame_shape,
-                    **filter.model_dump(exclude_unset=True, warnings="error"),
+                    **filter.model_dump(exclude_unset=True, warnings="none"),
                 )
 
             # Convert motion configuration
@@ -1480,7 +1480,7 @@ class FrigateConfig(FrigateBaseModel):
                     frame_shape=camera_config.frame_shape,
                     raw_mask=camera_config.motion.mask,
                     **camera_config.motion.model_dump(
-                        exclude_unset=True, warnings="error"
+                        exclude_unset=True, warnings="none"
                     ),
                 )
             camera_config.motion.enabled_in_config = camera_config.motion.enabled
@@ -1520,7 +1520,7 @@ class FrigateConfig(FrigateBaseModel):
             model_dict = (
                 detector
                 if isinstance(detector, dict)
-                else detector.model_dump(warnings="error")
+                else detector.model_dump(warnings="none")
             )
             detector_config: DetectorConfig = adapter.validate_python(model_dict)
             if detector_config.model is None:
@@ -1541,8 +1541,8 @@ class FrigateConfig(FrigateBaseModel):
                         "Customizing more than a detector model path is unsupported."
                     )
             merged_model = deep_merge(
-                detector_config.model.model_dump(exclude_unset=True, warnings="error"),
-                config.model.model_dump(exclude_unset=True, warnings="error"),
+                detector_config.model.model_dump(exclude_unset=True, warnings="none"),
+                config.model.model_dump(exclude_unset=True, warnings="none"),
             )
 
             if "path" not in merged_model:
