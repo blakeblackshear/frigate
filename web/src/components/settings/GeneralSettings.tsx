@@ -118,9 +118,11 @@ export default function GeneralSettings({ className }: GeneralSettings) {
             <a href="#">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button size="icon" variant="ghost">
-                    <LuSettings />
-                  </Button>
+                  <div
+                    className={`flex flex-col justify-center items-center ${isDesktop ? "rounded-lg text-secondary-foreground bg-secondary hover:bg-muted cursor-pointer" : "text-secondary-foreground"}`}
+                  >
+                    <LuSettings className="size-5 md:m-[6px]" />
+                  </div>
                 </TooltipTrigger>
                 <TooltipContent side="right">
                   <p>Settings</p>

@@ -24,12 +24,12 @@ import { isDesktop, isMobile } from "react-device-detect";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
-import FilterCheckBox from "./FilterCheckBox";
 import ReviewActivityCalendar from "../overlay/ReviewActivityCalendar";
 import MobileReviewSettingsDrawer, {
   DrawerFeatures,
 } from "../overlay/MobileReviewSettingsDrawer";
 import useOptimisticState from "@/hooks/use-optimistic-state";
+import FilterSwitch from "./FilterSwitch";
 
 const REVIEW_FILTERS = [
   "cameras",
@@ -248,8 +248,8 @@ export function CamerasFilterButton({
           <DropdownMenuSeparator />
         </>
       )}
-      <div className="h-auto overflow-y-auto overflow-x-hidden">
-        <FilterCheckBox
+      <div className="h-auto pt-2 overflow-y-auto overflow-x-hidden">
+        <FilterSwitch
           isChecked={currentCameras == undefined}
           label="All Cameras"
           onCheckedChange={(isChecked) => {
@@ -260,51 +260,52 @@ export function CamerasFilterButton({
         />
         {groups.length > 0 && (
           <>
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator className="mt-2" />
             {groups.map(([name, conf]) => {
               return (
-                <FilterCheckBox
+                <div
                   key={name}
-                  label={name}
-                  isChecked={false}
-                  onCheckedChange={() => {
-                    setCurrentCameras([...conf.cameras]);
-                  }}
-                />
+                  className="w-full px-2 py-1.5 text-sm text-primary capitalize cursor-pointer rounded-lg hover:bg-muted"
+                  onClick={() => setCurrentCameras([...conf.cameras])}
+                >
+                  {name}
+                </div>
               );
             })}
           </>
         )}
-        <DropdownMenuSeparator />
-        {allCameras.map((item) => (
-          <FilterCheckBox
-            key={item}
-            isChecked={currentCameras?.includes(item) ?? false}
-            label={item.replaceAll("_", " ")}
-            onCheckedChange={(isChecked) => {
-              if (isChecked) {
-                const updatedCameras = currentCameras
-                  ? [...currentCameras]
-                  : [];
+        <DropdownMenuSeparator className="my-2" />
+        <div className="flex flex-col gap-2.5">
+          {allCameras.map((item) => (
+            <FilterSwitch
+              key={item}
+              isChecked={currentCameras?.includes(item) ?? false}
+              label={item.replaceAll("_", " ")}
+              onCheckedChange={(isChecked) => {
+                if (isChecked) {
+                  const updatedCameras = currentCameras
+                    ? [...currentCameras]
+                    : [];
 
-                updatedCameras.push(item);
-                setCurrentCameras(updatedCameras);
-              } else {
-                const updatedCameras = currentCameras
-                  ? [...currentCameras]
-                  : [];
-
-                // can not deselect the last item
-                if (updatedCameras.length > 1) {
-                  updatedCameras.splice(updatedCameras.indexOf(item), 1);
+                  updatedCameras.push(item);
                   setCurrentCameras(updatedCameras);
+                } else {
+                  const updatedCameras = currentCameras
+                    ? [...currentCameras]
+                    : [];
+
+                  // can not deselect the last item
+                  if (updatedCameras.length > 1) {
+                    updatedCameras.splice(updatedCameras.indexOf(item), 1);
+                    setCurrentCameras(updatedCameras);
+                  }
                 }
-              }
-            }}
-          />
-        ))}
+              }}
+            />
+          ))}
+        </div>
       </div>
-      <DropdownMenuSeparator />
+      <DropdownMenuSeparator className="my-2" />
       <div className="p-2 flex justify-evenly items-center">
         <Button
           variant="select"

@@ -32,7 +32,7 @@ function Sidebar() {
           );
         })}
       </div>
-      <div className="flex flex-col items-center mb-8">
+      <div className="flex flex-col items-center gap-4 mb-8">
         <GeneralSettings />
         <AccountSettings />
       </div>

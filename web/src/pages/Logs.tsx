@@ -31,7 +31,7 @@ function Logs() {
   const [logService, setLogService] = useState<LogType>("frigate");
 
   useEffect(() => {
-    document.title = `${logService[0].toUpperCase()}${logService.substring(1)} Stats - Frigate`;
+    document.title = `${logService[0].toUpperCase()}${logService.substring(1)} Logs - Frigate`;
   }, [logService]);
 
   // log data handling
@@ -366,7 +366,7 @@ function Logs() {
             size="sm"
             onClick={handleCopyLogs}
           >
-            <FaCopy />
+            <FaCopy className="text-secondary-foreground" />
             <div className="hidden md:block text-primary">
               Copy to Clipboard
             </div>
