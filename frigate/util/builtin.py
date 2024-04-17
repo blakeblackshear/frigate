@@ -223,8 +223,6 @@ def update_yaml_file(file_path, key_path, new_value):
         data = yaml.load(f)
 
     data = update_yaml(data, key_path, new_value)
-    with open("/config/test.yaml", "w") as f:
-        yaml.dump(data, f)
     with open(file_path, "w") as f:
         yaml.dump(data, f)
 
