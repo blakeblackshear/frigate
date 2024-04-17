@@ -52,7 +52,9 @@ def migrate_frigate_config(config_file: str):
                 continue
 
             new_name = file.replace("@", "_")
-            os.rename(os.path.join(EXPORT_DIR, file), os.path.join(EXPORT_DIR, new_name))
+            os.rename(
+                os.path.join(EXPORT_DIR, file), os.path.join(EXPORT_DIR, new_name)
+            )
 
     with open(version_file, "w") as f:
         f.write(str(CURRENT_CONFIG_VERSION))
