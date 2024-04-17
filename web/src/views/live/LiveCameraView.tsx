@@ -127,21 +127,21 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
     if (mainRef.current == null) {
       return;
     }
-
     const fsListener = () => {
       setFullscreen(document.fullscreenElement != null);
     };
-    const pipListener = () => {
-      setPip(document.pictureInPictureElement != null);
-    };
     document.addEventListener("fullscreenchange", fsListener);
-    document.addEventListener("focusin", pipListener);
 
     return () => {
       document.removeEventListener("fullscreenchange", fsListener);
-      document.removeEventListener("focusin", pipListener);
     };
   }, [mainRef]);
+
+  useEffect(() => {
+    setPip(document.pictureInPictureElement != null);
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [document.pictureInPictureElement]);
 
   // playback state
 
