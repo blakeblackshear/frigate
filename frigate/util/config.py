@@ -81,6 +81,12 @@ def migrate_014(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
         if not new_config["record"]:
             del new_config["record"]
 
+        if new_config.get("ui", {}).get("use_experimental"):
+            del new_config["ui"]["experimental"]
+
+            if not new_config["ui"]:
+                del new_config["ui"]
+
     # remove rtmp
     if new_config.get("ffmpeg", {}).get("output_args", {}).get("rtmp"):
         del new_config["ffmpeg"]["output_args"]["rtmp"]
