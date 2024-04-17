@@ -55,10 +55,8 @@ export default function Settings() {
   const [filterZoneMask, setFilterZoneMask] = useState<PolygonType[]>();
 
   useEffect(() => {
-    if (cameras) {
-      // TODO: fixme
+    if (cameras.length) {
       setSelectedCamera(cameras[0].name);
-      console.log("setting selected cam");
     }
   }, []);
 
@@ -97,7 +95,6 @@ export default function Settings() {
                 updateZoneMaskFilter={setFilterZoneMask}
               />
             )}
-            {/* {isEditing && page == "masks / zones" && (<PolygonEditControls /)} */}
             <CameraSelectButton
               allCameras={cameras}
               selectedCamera={selectedCamera}
@@ -140,7 +137,7 @@ function CameraSelectButton({
 }: CameraSelectButtonProps) {
   const [open, setOpen] = useState(false);
 
-  if (!allCameras) {
+  if (!allCameras.length) {
     return;
   }
 

@@ -7,7 +7,7 @@ import { Polygon, PolygonType } from "@/types/canvas";
 import { interpolatePoints, parseCoordinates } from "@/utils/canvasUtil";
 import { Skeleton } from "../ui/skeleton";
 import { useResizeObserver } from "@/hooks/resize-observer";
-import { LuExternalLink, LuInfo, LuPlus } from "react-icons/lu";
+import { LuExternalLink, LuPlus } from "react-icons/lu";
 import {
   HoverCard,
   HoverCardContent,
@@ -24,12 +24,6 @@ import MotionMaskEditPane from "./MotionMaskEditPane";
 import ObjectMaskEditPane from "./ObjectMaskEditPane";
 import PolygonItem from "./PolygonItem";
 import { Link } from "react-router-dom";
-
-// export type ZoneObjects = {
-//   camera: string;
-//   zoneName: string;
-//   objects: string[];
-// };
 
 type MasksAndZoneProps = {
   selectedCamera: string;
@@ -209,12 +203,12 @@ export default function MasksAndZones({
     setActivePolygonIndex(allPolygons.length);
 
     let polygonColor = [128, 128, 0];
+
     if (type == "motion_mask") {
       polygonColor = [0, 0, 220];
     }
     if (type == "object_mask") {
       polygonColor = [128, 128, 128];
-      // TODO - get this from config object after mutation so label can be set
     }
 
     setEditingPolygons([
@@ -224,6 +218,7 @@ export default function MasksAndZones({
         isFinished: false,
         // isUnsaved: true,
         type,
+        typeIndex: 9999,
         name: "",
         objects: [],
         camera: selectedCamera,
@@ -305,30 +300,49 @@ export default function MasksAndZones({
         }),
       );
 
-      // this can be an array or a string
-      const motionMasks = Object.entries(
-        Array.isArray(cameraConfig.motion.mask)
-          ? cameraConfig.motion.mask
-          : [cameraConfig.motion.mask],
-      ).map(([, maskData], index) => ({
-        type: "motion_mask" as PolygonType,
-        typeIndex: index,
-        camera: cameraConfig.name,
-        name: `Motion Mask ${index + 1}`,
-        objects: [],
-        points: interpolatePoints(
-          parseCoordinates(maskData),
-          1,
-          1,
-          scaledWidth,
-          scaledHeight,
-        ),
-        isFinished: true,
-        color: [0, 0, 255],
-      }));
+      let motionMasks: Polygon[] = [];
+      let globalObjectMasks: Polygon[] = [];
+      let objectMasks: Polygon[] = [];
 
-      const globalObjectMasks = Object.entries(cameraConfig.objects.mask).map(
-        ([, maskData], index) => ({
+      if (
+        cameraConfig.motion.mask !== null &&
+        cameraConfig.motion.mask !== undefined
+      ) {
+        // this can be an array or a string
+        motionMasks = (
+          Array.isArray(cameraConfig.motion.mask)
+            ? cameraConfig.motion.mask
+            : cameraConfig.motion.mask
+              ? [cameraConfig.motion.mask]
+              : []
+        ).map((maskData, index) => ({
+          type: "motion_mask" as PolygonType,
+          typeIndex: index,
+          camera: cameraConfig.name,
+          name: `Motion Mask ${index + 1}`,
+          objects: [],
+          points: interpolatePoints(
+            parseCoordinates(maskData),
+            1,
+            1,
+            scaledWidth,
+            scaledHeight,
+          ),
+          isFinished: true,
+          color: [0, 0, 255],
+        }));
+      }
+
+      const globalObjectMasksArray = Array.isArray(cameraConfig.objects.mask)
+        ? cameraConfig.objects.mask
+        : cameraConfig.objects.mask
+          ? [cameraConfig.objects.mask]
+          : [];
+      if (
+        cameraConfig.objects.mask !== null &&
+        cameraConfig.objects.mask !== undefined
+      ) {
+        globalObjectMasks = globalObjectMasksArray.map((maskData, index) => ({
           type: "object_mask" as PolygonType,
           typeIndex: index,
           camera: cameraConfig.name,
@@ -342,41 +356,66 @@ export default function MasksAndZones({
             scaledHeight,
           ),
           isFinished: true,
-          // isUnsaved: false,
-          color: [0, 0, 255],
-        }),
-      );
+          color: [128, 128, 128],
+        }));
+      }
+
+      // if (globalObjectMasks && !Array.isArray(globalObjectMasks)) {
+      //   globalObjectMasks = [globalObjectMasks];
+      // }
+
+      console.log("global", globalObjectMasks);
 
       const globalObjectMasksCount = globalObjectMasks.length;
 
-      const objectMasks = Object.entries(cameraConfig.objects.filters).flatMap(
-        ([objectName, { mask }]): Polygon[] =>
-          mask !== null && mask !== undefined
-            ? mask.flatMap((maskItem, subIndex) =>
-                maskItem !== null && maskItem !== undefined
-                  ? [
-                      {
-                        type: "object_mask" as PolygonType,
-                        typeIndex: subIndex,
-                        camera: cameraConfig.name,
-                        name: `Object Mask ${globalObjectMasksCount + subIndex + 1} (${objectName})`,
-                        objects: [objectName],
-                        points: interpolatePoints(
-                          parseCoordinates(maskItem),
-                          1,
-                          1,
-                          scaledWidth,
-                          scaledHeight,
-                        ),
-                        isFinished: true,
-                        // isUnsaved: false,
-                        color: [128, 128, 128],
-                      },
-                    ]
-                  : [],
+      console.log("filters", cameraConfig.objects.filters);
+
+      let index = 0;
+      objectMasks = Object.entries(cameraConfig.objects.filters)
+        .filter(([_, { mask }]) => mask || Array.isArray(mask))
+        .flatMap(([objectName, { mask }]): Polygon[] => {
+          console.log("index", index);
+          console.log("outer", objectName, mask);
+
+          const maskArray = Array.isArray(mask) ? mask : mask ? [mask] : [];
+
+          return maskArray.flatMap((maskItem, subIndex) => {
+            const maskItemString = maskItem;
+
+            const newMask = {
+              type: "object_mask" as PolygonType,
+              typeIndex: subIndex,
+              camera: cameraConfig.name,
+              name: `Object Mask ${globalObjectMasksCount + index + 1} (${objectName})`,
+              objects: [objectName],
+              points: interpolatePoints(
+                parseCoordinates(maskItem),
+                1,
+                1,
+                scaledWidth,
+                scaledHeight,
+              ),
+              isFinished: true,
+              color: [128, 128, 128],
+            };
+            index++;
+
+            if (
+              globalObjectMasksArray.some(
+                (globalMask) => globalMask === maskItemString,
               )
-            : [],
-      );
+            ) {
+              index--;
+              return [];
+            } else {
+              return [newMask];
+            }
+          });
+        });
+
+      console.log(Object.entries(cameraConfig.objects.filters));
+
+      console.log("final object masks", objectMasks);
 
       // console.log("setting all and editing");
       setAllPolygons([
@@ -404,9 +443,9 @@ export default function MasksAndZones({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cameraConfig, containerRef, scaledHeight, scaledWidth]);
 
-  useEffect(() => {
-    console.log("editing polygons changed:", editingPolygons);
-  }, [editingPolygons]);
+  // useEffect(() => {
+  //   console.log("editing polygons changed:", editingPolygons);
+  // }, [editingPolygons]);
 
   useEffect(() => {
     if (editPane === undefined) {

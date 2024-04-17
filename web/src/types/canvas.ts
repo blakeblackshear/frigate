@@ -12,7 +12,7 @@ export type Polygon = {
   color: number[];
 };
 
-export type FormValuesType = {
+export type ZoneFormValuesType = {
   name: string;
   inertia: number;
   loitering_time: number;
@@ -20,4 +20,12 @@ export type FormValuesType = {
   objects: string[];
   review_alerts: boolean;
   review_detections: boolean;
+};
+
+export type ObjectMaskFormValuesType = {
+  objects: string;
+  polygon: {
+    isFinished: boolean;
+    name: string;
+  };
 };

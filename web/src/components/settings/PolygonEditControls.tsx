@@ -44,6 +44,10 @@ export default function PolygonEditControls({
     setPolygons(updatedPolygons);
   };
 
+  if (activePolygonIndex === undefined || !polygons) {
+    return;
+  }
+
   return (
     <div className="flex flex-row justify-center gap-2">
       <Tooltip>
@@ -51,6 +55,7 @@ export default function PolygonEditControls({
           <Button
             variant="secondary"
             className="size-6 p-1 rounded-md text-background bg-secondary-foreground"
+            disabled={!polygons[activePolygonIndex].points.length}
             onClick={undo}
           >
             <MdUndo />
@@ -63,6 +68,7 @@ export default function PolygonEditControls({
           <Button
             variant="secondary"
             className="size-6 p-1 rounded-md text-background bg-secondary-foreground"
+            disabled={!polygons[activePolygonIndex].points.length}
             onClick={reset}
           >
             <MdOutlineRestartAlt />

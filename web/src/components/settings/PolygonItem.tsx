@@ -37,7 +37,6 @@ import { reviewQueries } from "@/utils/zoneEdutUtil";
 type PolygonItemProps = {
   polygon: Polygon;
   setAllPolygons: React.Dispatch<React.SetStateAction<Polygon[]>>;
-  setReindexPolygons: React.Dispatch<React.SetStateAction<Polygon[]>>;
   index: number;
   activePolygonIndex: number | undefined;
   hoveredPolygonIndex: number | null;
@@ -95,13 +94,6 @@ export default function PolygonItem({
       }
       if (polygon.type == "motion_mask") {
         console.log("deleting", polygon.typeIndex);
-        if (polygon.name) {
-          const match = polygon.name.match(/\d+/);
-          if (match) {
-            // index = parseInt(match[0]) - 1;
-            console.log("deleting, index", polygon.typeIndex);
-          }
-        }
 
         const filteredMask = (
           Array.isArray(cameraConfig.motion.mask)
@@ -118,11 +110,94 @@ export default function PolygonItem({
             return `cameras.${polygon?.camera}.motion.mask=${coordinates}&`;
           })
           .join("");
+
+        if (!url) {
+          // deleting last mask
+          url = `cameras.${polygon?.camera}.motion.mask&`;
+        }
         console.log(url);
 
         // return;
         // url = `config/set?cameras.${polygon.camera}.motion.mask`;
       }
+
+      if (polygon.type == "object_mask") {
+        console.log("deleting", polygon.typeIndex, polygon);
+        let configObject;
+        let globalMask = false;
+        console.log("polygon objects", polygon.objects, !polygon.objects);
+
+        // global mask on camera for all objects
+        if (!polygon.objects.length) {
+          console.log("deleting global");
+          configObject = cameraConfig.objects.mask;
+          globalMask = true;
+        } else {
+          configObject = cameraConfig.objects.filters[polygon.objects[0]].mask;
+        }
+
+        if (!configObject) {
+          return;
+        }
+
+        const globalObjectMasksArray = Array.isArray(cameraConfig.objects.mask)
+          ? cameraConfig.objects.mask
+          : cameraConfig.objects.mask
+            ? [cameraConfig.objects.mask]
+            : [];
+
+        let filteredMask;
+        if (globalMask) {
+          filteredMask = (
+            Array.isArray(configObject) ? configObject : [configObject]
+          ).filter((_, currentIndex) => currentIndex !== polygon.typeIndex);
+        } else {
+          console.log("not globals config object:", configObject);
+
+          filteredMask = (
+            Array.isArray(configObject) ? configObject : [configObject]
+          )
+            .filter((mask) => !globalObjectMasksArray.includes(mask))
+            .filter((_, currentIndex) => {
+              console.log(
+                "current index",
+                currentIndex,
+                "global length:",
+                globalObjectMasksArray.length,
+                "polygon typeindex",
+                polygon.typeIndex,
+              );
+
+              return currentIndex !== polygon.typeIndex;
+            });
+        }
+
+        console.log("filtered:", filteredMask);
+
+        url = filteredMask
+          .map((pointsArray) => {
+            const coordinates = flattenPoints(
+              parseCoordinates(pointsArray),
+            ).join(",");
+            return globalMask
+              ? `cameras.${polygon?.camera}.objects.mask=${coordinates}&`
+              : `cameras.${polygon?.camera}.objects.filters.${polygon.objects[0]}.mask=${coordinates}&`;
+          })
+          .join("");
+
+        if (!url) {
+          // deleting last mask
+          url = globalMask
+            ? `cameras.${polygon?.camera}.objects.mask&`
+            : `cameras.${polygon?.camera}.objects.filters.${polygon.objects[0]}.mask`;
+        }
+
+        console.log("url:", url);
+
+        // return;
+        // url = `config/set?cameras.${polygon.camera}.motion.mask`;
+      }
+
       await axios
         .put(`config/set?${url}`, { requires_restart: 0 })
         .then((res) => {
@@ -169,15 +244,16 @@ export default function PolygonItem({
   };
 
   const handleDelete = (type: string, typeIndex: number) => {
-    setAllPolygons((oldPolygons) => {
-      const filteredPolygons = oldPolygons.filter(
-        (polygon) =>
-          !(polygon.type === type && polygon.typeIndex === typeIndex),
-      );
-      console.log("filtered", filteredPolygons);
-      // console.log("reindexed", reindexPolygons(filteredPolygons));
-      return filteredPolygons;
-    });
+    // setAllPolygons((oldPolygons) => {
+    //   console.log("old polygons", oldPolygons);
+    //   const filteredPolygons = oldPolygons.filter(
+    //     (polygon) =>
+    //       !(polygon.type === type && polygon.typeIndex === typeIndex),
+    //   );
+    //   console.log("filtered", filteredPolygons);
+    //   // console.log("reindexed", reindexPolygons(filteredPolygons));
+    //   return filteredPolygons;
+    // });
     setActivePolygonIndex(undefined);
     saveToConfig(polygon);
   };

@@ -19,20 +19,33 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { ATTRIBUTE_LABELS, FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Polygon } from "@/types/canvas";
+import { ObjectMaskFormValuesType, Polygon } from "@/types/canvas";
 import PolygonEditControls from "./PolygonEditControls";
 import { FaCheckCircle } from "react-icons/fa";
+import {
+  flattenPoints,
+  interpolatePoints,
+  parseCoordinates,
+} from "@/utils/canvasUtil";
+import axios from "axios";
+import { toast } from "sonner";
+import { Toaster } from "../ui/sonner";
+import ActivityIndicator from "../indicators/activity-indicator";
 
 type ObjectMaskEditPaneProps = {
   polygons?: Polygon[];
   setPolygons: React.Dispatch<React.SetStateAction<Polygon[]>>;
   activePolygonIndex?: number;
+  scaledWidth?: number;
+  scaledHeight?: number;
+  isLoading: boolean;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   onSave?: () => void;
   onCancel?: () => void;
 };
@@ -41,9 +54,15 @@ export default function ObjectMaskEditPane({
   polygons,
   setPolygons,
   activePolygonIndex,
+  scaledWidth,
+  scaledHeight,
+  isLoading,
+  setIsLoading,
   onSave,
   onCancel,
 }: ObjectMaskEditPaneProps) {
+  const { data: config, mutate: updateConfig } =
+    useSWR<FrigateConfig>("config");
   // const { data: config } = useSWR<FrigateConfig>("config");
 
   // const cameras = useMemo(() => {
@@ -63,6 +82,12 @@ export default function ObjectMaskEditPane({
       return null;
     }
   }, [polygons, activePolygonIndex]);
+
+  const cameraConfig = useMemo(() => {
+    if (polygon?.camera && config) {
+      return config.cameras[polygon.camera];
+    }
+  }, [polygon, config]);
 
   const defaultName = useMemo(() => {
     if (!polygons) {
@@ -101,20 +126,157 @@ export default function ObjectMaskEditPane({
     },
   });
 
+  const saveToConfig = useCallback(
+    async (
+      { objects: form_objects }: ObjectMaskFormValuesType, // values submitted via the form
+      objects: string[],
+    ) => {
+      if (!scaledWidth || !scaledHeight || !polygon || !cameraConfig) {
+        return;
+      }
+      // console.log("loitering time", loitering_time);
+      // const alertsZones = config?.cameras[camera]?.review.alerts.required_zones;
+
+      // const detectionsZones =
+      //   config?.cameras[camera]?.review.detections.required_zones;
+
+      // console.log("out of try except", mutatedConfig);
+
+      console.log("form objects:", form_objects);
+      console.log("objects:", objects);
+      console.log(cameraConfig.objects.filters);
+
+      const coordinates = flattenPoints(
+        interpolatePoints(polygon.points, scaledWidth, scaledHeight, 1, 1),
+      ).join(",");
+
+      let queryString = "";
+      let configObject;
+      let createFilter = false;
+      let globalMask = false;
+      let filteredMask = [coordinates];
+      const editingMask = polygon.name.length > 0;
+
+      // global mask on camera for all objects
+      if (form_objects == "all_labels") {
+        configObject = cameraConfig.objects.mask;
+        globalMask = true;
+      } else {
+        if (
+          cameraConfig.objects.filters[form_objects] &&
+          cameraConfig.objects.filters[form_objects].mask !== null
+        ) {
+          configObject = cameraConfig.objects.filters[form_objects].mask;
+        } else {
+          createFilter = true;
+        }
+      }
+
+      if (!createFilter) {
+        let index = Array.isArray(configObject)
+          ? configObject.length
+          : configObject
+            ? 1
+            : 0;
+
+        if (editingMask) {
+          index = polygon.typeIndex;
+        }
+
+        console.log("are we an array?", Array.isArray(configObject));
+        console.log("index", index);
+
+        // editing existing mask, not creating a new one
+        if (editingMask) {
+          index = polygon.typeIndex;
+        }
+
+        filteredMask = (
+          Array.isArray(configObject) ? configObject : [configObject as string]
+        ).filter((_, currentIndex) => currentIndex !== index);
+
+        console.log("filtered", filteredMask);
+
+        filteredMask.splice(index, 0, coordinates);
+        console.log("filtered after splice", filteredMask);
+      }
+
+      queryString = filteredMask
+        .map((pointsArray) => {
+          const coordinates = flattenPoints(parseCoordinates(pointsArray)).join(
+            ",",
+          );
+          return globalMask
+            ? `cameras.${polygon?.camera}.objects.mask=${coordinates}&`
+            : `cameras.${polygon?.camera}.objects.filters.${form_objects}.mask=${coordinates}&`;
+        })
+        .join("");
+
+      console.log("polygon", polygon);
+      console.log(queryString);
+
+      // console.log(
+      //   `config/set?cameras.${polygon?.camera}.objects.mask=${coordinates}&${queryString}`,
+      // );
+      // console.log("object masks", cameraConfig.objects.mask);
+      // console.log("new coords", coordinates);
+      // return;
+
+      if (!queryString) {
+        console.log("no query string");
+        return;
+      }
+
+      axios
+        .put(`config/set?${queryString}`, {
+          requires_restart: 0,
+        })
+        .then((res) => {
+          if (res.status === 200) {
+            toast.success(`${polygon.name || "Object Mask"} has been saved.`, {
+              position: "top-center",
+            });
+            // setChangedValue(false);
+            updateConfig();
+          } else {
+            toast.error(`Failed to save config changes: ${res.statusText}`, {
+              position: "top-center",
+            });
+          }
+        })
+        .catch((error) => {
+          toast.error(
+            `Failed to save config changes: ${error.response.data.message}`,
+            { position: "top-center" },
+          );
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    },
+    [updateConfig, polygon, scaledWidth, scaledHeight, setIsLoading],
+  );
+
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("form values", values);
-    // if (activePolygonIndex === undefined || !polygons) {
-    //   return;
-    // }
+    if (activePolygonIndex === undefined || !values || !polygons) {
+      return;
+    }
+    setIsLoading(true);
+    // polygons[activePolygonIndex].name = values.name;
+    // console.log("form values", values);
+    // console.log(
+    //   "string",
 
-    // const updatedPolygons = [...polygons];
-    // const activePolygon = updatedPolygons[activePolygonIndex];
-    // updatedPolygons[activePolygonIndex] = {
-    //   ...activePolygon,
-    //   name: defaultName ?? "foo",
-    // };
-    // setPolygons(updatedPolygons);
+    //   flattenPoints(
+    //     interpolatePoints(polygon.points, scaledWidth, scaledHeight, 1, 1),
+    //   ).join(","),
+    // );
+    // console.log("active polygon", polygons[activePolygonIndex]);
 
+    saveToConfig(
+      values as ObjectMaskFormValuesType,
+      polygons[activePolygonIndex].objects,
+    );
     if (onSave) {
       onSave();
     }
@@ -126,6 +288,7 @@ export default function ObjectMaskEditPane({
 
   return (
     <>
+      <Toaster position="top-center" />
       <Heading as="h3" className="my-2">
         {polygon.name.length ? "Edit" : "New"} Object Mask
       </Heading>
@@ -211,8 +374,20 @@ export default function ObjectMaskEditPane({
             <Button className="flex flex-1" onClick={onCancel}>
               Cancel
             </Button>
-            <Button variant="select" className="flex flex-1" type="submit">
-              Save
+            <Button
+              variant="select"
+              disabled={isLoading}
+              className="flex flex-1"
+              type="submit"
+            >
+              {isLoading ? (
+                <div className="flex flex-row items-center gap-2">
+                  <ActivityIndicator />
+                  <span>Saving...</span>
+                </div>
+              ) : (
+                "Save"
+              )}
             </Button>
           </div>
         </form>

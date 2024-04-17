@@ -56,8 +56,8 @@ export const interpolatePoints = (
   const newPoints: number[][] = [];
 
   for (const [x, y] of points) {
-    const newX = (x * newWidth) / width;
-    const newY = (y * newHeight) / height;
+    const newX = +((x * newWidth) / width).toFixed(3);
+    const newY = +((y * newHeight) / height).toFixed(3);
     newPoints.push([newX, newY]);
   }
 
@@ -87,4 +87,16 @@ export const toRGBColorString = (color: number[], darkened: boolean) => {
   }
 
   return `rgba(${color[2]},${color[1]},${color[0]},${darkened ? "0.7" : "0.3"})`;
+};
+
+export const masksAreIdentical = (arr1: string[], arr2: string[]): boolean => {
+  if (arr1.length !== arr2.length) {
+    return false;
+  }
+  for (let i = 0; i < arr1.length; i++) {
+    if (arr1[i] !== arr2[i]) {
+      return false;
+    }
+  }
+  return true;
 };

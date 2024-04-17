@@ -14,11 +14,10 @@ import { Input } from "@/components/ui/input";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ATTRIBUTE_LABELS, FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
-import { isMobile } from "react-device-detect";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { FormValuesType, Polygon } from "@/types/canvas";
+import { ZoneFormValuesType, Polygon } from "@/types/canvas";
 import { reviewQueries } from "@/utils/zoneEdutUtil";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
@@ -187,13 +186,13 @@ export default function ZoneEditPane({
   const saveToConfig = useCallback(
     async (
       {
-        name,
+        name: zoneName,
         inertia,
         loitering_time,
         objects: form_objects,
         review_alerts,
         review_detections,
-      }: FormValuesType, // values submitted via the form
+      }: ZoneFormValuesType, // values submitted via the form
       objects: string[],
     ) => {
       if (!scaledWidth || !scaledHeight || !polygon) {
@@ -206,7 +205,7 @@ export default function ZoneEditPane({
       //   config?.cameras[camera]?.review.detections.required_zones;
       let mutatedConfig = config;
 
-      const renamingZone = name != polygon.name && polygon.name != "";
+      const renamingZone = zoneName != polygon.name && polygon.name != "";
 
       if (renamingZone) {
         // rename - delete old zone and replace with new
@@ -252,7 +251,7 @@ export default function ZoneEditPane({
       let objectQueries = objects
         .map(
           (object) =>
-            `&cameras.${polygon?.camera}.zones.${name}.objects=${object}`,
+            `&cameras.${polygon?.camera}.zones.${zoneName}.objects=${object}`,
         )
         .join("");
 
@@ -265,11 +264,11 @@ export default function ZoneEditPane({
       // deleting objects
       if (!objectQueries && !same_objects && !renamingZone) {
         // console.log("deleting objects");
-        objectQueries = `&cameras.${polygon?.camera}.zones.${name}.objects`;
+        objectQueries = `&cameras.${polygon?.camera}.zones.${zoneName}.objects`;
       }
 
       const { alertQueries, detectionQueries } = reviewQueries(
-        name,
+        zoneName,
         review_alerts,
         review_detections,
         polygon.camera,
@@ -289,12 +288,12 @@ export default function ZoneEditPane({
 
       axios
         .put(
-          `config/set?cameras.${polygon?.camera}.zones.${name}.coordinates=${coordinates}&cameras.${polygon?.camera}.zones.${name}.inertia=${inertia}&cameras.${polygon?.camera}.zones.${name}.loitering_time=${loitering_time}${objectQueries}${alertQueries}${detectionQueries}`,
+          `config/set?cameras.${polygon?.camera}.zones.${zoneName}.coordinates=${coordinates}&cameras.${polygon?.camera}.zones.${zoneName}.inertia=${inertia}&cameras.${polygon?.camera}.zones.${zoneName}.loitering_time=${loitering_time}${objectQueries}${alertQueries}${detectionQueries}`,
           { requires_restart: 0 },
         )
         .then((res) => {
           if (res.status === 200) {
-            toast.success(`Zone ${name} saved.`, {
+            toast.success(`Zone (${zoneName}) has been saved.`, {
               position: "top-center",
             });
             // setChangedValue(false);
@@ -343,7 +342,7 @@ export default function ZoneEditPane({
     // console.log("active polygon", polygons[activePolygonIndex]);
 
     saveToConfig(
-      values as FormValuesType,
+      values as ZoneFormValuesType,
       polygons[activePolygonIndex].objects,
     );
 
@@ -599,13 +598,13 @@ export function ZoneObjectSelector({
 
     const labels = new Set<string>();
 
-    Object.values(config.cameras).forEach((camera) => {
-      camera.objects.track.forEach((label) => {
-        if (!ATTRIBUTE_LABELS.includes(label)) {
-          labels.add(label);
-        }
-      });
-    });
+    // Object.values(config.cameras).forEach((camera) => {
+    //   camera.objects.track.forEach((label) => {
+    //     if (!ATTRIBUTE_LABELS.includes(label)) {
+    //       labels.add(label);
+    //     }
+    //   });
+    // });
 
     cameraConfig.objects.track.forEach((label) => {
       if (!ATTRIBUTE_LABELS.includes(label)) {

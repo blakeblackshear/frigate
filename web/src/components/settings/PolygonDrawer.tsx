@@ -106,6 +106,7 @@ export default function PolygonDrawer({
       onMouseOver={isActive ? handleGroupMouseOver : undefined}
       onTouchStart={isActive ? handleGroupMouseOver : undefined}
       onMouseOut={isActive ? handleGroupMouseOut : undefined}
+      zIndex={isActive ? 999 : 100}
     >
       <Line
         points={flattenedPoints}

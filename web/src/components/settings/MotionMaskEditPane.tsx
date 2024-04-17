@@ -19,6 +19,7 @@ import {
 import axios from "axios";
 import { toast } from "sonner";
 import { Toaster } from "../ui/sonner";
+import ActivityIndicator from "../indicators/activity-indicator";
 
 type MotionMaskEditPaneProps = {
   polygons?: Polygon[];
@@ -105,7 +106,9 @@ export default function MotionMaskEditPane({
 
     let index = Array.isArray(cameraConfig.motion.mask)
       ? cameraConfig.motion.mask.length
-      : 1;
+      : cameraConfig.motion.mask
+        ? 1
+        : 0;
 
     console.log("are we an array?", Array.isArray(cameraConfig.motion.mask));
     console.log("index", index);
@@ -114,20 +117,14 @@ export default function MotionMaskEditPane({
     // editing existing mask, not creating a new one
     if (editingMask) {
       index = polygon.typeIndex;
-      if (polygon.name) {
-        const match = polygon.name.match(/\d+/);
-        if (match) {
-          // index = parseInt(match[0]) - 1;
-          console.log("editing, index", index);
-        }
-      }
+      console.log("editing, index", index);
     }
 
-    const filteredMask = Array.isArray(cameraConfig.motion.mask)
-      ? cameraConfig.motion.mask
-      : [cameraConfig.motion.mask].filter(
-          (_, currentIndex) => currentIndex !== index,
-        );
+    const filteredMask = (
+      Array.isArray(cameraConfig.motion.mask)
+        ? cameraConfig.motion.mask
+        : [cameraConfig.motion.mask]
+    ).filter((_, currentIndex) => currentIndex !== index);
     console.log("filtered", filteredMask);
 
     // if (editingMask) {
@@ -163,7 +160,7 @@ export default function MotionMaskEditPane({
       })
       .then((res) => {
         if (res.status === 200) {
-          toast.success(`Zone ${name} saved.`, {
+          toast.success(`${polygon.name || "Motion Mask"} has been saved.`, {
             position: "top-center",
           });
           // setChangedValue(false);
@@ -274,8 +271,20 @@ export default function MotionMaskEditPane({
             <Button className="flex flex-1" onClick={onCancel}>
               Cancel
             </Button>
-            <Button variant="select" className="flex flex-1" type="submit">
-              Save
+            <Button
+              variant="select"
+              disabled={isLoading}
+              className="flex flex-1"
+              type="submit"
+            >
+              {isLoading ? (
+                <div className="flex flex-row items-center gap-2">
+                  <ActivityIndicator />
+                  <span>Saving...</span>
+                </div>
+              ) : (
+                "Save"
+              )}
             </Button>
           </div>
         </form>
