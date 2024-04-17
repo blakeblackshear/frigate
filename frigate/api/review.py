@@ -8,6 +8,7 @@ from pathlib import Path
 import pandas as pd
 from flask import Blueprint, jsonify, make_response, request
 from peewee import Case, DoesNotExist, fn, operator
+from playhouse.shortcuts import model_to_dict
 
 from frigate.models import Recordings, ReviewSegment
 from frigate.util.builtin import get_tz_modifiers
@@ -76,6 +77,14 @@ def review():
     )
 
     return jsonify([r for r in review])
+
+
+@ReviewBp.route("/review/<id>")
+def get_review(id: str):
+    try:
+        return model_to_dict(ReviewSegment.get(ReviewSegment.id == id))
+    except DoesNotExist:
+        return "Review item not found", 404
 
 
 @ReviewBp.route("/review/summary")
