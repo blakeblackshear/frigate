@@ -90,6 +90,13 @@ export function ThresholdBarGraph({
           distributed: true,
         },
       },
+      states: {
+        active: {
+          filter: {
+            type: "none",
+          },
+        },
+      },
       tooltip: {
         theme: systemTheme || theme,
         y: {
@@ -190,6 +197,18 @@ export function StorageGraph({ graphId, used, total }: StorageGraphProps) {
       plotOptions: {
         bar: {
           horizontal: true,
+        },
+      },
+      states: {
+        active: {
+          filter: {
+            type: "none",
+          },
+        },
+        hover: {
+          filter: {
+            type: "none",
+          },
         },
       },
       tooltip: {
