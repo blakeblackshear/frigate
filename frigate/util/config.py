@@ -6,7 +6,7 @@ import shutil
 
 from ruamel.yaml import YAML
 
-from frigate.const import CONFIG_DIR
+from frigate.const import CONFIG_DIR, EXPORT_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +45,16 @@ def migrate_frigate_config(config_file: str):
         with open(config_file, "w") as f:
             yaml.dump(new_config, f)
         previous_version = 0.14
+
+        logger.info("Migrating export file names...")
+        for file in os.listdir(EXPORT_DIR):
+            if "@" not in file:
+                continue
+
+            new_name = file.replace("@", "_")
+            os.rename(
+                os.path.join(EXPORT_DIR, file), os.path.join(EXPORT_DIR, new_name)
+            )
 
     with open(version_file, "w") as f:
         f.write(str(CURRENT_CONFIG_VERSION))
