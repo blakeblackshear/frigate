@@ -33,6 +33,7 @@ import { LuExternalLink } from "react-icons/lu";
 
 type MotionTunerProps = {
   selectedCamera: string;
+  setUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 type MotionSettings = {
@@ -41,7 +42,10 @@ type MotionSettings = {
   improve_contrast?: boolean;
 };
 
-export default function MotionTuner({ selectedCamera }: MotionTunerProps) {
+export default function MotionTuner({
+  selectedCamera,
+  setUnsavedChanges,
+}: MotionTunerProps) {
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
   const [changedValue, setChangedValue] = useState(false);

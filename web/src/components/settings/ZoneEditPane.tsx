@@ -156,33 +156,6 @@ export default function ZoneEditPane({
     },
   });
 
-  // const [changedValue, setChangedValue] = useState(false);
-
-  // const requiredDetectionZones = useMemo(
-  //   () => cameraConfig?.review.detections.required_zones,
-  //   [cameraConfig],
-  // );
-
-  // const requiredAlertZones = useMemo(
-  //   () => cameraConfig?.review.alerts.required_zones,
-  //   [cameraConfig],
-  // );
-
-  // const [alertQueries, setAlertQueries] = useState("");
-  // const [detectionQueries, setDetectionQueries] = useState("");
-
-  // useEffect(() => {
-  //   console.log("config updated!", config);
-  // }, [config]);
-
-  // useEffect(() => {
-  //   console.log("camera config updated!", cameraConfig);
-  // }, [cameraConfig]);
-
-  // useEffect(() => {
-  //   console.log("required zones updated!", requiredZones);
-  // }, [requiredZones]);
-
   const saveToConfig = useCallback(
     async (
       {
@@ -198,11 +171,6 @@ export default function ZoneEditPane({
       if (!scaledWidth || !scaledHeight || !polygon) {
         return;
       }
-      // console.log("loitering time", loitering_time);
-      // const alertsZones = config?.cameras[camera]?.review.alerts.required_zones;
-
-      // const detectionsZones =
-      //   config?.cameras[camera]?.review.detections.required_zones;
       let mutatedConfig = config;
 
       const renamingZone = zoneName != polygon.name && polygon.name != "";
@@ -231,8 +199,6 @@ export default function ZoneEditPane({
 
           // Wait for the config to be updated
           mutatedConfig = await updateConfig();
-          // console.log("this should be updated...", mutatedConfig.cameras);
-          // console.log("check original config object...", config);
         } catch (error) {
           toast.error(`Failed to save config changes.`, {
             position: "top-center",
@@ -241,12 +207,9 @@ export default function ZoneEditPane({
         }
       }
 
-      // console.log("out of try except", mutatedConfig);
-
       const coordinates = flattenPoints(
         interpolatePoints(polygon.points, scaledWidth, scaledHeight, 1, 1),
       ).join(",");
-      // const foo = config.cameras["doorbell"].zones["outside"].objects;
 
       let objectQueries = objects
         .map(
@@ -263,7 +226,6 @@ export default function ZoneEditPane({
 
       // deleting objects
       if (!objectQueries && !same_objects && !renamingZone) {
-        // console.log("deleting objects");
         objectQueries = `&cameras.${polygon?.camera}.zones.${zoneName}.objects`;
       }
 
@@ -278,14 +240,6 @@ export default function ZoneEditPane({
           .required_zones || [],
       );
 
-      // console.log("object queries:", objectQueries);
-      // console.log("alert queries:", alertQueries);
-      // console.log("detection queries:", detectionQueries);
-
-      // console.log(
-      //   `config/set?cameras.${polygon?.camera}.zones.${name}.coordinates=${coordinates}&cameras.${polygon?.camera}.zones.${name}.inertia=${inertia}&cameras.${polygon?.camera}.zones.${name}.loitering_time=${loitering_time}${objectQueries}${alertQueries}${detectionQueries}`,
-      // );
-
       axios
         .put(
           `config/set?cameras.${polygon?.camera}.zones.${zoneName}.coordinates=${coordinates}&cameras.${polygon?.camera}.zones.${zoneName}.inertia=${inertia}&cameras.${polygon?.camera}.zones.${zoneName}.loitering_time=${loitering_time}${objectQueries}${alertQueries}${detectionQueries}`,
@@ -296,7 +250,6 @@ export default function ZoneEditPane({
             toast.success(`Zone (${zoneName}) has been saved.`, {
               position: "top-center",
             });
-            // setChangedValue(false);
             updateConfig();
           } else {
             toast.error(`Failed to save config changes: ${res.statusText}`, {
@@ -330,16 +283,6 @@ export default function ZoneEditPane({
       return;
     }
     setIsLoading(true);
-    // polygons[activePolygonIndex].name = values.name;
-    // console.log("form values", values);
-    // console.log(
-    //   "string",
-
-    //   flattenPoints(
-    //     interpolatePoints(polygon.points, scaledWidth, scaledHeight, 1, 1),
-    //   ).join(","),
-    // );
-    // console.log("active polygon", polygons[activePolygonIndex]);
 
     saveToConfig(
       values as ZoneFormValuesType,

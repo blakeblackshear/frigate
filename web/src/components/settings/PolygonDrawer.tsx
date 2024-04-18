@@ -1,11 +1,6 @@
 import { useCallback, useRef, useState } from "react";
-import { Line, Circle, Group, Text } from "react-konva";
-import {
-  minMax,
-  toRGBColorString,
-  dragBoundFunc,
-  getAveragePoint,
-} from "@/utils/canvasUtil";
+import { Line, Circle, Group } from "react-konva";
+import { minMax, toRGBColorString, dragBoundFunc } from "@/utils/canvasUtil";
 import type { KonvaEventObject } from "konva/lib/Node";
 import Konva from "konva";
 import { Vector2d } from "konva/lib/types";
@@ -17,7 +12,6 @@ type PolygonDrawerProps = {
   isHovered: boolean;
   isFinished: boolean;
   color: number[];
-  name: string;
   handlePointDragMove: (e: KonvaEventObject<MouseEvent | TouchEvent>) => void;
   handleGroupDragEnd: (e: KonvaEventObject<MouseEvent | TouchEvent>) => void;
   handleMouseOverStartPoint: (
@@ -34,7 +28,6 @@ export default function PolygonDrawer({
   isActive,
   isHovered,
   isFinished,
-  name,
   color,
   handlePointDragMove,
   handleGroupDragEnd,
@@ -92,8 +85,6 @@ export default function PolygonDrawer({
     },
     [color],
   );
-
-  // console.log(groupRef.current?.height());
 
   return (
     <Group
@@ -157,26 +148,6 @@ export default function PolygonDrawer({
           />
         );
       })}
-      {groupRef.current && (
-        <Text
-          text={name}
-          // align="left"
-          // verticalAlign="top"
-          width={groupRef.current.width()}
-          height={groupRef.current.height()}
-          align="center"
-          verticalAlign="middle"
-          x={
-            getAveragePoint(flattenedPoints).x //-
-            //(polygon.name.length * 16 * 0.6) / 2
-          }
-          y={
-            getAveragePoint(flattenedPoints).y //-
-            //16 / 2
-          }
-          fontSize={16}
-        />
-      )}
     </Group>
   );
 }

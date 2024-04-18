@@ -36,9 +36,7 @@ import { reviewQueries } from "@/utils/zoneEdutUtil";
 
 type PolygonItemProps = {
   polygon: Polygon;
-  setAllPolygons: React.Dispatch<React.SetStateAction<Polygon[]>>;
   index: number;
-  activePolygonIndex: number | undefined;
   hoveredPolygonIndex: number | null;
   setHoveredPolygonIndex: (index: number | null) => void;
   setActivePolygonIndex: (index: number | undefined) => void;
@@ -48,9 +46,7 @@ type PolygonItemProps = {
 
 export default function PolygonItem({
   polygon,
-  setAllPolygons,
   index,
-  activePolygonIndex,
   hoveredPolygonIndex,
   setHoveredPolygonIndex,
   setActivePolygonIndex,
@@ -60,6 +56,7 @@ export default function PolygonItem({
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const cameraConfig = useMemo(() => {
     if (polygon?.camera && config) {
@@ -93,14 +90,11 @@ export default function PolygonItem({
         url = `cameras.${polygon.camera}.zones.${polygon.name}${alertQueries}${detectionQueries}`;
       }
       if (polygon.type == "motion_mask") {
-        console.log("deleting", polygon.typeIndex);
-
         const filteredMask = (
           Array.isArray(cameraConfig.motion.mask)
             ? cameraConfig.motion.mask
             : [cameraConfig.motion.mask]
         ).filter((_, currentIndex) => currentIndex !== polygon.typeIndex);
-        console.log(filteredMask);
 
         url = filteredMask
           .map((pointsArray) => {
@@ -115,21 +109,14 @@ export default function PolygonItem({
           // deleting last mask
           url = `cameras.${polygon?.camera}.motion.mask&`;
         }
-        console.log(url);
-
-        // return;
-        // url = `config/set?cameras.${polygon.camera}.motion.mask`;
       }
 
       if (polygon.type == "object_mask") {
-        console.log("deleting", polygon.typeIndex, polygon);
         let configObject;
         let globalMask = false;
-        console.log("polygon objects", polygon.objects, !polygon.objects);
 
         // global mask on camera for all objects
         if (!polygon.objects.length) {
-          console.log("deleting global");
           configObject = cameraConfig.objects.mask;
           globalMask = true;
         } else {
@@ -152,27 +139,12 @@ export default function PolygonItem({
             Array.isArray(configObject) ? configObject : [configObject]
           ).filter((_, currentIndex) => currentIndex !== polygon.typeIndex);
         } else {
-          console.log("not globals config object:", configObject);
-
           filteredMask = (
             Array.isArray(configObject) ? configObject : [configObject]
           )
             .filter((mask) => !globalObjectMasksArray.includes(mask))
-            .filter((_, currentIndex) => {
-              console.log(
-                "current index",
-                currentIndex,
-                "global length:",
-                globalObjectMasksArray.length,
-                "polygon typeindex",
-                polygon.typeIndex,
-              );
-
-              return currentIndex !== polygon.typeIndex;
-            });
+            .filter((_, currentIndex) => currentIndex !== polygon.typeIndex);
         }
-
-        console.log("filtered:", filteredMask);
 
         url = filteredMask
           .map((pointsArray) => {
@@ -191,12 +163,9 @@ export default function PolygonItem({
             ? `cameras.${polygon?.camera}.objects.mask&`
             : `cameras.${polygon?.camera}.objects.filters.${polygon.objects[0]}.mask`;
         }
-
-        console.log("url:", url);
-
-        // return;
-        // url = `config/set?cameras.${polygon.camera}.motion.mask`;
       }
+
+      setIsLoading(true);
 
       await axios
         .put(`config/set?${url}`, { requires_restart: 0 })
@@ -205,7 +174,6 @@ export default function PolygonItem({
             toast.success(`${polygon?.name} has been deleted.`, {
               position: "top-center",
             });
-            // setChangedValue(false);
             updateConfig();
           } else {
             toast.error(`Failed to save config changes: ${res.statusText}`, {
@@ -220,40 +188,13 @@ export default function PolygonItem({
           );
         })
         .finally(() => {
-          //   setIsLoading(false);
+          setIsLoading(false);
         });
     },
     [updateConfig, cameraConfig],
   );
 
-  const reindexPolygons = (arr: Polygon[]): Polygon[] => {
-    const typeCounters: { [type: string]: number } = {};
-
-    return arr.map((obj) => {
-      if (!typeCounters[obj.type]) {
-        typeCounters[obj.type] = 0;
-      }
-
-      const newObj: Polygon = {
-        ...obj,
-        typeIndex: typeCounters[obj.type],
-      };
-      typeCounters[obj.type]++;
-      return newObj;
-    });
-  };
-
-  const handleDelete = (type: string, typeIndex: number) => {
-    // setAllPolygons((oldPolygons) => {
-    //   console.log("old polygons", oldPolygons);
-    //   const filteredPolygons = oldPolygons.filter(
-    //     (polygon) =>
-    //       !(polygon.type === type && polygon.typeIndex === typeIndex),
-    //   );
-    //   console.log("filtered", filteredPolygons);
-    //   // console.log("reindexed", reindexPolygons(filteredPolygons));
-    //   return filteredPolygons;
-    // });
+  const handleDelete = () => {
     setActivePolygonIndex(undefined);
     saveToConfig(polygon);
   };
@@ -307,9 +248,7 @@ export default function PolygonItem({
             </AlertDialogDescription>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => handleDelete(polygon.type, polygon.typeIndex)}
-              >
+              <AlertDialogAction onClick={handleDelete}>
                 Delete
               </AlertDialogAction>
             </AlertDialogFooter>
@@ -334,7 +273,10 @@ export default function PolygonItem({
                 <DropdownMenuItem onClick={() => handleCopyCoordinates(index)}>
                   Copy
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setDeleteDialogOpen(true)}>
+                <DropdownMenuItem
+                  disabled={isLoading}
+                  onClick={() => setDeleteDialogOpen(true)}
+                >
                   Delete
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -378,7 +320,7 @@ export default function PolygonItem({
             </div>
             <div
               className="cursor-pointer size-[15px]"
-              onClick={() => setDeleteDialogOpen(true)}
+              onClick={() => !isLoading && setDeleteDialogOpen(true)}
             >
               <Tooltip>
                 <TooltipTrigger>

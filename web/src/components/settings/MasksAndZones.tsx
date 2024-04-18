@@ -28,52 +28,26 @@ import { Link } from "react-router-dom";
 type MasksAndZoneProps = {
   selectedCamera: string;
   selectedZoneMask?: PolygonType[];
-  isEditing: boolean;
-  setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
-  unsavedChanges: boolean;
   setUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export default function MasksAndZones({
   selectedCamera,
   selectedZoneMask,
-  isEditing,
-  setIsEditing,
-  unsavedChanges,
   setUnsavedChanges,
 }: MasksAndZoneProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
   const [allPolygons, setAllPolygons] = useState<Polygon[]>([]);
   const [editingPolygons, setEditingPolygons] = useState<Polygon[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  // const [zoneObjects, setZoneObjects] = useState<ZoneObjects[]>([]);
   const [activePolygonIndex, setActivePolygonIndex] = useState<
     number | undefined
   >(undefined);
   const [hoveredPolygonIndex, setHoveredPolygonIndex] = useState<number | null>(
     null,
   );
-
   const containerRef = useRef<HTMLDivElement | null>(null);
-  // const polygonTypes = [
-  //   "zone",
-  //   "motion_mask",
-  //   "object_mask",
-  //   undefined,
-  // ] as const;
-
-  // type EditPaneType = (typeof polygonTypes)[number];
   const [editPane, setEditPane] = useState<PolygonType | undefined>(undefined);
-
-  // const cameras = useMemo(() => {
-  //   if (!config) {
-  //     return [];
-  //   }
-
-  //   return Object.values(config.cameras)
-  //     .filter((conf) => conf.ui.dashboard && conf.enabled)
-  //     .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
-  // }, [config]);
 
   const cameraConfig = useMemo(() => {
     if (config && selectedCamera) {
@@ -81,57 +55,9 @@ export default function MasksAndZones({
     }
   }, [config, selectedCamera]);
 
-  // const saveZoneObjects = useCallback(
-  //   (camera: string, zoneName: string, newObjects?: string[]) => {
-  //     setZoneObjects((prevZoneObjects) =>
-  //       prevZoneObjects.map((zoneObject) => {
-  //         if (
-  //           zoneObject.camera === camera &&
-  //           zoneObject.zoneName === zoneName
-  //         ) {
-  //           console.log("found", camera, "with", zoneName);
-  //           console.log("new objects", newObjects);
-  //           console.log("new zoneobject", {
-  //             ...zoneObject,
-  //             objects: newObjects ?? [],
-  //           });
-  //           // Replace objects with newObjects if provided
-  //           return {
-  //             ...zoneObject,
-  //             objects: newObjects ?? [],
-  //           };
-  //         }
-  //         return zoneObject; // Keep original object
-  //       }),
-  //     );
-  //   },
-  //   [setZoneObjects],
-  // );
-
-  // const saveZoneObjects = useCallback(
-  //   (camera: string, zoneName: string, objects?: string[]) => {
-  //     setZoneObjects((prevZoneObjects) => {
-  //       const updatedZoneObjects = prevZoneObjects.map((zoneObject) => {
-  //         if (
-  //           zoneObject.camera === camera &&
-  //           zoneObject.zoneName === zoneName
-  //         ) {
-  //           return { ...zoneObject, objects: objects || [] };
-  //         }
-  //         return zoneObject;
-  //       });
-  //       return updatedZoneObjects;
-  //     });
-  //   },
-  //   [setZoneObjects],
-  // );
-
   const [{ width: containerWidth, height: containerHeight }] =
     useResizeObserver(containerRef);
 
-  // const { width: detectWidth, height: detectHeight } = cameraConfig
-  //   ? cameraConfig.detect
-  //   : { width: 1, height: 1 };
   const aspectRatio = useMemo(() => {
     if (!config) {
       return undefined;
@@ -216,7 +142,6 @@ export default function MasksAndZones({
       {
         points: [],
         isFinished: false,
-        // isUnsaved: true,
         type,
         typeIndex: 9999,
         name: "",
@@ -228,35 +153,27 @@ export default function MasksAndZones({
   };
 
   const handleCancel = useCallback(() => {
-    // console.log("handling cancel");
     setEditPane(undefined);
-    // console.log("all", allPolygons);
-    // console.log("editing", editingPolygons);
-    // setAllPolygons(allPolygons.filter((poly) => !poly.isUnsaved));
     setEditingPolygons([...allPolygons]);
     setActivePolygonIndex(undefined);
     setHoveredPolygonIndex(null);
   }, [allPolygons]);
 
   const handleSave = useCallback(() => {
-    // console.log("handling save");
     setAllPolygons([...(editingPolygons ?? [])]);
-
-    // setEditPane(undefined);
     setHoveredPolygonIndex(null);
   }, [editingPolygons]);
 
   useEffect(() => {
-    console.log(isLoading);
-    console.log("edit pane", editPane);
     if (isLoading) {
       return;
     }
     if (!isLoading && editPane !== undefined) {
-      console.log("setting");
       setActivePolygonIndex(undefined);
       setEditPane(undefined);
     }
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading]);
 
   const handleCopyCoordinates = useCallback(
@@ -276,8 +193,6 @@ export default function MasksAndZones({
     [allPolygons, scaledHeight, scaledWidth],
   );
 
-  // useEffect(() => {}, [editPane]);
-
   useEffect(() => {
     if (cameraConfig && containerRef.current && scaledWidth && scaledHeight) {
       const zones = Object.entries(cameraConfig.zones).map(
@@ -295,7 +210,6 @@ export default function MasksAndZones({
             scaledHeight,
           ),
           isFinished: true,
-          // isUnsaved: false,
           color: zoneData.color,
         }),
       );
@@ -338,6 +252,7 @@ export default function MasksAndZones({
         : cameraConfig.objects.mask
           ? [cameraConfig.objects.mask]
           : [];
+      // TODO: check to see if this is necessary
       if (
         cameraConfig.objects.mask !== null &&
         cameraConfig.objects.mask !== undefined
@@ -360,28 +275,15 @@ export default function MasksAndZones({
         }));
       }
 
-      // if (globalObjectMasks && !Array.isArray(globalObjectMasks)) {
-      //   globalObjectMasks = [globalObjectMasks];
-      // }
-
-      console.log("global", globalObjectMasks);
-
       const globalObjectMasksCount = globalObjectMasks.length;
-
-      console.log("filters", cameraConfig.objects.filters);
-
       let index = 0;
+
       objectMasks = Object.entries(cameraConfig.objects.filters)
-        .filter(([_, { mask }]) => mask || Array.isArray(mask))
+        .filter(([, { mask }]) => mask || Array.isArray(mask))
         .flatMap(([objectName, { mask }]): Polygon[] => {
-          console.log("index", index);
-          console.log("outer", objectName, mask);
-
           const maskArray = Array.isArray(mask) ? mask : mask ? [mask] : [];
-
           return maskArray.flatMap((maskItem, subIndex) => {
             const maskItemString = maskItem;
-
             const newMask = {
               type: "object_mask" as PolygonType,
               typeIndex: subIndex,
@@ -413,11 +315,6 @@ export default function MasksAndZones({
           });
         });
 
-      console.log(Object.entries(cameraConfig.objects.filters));
-
-      console.log("final object masks", objectMasks);
-
-      // console.log("setting all and editing");
       setAllPolygons([
         ...zones,
         ...motionMasks,
@@ -430,46 +327,18 @@ export default function MasksAndZones({
         ...globalObjectMasks,
         ...objectMasks,
       ]);
-
-      // setZoneObjects(
-      //   Object.entries(cameraConfig.zones).map(([name, zoneData]) => ({
-      //     camera: cameraConfig.name,
-      //     zoneName: name,
-      //     objects: Object.keys(zoneData.filters),
-      //   })),
-      // );
     }
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cameraConfig, containerRef, scaledHeight, scaledWidth]);
 
-  // useEffect(() => {
-  //   console.log("editing polygons changed:", editingPolygons);
-  // }, [editingPolygons]);
-
   useEffect(() => {
     if (editPane === undefined) {
       setEditingPolygons([...allPolygons]);
-      setIsEditing(false);
-      // console.log("edit pane undefined, all", allPolygons);
-    } else {
-      setIsEditing(true);
     }
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setEditingPolygons, setIsEditing, allPolygons]);
-
-  // useEffect(() => {
-  //   console.log(
-  //     "config zone objects",
-  //     Object.entries(cameraConfig.zones).map(([name, zoneData]) => ({
-  //       camera: cameraConfig.name,
-  //       zoneName: name,
-  //       objects: Object.keys(zoneData.filters),
-  //     })),
-  //   );
-  //   console.log("component zone objects", zoneObjects);
-  // }, [zoneObjects]);
+  }, [setEditingPolygons, allPolygons]);
 
   useEffect(() => {
     if (selectedCamera) {
@@ -586,12 +455,10 @@ export default function MasksAndZones({
                             key={index}
                             polygon={polygon}
                             index={index}
-                            activePolygonIndex={activePolygonIndex}
                             hoveredPolygonIndex={hoveredPolygonIndex}
                             setHoveredPolygonIndex={setHoveredPolygonIndex}
                             setActivePolygonIndex={setActivePolygonIndex}
                             setEditPane={setEditPane}
-                            setAllPolygons={setAllPolygons}
                             handleCopyCoordinates={handleCopyCoordinates}
                           />
                         ))}
@@ -658,12 +525,10 @@ export default function MasksAndZones({
                             key={index}
                             polygon={polygon}
                             index={index}
-                            activePolygonIndex={activePolygonIndex}
                             hoveredPolygonIndex={hoveredPolygonIndex}
                             setHoveredPolygonIndex={setHoveredPolygonIndex}
                             setActivePolygonIndex={setActivePolygonIndex}
                             setEditPane={setEditPane}
-                            setAllPolygons={setAllPolygons}
                             handleCopyCoordinates={handleCopyCoordinates}
                           />
                         ))}
@@ -729,12 +594,10 @@ export default function MasksAndZones({
                             key={index}
                             polygon={polygon}
                             index={index}
-                            activePolygonIndex={activePolygonIndex}
                             hoveredPolygonIndex={hoveredPolygonIndex}
                             setHoveredPolygonIndex={setHoveredPolygonIndex}
                             setActivePolygonIndex={setActivePolygonIndex}
                             setEditPane={setEditPane}
-                            setAllPolygons={setAllPolygons}
                             handleCopyCoordinates={handleCopyCoordinates}
                           />
                         ))}
@@ -743,85 +606,6 @@ export default function MasksAndZones({
                 </div>
               </>
             )}
-            {/* <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[100px]">Name</TableHead>
-                  <TableHead className="max-w-[200px]">Coordinates</TableHead>
-                  <TableHead>Edit</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {allPolygons.map((polygon, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="font-medium">
-                      {polygon.name}
-                    </TableCell>
-                    <TableCell className="max-w-[200px] text-wrap">
-                      <code>
-                        {JSON.stringify(
-                          interpolatePoints(
-                            polygon.points,
-                            scaledWidth,
-                            scaledHeight,
-                            cameraConfig.detect.width,
-                            cameraConfig.detect.height,
-                          ),
-                          null,
-                          0,
-                        )}
-                      </code>
-                    </TableCell>
-                    <TableCell>
-                      <div
-                        className="cursor-pointer"
-                        onClick={() => setActivePolygonIndex(index)}
-                      >
-                        <LuPencil className="size-4 text-white" />
-                      </div>
-                      <ZoneObjectSelector
-                        camera={polygon.camera}
-                        zoneName={polygon.name}
-                        allLabels={allLabels}
-                        updateLabelFilter={(objects) =>
-                          saveZoneObjects(polygon.camera, polygon.name, objects)
-                        }
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            <div>
-              scaled width: {scaledWidth}, scaled height: {scaledHeight},
-              container width: {containerWidth}, container height:
-              {containerHeight}
-            </div>
-            <ZoneControls
-              camera={cameraConfig.name}
-              polygons={allPolygons}
-              setPolygons={setAllPolygons}
-              activePolygonIndex={activePolygonIndex}
-              setActivePolygonIndex={setActivePolygonIndex}
-            />
-            <div className="flex flex-col justify-center items-center m-auto w-[30%] bg-secondary">
-              <pre style={{ whiteSpace: "pre-wrap" }}>
-                {JSON.stringify(
-                  allPolygons &&
-                    allPolygons.map((polygon) =>
-                      interpolatePoints(
-                        polygon.points,
-                        scaledWidth,
-                        scaledHeight,
-                        1,
-                        1,
-                      ),
-                    ),
-                  null,
-                  0,
-                )}
-              </pre>
-            </div> */}
           </div>
           <div
             ref={containerRef}

@@ -5,7 +5,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import MotionTuner from "@/components/settings/MotionTuner";
@@ -13,7 +12,6 @@ import MasksAndZones from "@/components/settings/MasksAndZones";
 import { Button } from "@/components/ui/button";
 import { useEffect, useMemo, useState } from "react";
 import useOptimisticState from "@/hooks/use-optimistic-state";
-import Logo from "@/components/Logo";
 import { isMobile } from "react-device-detect";
 import { FaVideo } from "react-icons/fa";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
@@ -22,6 +20,7 @@ import General from "@/components/settings/General";
 import FilterSwitch from "@/components/filter/FilterSwitch";
 import { ZoneMaskFilterButton } from "@/components/filter/ZoneMaskFilter";
 import { PolygonType } from "@/types/canvas";
+import ObjectSettings from "@/components/settings/ObjectSettings";
 
 export default function Settings() {
   const settingsViews = [
@@ -37,7 +36,7 @@ export default function Settings() {
 
   const { data: config } = useSWR<FrigateConfig>("config");
 
-  const [isEditing, setIsEditing] = useState(false);
+  // TODO: confirm leave page
   const [unsavedChanges, setUnsavedChanges] = useState(false);
 
   const cameras = useMemo(() => {
@@ -50,7 +49,7 @@ export default function Settings() {
       .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
   }, [config]);
 
-  const [selectedCamera, setSelectedCamera] = useState<string>();
+  const [selectedCamera, setSelectedCamera] = useState<string>("");
 
   const [filterZoneMask, setFilterZoneMask] = useState<PolygonType[]>();
 
@@ -58,6 +57,8 @@ export default function Settings() {
     if (cameras.length) {
       setSelectedCamera(cameras[0].name);
     }
+    // only run once
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -77,7 +78,7 @@ export default function Settings() {
           {Object.values(settingsViews).map((item) => (
             <ToggleGroupItem
               key={item}
-              className={`flex items-center justify-between gap-2 ${pageToggle == item ? "" : "*:text-gray-500"}`}
+              className={`flex items-center justify-between gap-2 ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
               value={item}
               aria-label={`Select ${item}`}
             >
@@ -105,19 +106,21 @@ export default function Settings() {
       </div>
       <div className="mt-2 flex flex-col items-start w-full h-full md:h-dvh md:pb-24">
         {page == "general" && <General />}
-        {page == "objects" && <></>}
+        {page == "objects" && (
+          <ObjectSettings selectedCamera={selectedCamera} />
+        )}
         {page == "masks / zones" && (
           <MasksAndZones
             selectedCamera={selectedCamera}
             selectedZoneMask={filterZoneMask}
-            isEditing={isEditing}
-            setIsEditing={setIsEditing}
-            unsavedChanges={unsavedChanges}
             setUnsavedChanges={setUnsavedChanges}
           />
         )}
         {page == "motion tuner" && (
-          <MotionTuner selectedCamera={selectedCamera} />
+          <MotionTuner
+            selectedCamera={selectedCamera}
+            setUnsavedChanges={setUnsavedChanges}
+          />
         )}
       </div>
     </div>

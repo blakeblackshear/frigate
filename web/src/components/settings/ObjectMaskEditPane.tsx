@@ -63,17 +63,6 @@ export default function ObjectMaskEditPane({
 }: ObjectMaskEditPaneProps) {
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
-  // const { data: config } = useSWR<FrigateConfig>("config");
-
-  // const cameras = useMemo(() => {
-  //   if (!config) {
-  //     return [];
-  //   }
-
-  //   return Object.values(config.cameras)
-  //     .filter((conf) => conf.ui.dashboard && conf.enabled)
-  //     .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
-  // }, [config]);
 
   const polygon = useMemo(() => {
     if (polygons && activePolygonIndex !== undefined) {
@@ -129,22 +118,10 @@ export default function ObjectMaskEditPane({
   const saveToConfig = useCallback(
     async (
       { objects: form_objects }: ObjectMaskFormValuesType, // values submitted via the form
-      objects: string[],
     ) => {
       if (!scaledWidth || !scaledHeight || !polygon || !cameraConfig) {
         return;
       }
-      // console.log("loitering time", loitering_time);
-      // const alertsZones = config?.cameras[camera]?.review.alerts.required_zones;
-
-      // const detectionsZones =
-      //   config?.cameras[camera]?.review.detections.required_zones;
-
-      // console.log("out of try except", mutatedConfig);
-
-      console.log("form objects:", form_objects);
-      console.log("objects:", objects);
-      console.log(cameraConfig.objects.filters);
 
       const coordinates = flattenPoints(
         interpolatePoints(polygon.points, scaledWidth, scaledHeight, 1, 1),
@@ -183,9 +160,6 @@ export default function ObjectMaskEditPane({
           index = polygon.typeIndex;
         }
 
-        console.log("are we an array?", Array.isArray(configObject));
-        console.log("index", index);
-
         // editing existing mask, not creating a new one
         if (editingMask) {
           index = polygon.typeIndex;
@@ -195,10 +169,7 @@ export default function ObjectMaskEditPane({
           Array.isArray(configObject) ? configObject : [configObject as string]
         ).filter((_, currentIndex) => currentIndex !== index);
 
-        console.log("filtered", filteredMask);
-
         filteredMask.splice(index, 0, coordinates);
-        console.log("filtered after splice", filteredMask);
       }
 
       queryString = filteredMask
@@ -212,18 +183,7 @@ export default function ObjectMaskEditPane({
         })
         .join("");
 
-      console.log("polygon", polygon);
-      console.log(queryString);
-
-      // console.log(
-      //   `config/set?cameras.${polygon?.camera}.objects.mask=${coordinates}&${queryString}`,
-      // );
-      // console.log("object masks", cameraConfig.objects.mask);
-      // console.log("new coords", coordinates);
-      // return;
-
       if (!queryString) {
-        console.log("no query string");
         return;
       }
 
@@ -236,7 +196,6 @@ export default function ObjectMaskEditPane({
             toast.success(`${polygon.name || "Object Mask"} has been saved.`, {
               position: "top-center",
             });
-            // setChangedValue(false);
             updateConfig();
           } else {
             toast.error(`Failed to save config changes: ${res.statusText}`, {
@@ -254,7 +213,14 @@ export default function ObjectMaskEditPane({
           setIsLoading(false);
         });
     },
-    [updateConfig, polygon, scaledWidth, scaledHeight, setIsLoading],
+    [
+      updateConfig,
+      polygon,
+      scaledWidth,
+      scaledHeight,
+      setIsLoading,
+      cameraConfig,
+    ],
   );
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -262,21 +228,8 @@ export default function ObjectMaskEditPane({
       return;
     }
     setIsLoading(true);
-    // polygons[activePolygonIndex].name = values.name;
-    // console.log("form values", values);
-    // console.log(
-    //   "string",
 
-    //   flattenPoints(
-    //     interpolatePoints(polygon.points, scaledWidth, scaledHeight, 1, 1),
-    //   ).join(","),
-    // );
-    // console.log("active polygon", polygons[activePolygonIndex]);
-
-    saveToConfig(
-      values as ObjectMaskFormValuesType,
-      polygons[activePolygonIndex].objects,
-    );
+    saveToConfig(values as ObjectMaskFormValuesType);
     if (onSave) {
       onSave();
     }

@@ -92,13 +92,6 @@ export default function MotionMaskEditPane({
     if (!scaledWidth || !scaledHeight || !polygon || !cameraConfig) {
       return;
     }
-    // console.log("loitering time", loitering_time);
-    // const alertsZones = config?.cameras[camera]?.review.alerts.required_zones;
-
-    // const detectionsZones =
-    //   config?.cameras[camera]?.review.detections.required_zones;
-
-    // console.log("out of try except", mutatedConfig);
 
     const coordinates = flattenPoints(
       interpolatePoints(polygon.points, scaledWidth, scaledHeight, 1, 1),
@@ -110,14 +103,11 @@ export default function MotionMaskEditPane({
         ? 1
         : 0;
 
-    console.log("are we an array?", Array.isArray(cameraConfig.motion.mask));
-    console.log("index", index);
     const editingMask = polygon.name.length > 0;
 
     // editing existing mask, not creating a new one
     if (editingMask) {
       index = polygon.typeIndex;
-      console.log("editing, index", index);
     }
 
     const filteredMask = (
@@ -125,15 +115,8 @@ export default function MotionMaskEditPane({
         ? cameraConfig.motion.mask
         : [cameraConfig.motion.mask]
     ).filter((_, currentIndex) => currentIndex !== index);
-    console.log("filtered", filteredMask);
 
-    // if (editingMask) {
-    //   if (index != null) {
-
-    //   }
-    // }
     filteredMask.splice(index, 0, coordinates);
-    console.log("filtered after splice", filteredMask);
 
     const queryString = filteredMask
       .map((pointsArray) => {
@@ -144,16 +127,6 @@ export default function MotionMaskEditPane({
       })
       .join("");
 
-    console.log("polygon", polygon);
-    console.log(queryString);
-
-    // console.log(
-    //   `config/set?cameras.${polygon?.camera}.motion.mask=${coordinates}&${queryString}`,
-    // );
-    console.log("motion masks", cameraConfig.motion.mask);
-    console.log("new coords", coordinates);
-    // return;
-
     axios
       .put(`config/set?${queryString}`, {
         requires_restart: 0,
@@ -163,7 +136,6 @@ export default function MotionMaskEditPane({
           toast.success(`${polygon.name || "Motion Mask"} has been saved.`, {
             position: "top-center",
           });
-          // setChangedValue(false);
           updateConfig();
         } else {
           toast.error(`Failed to save config changes: ${res.statusText}`, {
@@ -180,23 +152,20 @@ export default function MotionMaskEditPane({
       .finally(() => {
         setIsLoading(false);
       });
-  }, [updateConfig, polygon, scaledWidth, scaledHeight, setIsLoading]);
+  }, [
+    updateConfig,
+    polygon,
+    scaledWidth,
+    scaledHeight,
+    setIsLoading,
+    cameraConfig,
+  ]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (activePolygonIndex === undefined || !values || !polygons) {
       return;
     }
     setIsLoading(true);
-    // polygons[activePolygonIndex].name = values.name;
-    // console.log("form values", values);
-    // console.log(
-    //   "string",
-
-    //   flattenPoints(
-    //     interpolatePoints(polygon.points, scaledWidth, scaledHeight, 1, 1),
-    //   ).join(","),
-    // );
-    // console.log("active polygon", polygons[activePolygonIndex]);
 
     saveToConfig();
     if (onSave) {
