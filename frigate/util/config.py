@@ -166,4 +166,4 @@ def get_relative_coordinates(
 
         return mask
 
-    return None
+    return mask
