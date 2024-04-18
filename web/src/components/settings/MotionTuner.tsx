@@ -27,6 +27,9 @@ import { Button } from "../ui/button";
 import { Switch } from "../ui/switch";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
+import { Separator } from "../ui/separator";
+import { Link } from "react-router-dom";
+import { LuExternalLink } from "react-icons/lu";
 
 type MotionTunerProps = {
   selectedCamera: string;
@@ -45,14 +48,17 @@ export default function MotionTuner({ selectedCamera }: MotionTunerProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
 
-  // const [selectedCamera, setSelectedCamera] = useState(cameras[0]?.name);
-  const [nextSelectedCamera, setNextSelectedCamera] = useState("");
-
   const { send: sendMotionThreshold } = useMotionThreshold(selectedCamera);
   const { send: sendMotionContourArea } = useMotionContourArea(selectedCamera);
   const { send: sendImproveContrast } = useImproveContrast(selectedCamera);
 
   const [motionSettings, setMotionSettings] = useState<MotionSettings>({
+    threshold: undefined,
+    contour_area: undefined,
+    improve_contrast: undefined,
+  });
+
+  const [origMotionSettings, setOrigMotionSettings] = useState<MotionSettings>({
     threshold: undefined,
     contour_area: undefined,
     improve_contrast: undefined,
@@ -67,6 +73,11 @@ export default function MotionTuner({ selectedCamera }: MotionTunerProps) {
   useEffect(() => {
     if (cameraConfig) {
       setMotionSettings({
+        threshold: cameraConfig.motion.threshold,
+        contour_area: cameraConfig.motion.contour_area,
+        improve_contrast: cameraConfig.motion.improve_contrast,
+      });
+      setOrigMotionSettings({
         threshold: cameraConfig.motion.threshold,
         contour_area: cameraConfig.motion.contour_area,
         improve_contrast: cameraConfig.motion.improve_contrast,
@@ -150,15 +161,16 @@ export default function MotionTuner({ selectedCamera }: MotionTunerProps) {
     selectedCamera,
   ]);
 
-  const onCancel = useCallback(() => {}, []);
+  const onCancel = useCallback(() => {
+    setMotionSettings(origMotionSettings);
+    setChangedValue(false);
+  }, [origMotionSettings]);
 
   const handleDialog = useCallback(
     (save: boolean) => {
       if (save) {
         saveToConfig();
       }
-      // setSelectedCamera(nextSelectedCamera);
-      setNextSelectedCamera("");
       setConfirmationDialogOpen(false);
       setChangedValue(false);
     },
@@ -176,72 +188,117 @@ export default function MotionTuner({ selectedCamera }: MotionTunerProps) {
         <Heading as="h3" className="my-2">
           Motion Detection Tuner
         </Heading>
+        <div className="text-sm text-muted-foreground my-3 space-y-3">
+          <p>
+            Frigate uses motion detection as a first line check to see if there
+            is anything happening in the frame worth checking with object
+            detection.
+          </p>
 
-        <div className="flex flex-col w-full space-y-10">
-          <div className="flex flex-row mb-5">
-            <Slider
-              id="motion-threshold"
-              className="w-[300px]"
-              disabled={motionSettings.threshold === undefined}
-              value={[motionSettings.threshold ?? 0]}
-              min={10}
-              max={80}
-              step={1}
-              onValueChange={(value) => {
-                handleMotionConfigChange({ threshold: value[0] });
-              }}
-            />
-            <Label htmlFor="motion-threshold" className="px-2">
-              Threshold: {motionSettings.threshold}
-            </Label>
+          <div className="flex items-center text-primary">
+            <Link
+              to="https://docs.frigate.video/configuration/motion_detection"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline"
+            >
+              Read the Motion Tuning Guide{" "}
+              <LuExternalLink className="size-3 ml-2 inline-flex" />
+            </Link>
           </div>
-          <div className="flex flex-row">
-            <Slider
-              id="motion-contour-area"
-              className="w-[300px]"
-              disabled={motionSettings.contour_area === undefined}
-              value={[motionSettings.contour_area ?? 0]}
-              min={10}
-              max={200}
-              step={5}
-              onValueChange={(value) => {
-                handleMotionConfigChange({ contour_area: value[0] });
-              }}
-            />
-            <Label htmlFor="motion-contour-area" className="px-2">
-              Contour Area: {motionSettings.contour_area}
-            </Label>
+        </div>
+        <Separator className="flex my-2 bg-secondary" />
+        <div className="flex flex-col w-full space-y-6">
+          <div className="mt-2 space-y-6">
+            <div className="space-y-0.5">
+              <Label htmlFor="motion-threshold" className="text-md">
+                Threshold
+              </Label>
+              <div className="text-sm text-muted-foreground my-2">
+                <p>
+                  The threshold value dictates how much of a change in a pixel's
+                  luminance is required to be considered motion.{" "}
+                  <em>Default: 30</em>
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-row justify-between">
+              <Slider
+                id="motion-threshold"
+                className="w-full"
+                disabled={motionSettings.threshold === undefined}
+                value={[motionSettings.threshold ?? 0]}
+                min={5}
+                max={80}
+                step={1}
+                onValueChange={(value) => {
+                  handleMotionConfigChange({ threshold: value[0] });
+                }}
+              />
+              <div className="text-lg ml-6 mr-2 flex align-center">
+                {motionSettings.threshold}
+              </div>
+            </div>
           </div>
-          <div className="flex flex-row">
+          <div className="mt-2 space-y-6">
+            <div className="space-y-0.5">
+              <Label htmlFor="motion-threshold" className="text-md">
+                Contour Area
+              </Label>
+              <div className="text-sm text-muted-foreground my-2">
+                <p>
+                  The contour area value is used to decide which groups of
+                  changed pixels qualify as motion. <em>Default: 10</em>
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-row justify-between">
+              <Slider
+                id="motion-contour-area"
+                className="w-full"
+                disabled={motionSettings.contour_area === undefined}
+                value={[motionSettings.contour_area ?? 0]}
+                min={5}
+                max={100}
+                step={1}
+                onValueChange={(value) => {
+                  handleMotionConfigChange({ contour_area: value[0] });
+                }}
+              />
+              <div className="text-lg ml-6 mr-2 flex align-center">
+                {motionSettings.contour_area}
+              </div>
+            </div>
+          </div>
+          <Separator className="flex my-2 bg-secondary" />
+          <div className="flex flex-row items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="improve-contrast">Improve Contrast</Label>
+              <div className="text-sm text-muted-foreground">
+                Improve contrast for darker scenes. <em>Default: ON</em>
+              </div>
+            </div>
             <Switch
               id="improve-contrast"
+              className="ml-3"
               disabled={motionSettings.improve_contrast === undefined}
               checked={motionSettings.improve_contrast === true}
               onCheckedChange={(isChecked) => {
                 handleMotionConfigChange({ improve_contrast: isChecked });
               }}
             />
-            <Label htmlFor="improve-contrast">Improve Contrast</Label>
           </div>
-          <div className="flex flex-row items-center justify-between rounded-lg border p-4">
-            <div className="space-y-0.5">
-              <div className="text-base">Improve Contrast</div>
-              <div>Improve contrast for darker scenes.</div>
-            </div>
-            <div>
-              <div checked={field.value} onCheckedChange={field.onChange} />
-            </div>
-          </div>
-
+        </div>
+        <div className="flex flex-col flex-1 justify-end">
           <div className="flex flex-row gap-2 pt-5">
             <Button className="flex flex-1" onClick={onCancel}>
-              Cancel
+              Reset
             </Button>
             <Button
               variant="select"
-              disabled={isLoading}
+              disabled={!changedValue || isLoading}
               className="flex flex-1"
-              type="submit"
+              onClick={saveToConfig}
             >
               {isLoading ? (
                 <div className="flex flex-row items-center gap-2">

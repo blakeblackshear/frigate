@@ -325,70 +325,77 @@ export default function ObjectMaskEditPane({
       <Separator className="my-3 bg-secondary" />
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="polygon.name"
-            render={() => (
-              <FormItem>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="objects"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Objects</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an object type" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <ZoneObjectSelector camera={polygon.camera} />
-                  </SelectContent>
-                </Select>
-                <FormDescription>
-                  The object type that that applies to this object mask.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="polygon.isFinished"
-            render={() => (
-              <FormItem>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div className="flex flex-row gap-2 pt-5">
-            <Button className="flex flex-1" onClick={onCancel}>
-              Cancel
-            </Button>
-            <Button
-              variant="select"
-              disabled={isLoading}
-              className="flex flex-1"
-              type="submit"
-            >
-              {isLoading ? (
-                <div className="flex flex-row items-center gap-2">
-                  <ActivityIndicator />
-                  <span>Saving...</span>
-                </div>
-              ) : (
-                "Save"
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-6 flex flex-col flex-1"
+        >
+          <div>
+            <FormField
+              control={form.control}
+              name="polygon.name"
+              render={() => (
+                <FormItem>
+                  <FormMessage />
+                </FormItem>
               )}
-            </Button>
+            />
+            <FormField
+              control={form.control}
+              name="objects"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Objects</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select an object type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <ZoneObjectSelector camera={polygon.camera} />
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    The object type that that applies to this object mask.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="polygon.isFinished"
+              render={() => (
+                <FormItem>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="flex flex-col flex-1 justify-end">
+            <div className="flex flex-row gap-2 pt-5">
+              <Button className="flex flex-1" onClick={onCancel}>
+                Cancel
+              </Button>
+              <Button
+                variant="select"
+                disabled={isLoading}
+                className="flex flex-1"
+                type="submit"
+              >
+                {isLoading ? (
+                  <div className="flex flex-row items-center gap-2">
+                    <ActivityIndicator />
+                    <span>Saving...</span>
+                  </div>
+                ) : (
+                  "Save"
+                )}
+              </Button>
+            </div>
           </div>
         </form>
       </Form>

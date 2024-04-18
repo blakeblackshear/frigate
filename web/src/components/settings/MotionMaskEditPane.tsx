@@ -248,7 +248,10 @@ export default function MotionMaskEditPane({
       <Separator className="my-3 bg-secondary" />
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-6 flex flex-col flex-1"
+        >
           <FormField
             control={form.control}
             name="polygon.name"
@@ -267,25 +270,27 @@ export default function MotionMaskEditPane({
               </FormItem>
             )}
           />
-          <div className="flex flex-row gap-2 pt-5">
-            <Button className="flex flex-1" onClick={onCancel}>
-              Cancel
-            </Button>
-            <Button
-              variant="select"
-              disabled={isLoading}
-              className="flex flex-1"
-              type="submit"
-            >
-              {isLoading ? (
-                <div className="flex flex-row items-center gap-2">
-                  <ActivityIndicator />
-                  <span>Saving...</span>
-                </div>
-              ) : (
-                "Save"
-              )}
-            </Button>
+          <div className="flex flex-col flex-1 justify-end">
+            <div className="flex flex-row gap-2 pt-5">
+              <Button className="flex flex-1" onClick={onCancel}>
+                Cancel
+              </Button>
+              <Button
+                variant="select"
+                disabled={isLoading}
+                className="flex flex-1"
+                type="submit"
+              >
+                {isLoading ? (
+                  <div className="flex flex-row items-center gap-2">
+                    <ActivityIndicator />
+                    <span>Saving...</span>
+                  </div>
+                ) : (
+                  "Save"
+                )}
+              </Button>
+            </div>
           </div>
         </form>
       </Form>

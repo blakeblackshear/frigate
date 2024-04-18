@@ -394,7 +394,7 @@ export default function ZoneEditPane({
       <Separator className="my-3 bg-secondary" />
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="mt-2 space-y-6">
           <FormField
             control={form.control}
             name="name"
@@ -416,9 +416,7 @@ export default function ZoneEditPane({
               </FormItem>
             )}
           />
-          <div className="flex my-2">
-            <Separator className="bg-secondary" />
-          </div>
+          <Separator className="flex my-2 bg-secondary" />
           <FormField
             control={form.control}
             name="inertia"
@@ -440,9 +438,7 @@ export default function ZoneEditPane({
               </FormItem>
             )}
           />
-          <div className="flex my-2">
-            <Separator className="bg-secondary" />
-          </div>
+          <Separator className="flex my-2 bg-secondary" />
           <FormField
             control={form.control}
             name="loitering_time"
@@ -464,9 +460,7 @@ export default function ZoneEditPane({
               </FormItem>
             )}
           />
-          <div className="flex my-2">
-            <Separator className="bg-secondary" />
-          </div>
+          <Separator className="flex my-2 bg-secondary" />
           <FormItem>
             <FormLabel>Objects</FormLabel>
             <FormDescription>
@@ -490,14 +484,14 @@ export default function ZoneEditPane({
               }}
             />
           </FormItem>
-          <div className="flex my-2">
-            <Separator className="bg-secondary" />
-          </div>
+
+          <Separator className="flex my-2 bg-secondary" />
+
           <FormField
             control={form.control}
             name="review_alerts"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <FormItem className="flex flex-row items-center justify-between">
                 <div className="space-y-0.5">
                   <FormLabel>Alerts</FormLabel>
                   <FormDescription>
@@ -509,6 +503,7 @@ export default function ZoneEditPane({
                   <Switch
                     checked={field.value}
                     onCheckedChange={field.onChange}
+                    className="ml-3"
                   />
                 </FormControl>
               </FormItem>
@@ -518,7 +513,7 @@ export default function ZoneEditPane({
             control={form.control}
             name="review_detections"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <FormItem className="flex flex-row items-center justify-between">
                 <div className="space-y-0.5">
                   <FormLabel className="text-base">Detections</FormLabel>
                   <FormDescription>
@@ -530,6 +525,7 @@ export default function ZoneEditPane({
                   <Switch
                     checked={field.value}
                     onCheckedChange={field.onChange}
+                    className="ml-3"
                   />
                 </FormControl>
               </FormItem>
