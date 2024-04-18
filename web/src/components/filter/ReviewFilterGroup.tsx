@@ -248,7 +248,7 @@ export function CamerasFilterButton({
           <DropdownMenuSeparator />
         </>
       )}
-      <div className="h-auto pt-2 overflow-y-auto overflow-x-hidden">
+      <div className="h-auto p-4 overflow-y-auto overflow-x-hidden">
         <FilterSwitch
           isChecked={currentCameras == undefined}
           label="All Cameras"
