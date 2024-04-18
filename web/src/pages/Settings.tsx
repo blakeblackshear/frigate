@@ -19,7 +19,7 @@ import { FaVideo } from "react-icons/fa";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 import General from "@/components/settings/General";
-import FilterCheckBox from "@/components/filter/FilterCheckBox";
+import FilterSwitch from "@/components/filter/FilterSwitch";
 import { ZoneMaskFilterButton } from "@/components/filter/ZoneMaskFilter";
 import { PolygonType } from "@/types/canvas";
 
@@ -162,20 +162,22 @@ function CameraSelectButton({
           <DropdownMenuSeparator />
         </>
       )}
-      <div className="h-auto overflow-y-auto overflow-x-hidden pb-4 md:pb-0">
-        {allCameras.map((item) => (
-          <FilterCheckBox
-            key={item.name}
-            isChecked={item.name === selectedCamera}
-            label={item.name}
-            onCheckedChange={(isChecked) => {
-              if (isChecked) {
-                setSelectedCamera(item.name);
-                setOpen(false);
-              }
-            }}
-          />
-        ))}
+      <div className="h-auto pt-2 overflow-y-auto overflow-x-hidden">
+        <div className="flex flex-col gap-2.5">
+          {allCameras.map((item) => (
+            <FilterSwitch
+              key={item.name}
+              isChecked={item.name === selectedCamera}
+              label={item.name}
+              onCheckedChange={(isChecked) => {
+                if (isChecked) {
+                  setSelectedCamera(item.name);
+                  setOpen(false);
+                }
+              }}
+            />
+          ))}
+        </div>
       </div>
     </>
   );

@@ -45,16 +45,6 @@ export default function MotionTuner({ selectedCamera }: MotionTunerProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
 
-  const cameras = useMemo(() => {
-    if (!config) {
-      return [];
-    }
-
-    return Object.values(config.cameras)
-      .filter((conf) => conf.ui.dashboard && conf.enabled)
-      .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
-  }, [config]);
-
   // const [selectedCamera, setSelectedCamera] = useState(cameras[0]?.name);
   const [nextSelectedCamera, setNextSelectedCamera] = useState("");
 
@@ -132,7 +122,9 @@ export default function MotionTuner({ selectedCamera }: MotionTunerProps) {
       )
       .then((res) => {
         if (res.status === 200) {
-          toast.success("Motion settings saved.", { position: "top-center" });
+          toast.success("Motion settings have been saved.", {
+            position: "top-center",
+          });
           setChangedValue(false);
           updateConfig();
         } else {
@@ -158,18 +150,7 @@ export default function MotionTuner({ selectedCamera }: MotionTunerProps) {
     selectedCamera,
   ]);
 
-  const handleSelectedCameraChange = useCallback(
-    (camera: string) => {
-      if (changedValue) {
-        setNextSelectedCamera(camera);
-        setConfirmationDialogOpen(true);
-      } else {
-        // setSelectedCamera(camera);
-        setNextSelectedCamera("");
-      }
-    },
-    [changedValue],
-  );
+  const onCancel = useCallback(() => {}, []);
 
   const handleDialog = useCallback(
     (save: boolean) => {
@@ -242,15 +223,34 @@ export default function MotionTuner({ selectedCamera }: MotionTunerProps) {
             />
             <Label htmlFor="improve-contrast">Improve Contrast</Label>
           </div>
+          <div className="flex flex-row items-center justify-between rounded-lg border p-4">
+            <div className="space-y-0.5">
+              <div className="text-base">Improve Contrast</div>
+              <div>Improve contrast for darker scenes.</div>
+            </div>
+            <div>
+              <div checked={field.value} onCheckedChange={field.onChange} />
+            </div>
+          </div>
 
-          <div className="flex">
+          <div className="flex flex-row gap-2 pt-5">
+            <Button className="flex flex-1" onClick={onCancel}>
+              Cancel
+            </Button>
             <Button
-              size="sm"
-              variant={isLoading ? "ghost" : "select"}
-              disabled={!changedValue || isLoading}
-              onClick={saveToConfig}
+              variant="select"
+              disabled={isLoading}
+              className="flex flex-1"
+              type="submit"
             >
-              {isLoading ? "Saving..." : "Save to Config"}
+              {isLoading ? (
+                <div className="flex flex-row items-center gap-2">
+                  <ActivityIndicator />
+                  <span>Saving...</span>
+                </div>
+              ) : (
+                "Save"
+              )}
             </Button>
           </div>
         </div>
