@@ -33,6 +33,7 @@ import { toast } from "sonner";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { reviewQueries } from "@/utils/zoneEdutUtil";
+import IconWrapper from "../ui/icon-wrapper";
 
 type PolygonItemProps = {
   polygon: Polygon;
@@ -285,55 +286,46 @@ export default function PolygonItem({
         )}
         {!isMobile && hoveredPolygonIndex === index && (
           <div className="flex flex-row gap-2 items-center">
-            <div
-              className="cursor-pointer"
-              onClick={() => {
-                setActivePolygonIndex(index);
-                setEditPane(polygon.type);
-              }}
-            >
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <LuPencil
-                    className={`size-[15px] ${
-                      hoveredPolygonIndex === index && "text-primary-variant"
-                    }`}
-                  />
-                </TooltipTrigger>
-                <TooltipContent>Edit</TooltipContent>
-              </Tooltip>
-            </div>
-            <div
-              className="cursor-pointer"
-              onClick={() => handleCopyCoordinates(index)}
-            >
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <LuCopy
-                    className={`size-[15px] ${
-                      hoveredPolygonIndex === index && "text-primary-variant"
-                    }`}
-                  />
-                </TooltipTrigger>
-                <TooltipContent>Copy coordinates</TooltipContent>
-              </Tooltip>
-            </div>
-            <div
-              className="cursor-pointer"
-              onClick={() => !isLoading && setDeleteDialogOpen(true)}
-            >
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <HiTrash
-                    className={`size-[15px] ${
-                      hoveredPolygonIndex === index &&
-                      "text-primary-variant fill-primary-variant"
-                    }`}
-                  />
-                </TooltipTrigger>
-                <TooltipContent>Delete</TooltipContent>
-              </Tooltip>
-            </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <IconWrapper
+                  icon={LuPencil}
+                  className={`size-[15px] cursor-pointer ${hoveredPolygonIndex === index && "text-primary-variant"}`}
+                  onClick={() => {
+                    setActivePolygonIndex(index);
+                    setEditPane(polygon.type);
+                  }}
+                />
+              </TooltipTrigger>
+              <TooltipContent>Edit</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <IconWrapper
+                  icon={LuCopy}
+                  className={`size-[15px] cursor-pointer ${
+                    hoveredPolygonIndex === index && "text-primary-variant"
+                  }`}
+                  onClick={() => handleCopyCoordinates(index)}
+                />
+              </TooltipTrigger>
+              <TooltipContent>Copy coordinates</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <IconWrapper
+                  icon={HiTrash}
+                  className={`size-[15px] cursor-pointer ${
+                    hoveredPolygonIndex === index &&
+                    "text-primary-variant fill-primary-variant"
+                  }`}
+                  onClick={() => !isLoading && setDeleteDialogOpen(true)}
+                />
+              </TooltipTrigger>
+              <TooltipContent>Delete</TooltipContent>
+            </Tooltip>
           </div>
         )}
       </div>
