@@ -338,6 +338,7 @@ export default function MasksAndZones({
   useEffect(() => {
     if (selectedCamera) {
       setActivePolygonIndex(undefined);
+      setEditPane(undefined);
     }
   }, [selectedCamera]);
 
