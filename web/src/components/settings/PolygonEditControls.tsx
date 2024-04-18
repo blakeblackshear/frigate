@@ -53,12 +53,12 @@ export default function PolygonEditControls({
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
-            variant="secondary"
-            className="size-6 p-1 rounded-md text-background bg-secondary-foreground"
+            variant="default"
+            className="size-6 p-1 rounded-md"
             disabled={!polygons[activePolygonIndex].points.length}
             onClick={undo}
           >
-            <MdUndo />
+            <MdUndo className="text-secondary-foreground" />
           </Button>
         </TooltipTrigger>
         <TooltipContent>Undo</TooltipContent>
@@ -66,12 +66,12 @@ export default function PolygonEditControls({
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
-            variant="secondary"
-            className="size-6 p-1 rounded-md text-background bg-secondary-foreground"
+            variant="default"
+            className="size-6 p-1 rounded-md"
             disabled={!polygons[activePolygonIndex].points.length}
             onClick={reset}
           >
-            <MdOutlineRestartAlt />
+            <MdOutlineRestartAlt className="text-secondary-foreground" />
           </Button>
         </TooltipTrigger>
         <TooltipContent>Reset</TooltipContent>

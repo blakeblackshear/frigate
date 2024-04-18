@@ -24,6 +24,7 @@ import MotionMaskEditPane from "./MotionMaskEditPane";
 import ObjectMaskEditPane from "./ObjectMaskEditPane";
 import PolygonItem from "./PolygonItem";
 import { Link } from "react-router-dom";
+import { isDesktop } from "react-device-detect";
 
 type MasksAndZoneProps = {
   selectedCamera: string;
@@ -87,8 +88,8 @@ export default function MasksAndZones({
   }, [config, selectedCamera]);
 
   const stretch = true;
-  // TODO: mobile / portrait cams
-  const fitAspect = 16 / 9;
+  // may need tweaking for mobile
+  const fitAspect = isDesktop ? 16 / 9 : 3 / 4;
 
   const scaledHeight = useMemo(() => {
     if (containerRef.current && aspectRatio && detectHeight) {
@@ -97,7 +98,9 @@ export default function MasksAndZones({
           ? Math.floor(
               Math.min(containerHeight, containerRef.current?.clientHeight),
             )
-          : Math.floor(containerWidth / aspectRatio);
+          : isDesktop || aspectRatio > fitAspect
+            ? Math.floor(containerWidth / aspectRatio)
+            : Math.floor(containerWidth / aspectRatio) / 1.5;
       const finalHeight = stretch
         ? scaledHeight
         : Math.min(scaledHeight, detectHeight);
@@ -157,12 +160,14 @@ export default function MasksAndZones({
     setEditingPolygons([...allPolygons]);
     setActivePolygonIndex(undefined);
     setHoveredPolygonIndex(null);
-  }, [allPolygons]);
+    setUnsavedChanges(false);
+  }, [allPolygons, setUnsavedChanges]);
 
   const handleSave = useCallback(() => {
     setAllPolygons([...(editingPolygons ?? [])]);
     setHoveredPolygonIndex(null);
-  }, [editingPolygons]);
+    setUnsavedChanges(false);
+  }, [editingPolygons, setUnsavedChanges]);
 
   useEffect(() => {
     if (isLoading) {
@@ -218,62 +223,52 @@ export default function MasksAndZones({
       let globalObjectMasks: Polygon[] = [];
       let objectMasks: Polygon[] = [];
 
-      if (
-        cameraConfig.motion.mask !== null &&
-        cameraConfig.motion.mask !== undefined
-      ) {
-        // this can be an array or a string
-        motionMasks = (
-          Array.isArray(cameraConfig.motion.mask)
-            ? cameraConfig.motion.mask
-            : cameraConfig.motion.mask
-              ? [cameraConfig.motion.mask]
-              : []
-        ).map((maskData, index) => ({
-          type: "motion_mask" as PolygonType,
-          typeIndex: index,
-          camera: cameraConfig.name,
-          name: `Motion Mask ${index + 1}`,
-          objects: [],
-          points: interpolatePoints(
-            parseCoordinates(maskData),
-            1,
-            1,
-            scaledWidth,
-            scaledHeight,
-          ),
-          isFinished: true,
-          color: [0, 0, 255],
-        }));
-      }
+      // this can be an array or a string
+      motionMasks = (
+        Array.isArray(cameraConfig.motion.mask)
+          ? cameraConfig.motion.mask
+          : cameraConfig.motion.mask
+            ? [cameraConfig.motion.mask]
+            : []
+      ).map((maskData, index) => ({
+        type: "motion_mask" as PolygonType,
+        typeIndex: index,
+        camera: cameraConfig.name,
+        name: `Motion Mask ${index + 1}`,
+        objects: [],
+        points: interpolatePoints(
+          parseCoordinates(maskData),
+          1,
+          1,
+          scaledWidth,
+          scaledHeight,
+        ),
+        isFinished: true,
+        color: [0, 0, 255],
+      }));
 
       const globalObjectMasksArray = Array.isArray(cameraConfig.objects.mask)
         ? cameraConfig.objects.mask
         : cameraConfig.objects.mask
           ? [cameraConfig.objects.mask]
           : [];
-      // TODO: check to see if this is necessary
-      if (
-        cameraConfig.objects.mask !== null &&
-        cameraConfig.objects.mask !== undefined
-      ) {
-        globalObjectMasks = globalObjectMasksArray.map((maskData, index) => ({
-          type: "object_mask" as PolygonType,
-          typeIndex: index,
-          camera: cameraConfig.name,
-          name: `Object Mask ${index + 1} (all objects)`,
-          objects: [],
-          points: interpolatePoints(
-            parseCoordinates(maskData),
-            1,
-            1,
-            scaledWidth,
-            scaledHeight,
-          ),
-          isFinished: true,
-          color: [128, 128, 128],
-        }));
-      }
+
+      globalObjectMasks = globalObjectMasksArray.map((maskData, index) => ({
+        type: "object_mask" as PolygonType,
+        typeIndex: index,
+        camera: cameraConfig.name,
+        name: `Object Mask ${index + 1} (all objects)`,
+        objects: [],
+        points: interpolatePoints(
+          parseCoordinates(maskData),
+          1,
+          1,
+          scaledWidth,
+          scaledHeight,
+        ),
+        isFinished: true,
+        color: [128, 128, 128],
+      }));
 
       const globalObjectMasksCount = globalObjectMasks.length;
       let index = 0;

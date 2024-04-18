@@ -97,6 +97,7 @@ export default function PolygonDrawer({
       onMouseOver={isActive ? handleGroupMouseOver : undefined}
       onTouchStart={isActive ? handleGroupMouseOver : undefined}
       onMouseOut={isActive ? handleGroupMouseOut : undefined}
+      // TODO: don't use zindex
       zIndex={isActive ? 999 : 100}
     >
       <Line

@@ -236,7 +236,7 @@ export function useMotionContourArea(camera: string): {
 }
 
 export function useImproveContrast(camera: string): {
-  payload: string;
+  payload: ToggleableSetting;
   send: (payload: string, retain?: boolean) => void;
 } {
   const {
@@ -246,5 +246,5 @@ export function useImproveContrast(camera: string): {
     `${camera}/improve_contrast/state`,
     `${camera}/improve_contrast/set`,
   );
-  return { payload: payload as string, send };
+  return { payload: payload as ToggleableSetting, send };
 }

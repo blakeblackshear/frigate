@@ -1,14 +1,4 @@
 import Heading from "@/components/ui/heading";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "../ui/alert-dialog";
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 import axios from "axios";
@@ -50,7 +40,6 @@ export default function MotionTuner({
     useSWR<FrigateConfig>("config");
   const [changedValue, setChangedValue] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
 
   const { send: sendMotionThreshold } = useMotionThreshold(selectedCamera);
   const { send: sendMotionContourArea } = useMotionContourArea(selectedCamera);
@@ -87,43 +76,31 @@ export default function MotionTuner({
         improve_contrast: cameraConfig.motion.improve_contrast,
       });
     }
-  }, [cameraConfig]);
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
-    if (cameraConfig) {
-      const { threshold, contour_area, improve_contrast } = motionSettings;
+    if (!motionSettings.threshold) return;
 
-      if (
-        threshold !== undefined &&
-        cameraConfig.motion.threshold !== threshold
-      ) {
-        sendMotionThreshold(threshold);
-      }
+    sendMotionThreshold(motionSettings.threshold);
+  }, [motionSettings.threshold, sendMotionThreshold]);
 
-      if (
-        contour_area !== undefined &&
-        cameraConfig.motion.contour_area !== contour_area
-      ) {
-        sendMotionContourArea(contour_area);
-      }
+  useEffect(() => {
+    if (!motionSettings.contour_area) return;
 
-      if (
-        improve_contrast !== undefined &&
-        cameraConfig.motion.improve_contrast !== improve_contrast
-      ) {
-        sendImproveContrast(improve_contrast ? "ON" : "OFF");
-      }
-    }
-  }, [
-    cameraConfig,
-    motionSettings,
-    sendMotionThreshold,
-    sendMotionContourArea,
-    sendImproveContrast,
-  ]);
+    sendMotionContourArea(motionSettings.contour_area);
+  }, [motionSettings.contour_area, sendMotionContourArea]);
+
+  useEffect(() => {
+    if (motionSettings.improve_contrast === undefined) return;
+
+    sendImproveContrast(motionSettings.improve_contrast ? "ON" : "OFF");
+  }, [motionSettings.improve_contrast, sendImproveContrast]);
 
   const handleMotionConfigChange = (newConfig: Partial<MotionSettings>) => {
     setMotionSettings((prevConfig) => ({ ...prevConfig, ...newConfig }));
+    setUnsavedChanges(true);
     setChangedValue(true);
   };
 
@@ -169,17 +146,6 @@ export default function MotionTuner({
     setMotionSettings(origMotionSettings);
     setChangedValue(false);
   }, [origMotionSettings]);
-
-  const handleDialog = useCallback(
-    (save: boolean) => {
-      if (save) {
-        saveToConfig();
-      }
-      setConfirmationDialogOpen(false);
-      setChangedValue(false);
-    },
-    [saveToConfig],
-  );
 
   if (!cameraConfig && !selectedCamera) {
     return <ActivityIndicator />;
@@ -315,31 +281,6 @@ export default function MotionTuner({
             </Button>
           </div>
         </div>
-        {confirmationDialogOpen && (
-          <AlertDialog
-            open={confirmationDialogOpen}
-            onOpenChange={() => setConfirmationDialogOpen(false)}
-          >
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>
-                  You have unsaved changes on this camera.
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  Do you want to save your changes before continuing?
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel onClick={() => handleDialog(false)}>
-                  Cancel
-                </AlertDialogCancel>
-                <AlertDialogAction onClick={() => handleDialog(true)}>
-                  Save
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        )}
       </div>
 
       {cameraConfig ? (

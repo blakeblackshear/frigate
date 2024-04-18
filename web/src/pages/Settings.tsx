@@ -5,12 +5,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import MotionTuner from "@/components/settings/MotionTuner";
 import MasksAndZones from "@/components/settings/MasksAndZones";
 import { Button } from "@/components/ui/button";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import { isMobile } from "react-device-detect";
 import { FaVideo } from "react-icons/fa";
@@ -38,6 +48,7 @@ export default function Settings() {
 
   // TODO: confirm leave page
   const [unsavedChanges, setUnsavedChanges] = useState(false);
+  const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
 
   const cameras = useMemo(() => {
     if (!config) {
@@ -52,6 +63,17 @@ export default function Settings() {
   const [selectedCamera, setSelectedCamera] = useState<string>("");
 
   const [filterZoneMask, setFilterZoneMask] = useState<PolygonType[]>();
+
+  const handleDialog = useCallback(
+    (save: boolean) => {
+      if (unsavedChanges && save) {
+        // TODO
+      }
+      setConfirmationDialogOpen(false);
+      setUnsavedChanges(false);
+    },
+    [unsavedChanges],
+  );
 
   useEffect(() => {
     if (cameras.length) {
@@ -123,6 +145,29 @@ export default function Settings() {
           />
         )}
       </div>
+      {confirmationDialogOpen && (
+        <AlertDialog
+          open={confirmationDialogOpen}
+          onOpenChange={() => setConfirmationDialogOpen(false)}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>You have unsaved changes.</AlertDialogTitle>
+              <AlertDialogDescription>
+                Do you want to save your changes before continuing?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => handleDialog(false)}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction onClick={() => handleDialog(true)}>
+                Save
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </div>
   );
 }
@@ -165,7 +210,7 @@ function CameraSelectButton({
           <DropdownMenuSeparator />
         </>
       )}
-      <div className="h-auto pt-2 overflow-y-auto overflow-x-hidden">
+      <div className="h-auto pt-2 p-3 mb-5 md:p-1 md:mb-1 overflow-y-auto overflow-x-hidden">
         <div className="flex flex-col gap-2.5">
           {allCameras.map((item) => (
             <FilterSwitch
