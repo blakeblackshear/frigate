@@ -20,6 +20,12 @@ type PolygonDrawerProps = {
   handleMouseOutStartPoint: (
     e: KonvaEventObject<MouseEvent | TouchEvent>,
   ) => void;
+  handleMouseOverAnyPoint: (
+    e: KonvaEventObject<MouseEvent | TouchEvent>,
+  ) => void;
+  handleMouseOutAnyPoint: (
+    e: KonvaEventObject<MouseEvent | TouchEvent>,
+  ) => void;
 };
 
 export default function PolygonDrawer({
@@ -33,6 +39,8 @@ export default function PolygonDrawer({
   handleGroupDragEnd,
   handleMouseOverStartPoint,
   handleMouseOutStartPoint,
+  handleMouseOverAnyPoint,
+  handleMouseOutAnyPoint,
 }: PolygonDrawerProps) {
   const vertexRadius = 6;
   const [stage, setStage] = useState<Konva.Stage>();
@@ -121,6 +129,13 @@ export default function PolygonDrawer({
                 onMouseOut: handleMouseOutStartPoint,
               }
             : null;
+        const otherPointsAttr =
+          index !== 0
+            ? {
+                onMouseOver: handleMouseOverAnyPoint,
+                onMouseOut: handleMouseOutAnyPoint,
+              }
+            : null;
 
         return (
           <Circle
@@ -146,6 +161,7 @@ export default function PolygonDrawer({
               }
             }}
             {...startPointAttr}
+            {...otherPointsAttr}
           />
         );
       })}
