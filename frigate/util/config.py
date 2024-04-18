@@ -3,6 +3,7 @@
 import logging
 import os
 import shutil
+from typing import Optional, Union
 
 from ruamel.yaml import YAML
 
@@ -141,3 +142,38 @@ def migrate_014(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
         new_config["cameras"][name] = camera_config
 
     return new_config
+
+
+def get_relative_coordinates(
+    mask: Optional[Union[str, list]], frame_shape: tuple[int, int]
+) -> Union[str, list]:
+    # masks and zones are saved as relative coordinates
+    # we know if any points are > 1 then it is using the
+    # old native resolution coordinates
+    if mask:
+        if isinstance(mask, list) and any(x > "1.0" for x in mask[0].split(",")):
+            relative_masks = []
+            for m in mask:
+                points = m.split(",")
+                relative_masks.append(
+                    ",".join(
+                        [
+                            f"{round(int(points[i]) / frame_shape[1], 3)},{round(int(points[i + 1]) / frame_shape[0], 3)}"
+                            for i in range(0, len(points), 2)
+                        ]
+                    )
+                )
+
+            mask = relative_masks
+        elif isinstance(mask, str) and any(x > "1.0" for x in mask.split(",")):
+            points = mask.split(",")
+            mask = ",".join(
+                [
+                    f"{round(int(points[i]) / frame_shape[1], 3)},{round(int(points[i + 1]) / frame_shape[0], 3)}"
+                    for i in range(0, len(points), 2)
+                ]
+            )
+
+        return mask
+
+    return mask
