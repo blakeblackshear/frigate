@@ -196,7 +196,9 @@ function CameraSelectButton({
     >
       <FaVideo className="text-background dark:text-primary" />
       <div className="hidden md:block text-background dark:text-primary">
-        {selectedCamera == undefined ? "No Camera" : selectedCamera}
+        {selectedCamera == undefined
+          ? "No Camera"
+          : selectedCamera.replaceAll("_", " ")}
       </div>
     </Button>
   );

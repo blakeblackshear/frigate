@@ -286,14 +286,14 @@ export default function PolygonItem({
         {!isMobile && hoveredPolygonIndex === index && (
           <div className="flex flex-row gap-2 items-center">
             <div
-              className="cursor-pointer size-[15px]"
+              className="cursor-pointer"
               onClick={() => {
                 setActivePolygonIndex(index);
                 setEditPane(polygon.type);
               }}
             >
               <Tooltip>
-                <TooltipTrigger>
+                <TooltipTrigger asChild>
                   <LuPencil
                     className={`size-[15px] ${
                       hoveredPolygonIndex === index && "text-primary-variant"
@@ -304,11 +304,11 @@ export default function PolygonItem({
               </Tooltip>
             </div>
             <div
-              className="cursor-pointer size-[15px]"
+              className="cursor-pointer"
               onClick={() => handleCopyCoordinates(index)}
             >
               <Tooltip>
-                <TooltipTrigger>
+                <TooltipTrigger asChild>
                   <LuCopy
                     className={`size-[15px] ${
                       hoveredPolygonIndex === index && "text-primary-variant"
@@ -319,11 +319,11 @@ export default function PolygonItem({
               </Tooltip>
             </div>
             <div
-              className="cursor-pointer size-[15px]"
+              className="cursor-pointer"
               onClick={() => !isLoading && setDeleteDialogOpen(true)}
             >
               <Tooltip>
-                <TooltipTrigger>
+                <TooltipTrigger asChild>
                   <HiTrash
                     className={`size-[15px] ${
                       hoveredPolygonIndex === index &&

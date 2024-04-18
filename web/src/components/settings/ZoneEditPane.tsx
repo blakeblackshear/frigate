@@ -107,12 +107,19 @@ export default function ZoneEditPane({
           message: "Zone name already exists on this camera.",
         },
       ),
-    inertia: z.coerce.number().min(1, {
-      message: "Inertia must be above 0.",
-    }),
-    loitering_time: z.coerce.number().min(0, {
-      message: "Loitering time must be greater than or equal to 0.",
-    }),
+    inertia: z.coerce
+      .number()
+      .min(1, {
+        message: "Inertia must be above 0.",
+      })
+      .or(z.literal("")),
+    loitering_time: z.coerce
+      .number()
+      .min(0, {
+        message: "Loitering time must be greater than or equal to 0.",
+      })
+      .optional()
+      .or(z.literal("")),
     isFinished: z.boolean().refine(() => polygon?.isFinished === true, {
       message: "The polygon drawing must be finished before saving.",
     }),
@@ -127,16 +134,13 @@ export default function ZoneEditPane({
     defaultValues: {
       name: polygon?.name ?? "",
       inertia:
-        (polygon?.camera &&
-          polygon?.name &&
-          config?.cameras[polygon.camera]?.zones[polygon.name]?.inertia) ||
-        3,
+        polygon?.camera &&
+        polygon?.name &&
+        config?.cameras[polygon.camera]?.zones[polygon.name]?.inertia,
       loitering_time:
-        (polygon?.camera &&
-          polygon?.name &&
-          config?.cameras[polygon.camera]?.zones[polygon.name]
-            ?.loitering_time) ||
-        0,
+        polygon?.camera &&
+        polygon?.name &&
+        config?.cameras[polygon.camera]?.zones[polygon.name]?.loitering_time,
       isFinished: polygon?.isFinished ?? false,
       objects: polygon?.objects ?? [],
       review_alerts:
@@ -240,9 +244,19 @@ export default function ZoneEditPane({
           .required_zones || [],
       );
 
+      let inertiaQuery = "";
+      if (inertia) {
+        inertiaQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.inertia=${inertia}`;
+      }
+
+      let loiteringTimeQuery = "";
+      if (loitering_time) {
+        loiteringTimeQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.loitering_time=${loitering_time}`;
+      }
+
       axios
         .put(
-          `config/set?cameras.${polygon?.camera}.zones.${zoneName}.coordinates=${coordinates}&cameras.${polygon?.camera}.zones.${zoneName}.inertia=${inertia}&cameras.${polygon?.camera}.zones.${zoneName}.loitering_time=${loitering_time}${objectQueries}${alertQueries}${detectionQueries}`,
+          `config/set?cameras.${polygon?.camera}.zones.${zoneName}.coordinates=${coordinates}${inertiaQuery}${loiteringTimeQuery}${objectQueries}${alertQueries}${detectionQueries}`,
           { requires_restart: 0 },
         )
         .then((res) => {
@@ -346,7 +360,7 @@ export default function ZoneEditPane({
                 <FormLabel>Name</FormLabel>
                 <FormControl>
                   <Input
-                    className="w-full p-2 border border-input bg-background text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                    className="w-full p-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                     placeholder="Enter a name..."
                     {...field}
                   />
@@ -368,7 +382,7 @@ export default function ZoneEditPane({
                 <FormLabel>Inertia</FormLabel>
                 <FormControl>
                   <Input
-                    className="w-full p-2 border border-input bg-background text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                    className="w-full p-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                     placeholder="3"
                     {...field}
                   />
@@ -390,7 +404,7 @@ export default function ZoneEditPane({
                 <FormLabel>Loitering Time</FormLabel>
                 <FormControl>
                   <Input
-                    className="w-full p-2 border border-input bg-background text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                    className="w-full p-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                     placeholder="0"
                     {...field}
                   />
