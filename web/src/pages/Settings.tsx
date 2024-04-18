@@ -216,7 +216,7 @@ function CameraSelectButton({
             <FilterSwitch
               key={item.name}
               isChecked={item.name === selectedCamera}
-              label={item.name}
+              label={item.name.replaceAll("_", " ")}
               onCheckedChange={(isChecked) => {
                 if (isChecked) {
                   setSelectedCamera(item.name);
