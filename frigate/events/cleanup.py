@@ -83,7 +83,7 @@ class EventCleanup(threading.Thread):
                 datetime.datetime.now() - datetime.timedelta(days=expire_days)
             ).timestamp()
             # grab all events after specific time
-            expired_events = (
+            expired_events: list[Event] = (
                 Event.select(
                     Event.id,
                     Event.camera,
@@ -103,12 +103,16 @@ class EventCleanup(threading.Thread):
                 media_path = Path(
                     f"{os.path.join(CLIPS_DIR, media_name)}.{file_extension}"
                 )
-                media_path.unlink(missing_ok=True)
-                if file_extension == "jpg":
-                    media_path = Path(
-                        f"{os.path.join(CLIPS_DIR, media_name)}-clean.png"
-                    )
+
+                try:
                     media_path.unlink(missing_ok=True)
+                    if file_extension == "jpg":
+                        media_path = Path(
+                            f"{os.path.join(CLIPS_DIR, media_name)}-clean.png"
+                        )
+                        media_path.unlink(missing_ok=True)
+                except OSError as e:
+                    logger.warning(f"Unable to delete event images: {e}")
 
             # update the clips attribute for the db entry
             update_query = Event.update(update_params).where(
@@ -163,15 +167,18 @@ class EventCleanup(threading.Thread):
                     events_to_update.append(event.id)
 
                     if media_type == EventCleanupType.snapshots:
-                        media_name = f"{event.camera}-{event.id}"
-                        media_path = Path(
-                            f"{os.path.join(CLIPS_DIR, media_name)}.{file_extension}"
-                        )
-                        media_path.unlink(missing_ok=True)
-                        media_path = Path(
-                            f"{os.path.join(CLIPS_DIR, media_name)}-clean.png"
-                        )
-                        media_path.unlink(missing_ok=True)
+                        try:
+                            media_name = f"{event.camera}-{event.id}"
+                            media_path = Path(
+                                f"{os.path.join(CLIPS_DIR, media_name)}.{file_extension}"
+                            )
+                            media_path.unlink(missing_ok=True)
+                            media_path = Path(
+                                f"{os.path.join(CLIPS_DIR, media_name)}-clean.png"
+                            )
+                            media_path.unlink(missing_ok=True)
+                        except OSError as e:
+                            logger.warning(f"Unable to delete event images: {e}")
 
         # update the clips attribute for the db entry
         Event.update(update_params).where(Event.id << events_to_update).execute()
@@ -195,14 +202,18 @@ class EventCleanup(threading.Thread):
         select distinct id, camera, has_snapshot, has_clip from grouped_events
         where copy_number > 1 and end_time not null;"""
 
-        duplicate_events = Event.raw(duplicate_query)
+        duplicate_events: list[Event] = Event.raw(duplicate_query)
         for event in duplicate_events:
             logger.debug(f"Removing duplicate: {event.id}")
-            media_name = f"{event.camera}-{event.id}"
-            media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}.jpg")
-            media_path.unlink(missing_ok=True)
-            media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}-clean.png")
-            media_path.unlink(missing_ok=True)
+
+            try:
+                media_name = f"{event.camera}-{event.id}"
+                media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}.jpg")
+                media_path.unlink(missing_ok=True)
+                media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}-clean.png")
+                media_path.unlink(missing_ok=True)
+            except OSError as e:
+                logger.warning(f"Unable to delete event images: {e}")
 
         (
             Event.delete()
