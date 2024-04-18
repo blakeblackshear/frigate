@@ -1231,6 +1231,16 @@ def verify_zone_objects_are_tracked(camera_config: CameraConfig) -> None:
                 )
 
 
+def verify_required_zones_exist(camera_config: CameraConfig) -> None:
+    for det_zone in camera_config.review.detections.required_zones:
+        if det_zone not in camera_config.zones.keys():
+            raise ValueError(f"Camera {camera_config.name} has a required zone for detections {det_zone} that is not defined.")
+
+    for det_zone in camera_config.review.alerts.required_zones:
+        if det_zone not in camera_config.zones.keys():
+            raise ValueError(f"Camera {camera_config.name} has a required zone for alerts {det_zone} that is not defined.")
+
+
 def verify_autotrack_zones(camera_config: CameraConfig) -> ValueError | None:
     """Verify that required_zones are specified when autotracking is enabled."""
     if (
@@ -1495,6 +1505,7 @@ class FrigateConfig(FrigateBaseModel):
             verify_recording_retention(camera_config)
             verify_recording_segments_setup_with_reasonable_time(camera_config)
             verify_zone_objects_are_tracked(camera_config)
+            verify_required_zones_exist(camera_config)
             verify_autotrack_zones(camera_config)
             verify_motion_and_detect(camera_config)
 
