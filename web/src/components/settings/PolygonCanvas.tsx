@@ -222,6 +222,27 @@ export function PolygonCanvas({
     }
   };
 
+  const handleStageMouseOver = (
+    e: Konva.KonvaEventObject<MouseEvent | TouchEvent>,
+  ) => {
+    if (activePolygonIndex === undefined || !polygons) {
+      return;
+    }
+
+    const updatedPolygons = [...polygons];
+    const activePolygon = updatedPolygons[activePolygonIndex];
+
+    if (activePolygon.isFinished) return;
+    e.target.getStage()!.container().style.cursor = "crosshair";
+  };
+
+  const handleStageMouseOut = (
+    e: Konva.KonvaEventObject<MouseEvent | TouchEvent>,
+  ) => {
+    if (!e.target) return;
+    e.target.getStage()!.container().style.cursor = "default";
+  };
+
   return (
     <Stage
       ref={stageRef}
@@ -229,6 +250,8 @@ export function PolygonCanvas({
       height={height}
       onMouseDown={handleMouseDown}
       onTouchStart={handleMouseDown}
+      onMouseOver={handleStageMouseOver}
+      onMouseOut={handleStageMouseOut}
     >
       <Layer>
         <Image
