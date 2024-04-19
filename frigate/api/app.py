@@ -15,6 +15,7 @@ from peewee import operator
 from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.api.event import EventBp
+from frigate.api.export import ExportBp
 from frigate.api.media import MediaBp
 from frigate.api.preview import PreviewBp
 from frigate.api.review import ReviewBp
@@ -39,6 +40,7 @@ logger = logging.getLogger(__name__)
 
 bp = Blueprint("frigate", __name__)
 bp.register_blueprint(EventBp)
+bp.register_blueprint(ExportBp)
 bp.register_blueprint(MediaBp)
 bp.register_blueprint(PreviewBp)
 bp.register_blueprint(ReviewBp)
