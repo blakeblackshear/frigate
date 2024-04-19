@@ -228,7 +228,7 @@ export default function EventView({
           } // don't allow the severity to be unselected
         >
           <ToggleGroupItem
-            className={`${severityToggle == "alert" ? "" : "text-gray-500"}`}
+            className={`${severityToggle == "alert" ? "" : "text-muted-foreground"}`}
             value="alert"
             aria-label="Select alerts"
           >
@@ -238,7 +238,7 @@ export default function EventView({
             </div>
           </ToggleGroupItem>
           <ToggleGroupItem
-            className={`${severityToggle == "detection" ? "" : "text-gray-500"}`}
+            className={`${severityToggle == "detection" ? "" : "text-muted-foreground"}`}
             value="detection"
             aria-label="Select detections"
           >
@@ -250,7 +250,9 @@ export default function EventView({
           </ToggleGroupItem>
           <ToggleGroupItem
             className={`px-3 py-4 rounded-2xl ${
-              severityToggle == "significant_motion" ? "" : "text-gray-500"
+              severityToggle == "significant_motion"
+                ? ""
+                : "text-muted-foreground"
             }`}
             value="significant_motion"
             aria-label="Select motion"

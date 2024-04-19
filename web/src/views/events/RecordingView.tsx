@@ -321,14 +321,14 @@ export function RecordingView({
               } // don't allow the severity to be unselected
             >
               <ToggleGroupItem
-                className={`${timelineType == "timeline" ? "" : "text-gray-500"}`}
+                className={`${timelineType == "timeline" ? "" : "text-muted-foreground"}`}
                 value="timeline"
                 aria-label="Select timeline"
               >
                 <div className="">Timeline</div>
               </ToggleGroupItem>
               <ToggleGroupItem
-                className={`${timelineType == "events" ? "" : "text-gray-500"}`}
+                className={`${timelineType == "events" ? "" : "text-muted-foreground"}`}
                 value="events"
                 aria-label="Select events"
               >
