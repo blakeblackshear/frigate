@@ -159,7 +159,7 @@ class RecordingExporter(threading.Thread):
         export_id = f"{self.camera}_{''.join(random.choices(string.ascii_lowercase + string.digits, k=6))}"
         export_name = (
             self.user_provided_name
-            or f"{self.camera.replace("_", " ")} {self.get_datetime_from_timestamp(self.start_time)} {self.get_datetime_from_timestamp(self.end_time)}"
+            or f"{self.camera.replace('_', ' ')} {self.get_datetime_from_timestamp(self.start_time)} {self.get_datetime_from_timestamp(self.end_time)}"
         )
         video_path = f"{EXPORT_DIR}/{export_id}.mp4"
 

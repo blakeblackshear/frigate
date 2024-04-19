@@ -34,9 +34,7 @@ function Exports() {
     }
 
     return exports.filter((exp) =>
-      exp.name
-        .toLowerCase()
-        .includes(search.toLowerCase().replaceAll(" ", "_")),
+      exp.name.toLowerCase().includes(search.toLowerCase()),
     );
   }, [exports, search]);
 
@@ -90,7 +88,11 @@ function Exports() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <Button variant="destructive" onClick={() => onHandleDelete()}>
+            <Button
+              className="text-white"
+              variant="destructive"
+              onClick={() => onHandleDelete()}
+            >
               Delete
             </Button>
           </AlertDialogFooter>
@@ -144,7 +146,7 @@ function Exports() {
                 exportedRecording={item}
                 onSelect={setSelected}
                 onRename={onHandleRename}
-                onDelete={(file) => setDeleteClip(file)}
+                onDelete={(id) => setDeleteClip(id)}
               />
             ))}
           </div>

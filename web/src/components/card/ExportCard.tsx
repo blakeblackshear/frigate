@@ -40,7 +40,7 @@ export default function ExportCard({
     editName != undefined ? ["Enter"] : [],
     (_, down, repeat) => {
       if (down && !repeat && editName && editName.update.length > 0) {
-        onRename(editName.original, editName.update);
+        onRename(exportedRecording.id, editName.update);
         setEditName(undefined);
       }
     },
@@ -78,10 +78,7 @@ export default function ExportCard({
                   variant="select"
                   disabled={(editName?.update?.length ?? 0) == 0}
                   onClick={() => {
-                    onRename(
-                      editName.original,
-                      editName.update.replaceAll(" ", "_"),
-                    );
+                    onRename(exportedRecording.id, editName.update);
                     setEditName(undefined);
                   }}
                 >
@@ -118,7 +115,7 @@ export default function ExportCard({
               <Chip
                 className="bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 rounded-md cursor-pointer"
                 onClick={() =>
-                  setEditName({ original: exportedRecording.id, update: "" })
+                  setEditName({ original: exportedRecording.name, update: "" })
                 }
               >
                 <LuPencil className="size-4 text-white" />

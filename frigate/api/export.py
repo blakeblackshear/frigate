@@ -76,7 +76,7 @@ def export_recording(camera_name: str, start_time, end_time):
     exporter = RecordingExporter(
         current_app.frigate_config,
         camera_name,
-        secure_filename(name.replace(" ", "_")) if name else None,
+        secure_filename(name) if name else None,
         int(start_time),
         int(end_time),
         (
@@ -97,7 +97,7 @@ def export_recording(camera_name: str, start_time, end_time):
     )
 
 
-@ExportBp.route("/export/<id>/<new_name>", methods=["POST"])
+@ExportBp.route("/export/<id>/<new_name>", methods=["PATCH"])
 def export_rename(id, new_name: str):
     try:
         export: Export = Export.get(Export.id == id)
@@ -142,7 +142,7 @@ def export_delete(id: str):
 
     Path(export.video_path).unlink(missing_ok=True)
     Path(export.thumb_path).unlink(missing_ok=True)
-    export.delete()
+    export.delete_instance()
     return make_response(
         jsonify(
             {
