@@ -178,21 +178,17 @@ export function PolygonCanvas({
       ) {
         let updatedPoints;
 
-        // we've clicked near a line segment, so add a new point in the right position
         if (isPointNearLineSegment(activePolygon, mousePos)) {
+          // we've clicked near a line segment, so add a new point in the right position
           updatedPoints = addPointToPolygon(activePolygon, mousePos);
-          updatedPolygons[activePolygonIndex] = {
-            ...activePolygon,
-            points: updatedPoints,
-          };
         } else {
-          updatedPoints = [...activePolygon.points, mousePos];
           // Add a new point to the active polygon
-          updatedPolygons[activePolygonIndex] = {
-            ...activePolygon,
-            points: updatedPoints,
-          };
+          updatedPoints = [...activePolygon.points, mousePos];
         }
+        updatedPolygons[activePolygonIndex] = {
+          ...activePolygon,
+          points: updatedPoints,
+        };
         setPolygons(updatedPolygons);
       }
     }
