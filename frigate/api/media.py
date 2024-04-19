@@ -611,6 +611,13 @@ def export_recording(camera_name: str, start_time, end_time):
     json: dict[str, any] = request.get_json(silent=True) or {}
     playback_factor = json.get("playback", "realtime")
     name: Optional[str] = json.get("name")
+    existing_thumb: Optional[str] = json.get("thumb")
+
+    if len(name) > 256 or len(existing_thumb) > 256:
+        return make_response(
+            jsonify({"success": False, "message": "File name is too long."}),
+            401,
+        )
 
     recordings_count = (
         Recordings.select()
@@ -635,6 +642,7 @@ def export_recording(camera_name: str, start_time, end_time):
         current_app.frigate_config,
         camera_name,
         secure_filename(name.replace(" ", "_")) if name else None,
+        secure_filename(existing_thumb),
         int(start_time),
         int(end_time),
         (

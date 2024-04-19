@@ -3,18 +3,27 @@
 import datetime
 import logging
 import os
+import random
+import shutil
+import string
 import subprocess as sp
 import threading
 from enum import Enum
 from pathlib import Path
 
 from frigate.config import FrigateConfig
-from frigate.const import EXPORT_DIR, MAX_PLAYLIST_SECONDS
+from frigate.const import (
+    CACHE_DIR,
+    CLIPS_DIR,
+    EXPORT_DIR,
+    MAX_PLAYLIST_SECONDS,
+    PREVIEW_FRAME_TYPE,
+)
 from frigate.ffmpeg_presets import (
     EncodeTypeEnum,
     parse_preset_hardware_acceleration_encode,
 )
-from frigate.models import Recordings
+from frigate.models import Export, Previews, Recordings
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +48,7 @@ class RecordingExporter(threading.Thread):
         config: FrigateConfig,
         camera: str,
         name: str,
+        existing_thumb: str,
         start_time: int,
         end_time: int,
         playback_factor: PlaybackFactorEnum,
@@ -47,13 +57,105 @@ class RecordingExporter(threading.Thread):
         self.config = config
         self.camera = camera
         self.user_provided_name = name
+        self.existing_thumb = existing_thumb
         self.start_time = start_time
         self.end_time = end_time
         self.playback_factor = playback_factor
 
+        # ensure export thumb dir
+        Path(os.path.join(CLIPS_DIR, "export")).mkdir(exist_ok=True)
+
     def get_datetime_from_timestamp(self, timestamp: int) -> str:
         """Convenience fun to get a simple date time from timestamp."""
         return datetime.datetime.fromtimestamp(timestamp).strftime("%Y_%m_%d_%H_%M")
+
+    def save_thumbnail(self, id: str) -> str:
+        thumb_path = os.path.join(CLIPS_DIR, f"export/{id}.webp")
+
+        if self.existing_thumb and os.path.isfile(self.existing_thumb):
+            shutil.copyfile(self.existing_thumb, thumb_path)
+        else:
+            if datetime.datetime.fromtimestamp(
+                self.start_time
+            ) < datetime.datetime.now().replace(minute=0, second=0):
+                # has preview mp4
+                preview: Previews = (
+                    Previews.select(
+                        Previews.camera,
+                        Previews.path,
+                        Previews.duration,
+                        Previews.start_time,
+                        Previews.end_time,
+                    )
+                    .where(
+                        Previews.start_time.between(self.start_time, self.end_time)
+                        | Previews.end_time.between(self.start_time, self.end_time)
+                        | (
+                            (self.start_time > Previews.start_time)
+                            & (self.end_time < Previews.end_time)
+                        )
+                    )
+                    .where(Previews.camera == self.camera)
+                    .limit(1)
+                    .get()
+                )
+
+            if not preview:
+                return ""
+
+            diff = self.start_time - preview.start_time
+            minutes = int(diff / 60)
+            seconds = int(diff % 60)
+            ffmpeg_cmd = [
+                "ffmpeg",
+                "-hide_banner",
+                "-loglevel",
+                "warning",
+                "-ss",
+                f"00:{minutes}:{seconds}",
+                "-i",
+                preview.path,
+                "-c:v",
+                "libwebp",
+                thumb_path,
+            ]
+
+            process = sp.run(
+                ffmpeg_cmd,
+                capture_output=True,
+            )
+
+        if process.returncode != 0:
+            logger.error(process.stderr)
+            return ""
+
+        else:
+            # need to generate from existing images
+            preview_dir = os.path.join(CACHE_DIR, "preview_frames")
+            file_start = f"preview_{self.camera}"
+            start_file = f"{file_start}-{self.start_time}.{PREVIEW_FRAME_TYPE}"
+            end_file = f"{file_start}-{self.end_time}.{PREVIEW_FRAME_TYPE}"
+            selected_preview = None
+
+            for file in sorted(os.listdir(preview_dir)):
+                if not file.startswith(file_start):
+                    continue
+
+                if file < start_file:
+                    continue
+
+                if file > end_file:
+                    break
+
+                selected_preview = os.path.join(preview_dir, file)
+                break
+
+            if not selected_preview:
+                return ""
+
+            shutil.copyfile(selected_preview, thumb_path)
+
+        return thumb_path
 
     def run(self) -> None:
         logger.debug(
@@ -133,4 +235,18 @@ class RecordingExporter(threading.Thread):
 
         logger.debug(f"Updating finalized export {file_path}")
         os.rename(file_path, final_file_path)
+        export_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
+
+        thumb_path = self.save_thumbnail(export_id)
+
+        Export.insert(
+            {
+                Export.id: export_id,
+                Export.camera: self.camera,
+                Export.date: self.start_time,
+                Export.video_path: final_file_path,
+                Export.thumb_path: thumb_path,
+            }
+        )
+
         logger.debug(f"Finished exporting {file_path}")

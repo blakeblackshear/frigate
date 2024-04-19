@@ -84,6 +84,7 @@ class Export(Model):  # type: ignore[misc]
     video_path = CharField(unique=True)
     thumb_path = CharField(unique=True)
 
+
 class ReviewSegment(Model):  # type: ignore[misc]
     id = CharField(null=False, primary_key=True, max_length=30)
     camera = CharField(index=True, max_length=20)

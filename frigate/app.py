@@ -41,6 +41,7 @@ from frigate.events.maintainer import EventProcessor
 from frigate.log import log_process, root_configurer
 from frigate.models import (
     Event,
+    Export,
     Previews,
     Recordings,
     RecordingsToDelete,
@@ -320,6 +321,7 @@ class FrigateApp:
         )
         models = [
             Event,
+            Export,
             Previews,
             Recordings,
             RecordingsToDelete,
