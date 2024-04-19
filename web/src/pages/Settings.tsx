@@ -86,39 +86,40 @@ export default function Settings() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (tabsRef.current) {
+      const element = tabsRef.current.querySelector(
+        `[data-nav-item="${pageToggle}"]`,
+      );
+      if (element instanceof HTMLElement) {
+        scrollIntoView(element, {
+          behavior: "smooth",
+          inline: "start",
+        });
+      }
+    }
+  }, [tabsRef, pageToggle]);
+
   return (
     <div className="size-full p-2 flex flex-col">
       <div className="w-full h-11 relative flex justify-between items-center">
         <ScrollArea className="w-full whitespace-nowrap">
-          <div ref={tabsRef} className="flex flex-row scroll-mx-20">
+          <div ref={tabsRef} className="flex flex-row">
             <ToggleGroup
-              className="*:px-3 *:py-4 *:rounded-md shrink-0"
+              className="*:px-3 *:py-4 *:rounded-md"
               type="single"
               size="sm"
               value={pageToggle}
               onValueChange={(value: SettingsType) => {
                 if (value) {
                   setPageToggle(value);
-
-                  if (tabsRef.current) {
-                    const element = tabsRef.current.querySelector(
-                      `[data-nav-item="${value}"]`,
-                    );
-                    if (element instanceof HTMLElement) {
-                      scrollIntoView(element, {
-                        behavior: "smooth",
-                        block: "center",
-                        inline: "center",
-                      });
-                    }
-                  }
                 }
               }}
             >
               {Object.values(settingsViews).map((item) => (
                 <ToggleGroupItem
                   key={item}
-                  className={`flex items-center justify-between gap-2 ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
+                  className={`flex items-center justify-between gap-2 scroll-mx-10 ${page == "general" ? "last:mr-20" : ""} ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
                   value={item}
                   data-nav-item={item}
                   aria-label={`Select ${item}`}
