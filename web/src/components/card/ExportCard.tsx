@@ -1,15 +1,17 @@
 import ActivityIndicator from "../indicators/activity-indicator";
-import { LuPencil, LuTrash } from "react-icons/lu";
+import { LuTrash } from "react-icons/lu";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import { isDesktop } from "react-device-detect";
-import { FaPlay } from "react-icons/fa";
+import { FaDownload, FaPlay } from "react-icons/fa";
 import Chip from "../indicators/Chip";
 import { Skeleton } from "../ui/skeleton";
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from "../ui/dialog";
 import { Input } from "../ui/input";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { Export } from "@/types/export";
+import { MdEditSquare } from "react-icons/md";
+import { baseUrl } from "@/api/baseUrl";
 
 type ExportProps = {
   className: string;
@@ -114,13 +116,22 @@ export default function ExportCard({
           <>
             <div className="absolute inset-0 z-10 bg-black bg-opacity-60 rounded-2xl" />
             <div className="absolute top-1 right-1 flex items-center gap-2">
+              <a
+                className="z-20"
+                download
+                href={`${baseUrl}${exportedRecording.video_path.replace("/media/frigate/", "")}`}
+              >
+                <Chip className="bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 rounded-md cursor-pointer">
+                  <FaDownload className="size-4 text-white" />
+                </Chip>
+              </a>
               <Chip
                 className="bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 rounded-md cursor-pointer"
                 onClick={() =>
                   setEditName({ original: exportedRecording.name, update: "" })
                 }
               >
-                <LuPencil className="size-4 text-white" />
+                <MdEditSquare className="size-4 text-white" />
               </Chip>
               <Chip
                 className="bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 rounded-md cursor-pointer"
@@ -161,7 +172,7 @@ export default function ExportCard({
         )}
         <div className="absolute bottom-0 inset-x-0 rounded-b-l z-10 h-[20%] bg-gradient-to-t from-black/60 to-transparent pointer-events-none rounded-2xl">
           <div className="flex h-full justify-between items-end mx-3 pb-1 text-white text-sm capitalize">
-            {exportedRecording.name}
+            {exportedRecording.name.replaceAll("_", " ")}
           </div>
         </div>
       </div>

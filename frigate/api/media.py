@@ -1166,26 +1166,32 @@ def preview_gif(camera_name: str, start_ts, end_ts, max_cache_age=2592000):
 
 @MediaBp.route("/<camera_name>/start/<int:start_ts>/end/<int:end_ts>/preview.mp4")
 @MediaBp.route("/<camera_name>/start/<float:start_ts>/end/<float:end_ts>/preview.mp4")
-def preview_mp4(camera_name: str, start_ts, end_ts, max_cache_age=2592000):
+def preview_mp4(camera_name: str, start_ts, end_ts):
+    file_name = secure_filename(f"clip_{camera_name}_{start_ts}-{end_ts}.mp4")
+    path = os.path.join(CACHE_DIR, file_name)
+
     if datetime.fromtimestamp(start_ts) < datetime.now().replace(minute=0, second=0):
         # has preview mp4
-        preview: Previews = (
-            Previews.select(
-                Previews.camera,
-                Previews.path,
-                Previews.duration,
-                Previews.start_time,
-                Previews.end_time,
+        try:
+            preview: Previews = (
+                Previews.select(
+                    Previews.camera,
+                    Previews.path,
+                    Previews.duration,
+                    Previews.start_time,
+                    Previews.end_time,
+                )
+                .where(
+                    Previews.start_time.between(start_ts, end_ts)
+                    | Previews.end_time.between(start_ts, end_ts)
+                    | ((start_ts > Previews.start_time) & (end_ts < Previews.end_time))
+                )
+                .where(Previews.camera == camera_name)
+                .limit(1)
+                .get()
             )
-            .where(
-                Previews.start_time.between(start_ts, end_ts)
-                | Previews.end_time.between(start_ts, end_ts)
-                | ((start_ts > Previews.start_time) & (end_ts < Previews.end_time))
-            )
-            .where(Previews.camera == camera_name)
-            .limit(1)
-            .get()
-        )
+        except DoesNotExist:
+            preview = None
 
         if not preview:
             return make_response(
@@ -1200,6 +1206,7 @@ def preview_mp4(camera_name: str, start_ts, end_ts, max_cache_age=2592000):
             "-hide_banner",
             "-loglevel",
             "warning",
+            "-y",
             "-ss",
             f"00:{minutes}:{seconds}",
             "-t",
@@ -1210,13 +1217,11 @@ def preview_mp4(camera_name: str, start_ts, end_ts, max_cache_age=2592000):
             "8",
             "-vf",
             "setpts=0.12*PTS",
-            "-loop",
-            "0",
             "-c:v",
-            "copy",
-            "-f",
-            "mp4",
-            "-",
+            "libx264",
+            "-movflags",
+            "+faststart",
+            path,
         ]
 
         process = sp.run(
@@ -1231,7 +1236,6 @@ def preview_mp4(camera_name: str, start_ts, end_ts, max_cache_age=2592000):
                 500,
             )
 
-        gif_bytes = process.stdout
     else:
         # need to generate from existing images
         preview_dir = os.path.join(CACHE_DIR, "preview_frames")
@@ -1275,13 +1279,11 @@ def preview_mp4(camera_name: str, start_ts, end_ts, max_cache_age=2592000):
             "0",
             "-i",
             "/dev/stdin",
-            "-loop",
-            "0",
             "-c:v",
             "libx264",
-            "-f",
-            "gif",
-            "-",
+            "-movflags",
+            "+faststart",
+            path,
         ]
 
         process = sp.run(
@@ -1297,11 +1299,14 @@ def preview_mp4(camera_name: str, start_ts, end_ts, max_cache_age=2592000):
                 500,
             )
 
-        gif_bytes = process.stdout
-
-    response = make_response(gif_bytes)
-    response.headers["Content-Type"] = "image/gif"
-    response.headers["Cache-Control"] = f"private, max-age={max_cache_age}"
+    response = make_response()
+    response.headers["Content-Description"] = "File Transfer"
+    response.headers["Cache-Control"] = "no-cache"
+    response.headers["Content-Type"] = "video/mp4"
+    response.headers["Content-Length"] = os.path.getsize(path)
+    response.headers["X-Accel-Redirect"] = (
+        f"/cache/{file_name}"  # nginx: https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
+    )
     return response
 
 
