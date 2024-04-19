@@ -591,7 +591,9 @@ function DetectionReview({
               })
             : Array(itemsToReview)
                 .fill(0)
-                .map(() => <Skeleton className="size-full aspect-video" />)}
+                .map((_, idx) => (
+                  <Skeleton key={idx} className="size-full aspect-video" />
+                ))}
           {!loading &&
             (currentItems?.length ?? 0) > 0 &&
             (itemsToReview ?? 0) > 0 && (
