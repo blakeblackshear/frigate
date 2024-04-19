@@ -6,6 +6,7 @@ type AutoUpdatingCameraImageProps = {
   searchParams?: URLSearchParams;
   showFps?: boolean;
   className?: string;
+  cameraClasses?: string;
   reloadInterval?: number;
 };
 
@@ -16,6 +17,7 @@ export default function AutoUpdatingCameraImage({
   searchParams = undefined,
   showFps = true,
   className,
+  cameraClasses,
   reloadInterval = MIN_LOAD_TIMEOUT_MS,
 }: AutoUpdatingCameraImageProps) {
   const [key, setKey] = useState(Date.now());
@@ -68,6 +70,7 @@ export default function AutoUpdatingCameraImage({
         camera={camera}
         onload={handleLoad}
         searchParams={`cache=${key}&${searchParams}`}
+        className={cameraClasses}
       />
       {showFps ? <span className="text-xs">Displaying at {fps}fps</span> : null}
     </div>

@@ -3,29 +3,39 @@ import { FaFilter } from "react-icons/fa";
 import { isMobile } from "react-device-detect";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { LogSeverity } from "@/types/log";
+import { PolygonType } from "@/types/canvas";
 import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
 import { DropdownMenuSeparator } from "../ui/dropdown-menu";
 
-type LogLevelFilterButtonProps = {
-  selectedLabels?: LogSeverity[];
-  updateLabelFilter: (labels: LogSeverity[] | undefined) => void;
+type ZoneMaskFilterButtonProps = {
+  selectedZoneMask?: PolygonType[];
+  updateZoneMaskFilter: (labels: PolygonType[] | undefined) => void;
 };
-export function LogLevelFilterButton({
-  selectedLabels,
-  updateLabelFilter,
-}: LogLevelFilterButtonProps) {
+export function ZoneMaskFilterButton({
+  selectedZoneMask,
+  updateZoneMaskFilter,
+}: ZoneMaskFilterButtonProps) {
   const trigger = (
-    <Button size="sm" className="flex items-center gap-2">
-      <FaFilter className="text-secondary-foreground" />
-      <div className="hidden md:block text-primary">Filter</div>
+    <Button
+      size="sm"
+      variant={selectedZoneMask?.length ? "select" : "default"}
+      className="flex items-center gap-2 capitalize"
+    >
+      <FaFilter
+        className={`${selectedZoneMask?.length ? "text-selected-foreground" : "text-secondary-foreground"}`}
+      />
+      <div
+        className={`hidden md:block ${selectedZoneMask?.length ? "text-selected-foreground" : "text-primary"}`}
+      >
+        Filter
+      </div>
     </Button>
   );
   const content = (
     <GeneralFilterContent
-      selectedLabels={selectedLabels}
-      updateLabelFilter={updateLabelFilter}
+      selectedZoneMask={selectedZoneMask}
+      updateZoneMaskFilter={updateZoneMaskFilter}
     />
   );
 
@@ -49,12 +59,12 @@ export function LogLevelFilterButton({
 }
 
 type GeneralFilterContentProps = {
-  selectedLabels: LogSeverity[] | undefined;
-  updateLabelFilter: (labels: LogSeverity[] | undefined) => void;
+  selectedZoneMask: PolygonType[] | undefined;
+  updateZoneMaskFilter: (labels: PolygonType[] | undefined) => void;
 };
 export function GeneralFilterContent({
-  selectedLabels,
-  updateLabelFilter,
+  selectedZoneMask,
+  updateZoneMaskFilter,
 }: GeneralFilterContentProps) {
   return (
     <>
@@ -64,54 +74,58 @@ export function GeneralFilterContent({
             className="mx-2 text-primary cursor-pointer"
             htmlFor="allLabels"
           >
-            All Logs
+            All Masks and Zones
           </Label>
           <Switch
             className="ml-1"
             id="allLabels"
-            checked={selectedLabels == undefined}
+            checked={selectedZoneMask == undefined}
             onCheckedChange={(isChecked) => {
               if (isChecked) {
-                updateLabelFilter(undefined);
+                updateZoneMaskFilter(undefined);
               }
             }}
           />
         </div>
         <DropdownMenuSeparator />
         <div className="my-2.5 flex flex-col gap-2.5">
-          {["debug", "info", "warning", "error"].map((item) => (
-            <div className="flex justify-between items-center">
+          {["zone", "motion_mask", "object_mask"].map((item) => (
+            <div key={item} className="flex justify-between items-center">
               <Label
                 className="w-full mx-2 text-primary capitalize cursor-pointer"
                 htmlFor={item}
               >
-                {item.replaceAll("_", " ")}
+                {item
+                  .replace(/_/g, " ")
+                  .replace(/\b\w/g, (char) => char.toUpperCase()) + "s"}
               </Label>
               <Switch
                 key={item}
                 className="ml-1"
                 id={item}
-                checked={selectedLabels?.includes(item as LogSeverity) ?? false}
+                checked={
+                  selectedZoneMask?.includes(item as PolygonType) ?? false
+                }
                 onCheckedChange={(isChecked) => {
                   if (isChecked) {
-                    const updatedLabels = selectedLabels
-                      ? [...selectedLabels]
+                    const updatedLabels = selectedZoneMask
+                      ? [...selectedZoneMask]
                       : [];
 
-                    updatedLabels.push(item as LogSeverity);
-                    updateLabelFilter(updatedLabels);
+                    updatedLabels.push(item as PolygonType);
+                    updateZoneMaskFilter(updatedLabels);
                   } else {
-                    const updatedLabels = selectedLabels
-                      ? [...selectedLabels]
+                    const updatedLabels = selectedZoneMask
+                      ? [...selectedZoneMask]
                       : [];
 
                     // can not deselect the last item
                     if (updatedLabels.length > 1) {
                       updatedLabels.splice(
-                        updatedLabels.indexOf(item as LogSeverity),
+                        updatedLabels.indexOf(item as PolygonType),
                         1,
                       );
-                      updateLabelFilter(updatedLabels);
+                      updateZoneMaskFilter(updatedLabels);
                     }
                   }
                 }}

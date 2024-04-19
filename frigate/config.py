@@ -533,6 +533,14 @@ class ZoneConfig(BaseModel):
     def contour(self) -> np.ndarray:
         return self._contour
 
+    @field_validator("objects", mode="before")
+    @classmethod
+    def validate_objects(cls, v):
+        if isinstance(v, str) and "," not in v:
+            return [v]
+
+        return v
+
     def __init__(self, **config):
         super().__init__(**config)
 
@@ -613,6 +621,14 @@ class AlertsConfig(FrigateBaseModel):
         title="List of required zones to be entered in order to save the event as an alert.",
     )
 
+    @field_validator("required_zones", mode="before")
+    @classmethod
+    def validate_required_zones(cls, v):
+        if isinstance(v, str) and "," not in v:
+            return [v]
+
+        return v
+
 
 class DetectionsConfig(FrigateBaseModel):
     """Configure detections"""
@@ -624,6 +640,14 @@ class DetectionsConfig(FrigateBaseModel):
         default_factory=list,
         title="List of required zones to be entered in order to save the event as a detection.",
     )
+
+    @field_validator("required_zones", mode="before")
+    @classmethod
+    def validate_required_zones(cls, v):
+        if isinstance(v, str) and "," not in v:
+            return [v]
+
+        return v
 
 
 class ReviewConfig(FrigateBaseModel):

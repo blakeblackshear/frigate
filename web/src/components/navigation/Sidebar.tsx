@@ -2,8 +2,8 @@ import Logo from "../Logo";
 import NavItem from "./NavItem";
 import { CameraGroupSelector } from "../filter/CameraGroupSelector";
 import { useLocation } from "react-router-dom";
-import GeneralSettings from "../settings/GeneralSettings";
-import AccountSettings from "../settings/AccountSettings";
+import GeneralSettings from "../menu/GeneralSettings";
+import AccountSettings from "../menu/AccountSettings";
 import useNavigation from "@/hooks/use-navigation";
 
 function Sidebar() {

@@ -24,7 +24,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { DualThumbSlider } from "@/components/ui/slider";
 import { Event } from "@/types/event";
-import { FrigateConfig } from "@/types/frigateConfig";
+import { ATTRIBUTE_LABELS, FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { isMobile } from "react-device-detect";
@@ -199,8 +199,6 @@ export default function SubmitPlus() {
   );
 }
 
-const ATTRIBUTES = ["amazon", "face", "fedex", "license_plate", "ups"];
-
 type PlusFilterGroupProps = {
   selectedCameras: string[] | undefined;
   selectedLabels: string[] | undefined;
@@ -237,7 +235,7 @@ function PlusFilterGroup({
     cameras.forEach((camera) => {
       const cameraConfig = config.cameras[camera];
       cameraConfig.objects.track.forEach((label) => {
-        if (!ATTRIBUTES.includes(label)) {
+        if (!ATTRIBUTE_LABELS.includes(label)) {
           labels.add(label);
         }
       });
