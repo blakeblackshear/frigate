@@ -11,7 +11,7 @@ import { Redirect } from "./components/navigation/Redirect";
 
 const Live = lazy(() => import("@/pages/Live"));
 const Events = lazy(() => import("@/pages/Events"));
-const Export = lazy(() => import("@/pages/Export"));
+const Exports = lazy(() => import("@/pages/Exports"));
 const SubmitPlus = lazy(() => import("@/pages/SubmitPlus"));
 const ConfigEditor = lazy(() => import("@/pages/ConfigEditor"));
 const System = lazy(() => import("@/pages/System"));
@@ -38,7 +38,7 @@ function App() {
                   <Route path="/" element={<Live />} />
                   <Route path="/events" element={<Redirect to="/review" />} />
                   <Route path="/review" element={<Events />} />
-                  <Route path="/export" element={<Export />} />
+                  <Route path="/export" element={<Exports />} />
                   <Route path="/plus" element={<SubmitPlus />} />
                   <Route path="/system" element={<System />} />
                   <Route path="/settings" element={<Settings />} />

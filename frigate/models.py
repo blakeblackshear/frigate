@@ -77,6 +77,16 @@ class Recordings(Model):  # type: ignore[misc]
     regions = IntegerField(null=True)
 
 
+class Export(Model):  # type: ignore[misc]
+    id = CharField(null=False, primary_key=True, max_length=30)
+    camera = CharField(index=True, max_length=20)
+    name = CharField(index=True, max_length=100)
+    date = DateTimeField()
+    video_path = CharField(unique=True)
+    thumb_path = CharField(unique=True)
+    in_progress = BooleanField()
+
+
 class ReviewSegment(Model):  # type: ignore[misc]
     id = CharField(null=False, primary_key=True, max_length=30)
     camera = CharField(index=True, max_length=20)

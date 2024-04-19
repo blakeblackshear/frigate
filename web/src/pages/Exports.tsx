@@ -10,20 +10,15 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Export } from "@/types/export";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 
-type ExportItem = {
-  name: string;
-};
-
-function Export() {
-  const { data: allExports, mutate } = useSWR<ExportItem[]>(
-    "exports/",
-    (url: string) => axios({ baseURL: baseUrl, url }).then((res) => res.data),
-  );
+function Exports() {
+  const { data: exports, mutate } = useSWR<Export[]>("exports");
 
   useEffect(() => {
     document.title = "Export - Frigate";
@@ -33,17 +28,18 @@ function Export() {
 
   const [search, setSearch] = useState("");
 
-  const exports = useMemo(() => {
-    if (!search || !allExports) {
-      return allExports;
+  const filteredExports = useMemo(() => {
+    if (!search || !exports) {
+      return exports;
     }
 
-    return allExports.filter((exp) =>
+    return exports.filter((exp) =>
       exp.name
         .toLowerCase()
-        .includes(search.toLowerCase().replaceAll(" ", "_")),
+        .replaceAll("_", " ")
+        .includes(search.toLowerCase()),
     );
-  }, [allExports, search]);
+  }, [exports, search]);
 
   // Deleting
 
@@ -65,8 +61,8 @@ function Export() {
   // Renaming
 
   const onHandleRename = useCallback(
-    (original: string, update: string) => {
-      axios.patch(`export/${original}/${update}`).then((response) => {
+    (id: string, update: string) => {
+      axios.patch(`export/${id}/${update}`).then((response) => {
         if (response.status == 200) {
           setDeleteClip(undefined);
           mutate();
@@ -75,6 +71,10 @@ function Export() {
     },
     [mutate],
   );
+
+  // Viewing
+
+  const [selected, setSelected] = useState<Export>();
 
   return (
     <div className="size-full p-2 overflow-hidden flex flex-col gap-2">
@@ -91,12 +91,42 @@ function Export() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <Button variant="destructive" onClick={() => onHandleDelete()}>
+            <Button
+              className="text-white"
+              variant="destructive"
+              onClick={() => onHandleDelete()}
+            >
               Delete
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog
+        open={selected != undefined}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelected(undefined);
+          }
+        }}
+      >
+        <DialogContent className="max-w-7xl">
+          <DialogTitle>{selected?.name}</DialogTitle>
+          <video
+            className="size-full rounded-2xl"
+            playsInline
+            preload="auto"
+            autoPlay
+            controls
+            muted
+          >
+            <source
+              src={`${baseUrl}${selected?.video_path?.replace("/media/frigate/", "")}`}
+              type="video/mp4"
+            />
+          </video>
+        </DialogContent>
+      </Dialog>
 
       <div className="w-full p-2 flex items-center justify-center">
         <Input
@@ -108,17 +138,18 @@ function Export() {
       </div>
 
       <div className="w-full overflow-hidden">
-        {allExports && exports && (
+        {exports && filteredExports && (
           <div className="size-full grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 overflow-y-auto">
-            {Object.values(allExports).map((item) => (
+            {Object.values(exports).map((item) => (
               <ExportCard
                 key={item.name}
                 className={
-                  search == "" || exports.includes(item) ? "" : "hidden"
+                  search == "" || filteredExports.includes(item) ? "" : "hidden"
                 }
-                file={item}
+                exportedRecording={item}
+                onSelect={setSelected}
                 onRename={onHandleRename}
-                onDelete={(file) => setDeleteClip(file)}
+                onDelete={(id) => setDeleteClip(id)}
               />
             ))}
           </div>
@@ -128,4 +159,4 @@ function Export() {
   );
 }
 
-export default Export;
+export default Exports;
