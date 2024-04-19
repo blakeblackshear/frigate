@@ -55,7 +55,7 @@ const NoThumbSlider = React.forwardRef<
     )}
     {...props}
   >
-    <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full">
+    <SliderPrimitive.Track className="relative h-full w-full grow overflow-hidden rounded-full">
       <SliderPrimitive.Range className="absolute h-full bg-selected" />
     </SliderPrimitive.Track>
     <SliderPrimitive.Thumb className="block h-4 w-16 rounded-full bg-transparent -translate-y-[50%] ring-offset-transparent focus-visible:outline-none focus-visible:ring-transparent disabled:pointer-events-none disabled:opacity-50 cursor-col-resize" />
