@@ -405,7 +405,7 @@ function Logs() {
         </div>
         <div
           ref={contentRef}
-          className="w-full flex flex-col overflow-y-auto no-scrollbar"
+          className="w-full flex flex-col overflow-y-auto no-scrollbar overscroll-contain"
         >
           {logLines.length > 0 &&
             [...Array(logRange.end).keys()].map((idx) => {
