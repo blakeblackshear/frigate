@@ -141,7 +141,10 @@ def export_delete(id: str):
         )
 
     Path(export.video_path).unlink(missing_ok=True)
-    Path(export.thumb_path).unlink(missing_ok=True)
+
+    if export.thumb_path:
+        Path(export.thumb_path).unlink(missing_ok=True)
+
     export.delete_instance()
     return make_response(
         jsonify(
@@ -152,4 +155,3 @@ def export_delete(id: str):
         ),
         200,
     )
-

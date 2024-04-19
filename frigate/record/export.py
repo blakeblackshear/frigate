@@ -249,3 +249,61 @@ class RecordingExporter(threading.Thread):
             ).execute()
 
         logger.debug(f"Finished exporting {video_path}")
+
+
+def migrate_exports(camera_names: list[str]):
+    Path(os.path.join(CLIPS_DIR, "export")).mkdir(exist_ok=True)
+
+    exports = []
+    for export_file in os.listdir(EXPORT_DIR):
+        camera = "unknown"
+
+        for cam_name in camera_names:
+            if cam_name in export_file:
+                camera = cam_name
+                break
+
+        id = f"{camera}_{''.join(random.choices(string.ascii_lowercase + string.digits, k=6))}"
+        video_path = os.path.join(EXPORT_DIR, export_file)
+        thumb_path = os.path.join(
+            CLIPS_DIR, f"export/{id}.jpg"
+        )  # use jpg because webp encoder can't get quality low enough
+
+        ffmpeg_cmd = [
+            "ffmpeg",
+            "-hide_banner",
+            "-loglevel",
+            "warning",
+            "-i",
+            video_path,
+            "-vf",
+            "scale=-1:180",
+            "-frames",
+            "1",
+            "-q:v",
+            "8",
+            thumb_path,
+        ]
+
+        process = sp.run(
+            ffmpeg_cmd,
+            capture_output=True,
+        )
+
+        if process.returncode != 0:
+            logger.error(process.stderr)
+            continue
+
+        exports.append(
+            {
+                Export.id: id,
+                Export.camera: camera,
+                Export.name: export_file.replace(".mp4", ""),
+                Export.date: os.path.getctime(video_path),
+                Export.video_path: video_path,
+                Export.thumb_path: thumb_path,
+                Export.in_progress: False,
+            }
+        )
+
+    Export.insert_many(exports).execute()

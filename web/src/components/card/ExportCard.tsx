@@ -27,7 +27,9 @@ export default function ExportCard({
   onDelete,
 }: ExportProps) {
   const [hovered, setHovered] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(
+    exportedRecording.thumb_path.length > 0,
+  );
 
   // editing name
 
@@ -129,7 +131,7 @@ export default function ExportCard({
             </div>
 
             <Button
-              className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-20 h-20 z-20 text-white hover:text-white hover:bg-transparent"
+              className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-20 h-20 z-20 text-white hover:text-white hover:bg-transparent cursor-pointer"
               variant="ghost"
               onClick={() => {
                 onSelect(exportedRecording);
@@ -142,11 +144,17 @@ export default function ExportCard({
         {exportedRecording.in_progress ? (
           <ActivityIndicator />
         ) : (
-          <img
-            className="absolute inset-0 object-contain aspect-video rounded-2xl"
-            src={exportedRecording.thumb_path.replace("/media/frigate", "")}
-            onLoad={() => setLoading(false)}
-          />
+          <>
+            {exportedRecording.thumb_path.length > 0 ? (
+              <img
+                className="size-full absolute inset-0 object-contain aspect-video rounded-2xl"
+                src={exportedRecording.thumb_path.replace("/media/frigate", "")}
+                onLoad={() => setLoading(false)}
+              />
+            ) : (
+              <div className="absolute inset-0 bg-secondary rounded-2xl" />
+            )}
+          </>
         )}
         {loading && (
           <Skeleton className="absolute inset-0 aspect-video rounded-2xl" />
