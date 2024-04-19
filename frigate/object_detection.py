@@ -158,7 +158,7 @@ class ObjectDetectProcess:
         logging.info("Waiting for detection process to exit gracefully...")
         self.detect_process.join(timeout=30)
         if self.detect_process.exitcode is None:
-            logging.info("Detection process didnt exit. Force killing...")
+            logging.info("Detection process didn't exit. Force killing...")
             self.detect_process.kill()
             self.detect_process.join()
         logging.info("Detection process has exited...")
