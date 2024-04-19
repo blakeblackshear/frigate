@@ -48,7 +48,6 @@ class RecordingExporter(threading.Thread):
         config: FrigateConfig,
         camera: str,
         name: str,
-        existing_thumb: str,
         start_time: int,
         end_time: int,
         playback_factor: PlaybackFactorEnum,
@@ -57,7 +56,6 @@ class RecordingExporter(threading.Thread):
         self.config = config
         self.camera = camera
         self.user_provided_name = name
-        self.existing_thumb = existing_thumb
         self.start_time = start_time
         self.end_time = end_time
         self.playback_factor = playback_factor
@@ -72,33 +70,31 @@ class RecordingExporter(threading.Thread):
     def save_thumbnail(self, id: str) -> str:
         thumb_path = os.path.join(CLIPS_DIR, f"export/{id}.webp")
 
-        if self.existing_thumb and os.path.isfile(self.existing_thumb):
-            shutil.copyfile(self.existing_thumb, thumb_path)
-        else:
-            if datetime.datetime.fromtimestamp(
-                self.start_time
-            ) < datetime.datetime.now().replace(minute=0, second=0):
-                # has preview mp4
-                preview: Previews = (
-                    Previews.select(
-                        Previews.camera,
-                        Previews.path,
-                        Previews.duration,
-                        Previews.start_time,
-                        Previews.end_time,
-                    )
-                    .where(
-                        Previews.start_time.between(self.start_time, self.end_time)
-                        | Previews.end_time.between(self.start_time, self.end_time)
-                        | (
-                            (self.start_time > Previews.start_time)
-                            & (self.end_time < Previews.end_time)
-                        )
-                    )
-                    .where(Previews.camera == self.camera)
-                    .limit(1)
-                    .get()
+
+        if datetime.datetime.fromtimestamp(
+            self.start_time
+        ) < datetime.datetime.now().replace(minute=0, second=0):
+            # has preview mp4
+            preview: Previews = (
+                Previews.select(
+                    Previews.camera,
+                    Previews.path,
+                    Previews.duration,
+                    Previews.start_time,
+                    Previews.end_time,
                 )
+                .where(
+                    Previews.start_time.between(self.start_time, self.end_time)
+                    | Previews.end_time.between(self.start_time, self.end_time)
+                    | (
+                        (self.start_time > Previews.start_time)
+                        & (self.end_time < Previews.end_time)
+                    )
+                )
+                .where(Previews.camera == self.camera)
+                .limit(1)
+                .get()
+            )
 
             if not preview:
                 return ""
@@ -125,9 +121,9 @@ class RecordingExporter(threading.Thread):
                 capture_output=True,
             )
 
-        if process.returncode != 0:
-            logger.error(process.stderr)
-            return ""
+            if process.returncode != 0:
+                logger.error(process.stderr)
+                return ""
 
         else:
             # need to generate from existing images
@@ -235,7 +231,7 @@ class RecordingExporter(threading.Thread):
 
         logger.debug(f"Updating finalized export {file_path}")
         os.rename(file_path, final_file_path)
-        export_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
+        export_id = f"{self.camera}_{''.join(random.choices(string.ascii_lowercase + string.digits, k=6))}"
 
         thumb_path = self.save_thumbnail(export_id)
 

@@ -66,7 +66,7 @@ class PendingReviewSegment:
         self.frame = np.zeros((THUMB_HEIGHT * 3 // 2, THUMB_WIDTH), np.uint8)
         self.frame_active_count = 0
         self.frame_path = os.path.join(
-            CLIPS_DIR, f"review/thumb-{self.camera}-{self.id}.jpg"
+            CLIPS_DIR, f"review/thumb-{self.camera}-{self.id}.webp"
         )
 
     def update_frame(
