@@ -14,14 +14,7 @@ from urllib.parse import unquote
 import cv2
 import numpy as np
 import pytz
-from flask import (
-    Blueprint,
-    Response,
-    current_app,
-    jsonify,
-    make_response,
-    request,
-)
+from flask import Blueprint, Response, current_app, jsonify, make_response, request
 from peewee import DoesNotExist, fn
 from tzlocal import get_localzone_name
 from werkzeug.utils import secure_filename
@@ -36,9 +29,7 @@ from frigate.const import (
 )
 from frigate.models import Event, Previews, Recordings, Regions, ReviewSegment
 from frigate.record.export import PlaybackFactorEnum, RecordingExporter
-from frigate.util.builtin import (
-    get_tz_modifiers,
-)
+from frigate.util.builtin import get_tz_modifiers
 
 logger = logging.getLogger(__name__)
 
@@ -1322,8 +1313,151 @@ def preview_gif(camera_name: str, start_ts, end_ts, max_cache_age=2592000):
     return response
 
 
-@MediaBp.route("/review/<id>/preview.gif")
+@MediaBp.route("/<camera_name>/start/<int:start_ts>/end/<int:end_ts>/preview.mp4")
+@MediaBp.route("/<camera_name>/start/<float:start_ts>/end/<float:end_ts>/preview.mp4")
+def preview_mp4(camera_name: str, start_ts, end_ts, max_cache_age=2592000):
+    if datetime.fromtimestamp(start_ts) < datetime.now().replace(minute=0, second=0):
+        # has preview mp4
+        preview: Previews = (
+            Previews.select(
+                Previews.camera,
+                Previews.path,
+                Previews.duration,
+                Previews.start_time,
+                Previews.end_time,
+            )
+            .where(
+                Previews.start_time.between(start_ts, end_ts)
+                | Previews.end_time.between(start_ts, end_ts)
+                | ((start_ts > Previews.start_time) & (end_ts < Previews.end_time))
+            )
+            .where(Previews.camera == camera_name)
+            .limit(1)
+            .get()
+        )
+
+        if not preview:
+            return make_response(
+                jsonify({"success": False, "message": "Preview not found"}), 404
+            )
+
+        diff = start_ts - preview.start_time
+        minutes = int(diff / 60)
+        seconds = int(diff % 60)
+        ffmpeg_cmd = [
+            "ffmpeg",
+            "-hide_banner",
+            "-loglevel",
+            "warning",
+            "-ss",
+            f"00:{minutes}:{seconds}",
+            "-t",
+            f"{end_ts - start_ts}",
+            "-i",
+            preview.path,
+            "-r",
+            "8",
+            "-vf",
+            "setpts=0.12*PTS",
+            "-loop",
+            "0",
+            "-c:v",
+            "copy",
+            "-f",
+            "mp4",
+            "-",
+        ]
+
+        process = sp.run(
+            ffmpeg_cmd,
+            capture_output=True,
+        )
+
+        if process.returncode != 0:
+            logger.error(process.stderr)
+            return make_response(
+                jsonify({"success": False, "message": "Unable to create preview gif"}),
+                500,
+            )
+
+        gif_bytes = process.stdout
+    else:
+        # need to generate from existing images
+        preview_dir = os.path.join(CACHE_DIR, "preview_frames")
+        file_start = f"preview_{camera_name}"
+        start_file = f"{file_start}-{start_ts}.{PREVIEW_FRAME_TYPE}"
+        end_file = f"{file_start}-{end_ts}.{PREVIEW_FRAME_TYPE}"
+        selected_previews = []
+
+        for file in sorted(os.listdir(preview_dir)):
+            if not file.startswith(file_start):
+                continue
+
+            if file < start_file:
+                continue
+
+            if file > end_file:
+                break
+
+            selected_previews.append(f"file '{os.path.join(preview_dir, file)}'")
+            selected_previews.append("duration 0.12")
+
+        if not selected_previews:
+            return make_response(
+                jsonify({"success": False, "message": "Preview not found"}), 404
+            )
+
+        last_file = selected_previews[-2]
+        selected_previews.append(last_file)
+
+        ffmpeg_cmd = [
+            "ffmpeg",
+            "-hide_banner",
+            "-loglevel",
+            "warning",
+            "-f",
+            "concat",
+            "-y",
+            "-protocol_whitelist",
+            "pipe,file",
+            "-safe",
+            "0",
+            "-i",
+            "/dev/stdin",
+            "-loop",
+            "0",
+            "-c:v",
+            "libx264",
+            "-f",
+            "gif",
+            "-",
+        ]
+
+        process = sp.run(
+            ffmpeg_cmd,
+            input=str.encode("\n".join(selected_previews)),
+            capture_output=True,
+        )
+
+        if process.returncode != 0:
+            logger.error(process.stderr)
+            return make_response(
+                jsonify({"success": False, "message": "Unable to create preview gif"}),
+                500,
+            )
+
+        gif_bytes = process.stdout
+
+    response = make_response(gif_bytes)
+    response.headers["Content-Type"] = "image/gif"
+    response.headers["Cache-Control"] = f"private, max-age={max_cache_age}"
+    return response
+
+
+@MediaBp.route("/review/<id>/preview")
 def review_preview(id: str):
+    format = request.args.get("format", default="gif")
+
     try:
         review: ReviewSegment = ReviewSegment.get(ReviewSegment.id == id)
     except DoesNotExist:
@@ -1336,7 +1470,11 @@ def review_preview(id: str):
     end_ts = (
         review.end_time + padding if review.end_time else datetime.now().timestamp()
     )
-    return preview_gif(review.camera, start_ts, end_ts)
+
+    if format == "gif":
+        return preview_gif(review.camera, start_ts, end_ts)
+    else:
+        return preview_mp4(review.camera, start_ts, end_ts)
 
 
 @MediaBp.route("/preview/<file_name>/thumbnail.jpg")
