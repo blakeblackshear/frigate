@@ -6,6 +6,7 @@ import {
   useSnapshotsState,
 } from "@/api/ws";
 import CameraFeatureToggle from "@/components/dynamic/CameraFeatureToggle";
+import FilterSwitch from "@/components/filter/FilterSwitch";
 import LivePlayer from "@/components/player/LivePlayer";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
@@ -15,8 +16,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
@@ -623,67 +622,29 @@ function FrigateCameraFeatures({
         />
       </DrawerTrigger>
       <DrawerContent className="px-2 py-4 flex flex-col gap-3 rounded-2xl">
-        <div className="flex justify-between items-center gap-1">
-          <Label
-            className="w-full mx-2 text-secondary-foreground capitalize cursor-pointer"
-            htmlFor={"camera-detect"}
-          >
-            Object Detection
-          </Label>
-          <Switch
-            id={"camera-detect"}
-            checked={detectState == "ON"}
-            onCheckedChange={() =>
-              sendDetect(detectState == "ON" ? "OFF" : "ON")
-            }
-          />
-        </div>
-        <div className="flex justify-between items-center gap-1">
-          <Label
-            className="w-full mx-2 text-secondary-foreground capitalize cursor-pointer"
-            htmlFor={"camera-record"}
-          >
-            Recording
-          </Label>
-          <Switch
-            id={"camera-record"}
-            checked={recordState == "ON"}
-            onCheckedChange={() =>
-              sendRecord(recordState == "ON" ? "OFF" : "ON")
-            }
-          />
-        </div>
-        <div className="flex justify-between items-center gap-1">
-          <Label
-            className="w-full mx-2 text-secondary-foreground capitalize cursor-pointer"
-            htmlFor={"camera-snapshot"}
-          >
-            Snapshots
-          </Label>
-          <Switch
-            id={"camera-snapshot"}
-            checked={snapshotState == "ON"}
-            onCheckedChange={() =>
-              sendSnapshot(snapshotState == "ON" ? "OFF" : "ON")
-            }
-          />
-        </div>
+        <FilterSwitch
+          label="Object Detection"
+          isChecked={detectState == "ON"}
+          onCheckedChange={() => sendDetect(detectState == "ON" ? "OFF" : "ON")}
+        />
+        <FilterSwitch
+          label="Recording"
+          isChecked={recordState == "ON"}
+          onCheckedChange={() => sendRecord(recordState == "ON" ? "OFF" : "ON")}
+        />
+        <FilterSwitch
+          label="Snapshots"
+          isChecked={snapshotState == "ON"}
+          onCheckedChange={() =>
+            sendSnapshot(snapshotState == "ON" ? "OFF" : "ON")
+          }
+        />
         {audioDetectEnabled && (
-          <div className="flex justify-between items-center gap-1">
-            <Label
-              className="w-full mx-2 text-secondary-foreground capitalize cursor-pointer"
-              htmlFor={"camera-audio-detect"}
-            >
-              Audio Detection
-            </Label>
-            <Switch
-              id={"camera-audio-detect"}
-              checked={audioState == "ON"}
-              onCheckedChange={() =>
-                sendAudio(audioState == "ON" ? "OFF" : "ON")
-              }
-            />
-          </div>
+          <FilterSwitch
+            label="Audio Detection"
+            isChecked={audioState == "ON"}
+            onCheckedChange={() => sendAudio(audioState == "ON" ? "OFF" : "ON")}
+          />
         )}
       </DrawerContent>
     </Drawer>
