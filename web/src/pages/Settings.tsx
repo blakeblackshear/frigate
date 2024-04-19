@@ -20,7 +20,7 @@ import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import MotionTuner from "@/components/settings/MotionTuner";
 import MasksAndZones from "@/components/settings/MasksAndZones";
 import { Button } from "@/components/ui/button";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import { isMobile } from "react-device-detect";
 import { FaVideo } from "react-icons/fa";
@@ -31,6 +31,8 @@ import FilterSwitch from "@/components/filter/FilterSwitch";
 import { ZoneMaskFilterButton } from "@/components/filter/ZoneMaskFilter";
 import { PolygonType } from "@/types/canvas";
 import ObjectSettings from "@/components/settings/ObjectSettings";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import scrollIntoView from "scroll-into-view-if-needed";
 
 export default function Settings() {
   const settingsViews = [
@@ -43,6 +45,7 @@ export default function Settings() {
   type SettingsType = (typeof settingsViews)[number];
   const [page, setPage] = useState<SettingsType>("general");
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
+  const tabsRef = useRef<HTMLDivElement | null>(null);
 
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -83,33 +86,51 @@ export default function Settings() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (tabsRef.current) {
+      const element = tabsRef.current.querySelector(
+        `[data-nav-item="${pageToggle}"]`,
+      );
+      if (element instanceof HTMLElement) {
+        scrollIntoView(element, {
+          behavior: "smooth",
+          inline: "start",
+        });
+      }
+    }
+  }, [tabsRef, pageToggle]);
+
   return (
     <div className="size-full p-2 flex flex-col">
       <div className="w-full h-11 relative flex justify-between items-center">
-        <div className="flex flex-row overflow-x-auto">
-          <ToggleGroup
-            className="*:px-3 *:py-4 *:rounded-md flex-shrink-0"
-            type="single"
-            size="sm"
-            value={pageToggle}
-            onValueChange={(value: SettingsType) => {
-              if (value) {
-                setPageToggle(value);
-              }
-            }}
-          >
-            {Object.values(settingsViews).map((item) => (
-              <ToggleGroupItem
-                key={item}
-                className={`flex items-center justify-between gap-2 ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
-                value={item}
-                aria-label={`Select ${item}`}
-              >
-                <div className="capitalize">{item}</div>
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-        </div>
+        <ScrollArea className="w-full whitespace-nowrap">
+          <div ref={tabsRef} className="flex flex-row">
+            <ToggleGroup
+              className="*:px-3 *:py-4 *:rounded-md"
+              type="single"
+              size="sm"
+              value={pageToggle}
+              onValueChange={(value: SettingsType) => {
+                if (value) {
+                  setPageToggle(value);
+                }
+              }}
+            >
+              {Object.values(settingsViews).map((item) => (
+                <ToggleGroupItem
+                  key={item}
+                  className={`flex items-center justify-between gap-2 scroll-mx-10 ${page == "general" ? "last:mr-20" : ""} ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
+                  value={item}
+                  data-nav-item={item}
+                  aria-label={`Select ${item}`}
+                >
+                  <div className="capitalize">{item}</div>
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+            <ScrollBar orientation="horizontal" className="h-0" />
+          </div>
+        </ScrollArea>
         {(page == "objects" ||
           page == "masks / zones" ||
           page == "motion tuner") && (

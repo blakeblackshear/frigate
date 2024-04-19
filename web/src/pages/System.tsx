@@ -52,7 +52,7 @@ function System() {
           {Object.values(metrics).map((item) => (
             <ToggleGroupItem
               key={item}
-              className={`flex items-center justify-between gap-2 ${pageToggle == item ? "" : "*:text-gray-500"}`}
+              className={`flex items-center justify-between gap-2 ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
               value={item}
               aria-label={`Select ${item}`}
             >

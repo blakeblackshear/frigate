@@ -352,7 +352,7 @@ function Logs() {
           {Object.values(logTypes).map((item) => (
             <ToggleGroupItem
               key={item}
-              className={`flex items-center justify-between gap-2 ${logService == item ? "" : "text-gray-500"}`}
+              className={`flex items-center justify-between gap-2 ${logService == item ? "" : "text-muted-foreground"}`}
               value={item}
               aria-label={`Select ${item}`}
             >
