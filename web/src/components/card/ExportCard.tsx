@@ -1,7 +1,7 @@
 import ActivityIndicator from "../indicators/activity-indicator";
 import { LuPencil, LuTrash } from "react-icons/lu";
 import { Button } from "../ui/button";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { isDesktop } from "react-device-detect";
 import { FaPlay } from "react-icons/fa";
 import Chip from "../indicators/Chip";
@@ -14,6 +14,7 @@ import { Export } from "@/types/export";
 type ExportProps = {
   className: string;
   exportedRecording: Export;
+  onSelect: (selected: Export) => void;
   onRename: (original: string, update: string) => void;
   onDelete: (file: string) => void;
 };
@@ -21,12 +22,11 @@ type ExportProps = {
 export default function ExportCard({
   className,
   exportedRecording,
+  onSelect,
   onRename,
   onDelete,
 }: ExportProps) {
-  const videoRef = useRef<HTMLVideoElement | null>(null);
   const [hovered, setHovered] = useState(false);
-  const [playing, setPlaying] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // editing name
@@ -113,9 +113,7 @@ export default function ExportCard({
       >
         {hovered && (
           <>
-            {!playing && (
-              <div className="absolute inset-0 z-10 bg-black bg-opacity-60 rounded-2xl" />
-            )}
+            <div className="absolute inset-0 z-10 bg-black bg-opacity-60 rounded-2xl" />
             <div className="absolute top-1 right-1 flex items-center gap-2">
               <Chip
                 className="bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 rounded-md cursor-pointer"
@@ -132,25 +130,23 @@ export default function ExportCard({
                 <LuTrash className="size-4 text-destructive fill-destructive" />
               </Chip>
             </div>
-            {!playing && (
-              <Button
-                className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-20 h-20 z-20 text-white hover:text-white hover:bg-transparent"
-                variant="ghost"
-                onClick={() => {
-                  setPlaying(true);
-                  videoRef.current?.play();
-                }}
-              >
-                <FaPlay />
-              </Button>
-            )}
+
+            <Button
+              className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-20 h-20 z-20 text-white hover:text-white hover:bg-transparent"
+              variant="ghost"
+              onClick={() => {
+                onSelect(exportedRecording);
+              }}
+            >
+              <FaPlay />
+            </Button>
           </>
         )}
         {exportedRecording.in_progress ? (
           <ActivityIndicator />
         ) : (
           <img
-            className="absolute inset-0 aspect-video rounded-2xl"
+            className="absolute inset-0 object-contain aspect-video rounded-2xl"
             src={exportedRecording.thumb_path.replace("/media/frigate", "")}
             onLoad={() => setLoading(false)}
           />
@@ -158,13 +154,11 @@ export default function ExportCard({
         {loading && (
           <Skeleton className="absolute inset-0 aspect-video rounded-2xl" />
         )}
-        {!playing && (
-          <div className="absolute bottom-0 inset-x-0 rounded-b-l z-10 h-[20%] bg-gradient-to-t from-black/60 to-transparent pointer-events-none rounded-2xl">
-            <div className="flex h-full justify-between items-end mx-3 pb-1 text-white text-sm capitalize">
-              {exportedRecording.name}
-            </div>
+        <div className="absolute bottom-0 inset-x-0 rounded-b-l z-10 h-[20%] bg-gradient-to-t from-black/60 to-transparent pointer-events-none rounded-2xl">
+          <div className="flex h-full justify-between items-end mx-3 pb-1 text-white text-sm capitalize">
+            {exportedRecording.name}
           </div>
-        )}
+        </div>
       </div>
     </>
   );

@@ -1,3 +1,4 @@
+import { baseUrl } from "@/api/baseUrl";
 import ExportCard from "@/components/card/ExportCard";
 import {
   AlertDialog,
@@ -9,6 +10,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Export } from "@/types/export";
 import axios from "axios";
@@ -69,6 +71,10 @@ function Exports() {
     [mutate],
   );
 
+  // Viewing
+
+  const [selected, setSelected] = useState<Export>();
+
   return (
     <div className="size-full p-2 overflow-hidden flex flex-col gap-2">
       <AlertDialog
@@ -91,6 +97,32 @@ function Exports() {
         </AlertDialogContent>
       </AlertDialog>
 
+      <Dialog
+        open={selected != undefined}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelected(undefined);
+          }
+        }}
+      >
+        <DialogContent className="max-w-7xl">
+          <DialogTitle>{selected?.name}</DialogTitle>
+          <video
+            className="size-full rounded-2xl"
+            playsInline
+            preload="auto"
+            autoPlay
+            controls
+            muted
+          >
+            <source
+              src={`${baseUrl}${selected?.video_path?.replace("/media/frigate/", "")}`}
+              type="video/mp4"
+            />
+          </video>
+        </DialogContent>
+      </Dialog>
+
       <div className="w-full p-2 flex items-center justify-center">
         <Input
           className="w-full md:w-1/3 bg-muted"
@@ -110,6 +142,7 @@ function Exports() {
                   search == "" || filteredExports.includes(item) ? "" : "hidden"
                 }
                 exportedRecording={item}
+                onSelect={setSelected}
                 onRename={onHandleRename}
                 onDelete={(file) => setDeleteClip(file)}
               />
