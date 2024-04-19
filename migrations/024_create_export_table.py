@@ -30,9 +30,7 @@ def migrate(migrator, database, fake=False, **kwargs):
     migrator.sql(
         'CREATE TABLE IF NOT EXISTS "export" ("id" VARCHAR(30) NOT NULL PRIMARY KEY, "camera" VARCHAR(20) NOT NULL, "name" VARCHAR(100) NOT NULL, "date" DATETIME NOT NULL, "video_path" VARCHAR(255) NOT NULL, "thumb_path" VARCHAR(255) NOT NULL, "in_progress" INTEGER NOT NULL)'
     )
-    migrator.sql(
-        'CREATE INDEX IF NOT EXISTS "export_camera" ON "export" ("camera")'
-    )
+    migrator.sql('CREATE INDEX IF NOT EXISTS "export_camera" ON "export" ("camera")')
 
 
 def rollback(migrator, database, fake=False, **kwargs):
