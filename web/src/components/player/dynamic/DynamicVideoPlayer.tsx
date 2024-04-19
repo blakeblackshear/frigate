@@ -197,7 +197,7 @@ export default function DynamicVideoPlayer({
       {isLoading && !noRecording && (
         <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
       )}
-      {noRecording && (
+      {!isScrubbing && noRecording && (
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           No recordings found for this time
         </div>
