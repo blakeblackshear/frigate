@@ -7,8 +7,8 @@ export type Polygon = {
   type: PolygonType;
   objects: string[];
   points: number[][];
+  pointsOrder?: number[];
   isFinished: boolean;
-  // isUnsaved: boolean;
   color: number[];
 };
 

@@ -21,12 +21,31 @@ export default function PolygonEditControls({
 
     const updatedPolygons = [...polygons];
     const activePolygon = updatedPolygons[activePolygonIndex];
-    updatedPolygons[activePolygonIndex] = {
-      ...activePolygon,
-      points: [...activePolygon.points.slice(0, -1)],
-      isFinished: false,
-    };
-    setPolygons(updatedPolygons);
+
+    if (
+      activePolygon.points.length > 0 &&
+      activePolygon.pointsOrder &&
+      activePolygon.pointsOrder.length > 0
+    ) {
+      const lastPointOrderIndex = activePolygon.pointsOrder.indexOf(
+        Math.max(...activePolygon.pointsOrder),
+      );
+
+      updatedPolygons[activePolygonIndex] = {
+        ...activePolygon,
+        points: [
+          ...activePolygon.points.slice(0, lastPointOrderIndex),
+          ...activePolygon.points.slice(lastPointOrderIndex + 1),
+        ],
+        pointsOrder: [
+          ...activePolygon.pointsOrder.slice(0, lastPointOrderIndex),
+          ...activePolygon.pointsOrder.slice(lastPointOrderIndex + 1),
+        ],
+        isFinished: false,
+      };
+
+      setPolygons(updatedPolygons);
+    }
   };
 
   const reset = () => {

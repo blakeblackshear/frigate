@@ -61,8 +61,19 @@ export function PolygonCanvas({
 
   const addPointToPolygon = (polygon: Polygon, newPoint: number[]) => {
     const points = polygon.points;
+    const pointsOrder = polygon.pointsOrder;
+
     const [newPointX, newPointY] = newPoint;
     const updatedPoints = [...points];
+
+    let updatedPointsOrder: number[];
+    if (!pointsOrder) {
+      updatedPointsOrder = [];
+    } else {
+      updatedPointsOrder = [...pointsOrder];
+    }
+
+    let insertIndex = points.length;
 
     for (let i = 0; i < points.length; i++) {
       const [x1, y1] = points[i];
@@ -76,48 +87,16 @@ export function PolygonCanvas({
           (y1 <= newPointY && newPointY <= y2) ||
           (y2 <= newPointY && newPointY <= y1)
         ) {
-          const insertIndex = i + 1;
-          updatedPoints.splice(insertIndex, 0, [newPointX, newPointY]);
+          insertIndex = i + 1;
           break;
         }
       }
     }
 
-    return updatedPoints;
-  };
+    updatedPoints.splice(insertIndex, 0, [newPointX, newPointY]);
+    updatedPointsOrder.splice(insertIndex, 0, updatedPoints.length);
 
-  const isPointNearLineSegment = (
-    polygon: Polygon,
-    mousePos: number[],
-    radius = 10,
-  ) => {
-    const points = polygon.points;
-    const [x, y] = mousePos;
-
-    for (let i = 0; i < points.length; i++) {
-      const [x1, y1] = points[i];
-      const [x2, y2] = i === points.length - 1 ? points[0] : points[i + 1];
-
-      const crossProduct = (x - x1) * (x2 - x1) + (y - y1) * (y2 - y1);
-      if (crossProduct > 0) {
-        const lengthSquared = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
-        const dot = (x - x1) * (x2 - x1) + (y - y1) * (y2 - y1);
-        if (dot < 0 || dot > lengthSquared) {
-          continue;
-        }
-        const lineSegmentDistance = Math.abs(
-          ((y2 - y1) * x - (x2 - x1) * y + x2 * y1 - y2 * x1) /
-            Math.sqrt(Math.pow(y2 - y1, 2) + Math.pow(x2 - x1, 2)),
-        );
-        if (lineSegmentDistance <= radius) {
-          const midPointX = (x1 + x2) / 2;
-          const midPointY = (y1 + y2) / 2;
-          return [midPointX, midPointY];
-        }
-      }
-    }
-
-    return null;
+    return { updatedPoints, updatedPointsOrder };
   };
 
   const isMouseOverFirstPoint = (polygon: Polygon, mousePos: number[]) => {
@@ -176,18 +155,15 @@ export function PolygonCanvas({
         !activePolygon.isFinished &&
         !isMouseOverAnyPoint(activePolygon, mousePos)
       ) {
-        let updatedPoints;
+        const { updatedPoints, updatedPointsOrder } = addPointToPolygon(
+          activePolygon,
+          mousePos,
+        );
 
-        if (isPointNearLineSegment(activePolygon, mousePos)) {
-          // we've clicked near a line segment, so add a new point in the right position
-          updatedPoints = addPointToPolygon(activePolygon, mousePos);
-        } else {
-          // Add a new point to the active polygon
-          updatedPoints = [...activePolygon.points, mousePos];
-        }
         updatedPolygons[activePolygonIndex] = {
           ...activePolygon,
           points: updatedPoints,
+          pointsOrder: updatedPointsOrder,
         };
         setPolygons(updatedPolygons);
       }
@@ -317,6 +293,24 @@ export function PolygonCanvas({
 
     e.target.getStage()!.container().style.cursor = "crosshair";
   };
+
+  useEffect(() => {
+    if (activePolygonIndex === undefined || !polygons) {
+      return;
+    }
+
+    const updatedPolygons = [...polygons];
+    const activePolygon = updatedPolygons[activePolygonIndex];
+
+    // add default points order for already completed polygons
+    if (!activePolygon.pointsOrder && activePolygon.isFinished) {
+      updatedPolygons[activePolygonIndex] = {
+        ...activePolygon,
+        pointsOrder: activePolygon.points.map((_, index) => index),
+      };
+      setPolygons(updatedPolygons);
+    }
+  }, [activePolygonIndex, polygons, setPolygons]);
 
   return (
     <Stage
