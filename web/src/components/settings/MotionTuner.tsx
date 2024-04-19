@@ -78,7 +78,7 @@ export default function MotionTuner({
     }
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [selectedCamera]);
 
   useEffect(() => {
     if (!motionSettings.threshold) return;

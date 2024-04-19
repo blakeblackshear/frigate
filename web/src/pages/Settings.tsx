@@ -86,32 +86,34 @@ export default function Settings() {
   return (
     <div className="size-full p-2 flex flex-col">
       <div className="w-full h-11 relative flex justify-between items-center">
-        <ToggleGroup
-          className="*:px-3 *:py-4 *:rounded-md"
-          type="single"
-          size="sm"
-          value={pageToggle}
-          onValueChange={(value: SettingsType) => {
-            if (value) {
-              setPageToggle(value);
-            }
-          }}
-        >
-          {Object.values(settingsViews).map((item) => (
-            <ToggleGroupItem
-              key={item}
-              className={`flex items-center justify-between gap-2 ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
-              value={item}
-              aria-label={`Select ${item}`}
-            >
-              <div className="capitalize">{item}</div>
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
+        <div className="flex flex-row overflow-x-auto">
+          <ToggleGroup
+            className="*:px-3 *:py-4 *:rounded-md flex-shrink-0"
+            type="single"
+            size="sm"
+            value={pageToggle}
+            onValueChange={(value: SettingsType) => {
+              if (value) {
+                setPageToggle(value);
+              }
+            }}
+          >
+            {Object.values(settingsViews).map((item) => (
+              <ToggleGroupItem
+                key={item}
+                className={`flex items-center justify-between gap-2 ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
+                value={item}
+                aria-label={`Select ${item}`}
+              >
+                <div className="capitalize">{item}</div>
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+        </div>
         {(page == "objects" ||
           page == "masks / zones" ||
           page == "motion tuner") && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 ml-2 flex-shrink-0">
             {page == "masks / zones" && (
               <ZoneMaskFilterButton
                 selectedZoneMask={filterZoneMask}
