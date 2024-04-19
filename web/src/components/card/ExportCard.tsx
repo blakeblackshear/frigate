@@ -46,7 +46,7 @@ export default function ExportCard({
     editName != undefined ? ["Enter"] : [],
     (_, down, repeat) => {
       if (down && !repeat && editName && editName.update.length > 0) {
-        onRename(editName.original, editName.update.replaceAll(" ", "_"));
+        onRename(editName.original, editName.update);
         setEditName(undefined);
       }
     },

@@ -39,9 +39,7 @@ function Export() {
     }
 
     return allExports.filter((exp) =>
-      exp.name
-        .toLowerCase()
-        .includes(search.toLowerCase().replaceAll(" ", "_")),
+      exp.name.toLowerCase().includes(search.toLowerCase()),
     );
   }, [allExports, search]);
 
