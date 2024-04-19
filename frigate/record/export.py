@@ -65,11 +65,10 @@ class RecordingExporter(threading.Thread):
 
     def get_datetime_from_timestamp(self, timestamp: int) -> str:
         """Convenience fun to get a simple date time from timestamp."""
-        return datetime.datetime.fromtimestamp(timestamp).strftime("%Y_%m_%d_%H_%M")
+        return datetime.datetime.fromtimestamp(timestamp).strftime("%Y/%m/%d %H:%M")
 
     def save_thumbnail(self, id: str) -> str:
         thumb_path = os.path.join(CLIPS_DIR, f"export/{id}.webp")
-
 
         if datetime.datetime.fromtimestamp(
             self.start_time
@@ -157,12 +156,26 @@ class RecordingExporter(threading.Thread):
         logger.debug(
             f"Beginning export for {self.camera} from {self.start_time} to {self.end_time}"
         )
-        file_name = (
+        export_id = f"{self.camera}_{''.join(random.choices(string.ascii_lowercase + string.digits, k=6))}"
+        export_name = (
             self.user_provided_name
-            or f"{self.camera}_{self.get_datetime_from_timestamp(self.start_time)}__{self.get_datetime_from_timestamp(self.end_time)}"
+            or f"{self.camera} {self.get_datetime_from_timestamp(self.start_time)} {self.get_datetime_from_timestamp(self.end_time)}"
         )
-        file_path = f"{EXPORT_DIR}/in_progress.{file_name}.mp4"
-        final_file_path = f"{EXPORT_DIR}/{file_name}.mp4"
+        video_path = f"{EXPORT_DIR}/{export_id}.mp4"
+
+        thumb_path = self.save_thumbnail(export_id)
+
+        Export.insert(
+            {
+                Export.id: export_id,
+                Export.camera: self.camera,
+                Export.name: export_name,
+                Export.date: self.start_time,
+                Export.video_path: video_path,
+                Export.thumb_path: thumb_path,
+                Export.in_progress: True,
+            }
+        ).execute()
 
         if (self.end_time - self.start_time) <= MAX_PLAYLIST_SECONDS:
             playlist_lines = f"http://127.0.0.1:5000/vod/{self.camera}/start/{self.start_time}/end/{self.end_time}/index.m3u8"
@@ -201,14 +214,14 @@ class RecordingExporter(threading.Thread):
 
         if self.playback_factor == PlaybackFactorEnum.realtime:
             ffmpeg_cmd = (
-                f"ffmpeg -hide_banner {ffmpeg_input} -c copy -movflags +faststart {file_path}"
+                f"ffmpeg -hide_banner {ffmpeg_input} -c copy -movflags +faststart {video_path}"
             ).split(" ")
         elif self.playback_factor == PlaybackFactorEnum.timelapse_25x:
             ffmpeg_cmd = (
                 parse_preset_hardware_acceleration_encode(
                     self.config.ffmpeg.hwaccel_args,
                     f"{TIMELAPSE_DATA_INPUT_ARGS} {ffmpeg_input}",
-                    f"{self.config.cameras[self.camera].record.export.timelapse_args} -movflags +faststart {file_path}",
+                    f"{self.config.cameras[self.camera].record.export.timelapse_args} -movflags +faststart {video_path}",
                     EncodeTypeEnum.timelapse,
                 )
             ).split(" ")
@@ -226,23 +239,13 @@ class RecordingExporter(threading.Thread):
                 f"Failed to export recording for command {' '.join(ffmpeg_cmd)}"
             )
             logger.error(p.stderr)
-            Path(file_path).unlink(missing_ok=True)
+            Path(video_path).unlink(missing_ok=True)
+            Export.delete().where(Export.id == export_id).execute()
+            Path(thumb_path).unlink(missing_ok=True)
             return
+        else:
+            Export.update({Export.in_progress: False}).where(
+                Export.id == export_id
+            ).execute()
 
-        logger.debug(f"Updating finalized export {file_path}")
-        os.rename(file_path, final_file_path)
-        export_id = f"{self.camera}_{''.join(random.choices(string.ascii_lowercase + string.digits, k=6))}"
-
-        thumb_path = self.save_thumbnail(export_id)
-
-        Export.insert(
-            {
-                Export.id: export_id,
-                Export.camera: self.camera,
-                Export.date: self.start_time,
-                Export.video_path: final_file_path,
-                Export.thumb_path: thumb_path,
-            }
-        )
-
-        logger.debug(f"Finished exporting {file_path}")
+        logger.debug(f"Finished exporting {video_path}")
