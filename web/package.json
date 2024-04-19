@@ -77,7 +77,7 @@
     "@tailwindcss/forms": "^0.5.7",
     "@testing-library/jest-dom": "^6.1.5",
     "@types/node": "^20.12.7",
-    "@types/react": "^18.2.78",
+    "@types/react": "^18.2.79",
     "@types/react-dom": "^18.2.25",
     "@types/react-icons": "^3.0.0",
     "@types/react-transition-group": "^4.4.10",
