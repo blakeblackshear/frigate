@@ -1,8 +1,7 @@
-import { baseUrl } from "@/api/baseUrl";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { LuPencil, LuTrash } from "react-icons/lu";
 import { Button } from "../ui/button";
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { isDesktop } from "react-device-detect";
 import { FaPlay } from "react-icons/fa";
 import Chip from "../indicators/Chip";
@@ -10,19 +9,18 @@ import { Skeleton } from "../ui/skeleton";
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from "../ui/dialog";
 import { Input } from "../ui/input";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
+import { Export } from "@/types/export";
 
 type ExportProps = {
   className: string;
-  file: {
-    name: string;
-  };
+  exportedRecording: Export;
   onRename: (original: string, update: string) => void;
   onDelete: (file: string) => void;
 };
 
 export default function ExportCard({
   className,
-  file,
+  exportedRecording,
   onRename,
   onDelete,
 }: ExportProps) {
@@ -30,10 +28,6 @@ export default function ExportCard({
   const [hovered, setHovered] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [loading, setLoading] = useState(true);
-  const inProgress = useMemo(
-    () => file.name.startsWith("in_progress"),
-    [file.name],
-  );
 
   // editing name
 
@@ -102,13 +96,19 @@ export default function ExportCard({
       <div
         className={`relative aspect-video bg-black rounded-2xl flex justify-center items-center ${className}`}
         onMouseEnter={
-          isDesktop && !inProgress ? () => setHovered(true) : undefined
+          isDesktop && !exportedRecording.in_progress
+            ? () => setHovered(true)
+            : undefined
         }
         onMouseLeave={
-          isDesktop && !inProgress ? () => setHovered(false) : undefined
+          isDesktop && !exportedRecording.in_progress
+            ? () => setHovered(false)
+            : undefined
         }
         onClick={
-          isDesktop || inProgress ? undefined : () => setHovered(!hovered)
+          isDesktop || exportedRecording.in_progress
+            ? undefined
+            : () => setHovered(!hovered)
         }
       >
         {hovered && (
@@ -119,13 +119,15 @@ export default function ExportCard({
             <div className="absolute top-1 right-1 flex items-center gap-2">
               <Chip
                 className="bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 rounded-md cursor-pointer"
-                onClick={() => setEditName({ original: file.name, update: "" })}
+                onClick={() =>
+                  setEditName({ original: exportedRecording.id, update: "" })
+                }
               >
                 <LuPencil className="size-4 text-white" />
               </Chip>
               <Chip
                 className="bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 rounded-md cursor-pointer"
-                onClick={() => onDelete(file.name)}
+                onClick={() => onDelete(exportedRecording.id)}
               >
                 <LuTrash className="size-4 text-destructive fill-destructive" />
               </Chip>
@@ -144,20 +146,14 @@ export default function ExportCard({
             )}
           </>
         )}
-        {inProgress ? (
+        {exportedRecording.in_progress ? (
           <ActivityIndicator />
         ) : (
-          <video
-            ref={videoRef}
+          <img
             className="absolute inset-0 aspect-video rounded-2xl"
-            playsInline
-            preload="auto"
-            muted
-            controls={playing}
-            onLoadedData={() => setLoading(false)}
-          >
-            <source src={`${baseUrl}exports/${file.name}`} type="video/mp4" />
-          </video>
+            src={exportedRecording.thumb_path.replace("/media/frigate", "")}
+            onLoad={() => setLoading(false)}
+          />
         )}
         {loading && (
           <Skeleton className="absolute inset-0 aspect-video rounded-2xl" />
@@ -165,9 +161,7 @@ export default function ExportCard({
         {!playing && (
           <div className="absolute bottom-0 inset-x-0 rounded-b-l z-10 h-[20%] bg-gradient-to-t from-black/60 to-transparent pointer-events-none rounded-2xl">
             <div className="flex h-full justify-between items-end mx-3 pb-1 text-white text-sm capitalize">
-              {file.name
-                .substring(0, file.name.length - 4)
-                .replaceAll("_", " ")}
+              {exportedRecording.name}
             </div>
           </div>
         )}

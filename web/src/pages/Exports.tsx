@@ -1,4 +1,3 @@
-import { baseUrl } from "@/api/baseUrl";
 import ExportCard from "@/components/card/ExportCard";
 import {
   AlertDialog,
@@ -11,19 +10,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Export } from "@/types/export";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 
-type ExportItem = {
-  name: string;
-};
-
-function Export() {
-  const { data: allExports, mutate } = useSWR<ExportItem[]>(
-    "exports/",
-    (url: string) => axios({ baseURL: baseUrl, url }).then((res) => res.data),
-  );
+function Exports() {
+  const { data: exports, mutate } = useSWR<Export[]>("exports");
 
   useEffect(() => {
     document.title = "Export - Frigate";
@@ -33,15 +26,17 @@ function Export() {
 
   const [search, setSearch] = useState("");
 
-  const exports = useMemo(() => {
-    if (!search || !allExports) {
-      return allExports;
+  const filteredExports = useMemo(() => {
+    if (!search || !exports) {
+      return exports;
     }
 
-    return allExports.filter((exp) =>
-      exp.name.toLowerCase().includes(search.toLowerCase()),
+    return exports.filter((exp) =>
+      exp.name
+        .toLowerCase()
+        .includes(search.toLowerCase().replaceAll(" ", "_")),
     );
-  }, [allExports, search]);
+  }, [exports, search]);
 
   // Deleting
 
@@ -63,8 +58,8 @@ function Export() {
   // Renaming
 
   const onHandleRename = useCallback(
-    (original: string, update: string) => {
-      axios.patch(`export/${original}/${update}`).then((response) => {
+    (id: string, update: string) => {
+      axios.patch(`export/${id}/${update}`).then((response) => {
         if (response.status == 200) {
           setDeleteClip(undefined);
           mutate();
@@ -106,15 +101,15 @@ function Export() {
       </div>
 
       <div className="w-full overflow-hidden">
-        {allExports && exports && (
+        {exports && filteredExports && (
           <div className="size-full grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 overflow-y-auto">
-            {Object.values(allExports).map((item) => (
+            {Object.values(exports).map((item) => (
               <ExportCard
                 key={item.name}
                 className={
-                  search == "" || exports.includes(item) ? "" : "hidden"
+                  search == "" || filteredExports.includes(item) ? "" : "hidden"
                 }
-                file={item}
+                exportedRecording={item}
                 onRename={onHandleRename}
                 onDelete={(file) => setDeleteClip(file)}
               />
@@ -126,4 +121,4 @@ function Export() {
   );
 }
 
-export default Export;
+export default Exports;
