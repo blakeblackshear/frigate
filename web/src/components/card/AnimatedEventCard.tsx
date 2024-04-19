@@ -1,20 +1,29 @@
-import { baseUrl } from "@/api/baseUrl";
 import TimeAgo from "../dynamic/TimeAgo";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { ReviewSegment } from "@/types/review";
 import { useNavigate } from "react-router-dom";
-import { Skeleton } from "../ui/skeleton";
 import { RecordingStartingPoint } from "@/types/record";
 import axios from "axios";
+import { Preview } from "@/types/preview";
+import {
+  InProgressPreview,
+  VideoPreview,
+} from "../player/PreviewThumbnailPlayer";
 
 type AnimatedEventCardProps = {
   event: ReviewSegment;
 };
 export function AnimatedEventCard({ event }: AnimatedEventCardProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
+
+  // preview
+
+  const { data: previews } = useSWR<Preview[]>(
+    `/preview/${event.camera}/start/${Math.round(event.start_time)}/end/${Math.round(event.end_time || event.start_time + 20)}`,
+  );
 
   // interaction
 
@@ -35,16 +44,6 @@ export function AnimatedEventCard({ event }: AnimatedEventCardProps) {
 
   // image behavior
 
-  const [loaded, setLoaded] = useState(false);
-  const [error, setError] = useState(0);
-  const imageUrl = useMemo(() => {
-    if (error > 0) {
-      return `${baseUrl}api/review/${event.id}/preview.gif?key=${error}`;
-    }
-
-    return `${baseUrl}api/review/${event.id}/preview.gif`;
-  }, [error, event]);
-
   const aspectRatio = useMemo(() => {
     if (!config) {
       return 1;
@@ -63,18 +62,36 @@ export function AnimatedEventCard({ event }: AnimatedEventCardProps) {
             aspectRatio: aspectRatio,
           }}
         >
-          <img
-            className="size-full rounded object-cover object-center cursor-pointer"
-            src={imageUrl}
+          <div
+            className="size-full rounded cursor-pointer"
             onClick={onOpenReview}
-            onLoad={() => setLoaded(true)}
-            onError={() => {
-              if (error < 2) {
-                setError(error + 1);
-              }
-            }}
-          />
-          {!loaded && <Skeleton className="absolute inset-0" />}
+          >
+            {previews ? (
+              <VideoPreview
+                relevantPreview={previews[previews.length - 1]}
+                startTime={event.start_time}
+                endTime={event.end_time}
+                loop
+                showProgress={false}
+                setReviewed={() => {}}
+                setIgnoreClick={() => {}}
+                isPlayingBack={() => {}}
+              />
+            ) : (
+              <InProgressPreview
+                review={event}
+                timeRange={{
+                  after: event.start_time,
+                  before: event.end_time ?? event.start_time + 20,
+                }}
+                loop
+                showProgress={false}
+                setReviewed={() => {}}
+                setIgnoreClick={() => {}}
+                isPlayingBack={() => {}}
+              />
+            )}
+          </div>
           <div className="absolute bottom-0 inset-x-0 h-6 bg-gradient-to-t from-slate-900/50 to-transparent rounded">
             <div className="w-full absolute left-1 bottom-0 text-xs text-white">
               <TimeAgo time={event.start_time * 1000} dense />
