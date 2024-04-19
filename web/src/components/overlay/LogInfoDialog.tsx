@@ -28,7 +28,9 @@ export default function LogInfoDialog({
         }
       }}
     >
-      <Content className={isDesktop ? "" : "max-h-[75dvh] p-2 overflow-hidden"}>
+      <Content
+        className={isDesktop ? "" : "max-h-[75dvh] p-2 pb-4 overflow-hidden"}
+      >
         {logLine && (
           <div className="size-full flex flex-col gap-5">
             <div className="w-min flex flex-col gap-1.5">
