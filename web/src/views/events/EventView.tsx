@@ -591,7 +591,9 @@ function DetectionReview({
               })
             : Array(itemsToReview)
                 .fill(0)
-                .map(() => <Skeleton className="size-full aspect-video" />)}
+                .map((_, idx) => (
+                  <Skeleton key={idx} className="size-full aspect-video" />
+                ))}
           {!loading &&
             (currentItems?.length ?? 0) > 0 &&
             (itemsToReview ?? 0) > 0 && (
@@ -953,7 +955,7 @@ function MotionReview({
 
       {!scrubbing && (
         <VideoControls
-          className="absolute bottom-16 left-1/2 -translate-x-1/2"
+          className="absolute bottom-16 left-1/2 -translate-x-1/2 bg-secondary"
           features={{
             volume: false,
             seek: true,

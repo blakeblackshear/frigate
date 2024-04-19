@@ -45,6 +45,7 @@ export default function DynamicVideoPlayer({
   const playerRef = useRef<HTMLVideoElement | null>(null);
   const [previewController, setPreviewController] =
     useState<PreviewController | null>(null);
+  const [noRecording, setNoRecording] = useState(false);
   const controller = useMemo(() => {
     if (!config || !playerRef.current || !previewController) {
       return undefined;
@@ -56,6 +57,7 @@ export default function DynamicVideoPlayer({
       previewController,
       (config.cameras[camera]?.detect?.annotation_offset || 0) / 1000,
       isScrubbing ? "scrubbing" : "playback",
+      setNoRecording,
       () => {},
     );
     // we only want to fire once when players are ready
@@ -92,9 +94,11 @@ export default function DynamicVideoPlayer({
 
     return () => {
       if (loadingTimeout) {
-        clearTimeout(loadingTimeout)
+        clearTimeout(loadingTimeout);
       }
-    }
+    };
+    // we only want trigger when scrubbing state changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [camera, isScrubbing]);
 
   const onPlayerLoaded = useCallback(() => {
@@ -149,6 +153,7 @@ export default function DynamicVideoPlayer({
 
     controller.newPlayback({
       recordings: recordings ?? [],
+      timeRange,
     });
 
     // we only want this to change when recordings update
@@ -175,6 +180,7 @@ export default function DynamicVideoPlayer({
           }
 
           setIsLoading(false);
+          setNoRecording(false);
         }}
       />
       <PreviewPlayer
@@ -188,8 +194,13 @@ export default function DynamicVideoPlayer({
           setPreviewController(previewController);
         }}
       />
-      {isLoading && (
+      {isLoading && !noRecording && (
         <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+      )}
+      {!isScrubbing && noRecording && (
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          No recordings found for this time
+        </div>
       )}
     </>
   );

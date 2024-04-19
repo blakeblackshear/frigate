@@ -520,6 +520,7 @@ export function VideoPreview({
   const onStopManualSeek = useCallback(() => {
     setTimeout(() => {
       setIgnoreClick(false);
+      setHoverTimeout(undefined);
 
       if (isSafari || (isFirefox && isMobile)) {
         setManualPlayback(true);
@@ -565,7 +566,7 @@ export function VideoPreview({
       {showProgress && (
         <NoThumbSlider
           ref={sliderRef}
-          className="absolute inset-x-0 bottom-0 z-30"
+          className={`absolute inset-x-0 bottom-0 z-30 cursor-col-resize ${hoverTimeout != undefined ? "h-4" : "h-2"}`}
           value={[progress]}
           onValueChange={onManualSeek}
           onValueCommit={onStopManualSeek}
@@ -740,7 +741,7 @@ export function InProgressPreview({
       {showProgress && (
         <NoThumbSlider
           ref={sliderRef}
-          className="absolute inset-x-0 bottom-0 z-30"
+          className={`absolute inset-x-0 bottom-0 z-30 cursor-col-resize ${manualFrame ? "h-4" : "h-2"}`}
           value={[key]}
           onValueChange={onManualSeek}
           onValueCommit={onStopManualSeek}

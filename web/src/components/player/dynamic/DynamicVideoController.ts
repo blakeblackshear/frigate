@@ -1,7 +1,7 @@
 import { Recording } from "@/types/record";
 import { DynamicPlayback } from "@/types/playback";
 import { PreviewController } from "../PreviewPlayer";
-import { Timeline } from "@/types/timeline";
+import { TimeRange, Timeline } from "@/types/timeline";
 
 type PlayerMode = "playback" | "scrubbing";
 
@@ -10,11 +10,13 @@ export class DynamicVideoController {
   public camera = "";
   private playerController: HTMLVideoElement;
   private previewController: PreviewController;
+  private setNoRecording: (noRecs: boolean) => void;
   private setFocusedItem: (timeline: Timeline) => void;
   private playerMode: PlayerMode = "playback";
 
   // playback
   private recordings: Recording[] = [];
+  private timeRange: TimeRange = { after: 0, before: 0 };
   private annotationOffset: number;
   private timeToStart: number | undefined = undefined;
 
@@ -24,6 +26,7 @@ export class DynamicVideoController {
     previewController: PreviewController,
     annotationOffset: number,
     defaultMode: PlayerMode,
+    setNoRecording: (noRecs: boolean) => void,
     setFocusedItem: (timeline: Timeline) => void,
   ) {
     this.camera = camera;
@@ -31,11 +34,13 @@ export class DynamicVideoController {
     this.previewController = previewController;
     this.annotationOffset = annotationOffset;
     this.playerMode = defaultMode;
+    this.setNoRecording = setNoRecording;
     this.setFocusedItem = setFocusedItem;
   }
 
   newPlayback(newPlayback: DynamicPlayback) {
     this.recordings = newPlayback.recordings;
+    this.timeRange = newPlayback.timeRange;
 
     if (this.timeToStart) {
       this.seekToTimestamp(this.timeToStart);
@@ -52,12 +57,17 @@ export class DynamicVideoController {
   }
 
   seekToTimestamp(time: number, play: boolean = false) {
+    if (time < this.timeRange.after || time > this.timeRange.before) {
+      this.timeToStart = time;
+      return;
+    }
+
     if (
       this.recordings.length == 0 ||
       time < this.recordings[0].start_time ||
       time > this.recordings[this.recordings.length - 1].end_time
     ) {
-      this.timeToStart = time;
+      this.setNoRecording(true);
       return;
     }
 
@@ -90,6 +100,8 @@ export class DynamicVideoController {
       } else {
         this.playerController.pause();
       }
+    } else {
+      console.log(`seek time is 0`);
     }
   }
 
