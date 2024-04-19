@@ -1,13 +1,17 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { Line, Circle, Group } from "react-konva";
-import { minMax, toRGBColorString, dragBoundFunc } from "@/utils/canvasUtil";
+import {
+  minMax,
+  toRGBColorString,
+  dragBoundFunc,
+  flattenPoints,
+} from "@/utils/canvasUtil";
 import type { KonvaEventObject } from "konva/lib/Node";
 import Konva from "konva";
 import { Vector2d } from "konva/lib/types";
 
 type PolygonDrawerProps = {
   points: number[][];
-  flattenedPoints: number[];
   isActive: boolean;
   isHovered: boolean;
   isFinished: boolean;
@@ -30,7 +34,6 @@ type PolygonDrawerProps = {
 
 export default function PolygonDrawer({
   points,
-  flattenedPoints,
   isActive,
   isHovered,
   isFinished,
@@ -43,6 +46,7 @@ export default function PolygonDrawer({
   handleMouseOutAnyPoint,
 }: PolygonDrawerProps) {
   const vertexRadius = 6;
+  const flattenedPoints = useMemo(() => flattenPoints(points), [points]);
   const [stage, setStage] = useState<Konva.Stage>();
   const [minMaxX, setMinMaxX] = useState([0, 0]);
   const [minMaxY, setMinMaxY] = useState([0, 0]);
@@ -59,7 +63,7 @@ export default function PolygonDrawer({
   const handleGroupMouseOut = (
     e: Konva.KonvaEventObject<MouseEvent | TouchEvent>,
   ) => {
-    if (!e.target) return;
+    if (!e.target || !isFinished) return;
     e.target.getStage()!.container().style.cursor = "default";
   };
 
@@ -105,8 +109,6 @@ export default function PolygonDrawer({
       onMouseOver={isActive ? handleGroupMouseOver : undefined}
       onTouchStart={isActive ? handleGroupMouseOver : undefined}
       onMouseOut={isActive ? handleGroupMouseOut : undefined}
-      // TODO: don't use zindex
-      zIndex={isActive ? 999 : 100}
     >
       <Line
         points={flattenedPoints}
@@ -119,8 +121,8 @@ export default function PolygonDrawer({
         if (!isActive) {
           return;
         }
-        const x = point[0] - vertexRadius / 2;
-        const y = point[1] - vertexRadius / 2;
+        const x = point[0];
+        const y = point[1];
         const startPointAttr =
           index === 0
             ? {

@@ -5,7 +5,6 @@ import Konva from "konva";
 import type { KonvaEventObject } from "konva/lib/Node";
 import { Polygon, PolygonType } from "@/types/canvas";
 import { useApiHost } from "@/api";
-import { flattenPoints } from "@/utils/canvasUtil";
 
 type PolygonCanvasProps = {
   camera: string;
@@ -60,8 +59,69 @@ export function PolygonCanvas({
     return [stage.getPointerPosition()!.x, stage.getPointerPosition()!.y];
   };
 
+  const addPointToPolygon = (polygon: Polygon, newPoint: number[]) => {
+    const points = polygon.points;
+    const [newPointX, newPointY] = newPoint;
+    const updatedPoints = [...points];
+
+    for (let i = 0; i < points.length; i++) {
+      const [x1, y1] = points[i];
+      const [x2, y2] = i === points.length - 1 ? points[0] : points[i + 1];
+
+      if (
+        (x1 <= newPointX && newPointX <= x2) ||
+        (x2 <= newPointX && newPointX <= x1)
+      ) {
+        if (
+          (y1 <= newPointY && newPointY <= y2) ||
+          (y2 <= newPointY && newPointY <= y1)
+        ) {
+          const insertIndex = i + 1;
+          updatedPoints.splice(insertIndex, 0, [newPointX, newPointY]);
+          break;
+        }
+      }
+    }
+
+    return updatedPoints;
+  };
+
+  const isPointNearLineSegment = (
+    polygon: Polygon,
+    mousePos: number[],
+    radius = 10,
+  ) => {
+    const points = polygon.points;
+    const [x, y] = mousePos;
+
+    for (let i = 0; i < points.length; i++) {
+      const [x1, y1] = points[i];
+      const [x2, y2] = i === points.length - 1 ? points[0] : points[i + 1];
+
+      const crossProduct = (x - x1) * (x2 - x1) + (y - y1) * (y2 - y1);
+      if (crossProduct > 0) {
+        const lengthSquared = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+        const dot = (x - x1) * (x2 - x1) + (y - y1) * (y2 - y1);
+        if (dot < 0 || dot > lengthSquared) {
+          continue;
+        }
+        const lineSegmentDistance = Math.abs(
+          ((y2 - y1) * x - (x2 - x1) * y + x2 * y1 - y2 * x1) /
+            Math.sqrt(Math.pow(y2 - y1, 2) + Math.pow(x2 - x1, 2)),
+        );
+        if (lineSegmentDistance <= radius) {
+          const midPointX = (x1 + x2) / 2;
+          const midPointY = (y1 + y2) / 2;
+          return [midPointX, midPointY];
+        }
+      }
+    }
+
+    return null;
+  };
+
   const isMouseOverFirstPoint = (polygon: Polygon, mousePos: number[]) => {
-    if (!polygon || !polygon.points) {
+    if (!polygon || !polygon.points || polygon.points.length < 1) {
       return false;
     }
     const [firstPoint] = polygon.points;
@@ -69,7 +129,7 @@ export function PolygonCanvas({
       mousePos[0] - firstPoint[0],
       mousePos[1] - firstPoint[1],
     );
-    return distance < 15;
+    return distance < 10;
   };
 
   const isMouseOverAnyPoint = (polygon: Polygon, mousePos: number[]) => {
@@ -83,7 +143,7 @@ export function PolygonCanvas({
         mousePos[0] - point[0],
         mousePos[1] - point[1],
       );
-      if (distance < 15) {
+      if (distance < 10) {
         return true;
       }
     }
@@ -116,11 +176,23 @@ export function PolygonCanvas({
         !activePolygon.isFinished &&
         !isMouseOverAnyPoint(activePolygon, mousePos)
       ) {
-        // Add a new point to the active polygon
-        updatedPolygons[activePolygonIndex] = {
-          ...activePolygon,
-          points: [...activePolygon.points, mousePos],
-        };
+        let updatedPoints;
+
+        // we've clicked near a line segment, so add a new point in the right position
+        if (isPointNearLineSegment(activePolygon, mousePos)) {
+          updatedPoints = addPointToPolygon(activePolygon, mousePos);
+          updatedPolygons[activePolygonIndex] = {
+            ...activePolygon,
+            points: updatedPoints,
+          };
+        } else {
+          updatedPoints = [...activePolygon.points, mousePos];
+          // Add a new point to the active polygon
+          updatedPolygons[activePolygonIndex] = {
+            ...activePolygon,
+            points: updatedPoints,
+          };
+        }
         setPolygons(updatedPolygons);
       }
     }
@@ -136,6 +208,7 @@ export function PolygonCanvas({
 
     const activePolygon = polygons[activePolygonIndex];
     if (!activePolygon.isFinished && activePolygon.points.length >= 3) {
+      e.target.getStage()!.container().style.cursor = "default";
       e.currentTarget.scale({ x: 2, y: 2 });
     }
   };
@@ -161,7 +234,7 @@ export function PolygonCanvas({
   const handleMouseOverAnyPoint = (
     e: KonvaEventObject<MouseEvent | TouchEvent>,
   ) => {
-    if (activePolygonIndex === undefined || !polygons) {
+    if (!polygons) {
       return;
     }
     e.target.getStage()!.container().style.cursor = "move";
@@ -173,7 +246,12 @@ export function PolygonCanvas({
     if (activePolygonIndex === undefined || !polygons) {
       return;
     }
-    e.target.getStage()!.container().style.cursor = "default";
+    const activePolygon = polygons[activePolygonIndex];
+    if (activePolygon.isFinished) {
+      e.target.getStage()!.container().style.cursor = "default";
+    } else {
+      e.target.getStage()!.container().style.cursor = "crosshair";
+    }
   };
 
   const handlePointDragMove = (
@@ -231,16 +309,17 @@ export function PolygonCanvas({
 
     const updatedPolygons = [...polygons];
     const activePolygon = updatedPolygons[activePolygonIndex];
+    const stage = e.target.getStage()!;
+    const mousePos = getMousePos(stage);
 
-    if (activePolygon.isFinished) return;
+    if (
+      activePolygon.isFinished ||
+      isMouseOverAnyPoint(activePolygon, mousePos) ||
+      isMouseOverFirstPoint(activePolygon, mousePos)
+    )
+      return;
+
     e.target.getStage()!.container().style.cursor = "crosshair";
-  };
-
-  const handleStageMouseOut = (
-    e: Konva.KonvaEventObject<MouseEvent | TouchEvent>,
-  ) => {
-    if (!e.target) return;
-    e.target.getStage()!.container().style.cursor = "default";
   };
 
   return (
@@ -251,7 +330,6 @@ export function PolygonCanvas({
       onMouseDown={handleMouseDown}
       onTouchStart={handleMouseDown}
       onMouseOver={handleStageMouseOver}
-      onMouseOut={handleStageMouseOut}
     >
       <Layer>
         <Image
@@ -265,11 +343,11 @@ export function PolygonCanvas({
         {polygons?.map(
           (polygon, index) =>
             (selectedZoneMask === undefined ||
-              selectedZoneMask.includes(polygon.type)) && (
+              selectedZoneMask.includes(polygon.type)) &&
+            index !== activePolygonIndex && (
               <PolygonDrawer
                 key={index}
                 points={polygon.points}
-                flattenedPoints={flattenPoints(polygon.points)}
                 isActive={index === activePolygonIndex}
                 isHovered={index === hoveredPolygonIndex}
                 isFinished={polygon.isFinished}
@@ -283,6 +361,25 @@ export function PolygonCanvas({
               />
             ),
         )}
+        {activePolygonIndex !== undefined &&
+          polygons?.[activePolygonIndex] &&
+          (selectedZoneMask === undefined ||
+            selectedZoneMask.includes(polygons[activePolygonIndex].type)) && (
+            <PolygonDrawer
+              key={activePolygonIndex}
+              points={polygons[activePolygonIndex].points}
+              isActive={true}
+              isHovered={activePolygonIndex === hoveredPolygonIndex}
+              isFinished={polygons[activePolygonIndex].isFinished}
+              color={polygons[activePolygonIndex].color}
+              handlePointDragMove={handlePointDragMove}
+              handleGroupDragEnd={handleGroupDragEnd}
+              handleMouseOverStartPoint={handleMouseOverStartPoint}
+              handleMouseOutStartPoint={handleMouseOutStartPoint}
+              handleMouseOverAnyPoint={handleMouseOverAnyPoint}
+              handleMouseOutAnyPoint={handleMouseOutAnyPoint}
+            />
+          )}
       </Layer>
     </Stage>
   );
