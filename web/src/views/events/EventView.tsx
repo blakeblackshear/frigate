@@ -955,7 +955,7 @@ function MotionReview({
 
       {!scrubbing && (
         <VideoControls
-          className="absolute bottom-16 left-1/2 -translate-x-1/2"
+          className="absolute bottom-16 left-1/2 -translate-x-1/2 bg-secondary"
           features={{
             volume: false,
             seek: true,
