@@ -206,3 +206,45 @@ export function useAudioActivity(camera: string): { payload: number } {
   } = useWs(`${camera}/audio/rms`, "");
   return { payload: payload as number };
 }
+
+export function useMotionThreshold(camera: string): {
+  payload: string;
+  send: (payload: number, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(
+    `${camera}/motion_threshold/state`,
+    `${camera}/motion_threshold/set`,
+  );
+  return { payload: payload as string, send };
+}
+
+export function useMotionContourArea(camera: string): {
+  payload: string;
+  send: (payload: number, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(
+    `${camera}/motion_contour_area/state`,
+    `${camera}/motion_contour_area/set`,
+  );
+  return { payload: payload as string, send };
+}
+
+export function useImproveContrast(camera: string): {
+  payload: ToggleableSetting;
+  send: (payload: string, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(
+    `${camera}/improve_contrast/state`,
+    `${camera}/improve_contrast/set`,
+  );
+  return { payload: payload as ToggleableSetting, send };
+}

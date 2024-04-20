@@ -3,10 +3,11 @@
 import logging
 import os
 import shutil
+from typing import Optional, Union
 
 from ruamel.yaml import YAML
 
-from frigate.const import CONFIG_DIR
+from frigate.const import CONFIG_DIR, EXPORT_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +47,16 @@ def migrate_frigate_config(config_file: str):
             yaml.dump(new_config, f)
         previous_version = 0.14
 
+        logger.info("Migrating export file names...")
+        for file in os.listdir(EXPORT_DIR):
+            if "@" not in file:
+                continue
+
+            new_name = file.replace("@", "_")
+            os.rename(
+                os.path.join(EXPORT_DIR, file), os.path.join(EXPORT_DIR, new_name)
+            )
+
     with open(version_file, "w") as f:
         f.write(str(CURRENT_CONFIG_VERSION))
 
@@ -80,6 +91,12 @@ def migrate_014(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
 
         if not new_config["record"]:
             del new_config["record"]
+
+        if new_config.get("ui", {}).get("use_experimental"):
+            del new_config["ui"]["experimental"]
+
+            if not new_config["ui"]:
+                del new_config["ui"]
 
     # remove rtmp
     if new_config.get("ffmpeg", {}).get("output_args", {}).get("rtmp"):
@@ -125,3 +142,38 @@ def migrate_014(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
         new_config["cameras"][name] = camera_config
 
     return new_config
+
+
+def get_relative_coordinates(
+    mask: Optional[Union[str, list]], frame_shape: tuple[int, int]
+) -> Union[str, list]:
+    # masks and zones are saved as relative coordinates
+    # we know if any points are > 1 then it is using the
+    # old native resolution coordinates
+    if mask:
+        if isinstance(mask, list) and any(x > "1.0" for x in mask[0].split(",")):
+            relative_masks = []
+            for m in mask:
+                points = m.split(",")
+                relative_masks.append(
+                    ",".join(
+                        [
+                            f"{round(int(points[i]) / frame_shape[1], 3)},{round(int(points[i + 1]) / frame_shape[0], 3)}"
+                            for i in range(0, len(points), 2)
+                        ]
+                    )
+                )
+
+            mask = relative_masks
+        elif isinstance(mask, str) and any(x > "1.0" for x in mask.split(",")):
+            points = mask.split(",")
+            mask = ",".join(
+                [
+                    f"{round(int(points[i]) / frame_shape[1], 3)},{round(int(points[i + 1]) / frame_shape[0], 3)}"
+                    for i in range(0, len(points), 2)
+                ]
+            )
+
+        return mask
+
+    return mask

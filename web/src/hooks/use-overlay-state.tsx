@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { usePersistence } from "./use-persistence";
 
@@ -90,4 +90,31 @@ export function useHashState<S extends string>(): [
   );
 
   return [hash, setHash];
+}
+
+export function useSearchEffect(
+  key: string,
+  callback: (value: string) => void,
+) {
+  const location = useLocation();
+
+  const param = useMemo(() => {
+    if (!location || !location.search || location.search.length == 0) {
+      return undefined;
+    }
+
+    const params = location.search.substring(1).split("&");
+
+    return params
+      .find((p) => p.includes("=") && p.split("=")[0] == key)
+      ?.split("=");
+  }, [location, key]);
+
+  useEffect(() => {
+    if (!param) {
+      return;
+    }
+
+    callback(param[1]);
+  }, [param, callback]);
 }

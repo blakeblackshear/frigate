@@ -31,7 +31,7 @@ function Logs() {
   const [logService, setLogService] = useState<LogType>("frigate");
 
   useEffect(() => {
-    document.title = `${logService[0].toUpperCase()}${logService.substring(1)} Stats - Frigate`;
+    document.title = `${logService[0].toUpperCase()}${logService.substring(1)} Logs - Frigate`;
   }, [logService]);
 
   // log data handling
@@ -352,7 +352,7 @@ function Logs() {
           {Object.values(logTypes).map((item) => (
             <ToggleGroupItem
               key={item}
-              className={`flex items-center justify-between gap-2 ${logService == item ? "" : "text-gray-500"}`}
+              className={`flex items-center justify-between gap-2 ${logService == item ? "" : "text-muted-foreground"}`}
               value={item}
               aria-label={`Select ${item}`}
             >
@@ -366,7 +366,7 @@ function Logs() {
             size="sm"
             onClick={handleCopyLogs}
           >
-            <FaCopy />
+            <FaCopy className="text-secondary-foreground" />
             <div className="hidden md:block text-primary">
               Copy to Clipboard
             </div>
@@ -405,7 +405,7 @@ function Logs() {
         </div>
         <div
           ref={contentRef}
-          className="w-full flex flex-col overflow-y-auto no-scrollbar"
+          className="w-full flex flex-col overflow-y-auto no-scrollbar overscroll-contain"
         >
           {logLines.length > 0 &&
             [...Array(logRange.end).keys()].map((idx) => {

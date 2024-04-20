@@ -163,6 +163,7 @@ export default function LivePlayer({
           camera={cameraConfig.name}
           showFps={false}
           reloadInterval={stillReloadInterval}
+          cameraClasses="relative w-full h-full flex justify-center"
         />
       </div>
 

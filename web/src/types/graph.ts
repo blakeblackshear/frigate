@@ -18,6 +18,11 @@ export const InferenceThreshold = {
   error: 100,
 } as Threshold;
 
+export const DetectorTempThreshold = {
+  warning: 72,
+  error: 80,
+} as Threshold;
+
 export const DetectorCpuThreshold = {
   warning: 25,
   error: 50,

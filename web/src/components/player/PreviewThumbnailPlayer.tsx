@@ -239,7 +239,7 @@ export default function PreviewThumbnailPlayer({
                       <Chip
                         className={`flex items-start justify-between space-x-1 ${playingBack ? "hidden" : ""} bg-gradient-to-br ${review.has_been_reviewed ? "from-green-600 to-green-700 bg-green-600" : "from-gray-400 to-gray-500 bg-gray-500"} z-0`}
                       >
-                        {review.data.objects.map((object) => {
+                        {review.data.objects.sort().map((object) => {
                           return getIconForLabel(object, "size-3 text-white");
                         })}
                         {review.data.audio.map((audio) => {
@@ -252,8 +252,18 @@ export default function PreviewThumbnailPlayer({
               </TooltipTrigger>
             </div>
             <TooltipContent className="capitalize">
-              {[...(review.data.objects || []), ...(review.data.audio || [])]
-                .filter((item) => item !== undefined)
+              {[
+                ...new Set([
+                  ...(review.data.objects || []),
+                  ...(review.data.sub_labels || []),
+                  ...(review.data.audio || []),
+                ]),
+              ]
+                .filter(
+                  (item) => item !== undefined && !item.includes("-verified"),
+                )
+                .map((text) => text.charAt(0).toUpperCase() + text.substring(1))
+                .sort()
                 .join(", ")
                 .replaceAll("-verified", "")}
             </TooltipContent>
@@ -332,15 +342,19 @@ type VideoPreviewProps = {
   relevantPreview: Preview;
   startTime: number;
   endTime?: number;
+  showProgress?: boolean;
+  loop?: boolean;
   setReviewed: () => void;
   setIgnoreClick: (ignore: boolean) => void;
   isPlayingBack: (ended: boolean) => void;
   onTimeUpdate?: (time: number | undefined) => void;
 };
-function VideoPreview({
+export function VideoPreview({
   relevantPreview,
   startTime,
   endTime,
+  showProgress = true,
+  loop = false,
   setReviewed,
   setIgnoreClick,
   isPlayingBack,
@@ -414,6 +428,11 @@ function VideoPreview({
 
     if (playerPercent > 100) {
       setReviewed();
+
+      if (loop && playerRef.current) {
+        playerRef.current.currentTime = playerStartTime;
+        return;
+      }
 
       if (isMobile) {
         isPlayingBack(false);
@@ -501,6 +520,7 @@ function VideoPreview({
   const onStopManualSeek = useCallback(() => {
     setTimeout(() => {
       setIgnoreClick(false);
+      setHoverTimeout(undefined);
 
       if (isSafari || (isFirefox && isMobile)) {
         setManualPlayback(true);
@@ -543,17 +563,19 @@ function VideoPreview({
       >
         <source src={relevantPreview.src} type={relevantPreview.type} />
       </video>
-      <NoThumbSlider
-        ref={sliderRef}
-        className="absolute inset-x-0 bottom-0 z-30"
-        value={[progress]}
-        onValueChange={onManualSeek}
-        onValueCommit={onStopManualSeek}
-        min={0}
-        step={1}
-        max={100}
-        onMouseMove={isMobile ? undefined : onProgressHover}
-      />
+      {showProgress && (
+        <NoThumbSlider
+          ref={sliderRef}
+          className={`absolute inset-x-0 bottom-0 z-30 cursor-col-resize ${hoverTimeout != undefined ? "h-4" : "h-2"}`}
+          value={[progress]}
+          onValueChange={onManualSeek}
+          onValueCommit={onStopManualSeek}
+          min={0}
+          step={1}
+          max={100}
+          onMouseMove={isMobile ? undefined : onProgressHover}
+        />
+      )}
     </div>
   );
 }
@@ -562,14 +584,18 @@ const MIN_LOAD_TIMEOUT_MS = 200;
 type InProgressPreviewProps = {
   review: ReviewSegment;
   timeRange: TimeRange;
+  showProgress?: boolean;
+  loop?: boolean;
   setReviewed: (reviewId: string) => void;
   setIgnoreClick: (ignore: boolean) => void;
   isPlayingBack: (ended: boolean) => void;
   onTimeUpdate?: (time: number | undefined) => void;
 };
-function InProgressPreview({
+export function InProgressPreview({
   review,
   timeRange,
+  showProgress = true,
+  loop = false,
   setReviewed,
   setIgnoreClick,
   isPlayingBack,
@@ -603,6 +629,11 @@ function InProgressPreview({
     if (key == previewFrames.length - 1) {
       if (!review.has_been_reviewed) {
         setReviewed(review.id);
+      }
+
+      if (loop) {
+        setKey(0);
+        return;
       }
 
       if (isMobile) {
@@ -707,17 +738,19 @@ function InProgressPreview({
         src={`${apiHost}api/preview/${previewFrames[key]}/thumbnail.webp`}
         onLoad={handleLoad}
       />
-      <NoThumbSlider
-        ref={sliderRef}
-        className="absolute inset-x-0 bottom-0 z-30"
-        value={[key]}
-        onValueChange={onManualSeek}
-        onValueCommit={onStopManualSeek}
-        min={0}
-        step={1}
-        max={previewFrames.length - 1}
-        onMouseMove={isMobile ? undefined : onProgressHover}
-      />
+      {showProgress && (
+        <NoThumbSlider
+          ref={sliderRef}
+          className={`absolute inset-x-0 bottom-0 z-30 cursor-col-resize ${manualFrame ? "h-4" : "h-2"}`}
+          value={[key]}
+          onValueChange={onManualSeek}
+          onValueCommit={onStopManualSeek}
+          min={0}
+          step={1}
+          max={previewFrames.length - 1}
+          onMouseMove={isMobile ? undefined : onProgressHover}
+        />
+      )}
     </div>
   );
 }

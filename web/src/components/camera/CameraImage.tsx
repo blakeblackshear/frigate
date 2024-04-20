@@ -36,12 +36,7 @@ export default function CameraImage({
   }, [apiHost, name, imgRef, searchParams, config]);
 
   return (
-    <div
-      className={`relative w-full h-full flex justify-center ${
-        className || ""
-      }`}
-      ref={containerRef}
-    >
+    <div className={className} ref={containerRef}>
       {enabled ? (
         <img
           ref={imgRef}

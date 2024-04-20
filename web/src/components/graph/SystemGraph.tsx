@@ -72,7 +72,7 @@ export function ThresholdBarGraph({
           } else if (value >= threshold.warning) {
             return "#FF9966";
           } else {
-            return (systemTheme || theme) == "dark" ? "#404040" : "#E5E5E5";
+            return "#217930";
           }
         },
       ],
@@ -88,6 +88,13 @@ export function ThresholdBarGraph({
       plotOptions: {
         bar: {
           distributed: true,
+        },
+      },
+      states: {
+        active: {
+          filter: {
+            type: "none",
+          },
         },
       },
       tooltip: {
@@ -190,6 +197,18 @@ export function StorageGraph({ graphId, used, total }: StorageGraphProps) {
       plotOptions: {
         bar: {
           horizontal: true,
+        },
+      },
+      states: {
+        active: {
+          filter: {
+            type: "none",
+          },
+        },
+        hover: {
+          filter: {
+            type: "none",
+          },
         },
       },
       tooltip: {

@@ -22,8 +22,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import FilterCheckBox from "./FilterCheckBox";
 import axios from "axios";
+import FilterSwitch from "./FilterSwitch";
 
 type CameraGroupSelectorProps = {
   className?: string;
@@ -305,7 +305,7 @@ function NewGroupDialog({ open, setOpen, currentGroups }: NewGroupDialogProps) {
                   ...(birdseyeConfig?.enabled ? ["birdseye"] : []),
                   ...Object.keys(config?.cameras ?? {}),
                 ].map((camera) => (
-                  <FilterCheckBox
+                  <FilterSwitch
                     key={camera}
                     isChecked={cameras.includes(camera)}
                     label={camera.replaceAll("_", " ")}

@@ -607,8 +607,6 @@ ui:
   live_mode: mse
   # Optional: Set a timezone to use in the UI (default: use browser local time)
   # timezone: America/Denver
-  # Optional: Use an experimental recordings / camera view UI (default: shown below)
-  use_experimental: False
   # Optional: Set the time format used.
   # Options are browser, 12hour, or 24hour (default: shown below)
   time_format: browser

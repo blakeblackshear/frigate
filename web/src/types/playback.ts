@@ -4,6 +4,7 @@ import { TimeRange } from "./timeline";
 
 export type DynamicPlayback = {
   recordings: Recording[];
+  timeRange: TimeRange;
 };
 
 export type PreviewPlayback = {
