@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Export } from "@/types/export";
+import { DeleteClipType, Export } from "@/types/export";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
@@ -42,11 +42,6 @@ function Exports() {
   }, [exports, search]);
 
   // Deleting
-
-  type DeleteClipType = {
-    file: string;
-    exportName: string;
-  };
 
   const [deleteClip, setDeleteClip] = useState<DeleteClipType | undefined>();
 

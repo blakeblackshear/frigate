@@ -15,7 +15,7 @@ import {
 } from "../ui/dialog";
 import { Input } from "../ui/input";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
-import { Export } from "@/types/export";
+import { DeleteClipType, Export } from "@/types/export";
 import { MdEditSquare } from "react-icons/md";
 import { baseUrl } from "@/api/baseUrl";
 
@@ -24,7 +24,7 @@ type ExportProps = {
   exportedRecording: Export;
   onSelect: (selected: Export) => void;
   onRename: (original: string, update: string) => void;
-  onDelete: ({ file: string, exportName: string }) => void;
+  onDelete: ({ file, exportName }: DeleteClipType) => void;
 };
 
 export default function ExportCard({

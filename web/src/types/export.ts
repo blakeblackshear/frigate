@@ -7,3 +7,8 @@ export type Export = {
   thumb_path: string;
   in_progress: boolean;
 };
+
+export type DeleteClipType = {
+  file: string;
+  exportName: string;
+};
