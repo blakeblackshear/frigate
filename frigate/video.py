@@ -60,7 +60,7 @@ def stop_ffmpeg(ffmpeg_process, logger):
         logger.info("Waiting for ffmpeg to exit gracefully...")
         ffmpeg_process.communicate(timeout=30)
     except sp.TimeoutExpired:
-        logger.info("FFmpeg didnt exit. Force killing...")
+        logger.info("FFmpeg didn't exit. Force killing...")
         ffmpeg_process.kill()
         ffmpeg_process.communicate()
     ffmpeg_process = None

@@ -53,7 +53,7 @@ def get_frame_shape(source):
     if video_info["height"] != 0 and video_info["width"] != 0:
         return (video_info["height"], video_info["width"], 3)
 
-    # fallback to using opencv if ffprobe didnt succeed
+    # fallback to using opencv if ffprobe didn't succeed
     video = cv2.VideoCapture(source)
     ret, frame = video.read()
     frame_shape = frame.shape
