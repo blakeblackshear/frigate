@@ -249,6 +249,14 @@ class FrigateApp:
         # Run migrations
         del logging.getLogger("peewee_migrate").handlers[:]
         router = Router(migrate_db)
+
+        if len(router.diff) > 0:
+            logger.info("Making backup of DB before migrations...")
+            shutil.copyfile(
+                self.config.database.path,
+                self.config.database.path.replace("frigate.db", "backup.db"),
+            )
+
         router.run()
 
         # this is a temporary check to clean up user DB from beta
