@@ -43,14 +43,19 @@ function Exports() {
 
   // Deleting
 
-  const [deleteClip, setDeleteClip] = useState<string | undefined>();
+  type DeleteClipType = {
+    file: string;
+    exportName: string;
+  };
+
+  const [deleteClip, setDeleteClip] = useState<DeleteClipType | undefined>();
 
   const onHandleDelete = useCallback(() => {
     if (!deleteClip) {
       return;
     }
 
-    axios.delete(`export/${deleteClip}`).then((response) => {
+    axios.delete(`export/${deleteClip.file}`).then((response) => {
       if (response.status == 200) {
         setDeleteClip(undefined);
         mutate();
@@ -86,7 +91,7 @@ function Exports() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Export</AlertDialogTitle>
             <AlertDialogDescription>
-              Confirm deletion of {deleteClip}.
+              Are you sure you want to delete {deleteClip?.exportName}?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -149,7 +154,9 @@ function Exports() {
                 exportedRecording={item}
                 onSelect={setSelected}
                 onRename={onHandleRename}
-                onDelete={(id) => setDeleteClip(id)}
+                onDelete={({ file, exportName }) =>
+                  setDeleteClip({ file, exportName })
+                }
               />
             ))}
           </div>
