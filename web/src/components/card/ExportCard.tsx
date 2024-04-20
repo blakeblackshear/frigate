@@ -6,10 +6,16 @@ import { isDesktop } from "react-device-detect";
 import { FaDownload, FaPlay } from "react-icons/fa";
 import Chip from "../indicators/Chip";
 import { Skeleton } from "../ui/skeleton";
-import { Dialog, DialogContent, DialogFooter, DialogTitle } from "../ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogTitle,
+} from "../ui/dialog";
 import { Input } from "../ui/input";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
-import { Export } from "@/types/export";
+import { DeleteClipType, Export } from "@/types/export";
 import { MdEditSquare } from "react-icons/md";
 import { baseUrl } from "@/api/baseUrl";
 
@@ -18,7 +24,7 @@ type ExportProps = {
   exportedRecording: Export;
   onSelect: (selected: Export) => void;
   onRename: (original: string, update: string) => void;
-  onDelete: (file: string) => void;
+  onDelete: ({ file, exportName }: DeleteClipType) => void;
 };
 
 export default function ExportCard({
@@ -62,6 +68,9 @@ export default function ExportCard({
       >
         <DialogContent>
           <DialogTitle>Rename Export</DialogTitle>
+          <DialogDescription>
+            Enter a new name for this export.
+          </DialogDescription>
           {editName && (
             <>
               <Input
@@ -135,7 +144,12 @@ export default function ExportCard({
               </Chip>
               <Chip
                 className="bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 rounded-md cursor-pointer"
-                onClick={() => onDelete(exportedRecording.id)}
+                onClick={() =>
+                  onDelete({
+                    file: exportedRecording.id,
+                    exportName: exportedRecording.name,
+                  })
+                }
               >
                 <LuTrash className="size-4 text-destructive fill-destructive" />
               </Chip>
