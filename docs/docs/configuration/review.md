@@ -21,16 +21,6 @@ review:
       - speech
 ```
 
-## Restricting alerts to specific zones
-
-By default a review item will be marked as an alert if any `review -> alerts -> labels` are detected anywhere in the camera frame. You will likely want to configure review items to only be marked as an alert when the object enters an area of interest, [see the zone docs for more information](./zones.md#restricting-alerts-and-detections-to-specific-zones)
-
-:::info
-
-Because zones don't apply to audio, audio labels will always be marked as an alert.
-
-:::
-
 ## Restricting detections to specific labels
 
 By default all detections that do not qualify as an alert qualify as a detection. However, detections can further be filtered to only include certain labels or certain zones.
@@ -46,12 +36,12 @@ review:
       - dog
 ```
 
-## Restricting alerts to specific zones
+## Restricting review items to specific zones
 
-By default a review item will be marked as a detection if any `review -> detections -> labels` are detected anywhere in the camera frame. You may want to configure review items to only be marked as a detection when the object enters an area of secondary interest, [see the zone docs for more information](./zones.md#restricting-alerts-and-detections-to-specific-zones)
+By default a review item will be created if any `review -> alerts -> labels` and `review -> detections -> labels` are detected anywhere in the camera frame. You will likely want to configure review items to only be created when the object enters an area of interest, [see the zone docs for more information](./zones.md#restricting-alerts-and-detections-to-specific-zones)
 
 :::info
 
-Because zones don't apply to audio, audio labels will always be marked as a detection.
+Because zones don't apply to audio, audio labels will always be marked as an alert.
 
 :::
