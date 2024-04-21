@@ -154,8 +154,10 @@ export default function MotionTuner({
   useEffect(() => {
     if (changedValue) {
       addMessage("motion_tuner", "Unsaved motion changes", "text-danger");
+    } else {
+      clearMessages("motion_tuner");
     }
-  }, [changedValue, addMessage]);
+  }, [changedValue, addMessage, clearMessages]);
 
   if (!cameraConfig && !selectedCamera) {
     return <ActivityIndicator />;
