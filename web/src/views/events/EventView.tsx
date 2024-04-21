@@ -589,7 +589,7 @@ function DetectionReview({
                   </div>
                 );
               })
-            : itemsToReview ??
+            : (itemsToReview ?? 0) > 0 &&
               Array(itemsToReview)
                 .fill(0)
                 .map((_, idx) => (
