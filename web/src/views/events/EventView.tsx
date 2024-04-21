@@ -589,7 +589,8 @@ function DetectionReview({
                   </div>
                 );
               })
-            : Array(itemsToReview)
+            : itemsToReview ??
+              Array(itemsToReview)
                 .fill(0)
                 .map((_, idx) => (
                   <Skeleton key={idx} className="size-full aspect-video" />
