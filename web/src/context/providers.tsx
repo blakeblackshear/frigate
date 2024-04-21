@@ -4,6 +4,7 @@ import { RecoilRoot } from "recoil";
 import { ApiProvider } from "@/api";
 import { IconContext } from "react-icons";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { StatusBarMessagesProvider } from "@/context/statusbar-provider";
 
 type TProvidersProps = {
   children: ReactNode;
@@ -16,7 +17,7 @@ function providers({ children }: TProvidersProps) {
         <ThemeProvider defaultTheme="system" storageKey="frigate-ui-theme">
           <TooltipProvider>
             <IconContext.Provider value={{ size: "20" }}>
-              {children}
+              <StatusBarMessagesProvider>{children}</StatusBarMessagesProvider>
             </IconContext.Provider>
           </TooltipProvider>
         </ThemeProvider>
