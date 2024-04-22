@@ -185,13 +185,15 @@ class ReviewSegmentMaintainer(threading.Thread):
 
     def end_segment(self, segment: PendingReviewSegment) -> None:
         """End segment."""
-        seg_data = segment.get_data(ended=True)
-        self.requestor.send_data(UPSERT_REVIEW_SEGMENT, seg_data)
+        final_data = segment.get_data(ended=True)
+        self.requestor.send_data(UPSERT_REVIEW_SEGMENT, final_data)
         self.requestor.send_data(
             "reviews",
-            json.dumps(
-                {"type": "end", "review": {k.name: v for k, v in seg_data.items()}}
-            ),
+            {
+                "type": "update",
+                "before": json.dumps({k.name: v for k, v in final_data.items()}),
+                "after": {},
+            },
         )
         self.active_review_segments[segment.camera] = None
 
