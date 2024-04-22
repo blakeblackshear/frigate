@@ -6,6 +6,7 @@ import {
 import useStats from "@/hooks/use-stats";
 import { FrigateStats } from "@/types/stats";
 import { useContext, useEffect, useMemo } from "react";
+import { FaCheck } from "react-icons/fa";
 import { IoIosWarning } from "react-icons/io";
 import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
@@ -101,16 +102,25 @@ export default function Statusbar() {
         })}
       </div>
       <div className="h-full flex items-center gap-2">
-        {Object.entries(messages).map(([key, messageArray]) => (
-          <div key={key} className="h-full flex items-center gap-2">
-            {messageArray.map(({ id, text, color }: StatusMessage) => (
-              <div key={id} className="flex items-center text-sm gap-2">
-                <IoIosWarning className={`size-5 ${color || "text-danger"}`} />
-                {text}
-              </div>
-            ))}
+        {Object.entries(messages).length === 0 ? (
+          <div className="flex items-center text-sm gap-2">
+            <FaCheck className="size-3 text-green-500" />
+            System is healthy
           </div>
-        ))}
+        ) : (
+          Object.entries(messages).map(([key, messageArray]) => (
+            <div key={key} className="h-full flex items-center gap-2">
+              {messageArray.map(({ id, text, color }: StatusMessage) => (
+                <div key={id} className="flex items-center text-sm gap-2">
+                  <IoIosWarning
+                    className={`size-5 ${color || "text-danger"}`}
+                  />
+                  {text}
+                </div>
+              ))}
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
