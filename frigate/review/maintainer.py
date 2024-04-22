@@ -197,7 +197,7 @@ class ReviewSegmentMaintainer(threading.Thread):
             "reviews",
             json.dumps(
                 {
-                    "type": "update",
+                    "type": "end",
                     "before": end_data,
                     "after": end_data,
                 }
