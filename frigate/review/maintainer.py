@@ -153,13 +153,16 @@ class ReviewSegmentMaintainer(threading.Thread):
         """New segment."""
         new_data = segment.get_data(ended=False)
         self.requestor.send_data(UPSERT_REVIEW_SEGMENT, new_data)
+        start_data = {k.name: v for k, v in new_data.items()}
         self.requestor.send_data(
             "reviews",
-            {
-                "type": "new",
-                "before": {},
-                "after": json.dumps({k.name: v for k, v in new_data.items()}),
-            },
+            json.dumps(
+                {
+                    "type": "new",
+                    "before": start_data,
+                    "after": start_data,
+                }
+            ),
         )
 
     def update_segment(
@@ -176,24 +179,30 @@ class ReviewSegmentMaintainer(threading.Thread):
         self.requestor.send_data(UPSERT_REVIEW_SEGMENT, new_data)
         self.requestor.send_data(
             "reviews",
-            {
-                "type": "update",
-                "before": json.dumps({k.name: v for k, v in prev_data.items()}),
-                "after": json.dumps({k.name: v for k, v in new_data.items()}),
-            },
+            json.dumps(
+                {
+                    "type": "update",
+                    "before": {k.name: v for k, v in prev_data.items()},
+                    "after": {k.name: v for k, v in new_data.items()},
+                }
+            ),
         )
 
     def end_segment(self, segment: PendingReviewSegment) -> None:
         """End segment."""
+        logger.error(f"ending review segment {segment.camera}")
         final_data = segment.get_data(ended=True)
         self.requestor.send_data(UPSERT_REVIEW_SEGMENT, final_data)
+        end_data = {k.name: v for k, v in final_data.items()}
         self.requestor.send_data(
             "reviews",
-            {
-                "type": "update",
-                "before": json.dumps({k.name: v for k, v in final_data.items()}),
-                "after": {},
-            },
+            json.dumps(
+                {
+                    "type": "update",
+                    "before": end_data,
+                    "after": end_data,
+                }
+            ),
         )
         self.active_review_segments[segment.camera] = None
 

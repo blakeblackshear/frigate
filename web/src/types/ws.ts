@@ -31,7 +31,8 @@ type FrigateObjectState = {
 
 export interface FrigateReview {
   type: "new" | "update" | "end";
-  review: ReviewSegment;
+  before: ReviewSegment;
+  after: ReviewSegment;
 }
 
 export interface FrigateEvent {
