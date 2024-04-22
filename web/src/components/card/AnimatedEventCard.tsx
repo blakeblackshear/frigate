@@ -63,7 +63,7 @@ export function AnimatedEventCard({ event }: AnimatedEventCardProps) {
           }}
         >
           <div
-            className="size-full rounded cursor-pointer overflow-hidden"
+            className="size-full rounded md:rounded-lg cursor-pointer overflow-hidden"
             onClick={onOpenReview}
           >
             {previews ? (

@@ -113,7 +113,7 @@ function Exports() {
         <DialogContent className="max-w-7xl">
           <DialogTitle>{selected?.name}</DialogTitle>
           <video
-            className="size-full rounded-2xl"
+            className="size-full rounded-lg md:rounded-2xl"
             playsInline
             preload="auto"
             autoPlay

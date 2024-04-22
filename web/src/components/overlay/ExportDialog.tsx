@@ -130,7 +130,9 @@ export default function ExportDialog({
         </Trigger>
         <Content
           className={
-            isDesktop ? "sm:rounded-2xl" : "px-4 pb-4 mx-4 rounded-2xl"
+            isDesktop
+              ? "sm:rounded-lg md:rounded-2xl"
+              : "px-4 pb-4 mx-4 rounded-lg md:rounded-2xl"
           }
         >
           <ExportContent

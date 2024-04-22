@@ -95,7 +95,7 @@ export default function LivePlayer({
   if (liveMode == "webrtc") {
     player = (
       <WebRtcPlayer
-        className={`rounded-2xl size-full ${liveReady ? "" : "hidden"}`}
+        className={`rounded-lg md:rounded-2xl size-full ${liveReady ? "" : "hidden"}`}
         camera={cameraConfig.live.stream_name}
         playbackEnabled={cameraActive}
         audioEnabled={playAudio}
@@ -109,7 +109,7 @@ export default function LivePlayer({
     if ("MediaSource" in window || "ManagedMediaSource" in window) {
       player = (
         <MSEPlayer
-          className={`rounded-2xl size-full ${liveReady ? "" : "hidden"}`}
+          className={`rounded-lg md:rounded-2xl size-full ${liveReady ? "" : "hidden"}`}
           camera={cameraConfig.name}
           playbackEnabled={cameraActive}
           audioEnabled={playAudio}
@@ -128,7 +128,7 @@ export default function LivePlayer({
   } else if (liveMode == "jsmpeg") {
     player = (
       <JSMpegPlayer
-        className="size-full flex justify-center rounded-2xl overflow-hidden"
+        className="size-full flex justify-center rounded-lg md:rounded-2xl overflow-hidden"
         camera={cameraConfig.name}
         width={cameraConfig.detect.width}
         height={cameraConfig.detect.height}
@@ -144,13 +144,13 @@ export default function LivePlayer({
       data-camera={cameraConfig.name}
       className={`relative flex justify-center ${liveMode == "jsmpeg" ? "size-full" : "w-full"} outline cursor-pointer ${
         activeTracking
-          ? "outline-severity_alert outline-3 rounded-2xl shadow-severity_alert"
+          ? "outline-severity_alert outline-3 rounded-lg md:rounded-2xl shadow-severity_alert"
           : "outline-0 outline-background"
       } transition-all duration-500 ${className}`}
       onClick={onClick}
     >
-      <div className="absolute top-0 inset-x-0 rounded-2xl z-10 w-full h-[30%] bg-gradient-to-b from-black/20 to-transparent pointer-events-none"></div>
-      <div className="absolute bottom-0 inset-x-0 rounded-2xl z-10 w-full h-[10%] bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
+      <div className="absolute top-0 inset-x-0 rounded-lg md:rounded-2xl z-10 w-full h-[30%] bg-gradient-to-b from-black/20 to-transparent pointer-events-none"></div>
+      <div className="absolute bottom-0 inset-x-0 rounded-lg md:rounded-2xl z-10 w-full h-[10%] bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
       {player}
 
       <div

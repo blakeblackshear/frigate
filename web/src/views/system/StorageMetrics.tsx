@@ -45,7 +45,7 @@ export default function StorageMetrics({
     <div className="size-full mt-4 flex flex-col overflow-y-auto">
       <div className="text-muted-foreground text-sm font-medium">Overview</div>
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
-        <div className="p-2.5 bg-background_alt rounded-2xl flex-col">
+        <div className="p-2.5 bg-background_alt rounded-lg md:rounded-2xl flex-col">
           <div className="mb-5">Recordings</div>
           <StorageGraph
             graphId="general-recordings"
@@ -53,7 +53,7 @@ export default function StorageMetrics({
             total={totalStorage.total}
           />
         </div>
-        <div className="p-2.5 bg-background_alt rounded-2xl flex-col">
+        <div className="p-2.5 bg-background_alt rounded-lg md:rounded-2xl flex-col">
           <div className="mb-5">/tmp/cache</div>
           <StorageGraph
             graphId="general-cache"
@@ -61,7 +61,7 @@ export default function StorageMetrics({
             total={stats.service.storage["/tmp/cache"]["total"]}
           />
         </div>
-        <div className="p-2.5 bg-background_alt rounded-2xl flex-col">
+        <div className="p-2.5 bg-background_alt rounded-lg md:rounded-2xl flex-col">
           <div className="mb-5">/dev/shm</div>
           <StorageGraph
             graphId="general-shared-memory"
@@ -75,7 +75,7 @@ export default function StorageMetrics({
       </div>
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
         {Object.keys(cameraStorage).map((camera) => (
-          <div className="p-2.5 bg-background_alt rounded-2xl flex-col">
+          <div className="p-2.5 bg-background_alt rounded-lg md:rounded-2xl flex-col">
             <div className="mb-5 capitalize">{camera.replaceAll("_", " ")}</div>
             <StorageGraph
               graphId={`${camera}-storage`}

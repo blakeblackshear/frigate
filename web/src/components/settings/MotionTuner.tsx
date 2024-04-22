@@ -308,7 +308,7 @@ export default function MotionTuner({
           </div>
         </div>
       ) : (
-        <Skeleton className="size-full rounded-2xl" />
+        <Skeleton className="size-full rounded-lg md:rounded-2xl" />
       )}
     </div>
   );
