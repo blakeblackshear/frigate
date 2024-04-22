@@ -4,7 +4,7 @@ import useSWR from "swr";
 import axios from "axios";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import AutoUpdatingCameraImage from "@/components/camera/AutoUpdatingCameraImage";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import {
@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { Separator } from "../ui/separator";
 import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";
+import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 
 type MotionTunerProps = {
   selectedCamera: string;
@@ -40,6 +41,8 @@ export default function MotionTuner({
     useSWR<FrigateConfig>("config");
   const [changedValue, setChangedValue] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const { addMessage, clearMessages } = useContext(StatusBarMessagesContext)!;
 
   const { send: sendMotionThreshold } = useMotionThreshold(selectedCamera);
   const { send: sendMotionContourArea } = useMotionContourArea(selectedCamera);
@@ -145,7 +148,16 @@ export default function MotionTuner({
   const onCancel = useCallback(() => {
     setMotionSettings(origMotionSettings);
     setChangedValue(false);
-  }, [origMotionSettings]);
+    clearMessages("motion_tuner");
+  }, [origMotionSettings, clearMessages]);
+
+  useEffect(() => {
+    if (changedValue) {
+      addMessage("motion_tuner", "Unsaved motion tuner changes");
+    } else {
+      clearMessages("motion_tuner");
+    }
+  }, [changedValue, addMessage, clearMessages]);
 
   if (!cameraConfig && !selectedCamera) {
     return <ActivityIndicator />;

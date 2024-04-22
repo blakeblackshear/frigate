@@ -1,7 +1,12 @@
 import { useFrigateStats } from "@/api/ws";
+import {
+  StatusBarMessagesContext,
+  StatusMessage,
+} from "@/context/statusbar-provider";
 import useStats from "@/hooks/use-stats";
 import { FrigateStats } from "@/types/stats";
-import { useMemo } from "react";
+import { useContext, useEffect, useMemo } from "react";
+import { FaCheck } from "react-icons/fa";
 import { IoIosWarning } from "react-icons/io";
 import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
@@ -11,6 +16,10 @@ export default function Statusbar() {
     revalidateOnFocus: false,
   });
   const { payload: latestStats } = useFrigateStats();
+  const { messages, addMessage, clearMessages } = useContext(
+    StatusBarMessagesContext,
+  )!;
+
   const stats = useMemo(() => {
     if (latestStats) {
       return latestStats;
@@ -30,6 +39,13 @@ export default function Statusbar() {
   }, [stats]);
 
   const { potentialProblems } = useStats(stats);
+
+  useEffect(() => {
+    clearMessages("stats");
+    potentialProblems.forEach((problem) => {
+      addMessage("stats", problem.text, problem.color);
+    });
+  }, [potentialProblems, addMessage, clearMessages]);
 
   return (
     <div className="absolute left-0 bottom-0 right-0 w-full h-8 flex justify-between items-center px-4 bg-background_alt z-10 dark:text-secondary-foreground border-t border-secondary-highlight">
@@ -86,15 +102,25 @@ export default function Statusbar() {
         })}
       </div>
       <div className="h-full flex items-center gap-2">
-        {potentialProblems.map((prob) => (
-          <div
-            key={prob.text}
-            className="flex items-center text-sm gap-2 capitalize"
-          >
-            <IoIosWarning className={`size-5 ${prob.color}`} />
-            {prob.text}
+        {Object.entries(messages).length === 0 ? (
+          <div className="flex items-center text-sm gap-2">
+            <FaCheck className="size-3 text-green-500" />
+            System is healthy
           </div>
-        ))}
+        ) : (
+          Object.entries(messages).map(([key, messageArray]) => (
+            <div key={key} className="h-full flex items-center gap-2">
+              {messageArray.map(({ id, text, color }: StatusMessage) => (
+                <div key={id} className="flex items-center text-sm gap-2">
+                  <IoIosWarning
+                    className={`size-5 ${color || "text-danger"}`}
+                  />
+                  {text}
+                </div>
+              ))}
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
