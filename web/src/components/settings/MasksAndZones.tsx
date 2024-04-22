@@ -177,11 +177,7 @@ export default function MasksAndZones({
     setAllPolygons([...(editingPolygons ?? [])]);
     setHoveredPolygonIndex(null);
     setUnsavedChanges(false);
-    addMessage(
-      "masks_zones",
-      "Restart required (masks/zones changed)",
-      "text-danger",
-    );
+    addMessage("masks_zones", "Restart required (masks/zones changed)");
   }, [editingPolygons, setUnsavedChanges, addMessage]);
 
   useEffect(() => {

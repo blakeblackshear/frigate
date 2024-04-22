@@ -9,7 +9,7 @@ import {
 export type StatusMessage = {
   id: string;
   text: string;
-  color: string;
+  color?: string;
 };
 
 export type StatusMessagesState = {
@@ -25,7 +25,7 @@ type StatusBarMessagesContextValue = {
   addMessage: (
     key: string,
     message: string,
-    color: string,
+    color?: string,
     messageId?: string,
   ) => string;
   removeMessage: (key: string, messageId: string) => void;
@@ -45,9 +45,13 @@ export function StatusBarMessagesProvider({
   const addMessage = useCallback(
     (key: string, message: string, color: string, messageId?: string) => {
       const id = messageId || Date.now().toString();
+      const msgColor = color || "text-danger";
       setMessagesState((prevMessages) => ({
         ...prevMessages,
-        [key]: [...(prevMessages[key] || []), { id, text: message, color }],
+        [key]: [
+          ...(prevMessages[key] || []),
+          { id, text: message, color: msgColor },
+        ],
       }));
       return id;
     },
