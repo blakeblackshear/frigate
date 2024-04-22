@@ -190,7 +190,6 @@ class ReviewSegmentMaintainer(threading.Thread):
 
     def end_segment(self, segment: PendingReviewSegment) -> None:
         """End segment."""
-        logger.error(f"ending review segment {segment.camera}")
         final_data = segment.get_data(ended=True)
         self.requestor.send_data(UPSERT_REVIEW_SEGMENT, final_data)
         end_data = {k.name: v for k, v in final_data.items()}
