@@ -40,7 +40,7 @@ export default function CameraImage({
       {enabled ? (
         <img
           ref={imgRef}
-          className="object-contain rounded-2xl"
+          className="object-contain rounded-lg md:rounded-2xl"
           onLoad={() => {
             setHasLoaded(true);
 

@@ -189,7 +189,7 @@ export default function CameraMetrics({
       <div className="text-muted-foreground text-sm font-medium">Overview</div>
       <div className="grid grid-cols-1 md:grid-cols-3">
         {statsHistory.length != 0 ? (
-          <div className="p-2.5 bg-background_alt rounded-2xl">
+          <div className="p-2.5 bg-background_alt rounded-lg md:rounded-2xl">
             <div className="mb-5">DPS</div>
             <CameraLineGraph
               graphId="overall-stats"
@@ -200,7 +200,7 @@ export default function CameraMetrics({
             />
           </div>
         ) : (
-          <Skeleton className="w-full h-32" />
+          <Skeleton className="w-full rounded-lg md:rounded-2xl h-32" />
         )}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -214,7 +214,7 @@ export default function CameraMetrics({
                   </div>
                   <div key={camera.name} className="grid sm:grid-cols-2 gap-2">
                     {Object.keys(cameraCpuSeries).includes(camera.name) ? (
-                      <div className="p-2.5 bg-background_alt rounded-2xl">
+                      <div className="p-2.5 bg-background_alt rounded-lg md:rounded-2xl">
                         <div className="mb-5">CPU</div>
                         <CameraLineGraph
                           graphId={`${camera.name}-cpu`}
@@ -230,7 +230,7 @@ export default function CameraMetrics({
                       <Skeleton className="size-full aspect-video" />
                     )}
                     {Object.keys(cameraFpsSeries).includes(camera.name) ? (
-                      <div className="p-2.5 bg-background_alt rounded-2xl">
+                      <div className="p-2.5 bg-background_alt rounded-lg md:rounded-2xl">
                         <div className="mb-5">DPS</div>
                         <CameraLineGraph
                           graphId={`${camera.name}-dps`}

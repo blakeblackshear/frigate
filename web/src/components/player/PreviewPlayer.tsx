@@ -238,7 +238,7 @@ function PreviewVideoPlayer({
 
   return (
     <div
-      className={`relative rounded-2xl w-full flex justify-center bg-black overflow-hidden ${onClick ? "cursor-pointer" : ""} ${className ?? ""}`}
+      className={`relative rounded-lg md:rounded-2xl w-full flex justify-center bg-black overflow-hidden ${onClick ? "cursor-pointer" : ""} ${className ?? ""}`}
       onClick={onClick}
     >
       <img
@@ -283,7 +283,7 @@ function PreviewVideoPlayer({
         )}
       </video>
       {cameraPreviews && !currentPreview && (
-        <div className="absolute inset-0 text-white rounded-2xl flex justify-center items-center">
+        <div className="absolute inset-0 text-white rounded-lg md:rounded-2xl flex justify-center items-center">
           No Preview Found
         </div>
       )}
@@ -481,11 +481,11 @@ function PreviewFramesPlayer({
     >
       <img
         ref={imgRef}
-        className={`size-full object-contain rounded-2xl bg-black`}
+        className={`size-full object-contain rounded-lg md:rounded-2xl bg-black`}
         onLoad={onImageLoaded}
       />
       {previewFrames?.length === 0 && (
-        <div className="absolute inset-x-0 top-1/2 -y-translate-1/2 bg-black text-white rounded-2xl align-center text-center">
+        <div className="absolute inset-x-0 top-1/2 -y-translate-1/2 bg-black text-white rounded-lg md:rounded-2xl align-center text-center">
           No Preview Found
         </div>
       )}

@@ -182,11 +182,11 @@ export default function SubmitPlus() {
             return (
               <div
                 key={event.id}
-                className="w-full rounded-2xl aspect-video flex justify-center items-center bg-black cursor-pointer"
+                className="w-full rounded-lg md:rounded-2xl aspect-video flex justify-center items-center bg-black cursor-pointer"
                 onClick={() => setUpload(event)}
               >
                 <img
-                  className="aspect-video h-full object-contain rounded-2xl"
+                  className="aspect-video h-full object-contain rounded-lg md:rounded-2xl"
                   src={`${baseUrl}api/events/${event.id}/snapshot.jpg`}
                   loading="lazy"
                 />

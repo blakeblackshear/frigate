@@ -210,7 +210,9 @@ export default function GeneralSettings({ className }: GeneralSettings) {
                   </SubItemTrigger>
                   <Portal>
                     <SubItemContent
-                      className={isDesktop ? "" : "w-[92%] rounded-2xl"}
+                      className={
+                        isDesktop ? "" : "w-[92%] rounded-lg md:rounded-2xl"
+                      }
                     >
                       <span tabIndex={0} className="sr-only" />
                       <MenuItem
@@ -280,7 +282,9 @@ export default function GeneralSettings({ className }: GeneralSettings) {
                   </SubItemTrigger>
                   <Portal>
                     <SubItemContent
-                      className={isDesktop ? "" : "w-[92%] rounded-2xl"}
+                      className={
+                        isDesktop ? "" : "w-[92%] rounded-lg md:rounded-2xl"
+                      }
                     >
                       <span tabIndex={0} className="sr-only" />
                       {colorSchemes.map((scheme) => (

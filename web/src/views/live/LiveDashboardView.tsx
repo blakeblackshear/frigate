@@ -175,7 +175,7 @@ export default function LiveDashboardView({
       )}
 
       <div
-        className={`mt-2 px-2 grid ${layout == "grid" ? "grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4" : ""} gap-2 md:gap-4 *:rounded-2xl *:bg-black`}
+        className={`mt-2 px-2 grid ${layout == "grid" ? "grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4" : ""} gap-2 md:gap-4 *:bg-black`}
       >
         {includeBirdseye && birdseyeConfig?.enabled && (
           <BirdseyeLivePlayer
