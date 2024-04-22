@@ -43,7 +43,7 @@ export function StatusBarMessagesProvider({
   const messages = useMemo(() => messagesState, [messagesState]);
 
   const addMessage = useCallback(
-    (key: string, message: string, color: string, messageId?: string) => {
+    (key: string, message: string, color?: string, messageId?: string) => {
       const id = messageId || Date.now().toString();
       const msgColor = color || "text-danger";
       setMessagesState((prevMessages) => ({
