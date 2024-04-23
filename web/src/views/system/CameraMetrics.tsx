@@ -66,6 +66,7 @@ export default function CameraMetrics({
       [key: string]: { name: string; data: { x: number; y: number }[] };
     } = {};
 
+    series["overall_fps"] = { name: "overall frames per second", data: [] };
     series["overall_dps"] = { name: "overall detections per second", data: [] };
     series["overall_skipped_dps"] = {
       name: "overall skipped detections per second",
@@ -76,6 +77,16 @@ export default function CameraMetrics({
       if (!stats) {
         return;
       }
+
+      let frames = 0;
+      Object.values(stats.cameras).forEach(
+        (camStat) => (frames += camStat.camera_fps),
+      );
+
+      series["overall_fps"].data.push({
+        x: statsIdx,
+        y: Math.round(frames),
+      });
 
       series["overall_dps"].data.push({
         x: statsIdx,
@@ -161,6 +172,10 @@ export default function CameraMetrics({
         if (!(key in series)) {
           const camName = key.replaceAll("_", " ");
           series[key] = {};
+          series[key]["fps"] = {
+            name: `${camName} frames per second`,
+            data: [],
+          };
           series[key]["det"] = {
             name: `${camName} detections per second`,
             data: [],
@@ -171,6 +186,10 @@ export default function CameraMetrics({
           };
         }
 
+        series[key]["fps"].data.push({
+          x: statsIdx,
+          y: camStats.camera_fps,
+        });
         series[key]["det"].data.push({
           x: statsIdx,
           y: camStats.detection_fps,
@@ -190,11 +209,11 @@ export default function CameraMetrics({
       <div className="grid grid-cols-1 md:grid-cols-3">
         {statsHistory.length != 0 ? (
           <div className="p-2.5 bg-background_alt rounded-lg md:rounded-2xl">
-            <div className="mb-5">DPS</div>
+            <div className="mb-5">Frames / Detections</div>
             <CameraLineGraph
               graphId="overall-stats"
-              unit=" DPS"
-              dataLabels={["detect", "skipped"]}
+              unit=""
+              dataLabels={["camera", "detect", "skipped"]}
               updateTimes={updateTimes}
               data={overallFpsSeries}
             />
@@ -231,11 +250,11 @@ export default function CameraMetrics({
                     )}
                     {Object.keys(cameraFpsSeries).includes(camera.name) ? (
                       <div className="p-2.5 bg-background_alt rounded-lg md:rounded-2xl">
-                        <div className="mb-5">DPS</div>
+                        <div className="mb-5">Frames / Detections</div>
                         <CameraLineGraph
                           graphId={`${camera.name}-dps`}
-                          unit=" DPS"
-                          dataLabels={["detect", "skipped"]}
+                          unit=""
+                          dataLabels={["camera", "detect", "skipped"]}
                           updateTimes={updateTimes}
                           data={Object.values(
                             cameraFpsSeries[camera.name] || {},
