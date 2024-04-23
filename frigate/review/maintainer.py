@@ -146,25 +146,61 @@ class ReviewSegmentMaintainer(threading.Thread):
 
         self.stop_event = stop_event
 
-    def update_segment(self, segment: PendingReviewSegment) -> None:
-        """Update segment."""
-        seg_data = segment.get_data(ended=False)
-        self.requestor.send_data(UPSERT_REVIEW_SEGMENT, seg_data)
+    def new_segment(
+        self,
+        segment: PendingReviewSegment,
+    ) -> None:
+        """New segment."""
+        new_data = segment.get_data(ended=False)
+        self.requestor.send_data(UPSERT_REVIEW_SEGMENT, new_data)
+        start_data = {k.name: v for k, v in new_data.items()}
         self.requestor.send_data(
             "reviews",
             json.dumps(
-                {"type": "update", "review": {k.name: v for k, v in seg_data.items()}}
+                {
+                    "type": "new",
+                    "before": start_data,
+                    "after": start_data,
+                }
+            ),
+        )
+
+    def update_segment(
+        self,
+        segment: PendingReviewSegment,
+        camera_config: CameraConfig,
+        frame,
+        objects: list[TrackedObject],
+    ) -> None:
+        """Update segment."""
+        prev_data = segment.get_data(ended=False)
+        segment.update_frame(camera_config, frame, objects)
+        new_data = segment.get_data(ended=False)
+        self.requestor.send_data(UPSERT_REVIEW_SEGMENT, new_data)
+        self.requestor.send_data(
+            "reviews",
+            json.dumps(
+                {
+                    "type": "update",
+                    "before": {k.name: v for k, v in prev_data.items()},
+                    "after": {k.name: v for k, v in new_data.items()},
+                }
             ),
         )
 
     def end_segment(self, segment: PendingReviewSegment) -> None:
         """End segment."""
-        seg_data = segment.get_data(ended=True)
-        self.requestor.send_data(UPSERT_REVIEW_SEGMENT, seg_data)
+        final_data = segment.get_data(ended=True)
+        self.requestor.send_data(UPSERT_REVIEW_SEGMENT, final_data)
+        end_data = {k.name: v for k, v in final_data.items()}
         self.requestor.send_data(
             "reviews",
             json.dumps(
-                {"type": "end", "review": {k.name: v for k, v in seg_data.items()}}
+                {
+                    "type": "end",
+                    "before": end_data,
+                    "after": end_data,
+                }
             ),
         )
         self.active_review_segments[segment.camera] = None
@@ -219,9 +255,10 @@ class ReviewSegmentMaintainer(threading.Thread):
                     yuv_frame = self.frame_manager.get(
                         frame_id, camera_config.frame_shape_yuv
                     )
-                    segment.update_frame(camera_config, yuv_frame, active_objects)
+                    self.update_segment(
+                        segment, camera_config, yuv_frame, active_objects
+                    )
                     self.frame_manager.close(frame_id)
-                    self.update_segment(segment)
                 except FileNotFoundError:
                     return
         else:
@@ -317,7 +354,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                         camera_config, yuv_frame, active_objects
                     )
                     self.frame_manager.close(frame_id)
-                    self.update_segment(self.active_review_segments[camera])
+                    self.new_segment(self.active_review_segments[camera])
                 except FileNotFoundError:
                     return
 

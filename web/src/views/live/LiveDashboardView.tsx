@@ -47,8 +47,19 @@ export default function LiveDashboardView({
     }
 
     // if event is ended and was saved, update events list
-    if (eventUpdate.review.severity == "alert") {
-      setTimeout(() => updateEvents(), eventUpdate.type == "end" ? 1000 : 6000);
+    if (eventUpdate.after.severity == "alert") {
+      if (eventUpdate.type == "end" || eventUpdate.type == "new") {
+        setTimeout(
+          () => updateEvents(),
+          eventUpdate.type == "end" ? 1000 : 6000,
+        );
+      } else if (
+        eventUpdate.before.data.objects.length <
+        eventUpdate.after.data.objects.length
+      ) {
+        setTimeout(() => updateEvents(), 5000);
+      }
+
       return;
     }
   }, [eventUpdate, updateEvents]);
