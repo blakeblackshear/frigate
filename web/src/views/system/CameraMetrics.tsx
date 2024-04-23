@@ -209,7 +209,7 @@ export default function CameraMetrics({
       <div className="grid grid-cols-1 md:grid-cols-3">
         {statsHistory.length != 0 ? (
           <div className="p-2.5 bg-background_alt rounded-lg md:rounded-2xl">
-            <div className="mb-5">FPS</div>
+            <div className="mb-5">Frames / Detections</div>
             <CameraLineGraph
               graphId="overall-stats"
               unit=""
@@ -250,7 +250,7 @@ export default function CameraMetrics({
                     )}
                     {Object.keys(cameraFpsSeries).includes(camera.name) ? (
                       <div className="p-2.5 bg-background_alt rounded-lg md:rounded-2xl">
-                        <div className="mb-5">FPS</div>
+                        <div className="mb-5">Frames / Detections</div>
                         <CameraLineGraph
                           graphId={`${camera.name}-dps`}
                           unit=""
