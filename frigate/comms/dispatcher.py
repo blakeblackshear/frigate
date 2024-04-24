@@ -1,5 +1,6 @@
 """Handle communication between Frigate and other applications."""
 
+import datetime
 import logging
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Optional
@@ -7,6 +8,7 @@ from typing import Any, Callable, Optional
 from frigate.comms.config_updater import ConfigPublisher
 from frigate.config import BirdseyeModeEnum, FrigateConfig
 from frigate.const import (
+    CLEAR_ONGOING_REVIEW_SEGMENTS,
     INSERT_MANY_RECORDINGS,
     INSERT_PREVIEW,
     REQUEST_REGION_GRID,
@@ -116,6 +118,10 @@ class Dispatcher:
                 )
                 .execute()
             )
+        elif topic == CLEAR_ONGOING_REVIEW_SEGMENTS:
+            ReviewSegment.update(end_time=datetime.datetime.now().timestamp()).where(
+                ReviewSegment.end_time == None
+            ).execute()
         else:
             self.publish(topic, payload, retain=False)
 
