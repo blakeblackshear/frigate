@@ -19,7 +19,12 @@ from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionSubscriber, DetectionTypeEnum
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, FrigateConfig
-from frigate.const import ALL_ATTRIBUTE_LABELS, CLIPS_DIR, UPSERT_REVIEW_SEGMENT
+from frigate.const import (
+    ALL_ATTRIBUTE_LABELS,
+    CLEAR_ONGOING_REVIEW_SEGMENTS,
+    CLIPS_DIR,
+    UPSERT_REVIEW_SEGMENT,
+)
 from frigate.events.external import ManualEventState
 from frigate.models import ReviewSegment
 from frigate.object_processing import TrackedObject
@@ -145,6 +150,9 @@ class ReviewSegmentMaintainer(threading.Thread):
         Path(os.path.join(CLIPS_DIR, "review")).mkdir(exist_ok=True)
 
         self.stop_event = stop_event
+
+        # clear ongoing review segments from last instance
+        self.requestor.send_data(CLEAR_ONGOING_REVIEW_SEGMENTS, "")
 
     def new_segment(
         self,
