@@ -104,7 +104,7 @@ export default function ExportCard({
       </Dialog>
 
       <div
-        className={`relative aspect-video bg-black rounded-2xl flex justify-center items-center ${className}`}
+        className={`relative aspect-video bg-black rounded-lg md:rounded-2xl flex justify-center items-center ${className}`}
         onMouseEnter={
           isDesktop && !exportedRecording.in_progress
             ? () => setHovered(true)
@@ -123,7 +123,7 @@ export default function ExportCard({
       >
         {hovered && (
           <>
-            <div className="absolute inset-0 z-10 bg-black bg-opacity-60 rounded-2xl" />
+            <div className="absolute inset-0 z-10 bg-black bg-opacity-60 rounded-lg md:rounded-2xl" />
             <div className="absolute top-1 right-1 flex items-center gap-2">
               <a
                 className="z-20"
@@ -172,19 +172,19 @@ export default function ExportCard({
           <>
             {exportedRecording.thumb_path.length > 0 ? (
               <img
-                className="size-full absolute inset-0 object-contain aspect-video rounded-2xl"
+                className="size-full absolute inset-0 object-contain aspect-video rounded-lg md:rounded-2xl"
                 src={exportedRecording.thumb_path.replace("/media/frigate", "")}
                 onLoad={() => setLoading(false)}
               />
             ) : (
-              <div className="absolute inset-0 bg-secondary rounded-2xl" />
+              <div className="absolute inset-0 bg-secondary rounded-lg md:rounded-2xl" />
             )}
           </>
         )}
         {loading && (
-          <Skeleton className="absolute inset-0 aspect-video rounded-2xl" />
+          <Skeleton className="absolute inset-0 aspect-video rounded-lg md:rounded-2xl" />
         )}
-        <div className="absolute bottom-0 inset-x-0 rounded-b-l z-10 h-[20%] bg-gradient-to-t from-black/60 to-transparent pointer-events-none rounded-2xl">
+        <div className="absolute bottom-0 inset-x-0 rounded-b-l z-10 h-[20%] bg-gradient-to-t from-black/60 to-transparent pointer-events-none rounded-lg md:rounded-2xl">
           <div className="flex h-full justify-between items-end mx-3 pb-1 text-white text-sm capitalize">
             {exportedRecording.name.replaceAll("_", " ")}
           </div>

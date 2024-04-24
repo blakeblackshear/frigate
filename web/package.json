@@ -44,6 +44,7 @@
     "idb-keyval": "^6.2.1",
     "immer": "^10.0.4",
     "konva": "^9.3.6",
+    "lodash": "^4.17.21",
     "lucide-react": "^0.372.0",
     "monaco-yaml": "^5.1.1",
     "next-themes": "^0.3.0",
@@ -76,6 +77,7 @@
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.7",
     "@testing-library/jest-dom": "^6.1.5",
+    "@types/lodash": "^4.17.0",
     "@types/node": "^20.12.7",
     "@types/react": "^18.2.79",
     "@types/react-dom": "^18.2.25",

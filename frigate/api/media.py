@@ -1351,6 +1351,6 @@ def preview_thumbnail(file_name: str):
         )
 
     response = make_response(jpg_bytes)
-    response.headers["Content-Type"] = "image/jpeg"
+    response.headers["Content-Type"] = "image/webp"
     response.headers["Cache-Control"] = "private, max-age=31536000"
     return response

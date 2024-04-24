@@ -47,8 +47,19 @@ export default function LiveDashboardView({
     }
 
     // if event is ended and was saved, update events list
-    if (eventUpdate.review.severity == "alert") {
-      setTimeout(() => updateEvents(), eventUpdate.type == "end" ? 1000 : 6000);
+    if (eventUpdate.after.severity == "alert") {
+      if (eventUpdate.type == "end" || eventUpdate.type == "new") {
+        setTimeout(
+          () => updateEvents(),
+          eventUpdate.type == "end" ? 1000 : 6000,
+        );
+      } else if (
+        eventUpdate.before.data.objects.length <
+        eventUpdate.after.data.objects.length
+      ) {
+        setTimeout(() => updateEvents(), 5000);
+      }
+
       return;
     }
   }, [eventUpdate, updateEvents]);
@@ -175,7 +186,7 @@ export default function LiveDashboardView({
       )}
 
       <div
-        className={`mt-2 px-2 grid ${layout == "grid" ? "grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4" : ""} gap-2 md:gap-4 *:rounded-2xl *:bg-black`}
+        className={`mt-2 px-2 grid ${layout == "grid" ? "grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4" : ""} gap-2 md:gap-4`}
       >
         {includeBirdseye && birdseyeConfig?.enabled && (
           <BirdseyeLivePlayer
@@ -198,7 +209,7 @@ export default function LiveDashboardView({
             <LivePlayer
               cameraRef={cameraRef}
               key={camera.name}
-              className={grow}
+              className={`${grow} rounded-lg md:rounded-2xl bg-black`}
               windowVisible={
                 windowVisible && visibleCameras.includes(camera.name)
               }

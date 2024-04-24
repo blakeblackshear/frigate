@@ -249,7 +249,7 @@ export default function EventView({
             </div>
           </ToggleGroupItem>
           <ToggleGroupItem
-            className={`px-3 py-4 rounded-2xl ${
+            className={`px-3 py-4 rounded-lg ${
               severityToggle == "significant_motion"
                 ? ""
                 : "text-muted-foreground"
@@ -589,7 +589,8 @@ function DetectionReview({
                   </div>
                 );
               })
-            : Array(itemsToReview)
+            : (itemsToReview ?? 0) > 0 &&
+              Array(itemsToReview)
                 .fill(0)
                 .map((_, idx) => (
                   <Skeleton key={idx} className="size-full aspect-video" />
@@ -890,7 +891,7 @@ function MotionReview({
                 {motionData ? (
                   <>
                     <PreviewPlayer
-                      className={`rounded-2xl ${spans} ${grow}`}
+                      className={`rounded-lg md:rounded-2xl ${spans} ${grow}`}
                       camera={camera.name}
                       timeRange={currentTimeRange}
                       startTime={previewStart}
@@ -916,7 +917,7 @@ function MotionReview({
                   </>
                 ) : (
                   <Skeleton
-                    className={`rounded-2xl size-full ${spans} ${grow}`}
+                    className={`rounded-lg md:rounded-2xl size-full ${spans} ${grow}`}
                   />
                 )}
               </div>

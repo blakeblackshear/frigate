@@ -247,7 +247,7 @@ export function EventSegment({
               </HoverCardTrigger>
               <HoverCardPortal>
                 <HoverCardContent
-                  className="rounded-2xl w-[250px] p-2"
+                  className="rounded-lg md:rounded-2xl w-[250px] p-2"
                   side="left"
                 >
                   <img

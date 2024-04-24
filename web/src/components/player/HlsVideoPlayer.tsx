@@ -164,7 +164,7 @@ export default function HlsVideoPlayer({
       >
         <video
           ref={videoRef}
-          className={`size-full bg-black rounded-2xl ${loadedMetadata ? "" : "invisible"}`}
+          className={`size-full bg-black rounded-lg md:rounded-2xl ${loadedMetadata ? "" : "invisible"}`}
           preload="auto"
           autoPlay
           controls={false}
