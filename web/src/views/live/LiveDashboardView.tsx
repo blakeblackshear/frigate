@@ -144,7 +144,9 @@ export default function LiveDashboardView({
       {isMobile && (
         <div className="h-11 relative flex items-center justify-between">
           <Logo className="absolute inset-x-1/2 -translate-x-1/2 h-8" />
-          <CameraGroupSelector />
+          <div className="max-w-[45%]">
+            <CameraGroupSelector />
+          </div>
           <div className="flex items-center gap-1">
             <Button
               className={`p-1 ${

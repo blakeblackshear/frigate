@@ -551,14 +551,6 @@ export function ZoneObjectSelector({
 
     const labels = new Set<string>();
 
-    // Object.values(config.cameras).forEach((camera) => {
-    //   camera.objects.track.forEach((label) => {
-    //     if (!ATTRIBUTE_LABELS.includes(label)) {
-    //       labels.add(label);
-    //     }
-    //   });
-    // });
-
     cameraConfig.objects.track.forEach((label) => {
       if (!ATTRIBUTE_LABELS.includes(label)) {
         labels.add(label);
