@@ -13,6 +13,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { getIconForGroup } from "@/utils/iconUtil";
 import { LuPencil, LuPlus } from "react-icons/lu";
 import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
+import { Drawer, DrawerContent } from "../ui/drawer";
 import { Input } from "../ui/input";
 import { Separator } from "../ui/separator";
 import {
@@ -267,18 +268,23 @@ function NewGroupDialog({
     setEditState("edit");
   }, []);
 
+  const Overlay = isDesktop ? Dialog : Drawer;
+  const Content = isDesktop ? DialogContent : DrawerContent;
+
   return (
     <>
       <Toaster className="toaster group z-[100]" position="top-center" />
-      <Dialog
+      <Overlay
         open={open}
         onOpenChange={(open) => {
           setEditState("none");
           setOpen(open);
         }}
       >
-        <DialogContent className="min-w-0 w-96 md:w-6/12 max-h-dvh overflow-y-auto">
-          <div className="flex flex-col my-4">
+        <Content
+          className={`min-w-0 ${isMobile ? "w-full p-3 rounded-t-2xl max-h-[90%]" : "w-6/12 max-h-dvh overflow-y-auto"}`}
+        >
+          <div className="flex flex-col my-4 overflow-y-auto">
             {editState === "none" && (
               <>
                 <div className="flex flex-row justify-between items-center py-2">
@@ -322,8 +328,8 @@ function NewGroupDialog({
               </>
             )}
           </div>
-        </DialogContent>
-      </Dialog>
+        </Content>
+      </Overlay>
     </>
   );
 }
