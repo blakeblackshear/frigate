@@ -10,8 +10,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { useEffect } from "react";
 
 export default function General() {
+  useEffect(() => {
+    document.title = "General Settings - Frigate";
+  }, []);
+
   return (
     <>
       <Heading as="h2">Settings</Heading>

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import DebugCameraImage from "../camera/DebugCameraImage";
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
@@ -18,6 +18,10 @@ export default function ObjectSettings({
       return config.cameras[selectedCamera];
     }
   }, [config, selectedCamera]);
+
+  useEffect(() => {
+    document.title = "Object Settings - Frigate";
+  }, []);
 
   if (!cameraConfig) {
     return <ActivityIndicator />;
