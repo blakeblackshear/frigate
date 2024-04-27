@@ -212,7 +212,7 @@ export default function GeneralMetrics({
     } = {};
 
     statsHistory.forEach((stats, statsIdx) => {
-      if (!stats) {
+      if (!stats || !canGetGpuInfo) {
         return;
       }
 
@@ -225,7 +225,7 @@ export default function GeneralMetrics({
       });
     });
     return Object.keys(series).length > 0 ? Object.values(series) : [];
-  }, [statsHistory]);
+  }, [statsHistory, canGetGpuInfo]);
 
   const gpuMemSeries = useMemo(() => {
     if (!statsHistory) {
@@ -245,7 +245,7 @@ export default function GeneralMetrics({
     } = {};
 
     statsHistory.forEach((stats, statsIdx) => {
-      if (!stats) {
+      if (!stats || !canGetGpuInfo) {
         return;
       }
 
@@ -258,7 +258,7 @@ export default function GeneralMetrics({
       });
     });
     return Object.values(series);
-  }, [statsHistory]);
+  }, [statsHistory, canGetGpuInfo]);
 
   // other processes stats
 
@@ -411,13 +411,13 @@ export default function GeneralMetrics({
           )}
         </div>
 
-        {(statsHistory.length == 0 || statsHistory[0].gpu_usages) && (
-          <>
-            <div className="mt-4 flex items-center justify-between">
-              <div className="text-muted-foreground text-sm font-medium">
-                GPUs
-              </div>
-              {canGetGpuInfo && (
+        {canGetGpuInfo &&
+          (statsHistory.length == 0 || statsHistory[0].gpu_usages) && (
+            <>
+              <div className="mt-4 flex items-center justify-between">
+                <div className="text-muted-foreground text-sm font-medium">
+                  GPUs
+                </div>
                 <Button
                   className="cursor-pointer"
                   size="sm"
@@ -425,52 +425,51 @@ export default function GeneralMetrics({
                 >
                   Hardware Info
                 </Button>
-              )}
-            </div>
-            <div className=" mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {statsHistory.length != 0 ? (
-                <div className="p-2.5 bg-background_alt rounded-lg md:rounded-2xl">
-                  <div className="mb-5">GPU Usage</div>
-                  {gpuSeries.map((series) => (
-                    <ThresholdBarGraph
-                      key={series.name}
-                      graphId={`${series.name}-gpu`}
-                      name={series.name}
-                      unit="%"
-                      threshold={GPUUsageThreshold}
-                      updateTimes={updateTimes}
-                      data={[series]}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <Skeleton className="w-full aspect-video" />
-              )}
-              {statsHistory.length != 0 ? (
-                <>
-                  {gpuMemSeries && (
-                    <div className="p-2.5 bg-background_alt rounded-lg md:rounded-2xl">
-                      <div className="mb-5">GPU Memory</div>
-                      {gpuMemSeries.map((series) => (
-                        <ThresholdBarGraph
-                          key={series.name}
-                          graphId={`${series.name}-mem`}
-                          unit="%"
-                          name={series.name}
-                          threshold={GPUMemThreshold}
-                          updateTimes={updateTimes}
-                          data={[series]}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </>
-              ) : (
-                <Skeleton className="w-full aspect-video" />
-              )}
-            </div>
-          </>
-        )}
+              </div>
+              <div className=" mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {statsHistory.length != 0 ? (
+                  <div className="p-2.5 bg-background_alt rounded-lg md:rounded-2xl">
+                    <div className="mb-5">GPU Usage</div>
+                    {gpuSeries.map((series) => (
+                      <ThresholdBarGraph
+                        key={series.name}
+                        graphId={`${series.name}-gpu`}
+                        name={series.name}
+                        unit="%"
+                        threshold={GPUUsageThreshold}
+                        updateTimes={updateTimes}
+                        data={[series]}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <Skeleton className="w-full aspect-video" />
+                )}
+                {statsHistory.length != 0 ? (
+                  <>
+                    {gpuMemSeries && (
+                      <div className="p-2.5 bg-background_alt rounded-lg md:rounded-2xl">
+                        <div className="mb-5">GPU Memory</div>
+                        {gpuMemSeries.map((series) => (
+                          <ThresholdBarGraph
+                            key={series.name}
+                            graphId={`${series.name}-mem`}
+                            unit="%"
+                            name={series.name}
+                            threshold={GPUMemThreshold}
+                            updateTimes={updateTimes}
+                            data={[series]}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <Skeleton className="w-full aspect-video" />
+                )}
+              </div>
+            </>
+          )}
 
         <div className="mt-4 text-muted-foreground text-sm font-medium">
           Other Processes
