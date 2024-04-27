@@ -392,7 +392,17 @@ def recording_clip(camera_name, start_ts, end_ts):
         if clip.end_time > end_ts:
             playlist_lines.append(f"outpoint {int(end_ts - clip.start_time)}")
 
-    file_name = secure_filename(f"clip_{camera_name}_{start_ts}-{end_ts}.mp4")
+    file_name = f"clip_{camera_name}_{start_ts}-{end_ts}.mp4"
+
+    if len(file_name) > 1000:
+        return make_response(
+            jsonify(
+                {"success": False, "message": "Filename exceeded max length of 1000"}
+            ),
+            403,
+        )
+
+    file_name = secure_filename(file_name)
     path = os.path.join(CACHE_DIR, file_name)
 
     if not os.path.exists(path):
@@ -1167,7 +1177,20 @@ def preview_gif(camera_name: str, start_ts, end_ts, max_cache_age=2592000):
 @MediaBp.route("/<camera_name>/start/<int:start_ts>/end/<int:end_ts>/preview.mp4")
 @MediaBp.route("/<camera_name>/start/<float:start_ts>/end/<float:end_ts>/preview.mp4")
 def preview_mp4(camera_name: str, start_ts, end_ts):
-    file_name = secure_filename(f"clip_{camera_name}_{start_ts}-{end_ts}.mp4")
+    file_name = f"clip_{camera_name}_{start_ts}-{end_ts}.mp4"
+
+    if len(file_name) > 1000:
+        return make_response(
+            jsonify(
+                {
+                    "success": False,
+                    "message": "Filename exceeded max length of 1000 characters.",
+                }
+            ),
+            403,
+        )
+
+    file_name = secure_filename(file_name)
     path = os.path.join(CACHE_DIR, file_name)
 
     if datetime.fromtimestamp(start_ts) < datetime.now().replace(minute=0, second=0):
@@ -1337,6 +1360,14 @@ def review_preview(id: str):
 @MediaBp.route("/preview/<file_name>/thumbnail.webp")
 def preview_thumbnail(file_name: str):
     """Get a thumbnail from the cached preview frames."""
+    if len(file_name) > 1000:
+        return make_response(
+            jsonify(
+                {"success": False, "message": "Filename exceeded max length of 1000"}
+            ),
+            403,
+        )
+
     safe_file_name_current = secure_filename(file_name)
     preview_dir = os.path.join(CACHE_DIR, "preview_frames")
 
