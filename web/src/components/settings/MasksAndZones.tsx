@@ -171,6 +171,7 @@ export default function MasksAndZones({
     setActivePolygonIndex(undefined);
     setHoveredPolygonIndex(null);
     setUnsavedChanges(false);
+    document.title = "Mask and Zone Editor - Frigate";
   }, [allPolygons, setUnsavedChanges]);
 
   const handleSave = useCallback(() => {
@@ -352,6 +353,10 @@ export default function MasksAndZones({
       setEditPane(undefined);
     }
   }, [selectedCamera]);
+
+  useEffect(() => {
+    document.title = "Mask and Zone Editor - Frigate";
+  }, []);
 
   if (!cameraConfig && !selectedCamera) {
     return <ActivityIndicator />;

@@ -308,6 +308,10 @@ export default function ZoneEditPane({
     }
   }
 
+  useEffect(() => {
+    document.title = "Edit Zone - Frigate";
+  }, []);
+
   if (!polygon) {
     return;
   }

@@ -100,6 +100,10 @@ export default function Settings() {
     }
   }, [tabsRef, pageToggle]);
 
+  useEffect(() => {
+    document.title = "Settings - Frigate";
+  }, []);
+
   return (
     <div className="size-full p-2 flex flex-col">
       <div className="w-full h-11 relative flex justify-between items-center">
