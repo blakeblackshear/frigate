@@ -396,7 +396,10 @@ def recording_clip(camera_name, start_ts, end_ts):
 
     if len(file_name) > 1000:
         return make_response(
-            jsonify({"success": False, "message": "Filename exceeded max length of 1000"}), 403
+            jsonify(
+                {"success": False, "message": "Filename exceeded max length of 1000"}
+            ),
+            403,
         )
 
     file_name = secure_filename(file_name)
@@ -1178,7 +1181,13 @@ def preview_mp4(camera_name: str, start_ts, end_ts):
 
     if len(file_name) > 1000:
         return make_response(
-            jsonify({"success": False, "message": "Filename exceeded max length of 1000 characters."}), 403
+            jsonify(
+                {
+                    "success": False,
+                    "message": "Filename exceeded max length of 1000 characters.",
+                }
+            ),
+            403,
         )
 
     file_name = secure_filename(file_name)
@@ -1353,7 +1362,10 @@ def preview_thumbnail(file_name: str):
     """Get a thumbnail from the cached preview frames."""
     if len(file_name) > 1000:
         return make_response(
-            jsonify({"success": False, "message": "Filename exceeded max length of 1000"}), 403
+            jsonify(
+                {"success": False, "message": "Filename exceeded max length of 1000"}
+            ),
+            403,
         )
 
     safe_file_name_current = secure_filename(file_name)
