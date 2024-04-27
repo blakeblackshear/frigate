@@ -210,6 +210,7 @@ export default function GeneralMetrics({
     const series: {
       [key: string]: { name: string; data: { x: number; y: string }[] };
     } = {};
+    let hasValidGpu = false;
 
     statsHistory.forEach((stats, statsIdx) => {
       if (!stats) {
@@ -221,9 +222,17 @@ export default function GeneralMetrics({
           series[key] = { name: key, data: [] };
         }
 
-        series[key].data.push({ x: statsIdx + 1, y: stats.gpu.slice(0, -1) });
+        if (stats.gpu) {
+          hasValidGpu = true;
+          series[key].data.push({ x: statsIdx + 1, y: stats.gpu.slice(0, -1) });
+        }
       });
     });
+
+    if (!hasValidGpu) {
+      return [];
+    }
+
     return Object.keys(series).length > 0 ? Object.values(series) : [];
   }, [statsHistory]);
 
@@ -243,6 +252,7 @@ export default function GeneralMetrics({
     const series: {
       [key: string]: { name: string; data: { x: number; y: string }[] };
     } = {};
+    let hasValidGpu = false;
 
     statsHistory.forEach((stats, statsIdx) => {
       if (!stats) {
@@ -254,9 +264,17 @@ export default function GeneralMetrics({
           series[key] = { name: key, data: [] };
         }
 
-        series[key].data.push({ x: statsIdx + 1, y: stats.mem.slice(0, -1) });
+        if (stats.mem) {
+          hasValidGpu = true;
+          series[key].data.push({ x: statsIdx + 1, y: stats.mem.slice(0, -1) });
+        }
       });
     });
+
+    if (!hasValidGpu) {
+      return [];
+    }
+
     return Object.values(series);
   }, [statsHistory]);
 
