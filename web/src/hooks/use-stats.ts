@@ -53,6 +53,7 @@ export default function useStats(stats: FrigateStats | undefined) {
         problems.push({
           text: `${capitalizeFirstLetter(name.replaceAll("_", " "))} is offline`,
           color: "text-danger",
+          relevantLink: "logs",
         });
       }
     });
