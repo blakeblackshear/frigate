@@ -13,6 +13,7 @@ import {
   StatusBarMessagesContext,
   StatusMessage,
 } from "@/context/statusbar-provider";
+import { Link } from "react-router-dom";
 
 function Bottombar() {
   const navItems = useNavigation("secondary");
@@ -85,7 +86,7 @@ function StatusAlertNav() {
                 );
 
                 if (link) {
-                  return <a href={link}>{message}</a>;
+                  return <Link to={link}>{message}</Link>;
                 } else {
                   return message;
                 }

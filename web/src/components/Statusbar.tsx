@@ -9,6 +9,7 @@ import { useContext, useEffect, useMemo } from "react";
 import { FaCheck } from "react-icons/fa";
 import { IoIosWarning } from "react-icons/io";
 import { MdCircle } from "react-icons/md";
+import { Link } from "react-router-dom";
 import useSWR from "swr";
 
 export default function Statusbar() {
@@ -130,7 +131,7 @@ export default function Statusbar() {
                 );
 
                 if (link) {
-                  return <a href={link}>{message}</a>;
+                  return <Link to={link}>{message}</Link>;
                 } else {
                   return message;
                 }
