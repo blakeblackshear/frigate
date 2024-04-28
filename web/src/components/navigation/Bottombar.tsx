@@ -51,7 +51,13 @@ function StatusAlertNav() {
   useEffect(() => {
     clearMessages("stats");
     potentialProblems.forEach((problem) => {
-      addMessage("stats", problem.text, problem.color);
+      addMessage(
+        "stats",
+        problem.text,
+        problem.color,
+        undefined,
+        problem.relevantLink,
+      );
     });
   }, [potentialProblems, addMessage, clearMessages]);
 
@@ -68,14 +74,22 @@ function StatusAlertNav() {
         <div className="w-full h-auto py-4 overflow-y-auto overflow-x-hidden flex flex-col items-center gap-2">
           {Object.entries(messages).map(([key, messageArray]) => (
             <div key={key} className="w-full flex items-center gap-2">
-              {messageArray.map(({ id, text, color }: StatusMessage) => (
-                <div key={id} className="flex items-center text-xs gap-2">
-                  <IoIosWarning
-                    className={`size-5 ${color || "text-danger"}`}
-                  />
-                  {text}
-                </div>
-              ))}
+              {messageArray.map(({ id, text, color, link }: StatusMessage) => {
+                const message = (
+                  <div key={id} className="flex items-center text-xs gap-2">
+                    <IoIosWarning
+                      className={`size-5 ${color || "text-danger"}`}
+                    />
+                    {text}
+                  </div>
+                );
+
+                if (link) {
+                  return <a href={link}>{message}</a>;
+                } else {
+                  return message;
+                }
+              })}
             </div>
           ))}
         </div>
