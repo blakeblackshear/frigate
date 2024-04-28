@@ -110,7 +110,7 @@ export default function LivePlayer({
       player = (
         <MSEPlayer
           className={`rounded-lg md:rounded-2xl size-full ${liveReady ? "" : "hidden"}`}
-          camera={cameraConfig.name}
+          camera={cameraConfig.live.stream_name}
           playbackEnabled={cameraActive}
           audioEnabled={playAudio}
           onPlaying={() => setLiveReady(true)}
@@ -129,7 +129,7 @@ export default function LivePlayer({
     player = (
       <JSMpegPlayer
         className="size-full flex justify-center rounded-lg md:rounded-2xl overflow-hidden"
-        camera={cameraConfig.name}
+        camera={cameraConfig.live.stream_name}
         width={cameraConfig.detect.width}
         height={cameraConfig.detect.height}
       />
