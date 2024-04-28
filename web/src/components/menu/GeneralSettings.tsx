@@ -139,7 +139,7 @@ export default function GeneralSettings({ className }: GeneralSettings) {
               <DropdownMenuLabel>System</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup className={isDesktop ? "" : "flex flex-col"}>
-                <Link to="/system">
+                <Link to="/system#general">
                   <MenuItem
                     className={
                       isDesktop
