@@ -597,24 +597,6 @@ class FrigateApp:
         self.init_logger()
         logger.info(f"Starting Frigate ({VERSION})")
 
-        if not os.environ.get("I_PROMISE_I_WONT_MAKE_AN_ISSUE_ON_GITHUB"):
-            print(
-                "**********************************************************************************"
-            )
-            print(
-                "**********************************************************************************"
-            )
-            print("Frigate 0.14 UNSTABLE")
-            print("This build is not for public use. Please use Frigate stable.")
-            print("Unstable/experimental builds are not enabled, Frigate is exiting.")
-            print(
-                "**********************************************************************************"
-            )
-            print(
-                "**********************************************************************************"
-            )
-            sys.exit(1)
-
         try:
             self.ensure_dirs()
             try:
