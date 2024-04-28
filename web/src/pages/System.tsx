@@ -12,6 +12,7 @@ import Logo from "@/components/Logo";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import CameraMetrics from "@/views/system/CameraMetrics";
 import { useHashState } from "@/hooks/use-overlay-state";
+import { capitalizeFirstLetter } from "@/utils/stringUtil";
 
 const metrics = ["general", "storage", "cameras"] as const;
 type SystemMetric = (typeof metrics)[number];
@@ -29,7 +30,7 @@ function System() {
 
   useEffect(() => {
     if (pageToggle) {
-      document.title = `${pageToggle[0].toUpperCase()}${pageToggle.substring(1)} Stats - Frigate`;
+      document.title = `${capitalizeFirstLetter(pageToggle)} Stats - Frigate`;
     }
   }, [pageToggle]);
 
