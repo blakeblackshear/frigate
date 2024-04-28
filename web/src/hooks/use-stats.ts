@@ -34,11 +34,13 @@ export default function useStats(stats: FrigateStats | undefined) {
         problems.push({
           text: `${capitalizeFirstLetter(key)} is very slow (${det["inference_speed"]} ms)`,
           color: "text-danger",
+          relevantLink: "/system#general",
         });
       } else if (det["inference_speed"] > InferenceThreshold.warning) {
         problems.push({
           text: `${capitalizeFirstLetter(key)} is slow (${det["inference_speed"]} ms)`,
           color: "text-orange-400",
+          relevantLink: "/system#general",
         });
       }
     });
@@ -53,6 +55,7 @@ export default function useStats(stats: FrigateStats | undefined) {
         problems.push({
           text: `${capitalizeFirstLetter(name.replaceAll("_", " "))} is offline`,
           color: "text-danger",
+          relevantLink: "logs",
         });
       }
     });
@@ -70,6 +73,7 @@ export default function useStats(stats: FrigateStats | undefined) {
         problems.push({
           text: `${capitalizeFirstLetter(name.replaceAll("_", " "))} has high FFMPEG CPU usage (${ffmpegAvg}%)`,
           color: "text-danger",
+          relevantLink: "/system#cameras",
         });
       }
 
@@ -77,6 +81,7 @@ export default function useStats(stats: FrigateStats | undefined) {
         problems.push({
           text: `${capitalizeFirstLetter(name.replaceAll("_", " "))} has high detect CPU usage (${detectAvg}%)`,
           color: "text-danger",
+          relevantLink: "/system#cameras",
         });
       }
     });

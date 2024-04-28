@@ -62,6 +62,7 @@ export type StorageStats = {
 export type PotentialProblem = {
   text: string;
   color: string;
+  relevantLink?: string;
 };
 
 export type Vainfo = {

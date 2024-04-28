@@ -10,6 +10,7 @@ export type StatusMessage = {
   id: string;
   text: string;
   color?: string;
+  link?: string;
 };
 
 export type StatusMessagesState = {
@@ -27,6 +28,7 @@ type StatusBarMessagesContextValue = {
     message: string,
     color?: string,
     messageId?: string,
+    link?: string,
   ) => string;
   removeMessage: (key: string, messageId: string) => void;
   clearMessages: (key: string) => void;
@@ -43,14 +45,20 @@ export function StatusBarMessagesProvider({
   const messages = useMemo(() => messagesState, [messagesState]);
 
   const addMessage = useCallback(
-    (key: string, message: string, color?: string, messageId?: string) => {
+    (
+      key: string,
+      message: string,
+      color?: string,
+      messageId?: string,
+      link?: string,
+    ) => {
       const id = messageId || Date.now().toString();
       const msgColor = color || "text-danger";
       setMessagesState((prevMessages) => ({
         ...prevMessages,
         [key]: [
           ...(prevMessages[key] || []),
-          { id, text: message, color: msgColor },
+          { id, text: message, color: msgColor, link },
         ],
       }));
       return id;
