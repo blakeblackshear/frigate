@@ -12,6 +12,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
 import {
   MotionData,
+  REVIEW_PADDING,
   ReviewFilter,
   ReviewSegment,
   ReviewSeverity,
@@ -175,7 +176,7 @@ export default function EventView({
       } else {
         onOpenRecording({
           camera: review.camera,
-          startTime: review.start_time,
+          startTime: review.start_time - REVIEW_PADDING,
           severity: review.severity,
         });
 

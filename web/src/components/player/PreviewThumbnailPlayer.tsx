@@ -23,6 +23,7 @@ import useContextMenu from "@/hooks/use-contextmenu";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { TimeRange } from "@/types/timeline";
 import { NoThumbSlider } from "../ui/slider";
+import { PREVIEW_FPS, PREVIEW_PADDING } from "@/types/preview";
 
 type PreviewPlayerProps = {
   review: ReviewSegment;
@@ -337,7 +338,6 @@ function PreviewContent({
   }
 }
 
-const PREVIEW_PADDING = 16;
 type VideoPreviewProps = {
   relevantPreview: Preview;
   startTime: number;
@@ -398,7 +398,7 @@ export function VideoPreview({
       setManualPlayback(true);
     } else {
       playerRef.current.currentTime = playerStartTime;
-      playerRef.current.playbackRate = 8;
+      playerRef.current.playbackRate = PREVIEW_FPS;
     }
 
     // we know that these deps are correct
@@ -470,7 +470,7 @@ export function VideoPreview({
         playerRef.current.currentTime = playerStartTime + counter;
         counter += 1;
       }
-    }, 125);
+    }, 1000 / PREVIEW_FPS);
     return () => clearInterval(intervalId);
 
     // we know that these deps are correct

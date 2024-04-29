@@ -48,3 +48,5 @@ export type MotionData = {
   audio?: number;
   camera: string;
 };
+
+export const REVIEW_PADDING = 2;
