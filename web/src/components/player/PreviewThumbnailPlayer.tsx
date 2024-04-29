@@ -23,6 +23,7 @@ import useContextMenu from "@/hooks/use-contextmenu";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { TimeRange } from "@/types/timeline";
 import { NoThumbSlider } from "../ui/slider";
+import { PREVIEW_PADDING } from "@/types/preview";
 
 type PreviewPlayerProps = {
   review: ReviewSegment;
@@ -337,7 +338,6 @@ function PreviewContent({
   }
 }
 
-const PREVIEW_PADDING = 16;
 type VideoPreviewProps = {
   relevantPreview: Preview;
   startTime: number;

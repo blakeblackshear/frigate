@@ -5,3 +5,6 @@ export type Preview = {
   start: number;
   end: number;
 };
+
+export const PREVIEW_PADDING = 16;
+
