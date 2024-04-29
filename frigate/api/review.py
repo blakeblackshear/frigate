@@ -520,7 +520,6 @@ def audio_activity():
     df = pd.DataFrame(data, columns=["start_time", "audio"])
     df = df.astype(dtype={"audio": "float16"})
 
-
     # set date as datetime index
     df["start_time"] = pd.to_datetime(df["start_time"], unit="s")
     df.set_index(["start_time"], inplace=True)
