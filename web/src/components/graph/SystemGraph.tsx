@@ -107,7 +107,7 @@ export function ThresholdBarGraph({
         size: 0,
       },
       xaxis: {
-        tickAmount: isMobileOnly ? 3 : 4,
+        tickAmount: 3,
         tickPlacement: "on",
         labels: {
           offsetX: -18,
@@ -349,7 +349,7 @@ export function CameraLineGraph({
         size: 0,
       },
       xaxis: {
-        tickAmount: isMobileOnly ? 3 : 4,
+        tickAmount: 3,
         tickPlacement: "on",
         labels: {
           offsetX: isMobileOnly ? -18 : 0,
