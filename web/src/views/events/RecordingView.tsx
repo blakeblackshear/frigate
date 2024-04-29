@@ -15,6 +15,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
 import {
   MotionData,
+  REVIEW_PADDING,
   ReviewFilter,
   ReviewSegment,
   ReviewSummary,
@@ -558,7 +559,7 @@ function Timeline({
                 currentTime={currentTime}
                 onClick={() => {
                   setScrubbing(true);
-                  setCurrentTime(review.start_time);
+                  setCurrentTime(review.start_time - REVIEW_PADDING);
                   setScrubbing(false);
                 }}
               />
