@@ -12,6 +12,7 @@ from frigate.const import (
     INSERT_MANY_RECORDINGS,
     INSERT_PREVIEW,
     REQUEST_REGION_GRID,
+    UPDATE_CAMERA_ACTIVITY,
     UPSERT_REVIEW_SEGMENT,
 )
 from frigate.models import Previews, Recordings, ReviewSegment
@@ -76,6 +77,8 @@ class Dispatcher:
         for comm in self.comms:
             comm.subscribe(self._receive)
 
+        self.camera_activity = {}
+
     def _receive(self, topic: str, payload: str) -> Optional[Any]:
         """Handle receiving of payload from communicators."""
         if topic.endswith("set"):
@@ -122,6 +125,8 @@ class Dispatcher:
             ReviewSegment.update(end_time=datetime.datetime.now().timestamp()).where(
                 ReviewSegment.end_time == None
             ).execute()
+        elif topic == UPDATE_CAMERA_ACTIVITY:
+            logger.error(f"we got the incoming data {payload}")
         else:
             self.publish(topic, payload, retain=False)
 

@@ -80,6 +80,7 @@ INSERT_PREVIEW = "insert_preview"
 REQUEST_REGION_GRID = "request_region_grid"
 UPSERT_REVIEW_SEGMENT = "upsert_review_segment"
 CLEAR_ONGOING_REVIEW_SEGMENTS = "clear_ongoing_review_segments"
+UPDATE_CAMERA_ACTIVITY = "update_camera_activity"
 
 # Autotracking
 
