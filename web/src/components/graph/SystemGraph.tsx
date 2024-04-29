@@ -123,9 +123,10 @@ export function ThresholdBarGraph({
       yaxis: {
         show: true,
         labels: {
-          formatter: (val: number) => Math.ceil(val).toString(),
+          formatter: (val: number) => `${Math.ceil(val)}${unit}`,
         },
         min: 0,
+        stepSize: unit === "%" ? 5 : undefined,
       },
     } as ApexCharts.ApexOptions;
   }, [graphId, threshold, unit, systemTheme, theme, formatTime]);
@@ -365,9 +366,10 @@ export function CameraLineGraph({
       yaxis: {
         show: true,
         labels: {
-          formatter: (val: number) => Math.ceil(val).toString(),
+          formatter: (val: number) => `${Math.ceil(val)}${unit}`,
         },
         min: 0,
+        stepSize: unit === "%" ? 5 : undefined,
       },
     } as ApexCharts.ApexOptions;
   }, [graphId, systemTheme, theme, formatTime]);
