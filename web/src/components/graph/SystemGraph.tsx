@@ -37,10 +37,6 @@ export function ThresholdBarGraph({
 
   const formatTime = useCallback(
     (val: unknown) => {
-      if (val == 1) {
-        return;
-      }
-
       const date = new Date(updateTimes[Math.round(val as number) - 1] * 1000);
       return date.toLocaleTimeString([], {
         hour12: config?.ui.time_format != "24hour",
@@ -111,8 +107,8 @@ export function ThresholdBarGraph({
         tickPlacement: "on",
         labels: {
           rotate: 0,
-          offsetX: -18,
           formatter: formatTime,
+          offsetX: isMobileOnly ? -18 : 0,
         },
         axisBorder: {
           show: false,
@@ -302,10 +298,6 @@ export function CameraLineGraph({
 
   const formatTime = useCallback(
     (val: unknown) => {
-      if (val == 1) {
-        return;
-      }
-
       const date = new Date(updateTimes[Math.round(val as number)] * 1000);
       return date.toLocaleTimeString([], {
         hour12: config?.ui.time_format != "24hour",
