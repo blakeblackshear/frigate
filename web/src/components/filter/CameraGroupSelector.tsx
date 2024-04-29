@@ -559,7 +559,7 @@ export function CameraGroupEdit({
         />
 
         <Separator className="flex my-2 bg-secondary" />
-        <div className="max-h-[40vh] overflow-y-auto">
+        <div className="max-h-[40dvh] overflow-y-auto">
           <FormField
             control={form.control}
             name="cameras"
