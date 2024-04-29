@@ -248,7 +248,7 @@ export function CamerasFilterButton({
           <DropdownMenuSeparator />
         </>
       )}
-      <div className="h-auto p-4 overflow-y-auto overflow-x-hidden">
+      <div className="h-auto max-h-[80dvh] p-4 overflow-y-auto overflow-x-hidden">
         <FilterSwitch
           isChecked={currentCameras == undefined}
           label="All Cameras"
@@ -571,7 +571,7 @@ export function GeneralFilterContent({
 }: GeneralFilterContentProps) {
   return (
     <>
-      <div className="h-auto overflow-y-auto overflow-x-hidden">
+      <div className="h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
         <div className="flex justify-between items-center my-2.5">
           <Label
             className="mx-2 text-primary cursor-pointer"
