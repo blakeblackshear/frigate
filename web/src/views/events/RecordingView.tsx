@@ -41,6 +41,7 @@ import MobileReviewSettingsDrawer from "@/components/overlay/MobileReviewSetting
 import Logo from "@/components/Logo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FaVideo } from "react-icons/fa";
+import { VideoResolutionType } from "@/types/live";
 
 const SEGMENT_DURATION = 30;
 
@@ -199,6 +200,11 @@ export function RecordingView({
 
   // motion timeline data
 
+  const [liveResolution, setLiveResolution] = useState<VideoResolutionType>({
+    width: 0,
+    height: 0,
+  });
+
   const getCameraAspect = useCallback(
     (cam: string) => {
       if (!config) {
@@ -211,9 +217,13 @@ export function RecordingView({
         return undefined;
       }
 
-      return camera.detect.width / camera.detect.height;
+      if (liveResolution.width && liveResolution.height) {
+        return liveResolution.width / liveResolution.height;
+      } else {
+        return camera.detect.width / camera.detect.height;
+      }
     },
-    [config],
+    [config, liveResolution],
   );
 
   const mainCameraAspect = useMemo(() => {
@@ -397,6 +407,7 @@ export function RecordingView({
                   mainControllerRef.current = controller;
                 }}
                 isScrubbing={scrubbing || exportMode == "timeline"}
+                setLiveResolution={setLiveResolution}
               />
             </div>
             {isDesktop && (

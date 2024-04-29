@@ -20,6 +20,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { CameraConfig } from "@/types/frigateConfig";
+import { VideoResolutionType } from "@/types/live";
 import { CameraPtzInfo } from "@/types/ptz";
 import { RecordingStartingPoint } from "@/types/record";
 import React, {
@@ -149,8 +150,18 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
   const [fullscreen, setFullscreen] = useState(false);
   const [pip, setPip] = useState(false);
 
+  const [liveResolution, setLiveResolution] = useState<VideoResolutionType>({
+    width: 0,
+    height: 0,
+  });
+
   const growClassName = useMemo(() => {
-    const aspect = camera.detect.width / camera.detect.height;
+    let aspect;
+    if (liveResolution.width && liveResolution.height) {
+      aspect = liveResolution.width / liveResolution.height;
+    } else {
+      aspect = camera.detect.width / camera.detect.height;
+    }
 
     if (isMobile) {
       if (isPortrait) {
@@ -173,7 +184,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
     } else {
       return "absolute top-2 bottom-2 left-[50%] -translate-x-[50%]";
     }
-  }, [camera, fullscreen, isPortrait]);
+  }, [camera, fullscreen, isPortrait, liveResolution]);
 
   const preferredLiveMode = useMemo(() => {
     if (isSafari || mic) {
@@ -188,8 +199,12 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
   }, [windowWidth, windowHeight]);
 
   const cameraAspectRatio = useMemo(() => {
-    return camera.detect.width / camera.detect.height;
-  }, [camera]);
+    if (liveResolution.width && liveResolution.height) {
+      return liveResolution.width / liveResolution.height;
+    } else {
+      return camera.detect.width / camera.detect.height;
+    }
+  }, [camera, liveResolution]);
 
   const aspectRatio = useMemo<number>(() => {
     if (isMobile || fullscreen) {
@@ -347,6 +362,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
               iOSCompatFullScreen={isIOS}
               preferredLiveMode={preferredLiveMode}
               pip={pip}
+              setLiveResolution={setLiveResolution}
             />
           </div>
           {camera.onvif.host != "" && (

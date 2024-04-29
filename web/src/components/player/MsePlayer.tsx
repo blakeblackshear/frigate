@@ -1,5 +1,13 @@
 import { baseUrl } from "@/api/baseUrl";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { VideoResolutionType } from "@/types/live";
+import {
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 type MSEPlayerProps = {
   camera: string;
@@ -8,6 +16,7 @@ type MSEPlayerProps = {
   audioEnabled?: boolean;
   pip?: boolean;
   onPlaying?: () => void;
+  setLiveResolution?: React.Dispatch<SetStateAction<VideoResolutionType>>;
 };
 
 function MSEPlayer({
@@ -17,6 +26,7 @@ function MSEPlayer({
   audioEnabled = false,
   pip = false,
   onPlaying,
+  setLiveResolution,
 }: MSEPlayerProps) {
   let connectTS: number = 0;
 
@@ -49,6 +59,15 @@ function MSEPlayer({
   const wsURL = useMemo(() => {
     return `${baseUrl.replace(/^http/, "ws")}live/mse/api/ws?src=${camera}`;
   }, [camera]);
+
+  const handleLoadedMetadata = useCallback(() => {
+    if (videoRef.current && setLiveResolution) {
+      setLiveResolution({
+        width: videoRef.current.videoWidth,
+        height: videoRef.current.videoHeight,
+      });
+    }
+  }, [setLiveResolution]);
 
   const play = () => {
     const currentVideo = videoRef.current;
@@ -286,6 +305,7 @@ function MSEPlayer({
       playsInline
       preload="auto"
       onLoadedData={onPlaying}
+      onLoadedMetadata={handleLoadedMetadata}
       muted={!audioEnabled}
     />
   );
