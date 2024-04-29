@@ -8,4 +8,5 @@ export type Preview = {
   end: number;
 };
 
-export const PREVIEW_PADDING = REVIEW_PADDING * 2;
+export const PREVIEW_FPS = 8;
+export const PREVIEW_PADDING = REVIEW_PADDING * PREVIEW_FPS;
