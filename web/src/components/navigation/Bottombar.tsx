@@ -68,7 +68,7 @@ function StatusAlertNav({ className }: StatusAlertNavProps) {
         <IoIosWarning className="size-5 text-danger" />
       </DrawerTrigger>
       <DrawerContent
-        className={`}max-h-[75dvh] px-2 mx-1 rounded-t-2xl overflow-hidden ${className ?? ""}`}
+        className={`max-h-[75dvh] px-2 mx-1 rounded-t-2xl overflow-hidden ${className ?? ""}`}
       >
         <div className="w-full h-auto py-4 overflow-y-auto overflow-x-hidden flex flex-col items-center gap-2">
           {Object.entries(messages).map(([key, messageArray]) => (
