@@ -440,6 +440,7 @@ def motion_activity():
 
     # resample data using pandas to get activity on scaled basis
     df = pd.DataFrame(data, columns=["start_time", "motion", "camera"])
+    df = df.astype(dtype={"motion": "float16"})
 
     # set date as datetime index
     df["start_time"] = pd.to_datetime(df["start_time"], unit="s")
@@ -517,6 +518,7 @@ def audio_activity():
 
     # resample data using pandas to get activity on scaled basis
     df = pd.DataFrame(data, columns=["start_time", "audio"])
+    df = df.astype(dtype={"audio": "float16"})
 
     # set date as datetime index
     df["start_time"] = pd.to_datetime(df["start_time"], unit="s")
