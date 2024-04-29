@@ -138,7 +138,10 @@ export default function MobileReviewSettingsDrawer({
         {features.includes("export") && (
           <Button
             className="w-full flex justify-center items-center gap-2"
-            onClick={() => setDrawerMode("export")}
+            onClick={() => {
+              setDrawerMode("export");
+              setMode("select");
+            }}
           >
             <FaArrowDown className="p-1 fill-secondary bg-secondary-foreground rounded-md" />
             Export
