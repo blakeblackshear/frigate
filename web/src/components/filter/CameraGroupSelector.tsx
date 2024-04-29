@@ -282,7 +282,7 @@ function NewGroupDialog({
         }}
       >
         <Content
-          className={`min-w-0 ${isMobile ? "w-full p-3 rounded-t-2xl max-h-[90%]" : "w-6/12 max-h-dvh overflow-y-auto"}`}
+          className={`min-w-0 ${isMobile ? "w-full p-3 rounded-t-2xl max-h-[90%]" : "w-6/12 max-h-dvh overflow-y-hidden"}`}
         >
           <div className="flex flex-col my-4 overflow-y-auto">
             {editState === "none" && (
@@ -535,7 +535,10 @@ export function CameraGroupEdit({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="mt-2 space-y-6">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="mt-2 space-y-6 overflow-y-hidden"
+      >
         <FormField
           control={form.control}
           name="name"
@@ -556,34 +559,38 @@ export function CameraGroupEdit({
         />
 
         <Separator className="flex my-2 bg-secondary" />
-        <FormField
-          control={form.control}
-          name="cameras"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Cameras</FormLabel>
-              <FormDescription>Select cameras for this group.</FormDescription>
-              {[
-                ...(birdseyeConfig?.enabled ? ["birdseye"] : []),
-                ...Object.keys(config?.cameras ?? {}),
-              ].map((camera) => (
-                <FormControl key={camera}>
-                  <FilterSwitch
-                    isChecked={field.value && field.value.includes(camera)}
-                    label={camera.replaceAll("_", " ")}
-                    onCheckedChange={(checked) => {
-                      const updatedCameras = checked
-                        ? [...(field.value || []), camera]
-                        : (field.value || []).filter((c) => c !== camera);
-                      form.setValue("cameras", updatedCameras);
-                    }}
-                  />
-                </FormControl>
-              ))}
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="max-h-[40dvh] overflow-y-auto">
+          <FormField
+            control={form.control}
+            name="cameras"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cameras</FormLabel>
+                <FormDescription>
+                  Select cameras for this group.
+                </FormDescription>
+                {[
+                  ...(birdseyeConfig?.enabled ? ["birdseye"] : []),
+                  ...Object.keys(config?.cameras ?? {}),
+                ].map((camera) => (
+                  <FormControl key={camera}>
+                    <FilterSwitch
+                      isChecked={field.value && field.value.includes(camera)}
+                      label={camera.replaceAll("_", " ")}
+                      onCheckedChange={(checked) => {
+                        const updatedCameras = checked
+                          ? [...(field.value || []), camera]
+                          : (field.value || []).filter((c) => c !== camera);
+                        form.setValue("cameras", updatedCameras);
+                      }}
+                    />
+                  </FormControl>
+                ))}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <Separator className="flex my-2 bg-secondary" />
         <FormField
