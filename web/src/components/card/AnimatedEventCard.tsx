@@ -3,7 +3,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { useCallback, useMemo } from "react";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { ReviewSegment } from "@/types/review";
+import { REVIEW_PADDING, ReviewSegment } from "@/types/review";
 import { useNavigate } from "react-router-dom";
 import { RecordingStartingPoint } from "@/types/record";
 import axios from "axios";
@@ -39,7 +39,7 @@ export function AnimatedEventCard({ event }: AnimatedEventCardProps) {
         severity: event.severity,
         recording: {
           camera: event.camera,
-          startTime: event.start_time,
+          startTime: event.start_time - REVIEW_PADDING,
           severity: event.severity,
         } as RecordingStartingPoint,
       },
