@@ -733,7 +733,7 @@ class CameraState:
             object_type = obj.obj_data["label"]
             active = (
                 obj.obj_data["motionless_count"]
-                > self.camera_config.detect.stationary.threshold
+                < self.camera_config.detect.stationary.threshold
             )
 
             if (
