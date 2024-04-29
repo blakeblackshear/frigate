@@ -155,14 +155,18 @@ def get_relative_coordinates(
             relative_masks = []
             for m in mask:
                 points = m.split(",")
-                relative_masks.append(
-                    ",".join(
-                        [
-                            f"{round(int(points[i]) / frame_shape[1], 3)},{round(int(points[i + 1]) / frame_shape[0], 3)}"
-                            for i in range(0, len(points), 2)
-                        ]
+
+                if any(x > "1.0" for x in points):
+                    relative_masks.append(
+                        ",".join(
+                            [
+                                f"{round(int(points[i]) / frame_shape[1], 3)},{round(int(points[i + 1]) / frame_shape[0], 3)}"
+                                for i in range(0, len(points), 2)
+                            ]
+                        )
                     )
-                )
+                else:
+                    relative_masks.append(m)
 
             mask = relative_masks
         elif isinstance(mask, str) and any(x > "1.0" for x in mask.split(",")):
