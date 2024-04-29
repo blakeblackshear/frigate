@@ -126,7 +126,6 @@ export function ThresholdBarGraph({
           formatter: (val: number) => `${Math.ceil(val)}${unit}`,
         },
         min: 0,
-        stepSize: unit === "%" ? 5 : undefined,
       },
     } as ApexCharts.ApexOptions;
   }, [graphId, threshold, unit, systemTheme, theme, formatTime]);
@@ -369,7 +368,6 @@ export function CameraLineGraph({
           formatter: (val: number) => `${Math.ceil(val)}${unit}`,
         },
         min: 0,
-        stepSize: unit === "%" ? 5 : undefined,
       },
     } as ApexCharts.ApexOptions;
   }, [graphId, systemTheme, theme, formatTime]);
