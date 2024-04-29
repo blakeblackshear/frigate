@@ -4,17 +4,24 @@ import { MotionData, ReviewSegment } from "@/types/review";
 import { useEffect, useMemo, useState } from "react";
 import { useTimelineUtils } from "./use-timeline-utils";
 
+type ActiveObjectType = {
+  id: string;
+  label: string;
+  stationary: boolean;
+};
+
 type useCameraActivityReturn = {
   activeTracking: boolean;
   activeMotion: boolean;
+  activeObjects: ActiveObjectType[];
 };
 
 export function useCameraActivity(
   camera: CameraConfig,
 ): useCameraActivityReturn {
-  const [activeObjects, setActiveObjects] = useState<string[]>([]);
+  const [activeObjects, setActiveObjects] = useState<ActiveObjectType[]>([]);
   const hasActiveObjects = useMemo(
-    () => activeObjects.length > 0,
+    () => activeObjects.filter((obj) => !obj.stationary).length > 0,
     [activeObjects],
   );
 
@@ -30,7 +37,9 @@ export function useCameraActivity(
       return;
     }
 
-    const eventIndex = activeObjects.indexOf(event.after.id);
+    const eventIndex = activeObjects.findIndex(
+      (obj) => obj.id === event.after.id,
+    );
 
     if (event.type == "end") {
       if (eventIndex != -1) {
@@ -42,13 +51,13 @@ export function useCameraActivity(
       if (eventIndex == -1) {
         // add unknown event to list if not stationary
         if (!event.after.stationary) {
-          const newActiveObjects = [...activeObjects, event.after.id];
+          const newActiveObject: ActiveObjectType = {
+            id: event.after.id,
+            label: event.after.label,
+            stationary: event.after.stationary,
+          };
+          const newActiveObjects = [...activeObjects, newActiveObject];
           setActiveObjects(newActiveObjects);
-        }
-      } else {
-        // remove known event from list if it has become stationary
-        if (event.after.stationary) {
-          activeObjects.splice(eventIndex, 1);
         }
       }
     }
@@ -57,6 +66,7 @@ export function useCameraActivity(
   return {
     activeTracking: hasActiveObjects,
     activeMotion: detectingMotion == "ON",
+    activeObjects,
   };
 }
 
