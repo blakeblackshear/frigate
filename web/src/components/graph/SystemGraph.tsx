@@ -107,8 +107,8 @@ export function ThresholdBarGraph({
         tickPlacement: "on",
         labels: {
           rotate: 0,
-          formatter: formatTime,
           offsetX: isMobileOnly ? -18 : 0,
+          formatter: formatTime,
         },
         axisBorder: {
           show: false,
