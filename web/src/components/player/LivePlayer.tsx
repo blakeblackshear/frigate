@@ -145,12 +145,6 @@ export default function LivePlayer({
         height={cameraConfig.detect.height}
       />
     );
-    if (setLiveResolution) {
-      setLiveResolution({
-        width: cameraConfig.detect.width,
-        height: cameraConfig.detect.height,
-      });
-    }
   } else {
     player = <ActivityIndicator />;
   }
