@@ -9,9 +9,10 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useTimelineUtils } from "@/hooks/use-timeline-utils";
 import { useScrollLockout } from "@/hooks/use-mouse-listener";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { PREVIEW_PADDING, Preview } from "@/types/preview";
+import { Preview } from "@/types/preview";
 import {
   MotionData,
+  REVIEW_PADDING,
   ReviewFilter,
   ReviewSegment,
   ReviewSeverity,
@@ -175,7 +176,7 @@ export default function EventView({
       } else {
         onOpenRecording({
           camera: review.camera,
-          startTime: review.start_time - PREVIEW_PADDING,
+          startTime: review.start_time - REVIEW_PADDING,
           severity: review.severity,
         });
 
