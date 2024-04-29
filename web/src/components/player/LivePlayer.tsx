@@ -6,9 +6,14 @@ import { useEffect, useMemo, useState } from "react";
 import MSEPlayer from "./MsePlayer";
 import JSMpegPlayer from "./JSMpegPlayer";
 import { MdCircle } from "react-icons/md";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { useCameraActivity } from "@/hooks/use-camera-activity";
 import { LivePlayerMode } from "@/types/live";
 import useCameraLiveMode from "@/hooks/use-camera-live-mode";
+import { getIconForLabel } from "@/utils/iconUtil";
+import Chip from "../indicators/Chip";
+import { isMobile } from "react-device-detect";
+import { capitalizeFirstLetter } from "@/utils/stringUtil";
 
 type LivePlayerProps = {
   cameraRef?: (ref: HTMLDivElement | null) => void;
@@ -37,9 +42,12 @@ export default function LivePlayer({
   pip,
   onClick,
 }: LivePlayerProps) {
+  const [cameraHovered, setCameraHovered] = useState(false);
+
   // camera activity
 
-  const { activeMotion, activeTracking } = useCameraActivity(cameraConfig);
+  const { activeMotion, activeTracking, activeObjects } =
+    useCameraActivity(cameraConfig);
 
   const cameraActive = useMemo(
     () =>
@@ -148,10 +156,53 @@ export default function LivePlayer({
           : "outline-0 outline-background"
       } transition-all duration-500 ${className}`}
       onClick={onClick}
+      onMouseEnter={() => setCameraHovered(true)}
+      onMouseLeave={() => setCameraHovered(false)}
     >
       <div className="absolute top-0 inset-x-0 rounded-lg md:rounded-2xl z-10 w-full h-[30%] bg-gradient-to-b from-black/20 to-transparent pointer-events-none"></div>
       <div className="absolute bottom-0 inset-x-0 rounded-lg md:rounded-2xl z-10 w-full h-[10%] bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
       {player}
+
+      {activeObjects.length > 0 && (
+        <div className="absolute left-0 top-2 z-40">
+          <Tooltip>
+            <div className="flex">
+              <TooltipTrigger asChild>
+                <div className="mx-3 pb-1 text-white text-sm">
+                  <Chip
+                    className={`flex items-start justify-between space-x-1 ${cameraHovered || isMobile ? "" : "hidden"} bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 z-0`}
+                  >
+                    {[
+                      ...new Set([
+                        ...(activeObjects || []).map(({ label }) => label),
+                      ]),
+                    ]
+                      .map((label) => {
+                        return getIconForLabel(label, "size-3 text-white");
+                      })
+                      .sort()}
+                  </Chip>
+                </div>
+              </TooltipTrigger>
+            </div>
+            <TooltipContent className="capitalize">
+              {[
+                ...new Set([
+                  ...(activeObjects || []).map(({ label }) => label),
+                ]),
+              ]
+                .filter(
+                  (label) =>
+                    label !== undefined && !label.includes("-verified"),
+                )
+                .map((label) => capitalizeFirstLetter(label))
+                .sort()
+                .join(", ")
+                .replaceAll("-verified", "")}
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      )}
 
       <div
         className={`absolute inset-0 w-full ${
