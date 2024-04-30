@@ -7,7 +7,7 @@ mypy == 1.6.1
 numpy == 1.26.*
 onvif_zeep == 0.2.12
 opencv-python-headless == 4.9.0.*
-paho-mqtt == 2.0.*
+paho-mqtt == 2.1.*
 pandas == 2.2.*
 peewee == 3.17.*
 peewee_migrate == 1.12.*
