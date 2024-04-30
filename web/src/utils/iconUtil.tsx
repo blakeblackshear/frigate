@@ -35,6 +35,7 @@ export function getIconForGroup(icon: string, className: string = "size-4") {
 }
 
 export function getIconForLabel(label: string, className?: string) {
+  console.log(`the label is ${label}`)
   if (label.endsWith("-verified")) {
     return getVerifiedIcon(label, className);
   }

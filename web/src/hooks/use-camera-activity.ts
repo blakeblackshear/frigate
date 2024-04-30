@@ -29,6 +29,7 @@ export function useCameraActivity(
 
   useEffect(() => {
     if (updatedCameraState) {
+      console.log(`the initial objects are ${JSON.stringify(updatedCameraState.objects)}`)
       setObjects(updatedCameraState.objects);
     }
   }, [updatedCameraState]);
