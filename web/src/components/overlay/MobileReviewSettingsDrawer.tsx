@@ -109,6 +109,9 @@ export default function MobileReviewSettingsDrawer({
     const cameras = filter?.cameras || Object.keys(config.cameras);
 
     cameras.forEach((camera) => {
+      if (camera == "birdseye") {
+        return;
+      }
       const cameraConfig = config.cameras[camera];
       cameraConfig.objects.track.forEach((label) => {
         labels.add(label);
