@@ -48,8 +48,8 @@ export default function HlsVideoPlayer({
   const [loadedMetadata, setLoadedMetadata] = useState(false);
 
   const handleLoadedMetadata = useCallback(() => {
+    setLoadedMetadata(true);
     if (videoRef.current) {
-      setLoadedMetadata(true);
       if (setLiveResolution) {
         setLiveResolution({
           width: videoRef.current.videoWidth,

@@ -190,20 +190,24 @@ export function RecordingView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentTime, scrubbing]);
 
+  const [liveResolution, setLiveResolution] = useState<VideoResolutionType>({
+    width: 0,
+    height: 0,
+  });
+
   const onSelectCamera = useCallback(
     (newCam: string) => {
       setMainCamera(newCam);
+      setLiveResolution({
+        width: 0,
+        height: 0,
+      });
       setPlaybackStart(currentTime);
     },
     [currentTime],
   );
 
   // motion timeline data
-
-  const [liveResolution, setLiveResolution] = useState<VideoResolutionType>({
-    width: 0,
-    height: 0,
-  });
 
   const getCameraAspect = useCallback(
     (cam: string) => {
