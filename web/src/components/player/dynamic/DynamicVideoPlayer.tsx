@@ -9,6 +9,7 @@ import { DynamicVideoController } from "./DynamicVideoController";
 import HlsVideoPlayer from "../HlsVideoPlayer";
 import { TimeRange } from "@/types/timeline";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import { VideoResolutionType } from "@/types/live";
 
 /**
  * Dynamically switches between video playback and scrubbing preview player.
@@ -24,6 +25,7 @@ type DynamicVideoPlayerProps = {
   onControllerReady: (controller: DynamicVideoController) => void;
   onTimestampUpdate?: (timestamp: number) => void;
   onClipEnded?: () => void;
+  setFullResolution: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
 };
 export default function DynamicVideoPlayer({
   className,
@@ -36,6 +38,7 @@ export default function DynamicVideoPlayer({
   onControllerReady,
   onTimestampUpdate,
   onClipEnded,
+  setFullResolution,
 }: DynamicVideoPlayerProps) {
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -182,6 +185,7 @@ export default function DynamicVideoPlayer({
           setIsLoading(false);
           setNoRecording(false);
         }}
+        setFullResolution={setFullResolution}
       />
       <PreviewPlayer
         className={`${isScrubbing || isLoading ? "visible" : "hidden"} ${className}`}

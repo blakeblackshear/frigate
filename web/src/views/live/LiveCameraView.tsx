@@ -20,6 +20,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { CameraConfig } from "@/types/frigateConfig";
+import { VideoResolutionType } from "@/types/live";
 import { CameraPtzInfo } from "@/types/ptz";
 import { RecordingStartingPoint } from "@/types/record";
 import React, {
@@ -149,14 +150,24 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
   const [fullscreen, setFullscreen] = useState(false);
   const [pip, setPip] = useState(false);
 
+  const [fullResolution, setFullResolution] = useState<VideoResolutionType>({
+    width: 0,
+    height: 0,
+  });
+
   const growClassName = useMemo(() => {
-    const aspect = camera.detect.width / camera.detect.height;
+    let aspect;
+    if (fullResolution.width && fullResolution.height) {
+      aspect = fullResolution.width / fullResolution.height;
+    } else {
+      aspect = camera.detect.width / camera.detect.height;
+    }
 
     if (isMobile) {
       if (isPortrait) {
         return "absolute left-2 right-2 top-[50%] -translate-y-[50%]";
       } else {
-        if (aspect > 16 / 9) {
+        if (aspect > 1.5) {
           return "p-2 absolute left-0 top-[50%] -translate-y-[50%]";
         } else {
           return "p-2 absolute top-2 bottom-2 left-[50%] -translate-x-[50%]";
@@ -165,7 +176,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
     }
 
     if (fullscreen) {
-      if (aspect > 16 / 9) {
+      if (aspect > 1.5) {
         return "absolute inset-x-2 top-[50%] -translate-y-[50%]";
       } else {
         return "absolute inset-y-2 left-[50%] -translate-x-[50%]";
@@ -173,7 +184,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
     } else {
       return "absolute top-2 bottom-2 left-[50%] -translate-x-[50%]";
     }
-  }, [camera, fullscreen, isPortrait]);
+  }, [camera, fullscreen, isPortrait, fullResolution]);
 
   const preferredLiveMode = useMemo(() => {
     if (isSafari || mic) {
@@ -188,8 +199,12 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
   }, [windowWidth, windowHeight]);
 
   const cameraAspectRatio = useMemo(() => {
-    return camera.detect.width / camera.detect.height;
-  }, [camera]);
+    if (fullResolution.width && fullResolution.height) {
+      return fullResolution.width / fullResolution.height;
+    } else {
+      return camera.detect.width / camera.detect.height;
+    }
+  }, [camera, fullResolution]);
 
   const aspectRatio = useMemo<number>(() => {
     if (isMobile || fullscreen) {
@@ -347,6 +362,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
               iOSCompatFullScreen={isIOS}
               preferredLiveMode={preferredLiveMode}
               pip={pip}
+              setFullResolution={setFullResolution}
             />
           </div>
           {camera.onvif.host != "" && (

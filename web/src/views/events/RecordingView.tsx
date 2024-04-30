@@ -41,6 +41,8 @@ import MobileReviewSettingsDrawer from "@/components/overlay/MobileReviewSetting
 import Logo from "@/components/Logo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FaVideo } from "react-icons/fa";
+import { VideoResolutionType } from "@/types/live";
+import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
 
 const SEGMENT_DURATION = 30;
 
@@ -189,9 +191,18 @@ export function RecordingView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentTime, scrubbing]);
 
+  const [fullResolution, setFullResolution] = useState<VideoResolutionType>({
+    width: 0,
+    height: 0,
+  });
+
   const onSelectCamera = useCallback(
     (newCam: string) => {
       setMainCamera(newCam);
+      setFullResolution({
+        width: 0,
+        height: 0,
+      });
       setPlaybackStart(currentTime);
     },
     [currentTime],
@@ -205,6 +216,10 @@ export function RecordingView({
         return undefined;
       }
 
+      if (cam == mainCamera && fullResolution.width && fullResolution.height) {
+        return fullResolution.width / fullResolution.height;
+      }
+
       const camera = config.cameras[cam];
 
       if (!camera) {
@@ -213,7 +228,7 @@ export function RecordingView({
 
       return camera.detect.width / camera.detect.height;
     },
-    [config],
+    [config, fullResolution, mainCamera],
   );
 
   const mainCameraAspect = useMemo(() => {
@@ -221,9 +236,9 @@ export function RecordingView({
 
     if (!aspectRatio) {
       return "normal";
-    } else if (aspectRatio > 2) {
+    } else if (aspectRatio > ASPECT_WIDE_LAYOUT) {
       return "wide";
-    } else if (aspectRatio < 16 / 9) {
+    } else if (aspectRatio < ASPECT_VERTICAL_LAYOUT) {
       return "tall";
     } else {
       return "normal";
@@ -397,6 +412,7 @@ export function RecordingView({
                   mainControllerRef.current = controller;
                 }}
                 isScrubbing={scrubbing || exportMode == "timeline"}
+                setFullResolution={setFullResolution}
               />
             </div>
             {isDesktop && (

@@ -1,8 +1,15 @@
-import { MutableRefObject, useEffect, useRef, useState } from "react";
+import {
+  MutableRefObject,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import Hls from "hls.js";
 import { isAndroid, isDesktop, isMobile } from "react-device-detect";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import VideoControls from "./VideoControls";
+import { VideoResolutionType } from "@/types/live";
 
 // Android native hls does not seek correctly
 const USE_NATIVE_HLS = !isAndroid;
@@ -21,6 +28,7 @@ type HlsVideoPlayerProps = {
   onPlayerLoaded?: () => void;
   onTimeUpdate?: (time: number) => void;
   onPlaying?: () => void;
+  setFullResolution?: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
 };
 export default function HlsVideoPlayer({
   videoRef,
@@ -31,12 +39,25 @@ export default function HlsVideoPlayer({
   onPlayerLoaded,
   onTimeUpdate,
   onPlaying,
+  setFullResolution,
 }: HlsVideoPlayerProps) {
   // playback
 
   const hlsRef = useRef<Hls>();
   const [useHlsCompat, setUseHlsCompat] = useState(false);
   const [loadedMetadata, setLoadedMetadata] = useState(false);
+
+  const handleLoadedMetadata = useCallback(() => {
+    setLoadedMetadata(true);
+    if (videoRef.current) {
+      if (setFullResolution) {
+        setFullResolution({
+          width: videoRef.current.videoWidth,
+          height: videoRef.current.videoHeight,
+        });
+      }
+    }
+  }, [videoRef, setFullResolution]);
 
   useEffect(() => {
     if (!videoRef.current) {
@@ -193,7 +214,7 @@ export default function HlsVideoPlayer({
               : undefined
           }
           onLoadedData={onPlayerLoaded}
-          onLoadedMetadata={() => setLoadedMetadata(true)}
+          onLoadedMetadata={handleLoadedMetadata}
           onEnded={onClipEnded}
           onError={(e) => {
             if (
