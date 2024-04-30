@@ -62,7 +62,7 @@ export function AnimatedEventCard({ event }: AnimatedEventCardProps) {
     <Tooltip>
       <TooltipTrigger asChild>
         <div
-          className="h-24 relative"
+          className="h-24 4k:h-32 relative"
           style={{
             aspectRatio: aspectRatio,
           }}
