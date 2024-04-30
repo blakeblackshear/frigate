@@ -131,7 +131,11 @@ export default function Statusbar() {
                 );
 
                 if (link) {
-                  return <Link to={link}>{message}</Link>;
+                  return (
+                    <Link key={id} to={link}>
+                      {message}
+                    </Link>
+                  );
                 } else {
                   return message;
                 }
