@@ -65,7 +65,13 @@ function useValue(): useValueReturn {
         setWsState({ ...wsState, [data.topic]: data.payload });
       }
     },
-    onOpen: () => {},
+    onOpen: () => {
+      sendJsonMessage({
+        topic: "onConnect",
+        message: "",
+        retain: false,
+      });
+    },
     shouldReconnect: () => true,
   });
 
