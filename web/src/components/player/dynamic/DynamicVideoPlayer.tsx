@@ -25,7 +25,7 @@ type DynamicVideoPlayerProps = {
   onControllerReady: (controller: DynamicVideoController) => void;
   onTimestampUpdate?: (timestamp: number) => void;
   onClipEnded?: () => void;
-  setLiveResolution: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
+  setFullResolution: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
 };
 export default function DynamicVideoPlayer({
   className,
@@ -38,7 +38,7 @@ export default function DynamicVideoPlayer({
   onControllerReady,
   onTimestampUpdate,
   onClipEnded,
-  setLiveResolution,
+  setFullResolution,
 }: DynamicVideoPlayerProps) {
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -185,7 +185,7 @@ export default function DynamicVideoPlayer({
           setIsLoading(false);
           setNoRecording(false);
         }}
-        setLiveResolution={setLiveResolution}
+        setFullResolution={setFullResolution}
       />
       <PreviewPlayer
         className={`${isScrubbing || isLoading ? "visible" : "hidden"} ${className}`}

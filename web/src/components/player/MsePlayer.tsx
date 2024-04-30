@@ -16,7 +16,7 @@ type MSEPlayerProps = {
   audioEnabled?: boolean;
   pip?: boolean;
   onPlaying?: () => void;
-  setLiveResolution?: React.Dispatch<SetStateAction<VideoResolutionType>>;
+  setFullResolution?: React.Dispatch<SetStateAction<VideoResolutionType>>;
 };
 
 function MSEPlayer({
@@ -26,7 +26,7 @@ function MSEPlayer({
   audioEnabled = false,
   pip = false,
   onPlaying,
-  setLiveResolution,
+  setFullResolution,
 }: MSEPlayerProps) {
   let connectTS: number = 0;
 
@@ -61,13 +61,13 @@ function MSEPlayer({
   }, [camera]);
 
   const handleLoadedMetadata = useCallback(() => {
-    if (videoRef.current && setLiveResolution) {
-      setLiveResolution({
+    if (videoRef.current && setFullResolution) {
+      setFullResolution({
         width: videoRef.current.videoWidth,
         height: videoRef.current.videoHeight,
       });
     }
-  }, [setLiveResolution]);
+  }, [setFullResolution]);
 
   const play = () => {
     const currentVideo = videoRef.current;

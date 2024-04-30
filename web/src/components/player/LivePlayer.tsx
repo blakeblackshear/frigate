@@ -27,7 +27,7 @@ type LivePlayerProps = {
   iOSCompatFullScreen?: boolean;
   pip?: boolean;
   onClick?: () => void;
-  setLiveResolution: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
+  setFullResolution: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
 };
 
 export default function LivePlayer({
@@ -42,7 +42,7 @@ export default function LivePlayer({
   iOSCompatFullScreen = false,
   pip,
   onClick,
-  setLiveResolution,
+  setFullResolution,
 }: LivePlayerProps) {
   const [cameraHovered, setCameraHovered] = useState(false);
 
@@ -125,7 +125,7 @@ export default function LivePlayer({
           audioEnabled={playAudio}
           onPlaying={() => setLiveReady(true)}
           pip={pip}
-          setLiveResolution={setLiveResolution}
+          setFullResolution={setFullResolution}
         />
       );
     } else {

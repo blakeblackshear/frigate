@@ -150,15 +150,15 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
   const [fullscreen, setFullscreen] = useState(false);
   const [pip, setPip] = useState(false);
 
-  const [liveResolution, setLiveResolution] = useState<VideoResolutionType>({
+  const [fullResolution, setFullResolution] = useState<VideoResolutionType>({
     width: 0,
     height: 0,
   });
 
   const growClassName = useMemo(() => {
     let aspect;
-    if (liveResolution.width && liveResolution.height) {
-      aspect = liveResolution.width / liveResolution.height;
+    if (fullResolution.width && fullResolution.height) {
+      aspect = fullResolution.width / fullResolution.height;
     } else {
       aspect = camera.detect.width / camera.detect.height;
     }
@@ -184,7 +184,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
     } else {
       return "absolute top-2 bottom-2 left-[50%] -translate-x-[50%]";
     }
-  }, [camera, fullscreen, isPortrait, liveResolution]);
+  }, [camera, fullscreen, isPortrait, fullResolution]);
 
   const preferredLiveMode = useMemo(() => {
     if (isSafari || mic) {
@@ -199,12 +199,12 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
   }, [windowWidth, windowHeight]);
 
   const cameraAspectRatio = useMemo(() => {
-    if (liveResolution.width && liveResolution.height) {
-      return liveResolution.width / liveResolution.height;
+    if (fullResolution.width && fullResolution.height) {
+      return fullResolution.width / fullResolution.height;
     } else {
       return camera.detect.width / camera.detect.height;
     }
-  }, [camera, liveResolution]);
+  }, [camera, fullResolution]);
 
   const aspectRatio = useMemo<number>(() => {
     if (isMobile || fullscreen) {
@@ -362,7 +362,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
               iOSCompatFullScreen={isIOS}
               preferredLiveMode={preferredLiveMode}
               pip={pip}
-              setLiveResolution={setLiveResolution}
+              setFullResolution={setFullResolution}
             />
           </div>
           {camera.onvif.host != "" && (

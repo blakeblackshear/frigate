@@ -28,7 +28,7 @@ type HlsVideoPlayerProps = {
   onPlayerLoaded?: () => void;
   onTimeUpdate?: (time: number) => void;
   onPlaying?: () => void;
-  setLiveResolution?: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
+  setFullResolution?: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
 };
 export default function HlsVideoPlayer({
   videoRef,
@@ -39,7 +39,7 @@ export default function HlsVideoPlayer({
   onPlayerLoaded,
   onTimeUpdate,
   onPlaying,
-  setLiveResolution,
+  setFullResolution,
 }: HlsVideoPlayerProps) {
   // playback
 
@@ -50,14 +50,14 @@ export default function HlsVideoPlayer({
   const handleLoadedMetadata = useCallback(() => {
     setLoadedMetadata(true);
     if (videoRef.current) {
-      if (setLiveResolution) {
-        setLiveResolution({
+      if (setFullResolution) {
+        setFullResolution({
           width: videoRef.current.videoWidth,
           height: videoRef.current.videoHeight,
         });
       }
     }
-  }, [videoRef, setLiveResolution]);
+  }, [videoRef, setFullResolution]);
 
   useEffect(() => {
     if (!videoRef.current) {

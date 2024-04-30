@@ -190,7 +190,7 @@ export function RecordingView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentTime, scrubbing]);
 
-  const [liveResolution, setLiveResolution] = useState<VideoResolutionType>({
+  const [fullResolution, setFullResolution] = useState<VideoResolutionType>({
     width: 0,
     height: 0,
   });
@@ -198,7 +198,7 @@ export function RecordingView({
   const onSelectCamera = useCallback(
     (newCam: string) => {
       setMainCamera(newCam);
-      setLiveResolution({
+      setFullResolution({
         width: 0,
         height: 0,
       });
@@ -221,13 +221,13 @@ export function RecordingView({
         return undefined;
       }
 
-      if (liveResolution.width && liveResolution.height) {
-        return liveResolution.width / liveResolution.height;
+      if (fullResolution.width && fullResolution.height) {
+        return fullResolution.width / fullResolution.height;
       } else {
         return camera.detect.width / camera.detect.height;
       }
     },
-    [config, liveResolution],
+    [config, fullResolution],
   );
 
   const mainCameraAspect = useMemo(() => {
@@ -411,7 +411,7 @@ export function RecordingView({
                   mainControllerRef.current = controller;
                 }}
                 isScrubbing={scrubbing || exportMode == "timeline"}
-                setLiveResolution={setLiveResolution}
+                setFullResolution={setFullResolution}
               />
             </div>
             {isDesktop && (
