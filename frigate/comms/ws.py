@@ -50,6 +50,10 @@ class WebSocketClient(Communicator):  # type: ignore[misc]
         class _WebSocketHandler(WebSocket):  # type: ignore[misc]
             receiver = self._dispatcher
 
+            def opened(self) -> None:
+                """A new websocket is opened, we need to send an update message"""
+                threading.Timer(1.0, self.receiver, ("onConnect", "")).start()
+
             def received_message(self, message: WebSocket.received_message) -> None:
                 try:
                     json_message = json.loads(message.data.decode("utf-8"))

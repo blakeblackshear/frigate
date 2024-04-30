@@ -16,6 +16,7 @@ import numpy as np
 from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
 from frigate.comms.dispatcher import Dispatcher
 from frigate.comms.events_updater import EventEndSubscriber, EventUpdatePublisher
+from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import (
     CameraConfig,
     FrigateConfig,
@@ -24,7 +25,7 @@ from frigate.config import (
     SnapshotsConfig,
     ZoomingModeEnum,
 )
-from frigate.const import CLIPS_DIR
+from frigate.const import ALL_ATTRIBUTE_LABELS, CLIPS_DIR, UPDATE_CAMERA_ACTIVITY
 from frigate.events.types import EventStateEnum, EventTypeEnum
 from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.util.image import (
@@ -724,8 +725,31 @@ class CameraState:
 
         # TODO: can i switch to looking this up and only changing when an event ends?
         # maintain best objects
+        camera_activity: dict[str, list[any]] = {
+            "motion": len(motion_boxes) > 0,
+            "objects": [],
+        }
+
         for obj in tracked_objects.values():
             object_type = obj.obj_data["label"]
+            active = (
+                obj.obj_data["motionless_count"]
+                < self.camera_config.detect.stationary.threshold
+            )
+
+            if not obj.false_positive:
+                label = object_type
+
+                if (
+                    obj.obj_data.get("sub_label")
+                    and obj.obj_data.get("sub_label")[0] in ALL_ATTRIBUTE_LABELS
+                ):
+                    label = obj.obj_data["sub_label"]
+
+                camera_activity["objects"].append(
+                    {"id": obj.obj_data["id"], "label": label, "stationary": not active}
+                )
+
             # if the object's thumbnail is not from the current frame
             if obj.false_positive or obj.thumbnail_data["frame_time"] != frame_time:
                 continue
@@ -751,6 +775,9 @@ class CameraState:
                 self.best_objects[object_type] = obj
                 for c in self.callbacks["snapshot"]:
                     c(self.name, self.best_objects[object_type], frame_time)
+
+        for c in self.callbacks["camera_activity"]:
+            c(self.name, camera_activity)
 
         # update overall camera state for each object type
         obj_counter = Counter(
@@ -841,9 +868,13 @@ class TrackedObjectProcessor(threading.Thread):
         self.frame_manager = SharedMemoryFrameManager()
         self.last_motion_detected: dict[str, float] = {}
         self.ptz_autotracker_thread = ptz_autotracker_thread
+
+        self.requestor = InterProcessRequestor()
         self.detection_publisher = DetectionPublisher(DetectionTypeEnum.video)
         self.event_sender = EventUpdatePublisher()
         self.event_end_subscriber = EventEndSubscriber()
+
+        self.camera_activity: dict[str, dict[str, any]] = {}
 
         def start(camera, obj: TrackedObject, current_frame_time):
             self.event_sender.publish(
@@ -962,6 +993,13 @@ class TrackedObjectProcessor(threading.Thread):
         def object_status(camera, object_name, status):
             self.dispatcher.publish(f"{camera}/{object_name}", status, retain=False)
 
+        def camera_activity(camera, activity):
+            last_activity = self.camera_activity.get(camera)
+
+            if not last_activity or activity != last_activity:
+                self.camera_activity[camera] = activity
+                self.requestor.send_data(UPDATE_CAMERA_ACTIVITY, self.camera_activity)
+
         for camera in self.config.cameras.keys():
             camera_state = CameraState(
                 camera, self.config, self.frame_manager, self.ptz_autotracker_thread
@@ -972,6 +1010,7 @@ class TrackedObjectProcessor(threading.Thread):
             camera_state.on("end", end)
             camera_state.on("snapshot", snapshot)
             camera_state.on("object_status", object_status)
+            camera_state.on("camera_activity", camera_activity)
             self.camera_states[camera] = camera_state
 
         # {
@@ -1228,6 +1267,7 @@ class TrackedObjectProcessor(threading.Thread):
                 event_id, camera = update
                 self.camera_states[camera].finished(event_id)
 
+        self.requestor.stop()
         self.detection_publisher.stop()
         self.event_sender.stop()
         self.event_end_subscriber.stop()

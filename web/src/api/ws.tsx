@@ -2,7 +2,12 @@ import { baseUrl } from "./baseUrl";
 import { useCallback, useEffect, useState } from "react";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { FrigateEvent, FrigateReview, ToggleableSetting } from "@/types/ws";
+import {
+  FrigateCameraState,
+  FrigateEvent,
+  FrigateReview,
+  ToggleableSetting,
+} from "@/types/ws";
 import { FrigateStats } from "@/types/stats";
 import useSWR from "swr";
 import { createContainer } from "react-tracked";
@@ -191,6 +196,16 @@ export function useFrigateStats(): { payload: FrigateStats } {
     value: { payload },
   } = useWs("stats", "");
   return { payload: JSON.parse(payload as string) };
+}
+
+export function useInitialCameraState(camera: string): {
+  payload: FrigateCameraState;
+} {
+  const {
+    value: { payload },
+  } = useWs("camera_activity", "");
+  const data = JSON.parse(payload as string);
+  return { payload: data ? data[camera] : undefined };
 }
 
 export function useMotionActivity(camera: string): { payload: string } {
