@@ -2,6 +2,7 @@
 
 import datetime
 import logging
+import json
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Optional
 
@@ -127,6 +128,8 @@ class Dispatcher:
             ).execute()
         elif topic == UPDATE_CAMERA_ACTIVITY:
             self.camera_activity = payload
+        elif topic == "onConnect":
+            self.publish("camera_activity", json.dumps(self.camera_activity))
         else:
             self.publish(topic, payload, retain=False)
 

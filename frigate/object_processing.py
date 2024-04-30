@@ -25,7 +25,7 @@ from frigate.config import (
     SnapshotsConfig,
     ZoomingModeEnum,
 )
-from frigate.const import CLIPS_DIR, UPDATE_CAMERA_ACTIVITY
+from frigate.const import ALL_ATTRIBUTE_LABELS, CLIPS_DIR, UPDATE_CAMERA_ACTIVITY
 from frigate.events.types import EventStateEnum, EventTypeEnum
 from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.util.image import (
@@ -538,7 +538,9 @@ class CameraState:
                     ):
                         max_target_box = self.ptz_autotracker_thread.ptz_autotracker.tracked_object_metrics[
                             self.name
-                        ]["max_target_box"]
+                        ][
+                            "max_target_box"
+                        ]
                         side_length = max_target_box * (
                             max(
                                 self.camera_config.detect.width,
@@ -736,19 +738,22 @@ class CameraState:
                 < self.camera_config.detect.stationary.threshold
             )
 
-            if (
-                obj.obj_data["position_changes"] > 0
-                and not obj.obj_data["false_positive"]
-            ):
-                if object_type not in camera_activity:
-                    camera_activity[object_type] = {
+            if not obj.false_positive:
+                label = object_type
+
+                if (
+                    obj.obj_data.get("sub_label")
+                    and obj.obj_data.get("sub_label")[0] in ALL_ATTRIBUTE_LABELS
+                ):
+                    label = obj.obj_data["sub_label"]
+
+                if label not in camera_activity:
+                    camera_activity[label] = {
                         "active": 1 if active else 0,
                         "stationary": 1 if not active else 0,
                     }
                 else:
-                    camera_activity[object_type][
-                        "active" if active else "stationary"
-                    ] += 1
+                    camera_activity[label]["active" if active else "stationary"] += 1
 
             # if the object's thumbnail is not from the current frame
             if obj.false_positive or obj.thumbnail_data["frame_time"] != frame_time:
