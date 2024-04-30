@@ -52,7 +52,7 @@ class WebSocketClient(Communicator):  # type: ignore[misc]
 
             def opened(self) -> None:
                 """A new websocket is opened, we need to send an update message"""
-                self.receiver("onConnect", "")
+                threading.Timer(1.0, self.receiver, ("onConnect", "")).start()
 
             def received_message(self, message: WebSocket.received_message) -> None:
                 try:

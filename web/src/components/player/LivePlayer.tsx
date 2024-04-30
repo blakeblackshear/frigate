@@ -46,7 +46,7 @@ export default function LivePlayer({
 
   // camera activity
 
-  const { activeMotion, activeTracking, activeObjects } =
+  const { activeMotion, activeTracking, objects } =
     useCameraActivity(cameraConfig);
 
   const cameraActive = useMemo(
@@ -163,7 +163,7 @@ export default function LivePlayer({
       <div className="absolute bottom-0 inset-x-0 rounded-lg md:rounded-2xl z-10 w-full h-[10%] bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
       {player}
 
-      {activeObjects.length > 0 && (
+      {objects.length > 0 && (
         <div className="absolute left-0 top-2 z-40">
           <Tooltip>
             <div className="flex">
@@ -174,7 +174,7 @@ export default function LivePlayer({
                   >
                     {[
                       ...new Set([
-                        ...(activeObjects || []).map(({ label }) => label),
+                        ...(objects || []).map(({ label }) => label),
                       ]),
                     ]
                       .map((label) => {
@@ -186,11 +186,7 @@ export default function LivePlayer({
               </TooltipTrigger>
             </div>
             <TooltipContent className="capitalize">
-              {[
-                ...new Set([
-                  ...(activeObjects || []).map(({ label }) => label),
-                ]),
-              ]
+              {[...new Set([...(objects || []).map(({ label }) => label)])]
                 .filter(
                   (label) =>
                     label !== undefined && !label.includes("-verified"),

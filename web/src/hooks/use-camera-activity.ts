@@ -1,72 +1,97 @@
-import { useFrigateEvents, useMotionActivity } from "@/api/ws";
+import {
+  useFrigateEvents,
+  useInitialCameraState,
+  useMotionActivity,
+} from "@/api/ws";
 import { CameraConfig } from "@/types/frigateConfig";
 import { MotionData, ReviewSegment } from "@/types/review";
 import { useEffect, useMemo, useState } from "react";
 import { useTimelineUtils } from "./use-timeline-utils";
-
-type ActiveObjectType = {
-  id: string;
-  label: string;
-  stationary: boolean;
-};
+import { ObjectType } from "@/types/ws";
+import useDeepMemo from "./use-deep-memo";
 
 type useCameraActivityReturn = {
   activeTracking: boolean;
   activeMotion: boolean;
-  activeObjects: ActiveObjectType[];
+  objects: ObjectType[];
 };
 
 export function useCameraActivity(
   camera: CameraConfig,
 ): useCameraActivityReturn {
-  const [activeObjects, setActiveObjects] = useState<ActiveObjectType[]>([]);
+  const [objects, setObjects] = useState<ObjectType[]>([]);
+
+  // init camera activity
+
+  const { payload: initialCameraState } = useInitialCameraState(camera.name);
+
+  const updatedCameraState = useDeepMemo(initialCameraState);
+
+  useEffect(() => {
+    if (updatedCameraState) {
+      setObjects(updatedCameraState.objects);
+    }
+  }, [updatedCameraState]);
+
+  // handle camera activity
+
   const hasActiveObjects = useMemo(
-    () => activeObjects.filter((obj) => !obj.stationary).length > 0,
-    [activeObjects],
+    () => objects.filter((obj) => !obj.stationary).length > 0,
+    [objects],
   );
 
   const { payload: detectingMotion } = useMotionActivity(camera.name);
   const { payload: event } = useFrigateEvents();
+  const updatedEvent = useDeepMemo(event);
 
   useEffect(() => {
-    if (!event) {
+    if (!updatedEvent) {
       return;
     }
 
-    if (event.after.camera != camera.name) {
+    if (updatedEvent.after.camera != camera.name) {
       return;
     }
 
-    const eventIndex = activeObjects.findIndex(
-      (obj) => obj.id === event.after.id,
+    const updatedEventIndex = objects.findIndex(
+      (obj) => obj.id === updatedEvent.after.id,
     );
 
-    if (event.type == "end") {
-      if (eventIndex != -1) {
-        const newActiveObjects = [...activeObjects];
-        newActiveObjects.splice(eventIndex, 1);
-        setActiveObjects(newActiveObjects);
+    if (updatedEvent.type == "end") {
+      if (updatedEventIndex != -1) {
+        const newActiveObjects = [...objects];
+        newActiveObjects.splice(updatedEventIndex, 1);
+        setObjects(newActiveObjects);
       }
     } else {
-      if (eventIndex == -1) {
-        // add unknown event to list if not stationary
-        if (!event.after.stationary) {
-          const newActiveObject: ActiveObjectType = {
-            id: event.after.id,
-            label: event.after.label,
-            stationary: event.after.stationary,
+      if (updatedEventIndex == -1) {
+        // add unknown updatedEvent to list if not stationary
+        if (!updatedEvent.after.stationary) {
+          const newActiveObject: ObjectType = {
+            id: updatedEvent.after.id,
+            label: updatedEvent.after.label,
+            stationary: updatedEvent.after.stationary,
           };
-          const newActiveObjects = [...activeObjects, newActiveObject];
-          setActiveObjects(newActiveObjects);
+          const newActiveObjects = [...objects, newActiveObject];
+          setObjects(newActiveObjects);
         }
+      } else {
+        const newObjects = [...objects];
+        newObjects[updatedEventIndex].label =
+          updatedEvent.after.sub_label ?? updatedEvent.after.label;
+        newObjects[updatedEventIndex].stationary =
+          updatedEvent.after.stationary;
+        setObjects(newObjects);
       }
     }
-  }, [camera, event, activeObjects]);
+  }, [camera, updatedEvent, objects]);
 
   return {
     activeTracking: hasActiveObjects,
-    activeMotion: detectingMotion == "ON",
-    activeObjects,
+    activeMotion: detectingMotion
+      ? detectingMotion == "ON"
+      : initialCameraState?.motion == true,
+    objects,
   };
 }
 

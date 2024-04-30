@@ -727,8 +727,9 @@ class CameraState:
 
         # TODO: can i switch to looking this up and only changing when an event ends?
         # maintain best objects
-        camera_activity = {
+        camera_activity: dict[str, list[any]] = {
             "motion": len(motion_boxes) > 0,
+            "objects": [],
         }
 
         for obj in tracked_objects.values():
@@ -747,13 +748,9 @@ class CameraState:
                 ):
                     label = obj.obj_data["sub_label"]
 
-                if label not in camera_activity:
-                    camera_activity[label] = {
-                        "active": 1 if active else 0,
-                        "stationary": 1 if not active else 0,
-                    }
-                else:
-                    camera_activity[label]["active" if active else "stationary"] += 1
+                camera_activity["objects"].append(
+                    {"id": obj.obj_data["id"], "label": label, "stationary": not active}
+                )
 
             # if the object's thumbnail is not from the current frame
             if obj.false_positive or obj.thumbnail_data["frame_time"] != frame_time:
