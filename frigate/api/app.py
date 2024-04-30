@@ -164,6 +164,7 @@ def config():
             camera_dict["zones"][zone_name]["color"] = zone.color
 
     config["plus"] = {"enabled": current_app.plus_api.is_active()}
+    config["model"]["colormap"] = config_obj.model.colormap
 
     for detector_config in config["detectors"].values():
         detector_config["model"]["labelmap"] = (

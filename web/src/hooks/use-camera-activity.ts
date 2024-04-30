@@ -5,10 +5,11 @@ import {
 } from "@/api/ws";
 import { CameraConfig } from "@/types/frigateConfig";
 import { MotionData, ReviewSegment } from "@/types/review";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTimelineUtils } from "./use-timeline-utils";
 import { ObjectType } from "@/types/ws";
 import useDeepMemo from "./use-deep-memo";
+import { isEqual } from "lodash";
 
 type useCameraActivityReturn = {
   activeTracking: boolean;
@@ -44,12 +45,21 @@ export function useCameraActivity(
   const { payload: event } = useFrigateEvents();
   const updatedEvent = useDeepMemo(event);
 
+  const handleSetObjects = useCallback(
+    (newObjects: ObjectType[]) => {
+      if (!isEqual(objects, newObjects)) {
+        setObjects(newObjects);
+      }
+    },
+    [objects],
+  );
+
   useEffect(() => {
     if (!updatedEvent) {
       return;
     }
 
-    if (updatedEvent.after.camera != camera.name) {
+    if (updatedEvent.after.camera !== camera.name) {
       return;
     }
 
@@ -57,40 +67,42 @@ export function useCameraActivity(
       (obj) => obj.id === updatedEvent.after.id,
     );
 
-    if (updatedEvent.type == "end") {
-      if (updatedEventIndex != -1) {
-        const newActiveObjects = [...objects];
-        newActiveObjects.splice(updatedEventIndex, 1);
-        setObjects(newActiveObjects);
+    let newObjects: ObjectType[] = [...objects];
+
+    if (updatedEvent.type === "end") {
+      if (updatedEventIndex !== -1) {
+        newObjects.splice(updatedEventIndex, 1);
       }
     } else {
-      if (updatedEventIndex == -1) {
+      if (updatedEventIndex === -1) {
         // add unknown updatedEvent to list if not stationary
         if (!updatedEvent.after.stationary) {
           const newActiveObject: ObjectType = {
             id: updatedEvent.after.id,
             label: updatedEvent.after.label,
             stationary: updatedEvent.after.stationary,
+            area: updatedEvent.after.area,
+            ratio: updatedEvent.after.ratio,
+            score: updatedEvent.after.score,
           };
-          const newActiveObjects = [...objects, newActiveObject];
-          setObjects(newActiveObjects);
+          newObjects = [...objects, newActiveObject];
         }
       } else {
-        const newObjects = [...objects];
         newObjects[updatedEventIndex].label =
           updatedEvent.after.sub_label ?? updatedEvent.after.label;
         newObjects[updatedEventIndex].stationary =
           updatedEvent.after.stationary;
-        setObjects(newObjects);
       }
     }
-  }, [camera, updatedEvent, objects]);
+
+    handleSetObjects(newObjects);
+  }, [camera, updatedEvent, objects, handleSetObjects]);
 
   return {
     activeTracking: hasActiveObjects,
     activeMotion: detectingMotion
-      ? detectingMotion == "ON"
-      : initialCameraState?.motion == true,
+      ? detectingMotion === "ON"
+      : initialCameraState?.motion === true,
     objects,
   };
 }
