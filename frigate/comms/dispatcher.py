@@ -126,7 +126,7 @@ class Dispatcher:
                 ReviewSegment.end_time == None
             ).execute()
         elif topic == UPDATE_CAMERA_ACTIVITY:
-            logger.error(f"we got the incoming data {payload}")
+            self.camera_activity = payload
         else:
             self.publish(topic, payload, retain=False)
 
