@@ -42,6 +42,7 @@ import Logo from "@/components/Logo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FaVideo } from "react-icons/fa";
 import { VideoResolutionType } from "@/types/live";
+import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
 
 const SEGMENT_DURATION = 30;
 
@@ -215,19 +216,19 @@ export function RecordingView({
         return undefined;
       }
 
+      if (cam == mainCamera && fullResolution.width && fullResolution.height) {
+        return fullResolution.width / fullResolution.height;
+      }
+
       const camera = config.cameras[cam];
 
       if (!camera) {
         return undefined;
       }
 
-      if (fullResolution.width && fullResolution.height) {
-        return fullResolution.width / fullResolution.height;
-      } else {
-        return camera.detect.width / camera.detect.height;
-      }
+      return camera.detect.width / camera.detect.height;
     },
-    [config, fullResolution],
+    [config, fullResolution, mainCamera],
   );
 
   const mainCameraAspect = useMemo(() => {
@@ -235,9 +236,9 @@ export function RecordingView({
 
     if (!aspectRatio) {
       return "normal";
-    } else if (aspectRatio > 2) {
+    } else if (aspectRatio > ASPECT_WIDE_LAYOUT) {
       return "wide";
-    } else if (aspectRatio < 16 / 9) {
+    } else if (aspectRatio < ASPECT_VERTICAL_LAYOUT) {
       return "tall";
     } else {
       return "normal";

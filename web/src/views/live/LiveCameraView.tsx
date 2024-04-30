@@ -167,7 +167,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
       if (isPortrait) {
         return "absolute left-2 right-2 top-[50%] -translate-y-[50%]";
       } else {
-        if (aspect > 16 / 9) {
+        if (aspect > 1.5) {
           return "p-2 absolute left-0 top-[50%] -translate-y-[50%]";
         } else {
           return "p-2 absolute top-2 bottom-2 left-[50%] -translate-x-[50%]";
@@ -176,7 +176,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
     }
 
     if (fullscreen) {
-      if (aspect > 16 / 9) {
+      if (aspect > 1.5) {
         return "absolute inset-x-2 top-[50%] -translate-y-[50%]";
       } else {
         return "absolute inset-y-2 left-[50%] -translate-x-[50%]";
