@@ -747,7 +747,14 @@ class CameraState:
                         label = f"{object_type}-verified"
 
                 camera_activity["objects"].append(
-                    {"id": obj.obj_data["id"], "label": label, "stationary": not active}
+                    {
+                        "id": obj.obj_data["id"],
+                        "label": label,
+                        "stationary": not active,
+                        "area": obj.obj_data["area"],
+                        "ratio": obj.obj_data["ratio"],
+                        "score": obj.obj_data["score"],
+                    }
                 )
 
             # if the object's thumbnail is not from the current frame
