@@ -147,15 +147,15 @@ export default function ObjectSettings({
                       key={param}
                       className="flex flex-row w-full justify-between items-center"
                     >
-                      <div className="flex flex-col">
+                      <div className="flex flex-col mb-2">
                         <Label
-                          className="text-sm w-full text-primary capitalize cursor-pointer"
+                          className="w-full text-primary capitalize cursor-pointer mb-2"
                           htmlFor={param}
                         >
                           {title}
                         </Label>
-                        <div className="text-xs">
-                          <em>{description}</em>
+                        <div className="text-xs text-muted-foreground">
+                          {description}
                         </div>
                       </div>
                       <Switch
