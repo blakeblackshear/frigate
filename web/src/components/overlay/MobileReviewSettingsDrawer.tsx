@@ -7,7 +7,7 @@ import { ExportContent } from "./ExportDialog";
 import { ExportMode } from "@/types/filter";
 import ReviewActivityCalendar from "./ReviewActivityCalendar";
 import { SelectSeparator } from "../ui/select";
-import { ReviewFilter, ReviewSummary } from "@/types/review";
+import { ReviewFilter, ReviewSeverity, ReviewSummary } from "@/types/review";
 import { getEndOfDayTimestamp } from "@/utils/dateUtil";
 import { GeneralFilterContent } from "../filter/ReviewFilterGroup";
 import useSWR from "swr";
