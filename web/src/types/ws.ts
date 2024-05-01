@@ -48,6 +48,7 @@ export type ObjectType = {
   area: number;
   ratio: number;
   score: number;
+  sub_label: string;
 };
 
 export interface FrigateCameraState {

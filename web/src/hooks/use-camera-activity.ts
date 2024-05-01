@@ -84,6 +84,7 @@ export function useCameraActivity(
             area: updatedEvent.after.area,
             ratio: updatedEvent.after.ratio,
             score: updatedEvent.after.score,
+            sub_label: updatedEvent.after.sub_label?.[0] ?? "",
           };
           newObjects = [...objects, newActiveObject];
         }
