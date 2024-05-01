@@ -216,7 +216,10 @@ function ObjectList(objects?: ObjectType[]) {
                       <p className="text-sm mb-1.5 text-primary-variant">
                         Score
                       </p>
-                      {(obj.score * 100).toFixed(1).toString()}%
+                      {obj.score
+                        ? (obj.score * 100).toFixed(1).toString()
+                        : "-"}
+                      %
                     </div>
                   </div>
                   <div className="mr-2 text-md w-1/3">
@@ -224,7 +227,7 @@ function ObjectList(objects?: ObjectType[]) {
                       <p className="text-sm mb-1.5 text-primary-variant">
                         Ratio
                       </p>
-                      {obj.ratio.toFixed(2).toString()}
+                      {obj.ratio ? obj.ratio.toFixed(2).toString() : "-"}
                     </div>
                   </div>
                   <div className="mr-2 text-md w-1/3">
@@ -232,7 +235,7 @@ function ObjectList(objects?: ObjectType[]) {
                       <p className="text-sm mb-1.5 text-primary-variant">
                         Area
                       </p>
-                      {obj.area.toString()}
+                      {obj.area ? obj.area.toString() : "-"}
                     </div>
                   </div>
                 </div>

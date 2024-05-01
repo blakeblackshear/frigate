@@ -32,7 +32,7 @@ export function useCameraActivity(
     if (updatedCameraState) {
       setObjects(updatedCameraState.objects);
     }
-  }, [updatedCameraState]);
+  }, [updatedCameraState, camera]);
 
   // handle camera activity
 
