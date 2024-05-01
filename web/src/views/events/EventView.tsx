@@ -270,6 +270,7 @@ export default function EventView({
                 ? ["cameras", "date", "motionOnly"]
                 : ["cameras", "reviewed", "date", "general"]
             }
+            currentSeverity={severityToggle}
             reviewSummary={reviewSummary}
             filter={filter}
             onUpdateFilter={updateFilter}
@@ -370,7 +371,13 @@ function DetectionReview({
       return null;
     }
 
-    const current = reviewItems[severity];
+    let current;
+
+    if (filter?.showAll) {
+      current = reviewItems.all;
+    } else {
+      current = reviewItems[severity];
+    }
 
     if (!current || current.length == 0) {
       return [];

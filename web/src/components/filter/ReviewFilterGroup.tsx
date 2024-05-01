@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { ReviewFilter, ReviewSummary } from "@/types/review";
+import { ReviewFilter, ReviewSeverity, ReviewSummary } from "@/types/review";
 import { getEndOfDayTimestamp } from "@/utils/dateUtil";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import {
@@ -49,19 +49,21 @@ const DEFAULT_REVIEW_FILTERS: ReviewFilters[] = [
 
 type ReviewFilterGroupProps = {
   filters?: ReviewFilters[];
+  currentSeverity?: ReviewSeverity;
   reviewSummary?: ReviewSummary;
   filter?: ReviewFilter;
-  onUpdateFilter: (filter: ReviewFilter) => void;
   motionOnly: boolean;
+  onUpdateFilter: (filter: ReviewFilter) => void;
   setMotionOnly: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export default function ReviewFilterGroup({
   filters = DEFAULT_REVIEW_FILTERS,
+  currentSeverity,
   reviewSummary,
   filter,
-  onUpdateFilter,
   motionOnly,
+  onUpdateFilter,
   setMotionOnly,
 }: ReviewFilterGroupProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -179,6 +181,11 @@ export default function ReviewFilterGroup({
         <GeneralFilterButton
           allLabels={filterValues.labels}
           selectedLabels={filter?.labels}
+          currentSeverity={currentSeverity}
+          showAll={filter?.showAll == true}
+          setShowAll={(showAll) => {
+            onUpdateFilter({ ...filter, showAll });
+          }}
           updateLabelFilter={(newLabels) => {
             onUpdateFilter({ ...filter, labels: newLabels });
           }}
@@ -188,6 +195,7 @@ export default function ReviewFilterGroup({
         <MobileReviewSettingsDrawer
           features={mobileSettingsFeatures}
           filter={filter}
+          currentSeverity={currentSeverity}
           reviewSummary={reviewSummary}
           onUpdateFilter={onUpdateFilter}
           // not applicable as exports are not used
@@ -477,11 +485,17 @@ function CalendarFilterButton({
 type GeneralFilterButtonProps = {
   allLabels: string[];
   selectedLabels: string[] | undefined;
+  currentSeverity?: ReviewSeverity;
+  showAll: boolean;
+  setShowAll: (showAll: boolean) => void;
   updateLabelFilter: (labels: string[] | undefined) => void;
 };
 function GeneralFilterButton({
   allLabels,
   selectedLabels,
+  currentSeverity,
+  showAll,
+  setShowAll,
   updateLabelFilter,
 }: GeneralFilterButtonProps) {
   const [open, setOpen] = useState(false);
@@ -510,6 +524,9 @@ function GeneralFilterButton({
       allLabels={allLabels}
       selectedLabels={selectedLabels}
       currentLabels={currentLabels}
+      currentSeverity={currentSeverity}
+      showAll={showAll}
+      setShowAll={setShowAll}
       updateLabelFilter={updateLabelFilter}
       setCurrentLabels={setCurrentLabels}
       onClose={() => setOpen(false)}
@@ -557,6 +574,9 @@ type GeneralFilterContentProps = {
   allLabels: string[];
   selectedLabels: string[] | undefined;
   currentLabels: string[] | undefined;
+  currentSeverity?: ReviewSeverity;
+  showAll?: boolean;
+  setShowAll?: (showAll: boolean) => void;
   updateLabelFilter: (labels: string[] | undefined) => void;
   setCurrentLabels: (labels: string[] | undefined) => void;
   onClose: () => void;
@@ -565,6 +585,9 @@ export function GeneralFilterContent({
   allLabels,
   selectedLabels,
   currentLabels,
+  currentSeverity,
+  showAll,
+  setShowAll,
   updateLabelFilter,
   setCurrentLabels,
   onClose,
@@ -572,6 +595,25 @@ export function GeneralFilterContent({
   return (
     <>
       <div className="h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
+        {currentSeverity && setShowAll && (
+          <div className="my-2.5 flex flex-col gap-2.5">
+            <FilterSwitch
+              label="Alerts"
+              disabled={currentSeverity == "alert"}
+              isChecked={currentSeverity == "alert" ? true : showAll == true}
+              onCheckedChange={setShowAll}
+            />
+            <FilterSwitch
+              label="Detections"
+              disabled={currentSeverity == "detection"}
+              isChecked={
+                currentSeverity == "detection" ? true : showAll == true
+              }
+              onCheckedChange={setShowAll}
+            />
+            <DropdownMenuSeparator />
+          </div>
+        )}
         <div className="flex justify-between items-center my-2.5">
           <Label
             className="mx-2 text-primary cursor-pointer"
