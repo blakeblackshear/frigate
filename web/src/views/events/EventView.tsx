@@ -520,7 +520,7 @@ function DetectionReview({
     }
 
     const element = contentRef.current?.querySelector(
-      `[data-start="${startTime}"]`,
+      `[data-start="${startTime + REVIEW_PADDING}"]`,
     );
     if (element) {
       scrollIntoView(element, {
