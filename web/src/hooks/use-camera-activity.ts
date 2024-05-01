@@ -3,7 +3,7 @@ import {
   useInitialCameraState,
   useMotionActivity,
 } from "@/api/ws";
-import { CameraConfig } from "@/types/frigateConfig";
+import { ATTRIBUTE_LABELS, CameraConfig } from "@/types/frigateConfig";
 import { MotionData, ReviewSegment } from "@/types/review";
 import { useEffect, useMemo, useState } from "react";
 import { useTimelineUtils } from "./use-timeline-utils";
@@ -29,6 +29,7 @@ export function useCameraActivity(
 
   useEffect(() => {
     if (updatedCameraState) {
+      console.log(`the initial objects are ${JSON.stringify(updatedCameraState.objects)}`)
       setObjects(updatedCameraState.objects);
     }
   }, [updatedCameraState]);
@@ -77,8 +78,20 @@ export function useCameraActivity(
         }
       } else {
         const newObjects = [...objects];
-        newObjects[updatedEventIndex].label =
-          updatedEvent.after.sub_label ?? updatedEvent.after.label;
+
+        let label = updatedEvent.after.label;
+
+        if (updatedEvent.after.sub_label) {
+          const sub_label = updatedEvent.after.sub_label[0];
+
+          if (ATTRIBUTE_LABELS.includes(sub_label)) {
+            label = sub_label;
+          } else {
+            label = `${label}-verified`;
+          }
+        }
+
+        newObjects[updatedEventIndex].label = label;
         newObjects[updatedEventIndex].stationary =
           updatedEvent.after.stationary;
         setObjects(newObjects);

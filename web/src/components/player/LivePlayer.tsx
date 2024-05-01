@@ -12,7 +12,6 @@ import { LivePlayerMode, VideoResolutionType } from "@/types/live";
 import useCameraLiveMode from "@/hooks/use-camera-live-mode";
 import { getIconForLabel } from "@/utils/iconUtil";
 import Chip from "../indicators/Chip";
-import { isMobile } from "react-device-detect";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
 
 type LivePlayerProps = {
@@ -44,8 +43,6 @@ export default function LivePlayer({
   onClick,
   setFullResolution,
 }: LivePlayerProps) {
-  const [cameraHovered, setCameraHovered] = useState(false);
-
   // camera activity
 
   const { activeMotion, activeTracking, objects } =
@@ -159,8 +156,6 @@ export default function LivePlayer({
           : "outline-0 outline-background"
       } transition-all duration-500 ${className}`}
       onClick={onClick}
-      onMouseEnter={() => setCameraHovered(true)}
-      onMouseLeave={() => setCameraHovered(false)}
     >
       <div className="absolute top-0 inset-x-0 rounded-lg md:rounded-2xl z-10 w-full h-[30%] bg-gradient-to-b from-black/20 to-transparent pointer-events-none"></div>
       <div className="absolute bottom-0 inset-x-0 rounded-lg md:rounded-2xl z-10 w-full h-[10%] bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
@@ -173,7 +168,7 @@ export default function LivePlayer({
               <TooltipTrigger asChild>
                 <div className="mx-3 pb-1 text-white text-sm">
                   <Chip
-                    className={`flex items-start justify-between space-x-1 ${cameraHovered || isMobile ? "" : "hidden"} bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 z-0`}
+                    className={`flex items-start justify-between space-x-1 bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 z-0`}
                   >
                     {[
                       ...new Set([

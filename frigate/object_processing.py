@@ -740,11 +740,11 @@ class CameraState:
             if not obj.false_positive:
                 label = object_type
 
-                if (
-                    obj.obj_data.get("sub_label")
-                    and obj.obj_data.get("sub_label")[0] in ALL_ATTRIBUTE_LABELS
-                ):
-                    label = obj.obj_data["sub_label"]
+                if obj.obj_data.get("sub_label"):
+                    if obj.obj_data.get("sub_label")[0] in ALL_ATTRIBUTE_LABELS:
+                        label = obj.obj_data["sub_label"][0]
+                    else:
+                        label = f"{object_type}-verified"
 
                 camera_activity["objects"].append(
                     {"id": obj.obj_data["id"], "label": label, "stationary": not active}

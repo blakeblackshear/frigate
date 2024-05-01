@@ -141,7 +141,7 @@ export default function SubmitPlus() {
             open={upload != undefined}
             onOpenChange={(open) => (!open ? setUpload(undefined) : null)}
           >
-            <DialogContent className="md:max-w-4xl">
+            <DialogContent className="md:max-w-2xl lg:max-w-3xl xl:max-w-4xl">
               <DialogHeader>
                 <DialogTitle>Submit To Frigate+</DialogTitle>
                 <DialogDescription>
