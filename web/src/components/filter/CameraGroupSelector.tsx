@@ -485,7 +485,7 @@ export function CameraGroupEdit({
           ? currentGroups.length + 1
           : editingGroup[1].order;
 
-      const orderQuery = `camera_groups.${values.name}.order=${order}`;
+      const orderQuery = `camera_groups.${values.name}.order=${+order}`;
       const iconQuery = `camera_groups.${values.name}.icon=${values.icon}`;
       const cameraQueries = values.cameras
         .map((cam) => `&camera_groups.${values.name}.cameras=${cam}`)
