@@ -575,8 +575,8 @@ type GeneralFilterContentProps = {
   selectedLabels: string[] | undefined;
   currentLabels: string[] | undefined;
   currentSeverity?: ReviewSeverity;
-  showAll: boolean;
-  setShowAll: (showAll: boolean) => void;
+  showAll?: boolean;
+  setShowAll?: (showAll: boolean) => void;
   updateLabelFilter: (labels: string[] | undefined) => void;
   setCurrentLabels: (labels: string[] | undefined) => void;
   onClose: () => void;
@@ -595,18 +595,20 @@ export function GeneralFilterContent({
   return (
     <>
       <div className="h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
-        {currentSeverity && (
+        {currentSeverity && setShowAll && (
           <div className="my-2.5 flex flex-col gap-2.5">
             <FilterSwitch
               label="Alerts"
               disabled={currentSeverity == "alert"}
-              isChecked={currentSeverity == "alert" ? true : showAll}
+              isChecked={currentSeverity == "alert" ? true : showAll == true}
               onCheckedChange={setShowAll}
             />
             <FilterSwitch
               label="Detections"
               disabled={currentSeverity == "detection"}
-              isChecked={currentSeverity == "detection" ? true : showAll}
+              isChecked={
+                currentSeverity == "detection" ? true : showAll == true
+              }
               onCheckedChange={setShowAll}
             />
             <DropdownMenuSeparator />
