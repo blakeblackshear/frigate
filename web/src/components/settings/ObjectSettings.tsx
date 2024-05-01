@@ -34,7 +34,7 @@ export default function ObjectSettings({
     { param: "bbox", title: "Bounding boxes" },
     { param: "timestamp", title: "Timestamp" },
     { param: "zones", title: "Zones" },
-    { param: "mask", title: "Masks" },
+    { param: "mask", title: "Motion masks" },
     { param: "motion", title: "Motion boxes" },
     { param: "regions", title: "Regions" },
   ];
