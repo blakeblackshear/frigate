@@ -518,7 +518,7 @@ class ZoneConfig(BaseModel):
         ge=0,
         title="Number of seconds that an object must loiter to be considered in the zone.",
     )
-    objects: List[str] = Field(
+    objects: Union[str, List[str]] = Field(
         default_factory=list,
         title="List of objects that can trigger the zone.",
     )
@@ -616,7 +616,7 @@ class AlertsConfig(FrigateBaseModel):
     labels: List[str] = Field(
         default=DEFAULT_ALERT_OBJECTS, title="Labels to create alerts for."
     )
-    required_zones: List[str] = Field(
+    required_zones: Union[str, List[str]] = Field(
         default_factory=list,
         title="List of required zones to be entered in order to save the event as an alert.",
     )
@@ -636,7 +636,7 @@ class DetectionsConfig(FrigateBaseModel):
     labels: Optional[List[str]] = Field(
         default=None, title="Labels to create detections for."
     )
-    required_zones: List[str] = Field(
+    required_zones: Union[str, List[str]] = Field(
         default_factory=list,
         title="List of required zones to be entered in order to save the event as a detection.",
     )
