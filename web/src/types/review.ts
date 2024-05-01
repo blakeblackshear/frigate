@@ -26,6 +26,7 @@ export type ReviewFilter = {
   before?: number;
   after?: number;
   showReviewed?: 0 | 1;
+  showAll?: boolean;
 };
 
 type ReviewSummaryDay = {
