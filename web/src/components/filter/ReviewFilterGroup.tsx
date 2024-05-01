@@ -195,6 +195,7 @@ export default function ReviewFilterGroup({
         <MobileReviewSettingsDrawer
           features={mobileSettingsFeatures}
           filter={filter}
+          currentSeverity={currentSeverity}
           reviewSummary={reviewSummary}
           onUpdateFilter={onUpdateFilter}
           // not applicable as exports are not used
