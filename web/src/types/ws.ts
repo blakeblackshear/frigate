@@ -45,6 +45,10 @@ export type ObjectType = {
   id: string;
   label: string;
   stationary: boolean;
+  area: number;
+  ratio: number;
+  score: number;
+  sub_label: string;
 };
 
 export interface FrigateCameraState {

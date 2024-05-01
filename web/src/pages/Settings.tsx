@@ -37,9 +37,9 @@ import scrollIntoView from "scroll-into-view-if-needed";
 export default function Settings() {
   const settingsViews = [
     "general",
-    "objects",
     "masks / zones",
     "motion tuner",
+    "debug",
   ] as const;
 
   type SettingsType = (typeof settingsViews)[number];
@@ -135,7 +135,7 @@ export default function Settings() {
             <ScrollBar orientation="horizontal" className="h-0" />
           </div>
         </ScrollArea>
-        {(page == "objects" ||
+        {(page == "debug" ||
           page == "masks / zones" ||
           page == "motion tuner") && (
           <div className="flex items-center gap-2 ml-2 flex-shrink-0">
@@ -155,9 +155,7 @@ export default function Settings() {
       </div>
       <div className="mt-2 flex flex-col items-start w-full h-full md:h-dvh md:pb-24">
         {page == "general" && <General />}
-        {page == "objects" && (
-          <ObjectSettings selectedCamera={selectedCamera} />
-        )}
+        {page == "debug" && <ObjectSettings selectedCamera={selectedCamera} />}
         {page == "masks / zones" && (
           <MasksAndZones
             selectedCamera={selectedCamera}
