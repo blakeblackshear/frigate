@@ -739,12 +739,14 @@ class CameraState:
 
             if not obj.false_positive:
                 label = object_type
+                sub_label = None
 
                 if obj.obj_data.get("sub_label"):
                     if obj.obj_data.get("sub_label")[0] in ALL_ATTRIBUTE_LABELS:
                         label = obj.obj_data["sub_label"][0]
                     else:
                         label = f"{object_type}-verified"
+                        sub_label = obj.obj_data["sub_label"][0]
 
                 camera_activity["objects"].append(
                     {
@@ -754,6 +756,7 @@ class CameraState:
                         "area": obj.obj_data["area"],
                         "ratio": obj.obj_data["ratio"],
                         "score": obj.obj_data["score"],
+                        "sub_label": sub_label,
                     }
                 )
 
