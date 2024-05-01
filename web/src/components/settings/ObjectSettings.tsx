@@ -31,12 +31,37 @@ export default function ObjectSettings({
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const DEBUG_OPTIONS = [
-    { param: "bbox", title: "Bounding boxes" },
-    { param: "timestamp", title: "Timestamp" },
-    { param: "zones", title: "Zones" },
-    { param: "mask", title: "Motion masks" },
-    { param: "motion", title: "Motion boxes" },
-    { param: "regions", title: "Regions" },
+    {
+      param: "bbox",
+      title: "Bounding boxes",
+      description: "Show bounding boxes around detected objects",
+    },
+    {
+      param: "timestamp",
+      title: "Timestamp",
+      description: "Overlay a timestamp on the image",
+    },
+    {
+      param: "zones",
+      title: "Zones",
+      description: "Show an outline of any defined zones",
+    },
+    {
+      param: "mask",
+      title: "Motion masks",
+      description: "Show motion mask polygons",
+    },
+    {
+      param: "motion",
+      title: "Motion boxes",
+      description: "Show boxes around areas where motion is detected",
+    },
+    {
+      param: "regions",
+      title: "Regions",
+      description:
+        "Show a box of the region of interest sent to the object detector",
+    },
   ];
 
   const [options, setOptions] = usePersistence<Options>(
@@ -117,17 +142,22 @@ export default function ObjectSettings({
             <div className="flex flex-col w-full space-y-6">
               <div className="mt-2 space-y-6">
                 <div className="my-2.5 flex flex-col gap-2.5">
-                  {DEBUG_OPTIONS.map(({ param, title }) => (
+                  {DEBUG_OPTIONS.map(({ param, title, description }) => (
                     <div
                       key={param}
-                      className="flex justify-between items-center"
+                      className="flex flex-row w-full justify-between items-center"
                     >
-                      <Label
-                        className="w-full text-primary capitalize cursor-pointer"
-                        htmlFor={param}
-                      >
-                        {title}
-                      </Label>
+                      <div className="flex flex-col">
+                        <Label
+                          className="text-sm w-full text-primary capitalize cursor-pointer"
+                          htmlFor={param}
+                        >
+                          {title}
+                        </Label>
+                        <div className="text-xs">
+                          <em>{description}</em>
+                        </div>
+                      </div>
                       <Switch
                         key={param}
                         className="ml-1"
