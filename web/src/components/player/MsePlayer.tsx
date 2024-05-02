@@ -215,8 +215,7 @@ function MSEPlayer({
             }
           }
         } catch (e) {
-          // eslint-disable-next-line no-console
-          console.debug(e);
+          // no-op
         }
       });
 
@@ -233,8 +232,7 @@ function MSEPlayer({
           try {
             sb?.appendBuffer(data);
           } catch (e) {
-            // eslint-disable-next-line no-console
-            console.debug(e);
+            // no-op
           }
         }
       };

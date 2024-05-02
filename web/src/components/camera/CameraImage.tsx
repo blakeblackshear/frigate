@@ -2,6 +2,7 @@ import { useApiHost } from "@/api";
 import { useEffect, useRef, useState } from "react";
 import useSWR from "swr";
 import ActivityIndicator from "../indicators/activity-indicator";
+import { useResizeObserver } from "@/hooks/resize-observer";
 
 type CameraImageProps = {
   className?: string;
@@ -24,6 +25,7 @@ export default function CameraImage({
 
   const { name } = config ? config.cameras[camera] : "";
   const enabled = config ? config.cameras[camera].enabled : "True";
+  const [isPortraitImage, setIsPortraitImage] = useState(false);
 
   useEffect(() => {
     if (!config || !imgRef.current) {
@@ -35,14 +37,24 @@ export default function CameraImage({
     }`;
   }, [apiHost, name, imgRef, searchParams, config]);
 
+  const [{ width: containerWidth, height: containerHeight }] =
+    useResizeObserver(containerRef);
+
   return (
     <div className={className} ref={containerRef}>
       {enabled ? (
         <img
           ref={imgRef}
-          className="object-contain rounded-lg md:rounded-2xl"
+          className={`object-contain ${isPortraitImage ? "h-full w-auto" : "w-full h-auto"} rounded-lg md:rounded-2xl`}
           onLoad={() => {
             setHasLoaded(true);
+
+            if (imgRef.current) {
+              const { naturalHeight, naturalWidth } = imgRef.current;
+              setIsPortraitImage(
+                naturalWidth / naturalHeight < containerWidth / containerHeight,
+              );
+            }
 
             if (onload) {
               onload();
