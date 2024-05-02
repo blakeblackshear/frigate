@@ -9,6 +9,7 @@ import {
 import type { KonvaEventObject } from "konva/lib/Node";
 import Konva from "konva";
 import { Vector2d } from "konva/lib/types";
+import { isMobileOnly } from "react-device-detect";
 
 type PolygonDrawerProps = {
   points: number[][];
@@ -45,7 +46,7 @@ export default function PolygonDrawer({
   handleMouseOverAnyPoint,
   handleMouseOutAnyPoint,
 }: PolygonDrawerProps) {
-  const vertexRadius = 6;
+  const vertexRadius = isMobileOnly ? 12 : 6;
   const flattenedPoints = useMemo(() => flattenPoints(points), [points]);
   const [stage, setStage] = useState<Konva.Stage>();
   const [minMaxX, setMinMaxX] = useState([0, 0]);
