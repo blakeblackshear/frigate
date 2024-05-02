@@ -137,10 +137,15 @@ export default function HlsVideoPlayer({
         className="absolute bottom-5 left-1/2 -translate-x-1/2 z-50"
         video={videoRef.current}
         isPlaying={isPlaying}
-        show={visible && controls}
+        show={visible && (controls || controlsOpen)}
         muted={muted}
         volume={volume}
-        controlsOpen={controlsOpen}
+        features={{
+          volume: true,
+          seek: true,
+          playbackRate: true,
+          plusUpload: true,
+        }}
         setControlsOpen={setControlsOpen}
         setMuted={setMuted}
         playbackRate={videoRef.current?.playbackRate ?? 1}

@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { isSafari } from "react-device-detect";
 import { LuPause, LuPlay } from "react-icons/lu";
 import {
@@ -18,17 +18,30 @@ import {
 } from "react-icons/md";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { VolumeSlider } from "../ui/slider";
+import FrigatePlusIcon from "../icons/FrigatePlusIcon";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../ui/alert-dialog";
 
 type VideoControls = {
   volume?: boolean;
   seek?: boolean;
   playbackRate?: boolean;
+  plusUpload?: boolean;
 };
 
 const CONTROLS_DEFAULT: VideoControls = {
   volume: true,
   seek: true,
   playbackRate: true,
+  plusUpload: false,
 };
 const PLAYBACK_RATE_DEFAULT = isSafari ? [0.5, 1, 2] : [0.5, 1, 2, 4, 8, 16];
 
@@ -40,7 +53,6 @@ type VideoControlsProps = {
   show: boolean;
   muted?: boolean;
   volume?: number;
-  controlsOpen?: boolean;
   playbackRates?: number[];
   playbackRate: number;
   hotKeys?: boolean;
@@ -58,7 +70,6 @@ export default function VideoControls({
   show,
   muted,
   volume,
-  controlsOpen,
   playbackRates = PLAYBACK_RATE_DEFAULT,
   playbackRate,
   hotKeys = true,
@@ -189,7 +200,6 @@ export default function VideoControls({
       )}
       {features.playbackRate && (
         <DropdownMenu
-          open={controlsOpen == true}
           onOpenChange={(open) => {
             if (setControlsOpen) {
               setControlsOpen(open);
@@ -214,6 +224,81 @@ export default function VideoControls({
           </DropdownMenuContent>
         </DropdownMenu>
       )}
+      {features.plusUpload && (
+        <FrigatePlusUploadButton
+          video={video}
+          onClose={() => {
+            if (setControlsOpen) {
+              setControlsOpen(false);
+            }
+          }}
+          onOpen={() => {
+            onPlayPause(false);
+
+            if (setControlsOpen) {
+              setControlsOpen(true);
+            }
+          }}
+        />
+      )}
     </div>
+  );
+}
+
+type FrigatePlusUploadButtonProps = {
+  video?: HTMLVideoElement | null;
+  onOpen: () => void;
+  onClose: () => void;
+};
+function FrigatePlusUploadButton({
+  video,
+  onOpen,
+  onClose,
+}: FrigatePlusUploadButtonProps) {
+  const [videoImg, setVideoImg] = useState<string>();
+
+  return (
+    <AlertDialog
+      onOpenChange={(open) => {
+        if (!open) {
+          onClose();
+        }
+      }}
+    >
+      <AlertDialogTrigger asChild>
+        <FrigatePlusIcon
+          className="size-5 cursor-pointer"
+          onClick={() => {
+            onOpen();
+
+            if (video) {
+              const videoSize = [video.clientWidth, video.clientHeight];
+              const canvas = document.createElement("canvas");
+              canvas.width = videoSize[0];
+              canvas.height = videoSize[1];
+
+              const context = canvas?.getContext("2d");
+
+              if (context) {
+                context.drawImage(video, 0, 0, videoSize[0], videoSize[1]);
+                setVideoImg(canvas.toDataURL("image/webp"));
+              }
+            }
+          }}
+        />
+      </AlertDialogTrigger>
+      <AlertDialogContent className="md:max-w-[80%]">
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            Submit this frame to Frigate Plus?
+          </AlertDialogTitle>
+        </AlertDialogHeader>
+        <img className="w-full object-contain" src={videoImg} />
+        <AlertDialogFooter>
+          <AlertDialogAction>Submit</AlertDialogAction>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

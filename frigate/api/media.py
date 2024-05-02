@@ -7,7 +7,6 @@ import os
 import subprocess as sp
 import time
 from datetime import datetime, timedelta, timezone
-from io import BytesIO
 from urllib.parse import unquote
 
 import cv2
@@ -15,7 +14,6 @@ import numpy as np
 import pytz
 from flask import Blueprint, Response, current_app, jsonify, make_response, request
 from peewee import DoesNotExist, fn
-from PIL import Image
 from tzlocal import get_localzone_name
 from werkzeug.utils import secure_filename
 
