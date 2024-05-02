@@ -2,6 +2,7 @@ import { useApiHost } from "@/api";
 import { useEffect, useRef, useState } from "react";
 import useSWR from "swr";
 import ActivityIndicator from "../indicators/activity-indicator";
+import { useResizeObserver } from "@/hooks/resize-observer";
 
 type CameraImageProps = {
   className?: string;
@@ -36,6 +37,9 @@ export default function CameraImage({
     }`;
   }, [apiHost, name, imgRef, searchParams, config]);
 
+  const [{ width: containerWidth, height: containerHeight }] =
+    useResizeObserver(containerRef);
+
   return (
     <div className={className} ref={containerRef}>
       {enabled ? (
@@ -47,7 +51,9 @@ export default function CameraImage({
 
             if (imgRef.current) {
               const { naturalHeight, naturalWidth } = imgRef.current;
-              setIsPortraitImage(naturalHeight > naturalWidth);
+              setIsPortraitImage(
+                naturalWidth / naturalHeight < containerWidth / containerHeight,
+              );
             }
 
             if (onload) {
