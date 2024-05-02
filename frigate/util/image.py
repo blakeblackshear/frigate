@@ -2,6 +2,7 @@
 
 import datetime
 import logging
+import subprocess as sp
 from abc import ABC, abstractmethod
 from multiprocessing import shared_memory
 from string import printable
@@ -360,14 +361,17 @@ def yuv_crop_and_resize(frame, region, height=None):
     # copy u2
     yuv_cropped_frame[
         size + uv_channel_y_offset : size + uv_channel_y_offset + uv_crop_height,
-        size // 2 + uv_channel_x_offset : size // 2
+        size // 2
+        + uv_channel_x_offset : size // 2
         + uv_channel_x_offset
         + uv_crop_width,
     ] = frame[u2[1] : u2[3], u2[0] : u2[2]]
 
     # copy v1
     yuv_cropped_frame[
-        size + size // 4 + uv_channel_y_offset : size
+        size
+        + size // 4
+        + uv_channel_y_offset : size
         + size // 4
         + uv_channel_y_offset
         + uv_crop_height,
@@ -376,11 +380,14 @@ def yuv_crop_and_resize(frame, region, height=None):
 
     # copy v2
     yuv_cropped_frame[
-        size + size // 4 + uv_channel_y_offset : size
+        size
+        + size // 4
+        + uv_channel_y_offset : size
         + size // 4
         + uv_channel_y_offset
         + uv_crop_height,
-        size // 2 + uv_channel_x_offset : size // 2
+        size // 2
+        + uv_channel_x_offset : size // 2
         + uv_channel_x_offset
         + uv_crop_width,
     ] = frame[v2[1] : v2[3], v2[0] : v2[2]]
@@ -746,3 +753,37 @@ def add_mask(mask: str, mask_img: np.ndarray):
         ]
     )
     cv2.fillPoly(mask_img, pts=[contour], color=(0))
+
+
+def get_image_from_recording(
+    file_path: str, relative_frame_time: float
+) -> Optional[any]:
+    """retrieve a frame from given time in recording file."""
+
+    ffmpeg_cmd = [
+        "ffmpeg",
+        "-hide_banner",
+        "-loglevel",
+        "warning",
+        "-ss",
+        f"00:00:{relative_frame_time}",
+        "-i",
+        file_path,
+        "-frames:v",
+        "1",
+        "-c:v",
+        "png",
+        "-f",
+        "image2pipe",
+        "-",
+    ]
+
+    process = sp.run(
+        ffmpeg_cmd,
+        capture_output=True,
+    )
+
+    if process.returncode == 0:
+        return process.stdout
+    else:
+        return None
