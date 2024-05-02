@@ -45,11 +45,12 @@ export default function CameraImage({
           onLoad={() => {
             setHasLoaded(true);
 
+            if (imgRef.current) {
+              const { naturalHeight, naturalWidth } = imgRef.current;
+              setIsPortraitImage(naturalHeight > naturalWidth);
+            }
+
             if (onload) {
-              if (imgRef.current) {
-                const { naturalHeight, naturalWidth } = imgRef.current;
-                setIsPortraitImage(naturalHeight > naturalWidth);
-              }
               onload();
             }
           }}
