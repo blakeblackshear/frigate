@@ -975,10 +975,9 @@ function MotionReview({
           playbackRate: true,
         }}
         isPlaying={playing}
-        show={!scrubbing}
+        show={!scrubbing || controlsOpen}
         playbackRates={[4, 8, 12, 16]}
         playbackRate={playbackRate}
-        controlsOpen={controlsOpen}
         setControlsOpen={setControlsOpen}
         onPlayPause={setPlaying}
         onSeek={(diff) => {
