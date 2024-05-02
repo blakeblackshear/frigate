@@ -10,6 +10,10 @@ import { isAndroid, isDesktop, isMobile } from "react-device-detect";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import VideoControls from "./VideoControls";
 import { VideoResolutionType } from "@/types/live";
+import useSWR from "swr";
+import { FrigateConfig } from "@/types/frigateConfig";
+import { AxiosResponse } from "axios";
+import { toast } from "sonner";
 
 // Android native hls does not seek correctly
 const USE_NATIVE_HLS = !isAndroid;
@@ -29,6 +33,7 @@ type HlsVideoPlayerProps = {
   onTimeUpdate?: (time: number) => void;
   onPlaying?: () => void;
   setFullResolution?: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
+  onUploadFrame?: (playTime: number) => Promise<AxiosResponse> | undefined;
 };
 export default function HlsVideoPlayer({
   videoRef,
@@ -40,7 +45,10 @@ export default function HlsVideoPlayer({
   onTimeUpdate,
   onPlaying,
   setFullResolution,
+  onUploadFrame,
 }: HlsVideoPlayerProps) {
+  const { data: config } = useSWR<FrigateConfig>("config");
+
   // playback
 
   const hlsRef = useRef<Hls>();
@@ -144,7 +152,7 @@ export default function HlsVideoPlayer({
           volume: true,
           seek: true,
           playbackRate: true,
-          plusUpload: true,
+          plusUpload: config?.plus?.enabled == true,
         }}
         setControlsOpen={setControlsOpen}
         setMuted={setMuted}
@@ -173,6 +181,21 @@ export default function HlsVideoPlayer({
         onSetPlaybackRate={(rate) =>
           videoRef.current ? (videoRef.current.playbackRate = rate) : null
         }
+        onUploadFrame={async () => {
+          if (videoRef.current && onUploadFrame) {
+            const resp = await onUploadFrame(videoRef.current.currentTime);
+
+            if (resp && resp.status == 200) {
+              toast.success("Successfully submitted frame to Frigate Plus", {
+                position: "top-center",
+              });
+            } else {
+              toast.success("Failed to submit frame to Frigate Plus", {
+                position: "top-center",
+              });
+            }
+          }
+        }}
       />
       <TransformComponent
         wrapperStyle={{

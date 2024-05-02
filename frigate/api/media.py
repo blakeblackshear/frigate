@@ -234,7 +234,7 @@ def get_snapshot_from_recording(camera_name: str, frame_time: str):
         )
 
 
-@MediaBp.route("/<camera_name>/plus/<frame_time>")
+@MediaBp.route("/<camera_name>/plus/<frame_time>", methods=("POST",))
 def submit_recording_snapshot_to_plus(camera_name: str, frame_time: str):
     if camera_name not in current_app.frigate_config.cameras:
         return make_response(

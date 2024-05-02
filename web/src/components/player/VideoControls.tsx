@@ -61,6 +61,7 @@ type VideoControlsProps = {
   onPlayPause: (play: boolean) => void;
   onSeek: (diff: number) => void;
   onSetPlaybackRate: (rate: number) => void;
+  onUploadFrame?: () => void;
 };
 export default function VideoControls({
   className,
@@ -78,6 +79,7 @@ export default function VideoControls({
   onPlayPause,
   onSeek,
   onSetPlaybackRate,
+  onUploadFrame,
 }: VideoControlsProps) {
   const onReplay = useCallback(
     (e: React.MouseEvent<SVGElement>) => {
@@ -224,7 +226,7 @@ export default function VideoControls({
           </DropdownMenuContent>
         </DropdownMenu>
       )}
-      {features.plusUpload && (
+      {features.plusUpload && onUploadFrame && (
         <FrigatePlusUploadButton
           video={video}
           onClose={() => {
@@ -239,6 +241,7 @@ export default function VideoControls({
               setControlsOpen(true);
             }
           }}
+          onUploadFrame={onUploadFrame}
         />
       )}
     </div>
@@ -249,11 +252,13 @@ type FrigatePlusUploadButtonProps = {
   video?: HTMLVideoElement | null;
   onOpen: () => void;
   onClose: () => void;
+  onUploadFrame: () => void;
 };
 function FrigatePlusUploadButton({
   video,
   onOpen,
   onClose,
+  onUploadFrame,
 }: FrigatePlusUploadButtonProps) {
   const [videoImg, setVideoImg] = useState<string>();
 
@@ -295,7 +300,9 @@ function FrigatePlusUploadButton({
         </AlertDialogHeader>
         <img className="w-full object-contain" src={videoImg} />
         <AlertDialogFooter>
-          <AlertDialogAction>Submit</AlertDialogAction>
+          <AlertDialogAction className="bg-selected" onClick={onUploadFrame}>
+            Submit
+          </AlertDialogAction>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
         </AlertDialogFooter>
       </AlertDialogContent>
