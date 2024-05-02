@@ -24,6 +24,7 @@ export default function CameraImage({
 
   const { name } = config ? config.cameras[camera] : "";
   const enabled = config ? config.cameras[camera].enabled : "True";
+  const [isPortraitImage, setIsPortraitImage] = useState(false);
 
   useEffect(() => {
     if (!config || !imgRef.current) {
@@ -40,11 +41,15 @@ export default function CameraImage({
       {enabled ? (
         <img
           ref={imgRef}
-          className="object-contain rounded-lg md:rounded-2xl"
+          className={`object-contain ${isPortraitImage ? "h-full w-auto" : "w-full h-auto"} rounded-lg md:rounded-2xl`}
           onLoad={() => {
             setHasLoaded(true);
 
             if (onload) {
+              if (imgRef.current) {
+                const { naturalHeight, naturalWidth } = imgRef.current;
+                setIsPortraitImage(naturalHeight > naturalWidth);
+              }
               onload();
             }
           }}
