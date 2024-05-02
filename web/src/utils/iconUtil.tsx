@@ -1,6 +1,8 @@
 import { BsPersonWalking } from "react-icons/bs";
 import {
   FaAmazon,
+  FaBicycle,
+  FaBus,
   FaCarSide,
   FaCat,
   FaCheckCircle,
@@ -11,6 +13,7 @@ import {
   FaLeaf,
   FaUps,
 } from "react-icons/fa";
+import { GiHummingbird } from "react-icons/gi";
 import { LuBox, LuLassoSelect } from "react-icons/lu";
 import { MdRecordVoiceOver } from "react-icons/md";
 
@@ -40,10 +43,18 @@ export function getIconForLabel(label: string, className?: string) {
   }
 
   switch (label) {
+    case "bicycle":
+      return <FaBicycle key={label} className={className} />;
+    case "bird":
+      return <GiHummingbird key={label} className={className} />;
+    case "bus":
+      return <FaBus key={label} className={className} />;
     case "car":
+    case "vehicle":
       return <FaCarSide key={label} className={className} />;
     case "cat":
       return <FaCat key={label} className={className} />;
+    case "animal":
     case "bark":
     case "dog":
       return <FaDog key={label} className={className} />;
