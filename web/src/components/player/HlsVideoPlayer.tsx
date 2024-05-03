@@ -186,11 +186,11 @@ export default function HlsVideoPlayer({
             const resp = await onUploadFrame(videoRef.current.currentTime);
 
             if (resp && resp.status == 200) {
-              toast.success("Successfully submitted frame to Frigate Plus", {
+              toast.success("Successfully submitted frame to Frigate+", {
                 position: "top-center",
               });
             } else {
-              toast.success("Failed to submit frame to Frigate Plus", {
+              toast.success("Failed to submit frame to Frigate+", {
                 position: "top-center",
               });
             }

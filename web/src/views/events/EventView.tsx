@@ -45,6 +45,8 @@ import { useCameraMotionNextTimestamp } from "@/hooks/use-camera-activity";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import scrollIntoView from "scroll-into-view-if-needed";
+import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 type EventViewProps = {
   reviews?: ReviewSegment[];
@@ -194,10 +196,31 @@ export default function EventView({
         return;
       }
 
-      axios.post(
-        `export/${review.camera}/start/${review.start_time}/end/${review.end_time}`,
-        { playback: "realtime" },
-      );
+      axios
+        .post(
+          `export/${review.camera}/start/${review.start_time}/end/${review.end_time}`,
+          { playback: "realtime" },
+        )
+        .then((response) => {
+          if (response.status == 200) {
+            toast.success(
+              "Successfully started export. View the file in the /exports folder.",
+              { position: "top-center" },
+            );
+          }
+        })
+        .catch((error) => {
+          if (error.response?.data?.message) {
+            toast.error(
+              `Failed to start export: ${error.response.data.message}`,
+              { position: "top-center" },
+            );
+          } else {
+            toast.error(`Failed to start export: ${error.message}`, {
+              position: "top-center",
+            });
+          }
+        });
     },
     [reviewItems],
   );
@@ -215,6 +238,7 @@ export default function EventView({
 
   return (
     <div className="py-2 flex flex-col size-full">
+      <Toaster />
       <div className="h-11 mb-2 pl-3 pr-2 relative flex justify-between items-center">
         {isMobile && (
           <Logo className="absolute inset-x-1/2 -translate-x-1/2 h-8" />

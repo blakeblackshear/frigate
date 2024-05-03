@@ -22,8 +22,8 @@ from frigate.util.object import average_boxes, median_of_boxes
 logger = logging.getLogger(__name__)
 
 
-THRESHOLD_ACTIVE_IOU = 0.2
-THRESHOLD_STATIONARY_IOU = 0.6
+THRESHOLD_ACTIVE_IOU = 0.35
+THRESHOLD_STATIONARY_IOU = 0.7
 MAX_STATIONARY_HISTORY = 10
 
 

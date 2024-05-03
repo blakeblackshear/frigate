@@ -184,43 +184,6 @@ class EventCleanup(threading.Thread):
         Event.update(update_params).where(Event.id << events_to_update).execute()
         return events_to_update
 
-    def purge_duplicates(self) -> None:
-        duplicate_query = """with grouped_events as (
-          select id,
-            label,
-            camera,
-            has_snapshot,
-            has_clip,
-            end_time,
-            row_number() over (
-              partition by label, camera, round(start_time/5,0)*5
-              order by end_time-start_time desc
-            ) as copy_number
-          from event
-        )
-
-        select distinct id, camera, has_snapshot, has_clip from grouped_events
-        where copy_number > 1 and end_time not null;"""
-
-        duplicate_events: list[Event] = Event.raw(duplicate_query)
-        for event in duplicate_events:
-            logger.debug(f"Removing duplicate: {event.id}")
-
-            try:
-                media_name = f"{event.camera}-{event.id}"
-                media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}.jpg")
-                media_path.unlink(missing_ok=True)
-                media_path = Path(f"{os.path.join(CLIPS_DIR, media_name)}-clean.png")
-                media_path.unlink(missing_ok=True)
-            except OSError as e:
-                logger.warning(f"Unable to delete event images: {e}")
-
-        (
-            Event.delete()
-            .where(Event.id << [event.id for event in duplicate_events])
-            .execute()
-        )
-
     def run(self) -> None:
         # only expire events every 5 minutes
         while not self.stop_event.wait(300):
@@ -232,7 +195,6 @@ class EventCleanup(threading.Thread):
             ).execute()
 
             self.expire(EventCleanupType.snapshots)
-            self.purge_duplicates()
 
             # drop events from db where has_clip and has_snapshot are false
             delete_query = Event.delete().where(
