@@ -203,11 +203,11 @@ export default function EventView({
         )
         .then((resp) => {
           if (resp.status == 200) {
-            toast.success("Successfully started export", {
+            toast.success("Export in progress.", {
               position: "top-center",
             });
           } else {
-            toast.error("Failed to start export", { position: "top-center" });
+            toast.error("Failed to start export.", { position: "top-center" });
           }
         });
     },
