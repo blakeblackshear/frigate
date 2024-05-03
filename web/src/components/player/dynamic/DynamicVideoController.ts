@@ -101,7 +101,7 @@ export class DynamicVideoController {
         this.playerController.pause();
       }
     } else {
-      console.log(`seek time is 0`);
+      // no op
     }
   }
 

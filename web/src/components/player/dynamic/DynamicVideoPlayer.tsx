@@ -10,6 +10,7 @@ import HlsVideoPlayer from "../HlsVideoPlayer";
 import { TimeRange } from "@/types/timeline";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { VideoResolutionType } from "@/types/live";
+import axios from "axios";
 
 /**
  * Dynamically switches between video playback and scrubbing preview player.
@@ -127,6 +128,18 @@ export default function DynamicVideoPlayer({
     [controller, onTimestampUpdate, isScrubbing, isLoading],
   );
 
+  const onUploadFrameToPlus = useCallback(
+    (playTime: number) => {
+      if (!controller) {
+        return;
+      }
+
+      const time = controller.getProgress(playTime);
+      return axios.post(`/${camera}/plus/${time}`);
+    },
+    [camera, controller],
+  );
+
   // state of playback player
 
   const recordingParams = useMemo(() => {
@@ -186,6 +199,7 @@ export default function DynamicVideoPlayer({
           setNoRecording(false);
         }}
         setFullResolution={setFullResolution}
+        onUploadFrame={onUploadFrameToPlus}
       />
       <PreviewPlayer
         className={`${isScrubbing || isLoading ? "visible" : "hidden"} ${className}`}
