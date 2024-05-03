@@ -294,9 +294,7 @@ function FrigatePlusUploadButton({
       </AlertDialogTrigger>
       <AlertDialogContent className="md:max-w-[80%]">
         <AlertDialogHeader>
-          <AlertDialogTitle>
-            Submit this frame to Frigate Plus?
-          </AlertDialogTitle>
+          <AlertDialogTitle>Submit this frame to Frigate+?</AlertDialogTitle>
         </AlertDialogHeader>
         <img className="w-full object-contain" src={videoImg} />
         <AlertDialogFooter>
