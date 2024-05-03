@@ -201,13 +201,24 @@ export default function EventView({
           `export/${review.camera}/start/${review.start_time}/end/${review.end_time}`,
           { playback: "realtime" },
         )
-        .then((resp) => {
-          if (resp.status == 200) {
-            toast.success("Export in progress.", {
+        .then((response) => {
+          if (response.status == 200) {
+            toast.success(
+              "Successfully started export. View the file in the /exports folder.",
+              { position: "top-center" },
+            );
+          }
+        })
+        .catch((error) => {
+          if (error.response?.data?.message) {
+            toast.error(
+              `Failed to start export: ${error.response.data.message}`,
+              { position: "top-center" },
+            );
+          } else {
+            toast.error(`Failed to start export: ${error.message}`, {
               position: "top-center",
             });
-          } else {
-            toast.error("Failed to start export.", { position: "top-center" });
           }
         });
     },
