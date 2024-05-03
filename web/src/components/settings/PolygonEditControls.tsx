@@ -41,7 +41,7 @@ export default function PolygonEditControls({
           ...activePolygon.pointsOrder.slice(0, lastPointOrderIndex),
           ...activePolygon.pointsOrder.slice(lastPointOrderIndex + 1),
         ],
-        isFinished: false,
+        isFinished: activePolygon.isFinished && activePolygon.points.length > 3,
       };
 
       setPolygons(updatedPolygons);

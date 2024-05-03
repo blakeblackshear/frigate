@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState, useEffect } from "react";
+import React, { useMemo, useRef, useState, useEffect, RefObject } from "react";
 import PolygonDrawer from "./PolygonDrawer";
 import { Stage, Layer, Image } from "react-konva";
 import Konva from "konva";
@@ -7,6 +7,7 @@ import { Polygon, PolygonType } from "@/types/canvas";
 import { useApiHost } from "@/api";
 
 type PolygonCanvasProps = {
+  containerRef: RefObject<HTMLDivElement>;
   camera: string;
   width: number;
   height: number;
@@ -18,6 +19,7 @@ type PolygonCanvasProps = {
 };
 
 export function PolygonCanvas({
+  containerRef,
   camera,
   width,
   height,
@@ -54,10 +56,6 @@ export function PolygonCanvas({
       videoElement.removeEventListener("load", onload);
     };
   }, [videoElement]);
-
-  const getMousePos = (stage: Konva.Stage) => {
-    return [stage.getPointerPosition()!.x, stage.getPointerPosition()!.y];
-  };
 
   const addPointToPolygon = (polygon: Polygon, newPoint: number[]) => {
     const points = polygon.points;
@@ -99,37 +97,6 @@ export function PolygonCanvas({
     return { updatedPoints, updatedPointsOrder };
   };
 
-  const isMouseOverFirstPoint = (polygon: Polygon, mousePos: number[]) => {
-    if (!polygon || !polygon.points || polygon.points.length < 1) {
-      return false;
-    }
-    const [firstPoint] = polygon.points;
-    const distance = Math.hypot(
-      mousePos[0] - firstPoint[0],
-      mousePos[1] - firstPoint[1],
-    );
-    return distance < 10;
-  };
-
-  const isMouseOverAnyPoint = (polygon: Polygon, mousePos: number[]) => {
-    if (!polygon || !polygon.points || polygon.points.length === 0) {
-      return false;
-    }
-
-    for (let i = 1; i < polygon.points.length; i++) {
-      const point = polygon.points[i];
-      const distance = Math.hypot(
-        mousePos[0] - point[0],
-        mousePos[1] - point[1],
-      );
-      if (distance < 10) {
-        return true;
-      }
-    }
-
-    return false;
-  };
-
   const handleMouseDown = (e: KonvaEventObject<MouseEvent | TouchEvent>) => {
     if (activePolygonIndex === undefined || !polygons) {
       return;
@@ -138,11 +105,13 @@ export function PolygonCanvas({
     const updatedPolygons = [...polygons];
     const activePolygon = updatedPolygons[activePolygonIndex];
     const stage = e.target.getStage()!;
-    const mousePos = getMousePos(stage);
+    const mousePos = stage.getPointerPosition() ?? { x: 0, y: 0 };
+    const intersection = stage.getIntersection(mousePos);
 
     if (
       activePolygon.points.length >= 3 &&
-      isMouseOverFirstPoint(activePolygon, mousePos)
+      intersection?.getClassName() == "Circle" &&
+      intersection?.name() == "point-0"
     ) {
       // Close the polygon
       updatedPolygons[activePolygonIndex] = {
@@ -152,12 +121,13 @@ export function PolygonCanvas({
       setPolygons(updatedPolygons);
     } else {
       if (
-        !activePolygon.isFinished &&
-        !isMouseOverAnyPoint(activePolygon, mousePos)
+        (!activePolygon.isFinished &&
+          intersection?.getClassName() !== "Circle") ||
+        (activePolygon.isFinished && intersection?.name() == "unfilled-line")
       ) {
         const { updatedPoints, updatedPointsOrder } = addPointToPolygon(
           activePolygon,
-          mousePos,
+          [mousePos.x, mousePos.y],
         );
 
         updatedPolygons[activePolygonIndex] = {
@@ -167,62 +137,6 @@ export function PolygonCanvas({
         };
         setPolygons(updatedPolygons);
       }
-    }
-    // }
-  };
-
-  const handleMouseOverStartPoint = (
-    e: KonvaEventObject<MouseEvent | TouchEvent>,
-  ) => {
-    if (activePolygonIndex === undefined || !polygons) {
-      return;
-    }
-
-    const activePolygon = polygons[activePolygonIndex];
-    if (!activePolygon.isFinished && activePolygon.points.length >= 3) {
-      e.target.getStage()!.container().style.cursor = "default";
-      e.currentTarget.scale({ x: 2, y: 2 });
-    }
-  };
-
-  const handleMouseOutStartPoint = (
-    e: KonvaEventObject<MouseEvent | TouchEvent>,
-  ) => {
-    e.currentTarget.scale({ x: 1, y: 1 });
-
-    if (activePolygonIndex === undefined || !polygons) {
-      return;
-    }
-
-    const activePolygon = polygons[activePolygonIndex];
-    if (
-      (!activePolygon.isFinished && activePolygon.points.length >= 3) ||
-      activePolygon.isFinished
-    ) {
-      e.currentTarget.scale({ x: 1, y: 1 });
-    }
-  };
-
-  const handleMouseOverAnyPoint = (
-    e: KonvaEventObject<MouseEvent | TouchEvent>,
-  ) => {
-    if (!polygons) {
-      return;
-    }
-    e.target.getStage()!.container().style.cursor = "move";
-  };
-
-  const handleMouseOutAnyPoint = (
-    e: KonvaEventObject<MouseEvent | TouchEvent>,
-  ) => {
-    if (activePolygonIndex === undefined || !polygons) {
-      return;
-    }
-    const activePolygon = polygons[activePolygonIndex];
-    if (activePolygon.isFinished) {
-      e.target.getStage()!.container().style.cursor = "default";
-    } else {
-      e.target.getStage()!.container().style.cursor = "crosshair";
     }
   };
 
@@ -237,7 +151,8 @@ export function PolygonCanvas({
     const activePolygon = updatedPolygons[activePolygonIndex];
     const stage = e.target.getStage();
     if (stage) {
-      const index = e.target.index - 1;
+      // we add an unfilled line for adding points when finished
+      const index = e.target.index - (activePolygon.isFinished ? 2 : 1);
       const pos = [e.target._lastPos!.x, e.target._lastPos!.y];
       if (pos[0] < 0) pos[0] = 0;
       if (pos[1] < 0) pos[1] = 0;
@@ -272,26 +187,17 @@ export function PolygonCanvas({
     }
   };
 
-  const handleStageMouseOver = (
-    e: Konva.KonvaEventObject<MouseEvent | TouchEvent>,
-  ) => {
+  const handleStageMouseOver = () => {
     if (activePolygonIndex === undefined || !polygons) {
       return;
     }
 
     const updatedPolygons = [...polygons];
     const activePolygon = updatedPolygons[activePolygonIndex];
-    const stage = e.target.getStage()!;
-    const mousePos = getMousePos(stage);
 
-    if (
-      activePolygon.isFinished ||
-      isMouseOverAnyPoint(activePolygon, mousePos) ||
-      isMouseOverFirstPoint(activePolygon, mousePos)
-    )
-      return;
-
-    e.target.getStage()!.container().style.cursor = "crosshair";
+    if (containerRef.current && !activePolygon.isFinished) {
+      containerRef.current.style.cursor = "crosshair";
+    }
   };
 
   useEffect(() => {
@@ -336,6 +242,7 @@ export function PolygonCanvas({
               selectedZoneMask.includes(polygon.type)) &&
             index !== activePolygonIndex && (
               <PolygonDrawer
+                stageRef={stageRef}
                 key={index}
                 points={polygon.points}
                 isActive={index === activePolygonIndex}
@@ -344,10 +251,6 @@ export function PolygonCanvas({
                 color={polygon.color}
                 handlePointDragMove={handlePointDragMove}
                 handleGroupDragEnd={handleGroupDragEnd}
-                handleMouseOverStartPoint={handleMouseOverStartPoint}
-                handleMouseOutStartPoint={handleMouseOutStartPoint}
-                handleMouseOverAnyPoint={handleMouseOverAnyPoint}
-                handleMouseOutAnyPoint={handleMouseOutAnyPoint}
               />
             ),
         )}
@@ -356,6 +259,7 @@ export function PolygonCanvas({
           (selectedZoneMask === undefined ||
             selectedZoneMask.includes(polygons[activePolygonIndex].type)) && (
             <PolygonDrawer
+              stageRef={stageRef}
               key={activePolygonIndex}
               points={polygons[activePolygonIndex].points}
               isActive={true}
@@ -364,10 +268,6 @@ export function PolygonCanvas({
               color={polygons[activePolygonIndex].color}
               handlePointDragMove={handlePointDragMove}
               handleGroupDragEnd={handleGroupDragEnd}
-              handleMouseOverStartPoint={handleMouseOverStartPoint}
-              handleMouseOutStartPoint={handleMouseOutStartPoint}
-              handleMouseOverAnyPoint={handleMouseOverAnyPoint}
-              handleMouseOutAnyPoint={handleMouseOutAnyPoint}
             />
           )}
       </Layer>
