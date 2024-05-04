@@ -1505,29 +1505,26 @@ class FrigateConfig(FrigateBaseModel):
         for key, detector in config.detectors.items():
             adapter = TypeAdapter(DetectorConfig)
             model_dict = (
-                detector if isinstance(detector, dict) else detector.model_dump()
+                detector
+                if isinstance(detector, dict)
+                else detector.model_dump(warnings="none")
             )
             detector_config: DetectorConfig = adapter.validate_python(model_dict)
             if detector_config.model is None:
-                detector_config.model = config.model
+                detector_config.model = config.model.model_copy()
             else:
-                model = detector_config.model
-                schema = ModelConfig.model_json_schema()["properties"]
-                if (
-                    model.width != schema["width"]["default"]
-                    or model.height != schema["height"]["default"]
-                    or model.labelmap_path is not None
-                    or model.labelmap
-                    or model.input_tensor != schema["input_tensor"]["default"]
-                    or model.input_pixel_format
-                    != schema["input_pixel_format"]["default"]
-                ):
+                path = detector_config.model.path
+                detector_config.model = config.model.model_copy()
+                detector_config.model.path = path
+
+                if "path" not in model_dict or len(model_dict.keys()) > 1:
                     logger.warning(
                         "Customizing more than a detector model path is unsupported."
                     )
+
             merged_model = deep_merge(
-                detector_config.model.model_dump(exclude_unset=True),
-                config.model.model_dump(exclude_unset=True),
+                detector_config.model.model_dump(exclude_unset=True, warnings="none"),
+                config.model.model_dump(exclude_unset=True, warnings="none"),
             )
 
             if "path" not in merged_model:
