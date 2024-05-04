@@ -1,4 +1,11 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import {
+  RefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Line, Circle, Group } from "react-konva";
 import {
   minMax,
@@ -9,9 +16,9 @@ import {
 import type { KonvaEventObject } from "konva/lib/Node";
 import Konva from "konva";
 import { Vector2d } from "konva/lib/types";
-import { isMobileOnly } from "react-device-detect";
 
 type PolygonDrawerProps = {
+  stageRef: RefObject<Konva.Stage>;
   points: number[][];
   isActive: boolean;
   isHovered: boolean;
@@ -19,21 +26,10 @@ type PolygonDrawerProps = {
   color: number[];
   handlePointDragMove: (e: KonvaEventObject<MouseEvent | TouchEvent>) => void;
   handleGroupDragEnd: (e: KonvaEventObject<MouseEvent | TouchEvent>) => void;
-  handleMouseOverStartPoint: (
-    e: KonvaEventObject<MouseEvent | TouchEvent>,
-  ) => void;
-  handleMouseOutStartPoint: (
-    e: KonvaEventObject<MouseEvent | TouchEvent>,
-  ) => void;
-  handleMouseOverAnyPoint: (
-    e: KonvaEventObject<MouseEvent | TouchEvent>,
-  ) => void;
-  handleMouseOutAnyPoint: (
-    e: KonvaEventObject<MouseEvent | TouchEvent>,
-  ) => void;
 };
 
 export default function PolygonDrawer({
+  stageRef,
   points,
   isActive,
   isHovered,
@@ -41,31 +37,41 @@ export default function PolygonDrawer({
   color,
   handlePointDragMove,
   handleGroupDragEnd,
-  handleMouseOverStartPoint,
-  handleMouseOutStartPoint,
-  handleMouseOverAnyPoint,
-  handleMouseOutAnyPoint,
 }: PolygonDrawerProps) {
-  const vertexRadius = isMobileOnly ? 12 : 6;
+  const vertexRadius = 6;
   const flattenedPoints = useMemo(() => flattenPoints(points), [points]);
-  const [stage, setStage] = useState<Konva.Stage>();
   const [minMaxX, setMinMaxX] = useState([0, 0]);
   const [minMaxY, setMinMaxY] = useState([0, 0]);
   const groupRef = useRef<Konva.Group>(null);
+  const [cursor, setCursor] = useState("default");
 
-  const handleGroupMouseOver = (
-    e: Konva.KonvaEventObject<MouseEvent | TouchEvent>,
+  const handleMouseOverPoint = (
+    e: KonvaEventObject<MouseEvent | TouchEvent>,
   ) => {
-    if (!isFinished) return;
-    e.target.getStage()!.container().style.cursor = "move";
-    setStage(e.target.getStage()!);
+    if (!e.target) return;
+
+    if (!isFinished && points.length >= 3 && e.target.name() === "point-0") {
+      e.target.scale({ x: 2, y: 2 });
+      setCursor("crosshair");
+    } else {
+      setCursor("move");
+    }
   };
 
-  const handleGroupMouseOut = (
-    e: Konva.KonvaEventObject<MouseEvent | TouchEvent>,
+  const handleMouseOutPoint = (
+    e: KonvaEventObject<MouseEvent | TouchEvent>,
   ) => {
-    if (!e.target || !isFinished) return;
-    e.target.getStage()!.container().style.cursor = "default";
+    if (!e.target) return;
+
+    if (isFinished) {
+      setCursor("default");
+    } else {
+      setCursor("crosshair");
+    }
+
+    if (e.target.name() === "point-0") {
+      e.target.scale({ x: 1, y: 1 });
+    }
   };
 
   const handleGroupDragStart = () => {
@@ -76,13 +82,13 @@ export default function PolygonDrawer({
   };
 
   const groupDragBound = (pos: Vector2d) => {
-    if (!stage) {
+    if (!stageRef.current) {
       return pos;
     }
 
     let { x, y } = pos;
-    const sw = stage.width();
-    const sh = stage.height();
+    const sw = stageRef.current.width();
+    const sh = stageRef.current.height();
 
     if (minMaxY[0] + y < 0) y = -1 * minMaxY[0];
     if (minMaxX[0] + x < 0) x = -1 * minMaxX[0];
@@ -99,6 +105,14 @@ export default function PolygonDrawer({
     [color],
   );
 
+  useEffect(() => {
+    if (!stageRef.current) {
+      return;
+    }
+
+    stageRef.current.container().style.cursor = cursor;
+  }, [stageRef, cursor]);
+
   return (
     <Group
       name="polygon"
@@ -107,55 +121,62 @@ export default function PolygonDrawer({
       onDragStart={isActive ? handleGroupDragStart : undefined}
       onDragEnd={isActive ? handleGroupDragEnd : undefined}
       dragBoundFunc={isActive ? groupDragBound : undefined}
-      onMouseOver={isActive ? handleGroupMouseOver : undefined}
-      onTouchStart={isActive ? handleGroupMouseOver : undefined}
-      onMouseOut={isActive ? handleGroupMouseOut : undefined}
     >
       <Line
+        name="filled-line"
         points={flattenedPoints}
         stroke={colorString(true)}
         strokeWidth={3}
+        hitStrokeWidth={12}
         closed={isFinished}
         fill={colorString(isActive || isHovered ? true : false)}
+        onMouseOver={() =>
+          isFinished ? setCursor("move") : setCursor("crosshair")
+        }
+        onMouseOut={() =>
+          isFinished ? setCursor("default") : setCursor("crosshair")
+        }
       />
+      {isFinished && isActive && (
+        <Line
+          name="unfilled-line"
+          points={flattenedPoints}
+          hitStrokeWidth={12}
+          closed={isFinished}
+          fillEnabled={false}
+          onMouseOver={() => setCursor("crosshair")}
+          onMouseOut={() =>
+            isFinished ? setCursor("default") : setCursor("crosshair")
+          }
+        />
+      )}
       {points.map((point, index) => {
         if (!isActive) {
           return;
         }
         const x = point[0];
         const y = point[1];
-        const startPointAttr =
-          index === 0
-            ? {
-                hitStrokeWidth: 12,
-                onMouseOver: handleMouseOverStartPoint,
-                onMouseOut: handleMouseOutStartPoint,
-              }
-            : null;
-        const otherPointsAttr =
-          index !== 0
-            ? {
-                onMouseOver: handleMouseOverAnyPoint,
-                onMouseOut: handleMouseOutAnyPoint,
-              }
-            : null;
 
         return (
           <Circle
             key={index}
+            name={`point-${index}`}
             x={x}
             y={y}
             radius={vertexRadius}
             stroke={colorString(true)}
             fill="#ffffff"
             strokeWidth={3}
+            hitStrokeWidth={index === 0 ? 12 : 9}
+            onMouseOver={handleMouseOverPoint}
+            onMouseOut={handleMouseOutPoint}
             draggable={isActive}
             onDragMove={isActive ? handlePointDragMove : undefined}
             dragBoundFunc={(pos) => {
-              if (stage) {
+              if (stageRef.current) {
                 return dragBoundFunc(
-                  stage.width(),
-                  stage.height(),
+                  stageRef.current.width(),
+                  stageRef.current.height(),
                   vertexRadius,
                   pos,
                 );
@@ -163,8 +184,6 @@ export default function PolygonDrawer({
                 return pos;
               }
             }}
-            {...startPointAttr}
-            {...otherPointsAttr}
           />
         );
       })}

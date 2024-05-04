@@ -629,6 +629,7 @@ export default function MasksAndZones({
               scaledHeight &&
               editingPolygons ? (
                 <PolygonCanvas
+                  containerRef={containerRef}
                   camera={cameraConfig.name}
                   width={scaledWidth}
                   height={scaledHeight}
