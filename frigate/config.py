@@ -1505,7 +1505,9 @@ class FrigateConfig(FrigateBaseModel):
         for key, detector in config.detectors.items():
             adapter = TypeAdapter(DetectorConfig)
             model_dict = (
-                detector if isinstance(detector, dict) else detector.model_dump()
+                detector
+                if isinstance(detector, dict)
+                else detector.model_dump(warnings="none")
             )
             detector_config: DetectorConfig = adapter.validate_python(model_dict)
             if detector_config.model is None:
@@ -1521,8 +1523,8 @@ class FrigateConfig(FrigateBaseModel):
                     )
 
             merged_model = deep_merge(
-                detector_config.model.model_dump(exclude_unset=True),
-                config.model.model_dump(exclude_unset=True),
+                detector_config.model.model_dump(exclude_unset=True, warnings="none"),
+                config.model.model_dump(exclude_unset=True, warnings="none"),
             )
 
             if "path" not in merged_model:
