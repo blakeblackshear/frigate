@@ -1511,20 +1511,15 @@ class FrigateConfig(FrigateBaseModel):
             if detector_config.model is None:
                 detector_config.model = config.model
             else:
-                model = detector_config.model
-                schema = ModelConfig.model_json_schema()["properties"]
-                if (
-                    model.width != schema["width"]["default"]
-                    or model.height != schema["height"]["default"]
-                    or model.labelmap_path is not None
-                    or model.labelmap
-                    or model.input_tensor != schema["input_tensor"]["default"]
-                    or model.input_pixel_format
-                    != schema["input_pixel_format"]["default"]
-                ):
+                path = detector_config.model.path
+                detector_config.model = config.model
+                detector_config.model.path = path
+
+                if "path" not in model_dict or len(model_dict.keys()) > 1:
                     logger.warning(
                         "Customizing more than a detector model path is unsupported."
                     )
+
             merged_model = deep_merge(
                 detector_config.model.model_dump(exclude_unset=True),
                 config.model.model_dump(exclude_unset=True),
