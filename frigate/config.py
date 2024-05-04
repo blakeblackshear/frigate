@@ -1511,10 +1511,10 @@ class FrigateConfig(FrigateBaseModel):
             )
             detector_config: DetectorConfig = adapter.validate_python(model_dict)
             if detector_config.model is None:
-                detector_config.model = config.model
+                detector_config.model = config.model.model_copy()
             else:
                 path = detector_config.model.path
-                detector_config.model = config.model
+                detector_config.model = config.model.model_copy()
                 detector_config.model.path = path
 
                 if "path" not in model_dict or len(model_dict.keys()) > 1:
