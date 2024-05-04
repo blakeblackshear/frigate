@@ -153,7 +153,12 @@ export default function MotionTuner({
 
   useEffect(() => {
     if (changedValue) {
-      addMessage("motion_tuner", "Unsaved motion tuner changes");
+      addMessage(
+        "motion_tuner",
+        "Unsaved motion tuner changes",
+        undefined,
+        "motion_tuner",
+      );
     } else {
       clearMessages("motion_tuner");
     }
