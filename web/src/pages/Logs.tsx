@@ -332,7 +332,7 @@ function Logs() {
 
   return (
     <div className="size-full p-2 flex flex-col">
-      <Toaster position="top-center" />
+      <Toaster position="top-center" closeButton={true} />
       <LogInfoDialog logLine={selectedLog} setLogLine={setSelectedLog} />
 
       <div className="flex justify-between items-center">

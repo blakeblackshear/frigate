@@ -318,7 +318,7 @@ export default function ZoneEditPane({
 
   return (
     <>
-      <Toaster position="top-center" />
+      <Toaster position="top-center" closeButton={true} />
       <Heading as="h3" className="my-2">
         {polygon.name.length ? "Edit" : "New"} Zone
       </Heading>
