@@ -64,7 +64,7 @@ export default function ObjectSettings({
     },
   ];
 
-  const [options, setOptions] = usePersistence<Options>(
+  const [options, setOptions, optionsLoaded] = usePersistence<Options>(
     `${selectedCamera}-feed`,
     emptyObject,
   );
@@ -87,17 +87,20 @@ export default function ObjectSettings({
 
   const memoizedObjects = useDeepMemo(objects);
 
-  const searchParams = useMemo(
-    () =>
-      new URLSearchParams(
-        Object.keys(options || {}).reduce((memo, key) => {
-          //@ts-expect-error we know this is correct
-          memo.push([key, options[key] === true ? "1" : "0"]);
-          return memo;
-        }, []),
-      ),
-    [options],
-  );
+  const searchParams = useMemo(() => {
+    if (!optionsLoaded) {
+      return new URLSearchParams();
+    }
+
+    const params = new URLSearchParams(
+      Object.keys(options || {}).reduce((memo, key) => {
+        //@ts-expect-error we know this is correct
+        memo.push([key, options[key] === true ? "1" : "0"]);
+        return memo;
+      }, []),
+    );
+    return params;
+  }, [options, optionsLoaded]);
 
   useEffect(() => {
     document.title = "Object Settings - Frigate";
