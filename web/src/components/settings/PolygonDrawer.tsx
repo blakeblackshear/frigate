@@ -122,6 +122,21 @@ export default function PolygonDrawer({
       onDragEnd={isActive ? handleGroupDragEnd : undefined}
       dragBoundFunc={isActive ? groupDragBound : undefined}
     >
+      <Line
+        name="filled-line"
+        points={flattenedPoints}
+        stroke={colorString(true)}
+        strokeWidth={3}
+        hitStrokeWidth={12}
+        closed={isFinished}
+        fill={colorString(isActive || isHovered ? true : false)}
+        onMouseOver={() =>
+          isFinished ? setCursor("move") : setCursor("crosshair")
+        }
+        onMouseOut={() =>
+          isFinished ? setCursor("default") : setCursor("crosshair")
+        }
+      />
       {isFinished && isActive && (
         <Line
           name="unfilled-line"
@@ -135,21 +150,6 @@ export default function PolygonDrawer({
           }
         />
       )}
-      <Line
-        name="filled-line"
-        points={flattenedPoints}
-        stroke={colorString(true)}
-        strokeWidth={3}
-        closed={isFinished}
-        fill={colorString(isActive || isHovered ? true : false)}
-        onMouseOver={() =>
-          isFinished ? setCursor("move") : setCursor("crosshair")
-        }
-        onMouseOut={() =>
-          isFinished ? setCursor("default") : setCursor("crosshair")
-        }
-      />
-
       {points.map((point, index) => {
         if (!isActive) {
           return;
