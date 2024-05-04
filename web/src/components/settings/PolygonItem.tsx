@@ -202,7 +202,7 @@ export default function PolygonItem({
 
   return (
     <>
-      <Toaster position="top-center" />
+      <Toaster position="top-center" closeButton={true} />
 
       <div
         key={index}

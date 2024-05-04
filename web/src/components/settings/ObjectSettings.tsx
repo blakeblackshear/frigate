@@ -109,7 +109,7 @@ export default function ObjectSettings({
 
   return (
     <div className="flex flex-col md:flex-row size-full">
-      <Toaster position="top-center" />
+      <Toaster position="top-center" closeButton={true} />
       <div className="flex flex-col h-full w-full overflow-y-auto mt-2 md:mt-0 mb-10 md:mb-0 md:w-3/12 order-last md:order-none md:mr-2 rounded-lg border-secondary-foreground border-[1px] p-2 bg-background_alt">
         <Heading as="h3" className="my-2">
           Debug

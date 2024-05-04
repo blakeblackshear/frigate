@@ -273,7 +273,11 @@ function NewGroupDialog({
 
   return (
     <>
-      <Toaster className="toaster group z-[100]" position="top-center" />
+      <Toaster
+        className="toaster group z-[100]"
+        position="top-center"
+        closeButton={true}
+      />
       <Overlay
         open={open}
         onOpenChange={(open) => {

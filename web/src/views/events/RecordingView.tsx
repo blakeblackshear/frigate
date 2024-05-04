@@ -261,7 +261,7 @@ export function RecordingView({
 
   return (
     <div ref={contentRef} className="size-full pt-2 flex flex-col">
-      <Toaster />
+      <Toaster closeButton={true} />
       <div
         className={`w-full h-11 mb-2 px-2 relative flex items-center justify-between`}
       >
