@@ -175,9 +175,6 @@ class TensorRtDetector(DetectionApi):
                 if len(binding_dims) == 4:
                     # explicit batch case (TensorRT 7+)
                     size = trt.volume(binding_dims)
-                elif len(binding_dims) == 3:
-                    # implicit batch case (TensorRT 6 or older)
-                    size = trt.volume(binding_dims) * self.engine.max_batch_size
                 else:
                     raise ValueError(
                         "bad dims of binding %s: %s" % (binding, str(binding_dims))
