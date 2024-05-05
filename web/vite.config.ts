@@ -1,5 +1,5 @@
 /// <reference types="vitest" />
-import path from "path";
+import path, { resolve } from "path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import monacoEditorPlugin from "vite-plugin-monaco-editor";
@@ -32,6 +32,14 @@ export default defineConfig({
         target: "ws://localhost:5000",
         changeOrigin: true,
         ws: true,
+      },
+    },
+  },
+  build: {
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, "index.html"),
+        login: resolve(__dirname, "login.html"),
       },
     },
   },
