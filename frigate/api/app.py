@@ -14,6 +14,7 @@ from markupsafe import escape
 from peewee import operator
 from playhouse.sqliteq import SqliteQueueDatabase
 
+from frigate.api.auth import AuthBp
 from frigate.api.event import EventBp
 from frigate.api.export import ExportBp
 from frigate.api.media import MediaBp
@@ -44,6 +45,7 @@ bp.register_blueprint(ExportBp)
 bp.register_blueprint(MediaBp)
 bp.register_blueprint(PreviewBp)
 bp.register_blueprint(ReviewBp)
+bp.register_blueprint(AuthBp)
 
 
 def create_app(
