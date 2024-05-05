@@ -45,6 +45,7 @@ function WsWithConfig({ children }: WsWithConfigType) {
   return <WsProvider>{children}</WsProvider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useApiHost() {
   return baseUrl;
 }

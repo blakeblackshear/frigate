@@ -12,6 +12,7 @@ type ColorScheme =
   | "theme-red"
   | "theme-default";
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const colorSchemes: ColorScheme[] = [
   "theme-blue",
   "theme-gold",
@@ -25,6 +26,7 @@ export const colorSchemes: ColorScheme[] = [
 ];
 
 // Helper function to generate friendly color scheme names
+// eslint-disable-next-line react-refresh/only-export-components
 export const friendlyColorSchemeName = (className: string): string => {
   const words = className.split("-").slice(1); // Exclude the first word (e.g., 'theme')
   return words
@@ -136,6 +138,7 @@ export function ThemeProvider({
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useTheme = () => {
   const context = useContext(ThemeProviderContext);
 
