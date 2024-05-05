@@ -9,7 +9,6 @@ import {
 import { SummarySegment } from "./SummarySegment";
 import { useTimelineUtils } from "@/hooks/use-timeline-utils";
 import { ReviewSegment, ReviewSeverity } from "@/types/review";
-import { isMobile } from "react-device-detect";
 
 export type SummaryTimelineProps = {
   reviewTimelineRef: RefObject<HTMLDivElement>;
@@ -188,7 +187,7 @@ export function SummaryTimeline({
       e.stopPropagation();
 
       let clientY;
-      if (isMobile && e.nativeEvent instanceof TouchEvent) {
+      if (e.nativeEvent instanceof TouchEvent) {
         clientY = e.nativeEvent.touches[0].clientY;
       } else if (e.nativeEvent instanceof MouseEvent) {
         clientY = e.nativeEvent.clientY;
@@ -239,7 +238,7 @@ export function SummaryTimeline({
       setIsDragging(true);
 
       let clientY;
-      if (isMobile && e.nativeEvent instanceof TouchEvent) {
+      if (e.nativeEvent instanceof TouchEvent) {
         clientY = e.nativeEvent.touches[0].clientY;
       } else if (e.nativeEvent instanceof MouseEvent) {
         clientY = e.nativeEvent.clientY;
@@ -277,7 +276,7 @@ export function SummaryTimeline({
         }
         e.stopPropagation();
         let clientY;
-        if (isMobile && e instanceof TouchEvent) {
+        if (e instanceof TouchEvent) {
           clientY = e.touches[0].clientY;
         } else if (e instanceof MouseEvent) {
           clientY = e.clientY;

@@ -98,7 +98,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
 
       let clientX;
       let clientY;
-      if (isMobile && e.nativeEvent instanceof TouchEvent) {
+      if (e.nativeEvent instanceof TouchEvent) {
         clientX = e.nativeEvent.touches[0].clientX;
         clientY = e.nativeEvent.touches[0].clientY;
       } else if (e.nativeEvent instanceof MouseEvent) {

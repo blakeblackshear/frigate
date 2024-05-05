@@ -1,5 +1,4 @@
 import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
-import { isMobile } from "react-device-detect";
 import scrollIntoView from "scroll-into-view-if-needed";
 import { useTimelineUtils } from "./use-timeline-utils";
 
@@ -88,7 +87,7 @@ function useDraggableElement({
   const getClientYPosition = useCallback(
     (e: MouseEvent | TouchEvent) => {
       let clientY;
-      if (isMobile && e instanceof TouchEvent) {
+      if (e instanceof TouchEvent) {
         clientY = e.touches[0].clientY;
       } else if (e instanceof MouseEvent) {
         clientY = e.clientY;
@@ -114,7 +113,7 @@ function useDraggableElement({
       setIsDragging(true);
 
       let clientY;
-      if (isMobile && e.nativeEvent instanceof TouchEvent) {
+      if (e.nativeEvent instanceof TouchEvent) {
         clientY = e.nativeEvent.touches[0].clientY;
       } else if (e.nativeEvent instanceof MouseEvent) {
         clientY = e.nativeEvent.clientY;
