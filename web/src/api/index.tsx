@@ -25,8 +25,8 @@ export function ApiProvider({ children, options }: ApiProviderType) {
           return axios.get(path, { params }).then((res) => res.data);
         },
         onError: (error, _key) => {
-          if (error.status === 401) {
-            window.location.reload();
+          if (error.response.status === 401) {
+            window.location.href = "login";
           }
         },
         ...options,
