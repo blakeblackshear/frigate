@@ -14,7 +14,7 @@ from markupsafe import escape
 from peewee import operator
 from playhouse.sqliteq import SqliteQueueDatabase
 
-from frigate.api.auth import AuthBp
+from frigate.api.auth import AuthBp, get_jwt_secret
 from frigate.api.event import EventBp
 from frigate.api.export import ExportBp
 from frigate.api.media import MediaBp
@@ -85,6 +85,7 @@ def create_app(
     app.plus_api = plus_api
     app.camera_error_image = None
     app.stats_emitter = stats_emitter
+    app.jwt_token = get_jwt_secret() if frigate_config.auth.enabled else None
 
     app.register_blueprint(bp)
 
