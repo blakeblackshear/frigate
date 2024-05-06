@@ -59,6 +59,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
+import { usePersistence } from "@/hooks/use-persistence";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 
 type CameraGroupSelectorProps = {
@@ -88,7 +89,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
 
   // groups
 
-  const [group, setGroup] = usePersistedOverlayState(
+  const [group, setGroup, deleteGroup] = usePersistedOverlayState(
     "cameraGroup",
     "default" as string,
   );
@@ -117,6 +118,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
         currentGroups={groups}
         activeGroup={group}
         setGroup={setGroup}
+        deleteGroup={deleteGroup}
       />
       <Scroller className={`${isMobile ? "whitespace-nowrap" : ""}`}>
         <div
@@ -193,6 +195,7 @@ type NewGroupDialogProps = {
   currentGroups: [string, CameraGroupConfig][];
   activeGroup?: string;
   setGroup: (value: string | undefined, replace?: boolean | undefined) => void;
+  deleteGroup: () => void;
 };
 function NewGroupDialog({
   open,
@@ -200,6 +203,7 @@ function NewGroupDialog({
   currentGroups,
   activeGroup,
   setGroup,
+  deleteGroup,
 }: NewGroupDialogProps) {
   const { mutate: updateConfig } = useSWR<FrigateConfig>("config");
 
@@ -220,11 +224,16 @@ function NewGroupDialog({
   const [editState, setEditState] = useState<"none" | "add" | "edit">("none");
   const [isLoading, setIsLoading] = useState(false);
 
+  const [, , , deleteGridLayout] = usePersistence(
+    `${activeGroup}-draggable-layout`,
+  );
+
   // callbacks
 
   const onDeleteGroup = useCallback(
     async (name: string) => {
-      // TODO: reset order on groups when deleting
+      deleteGridLayout();
+      deleteGroup();
 
       await axios
         .put(`config/set?camera_groups.${name}`, { requires_restart: 0 })
@@ -255,7 +264,14 @@ function NewGroupDialog({
           setIsLoading(false);
         });
     },
-    [updateConfig, activeGroup, setGroup, setOpen],
+    [
+      updateConfig,
+      activeGroup,
+      setGroup,
+      setOpen,
+      deleteGroup,
+      deleteGridLayout,
+    ],
   );
 
   const onSave = () => {
@@ -474,7 +490,11 @@ export function CameraGroupEdit({
         {
           message: "Camera group name already exists.",
         },
-      ),
+      )
+      .refine((value: string) => value.toLowerCase() !== "default", {
+        message: "Invalid camera group name.",
+      }),
+
     cameras: z.array(z.string()).min(2, {
       message: "You must select at least two cameras.",
     }),

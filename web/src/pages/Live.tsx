@@ -89,6 +89,7 @@ function Live() {
   return (
     <LiveDashboardView
       cameras={cameras}
+      cameraGroup={cameraGroup}
       includeBirdseye={includesBirdseye}
       onSelectCamera={setSelectedCameraName}
     />
