@@ -116,6 +116,30 @@ class UIConfig(FrigateBaseModel):
     )
 
 
+class UserConfig(FrigateBaseModel):
+    user: str = Field(title="Username")
+    password_hash: str = Field(
+        title="Password hashed and salted using hashlib.pbkdf2_hmac"
+    )
+
+
+class AuthConfig(FrigateBaseModel):
+    enabled: bool = Field(default=False, title="Enable authentication")
+    # TODO: validation for cookie names
+    cookie_name: str = Field(
+        default="jwt.token", title="Name for jwt token cookie", pattern=r"^[a-z]_*$"
+    )
+    session_length: int = Field(
+        default=86400, title="Session length for jwt session tokens", ge=60
+    )
+    refresh_time: int = Field(
+        default=43200,
+        title="Refresh the session if it is going to expire in this many seconds",
+        ge=30,
+    )
+    users: Optional[List[UserConfig]] = Field(default=[], title="Users")
+
+
 class StatsConfig(FrigateBaseModel):
     amd_gpu_stats: bool = Field(default=True, title="Enable AMD GPU stats.")
     intel_gpu_stats: bool = Field(default=True, title="Enable Intel GPU stats.")
@@ -1245,10 +1269,11 @@ def verify_motion_and_detect(camera_config: CameraConfig) -> ValueError | None:
 
 
 class FrigateConfig(FrigateBaseModel):
-    mqtt: MqttConfig = Field(title="MQTT Configuration.")
+    mqtt: MqttConfig = Field(title="MQTT configuration.")
     database: DatabaseConfig = Field(
         default_factory=DatabaseConfig, title="Database configuration."
     )
+    auth: AuthConfig = Field(default_factory=AuthConfig, title="Auth configuration.")
     environment_vars: Dict[str, str] = Field(
         default_factory=dict, title="Frigate environment variables."
     )

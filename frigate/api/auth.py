@@ -7,7 +7,7 @@ import secrets
 import time
 from datetime import datetime
 
-from flask import Blueprint, make_response, request
+from flask import Blueprint, current_app, make_response, request
 from joserfc import jwt
 
 logger = logging.getLogger(__name__)
@@ -16,10 +16,7 @@ AuthBp = Blueprint("auth", __name__)
 
 
 ALGORITHM = "pbkdf2_sha256"
-JWT_COOKIE_NAME = "jwt.cookie"
 JWT_SECRET = "secret"
-JWT_REFRESH = 120
-JWT_SESSION_LENGTH = 300
 
 
 def hash_password(password, salt=None, iterations=260000):
@@ -55,13 +52,15 @@ def set_jwt_cookie(response, cookie_name, encoded_jwt, expiration):
 
 # TODO:
 # - on startup, generate a signing secret for jwt if it doesn't exist and save as ".auth-token" in the config folder
-# - add users to config
-# - create login page
 # -
 
 
 @AuthBp.route("/auth")
 def auth():
+    JWT_COOKIE_NAME = current_app.frigate_config.auth.cookie_name
+    JWT_REFRESH = current_app.frigate_config.auth.refresh_time
+    JWT_SESSION_LENGTH = current_app.frigate_config.auth.session_length
+
     jwt_source = None
     encoded_token = None
     if "authorization" in request.headers and request.headers[
@@ -126,10 +125,22 @@ def auth():
 
 @AuthBp.route("/login", methods=["POST"])
 def login():
-    password_hash = "pbkdf2_sha256$260000$2e68caab677bb466138d21d18ac94033$3VZhLOSiY9AqD2Y37DgVOerx4L2wi6nPyruoVXd06VQ="
+    JWT_COOKIE_NAME = current_app.frigate_config.auth.cookie_name
+    JWT_SESSION_LENGTH = current_app.frigate_config.auth.session_length
     content = request.get_json()
     user = content["user"]
     password = content["password"]
+    password_hash = next(
+        (
+            u.password_hash
+            for u in current_app.frigate_config.auth.users
+            if u.user == user
+        ),
+        None,
+    )
+    # if the user wasn't found in the config
+    if password_hash is None:
+        make_response({"message": "Login failed"}, 400)
     if verify_password(password, password_hash):
         expiration = int(time.time()) + JWT_SESSION_LENGTH
         encoded_jwt = create_encoded_jwt(user, expiration, JWT_SECRET)
