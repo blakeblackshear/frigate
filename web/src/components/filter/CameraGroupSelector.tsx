@@ -59,6 +59,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
+import { TooltipPortal } from "@radix-ui/react-tooltip";
 
 type CameraGroupSelectorProps = {
   className?: string;
@@ -137,9 +138,11 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
                 <MdHome className="size-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent className="capitalize" side="right">
-              All Cameras
-            </TooltipContent>
+            <TooltipPortal>
+              <TooltipContent className="capitalize" side="right">
+                All Cameras
+              </TooltipContent>
+            </TooltipPortal>
           </Tooltip>
           {groups.map(([name, config]) => {
             return (
@@ -161,9 +164,11 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
                     {getIconForGroup(config.icon)}
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent className="capitalize" side="right">
-                  {name}
-                </TooltipContent>
+                <TooltipPortal>
+                  <TooltipContent className="capitalize" side="right">
+                    {name}
+                  </TooltipContent>
+                </TooltipPortal>
               </Tooltip>
             );
           })}
