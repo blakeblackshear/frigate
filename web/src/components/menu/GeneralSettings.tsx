@@ -65,6 +65,7 @@ import {
   DialogPortal,
   DialogTrigger,
 } from "../ui/dialog";
+import { TooltipPortal } from "@radix-ui/react-tooltip";
 
 type GeneralSettingsProps = {
   className?: string;
@@ -124,9 +125,11 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                     <LuSettings className="size-5 md:m-[6px]" />
                   </div>
                 </TooltipTrigger>
-                <TooltipContent side="right">
-                  <p>Settings</p>
-                </TooltipContent>
+                <TooltipPortal>
+                  <TooltipContent side="right">
+                    <p>Settings</p>
+                  </TooltipContent>
+                </TooltipPortal>
               </Tooltip>
             </a>
           </Trigger>

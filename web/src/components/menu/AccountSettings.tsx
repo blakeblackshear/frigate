@@ -3,6 +3,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { isDesktop } from "react-device-detect";
 import { VscAccount } from "react-icons/vsc";
 
@@ -19,9 +20,11 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
           <VscAccount className="size-5 md:m-[6px]" />
         </div>
       </TooltipTrigger>
-      <TooltipContent side="right">
-        <p>Account</p>
-      </TooltipContent>
+      <TooltipPortal>
+        <TooltipContent side="right">
+          <p>Account</p>
+        </TooltipContent>
+      </TooltipPortal>
     </Tooltip>
   );
 }
