@@ -3,6 +3,7 @@ import {
   CamerasFilterButton,
   GeneralFilterContent,
 } from "@/components/filter/ReviewFilterGroup";
+import Chip from "@/components/indicators/Chip";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -23,8 +24,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { DualThumbSlider } from "@/components/ui/slider";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Event } from "@/types/event";
 import { ATTRIBUTE_LABELS, FrigateConfig } from "@/types/frigateConfig";
+import { getIconForLabel } from "@/utils/iconUtil";
+import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { isMobile } from "react-device-detect";
@@ -182,9 +190,36 @@ export default function SubmitPlus() {
             return (
               <div
                 key={event.id}
-                className="w-full rounded-lg md:rounded-2xl aspect-video flex justify-center items-center bg-black cursor-pointer"
+                className="w-full relative rounded-lg md:rounded-2xl aspect-video flex justify-center items-center bg-black cursor-pointer"
                 onClick={() => setUpload(event)}
               >
+                <div className="absolute left-0 top-2 z-40">
+                  <Tooltip>
+                    <div className="flex">
+                      <TooltipTrigger asChild>
+                        <div className="mx-3 pb-1 text-white text-sm">
+                          <Chip
+                            className={`flex items-start justify-between space-x-1 bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 z-0`}
+                          >
+                            {[event.label].map((object) => {
+                              return getIconForLabel(
+                                object,
+                                "size-3 text-white",
+                              );
+                            })}
+                          </Chip>
+                        </div>
+                      </TooltipTrigger>
+                    </div>
+                    <TooltipContent className="capitalize">
+                      {[event.label]
+                        .map((text) => capitalizeFirstLetter(text))
+                        .sort()
+                        .join(", ")
+                        .replaceAll("-verified", "")}
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <img
                   className="aspect-video h-full object-contain rounded-lg md:rounded-2xl"
                   src={`${baseUrl}api/events/${event.id}/snapshot.jpg`}

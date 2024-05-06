@@ -24,6 +24,7 @@ import ActivityIndicator from "../indicators/activity-indicator";
 import { TimeRange } from "@/types/timeline";
 import { NoThumbSlider } from "../ui/slider";
 import { PREVIEW_FPS, PREVIEW_PADDING } from "@/types/preview";
+import { capitalizeFirstLetter } from "@/utils/stringUtil";
 
 type PreviewPlayerProps = {
   review: ReviewSegment;
@@ -263,7 +264,7 @@ export default function PreviewThumbnailPlayer({
                 .filter(
                   (item) => item !== undefined && !item.includes("-verified"),
                 )
-                .map((text) => text.charAt(0).toUpperCase() + text.substring(1))
+                .map((text) => capitalizeFirstLetter(text))
                 .sort()
                 .join(", ")
                 .replaceAll("-verified", "")}
