@@ -121,6 +121,14 @@ export default function ExportDialog({
             className="flex items-center gap-2"
             size="sm"
             onClick={() => {
+              const now = new Date(latestTime * 1000);
+              let start = 0;
+              now.setHours(now.getHours() - 1);
+              start = now.getTime() / 1000;
+              setRange({
+                before: latestTime,
+                after: start,
+              });
               setMode("select");
             }}
           >
