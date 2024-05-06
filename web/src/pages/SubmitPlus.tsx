@@ -32,6 +32,7 @@ import {
 import { Event } from "@/types/event";
 import { ATTRIBUTE_LABELS, FrigateConfig } from "@/types/frigateConfig";
 import { getIconForLabel } from "@/utils/iconUtil";
+import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { isMobile } from "react-device-detect";
@@ -212,10 +213,7 @@ export default function SubmitPlus() {
                     </div>
                     <TooltipContent className="capitalize">
                       {[event.label]
-                        .map(
-                          (text) =>
-                            text.charAt(0).toUpperCase() + text.substring(1),
-                        )
+                        .map((text) => capitalizeFirstLetter(text))
                         .sort()
                         .join(", ")
                         .replaceAll("-verified", "")}
