@@ -187,7 +187,7 @@ export function SummaryTimeline({
       e.stopPropagation();
 
       let clientY;
-      if (e.nativeEvent instanceof TouchEvent) {
+      if ("TouchEvent" in window && e.nativeEvent instanceof TouchEvent) {
         clientY = e.nativeEvent.touches[0].clientY;
       } else if (e.nativeEvent instanceof MouseEvent) {
         clientY = e.nativeEvent.clientY;
@@ -238,7 +238,7 @@ export function SummaryTimeline({
       setIsDragging(true);
 
       let clientY;
-      if (e.nativeEvent instanceof TouchEvent) {
+      if ("TouchEvent" in window && e.nativeEvent instanceof TouchEvent) {
         clientY = e.nativeEvent.touches[0].clientY;
       } else if (e.nativeEvent instanceof MouseEvent) {
         clientY = e.nativeEvent.clientY;
@@ -276,7 +276,7 @@ export function SummaryTimeline({
         }
         e.stopPropagation();
         let clientY;
-        if (e instanceof TouchEvent) {
+        if ("TouchEvent" in window && e instanceof TouchEvent) {
           clientY = e.touches[0].clientY;
         } else if (e instanceof MouseEvent) {
           clientY = e.clientY;
