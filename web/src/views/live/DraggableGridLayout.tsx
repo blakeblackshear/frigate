@@ -329,7 +329,7 @@ export default function DraggableGridLayout({
               <TooltipTrigger asChild>
                 <Button
                   variant="default"
-                  className="fixed bottom-9 right-6 z-50 h-12 w-12 p-0 rounded-full opacity-30 hover:opacity-100 transition-all duration-300"
+                  className="fixed bottom-12 lg:bottom-9 right-5 z-50 h-12 w-12 p-0 rounded-full opacity-30 hover:opacity-100 transition-all duration-300"
                   onClick={toggleEditMode}
                 >
                   {isEditMode ? (
