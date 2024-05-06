@@ -184,7 +184,13 @@ export default function LivePlayer({
               </TooltipTrigger>
             </div>
             <TooltipContent className="capitalize">
-              {[...new Set([...(objects || []).map(({ label }) => label)])]
+              {[
+                ...new Set([
+                  ...(objects || []).map(({ label, sub_label }) =>
+                    label.endsWith("verified") ? sub_label : label,
+                  ),
+                ]),
+              ]
                 .filter(
                   (label) =>
                     label !== undefined && !label.includes("-verified"),
