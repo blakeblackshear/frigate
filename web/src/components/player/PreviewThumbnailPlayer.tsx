@@ -431,6 +431,11 @@ export function VideoPreview({
       setReviewed();
 
       if (loop && playerRef.current) {
+        if (manualPlayback) {
+          setManualPlayback(false);
+          setTimeout(() => setManualPlayback(true), 100);
+        }
+
         playerRef.current.currentTime = playerStartTime;
         return;
       }

@@ -4,6 +4,7 @@ import {
   GeneralFilterContent,
 } from "@/components/filter/ReviewFilterGroup";
 import Chip from "@/components/indicators/Chip";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -34,7 +35,7 @@ import { ATTRIBUTE_LABELS, FrigateConfig } from "@/types/frigateConfig";
 import { getIconForLabel } from "@/utils/iconUtil";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import axios from "axios";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isMobile } from "react-device-detect";
 import {
   FaList,
@@ -44,6 +45,9 @@ import {
 } from "react-icons/fa";
 import { PiSlidersHorizontalFill } from "react-icons/pi";
 import useSWR from "swr";
+import useSWRInfinite from "swr/infinite";
+
+const API_LIMIT = 100;
 
 export default function SubmitPlus() {
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -64,20 +68,92 @@ export default function SubmitPlus() {
 
   // data
 
-  const { data: events, mutate: refresh } = useSWR<Event[]>([
-    "events",
-    {
-      limit: 100,
-      in_progress: 0,
-      is_submitted: 0,
-      cameras: selectedCameras ? selectedCameras.join(",") : null,
-      labels: selectedLabels ? selectedLabels.join(",") : null,
-      min_score: scoreRange ? scoreRange[0] : null,
-      max_score: scoreRange ? scoreRange[1] : null,
-      sort: sort ? sort : null,
+  const eventFetcher = useCallback((key: string) => {
+    const [path, params] = Array.isArray(key) ? key : [key, undefined];
+    return axios.get(path, { params }).then((res) => res.data);
+  }, []);
+
+  const getKey = useCallback(
+    (index: number, prevData: Event[]) => {
+      if (index > 0) {
+        const lastDate = prevData[prevData.length - 1].start_time;
+        return [
+          "events",
+          {
+            limit: API_LIMIT,
+            in_progress: 0,
+            is_submitted: 0,
+            cameras: selectedCameras ? selectedCameras.join(",") : null,
+            labels: selectedLabels ? selectedLabels.join(",") : null,
+            min_score: scoreRange ? scoreRange[0] : null,
+            max_score: scoreRange ? scoreRange[1] : null,
+            sort: sort ? sort : null,
+            before: lastDate,
+          },
+        ];
+      }
+
+      return [
+        "events",
+        {
+          limit: 100,
+          in_progress: 0,
+          is_submitted: 0,
+          cameras: selectedCameras ? selectedCameras.join(",") : null,
+          labels: selectedLabels ? selectedLabels.join(",") : null,
+          min_score: scoreRange ? scoreRange[0] : null,
+          max_score: scoreRange ? scoreRange[1] : null,
+          sort: sort ? sort : null,
+        },
+      ];
     },
-  ]);
+    [scoreRange, selectedCameras, selectedLabels, sort],
+  );
+
+  const {
+    data: eventPages,
+    mutate: refresh,
+    size,
+    setSize,
+    isValidating,
+  } = useSWRInfinite<Event[]>(getKey, eventFetcher, {
+    revalidateOnFocus: false,
+  });
+
+  const events = useMemo(
+    () => (eventPages ? eventPages.flat() : []),
+    [eventPages],
+  );
+
   const [upload, setUpload] = useState<Event>();
+
+  // paging
+
+  const isDone = useMemo(
+    () => (eventPages?.at(-1)?.length ?? 0) < API_LIMIT,
+    [eventPages],
+  );
+
+  const pagingObserver = useRef<IntersectionObserver | null>();
+  const lastEventRef = useCallback(
+    (node: HTMLElement | null) => {
+      if (isValidating) return;
+      if (pagingObserver.current) pagingObserver.current.disconnect();
+      try {
+        pagingObserver.current = new IntersectionObserver((entries) => {
+          if (entries[0].isIntersecting && !isDone) {
+            setSize(size + 1);
+          }
+        });
+        if (node) pagingObserver.current.observe(node);
+      } catch (e) {
+        // no op
+      }
+    },
+    [isValidating, isDone, size, setSize],
+  );
+
+  // layout
 
   const grow = useMemo(() => {
     if (!config || !upload) {
@@ -110,18 +186,35 @@ export default function SubmitPlus() {
           });
 
       refresh(
-        (data: Event[] | undefined) => {
+        (data: Event[][] | undefined) => {
           if (!data) {
             return data;
           }
 
-          const index = data.findIndex((e) => e.id == upload.id);
+          let pageIndex = -1;
+          let index = -1;
+
+          data.forEach((page, pIdx) => {
+            const search = page.findIndex((e) => e.id == upload.id);
+
+            if (search != -1) {
+              pageIndex = pIdx;
+              index = search;
+            }
+          });
 
           if (index == -1) {
             return data;
           }
 
-          return [...data.slice(0, index), ...data.slice(index + 1)];
+          return [
+            ...data.slice(0, pageIndex),
+            [
+              ...data[pageIndex].slice(0, index),
+              ...data[pageIndex].slice(index + 1),
+            ],
+            ...data.slice(pageIndex + 1),
+          ];
         },
         { revalidate: false, populateCache: true },
       );
@@ -182,14 +275,17 @@ export default function SubmitPlus() {
             </DialogContent>
           </Dialog>
 
-          {events?.map((event) => {
+          {events?.map((event, eIdx) => {
             if (event.data.type != "object") {
               return;
             }
 
+            const lastRow = eIdx == events.length - 1;
+
             return (
               <div
                 key={event.id}
+                ref={lastRow ? lastEventRef : null}
                 className="w-full relative rounded-lg md:rounded-2xl aspect-video flex justify-center items-center bg-black cursor-pointer"
                 onClick={() => setUpload(event)}
               >
@@ -228,6 +324,8 @@ export default function SubmitPlus() {
               </div>
             );
           })}
+
+          {isValidating && <ActivityIndicator />}
         </div>
       </div>
     </div>
