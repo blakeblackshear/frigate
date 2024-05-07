@@ -37,7 +37,7 @@
     "apexcharts": "^3.48.0",
     "axios": "^1.6.8",
     "class-variance-authority": "^0.7.0",
-    "clsx": "^2.1.0",
+    "clsx": "^2.1.1",
     "copy-to-clipboard": "^3.3.3",
     "date-fns": "^3.6.0",
     "hls.js": "^1.5.8",
