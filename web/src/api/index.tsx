@@ -25,8 +25,9 @@ export function ApiProvider({ children, options }: ApiProviderType) {
           return axios.get(path, { params }).then((res) => res.data);
         },
         onError: (error, _key) => {
-          if (error.response.status === 401) {
-            window.location.href = "login";
+          if ([401, 302, 307].includes(error.response.status)) {
+            window.location.href =
+              error.response.headers.get("location") ?? "login";
           }
         },
         ...options,
