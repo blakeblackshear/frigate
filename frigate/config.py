@@ -125,7 +125,6 @@ class UserConfig(FrigateBaseModel):
 
 class AuthConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable authentication")
-    # TODO: validation for cookie names
     cookie_name: str = Field(
         default="jwt.token", title="Name for jwt token cookie", pattern=r"^[a-z]_*$"
     )
@@ -136,6 +135,10 @@ class AuthConfig(FrigateBaseModel):
         default=43200,
         title="Refresh the session if it is going to expire in this many seconds",
         ge=30,
+    )
+    failed_login_rate_limit: Optional[str] = Field(
+        default="1/second;5/minute;20/hour",
+        title="Rate limits for failed login attempts.",
     )
     users: Optional[List[UserConfig]] = Field(default=[], title="Users")
 

@@ -11,6 +11,8 @@ from datetime import datetime
 from pathlib import Path
 
 from flask import Blueprint, current_app, make_response, request
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from joserfc import jwt
 
 from frigate.const import CONFIG_DIR, JWT_SECRET_ENV_VAR, PASSWORD_HASH_ALGORITHM
@@ -18,6 +20,15 @@ from frigate.const import CONFIG_DIR, JWT_SECRET_ENV_VAR, PASSWORD_HASH_ALGORITH
 logger = logging.getLogger(__name__)
 
 AuthBp = Blueprint("auth", __name__)
+
+limiter = Limiter(
+    lambda: get_remote_address,
+    storage_uri="memory://",
+)
+
+
+def get_rate_limit():
+    return current_app.frigate_config.auth.failed_login_rate_limit
 
 
 def get_jwt_secret() -> str:
@@ -179,6 +190,7 @@ def auth():
 
 
 @AuthBp.route("/login", methods=["POST"])
+@limiter.limit(get_rate_limit, deduct_when=lambda response: response.status_code == 400)
 def login():
     JWT_COOKIE_NAME = current_app.frigate_config.auth.cookie_name
     JWT_SESSION_LENGTH = current_app.frigate_config.auth.session_length

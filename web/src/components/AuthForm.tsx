@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import ActivityIndicator from "./indicators/activity-indicator";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { Toaster } from "./ui/sonner";
 import { toast } from "sonner";
 import {
@@ -56,9 +56,27 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       );
       window.location.href = "/";
     } catch (error) {
-      toast.error("Login failed", {
-        position: "top-center",
-      });
+      if (axios.isAxiosError(error)) {
+        const err = error as AxiosError;
+        if (err.response?.status === 429) {
+          toast.error("Exceeded rate limit. Try again in 1 minute.", {
+            position: "top-center",
+          });
+        } else if (err.response?.status === 400) {
+          toast.error("Login failed", {
+            position: "top-center",
+          });
+        } else {
+          toast.error("Unknown error. Check logs.", {
+            position: "top-center",
+          });
+        }
+      } else {
+        toast.error("Unknown error. Check console logs.", {
+          position: "top-center",
+        });
+      }
+
       setIsLoading(false);
     }
   };

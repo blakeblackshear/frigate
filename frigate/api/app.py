@@ -13,8 +13,9 @@ from flask import Blueprint, Flask, current_app, jsonify, make_response, request
 from markupsafe import escape
 from peewee import operator
 from playhouse.sqliteq import SqliteQueueDatabase
+from werkzeug.middleware.proxy_fix import ProxyFix
 
-from frigate.api.auth import AuthBp, get_jwt_secret
+from frigate.api.auth import AuthBp, get_jwt_secret, limiter
 from frigate.api.event import EventBp
 from frigate.api.export import ExportBp
 from frigate.api.media import MediaBp
@@ -86,6 +87,11 @@ def create_app(
     app.camera_error_image = None
     app.stats_emitter = stats_emitter
     app.jwt_token = get_jwt_secret() if frigate_config.auth.enabled else None
+    # initialize the rate limiter for the login endpoint
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1)
+    limiter.init_app(app)
+    if frigate_config.auth.failed_login_rate_limit is None:
+        limiter.enabled = False
 
     app.register_blueprint(bp)
 
