@@ -115,13 +115,20 @@ def create_encoded_jwt(user, expiration, secret):
 
 def set_jwt_cookie(response, cookie_name, encoded_jwt, expiration):
     # TODO: ideally this would set secure as well, but that requires TLS
-    response.set_cookie(cookie_name, encoded_jwt, httponly=True, expires=expiration)
+    response.set_cookie(
+        cookie_name, encoded_jwt, httponly=True, expires=expiration, secure=False
+    )
 
 
 @AuthBp.route("/auth")
 def auth():
+    success_response = make_response({}, 202)
+
+    fail_response = make_response({}, 401)
+    fail_response.headers["location"] = "/login"
+
     if not current_app.frigate_config.auth.enabled:
-        return make_response({}, 202)
+        return success_response
 
     JWT_COOKIE_NAME = current_app.frigate_config.auth.cookie_name
     JWT_REFRESH = current_app.frigate_config.auth.refresh_time
@@ -142,18 +149,16 @@ def auth():
 
     if encoded_token is None:
         logger.debug("No jwt token found")
-        return make_response({}, 401)
+        return fail_response
 
     try:
-        response = make_response({}, 202)
-
         token = jwt.decode(encoded_token, current_app.jwt_token)
         if "sub" not in token.claims:
             logger.debug("user not set in jwt token")
-            return make_response({}, 401)
+            return fail_response
         if "exp" not in token.claims:
             logger.debug("exp not set in jwt token")
-            return make_response({}, 401)
+            return fail_response
 
         user = token.claims.get("sub")
         current_time = int(time.time())
@@ -171,7 +176,7 @@ def auth():
         )
         if expiration <= current_time:
             logger.debug("jwt token expired")
-            return make_response({}, 401)
+            return fail_response
 
         # if the jwt cookie is expiring soon
         elif jwt_source == "cookie" and expiration - JWT_REFRESH <= current_time:
@@ -180,13 +185,15 @@ def auth():
             new_encoded_jwt = create_encoded_jwt(
                 user, new_expiration, current_app.jwt_token
             )
-            set_jwt_cookie(response, JWT_COOKIE_NAME, new_encoded_jwt, new_expiration)
+            set_jwt_cookie(
+                success_response, JWT_COOKIE_NAME, new_encoded_jwt, new_expiration
+            )
 
-        response.headers["remote-user"] = user
-        return response
+        success_response.headers["remote-user"] = user
+        return success_response
     except Exception as e:
         logger.error(f"Error parsing jwt: {e}")
-        return make_response({}, 401)
+        return fail_response
 
 
 @AuthBp.route("/login", methods=["POST"])
