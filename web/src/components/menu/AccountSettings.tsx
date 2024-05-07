@@ -3,6 +3,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { isDesktop } from "react-device-detect";
 import { VscAccount } from "react-icons/vsc";
@@ -15,7 +16,13 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
     <Tooltip>
       <TooltipTrigger asChild>
         <div
-          className={`flex flex-col justify-center items-center ${isDesktop ? "rounded-lg text-secondary-foreground bg-secondary hover:bg-muted cursor-pointer" : "text-secondary-foreground"} ${className ?? ""}`}
+          className={cn(
+            "flex flex-col justify-center items-center",
+            isDesktop
+              ? "rounded-lg text-secondary-foreground bg-secondary hover:bg-muted cursor-pointer"
+              : "text-secondary-foreground",
+            className,
+          )}
         >
           <VscAccount className="size-5 md:m-[6px]" />
         </div>

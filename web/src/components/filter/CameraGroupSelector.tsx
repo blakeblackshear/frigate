@@ -60,6 +60,7 @@ import { toast } from "sonner";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
+import { cn } from "@/lib/utils";
 
 type CameraGroupSelectorProps = {
   className?: string;
@@ -120,7 +121,11 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
       />
       <Scroller className={`${isMobile ? "whitespace-nowrap" : ""}`}>
         <div
-          className={`flex items-center justify-start gap-2 ${className ?? ""} ${isDesktop ? "flex-col" : "whitespace-nowrap"}`}
+          className={cn(
+            "flex items-center justify-start gap-2",
+            className,
+            isDesktop ? "flex-col" : "whitespace-nowrap",
+          )}
         >
           <Tooltip open={tooltip == "default"}>
             <TooltipTrigger asChild>

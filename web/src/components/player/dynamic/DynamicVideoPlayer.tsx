@@ -11,6 +11,7 @@ import { TimeRange } from "@/types/timeline";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { VideoResolutionType } from "@/types/live";
 import axios from "axios";
+import { cn } from "@/lib/utils";
 
 /**
  * Dynamically switches between video playback and scrubbing preview player.
@@ -202,7 +203,10 @@ export default function DynamicVideoPlayer({
         onUploadFrame={onUploadFrameToPlus}
       />
       <PreviewPlayer
-        className={`${isScrubbing || isLoading ? "visible" : "hidden"} ${className}`}
+        className={cn(
+          isScrubbing || isLoading ? "visible" : "hidden",
+          className,
+        )}
         camera={camera}
         timeRange={timeRange}
         cameraPreviews={cameraPreviews}

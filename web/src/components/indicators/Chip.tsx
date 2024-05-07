@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { LogSeverity } from "@/types/log";
 import { ReactNode, useMemo, useRef } from "react";
 import { CSSTransition } from "react-transition-group";
@@ -32,7 +33,10 @@ export default function Chip({
     >
       <div
         ref={nodeRef}
-        className={`flex px-2 py-1.5 rounded-2xl items-center z-10 ${className}`}
+        className={cn(
+          "flex px-2 py-1.5 rounded-2xl items-center z-10",
+          className,
+        )}
         onClick={onClick}
       >
         {children}

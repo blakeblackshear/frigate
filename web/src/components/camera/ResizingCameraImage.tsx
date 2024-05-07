@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { useResizeObserver } from "@/hooks/resize-observer";
+import { cn } from "@/lib/utils";
 
 type CameraImageProps = {
   className?: string;
@@ -95,7 +96,7 @@ export default function CameraImage({
 
   return (
     <div
-      className={`relative w-full h-full flex justify-center ${className}`}
+      className={cn("relative w-full h-full flex justify-center", className)}
       ref={containerRef}
     >
       {enabled ? (

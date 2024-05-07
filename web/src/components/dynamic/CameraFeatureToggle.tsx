@@ -5,6 +5,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { isDesktop } from "react-device-detect";
+import { cn } from "@/lib/utils";
 
 const variants = {
   primary: {
@@ -38,9 +39,11 @@ export default function CameraFeatureToggle({
   const content = (
     <div
       onClick={onClick}
-      className={`${className} flex flex-col justify-center items-center ${
-        variants[variant][isActive ? "active" : "inactive"]
-      }`}
+      className={cn(
+        className,
+        "flex flex-col justify-center items-center",
+        variants[variant][isActive ? "active" : "inactive"],
+      )}
     >
       <Icon
         className={`size-5 md:m-[6px] ${isActive ? "text-white" : "text-secondary-foreground"}`}

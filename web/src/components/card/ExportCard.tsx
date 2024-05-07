@@ -18,6 +18,7 @@ import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { DeleteClipType, Export } from "@/types/export";
 import { MdEditSquare } from "react-icons/md";
 import { baseUrl } from "@/api/baseUrl";
+import { cn } from "@/lib/utils";
 
 type ExportProps = {
   className: string;
@@ -104,7 +105,10 @@ export default function ExportCard({
       </Dialog>
 
       <div
-        className={`relative aspect-video bg-black rounded-lg md:rounded-2xl flex justify-center items-center ${className}`}
+        className={cn(
+          "relative aspect-video bg-black rounded-lg md:rounded-2xl flex justify-center items-center",
+          className,
+        )}
         onMouseEnter={
           isDesktop && !exportedRecording.in_progress
             ? () => setHovered(true)
