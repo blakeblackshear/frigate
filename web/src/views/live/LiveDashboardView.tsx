@@ -12,16 +12,24 @@ import { usePersistence } from "@/hooks/use-persistence";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import { ReviewSegment } from "@/types/review";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { isDesktop, isMobile, isSafari } from "react-device-detect";
+import {
+  isDesktop,
+  isMobile,
+  isMobileOnly,
+  isSafari,
+} from "react-device-detect";
 import useSWR from "swr";
+import DraggableGridLayout from "./DraggableGridLayout";
 
 type LiveDashboardViewProps = {
   cameras: CameraConfig[];
+  cameraGroup?: string;
   includeBirdseye: boolean;
   onSelectCamera: (camera: string) => void;
 };
 export default function LiveDashboardView({
   cameras,
+  cameraGroup,
   includeBirdseye,
   onSelectCamera,
 }: LiveDashboardViewProps) {
@@ -29,7 +37,7 @@ export default function LiveDashboardView({
 
   // layout
 
-  const [layout, setLayout] = usePersistence<"grid" | "list">(
+  const [mobileLayout, setMobileLayout] = usePersistence<"grid" | "list">(
     "live-layout",
     isDesktop ? "grid" : "list",
   );
@@ -150,25 +158,25 @@ export default function LiveDashboardView({
           <div className="flex items-center gap-1">
             <Button
               className={`p-1 ${
-                layout == "grid"
+                mobileLayout == "grid"
                   ? "bg-blue-900 focus:bg-blue-900 bg-opacity-60 focus:bg-opacity-60"
                   : "bg-secondary"
               }`}
               size="xs"
-              onClick={() => setLayout("grid")}
+              onClick={() => setMobileLayout("grid")}
             >
-              <LiveGridIcon layout={layout} />
+              <LiveGridIcon layout={mobileLayout} />
             </Button>
             <Button
               className={`p-1 ${
-                layout == "list"
+                mobileLayout == "list"
                   ? "bg-blue-900 focus:bg-blue-900 bg-opacity-60 focus:bg-opacity-60"
                   : "bg-secondary"
               }`}
               size="xs"
-              onClick={() => setLayout("list")}
+              onClick={() => setMobileLayout("list")}
             >
-              <LiveListIcon layout={layout} />
+              <LiveListIcon layout={mobileLayout} />
             </Button>
           </div>
         </div>
@@ -187,41 +195,53 @@ export default function LiveDashboardView({
         </ScrollArea>
       )}
 
-      <div
-        className={`mt-2 px-2 grid ${layout == "grid" ? "grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4" : ""} gap-2 md:gap-4`}
-      >
-        {includeBirdseye && birdseyeConfig?.enabled && (
-          <BirdseyeLivePlayer
-            birdseyeConfig={birdseyeConfig}
-            liveMode={birdseyeConfig.restream ? "mse" : "jsmpeg"}
-            onClick={() => onSelectCamera("birdseye")}
-          />
-        )}
-        {cameras.map((camera) => {
-          let grow;
-          const aspectRatio = camera.detect.width / camera.detect.height;
-          if (aspectRatio > 2) {
-            grow = `${layout == "grid" ? "col-span-2" : ""} aspect-wide`;
-          } else if (aspectRatio < 1) {
-            grow = `${layout == "grid" ? "row-span-2 aspect-tall md:h-full" : ""} aspect-tall`;
-          } else {
-            grow = "aspect-video";
-          }
-          return (
-            <LivePlayer
-              cameraRef={cameraRef}
-              key={camera.name}
-              className={`${grow} rounded-lg md:rounded-2xl bg-black`}
-              windowVisible={
-                windowVisible && visibleCameras.includes(camera.name)
-              }
-              cameraConfig={camera}
-              preferredLiveMode={isSafari ? "webrtc" : "mse"}
-              onClick={() => onSelectCamera(camera.name)}
+      {!cameraGroup || cameraGroup == "default" || isMobileOnly ? (
+        <div
+          className={`mt-2 px-2 grid ${mobileLayout == "grid" ? "grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4" : ""} gap-2 md:gap-4`}
+        >
+          {includeBirdseye && birdseyeConfig?.enabled && (
+            <BirdseyeLivePlayer
+              birdseyeConfig={birdseyeConfig}
+              liveMode={birdseyeConfig.restream ? "mse" : "jsmpeg"}
+              onClick={() => onSelectCamera("birdseye")}
             />
-          );
-        })}
-      </div>
+          )}
+          {cameras.map((camera) => {
+            let grow;
+            const aspectRatio = camera.detect.width / camera.detect.height;
+            if (aspectRatio > 2) {
+              grow = `${mobileLayout == "grid" ? "col-span-2" : ""} aspect-wide`;
+            } else if (aspectRatio < 1) {
+              grow = `${mobileLayout == "grid" ? "row-span-2 aspect-tall md:h-full" : ""} aspect-tall`;
+            } else {
+              grow = "aspect-video";
+            }
+            return (
+              <LivePlayer
+                cameraRef={cameraRef}
+                key={camera.name}
+                className={`${grow} rounded-lg md:rounded-2xl bg-black`}
+                windowVisible={
+                  windowVisible && visibleCameras.includes(camera.name)
+                }
+                cameraConfig={camera}
+                preferredLiveMode={isSafari ? "webrtc" : "mse"}
+                onClick={() => onSelectCamera(camera.name)}
+              />
+            );
+          })}
+        </div>
+      ) : (
+        <DraggableGridLayout
+          cameras={cameras}
+          cameraGroup={cameraGroup}
+          cameraRef={cameraRef}
+          includeBirdseye={includeBirdseye}
+          onSelectCamera={onSelectCamera}
+          windowVisible={windowVisible}
+          visibleCameras={visibleCameras}
+        />
+      )}
     </div>
   );
 }
