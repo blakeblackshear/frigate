@@ -8,6 +8,7 @@ import { isDesktop } from "react-device-detect";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { NavData } from "@/types/navigation";
 import { IconType } from "react-icons";
+import { cn } from "@/lib/utils";
 
 const variants = {
   primary: {
@@ -42,9 +43,11 @@ export default function NavItem({
       to={item.url}
       onClick={onClick}
       className={({ isActive }) =>
-        `flex flex-col justify-center items-center rounded-lg ${className ?? ""} ${
-          variants[item.variant ?? "primary"][isActive ? "active" : "inactive"]
-        }`
+        cn(
+          "flex flex-col justify-center items-center rounded-lg",
+          className,
+          variants[item.variant ?? "primary"][isActive ? "active" : "inactive"],
+        )
       }
     >
       <Icon className="size-5 md:m-[6px]" />

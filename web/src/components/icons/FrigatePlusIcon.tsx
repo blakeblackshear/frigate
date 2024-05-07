@@ -1,5 +1,6 @@
 import { LuPlus } from "react-icons/lu";
 import Logo from "../Logo";
+import { cn } from "@/lib/utils";
 
 type FrigatePlusIconProps = {
   className?: string;
@@ -11,7 +12,7 @@ export default function FrigatePlusIcon({
 }: FrigatePlusIconProps) {
   return (
     <div
-      className={`relative flex items-center ${className ?? ""}`}
+      className={cn("relative flex items-center", className)}
       onClick={onClick}
     >
       <Logo className="size-full" />

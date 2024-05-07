@@ -15,6 +15,7 @@ import { baseUrl } from "@/api/baseUrl";
 import { isAndroid, isChrome, isMobile } from "react-device-detect";
 import { TimeRange } from "@/types/timeline";
 import { Skeleton } from "../ui/skeleton";
+import { cn } from "@/lib/utils";
 
 type PreviewPlayerProps = {
   className?: string;
@@ -238,7 +239,11 @@ function PreviewVideoPlayer({
 
   return (
     <div
-      className={`relative rounded-lg md:rounded-2xl w-full flex justify-center bg-black overflow-hidden ${onClick ? "cursor-pointer" : ""} ${className ?? ""}`}
+      className={cn(
+        "relative rounded-lg md:rounded-2xl w-full flex justify-center bg-black overflow-hidden",
+        onClick && "cursor-pointer",
+        className,
+      )}
       onClick={onClick}
     >
       <img
@@ -476,7 +481,11 @@ function PreviewFramesPlayer({
 
   return (
     <div
-      className={`relative w-full flex justify-center ${className ?? ""} ${onClick ? "cursor-pointer" : ""}`}
+      className={cn(
+        "relative w-full flex justify-center",
+        className,
+        onClick && "cursor-pointer",
+      )}
       onClick={onClick}
     >
       <img

@@ -13,6 +13,7 @@ import useCameraLiveMode from "@/hooks/use-camera-live-mode";
 import { getIconForLabel } from "@/utils/iconUtil";
 import Chip from "../indicators/Chip";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
+import { cn } from "@/lib/utils";
 
 type LivePlayerProps = {
   cameraRef?: (ref: HTMLDivElement | null) => void;
@@ -150,11 +151,16 @@ export default function LivePlayer({
     <div
       ref={cameraRef}
       data-camera={cameraConfig.name}
-      className={`relative flex justify-center ${liveMode == "jsmpeg" ? "size-full" : "w-full"} outline cursor-pointer ${
+      className={cn(
+        "relative flex justify-center",
+        liveMode === "jsmpeg" ? "size-full" : "w-full",
+        "outline cursor-pointer",
         activeTracking
           ? "outline-severity_alert outline-3 rounded-lg md:rounded-2xl shadow-severity_alert"
-          : "outline-0 outline-background"
-      } transition-all duration-500 ${className}`}
+          : "outline-0 outline-background",
+        "transition-all duration-500",
+        className,
+      )}
       onClick={onClick}
     >
       <div className="absolute top-0 inset-x-0 rounded-lg md:rounded-2xl z-10 w-full h-[30%] bg-gradient-to-b from-black/20 to-transparent pointer-events-none"></div>

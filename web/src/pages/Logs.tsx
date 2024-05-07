@@ -12,6 +12,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { isDesktop } from "react-device-detect";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import { cn } from "@/lib/utils";
 
 const logTypes = ["frigate", "go2rtc", "nginx"] as const;
 type LogType = (typeof logTypes)[number];
@@ -472,7 +473,11 @@ function LogLineData({
   return (
     <div
       ref={startRef}
-      className={`w-full py-2 grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 gap-2 border-secondary border-t cursor-pointer hover:bg-muted ${className} *:text-sm`}
+      className={cn(
+        "w-full py-2 grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 gap-2 border-secondary border-t cursor-pointer hover:bg-muted",
+        className,
+        "*:text-sm",
+      )}
       onClick={onSelect}
     >
       <div className="h-full p-1 flex items-center gap-2">
