@@ -147,11 +147,18 @@ RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && python3 get-pip.py "pip"
 
+RUN apt-get -qq update && apt-get -qq install -y \
+    python3-numpy python3-matplotlib python3-opencv python3-scipy python3-pandas python3-onnx python3-lxml python3-zmq
+
 COPY docker/main/requirements.txt /requirements.txt
-RUN pip3 install -r /requirements.txt
+RUN PIP_IGNORE_INSTALLED=0 pip3 install -r /requirements.txt
+
+RUN PIP_IGNORE_INSTALLED=0 pip3 install --no-deps filterpy norfair==2.1.1
+
+RUN PIP_IGNORE_INSTALLED=0 pip3 install --no-deps zeep==3.0.0 onvif_zeep
 
 COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
-RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt
+RUN PIP_IGNORE_INSTALLED=0 pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt
 
 
 # Collect deps in a single layer
@@ -181,6 +188,9 @@ ENV PATH="/usr/lib/btbn-ffmpeg/bin:/usr/local/go2rtc/bin:/usr/local/nginx/sbin:$
 # Install dependencies
 RUN --mount=type=bind,source=docker/main/install_deps.sh,target=/deps/install_deps.sh \
     /deps/install_deps.sh
+
+COPY --from=wheels /usr/local/lib/python3.9/site-packages /usr/local/lib/python3.9/site-packages
+COPY --from=wheels /usr/lib/python3/dist-packages /usr/lib/python3/dist-packages
 
 RUN --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels \
     python3 -m pip install --upgrade pip && \
