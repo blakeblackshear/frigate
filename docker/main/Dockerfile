@@ -51,7 +51,7 @@ ARG DEBIAN_FRONTEND
 # Install OpenVino Runtime and Dev library
 COPY docker/main/requirements-ov.txt /requirements-ov.txt
 RUN apt-get -qq update \
-    && apt-get -qq install -y wget python3 python3-distutils \
+    && apt-get -qq install -y wget python3 python3-distutils pkg-config libhdf5-dev gcc python3-dev \
     && wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && python3 get-pip.py "pip" \
     && pip install -r /requirements-ov.txt
