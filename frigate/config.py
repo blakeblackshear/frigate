@@ -606,7 +606,7 @@ class ZoneConfig(BaseModel):
             if explicit:
                 self.coordinates = ",".join(
                     [
-                        f"{int(points[i]) / frame_shape[1]},{int(points[i + 1]) / frame_shape[0]}"
+                        f"{round(int(points[i]) / frame_shape[1], 3)},{round(int(points[i + 1]) / frame_shape[0], 3)}"
                         for i in range(0, len(points), 2)
                     ]
                 )
