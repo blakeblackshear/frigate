@@ -6,6 +6,8 @@ s6_version="3.1.5.0"
 
 if [[ "${TARGETARCH}" == "amd64" ]]; then
     s6_arch="x86_64"
+elif [[ "${TARGETARCH}" == "arm" ]]; then
+    s6_arch="armhf"
 elif [[ "${TARGETARCH}" == "arm64" ]]; then
     s6_arch="aarch64"
 fi

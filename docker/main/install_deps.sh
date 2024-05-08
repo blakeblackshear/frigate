@@ -16,6 +16,14 @@ apt-get -qq install --no-install-recommends -y \
     jq \
     nethogs
 
+# Use latest distro-provided numpy-related libraries, rather than building wheels from scatch
+apt-get -qq install --no-install-recommends --no-install-suggests -y \
+    python3-numpy python3-matplotlib python3-opencv python3-scipy -y
+
+# Again, avoid complicated wheel build for lxml and onif_zeep by using distro-provided libraries
+apt-get -qq install --no-install-recommends --no-install-suggests -y \
+    python3-lxml -y
+
 # ensure python3 defaults to python3.9
 update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
 
@@ -78,7 +86,14 @@ apt-get autoremove --purge -y
 rm -rf /var/lib/apt/lists/*
 
 # Install yq, for frigate-prepare and go2rtc echo source
+if [[ "${TARGETARCH}" == "arm" ]]; then
+curl -fsSL \
+    "https://github.com/mikefarah/yq/releases/download/v4.33.3/yq_linux_arm" \
+    --output /usr/local/bin/yq
+chmod +x /usr/local/bin/yq
+else
 curl -fsSL \
     "https://github.com/mikefarah/yq/releases/download/v4.33.3/yq_linux_$(dpkg --print-architecture)" \
     --output /usr/local/bin/yq
 chmod +x /usr/local/bin/yq
+fi

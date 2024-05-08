@@ -1,2 +1,6 @@
+--only-binary :all:
 scikit-build == 0.17.*
 nvidia-pyindex
+norfair == 2.1.1
+zeep == 3.0.0
+onvif_zeep

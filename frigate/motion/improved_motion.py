@@ -19,7 +19,6 @@ class ImprovedMotionDetector(MotionDetector):
         config: MotionConfig,
         fps: int,
         name="improved",
-        blur_radius=1,
         interpolation=cv2.INTER_NEAREST,
         contrast_frame_history=50,
     ):
@@ -42,7 +41,6 @@ class ImprovedMotionDetector(MotionDetector):
         self.mask = np.where(resized_mask == [0])
         self.save_images = False
         self.calibrating = True
-        self.blur_radius = blur_radius
         self.interpolation = interpolation
         self.contrast_values = np.zeros((contrast_frame_history, 2), np.uint8)
         self.contrast_values[:, 1:2] = 255
@@ -104,7 +102,7 @@ class ImprovedMotionDetector(MotionDetector):
         # Setting masked pixels to zero, to match the average frame at startup
         resized_frame[self.mask] = [0]
 
-        resized_frame = gaussian_filter(resized_frame, sigma=1, radius=self.blur_radius)
+        resized_frame = gaussian_filter(resized_frame, sigma=1)
 
         if self.save_images:
             blurred_saved = resized_frame.copy()
