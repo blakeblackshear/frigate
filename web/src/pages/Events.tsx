@@ -1,9 +1,9 @@
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import useApiFilter from "@/hooks/use-api-filter";
+import { useCameraPreviews } from "@/hooks/use-camera-previews";
 import { useTimezone } from "@/hooks/use-date-utils";
 import { useOverlayState, useSearchEffect } from "@/hooks/use-overlay-state";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { Preview } from "@/types/preview";
 import { RecordingStartingPoint } from "@/types/record";
 import {
   ReviewFilter,
@@ -161,7 +161,6 @@ export default function Events() {
   }, [updateSummary]);
 
   // preview videos
-  const [previewKey, setPreviewKey] = useState(0);
   const previewTimes = useMemo(() => {
     if (!reviews || reviews.length == 0) {
       return undefined;
@@ -170,49 +169,21 @@ export default function Events() {
     const startDate = new Date();
     startDate.setMinutes(0, 0, 0);
 
-    let endDate;
-    if (previewKey == 0) {
-      endDate = new Date(reviews.at(-1)?.end_time || 0);
-      endDate.setHours(0, 0, 0, 0);
-    } else {
-      endDate = new Date();
-      endDate.setMilliseconds(0);
-    }
+    const endDate = new Date(reviews.at(-1)?.end_time || 0);
+    endDate.setHours(0, 0, 0, 0);
 
     return {
-      start: startDate.getTime() / 1000,
-      end: endDate.getTime() / 1000,
+      after: startDate.getTime() / 1000,
+      before: endDate.getTime() / 1000,
     };
-  }, [reviews, previewKey]);
-  const { data: allPreviews } = useSWR<Preview[]>(
-    previewTimes
-      ? `preview/all/start/${previewTimes.start}/end/${previewTimes.end}`
-      : null,
-    { revalidateOnFocus: false, revalidateOnReconnect: false },
+  }, [reviews]);
+
+  const allPreviews = useCameraPreviews(
+    previewTimes ?? { after: 0, before: 0 },
+    {
+      fetchPreviews: previewTimes != undefined,
+    },
   );
-
-  // Set a timeout to update previews on the hour
-  useEffect(() => {
-    if (!allPreviews || allPreviews.length == 0) {
-      return;
-    }
-
-    const callback = () => {
-      const nextPreviewStart = new Date(
-        allPreviews[allPreviews.length - 1].end * 1000,
-      );
-      nextPreviewStart.setHours(nextPreviewStart.getHours() + 1);
-
-      if (Date.now() > nextPreviewStart.getTime()) {
-        setPreviewKey(10 * Math.random());
-      }
-    };
-    document.addEventListener("focusin", callback);
-
-    return () => {
-      document.removeEventListener("focusin", callback);
-    };
-  }, [allPreviews]);
 
   // review status
 

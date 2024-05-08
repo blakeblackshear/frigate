@@ -7,12 +7,12 @@ import { REVIEW_PADDING, ReviewSegment } from "@/types/review";
 import { useNavigate } from "react-router-dom";
 import { RecordingStartingPoint } from "@/types/record";
 import axios from "axios";
-import { Preview } from "@/types/preview";
 import {
   InProgressPreview,
   VideoPreview,
 } from "../player/PreviewThumbnailPlayer";
 import { isCurrentHour } from "@/utils/dateUtil";
+import { useCameraPreviews } from "@/hooks/use-camera-previews";
 
 type AnimatedEventCardProps = {
   event: ReviewSegment;
@@ -24,10 +24,15 @@ export function AnimatedEventCard({ event }: AnimatedEventCardProps) {
 
   // preview
 
-  const { data: previews } = useSWR<Preview[]>(
-    currentHour
-      ? null
-      : `/preview/${event.camera}/start/${Math.round(event.start_time)}/end/${Math.round(event.end_time || event.start_time + 20)}`,
+  const previews = useCameraPreviews(
+    {
+      after: Math.round(event.start_time),
+      before: Math.round(event.end_time || event.start_time + 20),
+    },
+    {
+      camera: event.camera,
+      fetchPreviews: !currentHour,
+    },
   );
 
   // interaction
