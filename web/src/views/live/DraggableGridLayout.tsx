@@ -7,6 +7,7 @@ import {
 import React, {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -20,7 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { isEqual } from "lodash";
 import useSWR from "swr";
-import { isSafari } from "react-device-detect";
+import { isDesktop, isMobile, isSafari } from "react-device-detect";
 import BirdseyeLivePlayer from "@/components/player/BirdseyeLivePlayer";
 import LivePlayer from "@/components/player/LivePlayer";
 import { Button } from "@/components/ui/button";
@@ -30,25 +31,32 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { IoClose } from "react-icons/io5";
-import { LuMoveDiagonal2 } from "react-icons/lu";
+import { LuMove } from "react-icons/lu";
+import { cn } from "@/lib/utils";
 
 type DraggableGridLayoutProps = {
   cameras: CameraConfig[];
   cameraGroup: string;
   cameraRef: (node: HTMLElement | null) => void;
+  containerRef: React.RefObject<HTMLDivElement>;
   includeBirdseye: boolean;
   onSelectCamera: (camera: string) => void;
   windowVisible: boolean;
   visibleCameras: string[];
+  isEditMode: boolean;
+  setIsEditMode: React.Dispatch<React.SetStateAction<boolean>>;
 };
 export default function DraggableGridLayout({
   cameras,
   cameraGroup,
+  containerRef,
   cameraRef,
   includeBirdseye,
   onSelectCamera,
   windowVisible,
   visibleCameras,
+  isEditMode,
+  setIsEditMode,
 }: DraggableGridLayoutProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
@@ -65,8 +73,6 @@ export default function DraggableGridLayout({
   const [currentGridLayout, setCurrentGridLayout] = useState<
     Layout[] | undefined
   >();
-
-  const [isEditMode, setIsEditMode] = useState<boolean>(false);
 
   const handleLayoutChange = useCallback(
     (currentLayout: Layout[]) => {
@@ -160,12 +166,12 @@ export default function DraggableGridLayout({
     birdseyeConfig,
   ]);
 
-  const toggleEditMode = useCallback(() => {
+  useEffect(() => {
     if (currentGridLayout) {
       const updatedGridLayout = currentGridLayout.map((layout) => ({
         ...layout,
-        isDraggable: !isEditMode,
-        isResizable: !isEditMode,
+        isDraggable: isEditMode,
+        isResizable: isEditMode,
       }));
       if (isEditMode) {
         setGridLayout(updatedGridLayout);
@@ -173,9 +179,10 @@ export default function DraggableGridLayout({
       } else {
         setGridLayout(updatedGridLayout);
       }
-      setIsEditMode((prevIsEditMode) => !prevIsEditMode);
     }
-  }, [currentGridLayout, isEditMode, setGridLayout]);
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditMode, setGridLayout]);
 
   useEffect(() => {
     if (isGridLayoutLoaded) {
@@ -218,31 +225,58 @@ export default function DraggableGridLayout({
     isGridLayoutLoaded,
   ]);
 
+  const [marginValue, setMarginValue] = useState(16);
+
+  // calculate margin value for browsers that don't have default font size of 16px
+  useLayoutEffect(() => {
+    const calculateRemValue = () => {
+      const htmlElement = document.documentElement;
+      const fontSize = window.getComputedStyle(htmlElement).fontSize;
+      setMarginValue(parseFloat(fontSize));
+    };
+
+    calculateRemValue();
+  }, []);
+
   const gridContainerRef = useRef<HTMLDivElement>(null);
 
-  const [{ width: containerWidth }] = useResizeObserver(gridContainerRef);
+  const [{ width: containerWidth, height: containerHeight }] =
+    useResizeObserver(gridContainerRef);
+
+  const hasScrollbar = useMemo(() => {
+    return (
+      containerHeight &&
+      containerRef.current &&
+      containerRef.current.offsetHeight <
+        (gridContainerRef.current?.scrollHeight ?? 0)
+    );
+  }, [containerRef, gridContainerRef, containerHeight]);
 
   const cellHeight = useMemo(() => {
     const aspectRatio = 16 / 9;
-    const totalMarginWidth = 11 * 13; // 11 margins with 13px each
-    const rowHeight =
-      ((containerWidth ?? window.innerWidth) - totalMarginWidth) /
-      (13 * aspectRatio);
-    return rowHeight;
-  }, [containerWidth]);
+    // subtract container margin, 1 camera takes up at least 4 rows
+    // account for additional margin on bottom of each row
+    return (
+      ((containerWidth ?? window.innerWidth) - 2 * marginValue) /
+        12 /
+        aspectRatio -
+      marginValue +
+      marginValue / 4
+    );
+  }, [containerWidth, marginValue]);
 
   return (
     <>
       {!isGridLayoutLoaded || !currentGridLayout ? (
         <div className="mt-2 px-2 grid grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 gap-2 md:gap-4">
           {includeBirdseye && birdseyeConfig?.enabled && (
-            <Skeleton className="size-full rounded-2xl" />
+            <Skeleton className="size-full rounded-lg md:rounded-2xl" />
           )}
           {cameras.map((camera) => {
             return (
               <Skeleton
                 key={camera.name}
-                className="aspect-video size-full rounded-2xl"
+                className="aspect-video size-full rounded-lg md:rounded-2xl"
               />
             );
           })}
@@ -264,37 +298,33 @@ export default function DraggableGridLayout({
             rowHeight={cellHeight}
             breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
             cols={{ lg: 12, md: 12, sm: 12, xs: 12, xxs: 12 }}
-            margin={[16, 16]}
-            containerPadding={[8, 8]}
-            resizeHandles={["sw", "nw", "se", "ne"]}
+            margin={[marginValue, marginValue]}
+            containerPadding={[0, isEditMode ? 6 : 3]}
+            resizeHandles={isEditMode ? ["sw", "nw", "se", "ne"] : []}
             onDragStop={handleLayoutChange}
             onResizeStop={handleLayoutChange}
           >
             {includeBirdseye && birdseyeConfig?.enabled && (
               <BirdseyeLivePlayerGridItem
                 key="birdseye"
-                className={`${isEditMode ? "outline outline-2 hover:outline-4 outline-muted-foreground hover:cursor-grab active:cursor-grabbing" : ""}`}
+                className={cn(
+                  isEditMode &&
+                    "outline outline-2 hover:outline-4 outline-muted-foreground hover:cursor-grab active:cursor-grabbing",
+                )}
                 birdseyeConfig={birdseyeConfig}
                 liveMode={birdseyeConfig.restream ? "mse" : "jsmpeg"}
                 onClick={() => onSelectCamera("birdseye")}
               >
-                {isEditMode && (
-                  <>
-                    <div className="absolute top-[-6px] left-[-6px] z-50 size-3 p-2 rounded-full bg-primary-variant outline-2 outline-muted text-background pointer-events-none" />
-                    <div className="absolute top-[-6px] right-[-6px] z-50 size-3 p-2 rounded-full bg-primary-variant outline-2 outline-muted text-background pointer-events-none" />
-                    <div className="absolute bottom-[-6px] right-[-6px] z-50 size-3 p-2 rounded-full bg-primary-variant outline-2 outline-muted text-background pointer-events-none" />
-                    <div className="absolute bottom-[-6px] left-[-6px] z-50 size-3 p-2 rounded-full bg-primary-variant outline-2 outline-muted text-background pointer-events-none" />
-                  </>
-                )}
+                {isEditMode && <CornerCircles />}
               </BirdseyeLivePlayerGridItem>
             )}
             {cameras.map((camera) => {
               let grow;
               const aspectRatio = camera.detect.width / camera.detect.height;
               if (aspectRatio > ASPECT_WIDE_LAYOUT) {
-                grow = `aspect-wide`;
+                grow = `aspect-wide w-full`;
               } else if (aspectRatio < ASPECT_VERTICAL_LAYOUT) {
-                grow = `aspect-tall`;
+                grow = `aspect-tall h-full`;
               } else {
                 grow = "aspect-video";
               }
@@ -302,7 +332,12 @@ export default function DraggableGridLayout({
                 <LivePlayerGridItem
                   key={camera.name}
                   cameraRef={cameraRef}
-                  className={`${grow} size-full rounded-lg md:rounded-2xl bg-black ${isEditMode ? "outline-2 hover:outline-4 outline-muted-foreground hover:cursor-grab active:cursor-grabbing" : ""}`}
+                  className={cn(
+                    "rounded-lg md:rounded-2xl bg-black",
+                    grow,
+                    isEditMode &&
+                      "outline-2 hover:outline-4 outline-muted-foreground hover:cursor-grab active:cursor-grabbing",
+                  )}
                   windowVisible={
                     windowVisible && visibleCameras.includes(camera.name)
                   }
@@ -312,40 +347,72 @@ export default function DraggableGridLayout({
                     !isEditMode && onSelectCamera(camera.name);
                   }}
                 >
-                  {isEditMode && (
-                    <>
-                      <div className="absolute top-[-6px] left-[-6px] z-50 size-3 p-2 rounded-full bg-primary-variant outline-2 outline-muted text-background pointer-events-none" />
-                      <div className="absolute top-[-6px] right-[-6px] z-50 size-3 p-2 rounded-full bg-primary-variant outline-2 outline-muted text-background pointer-events-none" />
-                      <div className="absolute bottom-[-6px] right-[-6px] z-50 size-3 p-2 rounded-full bg-primary-variant outline-2 outline-muted text-background pointer-events-none" />
-                      <div className="absolute bottom-[-6px] left-[-6px] z-50 size-3 p-2 rounded-full bg-primary-variant outline-2 outline-muted text-background pointer-events-none" />
-                    </>
-                  )}
+                  {isEditMode && <CornerCircles />}
                 </LivePlayerGridItem>
               );
             })}
           </ResponsiveGridLayout>
-          <div className="flex flex-row gap-2 items-center text-primary">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="default"
-                  className="fixed bottom-12 lg:bottom-9 right-5 z-50 h-12 w-12 p-0 rounded-full opacity-30 hover:opacity-100 transition-all duration-300"
-                  onClick={toggleEditMode}
-                >
-                  {isEditMode ? (
-                    <IoClose className="size-5" />
-                  ) : (
-                    <LuMoveDiagonal2 className="size-5" />
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="left">
-                {isEditMode ? "Exit Editing" : "Edit Layout"}
-              </TooltipContent>
-            </Tooltip>
-          </div>
+          {isDesktop && (
+            <DesktopEditLayoutButton
+              isEditMode={isEditMode}
+              setIsEditMode={setIsEditMode}
+              hasScrollbar={hasScrollbar}
+            />
+          )}
         </div>
       )}
+    </>
+  );
+}
+
+type DesktopEditLayoutButtonProps = {
+  isEditMode?: boolean;
+  setIsEditMode: React.Dispatch<React.SetStateAction<boolean>>;
+  hasScrollbar?: boolean | 0 | null;
+};
+
+function DesktopEditLayoutButton({
+  isEditMode,
+  setIsEditMode,
+  hasScrollbar,
+}: DesktopEditLayoutButtonProps) {
+  return (
+    <div className="flex flex-row gap-2 items-center text-primary">
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="default"
+            className={cn(
+              "fixed",
+              isDesktop && "bottom-12 lg:bottom-9",
+              isMobile && "bottom-12 lg:bottom-16",
+              hasScrollbar && isDesktop ? "right-6" : "right-1",
+              "z-50 h-8 w-8 p-0 rounded-full opacity-30 hover:opacity-100 transition-all duration-300",
+            )}
+            onClick={() => setIsEditMode((prevIsEditMode) => !prevIsEditMode)}
+          >
+            {isEditMode ? (
+              <IoClose className="size-5" />
+            ) : (
+              <LuMove className="size-5" />
+            )}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="left">
+          {isEditMode ? "Exit Editing" : "Edit Layout"}
+        </TooltipContent>
+      </Tooltip>
+    </div>
+  );
+}
+
+function CornerCircles() {
+  return (
+    <>
+      <div className="absolute top-[-4px] left-[-4px] z-50 size-3 p-2 rounded-full bg-primary-variant outline-2 outline-muted text-background pointer-events-none" />
+      <div className="absolute top-[-4px] right-[-4px] z-50 size-3 p-2 rounded-full bg-primary-variant outline-2 outline-muted text-background pointer-events-none" />
+      <div className="absolute bottom-[-4px] right-[-4px] z-50 size-3 p-2 rounded-full bg-primary-variant outline-2 outline-muted text-background pointer-events-none" />
+      <div className="absolute bottom-[-4px] left-[-4px] z-50 size-3 p-2 rounded-full bg-primary-variant outline-2 outline-muted text-background pointer-events-none" />
     </>
   );
 }

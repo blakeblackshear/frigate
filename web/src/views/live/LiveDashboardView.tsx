@@ -17,9 +17,12 @@ import {
   isMobile,
   isMobileOnly,
   isSafari,
+  isTablet,
 } from "react-device-detect";
 import useSWR from "swr";
 import DraggableGridLayout from "./DraggableGridLayout";
+import { IoClose } from "react-icons/io5";
+import { LuMove } from "react-icons/lu";
 
 type LiveDashboardViewProps = {
   cameras: CameraConfig[];
@@ -41,6 +44,9 @@ export default function LiveDashboardView({
     "live-layout",
     isDesktop ? "grid" : "list",
   );
+
+  const [isEditMode, setIsEditMode] = useState<boolean>(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // recent events
   const { payload: eventUpdate } = useFrigateReviews();
@@ -148,37 +154,52 @@ export default function LiveDashboardView({
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
 
   return (
-    <div className="size-full p-2 overflow-y-auto">
+    <div className="size-full p-2 overflow-y-auto" ref={containerRef}>
       {isMobile && (
         <div className="h-11 relative flex items-center justify-between">
           <Logo className="absolute inset-x-1/2 -translate-x-1/2 h-8" />
           <div className="max-w-[45%]">
             <CameraGroupSelector />
           </div>
-          <div className="flex items-center gap-1">
-            <Button
-              className={`p-1 ${
-                mobileLayout == "grid"
-                  ? "bg-blue-900 focus:bg-blue-900 bg-opacity-60 focus:bg-opacity-60"
-                  : "bg-secondary"
-              }`}
-              size="xs"
-              onClick={() => setMobileLayout("grid")}
-            >
-              <LiveGridIcon layout={mobileLayout} />
-            </Button>
-            <Button
-              className={`p-1 ${
-                mobileLayout == "list"
-                  ? "bg-blue-900 focus:bg-blue-900 bg-opacity-60 focus:bg-opacity-60"
-                  : "bg-secondary"
-              }`}
-              size="xs"
-              onClick={() => setMobileLayout("list")}
-            >
-              <LiveListIcon layout={mobileLayout} />
-            </Button>
-          </div>
+          {(!cameraGroup || cameraGroup == "default" || isMobileOnly) && (
+            <div className="flex items-center gap-1">
+              <Button
+                className={`p-1 ${
+                  mobileLayout == "grid"
+                    ? "bg-blue-900 focus:bg-blue-900 bg-opacity-60 focus:bg-opacity-60"
+                    : "bg-secondary"
+                }`}
+                size="xs"
+                onClick={() => setMobileLayout("grid")}
+              >
+                <LiveGridIcon layout={mobileLayout} />
+              </Button>
+              <Button
+                className={`p-1 ${
+                  mobileLayout == "list"
+                    ? "bg-blue-900 focus:bg-blue-900 bg-opacity-60 focus:bg-opacity-60"
+                    : "bg-secondary"
+                }`}
+                size="xs"
+                onClick={() => setMobileLayout("list")}
+              >
+                <LiveListIcon layout={mobileLayout} />
+              </Button>
+            </div>
+          )}
+          {cameraGroup && cameraGroup !== "default" && isTablet && (
+            <div className="flex items-center gap-1">
+              <Button
+                className="p-1"
+                size="xs"
+                onClick={() =>
+                  setIsEditMode((prevIsEditMode) => !prevIsEditMode)
+                }
+              >
+                {isEditMode ? <IoClose /> : <LuMove />}
+              </Button>
+            </div>
+          )}
         </div>
       )}
 
@@ -235,11 +256,14 @@ export default function LiveDashboardView({
         <DraggableGridLayout
           cameras={cameras}
           cameraGroup={cameraGroup}
+          containerRef={containerRef}
           cameraRef={cameraRef}
           includeBirdseye={includeBirdseye}
           onSelectCamera={onSelectCamera}
           windowVisible={windowVisible}
           visibleCameras={visibleCameras}
+          isEditMode={isEditMode}
+          setIsEditMode={setIsEditMode}
         />
       )}
     </div>
