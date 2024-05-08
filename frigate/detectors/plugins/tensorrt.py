@@ -91,10 +91,9 @@ class TensorRtDetector(DetectionApi):
 
     def _binding_is_input(self, binding):
         if TRT_VERSION < 10:
-            assert self.engine.binding_is_input(binding)
+            return self.engine.binding_is_input(binding)
         else:
-            assert binding == "input"
-        return True
+            return binding == "input"
 
     def _get_binding_dims(self, binding):
         if TRT_VERSION < 10:
@@ -106,7 +105,7 @@ class TensorRtDetector(DetectionApi):
         if TRT_VERSION < 10:
             return self.engine.get_binding_dtype(binding)
         else:
-            return self.engine.get_tensor_shape(binding)
+            return self.engine.get_tensor_dtype(binding)
 
     def _execute(self):
         if TRT_VERSION < 10:
