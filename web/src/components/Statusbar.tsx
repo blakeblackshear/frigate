@@ -58,18 +58,20 @@ export default function Statusbar() {
     <div className="absolute left-0 bottom-0 right-0 w-full h-8 flex justify-between items-center px-4 bg-background_alt z-10 dark:text-secondary-foreground border-t border-secondary-highlight">
       <div className="h-full flex items-center gap-2">
         {cpuPercent && (
-          <div className="flex items-center text-sm gap-2">
-            <MdCircle
-              className={`size-2 ${
-                cpuPercent < 50
-                  ? "text-success"
-                  : cpuPercent < 80
-                    ? "text-orange-400"
-                    : "text-danger"
-              }`}
-            />
-            CPU {cpuPercent}%
-          </div>
+          <Link to="/system#general">
+            <div className="flex items-center text-sm gap-2 cursor-pointer hover:underline">
+              <MdCircle
+                className={`size-2 ${
+                  cpuPercent < 50
+                    ? "text-success"
+                    : cpuPercent < 80
+                      ? "text-orange-400"
+                      : "text-danger"
+                }`}
+              />
+              CPU {cpuPercent}%
+            </div>
+          </Link>
         )}
         {Object.entries(stats?.gpu_usages || {}).map(([name, stats]) => {
           if (name == "error-gpu") {
@@ -93,18 +95,24 @@ export default function Statusbar() {
           const gpu = parseInt(stats.gpu);
 
           return (
-            <div key={gpuTitle} className="flex items-center text-sm gap-2">
-              <MdCircle
-                className={`size-2 ${
-                  gpu < 50
-                    ? "text-success"
-                    : gpu < 80
-                      ? "text-orange-400"
-                      : "text-danger"
-                }`}
-              />
-              {gpuTitle} {gpu}%
-            </div>
+            <Link key={gpuTitle} to="/system#general">
+              {" "}
+              <div
+                key={gpuTitle}
+                className="flex items-center text-sm gap-2 cursor-pointer hover:underline"
+              >
+                <MdCircle
+                  className={`size-2 ${
+                    gpu < 50
+                      ? "text-success"
+                      : gpu < 80
+                        ? "text-orange-400"
+                        : "text-danger"
+                  }`}
+                />
+                {gpuTitle} {gpu}%
+              </div>
+            </Link>
           );
         })}
       </div>
