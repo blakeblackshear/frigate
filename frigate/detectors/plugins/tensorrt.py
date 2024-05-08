@@ -89,43 +89,50 @@ class TensorRtDetector(DetectionApi):
         with open(model_path, "rb") as f, trt.Runtime(self.trt_logger) as runtime:
             return runtime.deserialize_cuda_engine(f.read())
 
+    def _binding_is_input(self, binding):
+        if TRT_VERSION < 10:
+            assert self.engine.binding_is_input(binding)
+        else:
+            assert binding == "input"
+        return True
+
+    def _get_binding_dims(self, binding):
+        if TRT_VERSION < 10:
+            return self.engine.get_binding_shape(binding)
+        else:
+            return self.engine.get_tensor_shape(binding)
+
+    def _get_binding_dtype(self, binding):
+        if TRT_VERSION < 10:
+            return self.engine.get_binding_dtype(binding)
+        else:
+            return self.engine.get_tensor_shape(binding)
+
+    def _execute(self):
+        if TRT_VERSION < 10:
+            return self.context.execute_async_v2(bindings=self.bindings, stream_handle=self.stream)
+        else:
+            return self.context.execute_v2(self.bindings)
+
     def _get_input_shape(self):
         """Get input shape of the TensorRT YOLO engine."""
         binding = self.engine[0]
-        if TRT_VERSION < 10:
-            assert self.engine.binding_is_input(binding)
-            binding_dims = self.engine.get_binding_shape(binding)
-            if len(binding_dims) == 4:
-                return (
-                    tuple(binding_dims[2:]),
-                    trt.nptype(self.engine.get_binding_dtype(binding)),
-                )
-            elif len(binding_dims) == 3:
-                return (
-                    tuple(binding_dims[1:]),
-                    trt.nptype(self.engine.get_binding_dtype(binding)),
-                )
-            else:
-                raise ValueError(
-                    "bad dims of binding %s: %s" % (binding, str(binding_dims))
-                )
+        assert self._binding_is_input(binding)
+        binding_dims = self._get_binding_dims(binding)
+        if len(binding_dims) == 4:
+            return (
+                tuple(binding_dims[2:]),
+                trt.nptype(self._get_binding_dtype(binding)),
+            )
+        elif len(binding_dims) == 3:
+            return (
+                tuple(binding_dims[1:]),
+                trt.nptype(self._get_binding_dtype(binding)),
+            )
         else:
-            assert binding == "input"
-            binding_dims = self.engine.get_tensor_shape("input")
-            if len(binding_dims) == 4:
-                return (
-                    tuple(binding_dims[2:]),
-                    trt.nptype(self.engine.get_tensor_dtype(binding)),
-                )
-            elif len(binding_dims) == 3:
-                return (
-                    tuple(binding_dims[1:]),
-                    trt.nptype(self.engine.get_tensor_dtype(binding)),
-                )
-            else:
-                raise ValueError(
-                    "bad dims of binding %s: %s" % (binding, str(binding_dims))
-                )
+            raise ValueError(
+                "bad dims of binding %s: %s" % (binding, str(binding_dims))
+            )
 
     def _allocate_buffers(self):
         """Allocates all host/device in/out buffers required for an engine."""
@@ -134,75 +141,41 @@ class TensorRtDetector(DetectionApi):
         bindings = []
         output_idx = 0
         for binding in self.engine:
-            if TRT_VERSION < 10:
-                binding_dims = self.engine.get_binding_shape(binding)
-                if len(binding_dims) == 4:
-                    # explicit batch case (TensorRT 7+)
-                    size = trt.volume(binding_dims)
-                elif len(binding_dims) == 3:
-                    # implicit batch case (TensorRT 6 or older)
-                    size = trt.volume(binding_dims) * self.engine.max_batch_size
-                else:
-                    raise ValueError(
-                        "bad dims of binding %s: %s" % (binding, str(binding_dims))
-                    )
-                nbytes = size * self.engine.get_binding_dtype(binding).itemsize
-                # Allocate host and device buffers
-                err, host_mem = cuda.cuMemHostAlloc(
-                    nbytes, Flags=cuda.CU_MEMHOSTALLOC_DEVICEMAP
-                )
-                assert err is cuda.CUresult.CUDA_SUCCESS, f"cuMemAllocHost returned {err}"
-                logger.debug(
-                    f"Allocated Tensor Binding {binding} Memory {nbytes} Bytes ({size} * {self.engine.get_binding_dtype(binding)})"
-                )
-                err, device_mem = cuda.cuMemAlloc(nbytes)
-                assert err is cuda.CUresult.CUDA_SUCCESS, f"cuMemAlloc returned {err}"
-                # Append the device buffer to device bindings.
-                bindings.append(int(device_mem))
-                # Append to the appropriate list.
-                if self.engine.binding_is_input(binding):
-                    logger.debug(f"Input has Shape {binding_dims}")
-                    inputs.append(HostDeviceMem(host_mem, device_mem, nbytes, size))
-                else:
-                    # each grid has 3 anchors, each anchor generates a detection
-                    # output of 7 float32 values
-                    assert size % 7 == 0, f"output size was {size}"
-                    logger.debug(f"Output has Shape {binding_dims}")
-                    outputs.append(HostDeviceMem(host_mem, device_mem, nbytes, size))
-                    output_idx += 1
+            binding_dims = self._get_binding_dims(binding)
+            if len(binding_dims) == 4:
+                # explicit batch case (TensorRT 7+)
+                size = trt.volume(binding_dims)
+            elif len(binding_dims) == 3:
+                # implicit batch case (TensorRT 6 or older)
+                size = trt.volume(binding_dims) * self.engine.max_batch_size
             else:
-                binding_dims = self.engine.get_tensor_shape(binding)
-                if len(binding_dims) == 4:
-                    # explicit batch case (TensorRT 7+)
-                    size = trt.volume(binding_dims)
-                else:
-                    raise ValueError(
-                        "bad dims of binding %s: %s" % (binding, str(binding_dims))
-                    )
-                nbytes = size * self.engine.get_tensor_dtype(binding).itemsize
-                # Allocate host and device buffers
-                err, host_mem = cuda.cuMemHostAlloc(
-                    nbytes, Flags=cuda.CU_MEMHOSTALLOC_DEVICEMAP
+                raise ValueError(
+                    "bad dims of binding %s: %s" % (binding, str(binding_dims))
                 )
-                assert err is cuda.CUresult.CUDA_SUCCESS, f"cuMemAllocHost returned {err}"
-                logger.debug(
-                    f"Allocated Tensor Binding {binding} Memory {nbytes} Bytes ({size} * {self.engine.get_tensor_dtype(binding)})"
-                )
-                err, device_mem = cuda.cuMemAlloc(nbytes)
-                assert err is cuda.CUresult.CUDA_SUCCESS, f"cuMemAlloc returned {err}"
-                # Append the device buffer to device bindings.
-                bindings.append(int(device_mem))
-                # Append to the appropriate list.
-                if binding == "input":
-                    logger.debug(f"Input has Shape {binding_dims}")
-                    inputs.append(HostDeviceMem(host_mem, device_mem, nbytes, size))
-                else:
-                    # each grid has 3 anchors, each anchor generates a detection
-                    # output of 7 float32 values
-                    assert size % 7 == 0, f"output size was {size}"
-                    logger.debug(f"Output has Shape {binding_dims}")
-                    outputs.append(HostDeviceMem(host_mem, device_mem, nbytes, size))
-                    output_idx += 1
+            nbytes = size * self._get_binding_dtype(binding).itemsize
+            # Allocate host and device buffers
+            err, host_mem = cuda.cuMemHostAlloc(
+                nbytes, Flags=cuda.CU_MEMHOSTALLOC_DEVICEMAP
+            )
+            assert err is cuda.CUresult.CUDA_SUCCESS, f"cuMemAllocHost returned {err}"
+            logger.debug(
+                f"Allocated Tensor Binding {binding} Memory {nbytes} Bytes ({size} * {self._get_binding_dtype(binding)})"
+            )
+            err, device_mem = cuda.cuMemAlloc(nbytes)
+            assert err is cuda.CUresult.CUDA_SUCCESS, f"cuMemAlloc returned {err}"
+            # Append the device buffer to device bindings.
+            bindings.append(int(device_mem))
+            # Append to the appropriate list.
+            if self._binding_is_input(binding):
+                logger.debug(f"Input has Shape {binding_dims}")
+                inputs.append(HostDeviceMem(host_mem, device_mem, nbytes, size))
+            else:
+                # each grid has 3 anchors, each anchor generates a detection
+                # output of 7 float32 values
+                assert size % 7 == 0, f"output size was {size}"
+                logger.debug(f"Output has Shape {binding_dims}")
+                outputs.append(HostDeviceMem(host_mem, device_mem, nbytes, size))
+                output_idx += 1
         assert len(inputs) == 1, f"inputs len was {len(inputs)}"
         assert len(outputs) == 1, f"output len was {len(outputs)}"
         return inputs, outputs, bindings
@@ -223,16 +196,8 @@ class TensorRtDetector(DetectionApi):
         ]
 
         # Run inference.
-        if TRT_VERSION < 10:
-            if not self.context.execute_async_v2(
-                bindings=self.bindings, stream_handle=self.stream
-            ):
-                logger.warn("Execute returned false")
-        else:
-            if not self.context.execute_v2(
-                self.bindings
-            ):
-                logger.warn("Execute returned false")
+        if not self._execute():
+            logger.warn("Execute returned false")
 
         # Transfer predictions back from the GPU.
         [
