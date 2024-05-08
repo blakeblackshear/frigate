@@ -57,7 +57,7 @@
     "react-hook-form": "^7.51.4",
     "react-icons": "^5.2.1",
     "react-konva": "^18.2.10",
-    "react-router-dom": "^6.22.3",
+    "react-router-dom": "^6.23.0",
     "react-swipeable": "^7.0.1",
     "react-tracked": "^2.0.0",
     "react-transition-group": "^4.4.5",
@@ -71,9 +71,9 @@
     "swr": "^2.2.5",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",
-    "vaul": "^0.9.0",
+    "vaul": "^0.9.1",
     "vite-plugin-monaco-editor": "^1.1.0",
-    "zod": "^3.22.5"
+    "zod": "^3.23.7"
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.7",
@@ -101,7 +101,7 @@
     "fake-indexeddb": "^5.0.2",
     "jest-websocket-mock": "^2.5.0",
     "jsdom": "^24.0.0",
-    "msw": "^2.2.14",
+    "msw": "^2.3.0",
     "postcss": "^8.4.38",
     "prettier": "^3.2.5",
     "tailwindcss": "^3.4.3",
