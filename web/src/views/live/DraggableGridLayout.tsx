@@ -31,7 +31,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { IoClose } from "react-icons/io5";
-import { LuMoveDiagonal2 } from "react-icons/lu";
+import { LuMove } from "react-icons/lu";
 import { cn } from "@/lib/utils";
 
 type DraggableGridLayoutProps = {
@@ -394,7 +394,7 @@ function DesktopEditLayoutButton({
             {isEditMode ? (
               <IoClose className="size-5" />
             ) : (
-              <LuMoveDiagonal2 className="size-5" />
+              <LuMove className="size-5" />
             )}
           </Button>
         </TooltipTrigger>

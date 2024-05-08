@@ -22,7 +22,7 @@ import {
 import useSWR from "swr";
 import DraggableGridLayout from "./DraggableGridLayout";
 import { IoClose } from "react-icons/io5";
-import { LuMoveDiagonal2 } from "react-icons/lu";
+import { LuMove } from "react-icons/lu";
 
 type LiveDashboardViewProps = {
   cameras: CameraConfig[];
@@ -196,7 +196,7 @@ export default function LiveDashboardView({
                   setIsEditMode((prevIsEditMode) => !prevIsEditMode)
                 }
               >
-                {isEditMode ? <IoClose /> : <LuMoveDiagonal2 />}
+                {isEditMode ? <IoClose /> : <LuMove />}
               </Button>
             </div>
           )}
