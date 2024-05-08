@@ -614,7 +614,7 @@ class FrigateApp:
                 print("*************************************************************")
                 if isinstance(e, ValidationError):
                     for error in e.errors():
-                        location = ".".join(error["loc"])
+                        location = ".".join(str(item) for item in error["loc"])
                         print(f"{location}: {error['msg']}")
                 else:
                     print(e)
