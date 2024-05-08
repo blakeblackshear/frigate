@@ -511,7 +511,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                             manual_info["label"]
                         )
                         # temporarily make it so this event can not end
-                        self.active_review_segments[camera] = sys.maxsize
+                        self.active_review_segments[camera].last_update = sys.maxsize
                     elif manual_info["state"] == ManualEventState.complete:
                         self.active_review_segments[camera].last_update = manual_info[
                             "end_time"
