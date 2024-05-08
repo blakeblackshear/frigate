@@ -16,6 +16,7 @@ import psutil
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
+from pydantic import ValidationError
 
 from frigate.api.app import create_app
 from frigate.comms.config_updater import ConfigPublisher
@@ -611,8 +612,13 @@ class FrigateApp:
                 print("*************************************************************")
                 print("***    Config Validation Errors                           ***")
                 print("*************************************************************")
-                print(e)
-                print(traceback.format_exc())
+                if isinstance(e, ValidationError):
+                    for error in e.errors():
+                        location = ".".join(str(item) for item in error["loc"])
+                        print(f"{location}: {error['msg']}")
+                else:
+                    print(e)
+                    print(traceback.format_exc())
                 print("*************************************************************")
                 print("***    End Config Validation Errors                       ***")
                 print("*************************************************************")

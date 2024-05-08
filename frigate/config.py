@@ -555,19 +555,24 @@ class ZoneConfig(BaseModel):
         # old native resolution coordinates
         if isinstance(coordinates, list):
             explicit = any(p.split(",")[0] > "1.0" for p in coordinates)
-            self._contour = np.array(
-                [
-                    (
-                        [int(p.split(",")[0]), int(p.split(",")[1])]
-                        if explicit
-                        else [
-                            int(float(p.split(",")[0]) * frame_shape[1]),
-                            int(float(p.split(",")[1]) * frame_shape[0]),
-                        ]
-                    )
-                    for p in coordinates
-                ]
-            )
+            try:
+                self._contour = np.array(
+                    [
+                        (
+                            [int(p.split(",")[0]), int(p.split(",")[1])]
+                            if explicit
+                            else [
+                                int(float(p.split(",")[0]) * frame_shape[1]),
+                                int(float(p.split(",")[1]) * frame_shape[0]),
+                            ]
+                        )
+                        for p in coordinates
+                    ]
+                )
+            except ValueError:
+                raise ValueError(
+                    f"Invalid coordinates found in configuration file. Coordinates must be relative (between 0-1): {coordinates}"
+                )
 
             if explicit:
                 self.coordinates = ",".join(
@@ -579,19 +584,24 @@ class ZoneConfig(BaseModel):
         elif isinstance(coordinates, str):
             points = coordinates.split(",")
             explicit = any(p > "1.0" for p in points)
-            self._contour = np.array(
-                [
-                    (
-                        [int(points[i]), int(points[i + 1])]
-                        if explicit
-                        else [
-                            int(float(points[i]) * frame_shape[1]),
-                            int(float(points[i + 1]) * frame_shape[0]),
-                        ]
-                    )
-                    for i in range(0, len(points), 2)
-                ]
-            )
+            try:
+                self._contour = np.array(
+                    [
+                        (
+                            [int(points[i]), int(points[i + 1])]
+                            if explicit
+                            else [
+                                int(float(points[i]) * frame_shape[1]),
+                                int(float(points[i + 1]) * frame_shape[0]),
+                            ]
+                        )
+                        for i in range(0, len(points), 2)
+                    ]
+                )
+            except ValueError:
+                raise ValueError(
+                    f"Invalid coordinates found in configuration file. Coordinates must be relative (between 0-1): {coordinates}"
+                )
 
             if explicit:
                 self.coordinates = ",".join(
