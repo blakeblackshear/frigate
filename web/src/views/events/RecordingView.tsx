@@ -43,10 +43,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { FaVideo } from "react-icons/fa";
 import { VideoResolutionType } from "@/types/live";
 import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
-import {
-  useOverflowObserver,
-  useResizeObserver,
-} from "@/hooks/resize-observer";
+import { useResizeObserver } from "@/hooks/resize-observer";
 import { cn } from "@/lib/utils";
 
 const SEGMENT_DURATION = 30;
@@ -247,8 +244,6 @@ export function RecordingView({
 
   // layout
 
-  const previewRowOverflows = useOverflowObserver(previewRowRef);
-
   const getCameraAspect = useCallback(
     (cam: string) => {
       if (!config) {
@@ -329,6 +324,17 @@ export function RecordingView({
       width: `${Math.round(percent)}%`,
     };
   }, [config, mainCameraAspect, mainWidth, mainHeight, mainCamera]);
+
+  const previewRowOverflows = useMemo(() => {
+    if (!previewRowRef.current) {
+      return false;
+    }
+
+    return (
+      previewRowRef.current.scrollWidth > previewRowRef.current.clientWidth ||
+      previewRowRef.current.scrollHeight > previewRowRef.current.clientHeight
+    );
+  }, [previewRowRef.current?.scrollWidth, previewRowRef.current?.scrollHeight]);
 
   return (
     <div ref={contentRef} className="size-full pt-2 flex flex-col">
