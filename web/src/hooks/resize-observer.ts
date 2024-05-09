@@ -53,7 +53,10 @@ export function useOverflowObserver(ref: MutableRefObject<HTMLElement | null>) {
       new ResizeObserver(() => {
         window.requestAnimationFrame(() => {
           if (ref.current) {
-            setOverflow(ref.current.scrollWidth > ref.current.clientWidth);
+            setOverflow(
+              ref.current.scrollWidth > ref.current.clientWidth ||
+                ref.current.scrollHeight > ref.current.clientHeight,
+            );
           }
         });
       }),

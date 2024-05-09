@@ -44,6 +44,7 @@ import { FaVideo } from "react-icons/fa";
 import { VideoResolutionType } from "@/types/live";
 import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
 import { useOverflowObserver } from "@/hooks/resize-observer";
+import { cn } from "@/lib/utils";
 
 const SEGMENT_DURATION = 30;
 
@@ -296,17 +297,18 @@ export function RecordingView({
   return (
     <div ref={contentRef} className="size-full pt-2 flex flex-col">
       <Toaster closeButton={true} />
-      <div
-        className={`w-full h-11 mb-2 px-2 relative flex items-center justify-between`}
-      >
+      <div className="w-full h-11 mb-2 px-2 relative flex items-center justify-between">
         {isMobile && (
           <Logo className="absolute inset-x-1/2 -translate-x-1/2 h-8" />
         )}
         <div
-          className={`flex items-center gap-2 ${isMobile ? "landscape:flex-col" : ""}`}
+          className={cn(
+            "flex items-center gap-2",
+            isMobile ? "landscape:flex-col" : "",
+          )}
         >
           <Button
-            className={`flex items-center gap-2.5 rounded-lg`}
+            className="flex items-center gap-2.5 rounded-lg"
             size="sm"
             onClick={() => navigate(-1)}
           >
@@ -407,19 +409,42 @@ export function RecordingView({
 
       <div
         ref={mainLayoutRef}
-        className={`h-full flex justify-center overflow-hidden ${isDesktop ? "" : "flex-col landscape:flex-row gap-2"}`}
+        className={cn(
+          "h-full flex justify-center overflow-hidden",
+          isDesktop ? "" : "flex-col landscape:flex-row gap-2",
+        )}
       >
-        <div className={`${isDesktop ? "w-[80%]" : ""} flex flex-1 flex-wrap`}>
+        <div
+          className={cn("flex flex-1 flex-wrap", isDesktop ? "w-[80%]" : "")}
+        >
           <div
-            className={`size-full flex items-center ${mainCameraAspect == "tall" ? "flex-row justify-evenly" : "flex-col justify-center gap-2"}`}
+            className={cn(
+              "size-full flex items-center",
+              mainCameraAspect == "tall"
+                ? "flex-row justify-evenly"
+                : "flex-col justify-center gap-2",
+            )}
           >
             <div
               key={mainCamera}
-              className={`relative ${
+              className={cn(
+                "relative",
                 isDesktop
-                  ? `${mainCameraAspect == "tall" ? "h-[50%] md:h-[60%] lg:h-[75%] xl:h-[90%]" : mainCameraAspect == "wide" ? "w-full" : "w-[78%]"} px-4 flex justify-center`
-                  : `portrait:w-full pt-2 ${mainCameraAspect == "wide" ? "landscape:w-full aspect-wide" : "landscape:h-[94%] aspect-video"}`
-              }`}
+                  ? cn(
+                      "px-4 flex justify-center",
+                      mainCameraAspect == "tall"
+                        ? "h-[50%] md:h-[60%] lg:h-[75%] xl:h-[90%]"
+                        : mainCameraAspect == "wide"
+                          ? "w-full"
+                          : "w-[78%]",
+                    )
+                  : cn(
+                      "portrait:w-full pt-2",
+                      mainCameraAspect == "wide"
+                        ? "landscape:w-full aspect-wide"
+                        : "landscape:h-[94%] aspect-video",
+                    ),
+              )}
               style={{
                 aspectRatio: isDesktop
                   ? mainCameraAspect == "tall"
@@ -455,7 +480,13 @@ export function RecordingView({
             {isDesktop && (
               <div
                 ref={previewRowRef}
-                className={`flex gap-2 ${mainCameraAspect == "tall" ? "h-full w-[12%] flex-col justify-center overflow-y-auto" : `w-full h-28 overflow-x-auto ${previewRowOverflows ? "" : "justify-center items-center"}`}`}
+                className={cn(
+                  "flex gap-2 overflow-auto",
+                  mainCameraAspect == "tall"
+                    ? "h-full w-48 flex-col"
+                    : `w-full h-28`,
+                  previewRowOverflows ? "" : "justify-center items-center",
+                )}
               >
                 <div className="w-2" />
                 {allCameras.map((cam) => {
