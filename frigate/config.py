@@ -140,7 +140,8 @@ class AuthConfig(FrigateBaseModel):
         default="1/second;5/minute;20/hour",
         title="Rate limits for failed login attempts.",
     )
-    users: Optional[List[UserConfig]] = Field(default=[], title="Users")
+    # As of Feb 2023, OWASP recommends 600000 iterations for PBKDF2-SHA256
+    hash_iterations: int = Field(default=600000, title="Password hash iterations")
 
 
 class StatsConfig(FrigateBaseModel):
