@@ -14,7 +14,27 @@ apt-get -qq install -y --no-install-recommends libx264-dev libx265-dev
 pushd /tmp
 
 # Install libnvmpi to enable nvmpi decoders (h264_nvmpi, hevc_nvmpi)
-if [ -e /usr/local/cuda-10.2 ]; then
+if [ -e /usr/local/cuda-12.2 ]; then
+    # assume Jetpack 6.X
+    apt-key adv --fetch-key https://repo.download.nvidia.com/jetson/jetson-ota-public.asc
+
+    echo "deb https://repo.download.nvidia.com/jetson/common r36.3 main" >> /etc/apt/sources.list.d/nvidia-l4t-apt-source.list
+    echo "deb https://repo.download.nvidia.com/jetson/t234 r36.3 main" >> /etc/apt/sources.list.d/nvidia-l4t-apt-source.list
+    echo "deb https://repo.download.nvidia.com/jetson/ffmpeg r36.3 main" >> /etc/apt/sources.list.d/nvidia-l4t-apt-source.list
+
+    mkdir -p /opt/nvidia/l4t-packages/
+    touch /opt/nvidia/l4t-packages/.nv-l4t-disable-boot-fw-update-in-preinstall
+
+    apt-get update
+
+    apt-get install nvidia-l4t-jetson-multimedia-api -y
+
+    wget https://www.python.org/ftp/python/3.9.6/Python-3.9.6.tgz
+    tar -xf Python-3.9.6.tgz
+    cd Python-3.9.6
+    ./configure --enable-optimizations
+    sudo make altinstall
+elif [ -e /usr/local/cuda-10.2 ]; then
     # assume Jetpack 4.X
     wget -q https://developer.nvidia.com/embedded/L4T/r32_Release_v5.0/T186/Jetson_Multimedia_API_R32.5.0_aarch64.tbz2 -O jetson_multimedia_api.tbz2
 else
