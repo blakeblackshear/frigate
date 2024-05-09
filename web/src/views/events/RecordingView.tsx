@@ -43,7 +43,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { FaVideo } from "react-icons/fa";
 import { VideoResolutionType } from "@/types/live";
 import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
-import { useOverflowObserver } from "@/hooks/resize-observer";
+import {
+  useOverflowObserver,
+  useResizeObserver,
+} from "@/hooks/resize-observer";
 import { cn } from "@/lib/utils";
 
 const SEGMENT_DURATION = 30;
@@ -79,6 +82,7 @@ export function RecordingView({
   const [mainCamera, setMainCamera] = useState(startCamera);
   const mainControllerRef = useRef<DynamicVideoController | null>(null);
   const mainLayoutRef = useRef<HTMLDivElement | null>(null);
+  const cameraLayoutRef = useRef<HTMLDivElement | null>(null);
   const previewRowRef = useRef<HTMLDivElement | null>(null);
   const previewRefs = useRef<{ [camera: string]: PreviewController }>({});
 
@@ -294,6 +298,38 @@ export function RecordingView({
     }
   }, [mainCameraAspect]);
 
+  const [{ width: mainWidth, height: mainHeight }] =
+    useResizeObserver(cameraLayoutRef);
+
+  const mainCameraStyle = useMemo(() => {
+    if (isMobile || mainCameraAspect != "normal" || !config) {
+      return undefined;
+    }
+
+    const camera = config.cameras[mainCamera];
+
+    if (!camera) {
+      return undefined;
+    }
+
+    const aspect = camera.detect.width / camera.detect.height;
+
+    if (!aspect) {
+      return undefined;
+    }
+
+    const availableHeight = mainHeight - 112;
+    const availableWidth = aspect * availableHeight;
+    const percent =
+      (mainWidth < availableWidth
+        ? mainWidth / availableWidth
+        : availableWidth / mainWidth) * 100;
+
+    return {
+      width: `${Math.round(percent)}%`,
+    };
+  }, [config, mainCameraAspect, mainWidth, mainHeight, mainCamera]);
+
   return (
     <div ref={contentRef} className="size-full pt-2 flex flex-col">
       <Toaster closeButton={true} />
@@ -415,6 +451,7 @@ export function RecordingView({
         )}
       >
         <div
+          ref={cameraLayoutRef}
           className={cn("flex flex-1 flex-wrap", isDesktop ? "w-[80%]" : "")}
         >
           <div
@@ -436,7 +473,7 @@ export function RecordingView({
                         ? "h-[50%] md:h-[60%] lg:h-[75%] xl:h-[90%]"
                         : mainCameraAspect == "wide"
                           ? "w-full"
-                          : "w-[78%]",
+                          : "",
                     )
                   : cn(
                       "portrait:w-full pt-2",
@@ -446,6 +483,7 @@ export function RecordingView({
                     ),
               )}
               style={{
+                width: mainCameraStyle ? mainCameraStyle.width : undefined,
                 aspectRatio: isDesktop
                   ? mainCameraAspect == "tall"
                     ? getCameraAspect(mainCamera)

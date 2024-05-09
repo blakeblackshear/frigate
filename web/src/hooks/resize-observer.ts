@@ -43,7 +43,21 @@ export function useResizeObserver(...refs: RefType[]) {
     };
   }, [refs, resizeObserver]);
 
-  return dimensions;
+  if (dimensions.length == refs.length) {
+    return dimensions;
+  } else {
+    const items = [...dimensions];
+    for (let i = dimensions.length; i < refs.length; i++) {
+      items.push({
+        width: 0,
+        height: 0,
+        x: -Infinity,
+        y: -Infinity,
+      });
+    }
+
+    return items;
+  }
 }
 
 export function useOverflowObserver(ref: MutableRefObject<HTMLElement | null>) {
