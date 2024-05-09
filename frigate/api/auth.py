@@ -10,12 +10,14 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-from flask import Blueprint, current_app, make_response, request
+from flask import Blueprint, current_app, jsonify, make_response, request
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from joserfc import jwt
+from peewee import DoesNotExist
 
 from frigate.const import CONFIG_DIR, JWT_SECRET_ENV_VAR, PASSWORD_HASH_ALGORITHM
+from frigate.models import User
 
 logger = logging.getLogger(__name__)
 
@@ -204,17 +206,13 @@ def login():
     content = request.get_json()
     user = content["user"]
     password = content["password"]
-    password_hash = next(
-        (
-            u.password_hash
-            for u in current_app.frigate_config.auth.users
-            if u.user == user
-        ),
-        None,
-    )
-    # if the user wasn't found in the config
-    if password_hash is None:
-        make_response({"message": "Login failed"}, 400)
+
+    try:
+        db_user: User = User.get_by_id(user)
+    except DoesNotExist:
+        return make_response({"message": "Login failed"}, 400)
+
+    password_hash = db_user.password_hash
     if verify_password(password, password_hash):
         expiration = int(time.time()) + JWT_SESSION_LENGTH
         encoded_jwt = create_encoded_jwt(user, expiration, current_app.jwt_token)
@@ -222,3 +220,49 @@ def login():
         set_jwt_cookie(response, JWT_COOKIE_NAME, encoded_jwt, expiration)
         return response
     return make_response({"message": "Login failed"}, 400)
+
+
+@AuthBp.route("/users")
+def get_users():
+    exports = User.select(User.username).order_by(User.username).dicts().iterator()
+    return jsonify([e for e in exports])
+
+
+@AuthBp.route("/users", methods=["POST"])
+def create_user():
+    HASH_ITERATIONS = current_app.frigate_config.auth.hash_iterations
+
+    request_data = request.get_json()
+
+    password_hash = hash_password(request_data["password"], iterations=HASH_ITERATIONS)
+
+    User.insert(
+        {
+            User.username: request_data["username"],
+            User.password_hash: password_hash,
+        }
+    ).execute()
+    return jsonify({"username": request_data["username"]})
+
+
+@AuthBp.route("/users/<username>", methods=["DELETE"])
+def delete_user(username: str):
+    User.delete_by_id(username).execute()
+    return jsonify({"success": True})
+
+
+@AuthBp.route("/users/<username>/password", methods=["PUT"])
+def update_password(username: str):
+    HASH_ITERATIONS = current_app.frigate_config.auth.hash_iterations
+
+    request_data = request.get_json()
+
+    password_hash = hash_password(request_data["password"], iterations=HASH_ITERATIONS)
+
+    User.set_by_id(
+        username,
+        {
+            User.password_hash: password_hash,
+        },
+    )
+    return jsonify({"success": True})
