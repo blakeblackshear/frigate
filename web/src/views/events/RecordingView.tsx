@@ -334,6 +334,8 @@ export function RecordingView({
       previewRowRef.current.scrollWidth > previewRowRef.current.clientWidth ||
       previewRowRef.current.scrollHeight > previewRowRef.current.clientHeight
     );
+    // we only want to update when the scroll size changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [previewRowRef.current?.scrollWidth, previewRowRef.current?.scrollHeight]);
 
   return (
@@ -343,12 +345,7 @@ export function RecordingView({
         {isMobile && (
           <Logo className="absolute inset-x-1/2 -translate-x-1/2 h-8" />
         )}
-        <div
-          className={cn(
-            "flex items-center gap-2",
-            isMobile ? "landscape:flex-col" : "",
-          )}
-        >
+        <div className={cn("flex items-center gap-2")}>
           <Button
             className="flex items-center gap-2.5 rounded-lg"
             size="sm"
