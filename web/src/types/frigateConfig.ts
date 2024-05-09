@@ -1,3 +1,4 @@
+import { IconName } from "@/components/icons/IconPicker";
 import { LivePlayerMode } from "./live";
 
 export interface UiConfig {
@@ -222,11 +223,9 @@ export interface CameraConfig {
   };
 }
 
-export const GROUP_ICONS = ["car", "cat", "dog", "leaf"] as const;
-
 export type CameraGroupConfig = {
   cameras: string[];
-  icon: (typeof GROUP_ICONS)[number];
+  icon: IconName;
   order: number;
 };
 

@@ -28,6 +28,7 @@ import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
 import SummaryTimeline from "@/components/timeline/SummaryTimeline";
 import { isMobile } from "react-device-detect";
+import IconPicker, { IconElement } from "@/components/icons/IconPicker";
 
 // Color data
 const colors = [
@@ -207,12 +208,23 @@ function UIPlayground() {
   const [isEventsReviewTimeline, setIsEventsReviewTimeline] = useState(true);
   const birdseyeConfig = config?.birdseye;
 
+  const [selectedIcon, setSelectedIcon] = useState<IconElement>();
+
   return (
     <>
       <div className="w-full h-full">
         <div className="flex h-full">
           <div className="flex-1 content-start gap-2 overflow-y-auto no-scrollbar mt-4 mr-5">
             <Heading as="h2">UI Playground</Heading>
+
+            <IconPicker
+              selectedIcon={selectedIcon}
+              setSelectedIcon={setSelectedIcon}
+            />
+
+            {selectedIcon?.name && (
+              <p>Selected icon name: {selectedIcon.name}</p>
+            )}
 
             <Heading as="h4" className="my-5">
               Scrubber

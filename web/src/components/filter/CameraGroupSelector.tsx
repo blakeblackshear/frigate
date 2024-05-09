@@ -1,8 +1,4 @@
-import {
-  CameraGroupConfig,
-  FrigateConfig,
-  GROUP_ICONS,
-} from "@/types/frigateConfig";
+import { CameraGroupConfig, FrigateConfig } from "@/types/frigateConfig";
 import { isDesktop, isMobile } from "react-device-detect";
 import useSWR from "swr";
 import { MdHome } from "react-icons/md";
@@ -10,7 +6,6 @@ import { usePersistedOverlayState } from "@/hooks/use-overlay-state";
 import { Button } from "../ui/button";
 import { useCallback, useMemo, useState } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import { getIconForGroup } from "@/utils/iconUtil";
 import { LuPencil, LuPlus } from "react-icons/lu";
 import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
 import { Drawer, DrawerContent } from "../ui/drawer";
@@ -31,13 +26,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -62,6 +50,9 @@ import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { usePersistence } from "@/hooks/use-persistence";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { cn } from "@/lib/utils";
+import * as LuIcons from "react-icons/lu";
+import IconPicker, { IconName, IconRenderer } from "../icons/IconPicker";
+import { isValidIconName } from "@/utils/iconUtil";
 
 type CameraGroupSelectorProps = {
   className?: string;
@@ -168,7 +159,12 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
                       isDesktop ? showTooltip(undefined) : null
                     }
                   >
-                    {getIconForGroup(config.icon)}
+                    {config && config.icon && isValidIconName(config.icon) && (
+                      <IconRenderer
+                        icon={LuIcons[config.icon]}
+                        className="size-4"
+                      />
+                    )}
                   </Button>
                 </TooltipTrigger>
                 <TooltipPortal>
@@ -503,7 +499,12 @@ export function CameraGroupEdit({
     cameras: z.array(z.string()).min(2, {
       message: "You must select at least two cameras.",
     }),
-    icon: z.string(),
+    icon: z
+      .string()
+      .min(1, { message: "You must select an icon." })
+      .refine((value) => Object.keys(LuIcons).includes(value), {
+        message: "Invalid icon",
+      }),
   });
 
   const onSubmit = useCallback(
@@ -559,10 +560,10 @@ export function CameraGroupEdit({
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    mode: "onChange",
+    mode: "onSubmit",
     defaultValues: {
       name: (editingGroup && editingGroup[0]) ?? "",
-      icon: editingGroup && editingGroup[1].icon,
+      icon: editingGroup && (editingGroup[1].icon as IconName),
       cameras: editingGroup && editingGroup[1].cameras,
     },
   });
@@ -571,7 +572,7 @@ export function CameraGroupEdit({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="mt-2 space-y-6 overflow-y-hidden"
+        className="mt-2 space-y-6 overflow-y-auto"
       >
         <FormField
           control={form.control}
@@ -631,29 +632,20 @@ export function CameraGroupEdit({
           control={form.control}
           name="icon"
           render={({ field }) => (
-            <FormItem className="space-y-3">
+            <FormItem className="flex flex-col space-y-2">
               <FormLabel>Icon</FormLabel>
               <FormControl>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an icon" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {GROUP_ICONS.map((gIcon) => (
-                      <SelectItem key={gIcon} value={gIcon}>
-                        <div className="flex flex-row justify-start items-center gap-2">
-                          <div className="size-4">{getIconForGroup(gIcon)}</div>
-                          {gIcon}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <IconPicker
+                  selectedIcon={{
+                    name: field.value,
+                    Icon: field.value
+                      ? LuIcons[field.value as IconName]
+                      : undefined,
+                  }}
+                  setSelectedIcon={(newIcon) => {
+                    field.onChange(newIcon?.name ?? undefined);
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -662,7 +654,7 @@ export function CameraGroupEdit({
 
         <Separator className="flex my-2 bg-secondary" />
 
-        <div className="flex flex-row gap-2 pt-5">
+        <div className="flex flex-row gap-2 py-5 md:pb-0">
           <Button className="flex flex-1" onClick={onCancel}>
             Cancel
           </Button>

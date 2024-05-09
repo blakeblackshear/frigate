@@ -1,3 +1,4 @@
+import { IconName } from "@/components/icons/IconPicker";
 import { BsPersonWalking } from "react-icons/bs";
 import {
   FaAmazon,
@@ -6,35 +7,18 @@ import {
   FaCarSide,
   FaCat,
   FaCheckCircle,
-  FaCircle,
   FaDog,
   FaFedex,
   FaFire,
-  FaLeaf,
   FaUps,
 } from "react-icons/fa";
 import { GiHummingbird } from "react-icons/gi";
 import { LuBox, LuLassoSelect } from "react-icons/lu";
+import * as LuIcons from "react-icons/lu";
 import { MdRecordVoiceOver } from "react-icons/md";
 
-export function getIconTypeForGroup(icon: string) {
-  switch (icon) {
-    case "car":
-      return FaCarSide;
-    case "cat":
-      return FaCat;
-    case "dog":
-      return FaDog;
-    case "leaf":
-      return FaLeaf;
-    default:
-      return FaCircle;
-  }
-}
-
-export function getIconForGroup(icon: string, className: string = "size-4") {
-  const GroupIcon = getIconTypeForGroup(icon);
-  return <GroupIcon className={className} />;
+export function isValidIconName(value: string): value is IconName {
+  return Object.keys(LuIcons).includes(value as IconName);
 }
 
 export function getIconForLabel(label: string, className?: string) {
