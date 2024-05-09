@@ -155,6 +155,8 @@ RUN PIP_IGNORE_INSTALLED=0 pip3 install -r /requirements.txt
 
 RUN PIP_IGNORE_INSTALLED=0 pip3 install --no-deps filterpy norfair==2.1.1
 
+RUN PIP_IGNORE_INSTALLED=0 pip3 install --no-deps onvif
+
 RUN PIP_IGNORE_INSTALLED=0 pip3 install --no-deps zeep==3.0.0 onvif_zeep
 
 COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
@@ -191,6 +193,8 @@ RUN --mount=type=bind,source=docker/main/install_deps.sh,target=/deps/install_de
 
 COPY --from=wheels /usr/local/lib/python3.9/site-packages /usr/local/lib/python3.9/site-packages
 COPY --from=wheels /usr/lib/python3/dist-packages /usr/lib/python3/dist-packages
+COPY --from=wheels /usr/share/matplotlib /usr/share/matplotlib
+COPY --from=wheels /etc/matplotlibrc /etc/matplotlibrc
 
 RUN --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels \
     python3 -m pip install --upgrade pip && \

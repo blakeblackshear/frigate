@@ -14,7 +14,10 @@ apt-get -qq install --no-install-recommends -y \
     python3-pip \
     curl \
     jq \
-    nethogs
+    nethogs \
+    libopencv-*4.5
+#   libopencv-core4.5 libopencv-contrib4.5 libopencv-shape4.5 libopencv-stitching4.5
+
 
 # ensure python3 defaults to python3.9
 update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1

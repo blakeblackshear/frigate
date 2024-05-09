@@ -19,7 +19,7 @@ class DetectionTypeEnum(str, Enum):
 
 
 class DetectionProxyRunner(threading.Thread):
-    def __init__(self, context: zmq.Context[zmq.Socket]) -> None:
+    def __init__(self, context ) -> None:
         threading.Thread.__init__(self)
         self.name = "detection_proxy"
         self.context = context
