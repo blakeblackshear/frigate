@@ -153,11 +153,13 @@ RUN apt-get -qq update && apt-get -qq install -y \
 COPY docker/main/requirements.txt /requirements.txt
 RUN PIP_IGNORE_INSTALLED=0 pip3 install -r /requirements.txt
 
-RUN PIP_IGNORE_INSTALLED=0 pip3 install --no-deps filterpy norfair==2.1.1
+RUN PIP_IGNORE_INSTALLED=0 pip3 install --no-deps rich filterpy==1.4.5 norfair==2.1.1
 
-RUN PIP_IGNORE_INSTALLED=0 pip3 install --no-deps onvif
+RUN PIP_IGNORE_INSTALLED=0 pip3 install --no-deps norfair==2.2.0
 
-RUN PIP_IGNORE_INSTALLED=0 pip3 install --no-deps zeep==3.0.0 onvif_zeep
+RUN PIP_IGNORE_INSTALLED=0 pip3 install onvif_zeep
+
+#RUN PIP_IGNORE_INSTALLED=0 pip3 install --no-deps zeep==3.0.0 onvif_zeep
 
 COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
 RUN PIP_IGNORE_INSTALLED=0 pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt

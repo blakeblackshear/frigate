@@ -15,7 +15,9 @@ apt-get -qq install --no-install-recommends -y \
     curl \
     jq \
     nethogs \
-    libopencv-*4.5
+    libopencv-*4.5 \
+    libxslt1.1 \
+    liblbfgsb0
 #   libopencv-core4.5 libopencv-contrib4.5 libopencv-shape4.5 libopencv-stitching4.5
 
 
