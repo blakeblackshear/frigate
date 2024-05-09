@@ -45,3 +45,34 @@ export function useResizeObserver(...refs: RefType[]) {
 
   return dimensions;
 }
+
+export function useOverflowObserver(ref: MutableRefObject<HTMLElement | null>) {
+  const [overflow, setOverflow] = useState<boolean>(false);
+  const resizeObserver = useMemo(
+    () =>
+      new ResizeObserver(() => {
+        window.requestAnimationFrame(() => {
+          if (ref.current) {
+            setOverflow(ref.current.scrollWidth > ref.current.clientWidth);
+          }
+        });
+      }),
+    [ref],
+  );
+
+  useEffect(() => {
+    const elem = ref.current;
+
+    if (elem) {
+      resizeObserver.observe(elem);
+    }
+
+    return () => {
+      if (elem) {
+        resizeObserver.unobserve(elem);
+      }
+    };
+  }, [ref, resizeObserver]);
+
+  return overflow;
+}

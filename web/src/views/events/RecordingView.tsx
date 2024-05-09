@@ -43,6 +43,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { FaVideo } from "react-icons/fa";
 import { VideoResolutionType } from "@/types/live";
 import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
+import { useOverflowObserver } from "@/hooks/resize-observer";
 
 const SEGMENT_DURATION = 30;
 
@@ -77,6 +78,7 @@ export function RecordingView({
   const [mainCamera, setMainCamera] = useState(startCamera);
   const mainControllerRef = useRef<DynamicVideoController | null>(null);
   const mainLayoutRef = useRef<HTMLDivElement | null>(null);
+  const previewRowRef = useRef<HTMLDivElement | null>(null);
   const previewRefs = useRef<{ [camera: string]: PreviewController }>({});
 
   const [playbackStart, setPlaybackStart] = useState(startTime);
@@ -239,6 +241,8 @@ export function RecordingView({
   }, [mainLayoutRef]);
 
   // layout
+
+  const previewRowOverflows = useOverflowObserver(previewRowRef);
 
   const getCameraAspect = useCallback(
     (cam: string) => {
@@ -450,7 +454,8 @@ export function RecordingView({
             </div>
             {isDesktop && (
               <div
-                className={`flex gap-2 ${mainCameraAspect == "tall" ? "h-full w-[12%] flex-col justify-center overflow-y-auto" : "w-full h-28 overflow-x-auto"} `}
+                ref={previewRowRef}
+                className={`flex gap-2 ${mainCameraAspect == "tall" ? "h-full w-[12%] flex-col justify-center overflow-y-auto" : `w-full h-28 overflow-x-auto ${previewRowOverflows ? "" : "justify-center items-center"}`}`}
               >
                 <div className="w-2" />
                 {allCameras.map((cam) => {
