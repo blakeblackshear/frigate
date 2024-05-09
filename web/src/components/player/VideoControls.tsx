@@ -170,7 +170,7 @@ export default function VideoControls({
   return (
     <div
       className={cn(
-        "px-4 py-2 flex justify-between items-center gap-8 text-primary z-50 bg-background/60 rounded-lg",
+        "px-4 py-2 flex flex-wrap md:flex-nowrap justify-between items-center gap-8 text-primary z-50 bg-background/60 rounded-lg",
         className,
       )}
     >
