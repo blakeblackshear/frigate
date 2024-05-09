@@ -400,7 +400,7 @@ export default function DraggableGridLayout({
                 "fixed",
                 isDesktop && "bottom-12 lg:bottom-9",
                 isMobile && "bottom-12 lg:bottom-16",
-                hasScrollbar && isDesktop ? "right-6" : "right-1",
+                hasScrollbar && isDesktop ? "right-6" : "right-3",
                 "z-50 flex flex-row gap-2",
               )}
             >
