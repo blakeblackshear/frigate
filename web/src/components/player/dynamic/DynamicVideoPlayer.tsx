@@ -24,10 +24,12 @@ type DynamicVideoPlayerProps = {
   startTimestamp?: number;
   isScrubbing: boolean;
   hotKeys: boolean;
+  fullscreen: boolean;
   onControllerReady: (controller: DynamicVideoController) => void;
   onTimestampUpdate?: (timestamp: number) => void;
   onClipEnded?: () => void;
   setFullResolution: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
+  setFullscreen: (full: boolean) => void;
 };
 export default function DynamicVideoPlayer({
   className,
@@ -37,10 +39,12 @@ export default function DynamicVideoPlayer({
   startTimestamp,
   isScrubbing,
   hotKeys,
+  fullscreen,
   onControllerReady,
   onTimestampUpdate,
   onClipEnded,
   setFullResolution,
+  setFullscreen,
 }: DynamicVideoPlayerProps) {
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -184,6 +188,7 @@ export default function DynamicVideoPlayer({
         visible={!(isScrubbing || isLoading)}
         currentSource={source}
         hotKeys={hotKeys}
+        fullscreen={fullscreen}
         onTimeUpdate={onTimeUpdate}
         onPlayerLoaded={onPlayerLoaded}
         onClipEnded={onClipEnded}
@@ -201,6 +206,7 @@ export default function DynamicVideoPlayer({
         }}
         setFullResolution={setFullResolution}
         onUploadFrame={onUploadFrameToPlus}
+        setFullscreen={setFullscreen}
       />
       <PreviewPlayer
         className={cn(
