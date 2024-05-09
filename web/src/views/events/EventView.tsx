@@ -997,6 +997,7 @@ function MotionReview({
           volume: false,
           seek: true,
           playbackRate: true,
+          fullscreen: false,
         }}
         isPlaying={playing}
         show={!scrubbing || controlsOpen}
