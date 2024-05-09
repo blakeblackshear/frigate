@@ -407,7 +407,7 @@ export default function DraggableGridLayout({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    className="px-2 opacity-30 hover:opacity-100 transition-all duration-300"
+                    className="px-2 py-1 bg-secondary-foreground rounded-lg opacity-30 hover:opacity-100 transition-all duration-300"
                     onClick={() =>
                       setIsEditMode((prevIsEditMode) => !prevIsEditMode)
                     }
@@ -432,7 +432,7 @@ export default function DraggableGridLayout({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
-                        className="px-2 opacity-30 hover:opacity-100 transition-all duration-300"
+                        className="px-2 py-1 bg-secondary-foreground rounded-lg opacity-30 hover:opacity-100 transition-all duration-300"
                         onClick={() =>
                           setEditGroup((prevEditGroup) => !prevEditGroup)
                         }
@@ -447,7 +447,7 @@ export default function DraggableGridLayout({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
-                        className="px-2 opacity-30 hover:opacity-100 transition-all duration-300"
+                        className="px-2 py-1 bg-secondary-foreground rounded-lg opacity-30 hover:opacity-100 transition-all duration-300"
                         onClick={() => {
                           if (fullscreen) {
                             document.exitFullscreen();
