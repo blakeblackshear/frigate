@@ -25,7 +25,7 @@ export function useCameraPreviews(
 
   const { data: allPreviews } = useSWR<Preview[]>(
     fetchPreviews
-      ? `preview/${camera}/start/${timeRange.after}/end/${timeRange.before}`
+      ? `preview/${camera}/start/${Math.round(timeRange.after)}/end/${Math.round(timeRange.before)}`
       : null,
     { revalidateOnFocus: false, revalidateOnReconnect: false },
   );

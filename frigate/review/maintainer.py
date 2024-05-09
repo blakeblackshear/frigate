@@ -110,6 +110,18 @@ class PendingReviewSegment:
                 self.frame_path, self.frame, [int(cv2.IMWRITE_WEBP_QUALITY), 60]
             )
 
+    def save_full_frame(self, camera_config: CameraConfig, frame):
+        color_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
+        width = int(THUMB_HEIGHT * color_frame.shape[1] / color_frame.shape[0])
+        self.frame = cv2.resize(
+            color_frame, dsize=(width, THUMB_HEIGHT), interpolation=cv2.INTER_AREA
+        )
+
+        if self.frame is not None:
+            cv2.imwrite(
+                self.frame_path, self.frame, [int(cv2.IMWRITE_WEBP_QUALITY), 60]
+            )
+
     def get_data(self, ended: bool) -> dict:
         return {
             ReviewSegment.id: self.id,
@@ -273,8 +285,30 @@ class ReviewSegmentMaintainer(threading.Thread):
             if segment.severity == SeverityEnum.alert and frame_time > (
                 segment.last_update + THRESHOLD_ALERT_ACTIVITY
             ):
+                if segment.frame is None:
+                    try:
+                        frame_id = f"{camera_config.name}{frame_time}"
+                        yuv_frame = self.frame_manager.get(
+                            frame_id, camera_config.frame_shape_yuv
+                        )
+                        segment.save_full_frame(camera_config, yuv_frame)
+                        self.frame_manager.close(frame_id)
+                    except FileNotFoundError:
+                        return
+
                 self.end_segment(segment)
             elif frame_time > (segment.last_update + THRESHOLD_DETECTION_ACTIVITY):
+                if segment.frame is None:
+                    try:
+                        frame_id = f"{camera_config.name}{frame_time}"
+                        yuv_frame = self.frame_manager.get(
+                            frame_id, camera_config.frame_shape_yuv
+                        )
+                        segment.save_full_frame(camera_config, yuv_frame)
+                        self.frame_manager.close(frame_id)
+                    except FileNotFoundError:
+                        return
+
                 self.end_segment(segment)
 
     def check_if_new_segment(

@@ -204,8 +204,8 @@ export default function DynamicVideoPlayer({
       />
       <PreviewPlayer
         className={cn(
-          isScrubbing || isLoading ? "visible" : "hidden",
           className,
+          isScrubbing || isLoading ? "visible" : "hidden",
         )}
         camera={camera}
         timeRange={timeRange}
