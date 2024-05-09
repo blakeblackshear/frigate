@@ -13,6 +13,8 @@ import {
   StatusBarMessagesContext,
   StatusMessage,
 } from "@/context/statusbar-provider";
+import { Link } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 function Bottombar() {
   const navItems = useNavigation("secondary");
@@ -20,16 +22,19 @@ function Bottombar() {
   return (
     <div className="absolute h-16 inset-x-4 bottom-0 flex flex-row items-center justify-between">
       {navItems.map((item) => (
-        <NavItem key={item.id} item={item} Icon={item.icon} />
+        <NavItem key={item.id} className="p-2" item={item} Icon={item.icon} />
       ))}
-      <GeneralSettings />
-      <AccountSettings />
-      <StatusAlertNav />
+      <GeneralSettings className="p-2" />
+      <AccountSettings className="p-2" />
+      <StatusAlertNav className="p-2" />
     </div>
   );
 }
 
-function StatusAlertNav() {
+type StatusAlertNavProps = {
+  className?: string;
+};
+function StatusAlertNav({ className }: StatusAlertNavProps) {
   const { data: initialStats } = useSWR<FrigateStats>("stats", {
     revalidateOnFocus: false,
   });
@@ -51,7 +56,13 @@ function StatusAlertNav() {
   useEffect(() => {
     clearMessages("stats");
     potentialProblems.forEach((problem) => {
-      addMessage("stats", problem.text, problem.color);
+      addMessage(
+        "stats",
+        problem.text,
+        problem.color,
+        undefined,
+        problem.relevantLink,
+      );
     });
   }, [potentialProblems, addMessage, clearMessages]);
 
@@ -64,18 +75,31 @@ function StatusAlertNav() {
       <DrawerTrigger>
         <IoIosWarning className="size-5 text-danger" />
       </DrawerTrigger>
-      <DrawerContent className="max-h-[75dvh] px-2 mx-1 rounded-t-2xl overflow-hidden">
+      <DrawerContent
+        className={cn(
+          "max-h-[75dvh] px-2 mx-1 rounded-t-2xl overflow-hidden",
+          className,
+        )}
+      >
         <div className="w-full h-auto py-4 overflow-y-auto overflow-x-hidden flex flex-col items-center gap-2">
           {Object.entries(messages).map(([key, messageArray]) => (
             <div key={key} className="w-full flex items-center gap-2">
-              {messageArray.map(({ id, text, color }: StatusMessage) => (
-                <div key={id} className="flex items-center text-xs gap-2">
-                  <IoIosWarning
-                    className={`size-5 ${color || "text-danger"}`}
-                  />
-                  {text}
-                </div>
-              ))}
+              {messageArray.map(({ id, text, color, link }: StatusMessage) => {
+                const message = (
+                  <div key={id} className="flex items-center text-xs gap-2">
+                    <IoIosWarning
+                      className={`size-5 ${color || "text-danger"}`}
+                    />
+                    {text}
+                  </div>
+                );
+
+                if (link) {
+                  return <Link to={link}>{message}</Link>;
+                } else {
+                  return message;
+                }
+              })}
             </div>
           ))}
         </div>

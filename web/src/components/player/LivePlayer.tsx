@@ -6,9 +6,14 @@ import { useEffect, useMemo, useState } from "react";
 import MSEPlayer from "./MsePlayer";
 import JSMpegPlayer from "./JSMpegPlayer";
 import { MdCircle } from "react-icons/md";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { useCameraActivity } from "@/hooks/use-camera-activity";
-import { LivePlayerMode } from "@/types/live";
+import { LivePlayerMode, VideoResolutionType } from "@/types/live";
 import useCameraLiveMode from "@/hooks/use-camera-live-mode";
+import { getIconForLabel } from "@/utils/iconUtil";
+import Chip from "../indicators/Chip";
+import { capitalizeFirstLetter } from "@/utils/stringUtil";
+import { cn } from "@/lib/utils";
 
 type LivePlayerProps = {
   cameraRef?: (ref: HTMLDivElement | null) => void;
@@ -22,6 +27,7 @@ type LivePlayerProps = {
   iOSCompatFullScreen?: boolean;
   pip?: boolean;
   onClick?: () => void;
+  setFullResolution?: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
 };
 
 export default function LivePlayer({
@@ -36,10 +42,12 @@ export default function LivePlayer({
   iOSCompatFullScreen = false,
   pip,
   onClick,
+  setFullResolution,
 }: LivePlayerProps) {
   // camera activity
 
-  const { activeMotion, activeTracking } = useCameraActivity(cameraConfig);
+  const { activeMotion, activeTracking, objects } =
+    useCameraActivity(cameraConfig);
 
   const cameraActive = useMemo(
     () =>
@@ -110,11 +118,12 @@ export default function LivePlayer({
       player = (
         <MSEPlayer
           className={`rounded-lg md:rounded-2xl size-full ${liveReady ? "" : "hidden"}`}
-          camera={cameraConfig.name}
+          camera={cameraConfig.live.stream_name}
           playbackEnabled={cameraActive}
           audioEnabled={playAudio}
           onPlaying={() => setLiveReady(true)}
           pip={pip}
+          setFullResolution={setFullResolution}
         />
       );
     } else {
@@ -129,7 +138,7 @@ export default function LivePlayer({
     player = (
       <JSMpegPlayer
         className="size-full flex justify-center rounded-lg md:rounded-2xl overflow-hidden"
-        camera={cameraConfig.name}
+        camera={cameraConfig.live.stream_name}
         width={cameraConfig.detect.width}
         height={cameraConfig.detect.height}
       />
@@ -142,16 +151,64 @@ export default function LivePlayer({
     <div
       ref={cameraRef}
       data-camera={cameraConfig.name}
-      className={`relative flex justify-center ${liveMode == "jsmpeg" ? "size-full" : "w-full"} outline cursor-pointer ${
+      className={cn(
+        "relative flex justify-center",
+        liveMode === "jsmpeg" ? "size-full" : "w-full",
+        "outline cursor-pointer",
         activeTracking
           ? "outline-severity_alert outline-3 rounded-lg md:rounded-2xl shadow-severity_alert"
-          : "outline-0 outline-background"
-      } transition-all duration-500 ${className}`}
+          : "outline-0 outline-background",
+        "transition-all duration-500",
+        className,
+      )}
       onClick={onClick}
     >
       <div className="absolute top-0 inset-x-0 rounded-lg md:rounded-2xl z-10 w-full h-[30%] bg-gradient-to-b from-black/20 to-transparent pointer-events-none"></div>
       <div className="absolute bottom-0 inset-x-0 rounded-lg md:rounded-2xl z-10 w-full h-[10%] bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
       {player}
+
+      {objects.length > 0 && (
+        <div className="absolute left-0 top-2 z-40">
+          <Tooltip>
+            <div className="flex">
+              <TooltipTrigger asChild>
+                <div className="mx-3 pb-1 text-white text-sm">
+                  <Chip
+                    className={`flex items-start justify-between space-x-1 bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 z-0`}
+                  >
+                    {[
+                      ...new Set([
+                        ...(objects || []).map(({ label }) => label),
+                      ]),
+                    ]
+                      .map((label) => {
+                        return getIconForLabel(label, "size-3 text-white");
+                      })
+                      .sort()}
+                  </Chip>
+                </div>
+              </TooltipTrigger>
+            </div>
+            <TooltipContent className="capitalize">
+              {[
+                ...new Set([
+                  ...(objects || []).map(({ label, sub_label }) =>
+                    label.endsWith("verified") ? sub_label : label,
+                  ),
+                ]),
+              ]
+                .filter(
+                  (label) =>
+                    label !== undefined && !label.includes("-verified"),
+                )
+                .map((label) => capitalizeFirstLetter(label))
+                .sort()
+                .join(", ")
+                .replaceAll("-verified", "")}
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      )}
 
       <div
         className={`absolute inset-0 w-full ${

@@ -18,6 +18,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
           actionButton: "group-[.toast]:bg-primary group-[.toast]:text-primary",
           cancelButton:
             "group-[.toast]:bg-muted group-[.toast]:text-muted-foreground",
+          closeButton:
+            "group-[.toast]:bg-secondary border-primary border-[1px]",
           success:
             "group toast group-[.toaster]:bg-success group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg",
           error:

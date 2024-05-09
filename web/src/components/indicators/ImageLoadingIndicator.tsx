@@ -1,5 +1,6 @@
 import { isSafari } from "react-device-detect";
 import { Skeleton } from "../ui/skeleton";
+import { cn } from "@/lib/utils";
 
 export default function ImageLoadingIndicator({
   className,
@@ -13,8 +14,8 @@ export default function ImageLoadingIndicator({
   }
 
   return isSafari ? (
-    <div className={`bg-gray-300 pointer-events-none ${className ?? ""}`} />
+    <div className={cn("bg-gray-300 pointer-events-none", className)} />
   ) : (
-    <Skeleton className={`pointer-events-none ${className ?? ""}`} />
+    <Skeleton className={cn("pointer-events-none", className)} />
   );
 }

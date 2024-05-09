@@ -7,7 +7,7 @@ import { ExportContent } from "./ExportDialog";
 import { ExportMode } from "@/types/filter";
 import ReviewActivityCalendar from "./ReviewActivityCalendar";
 import { SelectSeparator } from "../ui/select";
-import { ReviewFilter, ReviewSummary } from "@/types/review";
+import { ReviewFilter, ReviewSeverity, ReviewSummary } from "@/types/review";
 import { getEndOfDayTimestamp } from "@/utils/dateUtil";
 import { GeneralFilterContent } from "../filter/ReviewFilterGroup";
 import useSWR from "swr";
@@ -31,6 +31,7 @@ type MobileReviewSettingsDrawerProps = {
   features?: DrawerFeatures[];
   camera: string;
   filter?: ReviewFilter;
+  currentSeverity?: ReviewSeverity;
   latestTime: number;
   currentTime: number;
   range?: TimeRange;
@@ -44,6 +45,7 @@ export default function MobileReviewSettingsDrawer({
   features = DEFAULT_DRAWER_FEATURES,
   camera,
   filter,
+  currentSeverity,
   latestTime,
   currentTime,
   range,
@@ -109,6 +111,9 @@ export default function MobileReviewSettingsDrawer({
     const cameras = filter?.cameras || Object.keys(config.cameras);
 
     cameras.forEach((camera) => {
+      if (camera == "birdseye") {
+        return;
+      }
       const cameraConfig = config.cameras[camera];
       cameraConfig.objects.track.forEach((label) => {
         labels.add(label);
@@ -138,7 +143,10 @@ export default function MobileReviewSettingsDrawer({
         {features.includes("export") && (
           <Button
             className="w-full flex justify-center items-center gap-2"
-            onClick={() => setDrawerMode("export")}
+            onClick={() => {
+              setDrawerMode("export");
+              setMode("select");
+            }}
           >
             <FaArrowDown className="p-1 fill-secondary bg-secondary-foreground rounded-md" />
             Export
@@ -257,6 +265,11 @@ export default function MobileReviewSettingsDrawer({
           allLabels={allLabels}
           selectedLabels={filter?.labels}
           currentLabels={currentLabels}
+          currentSeverity={currentSeverity}
+          showAll={filter?.showAll == true}
+          setShowAll={(showAll) => {
+            onUpdateFilter({ ...filter, showAll });
+          }}
           setCurrentLabels={setCurrentLabels}
           updateLabelFilter={(newLabels) =>
             onUpdateFilter({ ...filter, labels: newLabels })

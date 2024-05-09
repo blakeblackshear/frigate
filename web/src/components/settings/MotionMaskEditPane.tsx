@@ -2,7 +2,7 @@ import Heading from "../ui/heading";
 import { Separator } from "../ui/separator";
 import { Button } from "@/components/ui/button";
 import { Form, FormField, FormItem, FormMessage } from "@/components/ui/form";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -173,13 +173,17 @@ export default function MotionMaskEditPane({
     }
   }
 
+  useEffect(() => {
+    document.title = "Edit Motion Mask - Frigate";
+  }, []);
+
   if (!polygon) {
     return;
   }
 
   return (
     <>
-      <Toaster position="top-center" />
+      <Toaster position="top-center" closeButton={true} />
       <Heading as="h3" className="my-2">
         {polygon.name.length ? "Edit" : "New"} Motion Mask
       </Heading>

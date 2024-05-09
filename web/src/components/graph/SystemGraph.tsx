@@ -37,10 +37,6 @@ export function ThresholdBarGraph({
 
   const formatTime = useCallback(
     (val: unknown) => {
-      if (val == 1) {
-        return;
-      }
-
       const date = new Date(updateTimes[Math.round(val as number) - 1] * 1000);
       return date.toLocaleTimeString([], {
         hour12: config?.ui.time_format != "24hour",
@@ -110,7 +106,7 @@ export function ThresholdBarGraph({
         tickAmount: isMobileOnly ? 3 : 4,
         tickPlacement: "on",
         labels: {
-          offsetX: -18,
+          rotate: 0,
           formatter: formatTime,
         },
         axisBorder: {
@@ -149,8 +145,8 @@ export function ThresholdBarGraph({
 }
 
 const getUnitSize = (MB: number) => {
-  if (isNaN(MB) || MB < 0) return "Invalid number";
-  if (MB < 1024) return `${MB} MiB`;
+  if (MB === null || isNaN(MB) || MB < 0) return "Invalid number";
+  if (MB < 1024) return `${MB.toFixed(2)} MiB`;
   if (MB < 1048576) return `${(MB / 1024).toFixed(2)} GiB`;
 
   return `${(MB / 1048576).toFixed(2)} TiB`;
@@ -301,10 +297,6 @@ export function CameraLineGraph({
 
   const formatTime = useCallback(
     (val: unknown) => {
-      if (val == 1) {
-        return;
-      }
-
       const date = new Date(updateTimes[Math.round(val as number)] * 1000);
       return date.toLocaleTimeString([], {
         hour12: config?.ui.time_format != "24hour",
@@ -352,7 +344,7 @@ export function CameraLineGraph({
         tickAmount: isMobileOnly ? 3 : 4,
         tickPlacement: "on",
         labels: {
-          offsetX: isMobileOnly ? -18 : 0,
+          rotate: 0,
           formatter: formatTime,
         },
         axisBorder: {

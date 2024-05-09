@@ -9,6 +9,9 @@ import { DynamicVideoController } from "./DynamicVideoController";
 import HlsVideoPlayer from "../HlsVideoPlayer";
 import { TimeRange } from "@/types/timeline";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import { VideoResolutionType } from "@/types/live";
+import axios from "axios";
+import { cn } from "@/lib/utils";
 
 /**
  * Dynamically switches between video playback and scrubbing preview player.
@@ -24,6 +27,7 @@ type DynamicVideoPlayerProps = {
   onControllerReady: (controller: DynamicVideoController) => void;
   onTimestampUpdate?: (timestamp: number) => void;
   onClipEnded?: () => void;
+  setFullResolution: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
 };
 export default function DynamicVideoPlayer({
   className,
@@ -36,6 +40,7 @@ export default function DynamicVideoPlayer({
   onControllerReady,
   onTimestampUpdate,
   onClipEnded,
+  setFullResolution,
 }: DynamicVideoPlayerProps) {
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -124,6 +129,18 @@ export default function DynamicVideoPlayer({
     [controller, onTimestampUpdate, isScrubbing, isLoading],
   );
 
+  const onUploadFrameToPlus = useCallback(
+    (playTime: number) => {
+      if (!controller) {
+        return;
+      }
+
+      const time = controller.getProgress(playTime);
+      return axios.post(`/${camera}/plus/${time}`);
+    },
+    [camera, controller],
+  );
+
   // state of playback player
 
   const recordingParams = useMemo(() => {
@@ -182,9 +199,14 @@ export default function DynamicVideoPlayer({
           setIsLoading(false);
           setNoRecording(false);
         }}
+        setFullResolution={setFullResolution}
+        onUploadFrame={onUploadFrameToPlus}
       />
       <PreviewPlayer
-        className={`${isScrubbing || isLoading ? "visible" : "hidden"} ${className}`}
+        className={cn(
+          className,
+          isScrubbing || isLoading ? "visible" : "hidden",
+        )}
         camera={camera}
         timeRange={timeRange}
         cameraPreviews={cameraPreviews}

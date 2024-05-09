@@ -19,7 +19,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { ATTRIBUTE_LABELS, FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -235,13 +235,17 @@ export default function ObjectMaskEditPane({
     }
   }
 
+  useEffect(() => {
+    document.title = "Edit Object Mask - Frigate";
+  }, []);
+
   if (!polygon) {
     return;
   }
 
   return (
     <>
-      <Toaster position="top-center" />
+      <Toaster position="top-center" closeButton={true} />
       <Heading as="h3" className="my-2">
         {polygon.name.length ? "Edit" : "New"} Object Mask
       </Heading>

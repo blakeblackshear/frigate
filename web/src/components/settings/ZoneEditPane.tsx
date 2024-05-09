@@ -308,13 +308,17 @@ export default function ZoneEditPane({
     }
   }
 
+  useEffect(() => {
+    document.title = "Edit Zone - Frigate";
+  }, []);
+
   if (!polygon) {
     return;
   }
 
   return (
     <>
-      <Toaster position="top-center" />
+      <Toaster position="top-center" closeButton={true} />
       <Heading as="h3" className="my-2">
         {polygon.name.length ? "Edit" : "New"} Zone
       </Heading>
@@ -550,14 +554,6 @@ export function ZoneObjectSelector({
     }
 
     const labels = new Set<string>();
-
-    // Object.values(config.cameras).forEach((camera) => {
-    //   camera.objects.track.forEach((label) => {
-    //     if (!ATTRIBUTE_LABELS.includes(label)) {
-    //       labels.add(label);
-    //     }
-    //   });
-    // });
 
     cameraConfig.objects.track.forEach((label) => {
       if (!ATTRIBUTE_LABELS.includes(label)) {

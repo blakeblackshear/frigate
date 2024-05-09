@@ -2,6 +2,7 @@
 
 import datetime
 import logging
+import subprocess as sp
 from abc import ABC, abstractmethod
 from multiprocessing import shared_memory
 from string import printable
@@ -746,3 +747,37 @@ def add_mask(mask: str, mask_img: np.ndarray):
         ]
     )
     cv2.fillPoly(mask_img, pts=[contour], color=(0))
+
+
+def get_image_from_recording(
+    file_path: str, relative_frame_time: float
+) -> Optional[any]:
+    """retrieve a frame from given time in recording file."""
+
+    ffmpeg_cmd = [
+        "ffmpeg",
+        "-hide_banner",
+        "-loglevel",
+        "warning",
+        "-ss",
+        f"00:00:{relative_frame_time}",
+        "-i",
+        file_path,
+        "-frames:v",
+        "1",
+        "-c:v",
+        "png",
+        "-f",
+        "image2pipe",
+        "-",
+    ]
+
+    process = sp.run(
+        ffmpeg_cmd,
+        capture_output=True,
+    )
+
+    if process.returncode == 0:
+        return process.stdout
+    else:
+        return None

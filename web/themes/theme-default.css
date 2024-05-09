@@ -78,8 +78,6 @@
     --selected-foreground: hsl(0 0% 100%);
     --selected-foreground: 0 0% 100%;
 
-    --radius: 0.5rem;
-
     --severity_alert: var(--red-800);
     --severity_alert_dimmed: var(--red-500);
 

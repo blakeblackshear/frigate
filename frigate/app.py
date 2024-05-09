@@ -16,6 +16,7 @@ import psutil
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
+from pydantic import ValidationError
 
 from frigate.api.app import create_app
 from frigate.comms.config_updater import ConfigPublisher
@@ -597,24 +598,6 @@ class FrigateApp:
         self.init_logger()
         logger.info(f"Starting Frigate ({VERSION})")
 
-        if not os.environ.get("I_PROMISE_I_WONT_MAKE_AN_ISSUE_ON_GITHUB"):
-            print(
-                "**********************************************************************************"
-            )
-            print(
-                "**********************************************************************************"
-            )
-            print("Frigate 0.14 UNSTABLE")
-            print("This build is not for public use. Please use Frigate stable.")
-            print("Unstable/experimental builds are not enabled, Frigate is exiting.")
-            print(
-                "**********************************************************************************"
-            )
-            print(
-                "**********************************************************************************"
-            )
-            sys.exit(1)
-
         try:
             self.ensure_dirs()
             try:
@@ -629,8 +612,13 @@ class FrigateApp:
                 print("*************************************************************")
                 print("***    Config Validation Errors                           ***")
                 print("*************************************************************")
-                print(e)
-                print(traceback.format_exc())
+                if isinstance(e, ValidationError):
+                    for error in e.errors():
+                        location = ".".join(str(item) for item in error["loc"])
+                        print(f"{location}: {error['msg']}")
+                else:
+                    print(e)
+                    print(traceback.format_exc())
                 print("*************************************************************")
                 print("***    End Config Validation Errors                       ***")
                 print("*************************************************************")
@@ -695,9 +683,9 @@ class FrigateApp:
         self.stop_event.set()
 
         # set an end_time on entries without an end_time before exiting
-        Event.update(end_time=datetime.datetime.now().timestamp()).where(
-            Event.end_time == None
-        ).execute()
+        Event.update(
+            end_time=datetime.datetime.now().timestamp(), has_snapshot=False
+        ).where(Event.end_time == None).execute()
         ReviewSegment.update(end_time=datetime.datetime.now().timestamp()).where(
             ReviewSegment.end_time == None
         ).execute()

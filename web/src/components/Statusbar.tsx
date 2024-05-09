@@ -9,6 +9,7 @@ import { useContext, useEffect, useMemo } from "react";
 import { FaCheck } from "react-icons/fa";
 import { IoIosWarning } from "react-icons/io";
 import { MdCircle } from "react-icons/md";
+import { Link } from "react-router-dom";
 import useSWR from "swr";
 
 export default function Statusbar() {
@@ -43,7 +44,13 @@ export default function Statusbar() {
   useEffect(() => {
     clearMessages("stats");
     potentialProblems.forEach((problem) => {
-      addMessage("stats", problem.text, problem.color);
+      addMessage(
+        "stats",
+        problem.text,
+        problem.color,
+        undefined,
+        problem.relevantLink,
+      );
     });
   }, [potentialProblems, addMessage, clearMessages]);
 
@@ -51,18 +58,20 @@ export default function Statusbar() {
     <div className="absolute left-0 bottom-0 right-0 w-full h-8 flex justify-between items-center px-4 bg-background_alt z-10 dark:text-secondary-foreground border-t border-secondary-highlight">
       <div className="h-full flex items-center gap-2">
         {cpuPercent && (
-          <div className="flex items-center text-sm gap-2">
-            <MdCircle
-              className={`size-2 ${
-                cpuPercent < 50
-                  ? "text-success"
-                  : cpuPercent < 80
-                    ? "text-orange-400"
-                    : "text-danger"
-              }`}
-            />
-            CPU {cpuPercent}%
-          </div>
+          <Link to="/system#general">
+            <div className="flex items-center text-sm gap-2 cursor-pointer hover:underline">
+              <MdCircle
+                className={`size-2 ${
+                  cpuPercent < 50
+                    ? "text-success"
+                    : cpuPercent < 80
+                      ? "text-orange-400"
+                      : "text-danger"
+                }`}
+              />
+              CPU {cpuPercent}%
+            </div>
+          </Link>
         )}
         {Object.entries(stats?.gpu_usages || {}).map(([name, stats]) => {
           if (name == "error-gpu") {
@@ -86,18 +95,24 @@ export default function Statusbar() {
           const gpu = parseInt(stats.gpu);
 
           return (
-            <div key={gpuTitle} className="flex items-center text-sm gap-2">
-              <MdCircle
-                className={`size-2 ${
-                  gpu < 50
-                    ? "text-success"
-                    : gpu < 80
-                      ? "text-orange-400"
-                      : "text-danger"
-                }`}
-              />
-              {gpuTitle} {gpu}%
-            </div>
+            <Link key={gpuTitle} to="/system#general">
+              {" "}
+              <div
+                key={gpuTitle}
+                className="flex items-center text-sm gap-2 cursor-pointer hover:underline"
+              >
+                <MdCircle
+                  className={`size-2 ${
+                    gpu < 50
+                      ? "text-success"
+                      : gpu < 80
+                        ? "text-orange-400"
+                        : "text-danger"
+                  }`}
+                />
+                {gpuTitle} {gpu}%
+              </div>
+            </Link>
           );
         })}
       </div>
@@ -110,14 +125,29 @@ export default function Statusbar() {
         ) : (
           Object.entries(messages).map(([key, messageArray]) => (
             <div key={key} className="h-full flex items-center gap-2">
-              {messageArray.map(({ id, text, color }: StatusMessage) => (
-                <div key={id} className="flex items-center text-sm gap-2">
-                  <IoIosWarning
-                    className={`size-5 ${color || "text-danger"}`}
-                  />
-                  {text}
-                </div>
-              ))}
+              {messageArray.map(({ id, text, color, link }: StatusMessage) => {
+                const message = (
+                  <div
+                    key={id}
+                    className={`flex items-center text-sm gap-2 ${link ? "hover:underline cursor-pointer" : ""}`}
+                  >
+                    <IoIosWarning
+                      className={`size-5 ${color || "text-danger"}`}
+                    />
+                    {text}
+                  </div>
+                );
+
+                if (link) {
+                  return (
+                    <Link key={id} to={link}>
+                      {message}
+                    </Link>
+                  );
+                } else {
+                  return message;
+                }
+              })}
             </div>
           ))
         )}

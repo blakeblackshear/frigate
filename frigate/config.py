@@ -518,7 +518,7 @@ class ZoneConfig(BaseModel):
         ge=0,
         title="Number of seconds that an object must loiter to be considered in the zone.",
     )
-    objects: List[str] = Field(
+    objects: Union[str, List[str]] = Field(
         default_factory=list,
         title="List of objects that can trigger the zone.",
     )
@@ -555,19 +555,24 @@ class ZoneConfig(BaseModel):
         # old native resolution coordinates
         if isinstance(coordinates, list):
             explicit = any(p.split(",")[0] > "1.0" for p in coordinates)
-            self._contour = np.array(
-                [
-                    (
-                        [int(p.split(",")[0]), int(p.split(",")[1])]
-                        if explicit
-                        else [
-                            int(float(p.split(",")[0]) * frame_shape[1]),
-                            int(float(p.split(",")[1]) * frame_shape[0]),
-                        ]
-                    )
-                    for p in coordinates
-                ]
-            )
+            try:
+                self._contour = np.array(
+                    [
+                        (
+                            [int(p.split(",")[0]), int(p.split(",")[1])]
+                            if explicit
+                            else [
+                                int(float(p.split(",")[0]) * frame_shape[1]),
+                                int(float(p.split(",")[1]) * frame_shape[0]),
+                            ]
+                        )
+                        for p in coordinates
+                    ]
+                )
+            except ValueError:
+                raise ValueError(
+                    f"Invalid coordinates found in configuration file. Coordinates must be relative (between 0-1): {coordinates}"
+                )
 
             if explicit:
                 self.coordinates = ",".join(
@@ -579,19 +584,24 @@ class ZoneConfig(BaseModel):
         elif isinstance(coordinates, str):
             points = coordinates.split(",")
             explicit = any(p > "1.0" for p in points)
-            self._contour = np.array(
-                [
-                    (
-                        [int(points[i]), int(points[i + 1])]
-                        if explicit
-                        else [
-                            int(float(points[i]) * frame_shape[1]),
-                            int(float(points[i + 1]) * frame_shape[0]),
-                        ]
-                    )
-                    for i in range(0, len(points), 2)
-                ]
-            )
+            try:
+                self._contour = np.array(
+                    [
+                        (
+                            [int(points[i]), int(points[i + 1])]
+                            if explicit
+                            else [
+                                int(float(points[i]) * frame_shape[1]),
+                                int(float(points[i + 1]) * frame_shape[0]),
+                            ]
+                        )
+                        for i in range(0, len(points), 2)
+                    ]
+                )
+            except ValueError:
+                raise ValueError(
+                    f"Invalid coordinates found in configuration file. Coordinates must be relative (between 0-1): {coordinates}"
+                )
 
             if explicit:
                 self.coordinates = ",".join(
@@ -616,7 +626,7 @@ class AlertsConfig(FrigateBaseModel):
     labels: List[str] = Field(
         default=DEFAULT_ALERT_OBJECTS, title="Labels to create alerts for."
     )
-    required_zones: List[str] = Field(
+    required_zones: Union[str, List[str]] = Field(
         default_factory=list,
         title="List of required zones to be entered in order to save the event as an alert.",
     )
@@ -636,7 +646,7 @@ class DetectionsConfig(FrigateBaseModel):
     labels: Optional[List[str]] = Field(
         default=None, title="Labels to create detections for."
     )
-    required_zones: List[str] = Field(
+    required_zones: Union[str, List[str]] = Field(
         default_factory=list,
         title="List of required zones to be entered in order to save the event as a detection.",
     )
@@ -1505,29 +1515,26 @@ class FrigateConfig(FrigateBaseModel):
         for key, detector in config.detectors.items():
             adapter = TypeAdapter(DetectorConfig)
             model_dict = (
-                detector if isinstance(detector, dict) else detector.model_dump()
+                detector
+                if isinstance(detector, dict)
+                else detector.model_dump(warnings="none")
             )
             detector_config: DetectorConfig = adapter.validate_python(model_dict)
             if detector_config.model is None:
-                detector_config.model = config.model
+                detector_config.model = config.model.model_copy()
             else:
-                model = detector_config.model
-                schema = ModelConfig.model_json_schema()["properties"]
-                if (
-                    model.width != schema["width"]["default"]
-                    or model.height != schema["height"]["default"]
-                    or model.labelmap_path is not None
-                    or model.labelmap
-                    or model.input_tensor != schema["input_tensor"]["default"]
-                    or model.input_pixel_format
-                    != schema["input_pixel_format"]["default"]
-                ):
+                path = detector_config.model.path
+                detector_config.model = config.model.model_copy()
+                detector_config.model.path = path
+
+                if "path" not in model_dict or len(model_dict.keys()) > 1:
                     logger.warning(
                         "Customizing more than a detector model path is unsupported."
                     )
+
             merged_model = deep_merge(
-                detector_config.model.model_dump(exclude_unset=True),
-                config.model.model_dump(exclude_unset=True),
+                detector_config.model.model_dump(exclude_unset=True, warnings="none"),
+                config.model.model_dump(exclude_unset=True, warnings="none"),
             )
 
             if "path" not in merged_model:

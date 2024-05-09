@@ -110,6 +110,8 @@ class RecordingExporter(threading.Thread):
                 f"00:{minutes}:{seconds}",
                 "-i",
                 preview.path,
+                "-frames",
+                "1",
                 "-c:v",
                 "libwebp",
                 thumb_path,

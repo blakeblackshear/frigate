@@ -8,7 +8,8 @@ export function useOverlayState<S>(
 ): [S | undefined, (value: S, replace?: boolean) => void] {
   const location = useLocation();
   const navigate = useNavigate();
-  const currentLocationState = location.state;
+
+  const currentLocationState = useMemo(() => location.state, [location]);
 
   const setOverlayStateValue = useCallback(
     (value: S, replace: boolean = false) => {
@@ -18,7 +19,7 @@ export function useOverlayState<S>(
     },
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [key, navigate],
+    [key, currentLocationState, navigate],
   );
 
   const overlayStateValue = useMemo<S | undefined>(
@@ -32,14 +33,16 @@ export function useOverlayState<S>(
 export function usePersistedOverlayState<S extends string>(
   key: string,
   defaultValue: S | undefined = undefined,
-): [S | undefined, (value: S | undefined, replace?: boolean) => void] {
-  const [persistedValue, setPersistedValue] = usePersistence<S>(
-    key,
-    defaultValue,
-  );
+): [
+  S | undefined,
+  (value: S | undefined, replace?: boolean) => void,
+  () => void,
+] {
+  const [persistedValue, setPersistedValue, , deletePersistedValue] =
+    usePersistence<S>(key, defaultValue);
   const location = useLocation();
   const navigate = useNavigate();
-  const currentLocationState = location.state;
+  const currentLocationState = useMemo(() => location.state, [location]);
 
   const setOverlayStateValue = useCallback(
     (value: S | undefined, replace: boolean = false) => {
@@ -50,7 +53,7 @@ export function usePersistedOverlayState<S extends string>(
     },
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [key, navigate],
+    [key, currentLocationState, navigate],
   );
 
   const overlayStateValue = useMemo<S | undefined>(
@@ -61,6 +64,7 @@ export function usePersistedOverlayState<S extends string>(
   return [
     overlayStateValue ?? persistedValue ?? defaultValue,
     setOverlayStateValue,
+    deletePersistedValue,
   ];
 }
 

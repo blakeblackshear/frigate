@@ -11,6 +11,8 @@ import { FaVideo } from "react-icons/fa";
 import Logo from "@/components/Logo";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import CameraMetrics from "@/views/system/CameraMetrics";
+import { useHashState } from "@/hooks/use-overlay-state";
+import { capitalizeFirstLetter } from "@/utils/stringUtil";
 
 const metrics = ["general", "storage", "cameras"] as const;
 type SystemMetric = (typeof metrics)[number];
@@ -18,12 +20,18 @@ type SystemMetric = (typeof metrics)[number];
 function System() {
   // stats page
 
-  const [page, setPage] = useState<SystemMetric>("general");
-  const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
+  const [page, setPage] = useHashState<SystemMetric>();
+  const [pageToggle, setPageToggle] = useOptimisticState(
+    page ?? "general",
+    setPage,
+    100,
+  );
   const [lastUpdated, setLastUpdated] = useState<number>(Date.now() / 1000);
 
   useEffect(() => {
-    document.title = `${pageToggle[0].toUpperCase()}${pageToggle.substring(1)} Stats - Frigate`;
+    if (pageToggle) {
+      document.title = `${capitalizeFirstLetter(pageToggle)} Stats - Frigate`;
+    }
   }, [pageToggle]);
 
   // stats collection

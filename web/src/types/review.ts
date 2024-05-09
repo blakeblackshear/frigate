@@ -26,6 +26,7 @@ export type ReviewFilter = {
   before?: number;
   after?: number;
   showReviewed?: 0 | 1;
+  showAll?: boolean;
 };
 
 type ReviewSummaryDay = {
@@ -48,3 +49,5 @@ export type MotionData = {
   audio?: number;
   camera: string;
 };
+
+export const REVIEW_PADDING = 2;

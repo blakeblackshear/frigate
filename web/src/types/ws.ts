@@ -41,4 +41,19 @@ export interface FrigateEvent {
   after: FrigateObjectState;
 }
 
+export type ObjectType = {
+  id: string;
+  label: string;
+  stationary: boolean;
+  area: number;
+  ratio: number;
+  score: number;
+  sub_label: string;
+};
+
+export interface FrigateCameraState {
+  motion: boolean;
+  objects: ObjectType[];
+}
+
 export type ToggleableSetting = "ON" | "OFF";

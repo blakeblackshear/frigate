@@ -38,12 +38,8 @@ export function MotionSegment({
   dense,
 }: MotionSegmentProps) {
   const severityType = "all";
-  const {
-    getSeverity,
-    getReviewed,
-    displaySeverityType,
-    shouldShowRoundedCorners,
-  } = useEventSegmentUtils(segmentDuration, events, severityType);
+  const { getSeverity, getReviewed, displaySeverityType } =
+    useEventSegmentUtils(segmentDuration, events, severityType);
 
   const { interpolateMotionAudioData } = useMotionSegmentUtils(
     segmentDuration,
@@ -66,11 +62,6 @@ export function MotionSegment({
   const reviewed = useMemo(
     () => getReviewed(segmentTime),
     [getReviewed, segmentTime],
-  );
-
-  const { roundTopSecondary, roundBottomSecondary } = useMemo(
-    () => shouldShowRoundedCorners(segmentTime),
-    [shouldShowRoundedCorners, segmentTime],
   );
 
   const timestamp = useMemo(() => new Date(segmentTime * 1000), [segmentTime]);
@@ -152,16 +143,16 @@ export function MotionSegment({
   const animationClassesFirstHalf = `motion-segment ${firstHalfSegmentWidth > 0 ? "hidden" : ""}
     zoom-in-[0.2] ${firstHalfSegmentWidth < 5 ? "duration-200" : "duration-1000"}`;
 
-  const severityColors: { [key: number]: string } = {
+  const severityColorsBg: { [key: number]: string } = {
     1: reviewed
-      ? "from-severity_significant_motion-dimmed/50 to-severity_significant_motion/50"
-      : "from-severity_significant_motion-dimmed to-severity_significant_motion",
+      ? "from-severity_significant_motion-dimmed/10 to-severity_significant_motion/10"
+      : "from-severity_significant_motion-dimmed/20 to-severity_significant_motion/20",
     2: reviewed
-      ? "from-severity_detection-dimmed/50 to-severity_detection/50"
-      : "from-severity_detection-dimmed to-severity_detection",
+      ? "from-severity_detection-dimmed/10 to-severity_detection/10"
+      : "from-severity_detection-dimmed/20 to-severity_detection/20",
     3: reviewed
-      ? "from-severity_alert-dimmed/50 to-severity_alert/50"
-      : "from-severity_alert-dimmed to-severity_alert",
+      ? "from-severity_alert-dimmed/10 to-severity_alert/10"
+      : "from-severity_alert-dimmed/20 to-severity_alert/20",
   };
 
   const segmentClick = useCallback(() => {
@@ -179,7 +170,7 @@ export function MotionSegment({
         <div
           key={segmentKey}
           data-segment-id={segmentKey}
-          className={`segment ${firstHalfSegmentWidth > 0 || secondHalfSegmentWidth > 0 ? "has-data" : ""} ${segmentClasses}`}
+          className={`segment ${firstHalfSegmentWidth > 0 || secondHalfSegmentWidth > 0 ? "has-data" : ""} ${segmentClasses}  bg-gradient-to-r ${severityColorsBg[severity[0]]}`}
           onClick={segmentClick}
           onTouchEnd={(event) => handleTouchStart(event, segmentClick)}
         >
@@ -219,7 +210,7 @@ export function MotionSegment({
                 <div
                   key={`${segmentKey}_motion_data_1`}
                   data-motion-value={secondHalfSegmentWidth}
-                  className={`${isDesktop && animationClassesSecondHalf} h-[2px] rounded-full ${severity[0] != 0 ? "bg-motion_review-dimmed" : "bg-motion_review"}`}
+                  className={`${isDesktop && animationClassesSecondHalf} h-[2px] rounded-full bg-motion_review`}
                   style={{
                     width: secondHalfSegmentWidth || 1,
                   }}
@@ -232,7 +223,7 @@ export function MotionSegment({
                 <div
                   key={`${segmentKey}_motion_data_2`}
                   data-motion-value={firstHalfSegmentWidth}
-                  className={`${isDesktop && animationClassesFirstHalf} h-[2px] rounded-full ${severity[0] != 0 ? "bg-motion_review-dimmed" : "bg-motion_review"}`}
+                  className={`${isDesktop && animationClassesFirstHalf} h-[2px] rounded-full bg-motion_review`}
                   style={{
                     width: firstHalfSegmentWidth || 1,
                   }}
@@ -240,29 +231,6 @@ export function MotionSegment({
               </div>
             </div>
           </div>
-
-          {!motionOnly &&
-            severity.map((severityValue: number, index: number) => {
-              if (severityValue > 0) {
-                return (
-                  <React.Fragment key={index}>
-                    <div className="absolute right-0 h-[8px] z-10">
-                      <div
-                        key={`${segmentKey}_${index}_secondary_data`}
-                        className={`
-                          w-1 h-[8px] bg-gradient-to-r
-                          ${roundBottomSecondary ? "rounded-bl-full rounded-br-full" : ""}
-                          ${roundTopSecondary ? "rounded-tl-full rounded-tr-full" : ""}
-                          ${severityColors[severityValue]}
-                        `}
-                      ></div>
-                    </div>
-                  </React.Fragment>
-                );
-              } else {
-                return null;
-              }
-            })}
         </div>
       )}
     </>

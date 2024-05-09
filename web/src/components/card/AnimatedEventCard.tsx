@@ -3,16 +3,16 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { useCallback, useMemo } from "react";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { ReviewSegment } from "@/types/review";
+import { REVIEW_PADDING, ReviewSegment } from "@/types/review";
 import { useNavigate } from "react-router-dom";
 import { RecordingStartingPoint } from "@/types/record";
 import axios from "axios";
-import { Preview } from "@/types/preview";
 import {
   InProgressPreview,
   VideoPreview,
 } from "../player/PreviewThumbnailPlayer";
 import { isCurrentHour } from "@/utils/dateUtil";
+import { useCameraPreviews } from "@/hooks/use-camera-previews";
 
 type AnimatedEventCardProps = {
   event: ReviewSegment;
@@ -24,10 +24,15 @@ export function AnimatedEventCard({ event }: AnimatedEventCardProps) {
 
   // preview
 
-  const { data: previews } = useSWR<Preview[]>(
-    currentHour
-      ? null
-      : `/preview/${event.camera}/start/${Math.round(event.start_time)}/end/${Math.round(event.end_time || event.start_time + 20)}`,
+  const previews = useCameraPreviews(
+    {
+      after: Math.round(event.start_time),
+      before: Math.round(event.end_time || event.start_time + 20),
+    },
+    {
+      camera: event.camera,
+      fetchPreviews: !currentHour,
+    },
   );
 
   // interaction
@@ -39,7 +44,7 @@ export function AnimatedEventCard({ event }: AnimatedEventCardProps) {
         severity: event.severity,
         recording: {
           camera: event.camera,
-          startTime: event.start_time,
+          startTime: event.start_time - REVIEW_PADDING,
           severity: event.severity,
         } as RecordingStartingPoint,
       },
@@ -62,7 +67,7 @@ export function AnimatedEventCard({ event }: AnimatedEventCardProps) {
     <Tooltip>
       <TooltipTrigger asChild>
         <div
-          className="h-24 relative"
+          className="h-24 4k:h-32 relative"
           style={{
             aspectRatio: aspectRatio,
           }}

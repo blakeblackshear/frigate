@@ -26,6 +26,7 @@ from frigate.const import (
 )
 from frigate.models import Event, Previews, Recordings, Regions, ReviewSegment
 from frigate.util.builtin import get_tz_modifiers
+from frigate.util.image import get_image_from_recording
 
 logger = logging.getLogger(__name__)
 
@@ -205,32 +206,87 @@ def get_snapshot_from_recording(camera_name: str, frame_time: str):
     try:
         recording: Recordings = recording_query.get()
         time_in_segment = frame_time - recording.start_time
+        image_data = get_image_from_recording(recording.path, time_in_segment)
 
-        ffmpeg_cmd = [
-            "ffmpeg",
-            "-hide_banner",
-            "-loglevel",
-            "warning",
-            "-ss",
-            f"00:00:{time_in_segment}",
-            "-i",
-            recording.path,
-            "-frames:v",
-            "1",
-            "-c:v",
-            "png",
-            "-f",
-            "image2pipe",
-            "-",
-        ]
+        if not image_data:
+            return make_response(
+                jsonify(
+                    {
+                        "success": False,
+                        "message": f"Unable to parse frame at time {frame_time}",
+                    }
+                ),
+                404,
+            )
 
-        process = sp.run(
-            ffmpeg_cmd,
-            capture_output=True,
-        )
-        response = make_response(process.stdout)
+        response = make_response(image_data)
         response.headers["Content-Type"] = "image/png"
         return response
+    except DoesNotExist:
+        return make_response(
+            jsonify(
+                {
+                    "success": False,
+                    "message": "Recording not found at {}".format(frame_time),
+                }
+            ),
+            404,
+        )
+
+
+@MediaBp.route("/<camera_name>/plus/<frame_time>", methods=("POST",))
+def submit_recording_snapshot_to_plus(camera_name: str, frame_time: str):
+    if camera_name not in current_app.frigate_config.cameras:
+        return make_response(
+            jsonify({"success": False, "message": "Camera not found"}),
+            404,
+        )
+
+    frame_time = float(frame_time)
+    recording_query = (
+        Recordings.select(
+            Recordings.path,
+            Recordings.start_time,
+        )
+        .where(
+            (
+                (frame_time >= Recordings.start_time)
+                & (frame_time <= Recordings.end_time)
+            )
+        )
+        .where(Recordings.camera == camera_name)
+        .order_by(Recordings.start_time.desc())
+        .limit(1)
+    )
+
+    try:
+        recording: Recordings = recording_query.get()
+        time_in_segment = frame_time - recording.start_time
+        image_data = get_image_from_recording(recording.path, time_in_segment)
+
+        if not image_data:
+            return make_response(
+                jsonify(
+                    {
+                        "success": False,
+                        "message": f"Unable to parse frame at time {frame_time}",
+                    }
+                ),
+                404,
+            )
+
+        nd = cv2.imdecode(np.frombuffer(image_data, dtype=np.int8), cv2.IMREAD_COLOR)
+        current_app.plus_api.upload_image(nd, camera_name)
+
+        return make_response(
+            jsonify(
+                {
+                    "success": True,
+                    "message": "Successfully submitted image.",
+                }
+            ),
+            200,
+        )
     except DoesNotExist:
         return make_response(
             jsonify(
@@ -392,7 +448,17 @@ def recording_clip(camera_name, start_ts, end_ts):
         if clip.end_time > end_ts:
             playlist_lines.append(f"outpoint {int(end_ts - clip.start_time)}")
 
-    file_name = secure_filename(f"clip_{camera_name}_{start_ts}-{end_ts}.mp4")
+    file_name = f"clip_{camera_name}_{start_ts}-{end_ts}.mp4"
+
+    if len(file_name) > 1000:
+        return make_response(
+            jsonify(
+                {"success": False, "message": "Filename exceeded max length of 1000"}
+            ),
+            403,
+        )
+
+    file_name = secure_filename(file_name)
     path = os.path.join(CACHE_DIR, file_name)
 
     if not os.path.exists(path):
@@ -1167,7 +1233,20 @@ def preview_gif(camera_name: str, start_ts, end_ts, max_cache_age=2592000):
 @MediaBp.route("/<camera_name>/start/<int:start_ts>/end/<int:end_ts>/preview.mp4")
 @MediaBp.route("/<camera_name>/start/<float:start_ts>/end/<float:end_ts>/preview.mp4")
 def preview_mp4(camera_name: str, start_ts, end_ts):
-    file_name = secure_filename(f"clip_{camera_name}_{start_ts}-{end_ts}.mp4")
+    file_name = f"clip_{camera_name}_{start_ts}-{end_ts}.mp4"
+
+    if len(file_name) > 1000:
+        return make_response(
+            jsonify(
+                {
+                    "success": False,
+                    "message": "Filename exceeded max length of 1000 characters.",
+                }
+            ),
+            403,
+        )
+
+    file_name = secure_filename(file_name)
     path = os.path.join(CACHE_DIR, file_name)
 
     if datetime.fromtimestamp(start_ts) < datetime.now().replace(minute=0, second=0):
@@ -1337,6 +1416,14 @@ def review_preview(id: str):
 @MediaBp.route("/preview/<file_name>/thumbnail.webp")
 def preview_thumbnail(file_name: str):
     """Get a thumbnail from the cached preview frames."""
+    if len(file_name) > 1000:
+        return make_response(
+            jsonify(
+                {"success": False, "message": "Filename exceeded max length of 1000"}
+            ),
+            403,
+        )
+
     safe_file_name_current = secure_filename(file_name)
     preview_dir = os.path.join(CACHE_DIR, "preview_frames")
 

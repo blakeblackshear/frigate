@@ -158,7 +158,7 @@ function ConfigEditor() {
       )}
 
       <div ref={configRef} className="h-full mt-2" />
-      <Toaster />
+      <Toaster closeButton={true} />
     </div>
   );
 }
