@@ -24,15 +24,18 @@ import useSWR from "swr";
 import { isDesktop, isMobile, isSafari } from "react-device-detect";
 import BirdseyeLivePlayer from "@/components/player/BirdseyeLivePlayer";
 import LivePlayer from "@/components/player/LivePlayer";
+import { IoClose } from "react-icons/io5";
+import { LuLayoutDashboard, LuPencil } from "react-icons/lu";
+import { cn } from "@/lib/utils";
+import { EditGroupDialog } from "@/components/filter/CameraGroupSelector";
+import { usePersistedOverlayState } from "@/hooks/use-overlay-state";
+import { FaCompress, FaExpand } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
-  TooltipContent,
   TooltipTrigger,
+  TooltipContent,
 } from "@/components/ui/tooltip";
-import { IoClose } from "react-icons/io5";
-import { LuMove } from "react-icons/lu";
-import { cn } from "@/lib/utils";
 
 type DraggableGridLayoutProps = {
   cameras: CameraConfig[];
@@ -66,6 +69,20 @@ export default function DraggableGridLayout({
   const [gridLayout, setGridLayout, isGridLayoutLoaded] = usePersistence<
     Layout[]
   >(`${cameraGroup}-draggable-layout`);
+
+  const [group] = usePersistedOverlayState("cameraGroup", "default" as string);
+
+  const groups = useMemo(() => {
+    if (!config) {
+      return [];
+    }
+
+    return Object.entries(config.camera_groups).sort(
+      (a, b) => a[1].order - b[1].order,
+    );
+  }, [config]);
+
+  const [editGroup, setEditGroup] = useState(false);
 
   const [currentCameras, setCurrentCameras] = useState<CameraConfig[]>();
   const [currentIncludeBirdseye, setCurrentIncludeBirdseye] =
@@ -252,6 +269,25 @@ export default function DraggableGridLayout({
     );
   }, [containerRef, gridContainerRef, containerHeight]);
 
+  // fullscreen state
+
+  useEffect(() => {
+    if (gridContainerRef.current == null) {
+      return;
+    }
+
+    const listener = () => {
+      setFullscreen(document.fullscreenElement != null);
+    };
+    document.addEventListener("fullscreenchange", listener);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", listener);
+    };
+  }, [gridContainerRef]);
+
+  const [fullscreen, setFullscreen] = useState(false);
+
   const cellHeight = useMemo(() => {
     const aspectRatio = 16 / 9;
     // subtract container margin, 1 camera takes up at least 4 rows
@@ -286,6 +322,12 @@ export default function DraggableGridLayout({
           className="my-2 px-2 pb-8 no-scrollbar overflow-x-hidden"
           ref={gridContainerRef}
         >
+          <EditGroupDialog
+            open={editGroup}
+            setOpen={setEditGroup}
+            currentGroups={groups}
+            activeGroup={group}
+          />
           <ResponsiveGridLayout
             className="grid-layout"
             layouts={{
@@ -352,57 +394,90 @@ export default function DraggableGridLayout({
               );
             })}
           </ResponsiveGridLayout>
-          {isDesktop && (
-            <DesktopEditLayoutButton
-              isEditMode={isEditMode}
-              setIsEditMode={setIsEditMode}
-              hasScrollbar={hasScrollbar}
-            />
+          {isDesktop && !fullscreen && (
+            <div
+              className={cn(
+                "fixed",
+                isDesktop && "bottom-12 lg:bottom-9",
+                isMobile && "bottom-12 lg:bottom-16",
+                hasScrollbar && isDesktop ? "right-6" : "right-3",
+                "z-50 flex flex-row gap-2",
+              )}
+            >
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    className="px-2 py-1 bg-secondary-foreground rounded-lg opacity-30 hover:opacity-100 transition-all duration-300"
+                    onClick={() =>
+                      setIsEditMode((prevIsEditMode) => !prevIsEditMode)
+                    }
+                  >
+                    {isEditMode ? (
+                      <>
+                        <IoClose className="size-5" />
+                      </>
+                    ) : (
+                      <>
+                        <LuLayoutDashboard className="size-5" />
+                      </>
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {isEditMode ? "Exit Editing" : "Edit Layout"}
+                </TooltipContent>
+              </Tooltip>
+              {!isEditMode && (
+                <>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        className="px-2 py-1 bg-secondary-foreground rounded-lg opacity-30 hover:opacity-100 transition-all duration-300"
+                        onClick={() =>
+                          setEditGroup((prevEditGroup) => !prevEditGroup)
+                        }
+                      >
+                        <LuPencil className="size-5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {isEditMode ? "Exit Editing" : "Edit Camera Group"}
+                    </TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        className="px-2 py-1 bg-secondary-foreground rounded-lg opacity-30 hover:opacity-100 transition-all duration-300"
+                        onClick={() => {
+                          if (fullscreen) {
+                            document.exitFullscreen();
+                          } else {
+                            gridContainerRef.current?.requestFullscreen();
+                          }
+                        }}
+                      >
+                        {fullscreen ? (
+                          <>
+                            <FaCompress className="size-5" />
+                          </>
+                        ) : (
+                          <>
+                            <FaExpand className="size-5" />
+                          </>
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {fullscreen ? "Exit Fullscreen" : "Fullscreen"}
+                    </TooltipContent>
+                  </Tooltip>
+                </>
+              )}
+            </div>
           )}
         </div>
       )}
     </>
-  );
-}
-
-type DesktopEditLayoutButtonProps = {
-  isEditMode?: boolean;
-  setIsEditMode: React.Dispatch<React.SetStateAction<boolean>>;
-  hasScrollbar?: boolean | 0 | null;
-};
-
-function DesktopEditLayoutButton({
-  isEditMode,
-  setIsEditMode,
-  hasScrollbar,
-}: DesktopEditLayoutButtonProps) {
-  return (
-    <div className="flex flex-row gap-2 items-center text-primary">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="default"
-            className={cn(
-              "fixed",
-              isDesktop && "bottom-12 lg:bottom-9",
-              isMobile && "bottom-12 lg:bottom-16",
-              hasScrollbar && isDesktop ? "right-6" : "right-1",
-              "z-50 h-8 w-8 p-0 rounded-full opacity-30 hover:opacity-100 transition-all duration-300",
-            )}
-            onClick={() => setIsEditMode((prevIsEditMode) => !prevIsEditMode)}
-          >
-            {isEditMode ? (
-              <IoClose className="size-5" />
-            ) : (
-              <LuMove className="size-5" />
-            )}
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="left">
-          {isEditMode ? "Exit Editing" : "Edit Layout"}
-        </TooltipContent>
-      </Tooltip>
-    </div>
   );
 }
 

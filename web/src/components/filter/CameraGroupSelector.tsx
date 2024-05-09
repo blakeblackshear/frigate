@@ -360,6 +360,65 @@ function NewGroupDialog({
   );
 }
 
+type EditGroupDialogProps = {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  currentGroups: [string, CameraGroupConfig][];
+  activeGroup?: string;
+};
+export function EditGroupDialog({
+  open,
+  setOpen,
+  currentGroups,
+  activeGroup,
+}: EditGroupDialogProps) {
+  // editing group and state
+
+  const editingGroup = useMemo(() => {
+    if (currentGroups && activeGroup) {
+      return currentGroups.find(([groupName]) => groupName === activeGroup);
+    } else {
+      return undefined;
+    }
+  }, [currentGroups, activeGroup]);
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  return (
+    <>
+      <Toaster
+        className="toaster group z-[100]"
+        position="top-center"
+        closeButton={true}
+      />
+      <Dialog
+        open={open}
+        onOpenChange={(open) => {
+          setOpen(open);
+        }}
+      >
+        <DialogContent
+          className={`min-w-0 ${isMobile ? "w-full p-3 rounded-t-2xl max-h-[90%]" : "w-6/12 max-h-dvh overflow-y-hidden"}`}
+        >
+          <div className="flex flex-col my-4 overflow-y-auto">
+            <div className="flex flex-row justify-between items-center mb-3">
+              <DialogTitle>Edit Camera Group</DialogTitle>
+            </div>
+            <CameraGroupEdit
+              currentGroups={currentGroups}
+              editingGroup={editingGroup}
+              isLoading={isLoading}
+              setIsLoading={setIsLoading}
+              onSave={() => setOpen(false)}
+              onCancel={() => setOpen(false)}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
 type CameraGroupRowProps = {
   group: [string, CameraGroupConfig];
   onDeleteGroup: () => void;
@@ -572,7 +631,7 @@ export function CameraGroupEdit({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="mt-2 space-y-6 overflow-y-auto"
+        className="mt-2 space-y-6 overflow-y-hidden"
       >
         <FormField
           control={form.control}
@@ -655,7 +714,7 @@ export function CameraGroupEdit({
         <Separator className="flex my-2 bg-secondary" />
 
         <div className="flex flex-row gap-2 py-5 md:pb-0">
-          <Button className="flex flex-1" onClick={onCancel}>
+          <Button type="button" className="flex flex-1" onClick={onCancel}>
             Cancel
           </Button>
           <Button
