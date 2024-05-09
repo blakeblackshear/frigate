@@ -314,11 +314,17 @@ export function RecordingView({
     }
 
     const availableHeight = mainHeight - 112;
-    const availableWidth = aspect * availableHeight;
-    const percent =
-      (mainWidth < availableWidth
-        ? mainWidth / availableWidth
-        : availableWidth / mainWidth) * 100;
+
+    let percent;
+    if (mainWidth / availableHeight < aspect) {
+      percent = 100;
+    } else {
+      const availableWidth = aspect * availableHeight;
+      percent =
+        (mainWidth < availableWidth
+          ? mainWidth / availableWidth
+          : availableWidth / mainWidth) * 100;
+    }
 
     return {
       width: `${Math.round(percent)}%`,
