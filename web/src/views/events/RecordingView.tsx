@@ -43,7 +43,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { FaVideo } from "react-icons/fa";
 import { VideoResolutionType } from "@/types/live";
 import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
-import { cn } from "@/lib/utils";
 
 const SEGMENT_DURATION = 30;
 
@@ -77,7 +76,6 @@ export function RecordingView({
 
   const [mainCamera, setMainCamera] = useState(startCamera);
   const mainControllerRef = useRef<DynamicVideoController | null>(null);
-  const mainLayoutRef = useRef<HTMLDivElement | null>(null);
   const previewRefs = useRef<{ [camera: string]: PreviewController }>({});
 
   const [playbackStart, setPlaybackStart] = useState(startTime);
@@ -210,36 +208,7 @@ export function RecordingView({
     [currentTime],
   );
 
-  // fullscreen
-
-  const [fullscreen, setFullscreen] = useState(false);
-
-  const onToggleFullscreen = useCallback(
-    (full: boolean) => {
-      if (full) {
-        mainLayoutRef.current?.requestFullscreen();
-      } else {
-        document.exitFullscreen();
-      }
-    },
-    [mainLayoutRef],
-  );
-
-  useEffect(() => {
-    if (mainLayoutRef.current == null) {
-      return;
-    }
-    const fsListener = () => {
-      setFullscreen(document.fullscreenElement != null);
-    };
-    document.addEventListener("fullscreenchange", fsListener);
-
-    return () => {
-      document.removeEventListener("fullscreenchange", fsListener);
-    };
-  }, [mainLayoutRef]);
-
-  // layout
+  // motion timeline data
 
   const getCameraAspect = useCallback(
     (cam: string) => {
@@ -403,40 +372,19 @@ export function RecordingView({
       </div>
 
       <div
-        ref={mainLayoutRef}
-        className={cn(
-          "h-full flex justify-center overflow-hidden",
-          isDesktop ? "" : "flex-col landscape:flex-row gap-2",
-        )}
+        className={`h-full flex justify-center overflow-hidden ${isDesktop ? "" : "flex-col landscape:flex-row gap-2"}`}
       >
-        <div
-          className={cn("flex flex-1 flex-wrap", isDesktop ? "w-[80%]" : "")}
-        >
+        <div className={`${isDesktop ? "w-[80%]" : ""} flex flex-1 flex-wrap`}>
           <div
             className={`size-full flex items-center ${mainCameraAspect == "tall" ? "flex-row justify-evenly" : "flex-col justify-center gap-2"}`}
           >
             <div
               key={mainCamera}
-              className={cn(
-                "relative",
+              className={`relative ${
                 isDesktop
-                  ? cn(
-                      "px-4 flex justify-center",
-                      mainCameraAspect == "tall"
-                        ? "h-[50%] md:h-[60%] lg:h-[75%] xl:h-[90%]"
-                        : mainCameraAspect == "wide"
-                          ? "w-full"
-                          : fullscreen
-                            ? "w-[100%]"
-                            : "w-[78%]",
-                    )
-                  : cn(
-                      "portrait:w-full pt-2",
-                      mainCameraAspect == "wide"
-                        ? "landscape:w-full aspect-wide"
-                        : "landscape:h-[94%] aspect-video",
-                    ),
-              )}
+                  ? `${mainCameraAspect == "tall" ? "h-[50%] md:h-[60%] lg:h-[75%] xl:h-[90%]" : mainCameraAspect == "wide" ? "w-full" : "w-[78%]"} px-4 flex justify-center`
+                  : `portrait:w-full pt-2 ${mainCameraAspect == "wide" ? "landscape:w-full aspect-wide" : "landscape:h-[94%] aspect-video"}`
+              }`}
               style={{
                 aspectRatio: isDesktop
                   ? mainCameraAspect == "tall"
@@ -452,7 +400,6 @@ export function RecordingView({
                 cameraPreviews={allPreviews ?? []}
                 startTimestamp={playbackStart}
                 hotKeys={exportMode != "select"}
-                fullscreen={fullscreen}
                 onTimestampUpdate={(timestamp) => {
                   setPlayerTime(timestamp);
                   setCurrentTime(timestamp);
@@ -466,17 +413,11 @@ export function RecordingView({
                 }}
                 isScrubbing={scrubbing || exportMode == "timeline"}
                 setFullResolution={setFullResolution}
-                setFullscreen={onToggleFullscreen}
               />
             </div>
             {isDesktop && (
               <div
-                className={cn(
-                  "flex gap-2",
-                  mainCameraAspect == "tall"
-                    ? "h-full w-[12%] flex-col justify-center overflow-y-auto"
-                    : `justify-center items-center overflow-x-auto ${fullscreen ? "h-[12%]" : "h-[14%]"}`,
-                )}
+                className={`flex gap-2 ${mainCameraAspect == "tall" ? "h-full w-[12%] flex-col justify-center overflow-y-auto" : "w-full h-[14%] justify-center items-center overflow-x-auto"} `}
               >
                 {allCameras.map((cam) => {
                   if (cam == mainCamera) {
