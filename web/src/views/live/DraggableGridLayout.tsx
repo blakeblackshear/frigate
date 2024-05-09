@@ -401,13 +401,13 @@ export default function DraggableGridLayout({
                 isDesktop && "bottom-12 lg:bottom-9",
                 isMobile && "bottom-12 lg:bottom-16",
                 hasScrollbar && isDesktop ? "right-6" : "right-1",
-                "z-50 flex flex-row gap-2 bg-secondary/30 p-2 rounded-full",
+                "z-50 flex flex-row gap-2",
               )}
             >
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    className="opacity-30 hover:opacity-100 transition-all duration-300"
+                    className="px-2 opacity-30 hover:opacity-100 transition-all duration-300"
                     onClick={() =>
                       setIsEditMode((prevIsEditMode) => !prevIsEditMode)
                     }
@@ -432,7 +432,7 @@ export default function DraggableGridLayout({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
-                        className="opacity-30 hover:opacity-100 transition-all duration-300"
+                        className="px-2 opacity-30 hover:opacity-100 transition-all duration-300"
                         onClick={() =>
                           setEditGroup((prevEditGroup) => !prevEditGroup)
                         }
@@ -447,7 +447,7 @@ export default function DraggableGridLayout({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
-                        className="opacity-30 hover:opacity-100 transition-all duration-300"
+                        className="px-2 opacity-30 hover:opacity-100 transition-all duration-300"
                         onClick={() => {
                           if (fullscreen) {
                             document.exitFullscreen();
