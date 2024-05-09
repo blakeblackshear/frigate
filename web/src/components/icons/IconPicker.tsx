@@ -114,26 +114,28 @@ export default function IconPicker({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <div className="grid grid-cols-6 my-2 gap-2 max-h-[20dvh] overflow-y-auto pr-1">
-            {icons.map(([name, Icon]) => (
-              <div
-                key={name}
-                className={cn(
-                  "flex flex-row justify-center items-start hover:cursor-pointer p-1 rounded-lg",
-                  selectedIcon?.name === name
-                    ? "bg-selected text-white"
-                    : "hover:bg-secondary-foreground",
-                )}
-              >
-                <Icon
-                  size={20}
-                  onClick={() => {
-                    handleIconSelect({ name, Icon });
-                    setOpen(false);
-                  }}
-                />
-              </div>
-            ))}
+          <div className="flex flex-col flex-1 h-[20dvh]">
+            <div className="grid grid-cols-6 my-2 gap-2 max-h-[20dvh] overflow-y-auto pr-1">
+              {icons.map(([name, Icon]) => (
+                <div
+                  key={name}
+                  className={cn(
+                    "flex flex-row justify-center items-start hover:cursor-pointer p-1 rounded-lg",
+                    selectedIcon?.name === name
+                      ? "bg-selected text-white"
+                      : "hover:bg-secondary-foreground",
+                  )}
+                >
+                  <Icon
+                    size={20}
+                    onClick={() => {
+                      handleIconSelect({ name, Icon });
+                      setOpen(false);
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         </PopoverContent>
       </Popover>
