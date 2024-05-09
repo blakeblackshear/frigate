@@ -450,8 +450,9 @@ export function RecordingView({
             </div>
             {isDesktop && (
               <div
-                className={`flex gap-2 ${mainCameraAspect == "tall" ? "h-full w-[12%] flex-col justify-center overflow-y-auto" : "w-full h-[14%] justify-center items-center overflow-x-auto"} `}
+                className={`flex gap-2 ${mainCameraAspect == "tall" ? "h-full w-[12%] flex-col justify-center overflow-y-auto" : "w-full h-28 overflow-x-auto"} `}
               >
+                <div className="w-2" />
                 {allCameras.map((cam) => {
                   if (cam == mainCamera) {
                     return;
@@ -483,6 +484,7 @@ export function RecordingView({
                     </div>
                   );
                 })}
+                <div className="w-2" />
               </div>
             )}
           </div>
