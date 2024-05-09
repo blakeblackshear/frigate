@@ -204,7 +204,6 @@ export default function DynamicVideoPlayer({
       />
       <PreviewPlayer
         className={cn(
-          "",
           className,
           isScrubbing || isLoading ? "visible" : "hidden",
         )}
