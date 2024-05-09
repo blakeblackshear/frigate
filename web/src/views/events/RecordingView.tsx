@@ -76,6 +76,7 @@ export function RecordingView({
 
   const [mainCamera, setMainCamera] = useState(startCamera);
   const mainControllerRef = useRef<DynamicVideoController | null>(null);
+  const mainLayoutRef = useRef<HTMLDivElement | null>(null);
   const previewRefs = useRef<{ [camera: string]: PreviewController }>({});
 
   const [playbackStart, setPlaybackStart] = useState(startTime);
@@ -208,7 +209,36 @@ export function RecordingView({
     [currentTime],
   );
 
-  // motion timeline data
+  // fullscreen
+
+  const [fullscreen, setFullscreen] = useState(false);
+
+  const onToggleFullscreen = useCallback(
+    (full: boolean) => {
+      if (full) {
+        mainLayoutRef.current?.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    },
+    [mainLayoutRef],
+  );
+
+  useEffect(() => {
+    if (mainLayoutRef.current == null) {
+      return;
+    }
+    const fsListener = () => {
+      setFullscreen(document.fullscreenElement != null);
+    };
+    document.addEventListener("fullscreenchange", fsListener);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", fsListener);
+    };
+  }, [mainLayoutRef]);
+
+  // layout
 
   const getCameraAspect = useCallback(
     (cam: string) => {
@@ -372,6 +402,7 @@ export function RecordingView({
       </div>
 
       <div
+        ref={mainLayoutRef}
         className={`h-full flex justify-center overflow-hidden ${isDesktop ? "" : "flex-col landscape:flex-row gap-2"}`}
       >
         <div className={`${isDesktop ? "w-[80%]" : ""} flex flex-1 flex-wrap`}>
@@ -400,6 +431,7 @@ export function RecordingView({
                 cameraPreviews={allPreviews ?? []}
                 startTimestamp={playbackStart}
                 hotKeys={exportMode != "select"}
+                fullscreen={fullscreen}
                 onTimestampUpdate={(timestamp) => {
                   setPlayerTime(timestamp);
                   setCurrentTime(timestamp);
@@ -413,6 +445,7 @@ export function RecordingView({
                 }}
                 isScrubbing={scrubbing || exportMode == "timeline"}
                 setFullResolution={setFullResolution}
+                setFullscreen={onToggleFullscreen}
               />
             </div>
             {isDesktop && (
