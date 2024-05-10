@@ -30,12 +30,14 @@ import { cn } from "@/lib/utils";
 import { EditGroupDialog } from "@/components/filter/CameraGroupSelector";
 import { usePersistedOverlayState } from "@/hooks/use-overlay-state";
 import { FaCompress, FaExpand } from "react-icons/fa";
-import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
+import { useFullscreen } from "@/hooks/use-fullscreen";
+import { toast } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 
 type DraggableGridLayoutProps = {
   cameras: CameraConfig[];
@@ -148,15 +150,15 @@ export default function DraggableGridLayout({
 
       if (aspectRatio < 1) {
         // Portrait
-        height = 2 * columnsPerPlayer;
+        height = 4 * columnsPerPlayer;
         width = columnsPerPlayer;
       } else if (aspectRatio > 2) {
         // Wide
-        height = 1 * columnsPerPlayer;
+        height = 2 * columnsPerPlayer;
         width = 2 * columnsPerPlayer;
       } else {
         // Landscape
-        height = 1 * columnsPerPlayer;
+        height = 2 * columnsPerPlayer;
         width = columnsPerPlayer;
       }
 
@@ -271,25 +273,20 @@ export default function DraggableGridLayout({
 
   // fullscreen state
 
+  const { fullscreen, toggleFullscreen, error, clearError } =
+    useFullscreen(gridContainerRef);
+
   useEffect(() => {
-    if (gridContainerRef.current == null) {
-      return;
+    if (error !== null) {
+      toast.error(`Error attempting fullscreen mode: ${error}`, {
+        position: "top-center",
+      });
+      clearError();
     }
-
-    const listener = () => {
-      setFullscreen(document.fullscreenElement != null);
-    };
-    document.addEventListener("fullscreenchange", listener);
-
-    return () => {
-      document.removeEventListener("fullscreenchange", listener);
-    };
-  }, [gridContainerRef]);
-
-  const [fullscreen, setFullscreen] = useState(false);
+  }, [error, clearError]);
 
   const cellHeight = useMemo(() => {
-    const aspectRatio = 16 / 9;
+    const aspectRatio = 32 / 9;
     // subtract container margin, 1 camera takes up at least 4 rows
     // account for additional margin on bottom of each row
     return (
@@ -297,12 +294,13 @@ export default function DraggableGridLayout({
         12 /
         aspectRatio -
       marginValue +
-      marginValue / 4
+      marginValue / 8
     );
   }, [containerWidth, marginValue]);
 
   return (
     <>
+      <Toaster position="top-center" closeButton={true} />
       {!isGridLayoutLoaded || !currentGridLayout ? (
         <div className="mt-2 px-2 grid grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 gap-2 md:gap-4">
           {includeBirdseye && birdseyeConfig?.enabled && (
@@ -393,8 +391,17 @@ export default function DraggableGridLayout({
                 </LivePlayerGridItem>
               );
             })}
+            {/* <div
+              key="test"
+              data-grid={{ x: 4, y: 0, w: 8, h: 8 }}
+              className=" bg-green-500"
+            >
+              <div className="size-full bg-green-500">
+                <img src="https://placehold.co/2560x720" />
+              </div>
+            </div> */}
           </ResponsiveGridLayout>
-          {isDesktop && !fullscreen && (
+          {isDesktop && (
             <div
               className={cn(
                 "fixed",
@@ -406,22 +413,18 @@ export default function DraggableGridLayout({
             >
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
-                    className="px-2 py-1 bg-secondary-foreground rounded-lg opacity-30 hover:opacity-100 transition-all duration-300"
+                  <div
+                    className="rounded-lg text-secondary-foreground bg-secondary hover:bg-muted cursor-pointer opacity-60 hover:opacity-100 transition-all duration-300"
                     onClick={() =>
                       setIsEditMode((prevIsEditMode) => !prevIsEditMode)
                     }
                   >
                     {isEditMode ? (
-                      <>
-                        <IoClose className="size-5" />
-                      </>
+                      <IoClose className="size-5 md:m-[6px]" />
                     ) : (
-                      <>
-                        <LuLayoutDashboard className="size-5" />
-                      </>
+                      <LuLayoutDashboard className="size-5 md:m-[6px]" />
                     )}
-                  </Button>
+                  </div>
                 </TooltipTrigger>
                 <TooltipContent>
                   {isEditMode ? "Exit Editing" : "Edit Layout"}
@@ -431,14 +434,14 @@ export default function DraggableGridLayout({
                 <>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button
-                        className="px-2 py-1 bg-secondary-foreground rounded-lg opacity-30 hover:opacity-100 transition-all duration-300"
+                      <div
+                        className="rounded-lg text-secondary-foreground bg-secondary hover:bg-muted cursor-pointer opacity-60 hover:opacity-100 transition-all duration-300"
                         onClick={() =>
                           setEditGroup((prevEditGroup) => !prevEditGroup)
                         }
                       >
-                        <LuPencil className="size-5" />
-                      </Button>
+                        <LuPencil className="size-5 md:m-[6px]" />
+                      </div>
                     </TooltipTrigger>
                     <TooltipContent>
                       {isEditMode ? "Exit Editing" : "Edit Camera Group"}
@@ -446,26 +449,16 @@ export default function DraggableGridLayout({
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button
-                        className="px-2 py-1 bg-secondary-foreground rounded-lg opacity-30 hover:opacity-100 transition-all duration-300"
-                        onClick={() => {
-                          if (fullscreen) {
-                            document.exitFullscreen();
-                          } else {
-                            gridContainerRef.current?.requestFullscreen();
-                          }
-                        }}
+                      <div
+                        className="rounded-lg text-secondary-foreground bg-secondary hover:bg-muted cursor-pointer opacity-60 hover:opacity-100 transition-all duration-300"
+                        onClick={toggleFullscreen}
                       >
                         {fullscreen ? (
-                          <>
-                            <FaCompress className="size-5" />
-                          </>
+                          <FaCompress className="size-5 md:m-[6px]" />
                         ) : (
-                          <>
-                            <FaExpand className="size-5" />
-                          </>
+                          <FaExpand className="size-5 md:m-[6px]" />
                         )}
-                      </Button>
+                      </div>
                     </TooltipTrigger>
                     <TooltipContent>
                       {fullscreen ? "Exit Fullscreen" : "Fullscreen"}

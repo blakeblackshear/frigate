@@ -95,10 +95,11 @@ export default function IconPicker({
           align="start"
           side="top"
           container={containerRef.current}
-          className="max-h-[50dvh]"
+          className="flex flex-col max-h-[50dvh] md:max-h-[30dvh] overflow-y-hidden"
         >
           <div className="flex flex-row justify-between items-center mb-3">
             <Heading as="h4">Select an icon</Heading>
+            <span tabIndex={0} className="sr-only" />
             <IoClose
               size={15}
               className="hover:cursor-pointer"
@@ -110,24 +111,24 @@ export default function IconPicker({
           <Input
             type="text"
             placeholder="Search for an icon..."
-            className="mb-3"
+            className="mb-3 text-md md:text-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <div className="flex flex-col flex-1 h-[20dvh]">
-            <div className="grid grid-cols-6 my-2 gap-2 max-h-[20dvh] overflow-y-auto pr-1">
+          <div className="flex flex-col h-full overflow-y-auto">
+            <div className="grid grid-cols-6 gap-2 pr-1">
               {icons.map(([name, Icon]) => (
                 <div
                   key={name}
                   className={cn(
-                    "flex flex-row justify-center items-start hover:cursor-pointer p-1 rounded-lg",
+                    "flex flex-row justify-center items-center hover:cursor-pointer p-1 rounded-lg",
                     selectedIcon?.name === name
                       ? "bg-selected text-white"
                       : "hover:bg-secondary-foreground",
                   )}
                 >
                   <Icon
-                    size={20}
+                    className="size-6"
                     onClick={() => {
                       handleIconSelect({ name, Icon });
                       setOpen(false);

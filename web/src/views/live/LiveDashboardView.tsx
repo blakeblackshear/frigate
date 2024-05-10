@@ -22,7 +22,8 @@ import {
 import useSWR from "swr";
 import DraggableGridLayout from "./DraggableGridLayout";
 import { IoClose } from "react-icons/io5";
-import { LuMove } from "react-icons/lu";
+import { LuLayoutDashboard } from "react-icons/lu";
+import { cn } from "@/lib/utils";
 
 type LiveDashboardViewProps = {
   cameras: CameraConfig[];
@@ -190,13 +191,18 @@ export default function LiveDashboardView({
           {cameraGroup && cameraGroup !== "default" && isTablet && (
             <div className="flex items-center gap-1">
               <Button
-                className="p-1"
+                className={cn(
+                  "p-1",
+                  isEditMode
+                    ? "text-primary bg-selected"
+                    : "text-secondary-foreground bg-secondary",
+                )}
                 size="xs"
                 onClick={() =>
                   setIsEditMode((prevIsEditMode) => !prevIsEditMode)
                 }
               >
-                {isEditMode ? <IoClose /> : <LuMove />}
+                {isEditMode ? <IoClose /> : <LuLayoutDashboard />}
               </Button>
             </div>
           )}
