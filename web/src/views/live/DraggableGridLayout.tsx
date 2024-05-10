@@ -363,6 +363,7 @@ export default function DraggableGridLayout({
             cols={{ lg: 12, md: 12, sm: 12, xs: 12, xxs: 12 }}
             margin={[marginValue, marginValue]}
             containerPadding={[0, isEditMode ? 6 : 3]}
+            compactType={null}
             resizeHandles={isEditMode ? ["sw", "nw", "se", "ne"] : []}
             onDragStop={handleLayoutChange}
             onResize={handleResize}
@@ -415,15 +416,6 @@ export default function DraggableGridLayout({
                 </LivePlayerGridItem>
               );
             })}
-            {/* <div
-              key="test"
-              data-grid={{ x: 4, y: 0, w: 8, h: 8 }}
-              className=" bg-green-500"
-            >
-              <div className="size-full bg-green-500">
-                <img src="https://placehold.co/2560x720" />
-              </div>
-            </div> */}
           </ResponsiveGridLayout>
           {isDesktop && (
             <div
