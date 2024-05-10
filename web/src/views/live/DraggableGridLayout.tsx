@@ -363,10 +363,9 @@ export default function DraggableGridLayout({
             cols={{ lg: 12, md: 12, sm: 12, xs: 12, xxs: 12 }}
             margin={[marginValue, marginValue]}
             containerPadding={[0, isEditMode ? 6 : 3]}
-            // preventCollision={true}
             resizeHandles={isEditMode ? ["sw", "nw", "se", "ne"] : []}
             onDragStop={handleLayoutChange}
-            // onResize={handleResize}
+            onResize={handleResize}
             onResizeStop={handleLayoutChange}
           >
             {includeBirdseye && birdseyeConfig?.enabled && (
