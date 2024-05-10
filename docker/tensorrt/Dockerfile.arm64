@@ -77,7 +77,7 @@ RUN --mount=type=bind,source=docker/tensorrt/build_jetson_ffmpeg.sh,target=/deps
 # Frigate w/ TensorRT for NVIDIA Jetson platforms
 FROM tensorrt-base AS frigate-tensorrt
 RUN apt-get update \
-    && apt-get install -y python-is-python3 libprotobuf17  \
+    && apt-get install -y python-is-python3 libprotobuf23  \
     && rm -rf /var/lib/apt/lists/*
 
 RUN rm -rf /usr/lib/btbn-ffmpeg/
