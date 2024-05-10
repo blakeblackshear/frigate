@@ -1,5 +1,9 @@
+function package_exists() {
+    return dpkg -l "$1" &> /dev/null
+}
+
 # TODO check if python3.9 is installable instead
-if [ -e /usr/local/cuda-12.2 ]; then
+if ! package_exists python3.9 ; then
   apt-get update && \
     apt-get install wget build-essential ccache clang cmake pkg-config -y
 
