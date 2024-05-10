@@ -115,6 +115,10 @@ FROM base AS wheels
 ARG DEBIAN_FRONTEND
 ARG TARGETARCH
 
+RUN --mount=type=bind,source=docker/tensorrt/install_python_39.sh,target=/deps/install_python_39.sh \
+    --mount=type=cache,target=/root/.ccache \
+    /deps/install_python_39.sh
+
 # Use a separate container to build wheels to prevent build dependencies in final image
 RUN apt-get -qq update \
     && apt-get -qq install -y \
@@ -128,8 +132,6 @@ RUN apt-get -qq update \
     tee /etc/apt/sources.list.d/debian-bullseye-nonfree.list \
     && apt-get -qq update \
     && apt-get -qq install -y \
-    python3.9 \
-    python3.9-dev \
     # opencv dependencies
     build-essential cmake git pkg-config libgtk-3-dev \
     libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
@@ -142,7 +144,7 @@ RUN apt-get -qq update \
     rm -rf /var/lib/apt/lists/*
 
 # Ensure python3 defaults to python3.9
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
+# RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
 
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && python3 get-pip.py "pip"

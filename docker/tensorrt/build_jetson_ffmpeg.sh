@@ -27,13 +27,7 @@ if [ -e /usr/local/cuda-12.2 ]; then
 
     apt-get update
 
-    apt-get install nvidia-l4t-jetson-multimedia-api -y
-
-    wget https://www.python.org/ftp/python/3.9.6/Python-3.9.6.tgz
-    tar -xf Python-3.9.6.tgz
-    cd Python-3.9.6
-    ./configure --enable-optimizations
-    sudo make altinstall
+    apt-get install nvidia-l4t-jetson-multimedia-api -o Dpkg::Options::="--force-confold" --force-yes -y
 elif [ -e /usr/local/cuda-10.2 ]; then
     # assume Jetpack 4.X
     wget -q https://developer.nvidia.com/embedded/L4T/r32_Release_v5.0/T186/Jetson_Multimedia_API_R32.5.0_aarch64.tbz2 -O jetson_multimedia_api.tbz2

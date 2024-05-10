@@ -4,13 +4,28 @@ set -euxo pipefail
 
 apt-get -qq update
 
+if [ -e /usr/local/cuda-12.2 ]; then
+  apt-get update && \
+    apt-get install wget build-essential ccache clang cmake pkg-config -y
+
+  wget https://www.python.org/ftp/python/3.9.6/Python-3.9.6.tgz
+  tar -xf Python-3.9.6.tgz
+  cd Python-3.9.6
+  ./configure --enable-optimizations
+  make altinstall
+else
+  apt-get -qq update \
+     && apt-get -qq install -y --no-install-recommends \
+        python3.9  \
+     && rm -rf /var/lib/apt/lists/*
+fi
+
 apt-get -qq install --no-install-recommends -y \
     apt-transport-https \
     gnupg \
     wget \
     procps vainfo \
     unzip locales tzdata libxml2 xz-utils \
-    python3.9 \
     python3-pip \
     curl \
     jq \
