@@ -172,7 +172,8 @@ export default function VideoControls({
       className={cn(
         "w-auto px-4 py-2 flex flex-wrap sm:flex-nowrap justify-between items-center gap-4 sm:gap-8 text-primary z-50 bg-background/60 rounded-lg",
         className,
-        isMobileOnly && Object.values(features).filter((feat) => feat).length > 4 &&
+        isMobileOnly &&
+          Object.values(features).filter((feat) => feat).length > 4 &&
           "min-w-[94%]",
       )}
     >
