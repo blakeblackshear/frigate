@@ -1,3 +1,5 @@
+#!/bin/bash
+
 function package_exists() {
     return dpkg -l "$1" &> /dev/null
 }
