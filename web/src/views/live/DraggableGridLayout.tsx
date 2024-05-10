@@ -155,15 +155,15 @@ export default function DraggableGridLayout({
 
       if (aspectRatio < 1) {
         // Portrait
-        height = 4 * columnsPerPlayer;
+        height = 2 * columnsPerPlayer;
         width = columnsPerPlayer;
       } else if (aspectRatio > 2) {
         // Wide
-        height = 2 * columnsPerPlayer;
+        height = 1 * columnsPerPlayer;
         width = 2 * columnsPerPlayer;
       } else {
         // Landscape
-        height = 2 * columnsPerPlayer;
+        height = 1 * columnsPerPlayer;
         width = columnsPerPlayer;
       }
 
@@ -291,7 +291,7 @@ export default function DraggableGridLayout({
   }, [error, clearError]);
 
   const cellHeight = useMemo(() => {
-    const aspectRatio = 32 / 9;
+    const aspectRatio = 16 / 9;
     // subtract container margin, 1 camera takes up at least 4 rows
     // account for additional margin on bottom of each row
     return (
@@ -299,7 +299,7 @@ export default function DraggableGridLayout({
         12 /
         aspectRatio -
       marginValue +
-      marginValue / 8
+      marginValue / 4
     );
   }, [containerWidth, marginValue]);
 
@@ -363,10 +363,10 @@ export default function DraggableGridLayout({
             cols={{ lg: 12, md: 12, sm: 12, xs: 12, xxs: 12 }}
             margin={[marginValue, marginValue]}
             containerPadding={[0, isEditMode ? 6 : 3]}
-            preventCollision={true}
+            // preventCollision={true}
             resizeHandles={isEditMode ? ["sw", "nw", "se", "ne"] : []}
             onDragStop={handleLayoutChange}
-            onResize={handleResize}
+            // onResize={handleResize}
             onResizeStop={handleLayoutChange}
           >
             {includeBirdseye && birdseyeConfig?.enabled && (
