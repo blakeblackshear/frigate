@@ -255,7 +255,7 @@ export default function HlsVideoPlayer({
           onLoadedMetadata={() => {
             handleLoadedMetadata();
 
-            if (videoRef.current) {
+            if (videoRef.current && volume) {
               videoRef.current.volume = volume;
             }
           }}
