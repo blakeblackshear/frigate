@@ -110,6 +110,18 @@ export function RecordingView({
     () => chunkedTimeRange[selectedRangeIdx],
     [selectedRangeIdx, chunkedTimeRange],
   );
+  const reviewLabels = useMemo(() => {
+    const uniqueLabels = new Set<string>();
+
+    reviewItems?.forEach((rev) => {
+      rev.data.objects.forEach((obj) =>
+        uniqueLabels.add(obj.replace("-verified", "")),
+      );
+      rev.data.audio.forEach((aud) => uniqueLabels.add(aud));
+    });
+
+    return [...uniqueLabels];
+  }, [reviewItems]);
 
   // export
 
@@ -402,8 +414,9 @@ export function RecordingView({
               filters={["date", "general"]}
               reviewSummary={reviewSummary}
               filter={filter}
-              onUpdateFilter={updateFilter}
               motionOnly={false}
+              filterLabels={reviewLabels}
+              onUpdateFilter={updateFilter}
               setMotionOnly={() => {}}
             />
           )}
@@ -445,6 +458,7 @@ export function RecordingView({
             latestTime={timeRange.before}
             mode={exportMode}
             range={exportRange}
+            allLabels={reviewLabels}
             onUpdateFilter={updateFilter}
             setRange={setExportRange}
             setMode={setExportMode}

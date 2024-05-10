@@ -119,7 +119,11 @@ class ExternalEventProcessor:
                 (
                     self.event_camera[event_id],
                     end_time,
-                    {"state": ManualEventState.end, "event_id": event_id},
+                    {
+                        "state": ManualEventState.end,
+                        "event_id": event_id,
+                        "end_time": end_time,
+                    },
                 )
             )
             self.event_camera.pop(event_id)

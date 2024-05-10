@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { isSafari } from "react-device-detect";
+import { isMobileOnly, isSafari } from "react-device-detect";
 import { LuPause, LuPlay } from "react-icons/lu";
 import {
   DropdownMenu,
@@ -48,6 +48,7 @@ const CONTROLS_DEFAULT: VideoControls = {
   fullscreen: false,
 };
 const PLAYBACK_RATE_DEFAULT = isSafari ? [0.5, 1, 2] : [0.5, 1, 2, 4, 8, 16];
+const MIN_ITEMS_WRAP = 6;
 
 type VideoControlsProps = {
   className?: string;
@@ -170,8 +171,12 @@ export default function VideoControls({
   return (
     <div
       className={cn(
-        "w-[96%] sm:w-auto px-4 py-2 flex flex-wrap sm:flex-nowrap justify-between items-center gap-4 sm:gap-8 text-primary z-50 bg-background/60 rounded-lg",
+        "w-auto px-4 py-2 flex sm:flex-nowrap justify-between items-center gap-4 sm:gap-8 text-primary z-50 bg-background/60 rounded-lg",
         className,
+        isMobileOnly &&
+          Object.values(features).filter((feat) => feat).length >
+            MIN_ITEMS_WRAP &&
+          "flex-wrap min-w-[75%]",
       )}
     >
       {video && features.volume && (

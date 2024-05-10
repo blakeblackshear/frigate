@@ -53,6 +53,7 @@ type ReviewFilterGroupProps = {
   reviewSummary?: ReviewSummary;
   filter?: ReviewFilter;
   motionOnly: boolean;
+  filterLabels?: string[];
   onUpdateFilter: (filter: ReviewFilter) => void;
   setMotionOnly: React.Dispatch<React.SetStateAction<boolean>>;
 };
@@ -63,12 +64,17 @@ export default function ReviewFilterGroup({
   reviewSummary,
   filter,
   motionOnly,
+  filterLabels,
   onUpdateFilter,
   setMotionOnly,
 }: ReviewFilterGroupProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const allLabels = useMemo<string[]>(() => {
+    if (filterLabels) {
+      return filterLabels;
+    }
+
     if (!config) {
       return [];
     }
@@ -93,7 +99,7 @@ export default function ReviewFilterGroup({
     });
 
     return [...labels].sort();
-  }, [config, filter]);
+  }, [config, filterLabels, filter]);
 
   const filterValues = useMemo(
     () => ({
@@ -197,6 +203,7 @@ export default function ReviewFilterGroup({
           filter={filter}
           currentSeverity={currentSeverity}
           reviewSummary={reviewSummary}
+          allLabels={allLabels}
           onUpdateFilter={onUpdateFilter}
           // not applicable as exports are not used
           camera=""
