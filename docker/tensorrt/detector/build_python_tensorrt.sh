@@ -12,7 +12,7 @@ if [[ "${TARGETARCH}" == "arm64" ]]; then
   # Get python-tensorrt source
   mkdir /workspace
   cd /workspace
-  git clone -b ${TENSORRT_VER} https://github.com/NVIDIA/TensorRT.git --depth=1
+  git clone -b release/8.6 https://github.com/NVIDIA/TensorRT.git --depth=1
 
   # Collect dependencies
   EXT_PATH=/workspace/external && mkdir -p $EXT_PATH
@@ -22,7 +22,7 @@ if [[ "${TARGETARCH}" == "arm64" ]]; then
 
   # Build wheel
   cd /workspace/TensorRT/python
-  EXT_PATH=$EXT_PATH PYTHON_MAJOR_VERSION=3 PYTHON_MINOR_VERSION=9 TARGET_ARCHITECTURE=aarch64 /bin/bash ./build.sh
-  mv build/dist/*.whl /trt-wheels/
+  EXT_PATH=$EXT_PATH PYTHON_MAJOR_VERSION=3 PYTHON_MINOR_VERSION=9 TARGET_ARCHITECTURE=aarch64 TENSORRT_MODULE=tensorrt /bin/bash ./build.sh
+  mv build/bindings_wheel/dist/*.whl /trt-wheels/
 
 fi

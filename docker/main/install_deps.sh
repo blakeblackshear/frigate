@@ -4,6 +4,10 @@ set -euxo pipefail
 
 apt-get -qq update
 
+apt-get -qq install software-properties-common -y
+add-apt-repository ppa:deadsnakes/ppa -y
+apt-get update -qq
+
 apt-get -qq install --no-install-recommends -y \
     apt-transport-https \
     gnupg \
@@ -11,6 +15,7 @@ apt-get -qq install --no-install-recommends -y \
     procps vainfo \
     unzip locales tzdata libxml2 xz-utils \
     python3.9 \
+    python3.9-distutils \
     python3-pip \
     curl \
     jq \
@@ -35,7 +40,16 @@ fi
 # coral drivers
 apt-get -qq update
 apt-get -qq install --no-install-recommends --no-install-suggests -y \
-    libedgetpu1-max python3-tflite-runtime python3-pycoral
+    libedgetpu1-max
+
+# apt-get -qq install --no-install-recommends --no-install-suggests -y \
+#     libedgetpu1-max python3-tflite-runtime python3-pycoral
+
+pip3 install --extra-index-url https://google-coral.github.io/py-repo/ tflite_runtime
+
+apt install gdal-bin python3-gdal -y
+
+pip3 install --extra-index-url https://google-coral.github.io/py-repo/ pycoral
 
 # btbn-ffmpeg -> amd64
 if [[ "${TARGETARCH}" == "amd64" ]]; then

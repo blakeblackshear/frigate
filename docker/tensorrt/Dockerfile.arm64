@@ -7,10 +7,15 @@ ARG BASE_IMAGE
 FROM ${BASE_IMAGE} AS build-wheels
 ARG DEBIAN_FRONTEND
 
+RUN apt-get update && \
+    apt-get install software-properties-common -y && \
+    add-apt-repository ppa:deadsnakes/ppa -y && \
+    apt-get update
+
 # Use a separate container to build wheels to prevent build dependencies in final image
 RUN apt-get -qq update \
     && apt-get -qq install -y --no-install-recommends \
-       python3.9 python3.9-dev \
+       python3.9 python3.9-dev python3.9-distutils \
        wget build-essential cmake git \
     && rm -rf /var/lib/apt/lists/*
 
@@ -24,6 +29,15 @@ RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
 FROM build-wheels AS trt-wheels
 ARG DEBIAN_FRONTEND
 ARG TARGETARCH
+
+RUN apt-key adv --fetch-key https://repo.download.nvidia.com/jetson/jetson-ota-public.asc
+
+RUN echo "deb https://repo.download.nvidia.com/jetson/common r36.3 main" >> /etc/apt/sources.list.d/nvidia-l4t-apt-source.list
+RUN echo "deb https://repo.download.nvidia.com/jetson/t234 r36.3 main" >> /etc/apt/sources.list.d/nvidia-l4t-apt-source.list
+RUN echo "deb https://repo.download.nvidia.com/jetson/ffmpeg r36.3 main" >> /etc/apt/sources.list.d/nvidia-l4t-apt-source.list
+
+RUN mkdir -p /opt/nvidia/l4t-packages/
+RUN touch /opt/nvidia/l4t-packages/.nv-l4t-disable-boot-fw-update-in-preinstall
 
 # python-tensorrt build deps are 3.4 GB!
 RUN apt-get update \
