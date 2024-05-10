@@ -232,6 +232,21 @@ export default function EventView({
     100,
   );
 
+  // review filter info
+
+  const reviewLabels = useMemo(() => {
+    const uniqueLabels = new Set<string>();
+
+    reviewItems?.all?.forEach((rev) => {
+      rev.data.objects.forEach((obj) =>
+        uniqueLabels.add(obj.replace("-verified", "")),
+      );
+      rev.data.audio.forEach((aud) => uniqueLabels.add(aud));
+    });
+
+    return [...uniqueLabels];
+  }, [reviewItems]);
+
   if (!config) {
     return <ActivityIndicator />;
   }
@@ -297,8 +312,9 @@ export default function EventView({
             currentSeverity={severityToggle}
             reviewSummary={reviewSummary}
             filter={filter}
-            onUpdateFilter={updateFilter}
             motionOnly={motionOnly}
+            filterLabels={reviewLabels}
+            onUpdateFilter={updateFilter}
             setMotionOnly={setMotionOnly}
           />
         ) : (

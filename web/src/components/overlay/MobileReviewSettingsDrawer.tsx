@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { Button } from "../ui/button";
 import { FaArrowDown, FaCalendarAlt, FaCog, FaFilter } from "react-icons/fa";
@@ -10,8 +10,6 @@ import { SelectSeparator } from "../ui/select";
 import { ReviewFilter, ReviewSeverity, ReviewSummary } from "@/types/review";
 import { getEndOfDayTimestamp } from "@/utils/dateUtil";
 import { GeneralFilterContent } from "../filter/ReviewFilterGroup";
-import useSWR from "swr";
-import { FrigateConfig } from "@/types/frigateConfig";
 import { toast } from "sonner";
 import axios from "axios";
 import SaveExportOverlay from "./SaveExportOverlay";
@@ -37,6 +35,7 @@ type MobileReviewSettingsDrawerProps = {
   range?: TimeRange;
   mode: ExportMode;
   reviewSummary?: ReviewSummary;
+  allLabels: string[];
   onUpdateFilter: (filter: ReviewFilter) => void;
   setRange: (range: TimeRange | undefined) => void;
   setMode: (mode: ExportMode) => void;
@@ -51,11 +50,11 @@ export default function MobileReviewSettingsDrawer({
   range,
   mode,
   reviewSummary,
+  allLabels,
   onUpdateFilter,
   setRange,
   setMode,
 }: MobileReviewSettingsDrawerProps) {
-  const { data: config } = useSWR<FrigateConfig>("config");
   const [drawerMode, setDrawerMode] = useState<DrawerMode>("none");
 
   // exports
@@ -102,32 +101,6 @@ export default function MobileReviewSettingsDrawer({
 
   // filters
 
-  const allLabels = useMemo<string[]>(() => {
-    if (!config) {
-      return [];
-    }
-
-    const labels = new Set<string>();
-    const cameras = filter?.cameras || Object.keys(config.cameras);
-
-    cameras.forEach((camera) => {
-      if (camera == "birdseye") {
-        return;
-      }
-      const cameraConfig = config.cameras[camera];
-      cameraConfig.objects.track.forEach((label) => {
-        labels.add(label);
-      });
-
-      if (cameraConfig.audio.enabled_in_config) {
-        cameraConfig.audio.listen.forEach((label) => {
-          labels.add(label);
-        });
-      }
-    });
-
-    return [...labels].sort();
-  }, [config, filter]);
   const [currentLabels, setCurrentLabels] = useState<string[] | undefined>(
     filter?.labels,
   );
