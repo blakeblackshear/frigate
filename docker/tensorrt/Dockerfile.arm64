@@ -11,11 +11,11 @@ ARG DEBIAN_FRONTEND
 RUN --mount=type=bind,source=docker/tensorrt/install_python_39.sh,target=/deps/install_python_39.sh \
     --mount=type=cache,target=/root/.ccache \
     /deps/install_python_39.sh
-#RUN apt-get -qq update \
-#    && apt-get -qq install -y --no-install-recommends \
-#       python3.9 python3.9-dev \
-#       wget build-essential cmake git \
-#    && rm -rf /var/lib/apt/lists/*
+
+RUN apt-get -qq update \
+    && apt-get -qq install -y --no-install-recommends \
+       wget build-essential cmake git \
+    && rm -rf /var/lib/apt/lists/*
 
 # Ensure python3 defaults to python3.9
 # RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
