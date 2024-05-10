@@ -93,7 +93,7 @@
     "autoprefixer": "^10.4.19",
     "eslint": "^8.55.0",
     "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-jest": "^28.2.0",
+    "eslint-plugin-jest": "^28.5.0",
     "eslint-plugin-prettier": "^5.0.1",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",
