@@ -12,7 +12,12 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Layout, Responsive, WidthProvider } from "react-grid-layout";
+import {
+  ItemCallback,
+  Layout,
+  Responsive,
+  WidthProvider,
+} from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import { LivePlayerMode } from "@/types/live";
@@ -298,6 +303,24 @@ export default function DraggableGridLayout({
     );
   }, [containerWidth, marginValue]);
 
+  const handleResize: ItemCallback = (
+    _: Layout[],
+    oldLayoutItem: Layout,
+    layoutItem: Layout,
+    placeholder: Layout,
+  ) => {
+    const heightDiff = layoutItem.h - oldLayoutItem.h;
+    const widthDiff = layoutItem.w - oldLayoutItem.w;
+    const changeCoef = oldLayoutItem.w / oldLayoutItem.h;
+    if (Math.abs(heightDiff) < Math.abs(widthDiff)) {
+      layoutItem.h = layoutItem.w / changeCoef;
+      placeholder.h = layoutItem.w / changeCoef;
+    } else {
+      layoutItem.w = layoutItem.h * changeCoef;
+      placeholder.w = layoutItem.h * changeCoef;
+    }
+  };
+
   return (
     <>
       <Toaster position="top-center" closeButton={true} />
@@ -342,6 +365,7 @@ export default function DraggableGridLayout({
             containerPadding={[0, isEditMode ? 6 : 3]}
             resizeHandles={isEditMode ? ["sw", "nw", "se", "ne"] : []}
             onDragStop={handleLayoutChange}
+            onResize={handleResize}
             onResizeStop={handleLayoutChange}
           >
             {includeBirdseye && birdseyeConfig?.enabled && (
