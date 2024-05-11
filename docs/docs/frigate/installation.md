@@ -30,7 +30,7 @@ Frigate uses the following locations for read/write operations in the container.
 
 :::warning
 
-For Frigate to start, you will need to have a valid configuration file inside your `config/` directory mentioned above. You can find a minimal reference configuration with a dummy camera on the [full reference config page](https://docs.frigate.video/configuration/reference/).
+For Frigate to start, it requires a valid configuration file inside the `/config/` directory mentioned above. There is a step by step guide to creating a minimal configuration in the [getting started guide](https://docs.frigate.video/guides/getting_started#configuring-frigate).
 
 :::
 
