@@ -54,6 +54,7 @@ Users of the Snapcraft build of Docker cannot use storage locations outside your
 :::
 
 ### Creating a minimal configuration
+
 For Frigate to start, you will need to have a valid configuration file inside your `config/` directory mentioned in the storage section of this page. You can find a minimal reference configuration with a dummy camera on the [full reference config page](https://docs.frigate.video/configuration/reference/).
 
 ### Calculating required shm-size
