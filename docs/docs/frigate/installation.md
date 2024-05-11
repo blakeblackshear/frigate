@@ -28,6 +28,12 @@ Frigate uses the following locations for read/write operations in the container.
 - `/tmp/cache`: Cache location for recording segments. Initial recordings are written here before being checked and converted to mp4 and moved to the recordings folder. Segments generated via the `clip.mp4` endpoints are also concatenated and processed here. It is recommended to use a [`tmpfs`](https://docs.docker.com/storage/tmpfs/) mount for this.
 - `/dev/shm`: Internal cache for raw decoded frames in shared memory. It is not recommended to modify this directory or map it with docker. The minimum size is impacted by the `shm-size` calculations below.
 
+:::warning
+
+For Frigate to start, you will need to have a valid configuration file inside your `config/` directory mentioned above. You can find a minimal reference configuration with a dummy camera on the [full reference config page](https://docs.frigate.video/configuration/reference/).
+
+:::
+
 #### Common docker compose storage configurations
 
 Writing to a local disk or external USB drive:
@@ -53,10 +59,6 @@ Users of the Snapcraft build of Docker cannot use storage locations outside your
 
 :::
 
-### Creating a minimal configuration
-
-For Frigate to start, you will need to have a valid configuration file inside your `config/` directory mentioned in the storage section of this page. You can find a minimal reference configuration with a dummy camera on the [full reference config page](https://docs.frigate.video/configuration/reference/).
-
 ### Calculating required shm-size
 
 Frigate utilizes shared memory to store frames during processing. The default `shm-size` provided by Docker is **64MB**.
@@ -81,12 +83,6 @@ $ python -c 'print("{:.2f}MB".format(((1280 * 720 * 1.5 * 9 + 270480) / 1048576)
 ```
 
 The shm size cannot be set per container for Home Assistant add-ons. However, this is probably not required since by default Home Assistant Supervisor allocates `/dev/shm` with half the size of your total memory. If your machine has 8GB of memory, chances are that Frigate will have access to up to 4GB without any additional configuration.
-
-:::warning
-
-Before proceeding, make sure you have setup a valid, minimal configuration, or full configuration if you already know what you are doing!
-
-:::
 
 ### Raspberry Pi 3/4
 
