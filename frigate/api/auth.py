@@ -5,6 +5,7 @@ import hashlib
 import json
 import logging
 import os
+import re
 import secrets
 import time
 from datetime import datetime
@@ -239,6 +240,9 @@ def create_user():
 
     request_data = request.get_json()
 
+    if not re.match("^[A-Za-z0-9._]+$", request_data.get("username", "")):
+        make_response({"message": "Invalid username"}, 400)
+
     password_hash = hash_password(request_data["password"], iterations=HASH_ITERATIONS)
 
     User.insert(
@@ -252,7 +256,7 @@ def create_user():
 
 @AuthBp.route("/users/<username>", methods=["DELETE"])
 def delete_user(username: str):
-    User.delete_by_id(username).execute()
+    User.delete_by_id(username)
     return jsonify({"success": True})
 
 
