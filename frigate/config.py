@@ -125,6 +125,9 @@ class UserConfig(FrigateBaseModel):
 
 class AuthConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable authentication")
+    reset_admin_password: bool = Field(
+        default=False, title="Reset the admin password on startup"
+    )
     cookie_name: str = Field(
         default="frigate_token", title="Name for jwt token cookie", pattern=r"^[a-z]_*$"
     )

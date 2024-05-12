@@ -613,6 +613,19 @@ class FrigateApp:
                 logger.info(f"***    Password: {password}   ***")
                 logger.info("********************************************************")
                 logger.info("********************************************************")
+            elif self.config.auth.reset_admin_password:
+                password = secrets.token_hex(16)
+                password_hash = hash_password(
+                    password, iterations=self.config.auth.hash_iterations
+                )
+                User.replace(username="admin", password_hash=password_hash).execute()
+
+                logger.info("********************************************************")
+                logger.info("********************************************************")
+                logger.info("***    Reset admin password set in the config.       ***")
+                logger.info(f"***    Password: {password}   ***")
+                logger.info("********************************************************")
+                logger.info("********************************************************")
 
     def start(self) -> None:
         parser = argparse.ArgumentParser(
