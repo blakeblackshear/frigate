@@ -183,6 +183,11 @@ def auth():
         # if the jwt cookie is expiring soon
         elif jwt_source == "cookie" and expiration - JWT_REFRESH <= current_time:
             logger.debug("jwt token expiring soon, refreshing cookie")
+            # ensure the user hasn't been deleted
+            try:
+                User.get_by_id(user).execute()
+            except DoesNotExist:
+                return fail_response
             new_expiration = current_time + JWT_SESSION_LENGTH
             new_encoded_jwt = create_encoded_jwt(
                 user, new_expiration, current_app.jwt_token
