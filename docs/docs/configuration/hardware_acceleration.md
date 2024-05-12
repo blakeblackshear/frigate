@@ -362,15 +362,43 @@ that NVDEC/NVDEC1 are in use.
 
 ## Rockchip platform
 
-Hardware accelerated video de-/encoding is supported on all Rockchip SoCs.
+Hardware accelerated video de-/encoding is supported on all Rockchip SoCs using [Nyanmisaka's FFmpeg Fork](https://github.com/nyanmisaka/ffmpeg-rockchip) based on [Rockchip's mpp library](https://github.com/rockchip-linux/mpp).
+
+### Prerequisites
+
+Make sure that you use a linux distribution that comes with the rockchip BSP kernel 5.10 or 6.1 and supports VPU. To check, enter the following commands:
+
+```
+$ uname -r
+5.10.xxx-rockchip # or 6.1.xxx; the -rockchip suffix is important
+$ ls /dev/dri
+by-path  card0  card1  renderD128  renderD129 # should list renderD128
+```
+
+I recommend [Joshua Riek's Ubuntu for Rockchip](https://github.com/Joshua-Riek/ubuntu-rockchip), if your board is supported.
 
 ### Setup
 
-Use a frigate docker image with `-rk` suffix and enable privileged mode by adding the `--privileged` flag to your docker run command or `privileged: true` to your `docker-compose.yml` file.
+Follow Frigate's default installation instructions, but use a docker image with `-rk` suffix for example `ghcr.io/blakeblackshear/frigate:stable-rk`.
+
+Next, you need to grant docker permissions to access your hardware:
+- During the configuration process, you should run docker in privileged mode to avoid any errors due to insufficient permissions. To do so, add `privileged: true` to your `docker-compose.yml` file or the `--privileged` flag to your docker run command.
+- After everything works, you should only grant necessary permissions to increase security. Add the lines below to your `docker-compose.yml` file or the following options to your docker run command: `--security-opt systempaths=unconfined --security-opt apparmor=unconfined --device /dev/dri:/dev/dri --device /dev/dma_heap:/dev/dma_heap --device /dev/rga:/dev/rga --device /dev/mpp_service:/dev/mpp_service`:
+
+```yaml
+    security_opt:
+      - apparmor=unconfined
+      - systempaths=unconfined
+    devices:
+      - /dev/dri:/dev/dri
+      - /dev/dma_heap:/dev/dma_heap
+      - /dev/rga:/dev/rga
+      - /dev/mpp_service:/dev/mpp_service
+```
 
 ### Configuration
 
-Add one of the following ffmpeg presets to your `config.yaml` to enable hardware acceleration:
+Add one of the following FFmpeg presets to your `config.yaml` to enable hardware video processing:
 
 ```yaml
 # if you try to decode a h264 encoded stream
@@ -385,31 +413,5 @@ ffmpeg:
 :::note
 
 Make sure that your SoC supports hardware acceleration for your input stream. For example, if your camera streams with h265 encoding and a 4k resolution, your SoC must be able to de- and encode h265 with a 4k resolution or higher. If you are unsure whether your SoC meets the requirements, take a look at the datasheet.
-
-:::
-
-### go2rtc presets for hardware accelerated transcoding
-
-If your input stream is to be transcoded using hardware acceleration, there are these presets for go2rtc: `h264/rk` and `h265/rk`. You can use them this way:
-
-```
-go2rtc:
-  streams:
-    Cam_h264: ffmpeg:rtsp://username:password@192.168.1.123/av_stream/ch0#video=h264/rk
-    Cam_h265: ffmpeg:rtsp://username:password@192.168.1.123/av_stream/ch0#video=h265/rk
-```
-
-:::warning
-
-The go2rtc docs may suggest the following configuration:
-
-```
-go2rtc:
-  streams:
-    Cam_h264: ffmpeg:rtsp://username:password@192.168.1.123/av_stream/ch0#video=h264#hardware=rk
-    Cam_h265: ffmpeg:rtsp://username:password@192.168.1.123/av_stream/ch0#video=h265#hardware=rk
-```
-
-However, this does not currently work.
 
 :::

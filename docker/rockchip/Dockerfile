@@ -25,5 +25,5 @@ ADD https://github.com/MarcA711/rknpu2/releases/download/v1.5.2/librknnrt_rk3588
 
 RUN rm -rf /usr/lib/btbn-ffmpeg/bin/ffmpeg
 RUN rm -rf /usr/lib/btbn-ffmpeg/bin/ffprobe
-ADD --chmod=111 https://github.com/MarcA711/Rockchip-FFmpeg-Builds/releases/download/6.1-1/ffmpeg /usr/lib/btbn-ffmpeg/bin/
-ADD --chmod=111 https://github.com/MarcA711/Rockchip-FFmpeg-Builds/releases/download/6.1-1/ffprobe /usr/lib/btbn-ffmpeg/bin/
+ADD --chmod=111 https://github.com/MarcA711/Rockchip-FFmpeg-Builds/releases/download/6.1-3/ffmpeg /usr/lib/btbn-ffmpeg/bin/
+ADD --chmod=111 https://github.com/MarcA711/Rockchip-FFmpeg-Builds/releases/download/6.1-3/ffprobe /usr/lib/btbn-ffmpeg/bin/
