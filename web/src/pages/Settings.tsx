@@ -33,6 +33,7 @@ import { PolygonType } from "@/types/canvas";
 import ObjectSettings from "@/components/settings/ObjectSettings";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import scrollIntoView from "scroll-into-view-if-needed";
+import Authentication from "@/components/settings/Authentication";
 
 export default function Settings() {
   const settingsViews = [
@@ -40,6 +41,7 @@ export default function Settings() {
     "masks / zones",
     "motion tuner",
     "debug",
+    "authentication",
   ] as const;
 
   type SettingsType = (typeof settingsViews)[number];
@@ -169,6 +171,7 @@ export default function Settings() {
             setUnsavedChanges={setUnsavedChanges}
           />
         )}
+        {page == "authentication" && <Authentication />}
       </div>
       {confirmationDialogOpen && (
         <AlertDialog
