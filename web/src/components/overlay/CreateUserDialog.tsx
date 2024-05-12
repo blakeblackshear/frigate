@@ -40,7 +40,7 @@ export default function CreateUserDialog({
       .regex(/^[A-Za-z0-9._]+$/, {
         message: "Username may only include letters, numbers, . or _",
       }),
-    password: z.string().min(8),
+    password: z.string(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
