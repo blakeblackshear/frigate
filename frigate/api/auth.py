@@ -186,7 +186,7 @@ def auth():
             logger.debug("jwt token expiring soon, refreshing cookie")
             # ensure the user hasn't been deleted
             try:
-                User.get_by_id(user).execute()
+                User.get_by_id(user)
             except DoesNotExist:
                 return fail_response
             new_expiration = current_time + JWT_SESSION_LENGTH
