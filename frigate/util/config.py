@@ -157,26 +157,45 @@ def get_relative_coordinates(
                 points = m.split(",")
 
                 if any(x > "1.0" for x in points):
-                    relative_masks.append(
-                        ",".join(
-                            [
-                                f"{round(int(points[i]) / frame_shape[1], 3)},{round(int(points[i + 1]) / frame_shape[0], 3)}"
-                                for i in range(0, len(points), 2)
-                            ]
+                    rel_points = []
+                    for i in range(0, len(points), 2):
+                        x = int(points[i])
+                        y = int(points[i + 1])
+
+                        if x > frame_shape[1] or y > frame_shape[0]:
+                            logger.error(
+                                f"Not applying mask due to invalid coordinates. {x},{y} is outside of the detection resolution {frame_shape[1]}x{frame_shape[0]}. Use the editor in the UI to correct the mask."
+                            )
+                            continue
+
+                        rel_points.append(
+                            f"{round(x / frame_shape[1], 3)},{round(y  / frame_shape[0], 3)}"
                         )
-                    )
+
+                    relative_masks.append(",".join(rel_points))
                 else:
                     relative_masks.append(m)
 
             mask = relative_masks
         elif isinstance(mask, str) and any(x > "1.0" for x in mask.split(",")):
             points = mask.split(",")
-            mask = ",".join(
-                [
-                    f"{round(int(points[i]) / frame_shape[1], 3)},{round(int(points[i + 1]) / frame_shape[0], 3)}"
-                    for i in range(0, len(points), 2)
-                ]
-            )
+            rel_points = []
+
+            for i in range(0, len(points), 2):
+                x = int(points[i])
+                y = int(points[i + 1])
+
+                if x > frame_shape[1] or y > frame_shape[0]:
+                    logger.error(
+                        f"Not applying mask due to invalid coordinates. {x},{y} is outside of the detection resolution {frame_shape[1]}x{frame_shape[0]}. Use the editor in the UI to correct the mask."
+                    )
+                    return []
+
+                rel_points.append(
+                    f"{round(x / frame_shape[1], 3)},{round(y  / frame_shape[0], 3)}"
+                )
+
+            mask = ",".join(rel_points)
 
         return mask
 
