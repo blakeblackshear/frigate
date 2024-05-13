@@ -153,17 +153,11 @@ RUN apt-get -qq update && apt-get -qq install -y \
 COPY docker/main/requirements.txt /requirements.txt
 RUN PIP_IGNORE_INSTALLED=0 pip3 install -r /requirements.txt
 
-RUN PIP_IGNORE_INSTALLED=0 pip3 install --no-deps rich filterpy==1.4.5 norfair==2.1.1
-
-RUN PIP_IGNORE_INSTALLED=0 pip3 install --no-deps norfair==2.2.0
-
-RUN PIP_IGNORE_INSTALLED=0 pip3 install onvif_zeep
-
-#RUN PIP_IGNORE_INSTALLED=0 pip3 install --no-deps zeep==3.0.0 onvif_zeep
+RUN PIP_IGNORE_INSTALLED=0 pip3 install rich filterpy==1.4.5 zeep==3.0.0 onvif_zeep && \
+    pip3 install --no-deps norfair==2.2.0
 
 COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
 RUN PIP_IGNORE_INSTALLED=0 pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt
-
 
 # Collect deps in a single layer
 FROM scratch AS deps-rootfs
@@ -193,7 +187,7 @@ ENV PATH="/usr/lib/btbn-ffmpeg/bin:/usr/local/go2rtc/bin:/usr/local/nginx/sbin:$
 RUN --mount=type=bind,source=docker/main/install_deps.sh,target=/deps/install_deps.sh \
     /deps/install_deps.sh
 
-COPY --from=wheels /usr/local/lib/python3.9/site-packages /usr/local/lib/python3.9/site-packages
+COPY --from=wheels /usr/local/lib/python3.9/dist-packages /usr/local/lib/python3.9/dist-packages
 COPY --from=wheels /usr/lib/python3/dist-packages /usr/lib/python3/dist-packages
 COPY --from=wheels /usr/share/matplotlib /usr/share/matplotlib
 COPY --from=wheels /etc/matplotlibrc /etc/matplotlibrc
