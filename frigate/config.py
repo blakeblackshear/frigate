@@ -116,13 +116,6 @@ class UIConfig(FrigateBaseModel):
     )
 
 
-class UserConfig(FrigateBaseModel):
-    user: str = Field(title="Username")
-    password_hash: str = Field(
-        title="Password hashed and salted using hashlib.pbkdf2_hmac"
-    )
-
-
 class AuthConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable authentication")
     reset_admin_password: bool = Field(

@@ -3,11 +3,11 @@
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
-import ActivityIndicator from "./indicators/activity-indicator";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 import axios, { AxiosError } from "axios";
-import { Toaster } from "./ui/sonner";
+import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import {
   Form,
