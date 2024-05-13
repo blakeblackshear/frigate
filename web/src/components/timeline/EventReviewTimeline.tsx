@@ -147,9 +147,11 @@ export function EventReviewTimeline({
         });
       }
     }
+    // don't scroll when segments update from unreviewed -> reviewed
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     selectedTimelineRef,
-    segments,
     showMinimap,
     alignStartDateToTimeline,
     visibleTimestamps,

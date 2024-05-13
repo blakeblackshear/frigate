@@ -206,7 +206,7 @@ export default function PolygonItem({
 
       <div
         key={index}
-        className="flex p-1 rounded-lg flex-row items-center justify-between mx-2 my-1.5 transition-background duration-100"
+        className="flex p-1 rounded-lg flex-row items-center justify-between my-1.5 transition-background duration-100"
         data-index={index}
         onMouseEnter={() => setHoveredPolygonIndex(index)}
         onMouseLeave={() => setHoveredPolygonIndex(null)}

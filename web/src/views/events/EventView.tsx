@@ -103,9 +103,9 @@ export default function EventView({
 
     if (filter?.showReviewed == 1) {
       return {
-        alert: summary.total_alert,
-        detection: summary.total_detection,
-        significant_motion: summary.total_motion,
+        alert: summary.total_alert ?? 0,
+        detection: summary.total_detection ?? 0,
+        significant_motion: summary.total_motion ?? 0,
       };
     } else {
       return {
