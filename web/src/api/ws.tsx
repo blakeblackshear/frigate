@@ -204,13 +204,26 @@ export function useFrigateStats(): { payload: FrigateStats } {
   return { payload: JSON.parse(payload as string) };
 }
 
-export function useInitialCameraState(camera: string): {
+export function useInitialCameraState(
+  camera: string,
+  refreshOnStart: boolean,
+): {
   payload: FrigateCameraState;
 } {
   const {
     value: { payload },
-  } = useWs("camera_activity", "");
+    send: sendCommand,
+  } = useWs("camera_activity", "onConnect");
   const data = JSON.parse(payload as string);
+
+  useEffect(() => {
+    if (refreshOnStart) {
+      sendCommand("onConnect");
+    }
+    // only refresh when onRefresh value changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshOnStart]);
+
   return { payload: data ? data[camera] : undefined };
 }
 
