@@ -57,7 +57,7 @@
     "react-hook-form": "^7.51.4",
     "react-icons": "^5.2.1",
     "react-konva": "^18.2.10",
-    "react-router-dom": "^6.23.0",
+    "react-router-dom": "^6.23.1",
     "react-swipeable": "^7.0.1",
     "react-tracked": "^2.0.0",
     "react-transition-group": "^4.4.5",
