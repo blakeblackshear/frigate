@@ -162,7 +162,7 @@ def get_relative_coordinates(
                         x = int(points[i])
                         y = int(points[i + 1])
 
-                        if x > frame_shape[1] or  y > frame_shape[0]:
+                        if x > frame_shape[1] or y > frame_shape[0]:
                             logger.error(
                                 f"Not applying mask due to invalid coordinates. {x},{y} is outside of the detection resolution {frame_shape[1]}x{frame_shape[0]}. Use the editor in the UI to correct the mask."
                             )
@@ -185,7 +185,7 @@ def get_relative_coordinates(
                 x = int(points[i])
                 y = int(points[i + 1])
 
-                if x > frame_shape[1] or  y > frame_shape[0]:
+                if x > frame_shape[1] or y > frame_shape[0]:
                     logger.error(
                         f"Not applying mask due to invalid coordinates. {x},{y} is outside of the detection resolution {frame_shape[1]}x{frame_shape[0]}. Use the editor in the UI to correct the mask."
                     )
