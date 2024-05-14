@@ -19,12 +19,16 @@ type useCameraActivityReturn = {
 
 export function useCameraActivity(
   camera: CameraConfig,
+  refreshOnStart: boolean = true,
 ): useCameraActivityReturn {
   const [objects, setObjects] = useState<ObjectType[]>([]);
 
   // init camera activity
 
-  const { payload: initialCameraState } = useInitialCameraState(camera.name);
+  const { payload: initialCameraState } = useInitialCameraState(
+    camera.name,
+    refreshOnStart,
+  );
 
   const updatedCameraState = useDeepMemo(initialCameraState);
 

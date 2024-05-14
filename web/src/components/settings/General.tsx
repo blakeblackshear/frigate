@@ -9,6 +9,17 @@ import { Button } from "../ui/button";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { del as delData } from "idb-keyval";
+import { usePersistence } from "@/hooks/use-persistence";
+import { isSafari } from "react-device-detect";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+} from "../ui/select";
+
+const PLAYBACK_RATE_DEFAULT = isSafari ? [0.5, 1, 2] : [0.5, 1, 2, 4, 8, 16];
 
 export default function General() {
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -38,6 +49,8 @@ export default function General() {
     document.title = "General Settings - Frigate";
   }, []);
 
+  const [playbackRate, setPlaybackRate] = usePersistence("playbackRate", 1);
+
   return (
     <>
       <div className="flex flex-col md:flex-row size-full">
@@ -63,6 +76,36 @@ export default function General() {
                 <Button onClick={clearStoredLayouts}>Clear All Layouts</Button>
               </div>
             </div>
+            <Separator className="flex my-2 bg-secondary" />
+            <div className="mt-2 space-y-6">
+              <div className="space-y-0.5">
+                <div className="text-md">Default Playback Rate</div>
+                <div className="text-sm text-muted-foreground my-2">
+                  <p>Default playback rate for recordings playback.</p>
+                </div>
+              </div>
+            </div>
+            <Select
+              value={playbackRate?.toString()}
+              onValueChange={(value) => setPlaybackRate(parseFloat(value))}
+            >
+              <SelectTrigger className="w-20">
+                {`${playbackRate}x`}
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {PLAYBACK_RATE_DEFAULT.map((rate) => (
+                    <SelectItem
+                      key={rate}
+                      className="cursor-pointer"
+                      value={rate.toString()}
+                    >
+                      {rate}x
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
             <Separator className="flex my-2 bg-secondary" />
             <div className="mt-2 space-y-6">
               <div className="space-y-0.5">
