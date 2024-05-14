@@ -34,7 +34,7 @@ export default function Chip({
       <div
         ref={nodeRef}
         className={cn(
-          "flex px-2 py-1.5 rounded-2xl items-center z-10",
+          "z-10 flex items-center rounded-2xl px-2 py-1.5",
           className,
         )}
         onClick={onClick}
@@ -63,7 +63,7 @@ export function LogChip({ severity, onClickSeverity }: LogChipProps) {
 
   return (
     <div
-      className={`py-[1px] px-1 capitalize text-xs rounded-md ${onClickSeverity ? "cursor-pointer" : ""} ${severityClassName}`}
+      className={`rounded-md px-1 py-[1px] text-xs capitalize ${onClickSeverity ? "cursor-pointer" : ""} ${severityClassName}`}
       onClick={(e) => {
         e.stopPropagation();
 

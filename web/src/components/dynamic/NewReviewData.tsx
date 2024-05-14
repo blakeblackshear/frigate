@@ -27,13 +27,13 @@ export default function NewReviewData({
 
   return (
     <div className={className}>
-      <div className="flex justify-center items-center mr-[65px] md:mr-[115px] pointer-events-auto">
+      <div className="pointer-events-auto mr-[65px] flex items-center justify-center md:mr-[115px]">
         <Button
           className={`${
             hasUpdate
-              ? "animate-in slide-in-from-top duration-500"
+              ? "duration-500 animate-in slide-in-from-top"
               : "invisible"
-          }  text-center mt-5 mx-auto bg-gray-400 text-white`}
+          }  mx-auto mt-5 bg-gray-400 text-center text-white`}
           onClick={() => {
             pullLatestData();
             if (contentRef.current) {
@@ -44,7 +44,7 @@ export default function NewReviewData({
             }
           }}
         >
-          <LuRefreshCcw className="w-4 h-4 mr-2" />
+          <LuRefreshCcw className="mr-2 h-4 w-4" />
           New Items To Review
         </Button>
       </div>

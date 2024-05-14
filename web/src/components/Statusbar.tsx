@@ -55,11 +55,11 @@ export default function Statusbar() {
   }, [potentialProblems, addMessage, clearMessages]);
 
   return (
-    <div className="absolute left-0 bottom-0 right-0 w-full h-8 flex justify-between items-center px-4 bg-background_alt z-10 dark:text-secondary-foreground border-t border-secondary-highlight">
-      <div className="h-full flex items-center gap-2">
+    <div className="absolute bottom-0 left-0 right-0 z-10 flex h-8 w-full items-center justify-between border-t border-secondary-highlight bg-background_alt px-4 dark:text-secondary-foreground">
+      <div className="flex h-full items-center gap-2">
         {cpuPercent && (
           <Link to="/system#general">
-            <div className="flex items-center text-sm gap-2 cursor-pointer hover:underline">
+            <div className="flex cursor-pointer items-center gap-2 text-sm hover:underline">
               <MdCircle
                 className={`size-2 ${
                   cpuPercent < 50
@@ -99,7 +99,7 @@ export default function Statusbar() {
               {" "}
               <div
                 key={gpuTitle}
-                className="flex items-center text-sm gap-2 cursor-pointer hover:underline"
+                className="flex cursor-pointer items-center gap-2 text-sm hover:underline"
               >
                 <MdCircle
                   className={`size-2 ${
@@ -116,20 +116,20 @@ export default function Statusbar() {
           );
         })}
       </div>
-      <div className="h-full flex items-center gap-2">
+      <div className="flex h-full items-center gap-2">
         {Object.entries(messages).length === 0 ? (
-          <div className="flex items-center text-sm gap-2">
+          <div className="flex items-center gap-2 text-sm">
             <FaCheck className="size-3 text-green-500" />
             System is healthy
           </div>
         ) : (
           Object.entries(messages).map(([key, messageArray]) => (
-            <div key={key} className="h-full flex items-center gap-2">
+            <div key={key} className="flex h-full items-center gap-2">
               {messageArray.map(({ id, text, color, link }: StatusMessage) => {
                 const message = (
                   <div
                     key={id}
-                    className={`flex items-center text-sm gap-2 ${link ? "hover:underline cursor-pointer" : ""}`}
+                    className={`flex items-center gap-2 text-sm ${link ? "cursor-pointer hover:underline" : ""}`}
                   >
                     <IoIosWarning
                       className={`size-5 ${color || "text-danger"}`}

@@ -332,13 +332,13 @@ function Logs() {
   const [selectedLog, setSelectedLog] = useState<LogLine>();
 
   return (
-    <div className="size-full p-2 flex flex-col">
+    <div className="flex size-full flex-col p-2">
       <Toaster position="top-center" closeButton={true} />
       <LogInfoDialog logLine={selectedLog} setLogLine={setSelectedLog} />
 
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <ToggleGroup
-          className="*:px-3 *:py-4 *:rounded-md"
+          className="*:rounded-md *:px-3 *:py-4"
           type="single"
           size="sm"
           value={logService}
@@ -363,12 +363,12 @@ function Logs() {
         </ToggleGroup>
         <div className="flex items-center gap-2">
           <Button
-            className="flex justify-between items-center gap-2"
+            className="flex items-center justify-between gap-2"
             size="sm"
             onClick={handleCopyLogs}
           >
             <FaCopy className="text-secondary-foreground" />
-            <div className="hidden md:block text-primary">
+            <div className="hidden text-primary md:block">
               Copy to Clipboard
             </div>
           </Button>
@@ -381,7 +381,7 @@ function Logs() {
 
       {initialScroll && !endVisible && (
         <Button
-          className="absolute bottom-8 left-[50%] -translate-x-[50%] rounded-md text-primary bg-secondary-foreground z-20 p-2"
+          className="absolute bottom-8 left-[50%] z-20 -translate-x-[50%] rounded-md bg-secondary-foreground p-2 text-primary"
           onClick={() =>
             contentRef.current?.scrollTo({
               top: contentRef.current?.scrollHeight,
@@ -393,20 +393,20 @@ function Logs() {
         </Button>
       )}
 
-      <div className="relative size-full flex flex-col my-2 font-mono text-sm sm:p-2 whitespace-pre-wrap bg-background_alt border border-secondary rounded-md overflow-hidden">
-        <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 *:px-2 *:py-3 *:text-sm *:text-primary/40">
-          <div className="p-1 flex items-center capitalize">Type</div>
-          <div className="col-span-2 sm:col-span-1 flex items-center">
+      <div className="font-mono relative my-2 flex size-full flex-col overflow-hidden whitespace-pre-wrap rounded-md border border-secondary bg-background_alt text-sm sm:p-2">
+        <div className="grid grid-cols-5 *:px-2 *:py-3 *:text-sm *:text-primary/40 sm:grid-cols-8 md:grid-cols-12">
+          <div className="flex items-center p-1 capitalize">Type</div>
+          <div className="col-span-2 flex items-center sm:col-span-1">
             Timestamp
           </div>
           <div className="col-span-2 flex items-center">Tag</div>
-          <div className="col-span-5 sm:col-span-4 md:col-span-8 flex items-center">
+          <div className="col-span-5 flex items-center sm:col-span-4 md:col-span-8">
             Message
           </div>
         </div>
         <div
           ref={contentRef}
-          className="w-full flex flex-col overflow-y-auto no-scrollbar overscroll-contain"
+          className="no-scrollbar flex w-full flex-col overflow-y-auto overscroll-contain"
         >
           {logLines.length > 0 &&
             [...Array(logRange.end).keys()].map((idx) => {
@@ -449,7 +449,7 @@ function Logs() {
           {logLines.length > 0 && <div id="page-bottom" ref={endLogRef} />}
         </div>
         {logLines.length == 0 && (
-          <ActivityIndicator className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2" />
+          <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
         )}
       </div>
     </div>
@@ -474,25 +474,25 @@ function LogLineData({
     <div
       ref={startRef}
       className={cn(
-        "w-full py-2 grid grid-cols-5 sm:grid-cols-8 md:grid-cols-12 gap-2 border-secondary border-t cursor-pointer hover:bg-muted",
+        "grid w-full cursor-pointer grid-cols-5 gap-2 border-t border-secondary py-2 hover:bg-muted sm:grid-cols-8 md:grid-cols-12",
         className,
         "*:text-sm",
       )}
       onClick={onSelect}
     >
-      <div className="h-full p-1 flex items-center gap-2">
+      <div className="flex h-full items-center gap-2 p-1">
         <LogChip severity={line.severity} onClickSeverity={onClickSeverity} />
       </div>
-      <div className="h-full col-span-2 sm:col-span-1 flex items-center">
+      <div className="col-span-2 flex h-full items-center sm:col-span-1">
         {line.dateStamp}
       </div>
-      <div className="size-full pr-2 col-span-2 flex items-center">
-        <div className="w-full overflow-hidden whitespace-nowrap text-ellipsis">
+      <div className="col-span-2 flex size-full items-center pr-2">
+        <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap">
           {line.section}
         </div>
       </div>
-      <div className="size-full pl-2 sm:pl-0 pr-2 col-span-5 sm:col-span-4 md:col-span-8 flex justify-between items-center">
-        <div className="w-full overflow-hidden whitespace-nowrap text-ellipsis">
+      <div className="col-span-5 flex size-full items-center justify-between pl-2 pr-2 sm:col-span-4 sm:pl-0 md:col-span-8">
+        <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap">
           {line.content}
         </div>
       </div>

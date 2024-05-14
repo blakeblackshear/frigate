@@ -27,12 +27,12 @@ export default function MobileCameraDrawer({
           <FaVideo className="text-secondary-foreground" />
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="max-h-[75dvh] px-4 mx-1 rounded-t-2xl overflow-hidden">
-        <div className="w-full h-auto py-4 overflow-y-auto overflow-x-hidden flex flex-col items-center gap-2">
+      <DrawerContent className="mx-1 max-h-[75dvh] overflow-hidden rounded-t-2xl px-4">
+        <div className="flex h-auto w-full flex-col items-center gap-2 overflow-y-auto overflow-x-hidden py-4">
           {allCameras.map((cam) => (
             <div
               key={cam}
-              className={`w-full mx-4 py-2 text-center capitalize ${cam == selected ? "bg-secondary rounded-lg" : ""}`}
+              className={`mx-4 w-full py-2 text-center capitalize ${cam == selected ? "rounded-lg bg-secondary" : ""}`}
               onClick={() => {
                 onSelectCamera(cam);
                 setCameraDrawer(false);

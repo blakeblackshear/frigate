@@ -370,9 +370,9 @@ export default function MasksAndZones({
   return (
     <>
       {cameraConfig && editingPolygons && (
-        <div className="flex flex-col md:flex-row size-full">
+        <div className="flex size-full flex-col md:flex-row">
           <Toaster position="top-center" closeButton={true} />
-          <div className="flex flex-col h-full w-full overflow-y-auto mt-2 md:mt-0 mb-10 md:mb-0 md:w-3/12 order-last md:order-none md:mr-2 rounded-lg border-secondary-foreground border-[1px] p-2 bg-background_alt">
+          <div className="order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0 md:w-3/12">
             {editPane == "zone" && (
               <ZoneEditPane
                 polygons={editingPolygons}
@@ -417,17 +417,17 @@ export default function MasksAndZones({
                 <Heading as="h3" className="my-2">
                   Masks / Zones
                 </Heading>
-                <div className="flex flex-col w-full">
+                <div className="flex w-full flex-col">
                   {(selectedZoneMask === undefined ||
                     selectedZoneMask.includes("zone" as PolygonType)) && (
-                    <div className="mt-0 pt-0 last:pb-3 last:border-b-[1px] last:border-secondary">
-                      <div className="flex flex-row justify-between items-center my-3">
+                    <div className="mt-0 pt-0 last:border-b-[1px] last:border-secondary last:pb-3">
+                      <div className="my-3 flex flex-row items-center justify-between">
                         <HoverCard>
                           <HoverCardTrigger asChild>
                             <div className="text-md cursor-default">Zones</div>
                           </HoverCardTrigger>
                           <HoverCardContent>
-                            <div className="flex flex-col gap-2 text-sm text-primary-variant my-2">
+                            <div className="my-2 flex flex-col gap-2 text-sm text-primary-variant">
                               <p>
                                 Zones allow you to define a specific area of the
                                 frame so you can determine whether or not an
@@ -441,7 +441,7 @@ export default function MasksAndZones({
                                   className="inline"
                                 >
                                   Documentation{" "}
-                                  <LuExternalLink className="size-3 ml-2 inline-flex" />
+                                  <LuExternalLink className="ml-2 inline-flex size-3" />
                                 </Link>
                               </div>
                             </div>
@@ -451,7 +451,7 @@ export default function MasksAndZones({
                           <TooltipTrigger asChild>
                             <Button
                               variant="secondary"
-                              className="size-6 p-1 rounded-md text-background bg-secondary-foreground"
+                              className="size-6 rounded-md bg-secondary-foreground p-1 text-background"
                               onClick={() => {
                                 setEditPane("zone");
                                 handleNewPolygon("zone");
@@ -485,8 +485,8 @@ export default function MasksAndZones({
                     selectedZoneMask.includes(
                       "motion_mask" as PolygonType,
                     )) && (
-                    <div className="first:mt-0 mt-3 first:pt-0 pt-3 last:pb-3 border-t-[1px] last:border-b-[1px] first:border-transparent border-secondary">
-                      <div className="flex flex-row justify-between items-center my-3">
+                    <div className="mt-3 border-t-[1px] border-secondary pt-3 first:mt-0 first:border-transparent first:pt-0 last:border-b-[1px] last:pb-3">
+                      <div className="my-3 flex flex-row items-center justify-between">
                         <HoverCard>
                           <HoverCardTrigger asChild>
                             <div className="text-md cursor-default">
@@ -494,7 +494,7 @@ export default function MasksAndZones({
                             </div>
                           </HoverCardTrigger>
                           <HoverCardContent>
-                            <div className="flex flex-col gap-2 text-sm text-primary-variant my-2">
+                            <div className="my-2 flex flex-col gap-2 text-sm text-primary-variant">
                               <p>
                                 Motion masks are used to prevent unwanted types
                                 of motion from triggering detection. Over
@@ -509,7 +509,7 @@ export default function MasksAndZones({
                                   className="inline"
                                 >
                                   Documentation{" "}
-                                  <LuExternalLink className="size-3 ml-2 inline-flex" />
+                                  <LuExternalLink className="ml-2 inline-flex size-3" />
                                 </Link>
                               </div>
                             </div>
@@ -519,7 +519,7 @@ export default function MasksAndZones({
                           <TooltipTrigger asChild>
                             <Button
                               variant="secondary"
-                              className="size-6 p-1 rounded-md text-background bg-secondary-foreground"
+                              className="size-6 rounded-md bg-secondary-foreground p-1 text-background"
                               onClick={() => {
                                 setEditPane("motion_mask");
                                 handleNewPolygon("motion_mask");
@@ -555,8 +555,8 @@ export default function MasksAndZones({
                     selectedZoneMask.includes(
                       "object_mask" as PolygonType,
                     )) && (
-                    <div className="first:mt-0 mt-3 first:pt-0 pt-3 last:pb-3 border-t-[1px] last:border-b-[1px] first:border-transparent border-secondary">
-                      <div className="flex flex-row justify-between items-center my-3">
+                    <div className="mt-3 border-t-[1px] border-secondary pt-3 first:mt-0 first:border-transparent first:pt-0 last:border-b-[1px] last:pb-3">
+                      <div className="my-3 flex flex-row items-center justify-between">
                         <HoverCard>
                           <HoverCardTrigger asChild>
                             <div className="text-md cursor-default">
@@ -564,7 +564,7 @@ export default function MasksAndZones({
                             </div>
                           </HoverCardTrigger>
                           <HoverCardContent>
-                            <div className="flex flex-col gap-2 text-sm text-primary-variant my-2">
+                            <div className="my-2 flex flex-col gap-2 text-sm text-primary-variant">
                               <p>
                                 Object filter masks are used to filter out false
                                 positives for a given object type based on
@@ -578,7 +578,7 @@ export default function MasksAndZones({
                                   className="inline"
                                 >
                                   Documentation{" "}
-                                  <LuExternalLink className="size-3 ml-2 inline-flex" />
+                                  <LuExternalLink className="ml-2 inline-flex size-3" />
                                 </Link>
                               </div>
                             </div>
@@ -588,7 +588,7 @@ export default function MasksAndZones({
                           <TooltipTrigger asChild>
                             <Button
                               variant="secondary"
-                              className="size-6 p-1 rounded-md text-background bg-secondary-foreground"
+                              className="size-6 rounded-md bg-secondary-foreground p-1 text-background"
                               onClick={() => {
                                 setEditPane("object_mask");
                                 handleNewPolygon("object_mask");
@@ -626,9 +626,9 @@ export default function MasksAndZones({
           </div>
           <div
             ref={containerRef}
-            className="flex md:w-7/12 md:grow md:h-dvh max-h-[50%] md:max-h-full"
+            className="flex max-h-[50%] md:h-dvh md:max-h-full md:w-7/12 md:grow"
           >
-            <div className="flex flex-row justify-center mx-auto size-full">
+            <div className="mx-auto flex size-full flex-row justify-center">
               {cameraConfig &&
               scaledWidth &&
               scaledHeight &&

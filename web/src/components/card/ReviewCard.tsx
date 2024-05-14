@@ -35,7 +35,7 @@ export default function ReviewCard({
 
   return (
     <div
-      className="w-full relative flex flex-col gap-1.5 cursor-pointer"
+      className="relative flex w-full cursor-pointer flex-col gap-1.5"
       onClick={onClick}
     >
       <ImageLoadingIndicator
@@ -51,8 +51,8 @@ export default function ReviewCard({
           onImgLoad();
         }}
       />
-      <div className="flex justify-between items-center">
-        <div className="flex justify-evenly items-center gap-1">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center justify-evenly gap-1">
           {event.data.objects.map((object) => {
             return getIconForLabel(object, "size-3 text-white");
           })}

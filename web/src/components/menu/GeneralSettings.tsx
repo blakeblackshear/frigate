@@ -120,7 +120,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div
-                    className={`flex flex-col justify-center items-center ${isDesktop ? "rounded-lg text-secondary-foreground bg-secondary hover:bg-muted cursor-pointer" : "text-secondary-foreground"}`}
+                    className={`flex flex-col items-center justify-center ${isDesktop ? "cursor-pointer rounded-lg bg-secondary text-secondary-foreground hover:bg-muted" : "text-secondary-foreground"}`}
                   >
                     <LuSettings className="size-5 md:m-[6px]" />
                   </div>
@@ -135,7 +135,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
           </Trigger>
           <Content
             className={
-              isDesktop ? "w-72 mr-5" : "max-h-[75dvh] p-2 overflow-hidden"
+              isDesktop ? "mr-5 w-72" : "max-h-[75dvh] overflow-hidden p-2"
             }
           >
             <div className="w-full flex-col overflow-y-auto overflow-x-hidden">
@@ -147,7 +147,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                     className={
                       isDesktop
                         ? "cursor-pointer"
-                        : "w-full p-2 flex items-center text-sm"
+                        : "flex w-full items-center p-2 text-sm"
                     }
                   >
                     <LuActivity className="mr-2 size-4" />
@@ -159,7 +159,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                     className={
                       isDesktop
                         ? "cursor-pointer"
-                        : "w-full p-2 flex items-center text-sm"
+                        : "flex w-full items-center p-2 text-sm"
                     }
                   >
                     <LuList className="mr-2 size-4" />
@@ -177,7 +177,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                     className={
                       isDesktop
                         ? "cursor-pointer"
-                        : "w-full p-2 flex items-center text-sm"
+                        : "flex w-full items-center p-2 text-sm"
                     }
                   >
                     <LuSettings className="mr-2 size-4" />
@@ -189,7 +189,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                     className={
                       isDesktop
                         ? "cursor-pointer"
-                        : "w-full p-2 flex items-center text-sm"
+                        : "flex w-full items-center p-2 text-sm"
                     }
                   >
                     <LuPenSquare className="mr-2 size-4" />
@@ -205,7 +205,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                     className={
                       isDesktop
                         ? "cursor-pointer"
-                        : "p-2 flex items-center text-sm"
+                        : "flex items-center p-2 text-sm"
                     }
                   >
                     <LuSunMoon className="mr-2 size-4" />
@@ -222,7 +222,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                         className={
                           isDesktop
                             ? "cursor-pointer"
-                            : "p-2 flex items-center text-sm"
+                            : "flex items-center p-2 text-sm"
                         }
                         onClick={() => setTheme("light")}
                       >
@@ -232,14 +232,14 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                             Light
                           </>
                         ) : (
-                          <span className="mr-2 ml-6">Light</span>
+                          <span className="ml-6 mr-2">Light</span>
                         )}
                       </MenuItem>
                       <MenuItem
                         className={
                           isDesktop
                             ? "cursor-pointer"
-                            : "p-2 flex items-center text-sm"
+                            : "flex items-center p-2 text-sm"
                         }
                         onClick={() => setTheme("dark")}
                       >
@@ -249,14 +249,14 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                             Dark
                           </>
                         ) : (
-                          <span className="mr-2 ml-6">Dark</span>
+                          <span className="ml-6 mr-2">Dark</span>
                         )}
                       </MenuItem>
                       <MenuItem
                         className={
                           isDesktop
                             ? "cursor-pointer"
-                            : "p-2 flex items-center text-sm"
+                            : "flex items-center p-2 text-sm"
                         }
                         onClick={() => setTheme("system")}
                       >
@@ -266,7 +266,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                             System
                           </>
                         ) : (
-                          <span className="mr-2 ml-6">System</span>
+                          <span className="ml-6 mr-2">System</span>
                         )}
                       </MenuItem>
                     </SubItemContent>
@@ -277,7 +277,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                     className={
                       isDesktop
                         ? "cursor-pointer"
-                        : "p-2 flex items-center text-sm"
+                        : "flex items-center p-2 text-sm"
                     }
                   >
                     <LuSunMoon className="mr-2 size-4" />
@@ -296,7 +296,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                           className={
                             isDesktop
                               ? "cursor-pointer"
-                              : "p-2 flex items-center text-sm"
+                              : "flex items-center p-2 text-sm"
                           }
                           onClick={() => setColorScheme(scheme)}
                         >
@@ -306,7 +306,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                               {friendlyColorSchemeName(scheme)}
                             </>
                           ) : (
-                            <span className="mr-2 ml-6">
+                            <span className="ml-6 mr-2">
                               {friendlyColorSchemeName(scheme)}
                             </span>
                           )}
@@ -325,7 +325,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                   className={
                     isDesktop
                       ? "cursor-pointer"
-                      : "p-2 flex items-center text-sm"
+                      : "flex items-center p-2 text-sm"
                   }
                 >
                   <LuLifeBuoy className="mr-2 size-4" />
@@ -337,7 +337,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                   className={
                     isDesktop
                       ? "cursor-pointer"
-                      : "p-2 flex items-center text-sm"
+                      : "flex items-center p-2 text-sm"
                   }
                 >
                   <LuGithub className="mr-2 size-4" />
@@ -347,7 +347,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
               <DropdownMenuSeparator className={isDesktop ? "mt-3" : "mt-1"} />
               <MenuItem
                 className={
-                  isDesktop ? "cursor-pointer" : "p-2 flex items-center text-sm"
+                  isDesktop ? "cursor-pointer" : "flex items-center p-2 text-sm"
                 }
                 onClick={() => setRestartDialogOpen(true)}
               >

@@ -325,7 +325,7 @@ export default function DraggableGridLayout({
     <>
       <Toaster position="top-center" closeButton={true} />
       {!isGridLayoutLoaded || !currentGridLayout ? (
-        <div className="mt-2 px-2 grid grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4 gap-2 md:gap-4">
+        <div className="mt-2 grid grid-cols-2 gap-2 px-2 md:gap-4 xl:grid-cols-3 3xl:grid-cols-4">
           {includeBirdseye && birdseyeConfig?.enabled && (
             <Skeleton className="size-full rounded-lg md:rounded-2xl" />
           )}
@@ -340,7 +340,7 @@ export default function DraggableGridLayout({
         </div>
       ) : (
         <div
-          className="my-2 px-2 pb-8 no-scrollbar overflow-x-hidden"
+          className="no-scrollbar my-2 overflow-x-hidden px-2 pb-8"
           ref={gridContainerRef}
         >
           <EditGroupDialog
@@ -373,7 +373,7 @@ export default function DraggableGridLayout({
                 key="birdseye"
                 className={cn(
                   isEditMode &&
-                    "outline outline-2 hover:outline-4 outline-muted-foreground hover:cursor-grab active:cursor-grabbing",
+                    "outline outline-2 outline-muted-foreground hover:cursor-grab hover:outline-4 active:cursor-grabbing",
                 )}
                 birdseyeConfig={birdseyeConfig}
                 liveMode={birdseyeConfig.restream ? "mse" : "jsmpeg"}
@@ -397,10 +397,10 @@ export default function DraggableGridLayout({
                   key={camera.name}
                   cameraRef={cameraRef}
                   className={cn(
-                    "rounded-lg md:rounded-2xl bg-black",
+                    "rounded-lg bg-black md:rounded-2xl",
                     grow,
                     isEditMode &&
-                      "outline-2 hover:outline-4 outline-muted-foreground hover:cursor-grab active:cursor-grabbing",
+                      "outline-2 outline-muted-foreground hover:cursor-grab hover:outline-4 active:cursor-grabbing",
                   )}
                   windowVisible={
                     windowVisible && visibleCameras.includes(camera.name)
@@ -429,7 +429,7 @@ export default function DraggableGridLayout({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div
-                    className="rounded-lg text-secondary-foreground bg-secondary hover:bg-muted cursor-pointer opacity-60 hover:opacity-100 transition-all duration-300"
+                    className="cursor-pointer rounded-lg bg-secondary text-secondary-foreground opacity-60 transition-all duration-300 hover:bg-muted hover:opacity-100"
                     onClick={() =>
                       setIsEditMode((prevIsEditMode) => !prevIsEditMode)
                     }
@@ -450,7 +450,7 @@ export default function DraggableGridLayout({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div
-                        className="rounded-lg text-secondary-foreground bg-secondary hover:bg-muted cursor-pointer opacity-60 hover:opacity-100 transition-all duration-300"
+                        className="cursor-pointer rounded-lg bg-secondary text-secondary-foreground opacity-60 transition-all duration-300 hover:bg-muted hover:opacity-100"
                         onClick={() =>
                           setEditGroup((prevEditGroup) => !prevEditGroup)
                         }
@@ -465,7 +465,7 @@ export default function DraggableGridLayout({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div
-                        className="rounded-lg text-secondary-foreground bg-secondary hover:bg-muted cursor-pointer opacity-60 hover:opacity-100 transition-all duration-300"
+                        className="cursor-pointer rounded-lg bg-secondary text-secondary-foreground opacity-60 transition-all duration-300 hover:bg-muted hover:opacity-100"
                         onClick={toggleFullscreen}
                       >
                         {fullscreen ? (
@@ -492,10 +492,10 @@ export default function DraggableGridLayout({
 function CornerCircles() {
   return (
     <>
-      <div className="absolute top-[-4px] left-[-4px] z-50 size-3 p-2 rounded-full bg-primary-variant outline-2 outline-muted text-background pointer-events-none" />
-      <div className="absolute top-[-4px] right-[-4px] z-50 size-3 p-2 rounded-full bg-primary-variant outline-2 outline-muted text-background pointer-events-none" />
-      <div className="absolute bottom-[-4px] right-[-4px] z-50 size-3 p-2 rounded-full bg-primary-variant outline-2 outline-muted text-background pointer-events-none" />
-      <div className="absolute bottom-[-4px] left-[-4px] z-50 size-3 p-2 rounded-full bg-primary-variant outline-2 outline-muted text-background pointer-events-none" />
+      <div className="pointer-events-none absolute left-[-4px] top-[-4px] z-50 size-3 rounded-full bg-primary-variant p-2 text-background outline-2 outline-muted" />
+      <div className="pointer-events-none absolute right-[-4px] top-[-4px] z-50 size-3 rounded-full bg-primary-variant p-2 text-background outline-2 outline-muted" />
+      <div className="pointer-events-none absolute bottom-[-4px] right-[-4px] z-50 size-3 rounded-full bg-primary-variant p-2 text-background outline-2 outline-muted" />
+      <div className="pointer-events-none absolute bottom-[-4px] left-[-4px] z-50 size-3 rounded-full bg-primary-variant p-2 text-background outline-2 outline-muted" />
     </>
   );
 }

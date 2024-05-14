@@ -26,9 +26,9 @@ export default function MobileTimelineDrawer({
           <FaFlag className="text-secondary-foreground" />
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="max-h-[75dvh] overflow-hidden flex flex-col items-center gap-2 px-4 pb-4 mx-1 rounded-t-2xl">
+      <DrawerContent className="mx-1 flex max-h-[75dvh] flex-col items-center gap-2 overflow-hidden rounded-t-2xl px-4 pb-4">
         <div
-          className={`w-full mx-4 py-2 text-center capitalize ${selected == "timeline" ? "bg-secondary rounded-lg" : ""}`}
+          className={`mx-4 w-full py-2 text-center capitalize ${selected == "timeline" ? "rounded-lg bg-secondary" : ""}`}
           onClick={() => {
             onSelect("timeline");
             setDrawer(false);
@@ -37,7 +37,7 @@ export default function MobileTimelineDrawer({
           Timeline
         </div>
         <div
-          className={`w-full mx-4 py-2 text-center capitalize ${selected == "events" ? "bg-secondary rounded-lg" : ""}`}
+          className={`mx-4 w-full py-2 text-center capitalize ${selected == "events" ? "rounded-lg bg-secondary" : ""}`}
           onClick={() => {
             onSelect("events");
             setDrawer(false);

@@ -77,7 +77,7 @@ function Exports() {
   const [selected, setSelected] = useState<Export>();
 
   return (
-    <div className="size-full p-2 overflow-hidden flex flex-col gap-2">
+    <div className="flex size-full flex-col gap-2 overflow-hidden p-2">
       <AlertDialog
         open={deleteClip != undefined}
         onOpenChange={() => setDeleteClip(undefined)}
@@ -128,9 +128,9 @@ function Exports() {
         </DialogContent>
       </Dialog>
 
-      <div className="w-full p-2 flex items-center justify-center">
+      <div className="flex w-full items-center justify-center p-2">
         <Input
-          className="w-full md:w-1/3 bg-muted"
+          className="w-full bg-muted md:w-1/3"
           placeholder="Search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -139,7 +139,7 @@ function Exports() {
 
       <div className="w-full overflow-hidden">
         {exports && filteredExports && (
-          <div className="size-full grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 overflow-y-auto">
+          <div className="grid size-full gap-2 overflow-y-auto sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {Object.values(exports).map((item) => (
               <ExportCard
                 key={item.name}

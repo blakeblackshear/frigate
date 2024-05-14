@@ -41,7 +41,7 @@ export default function CameraFeatureToggle({
       onClick={onClick}
       className={cn(
         className,
-        "flex flex-col justify-center items-center",
+        "flex flex-col items-center justify-center",
         variants[variant][isActive ? "active" : "inactive"],
       )}
     >
