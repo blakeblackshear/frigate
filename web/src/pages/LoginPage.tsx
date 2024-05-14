@@ -1,6 +1,6 @@
-import { UserAuthForm } from "@/components/AuthForm";
-import Logo from "./components/Logo";
-import { ThemeProvider } from "./context/theme-provider";
+import { UserAuthForm } from "@/components/auth/AuthForm";
+import Logo from "@/components/Logo";
+import { ThemeProvider } from "@/context/theme-provider";
 
 function LoginPage() {
   return (
