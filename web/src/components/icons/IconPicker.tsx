@@ -66,12 +66,12 @@ export default function IconPicker({
       >
         <PopoverTrigger asChild>
           {!selectedIcon?.name || !selectedIcon?.Icon ? (
-            <Button className="text-muted-foreground w-full mt-2">
+            <Button className="mt-2 w-full text-muted-foreground">
               Select an icon
             </Button>
           ) : (
             <div className="hover:cursor-pointer">
-              <div className="flex flex-row w-full justify-between items-center gap-2 my-3">
+              <div className="my-3 flex w-full flex-row items-center justify-between gap-2">
                 <div className="flex flex-row items-center gap-2">
                   <selectedIcon.Icon size={15} />
                   <div className="text-sm">
@@ -95,9 +95,9 @@ export default function IconPicker({
           align="start"
           side="top"
           container={containerRef.current}
-          className="flex flex-col max-h-[50dvh] md:max-h-[30dvh] overflow-y-hidden"
+          className="flex max-h-[50dvh] flex-col overflow-y-hidden md:max-h-[30dvh]"
         >
-          <div className="flex flex-row justify-between items-center mb-3">
+          <div className="mb-3 flex flex-row items-center justify-between">
             <Heading as="h4">Select an icon</Heading>
             <span tabIndex={0} className="sr-only" />
             <IoClose
@@ -111,17 +111,17 @@ export default function IconPicker({
           <Input
             type="text"
             placeholder="Search for an icon..."
-            className="mb-3 text-md md:text-sm"
+            className="text-md mb-3 md:text-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <div className="flex flex-col h-full overflow-y-auto">
+          <div className="flex h-full flex-col overflow-y-auto">
             <div className="grid grid-cols-6 gap-2 pr-1">
               {icons.map(([name, Icon]) => (
                 <div
                   key={name}
                   className={cn(
-                    "flex flex-row justify-center items-center hover:cursor-pointer p-1 rounded-lg",
+                    "flex flex-row items-center justify-center rounded-lg p-1 hover:cursor-pointer",
                     selectedIcon?.name === name
                       ? "bg-selected text-white"
                       : "hover:bg-secondary-foreground",

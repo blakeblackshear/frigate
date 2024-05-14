@@ -204,9 +204,9 @@ export function MotionSegment({
             </>
           )}
 
-          <div className="absolute left-1/2 transform -translate-x-1/2 w-[20px] md:w-[40px] h-[8px] z-10 cursor-pointer">
-            <div className="flex flex-row justify-center w-[20px] md:w-[40px] pt-[1px] mb-[1px]">
-              <div className="flex justify-center mb-[1px]">
+          <div className="absolute left-1/2 z-10 h-[8px] w-[20px] -translate-x-1/2 transform cursor-pointer md:w-[40px]">
+            <div className="mb-[1px] flex w-[20px] flex-row justify-center pt-[1px] md:w-[40px]">
+              <div className="mb-[1px] flex justify-center">
                 <div
                   key={`${segmentKey}_motion_data_1`}
                   data-motion-value={secondHalfSegmentWidth}
@@ -218,7 +218,7 @@ export function MotionSegment({
               </div>
             </div>
 
-            <div className="flex flex-row justify-center pb-[1px] w-[20px] md:w-[40px]">
+            <div className="flex w-[20px] flex-row justify-center pb-[1px] md:w-[40px]">
               <div className="flex justify-center">
                 <div
                   key={`${segmentKey}_motion_data_2`}

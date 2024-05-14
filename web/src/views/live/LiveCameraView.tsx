@@ -222,15 +222,15 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
         ref={mainRef}
         className={
           fullscreen
-            ? `fixed inset-0 bg-black z-30`
-            : `size-full p-2 flex flex-col ${isMobile ? "landscape:flex-row landscape:gap-1" : ""}`
+            ? `fixed inset-0 z-30 bg-black`
+            : `flex size-full flex-col p-2 ${isMobile ? "landscape:flex-row landscape:gap-1" : ""}`
         }
       >
         <div
           className={
             fullscreen
-              ? `absolute right-32 top-1 z-40 ${isMobile ? "landscape:left-2 landscape:right-auto landscape:bottom-1 landscape:top-auto" : ""}`
-              : `w-full h-12 flex flex-row items-center justify-between ${isMobile ? "landscape:w-12 landscape:h-full landscape:flex-col" : ""}`
+              ? `absolute right-32 top-1 z-40 ${isMobile ? "landscape:bottom-1 landscape:left-2 landscape:right-auto landscape:top-auto" : ""}`
+              : `flex h-12 w-full flex-row items-center justify-between ${isMobile ? "landscape:h-full landscape:w-12 landscape:flex-col" : ""}`
           }
         >
           {!fullscreen ? (
@@ -344,7 +344,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
           }}
         >
           <div
-            className={`flex flex-col justify-center items-center ${growClassName}`}
+            className={`flex flex-col items-center justify-center ${growClassName}`}
             ref={clickOverlayRef}
             onClick={handleOverlayClick}
             style={{
@@ -435,7 +435,7 @@ function PtzControlPanel({
   );
 
   return (
-    <div className="absolute inset-x-2 md:left-[50%] md:-translate-x-[50%] bottom-[10%] flex flex-wrap md:flex-nowrap justify-center items-center gap-1">
+    <div className="absolute inset-x-2 bottom-[10%] flex flex-wrap items-center justify-center gap-1 md:left-[50%] md:-translate-x-[50%] md:flex-nowrap">
       {ptz?.features?.includes("pt") && (
         <>
           <Button
@@ -637,7 +637,7 @@ function FrigateCameraFeatures({
           title={`${camera} Settings`}
         />
       </DrawerTrigger>
-      <DrawerContent className="px-2 py-4 flex flex-col gap-3 rounded-2xl">
+      <DrawerContent className="flex flex-col gap-3 rounded-2xl px-2 py-4">
         <FilterSwitch
           label="Object Detection"
           isChecked={detectState == "ON"}

@@ -131,7 +131,7 @@ export function ThresholdBarGraph({
   }, [graphId, options]);
 
   return (
-    <div className="w-full flex flex-col">
+    <div className="flex w-full flex-col">
       <div className="flex items-center gap-1">
         <div className="text-xs text-muted-foreground">{name}</div>
         <div className="text-xs text-primary">
@@ -234,8 +234,8 @@ export function StorageGraph({ graphId, used, total }: StorageGraphProps) {
   }, [graphId, options]);
 
   return (
-    <div className="w-full flex flex-col gap-2.5">
-      <div className="w-full flex justify-between items-center gap-1">
+    <div className="flex w-full flex-col gap-2.5">
+      <div className="flex w-full items-center justify-between gap-1">
         <div className="flex items-center gap-1">
           <div className="text-xs text-primary">{getUnitSize(used)}</div>
           <div className="text-xs text-primary">/</div>
@@ -247,7 +247,7 @@ export function StorageGraph({ graphId, used, total }: StorageGraphProps) {
           {Math.round((used / total) * 100)}%
         </div>
       </div>
-      <div className="h-5 rounded-md overflow-hidden">
+      <div className="h-5 overflow-hidden rounded-md">
         <Chart
           type="bar"
           options={options}
@@ -369,7 +369,7 @@ export function CameraLineGraph({
   }, [graphId, options]);
 
   return (
-    <div className="w-full flex flex-col">
+    <div className="flex w-full flex-col">
       {lastValues && (
         <div className="flex items-center gap-2.5">
           {dataLabels.map((label, labelIdx) => (

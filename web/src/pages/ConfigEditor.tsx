@@ -127,8 +127,8 @@ function ConfigEditor() {
   }
 
   return (
-    <div className="absolute top-2 bottom-16 right-0 left-0 md:left-2">
-      <div className="lg:flex justify-between mr-1">
+    <div className="absolute bottom-16 left-0 right-0 top-2 md:left-2">
+      <div className="mr-1 justify-between lg:flex">
         <Heading as="h2">Config</Heading>
         <div>
           <Button size="sm" className="mx-1" onClick={() => handleCopyConfig()}>
@@ -152,12 +152,12 @@ function ConfigEditor() {
       </div>
 
       {error && (
-        <div className="p-4 overflow-scroll text-danger whitespace-pre-wrap">
+        <div className="overflow-scroll whitespace-pre-wrap p-4 text-danger">
           {error}
         </div>
       )}
 
-      <div ref={configRef} className="h-full mt-2" />
+      <div ref={configRef} className="mt-2 h-full" />
       <Toaster closeButton={true} />
     </div>
   );

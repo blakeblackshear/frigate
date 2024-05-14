@@ -115,20 +115,20 @@ export default function LiveBirdseyeView() {
         ref={mainRef}
         className={
           fullscreen
-            ? `fixed inset-0 bg-black z-30`
-            : `size-full p-2 flex flex-col ${isMobile ? "landscape:flex-row" : ""}`
+            ? `fixed inset-0 z-30 bg-black`
+            : `flex size-full flex-col p-2 ${isMobile ? "landscape:flex-row" : ""}`
         }
       >
         <div
           className={
             fullscreen
-              ? `absolute right-32 top-1 z-40 ${isMobile ? "landscape:left-2 landscape:right-auto landscape:bottom-1 landscape:top-auto" : ""}`
-              : `w-full h-12 flex flex-row items-center justify-between ${isMobile ? "landscape:w-min landscape:h-full landscape:flex-col" : ""}`
+              ? `absolute right-32 top-1 z-40 ${isMobile ? "landscape:bottom-1 landscape:left-2 landscape:right-auto landscape:top-auto" : ""}`
+              : `flex h-12 w-full flex-row items-center justify-between ${isMobile ? "landscape:h-full landscape:w-min landscape:flex-col" : ""}`
           }
         >
           {!fullscreen ? (
             <Button
-              className={`rounded-lg flex items-center gap-2 ${isMobile ? "ml-2" : "ml-0"}`}
+              className={`flex items-center gap-2 rounded-lg ${isMobile ? "ml-2" : "ml-0"}`}
               size={isMobile ? "icon" : "sm"}
               onClick={() => navigate(-1)}
             >
@@ -140,7 +140,7 @@ export default function LiveBirdseyeView() {
           )}
           <TooltipProvider>
             <div
-              className={`flex flex-row items-center gap-2 mr-1 *:rounded-lg ${isMobile ? "landscape:flex-col" : ""}`}
+              className={`mr-1 flex flex-row items-center gap-2 *:rounded-lg ${isMobile ? "landscape:flex-col" : ""}`}
             >
               <CameraFeatureToggle
                 className="p-2 md:p-0"

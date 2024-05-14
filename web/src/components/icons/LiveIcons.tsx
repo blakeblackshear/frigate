@@ -4,11 +4,11 @@ type LiveIconProps = {
 
 export function LiveGridIcon({ layout }: LiveIconProps) {
   return (
-    <div className="size-full flex flex-col gap-0.5 rounded-md overflow-hidden">
+    <div className="flex size-full flex-col gap-0.5 overflow-hidden rounded-md">
       <div
         className={`h-1 w-full ${layout == "grid" ? "bg-selected" : "bg-muted-foreground"}`}
       />
-      <div className="h-1 w-full flex gap-0.5">
+      <div className="flex h-1 w-full gap-0.5">
         <div
           className={`w-full ${layout == "grid" ? "bg-selected" : "bg-muted-foreground"}`}
         />
@@ -16,7 +16,7 @@ export function LiveGridIcon({ layout }: LiveIconProps) {
           className={`w-full ${layout == "grid" ? "bg-selected" : "bg-muted-foreground"}`}
         />
       </div>
-      <div className="h-1 w-full flex gap-0.5">
+      <div className="flex h-1 w-full gap-0.5">
         <div
           className={`w-full ${layout == "grid" ? "bg-selected" : "bg-muted-foreground"}`}
         />
@@ -30,7 +30,7 @@ export function LiveGridIcon({ layout }: LiveIconProps) {
 
 export function LiveListIcon({ layout }: LiveIconProps) {
   return (
-    <div className="size-full flex flex-col gap-0.5 rounded-md overflow-hidden">
+    <div className="flex size-full flex-col gap-0.5 overflow-hidden rounded-md">
       <div
         className={`size-full ${layout == "list" ? "bg-selected" : "bg-secondary-foreground"}`}
       />

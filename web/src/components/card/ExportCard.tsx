@@ -106,7 +106,7 @@ export default function ExportCard({
 
       <div
         className={cn(
-          "relative aspect-video bg-black rounded-lg md:rounded-2xl flex justify-center items-center",
+          "relative flex aspect-video items-center justify-center rounded-lg bg-black md:rounded-2xl",
           className,
         )}
         onMouseEnter={
@@ -127,19 +127,19 @@ export default function ExportCard({
       >
         {hovered && (
           <>
-            <div className="absolute inset-0 z-10 bg-black bg-opacity-60 rounded-lg md:rounded-2xl" />
-            <div className="absolute top-1 right-1 flex items-center gap-2">
+            <div className="absolute inset-0 z-10 rounded-lg bg-black bg-opacity-60 md:rounded-2xl" />
+            <div className="absolute right-1 top-1 flex items-center gap-2">
               <a
                 className="z-20"
                 download
                 href={`${baseUrl}${exportedRecording.video_path.replace("/media/frigate/", "")}`}
               >
-                <Chip className="bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 rounded-md cursor-pointer">
+                <Chip className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500">
                   <FaDownload className="size-4 text-white" />
                 </Chip>
               </a>
               <Chip
-                className="bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 rounded-md cursor-pointer"
+                className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
                 onClick={() =>
                   setEditName({ original: exportedRecording.name, update: "" })
                 }
@@ -147,7 +147,7 @@ export default function ExportCard({
                 <MdEditSquare className="size-4 text-white" />
               </Chip>
               <Chip
-                className="bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 rounded-md cursor-pointer"
+                className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
                 onClick={() =>
                   onDelete({
                     file: exportedRecording.id,
@@ -155,12 +155,12 @@ export default function ExportCard({
                   })
                 }
               >
-                <LuTrash className="size-4 text-destructive fill-destructive" />
+                <LuTrash className="size-4 fill-destructive text-destructive" />
               </Chip>
             </div>
 
             <Button
-              className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-20 h-20 z-20 text-white hover:text-white hover:bg-transparent cursor-pointer"
+              className="absolute left-1/2 top-1/2 z-20 h-20 w-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer text-white hover:bg-transparent hover:text-white"
               variant="ghost"
               onClick={() => {
                 onSelect(exportedRecording);
@@ -176,20 +176,20 @@ export default function ExportCard({
           <>
             {exportedRecording.thumb_path.length > 0 ? (
               <img
-                className="size-full absolute inset-0 object-contain aspect-video rounded-lg md:rounded-2xl"
+                className="absolute inset-0 aspect-video size-full rounded-lg object-contain md:rounded-2xl"
                 src={exportedRecording.thumb_path.replace("/media/frigate", "")}
                 onLoad={() => setLoading(false)}
               />
             ) : (
-              <div className="absolute inset-0 bg-secondary rounded-lg md:rounded-2xl" />
+              <div className="absolute inset-0 rounded-lg bg-secondary md:rounded-2xl" />
             )}
           </>
         )}
         {loading && (
           <Skeleton className="absolute inset-0 aspect-video rounded-lg md:rounded-2xl" />
         )}
-        <div className="absolute bottom-0 inset-x-0 rounded-b-l z-10 h-[20%] bg-gradient-to-t from-black/60 to-transparent pointer-events-none rounded-lg md:rounded-2xl">
-          <div className="flex h-full justify-between items-end mx-3 pb-1 text-white text-sm capitalize">
+        <div className="rounded-b-l pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[20%] rounded-lg bg-gradient-to-t from-black/60 to-transparent md:rounded-2xl">
+          <div className="mx-3 flex h-full items-end justify-between pb-1 text-sm capitalize text-white">
             {exportedRecording.name.replaceAll("_", " ")}
           </div>
         </div>

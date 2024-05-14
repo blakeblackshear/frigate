@@ -344,15 +344,15 @@ export default function GeneralMetrics({
     <>
       <VainfoDialog showVainfo={showVainfo} setShowVainfo={setShowVainfo} />
 
-      <div className="size-full mt-4 flex flex-col overflow-y-auto">
-        <div className="text-muted-foreground text-sm font-medium">
+      <div className="mt-4 flex size-full flex-col overflow-y-auto">
+        <div className="text-sm font-medium text-muted-foreground">
           Detectors
         </div>
         <div
-          className={`w-full mt-4 grid grid-cols-1 gap-2 ${detTempSeries == undefined ? "sm:grid-cols-3" : "sm:grid-cols-4"}`}
+          className={`mt-4 grid w-full grid-cols-1 gap-2 ${detTempSeries == undefined ? "sm:grid-cols-3" : "sm:grid-cols-4"}`}
         >
           {statsHistory.length != 0 ? (
-            <div className="p-2.5 bg-background_alt rounded-lg md:rounded-2xl">
+            <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
               <div className="mb-5">Detector Inference Speed</div>
               {detInferenceTimeSeries.map((series) => (
                 <ThresholdBarGraph
@@ -367,12 +367,12 @@ export default function GeneralMetrics({
               ))}
             </div>
           ) : (
-            <Skeleton className="w-full rounded-lg md:rounded-2xl aspect-video" />
+            <Skeleton className="aspect-video w-full rounded-lg md:rounded-2xl" />
           )}
           {statsHistory.length != 0 ? (
             <>
               {detTempSeries && (
-                <div className="p-2.5 bg-background_alt rounded-lg md:rounded-2xl">
+                <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
                   <div className="mb-5">Detector Temperature</div>
                   {detTempSeries.map((series) => (
                     <ThresholdBarGraph
@@ -389,10 +389,10 @@ export default function GeneralMetrics({
               )}
             </>
           ) : (
-            <Skeleton className="w-full aspect-video" />
+            <Skeleton className="aspect-video w-full" />
           )}
           {statsHistory.length != 0 ? (
-            <div className="p-2.5 bg-background_alt rounded-lg md:rounded-2xl">
+            <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
               <div className="mb-5">Detector CPU Usage</div>
               {detCpuSeries.map((series) => (
                 <ThresholdBarGraph
@@ -407,10 +407,10 @@ export default function GeneralMetrics({
               ))}
             </div>
           ) : (
-            <Skeleton className="w-full aspect-video" />
+            <Skeleton className="aspect-video w-full" />
           )}
           {statsHistory.length != 0 ? (
-            <div className="p-2.5 bg-background_alt rounded-lg md:rounded-2xl">
+            <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
               <div className="mb-5">Detector Memory Usage</div>
               {detMemSeries.map((series) => (
                 <ThresholdBarGraph
@@ -425,14 +425,14 @@ export default function GeneralMetrics({
               ))}
             </div>
           ) : (
-            <Skeleton className="w-full aspect-video" />
+            <Skeleton className="aspect-video w-full" />
           )}
         </div>
 
         {(statsHistory.length == 0 || statsHistory[0].gpu_usages) && (
           <>
             <div className="mt-4 flex items-center justify-between">
-              <div className="text-muted-foreground text-sm font-medium">
+              <div className="text-sm font-medium text-muted-foreground">
                 GPUs
               </div>
               {canGetGpuInfo && (
@@ -445,9 +445,9 @@ export default function GeneralMetrics({
                 </Button>
               )}
             </div>
-            <div className=" mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className=" mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
               {statsHistory.length != 0 ? (
-                <div className="p-2.5 bg-background_alt rounded-lg md:rounded-2xl">
+                <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
                   <div className="mb-5">GPU Usage</div>
                   {gpuSeries.map((series) => (
                     <ThresholdBarGraph
@@ -462,12 +462,12 @@ export default function GeneralMetrics({
                   ))}
                 </div>
               ) : (
-                <Skeleton className="w-full aspect-video" />
+                <Skeleton className="aspect-video w-full" />
               )}
               {statsHistory.length != 0 ? (
                 <>
                   {gpuMemSeries && (
-                    <div className="p-2.5 bg-background_alt rounded-lg md:rounded-2xl">
+                    <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
                       <div className="mb-5">GPU Memory</div>
                       {gpuMemSeries.map((series) => (
                         <ThresholdBarGraph
@@ -484,18 +484,18 @@ export default function GeneralMetrics({
                   )}
                 </>
               ) : (
-                <Skeleton className="w-full aspect-video" />
+                <Skeleton className="aspect-video w-full" />
               )}
             </div>
           </>
         )}
 
-        <div className="mt-4 text-muted-foreground text-sm font-medium">
+        <div className="mt-4 text-sm font-medium text-muted-foreground">
           Other Processes
         </div>
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
           {statsHistory.length != 0 ? (
-            <div className="p-2.5 bg-background_alt rounded-lg md:rounded-2xl">
+            <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
               <div className="mb-5">Process CPU Usage</div>
               {otherProcessCpuSeries.map((series) => (
                 <ThresholdBarGraph
@@ -510,10 +510,10 @@ export default function GeneralMetrics({
               ))}
             </div>
           ) : (
-            <Skeleton className="w-full aspect-tall" />
+            <Skeleton className="aspect-tall w-full" />
           )}
           {statsHistory.length != 0 ? (
-            <div className="p-2.5 bg-background_alt rounded-lg md:rounded-2xl">
+            <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
               <div className="mb-5">Process Memory Usage</div>
               {otherProcessMemSeries.map((series) => (
                 <ThresholdBarGraph
@@ -528,7 +528,7 @@ export default function GeneralMetrics({
               ))}
             </div>
           ) : (
-            <Skeleton className="w-full aspect-tall" />
+            <Skeleton className="aspect-tall w-full" />
           )}
         </div>
       </div>

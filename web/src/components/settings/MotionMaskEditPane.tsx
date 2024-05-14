@@ -187,7 +187,7 @@ export default function MotionMaskEditPane({
       <Heading as="h3" className="my-2">
         {polygon.name.length ? "Edit" : "New"} Motion Mask
       </Heading>
-      <div className="text-sm text-muted-foreground my-2">
+      <div className="my-2 text-sm text-muted-foreground">
         <p>
           Motion masks are used to prevent unwanted types of motion from
           triggering detection. Over masking will make it more difficult for
@@ -196,7 +196,7 @@ export default function MotionMaskEditPane({
       </div>
       <Separator className="my-3 bg-secondary" />
       {polygons && activePolygonIndex !== undefined && (
-        <div className="flex flex-row my-2 text-sm w-full justify-between">
+        <div className="my-2 flex w-full flex-row justify-between text-sm">
           <div className="my-1 inline-flex">
             {polygons[activePolygonIndex].points.length}{" "}
             {polygons[activePolygonIndex].points.length > 1 ||
@@ -223,7 +223,7 @@ export default function MotionMaskEditPane({
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-6 flex flex-col flex-1"
+          className="flex flex-1 flex-col space-y-6"
         >
           <FormField
             control={form.control}
@@ -243,7 +243,7 @@ export default function MotionMaskEditPane({
               </FormItem>
             )}
           />
-          <div className="flex flex-col flex-1 justify-end">
+          <div className="flex flex-1 flex-col justify-end">
             <div className="flex flex-row gap-2 pt-5">
               <Button className="flex flex-1" onClick={onCancel}>
                 Cancel

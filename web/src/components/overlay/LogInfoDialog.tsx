@@ -29,11 +29,11 @@ export default function LogInfoDialog({
       }}
     >
       <Content
-        className={isDesktop ? "" : "max-h-[75dvh] p-2 pb-4 overflow-hidden"}
+        className={isDesktop ? "" : "max-h-[75dvh] overflow-hidden p-2 pb-4"}
       >
         {logLine && (
-          <div className="size-full flex flex-col gap-5">
-            <div className="w-min flex flex-col gap-1.5">
+          <div className="flex size-full flex-col gap-5">
+            <div className="flex w-min flex-col gap-1.5">
               <div className="text-sm text-primary/40">Type</div>
               <LogChip severity={logLine.severity} />
             </div>

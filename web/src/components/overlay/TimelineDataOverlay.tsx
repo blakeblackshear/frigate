@@ -84,12 +84,12 @@ export default function TimelineEventOverlay({
         }}
       >
         {timeline.class_type == "entered_zone" ? (
-          <div className="absolute w-2 h-2 bg-yellow-500 left-[50%] -translate-x-1/2 translate-y-3/4 bottom-0" />
+          <div className="absolute bottom-0 left-[50%] h-2 w-2 -translate-x-1/2 translate-y-3/4 bg-yellow-500" />
         ) : null}
       </div>
       {isHovering && (
         <div
-          className="absolute bg-white dark:bg-slate-800 p-4 block text-black dark:text-white text-lg"
+          className="absolute block bg-white p-4 text-lg text-black dark:bg-slate-800 dark:text-white"
           style={getHoverStyle()}
         >
           <div>{`Area: ${getObjectArea()} px`}</div>

@@ -44,6 +44,12 @@ module.exports = {
       { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
     ],
     "no-console": "error",
+    "prettier/prettier": [
+      "warn",
+      {
+        plugins: ["prettier-plugin-tailwindcss"],
+      },
+    ],
   },
   overrides: [
     {

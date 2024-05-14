@@ -19,7 +19,7 @@ export function LogLevelFilterButton({
   const trigger = (
     <Button size="sm" className="flex items-center gap-2">
       <FaFilter className="text-secondary-foreground" />
-      <div className="hidden md:block text-primary">Filter</div>
+      <div className="hidden text-primary md:block">Filter</div>
     </Button>
   );
   const content = (
@@ -33,7 +33,7 @@ export function LogLevelFilterButton({
     return (
       <Drawer>
         <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-        <DrawerContent className="max-h-[75dvh] p-3 mx-1 overflow-hidden">
+        <DrawerContent className="mx-1 max-h-[75dvh] overflow-hidden p-3">
           {content}
         </DrawerContent>
       </Drawer>
@@ -59,9 +59,9 @@ export function GeneralFilterContent({
   return (
     <>
       <div className="h-auto overflow-y-auto overflow-x-hidden">
-        <div className="flex justify-between items-center my-2.5">
+        <div className="my-2.5 flex items-center justify-between">
           <Label
-            className="mx-2 text-primary cursor-pointer"
+            className="mx-2 cursor-pointer text-primary"
             htmlFor="allLabels"
           >
             All Logs
@@ -80,9 +80,9 @@ export function GeneralFilterContent({
         <DropdownMenuSeparator />
         <div className="my-2.5 flex flex-col gap-2.5">
           {["debug", "info", "warning", "error"].map((item) => (
-            <div className="flex justify-between items-center">
+            <div className="flex items-center justify-between">
               <Label
-                className="w-full mx-2 text-primary capitalize cursor-pointer"
+                className="mx-2 w-full cursor-pointer capitalize text-primary"
                 htmlFor={item}
               >
                 {item.replaceAll("_", " ")}

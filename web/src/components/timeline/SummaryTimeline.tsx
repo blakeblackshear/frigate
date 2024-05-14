@@ -339,12 +339,12 @@ export function SummaryTimeline({
 
   return (
     <div
-      className={`relative h-full overflow-hidden no-scrollbar select-none bg-secondary border-l-[1px] border-neutral-700`}
+      className={`no-scrollbar relative h-full select-none overflow-hidden border-l-[1px] border-neutral-700 bg-secondary`}
       role="scrollbar"
     >
       <div
         ref={summaryTimelineRef}
-        className="h-full flex flex-col relative z-10"
+        className="relative z-10 flex h-full flex-col"
         onClick={timelineClick}
         onTouchEnd={timelineClick}
       >
@@ -354,7 +354,7 @@ export function SummaryTimeline({
         ref={visibleSectionRef}
         onMouseDown={handleMouseDown}
         onTouchStart={handleMouseDown}
-        className={`bg-primary/30 z-20 absolute w-full touch-none ${
+        className={`absolute z-20 w-full touch-none bg-primary/30 ${
           isDragging ? "cursor-grabbing" : "cursor-grab"
         }`}
       ></div>

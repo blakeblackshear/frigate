@@ -96,7 +96,7 @@ export default function CameraImage({
 
   return (
     <div
-      className={cn("relative w-full h-full flex justify-center", className)}
+      className={cn("relative flex h-full w-full justify-center", className)}
       ref={containerRef}
     >
       {enabled ? (
@@ -108,7 +108,7 @@ export default function CameraImage({
           width={scaledWidth}
         />
       ) : (
-        <div className="text-center pt-6">
+        <div className="pt-6 text-center">
           Camera is disabled in config, no stream or snapshot available!
         </div>
       )}

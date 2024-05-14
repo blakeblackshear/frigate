@@ -20,7 +20,7 @@ function Bottombar() {
   const navItems = useNavigation("secondary");
 
   return (
-    <div className="absolute h-16 inset-x-4 bottom-0 flex flex-row items-center justify-between">
+    <div className="absolute inset-x-4 bottom-0 flex h-16 flex-row items-center justify-between">
       {navItems.map((item) => (
         <NavItem key={item.id} className="p-2" item={item} Icon={item.icon} />
       ))}
@@ -77,16 +77,16 @@ function StatusAlertNav({ className }: StatusAlertNavProps) {
       </DrawerTrigger>
       <DrawerContent
         className={cn(
-          "max-h-[75dvh] px-2 mx-1 rounded-t-2xl overflow-hidden",
+          "mx-1 max-h-[75dvh] overflow-hidden rounded-t-2xl px-2",
           className,
         )}
       >
-        <div className="w-full h-auto py-4 overflow-y-auto overflow-x-hidden flex flex-col items-center gap-2">
+        <div className="flex h-auto w-full flex-col items-center gap-2 overflow-y-auto overflow-x-hidden py-4">
           {Object.entries(messages).map(([key, messageArray]) => (
-            <div key={key} className="w-full flex items-center gap-2">
+            <div key={key} className="flex w-full items-center gap-2">
               {messageArray.map(({ id, text, color, link }: StatusMessage) => {
                 const message = (
-                  <div key={id} className="flex items-center text-xs gap-2">
+                  <div key={id} className="flex items-center gap-2 text-xs">
                     <IoIosWarning
                       className={`size-5 ${color || "text-danger"}`}
                     />

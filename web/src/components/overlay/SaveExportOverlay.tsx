@@ -17,9 +17,9 @@ export default function SaveExportOverlay({
   return (
     <div className={className}>
       <div
-        className={`flex justify-center px-2 gap-2 items-center pointer-events-auto rounded-lg ${
-          show ? "animate-in slide-in-from-top duration-500" : "invisible"
-        }  text-center mt-5 mx-auto`}
+        className={`pointer-events-auto flex items-center justify-center gap-2 rounded-lg px-2 ${
+          show ? "duration-500 animate-in slide-in-from-top" : "invisible"
+        }  mx-auto mt-5 text-center`}
       >
         <Button
           className="flex items-center gap-1"

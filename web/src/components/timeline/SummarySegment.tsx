@@ -51,7 +51,7 @@ export function SummarySegment({
         <React.Fragment key={index}>
           {severityValue === displaySeverityType && (
             <div
-              className="flex justify-end cursor-pointer"
+              className="flex cursor-pointer justify-end"
               style={{ height: segmentHeight }}
             >
               <div

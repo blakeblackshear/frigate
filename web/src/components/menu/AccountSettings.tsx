@@ -17,9 +17,9 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
       <TooltipTrigger asChild>
         <div
           className={cn(
-            "flex flex-col justify-center items-center",
+            "flex flex-col items-center justify-center",
             isDesktop
-              ? "rounded-lg text-secondary-foreground bg-secondary hover:bg-muted cursor-pointer"
+              ? "cursor-pointer rounded-lg bg-secondary text-secondary-foreground hover:bg-muted"
               : "text-secondary-foreground",
             className,
           )}

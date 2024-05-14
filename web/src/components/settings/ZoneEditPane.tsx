@@ -322,7 +322,7 @@ export default function ZoneEditPane({
       <Heading as="h3" className="my-2">
         {polygon.name.length ? "Edit" : "New"} Zone
       </Heading>
-      <div className="text-sm text-muted-foreground my-2">
+      <div className="my-2 text-sm text-muted-foreground">
         <p>
           Zones allow you to define a specific area of the frame so you can
           determine whether or not an object is within a particular area.
@@ -330,7 +330,7 @@ export default function ZoneEditPane({
       </div>
       <Separator className="my-3 bg-secondary" />
       {polygons && activePolygonIndex !== undefined && (
-        <div className="flex flex-row my-2 text-sm w-full justify-between">
+        <div className="my-2 flex w-full flex-row justify-between text-sm">
           <div className="my-1 inline-flex">
             {polygons[activePolygonIndex].points.length}{" "}
             {polygons[activePolygonIndex].points.length > 1 ||
@@ -364,7 +364,7 @@ export default function ZoneEditPane({
                 <FormLabel>Name</FormLabel>
                 <FormControl>
                   <Input
-                    className="w-full p-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                    className="w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                     placeholder="Enter a name..."
                     {...field}
                   />
@@ -377,7 +377,7 @@ export default function ZoneEditPane({
               </FormItem>
             )}
           />
-          <Separator className="flex my-2 bg-secondary" />
+          <Separator className="my-2 flex bg-secondary" />
           <FormField
             control={form.control}
             name="inertia"
@@ -386,7 +386,7 @@ export default function ZoneEditPane({
                 <FormLabel>Inertia</FormLabel>
                 <FormControl>
                   <Input
-                    className="w-full p-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                    className="w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                     placeholder="3"
                     {...field}
                   />
@@ -399,7 +399,7 @@ export default function ZoneEditPane({
               </FormItem>
             )}
           />
-          <Separator className="flex my-2 bg-secondary" />
+          <Separator className="my-2 flex bg-secondary" />
           <FormField
             control={form.control}
             name="loitering_time"
@@ -408,7 +408,7 @@ export default function ZoneEditPane({
                 <FormLabel>Loitering Time</FormLabel>
                 <FormControl>
                   <Input
-                    className="w-full p-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                    className="w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                     placeholder="0"
                     {...field}
                   />
@@ -421,7 +421,7 @@ export default function ZoneEditPane({
               </FormItem>
             )}
           />
-          <Separator className="flex my-2 bg-secondary" />
+          <Separator className="my-2 flex bg-secondary" />
           <FormItem>
             <FormLabel>Objects</FormLabel>
             <FormDescription>
@@ -446,7 +446,7 @@ export default function ZoneEditPane({
             />
           </FormItem>
 
-          <Separator className="flex my-2 bg-secondary" />
+          <Separator className="my-2 flex bg-secondary" />
 
           <FormField
             control={form.control}
@@ -585,8 +585,8 @@ export function ZoneObjectSelector({
   return (
     <>
       <div className="h-auto overflow-y-auto overflow-x-hidden">
-        <div className="flex justify-between items-center my-2.5">
-          <Label className="text-primary cursor-pointer" htmlFor="allLabels">
+        <div className="my-2.5 flex items-center justify-between">
+          <Label className="cursor-pointer text-primary" htmlFor="allLabels">
             All Objects
           </Label>
           <Switch
@@ -603,9 +603,9 @@ export function ZoneObjectSelector({
         <Separator />
         <div className="my-2.5 flex flex-col gap-2.5">
           {allLabels.map((item) => (
-            <div key={item} className="flex justify-between items-center">
+            <div key={item} className="flex items-center justify-between">
               <Label
-                className="w-full text-primary capitalize cursor-pointer"
+                className="w-full cursor-pointer capitalize text-primary"
                 htmlFor={item}
               >
                 {item.replaceAll("_", " ")}

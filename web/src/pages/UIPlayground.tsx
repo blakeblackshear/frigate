@@ -55,9 +55,9 @@ const colors = [
 
 function ColorSwatch({ name, value }: { name: string; value: string }) {
   return (
-    <div className="flex items-center mb-2">
+    <div className="mb-2 flex items-center">
       <div
-        className="w-10 h-10 mr-2 border border-gray-300"
+        className="mr-2 h-10 w-10 border border-gray-300"
         style={{ backgroundColor: value }}
       ></div>
       <span>{name}</span>
@@ -212,9 +212,9 @@ function UIPlayground() {
 
   return (
     <>
-      <div className="w-full h-full">
+      <div className="h-full w-full">
         <div className="flex h-full">
-          <div className="flex-1 content-start gap-2 overflow-y-auto no-scrollbar mt-4 mr-5">
+          <div className="no-scrollbar mr-5 mt-4 flex-1 content-start gap-2 overflow-y-auto">
             <Heading as="h2">UI Playground</Heading>
 
             <IconPicker
@@ -294,7 +294,7 @@ function UIPlayground() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex p-2 justify-start items-center">
+              <div className="flex items-center justify-start p-2">
                 <Switch
                   id="exporthandles"
                   checked={showExportHandles}
@@ -326,7 +326,7 @@ function UIPlayground() {
                   Export
                 </Button>
               </div>
-              <div className="w-[40px] my-4">
+              <div className="my-4 w-[40px]">
                 <CameraActivityIndicator />
               </div>
               <p>
@@ -378,7 +378,7 @@ function UIPlayground() {
             </div>
           </div>
 
-          <div className="w-[55px] md:w-[100px] overflow-y-auto no-scrollbar">
+          <div className="no-scrollbar w-[55px] overflow-y-auto md:w-[100px]">
             {!isEventsReviewTimeline && (
               <MotionReviewTimeline
                 segmentDuration={zoomSettings.segmentDuration} // seconds per segment

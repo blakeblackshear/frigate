@@ -316,15 +316,15 @@ export function ReviewTimeline({
   return (
     <div
       ref={timelineRef}
-      className={`relative h-full overflow-y-auto no-scrollbar select-none bg-secondary ${
+      className={`no-scrollbar relative h-full select-none overflow-y-auto bg-secondary ${
         isDragging && (showHandlebar || showExportHandles)
           ? "cursor-grabbing"
           : "cursor-auto"
       }`}
     >
-      <div ref={segmentsRef} className="flex flex-col relative">
-        <div className="absolute top-0 inset-x-0 z-20 w-full h-[30px] bg-gradient-to-b from-secondary to-transparent pointer-events-none"></div>
-        <div className="absolute bottom-0 inset-x-0 z-20 w-full h-[30px] bg-gradient-to-t from-secondary to-transparent pointer-events-none"></div>
+      <div ref={segmentsRef} className="relative flex flex-col">
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-[30px] w-full bg-gradient-to-b from-secondary to-transparent"></div>
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[30px] w-full bg-gradient-to-t from-secondary to-transparent"></div>
         {children}
       </div>
       {children.length > 0 && (
@@ -336,7 +336,7 @@ export function ReviewTimeline({
               ref={handlebarRef}
             >
               <div
-                className="flex items-center justify-center touch-none select-none"
+                className="flex touch-none select-none items-center justify-center"
                 onMouseDown={handleHandlebar}
                 onTouchStart={handleHandlebar}
               >
@@ -346,21 +346,21 @@ export function ReviewTimeline({
                   }`}
                 >
                   <div
-                    className={`bg-destructive rounded-full mx-auto ${
+                    className={`mx-auto rounded-full bg-destructive ${
                       dense
                         ? "w-12 md:w-20"
                         : segmentDuration < 60
                           ? "w-24"
                           : "w-20"
-                    } h-5 ${isDraggingHandlebar && isMobile ? "fixed top-[18px] left-1/2 transform -translate-x-1/2 z-20 w-32 h-[30px] bg-destructive/80" : "static"} flex items-center justify-center`}
+                    } h-5 ${isDraggingHandlebar && isMobile ? "fixed left-1/2 top-[18px] z-20 h-[30px] w-32 -translate-x-1/2 transform bg-destructive/80" : "static"} flex items-center justify-center`}
                   >
                     <div
                       ref={handlebarTimeRef}
-                      className={`text-white pointer-events-none ${textSizeClasses("handlebar")} z-10`}
+                      className={`pointer-events-none text-white ${textSizeClasses("handlebar")} z-10`}
                     ></div>
                   </div>
                   <div
-                    className={`absolute h-[4px] w-full bg-destructive ${isDraggingHandlebar && isMobile ? "top-1" : "top-1/2 transform -translate-y-1/2"}`}
+                    className={`absolute h-[4px] w-full bg-destructive ${isDraggingHandlebar && isMobile ? "top-1" : "top-1/2 -translate-y-1/2 transform"}`}
                   ></div>
                 </div>
               </div>
@@ -374,7 +374,7 @@ export function ReviewTimeline({
                 ref={exportEndRef}
               >
                 <div
-                  className="flex items-center justify-center touch-none select-none"
+                  className="flex touch-none select-none items-center justify-center"
                   onMouseDown={handleExportEnd}
                   onTouchStart={handleExportEnd}
                 >
@@ -384,28 +384,28 @@ export function ReviewTimeline({
                     }`}
                   >
                     <div
-                      className={`bg-selected -mt-4 mx-auto ${
+                      className={`mx-auto -mt-4 bg-selected ${
                         dense
                           ? "w-12 md:w-20"
                           : segmentDuration < 60
                             ? "w-24"
                             : "w-20"
-                      } h-5 ${isDraggingExportEnd && isMobile ? "fixed mt-0 rounded-full top-[18px] left-1/2 transform -translate-x-1/2 z-20 w-32 h-[30px] bg-selected/80" : "rounded-tr-lg rounded-tl-lg static"} flex items-center justify-center`}
+                      } h-5 ${isDraggingExportEnd && isMobile ? "fixed left-1/2 top-[18px] z-20 mt-0 h-[30px] w-32 -translate-x-1/2 transform rounded-full bg-selected/80" : "static rounded-tl-lg rounded-tr-lg"} flex items-center justify-center`}
                     >
                       <div
                         ref={exportEndTimeRef}
-                        className={`text-white pointer-events-none ${isDraggingExportEnd && isMobile ? "mt-0" : ""} ${textSizeClasses("export_end")} z-10`}
+                        className={`pointer-events-none text-white ${isDraggingExportEnd && isMobile ? "mt-0" : ""} ${textSizeClasses("export_end")} z-10`}
                       ></div>
                     </div>
                     <div
-                      className={`absolute h-[4px] w-full bg-selected ${isDraggingExportEnd && isMobile ? "top-0" : "top-1/2 transform -translate-y-1/2"}`}
+                      className={`absolute h-[4px] w-full bg-selected ${isDraggingExportEnd && isMobile ? "top-0" : "top-1/2 -translate-y-1/2 transform"}`}
                     ></div>
                   </div>
                 </div>
               </div>
               <div
                 ref={exportSectionRef}
-                className="bg-selected/50 absolute w-full"
+                className="absolute w-full bg-selected/50"
               ></div>
               <div
                 className={`export-start absolute left-0 top-0 ${isDraggingExportStart && isIOS ? "" : "z-20"} w-full`}
@@ -413,7 +413,7 @@ export function ReviewTimeline({
                 ref={exportStartRef}
               >
                 <div
-                  className="flex items-center justify-center touch-none select-none"
+                  className="flex touch-none select-none items-center justify-center"
                   onMouseDown={handleExportStart}
                   onTouchStart={handleExportStart}
                 >
@@ -423,20 +423,20 @@ export function ReviewTimeline({
                     }`}
                   >
                     <div
-                      className={`absolute h-[4px] w-full bg-selected ${isDraggingExportStart && isMobile ? "top-[12px]" : "top-1/2 transform -translate-y-1/2"}`}
+                      className={`absolute h-[4px] w-full bg-selected ${isDraggingExportStart && isMobile ? "top-[12px]" : "top-1/2 -translate-y-1/2 transform"}`}
                     ></div>
                     <div
-                      className={`bg-selected mt-4 mx-auto ${
+                      className={`mx-auto mt-4 bg-selected ${
                         dense
                           ? "w-12 md:w-20"
                           : segmentDuration < 60
                             ? "w-24"
                             : "w-20"
-                      } h-5 ${isDraggingExportStart && isMobile ? "fixed mt-0 rounded-full top-[4px] left-1/2 transform -translate-x-1/2 z-20 w-32 h-[30px] bg-selected/80" : "rounded-br-lg rounded-bl-lg static"} flex items-center justify-center`}
+                      } h-5 ${isDraggingExportStart && isMobile ? "fixed left-1/2 top-[4px] z-20 mt-0 h-[30px] w-32 -translate-x-1/2 transform rounded-full bg-selected/80" : "static rounded-bl-lg rounded-br-lg"} flex items-center justify-center`}
                     >
                       <div
                         ref={exportStartTimeRef}
-                        className={`text-white pointer-events-none ${isDraggingExportStart && isMobile ? "mt-0" : ""} ${textSizeClasses("export_start")} z-10`}
+                        className={`pointer-events-none text-white ${isDraggingExportStart && isMobile ? "mt-0" : ""} ${textSizeClasses("export_start")} z-10`}
                       ></div>
                     </div>
                   </div>

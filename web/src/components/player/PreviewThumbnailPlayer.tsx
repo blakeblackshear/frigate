@@ -207,7 +207,7 @@ export default function PreviewThumbnailPlayer({
       <div className={`${imgLoaded ? "visible" : "invisible"}`}>
         <img
           ref={imgRef}
-          className={`size-full transition-opacity select-none ${
+          className={`size-full select-none transition-opacity ${
             playingBack ? "opacity-0" : "opacity-100"
           }`}
           style={
@@ -234,12 +234,12 @@ export default function PreviewThumbnailPlayer({
               onMouseLeave={() => setTooltipHovering(false)}
             >
               <TooltipTrigger asChild>
-                <div className="mx-3 pb-1 text-white text-sm">
+                <div className="mx-3 pb-1 text-sm text-white">
                   {(review.severity == "alert" ||
                     review.severity == "detection") && (
                     <>
                       <Chip
-                        className={`flex items-start justify-between space-x-1 ${playingBack ? "hidden" : ""} bg-gradient-to-br ${review.has_been_reviewed ? "from-green-600 to-green-700 bg-green-600" : "from-gray-400 to-gray-500 bg-gray-500"} z-0`}
+                        className={`flex items-start justify-between space-x-1 ${playingBack ? "hidden" : ""} bg-gradient-to-br ${review.has_been_reviewed ? "bg-green-600 from-green-600 to-green-700" : "bg-gray-500 from-gray-400 to-gray-500"} z-0`}
                       >
                         {review.data.objects.sort().map((object) => {
                           return getIconForLabel(object, "size-3 text-white");
@@ -273,9 +273,9 @@ export default function PreviewThumbnailPlayer({
         </div>
         {!playingBack && (
           <>
-            <div className="absolute top-0 inset-x-0 rounded-t-l z-10 w-full h-[30%] bg-gradient-to-b from-black/60 to-transparent pointer-events-none"></div>
-            <div className="absolute bottom-0 inset-x-0 rounded-b-l z-10 w-full h-[20%] bg-gradient-to-t from-black/60 to-transparent pointer-events-none">
-              <div className="flex h-full justify-between items-end mx-3 pb-1 text-white text-sm">
+            <div className="rounded-t-l pointer-events-none absolute inset-x-0 top-0 z-10 h-[30%] w-full bg-gradient-to-b from-black/60 to-transparent"></div>
+            <div className="rounded-b-l pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[20%] w-full bg-gradient-to-t from-black/60 to-transparent">
+              <div className="mx-3 flex h-full items-end justify-between pb-1 text-sm text-white">
                 {review.end_time ? (
                   <TimeAgo time={review.start_time * 1000} dense />
                 ) : (
@@ -557,10 +557,10 @@ export function VideoPreview({
   );
 
   return (
-    <div className="relative size-full aspect-video bg-black">
+    <div className="relative aspect-video size-full bg-black">
       <video
         ref={playerRef}
-        className="size-full aspect-video bg-black pointer-events-none"
+        className="pointer-events-none aspect-video size-full bg-black"
         autoPlay
         playsInline
         preload="auto"
@@ -738,9 +738,9 @@ export function InProgressPreview({
   }
 
   return (
-    <div className="relative size-full flex items-center bg-black">
+    <div className="relative flex size-full items-center bg-black">
       <img
-        className="size-full object-contain pointer-events-none"
+        className="pointer-events-none size-full object-contain"
         src={`${apiHost}api/preview/${previewFrames[key]}/thumbnail.webp`}
         onLoad={handleLoad}
       />

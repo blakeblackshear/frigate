@@ -14,9 +14,9 @@ export default function FilterSwitch({
   onCheckedChange,
 }: FilterSwitchProps) {
   return (
-    <div className="flex justify-between items-center gap-1">
+    <div className="flex items-center justify-between gap-1">
       <Label
-        className={`w-full mx-2 text-primary capitalize cursor-pointer ${disabled ? "text-secondary-foreground" : ""}`}
+        className={`mx-2 w-full cursor-pointer capitalize text-primary ${disabled ? "text-secondary-foreground" : ""}`}
         htmlFor={label}
       >
         {label}

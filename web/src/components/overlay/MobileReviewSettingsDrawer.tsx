@@ -112,22 +112,22 @@ export default function MobileReviewSettingsDrawer({
   let content;
   if (drawerMode == "select") {
     content = (
-      <div className="w-full p-4 flex flex-col gap-2">
+      <div className="flex w-full flex-col gap-2 p-4">
         {features.includes("export") && (
           <Button
-            className="w-full flex justify-center items-center gap-2"
+            className="flex w-full items-center justify-center gap-2"
             onClick={() => {
               setDrawerMode("export");
               setMode("select");
             }}
           >
-            <FaArrowDown className="p-1 fill-secondary bg-secondary-foreground rounded-md" />
+            <FaArrowDown className="rounded-md bg-secondary-foreground fill-secondary p-1" />
             Export
           </Button>
         )}
         {features.includes("calendar") && (
           <Button
-            className="w-full flex justify-center items-center gap-2"
+            className="flex w-full items-center justify-center gap-2"
             variant={filter?.after ? "select" : "default"}
             onClick={() => setDrawerMode("calendar")}
           >
@@ -139,7 +139,7 @@ export default function MobileReviewSettingsDrawer({
         )}
         {features.includes("filter") && (
           <Button
-            className="w-full flex justify-center items-center gap-2"
+            className="flex w-full items-center justify-center gap-2"
             variant={filter?.labels ? "select" : "default"}
             onClick={() => setDrawerMode("filter")}
           >
@@ -177,8 +177,8 @@ export default function MobileReviewSettingsDrawer({
     );
   } else if (drawerMode == "calendar") {
     content = (
-      <div className="w-full flex flex-col">
-        <div className="w-full h-8 relative">
+      <div className="flex w-full flex-col">
+        <div className="relative h-8 w-full">
           <div
             className="absolute left-0 text-selected"
             onClick={() => setDrawerMode("select")}
@@ -205,7 +205,7 @@ export default function MobileReviewSettingsDrawer({
           }}
         />
         <SelectSeparator />
-        <div className="p-2 flex justify-center items-center">
+        <div className="flex items-center justify-center p-2">
           <Button
             onClick={() => {
               onUpdateFilter({
@@ -222,8 +222,8 @@ export default function MobileReviewSettingsDrawer({
     );
   } else if (drawerMode == "filter") {
     content = (
-      <div className="w-full h-auto overflow-y-auto flex flex-col">
-        <div className="w-full h-8 mb-2 relative">
+      <div className="flex h-auto w-full flex-col overflow-y-auto">
+        <div className="relative mb-2 h-8 w-full">
           <div
             className="absolute left-0 text-selected"
             onClick={() => setDrawerMode("select")}
@@ -256,7 +256,7 @@ export default function MobileReviewSettingsDrawer({
   return (
     <>
       <SaveExportOverlay
-        className="absolute top-8 left-1/2 -translate-x-1/2 z-50 pointer-events-none"
+        className="pointer-events-none absolute left-1/2 top-8 z-50 -translate-x-1/2"
         show={mode == "timeline"}
         onSave={() => onStartExport()}
         onCancel={() => setMode("none")}
@@ -281,7 +281,7 @@ export default function MobileReviewSettingsDrawer({
             />
           </Button>
         </DrawerTrigger>
-        <DrawerContent className="max-h-[80dvh] overflow-hidden flex flex-col items-center gap-2 px-4 pb-4 mx-1 rounded-t-2xl">
+        <DrawerContent className="mx-1 flex max-h-[80dvh] flex-col items-center gap-2 overflow-hidden rounded-t-2xl px-4 pb-4">
           {content}
         </DrawerContent>
       </Drawer>

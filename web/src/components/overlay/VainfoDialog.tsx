@@ -33,7 +33,7 @@ export default function VainfoDialog({
           <DialogTitle>Vainfo Output</DialogTitle>
         </DialogHeader>
         {vainfo ? (
-          <div className="mb-2 max-h-96 whitespace-pre-line overflow-y-scroll">
+          <div className="mb-2 max-h-96 overflow-y-scroll whitespace-pre-line">
             <div>Return Code: {vainfo.return_code}</div>
             <br />
             <div>Process {vainfo.return_code == 0 ? "Output" : "Error"}:</div>
