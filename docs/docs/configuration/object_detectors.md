@@ -357,9 +357,6 @@ detectors: # required
     # 0 means choose automatically
     # increase for better performance if you have a multicore NPU e.g. set to 3 on rk3588
     num_cores: 0
-    # delete old models from config/model_cache/rknn_cache/ folder
-    # set to false to skip, but keep in mind to manually remove unused models
-    purge_model_cache: true
 
 model: # required
   # name of model (will be automatically downloaded) or path to your own .rknn model file
@@ -397,5 +394,5 @@ $ cat /sys/kernel/debug/rknpu/load
 :::
 
 - By default the rknn detector uses the yolonas_s model (`model: path: default-fp16-yolonas_s`). This model comes with the image, so no further steps than those mentioned above are necessary and no download happens.
-- The other choices are automatically downloaded and stored in the folder `config/model_cache/rknn_cache`.
-- Finally, you can also provide your own `.rknn` model. To convert a model to `.rknn` format see the `rknn-toolkit2` (requires a x86 machine). Note, that there is only post-processing for the supported models.
+- The other choices are automatically downloaded and stored in the folder `config/model_cache/rknn_cache`. After upgrading Frigate, you should remove older models to free up space.
+- Finally, you can also provide your own `.rknn` model. You should not save your own models in the `rknn_cache` folder, store them directly in the `model_cache` folder or another subfolder. To convert a model to `.rknn` format see the `rknn-toolkit2` (requires a x86 machine). Note, that there is only post-processing for the supported models.

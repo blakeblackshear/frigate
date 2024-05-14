@@ -37,14 +37,6 @@ class Rknn(DetectionApi):
         core_mask = 2**config.num_cores - 1
         soc = self.get_soc()
 
-        if config.purge_model_cache:
-            self.purge_model_cache()
-        else:
-            logger.warning(
-                "Purging model chache is disabled. Remember to manually delete unused models from "
-                + str(model_chache_dir[1:])
-            )
-
         model_props = self.parse_model_input(config.model.path, soc)
 
         from rknnlite.api import RKNNLite
@@ -59,15 +51,6 @@ class Rknn(DetectionApi):
 
     def __del__(self):
         self.rknn.release()
-
-    def purge_model_cache(self):
-        if os.path.isdir(model_chache_dir):
-            for file in os.listdir(model_chache_dir):
-                if os.path.isfile(file):
-                    if file.endswith("-v2.0.0-1.rknn"):
-                        continue
-                    else:
-                        os.remove(file)
 
     def get_soc(self):
         try:
