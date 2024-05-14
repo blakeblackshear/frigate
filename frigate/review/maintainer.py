@@ -468,7 +468,6 @@ class ReviewSegmentMaintainer(threading.Thread):
                             or audio in camera_config.review.detections.labels
                         ):
                             current_segment.audio.add(audio)
-
                 elif topic == DetectionTypeEnum.api:
                     if manual_info["state"] == ManualEventState.complete:
                         current_segment.detections[manual_info["event_id"]] = (
