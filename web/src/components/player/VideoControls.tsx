@@ -171,16 +171,16 @@ export default function VideoControls({
   return (
     <div
       className={cn(
-        "w-auto px-4 py-2 flex sm:flex-nowrap justify-between items-center gap-4 sm:gap-8 text-primary z-50 bg-background/60 rounded-lg",
+        "z-50 flex w-auto items-center justify-between gap-4 rounded-lg bg-background/60 px-4 py-2 text-primary sm:flex-nowrap sm:gap-8",
         className,
         isMobileOnly &&
           Object.values(features).filter((feat) => feat).length >
             MIN_ITEMS_WRAP &&
-          "flex-wrap min-w-[75%]",
+          "min-w-[75%] flex-wrap",
       )}
     >
       {video && features.volume && (
-        <div className="flex justify-normal items-center gap-2 cursor-pointer">
+        <div className="flex cursor-pointer items-center justify-normal gap-2">
           <VolumeIcon
             className="size-5"
             onClick={(e: React.MouseEvent) => {
@@ -208,9 +208,9 @@ export default function VideoControls({
       )}
       <div className="cursor-pointer" onClick={onTogglePlay}>
         {isPlaying ? (
-          <LuPause className="size-5 text-primary fill-primary" />
+          <LuPause className="size-5 fill-primary text-primary" />
         ) : (
-          <LuPlay className="size-5 text-primary fill-primary" />
+          <LuPlay className="size-5 fill-primary text-primary" />
         )}
       </div>
       {features.seek && (

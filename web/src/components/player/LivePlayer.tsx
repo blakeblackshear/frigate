@@ -103,7 +103,7 @@ export default function LivePlayer({
   if (liveMode == "webrtc") {
     player = (
       <WebRtcPlayer
-        className={`rounded-lg md:rounded-2xl size-full ${liveReady ? "" : "hidden"}`}
+        className={`size-full rounded-lg md:rounded-2xl ${liveReady ? "" : "hidden"}`}
         camera={cameraConfig.live.stream_name}
         playbackEnabled={cameraActive}
         audioEnabled={playAudio}
@@ -117,7 +117,7 @@ export default function LivePlayer({
     if ("MediaSource" in window || "ManagedMediaSource" in window) {
       player = (
         <MSEPlayer
-          className={`rounded-lg md:rounded-2xl size-full ${liveReady ? "" : "hidden"}`}
+          className={`size-full rounded-lg md:rounded-2xl ${liveReady ? "" : "hidden"}`}
           camera={cameraConfig.live.stream_name}
           playbackEnabled={cameraActive}
           audioEnabled={playAudio}
@@ -137,7 +137,7 @@ export default function LivePlayer({
   } else if (liveMode == "jsmpeg") {
     player = (
       <JSMpegPlayer
-        className="size-full flex justify-center rounded-lg md:rounded-2xl overflow-hidden"
+        className="flex size-full justify-center overflow-hidden rounded-lg md:rounded-2xl"
         camera={cameraConfig.live.stream_name}
         width={cameraConfig.detect.width}
         height={cameraConfig.detect.height}
@@ -154,17 +154,17 @@ export default function LivePlayer({
       className={cn(
         "relative flex justify-center",
         liveMode === "jsmpeg" ? "size-full" : "w-full",
-        "outline cursor-pointer",
+        "cursor-pointer outline",
         activeTracking
-          ? "outline-severity_alert outline-3 rounded-lg md:rounded-2xl shadow-severity_alert"
+          ? "outline-3 rounded-lg shadow-severity_alert outline-severity_alert md:rounded-2xl"
           : "outline-0 outline-background",
         "transition-all duration-500",
         className,
       )}
       onClick={onClick}
     >
-      <div className="absolute top-0 inset-x-0 rounded-lg md:rounded-2xl z-10 w-full h-[30%] bg-gradient-to-b from-black/20 to-transparent pointer-events-none"></div>
-      <div className="absolute bottom-0 inset-x-0 rounded-lg md:rounded-2xl z-10 w-full h-[10%] bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-[30%] w-full rounded-lg bg-gradient-to-b from-black/20 to-transparent md:rounded-2xl"></div>
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[10%] w-full rounded-lg bg-gradient-to-t from-black/20 to-transparent md:rounded-2xl"></div>
       {player}
 
       {objects.length > 0 && (
@@ -172,9 +172,9 @@ export default function LivePlayer({
           <Tooltip>
             <div className="flex">
               <TooltipTrigger asChild>
-                <div className="mx-3 pb-1 text-white text-sm">
+                <div className="mx-3 pb-1 text-sm text-white">
                   <Chip
-                    className={`flex items-start justify-between space-x-1 bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 z-0`}
+                    className={`z-0 flex items-start justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500`}
                   >
                     {[
                       ...new Set([
@@ -226,7 +226,7 @@ export default function LivePlayer({
 
       <div className="absolute right-2 top-2 size-4">
         {activeMotion && (
-          <MdCircle className="size-2 drop-shadow-md shadow-danger text-danger animate-pulse" />
+          <MdCircle className="size-2 animate-pulse text-danger shadow-danger drop-shadow-md" />
         )}
       </div>
     </div>

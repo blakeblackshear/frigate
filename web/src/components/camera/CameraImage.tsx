@@ -45,7 +45,7 @@ export default function CameraImage({
       {enabled ? (
         <img
           ref={imgRef}
-          className={`object-contain ${isPortraitImage ? "h-full w-auto" : "w-full h-auto"} rounded-lg md:rounded-2xl`}
+          className={`object-contain ${isPortraitImage ? "h-full w-auto" : "h-auto w-full"} rounded-lg md:rounded-2xl`}
           onLoad={() => {
             setHasLoaded(true);
 
@@ -62,12 +62,12 @@ export default function CameraImage({
           }}
         />
       ) : (
-        <div className="text-center pt-6">
+        <div className="pt-6 text-center">
           Camera is disabled in config, no stream or snapshot available!
         </div>
       )}
       {!hasLoaded && enabled ? (
-        <div className="absolute left-0 right-0 top-0 bottom-0 flex justify-center items-center">
+        <div className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
           <ActivityIndicator />
         </div>
       ) : null}

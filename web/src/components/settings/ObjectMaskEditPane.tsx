@@ -249,7 +249,7 @@ export default function ObjectMaskEditPane({
       <Heading as="h3" className="my-2">
         {polygon.name.length ? "Edit" : "New"} Object Mask
       </Heading>
-      <div className="text-sm text-muted-foreground my-2">
+      <div className="my-2 text-sm text-muted-foreground">
         <p>
           Object filter masks are used to filter out false positives for a given
           object type based on location.
@@ -257,7 +257,7 @@ export default function ObjectMaskEditPane({
       </div>
       <Separator className="my-3 bg-secondary" />
       {polygons && activePolygonIndex !== undefined && (
-        <div className="flex flex-row my-2 text-sm w-full justify-between">
+        <div className="my-2 flex w-full flex-row justify-between text-sm">
           <div className="my-1 inline-flex">
             {polygons[activePolygonIndex].points.length}{" "}
             {polygons[activePolygonIndex].points.length > 1 ||
@@ -284,7 +284,7 @@ export default function ObjectMaskEditPane({
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-6 flex flex-col flex-1"
+          className="flex flex-1 flex-col space-y-6"
         >
           <div>
             <FormField
@@ -332,7 +332,7 @@ export default function ObjectMaskEditPane({
               )}
             />
           </div>
-          <div className="flex flex-col flex-1 justify-end">
+          <div className="flex flex-1 flex-col justify-end">
             <div className="flex flex-row gap-2 pt-5">
               <Button className="flex flex-1" onClick={onCancel}>
                 Cancel

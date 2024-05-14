@@ -155,10 +155,10 @@ export default function LiveDashboardView({
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
 
   return (
-    <div className="size-full p-2 overflow-y-auto" ref={containerRef}>
+    <div className="size-full overflow-y-auto p-2" ref={containerRef}>
       {isMobile && (
-        <div className="h-11 relative flex items-center justify-between">
-          <Logo className="absolute inset-x-1/2 -translate-x-1/2 h-8" />
+        <div className="relative flex h-11 items-center justify-between">
+          <Logo className="absolute inset-x-1/2 h-8 -translate-x-1/2" />
           <div className="max-w-[45%]">
             <CameraGroupSelector />
           </div>
@@ -167,7 +167,7 @@ export default function LiveDashboardView({
               <Button
                 className={`p-1 ${
                   mobileLayout == "grid"
-                    ? "bg-blue-900 focus:bg-blue-900 bg-opacity-60 focus:bg-opacity-60"
+                    ? "bg-blue-900 bg-opacity-60 focus:bg-blue-900 focus:bg-opacity-60"
                     : "bg-secondary"
                 }`}
                 size="xs"
@@ -178,7 +178,7 @@ export default function LiveDashboardView({
               <Button
                 className={`p-1 ${
                   mobileLayout == "list"
-                    ? "bg-blue-900 focus:bg-blue-900 bg-opacity-60 focus:bg-opacity-60"
+                    ? "bg-blue-900 bg-opacity-60 focus:bg-blue-900 focus:bg-opacity-60"
                     : "bg-secondary"
                 }`}
                 size="xs"
@@ -194,8 +194,8 @@ export default function LiveDashboardView({
                 className={cn(
                   "p-1",
                   isEditMode
-                    ? "text-primary bg-selected"
-                    : "text-secondary-foreground bg-secondary",
+                    ? "bg-selected text-primary"
+                    : "bg-secondary text-secondary-foreground",
                 )}
                 size="xs"
                 onClick={() =>
@@ -212,7 +212,7 @@ export default function LiveDashboardView({
       {events && events.length > 0 && (
         <ScrollArea>
           <TooltipProvider>
-            <div className="px-1 flex gap-2 items-center">
+            <div className="flex items-center gap-2 px-1">
               {events.map((event) => {
                 return <AnimatedEventCard key={event.id} event={event} />;
               })}
@@ -224,7 +224,7 @@ export default function LiveDashboardView({
 
       {!cameraGroup || cameraGroup == "default" || isMobileOnly ? (
         <div
-          className={`mt-2 px-2 grid ${mobileLayout == "grid" ? "grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4" : ""} gap-2 md:gap-4`}
+          className={`mt-2 grid px-2 ${mobileLayout == "grid" ? "grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4" : ""} gap-2 md:gap-4`}
         >
           {includeBirdseye && birdseyeConfig?.enabled && (
             <BirdseyeLivePlayer
@@ -247,7 +247,7 @@ export default function LiveDashboardView({
               <LivePlayer
                 cameraRef={cameraRef}
                 key={camera.name}
-                className={`${grow} rounded-lg md:rounded-2xl bg-black`}
+                className={`${grow} rounded-lg bg-black md:rounded-2xl`}
                 windowVisible={
                   windowVisible && visibleCameras.includes(camera.name)
                 }

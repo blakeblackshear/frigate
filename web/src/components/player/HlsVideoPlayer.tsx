@@ -153,7 +153,7 @@ export default function HlsVideoPlayer({
   return (
     <TransformWrapper minScale={1.0}>
       <VideoControls
-        className="absolute bottom-5 left-1/2 -translate-x-1/2 z-50"
+        className="absolute bottom-5 left-1/2 z-50 -translate-x-1/2"
         video={videoRef.current}
         isPlaying={isPlaying}
         show={visible && (controls || controlsOpen)}
@@ -231,7 +231,7 @@ export default function HlsVideoPlayer({
       >
         <video
           ref={videoRef}
-          className={`size-full bg-black rounded-lg md:rounded-2xl ${loadedMetadata ? "" : "invisible"}`}
+          className={`size-full rounded-lg bg-black md:rounded-2xl ${loadedMetadata ? "" : "invisible"}`}
           preload="auto"
           autoPlay
           controls={false}

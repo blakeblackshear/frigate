@@ -26,28 +26,28 @@ import { TimeRange, Timeline } from "@/types/timeline";
 export function getTimelineIcon(timelineItem: Timeline) {
   switch (timelineItem.class_type) {
     case "visible":
-      return <LuPlay className="w-4 mr-1" />;
+      return <LuPlay className="mr-1 w-4" />;
     case "gone":
-      return <IoMdExit className="w-4 mr-1" />;
+      return <IoMdExit className="mr-1 w-4" />;
     case "active":
-      return <LuPlayCircle className="w-4 mr-1" />;
+      return <LuPlayCircle className="mr-1 w-4" />;
     case "stationary":
-      return <LuCircle className="w-4 mr-1" />;
+      return <LuCircle className="mr-1 w-4" />;
     case "entered_zone":
-      return <MdOutlineLocationOn className="w-4 mr-1" />;
+      return <MdOutlineLocationOn className="mr-1 w-4" />;
     case "attribute":
       switch (timelineItem.data.attribute) {
         case "face":
-          return <MdFaceUnlock className="w-4 mr-1" />;
+          return <MdFaceUnlock className="mr-1 w-4" />;
         case "license_plate":
-          return <MdOutlinePictureInPictureAlt className="w-4 mr-1" />;
+          return <MdOutlinePictureInPictureAlt className="mr-1 w-4" />;
         default:
-          return <LuTruck className="w-4 mr-1" />;
+          return <LuTruck className="mr-1 w-4" />;
       }
     case "heard":
-      return <LuEar className="w-4 mr-1" />;
+      return <LuEar className="mr-1 w-4" />;
     case "external":
-      return <LuCircleDot className="w-4 mr-1" />;
+      return <LuCircleDot className="mr-1 w-4" />;
   }
 }
 
@@ -59,21 +59,21 @@ export function getTimelineIcon(timelineItem: Timeline) {
 export function getTimelineDetectionIcon(timelineItem: Timeline) {
   switch (timelineItem.data.label) {
     case "bicycle":
-      return <FaBicycle className="w-4 mr-1" />;
+      return <FaBicycle className="mr-1 w-4" />;
     case "car":
-      return <LuCar className="w-4 mr-1" />;
+      return <LuCar className="mr-1 w-4" />;
     case "cat":
-      return <LuCat className="w-4 mr-1" />;
+      return <LuCat className="mr-1 w-4" />;
     case "deer":
-      return <GiDeer className="w-4 mr-1" />;
+      return <GiDeer className="mr-1 w-4" />;
     case "dog":
-      return <LuDog className="w-4 mr-1" />;
+      return <LuDog className="mr-1 w-4" />;
     case "package":
-      return <LuPackage className="w-4 mr-1" />;
+      return <LuPackage className="mr-1 w-4" />;
     case "person":
-      return <LuPersonStanding className="w-4 mr-1" />;
+      return <LuPersonStanding className="mr-1 w-4" />;
     default:
-      return <LuCamera className="w-4 mr-1" />;
+      return <LuCamera className="mr-1 w-4" />;
   }
 }
 

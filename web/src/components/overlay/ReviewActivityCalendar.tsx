@@ -67,7 +67,7 @@ function ReviewActivityDay({ reviewSummary, day }: ReviewActivityDayProps) {
   }, [reviewSummary, day]);
 
   return (
-    <div className="flex flex-col justify-center items-center">
+    <div className="flex flex-col items-center justify-center">
       {day.getDate()}
       {dayActivity != "none" && (
         <FaCircle

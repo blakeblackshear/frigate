@@ -263,7 +263,7 @@ export function CamerasFilterButton({
           <DropdownMenuSeparator />
         </>
       )}
-      <div className="h-auto max-h-[80dvh] p-4 overflow-y-auto overflow-x-hidden">
+      <div className="h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden p-4">
         <FilterSwitch
           isChecked={currentCameras == undefined}
           label="All Cameras"
@@ -280,7 +280,7 @@ export function CamerasFilterButton({
               return (
                 <div
                   key={name}
-                  className="w-full px-2 py-1.5 text-sm text-primary capitalize cursor-pointer rounded-lg hover:bg-muted"
+                  className="w-full cursor-pointer rounded-lg px-2 py-1.5 text-sm capitalize text-primary hover:bg-muted"
                   onClick={() => setCurrentCameras([...conf.cameras])}
                 >
                   {name}
@@ -321,7 +321,7 @@ export function CamerasFilterButton({
         </div>
       </div>
       <DropdownMenuSeparator className="my-2" />
-      <div className="p-2 flex justify-evenly items-center">
+      <div className="flex items-center justify-evenly p-2">
         <Button
           variant="select"
           onClick={() => {
@@ -394,7 +394,7 @@ function ShowReviewFilter({
   );
   return (
     <>
-      <div className="hidden h-9 md:flex p-2 justify-start items-center text-sm bg-secondary hover:bg-secondary/80 rounded-md cursor-pointer">
+      <div className="hidden h-9 cursor-pointer items-center justify-start rounded-md bg-secondary p-2 text-sm hover:bg-secondary/80 md:flex">
         <Switch
           id="reviewed"
           checked={showReviewedSwitch == 1}
@@ -408,7 +408,7 @@ function ShowReviewFilter({
       </div>
 
       <Button
-        className="block md:hidden duration-0"
+        className="block duration-0 md:hidden"
         variant={showReviewedSwitch == 1 ? "select" : "default"}
         size="sm"
         onClick={() => setShowReviewedSwitch(showReviewedSwitch == 0 ? 1 : 0)}
@@ -460,7 +460,7 @@ function CalendarFilterButton({
         onSelect={updateSelectedDay}
       />
       <DropdownMenuSeparator />
-      <div className="p-2 flex justify-center items-center">
+      <div className="flex items-center justify-center p-2">
         <Button
           onClick={() => {
             updateSelectedDay(undefined);
@@ -621,9 +621,9 @@ export function GeneralFilterContent({
             <DropdownMenuSeparator />
           </div>
         )}
-        <div className="flex justify-between items-center my-2.5">
+        <div className="my-2.5 flex items-center justify-between">
           <Label
-            className="mx-2 text-primary cursor-pointer"
+            className="mx-2 cursor-pointer text-primary"
             htmlFor="allLabels"
           >
             All Labels
@@ -666,7 +666,7 @@ export function GeneralFilterContent({
         </div>
       </div>
       <DropdownMenuSeparator />
-      <div className="p-2 flex justify-evenly items-center">
+      <div className="flex items-center justify-evenly p-2">
         <Button
           variant="select"
           onClick={() => {
@@ -707,7 +707,7 @@ function ShowMotionOnlyButton({
 
   return (
     <>
-      <div className="hidden md:inline-flex items-center justify-center whitespace-nowrap text-sm bg-secondary hover:bg-secondary/80 text-primary h-9 rounded-md px-3 mx-1 cursor-pointer">
+      <div className="mx-1 hidden h-9 cursor-pointer items-center justify-center whitespace-nowrap rounded-md bg-secondary px-3 text-sm text-primary hover:bg-secondary/80 md:inline-flex">
         <Switch
           className="ml-1"
           id="collapse-motion"
@@ -715,7 +715,7 @@ function ShowMotionOnlyButton({
           onCheckedChange={setMotionOnlyButton}
         />
         <Label
-          className="mx-2 text-primary cursor-pointer"
+          className="mx-2 cursor-pointer text-primary"
           htmlFor="collapse-motion"
         >
           Motion only

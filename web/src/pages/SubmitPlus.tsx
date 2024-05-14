@@ -224,8 +224,8 @@ export default function SubmitPlus() {
   );
 
   return (
-    <div className="size-full flex flex-col">
-      <div className="w-full h-16 px-2 flex items-center justify-between overflow-x-auto">
+    <div className="flex size-full flex-col">
+      <div className="flex h-16 w-full items-center justify-between overflow-x-auto px-2">
         <PlusFilterGroup
           selectedCameras={selectedCameras}
           selectedLabels={selectedLabels}
@@ -236,8 +236,8 @@ export default function SubmitPlus() {
         />
         <PlusSortSelector selectedSort={sort} setSelectedSort={setSort} />
       </div>
-      <div className="size-full flex flex-1 flex-wrap content-start gap-2 md:gap-4 overflow-y-auto no-scrollbar">
-        <div className="w-full p-2 grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+      <div className="no-scrollbar flex size-full flex-1 flex-wrap content-start gap-2 overflow-y-auto md:gap-4">
+        <div className="grid w-full gap-2 p-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           <Dialog
             open={upload != undefined}
             onOpenChange={(open) => (!open ? setUpload(undefined) : null)}
@@ -286,16 +286,16 @@ export default function SubmitPlus() {
               <div
                 key={event.id}
                 ref={lastRow ? lastEventRef : null}
-                className="w-full relative rounded-lg md:rounded-2xl aspect-video flex justify-center items-center bg-black cursor-pointer"
+                className="relative flex aspect-video w-full cursor-pointer items-center justify-center rounded-lg bg-black md:rounded-2xl"
                 onClick={() => setUpload(event)}
               >
                 <div className="absolute left-0 top-2 z-40">
                   <Tooltip>
                     <div className="flex">
                       <TooltipTrigger asChild>
-                        <div className="mx-3 pb-1 text-white text-sm">
+                        <div className="mx-3 pb-1 text-sm text-white">
                           <Chip
-                            className={`flex items-start justify-between space-x-1 bg-gradient-to-br from-gray-400 to-gray-500 bg-gray-500 z-0`}
+                            className={`z-0 flex items-start justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500`}
                           >
                             {[event.label].map((object) => {
                               return getIconForLabel(
@@ -317,7 +317,7 @@ export default function SubmitPlus() {
                   </Tooltip>
                 </div>
                 <img
-                  className="aspect-video h-full object-contain rounded-lg md:rounded-2xl"
+                  className="aspect-video h-full rounded-lg object-contain md:rounded-2xl"
                   src={`${baseUrl}api/events/${event.id}/snapshot.jpg`}
                   loading="lazy"
                 />
@@ -392,7 +392,7 @@ function PlusFilterGroup({
   const Content = isMobile ? DrawerContent : DropdownMenuContent;
 
   return (
-    <div className="h-full flex justify-start gap-2 items-center">
+    <div className="flex h-full items-center justify-start gap-2">
       <CamerasFilterButton
         allCameras={allCameras}
         groups={[]}
@@ -417,7 +417,7 @@ function PlusFilterGroup({
             <FaList
               className={`${selectedLabels == undefined ? "text-secondary-foreground" : "text-selected-foreground"}`}
             />
-            <div className="hidden md:block text-primary">
+            <div className="hidden text-primary md:block">
               {selectedLabels == undefined
                 ? "All Labels"
                 : `${selectedLabels.length} Labels`}
@@ -450,7 +450,7 @@ function PlusFilterGroup({
             <PiSlidersHorizontalFill
               className={`${selectedScoreRange == undefined ? "text-secondary-foreground" : "text-selected-foreground"}`}
             />
-            <div className="hidden md:block text-primary">
+            <div className="hidden text-primary md:block">
               {selectedScoreRange == undefined
                 ? "Score Range"
                 : `${selectedScoreRange[0] * 100}% - ${selectedScoreRange[1] * 100}%`}
@@ -458,7 +458,7 @@ function PlusFilterGroup({
           </Button>
         </Trigger>
         <Content
-          className={`min-w-80 p-2 flex flex-col justify-center ${isMobile ? "gap-2 *:max-h-[75dvh]" : ""}`}
+          className={`flex min-w-80 flex-col justify-center p-2 ${isMobile ? "gap-2 *:max-h-[75dvh]" : ""}`}
         >
           <div className="flex items-center gap-1">
             <Input
@@ -493,7 +493,7 @@ function PlusFilterGroup({
             />
           </div>
           <DropdownMenuSeparator />
-          <div className="p-2 flex justify-evenly items-center">
+          <div className="flex items-center justify-evenly p-2">
             <Button
               variant="select"
               onClick={() => {
@@ -547,7 +547,7 @@ function PlusSortSelector({
   const Content = isMobile ? DrawerContent : DropdownMenuContent;
 
   return (
-    <div className="h-full flex justify-start gap-2 items-center">
+    <div className="flex h-full items-center justify-start gap-2">
       <Menu
         open={open}
         onOpenChange={(open) => {
@@ -572,24 +572,24 @@ function PlusSortSelector({
             <Sort
               className={`${selectedSort == undefined ? "text-secondary-foreground" : "text-selected-foreground"}`}
             />
-            <div className="hidden md:block text-primary">
+            <div className="hidden text-primary md:block">
               {selectedSort == undefined ? "Sort" : selectedSort.split("_")[0]}
             </div>
           </Button>
         </Trigger>
         <Content
-          className={`p-2 flex flex-col justify-center gap-2 ${isMobile ? "max-h-[75dvh]" : ""}`}
+          className={`flex flex-col justify-center gap-2 p-2 ${isMobile ? "max-h-[75dvh]" : ""}`}
         >
           <RadioGroup
             className={`flex flex-col gap-4 ${isMobile ? "mt-4" : ""}`}
             onValueChange={(value) => setCurrentSort(value)}
           >
-            <div className="w-full flex items-center gap-2">
+            <div className="flex w-full items-center gap-2">
               <RadioGroupItem
                 className={
                   currentSort == "date"
-                    ? "from-selected/50 to-selected/90 text-selected bg-selected"
-                    : "from-secondary/50 to-secondary/90 text-secondary bg-secondary"
+                    ? "bg-selected from-selected/50 to-selected/90 text-selected"
+                    : "bg-secondary from-secondary/50 to-secondary/90 text-secondary"
                 }
                 id="date"
                 value="date"
@@ -616,12 +616,12 @@ function PlusSortSelector({
                 <div className="size-5" />
               )}
             </div>
-            <div className="w-full flex items-center gap-2">
+            <div className="flex w-full items-center gap-2">
               <RadioGroupItem
                 className={
                   currentSort == "score"
-                    ? "from-selected/50 to-selected/90 text-selected bg-selected"
-                    : "from-secondary/50 to-secondary/90 text-secondary bg-secondary"
+                    ? "bg-selected from-selected/50 to-selected/90 text-selected"
+                    : "bg-secondary from-secondary/50 to-secondary/90 text-secondary"
                 }
                 id="score"
                 value="score"
@@ -650,7 +650,7 @@ function PlusSortSelector({
             </div>
           </RadioGroup>
           <DropdownMenuSeparator />
-          <div className="p-2 flex justify-evenly items-center">
+          <div className="flex items-center justify-evenly p-2">
             <Button
               variant="select"
               onClick={() => {

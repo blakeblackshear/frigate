@@ -12,10 +12,10 @@ function Sidebar() {
   const navbarLinks = useNavigation();
 
   return (
-    <aside className="absolute w-[52px] z-10 left-o inset-y-0 overflow-y-auto scrollbar-hidden py-4 flex flex-col justify-between bg-background_alt border-r border-secondary-highlight">
+    <aside className="left-o scrollbar-hidden absolute inset-y-0 z-10 flex w-[52px] flex-col justify-between overflow-y-auto border-r border-secondary-highlight bg-background_alt py-4">
       <span tabIndex={0} className="sr-only" />
-      <div className="w-full flex flex-col gap-0 items-center">
-        <Logo className="w-8 h-8 mb-6" />
+      <div className="flex w-full flex-col items-center gap-0">
+        <Logo className="mb-6 h-8 w-8" />
         {navbarLinks.map((item) => {
           const showCameraGroups =
             item.id == 1 && item.url == location.pathname;
@@ -32,7 +32,7 @@ function Sidebar() {
           );
         })}
       </div>
-      <div className="flex flex-col items-center gap-4 mb-8">
+      <div className="mb-8 flex flex-col items-center gap-4">
         <GeneralSettings />
         <AccountSettings />
       </div>

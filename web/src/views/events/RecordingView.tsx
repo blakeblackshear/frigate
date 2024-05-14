@@ -357,11 +357,11 @@ export function RecordingView({
   }, [previewRowRef.current?.scrollWidth, previewRowRef.current?.scrollHeight]);
 
   return (
-    <div ref={contentRef} className="size-full pt-2 flex flex-col">
+    <div ref={contentRef} className="flex size-full flex-col pt-2">
       <Toaster closeButton={true} />
-      <div className="w-full h-11 mb-2 px-2 relative flex items-center justify-between">
+      <div className="relative mb-2 flex h-11 w-full items-center justify-between px-2">
         {isMobile && (
-          <Logo className="absolute inset-x-1/2 -translate-x-1/2 h-8" />
+          <Logo className="absolute inset-x-1/2 h-8 -translate-x-1/2" />
         )}
         <div className={cn("flex items-center gap-2")}>
           <Button
@@ -422,7 +422,7 @@ export function RecordingView({
           )}
           {isDesktop ? (
             <ToggleGroup
-              className="*:px-3 *:py-4 *:rounded-md"
+              className="*:rounded-md *:px-3 *:py-4"
               type="single"
               size="sm"
               value={timelineType}
@@ -469,8 +469,8 @@ export function RecordingView({
       <div
         ref={mainLayoutRef}
         className={cn(
-          "h-full flex justify-center overflow-hidden",
-          isDesktop ? "" : "flex-col landscape:flex-row gap-2",
+          "flex h-full justify-center overflow-hidden",
+          isDesktop ? "" : "flex-col gap-2 landscape:flex-row",
         )}
       >
         <div
@@ -479,7 +479,7 @@ export function RecordingView({
         >
           <div
             className={cn(
-              "size-full flex items-center",
+              "flex size-full items-center",
               mainCameraAspect == "tall"
                 ? "flex-row justify-evenly"
                 : "flex-col justify-center gap-2",
@@ -491,7 +491,7 @@ export function RecordingView({
                 "relative",
                 isDesktop
                   ? cn(
-                      "px-4 flex justify-center",
+                      "flex justify-center px-4",
                       mainCameraAspect == "tall"
                         ? "h-[50%] md:h-[60%] lg:h-[75%] xl:h-[90%]"
                         : mainCameraAspect == "wide"
@@ -499,10 +499,10 @@ export function RecordingView({
                           : "",
                     )
                   : cn(
-                      "portrait:w-full pt-2",
+                      "pt-2 portrait:w-full",
                       mainCameraAspect == "wide"
-                        ? "landscape:w-full aspect-wide"
-                        : "landscape:h-[94%] aspect-video",
+                        ? "aspect-wide landscape:w-full"
+                        : "aspect-video landscape:h-[94%]",
                     ),
               )}
               style={{
@@ -545,8 +545,8 @@ export function RecordingView({
                   "flex gap-2 overflow-auto",
                   mainCameraAspect == "tall"
                     ? "h-full w-48 flex-col"
-                    : `w-full h-28`,
-                  previewRowOverflows ? "" : "justify-center items-center",
+                    : `h-28 w-full`,
+                  previewRowOverflows ? "" : "items-center justify-center",
                 )}
               >
                 <div className="w-2" />
@@ -660,12 +660,12 @@ function Timeline({
     <div
       className={`${
         isDesktop
-          ? `${timelineType == "timeline" ? "w-[100px]" : "w-60"} overflow-y-auto no-scrollbar`
-          : "portrait:flex-grow landscape:w-[20%] overflow-hidden"
+          ? `${timelineType == "timeline" ? "w-[100px]" : "w-60"} no-scrollbar overflow-y-auto`
+          : "overflow-hidden portrait:flex-grow landscape:w-[20%]"
       } relative`}
     >
-      <div className="absolute top-0 inset-x-0 z-20 w-full h-[30px] bg-gradient-to-b from-secondary to-transparent pointer-events-none"></div>
-      <div className="absolute bottom-0 inset-x-0 z-20 w-full h-[30px] bg-gradient-to-t from-secondary to-transparent pointer-events-none"></div>
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-[30px] w-full bg-gradient-to-b from-secondary to-transparent"></div>
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[30px] w-full bg-gradient-to-t from-secondary to-transparent"></div>
       {timelineType == "timeline" ? (
         motionData ? (
           <MotionReviewTimeline
@@ -693,7 +693,7 @@ function Timeline({
         )
       ) : (
         <div
-          className={`h-full grid grid-cols-1 gap-4 overflow-auto p-4 bg-secondary ${isDesktop ? "" : "sm:grid-cols-2"}`}
+          className={`grid h-full grid-cols-1 gap-4 overflow-auto bg-secondary p-4 ${isDesktop ? "" : "sm:grid-cols-2"}`}
         >
           {mainCameraReviewItems.map((review) => {
             if (review.severity == "significant_motion") {

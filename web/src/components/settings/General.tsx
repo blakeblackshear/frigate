@@ -53,18 +53,18 @@ export default function General() {
 
   return (
     <>
-      <div className="flex flex-col md:flex-row size-full">
+      <div className="flex size-full flex-col md:flex-row">
         <Toaster position="top-center" closeButton={true} />
-        <div className="flex flex-col h-full w-full overflow-y-auto mt-2 md:mt-0 mb-10 md:mb-0 order-last md:order-none md:mr-2 rounded-lg border-secondary-foreground border-[1px] p-2 bg-background_alt">
+        <div className="order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
           <Heading as="h3" className="my-2">
             General Settings
           </Heading>
 
-          <div className="flex flex-col w-full space-y-6">
+          <div className="flex w-full flex-col space-y-6">
             <div className="mt-2 space-y-6">
               <div className="space-y-0.5">
                 <div className="text-md">Stored Layouts</div>
-                <div className="text-sm text-muted-foreground my-2">
+                <div className="my-2 text-sm text-muted-foreground">
                   <p>
                     The layout of cameras in a camera group can be
                     dragged/resized. The positions are stored in your browser's
@@ -72,11 +72,11 @@ export default function General() {
                   </p>
                 </div>
               </div>
-              <div className="flex flex-row justify-start items-center gap-2">
+              <div className="flex flex-row items-center justify-start gap-2">
                 <Button onClick={clearStoredLayouts}>Clear All Layouts</Button>
               </div>
             </div>
-            <Separator className="flex my-2 bg-secondary" />
+            <Separator className="my-2 flex bg-secondary" />
             <div className="mt-2 space-y-6">
               <div className="space-y-0.5">
                 <div className="text-md">Default Playback Rate</div>
@@ -110,13 +110,13 @@ export default function General() {
             <div className="mt-2 space-y-6">
               <div className="space-y-0.5">
                 <div className="text-md">Low Data Mode</div>
-                <div className="text-sm text-muted-foreground my-2">
+                <div className="my-2 text-sm text-muted-foreground">
                   <p>
                     Not yet implemented. <em>Default: disabled</em>
                   </p>
                 </div>
               </div>
-              <div className="flex flex-row justify-start items-center gap-2">
+              <div className="flex flex-row items-center justify-start gap-2">
                 <Switch
                   id="lowdata"
                   checked={false}

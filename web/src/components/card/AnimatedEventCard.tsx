@@ -67,13 +67,13 @@ export function AnimatedEventCard({ event }: AnimatedEventCardProps) {
     <Tooltip>
       <TooltipTrigger asChild>
         <div
-          className="h-24 4k:h-32 relative"
+          className="relative h-24 4k:h-32"
           style={{
             aspectRatio: aspectRatio,
           }}
         >
           <div
-            className="size-full rounded md:rounded-lg cursor-pointer overflow-hidden"
+            className="size-full cursor-pointer overflow-hidden rounded md:rounded-lg"
             onClick={onOpenReview}
           >
             {previews ? (
@@ -102,8 +102,8 @@ export function AnimatedEventCard({ event }: AnimatedEventCardProps) {
               />
             )}
           </div>
-          <div className="absolute bottom-0 inset-x-0 h-6 bg-gradient-to-t from-slate-900/50 to-transparent rounded">
-            <div className="w-full absolute left-1 bottom-0 text-xs text-white">
+          <div className="absolute inset-x-0 bottom-0 h-6 rounded bg-gradient-to-t from-slate-900/50 to-transparent">
+            <div className="absolute bottom-0 left-1 w-full text-xs text-white">
               <TimeAgo time={event.start_time * 1000} dense />
             </div>
           </div>
