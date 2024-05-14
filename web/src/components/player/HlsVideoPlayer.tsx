@@ -15,6 +15,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { AxiosResponse } from "axios";
 import { toast } from "sonner";
 import { useOverlayState } from "@/hooks/use-overlay-state";
+import { usePersistence } from "@/hooks/use-persistence";
 
 // Android native hls does not seek correctly
 const USE_NATIVE_HLS = !isAndroid;
@@ -111,6 +112,11 @@ export default function HlsVideoPlayer({
   const [isPlaying, setIsPlaying] = useState(true);
   const [muted, setMuted] = useOverlayState("playerMuted", true);
   const [volume, setVolume] = useOverlayState("playerVolume", 1.0);
+  const [defaultPlaybackRate] = usePersistence("playbackRate", 1);
+  const [playbackRate, setPlaybackRate] = useOverlayState(
+    "playbackRate",
+    defaultPlaybackRate ?? 1,
+  );
   const [mobileCtrlTimeout, setMobileCtrlTimeout] = useState<NodeJS.Timeout>();
   const [controls, setControls] = useState(isMobile);
   const [controlsOpen, setControlsOpen] = useState(false);
@@ -162,7 +168,7 @@ export default function HlsVideoPlayer({
         }}
         setControlsOpen={setControlsOpen}
         setMuted={(muted) => setMuted(muted, true)}
-        playbackRate={videoRef.current?.playbackRate ?? 1}
+        playbackRate={playbackRate ?? 1}
         hotKeys={hotKeys}
         onPlayPause={(play) => {
           if (!videoRef.current) {
@@ -184,9 +190,13 @@ export default function HlsVideoPlayer({
 
           videoRef.current.currentTime = Math.max(0, currentTime + diff);
         }}
-        onSetPlaybackRate={(rate) =>
-          videoRef.current ? (videoRef.current.playbackRate = rate) : null
-        }
+        onSetPlaybackRate={(rate) => {
+          setPlaybackRate(rate);
+
+          if (videoRef.current) {
+            videoRef.current.playbackRate = rate;
+          }
+        }}
         onUploadFrame={async () => {
           if (videoRef.current && onUploadFrame) {
             const resp = await onUploadFrame(videoRef.current.currentTime);
@@ -255,8 +265,14 @@ export default function HlsVideoPlayer({
           onLoadedMetadata={() => {
             handleLoadedMetadata();
 
-            if (videoRef.current && volume) {
-              videoRef.current.volume = volume;
+            if (videoRef.current) {
+              if (playbackRate) {
+                videoRef.current.playbackRate = playbackRate;
+              }
+
+              if (volume) {
+                videoRef.current.volume = volume;
+              }
             }
           }}
           onEnded={onClipEnded}
