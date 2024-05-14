@@ -10,14 +10,14 @@ import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { del as delData } from "idb-keyval";
 import { usePersistence } from "@/hooks/use-persistence";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
 import { isSafari } from "react-device-detect";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+} from "../ui/select";
 
 const PLAYBACK_RATE_DEFAULT = isSafari ? [0.5, 1, 2] : [0.5, 1, 2, 4, 8, 16];
 
@@ -85,26 +85,27 @@ export default function General() {
                 </div>
               </div>
             </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button className="w-20">{`${playbackRate}x`}</Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuRadioGroup
-                  onValueChange={(rate) => setPlaybackRate(parseFloat(rate))}
-                >
+            <Select
+              value={playbackRate?.toString()}
+              onValueChange={(value) => setPlaybackRate(parseFloat(value))}
+            >
+              <SelectTrigger className="w-20">
+                {`${playbackRate}x`}
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
                   {PLAYBACK_RATE_DEFAULT.map((rate) => (
-                    <DropdownMenuRadioItem
+                    <SelectItem
                       key={rate}
                       className="cursor-pointer"
                       value={rate.toString()}
                     >
                       {rate}x
-                    </DropdownMenuRadioItem>
+                    </SelectItem>
                   ))}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
             <Separator className="flex my-2 bg-secondary" />
             <div className="mt-2 space-y-6">
               <div className="space-y-0.5">
