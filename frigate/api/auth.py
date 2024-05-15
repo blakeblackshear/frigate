@@ -127,6 +127,11 @@ def set_jwt_cookie(response, cookie_name, encoded_jwt, expiration):
 def auth():
     success_response = make_response({}, 202)
 
+    # dont require auth if the request is on the internal port
+    # this header is set by Frigate's nginx proxy, so it cant be spoofed
+    if request.headers.get("x-server-port", 0, type=int) == 5000:
+        return success_response
+
     fail_response = make_response({}, 401)
     fail_response.headers["location"] = "/login"
 
