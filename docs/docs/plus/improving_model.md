@@ -17,7 +17,7 @@ For the best results, follow the following guidelines.
 
 **Make tight bounding boxes**: Tighter bounding boxes improve the recognition and ensure that accurate bounding boxes are predicted at runtime.
 
-**Label the full object even when occluded**: If you have a person standing behind a car, label the full person even though a portion of their body may be hidden behind the car. This helps predict accurate bounding boxes and improves zone accuracy and filters at runtime. If an object is partly out of frame, label it only when it is at least 60-80% visible.
+**Label the full object even when occluded**: If you have a person standing behind a car, label the full person even though a portion of their body may be hidden behind the car. This helps predict accurate bounding boxes and improves zone accuracy and filters at runtime. If an object is partly out of frame, label it only when a person would reasonably be able to recognize the object from the visible parts.
 
 **Label objects hard to identify as difficult**: When objects are truly difficult to make out, such as a car barely visible through a bush, or a dog that is hard to distinguish from the background at night, flag it as 'difficult'. This is not used in the model training as of now, but will in the future.
 
