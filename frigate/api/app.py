@@ -87,8 +87,9 @@ def create_app(
     app.camera_error_image = None
     app.stats_emitter = stats_emitter
     app.jwt_token = get_jwt_secret() if frigate_config.auth.enabled else None
-    # initialize the rate limiter for the login endpoint
+    # update the request_address with the x-forwarded-for header from nginx
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1)
+    # initialize the rate limiter for the login endpoint
     limiter.init_app(app)
     if frigate_config.auth.failed_login_rate_limit is None:
         limiter.enabled = False

@@ -59,7 +59,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       if (axios.isAxiosError(error)) {
         const err = error as AxiosError;
         if (err.response?.status === 429) {
-          toast.error("Exceeded rate limit. Try again in 1 minute.", {
+          toast.error("Exceeded rate limit. Try again later.", {
             position: "top-center",
           });
         } else if (err.response?.status === 400) {

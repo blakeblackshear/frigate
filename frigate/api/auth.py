@@ -2,6 +2,7 @@
 
 import base64
 import hashlib
+import ipaddress
 import json
 import logging
 import os
@@ -13,7 +14,6 @@ from pathlib import Path
 
 from flask import Blueprint, current_app, jsonify, make_response, request
 from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 from joserfc import jwt
 from peewee import DoesNotExist
 
@@ -24,8 +24,51 @@ logger = logging.getLogger(__name__)
 
 AuthBp = Blueprint("auth", __name__)
 
+
+def get_remote_addr():
+    route = list(reversed(request.headers.get("x-forwarded-for").split(",")))
+    logger.debug(f"IP Route: {[r for r in route]}")
+    trusted_proxies = []
+    for proxy in current_app.frigate_config.auth.trusted_proxies:
+        try:
+            network = ipaddress.ip_network(proxy)
+        except ValueError:
+            logger.warn(f"Unable to parse trusted network: {proxy}")
+        trusted_proxies.append(network)
+
+    # return the first remote address that is not trusted
+    for addr in route:
+        ip = ipaddress.ip_address(addr.strip())
+        logger.debug(f"Checking {ip} (v{ip.version})")
+        trusted = False
+        for trusted_proxy in trusted_proxies:
+            logger.debug(
+                f"Checking against trusted proxy: {trusted_proxy} (v{trusted_proxy.version})"
+            )
+            if trusted_proxy.version == 4:
+                ipv4 = ip.ipv4_mapped if ip.version == 6 else ip
+                if ipv4 in trusted_proxy:
+                    trusted = True
+                    logger.debug(f"Trusted: {str(ip)} by {str(trusted_proxy)}")
+                    break
+            elif trusted_proxy.version == 6 and ip.version == 6:
+                if ip in trusted_proxy:
+                    trusted = True
+                    logger.debug(f"Trusted: {str(ip)} by {str(trusted_proxy)}")
+                    break
+        if trusted:
+            logger.debug(f"{ip} is trusted")
+            continue
+        else:
+            logger.debug(f"First untrusted IP: {str(ip)}")
+            return str(ip)
+
+    # if there wasn't anything in the route, just return the default
+    return request.remote_addr or "127.0.0.1"
+
+
 limiter = Limiter(
-    lambda: get_remote_address,
+    get_remote_addr,
     storage_uri="memory://",
 )
 

@@ -136,6 +136,10 @@ class AuthConfig(FrigateBaseModel):
         default="1/second;5/minute;20/hour",
         title="Rate limits for failed login attempts.",
     )
+    trusted_proxies: Optional[List[str]] = Field(
+        default=[],
+        title="Trusted proxies for determining IP address to rate limit",
+    )
     # As of Feb 2023, OWASP recommends 600000 iterations for PBKDF2-SHA256
     hash_iterations: int = Field(default=600000, title="Password hash iterations")
 
