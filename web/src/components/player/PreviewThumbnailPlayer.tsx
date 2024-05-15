@@ -311,6 +311,21 @@ function PreviewContent({
   isPlayingBack,
   onTimeUpdate,
 }: PreviewContentProps) {
+  // visibility
+
+  const [windowVisible, setWindowVisible] = useState(true);
+  const visibilityListener = useCallback(() => {
+    setWindowVisible(document.visibilityState == "visible");
+  }, []);
+
+  useEffect(() => {
+    addEventListener("visibilitychange", visibilityListener);
+
+    return () => {
+      removeEventListener("visibilitychange", visibilityListener);
+    };
+  }, [visibilityListener]);
+
   // preview
 
   if (relevantPreview) {
@@ -323,6 +338,7 @@ function PreviewContent({
         setIgnoreClick={setIgnoreClick}
         isPlayingBack={isPlayingBack}
         onTimeUpdate={onTimeUpdate}
+        windowVisible={windowVisible}
       />
     );
   } else if (isCurrentHour(review.start_time)) {
@@ -334,6 +350,7 @@ function PreviewContent({
         setIgnoreClick={setIgnoreClick}
         isPlayingBack={isPlayingBack}
         onTimeUpdate={onTimeUpdate}
+        windowVisible={windowVisible}
       />
     );
   }
@@ -349,6 +366,7 @@ type VideoPreviewProps = {
   setIgnoreClick: (ignore: boolean) => void;
   isPlayingBack: (ended: boolean) => void;
   onTimeUpdate?: (time: number | undefined) => void;
+  windowVisible: boolean;
 };
 export function VideoPreview({
   relevantPreview,
@@ -360,6 +378,7 @@ export function VideoPreview({
   setIgnoreClick,
   isPlayingBack,
   onTimeUpdate,
+  windowVisible,
 }: VideoPreviewProps) {
   const playerRef = useRef<HTMLVideoElement | null>(null);
   const sliderRef = useRef<HTMLDivElement | null>(null);
@@ -409,6 +428,10 @@ export function VideoPreview({
   // time progress update
 
   const onProgress = useCallback(() => {
+    if (!windowVisible) {
+      return;
+    }
+
     if (onTimeUpdate) {
       onTimeUpdate(
         relevantPreview.start + (playerRef.current?.currentTime || 0),
@@ -458,7 +481,7 @@ export function VideoPreview({
 
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setProgress, lastPercent]);
+  }, [setProgress, lastPercent, windowVisible]);
 
   // manual playback
   // safari is incapable of playing at a speed > 2x
@@ -596,6 +619,7 @@ type InProgressPreviewProps = {
   setIgnoreClick: (ignore: boolean) => void;
   isPlayingBack: (ended: boolean) => void;
   onTimeUpdate?: (time: number | undefined) => void;
+  windowVisible: boolean;
 };
 export function InProgressPreview({
   review,
@@ -606,6 +630,7 @@ export function InProgressPreview({
   setIgnoreClick,
   isPlayingBack,
   onTimeUpdate,
+  windowVisible,
 }: InProgressPreviewProps) {
   const apiHost = useApiHost();
   const sliderRef = useRef<HTMLDivElement | null>(null);
@@ -620,7 +645,7 @@ export function InProgressPreview({
   const [key, setKey] = useState(0);
 
   const handleLoad = useCallback(() => {
-    if (!previewFrames) {
+    if (!previewFrames || !windowVisible) {
       return;
     }
 

@@ -1,6 +1,6 @@
 import TimeAgo from "../dynamic/TimeAgo";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { REVIEW_PADDING, ReviewSegment } from "@/types/review";
@@ -22,18 +22,34 @@ export function AnimatedEventCard({ event }: AnimatedEventCardProps) {
 
   const currentHour = useMemo(() => isCurrentHour(event.start_time), [event]);
 
-  // preview
-
-  const previews = useCameraPreviews(
-    {
+  const initialTimeRange = useMemo(() => {
+    return {
       after: Math.round(event.start_time),
       before: Math.round(event.end_time || event.start_time + 20),
-    },
-    {
-      camera: event.camera,
-      fetchPreviews: !currentHour,
-    },
-  );
+    };
+  }, [event]);
+
+  // preview
+
+  const previews = useCameraPreviews(initialTimeRange, {
+    camera: event.camera,
+    fetchPreviews: !currentHour,
+  });
+
+  // visibility
+
+  const [windowVisible, setWindowVisible] = useState(true);
+  const visibilityListener = useCallback(() => {
+    setWindowVisible(document.visibilityState == "visible");
+  }, []);
+
+  useEffect(() => {
+    addEventListener("visibilitychange", visibilityListener);
+
+    return () => {
+      removeEventListener("visibilitychange", visibilityListener);
+    };
+  }, [visibilityListener]);
 
   // interaction
 
@@ -86,6 +102,7 @@ export function AnimatedEventCard({ event }: AnimatedEventCardProps) {
                 setReviewed={() => {}}
                 setIgnoreClick={() => {}}
                 isPlayingBack={() => {}}
+                windowVisible={windowVisible}
               />
             ) : (
               <InProgressPreview
@@ -99,6 +116,7 @@ export function AnimatedEventCard({ event }: AnimatedEventCardProps) {
                 setReviewed={() => {}}
                 setIgnoreClick={() => {}}
                 isPlayingBack={() => {}}
+                windowVisible={windowVisible}
               />
             )}
           </div>
