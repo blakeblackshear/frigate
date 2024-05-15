@@ -36,6 +36,18 @@ Misidentified objects should have a correct label added. For example, if a perso
 
 ## Shortcuts for a faster workflow
 
-- Pressing 's' will switch to the next label for the current box
-- Pressing 'd' will mark the selected box difficult
-- Pressing 'Tab' cycles to the next bounding box (largest to smallest)
+|Shortcut Key|Description|
+|-----|--------|
+|`?`|Show all keyboard shortcuts|
+|`w`|Add box|
+|`d`|Toggle difficult|
+|`s`|Switch to the next label|
+|`tab`|Select next largest box|
+|`del`|Delete current box|
+|`esc`|Deselect/Cancel|
+|`← ↑ → ↓`|Move box|
+|`Shift + ← ↑ → ↓`|Resize box|
+|`-`|Zoom out|
+|`=`|Zoom in|
+|`f`|Hide/show all but current box|
+|`spacebar`|Verify and save|
