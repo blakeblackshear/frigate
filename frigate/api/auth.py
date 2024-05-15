@@ -252,6 +252,20 @@ def auth():
         return fail_response
 
 
+@AuthBp.route("/profile")
+def profile():
+    username = request.headers.get("remote-user", type=str)
+    return jsonify({"username": username})
+
+
+@AuthBp.route("/logout", methods=["POST"])
+def logout():
+    JWT_COOKIE_NAME = current_app.frigate_config.auth.cookie_name
+    response = make_response({}, 200)
+    response.delete_cookie(JWT_COOKIE_NAME)
+    return response
+
+
 @AuthBp.route("/login", methods=["POST"])
 @limiter.limit(get_rate_limit, deduct_when=lambda response: response.status_code == 400)
 def login():

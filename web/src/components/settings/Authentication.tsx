@@ -34,15 +34,13 @@ export default function Authentication() {
       })
       .then((response) => {
         if (response.status == 200) {
-          // console.log("saved");
+          setShowSetPassword(false);
         }
       })
-      .catch((error) => {
-        if (error.response?.data?.message) {
-          // console.log("error");
-        } else {
-          // console.log("error");
-        }
+      .catch((_error) => {
+        toast.error("Error setting password", {
+          position: "top-center",
+        });
       });
   }, []);
 
