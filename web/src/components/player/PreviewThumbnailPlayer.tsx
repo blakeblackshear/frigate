@@ -311,21 +311,6 @@ function PreviewContent({
   isPlayingBack,
   onTimeUpdate,
 }: PreviewContentProps) {
-  // visibility
-
-  const [windowVisible, setWindowVisible] = useState(true);
-  const visibilityListener = useCallback(() => {
-    setWindowVisible(document.visibilityState == "visible");
-  }, []);
-
-  useEffect(() => {
-    addEventListener("visibilitychange", visibilityListener);
-
-    return () => {
-      removeEventListener("visibilitychange", visibilityListener);
-    };
-  }, [visibilityListener]);
-
   // preview
 
   if (relevantPreview) {
@@ -338,7 +323,7 @@ function PreviewContent({
         setIgnoreClick={setIgnoreClick}
         isPlayingBack={isPlayingBack}
         onTimeUpdate={onTimeUpdate}
-        windowVisible={windowVisible}
+        windowVisible={true}
       />
     );
   } else if (isCurrentHour(review.start_time)) {
@@ -350,7 +335,7 @@ function PreviewContent({
         setIgnoreClick={setIgnoreClick}
         isPlayingBack={isPlayingBack}
         onTimeUpdate={onTimeUpdate}
-        windowVisible={windowVisible}
+        windowVisible={true}
       />
     );
   }
