@@ -25,7 +25,9 @@ function Bottombar() {
     <div
       className={cn(
         "absolute inset-x-4 bottom-0 flex h-16 flex-row justify-between",
-        isPWA ? "items-start pt-1" : "items-center",
+        isPWA
+          ? "portrait:items-start portrait:pt-1 landscape:items-center"
+          : "items-center",
         isMobile && !isPWA && "h-12 landscape:md:h-16",
       )}
     >
