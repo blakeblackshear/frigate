@@ -161,6 +161,17 @@ export function useAudioState(camera: string): {
   return { payload: payload as ToggleableSetting, send };
 }
 
+export function useAutotrackingState(camera: string): {
+  payload: ToggleableSetting;
+  send: (payload: ToggleableSetting, retain?: boolean) => void;
+} {
+  const {
+    value: { payload },
+    send,
+  } = useWs(`${camera}/ptz_autotracker/state`, `${camera}/ptz_autotracker/set`);
+  return { payload: payload as ToggleableSetting, send };
+}
+
 export function usePtzCommand(camera: string): {
   payload: string;
   send: (payload: string, retain?: boolean) => void;

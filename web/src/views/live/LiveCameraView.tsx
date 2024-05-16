@@ -1,5 +1,6 @@
 import {
   useAudioState,
+  useAutotrackingState,
   useDetectState,
   usePtzCommand,
   useRecordingsState,
@@ -50,7 +51,7 @@ import {
   FaMicrophoneSlash,
 } from "react-icons/fa";
 import { GiSpeaker, GiSpeakerOff } from "react-icons/gi";
-import { HiViewfinderCircle } from "react-icons/hi2";
+import { TbViewfinder, TbViewfinderOff } from "react-icons/tb";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import {
   LuEar,
@@ -326,6 +327,9 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
               <FrigateCameraFeatures
                 camera={camera.name}
                 audioDetectEnabled={camera.audio.enabled_in_config}
+                autotrackingEnabled={
+                  camera.onvif.autotracking.enabled_in_config
+                }
                 fullscreen={fullscreen}
               />
             </div>
@@ -534,7 +538,7 @@ function PtzControlPanel({
             className={`${clickOverlay ? "text-selected" : "text-primary"}`}
             onClick={() => setClickOverlay(!clickOverlay)}
           >
-            <HiViewfinderCircle />
+            <TbViewfinder />
           </Button>
         </>
       )}
@@ -566,11 +570,13 @@ function PtzControlPanel({
 type FrigateCameraFeaturesProps = {
   camera: string;
   audioDetectEnabled: boolean;
+  autotrackingEnabled: boolean;
   fullscreen: boolean;
 };
 function FrigateCameraFeatures({
   camera,
   audioDetectEnabled,
+  autotrackingEnabled,
   fullscreen,
 }: FrigateCameraFeaturesProps) {
   const { payload: detectState, send: sendDetect } = useDetectState(camera);
@@ -578,6 +584,8 @@ function FrigateCameraFeatures({
   const { payload: snapshotState, send: sendSnapshot } =
     useSnapshotsState(camera);
   const { payload: audioState, send: sendAudio } = useAudioState(camera);
+  const { payload: autotrackingState, send: sendAutotracking } =
+    useAutotrackingState(camera);
 
   // desktop shows icons part of row
   if (isDesktop) {
@@ -615,6 +623,18 @@ function FrigateCameraFeatures({
             isActive={audioState == "ON"}
             title={`${audioState == "ON" ? "Disable" : "Enable"} Audio Detect`}
             onClick={() => sendAudio(audioState == "ON" ? "OFF" : "ON")}
+          />
+        )}
+        {autotrackingEnabled && (
+          <CameraFeatureToggle
+            className="p-2 md:p-0"
+            variant={fullscreen ? "overlay" : "primary"}
+            Icon={autotrackingState == "ON" ? TbViewfinder : TbViewfinderOff}
+            isActive={autotrackingState == "ON"}
+            title={`${autotrackingState == "ON" ? "Disable" : "Enable"} Autotracking`}
+            onClick={() =>
+              sendAutotracking(autotrackingState == "ON" ? "OFF" : "ON")
+            }
           />
         )}
       </>
@@ -660,6 +680,15 @@ function FrigateCameraFeatures({
             label="Audio Detection"
             isChecked={audioState == "ON"}
             onCheckedChange={() => sendAudio(audioState == "ON" ? "OFF" : "ON")}
+          />
+        )}
+        {autotrackingEnabled && (
+          <FilterSwitch
+            label="Autotracking"
+            isChecked={autotrackingState == "ON"}
+            onCheckedChange={() =>
+              sendAutotracking(autotrackingState == "ON" ? "OFF" : "ON")
+            }
           />
         )}
       </DrawerContent>
