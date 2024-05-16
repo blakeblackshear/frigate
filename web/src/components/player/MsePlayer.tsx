@@ -305,6 +305,7 @@ function MSEPlayer({
       onLoadedData={onPlaying}
       onLoadedMetadata={handleLoadedMetadata}
       muted={!audioEnabled}
+      onError={onClose}
     />
   );
 }
