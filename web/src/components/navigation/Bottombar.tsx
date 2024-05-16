@@ -15,12 +15,18 @@ import {
 } from "@/context/statusbar-provider";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { isMobile } from "react-device-detect";
 
 function Bottombar() {
   const navItems = useNavigation("secondary");
 
   return (
-    <div className="absolute inset-x-4 bottom-0 flex h-16 flex-row items-center justify-between">
+    <div
+      className={cn(
+        "absolute inset-x-4 bottom-0 flex flex-row items-center justify-between",
+        isMobile ? "h-12 landscape:md:h-16" : "h-16",
+      )}
+    >
       {navItems.map((item) => (
         <NavItem key={item.id} className="p-2" item={item} Icon={item.icon} />
       ))}
@@ -72,8 +78,10 @@ function StatusAlertNav({ className }: StatusAlertNavProps) {
 
   return (
     <Drawer>
-      <DrawerTrigger>
-        <IoIosWarning className="size-5 text-danger" />
+      <DrawerTrigger asChild>
+        <div className="p-2">
+          <IoIosWarning className="size-5 text-danger md:m-[6px]" />
+        </div>
       </DrawerTrigger>
       <DrawerContent
         className={cn(
@@ -95,7 +103,11 @@ function StatusAlertNav({ className }: StatusAlertNavProps) {
                 );
 
                 if (link) {
-                  return <Link to={link}>{message}</Link>;
+                  return (
+                    <Link key={id} to={link}>
+                      {message}
+                    </Link>
+                  );
                 } else {
                   return message;
                 }

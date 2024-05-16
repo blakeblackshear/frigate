@@ -8,6 +8,7 @@ import Statusbar from "./components/Statusbar";
 import Bottombar from "./components/navigation/Bottombar";
 import { Suspense, lazy } from "react";
 import { Redirect } from "./components/navigation/Redirect";
+import { cn } from "./lib/utils";
 
 const Live = lazy(() => import("@/pages/Live"));
 const Events = lazy(() => import("@/pages/Events"));
@@ -31,7 +32,12 @@ function App() {
             {isMobile && <Bottombar />}
             <div
               id="pageRoot"
-              className={`absolute right-0 top-0 overflow-hidden ${isMobile ? "bottom-16 left-0" : "bottom-8 left-[52px]"}`}
+              className={cn(
+                "absolute right-0 top-0 overflow-hidden",
+                isMobile
+                  ? "bottom-12 left-0 md:bottom-16 landscape:bottom-14 landscape:md:bottom-16"
+                  : "bottom-8 left-[52px]",
+              )}
             >
               <Suspense>
                 <Routes>
