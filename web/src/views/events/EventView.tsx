@@ -254,7 +254,7 @@ export default function EventView({
   return (
     <div className="flex size-full flex-col pt-2 md:py-2">
       <Toaster closeButton={true} />
-      <div className="relative mb-2 flex h-11 items-center justify-between pl-3 pr-2">
+      <div className="relative mb-2 flex h-11 items-center justify-between pl-2 pr-2 md:pl-3">
         {isMobile && (
           <Logo className="absolute inset-x-1/2 h-8 -translate-x-1/2" />
         )}
@@ -602,7 +602,7 @@ function DetectionReview({
         )}
 
         <div
-          className="mx-2 grid w-full gap-2 px-1 sm:grid-cols-2 md:grid-cols-3 md:gap-4 3xl:grid-cols-4"
+          className="grid w-full gap-2 px-1 sm:grid-cols-2 md:mx-2 md:grid-cols-3 md:gap-4 3xl:grid-cols-4"
           ref={contentRef}
         >
           {!loading && currentItems
@@ -922,7 +922,7 @@ function MotionReview({
       <div className="no-scrollbar flex flex-1 flex-wrap content-start gap-2 overflow-y-auto md:gap-4">
         <div
           ref={contentRef}
-          className="no-scrollbar mx-2 grid w-full gap-2 overflow-auto px-1 sm:grid-cols-2 md:gap-4 xl:grid-cols-3 3xl:grid-cols-4"
+          className="no-scrollbar grid w-full gap-2 overflow-auto px-1 sm:grid-cols-2 md:mx-2 md:gap-4 xl:grid-cols-3 3xl:grid-cols-4"
         >
           {reviewCameras.map((camera) => {
             let grow;

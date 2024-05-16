@@ -16,6 +16,7 @@ import {
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { isMobile } from "react-device-detect";
+import { isPWA } from "@/utils/isPWA";
 
 function Bottombar() {
   const navItems = useNavigation("secondary");
@@ -23,8 +24,11 @@ function Bottombar() {
   return (
     <div
       className={cn(
-        "absolute inset-x-4 bottom-0 flex flex-row items-center justify-between",
-        isMobile ? "h-12 landscape:md:h-16" : "h-16",
+        "absolute inset-x-4 bottom-0 flex h-16 flex-row justify-between",
+        isPWA
+          ? "portrait:items-start portrait:pt-1 landscape:items-center"
+          : "items-center",
+        isMobile && !isPWA && "h-12 landscape:md:h-16",
       )}
     >
       {navItems.map((item) => (
