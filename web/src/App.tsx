@@ -9,6 +9,7 @@ import Bottombar from "./components/navigation/Bottombar";
 import { Suspense, lazy } from "react";
 import { Redirect } from "./components/navigation/Redirect";
 import { cn } from "./lib/utils";
+import { isPWA } from "./utils/isPWA";
 
 const Live = lazy(() => import("@/pages/Live"));
 const Events = lazy(() => import("@/pages/Events"));
@@ -34,9 +35,10 @@ function App() {
               id="pageRoot"
               className={cn(
                 "absolute right-0 top-0 overflow-hidden",
-                isMobile
-                  ? "bottom-12 left-0 md:bottom-16 landscape:bottom-14 landscape:md:bottom-16"
-                  : "bottom-8 left-[52px]",
+                isMobile &&
+                  "bottom-12 left-0 md:bottom-16 landscape:bottom-14 landscape:md:bottom-16",
+                isMobile && isPWA && "bottom-16",
+                isDesktop && "bottom-8 left-[52px]",
               )}
             >
               <Suspense>
