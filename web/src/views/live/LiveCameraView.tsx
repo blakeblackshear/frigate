@@ -20,7 +20,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { CameraConfig } from "@/types/frigateConfig";
-import { VideoResolutionType } from "@/types/live";
+import { LiveStreamMetadata, VideoResolutionType } from "@/types/live";
 import { CameraPtzInfo } from "@/types/ptz";
 import { RecordingStartingPoint } from "@/types/record";
 import React, {
@@ -81,6 +81,28 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
   const mainRef = useRef<HTMLDivElement | null>(null);
   const [{ width: windowWidth, height: windowHeight }] =
     useResizeObserver(window);
+
+  // supported features
+
+  const { data: cameraMetadata } = useSWR<LiveStreamMetadata>(
+    `go2rtc/streams/${camera.live.stream_name}`,
+    {
+      revalidateOnFocus: false,
+    },
+  );
+
+  const supports2WayTalk = useMemo(() => {
+    if (!window.isSecureContext || !cameraMetadata) {
+      return false;
+    }
+
+    return (
+      cameraMetadata.producers.find(
+        (prod) =>
+          prod.medias.find((media) => media.includes("sendonly")) != undefined,
+      ) != undefined
+    );
+  }, [cameraMetadata]);
 
   // click overlay for ptzs
 
@@ -305,7 +327,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
                   }}
                 />
               )}
-              {window.isSecureContext && (
+              {supports2WayTalk && (
                 <CameraFeatureToggle
                   className="p-2 md:p-0"
                   variant={fullscreen ? "overlay" : "primary"}
