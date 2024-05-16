@@ -54,7 +54,7 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
                     isDesktop
                       ? "cursor-pointer rounded-lg bg-secondary text-secondary-foreground hover:bg-muted"
                       : "text-secondary-foreground",
-                    className
+                    className,
                   )}
                 >
                   <VscAccount className="size-5 md:m-[6px]" />
