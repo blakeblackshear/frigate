@@ -99,10 +99,22 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
     return (
       cameraMetadata.producers.find(
         (prod) =>
-          prod.medias.find((media) => media.includes("sendonly")) != undefined,
+          prod.medias.find((media) => media.includes("audio, sendonly")) != undefined,
       ) != undefined
     );
   }, [cameraMetadata]);
+  const supportsAudioOutput = useMemo(() => {
+    if (!cameraMetadata) {
+      return false;
+    }
+
+    return (
+      cameraMetadata.producers.find(
+        (prod) =>
+          prod.medias.find((media) => media.includes("audio, recvonly")) != undefined,
+      ) != undefined
+    );
+  }, [cameraMetadata])
 
   // click overlay for ptzs
 
@@ -337,14 +349,14 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
                   onClick={() => setMic(!mic)}
                 />
               )}
-              <CameraFeatureToggle
+              {supportsAudioOutput && <CameraFeatureToggle
                 className="p-2 md:p-0"
                 variant={fullscreen ? "overlay" : "primary"}
                 Icon={audio ? GiSpeaker : GiSpeakerOff}
                 isActive={audio}
                 title={`${audio ? "Disable" : "Enable"} Camera Audio`}
                 onClick={() => setAudio(!audio)}
-              />
+              />}
               <FrigateCameraFeatures
                 camera={camera.name}
                 audioDetectEnabled={camera.audio.enabled_in_config}
