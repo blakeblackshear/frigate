@@ -77,7 +77,7 @@ function Exports() {
   const [selected, setSelected] = useState<Export>();
 
   return (
-    <div className="flex size-full flex-col gap-2 overflow-hidden p-2">
+    <div className="flex size-full flex-col gap-2 overflow-hidden px-1 pt-2 md:p-2">
       <AlertDialog
         open={deleteClip != undefined}
         onOpenChange={() => setDeleteClip(undefined)}

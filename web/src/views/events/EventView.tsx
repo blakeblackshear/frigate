@@ -252,7 +252,7 @@ export default function EventView({
   }
 
   return (
-    <div className="flex size-full flex-col py-2">
+    <div className="flex size-full flex-col pt-2 md:py-2">
       <Toaster closeButton={true} />
       <div className="relative mb-2 flex h-11 items-center justify-between pl-3 pr-2">
         {isMobile && (

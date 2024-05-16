@@ -155,7 +155,10 @@ export default function LiveDashboardView({
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
 
   return (
-    <div className="size-full overflow-y-auto p-2" ref={containerRef}>
+    <div
+      className="size-full overflow-y-auto px-1 pt-2 md:p-2"
+      ref={containerRef}
+    >
       {isMobile && (
         <div className="relative flex h-11 items-center justify-between">
           <Logo className="absolute inset-x-1/2 h-8 -translate-x-1/2" />
