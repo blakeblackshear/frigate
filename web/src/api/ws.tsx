@@ -42,13 +42,17 @@ function useValue(): useValueReturn {
     const cameraStates: WsState = {};
 
     Object.keys(config.cameras).forEach((camera) => {
-      const { name, record, detect, snapshots, audio } = config.cameras[camera];
+      const { name, record, detect, snapshots, audio, onvif } =
+        config.cameras[camera];
       cameraStates[`${name}/recordings/state`] = record.enabled ? "ON" : "OFF";
       cameraStates[`${name}/detect/state`] = detect.enabled ? "ON" : "OFF";
       cameraStates[`${name}/snapshots/state`] = snapshots.enabled
         ? "ON"
         : "OFF";
       cameraStates[`${name}/audio/state`] = audio.enabled ? "ON" : "OFF";
+      cameraStates[`${name}/ptz_autotracker/state`] = onvif.autotracking.enabled
+        ? "ON"
+        : "OFF";
     });
 
     setWsState({ ...wsState, ...cameraStates });
