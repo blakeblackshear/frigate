@@ -83,13 +83,13 @@ export default function Authentication() {
   }
 
   return (
-    <div className="flex flex-col md:flex-row size-full">
+    <div className="flex size-full flex-col md:flex-row">
       <Toaster position="top-center" closeButton={true} />
-      <div className="flex flex-col h-full w-full overflow-y-auto mt-2 md:mt-0 mb-10 md:mb-0 order-last md:order-none md:mr-2 rounded-lg border-secondary-foreground border-[1px] p-2 bg-background_alt">
+      <div className="order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
         <Heading as="h3" className="my-2">
           Users
         </Heading>
-        <div className="flex flex-row justify-end items-center gap-2">
+        <div className="flex flex-row items-center justify-end gap-2">
           <Button
             variant="select"
             onClick={() => {
@@ -101,9 +101,9 @@ export default function Authentication() {
         </div>
         <div className="mt-3 space-y-3">
           {users.map((u) => (
-            <Card key={u.username} className="p-2 mb-1">
+            <Card key={u.username} className="mb-1 p-2">
               <div className="flex items-center gap-3">
-                <div className="flex flex-none ml-3 text-lg align-middle text-ellipsis overflow-hidden shrink">
+                <div className="ml-3 flex flex-none shrink overflow-hidden text-ellipsis align-middle text-lg">
                   {u.username}
                 </div>
                 <div className="flex flex-1 justify-end space-x-2 ">

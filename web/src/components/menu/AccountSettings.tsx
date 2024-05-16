@@ -70,7 +70,7 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
         </Trigger>
         <Content
           className={
-            isDesktop ? "w-72 mr-5" : "max-h-[75dvh] p-2 overflow-hidden"
+            isDesktop ? "mr-5 w-72" : "max-h-[75dvh] overflow-hidden p-2"
           }
         >
           <div className="w-full flex-col overflow-y-auto overflow-x-hidden">
@@ -80,7 +80,7 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
             <DropdownMenuSeparator className={isDesktop ? "mt-3" : "mt-1"} />
             <MenuItem
               className={
-                isDesktop ? "cursor-pointer" : "p-2 flex items-center text-sm"
+                isDesktop ? "cursor-pointer" : "flex items-center p-2 text-sm"
               }
               onClick={() => handleLogout()}
             >

@@ -92,7 +92,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                 <FormLabel>User</FormLabel>
                 <FormControl>
                   <Input
-                    className="w-full text-md p-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                    className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                     {...field}
                   />
                 </FormControl>
@@ -106,7 +106,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                 <FormLabel>Password</FormLabel>
                 <FormControl>
                   <Input
-                    className="w-full text-md p-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                    className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                     type="password"
                     {...field}
                   />

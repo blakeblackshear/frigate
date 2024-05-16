@@ -74,7 +74,7 @@ export default function CreateUserDialog({
                   <FormLabel>User</FormLabel>
                   <FormControl>
                     <Input
-                      className="w-full p-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                      className="w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                       {...field}
                     />
                   </FormControl>
@@ -89,7 +89,7 @@ export default function CreateUserDialog({
                   <FormLabel>Password</FormLabel>
                   <FormControl>
                     <Input
-                      className="w-full p-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                      className="w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                       type="password"
                       {...field}
                     />

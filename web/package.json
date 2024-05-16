@@ -7,6 +7,7 @@
     "dev": "vite --host",
     "build": "tsc && vite build --base=/BASE_PATH/",
     "lint": "eslint --ext .jsx,.js,.tsx,.ts --ignore-path .gitignore .",
+    "lint:fix": "eslint --ext .jsx,.js,.tsx,.ts --ignore-path .gitignore --fix .",
     "preview": "vite preview",
     "prettier:write": "prettier -u -w --ignore-path .gitignore \"*.{ts,tsx,js,jsx,css,html}\"",
     "test": "vitest",
