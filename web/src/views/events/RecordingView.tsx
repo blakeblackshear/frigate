@@ -544,7 +544,7 @@ export function RecordingView({
                 className={cn(
                   "flex gap-2 overflow-auto",
                   mainCameraAspect == "tall"
-                    ? "h-full w-48 flex-col"
+                    ? "h-full w-72 flex-col"
                     : `h-28 w-full`,
                   previewRowOverflows ? "" : "items-center justify-center",
                 )}
@@ -559,7 +559,7 @@ export function RecordingView({
                     <div
                       key={cam}
                       className={
-                        mainCameraAspect == "tall" ? undefined : "h-full"
+                        mainCameraAspect == "tall" ? "w-full" : "h-full"
                       }
                       style={{
                         aspectRatio: getCameraAspect(cam),

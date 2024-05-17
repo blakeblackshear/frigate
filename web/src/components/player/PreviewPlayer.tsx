@@ -40,6 +40,33 @@ export default function PreviewPlayer({
 }: PreviewPlayerProps) {
   const [currentHourFrame, setCurrentHourFrame] = useState<string>();
 
+  const currentPreview = useMemo(() => {
+    return cameraPreviews.find(
+      (preview) =>
+        preview.camera == camera &&
+        Math.round(preview.start) >= timeRange.after &&
+        Math.floor(preview.end) <= timeRange.before,
+    );
+  }, [cameraPreviews, camera, timeRange]);
+
+  if (currentPreview) {
+    return (
+      <PreviewVideoPlayer
+        className={className}
+        camera={camera}
+        timeRange={timeRange}
+        cameraPreviews={cameraPreviews}
+        initialPreview={currentPreview}
+        startTime={startTime}
+        isScrubbing={isScrubbing}
+        currentHourFrame={currentHourFrame}
+        onControllerReady={onControllerReady}
+        onClick={onClick}
+        setCurrentHourFrame={setCurrentHourFrame}
+      />
+    );
+  }
+
   if (isCurrentHour(timeRange.before)) {
     return (
       <PreviewFramesPlayer
@@ -55,19 +82,10 @@ export default function PreviewPlayer({
   }
 
   return (
-    <PreviewVideoPlayer
-      className={className}
-      camera={camera}
-      timeRange={timeRange}
-      cameraPreviews={cameraPreviews}
-      startTime={startTime}
-      isScrubbing={isScrubbing}
-      currentHourFrame={currentHourFrame}
-      onControllerReady={onControllerReady}
-      onClick={onClick}
-      setCurrentHourFrame={setCurrentHourFrame}
-    />
-  );
+    <div className="size-full flex items-center justify-center rounded-lg text-white md:rounded-2xl">
+      No Preview Found
+    </div>
+  )
 }
 
 export abstract class PreviewController {
@@ -89,6 +107,7 @@ type PreviewVideoPlayerProps = {
   camera: string;
   timeRange: TimeRange;
   cameraPreviews: Preview[];
+  initialPreview?: Preview;
   startTime?: number;
   isScrubbing: boolean;
   currentHourFrame?: string;
@@ -101,6 +120,7 @@ function PreviewVideoPlayer({
   camera,
   timeRange,
   cameraPreviews,
+  initialPreview,
   startTime,
   isScrubbing,
   currentHourFrame,
@@ -146,18 +166,6 @@ function PreviewVideoPlayer({
   // initial state
 
   const [firstLoad, setFirstLoad] = useState(true);
-
-  const initialPreview = useMemo(() => {
-    return cameraPreviews.find(
-      (preview) =>
-        preview.camera == camera &&
-        Math.round(preview.start) >= timeRange.after &&
-        Math.floor(preview.end) <= timeRange.before,
-    );
-
-    // we only want to calculate this once
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const [currentPreview, setCurrentPreview] = useState(initialPreview);
 
