@@ -32,6 +32,7 @@ class Rknn(DetectionApi):
     type_key = DETECTOR_KEY
 
     def __init__(self, config: RknnDetectorConfig):
+        super().__init__(config)
         self.height = config.model.height
         self.width = config.model.width
         core_mask = 2**config.num_cores - 1
@@ -108,6 +109,8 @@ class Rknn(DetectionApi):
                     f"Model {model_path} is unsupported. Provide your own model or choose one of the following: {supported_models_str}"
                 )
 
+        return model_props
+
     def download_model(self, filename):
         if not os.path.isdir(model_chache_dir):
             os.mkdir(model_chache_dir)
@@ -133,13 +136,10 @@ class Rknn(DetectionApi):
                 'Make sure to set the model input_tensor to "nhwc" in your config.yml.'
             )
 
-    def post_process(self, output):
-        pass
-
     def detect_raw(self, tensor_input):
         output = self.rknn.inference(
             [
                 tensor_input,
             ]
         )
-        return self.postprocess(output[0])
+        return self.post_process(output)
