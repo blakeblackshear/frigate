@@ -27,7 +27,7 @@ from frigate.comms.dispatcher import Communicator, Dispatcher
 from frigate.comms.inter_process import InterProcessCommunicator
 from frigate.comms.mqtt import MqttClient
 from frigate.comms.ws import WebSocketClient
-from frigate.config import FrigateConfig
+from frigate.config import AuthModeEnum, FrigateConfig
 from frigate.const import (
     CACHE_DIR,
     CLIPS_DIR,
@@ -592,7 +592,7 @@ class FrigateApp:
             )
 
     def init_auth(self) -> None:
-        if self.config.auth.enabled:
+        if self.config.auth.mode == AuthModeEnum.native:
             if User.select().count() == 0:
                 password = secrets.token_hex(16)
                 password_hash = hash_password(

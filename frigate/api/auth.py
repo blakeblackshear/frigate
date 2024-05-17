@@ -17,6 +17,7 @@ from flask_limiter import Limiter
 from joserfc import jwt
 from peewee import DoesNotExist
 
+from frigate.config import AuthModeEnum
 from frigate.const import CONFIG_DIR, JWT_SECRET_ENV_VAR, PASSWORD_HASH_ALGORITHM
 from frigate.models import User
 
@@ -175,11 +176,23 @@ def auth():
     if request.headers.get("x-server-port", 0, type=int) == 5000:
         return success_response
 
+    # if proxy auth mode
+    if current_app.frigate_config.auth.mode == AuthModeEnum.proxy:
+        # pass the user header value from the upstream proxy if a mapping is specified
+        # or use anonymous if none are specified
+        if current_app.frigate_config.auth.header_map.user is not None:
+            upstream_user_header_value = request.headers.get(
+                current_app.frigate_config.auth.header_map.user,
+                type=str,
+                default="anonymous",
+            )
+            success_response.headers["remote-user"] = upstream_user_header_value
+        else:
+            success_response.headers["remote-user"] = "anonymous"
+        return success_response
+
     fail_response = make_response({}, 401)
     fail_response.headers["location"] = "/login"
-
-    if not current_app.frigate_config.auth.enabled:
-        return success_response
 
     JWT_COOKIE_NAME = current_app.frigate_config.auth.cookie_name
     JWT_REFRESH = current_app.frigate_config.auth.refresh_time

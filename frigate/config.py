@@ -116,8 +116,19 @@ class UIConfig(FrigateBaseModel):
     )
 
 
+class AuthModeEnum(str, Enum):
+    native = "native"
+    proxy = "proxy"
+
+
+class HeaderMappingConfig(FrigateBaseModel):
+    user: str = Field(
+        default=None, title="Header name from upstream proxy to identify user."
+    )
+
+
 class AuthConfig(FrigateBaseModel):
-    enabled: bool = Field(default=False, title="Enable authentication")
+    mode: AuthModeEnum = Field(default=AuthModeEnum.native, title="Authentication mode")
     reset_admin_password: bool = Field(
         default=False, title="Reset the admin password on startup"
     )
@@ -131,6 +142,10 @@ class AuthConfig(FrigateBaseModel):
         default=43200,
         title="Refresh the session if it is going to expire in this many seconds",
         ge=30,
+    )
+    header_map: Optional[HeaderMappingConfig] = Field(
+        default_factory=HeaderMappingConfig,
+        title="Header mapping definitions for proxy auth mode.",
     )
     failed_login_rate_limit: Optional[str] = Field(
         default="1/second;5/minute;20/hour",
