@@ -22,7 +22,7 @@ class DetectionApi(ABC):
     def detect_raw(self, tensor_input):
         pass
 
-    def yolonas(self, output):
+    def post_process_yolonas(self, output):
         """
         @param output: output of inference
         expected shape: [np.array(1, N, 4), np.array(1, N, 80)]
