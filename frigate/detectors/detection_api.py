@@ -1,7 +1,9 @@
 import logging
-from frigate.detectors.detector_config import ModelTypeEnum
 from abc import ABC, abstractmethod
+
 import numpy as np
+
+from frigate.detectors.detector_config import ModelTypeEnum
 
 logger = logging.getLogger(__name__)
 
@@ -54,20 +56,24 @@ class DetectionApi(ABC):
         boxes = np.transpose(
             np.vstack(
                 (
-                    boxes[:, 1]/self.height,
-                    boxes[:, 0]/self.width,
-                    boxes[:, 3]/self.height,
-                    boxes[:, 2]/self.width,
+                    boxes[:, 1] / self.height,
+                    boxes[:, 0] / self.width,
+                    boxes[:, 3] / self.height,
+                    boxes[:, 2] / self.width,
                 )
             )
         )
 
-        results = np.hstack((class_ids[..., np.newaxis], scores[..., np.newaxis], boxes))
+        results = np.hstack(
+            (class_ids[..., np.newaxis], scores[..., np.newaxis], boxes)
+        )
 
-        return np.resize(results, (20,6))
+        return np.resize(results, (20, 6))
 
     def post_process(self, output):
         if self.detector_config.model.model_type == ModelTypeEnum.yolonas:
             return self.yolonas(output)
         else:
-            raise ValueError(f'Model type "{self.detector_config.model.model_type}" is currently not supported.')
+            raise ValueError(
+                f'Model type "{self.detector_config.model.model_type}" is currently not supported.'
+            )
