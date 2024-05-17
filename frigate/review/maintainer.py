@@ -441,10 +441,13 @@ class ReviewSegmentMaintainer(threading.Thread):
                 if camera not in self.indefinite_events:
                     self.indefinite_events[camera] = {}
 
-            if not self.config.cameras[camera].record.enabled:
-                continue
-
             current_segment = self.active_review_segments.get(camera)
+
+            if not self.config.cameras[camera].record.enabled:
+                if current_segment:
+                    self.update_existing_segment(current_segment, frame_time, [])
+
+                continue
 
             if current_segment is not None:
                 if topic == DetectionTypeEnum.video:
