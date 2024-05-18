@@ -160,10 +160,10 @@ def create_encoded_jwt(user, expiration, secret):
     return jwt.encode({"alg": "HS256"}, {"sub": user, "exp": expiration}, secret)
 
 
-def set_jwt_cookie(response, cookie_name, encoded_jwt, expiration):
+def set_jwt_cookie(response, cookie_name, encoded_jwt, expiration, secure):
     # TODO: ideally this would set secure as well, but that requires TLS
     response.set_cookie(
-        cookie_name, encoded_jwt, httponly=True, expires=expiration, secure=False
+        cookie_name, encoded_jwt, httponly=True, expires=expiration, secure=secure
     )
 
 
@@ -196,6 +196,7 @@ def auth():
     fail_response.headers["location"] = "/login"
 
     JWT_COOKIE_NAME = current_app.frigate_config.auth.cookie_name
+    JWT_COOKIE_SECURE = current_app.frigate_config.auth.cookie_secure
     JWT_REFRESH = current_app.frigate_config.auth.refresh_time
     JWT_SESSION_LENGTH = current_app.frigate_config.auth.session_length
 
@@ -256,7 +257,11 @@ def auth():
                 user, new_expiration, current_app.jwt_token
             )
             set_jwt_cookie(
-                success_response, JWT_COOKIE_NAME, new_encoded_jwt, new_expiration
+                success_response,
+                JWT_COOKIE_NAME,
+                new_encoded_jwt,
+                new_expiration,
+                JWT_COOKIE_SECURE,
             )
 
         success_response.headers["remote-user"] = user
@@ -284,6 +289,7 @@ def logout():
 @limiter.limit(get_rate_limit, deduct_when=lambda response: response.status_code == 400)
 def login():
     JWT_COOKIE_NAME = current_app.frigate_config.auth.cookie_name
+    JWT_COOKIE_SECURE = current_app.frigate_config.auth.cookie_secure
     JWT_SESSION_LENGTH = current_app.frigate_config.auth.session_length
     content = request.get_json()
     user = content["user"]
@@ -299,7 +305,9 @@ def login():
         expiration = int(time.time()) + JWT_SESSION_LENGTH
         encoded_jwt = create_encoded_jwt(user, expiration, current_app.jwt_token)
         response = make_response({}, 200)
-        set_jwt_cookie(response, JWT_COOKIE_NAME, encoded_jwt, expiration)
+        set_jwt_cookie(
+            response, JWT_COOKIE_NAME, encoded_jwt, expiration, JWT_COOKIE_SECURE
+        )
         return response
     return make_response({"message": "Login failed"}, 400)
 
