@@ -6,7 +6,7 @@ import numpy as np
 try:
     import tensorrt as trt
     from cuda import cuda
-    TRT_VERSION = int(trt.__version__[0:trt.__version__.find(".")])
+    TRT_VERSION = int(trt.__version__[0 : trt.__version__.find(".")])
 
     TRT_SUPPORT = True
 except ModuleNotFoundError:
