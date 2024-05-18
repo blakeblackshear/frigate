@@ -18,11 +18,11 @@ Frigate supports two modes for authentication
 
 Frigate stores user information in its database. Password hashes are generated using industry standard PBKDF2-SHA256 with 600,000 iterations. Upon successful login, a JWT token is issued with an expiration date and set as a cookie. The cookie is refreshed as needed automatically. This JWT token can also be passed in the Authorization header as a bearer token.
 
-Users are managed in the UI under Settings > Authentication.
+Users are managed in the UI under Settings > Users.
 
 #### Onboarding
 
-On startup, an admin user and password are generated and printed in the logs. It is recommended to set a new password for the admin account after logging in for the first time under Settings > Authentication.
+On startup, an admin user and password are generated and printed in the logs. It is recommended to set a new password for the admin account after logging in for the first time under Settings > Users.
 
 #### Resetting admin password
 
