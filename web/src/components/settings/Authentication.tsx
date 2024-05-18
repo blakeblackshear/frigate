@@ -12,6 +12,9 @@ import CreateUserDialog from "../overlay/CreateUserDialog";
 import { toast } from "sonner";
 import DeleteUserDialog from "../overlay/DeleteUserDialog";
 import { Card } from "../ui/card";
+import { HiTrash } from "react-icons/hi";
+import { FaUserEdit } from "react-icons/fa";
+import { LuPlus } from "react-icons/lu";
 
 export default function Authentication() {
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -86,16 +89,18 @@ export default function Authentication() {
     <div className="flex size-full flex-col md:flex-row">
       <Toaster position="top-center" closeButton={true} />
       <div className="order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
-        <Heading as="h3" className="my-2">
-          Users
-        </Heading>
-        <div className="flex flex-row items-center justify-end gap-2">
+        <div className="flex flex-row items-center justify-between gap-2">
+          <Heading as="h3" className="my-2">
+            Users
+          </Heading>
           <Button
-            variant="select"
+            className="flex items-center gap-1"
+            variant="default"
             onClick={() => {
               setShowCreate(true);
             }}
           >
+            <LuPlus className="text-secondary-foreground" />
             Add User
           </Button>
         </div>
@@ -106,24 +111,28 @@ export default function Authentication() {
                 <div className="ml-3 flex flex-none shrink overflow-hidden text-ellipsis align-middle text-lg">
                   {u.username}
                 </div>
-                <div className="flex flex-1 justify-end space-x-2 ">
+                <div className="flex flex-1 justify-end space-x-2">
                   <Button
+                    className="flex items-center gap-1"
                     variant="secondary"
                     onClick={() => {
                       setShowSetPassword(true);
                       setSelectedUser(u.username);
                     }}
                   >
-                    Set Password
+                    <FaUserEdit />
+                    <div className="hidden md:block">Update Password</div>
                   </Button>
                   <Button
+                    className="flex items-center gap-1"
                     variant="destructive"
                     onClick={() => {
                       setShowDelete(true);
                       setSelectedUser(u.username);
                     }}
                   >
-                    Delete
+                    <HiTrash />
+                    <div className="hidden md:block">Delete</div>
                   </Button>
                 </div>
               </div>
