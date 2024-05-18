@@ -147,8 +147,8 @@ class AuthConfig(FrigateBaseModel):
         default_factory=HeaderMappingConfig,
         title="Header mapping definitions for proxy auth mode.",
     )
-    failed_login_rate_limit: str = Field(
-        default="1/second;5/minute;20/hour",
+    failed_login_rate_limit: Optional[str] = Field(
+        default=None,
         title="Rate limits for failed login attempts.",
     )
     trusted_proxies: List[str] = Field(

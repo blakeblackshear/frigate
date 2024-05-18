@@ -50,6 +50,7 @@ module.exports = {
         "configuration/stationary_objects",
       ],
       "Extra Configuration": [
+        "configuration/authentication",
         "configuration/hardware_acceleration",
         "configuration/ffmpeg_presets",
         "configuration/advanced",
