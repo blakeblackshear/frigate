@@ -73,6 +73,9 @@ auth:
   reset_admin_password: False
   # Optional: Cookie to store the JWT token for native auth (default: shown below)
   cookie_name: frigate_token
+  # Optional: Set secure flag on cookie. (default: shown below)
+  # NOTE: This should be set to True if you are using TLS
+  cookie_secure: False
   # Optional: Session length in seconds (default: shown below)
   session_length: 86400 # 24 hours
   # Optional: Refresh time in seconds (default: shown below)

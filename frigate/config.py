@@ -135,6 +135,7 @@ class AuthConfig(FrigateBaseModel):
     cookie_name: str = Field(
         default="frigate_token", title="Name for jwt token cookie", pattern=r"^[a-z]_*$"
     )
+    cookie_secure: bool = Field(default=False, title="Set secure flag on cookie")
     session_length: int = Field(
         default=86400, title="Session length for jwt session tokens", ge=60
     )
