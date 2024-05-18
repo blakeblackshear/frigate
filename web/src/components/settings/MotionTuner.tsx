@@ -42,7 +42,7 @@ export default function MotionTuner({
   const [changedValue, setChangedValue] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { addMessage, clearMessages } = useContext(StatusBarMessagesContext)!;
+  const { addMessage, removeMessage } = useContext(StatusBarMessagesContext)!;
 
   const { send: sendMotionThreshold } = useMotionThreshold(selectedCamera);
   const { send: sendMotionContourArea } = useMotionContourArea(selectedCamera);
@@ -148,21 +148,23 @@ export default function MotionTuner({
   const onCancel = useCallback(() => {
     setMotionSettings(origMotionSettings);
     setChangedValue(false);
-    clearMessages("motion_tuner");
-  }, [origMotionSettings, clearMessages]);
+    removeMessage("motion_tuner", `motion_tuner_${selectedCamera}`);
+  }, [origMotionSettings, removeMessage, selectedCamera]);
 
   useEffect(() => {
     if (changedValue) {
       addMessage(
         "motion_tuner",
-        "Unsaved motion tuner changes",
+        `Unsaved motion tuner changes (${selectedCamera})`,
         undefined,
-        "motion_tuner",
+        `motion_tuner_${selectedCamera}`,
       );
     } else {
-      clearMessages("motion_tuner");
+      removeMessage("motion_tuner", `motion_tuner_${selectedCamera}`);
     }
-  }, [changedValue, addMessage, clearMessages]);
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [changedValue, selectedCamera]);
 
   useEffect(() => {
     document.title = "Motion Tuner - Frigate";

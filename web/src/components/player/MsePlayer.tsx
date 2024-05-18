@@ -28,8 +28,6 @@ function MSEPlayer({
   onPlaying,
   setFullResolution,
 }: MSEPlayerProps) {
-  let connectTS: number = 0;
-
   const RECONNECT_TIMEOUT: number = 30000;
 
   const CODECS: string[] = [
@@ -46,6 +44,7 @@ function MSEPlayer({
   const visibilityCheck: boolean = !pip;
 
   const [wsState, setWsState] = useState<number>(WebSocket.CLOSED);
+  const [connectTS, setConnectTS] = useState<number>(0);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -103,14 +102,14 @@ function MSEPlayer({
 
     setWsState(WebSocket.CONNECTING);
 
-    // TODO may need to check this later
-    // eslint-disable-next-line
-    connectTS = Date.now();
+    setConnectTS(Date.now());
 
     wsRef.current = new WebSocket(wsURL);
     wsRef.current.binaryType = "arraybuffer";
-    wsRef.current.addEventListener("open", () => onOpen());
-    wsRef.current.addEventListener("close", () => onClose());
+    wsRef.current.addEventListener("open", onOpen);
+    wsRef.current.addEventListener("close", onClose);
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wsURL]);
 
   const onDisconnect = useCallback(() => {
@@ -121,7 +120,7 @@ function MSEPlayer({
     }
   }, []);
 
-  const onOpen = useCallback(() => {
+  const onOpen = () => {
     setWsState(WebSocket.OPEN);
 
     wsRef.current?.addEventListener("message", (ev) => {
@@ -139,23 +138,36 @@ function MSEPlayer({
     onmessageRef.current = {};
 
     onMse();
-    // only run once
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  };
 
-  const onClose = useCallback(() => {
-    if (wsState === WebSocket.CLOSED) return;
-
+  const reconnect = (timeout?: number) => {
+    console.log("reconnecting", camera);
     setWsState(WebSocket.CONNECTING);
     wsRef.current = null;
 
-    const delay = Math.max(RECONNECT_TIMEOUT - (Date.now() - connectTS), 0);
+    const delay =
+      timeout ?? Math.max(RECONNECT_TIMEOUT - (Date.now() - connectTS), 0);
 
     reconnectTIDRef.current = window.setTimeout(() => {
       reconnectTIDRef.current = null;
+      console.log("timeout ended, running onconnect", camera);
       onConnect();
     }, delay);
-  }, [wsState, connectTS, onConnect]);
+  };
+
+  const onClose = () => {
+    console.log(
+      "onClose running for",
+      camera,
+      wsState,
+      "closed?",
+      wsState === WebSocket.CLOSED,
+    );
+    if (wsState === WebSocket.CLOSED) return;
+    console.log("onClose running for", camera, "websocket not closed");
+
+    reconnect();
+  };
 
   const onMse = () => {
     if ("ManagedMediaSource" in window) {
@@ -296,6 +308,10 @@ function MSEPlayer({
     videoRef.current.requestPictureInPicture();
   }, [pip, videoRef]);
 
+  useEffect(() => {
+    console.log(camera, wsState);
+  }, [camera, wsState]);
+
   return (
     <video
       ref={videoRef}
@@ -305,7 +321,23 @@ function MSEPlayer({
       onLoadedData={onPlaying}
       onLoadedMetadata={handleLoadedMetadata}
       muted={!audioEnabled}
-      onError={onClose}
+      onError={(e) => {
+        console.log("onError event", e);
+        const videoElement = e.target as HTMLVideoElement;
+        if (videoElement.error) {
+          console.log("Video Error Code:", videoElement.error.code);
+          console.log("Video Error Message:", videoElement.error.message);
+        } else {
+          console.log("An unknown error occurred");
+        }
+        console.log("Camera object:", camera);
+        if (wsRef.current) {
+          console.log("websocket is", wsState);
+          wsRef.current.close();
+          wsRef.current = null;
+          reconnect(5000);
+        }
+      }}
     />
   );
 }

@@ -29,7 +29,7 @@ type StatusBarMessagesContextValue = {
     color?: string,
     messageId?: string,
     link?: string,
-  ) => string;
+  ) => string | undefined;
   removeMessage: (key: string, messageId: string) => void;
   clearMessages: (key: string) => void;
 };
@@ -52,26 +52,51 @@ export function StatusBarMessagesProvider({
       messageId?: string,
       link?: string,
     ) => {
-      const id = messageId || Date.now().toString();
-      const msgColor = color || "text-danger";
-      setMessagesState((prevMessages) => ({
-        ...prevMessages,
-        [key]: [
-          ...(prevMessages[key] || []),
-          { id, text: message, color: msgColor, link },
-        ],
-      }));
+      if (!key || !message) return;
+
+      const id = messageId ?? Date.now().toString();
+      const msgColor = color ?? "text-danger";
+
+      setMessagesState((prevMessages) => {
+        const existingMessages = prevMessages[key] || [];
+        // Check if a message with the same ID already exists
+        const messageIndex = existingMessages.findIndex((msg) => msg.id === id);
+
+        const newMessage = { id, text: message, color: msgColor, link };
+
+        // If the message exists, replace it, otherwise add the new message
+        let updatedMessages;
+        if (messageIndex > -1) {
+          updatedMessages = [
+            ...existingMessages.slice(0, messageIndex),
+            newMessage,
+            ...existingMessages.slice(messageIndex + 1),
+          ];
+        } else {
+          updatedMessages = [...existingMessages, newMessage];
+        }
+
+        return {
+          ...prevMessages,
+          [key]: updatedMessages,
+        };
+      });
+
       return id;
     },
     [],
   );
 
-  const removeMessage = useCallback((key: string, messageId: string) => {
-    setMessagesState((prevMessages) => ({
-      ...prevMessages,
-      [key]: prevMessages[key].filter((msg) => msg.id !== messageId),
-    }));
-  }, []);
+  const removeMessage = useCallback(
+    (key: string, messageId: string) => {
+      if (!messages || !key || !messages[key]) return;
+      setMessagesState((prevMessages) => ({
+        ...prevMessages,
+        [key]: prevMessages[key].filter((msg) => msg.id !== messageId),
+      }));
+    },
+    [messages],
+  );
 
   const clearMessages = useCallback((key: string) => {
     setMessagesState((prevMessages) => {

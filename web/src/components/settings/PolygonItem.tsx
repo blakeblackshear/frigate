@@ -26,7 +26,7 @@ import {
   toRGBColorString,
 } from "@/utils/canvasUtil";
 import { Polygon, PolygonType } from "@/types/canvas";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useContext, useMemo, useState } from "react";
 import axios from "axios";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
@@ -34,6 +34,7 @@ import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { reviewQueries } from "@/utils/zoneEdutUtil";
 import IconWrapper from "../ui/icon-wrapper";
+import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 
 type PolygonItemProps = {
   polygon: Polygon;
@@ -57,6 +58,7 @@ export default function PolygonItem({
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const { addMessage } = useContext(StatusBarMessagesContext)!;
   const [isLoading, setIsLoading] = useState(false);
 
   const cameraConfig = useMemo(() => {
@@ -198,6 +200,12 @@ export default function PolygonItem({
   const handleDelete = () => {
     setActivePolygonIndex(undefined);
     saveToConfig(polygon);
+    addMessage(
+      "masks_zones",
+      "Restart required (masks/zones changed)",
+      undefined,
+      "masks_zones",
+    );
   };
 
   return (
