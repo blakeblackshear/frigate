@@ -35,7 +35,7 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
 
   return (
     <Container>
-      <Trigger asChild>
+      <Trigger>
         <Tooltip>
           <TooltipTrigger asChild>
             <div

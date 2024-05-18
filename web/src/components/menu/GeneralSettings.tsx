@@ -115,7 +115,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
     <>
       <div className={className}>
         <Container>
-          <Trigger asChild>
+          <Trigger>
             <Tooltip>
               <TooltipTrigger asChild>
                 <div
