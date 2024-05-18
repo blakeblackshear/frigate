@@ -18,8 +18,6 @@ import {
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { DialogClose } from "../ui/dialog";
 import { LuLogOut } from "react-icons/lu";
-import { useCallback } from "react";
-import axios from "axios";
 import useSWR from "swr";
 
 type AccountSettingsProps = {
@@ -27,14 +25,8 @@ type AccountSettingsProps = {
 };
 export default function AccountSettings({ className }: AccountSettingsProps) {
   const { data: profile } = useSWR("profile");
-
-  const handleLogout = useCallback(() => {
-    axios.post(`logout`).then((response) => {
-      if (response.status == 200) {
-        window.location.href = "/";
-      }
-    });
-  }, []);
+  const { data: config } = useSWR("config");
+  const logoutUrl = config?.auth.logout_url || "/api/logout";
 
   const Container = isDesktop ? DropdownMenu : Drawer;
   const Trigger = isDesktop ? DropdownMenuTrigger : DrawerTrigger;
@@ -75,17 +67,18 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
         >
           <div className="w-full flex-col overflow-y-auto overflow-x-hidden">
             <DropdownMenuLabel>
-              Current User: {profile?.username}
+              Current User: {profile?.username || "anonymous"}
             </DropdownMenuLabel>
             <DropdownMenuSeparator className={isDesktop ? "mt-3" : "mt-1"} />
             <MenuItem
               className={
                 isDesktop ? "cursor-pointer" : "flex items-center p-2 text-sm"
               }
-              onClick={() => handleLogout()}
             >
-              <LuLogOut className="mr-2 size-4" />
-              <span>Logout</span>
+              <a className="flex" href={logoutUrl}>
+                <LuLogOut className="mr-2 size-4" />
+                <span>Logout</span>
+              </a>
             </MenuItem>
           </div>
         </Content>

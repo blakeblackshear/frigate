@@ -12,12 +12,12 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-from flask import Blueprint, current_app, jsonify, make_response, request
+from flask import Blueprint, current_app, jsonify, make_response, redirect, request
 from flask_limiter import Limiter
 from joserfc import jwt
 from peewee import DoesNotExist
 
-from frigate.config import AuthModeEnum
+from frigate.config import AuthConfig, AuthModeEnum
 from frigate.const import CONFIG_DIR, JWT_SECRET_ENV_VAR, PASSWORD_HASH_ALGORITHM
 from frigate.models import User
 
@@ -167,6 +167,7 @@ def set_jwt_cookie(response, cookie_name, encoded_jwt, expiration):
     )
 
 
+# Endpoint for use with nginx auth_request
 @AuthBp.route("/auth")
 def auth():
     success_response = make_response({}, 202)
@@ -271,11 +272,11 @@ def profile():
     return jsonify({"username": username})
 
 
-@AuthBp.route("/logout", methods=["POST"])
+@AuthBp.route("/logout")
 def logout():
-    JWT_COOKIE_NAME = current_app.frigate_config.auth.cookie_name
-    response = make_response({}, 200)
-    response.delete_cookie(JWT_COOKIE_NAME)
+    auth_config: AuthConfig = current_app.frigate_config.auth
+    response = make_response(redirect("/login", code=303))
+    response.delete_cookie(auth_config.cookie_name)
     return response
 
 

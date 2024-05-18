@@ -143,17 +143,20 @@ class AuthConfig(FrigateBaseModel):
         title="Refresh the session if it is going to expire in this many seconds",
         ge=30,
     )
-    header_map: Optional[HeaderMappingConfig] = Field(
+    header_map: HeaderMappingConfig = Field(
         default_factory=HeaderMappingConfig,
         title="Header mapping definitions for proxy auth mode.",
     )
-    failed_login_rate_limit: Optional[str] = Field(
+    failed_login_rate_limit: str = Field(
         default="1/second;5/minute;20/hour",
         title="Rate limits for failed login attempts.",
     )
-    trusted_proxies: Optional[List[str]] = Field(
+    trusted_proxies: List[str] = Field(
         default=[],
         title="Trusted proxies for determining IP address to rate limit",
+    )
+    logout_url: Optional[str] = Field(
+        default=None, title="Redirect url for logging out in proxy mode."
     )
     # As of Feb 2023, OWASP recommends 600000 iterations for PBKDF2-SHA256
     hash_iterations: int = Field(default=600000, title="Password hash iterations")
