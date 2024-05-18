@@ -41,7 +41,7 @@ export default function Settings() {
     "masks / zones",
     "motion tuner",
     "debug",
-    "authentication",
+    "users",
   ] as const;
 
   type SettingsType = (typeof settingsViews)[number];
@@ -171,7 +171,7 @@ export default function Settings() {
             setUnsavedChanges={setUnsavedChanges}
           />
         )}
-        {page == "authentication" && <Authentication />}
+        {page == "users" && <Authentication />}
       </div>
       {confirmationDialogOpen && (
         <AlertDialog
