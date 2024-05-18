@@ -13,13 +13,15 @@ from flask import Blueprint, Flask, current_app, jsonify, make_response, request
 from markupsafe import escape
 from peewee import operator
 from playhouse.sqliteq import SqliteQueueDatabase
+from werkzeug.middleware.proxy_fix import ProxyFix
 
+from frigate.api.auth import AuthBp, get_jwt_secret, limiter
 from frigate.api.event import EventBp
 from frigate.api.export import ExportBp
 from frigate.api.media import MediaBp
 from frigate.api.preview import PreviewBp
 from frigate.api.review import ReviewBp
-from frigate.config import FrigateConfig
+from frigate.config import AuthModeEnum, FrigateConfig
 from frigate.const import CONFIG_DIR
 from frigate.events.external import ExternalEventProcessor
 from frigate.models import Event, Timeline
@@ -44,6 +46,7 @@ bp.register_blueprint(ExportBp)
 bp.register_blueprint(MediaBp)
 bp.register_blueprint(PreviewBp)
 bp.register_blueprint(ReviewBp)
+bp.register_blueprint(AuthBp)
 
 
 def create_app(
@@ -83,6 +86,15 @@ def create_app(
     app.plus_api = plus_api
     app.camera_error_image = None
     app.stats_emitter = stats_emitter
+    app.jwt_token = (
+        get_jwt_secret() if frigate_config.auth.mode == AuthModeEnum.native else None
+    )
+    # update the request_address with the x-forwarded-for header from nginx
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1)
+    # initialize the rate limiter for the login endpoint
+    limiter.init_app(app)
+    if frigate_config.auth.failed_login_rate_limit is None:
+        limiter.enabled = False
 
     app.register_blueprint(bp)
 
@@ -114,6 +126,23 @@ def go2rtc_streams():
     for data in stream_data.values():
         for producer in data.get("producers", []):
             producer["url"] = clean_camera_user_pass(producer.get("url", ""))
+    return jsonify(stream_data)
+
+
+@bp.route("/go2rtc/streams/<camera_name>")
+def go2rtc_camera_stream(camera_name: str):
+    r = requests.get(
+        f"http://127.0.0.1:1984/api/streams?src={camera_name}&video=all&audio=all&microphone"
+    )
+    if not r.ok:
+        logger.error("Failed to fetch streams from go2rtc")
+        return make_response(
+            jsonify({"success": False, "message": "Error fetching stream data"}),
+            500,
+        )
+    stream_data = r.json()
+    for producer in stream_data.get("producers", []):
+        producer["url"] = clean_camera_user_pass(producer.get("url", ""))
     return jsonify(stream_data)
 
 

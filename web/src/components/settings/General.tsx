@@ -80,7 +80,7 @@ export default function General() {
             <div className="mt-2 space-y-6">
               <div className="space-y-0.5">
                 <div className="text-md">Default Playback Rate</div>
-                <div className="text-sm text-muted-foreground my-2">
+                <div className="my-2 text-sm text-muted-foreground">
                   <p>Default playback rate for recordings playback.</p>
                 </div>
               </div>
@@ -106,7 +106,7 @@ export default function General() {
                 </SelectGroup>
               </SelectContent>
             </Select>
-            <Separator className="flex my-2 bg-secondary" />
+            <Separator className="my-2 flex bg-secondary" />
             <div className="mt-2 space-y-6">
               <div className="space-y-0.5">
                 <div className="text-md">Low Data Mode</div>

@@ -10,10 +10,14 @@
   "features": {
     "ghcr.io/devcontainers/features/common-utils:1": {}
   },
-  "forwardPorts": [5000, 5001, 5173, 8554, 8555],
+  "forwardPorts": [8080, 5000, 5001, 5173, 8554, 8555],
   "portsAttributes": {
+    "8080": {
+      "label": "External NGINX",
+      "onAutoForward": "silent"
+    },
     "5000": {
-      "label": "NGINX",
+      "label": "Internal NGINX",
       "onAutoForward": "silent"
     },
     "5001": {

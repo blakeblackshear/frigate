@@ -38,20 +38,20 @@ Here we access Frigate via https://cctv.mydomain.co.uk
     ServerName cctv.mydomain.co.uk
 
     ProxyPreserveHost On
-    ProxyPass "/"  "http://frigatepi.local:5000/"
-    ProxyPassReverse "/"  "http://frigatepi.local:5000/"
+    ProxyPass "/"  "http://frigatepi.local:8080/"
+    ProxyPassReverse "/"  "http://frigatepi.local:8080/"
 
-    ProxyPass /ws ws://frigatepi.local:5000/ws
-    ProxyPassReverse /ws ws://frigatepi.local:5000/ws
+    ProxyPass /ws ws://frigatepi.local:8080/ws
+    ProxyPassReverse /ws ws://frigatepi.local:8080/ws
 
-    ProxyPass /live/ ws://frigatepi.local:5000/live/
-    ProxyPassReverse /live/ ws://frigatepi.local:5000/live/
+    ProxyPass /live/ ws://frigatepi.local:8080/live/
+    ProxyPassReverse /live/ ws://frigatepi.local:8080/live/
 
     RewriteEngine on
     RewriteCond %{HTTP:Upgrade} =websocket [NC]
-    RewriteRule /(.*)  ws://frigatepi.local:5000/$1 [P,L]
+    RewriteRule /(.*)  ws://frigatepi.local:8080/$1 [P,L]
     RewriteCond %{HTTP:Upgrade} !=websocket [NC]
-    RewriteRule /(.*)  http://frigatepi.local:5000/$1 [P,L]
+    RewriteRule /(.*)  http://frigatepi.local:8080/$1 [P,L]
 </VirtualHost>
 ```
 
@@ -101,7 +101,7 @@ This is set in `$server` and `$port` this should match your ports you have expos
 server {
   set $forward_scheme http;
   set $server         "192.168.100.2"; # FRIGATE SERVER LOCATION
-  set $port           5000;
+  set $port           8080;
 
   listen 80;
   listen 443 ssl http2;

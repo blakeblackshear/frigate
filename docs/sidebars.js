@@ -23,7 +23,7 @@ module.exports = {
         {
           type: "link",
           label: "Go2RTC Configuration Reference",
-          href: "https://github.com/AlexxIT/go2rtc/tree/v1.8.5#configuration",
+          href: "https://github.com/AlexxIT/go2rtc/tree/v1.9.2#configuration",
         },
       ],
       Detectors: [
@@ -50,6 +50,7 @@ module.exports = {
         "configuration/stationary_objects",
       ],
       "Extra Configuration": [
+        "configuration/authentication",
         "configuration/hardware_acceleration",
         "configuration/ffmpeg_presets",
         "configuration/advanced",

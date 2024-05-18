@@ -3,6 +3,7 @@ import datetime
 import logging
 import multiprocessing as mp
 import os
+import secrets
 import shutil
 import signal
 import sys
@@ -19,13 +20,14 @@ from playhouse.sqliteq import SqliteQueueDatabase
 from pydantic import ValidationError
 
 from frigate.api.app import create_app
+from frigate.api.auth import hash_password
 from frigate.comms.config_updater import ConfigPublisher
 from frigate.comms.detections_updater import DetectionProxy
 from frigate.comms.dispatcher import Communicator, Dispatcher
 from frigate.comms.inter_process import InterProcessCommunicator
 from frigate.comms.mqtt import MqttClient
 from frigate.comms.ws import WebSocketClient
-from frigate.config import FrigateConfig
+from frigate.config import AuthModeEnum, FrigateConfig
 from frigate.const import (
     CACHE_DIR,
     CLIPS_DIR,
@@ -49,6 +51,7 @@ from frigate.models import (
     Regions,
     ReviewSegment,
     Timeline,
+    User,
 )
 from frigate.object_detection import ObjectDetectProcess
 from frigate.object_processing import TrackedObjectProcessor
@@ -338,6 +341,7 @@ class FrigateApp:
             Regions,
             ReviewSegment,
             Timeline,
+            User,
         ]
         self.db.bind(models)
 
@@ -587,6 +591,42 @@ class FrigateApp:
                 f"The current SHM size of {available_shm}MB is too small, recommend increasing it to at least {min_req_shm}MB."
             )
 
+    def init_auth(self) -> None:
+        if self.config.auth.mode == AuthModeEnum.native:
+            if User.select().count() == 0:
+                password = secrets.token_hex(16)
+                password_hash = hash_password(
+                    password, iterations=self.config.auth.hash_iterations
+                )
+                User.insert(
+                    {
+                        User.username: "admin",
+                        User.password_hash: password_hash,
+                    }
+                ).execute()
+
+                logger.info("********************************************************")
+                logger.info("********************************************************")
+                logger.info("***    Auth is enabled, but no users exist.          ***")
+                logger.info("***    Created a default user:                       ***")
+                logger.info("***    User: admin                                   ***")
+                logger.info(f"***    Password: {password}   ***")
+                logger.info("********************************************************")
+                logger.info("********************************************************")
+            elif self.config.auth.reset_admin_password:
+                password = secrets.token_hex(16)
+                password_hash = hash_password(
+                    password, iterations=self.config.auth.hash_iterations
+                )
+                User.replace(username="admin", password_hash=password_hash).execute()
+
+                logger.info("********************************************************")
+                logger.info("********************************************************")
+                logger.info("***    Reset admin password set in the config.       ***")
+                logger.info(f"***    Password: {password}   ***")
+                logger.info("********************************************************")
+                logger.info("********************************************************")
+
     def start(self) -> None:
         parser = argparse.ArgumentParser(
             prog="Frigate",
@@ -664,6 +704,7 @@ class FrigateApp:
         self.start_record_cleanup()
         self.start_watchdog()
         self.check_shm()
+        self.init_auth()
 
         def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:
             self.stop()

@@ -155,7 +155,10 @@ export default function LiveDashboardView({
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
 
   return (
-    <div className="size-full overflow-y-auto p-2" ref={containerRef}>
+    <div
+      className="size-full overflow-y-auto px-1 pt-2 md:p-2"
+      ref={containerRef}
+    >
       {isMobile && (
         <div className="relative flex h-11 items-center justify-between">
           <Logo className="absolute inset-x-1/2 h-8 -translate-x-1/2" />
@@ -224,7 +227,12 @@ export default function LiveDashboardView({
 
       {!cameraGroup || cameraGroup == "default" || isMobileOnly ? (
         <div
-          className={`mt-2 grid px-2 ${mobileLayout == "grid" ? "grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4" : ""} gap-2 md:gap-4`}
+          className={cn(
+            "mt-2 grid gap-2 px-2 md:gap-4",
+            mobileLayout == "grid" &&
+              "grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4",
+            isMobile && "px-0",
+          )}
         >
           {includeBirdseye && birdseyeConfig?.enabled && (
             <BirdseyeLivePlayer

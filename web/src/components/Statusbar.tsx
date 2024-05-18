@@ -116,7 +116,7 @@ export default function Statusbar() {
           );
         })}
       </div>
-      <div className="flex h-full items-center gap-2">
+      <div className="flex h-full items-center gap-2 max-w-[50%] overflow-x-auto no-scrollbar">
         {Object.entries(messages).length === 0 ? (
           <div className="flex items-center gap-2 text-sm">
             <FaCheck className="size-3 text-green-500" />
@@ -125,11 +125,11 @@ export default function Statusbar() {
         ) : (
           Object.entries(messages).map(([key, messageArray]) => (
             <div key={key} className="flex h-full items-center gap-2">
-              {messageArray.map(({ id, text, color, link }: StatusMessage) => {
+              {messageArray.map(({ text, color, link }: StatusMessage) => {
                 const message = (
                   <div
-                    key={id}
-                    className={`flex items-center gap-2 text-sm ${link ? "cursor-pointer hover:underline" : ""}`}
+                    key={text}
+                    className={`flex items-center gap-2 text-sm whitespace-nowrap ${link ? "cursor-pointer hover:underline" : ""}`}
                   >
                     <IoIosWarning
                       className={`size-5 ${color || "text-danger"}`}
@@ -140,7 +140,7 @@ export default function Statusbar() {
 
                 if (link) {
                   return (
-                    <Link key={id} to={link}>
+                    <Link key={text} to={link}>
                       {message}
                     </Link>
                   );

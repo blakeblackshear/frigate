@@ -225,3 +225,13 @@ docker buildx create --name builder --driver docker-container --driver-opt netwo
 docker buildx inspect builder --bootstrap
 make push
 ```
+
+## Other
+
+### Nginx
+
+When testing nginx config changes from within the dev container, the following command can be used to copy and reload the config for testing without rebuilding the container:
+
+```console
+sudo cp docker/main/rootfs/usr/local/nginx/conf/* /usr/local/nginx/conf/ && sudo /usr/local/nginx/sbin/nginx -s reload
+```

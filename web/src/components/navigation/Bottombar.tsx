@@ -15,12 +15,22 @@ import {
 } from "@/context/statusbar-provider";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { isMobile } from "react-device-detect";
+import { isPWA } from "@/utils/isPWA";
 
 function Bottombar() {
   const navItems = useNavigation("secondary");
 
   return (
-    <div className="absolute inset-x-4 bottom-0 flex h-16 flex-row items-center justify-between">
+    <div
+      className={cn(
+        "absolute inset-x-4 bottom-0 flex h-16 flex-row justify-between",
+        isPWA
+          ? "portrait:items-start portrait:pt-1 landscape:items-center"
+          : "items-center",
+        isMobile && !isPWA && "h-12 landscape:md:h-16",
+      )}
+    >
       {navItems.map((item) => (
         <NavItem key={item.id} className="p-2" item={item} Icon={item.icon} />
       ))}
@@ -72,8 +82,10 @@ function StatusAlertNav({ className }: StatusAlertNavProps) {
 
   return (
     <Drawer>
-      <DrawerTrigger>
-        <IoIosWarning className="size-5 text-danger" />
+      <DrawerTrigger asChild>
+        <div className="p-2">
+          <IoIosWarning className="size-5 text-danger md:m-[6px]" />
+        </div>
       </DrawerTrigger>
       <DrawerContent
         className={cn(
@@ -95,7 +107,11 @@ function StatusAlertNav({ className }: StatusAlertNavProps) {
                 );
 
                 if (link) {
-                  return <Link to={link}>{message}</Link>;
+                  return (
+                    <Link key={id} to={link}>
+                      {message}
+                    </Link>
+                  );
                 } else {
                   return message;
                 }

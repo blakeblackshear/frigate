@@ -1,5 +1,6 @@
 import {
   useAudioState,
+  useAutotrackingState,
   useDetectState,
   usePtzCommand,
   useRecordingsState,
@@ -20,7 +21,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { CameraConfig } from "@/types/frigateConfig";
-import { VideoResolutionType } from "@/types/live";
+import { LiveStreamMetadata, VideoResolutionType } from "@/types/live";
 import { CameraPtzInfo } from "@/types/ptz";
 import { RecordingStartingPoint } from "@/types/record";
 import React, {
@@ -35,6 +36,7 @@ import {
   isIOS,
   isMobile,
   isSafari,
+  isTablet,
   useMobileOrientation,
 } from "react-device-detect";
 import { BsThreeDotsVertical } from "react-icons/bs";
@@ -50,7 +52,7 @@ import {
   FaMicrophoneSlash,
 } from "react-icons/fa";
 import { GiSpeaker, GiSpeakerOff } from "react-icons/gi";
-import { HiViewfinderCircle } from "react-icons/hi2";
+import { TbViewfinder, TbViewfinderOff } from "react-icons/tb";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import {
   LuEar,
@@ -81,6 +83,40 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
   const mainRef = useRef<HTMLDivElement | null>(null);
   const [{ width: windowWidth, height: windowHeight }] =
     useResizeObserver(window);
+
+  // supported features
+
+  const { data: cameraMetadata } = useSWR<LiveStreamMetadata>(
+    `go2rtc/streams/${camera.live.stream_name}`,
+    {
+      revalidateOnFocus: false,
+    },
+  );
+
+  const supports2WayTalk = useMemo(() => {
+    if (!window.isSecureContext || !cameraMetadata) {
+      return false;
+    }
+
+    return (
+      cameraMetadata.producers.find(
+        (prod) =>
+          prod.medias && prod.medias.find((media) => media.includes("audio, sendonly")) != undefined,
+      ) != undefined
+    );
+  }, [cameraMetadata]);
+  const supportsAudioOutput = useMemo(() => {
+    if (!cameraMetadata) {
+      return false;
+    }
+
+    return (
+      cameraMetadata.producers.find(
+        (prod) =>
+          prod.medias && prod.medias.find((media) => media.includes("audio, recvonly")) != undefined,
+      ) != undefined
+    );
+  }, [cameraMetadata])
 
   // click overlay for ptzs
 
@@ -305,7 +341,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
                   }}
                 />
               )}
-              {window.isSecureContext && (
+              {supports2WayTalk && (
                 <CameraFeatureToggle
                   className="p-2 md:p-0"
                   variant={fullscreen ? "overlay" : "primary"}
@@ -315,17 +351,20 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
                   onClick={() => setMic(!mic)}
                 />
               )}
-              <CameraFeatureToggle
+              {supportsAudioOutput && <CameraFeatureToggle
                 className="p-2 md:p-0"
                 variant={fullscreen ? "overlay" : "primary"}
                 Icon={audio ? GiSpeaker : GiSpeakerOff}
                 isActive={audio}
                 title={`${audio ? "Disable" : "Enable"} Camera Audio`}
                 onClick={() => setAudio(!audio)}
-              />
+              />}
               <FrigateCameraFeatures
                 camera={camera.name}
                 audioDetectEnabled={camera.audio.enabled_in_config}
+                autotrackingEnabled={
+                  camera.onvif.autotracking.enabled_in_config
+                }
                 fullscreen={fullscreen}
               />
             </div>
@@ -534,7 +573,7 @@ function PtzControlPanel({
             className={`${clickOverlay ? "text-selected" : "text-primary"}`}
             onClick={() => setClickOverlay(!clickOverlay)}
           >
-            <HiViewfinderCircle />
+            <TbViewfinder />
           </Button>
         </>
       )}
@@ -566,11 +605,13 @@ function PtzControlPanel({
 type FrigateCameraFeaturesProps = {
   camera: string;
   audioDetectEnabled: boolean;
+  autotrackingEnabled: boolean;
   fullscreen: boolean;
 };
 function FrigateCameraFeatures({
   camera,
   audioDetectEnabled,
+  autotrackingEnabled,
   fullscreen,
 }: FrigateCameraFeaturesProps) {
   const { payload: detectState, send: sendDetect } = useDetectState(camera);
@@ -578,9 +619,11 @@ function FrigateCameraFeatures({
   const { payload: snapshotState, send: sendSnapshot } =
     useSnapshotsState(camera);
   const { payload: audioState, send: sendAudio } = useAudioState(camera);
+  const { payload: autotrackingState, send: sendAutotracking } =
+    useAutotrackingState(camera);
 
   // desktop shows icons part of row
-  if (isDesktop) {
+  if (isDesktop || isTablet) {
     return (
       <>
         <CameraFeatureToggle
@@ -615,6 +658,18 @@ function FrigateCameraFeatures({
             isActive={audioState == "ON"}
             title={`${audioState == "ON" ? "Disable" : "Enable"} Audio Detect`}
             onClick={() => sendAudio(audioState == "ON" ? "OFF" : "ON")}
+          />
+        )}
+        {autotrackingEnabled && (
+          <CameraFeatureToggle
+            className="p-2 md:p-0"
+            variant={fullscreen ? "overlay" : "primary"}
+            Icon={autotrackingState == "ON" ? TbViewfinder : TbViewfinderOff}
+            isActive={autotrackingState == "ON"}
+            title={`${autotrackingState == "ON" ? "Disable" : "Enable"} Autotracking`}
+            onClick={() =>
+              sendAutotracking(autotrackingState == "ON" ? "OFF" : "ON")
+            }
           />
         )}
       </>
@@ -660,6 +715,15 @@ function FrigateCameraFeatures({
             label="Audio Detection"
             isChecked={audioState == "ON"}
             onCheckedChange={() => sendAudio(audioState == "ON" ? "OFF" : "ON")}
+          />
+        )}
+        {autotrackingEnabled && (
+          <FilterSwitch
+            label="Autotracking"
+            isChecked={autotrackingState == "ON"}
+            onCheckedChange={() =>
+              sendAutotracking(autotrackingState == "ON" ? "OFF" : "ON")
+            }
           />
         )}
       </DrawerContent>

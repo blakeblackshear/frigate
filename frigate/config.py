@@ -116,6 +116,52 @@ class UIConfig(FrigateBaseModel):
     )
 
 
+class AuthModeEnum(str, Enum):
+    native = "native"
+    proxy = "proxy"
+
+
+class HeaderMappingConfig(FrigateBaseModel):
+    user: str = Field(
+        default=None, title="Header name from upstream proxy to identify user."
+    )
+
+
+class AuthConfig(FrigateBaseModel):
+    mode: AuthModeEnum = Field(default=AuthModeEnum.native, title="Authentication mode")
+    reset_admin_password: bool = Field(
+        default=False, title="Reset the admin password on startup"
+    )
+    cookie_name: str = Field(
+        default="frigate_token", title="Name for jwt token cookie", pattern=r"^[a-z]_*$"
+    )
+    session_length: int = Field(
+        default=86400, title="Session length for jwt session tokens", ge=60
+    )
+    refresh_time: int = Field(
+        default=43200,
+        title="Refresh the session if it is going to expire in this many seconds",
+        ge=30,
+    )
+    header_map: HeaderMappingConfig = Field(
+        default_factory=HeaderMappingConfig,
+        title="Header mapping definitions for proxy auth mode.",
+    )
+    failed_login_rate_limit: Optional[str] = Field(
+        default=None,
+        title="Rate limits for failed login attempts.",
+    )
+    trusted_proxies: List[str] = Field(
+        default=[],
+        title="Trusted proxies for determining IP address to rate limit",
+    )
+    logout_url: Optional[str] = Field(
+        default=None, title="Redirect url for logging out in proxy mode."
+    )
+    # As of Feb 2023, OWASP recommends 600000 iterations for PBKDF2-SHA256
+    hash_iterations: int = Field(default=600000, title="Password hash iterations")
+
+
 class StatsConfig(FrigateBaseModel):
     amd_gpu_stats: bool = Field(default=True, title="Enable AMD GPU stats.")
     intel_gpu_stats: bool = Field(default=True, title="Enable Intel GPU stats.")
@@ -1245,10 +1291,11 @@ def verify_motion_and_detect(camera_config: CameraConfig) -> ValueError | None:
 
 
 class FrigateConfig(FrigateBaseModel):
-    mqtt: MqttConfig = Field(title="MQTT Configuration.")
+    mqtt: MqttConfig = Field(title="MQTT configuration.")
     database: DatabaseConfig = Field(
         default_factory=DatabaseConfig, title="Database configuration."
     )
+    auth: AuthConfig = Field(default_factory=AuthConfig, title="Auth configuration.")
     environment_vars: Dict[str, str] = Field(
         default_factory=dict, title="Frigate environment variables."
     )
