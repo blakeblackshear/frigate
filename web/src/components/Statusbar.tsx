@@ -116,7 +116,7 @@ export default function Statusbar() {
           );
         })}
       </div>
-      <div className="flex h-full items-center gap-2 max-w-[50%] overflow-x-auto no-scrollbar">
+      <div className="no-scrollbar flex h-full max-w-[50%] items-center gap-2 overflow-x-auto">
         {Object.entries(messages).length === 0 ? (
           <div className="flex items-center gap-2 text-sm">
             <FaCheck className="size-3 text-green-500" />
@@ -129,7 +129,7 @@ export default function Statusbar() {
                 const message = (
                   <div
                     key={text}
-                    className={`flex items-center gap-2 text-sm whitespace-nowrap ${link ? "cursor-pointer hover:underline" : ""}`}
+                    className={`flex items-center gap-2 whitespace-nowrap text-sm ${link ? "cursor-pointer hover:underline" : ""}`}
                   >
                     <IoIosWarning
                       className={`size-5 ${color || "text-danger"}`}
