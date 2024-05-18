@@ -109,7 +109,9 @@ class TensorRtDetector(DetectionApi):
 
     def _execute(self):
         if TRT_VERSION < 10:
-            return self.context.execute_async_v2(bindings=self.bindings, stream_handle=self.stream)
+            return self.context.execute_async_v2(
+                bindings=self.bindings, stream_handle=self.stream
+            )
         else:
             return self.context.execute_v2(self.bindings)
 
