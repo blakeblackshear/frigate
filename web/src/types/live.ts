@@ -10,8 +10,8 @@ type LiveProducerMetadata = {
   remote_addr: string;
   user_agent: string;
   sdp: string;
-  medias: string[];
-  receivers: string[];
+  medias?: string[];
+  receivers?: string[];
   recv: number;
 };
 
@@ -21,8 +21,8 @@ type LiveConsumerMetadata = {
   remote_addr: string;
   user_agent: string;
   sdp: string;
-  medias: string[];
-  senders: string[];
+  medias?: string[];
+  senders?: string[];
   send: number;
 };
 

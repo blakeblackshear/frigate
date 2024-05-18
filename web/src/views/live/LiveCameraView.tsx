@@ -100,7 +100,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
     return (
       cameraMetadata.producers.find(
         (prod) =>
-          prod.medias.find((media) => media.includes("audio, sendonly")) != undefined,
+          prod.medias && prod.medias.find((media) => media.includes("audio, sendonly")) != undefined,
       ) != undefined
     );
   }, [cameraMetadata]);
@@ -112,7 +112,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
     return (
       cameraMetadata.producers.find(
         (prod) =>
-          prod.medias.find((media) => media.includes("audio, recvonly")) != undefined,
+          prod.medias && prod.medias.find((media) => media.includes("audio, recvonly")) != undefined,
       ) != undefined
     );
   }, [cameraMetadata])
