@@ -233,6 +233,8 @@ RUN apt-get update \
 RUN --mount=type=bind,source=./docker/main/requirements-dev.txt,target=/workspace/frigate/requirements-dev.txt \
     pip3 install -r requirements-dev.txt
 
+HEALTHCHECK NONE
+
 CMD ["sleep", "infinity"]
 
 

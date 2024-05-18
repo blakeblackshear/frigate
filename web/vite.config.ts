@@ -1,8 +1,10 @@
 /// <reference types="vitest" />
-import path from "path";
+import path, { resolve } from "path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import monacoEditorPlugin from "vite-plugin-monaco-editor";
+
+const proxyHost = "localhost:5000";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -12,26 +14,34 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://localhost:5000",
+        target: `http://${proxyHost}`,
         ws: true,
       },
       "/vod": {
-        target: "http://localhost:5000",
+        target: `http://${proxyHost}`,
       },
       "/clips": {
-        target: "http://localhost:5000",
+        target: `http://${proxyHost}`,
       },
       "/exports": {
-        target: "http://localhost:5000",
+        target: `http://${proxyHost}`,
       },
       "/ws": {
-        target: "ws://localhost:5000",
+        target: `ws://${proxyHost}`,
         ws: true,
       },
       "/live": {
-        target: "ws://localhost:5000",
+        target: `ws://${proxyHost}`,
         changeOrigin: true,
         ws: true,
+      },
+    },
+  },
+  build: {
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, "index.html"),
+        login: resolve(__dirname, "login.html"),
       },
     },
   },

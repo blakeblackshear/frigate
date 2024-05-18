@@ -24,6 +24,12 @@ export function ApiProvider({ children, options }: ApiProviderType) {
           const [path, params] = Array.isArray(key) ? key : [key, undefined];
           return axios.get(path, { params }).then((res) => res.data);
         },
+        onError: (error, _key) => {
+          if ([401, 302, 307].includes(error.response.status)) {
+            window.location.href =
+              error.response.headers.get("location") ?? "login";
+          }
+        },
         ...options,
       }}
     >
@@ -40,6 +46,7 @@ function WsWithConfig({ children }: WsWithConfigType) {
   return <WsProvider>{children}</WsProvider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useApiHost() {
   return baseUrl;
 }

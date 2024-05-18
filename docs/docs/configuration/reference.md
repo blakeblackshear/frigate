@@ -63,6 +63,45 @@ database:
   # The path to store the SQLite DB (default: shown below)
   path: /config/frigate.db
 
+# Optional: Authentication configuration
+auth:
+  # Optional: Authentication mode (default: shown below)
+  # Valid values are: native, proxy
+  mode: native
+  # Optional: Reset the admin user password on startup (default: shown below)
+  # New password is printed in the logs
+  reset_admin_password: False
+  # Optional: Cookie to store the JWT token for native auth (default: shown below)
+  cookie_name: frigate_token
+  # Optional: Session length in seconds (default: shown below)
+  session_length: 86400 # 24 hours
+  # Optional: Refresh time in seconds (default: shown below)
+  # When the session is going to expire in less time than this setting,
+  # it will be refreshed back to the session_length.
+  refresh_time: 43200 # 12 hours
+  # Optional: Mapping for headers from upstream proxies. Only used in proxy auth mode.
+  # NOTE: Many authentication proxies pass a header downstream with the authenticated
+  #       user name. Not all values are supported. It must be a whitelisted header.
+  #       See the docs for more info.
+  header_map:
+    user: x-forwarded-user
+  # Optional: Rate limiting for login failures to help prevent brute force
+  # login attacks (default: shown below)
+  # See the docs for more information on valid values
+  failed_login_rate_limit: None
+  # Optional: Trusted proxies for determining IP address to rate limit
+  # NOTE: This is only used for rate limiting login attempts and does not bypass
+  # authentication in any way
+  trusted_proxies: []
+  # Optional: Url for logging out a user. This only needs to be set if you are using
+  # proxy mode.
+  logout_url: /api/logout
+  # Optional: Number of hashing iterations for user passwords
+  # As of Feb 2023, OWASP recommends 600000 iterations for PBKDF2-SHA256
+  # NOTE: changing this value will not automatically update password hashes, you
+  #       will need to change each user password for it to apply
+  hash_iterations: 600000
+
 # Optional: model modifications
 model:
   # Optional: path to the model (default: automatic based on detector)

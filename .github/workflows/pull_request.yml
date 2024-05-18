@@ -40,9 +40,9 @@ jobs:
           node-version: 16.x
       - run: npm install
         working-directory: ./web
-      # - name: Lint
-      #   run: npm run lint
-      #   working-directory: ./web
+      - name: Lint
+        run: npm run lint
+        working-directory: ./web
 
   web_test:
     name: Web - Test
