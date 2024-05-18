@@ -36,6 +36,7 @@ import {
   isIOS,
   isMobile,
   isSafari,
+  isTablet,
   useMobileOrientation,
 } from "react-device-detect";
 import { BsThreeDotsVertical } from "react-icons/bs";
@@ -100,7 +101,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
     return (
       cameraMetadata.producers.find(
         (prod) =>
-          prod.medias.find((media) => media.includes("audio, sendonly")) != undefined,
+          prod.medias && prod.medias.find((media) => media.includes("audio, sendonly")) != undefined,
       ) != undefined
     );
   }, [cameraMetadata]);
@@ -112,7 +113,7 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
     return (
       cameraMetadata.producers.find(
         (prod) =>
-          prod.medias.find((media) => media.includes("audio, recvonly")) != undefined,
+          prod.medias && prod.medias.find((media) => media.includes("audio, recvonly")) != undefined,
       ) != undefined
     );
   }, [cameraMetadata])
@@ -622,7 +623,7 @@ function FrigateCameraFeatures({
     useAutotrackingState(camera);
 
   // desktop shows icons part of row
-  if (isDesktop) {
+  if (isDesktop || isTablet) {
     return (
       <>
         <CameraFeatureToggle
