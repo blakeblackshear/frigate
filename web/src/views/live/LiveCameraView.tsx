@@ -101,7 +101,9 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
     return (
       cameraMetadata.producers.find(
         (prod) =>
-          prod.medias && prod.medias.find((media) => media.includes("audio, sendonly")) != undefined,
+          prod.medias &&
+          prod.medias.find((media) => media.includes("audio, sendonly")) !=
+            undefined,
       ) != undefined
     );
   }, [cameraMetadata]);
@@ -113,10 +115,12 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
     return (
       cameraMetadata.producers.find(
         (prod) =>
-          prod.medias && prod.medias.find((media) => media.includes("audio, recvonly")) != undefined,
+          prod.medias &&
+          prod.medias.find((media) => media.includes("audio, recvonly")) !=
+            undefined,
       ) != undefined
     );
-  }, [cameraMetadata])
+  }, [cameraMetadata]);
 
   // click overlay for ptzs
 
@@ -351,14 +355,16 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
                   onClick={() => setMic(!mic)}
                 />
               )}
-              {supportsAudioOutput && <CameraFeatureToggle
-                className="p-2 md:p-0"
-                variant={fullscreen ? "overlay" : "primary"}
-                Icon={audio ? GiSpeaker : GiSpeakerOff}
-                isActive={audio}
-                title={`${audio ? "Disable" : "Enable"} Camera Audio`}
-                onClick={() => setAudio(!audio)}
-              />}
+              {supportsAudioOutput && (
+                <CameraFeatureToggle
+                  className="p-2 md:p-0"
+                  variant={fullscreen ? "overlay" : "primary"}
+                  Icon={audio ? GiSpeaker : GiSpeakerOff}
+                  isActive={audio}
+                  title={`${audio ? "Disable" : "Enable"} Camera Audio`}
+                  onClick={() => setAudio(!audio)}
+                />
+              )}
               <FrigateCameraFeatures
                 camera={camera.name}
                 audioDetectEnabled={camera.audio.enabled_in_config}
