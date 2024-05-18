@@ -141,7 +141,6 @@ function MSEPlayer({
   };
 
   const reconnect = (timeout?: number) => {
-    console.log("reconnecting", camera);
     setWsState(WebSocket.CONNECTING);
     wsRef.current = null;
 
@@ -150,22 +149,12 @@ function MSEPlayer({
 
     reconnectTIDRef.current = window.setTimeout(() => {
       reconnectTIDRef.current = null;
-      console.log("timeout ended, running onconnect", camera);
       onConnect();
     }, delay);
   };
 
   const onClose = () => {
-    console.log(
-      "onClose running for",
-      camera,
-      wsState,
-      "closed?",
-      wsState === WebSocket.CLOSED,
-    );
     if (wsState === WebSocket.CLOSED) return;
-    console.log("onClose running for", camera, "websocket not closed");
-
     reconnect();
   };
 
@@ -308,10 +297,6 @@ function MSEPlayer({
     videoRef.current.requestPictureInPicture();
   }, [pip, videoRef]);
 
-  useEffect(() => {
-    console.log(camera, wsState);
-  }, [camera, wsState]);
-
   return (
     <video
       ref={videoRef}
@@ -321,18 +306,8 @@ function MSEPlayer({
       onLoadedData={onPlaying}
       onLoadedMetadata={handleLoadedMetadata}
       muted={!audioEnabled}
-      onError={(e) => {
-        console.log("onError event", e);
-        const videoElement = e.target as HTMLVideoElement;
-        if (videoElement.error) {
-          console.log("Video Error Code:", videoElement.error.code);
-          console.log("Video Error Message:", videoElement.error.message);
-        } else {
-          console.log("An unknown error occurred");
-        }
-        console.log("Camera object:", camera);
+      onError={() => {
         if (wsRef.current) {
-          console.log("websocket is", wsState);
           wsRef.current.close();
           wsRef.current = null;
           reconnect(5000);
