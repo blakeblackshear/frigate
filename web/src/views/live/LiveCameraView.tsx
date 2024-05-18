@@ -36,6 +36,7 @@ import {
   isIOS,
   isMobile,
   isSafari,
+  isTablet,
   useMobileOrientation,
 } from "react-device-detect";
 import { BsThreeDotsVertical } from "react-icons/bs";
@@ -622,7 +623,7 @@ function FrigateCameraFeatures({
     useAutotrackingState(camera);
 
   // desktop shows icons part of row
-  if (isDesktop) {
+  if (isDesktop || isTablet) {
     return (
       <>
         <CameraFeatureToggle
