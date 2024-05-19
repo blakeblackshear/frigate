@@ -11,6 +11,7 @@ import {
   ReviewSeverity,
   ReviewSummary,
 } from "@/types/review";
+import { getUTCOffset } from "@/utils/dateUtil";
 import EventView from "@/views/events/EventView";
 import { RecordingView } from "@/views/events/RecordingView";
 import axios from "axios";
@@ -166,6 +167,8 @@ export default function Events() {
       return undefined;
     }
 
+    const timezoneMinuteOffset = (getUTCOffset(new Date()) % 60) * 60;
+
     const startDate = new Date();
     startDate.setMinutes(0, 0, 0);
 
@@ -173,8 +176,8 @@ export default function Events() {
     endDate.setHours(0, 0, 0, 0);
 
     return {
-      after: startDate.getTime() / 1000,
-      before: endDate.getTime() / 1000,
+      after: startDate.getTime() / 1000 + timezoneMinuteOffset,
+      before: endDate.getTime() / 1000 + timezoneMinuteOffset,
     };
   }, [reviews]);
 

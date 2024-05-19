@@ -50,12 +50,6 @@ export default function DynamicVideoPlayer({
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
 
-  useEffect(() => {
-    console.log(
-      `the time range is ${new Date(timeRange.after * 1000)} -> ${new Date(timeRange.before * 1000)}`,
-    );
-  }, [timeRange]);
-
   // controlling playback
 
   const playerRef = useRef<HTMLVideoElement | null>(null);
