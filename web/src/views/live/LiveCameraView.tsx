@@ -20,7 +20,7 @@ import {
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
-import { CameraConfig } from "@/types/frigateConfig";
+import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import { LiveStreamMetadata, VideoResolutionType } from "@/types/live";
 import { CameraPtzInfo } from "@/types/ptz";
 import { RecordingStartingPoint } from "@/types/record";
@@ -75,9 +75,13 @@ import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import useSWR from "swr";
 
 type LiveCameraViewProps = {
+  config?: FrigateConfig;
   camera: CameraConfig;
 };
-export default function LiveCameraView({ camera }: LiveCameraViewProps) {
+export default function LiveCameraView({
+  config,
+  camera,
+}: LiveCameraViewProps) {
   const navigate = useNavigate();
   const { isPortrait } = useMobileOrientation();
   const mainRef = useRef<HTMLDivElement | null>(null);
@@ -86,8 +90,17 @@ export default function LiveCameraView({ camera }: LiveCameraViewProps) {
 
   // supported features
 
+  const isRestreamed = useMemo(
+    () =>
+      config &&
+      Object.keys(config.go2rtc.streams || {}).includes(
+        camera.live.stream_name,
+      ),
+    [camera, config],
+  );
+
   const { data: cameraMetadata } = useSWR<LiveStreamMetadata>(
-    `go2rtc/streams/${camera.live.stream_name}`,
+    isRestreamed ? `go2rtc/streams/${camera.live.stream_name}` : null,
     {
       revalidateOnFocus: false,
     },

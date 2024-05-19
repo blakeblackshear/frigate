@@ -83,7 +83,7 @@ function Live() {
   }
 
   if (selectedCamera) {
-    return <LiveCameraView camera={selectedCamera} />;
+    return <LiveCameraView config={config} camera={selectedCamera} />;
   }
 
   return (
