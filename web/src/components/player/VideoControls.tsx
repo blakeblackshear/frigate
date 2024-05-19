@@ -143,6 +143,11 @@ export default function VideoControls({
             onSeek(10);
           }
           break;
+        case "f":
+          if (setFullscreen && down && !repeat) {
+            setFullscreen(!fullscreen);
+          }
+          break;
         case "m":
           if (setMuted && down && !repeat && video) {
             setMuted(!muted);
@@ -157,10 +162,10 @@ export default function VideoControls({
     },
     // only update when preview only changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [video, isPlaying, onSeek],
+    [video, isPlaying, fullscreen, setFullscreen, onSeek],
   );
   useKeyboardListener(
-    hotKeys ? ["ArrowLeft", "ArrowRight", "m", " "] : [],
+    hotKeys ? ["ArrowLeft", "ArrowRight", "f", "m", " "] : [],
     onKeyboardShortcut,
   );
 
