@@ -1,5 +1,6 @@
 import strftime from "strftime";
 import { fromUnixTime, intervalToDuration, formatDuration } from "date-fns";
+import { useMemo } from "react";
 export const longToDate = (long: number): Date => new Date(long * 1000);
 export const epochToLong = (date: number): number => date / 1000;
 export const dateToLong = (date: Date): number => epochToLong(date.getTime());
@@ -235,7 +236,10 @@ export const getDurationFromTimestamps = (
  * @param timezone string representation of the timezone the user is requesting
  * @returns number of minutes offset from UTC
  */
-export const getUTCOffset = (date: Date, timezone: string): number => {
+export const getUTCOffset = (
+  date: Date,
+  timezone: string = getResolvedTimeZone(),
+): number => {
   // If timezone is in UTC±HH:MM format, parse it to get offset
   const utcOffsetMatch = timezone.match(/^UTC([+-])(\d{2}):(\d{2})$/);
   if (utcOffsetMatch) {
@@ -259,10 +263,10 @@ export const getUTCOffset = (date: Date, timezone: string): number => {
     target = new Date(`${iso}+000`);
   }
 
-  return (
+  return Math.round(
     (target.getTime() - utcDate.getTime() - date.getTimezoneOffset()) /
-    60 /
-    1000
+      60 /
+      1000,
   );
 };
 

@@ -101,6 +101,13 @@ export function RecordingView({
     () => getChunkedTimeDay(timeRange),
     [timeRange],
   );
+  useEffect(() => {
+    chunkedTimeRange.forEach((c) =>
+      console.log(
+        `the chunk is ${new Date(c.after * 1000)} -> ${new Date(c.before * 1000)}`,
+      ),
+    );
+  }, [chunkedTimeRange]);
   const [selectedRangeIdx, setSelectedRangeIdx] = useState(
     chunkedTimeRange.findIndex((chunk) => {
       return chunk.after <= startTime && chunk.before >= startTime;

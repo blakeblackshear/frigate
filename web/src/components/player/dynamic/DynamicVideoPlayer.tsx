@@ -12,6 +12,7 @@ import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { VideoResolutionType } from "@/types/live";
 import axios from "axios";
 import { cn } from "@/lib/utils";
+import { getUTCOffset } from "@/utils/dateUtil";
 
 /**
  * Dynamically switches between video playback and scrubbing preview player.
@@ -48,6 +49,12 @@ export default function DynamicVideoPlayer({
 }: DynamicVideoPlayerProps) {
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
+
+  useEffect(() => {
+    console.log(
+      `the time range is ${new Date(timeRange.after * 1000)} -> ${new Date(timeRange.before * 1000)}`,
+    );
+  }, [timeRange]);
 
   // controlling playback
 
@@ -148,9 +155,12 @@ export default function DynamicVideoPlayer({
   // state of playback player
 
   const recordingParams = useMemo(() => {
+    const timeRangeOffset =
+      (getUTCOffset(new Date(timeRange.before * 1000)) % 60) * 60;
+
     return {
-      before: timeRange.before,
-      after: timeRange.after,
+      before: timeRange.before + timeRangeOffset,
+      after: timeRange.after + timeRangeOffset,
     };
   }, [timeRange]);
   const { data: recordings } = useSWR<Recording[]>(
@@ -168,7 +178,7 @@ export default function DynamicVideoPlayer({
     }
 
     setSource(
-      `${apiHost}vod/${camera}/start/${timeRange.after}/end/${timeRange.before}/master.m3u8`,
+      `${apiHost}vod/${camera}/start/${recordingParams.after}/end/${recordingParams.before}/master.m3u8`,
     );
     setLoadingTimeout(setTimeout(() => setIsLoading(true), 1000));
 

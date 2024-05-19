@@ -10,7 +10,7 @@ import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
 import { PreviewPlayback } from "@/types/playback";
-import { isCurrentHour } from "@/utils/dateUtil";
+import { getUTCOffset, isCurrentHour } from "@/utils/dateUtil";
 import { baseUrl } from "@/api/baseUrl";
 import { isAndroid, isChrome, isMobile } from "react-device-detect";
 import { TimeRange } from "@/types/timeline";
@@ -41,11 +41,21 @@ export default function PreviewPlayer({
   const [currentHourFrame, setCurrentHourFrame] = useState<string>();
 
   const currentPreview = useMemo(() => {
+    const timeRangeOffset =
+      (getUTCOffset(new Date(timeRange.before * 1000)) % 60) * 60;
+
+    console.log(`the offset is ${timeRangeOffset}`);
+    cameraPreviews.forEach((preview) =>
+      console.log(
+        `check ${new Date(Math.round(preview.start) * 1000)} >= ${new Date((timeRange.after + timeRangeOffset) * 1000)}`,
+      ),
+    );
+
     return cameraPreviews.find(
       (preview) =>
         preview.camera == camera &&
-        Math.round(preview.start) >= timeRange.after &&
-        Math.floor(preview.end) <= timeRange.before,
+        Math.round(preview.start) >= timeRange.after + timeRangeOffset &&
+        Math.floor(preview.end) <= timeRange.before + timeRangeOffset,
     );
   }, [cameraPreviews, camera, timeRange]);
 
@@ -225,11 +235,14 @@ function PreviewVideoPlayer({
       return;
     }
 
+    const timeRangeOffset =
+      getUTCOffset(new Date(timeRange.before * 1000)) % 60;
+
     const preview = cameraPreviews.find(
       (preview) =>
         preview.camera == camera &&
-        Math.round(preview.start) >= timeRange.after &&
-        Math.floor(preview.end) <= timeRange.before,
+        Math.round(preview.start) >= timeRange.after + timeRangeOffset &&
+        Math.floor(preview.end) <= timeRange.before + timeRangeOffset,
     );
 
     if (preview != currentPreview) {
