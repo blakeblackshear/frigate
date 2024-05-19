@@ -82,7 +82,12 @@ export default function PreviewPlayer({
   }
 
   return (
-    <div className="flex size-full items-center justify-center rounded-lg text-white md:rounded-2xl">
+    <div
+      className={cn(
+        "flex size-full items-center justify-center rounded-lg text-white md:rounded-2xl",
+        className,
+      )}
+    >
       No Preview Found
     </div>
   );
