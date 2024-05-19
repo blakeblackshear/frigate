@@ -285,6 +285,14 @@ export default function HlsVideoPlayer({
             ) {
               setLoadedMetadata(false);
               setUseHlsCompat(true);
+            } else {
+              toast.error(
+                // @ts-expect-error code does exist
+                `Failed to play recordings (error ${e.target.error.code}): ${e.target.error.message}`,
+                {
+                  position: "top-center",
+                },
+              );
             }
           }}
         />
