@@ -44,13 +44,6 @@ export default function PreviewPlayer({
     const timeRangeOffset =
       (getUTCOffset(new Date(timeRange.before * 1000)) % 60) * 60;
 
-    console.log(`the offset is ${timeRangeOffset}`);
-    cameraPreviews.forEach((preview) =>
-      console.log(
-        `check ${new Date(Math.round(preview.start) * 1000)} >= ${new Date((timeRange.after + timeRangeOffset) * 1000)}`,
-      ),
-    );
-
     return cameraPreviews.find(
       (preview) =>
         preview.camera == camera &&
