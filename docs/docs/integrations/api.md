@@ -464,21 +464,53 @@ Summary of reviews for the last 30 days. Accepts the following query string para
 | `labels`   | str  | , separated list of labels  |
 | `timezone` | str  | Timezone name               |
 
-### `POST /api/review/<id>/viewed`
+### `POST /api/reviews/viewed`
 
-Mark an item as reviewed.
+Mark item(s) as reviewed.
+
+**Required Body:**
+
+```json
+{
+  "ids": ["123", "456"] // , separated list of review IDs
+}
+```
 
 ### `DELETE /api/review/<id>/viewed`
 
 Mark an item as not reviewed.
 
-### `POST /api/reviews/<ids>/viewed`
+### `POST /api/reviews/delete`
 
-Mark multiple items as reviewed. IDs are passed in as a comma separated list.
+Delete review items.
 
-### `DELETE /api/reviews/<ids>`
+**Required Body:**
 
-Delete items. IDs are passed in as a comma separated list
+```json
+{
+  "ids": ["123", "456"] // , separated list of review IDs
+}
+```
+
+### `GET /review/activity/motion`
+
+Get the motion activity for camera(s) during a specified time period.
+
+| param      | Type | Description                                                    |
+| ---------- | ---- | -------------------------------------------------------------- |
+| `before`   | int  | Epoch time                                                     |
+| `after`    | int  | Epoch time                                                     |
+| `cameras`  | str  | , separated list of cameras                                    |
+
+### `GET /review/activity/audio`
+
+Get the audio activity for camera(s) during a specified time period.
+
+| param      | Type | Description                                                    |
+| ---------- | ---- | -------------------------------------------------------------- |
+| `before`   | int  | Epoch time                                                     |
+| `after`    | int  | Epoch time                                                     |
+| `cameras`  | str  | , separated list of cameras                                    |
 
 ## Timeline
 
