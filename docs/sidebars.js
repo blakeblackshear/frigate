@@ -13,7 +13,6 @@ module.exports = {
       "guides/configuring_go2rtc",
       "guides/ha_notifications",
       "guides/ha_network_storage",
-      "guides/parked_cars",
       "guides/reverse_proxy",
     ],
     Configuration: {
