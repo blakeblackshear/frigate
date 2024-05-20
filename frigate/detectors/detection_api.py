@@ -72,7 +72,7 @@ class DetectionApi(ABC):
 
     def post_process(self, output):
         if self.detector_config.model.model_type == ModelTypeEnum.yolonas:
-            return self.yolonas(output)
+            return self.post_process_yolonas(output)
         else:
             raise ValueError(
                 f'Model type "{self.detector_config.model.model_type}" is currently not supported.'
