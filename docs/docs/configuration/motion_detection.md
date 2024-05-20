@@ -21,9 +21,7 @@ First, mask areas with regular motion not caused by the objects you want to dete
 
 ## Prepare For Testing
 
-The easiest way to tune motion detection is to do it live, have one window / screen open with the frigate debug view and motion boxes enabled with another window / screen open allowing for configuring the motion settings. It is recommended to use Home Assistant or MQTT as they offer live configuration of some motion settings meaning that Frigate does not need to be restarted when values are changed.
-
-In Home Assistant the `Improve Contrast`, `Contour Area`, and `Threshold` configuration entities are disabled by default but can easily be enabled and used to tune live, otherwise MQTT can be used.
+The easiest way to tune motion detection is to use the Frigate UI under Settings > Motion Tuner. This screen allows the changing of motion detection values live to easily see the immediate effect on what is detected as motion.
 
 ## Tuning Motion Detection During The Day
 
