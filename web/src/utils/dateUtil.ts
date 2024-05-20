@@ -269,6 +269,15 @@ export const getUTCOffset = (
   );
 };
 
+/**
+ * Gets the minute offset in seconds of the current timezone from UTC.
+ * Any timezones with an offset in hours will return 0,
+ * any timezones with an offset of 30 or 45 minutes will return that amount in seconds.
+ */
+export function getTimestampOffset(timestamp: number) {
+  return (getUTCOffset(new Date(timestamp * 1000)) % 60) * 60;
+}
+
 export function getRangeForTimestamp(timestamp: number) {
   const date = new Date(timestamp * 1000);
   date.setMinutes(0, 0, 0);

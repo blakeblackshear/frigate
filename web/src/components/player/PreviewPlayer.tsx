@@ -10,7 +10,7 @@ import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
 import { PreviewPlayback } from "@/types/playback";
-import { getUTCOffset, isCurrentHour } from "@/utils/dateUtil";
+import { getTimestampOffset, isCurrentHour } from "@/utils/dateUtil";
 import { baseUrl } from "@/api/baseUrl";
 import { isAndroid, isChrome, isMobile } from "react-device-detect";
 import { TimeRange } from "@/types/timeline";
@@ -41,8 +41,7 @@ export default function PreviewPlayer({
   const [currentHourFrame, setCurrentHourFrame] = useState<string>();
 
   const currentPreview = useMemo(() => {
-    const timeRangeOffset =
-      (getUTCOffset(new Date(timeRange.before * 1000)) % 60) * 60;
+    const timeRangeOffset = getTimestampOffset(timeRange.before);
 
     return cameraPreviews.find(
       (preview) =>
@@ -233,8 +232,8 @@ function PreviewVideoPlayer({
       return;
     }
 
-    const timeRangeOffset =
-      getUTCOffset(new Date(timeRange.before * 1000)) % 60;
+    // account for minutes offset in timezone
+    const timeRangeOffset = getTimestampOffset(timeRange.before);
 
     const preview = cameraPreviews.find(
       (preview) =>
