@@ -17,8 +17,6 @@ supported_socs = ["rk3562", "rk3566", "rk3568", "rk3576", "rk3588"]
 
 supported_models = {ModelTypeEnum.yolonas: "^deci-fp16-yolonas_[sml]$"}
 
-# default_model = "deci-fp16-yolonas_s"
-
 model_chache_dir = "/config/model_cache/rknn_cache/"
 
 
@@ -111,9 +109,6 @@ class Rknn(DetectionApi):
             if model_matched:
                 model_props["filename"] = model_path + f"-{soc}-v2.0.0-1.rknn"
 
-                # if model_path == default_model:
-                #     model_props["path"] = "/models/" + model_props["filename"]
-                # else:
                 model_props["path"] = model_chache_dir + model_props["filename"]
 
                 if not os.path.isfile(model_props["path"]):
