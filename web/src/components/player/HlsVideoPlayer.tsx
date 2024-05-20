@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { useOverlayState } from "@/hooks/use-overlay-state";
 import { usePersistence } from "@/hooks/use-persistence";
 import { cn } from "@/lib/utils";
+import { ASPECT_VERTICAL_LAYOUT } from "@/types/record";
 
 // Android native hls does not seek correctly
 const USE_NATIVE_HLS = !isAndroid;
@@ -73,7 +74,8 @@ export default function HlsVideoPlayer({
       }
 
       setTallCamera(
-        videoRef.current.videoWidth / videoRef.current.videoHeight < 1.5,
+        videoRef.current.videoWidth / videoRef.current.videoHeight <
+          ASPECT_VERTICAL_LAYOUT,
       );
     }
   }, [videoRef, setFullResolution]);
