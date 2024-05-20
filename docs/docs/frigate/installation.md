@@ -28,6 +28,12 @@ Frigate uses the following locations for read/write operations in the container.
 - `/tmp/cache`: Cache location for recording segments. Initial recordings are written here before being checked and converted to mp4 and moved to the recordings folder. Segments generated via the `clip.mp4` endpoints are also concatenated and processed here. It is recommended to use a [`tmpfs`](https://docs.docker.com/storage/tmpfs/) mount for this.
 - `/dev/shm`: Internal cache for raw decoded frames in shared memory. It is not recommended to modify this directory or map it with docker. The minimum size is impacted by the `shm-size` calculations below.
 
+:::warning
+
+For Frigate to start, it requires a valid configuration file inside the `/config/` directory mentioned above. There is a step by step guide to creating a minimal configuration in the [getting started guide](https://docs.frigate.video/guides/getting_started#configuring-frigate).
+
+:::
+
 #### Common docker compose storage configurations
 
 Writing to a local disk or external USB drive:
