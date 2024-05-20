@@ -88,7 +88,7 @@ class TestConfig(unittest.TestCase):
                     "type": "openvino",
                 },
             },
-            # needs to be a file that will exist, doesnt matter what
+            # needs to be a file that will exist, doesn't matter what
             "model": {"path": "/etc/hosts", "width": 512},
         }
 

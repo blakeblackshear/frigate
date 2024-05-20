@@ -43,6 +43,6 @@ The most common reason for the PCIe coral not being detected is that the driver 
 
 Coral Dual EdgeTPU is one card with two identical TPU cores. Each core has it's own PCIe interface and motherboard needs to have two PCIe busses on the m.2 slot to make them both work.
 
-E-key slot implemented to full m.2 electomechanical specification has two PCIe busses. Most motherboard manufacturers implement only one PCIe bus in m.2 E-key connector (this is why only one TPU is working). Some SBCs can have only USB bus on m.2 connector, ie none of TPUs will work.
+E-key slot implemented to full m.2 electromechanical specification has two PCIe busses. Most motherboard manufacturers implement only one PCIe bus in m.2 E-key connector (this is why only one TPU is working). Some SBCs can have only USB bus on m.2 connector, ie none of TPUs will work.
 
 In this case it is recommended to use a Dual EdgeTPU Adapter [like the one from MagicBlueSmoke](https://github.com/magic-blue-smoke/Dual-Edge-TPU-Adapter)
