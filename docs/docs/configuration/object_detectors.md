@@ -376,10 +376,15 @@ model: # required
   input_pixel_format: bgr # required
   # shape of detection frame
   input_tensor: nhwc
-  model_type: yolonas # required
 ```
 
 ### Choosing a model
+
+:::warning
+
+yolo-nas models use weights from DeciAI. These weights are subject to their license and can't be used commercially. For more information, see: https://docs.deci.ai/super-gradients/latest/LICENSE.YOLONAS.html 
+
+:::
 
 The inference time was determined on a rk3588 with 3 NPU cores.
 

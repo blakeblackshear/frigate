@@ -7,7 +7,7 @@ from typing import Literal
 from pydantic import Field
 
 from frigate.detectors.detection_api import DetectionApi
-from frigate.detectors.detector_config import BaseDetectorConfig
+from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
 
 logger = logging.getLogger(__name__)
 
@@ -15,9 +15,9 @@ DETECTOR_KEY = "rknn"
 
 supported_socs = ["rk3562", "rk3566", "rk3568", "rk3576", "rk3588"]
 
-supported_models = ["^deci-fp16-yolonas_[sml]$"]
+supported_models = {ModelTypeEnum.yolonas: "^deci-fp16-yolonas_[sml]$"}
 
-default_model = "deci-fp16-yolonas_s"
+# default_model = "deci-fp16-yolonas_s"
 
 model_chache_dir = "/config/model_cache/rknn_cache/"
 
@@ -39,6 +39,16 @@ class Rknn(DetectionApi):
         soc = self.get_soc()
 
         model_props = self.parse_model_input(config.model.path, soc)
+
+        if model_props["preset"]:
+            config.model.model_type = model_props["model_type"]
+
+        if model_props["model_type"] == ModelTypeEnum.yolonas:
+            logger.info("""
+                        You are using yolo-nas with weights from DeciAI.
+                        These weights are subject to their license and can't be used commercially.
+                        For more information, see: https://docs.deci.ai/super-gradients/latest/LICENSE.YOLONAS.html
+                        """)
 
         from rknnlite.api import RKNNLite
 
@@ -91,16 +101,23 @@ class Rknn(DetectionApi):
             Full name could be: default-fp16-yolonas_s-rk3588-v2.0.0-1.rknn
             """
 
-            if any(re.match(pattern, model_path) for pattern in supported_models):
+            model_matched = False
+
+            for model_type, pattern in supported_models.items():
+                if re.match(pattern, model_path):
+                    model_matched = True
+                    model_props["model_type"] = model_type
+
+            if model_matched:
                 model_props["filename"] = model_path + f"-{soc}-v2.0.0-1.rknn"
 
-                if model_path == default_model:
-                    model_props["path"] = "/models/" + model_props["filename"]
-                else:
-                    model_props["path"] = model_chache_dir + model_props["filename"]
+                # if model_path == default_model:
+                #     model_props["path"] = "/models/" + model_props["filename"]
+                # else:
+                model_props["path"] = model_chache_dir + model_props["filename"]
 
-                    if not os.path.isfile(model_props["path"]):
-                        self.download_model(model_props["filename"])
+                if not os.path.isfile(model_props["path"]):
+                    self.download_model(model_props["filename"])
             else:
                 supported_models_str = ", ".join(
                     model[1:-1] for model in supported_models
