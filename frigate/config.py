@@ -1442,6 +1442,12 @@ class FrigateConfig(FrigateBaseModel):
                         else False
                     )
 
+            # Warn if detect fps > 10
+            if camera_config.detect.fps > 10:
+                logger.warning(
+                    f"{camera_config.name} detect fps is set to {camera_config.detect.fps}. This does NOT need to match your camera's frame rate. High values could lead to reduced performance. Recommended value is 5."
+                )
+
             # Default min_initialized configuration
             min_initialized = int(camera_config.detect.fps / 2)
             if camera_config.detect.min_initialized is None:
