@@ -306,6 +306,7 @@ To verify that the integration is working correctly, start Frigate and observe t
 ## Rockchip platform
 
 Hardware accelerated object detection is supported on the following SoCs:
+
 - RK3562
 - RK3566
 - RK3568
@@ -334,20 +335,21 @@ I recommend [Joshua Riek's Ubuntu for Rockchip](https://github.com/Joshua-Riek/u
 Follow Frigate's default installation instructions, but use a docker image with `-rk` suffix for example `ghcr.io/blakeblackshear/frigate:stable-rk`.
 
 Next, you need to grant docker permissions to access your hardware:
+
 - During the configuration process, you should run docker in privileged mode to avoid any errors due to insufficient permissions. To do so, add `privileged: true` to your `docker-compose.yml` file or the `--privileged` flag to your docker run command.
 - After everything works, you should only grant necessary permissions to increase security. Add the lines below to your `docker-compose.yml` file or the following options to your docker run command: `--security-opt systempaths=unconfined --security-opt apparmor=unconfined --device /dev/dri:/dev/dri`:
 
 ```yaml
-    security_opt:
-      - apparmor=unconfined
-      - systempaths=unconfined
-    devices:
-      - /dev/dri:/dev/dri
+security_opt:
+  - apparmor=unconfined
+  - systempaths=unconfined
+devices:
+  - /dev/dri:/dev/dri
 ```
 
 ### Configuration
 
-This `config.yml` shows all relevant options to configure the detector and explains them. All values shown are the default values (except for one). Lines that are required at least to use the detector are labeled as required, all other lines are optional.
+This `config.yml` shows all relevant options to configure the detector and explains them. All values shown are the default values (except for two). Lines that are required at least to use the detector are labeled as required, all other lines are optional.
 
 ```yaml
 detectors: # required
@@ -361,11 +363,11 @@ detectors: # required
 model: # required
   # name of model (will be automatically downloaded) or path to your own .rknn model file
   # possible values are:
-  # - default-fp16-yolonas_s
-  # - default-fp16-yolonas_m
-  # - default-fp16-yolonas_l
+  # - deci-fp16-yolonas_s
+  # - deci-fp16-yolonas_m
+  # - deci-fp16-yolonas_l
   # - /config/model_cache/your_custom_model.rknn
-  path: default-fp16-yolonas_s
+  path: deci-fp16-yolonas_s
   # width and height of detection frames
   width: 320
   height: 320
@@ -374,13 +376,18 @@ model: # required
   input_pixel_format: bgr # required
   # shape of detection frame
   input_tensor: nhwc
+  model_type: yolonas # required
 ```
 
 ### Choosing a model
 
-| Model   | Size in mb | Inference Time |
-| ------- | ---------- | -------------- |
-|         |            |                |
+The inference time was determined on a rk3588 with 3 NPU cores.
+
+| Model               | Size in mb | Inference time in ms |
+| ------------------- | ---------- | -------------------- |
+| deci-fp16-yolonas_s | 24         | 25                   |
+| deci-fp16-yolonas_m | 62         | 35                   |
+| deci-fp16-yolonas_l | 81         | 45                   |
 
 :::tip
 
