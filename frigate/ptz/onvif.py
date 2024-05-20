@@ -163,7 +163,7 @@ class OnvifController:
                 logger.warning(f"Unable to get status from camera: {camera_name}: {e}")
                 status = None
 
-            # autoracking relative panning/tilting needs a relative zoom value set to 0
+            # autotracking relative panning/tilting needs a relative zoom value set to 0
             # if camera supports relative movement
             if (
                 self.config.cameras[camera_name].onvif.autotracking.zooming

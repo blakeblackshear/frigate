@@ -10,7 +10,7 @@ As of Home Assistant Core 2023.6, Network Mounted Storage is supported for addon
 ### Prerequisites
 
 - HA Core 2023.6 or newer is installed
-- Running HA OS 10.2 or newer OR Running Supervised with latest os-agent installed (this is required for superivsed install)
+- Running HA OS 10.2 or newer OR Running Supervised with latest os-agent installed (this is required for supervised install)
 
 ### Initial Setup
 

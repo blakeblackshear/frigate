@@ -221,7 +221,7 @@ function Logs() {
       copy(logs.join("\n"));
       toast.success(
         logRange.start == 0
-          ? "Coplied logs to clipboard"
+          ? "Copied logs to clipboard"
           : "Copied visible logs to clipboard",
       );
     } else {

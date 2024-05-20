@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 def get_standard_aspect_ratio(width: int, height: int) -> tuple[int, int]:
     """Ensure that only standard aspect ratios are used."""
-    # it is imoprtant that all ratios have the same scale
+    # it is important that all ratios have the same scale
     known_aspects = [
         (16, 9),
         (9, 16),

@@ -224,7 +224,7 @@ It is recommended to run Frigate in LXC for maximum performance. See [this discu
 
 For details on running Frigate using ESXi, please see the instructions [here](https://williamlam.com/2023/05/frigate-nvr-with-coral-tpu-igpu-passthrough-using-esxi-on-intel-nuc.html).
 
-If you're running Frigate on a rack mounted server and want to passthough the Google Coral, [read this.](https://github.com/blakeblackshear/frigate/issues/305)
+If you're running Frigate on a rack mounted server and want to passthrough the Google Coral, [read this.](https://github.com/blakeblackshear/frigate/issues/305)
 
 ## Synology NAS on DSM 7
 
@@ -294,8 +294,8 @@ mkdir -p /share/Container/frigate/config
 # Copy the config file prepared in step 2 into the newly created config directory.
 cp path/to/your/config/file /share/Container/frigate/config
 # Create directory to host Frigate media files on QNAP file system.
-# (if you have a surveilliance disk, create media directory on the surveilliance disk.
-# Example command assumes share_vol2 is the surveilliance drive
+# (if you have a surveillance disk, create media directory on the surveillance disk.
+# Example command assumes share_vol2 is the surveillance drive
 mkdir -p /share/share_vol2/frigate/media
 # Create Frigate docker container.  Replace shm-size value with the value from preparation step 3.
 # Also replace the time zone value for 'TZ' in the sample command.
