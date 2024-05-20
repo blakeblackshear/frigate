@@ -20,6 +20,8 @@ import axios from "axios";
 import { toast } from "sonner";
 import { Toaster } from "../ui/sonner";
 import ActivityIndicator from "../indicators/activity-indicator";
+import { Link } from "react-router-dom";
+import { LuExternalLink } from "react-icons/lu";
 
 type MotionMaskEditPaneProps = {
   polygons?: Polygon[];
@@ -187,12 +189,25 @@ export default function MotionMaskEditPane({
       <Heading as="h3" className="my-2">
         {polygon.name.length ? "Edit" : "New"} Motion Mask
       </Heading>
-      <div className="my-2 text-sm text-muted-foreground">
+      <div className="my-3 space-y-3 text-sm text-muted-foreground">
         <p>
           Motion masks are used to prevent unwanted types of motion from
-          triggering detection. Over masking will make it more difficult for
-          objects to be tracked.
+          triggering detection (example: tree branches, camera timestamps).
+          Motion masks should be used <em>very sparingly</em>, over-masking will
+          make it more difficult for objects to be tracked.
         </p>
+
+        <div className="flex items-center text-primary">
+          <Link
+            to="https://docs.frigate.video/configuration/masks/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline"
+          >
+            Read the documentation{" "}
+            <LuExternalLink className="ml-2 inline-flex size-3" />
+          </Link>
+        </div>
       </div>
       <Separator className="my-3 bg-secondary" />
       {polygons && activePolygonIndex !== undefined && (
