@@ -16,6 +16,8 @@ import { AxiosResponse } from "axios";
 import { toast } from "sonner";
 import { useOverlayState } from "@/hooks/use-overlay-state";
 import { usePersistence } from "@/hooks/use-persistence";
+import { cn } from "@/lib/utils";
+import { ASPECT_VERTICAL_LAYOUT } from "@/types/record";
 
 // Android native hls does not seek correctly
 const USE_NATIVE_HLS = !isAndroid;
@@ -70,6 +72,11 @@ export default function HlsVideoPlayer({
           height: videoRef.current.videoHeight,
         });
       }
+
+      setTallCamera(
+        videoRef.current.videoWidth / videoRef.current.videoHeight <
+          ASPECT_VERTICAL_LAYOUT,
+      );
     }
   }, [videoRef, setFullResolution]);
 
@@ -109,6 +116,7 @@ export default function HlsVideoPlayer({
 
   // controls
 
+  const [tallCamera, setTallCamera] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
   const [muted, setMuted] = useOverlayState("playerMuted", true);
   const [volume, setVolume] = useOverlayState("playerVolume", 1.0);
@@ -153,7 +161,10 @@ export default function HlsVideoPlayer({
   return (
     <TransformWrapper minScale={1.0}>
       <VideoControls
-        className="absolute bottom-5 left-1/2 z-50 -translate-x-1/2"
+        className={cn(
+          "absolute left-1/2 z-50 -translate-x-1/2",
+          tallCamera ? "bottom-12" : "bottom-5",
+        )}
         video={videoRef.current}
         isPlaying={isPlaying}
         show={visible && (controls || controlsOpen)}

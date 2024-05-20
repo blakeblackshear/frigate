@@ -221,7 +221,7 @@ export function useFrigateStats(): { payload: FrigateStats } {
 
 export function useInitialCameraState(
   camera: string,
-  refreshOnStart: boolean,
+  revalidateOnFocus: boolean,
 ): {
   payload: FrigateCameraState;
 } {
@@ -232,12 +232,25 @@ export function useInitialCameraState(
   const data = JSON.parse(payload as string);
 
   useEffect(() => {
-    if (refreshOnStart) {
+    let listener = undefined;
+    if (revalidateOnFocus) {
       sendCommand("onConnect");
+      listener = () => {
+        if (document.visibilityState == "visible") {
+          sendCommand("onConnect");
+        }
+      };
+      addEventListener("visibilitychange", listener);
     }
+
+    return () => {
+      if (listener) {
+        removeEventListener("visibilitychange", listener);
+      }
+    };
     // only refresh when onRefresh value changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refreshOnStart]);
+  }, [revalidateOnFocus]);
 
   return { payload: data ? data[camera] : undefined };
 }
