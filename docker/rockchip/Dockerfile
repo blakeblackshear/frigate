@@ -20,7 +20,11 @@ COPY --from=rootfs / /
 
 ADD https://github.com/MarcA711/rknn-toolkit2/releases/download/v2.0.0/librknnrt.so /usr/lib/
 
-# TODO removed models, other models support may need to be added back in
+ADD https://github.com/MarcA711/rknn-models/releases/download/v2.0.0/deci-fp16-yolonas_s-rk3562-v2.0.0-1.rknn /models/
+ADD https://github.com/MarcA711/rknn-models/releases/download/v2.0.0/deci-fp16-yolonas_s-rk3566-v2.0.0-1.rknn /models/
+ADD https://github.com/MarcA711/rknn-models/releases/download/v2.0.0/deci-fp16-yolonas_s-rk3568-v2.0.0-1.rknn /models/
+ADD https://github.com/MarcA711/rknn-models/releases/download/v2.0.0/deci-fp16-yolonas_s-rk3576-v2.0.0-1.rknn /models/
+ADD https://github.com/MarcA711/rknn-models/releases/download/v2.0.0/deci-fp16-yolonas_s-rk3588-v2.0.0-1.rknn /models/
 
 RUN rm -rf /usr/lib/btbn-ffmpeg/bin/ffmpeg
 RUN rm -rf /usr/lib/btbn-ffmpeg/bin/ffprobe

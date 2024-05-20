@@ -15,9 +15,9 @@ DETECTOR_KEY = "rknn"
 
 supported_socs = ["rk3562", "rk3566", "rk3568", "rk3576", "rk3588"]
 
-supported_models = ["^default-fp16-yolonas_[sml]$"]
+supported_models = ["^deci-fp16-yolonas_[sml]$"]
 
-default_model = "default-fp16-yolonas_s"
+default_model = "deci-fp16-yolonas_s"
 
 model_chache_dir = "/config/model_cache/rknn_cache/"
 
@@ -95,7 +95,7 @@ class Rknn(DetectionApi):
                 model_props["filename"] = model_path + f"-{soc}-v2.0.0-1.rknn"
 
                 if model_path == default_model:
-                    model_path["path"] = "/models/" + model_props["filename"]
+                    model_props["path"] = "/models/" + model_props["filename"]
                 else:
                     model_props["path"] = model_chache_dir + model_props["filename"]
 
@@ -116,7 +116,7 @@ class Rknn(DetectionApi):
             os.mkdir(model_chache_dir)
 
         urllib.request.urlretrieve(
-            f"https://github.com/MarcA711/rknn-models/releases/tag/v2.0.0/{filename}",
+            f"https://github.com/MarcA711/rknn-models/releases/download/v2.0.0/{filename}",
             model_chache_dir + filename,
         )
 
