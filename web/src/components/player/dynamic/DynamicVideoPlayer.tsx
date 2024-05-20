@@ -12,7 +12,7 @@ import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { VideoResolutionType } from "@/types/live";
 import axios from "axios";
 import { cn } from "@/lib/utils";
-import { getTimestampOffset, getUTCOffset } from "@/utils/dateUtil";
+import { getTimestampOffset } from "@/utils/dateUtil";
 
 /**
  * Dynamically switches between video playback and scrubbing preview player.

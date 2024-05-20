@@ -20,7 +20,7 @@ import {
   MdOutlinePictureInPictureAlt,
 } from "react-icons/md";
 import { FaBicycle } from "react-icons/fa";
-import { endOfHourOrCurrentTime, getUTCOffset } from "./dateUtil";
+import { endOfHourOrCurrentTime } from "./dateUtil";
 import { TimeRange, Timeline } from "@/types/timeline";
 
 export function getTimelineIcon(timelineItem: Timeline) {
