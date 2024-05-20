@@ -20,7 +20,7 @@ import {
   MdOutlinePictureInPictureAlt,
 } from "react-icons/md";
 import { FaBicycle } from "react-icons/fa";
-import { endOfHourOrCurrentTime, getUTCOffset } from "./dateUtil";
+import { endOfHourOrCurrentTime } from "./dateUtil";
 import { TimeRange, Timeline } from "@/types/timeline";
 
 export function getTimelineIcon(timelineItem: Timeline) {
@@ -131,25 +131,13 @@ export function getChunkedTimeDay(timeRange: TimeRange): TimeRange[] {
   endOfThisHour.setSeconds(0, 0);
   const data: TimeRange[] = [];
   const startDay = new Date(timeRange.after * 1000);
-  const timezoneMinuteOffset =
-    getUTCOffset(new Date(timeRange.before * 1000)) % 60;
-
-  if (timezoneMinuteOffset == 0) {
-    startDay.setMinutes(0, 0, 0);
-  } else {
-    startDay.setSeconds(0, 0);
-  }
+  startDay.setMinutes(0, 0, 0);
 
   let start = startDay.getTime() / 1000;
   let end = 0;
 
   for (let i = 0; i < 24; i++) {
-    startDay.setHours(
-      startDay.getHours() + 1,
-      Math.abs(timezoneMinuteOffset),
-      0,
-      0,
-    );
+    startDay.setHours(startDay.getHours() + 1, 0, 0, 0);
 
     if (startDay > endOfThisHour) {
       break;

@@ -12,7 +12,7 @@ import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { VideoResolutionType } from "@/types/live";
 import axios from "axios";
 import { cn } from "@/lib/utils";
-import { getUTCOffset } from "@/utils/dateUtil";
+import { getTimestampOffset } from "@/utils/dateUtil";
 
 /**
  * Dynamically switches between video playback and scrubbing preview player.
@@ -149,8 +149,7 @@ export default function DynamicVideoPlayer({
   // state of playback player
 
   const recordingParams = useMemo(() => {
-    const timeRangeOffset =
-      (getUTCOffset(new Date(timeRange.before * 1000)) % 60) * 60;
+    const timeRangeOffset = getTimestampOffset(timeRange.before);
 
     return {
       before: timeRange.before + timeRangeOffset,
