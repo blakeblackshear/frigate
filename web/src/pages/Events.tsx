@@ -169,7 +169,7 @@ export default function Events() {
     const startDate = new Date(selectedTimeRange.after * 1000);
     startDate.setMinutes(0, 0, 0);
 
-    const endDate = new Date();
+    const endDate = new Date(selectedTimeRange.before * 1000);
     endDate.setHours(endDate.getHours() + 1, 0, 0, 0);
 
     return {
