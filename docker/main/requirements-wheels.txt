@@ -23,7 +23,7 @@ ruamel.yaml == 0.18.*
 tzlocal == 5.2
 types-PyYAML == 6.0.*
 requests == 2.31.*
-types-requests == 2.31.*
+types-requests == 2.32.*
 scipy == 1.13.*
 norfair == 2.2.*
 setproctitle == 1.3.*
