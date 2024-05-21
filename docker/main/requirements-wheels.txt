@@ -22,7 +22,7 @@ pyzmq == 26.0.*
 ruamel.yaml == 0.18.*
 tzlocal == 5.2
 types-PyYAML == 6.0.*
-requests == 2.31.*
+requests == 2.32.*
 types-requests == 2.31.*
 scipy == 1.13.*
 norfair == 2.2.*
