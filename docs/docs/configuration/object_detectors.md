@@ -302,3 +302,109 @@ Replace `<your_codeproject_ai_server_ip>` and `<port>` with the IP address and p
 To verify that the integration is working correctly, start Frigate and observe the logs for any error messages related to CodeProject.AI. Additionally, you can check the Frigate web interface to see if the objects detected by CodeProject.AI are being displayed and tracked properly.
 
 # Community Supported Detectors
+
+## Rockchip platform
+
+Hardware accelerated object detection is supported on the following SoCs:
+
+- RK3562
+- RK3566
+- RK3568
+- RK3576
+- RK3588
+
+This implementation uses the [Rockchip's RKNN-Toolkit2](https://github.com/airockchip/rknn-toolkit2/) Currently, only [Yolo-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) is supported as object detection model.
+
+### Prerequisites
+
+Make sure that you use a linux distribution that comes with the rockchip BSP kernel 5.10 or 6.1 and rknpu driver. To check, enter the following commands:
+
+```
+$ uname -r
+5.10.xxx-rockchip # or 6.1.xxx; the -rockchip suffix is important
+$ ls /dev/dri
+by-path  card0  card1  renderD128  renderD129 # should list renderD129
+$ sudo cat /sys/kernel/debug/rknpu/version
+RKNPU driver: v0.9.2 # or later version
+```
+
+I recommend [Joshua Riek's Ubuntu for Rockchip](https://github.com/Joshua-Riek/ubuntu-rockchip), if your board is supported.
+
+### Setup
+
+Follow Frigate's default installation instructions, but use a docker image with `-rk` suffix for example `ghcr.io/blakeblackshear/frigate:stable-rk`.
+
+Next, you need to grant docker permissions to access your hardware:
+
+- During the configuration process, you should run docker in privileged mode to avoid any errors due to insufficient permissions. To do so, add `privileged: true` to your `docker-compose.yml` file or the `--privileged` flag to your docker run command.
+- After everything works, you should only grant necessary permissions to increase security. Add the lines below to your `docker-compose.yml` file or the following options to your docker run command: `--security-opt systempaths=unconfined --security-opt apparmor=unconfined --device /dev/dri:/dev/dri`:
+
+```yaml
+security_opt:
+  - apparmor=unconfined
+  - systempaths=unconfined
+devices:
+  - /dev/dri:/dev/dri
+```
+
+### Configuration
+
+This `config.yml` shows all relevant options to configure the detector and explains them. All values shown are the default values (except for two). Lines that are required at least to use the detector are labeled as required, all other lines are optional.
+
+```yaml
+detectors: # required
+  rknn: # required
+    type: rknn # required
+    # number of NPU cores to use
+    # 0 means choose automatically
+    # increase for better performance if you have a multicore NPU e.g. set to 3 on rk3588
+    num_cores: 0
+
+model: # required
+  # name of model (will be automatically downloaded) or path to your own .rknn model file
+  # possible values are:
+  # - deci-fp16-yolonas_s
+  # - deci-fp16-yolonas_m
+  # - deci-fp16-yolonas_l
+  # - /config/model_cache/your_custom_model.rknn
+  path: deci-fp16-yolonas_s
+  # width and height of detection frames
+  width: 320
+  height: 320
+  # pixel format of detection frame
+  # default value is rgb but yolo models usually use bgr format
+  input_pixel_format: bgr # required
+  # shape of detection frame
+  input_tensor: nhwc
+```
+
+### Choosing a model
+
+:::warning
+
+yolo-nas models use weights from DeciAI. These weights are subject to their license and can't be used commercially. For more information, see: https://docs.deci.ai/super-gradients/latest/LICENSE.YOLONAS.html 
+
+:::
+
+The inference time was determined on a rk3588 with 3 NPU cores.
+
+| Model               | Size in mb | Inference time in ms |
+| ------------------- | ---------- | -------------------- |
+| deci-fp16-yolonas_s | 24         | 25                   |
+| deci-fp16-yolonas_m | 62         | 35                   |
+| deci-fp16-yolonas_l | 81         | 45                   |
+
+:::tip
+
+You can get the load of your NPU with the following command:
+
+```bash
+$ cat /sys/kernel/debug/rknpu/load
+>> NPU load:  Core0:  0%, Core1:  0%, Core2:  0%,
+```
+
+:::
+
+- By default the rknn detector uses the yolonas_s model (`model: path: default-fp16-yolonas_s`). This model comes with the image, so no further steps than those mentioned above are necessary and no download happens.
+- The other choices are automatically downloaded and stored in the folder `config/model_cache/rknn_cache`. After upgrading Frigate, you should remove older models to free up space.
+- Finally, you can also provide your own `.rknn` model. You should not save your own models in the `rknn_cache` folder, store them directly in the `model_cache` folder or another subfolder. To convert a model to `.rknn` format see the `rknn-toolkit2` (requires a x86 machine). Note, that there is only post-processing for the supported models.

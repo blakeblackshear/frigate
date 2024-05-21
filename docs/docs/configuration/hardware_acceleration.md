@@ -366,7 +366,7 @@ Hardware accelerated video de-/encoding is supported on all Rockchip SoCs using 
 
 ### Prerequisites
 
-Make sure that you use a linux distribution that comes with the rockchip BSP kernel 5.10 or 6.1 and supports VPU. To check, enter the following commands:
+Make sure that you use a linux distribution that comes with the rockchip BSP kernel 5.10 or 6.1 and rkvdec2 driver. To check, enter the following commands:
 
 ```
 $ uname -r

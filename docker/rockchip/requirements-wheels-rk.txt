@@ -1,2 +1,1 @@
-hide-warnings == 0.17
-rknn-toolkit-lite2 @ https://github.com/MarcA711/rknn-toolkit2/releases/download/v1.5.2/rknn_toolkit_lite2-1.5.2-cp39-cp39-linux_aarch64.whl
+rknn-toolkit-lite2 @ https://github.com/MarcA711/rknn-toolkit2/releases/download/v2.0.0/rknn_toolkit_lite2-2.0.0b0-cp39-cp39-linux_aarch64.whl
