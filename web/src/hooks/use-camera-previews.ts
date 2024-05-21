@@ -27,31 +27,8 @@ export function useCameraPreviews(
     fetchPreviews
       ? `preview/${camera}/start/${Math.round(timeRange.after)}/end/${Math.round(timeRange.before)}`
       : null,
-    { revalidateOnFocus: false, revalidateOnReconnect: false },
+    { revalidateOnFocus: autoRefresh, revalidateOnReconnect: autoRefresh },
   );
-
-  // Set a timeout to update previews on the hour
-  useEffect(() => {
-    if (!autoRefresh || !fetchPreviews || !allPreviews) {
-      return;
-    }
-
-    const callback = () => {
-      const nextPreviewStart = new Date(
-        allPreviews[allPreviews.length - 1].end * 1000,
-      );
-      nextPreviewStart.setHours(nextPreviewStart.getHours() + 1);
-
-      if (Date.now() > nextPreviewStart.getTime()) {
-        setTimeRange({ after: timeRange.after, before: Date.now() / 1000 });
-      }
-    };
-    document.addEventListener("focusin", callback);
-
-    return () => {
-      document.removeEventListener("focusin", callback);
-    };
-  }, [allPreviews, autoRefresh, fetchPreviews, timeRange]);
 
   return allPreviews;
 }

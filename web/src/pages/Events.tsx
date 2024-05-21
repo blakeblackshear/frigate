@@ -163,24 +163,20 @@ export default function Events() {
 
   // preview videos
   const previewTimes = useMemo(() => {
-    if (!reviews || reviews.length == 0) {
-      return undefined;
-    }
-
     // offset by timezone minutes
     const timestampOffset = getTimestampOffset(Date.now() / 1000);
 
-    const startDate = new Date();
+    const startDate = new Date(selectedTimeRange.after * 1000);
     startDate.setMinutes(0, 0, 0);
 
-    const endDate = new Date(reviews.at(-1)?.end_time || 0);
-    endDate.setHours(0, 0, 0, 0);
+    const endDate = new Date(selectedTimeRange.before * 1000);
+    endDate.setHours(endDate.getHours() + 1, 0, 0, 0);
 
     return {
       after: startDate.getTime() / 1000 + timestampOffset,
       before: endDate.getTime() / 1000 + timestampOffset,
     };
-  }, [reviews]);
+  }, [selectedTimeRange]);
 
   const allPreviews = useCameraPreviews(
     previewTimes ?? { after: 0, before: 0 },
