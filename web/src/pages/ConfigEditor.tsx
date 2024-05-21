@@ -141,7 +141,7 @@ function ConfigEditor() {
               className="flex items-center gap-2"
               onClick={() => handleCopyConfig()}
             >
-              <LuCopy className="size-5 text-secondary-foreground" />
+              <LuCopy className="text-secondary-foreground" />
               <span className="hidden md:block">Copy Config</span>
             </Button>
             <Button
