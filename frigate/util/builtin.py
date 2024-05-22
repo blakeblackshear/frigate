@@ -279,7 +279,7 @@ def find_by_key(dictionary, target_key):
     return None
 
 
-def save_default_config(location: str):
+def save_default_config(location: str) -> None:
     try:
         with open(location, "w") as f:
             f.write(
@@ -303,6 +303,11 @@ cameras:
             )
     except PermissionError:
         logger.error("Unable to write default config to /config")
+        return
+
+    logger.info(
+        "Created default config file, see the getting started docs for configuration https://docs.frigate.video/guides/getting_started"
+    )
 
 
 def get_tomorrow_at_time(hour: int) -> datetime.datetime:
