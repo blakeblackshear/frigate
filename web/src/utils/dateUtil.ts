@@ -302,5 +302,8 @@ export function getEndOfDayTimestamp(date: Date) {
 export function isCurrentHour(timestamp: number) {
   const now = new Date();
   now.setMinutes(0, 0, 0);
-  return timestamp > now.getTime() / 1000;
+
+  const timeShift = getTimestampOffset(timestamp);
+
+  return timestamp > now.getTime() / 1000 + timeShift;
 }
