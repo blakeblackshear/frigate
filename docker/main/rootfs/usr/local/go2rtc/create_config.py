@@ -32,13 +32,16 @@ config_file_yaml = config_file.replace(".yml", ".yaml")
 if os.path.isfile(config_file_yaml):
     config_file = config_file_yaml
 
-with open(config_file) as f:
-    raw_config = f.read()
+try:
+    with open(config_file) as f:
+        raw_config = f.read()
 
-if config_file.endswith((".yaml", ".yml")):
-    config: dict[str, any] = yaml.safe_load(raw_config)
-elif config_file.endswith(".json"):
-    config: dict[str, any] = json.loads(raw_config)
+    if config_file.endswith((".yaml", ".yml")):
+        config: dict[str, any] = yaml.safe_load(raw_config)
+    elif config_file.endswith(".json"):
+        config: dict[str, any] = json.loads(raw_config)
+except FileNotFoundError:
+    config: dict[str, any] = {}
 
 go2rtc_config: dict[str, any] = config.get("go2rtc", {})
 
