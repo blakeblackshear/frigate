@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { isDesktop } from "react-device-detect";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { cn } from "@/lib/utils";
+import { MdVerticalAlignBottom } from "react-icons/md";
 
 const logTypes = ["frigate", "go2rtc", "nginx"] as const;
 type LogType = (typeof logTypes)[number];
@@ -381,7 +382,7 @@ function Logs() {
 
       {initialScroll && !endVisible && (
         <Button
-          className="absolute bottom-8 left-[50%] z-20 -translate-x-[50%] rounded-md bg-secondary-foreground p-2 text-primary"
+          className="absolute bottom-8 left-[50%] z-20 flex -translate-x-[50%] items-center gap-1 rounded-md p-2"
           onClick={() =>
             contentRef.current?.scrollTo({
               top: contentRef.current?.scrollHeight,
@@ -389,6 +390,7 @@ function Logs() {
             })
           }
         >
+          <MdVerticalAlignBottom />
           Jump to Bottom
         </Button>
       )}

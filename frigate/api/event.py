@@ -227,9 +227,9 @@ def events():
         elif sort == "score_desc":
             order_by = Event.data["score"].desc()
         elif sort == "date_asc":
-            Event.start_time.asc()
+            order_by = Event.start_time.asc()
         elif sort == "date_desc":
-            Event.start_time.desc()
+            order_by = Event.start_time.desc()
     else:
         order_by = Event.start_time.desc()
 
