@@ -10,7 +10,7 @@ For example, the cat in this image is currently in Zone 1, but **not** Zone 2.
 
 Zones cannot have the same name as a camera. If desired, a single zone can include multiple cameras if you have multiple cameras covering the same area by configuring zones with the same name for each camera.
 
-During testing, enable the Zones option for the debug feed so you can adjust as needed. The zone line will increase in thickness when any object enters the zone.
+During testing, enable the Zones option for the Debug view of your camera (Settings --> Debug) so you can adjust as needed. The zone line will increase in thickness when any object enters the zone.
 
 To create a zone, follow [the steps for a "Motion mask"](masks.md), but use the section of the web UI for creating a zone instead.
 
@@ -47,7 +47,6 @@ cameras:
         coordinates: ...
       inner_yard:
         coordinates: ...
-
 ```
 
 ### Restricting snapshots to specific zones
@@ -130,4 +129,18 @@ cameras:
         inertia: 1
         objects:
           - car
+```
+
+### Loitering Time
+
+Zones support a `loitering_time` configuration which can be used to only consider an object as part of a zone if they loiter in the zone for the specified number of seconds. This can be used, for example, to create alerts for cars that stop on the street but not cars that just drive past your camera.
+
+```yaml
+cameras:
+  name_of_your_camera:
+    zones:
+      front_yard:
+        loitering_time: 5 # unit is in seconds
+        objects:
+          - person
 ```

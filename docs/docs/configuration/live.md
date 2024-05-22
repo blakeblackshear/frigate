@@ -3,11 +3,11 @@ id: live
 title: Live View
 ---
 
-Frigate has different live view options, some of which require the bundled `go2rtc` to be configured as shown in the [step by step guide](/guides/configuring_go2rtc).
+Frigate intelligently displays your camera streams on the Live view dashboard. Your camera images update once per minute when no detectable activity is occurring to conserve bandwidth and resources. As soon as any motion is detected, cameras seamlessly switch to a live stream.
 
-## Live View Options
+## Live View technologies
 
-Live view options can be selected while viewing the live stream. The options are:
+Frigate intelligently uses three different streaming technologies to display your camera streams. The highest quality and fluency of the Live view requires the bundled `go2rtc` to be configured as shown in the [step by step guide](/guides/configuring_go2rtc).
 
 | Source | Latency | Frame Rate                            | Resolution     | Audio                        | Requires go2rtc | Other Limitations                                |
 | ------ | ------- | ------------------------------------- | -------------- | ---------------------------- | --------------- | ------------------------------------------------ |

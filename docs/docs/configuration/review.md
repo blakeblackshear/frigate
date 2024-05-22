@@ -3,7 +3,13 @@ id: review
 title: Review
 ---
 
-Review items are saved as periods of time where frigate detected events. After watching the preview of a review item it is marked as reviewed.
+The Review page of the Frigate UI is for quickly reviewing historical footage of interest from your cameras. _Review items_ are indicated on a vertical timeline and displayed as a grid of previews - bandwidth-optimized, low frame rate, low resolution videos. Hovering over or swiping a preview plays the video and marks it as reviewed. If more in-depth analysis is required, the preview can be clicked/tapped and the full frame rate, full resolution recording is displayed.
+
+Review items are filterable by date, object type, and camera.
+
+## Alerts and Detections
+
+Not every segment of video captured by Frigate may be of the same level of interest to you. Video of people who enter your property may be a different priority than those walking by on the sidewalk. For this reason, Frigate 0.14 categorizes review items as _alerts_ and _detections_. By default, all person and car objects are considered alerts. You can refine categorization of your review items by configuring required zones for them.
 
 ## Restricting alerts to specific labels
 

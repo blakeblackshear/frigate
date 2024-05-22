@@ -279,7 +279,7 @@ objects:
   # Optional: mask to prevent all object types from being detected in certain areas (default: no mask)
   # Checks based on the bottom center of the bounding box of the object.
   # NOTE: This mask is COMBINED with the object type specific mask below
-  mask: 0,0,1000,0,1000,200,0,200
+  mask: 0.000,0.000,0.781,0.000,0.781,0.278,0.000,0.278
   # Optional: filters to reduce false positives for specific object types
   filters:
     person:
@@ -297,7 +297,7 @@ objects:
       threshold: 0.7
       # Optional: mask to prevent this object type from being detected in certain areas (default: no mask)
       # Checks based on the bottom center of the bounding box of the object
-      mask: 0,0,1000,0,1000,200,0,200
+      mask: 0.000,0.000,0.781,0.000,0.781,0.278,0.000,0.278
 
 # Optional: Review configuration
 # NOTE: Can be overridden at the camera level
@@ -353,7 +353,7 @@ motion:
   frame_height: 100
   # Optional: motion mask
   # NOTE: see docs for more detailed info on creating masks
-  mask: 0,900,1080,900,1080,1920,0,1920
+  mask: 0.000,0.469,1.000,0.469,1.000,1.000,0.000,1.000
   # Optional: improve contrast (default: shown below)
   # Enables dynamic contrast improvement. This should help improve night detections at the cost of making motion detection more sensitive
   # for daytime.
@@ -547,7 +547,7 @@ cameras:
       front_steps:
         # Required: List of x,y coordinates to define the polygon of the zone.
         # NOTE: Presence in a zone is evaluated only based on the bottom center of the objects bounding box.
-        coordinates: 545,1077,747,939,788,805
+        coordinates: 0.284,0.997,0.389,0.869,0.410,0.745
         # Optional: Number of consecutive frames required for object to be considered present in the zone (default: shown below).
         inertia: 3
         # Optional: Number of seconds that an object must loiter to be considered in the zone (default: shown below)
