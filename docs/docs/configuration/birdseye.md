@@ -1,8 +1,10 @@
 # Birdseye
 
-In addition Frigate's Live camera dashboard, Birdseye allows a heads-up view of your cameras to see what is going on around your property / space without having to watch all cameras that may have nothing happening. Birdseye allows specific modes that intelligently show and disappear based on what you care about.
+In addition to Frigate's Live camera dashboard, Birdseye allows a portable heads-up view of your cameras to see what is going on around your property / space without having to watch all cameras that may have nothing happening. Birdseye allows specific modes that intelligently show and disappear based on what you care about.
 
 Birdseye can be viewed by adding the "Birdseye" camera to a Camera Group in the Web UI. Add a Camera Group by pressing the "+" icon on the Live page, and choose "Birdseye" as one of the cameras.
+
+Birdseye can also be used in HomeAssistant dashboards, cast to media devices, etc.
 
 ## Birdseye Behavior
 

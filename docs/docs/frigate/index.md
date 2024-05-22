@@ -26,4 +26,4 @@ Use of a [Google Coral Accelerator](https://coral.ai/products/) is optional, but
 
 ![Media Browser](/img/media_browser-min.png)
 
-![ation](/img/notification-min.png)
+![Notification](/img/notification-min.png)
