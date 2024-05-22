@@ -211,6 +211,7 @@ export default function SubmitPlus() {
             ...data.slice(0, pageIndex),
             [
               ...data[pageIndex].slice(0, index),
+              { ...data[pageIndex][index], plus_id: "new_upload" },
               ...data[pageIndex].slice(index + 1),
             ],
             ...data.slice(pageIndex + 1),
@@ -275,17 +276,14 @@ export default function SubmitPlus() {
             </DialogContent>
           </Dialog>
 
-          {events?.map((event, eIdx) => {
-            if (event.data.type != "object") {
+          {events?.map((event) => {
+            if (event.data.type != "object" || event.plus_id) {
               return;
             }
-
-            const lastRow = eIdx == events.length - 1;
 
             return (
               <div
                 key={event.id}
-                ref={lastRow ? lastEventRef : null}
                 className="relative flex aspect-video w-full cursor-pointer items-center justify-center rounded-lg bg-black md:rounded-2xl"
                 onClick={() => setUpload(event)}
               >
@@ -324,7 +322,7 @@ export default function SubmitPlus() {
               </div>
             );
           })}
-
+          {!isValidating && !isDone && <div ref={lastEventRef} />}
           {isValidating && <ActivityIndicator />}
         </div>
       </div>
