@@ -305,5 +305,5 @@ export function isCurrentHour(timestamp: number) {
 
   const timeShift = getTimestampOffset(timestamp);
 
-  return timestamp > now.getTime() / 1000 + timeShift;
+  return timestamp + timeShift > now.getTime() / 1000;
 }
