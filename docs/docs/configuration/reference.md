@@ -353,7 +353,7 @@ motion:
   frame_height: 100
   # Optional: motion mask
   # NOTE: see docs for more detailed info on creating masks
-  mask: 0.000,0.833,0.562,0.833,0.562,1.778,0.000,1.778
+  mask: 0.000,0.469,1.000,0.469,1.000,1.000,0.000,1.000
   # Optional: improve contrast (default: shown below)
   # Enables dynamic contrast improvement. This should help improve night detections at the cost of making motion detection more sensitive
   # for daytime.
