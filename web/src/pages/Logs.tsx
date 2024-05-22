@@ -381,7 +381,7 @@ function Logs() {
 
       {initialScroll && !endVisible && (
         <Button
-          className="absolute bottom-8 left-[50%] z-20 -translate-x-[50%] rounded-md bg-secondary-foreground p-2 text-primary"
+          className="absolute bottom-8 left-[50%] z-20 -translate-x-[50%] rounded-md p-2"
           onClick={() =>
             contentRef.current?.scrollTo({
               top: contentRef.current?.scrollHeight,
