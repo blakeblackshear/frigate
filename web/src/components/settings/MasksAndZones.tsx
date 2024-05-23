@@ -98,8 +98,11 @@ export default function MasksAndZones({
   }, [config, selectedCamera]);
 
   const stretch = true;
-  // may need tweaking for mobile
-  const fitAspect = isDesktop ? 16 / 9 : 3 / 4;
+
+  const fitAspect = useMemo(
+    () => (isDesktop ? containerWidth / containerHeight : 3 / 4),
+    [containerWidth, containerHeight],
+  );
 
   const scaledHeight = useMemo(() => {
     if (containerRef.current && aspectRatio && detectHeight) {
