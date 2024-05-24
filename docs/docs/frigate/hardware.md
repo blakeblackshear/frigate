@@ -105,7 +105,7 @@ Frigate support hardware video processing on all Rockchip boards. However, hardw
 - RK3576
 - RK3588
 
-The inference time of an rk3588 with all 3 cores enabled is typically 25-30 ms for yolo-nas s.
+The inference time of a rk3588 with all 3 cores enabled is typically 25-30 ms for yolo-nas s.
 
 ## What does Frigate use the CPU for and what does it use a detector for? (ELI5 Version)
 
