@@ -362,7 +362,7 @@ that NVDEC/NVDEC1 are in use.
 
 ## Rockchip platform
 
-Hardware accelerated video de-/encoding is supported on all Rockchip SoCs using [Nyanmisaka's FFmpeg Fork](https://github.com/nyanmisaka/ffmpeg-rockchip) based on [Rockchip's mpp library](https://github.com/rockchip-linux/mpp).
+Hardware accelerated video de-/encoding is supported on all Rockchip SoCs using [Nyanmisaka's FFmpeg 6.1 Fork](https://github.com/nyanmisaka/ffmpeg-rockchip) based on [Rockchip's mpp library](https://github.com/rockchip-linux/mpp).
 
 ### Prerequisites
 

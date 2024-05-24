@@ -313,7 +313,7 @@ Hardware accelerated object detection is supported on the following SoCs:
 - RK3576
 - RK3588
 
-This implementation uses the [Rockchip's RKNN-Toolkit2](https://github.com/airockchip/rknn-toolkit2/). Currently, only [Yolo-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) is supported as object detection model.
+This implementation uses the [Rockchip's RKNN-Toolkit2](https://github.com/airockchip/rknn-toolkit2/), version v2.0.0.beta0. Currently, only [Yolo-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) is supported as object detection model.
 
 ### Prerequisites
 
