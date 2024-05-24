@@ -97,7 +97,7 @@ Inference speed will vary depending on the YOLO model, jetson platform and jetso
 
 #### Rockchip platform
 
-Frigate support hardware video processing on all Rockchip boards. However, hardware object detection is only supported on these boards:
+Frigate supports hardware video processing on all Rockchip boards. However, hardware object detection is only supported on these boards:
 
 - RK3562
 - RK3566
