@@ -95,6 +95,56 @@ By default, the Raspberry Pi limits the amount of memory available to the GPU. I
 
 Additionally, the USB Coral draws a considerable amount of power. If using any other USB devices such as an SSD, you will experience instability due to the Pi not providing enough power to USB devices. You will need to purchase an external USB hub with it's own power supply. Some have reported success with <a href="https://amzn.to/3a2mH0P" target="_blank" rel="nofollow noopener sponsored">this</a> (affiliate link).
 
+### Rockchip platform
+
+Make sure that you use a linux distribution that comes with the rockchip BSP kernel 5.10 or 6.1 and necessary drivers (especially rkvdec2 and rknpu). To check, enter the following commands:
+
+```
+$ uname -r
+5.10.xxx-rockchip # or 6.1.xxx; the -rockchip suffix is important
+$ ls /dev/dri
+by-path  card0  card1  renderD128  renderD129 # should list renderD128 (VPU) and renderD129 (NPU)
+$ sudo cat /sys/kernel/debug/rknpu/version
+RKNPU driver: v0.9.2 # or later version
+```
+
+I recommend [Joshua Riek's Ubuntu for Rockchip](https://github.com/Joshua-Riek/ubuntu-rockchip), if your board is supported.
+
+#### Setup
+
+Follow Frigate's default installation instructions, but use a docker image with `-rk` suffix for example `ghcr.io/blakeblackshear/frigate:stable-rk`.
+
+Next, you need to grant docker permissions to access your hardware:
+
+- During the configuration process, you should run docker in privileged mode to avoid any errors due to insufficient permissions. To do so, add `privileged: true` to your `docker-compose.yml` file or the `--privileged` flag to your docker run command.
+- After everything works, you should only grant necessary permissions to increase security. Disable the privileged mode and add the lines below to your `docker-compose.yml` file:
+
+```yaml
+security_opt:
+  - apparmor=unconfined
+  - systempaths=unconfined
+devices:
+  - /dev/dri
+  - /dev/dma_heap
+  - /dev/rga
+  - /dev/mpp_service
+```
+
+or add these options to your `docker run` command:
+
+```
+--security-opt systempaths=unconfined \
+--security-opt apparmor=unconfined \
+--device /dev/dri \
+--device /dev/dma_heap \
+--device /dev/rga \
+--device /dev/mpp_service
+```
+
+#### Configuration
+
+Next, you should configure [hardware object detection](/configuration/object_detectors#rockchip-platform) and [hardware video processing](/configuration/hardware_acceleration#rockchip-platform).
+
 ## Docker
 
 Running in Docker with compose is the recommended install method.
