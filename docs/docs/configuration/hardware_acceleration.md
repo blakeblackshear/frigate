@@ -366,7 +366,7 @@ Hardware accelerated video de-/encoding is supported on all Rockchip SoCs using 
 
 ### Prerequisites
 
-Make sure to follow the [Rockchip specific installation instrucitions](/frigate/installation#rockchip-platform).
+Make sure to follow the [Rockchip specific installation instructions](/frigate/installation#rockchip-platform).
 
 ### Configuration
 
