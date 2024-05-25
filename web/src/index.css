@@ -162,3 +162,7 @@
   font-display: swap;
   src: url("../fonts/Inter-BlackItalic.woff2") format("woff2");
 }
+
+.react-resizable-handle {
+  z-index: 30;
+}
