@@ -313,39 +313,11 @@ Hardware accelerated object detection is supported on the following SoCs:
 - RK3576
 - RK3588
 
-This implementation uses the [Rockchip's RKNN-Toolkit2](https://github.com/airockchip/rknn-toolkit2/) Currently, only [Yolo-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) is supported as object detection model.
+This implementation uses the [Rockchip's RKNN-Toolkit2](https://github.com/airockchip/rknn-toolkit2/), version v2.0.0.beta0. Currently, only [Yolo-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) is supported as object detection model.
 
 ### Prerequisites
 
-Make sure that you use a linux distribution that comes with the rockchip BSP kernel 5.10 or 6.1 and rknpu driver. To check, enter the following commands:
-
-```
-$ uname -r
-5.10.xxx-rockchip # or 6.1.xxx; the -rockchip suffix is important
-$ ls /dev/dri
-by-path  card0  card1  renderD128  renderD129 # should list renderD129
-$ sudo cat /sys/kernel/debug/rknpu/version
-RKNPU driver: v0.9.2 # or later version
-```
-
-I recommend [Joshua Riek's Ubuntu for Rockchip](https://github.com/Joshua-Riek/ubuntu-rockchip), if your board is supported.
-
-### Setup
-
-Follow Frigate's default installation instructions, but use a docker image with `-rk` suffix for example `ghcr.io/blakeblackshear/frigate:stable-rk`.
-
-Next, you need to grant docker permissions to access your hardware:
-
-- During the configuration process, you should run docker in privileged mode to avoid any errors due to insufficient permissions. To do so, add `privileged: true` to your `docker-compose.yml` file or the `--privileged` flag to your docker run command.
-- After everything works, you should only grant necessary permissions to increase security. Add the lines below to your `docker-compose.yml` file or the following options to your docker run command: `--security-opt systempaths=unconfined --security-opt apparmor=unconfined --device /dev/dri:/dev/dri`:
-
-```yaml
-security_opt:
-  - apparmor=unconfined
-  - systempaths=unconfined
-devices:
-  - /dev/dri:/dev/dri
-```
+Make sure to follow the [Rockchip specific installation instrucitions](/frigate/installation#rockchip-platform).
 
 ### Configuration
 
@@ -405,6 +377,5 @@ $ cat /sys/kernel/debug/rknpu/load
 
 :::
 
-- By default the rknn detector uses the yolonas_s model (`model: path: default-fp16-yolonas_s`). This model comes with the image, so no further steps than those mentioned above are necessary and no download happens.
-- The other choices are automatically downloaded and stored in the folder `config/model_cache/rknn_cache`. After upgrading Frigate, you should remove older models to free up space.
-- Finally, you can also provide your own `.rknn` model. You should not save your own models in the `rknn_cache` folder, store them directly in the `model_cache` folder or another subfolder. To convert a model to `.rknn` format see the `rknn-toolkit2` (requires a x86 machine). Note, that there is only post-processing for the supported models.
+- All models are automatically downloaded and stored in the folder `config/model_cache/rknn_cache`. After upgrading Frigate, you should remove older models to free up space.
+- You can also provide your own `.rknn` model. You should not save your own models in the `rknn_cache` folder, store them directly in the `model_cache` folder or another subfolder. To convert a model to `.rknn` format see the `rknn-toolkit2` (requires a x86 machine). Note, that there is only post-processing for the supported models.

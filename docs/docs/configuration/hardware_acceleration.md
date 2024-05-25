@@ -362,39 +362,11 @@ that NVDEC/NVDEC1 are in use.
 
 ## Rockchip platform
 
-Hardware accelerated video de-/encoding is supported on all Rockchip SoCs using [Nyanmisaka's FFmpeg Fork](https://github.com/nyanmisaka/ffmpeg-rockchip) based on [Rockchip's mpp library](https://github.com/rockchip-linux/mpp).
+Hardware accelerated video de-/encoding is supported on all Rockchip SoCs using [Nyanmisaka's FFmpeg 6.1 Fork](https://github.com/nyanmisaka/ffmpeg-rockchip) based on [Rockchip's mpp library](https://github.com/rockchip-linux/mpp).
 
 ### Prerequisites
 
-Make sure that you use a linux distribution that comes with the rockchip BSP kernel 5.10 or 6.1 and rkvdec2 driver. To check, enter the following commands:
-
-```
-$ uname -r
-5.10.xxx-rockchip # or 6.1.xxx; the -rockchip suffix is important
-$ ls /dev/dri
-by-path  card0  card1  renderD128  renderD129 # should list renderD128
-```
-
-I recommend [Joshua Riek's Ubuntu for Rockchip](https://github.com/Joshua-Riek/ubuntu-rockchip), if your board is supported.
-
-### Setup
-
-Follow Frigate's default installation instructions, but use a docker image with `-rk` suffix for example `ghcr.io/blakeblackshear/frigate:stable-rk`.
-
-Next, you need to grant docker permissions to access your hardware:
-- During the configuration process, you should run docker in privileged mode to avoid any errors due to insufficient permissions. To do so, add `privileged: true` to your `docker-compose.yml` file or the `--privileged` flag to your docker run command.
-- After everything works, you should only grant necessary permissions to increase security. Add the lines below to your `docker-compose.yml` file or the following options to your docker run command: `--security-opt systempaths=unconfined --security-opt apparmor=unconfined --device /dev/dri:/dev/dri --device /dev/dma_heap:/dev/dma_heap --device /dev/rga:/dev/rga --device /dev/mpp_service:/dev/mpp_service`:
-
-```yaml
-    security_opt:
-      - apparmor=unconfined
-      - systempaths=unconfined
-    devices:
-      - /dev/dri:/dev/dri
-      - /dev/dma_heap:/dev/dma_heap
-      - /dev/rga:/dev/rga
-      - /dev/mpp_service:/dev/mpp_service
-```
+Make sure to follow the [Rockchip specific installation instructions](/frigate/installation#rockchip-platform).
 
 ### Configuration
 
