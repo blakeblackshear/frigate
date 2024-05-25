@@ -17,7 +17,9 @@ For the best results, follow the following guidelines.
 
 **Make tight bounding boxes**: Tighter bounding boxes improve the recognition and ensure that accurate bounding boxes are predicted at runtime.
 
-**Label the full object even when occluded**: If you have a person standing behind a car, label the full person even though a portion of their body may be hidden behind the car. This helps predict accurate bounding boxes and improves zone accuracy and filters at runtime.
+**Label the full object even when occluded**: If you have a person standing behind a car, label the full person even though a portion of their body may be hidden behind the car. This helps predict accurate bounding boxes and improves zone accuracy and filters at runtime. If an object is partly out of frame, label it only when a person would reasonably be able to recognize the object from the visible parts.
+
+**Label objects hard to identify as difficult**: When objects are truly difficult to make out, such as a car barely visible through a bush, or a dog that is hard to distinguish from the background at night, flag it as 'difficult'. This is not used in the model training as of now, but will in the future.
 
 **`amazon`, `ups`, and `fedex` should label the logo**: For a Fedex truck, label the truck as a `car` and make a different bounding box just for the Fedex logo. If there are multiple logos, label each of them.
 
@@ -31,3 +33,21 @@ False positives will be shown with a read box and the label will have a strike t
 Misidentified objects should have a correct label added. For example, if a person was mistakenly detected as a cat, you should submit it as a false positive in Frigate and add a label for the person. The boxes will overlap.
 
 ![add image](/img/plus/false-positive-overlap.jpg)
+
+## Shortcuts for a faster workflow
+
+|Shortcut Key|Description|
+|-----|--------|
+|`?`|Show all keyboard shortcuts|
+|`w`|Add box|
+|`d`|Toggle difficult|
+|`s`|Switch to the next label|
+|`tab`|Select next largest box|
+|`del`|Delete current box|
+|`esc`|Deselect/Cancel|
+|`← ↑ → ↓`|Move box|
+|`Shift + ← ↑ → ↓`|Resize box|
+|`-`|Zoom out|
+|`=`|Zoom in|
+|`f`|Hide/show all but current box|
+|`spacebar`|Verify and save|

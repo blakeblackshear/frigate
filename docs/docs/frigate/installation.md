@@ -13,7 +13,7 @@ Frigate is a Docker container that can be run on any Docker host including as a 
 
 ### Operating System
 
-Frigate runs best with docker installed on bare metal debian-based distributions. For ideal performance, Frigate needs access to underlying hardware for the Coral and GPU devices. Running Frigate in a VM on top of Proxmox, ESXi, Virtualbox, etc. is not recommended. The virtualization layer often introduces a sizable amount of overhead for communication with Coral devices, but [not in all circumstances](https://github.com/blakeblackshear/frigate/discussions/1837).
+Frigate runs best with Docker installed on bare metal Debian-based distributions. For ideal performance, Frigate needs low overhead access to underlying hardware for the Coral and GPU devices. Running Frigate in a VM on top of Proxmox, ESXi, Virtualbox, etc. is not recommended though [some users have had success with Proxmox](#proxmox).
 
 Windows is not officially supported, but some users have had success getting it to run under WSL or Virtualbox. Getting the GPU and/or Coral devices properly passed to Frigate may be difficult or impossible. Search previous discussions or issues for help.
 
@@ -218,7 +218,16 @@ To install make sure you have the [community app plugin here](https://forums.unr
 
 ## Proxmox
 
-It is recommended to run Frigate in LXC for maximum performance. See [this discussion](https://github.com/blakeblackshear/frigate/discussions/1111) for more information.
+It is recommended to run Frigate in LXC, rather than in a VM, for maximum performance. The setup can be complex so be prepared to read the Proxmox and LXC documentation. Suggestions include:
+
+- For Intel-based hardware acceleration, to allow access to the `/dev/dri/renderD128` device with major number 226 and minor number 128, add the following lines to the `/etc/pve/lxc/<id>.conf` LXC configuration:
+  - `lxc.cgroup2.devices.allow: c 226:128 rwm`
+  - `lxc.mount.entry: /dev/dri/renderD128 dev/dri/renderD128 none bind,optional,create=file`
+- The LXC configuration will likely also need `features: fuse=1,nesting=1`. This allows running a Docker container in an LXC container (`nesting`) and prevents duplicated files and wasted storage (`fuse`).
+- Successfully passing hardware devices through multiple levels of containerization (LXC then Docker) can be difficult. Many people make devices like `/dev/dri/renderD128` world-readable in the host or run Frigate in a privileged LXC container.
+- The virtualization layer often introduces a sizable amount of overhead for communication with Coral devices, but [not in all circumstances](https://github.com/blakeblackshear/frigate/discussions/1837).
+
+See the [Proxmox LXC discussion](https://github.com/blakeblackshear/frigate/discussions/5773) for more general information.
 
 ## ESXi
 
@@ -256,7 +265,7 @@ There may be other services running on your NAS that are using the same ports th
 
 You need to configure 2 paths:
 
-- The location of your config file in yaml format, this needs to be file and you need to go to the location of where your config.yml is located, this will be different depending on your NAS folder structure e.g. `/docker/frigate/config/config.yml` will mount to `/config/config.yml` within the container.
+- The location of your config directory which will be different depending on your NAS folder structure e.g. `/docker/frigate/config` will mount to `/config` within the container.
 - The location on your NAS where the recordings will be saved this needs to be a folder e.g. `/docker/volumes/frigate-0-media`
 
 ![image](https://user-images.githubusercontent.com/4516296/232585872-44431d15-55e0-4004-b78b-1e512702b911.png)
