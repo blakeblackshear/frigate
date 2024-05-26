@@ -303,8 +303,10 @@ function MSEPlayer({
       className={className}
       playsInline
       preload="auto"
-      onLoadedData={onPlaying}
-      onLoadedMetadata={handleLoadedMetadata}
+      onLoadedData={() => {
+        handleLoadedMetadata?.();
+        onPlaying?.();
+      }}
       muted={!audioEnabled}
       onError={() => {
         if (wsRef.current) {
