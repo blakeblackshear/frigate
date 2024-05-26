@@ -724,6 +724,28 @@ def label_clip(camera_name, label):
         return make_response(
             jsonify({"success": False, "message": "Event not found"}), 404
         )
+    
+@MediaBp.route("/<camera_name>/<label>/preview.gif")
+def label_preview(camera_name, label):
+    label = unquote(label)
+    event_query = Event.select(fn.MAX(Event.id), Event.start_time, Event.end_time, Event.camera).where(
+        Event.camera == camera_name
+    )
+    if label != "any":
+        event_query = event_query.where(Event.label == label)
+
+    try:
+        event = event_query.get()
+        
+
+    except DoesNotExist:
+        return make_response(
+            jsonify({"success": False, "message": "Event not found"}), 404
+        )
+    
+    start_ts = event.start_time
+    end_ts = start_ts + (min(event.end_time - event.start_time, 20) if event.end_time else 20)
+    return preview_gif(event.camera, start_ts, end_ts)
 
 
 @MediaBp.route("/<camera_name>/grid.jpg")

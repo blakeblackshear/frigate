@@ -195,6 +195,10 @@ Returns the thumbnail from the latest event for the given camera and label combo
 
 Returns the clip from the latest event for the given camera and label combo. Using `any` as the label will return the latest clip regardless of type.
 
+### `GET /api/<camera_name>/<label>/preview.gif`
+
+Returns the Gif covering the first 20 seconds of the latest event for the given camera and label combo. Using `any` as the label will return the latest Gif regardless of type.
+
 ### `GET /api/<camera_name>/<label>/snapshot.jpg`
 
 Returns the snapshot image from the latest event for the given camera and label combo. Using `any` as the label will return the latest thumbnail regardless of type.
