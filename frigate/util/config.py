@@ -18,6 +18,10 @@ def migrate_frigate_config(config_file: str):
     """handle migrating the frigate config."""
     logger.info("Checking if frigate config needs migration...")
 
+    if not os.access(config_file, mode=os.W_OK):
+        logger.error("Config file is read-only, unable to migrate config file.")
+        return
+
     yaml = YAML()
     yaml.indent(mapping=2, sequence=4, offset=2)
     with open(config_file, "r") as f:
