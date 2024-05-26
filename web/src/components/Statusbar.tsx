@@ -1,33 +1,20 @@
-import { useFrigateStats } from "@/api/ws";
 import {
   StatusBarMessagesContext,
   StatusMessage,
 } from "@/context/statusbar-provider";
-import useStats from "@/hooks/use-stats";
-import { FrigateStats } from "@/types/stats";
+import useStats, { useAutoFrigateStats } from "@/hooks/use-stats";
 import { useContext, useEffect, useMemo } from "react";
 import { FaCheck } from "react-icons/fa";
 import { IoIosWarning } from "react-icons/io";
 import { MdCircle } from "react-icons/md";
 import { Link } from "react-router-dom";
-import useSWR from "swr";
 
 export default function Statusbar() {
-  const { data: initialStats } = useSWR<FrigateStats>("stats", {
-    revalidateOnFocus: false,
-  });
-  const { payload: latestStats } = useFrigateStats();
   const { messages, addMessage, clearMessages } = useContext(
     StatusBarMessagesContext,
   )!;
 
-  const stats = useMemo(() => {
-    if (latestStats) {
-      return latestStats;
-    }
-
-    return initialStats;
-  }, [initialStats, latestStats]);
+  const stats = useAutoFrigateStats();
 
   const cpuPercent = useMemo(() => {
     const systemCpu = stats?.cpu_usages["frigate.full_system"]?.cpu;

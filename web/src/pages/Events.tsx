@@ -10,6 +10,7 @@ import {
   ReviewSegment,
   ReviewSeverity,
   ReviewSummary,
+  SegmentedReviewData,
 } from "@/types/review";
 import { getTimestampOffset } from "@/utils/dateUtil";
 import EventView from "@/views/events/EventView";
@@ -137,6 +138,66 @@ export default function Events() {
       revalidateOnReconnect: false,
     },
   );
+
+  const reviewItems = useMemo<SegmentedReviewData>(() => {
+    if (!reviews) {
+      return undefined;
+    }
+
+    const all: ReviewSegment[] = [];
+    const alerts: ReviewSegment[] = [];
+    const detections: ReviewSegment[] = [];
+    const motion: ReviewSegment[] = [];
+
+    reviews?.forEach((segment) => {
+      all.push(segment);
+
+      switch (segment.severity) {
+        case "alert":
+          alerts.push(segment);
+          break;
+        case "detection":
+          detections.push(segment);
+          break;
+        default:
+          motion.push(segment);
+          break;
+      }
+    });
+
+    return {
+      all: all,
+      alert: alerts,
+      detection: detections,
+      significant_motion: motion,
+    };
+  }, [reviews]);
+
+  const currentItems = useMemo(() => {
+    if (!reviewItems || !severity) {
+      return null;
+    }
+
+    let current;
+
+    if (reviewFilter?.showAll) {
+      current = reviewItems.all;
+    } else {
+      current = reviewItems[severity];
+    }
+
+    if (!current || current.length == 0) {
+      return [];
+    }
+
+    if (reviewFilter?.showReviewed != 1) {
+      return current.filter((seg) => !seg.has_been_reviewed);
+    } else {
+      return current;
+    }
+    // only refresh when severity or filter changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [severity, reviewFilter, reviewItems?.all.length]);
 
   // review summary
 
@@ -353,7 +414,8 @@ export default function Events() {
   } else {
     return (
       <EventView
-        reviews={reviews}
+        reviewItems={reviewItems}
+        currentReviewItems={currentItems}
         reviewSummary={reviewSummary}
         relevantPreviews={allPreviews}
         timeRange={selectedTimeRange}

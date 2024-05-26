@@ -17,6 +17,7 @@ import {
   ReviewSegment,
   ReviewSeverity,
   ReviewSummary,
+  SegmentedReviewData,
 } from "@/types/review";
 import { getChunkedTimeRange } from "@/utils/timelineUtil";
 import axios from "axios";
@@ -49,7 +50,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 
 type EventViewProps = {
-  reviews?: ReviewSegment[];
+  reviewItems?: SegmentedReviewData;
+  currentReviewItems: ReviewSegment[] | null;
   reviewSummary?: ReviewSummary;
   relevantPreviews?: Preview[];
   timeRange: TimeRange;
@@ -64,7 +66,8 @@ type EventViewProps = {
   updateFilter: (filter: ReviewFilter) => void;
 };
 export default function EventView({
-  reviews,
+  reviewItems,
+  currentReviewItems,
   reviewSummary,
   relevantPreviews,
   timeRange,
@@ -116,42 +119,6 @@ export default function EventView({
     }
   }, [filter, reviewSummary]);
 
-  // review paging
-
-  const reviewItems = useMemo(() => {
-    if (!reviews) {
-      return undefined;
-    }
-
-    const all: ReviewSegment[] = [];
-    const alerts: ReviewSegment[] = [];
-    const detections: ReviewSegment[] = [];
-    const motion: ReviewSegment[] = [];
-
-    reviews?.forEach((segment) => {
-      all.push(segment);
-
-      switch (segment.severity) {
-        case "alert":
-          alerts.push(segment);
-          break;
-        case "detection":
-          detections.push(segment);
-          break;
-        default:
-          motion.push(segment);
-          break;
-      }
-    });
-
-    return {
-      all: all,
-      alert: alerts,
-      detection: detections,
-      significant_motion: motion,
-    };
-  }, [reviews]);
-
   // review interaction
 
   const [selectedReviews, setSelectedReviews] = useState<string[]>([]);
@@ -182,6 +149,7 @@ export default function EventView({
           severity: review.severity,
         });
 
+        review.has_been_reviewed = true;
         markItemAsReviewed(review);
       }
     },
@@ -332,6 +300,7 @@ export default function EventView({
           <DetectionReview
             contentRef={contentRef}
             reviewItems={reviewItems}
+            currentItems={currentReviewItems}
             relevantPreviews={relevantPreviews}
             selectedReviews={selectedReviews}
             itemsToReview={reviewCounts[severityToggle]}
@@ -372,6 +341,7 @@ type DetectionReviewProps = {
     detection: ReviewSegment[];
     significant_motion: ReviewSegment[];
   };
+  currentItems: ReviewSegment[] | null;
   itemsToReview?: number;
   relevantPreviews?: Preview[];
   selectedReviews: string[];
@@ -388,6 +358,7 @@ type DetectionReviewProps = {
 function DetectionReview({
   contentRef,
   reviewItems,
+  currentItems,
   itemsToReview,
   relevantPreviews,
   selectedReviews,
@@ -404,33 +375,6 @@ function DetectionReview({
   const reviewTimelineRef = useRef<HTMLDivElement>(null);
 
   const segmentDuration = 60;
-
-  // review data
-  const currentItems = useMemo(() => {
-    if (!reviewItems) {
-      return null;
-    }
-
-    let current;
-
-    if (filter?.showAll) {
-      current = reviewItems.all;
-    } else {
-      current = reviewItems[severity];
-    }
-
-    if (!current || current.length == 0) {
-      return [];
-    }
-
-    if (filter?.showReviewed != 1) {
-      return current.filter((seg) => !seg.has_been_reviewed);
-    } else {
-      return current;
-    }
-    // only refresh when severity or filter changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [severity, filter, reviewItems?.all.length]);
 
   // preview
 

@@ -46,7 +46,7 @@ export default function LivePlayer({
 }: LivePlayerProps) {
   // camera activity
 
-  const { activeMotion, activeTracking, objects } =
+  const { activeMotion, activeTracking, objects, offline } =
     useCameraActivity(cameraConfig);
 
   const cameraActive = useMemo(
@@ -224,9 +224,16 @@ export default function LivePlayer({
         />
       </div>
 
-      <div className="absolute right-2 top-2 size-4">
-        {activeMotion && (
-          <MdCircle className="size-2 animate-pulse text-danger shadow-danger drop-shadow-md" />
+      <div className="absolute right-2 top-2">
+        {!offline && activeMotion && (
+          <MdCircle className="mr-2 size-2 animate-pulse text-danger shadow-danger drop-shadow-md" />
+        )}
+        {offline && (
+          <Chip
+            className={`z-0 flex items-start justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-xs capitalize`}
+          >
+            {cameraConfig.name.replaceAll("_", " ")}
+          </Chip>
         )}
       </div>
     </div>
