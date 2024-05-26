@@ -1,6 +1,5 @@
 import {
   useFrigateEvents,
-  useFrigateStats,
   useInitialCameraState,
   useMotionActivity,
 } from "@/api/ws";
@@ -11,7 +10,7 @@ import { useTimelineUtils } from "./use-timeline-utils";
 import { ObjectType } from "@/types/ws";
 import useDeepMemo from "./use-deep-memo";
 import { isEqual } from "lodash";
-import useStats from "./use-stats";
+import { useAutoFrigateStats } from "./use-stats";
 
 type useCameraActivityReturn = {
   activeTracking: boolean;
@@ -121,21 +120,21 @@ export function useCameraActivity(
 
   // determine if camera is offline
 
-  const { payload: frigateStats } = useFrigateStats();
+  const stats = useAutoFrigateStats();
 
   const offline = useMemo(() => {
-    if (!frigateStats) {
+    if (!stats) {
       return false;
     }
 
-    const cameras = frigateStats["cameras"];
+    const cameras = stats["cameras"];
 
     if (!cameras) {
       return false;
     }
 
     return cameras[camera.name].camera_fps == 0;
-  }, [camera, frigateStats]);
+  }, [camera, stats]);
 
   return {
     activeTracking: hasActiveObjects,

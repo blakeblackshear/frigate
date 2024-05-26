@@ -9,6 +9,7 @@ import { useMemo } from "react";
 import useSWR from "swr";
 import useDeepMemo from "./use-deep-memo";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
+import { useFrigateStats } from "@/api/ws";
 
 export default function useStats(stats: FrigateStats | undefined) {
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -90,4 +91,21 @@ export default function useStats(stats: FrigateStats | undefined) {
   }, [config, memoizedStats]);
 
   return { potentialProblems };
+}
+
+export function useAutoFrigateStats() {
+  const { data: initialStats } = useSWR<FrigateStats>("stats", {
+    revalidateOnFocus: false,
+  });
+  const { payload: latestStats } = useFrigateStats();
+
+  const stats = useMemo(() => {
+    if (latestStats) {
+      return latestStats;
+    }
+
+    return initialStats;
+  }, [initialStats, latestStats]);
+
+  return stats;
 }
