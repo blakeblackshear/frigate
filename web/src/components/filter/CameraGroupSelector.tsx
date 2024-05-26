@@ -663,6 +663,7 @@ export function CameraGroupEdit({
                 <FormDescription>
                   Select cameras for this group.
                 </FormDescription>
+                <FormMessage />
                 {[
                   ...(birdseyeConfig?.enabled ? ["birdseye"] : []),
                   ...Object.keys(config?.cameras ?? {}),
@@ -680,7 +681,6 @@ export function CameraGroupEdit({
                     />
                   </FormControl>
                 ))}
-                <FormMessage />
               </FormItem>
             )}
           />
