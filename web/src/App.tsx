@@ -20,7 +20,6 @@ const System = lazy(() => import("@/pages/System"));
 const Settings = lazy(() => import("@/pages/Settings"));
 const UIPlayground = lazy(() => import("@/pages/UIPlayground"));
 const Logs = lazy(() => import("@/pages/Logs"));
-const NoMatch = lazy(() => import("@/pages/NoMatch"));
 
 function App() {
   return (
@@ -52,7 +51,7 @@ function App() {
                   <Route path="/config" element={<ConfigEditor />} />
                   <Route path="/logs" element={<Logs />} />
                   <Route path="/playground" element={<UIPlayground />} />
-                  <Route path="*" element={<NoMatch />} />
+                  <Route path="*" element={<Redirect to="/" />} />
                 </Routes>
               </Suspense>
             </div>
