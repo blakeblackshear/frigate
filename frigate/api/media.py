@@ -68,17 +68,14 @@ def imagestream(detected_frames_processor, camera_name, fps, height, draw_option
     while True:
         # max out at specified FPS
         time.sleep(1 / fps)
-        frame = detected_frames_processor.get_current_frame(
-            camera_name, draw_options)
+        frame = detected_frames_processor.get_current_frame(camera_name, draw_options)
         if frame is None:
             frame = np.zeros((height, int(height * 16 / 9), 3), np.uint8)
 
         width = int(height * frame.shape[1] / frame.shape[0])
-        frame = cv2.resize(frame, dsize=(width, height),
-                           interpolation=cv2.INTER_LINEAR)
+        frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_LINEAR)
 
-        ret, jpg = cv2.imencode(
-            ".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
+        ret, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
         yield (
             b"--frame\r\n"
             b"Content-Type: image/jpeg\r\n\r\n" + jpg.tobytes() + b"\r\n\r\n"
@@ -114,19 +111,16 @@ def latest_frame(camera_name):
             camera_name, draw_options
         )
         retry_interval = float(
-            current_app.frigate_config.cameras.get(
-                camera_name).ffmpeg.retry_interval
+            current_app.frigate_config.cameras.get(camera_name).ffmpeg.retry_interval
             or 10
         )
 
         if frame is None or datetime.now().timestamp() > (
-            current_app.detected_frames_processor.get_current_frame_time(
-                camera_name)
+            current_app.detected_frames_processor.get_current_frame_time(camera_name)
             + retry_interval
         ):
             if current_app.camera_error_image is None:
-                error_image = glob.glob(
-                    "/opt/frigate/frigate/images/camera-error.jpg")
+                error_image = glob.glob("/opt/frigate/frigate/images/camera-error.jpg")
 
                 if len(error_image) > 0:
                     current_app.camera_error_image = cv2.imread(
@@ -146,13 +140,11 @@ def latest_frame(camera_name):
 
         if height < 1 or width < 1:
             return (
-                "Invalid height / width requested :: {} / {}".format(
-                    height, width),
+                "Invalid height / width requested :: {} / {}".format(height, width),
                 400,
             )
 
-        frame = cv2.resize(frame, dsize=(width, height),
-                           interpolation=cv2.INTER_AREA)
+        frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
 
         ret, img = cv2.imencode(
             ".webp", frame, [int(cv2.IMWRITE_WEBP_QUALITY), resize_quality]
@@ -163,16 +155,14 @@ def latest_frame(camera_name):
         return response
     elif camera_name == "birdseye" and current_app.frigate_config.birdseye.restream:
         frame = cv2.cvtColor(
-            current_app.detected_frames_processor.get_current_frame(
-                camera_name),
+            current_app.detected_frames_processor.get_current_frame(camera_name),
             cv2.COLOR_YUV2BGR_I420,
         )
 
         height = int(request.args.get("h", str(frame.shape[0])))
         width = int(height * frame.shape[1] / frame.shape[0])
 
-        frame = cv2.resize(frame, dsize=(width, height),
-                           interpolation=cv2.INTER_AREA)
+        frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
 
         ret, img = cv2.imencode(
             ".webp", frame, [int(cv2.IMWRITE_WEBP_QUALITY), resize_quality]
@@ -285,8 +275,7 @@ def submit_recording_snapshot_to_plus(camera_name: str, frame_time: str):
                 404,
             )
 
-        nd = cv2.imdecode(np.frombuffer(
-            image_data, dtype=np.int8), cv2.IMREAD_COLOR)
+        nd = cv2.imdecode(np.frombuffer(image_data, dtype=np.int8), cv2.IMREAD_COLOR)
         current_app.plus_api.upload_image(nd, camera_name)
 
         return make_response(
@@ -389,8 +378,7 @@ def recordings_summary(camera_name):
             "duration": round(recording_group.duration),
         }
         if day not in days:
-            days[day] = {"events": events_count,
-                         "hours": [hour_data], "day": day}
+            days[day] = {"events": events_count, "hours": [hour_data], "day": day}
         else:
             days[day]["events"] += events_count
             days[day]["hours"].append(hour_data)
@@ -404,8 +392,7 @@ def recordings(camera_name):
     after = request.args.get(
         "after", type=float, default=(datetime.now() - timedelta(hours=1)).timestamp()
     )
-    before = request.args.get("before", type=float,
-                              default=datetime.now().timestamp())
+    before = request.args.get("before", type=float, default=datetime.now().timestamp())
 
     recordings = (
         Recordings.select(
@@ -535,8 +522,7 @@ def recording_clip(camera_name, start_ts, end_ts):
 @MediaBp.route("/vod/<camera_name>/start/<float:start_ts>/end/<float:end_ts>")
 def vod_ts(camera_name, start_ts, end_ts):
     recordings = (
-        Recordings.select(
-            Recordings.path, Recordings.duration, Recordings.end_time)
+        Recordings.select(Recordings.path, Recordings.duration, Recordings.end_time)
         .where(
             Recordings.start_time.between(start_ts, end_ts)
             | Recordings.end_time.between(start_ts, end_ts)
@@ -565,8 +551,7 @@ def vod_ts(camera_name, start_ts, end_ts):
             clips.append(clip)
             durations.append(duration)
         else:
-            logger.warning(
-                f"Recording clip is missing or empty: {recording.path}")
+            logger.warning(f"Recording clip is missing or empty: {recording.path}")
 
     if not clips:
         logger.error("No recordings found for the requested time range")
@@ -604,8 +589,7 @@ def vod_hour_no_timezone(year_month, day, hour, camera_name):
 def vod_hour(year_month, day, hour, camera_name, tz_name):
     parts = year_month.split("-")
     start_date = (
-        datetime(int(parts[0]), int(parts[1]), int(
-            day), int(hour), tzinfo=timezone.utc)
+        datetime(int(parts[0]), int(parts[1]), int(day), int(hour), tzinfo=timezone.utc)
         - datetime.now(pytz.timezone(tz_name.replace(",", "/"))).utcoffset()
     )
     end_date = start_date + timedelta(hours=1) - timedelta(milliseconds=1)
@@ -695,8 +679,7 @@ def label_snapshot(camera_name, label):
         return event_snapshot(event.id)
     except DoesNotExist:
         frame = np.zeros((720, 1280, 3), np.uint8)
-        ret, jpg = cv2.imencode(
-            ".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
+        ret, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
 
         response = make_response(jpg.tobytes())
         response.headers["Content-Type"] = "image/jpeg"
@@ -707,8 +690,7 @@ def label_snapshot(camera_name, label):
 @MediaBp.route("/<camera_name>/<label>/thumbnail.jpg")
 def label_thumbnail(camera_name, label):
     label = unquote(label)
-    event_query = Event.select(fn.MAX(Event.id)).where(
-        Event.camera == camera_name)
+    event_query = Event.select(fn.MAX(Event.id)).where(Event.camera == camera_name)
     if label != "any":
         event_query = event_query.where(Event.label == label)
 
@@ -718,8 +700,7 @@ def label_thumbnail(camera_name, label):
         return event_thumbnail(event, 60)
     except DoesNotExist:
         frame = np.zeros((175, 175, 3), np.uint8)
-        ret, jpg = cv2.imencode(
-            ".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
+        ret, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
 
         response = make_response(jpg.tobytes())
         response.headers["Content-Type"] = "image/jpeg"
@@ -749,9 +730,9 @@ def label_clip(camera_name, label):
 @MediaBp.route("/<camera_name>/<label>/preview.gif")
 def label_preview(camera_name, label):
     label = unquote(label)
-    event_query = Event.select(fn.MAX(Event.id), Event.start_time, Event.end_time, Event.camera).where(
-        Event.camera == camera_name
-    )
+    event_query = Event.select(
+        fn.MAX(Event.id), Event.start_time, Event.end_time, Event.camera
+    ).where(Event.camera == camera_name)
     if label != "any":
         event_query = event_query.where(Event.label == label)
 
@@ -764,8 +745,9 @@ def label_preview(camera_name, label):
         )
 
     start_ts = event.start_time
-    end_ts = start_ts + \
-        (min(event.end_time - event.start_time, 20) if event.end_time else 20)
+    end_ts = start_ts + (
+        min(event.end_time - event.start_time, 20) if event.end_time else 20
+    )
     return preview_gif(event.camera, start_ts, end_ts)
 
 
@@ -775,17 +757,14 @@ def grid_snapshot(camera_name):
 
     if camera_name in current_app.frigate_config.cameras:
         detect = current_app.frigate_config.cameras[camera_name].detect
-        frame = current_app.detected_frames_processor.get_current_frame(
-            camera_name, {})
+        frame = current_app.detected_frames_processor.get_current_frame(camera_name, {})
         retry_interval = float(
-            current_app.frigate_config.cameras.get(
-                camera_name).ffmpeg.retry_interval
+            current_app.frigate_config.cameras.get(camera_name).ffmpeg.retry_interval
             or 10
         )
 
         if frame is None or datetime.now().timestamp() > (
-            current_app.detected_frames_processor.get_current_frame_time(
-                camera_name)
+            current_app.detected_frames_processor.get_current_frame_time(camera_name)
             + retry_interval
         ):
             return make_response(
@@ -807,8 +786,7 @@ def grid_snapshot(camera_name):
             )
 
         color_arg = request.args.get("color", default="", type=str).lower()
-        draw_font_scale = request.args.get(
-            "font_scale", default=0.5, type=float)
+        draw_font_scale = request.args.get("font_scale", default=0.5, type=float)
 
         if color_arg == "red":
             draw_color = (0, 0, 255)
@@ -881,8 +859,7 @@ def grid_snapshot(camera_name):
                     thickness=2,
                 )
 
-        ret, jpg = cv2.imencode(
-            ".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
+        ret, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
         response = make_response(jpg.tobytes())
         response.headers["Content-Type"] = "image/jpeg"
         response.headers["Cache-Control"] = "no-store"
@@ -929,8 +906,7 @@ def event_snapshot_clean(id):
                 )
         elif not event.has_snapshot:
             return make_response(
-                jsonify(
-                    {"success": False, "message": "Snapshot not available"}), 404
+                jsonify({"success": False, "message": "Snapshot not available"}), 404
             )
     except DoesNotExist:
         return make_response(
@@ -949,8 +925,7 @@ def event_snapshot_clean(id):
                     404,
                 )
             with open(
-                os.path.join(
-                    CLIPS_DIR, f"{event.camera}-{event.id}-clean.png"), "rb"
+                os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}-clean.png"), "rb"
             ) as image_file:
                 png_bytes = image_file.read()
         except Exception:
@@ -981,8 +956,7 @@ def event_snapshot(id):
         event_complete = True
         if not event.has_snapshot:
             return make_response(
-                jsonify(
-                    {"success": False, "message": "Snapshot not available"}), 404
+                jsonify({"success": False, "message": "Snapshot not available"}), 404
             )
         # read snapshot from disk
         with open(
@@ -1002,8 +976,7 @@ def event_snapshot(id):
                             bounding_box=request.args.get("bbox", type=int),
                             crop=request.args.get("crop", type=int),
                             height=request.args.get("h", type=int),
-                            quality=request.args.get(
-                                "quality", default=70, type=int),
+                            quality=request.args.get("quality", default=70, type=int),
                         )
         except Exception:
             return make_response(
@@ -1114,8 +1087,7 @@ def event_thumbnail(id, max_cache_age=2592000):
             cv2.BORDER_CONSTANT,
             (0, 0, 0),
         )
-        ret, jpg = cv2.imencode(
-            ".jpg", thumbnail, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
+        ret, jpg = cv2.imencode(".jpg", thumbnail, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
         thumbnail_bytes = jpg.tobytes()
 
     response = make_response(thumbnail_bytes)
@@ -1206,8 +1178,7 @@ def preview_gif(camera_name: str, start_ts, end_ts, max_cache_age=2592000):
         if process.returncode != 0:
             logger.error(process.stderr)
             return make_response(
-                jsonify(
-                    {"success": False, "message": "Unable to create preview gif"}),
+                jsonify({"success": False, "message": "Unable to create preview gif"}),
                 500,
             )
 
@@ -1230,8 +1201,7 @@ def preview_gif(camera_name: str, start_ts, end_ts, max_cache_age=2592000):
             if file > end_file:
                 break
 
-            selected_previews.append(
-                f"file '{os.path.join(preview_dir, file)}'")
+            selected_previews.append(f"file '{os.path.join(preview_dir, file)}'")
             selected_previews.append("duration 0.12")
 
         if not selected_previews:
@@ -1274,8 +1244,7 @@ def preview_gif(camera_name: str, start_ts, end_ts, max_cache_age=2592000):
         if process.returncode != 0:
             logger.error(process.stderr)
             return make_response(
-                jsonify(
-                    {"success": False, "message": "Unable to create preview gif"}),
+                jsonify({"success": False, "message": "Unable to create preview gif"}),
                 500,
             )
 
@@ -1368,8 +1337,7 @@ def preview_mp4(camera_name: str, start_ts, end_ts):
         if process.returncode != 0:
             logger.error(process.stderr)
             return make_response(
-                jsonify(
-                    {"success": False, "message": "Unable to create preview gif"}),
+                jsonify({"success": False, "message": "Unable to create preview gif"}),
                 500,
             )
 
@@ -1391,8 +1359,7 @@ def preview_mp4(camera_name: str, start_ts, end_ts):
             if file > end_file:
                 break
 
-            selected_previews.append(
-                f"file '{os.path.join(preview_dir, file)}'")
+            selected_previews.append(f"file '{os.path.join(preview_dir, file)}'")
             selected_previews.append("duration 0.12")
 
         if not selected_previews:
@@ -1433,8 +1400,7 @@ def preview_mp4(camera_name: str, start_ts, end_ts):
         if process.returncode != 0:
             logger.error(process.stderr)
             return make_response(
-                jsonify(
-                    {"success": False, "message": "Unable to create preview gif"}),
+                jsonify({"success": False, "message": "Unable to create preview gif"}),
                 500,
             )
 
