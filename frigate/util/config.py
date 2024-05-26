@@ -17,16 +17,13 @@ CURRENT_CONFIG_VERSION = 0.14
 def migrate_frigate_config(config_file: str):
     """handle migrating the frigate config."""
     logger.info("Checking if frigate config needs migration...")
-    version_file = os.path.join(CONFIG_DIR, ".version")
 
-    if not os.path.isfile(version_file):
-        previous_version = 0.13
-    else:
-        with open(version_file) as f:
-            try:
-                previous_version = float(f.readline())
-            except Exception:
-                previous_version = 0.13
+    yaml = YAML()
+    yaml.indent(mapping=2, sequence=4, offset=2)
+    with open(config_file, "r") as f:
+        config: dict[str, dict[str, any]] = yaml.load(f)
+
+    previous_version = config.get("version", 0.13)
 
     if previous_version == CURRENT_CONFIG_VERSION:
         logger.info("frigate config does not need migration...")
@@ -34,11 +31,6 @@ def migrate_frigate_config(config_file: str):
 
     logger.info("copying config as backup...")
     shutil.copy(config_file, os.path.join(CONFIG_DIR, "backup_config.yaml"))
-
-    yaml = YAML()
-    yaml.indent(mapping=2, sequence=4, offset=2)
-    with open(config_file, "r") as f:
-        config: dict[str, dict[str, any]] = yaml.load(f)
 
     if previous_version < 0.14:
         logger.info(f"Migrating frigate config from {previous_version} to 0.14...")
@@ -56,9 +48,6 @@ def migrate_frigate_config(config_file: str):
             os.rename(
                 os.path.join(EXPORT_DIR, file), os.path.join(EXPORT_DIR, new_name)
             )
-
-    with open(version_file, "w") as f:
-        f.write(str(CURRENT_CONFIG_VERSION))
 
     logger.info("Finished frigate config migration...")
 
@@ -141,6 +130,7 @@ def migrate_014(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
 
         new_config["cameras"][name] = camera_config
 
+    new_config["version"] = 0.14
     return new_config
 
 
