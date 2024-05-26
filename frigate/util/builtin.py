@@ -237,7 +237,7 @@ def update_yaml(data, key_path, new_value):
                 temp[key[0]] += [{}] * (key[1] - len(temp[key[0]]) + 1)
             temp = temp[key[0]][key[1]]
         else:
-            if key not in temp:
+            if key not in temp or temp[key] is None:
                 temp[key] = {}
             temp = temp[key]
 
