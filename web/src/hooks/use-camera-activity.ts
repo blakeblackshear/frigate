@@ -1,5 +1,6 @@
 import {
   useFrigateEvents,
+  useFrigateStats,
   useInitialCameraState,
   useMotionActivity,
 } from "@/api/ws";
@@ -10,11 +11,13 @@ import { useTimelineUtils } from "./use-timeline-utils";
 import { ObjectType } from "@/types/ws";
 import useDeepMemo from "./use-deep-memo";
 import { isEqual } from "lodash";
+import useStats from "./use-stats";
 
 type useCameraActivityReturn = {
   activeTracking: boolean;
   activeMotion: boolean;
   objects: ObjectType[];
+  offline: boolean;
 };
 
 export function useCameraActivity(
@@ -116,12 +119,31 @@ export function useCameraActivity(
     handleSetObjects(newObjects);
   }, [camera, updatedEvent, objects, handleSetObjects]);
 
+  // determine if camera is offline
+
+  const { payload: frigateStats } = useFrigateStats();
+
+  const offline = useMemo(() => {
+    if (!frigateStats) {
+      return false;
+    }
+
+    const cameras = frigateStats["cameras"];
+
+    if (!cameras) {
+      return false;
+    }
+
+    return cameras[camera.name].camera_fps == 0;
+  }, [camera, frigateStats]);
+
   return {
     activeTracking: hasActiveObjects,
     activeMotion: detectingMotion
       ? detectingMotion === "ON"
       : initialCameraState?.motion === true,
     objects,
+    offline,
   };
 }
 
