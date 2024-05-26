@@ -13,6 +13,7 @@ import {
 } from "../player/PreviewThumbnailPlayer";
 import { isCurrentHour } from "@/utils/dateUtil";
 import { useCameraPreviews } from "@/hooks/use-camera-previews";
+import { baseUrl } from "@/api/baseUrl";
 
 type AnimatedEventCardProps = {
   event: ReviewSegment;
@@ -105,18 +106,11 @@ export function AnimatedEventCard({ event }: AnimatedEventCardProps) {
                 windowVisible={windowVisible}
               />
             ) : (
-              <InProgressPreview
-                review={event}
-                timeRange={{
-                  after: event.start_time,
-                  before: event.end_time ?? event.start_time + 20,
-                }}
+              <video
+                src={`${baseUrl}api/review/${event.id}/preview?format=ts`}
+                muted
+                autoPlay
                 loop
-                showProgress={false}
-                setReviewed={() => {}}
-                setIgnoreClick={() => {}}
-                isPlayingBack={() => {}}
-                windowVisible={windowVisible}
               />
             )}
           </div>
