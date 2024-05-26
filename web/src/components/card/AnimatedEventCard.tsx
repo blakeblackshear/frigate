@@ -7,10 +7,7 @@ import { REVIEW_PADDING, ReviewSegment } from "@/types/review";
 import { useNavigate } from "react-router-dom";
 import { RecordingStartingPoint } from "@/types/record";
 import axios from "axios";
-import {
-  InProgressPreview,
-  VideoPreview,
-} from "../player/PreviewThumbnailPlayer";
+import { VideoPreview } from "../player/PreviewThumbnailPlayer";
 import { isCurrentHour } from "@/utils/dateUtil";
 import { useCameraPreviews } from "@/hooks/use-camera-previews";
 import { baseUrl } from "@/api/baseUrl";
