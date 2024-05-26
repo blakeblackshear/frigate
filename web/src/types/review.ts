@@ -20,6 +20,15 @@ export type ReviewData = {
   zones: string[];
 };
 
+export type SegmentedReviewData =
+  | {
+      all: ReviewSegment[];
+      alert: ReviewSegment[];
+      detection: ReviewSegment[];
+      significant_motion: ReviewSegment[];
+    }
+  | undefined;
+
 export type ReviewFilter = {
   cameras?: string[];
   labels?: string[];
