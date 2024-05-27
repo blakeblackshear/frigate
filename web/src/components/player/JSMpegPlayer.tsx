@@ -1,13 +1,15 @@
 import { baseUrl } from "@/api/baseUrl";
+import { useResizeObserver } from "@/hooks/resize-observer";
 // @ts-expect-error we know this doesn't have types
 import JSMpeg from "@cycjimmy/jsmpeg-player";
-import { useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 
 type JSMpegPlayerProps = {
   className?: string;
   camera: string;
   width: number;
   height: number;
+  containerRef?: React.MutableRefObject<HTMLDivElement | null>;
 };
 
 export default function JSMpegPlayer({
@@ -15,9 +17,57 @@ export default function JSMpegPlayer({
   width,
   height,
   className,
+  containerRef,
 }: JSMpegPlayerProps) {
   const url = `${baseUrl.replace(/^http/, "ws")}live/jsmpeg/${camera}`;
   const playerRef = useRef<HTMLDivElement | null>(null);
+  const internalContainerRef = useRef<HTMLDivElement | null>(null);
+
+  const [{ width: containerWidth, height: containerHeight }] =
+    useResizeObserver(containerRef ?? internalContainerRef);
+
+  const stretch = true;
+  const aspectRatio = width / height;
+
+  const fitAspect = useMemo(
+    () => containerWidth / containerHeight,
+    [containerWidth, containerHeight],
+  );
+
+  const scaledHeight = useMemo(() => {
+    if (containerRef?.current && width && height) {
+      const scaledHeight =
+        aspectRatio < (fitAspect ?? 0)
+          ? Math.floor(
+              Math.min(containerHeight, containerRef.current?.clientHeight),
+            )
+          : aspectRatio > fitAspect
+            ? Math.floor(containerWidth / aspectRatio)
+            : Math.floor(containerWidth / aspectRatio) / 1.5;
+      const finalHeight = stretch
+        ? scaledHeight
+        : Math.min(scaledHeight, height);
+
+      if (finalHeight > 0) {
+        return finalHeight;
+      }
+    }
+  }, [
+    aspectRatio,
+    containerWidth,
+    containerHeight,
+    fitAspect,
+    height,
+    width,
+    stretch,
+    containerRef,
+  ]);
+
+  const scaledWidth = useMemo(() => {
+    if (aspectRatio && scaledHeight) {
+      return Math.ceil(scaledHeight * aspectRatio);
+    }
+  }, [scaledHeight, aspectRatio]);
 
   useEffect(() => {
     if (!playerRef.current) {
@@ -43,15 +93,14 @@ export default function JSMpegPlayer({
   }, [url]);
 
   return (
-    <div className={className}>
-      <div
-        ref={playerRef}
-        className="jsmpeg h-full"
-        style={{ aspectRatio: width / height }}
-      >
+    <div className={className} ref={internalContainerRef}>
+      <div ref={playerRef} className="jsmpeg">
         <canvas
           id="video-canvas"
-          style={{ width: "100%", height: "100%" }}
+          style={{
+            width: scaledWidth ?? width,
+            height: scaledHeight ?? height,
+          }}
         ></canvas>
       </div>
     </div>
