@@ -18,7 +18,6 @@ export default function JSMpegPlayer({
 }: JSMpegPlayerProps) {
   const url = `${baseUrl.replace(/^http/, "ws")}live/jsmpeg/${camera}`;
   const playerRef = useRef<HTMLDivElement | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!playerRef.current) {
@@ -28,7 +27,7 @@ export default function JSMpegPlayer({
     const video = new JSMpeg.VideoElement(
       playerRef.current,
       url,
-      {},
+      { canvas: "#video-canvas" },
       { protocols: [], audio: false, videoBufferSize: 1024 * 1024 * 4 },
     );
 
@@ -44,12 +43,17 @@ export default function JSMpegPlayer({
   }, [url]);
 
   return (
-    <div className={className} ref={containerRef}>
+    <div className={className}>
       <div
         ref={playerRef}
         className="jsmpeg h-full"
         style={{ aspectRatio: width / height }}
-      />
+      >
+        <canvas
+          id="video-canvas"
+          style={{ width: "100%", height: "100%" }}
+        ></canvas>
+      </div>
     </div>
   );
 }
