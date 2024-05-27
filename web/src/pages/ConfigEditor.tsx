@@ -29,7 +29,7 @@ function ConfigEditor() {
   const [error, setError] = useState<string | undefined>();
 
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
-  const modelRef = useRef<monaco.editor.IEditorModel | null>(null);
+  const modelRef = useRef<monaco.editor.ITextModel | null>(null);
   const configRef = useRef<HTMLDivElement | null>(null);
 
   const onHandleSaveConfig = useCallback(
@@ -123,6 +123,12 @@ function ConfigEditor() {
       modelRef.current = null;
     };
   });
+
+  useEffect(() => {
+    if (config && modelRef.current) {
+      modelRef.current.setValue(config);
+    }
+  }, [config]);
 
   if (!config) {
     return <ActivityIndicator />;
