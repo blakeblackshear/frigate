@@ -42,6 +42,20 @@ review:
       - dog
 ```
 
+## Excluding a camera from alerts or detections
+
+To exclude a specific camera from alerts or detections, simply provide an empty list to the alerts or detections field _at the camera level_.
+
+For example, to exclude objects on the camera _gatecamera_ from any detections, include this in your config:
+
+```yaml
+cameras:
+  gatecamera:
+    review:
+      detections:
+        labels: []
+```
+
 ## Restricting review items to specific zones
 
 By default a review item will be created if any `review -> alerts -> labels` and `review -> detections -> labels` are detected anywhere in the camera frame. You will likely want to configure review items to only be created when the object enters an area of interest, [see the zone docs for more information](./zones.md#restricting-alerts-and-detections-to-specific-zones)
