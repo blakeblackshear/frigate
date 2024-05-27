@@ -33,6 +33,25 @@ export function ThresholdBarGraph({
     [data],
   );
 
+  const numXTicks = useMemo<number>(() => {
+    // Initialize the desired number of x ticks to display
+    let numTicks = isMobileOnly ? 3 : 4;
+
+    const numDataPoints = data[0].data.length;
+
+    // Remove some ticks based on how many data points have been received so far
+    if (numDataPoints < 20) {
+      numTicks += -3;
+    } else if (numDataPoints < 40) {
+      numTicks += -2;
+    } else if (numDataPoints < 60) {
+      numTicks += -1;
+    }
+
+    // No matter what, return at least 1 tick
+    return Math.max(numTicks, 1);
+  }, [data]);
+
   const { theme, systemTheme } = useTheme();
 
   const formatTime = useCallback(
@@ -103,7 +122,7 @@ export function ThresholdBarGraph({
         size: 0,
       },
       xaxis: {
-        tickAmount: isMobileOnly ? 3 : 4,
+        tickAmount: numXTicks,
         tickPlacement: "on",
         labels: {
           rotate: 0,
@@ -124,7 +143,7 @@ export function ThresholdBarGraph({
         min: 0,
       },
     } as ApexCharts.ApexOptions;
-  }, [graphId, threshold, unit, systemTheme, theme, formatTime]);
+  }, [graphId, threshold, unit, systemTheme, theme, formatTime, numXTicks]);
 
   useEffect(() => {
     ApexCharts.exec(graphId, "updateOptions", options, true, true);
@@ -293,6 +312,25 @@ export function CameraLineGraph({
     ) as number[];
   }, [data, dataLabels]);
 
+  const numXTicks = useMemo<number>(() => {
+    // Initialize the desired number of x ticks to display
+    let numTicks = isMobileOnly ? 3 : 4;
+
+    const numDataPoints = data[0].data.length;
+
+    // Remove some ticks based on how many data points have been received so far
+    if (numDataPoints < 20) {
+      numTicks += -3;
+    } else if (numDataPoints < 40) {
+      numTicks += -2;
+    } else if (numDataPoints < 30) {
+      numTicks += -1;
+    }
+
+    // No matter what, return at least 1 tick
+    return Math.max(numTicks, 1);
+  }, [data]);
+
   const { theme, systemTheme } = useTheme();
 
   const formatTime = useCallback(
@@ -341,7 +379,7 @@ export function CameraLineGraph({
         size: 0,
       },
       xaxis: {
-        tickAmount: isMobileOnly ? 3 : 4,
+        tickAmount: numXTicks,
         tickPlacement: "on",
         labels: {
           rotate: 0,
@@ -362,7 +400,7 @@ export function CameraLineGraph({
         min: 0,
       },
     } as ApexCharts.ApexOptions;
-  }, [graphId, systemTheme, theme, formatTime]);
+  }, [graphId, systemTheme, theme, formatTime, numXTicks]);
 
   useEffect(() => {
     ApexCharts.exec(graphId, "updateOptions", options, true, true);
