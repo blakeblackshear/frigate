@@ -135,14 +135,18 @@ export default function LivePlayer({
       );
     }
   } else if (liveMode == "jsmpeg") {
-    player = (
-      <JSMpegPlayer
-        className="flex size-full justify-center overflow-hidden rounded-lg md:rounded-2xl"
-        camera={cameraConfig.live.stream_name}
-        width={cameraConfig.detect.width}
-        height={cameraConfig.detect.height}
-      />
-    );
+    if (cameraActive) {
+      player = (
+        <JSMpegPlayer
+          className="flex size-full justify-center overflow-hidden rounded-lg md:rounded-2xl"
+          camera={cameraConfig.live.stream_name}
+          width={cameraConfig.detect.width}
+          height={cameraConfig.detect.height}
+        />
+      );
+    } else {
+      player = null;
+    }
   } else {
     player = <ActivityIndicator />;
   }
