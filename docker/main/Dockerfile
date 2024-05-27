@@ -57,9 +57,11 @@ RUN apt-get -qq update \
     && pip install -r /requirements-ov.txt
 
 # Get OpenVino Model
-RUN mkdir /models \
-    && cd /models && omz_downloader --name ssdlite_mobilenet_v2 \
-    && cd /models && omz_converter --name ssdlite_mobilenet_v2 --precision FP16
+RUN --mount=type=bind,source=docker/main/build_ov_model.py,target=/build_ov_model.py \
+    mkdir /models && cd /models \
+    && wget http://download.tensorflow.org/models/object_detection/ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz \
+    && tar -xvf ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz \
+    && python3 /build_ov_model.py
 
 
 # libUSB - No Udev
@@ -97,7 +99,8 @@ RUN wget -qO edgetpu_model.tflite https://github.com/google-coral/test_data/raw/
 RUN wget -qO cpu_model.tflite https://github.com/google-coral/test_data/raw/release-frogfish/ssdlite_mobiledet_coco_qat_postprocess.tflite
 COPY labelmap.txt .
 # Copy OpenVino model
-COPY --from=ov-converter /models/public/ssdlite_mobilenet_v2/FP16 openvino-model
+COPY --from=ov-converter /models/ssdlite_mobilenet_v2.xml openvino-model/
+COPY --from=ov-converter /models/ssdlite_mobilenet_v2.bin openvino-model/
 RUN wget -q https://github.com/openvinotoolkit/open_model_zoo/raw/master/data/dataset_classes/coco_91cl_bkgr.txt -O openvino-model/coco_91cl_bkgr.txt && \
     sed -i 's/truck/car/g' openvino-model/coco_91cl_bkgr.txt
 # Get Audio Model and labels

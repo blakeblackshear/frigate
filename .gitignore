@@ -17,3 +17,4 @@ web/coverage
 core
 !/web/**/*.ts
 .idea/*
+.ipynb_checkpoints
