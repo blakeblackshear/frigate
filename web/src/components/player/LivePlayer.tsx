@@ -135,7 +135,7 @@ export default function LivePlayer({
       );
     }
   } else if (liveMode == "jsmpeg") {
-    if (cameraActive) {
+    if (cameraActive || !showStillWithoutActivity) {
       player = (
         <JSMpegPlayer
           className="flex size-full justify-center overflow-hidden rounded-lg md:rounded-2xl"
