@@ -80,7 +80,7 @@ export default function LivePlayer({
   // camera still state
 
   const stillReloadInterval = useMemo(() => {
-    if (!windowVisible) {
+    if (!windowVisible || offline) {
       return -1; // no reason to update the image when the window is not visible
     }
 
@@ -88,12 +88,12 @@ export default function LivePlayer({
       return 60000;
     }
 
-    if (cameraActive) {
+    if (activeMotion || activeTracking) {
       return 200;
     }
 
     return 30000;
-  }, [liveReady, cameraActive, windowVisible]);
+  }, [liveReady, activeMotion, activeTracking, offline, windowVisible]);
 
   if (!cameraConfig) {
     return <ActivityIndicator />;
@@ -135,14 +135,18 @@ export default function LivePlayer({
       );
     }
   } else if (liveMode == "jsmpeg") {
-    player = (
-      <JSMpegPlayer
-        className="flex size-full justify-center overflow-hidden rounded-lg md:rounded-2xl"
-        camera={cameraConfig.live.stream_name}
-        width={cameraConfig.detect.width}
-        height={cameraConfig.detect.height}
-      />
-    );
+    if (cameraActive) {
+      player = (
+        <JSMpegPlayer
+          className="flex size-full justify-center overflow-hidden rounded-lg md:rounded-2xl"
+          camera={cameraConfig.live.stream_name}
+          width={cameraConfig.detect.width}
+          height={cameraConfig.detect.height}
+        />
+      );
+    } else {
+      player = null;
+    }
   } else {
     player = <ActivityIndicator />;
   }
