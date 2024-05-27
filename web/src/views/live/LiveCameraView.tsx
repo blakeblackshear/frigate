@@ -85,6 +85,7 @@ export default function LiveCameraView({
   const navigate = useNavigate();
   const { isPortrait } = useMobileOrientation();
   const mainRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [{ width: windowWidth, height: windowHeight }] =
     useResizeObserver(window);
 
@@ -389,48 +390,51 @@ export default function LiveCameraView({
             </div>
           </TooltipProvider>
         </div>
-        <TransformComponent
-          wrapperStyle={{
-            width: "100%",
-            height: "100%",
-          }}
-          contentStyle={{
-            position: "relative",
-            width: "100%",
-            height: "100%",
-            padding: "8px",
-          }}
-        >
-          <div
-            className={`flex flex-col items-center justify-center ${growClassName}`}
-            ref={clickOverlayRef}
-            onClick={handleOverlayClick}
-            style={{
-              aspectRatio: aspectRatio,
+        <div id="player-container" className="size-full" ref={containerRef}>
+          <TransformComponent
+            wrapperStyle={{
+              width: "100%",
+              height: "100%",
+            }}
+            contentStyle={{
+              position: "relative",
+              width: "100%",
+              height: "100%",
+              padding: "8px",
             }}
           >
-            <LivePlayer
-              key={camera.name}
-              className={`m-1 ${fullscreen ? "*:rounded-none" : ""}`}
-              windowVisible
-              showStillWithoutActivity={false}
-              cameraConfig={camera}
-              playAudio={audio}
-              micEnabled={mic}
-              iOSCompatFullScreen={isIOS}
-              preferredLiveMode={preferredLiveMode}
-              pip={pip}
-              setFullResolution={setFullResolution}
-            />
-          </div>
-          {camera.onvif.host != "" && (
-            <PtzControlPanel
-              camera={camera.name}
-              clickOverlay={clickOverlay}
-              setClickOverlay={setClickOverlay}
-            />
-          )}
-        </TransformComponent>
+            <div
+              className={`flex flex-col items-center justify-center ${growClassName}`}
+              ref={clickOverlayRef}
+              onClick={handleOverlayClick}
+              style={{
+                aspectRatio: aspectRatio,
+              }}
+            >
+              <LivePlayer
+                key={camera.name}
+                className={`${fullscreen ? "*:rounded-none" : ""}`}
+                windowVisible
+                showStillWithoutActivity={false}
+                cameraConfig={camera}
+                playAudio={audio}
+                micEnabled={mic}
+                iOSCompatFullScreen={isIOS}
+                preferredLiveMode={preferredLiveMode}
+                pip={pip}
+                setFullResolution={setFullResolution}
+                containerRef={containerRef}
+              />
+            </div>
+            {camera.onvif.host != "" && (
+              <PtzControlPanel
+                camera={camera.name}
+                clickOverlay={clickOverlay}
+                setClickOverlay={setClickOverlay}
+              />
+            )}
+          </TransformComponent>
+        </div>
       </div>
     </TransformWrapper>
   );

@@ -5,12 +5,14 @@ import JSMpegPlayer from "./JSMpegPlayer";
 import MSEPlayer from "./MsePlayer";
 import { LivePlayerMode } from "@/types/live";
 import { cn } from "@/lib/utils";
+import React from "react";
 
 type LivePlayerProps = {
   className?: string;
   birdseyeConfig: BirdseyeConfig;
   liveMode: LivePlayerMode;
   onClick?: () => void;
+  containerRef?: React.MutableRefObject<HTMLDivElement | null>;
 };
 
 export default function BirdseyeLivePlayer({
@@ -18,6 +20,7 @@ export default function BirdseyeLivePlayer({
   birdseyeConfig,
   liveMode,
   onClick,
+  containerRef,
 }: LivePlayerProps) {
   let player;
   if (liveMode == "webrtc") {
@@ -50,6 +53,7 @@ export default function BirdseyeLivePlayer({
         camera="birdseye"
         width={birdseyeConfig.width}
         height={birdseyeConfig.height}
+        containerRef={containerRef}
       />
     );
   } else {

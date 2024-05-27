@@ -23,6 +23,7 @@ export default function LiveBirdseyeView() {
   const navigate = useNavigate();
   const { isPortrait } = useMobileOrientation();
   const mainRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [{ width: windowWidth, height: windowHeight }] =
     useResizeObserver(window);
 
@@ -75,7 +76,7 @@ export default function LiveBirdseyeView() {
         return "absolute inset-y-2 left-[50%] -translate-x-[50%]";
       }
     } else {
-      return "absolute top-2 bottom-2 left-[50%] -translate-x-[50%]";
+      return "absolute top-0 bottom-0 left-[50%] -translate-x-[50%]";
     }
   }, [cameraAspectRatio, fullscreen, isPortrait]);
 
@@ -159,30 +160,33 @@ export default function LiveBirdseyeView() {
             </div>
           </TooltipProvider>
         </div>
-        <TransformComponent
-          wrapperStyle={{
-            width: "100%",
-            height: "100%",
-          }}
-          contentStyle={{
-            position: "relative",
-            width: "100%",
-            height: "100%",
-          }}
-        >
-          <div
-            className={growClassName}
-            style={{
-              aspectRatio: aspectRatio,
+        <div id="player-container" className="size-full" ref={containerRef}>
+          <TransformComponent
+            wrapperStyle={{
+              width: "100%",
+              height: "100%",
+            }}
+            contentStyle={{
+              position: "relative",
+              width: "100%",
+              height: "100%",
             }}
           >
-            <BirdseyeLivePlayer
-              className="h-full"
-              birdseyeConfig={config.birdseye}
-              liveMode={preferredLiveMode}
-            />
-          </div>
-        </TransformComponent>
+            <div
+              className={growClassName}
+              style={{
+                aspectRatio: aspectRatio,
+              }}
+            >
+              <BirdseyeLivePlayer
+                className={`${fullscreen ? "*:rounded-none" : ""}`}
+                birdseyeConfig={config.birdseye}
+                liveMode={preferredLiveMode}
+                containerRef={containerRef}
+              />
+            </div>
+          </TransformComponent>
+        </div>
       </div>
     </TransformWrapper>
   );

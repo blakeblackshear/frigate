@@ -28,6 +28,7 @@ type LivePlayerProps = {
   pip?: boolean;
   onClick?: () => void;
   setFullResolution?: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
+  containerRef?: React.MutableRefObject<HTMLDivElement | null>;
 };
 
 export default function LivePlayer({
@@ -43,6 +44,7 @@ export default function LivePlayer({
   pip,
   onClick,
   setFullResolution,
+  containerRef,
 }: LivePlayerProps) {
   // camera activity
 
@@ -138,10 +140,11 @@ export default function LivePlayer({
     if (cameraActive || !showStillWithoutActivity) {
       player = (
         <JSMpegPlayer
-          className="flex size-full justify-center overflow-hidden rounded-lg md:rounded-2xl"
+          className="flex justify-center overflow-hidden rounded-lg md:rounded-2xl"
           camera={cameraConfig.live.stream_name}
           width={cameraConfig.detect.width}
           height={cameraConfig.detect.height}
+          containerRef={containerRef}
         />
       );
     } else {
@@ -156,9 +159,7 @@ export default function LivePlayer({
       ref={cameraRef}
       data-camera={cameraConfig.name}
       className={cn(
-        "relative flex justify-center",
-        liveMode === "jsmpeg" ? "size-full" : "w-full",
-        "cursor-pointer outline",
+        "relative flex w-full cursor-pointer justify-center outline",
         activeTracking
           ? "outline-3 rounded-lg shadow-severity_alert outline-severity_alert md:rounded-2xl"
           : "outline-0 outline-background",
