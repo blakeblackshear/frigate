@@ -323,7 +323,7 @@ export function CameraLineGraph({
       numTicks += -3;
     } else if (numDataPoints < 40) {
       numTicks += -2;
-    } else if (numDataPoints < 30) {
+    } else if (numDataPoints < 60) {
       numTicks += -1;
     }
 
