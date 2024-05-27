@@ -3,7 +3,7 @@ import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { ReviewSegment } from "@/types/review";
 import { getIconForLabel } from "@/utils/iconUtil";
-import { isDesktop, isSafari } from "react-device-detect";
+import { isDesktop, isIOS, isSafari } from "react-device-detect";
 import useSWR from "swr";
 import TimeAgo from "../dynamic/TimeAgo";
 import { useCallback, useMemo, useState } from "react";
@@ -110,6 +110,15 @@ export default function ReviewCard({
         className={`size-full rounded-lg ${isSelected ? "outline outline-[3px] outline-offset-1 outline-selected" : ""} ${imgLoaded ? "visible" : "invisible"}`}
         src={`${baseUrl}${event.thumb_path.replace("/media/frigate/", "")}`}
         loading={isSafari ? "eager" : "lazy"}
+        style={
+          isIOS
+            ? {
+                WebkitUserSelect: "none",
+                WebkitTouchCallout: "none",
+              }
+            : undefined
+        }
+        draggable={false}
         onLoad={() => {
           onImgLoad();
         }}
