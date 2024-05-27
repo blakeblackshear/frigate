@@ -25,6 +25,7 @@ import { TimeRange } from "@/types/timeline";
 import { NoThumbSlider } from "../ui/slider";
 import { PREVIEW_FPS, PREVIEW_PADDING } from "@/types/preview";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
+import { baseUrl } from "@/api/baseUrl";
 
 type PreviewPlayerProps = {
   review: ReviewSegment;
@@ -575,7 +576,10 @@ export function VideoPreview({
         muted
         onTimeUpdate={onProgress}
       >
-        <source src={relevantPreview.src} type={relevantPreview.type} />
+        <source
+          src={`${baseUrl}${relevantPreview.src.substring(1)}`}
+          type={relevantPreview.type}
+        />
       </video>
       {showProgress && (
         <NoThumbSlider

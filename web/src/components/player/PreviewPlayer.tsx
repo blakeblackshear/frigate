@@ -302,7 +302,10 @@ function PreviewVideoPlayer({
         }}
       >
         {currentPreview != undefined && (
-          <source src={currentPreview.src} type={currentPreview.type} />
+          <source
+            src={`${baseUrl}${currentPreview.src.substring(1)}`}
+            type={currentPreview.type}
+          />
         )}
       </video>
       {cameraPreviews && !currentPreview && (
