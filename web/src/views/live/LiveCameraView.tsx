@@ -247,7 +247,7 @@ export default function LiveCameraView({
       if (isPortrait) {
         return "absolute left-0.5 right-0.5 top-[50%] -translate-y-[50%]";
       } else {
-        if (aspect > aspectRatio) {
+        if (aspect > containerAspectRatio) {
           return "p-2 absolute left-0 top-[50%] -translate-y-[50%]";
         } else {
           return "p-2 absolute top-0.5 bottom-0.5 left-[50%] -translate-x-[50%]";
@@ -256,7 +256,7 @@ export default function LiveCameraView({
     }
 
     if (fullscreen) {
-      if (aspect > aspectRatio) {
+      if (aspect > containerAspectRatio) {
         return "absolute inset-x-2 top-[50%] -translate-y-[50%]";
       } else {
         return "absolute inset-y-2 left-[50%] -translate-x-[50%]";
@@ -264,7 +264,7 @@ export default function LiveCameraView({
     } else {
       return "absolute top-0.5 bottom-0.5 left-[50%] -translate-x-[50%]";
     }
-  }, [camera, fullscreen, isPortrait, fullResolution, aspectRatio]);
+  }, [camera, fullscreen, isPortrait, fullResolution, containerAspectRatio]);
 
   return (
     <TransformWrapper minScale={1.0}>
