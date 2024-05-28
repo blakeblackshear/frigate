@@ -225,7 +225,7 @@ export default function LiveCameraView({
     }
   }, [camera, fullResolution]);
 
-  const aspectRatio = useMemo<number>(() => {
+  const constrainedAspectRatio = useMemo<number>(() => {
     if (isMobile || fullscreen) {
       return cameraAspectRatio;
     } else {
@@ -236,18 +236,11 @@ export default function LiveCameraView({
   }, [cameraAspectRatio, containerAspectRatio, fullscreen]);
 
   const growClassName = useMemo(() => {
-    let aspect;
-    if (fullResolution.width && fullResolution.height) {
-      aspect = fullResolution.width / fullResolution.height;
-    } else {
-      aspect = camera.detect.width / camera.detect.height;
-    }
-
     if (isMobile) {
       if (isPortrait) {
         return "absolute left-0.5 right-0.5 top-[50%] -translate-y-[50%]";
       } else {
-        if (aspect > containerAspectRatio) {
+        if (cameraAspectRatio > containerAspectRatio) {
           return "p-2 absolute left-0 top-[50%] -translate-y-[50%]";
         } else {
           return "p-2 absolute top-0.5 bottom-0.5 left-[50%] -translate-x-[50%]";
@@ -256,7 +249,7 @@ export default function LiveCameraView({
     }
 
     if (fullscreen) {
-      if (aspect > containerAspectRatio) {
+      if (cameraAspectRatio > containerAspectRatio) {
         return "absolute inset-x-2 top-[50%] -translate-y-[50%]";
       } else {
         return "absolute inset-y-2 left-[50%] -translate-x-[50%]";
@@ -264,7 +257,7 @@ export default function LiveCameraView({
     } else {
       return "absolute top-0.5 bottom-0.5 left-[50%] -translate-x-[50%]";
     }
-  }, [camera, fullscreen, isPortrait, fullResolution, containerAspectRatio]);
+  }, [fullscreen, isPortrait, cameraAspectRatio, containerAspectRatio]);
 
   return (
     <TransformWrapper minScale={1.0}>
@@ -398,7 +391,7 @@ export default function LiveCameraView({
               ref={clickOverlayRef}
               onClick={handleOverlayClick}
               style={{
-                aspectRatio: aspectRatio,
+                aspectRatio: constrainedAspectRatio,
               }}
             >
               <LivePlayer
