@@ -223,9 +223,6 @@ export default function Events() {
 
   // preview videos
   const previewTimes = useMemo(() => {
-    // offset by timezone minutes
-    const timestampOffset = 0;
-
     const startDate = new Date(selectedTimeRange.after * 1000);
     startDate.setUTCMinutes(0, 0, 0);
 
@@ -233,8 +230,8 @@ export default function Events() {
     endDate.setHours(endDate.getHours() + 1, 0, 0, 0);
 
     return {
-      after: startDate.getTime() / 1000 + timestampOffset,
-      before: endDate.getTime() / 1000 + timestampOffset,
+      after: startDate.getTime() / 1000,
+      before: endDate.getTime() / 1000,
     };
   }, [selectedTimeRange]);
 
