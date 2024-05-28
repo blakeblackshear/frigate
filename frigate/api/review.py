@@ -440,6 +440,11 @@ def motion_activity():
 
     # resample data using pandas to get activity on scaled basis
     df = pd.DataFrame(data, columns=["start_time", "motion", "camera"])
+
+    if df.empty:
+        logger.warning("No motion data found for the requested time range")
+        return jsonify([])
+
     df = df.astype(dtype={"motion": "float16"})
 
     # set date as datetime index
