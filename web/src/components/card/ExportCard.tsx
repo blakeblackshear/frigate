@@ -177,7 +177,7 @@ export default function ExportCard({
             {exportedRecording.thumb_path.length > 0 ? (
               <img
                 className="absolute inset-0 aspect-video size-full rounded-lg object-contain md:rounded-2xl"
-                src={exportedRecording.thumb_path.replace("/media/frigate", "")}
+                src={`${baseUrl}${exportedRecording.thumb_path.replace("/media/frigate", "")}`}
                 onLoad={() => setLoading(false)}
               />
             ) : (
