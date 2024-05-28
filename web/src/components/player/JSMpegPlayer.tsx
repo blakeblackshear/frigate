@@ -23,8 +23,13 @@ export default function JSMpegPlayer({
   const playerRef = useRef<HTMLDivElement | null>(null);
   const internalContainerRef = useRef<HTMLDivElement | null>(null);
 
+  const selectedContainerRef = useMemo(
+    () => containerRef ?? internalContainerRef,
+    [containerRef, internalContainerRef],
+  );
+
   const [{ width: containerWidth, height: containerHeight }] =
-    useResizeObserver(containerRef ?? internalContainerRef);
+    useResizeObserver(selectedContainerRef);
 
   const stretch = true;
   const aspectRatio = width / height;
@@ -35,11 +40,14 @@ export default function JSMpegPlayer({
   );
 
   const scaledHeight = useMemo(() => {
-    if (containerRef?.current && width && height) {
+    if (selectedContainerRef?.current && width && height) {
       const scaledHeight =
         aspectRatio < (fitAspect ?? 0)
           ? Math.floor(
-              Math.min(containerHeight, containerRef.current?.clientHeight),
+              Math.min(
+                containerHeight,
+                selectedContainerRef.current?.clientHeight,
+              ),
             )
           : aspectRatio > fitAspect
             ? Math.floor(containerWidth / aspectRatio)
@@ -60,7 +68,7 @@ export default function JSMpegPlayer({
     height,
     width,
     stretch,
-    containerRef,
+    selectedContainerRef,
   ]);
 
   const scaledWidth = useMemo(() => {
@@ -93,15 +101,17 @@ export default function JSMpegPlayer({
   }, [url, camera]);
 
   return (
-    <div className={className} ref={internalContainerRef}>
-      <div ref={playerRef} className="jsmpeg">
-        <canvas
-          id={`${camera}-canvas`}
-          style={{
-            width: scaledWidth ?? width,
-            height: scaledHeight ?? height,
-          }}
-        ></canvas>
+    <div className={className}>
+      <div className="size-full" ref={internalContainerRef}>
+        <div ref={playerRef} className="jsmpeg">
+          <canvas
+            id={`${camera}-canvas`}
+            style={{
+              width: scaledWidth ?? width,
+              height: scaledHeight ?? height,
+            }}
+          ></canvas>
+        </div>
       </div>
     </div>
   );
