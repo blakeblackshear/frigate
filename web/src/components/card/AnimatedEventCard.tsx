@@ -105,8 +105,11 @@ export function AnimatedEventCard({ event }: AnimatedEventCardProps) {
             ) : (
               <video
                 src={`${baseUrl}api/review/${event.id}/preview?format=ts`}
-                muted
+                preload="auto"
                 autoPlay
+                playsInline
+                muted
+                disableRemotePlayback
                 loop
               />
             )}
