@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { isMobileOnly, isSafari } from "react-device-detect";
 import { LuPause, LuPlay } from "react-icons/lu";
 import {
@@ -90,6 +90,12 @@ export default function VideoControls({
   onUploadFrame,
   setFullscreen,
 }: VideoControlsProps) {
+  // layout
+
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  // controls
+
   const onReplay = useCallback(
     (e: React.MouseEvent<SVGElement>) => {
       e.stopPropagation();
@@ -183,6 +189,7 @@ export default function VideoControls({
             MIN_ITEMS_WRAP &&
           "min-w-[75%] flex-wrap",
       )}
+      ref={containerRef}
     >
       {video && features.volume && (
         <div className="flex cursor-pointer items-center justify-normal gap-2">
@@ -230,7 +237,9 @@ export default function VideoControls({
           }}
         >
           <DropdownMenuTrigger>{`${playbackRate}x`}</DropdownMenuTrigger>
-          <DropdownMenuContent>
+          <DropdownMenuContent
+            portalProps={{ container: containerRef.current }}
+          >
             <DropdownMenuRadioGroup
               onValueChange={(rate) => onSetPlaybackRate(parseFloat(rate))}
             >
