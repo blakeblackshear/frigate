@@ -5,6 +5,7 @@ import logging
 import os
 import subprocess as sp
 import threading
+import time
 from pathlib import Path
 
 import cv2
@@ -101,12 +102,24 @@ class FFMpegConverter(threading.Thread):
                 f"duration {self.frame_times[t_idx + 1] - self.frame_times[t_idx]}"
             )
 
-        p = sp.run(
-            self.ffmpeg_cmd.split(" "),
-            input="\n".join(playlist),
-            encoding="ascii",
-            capture_output=True,
-        )
+        try:
+            p = sp.run(
+                self.ffmpeg_cmd.split(" "),
+                input="\n".join(playlist),
+                encoding="ascii",
+                capture_output=True,
+            )
+        except BlockingIOError:
+            logger.warning(
+                f"Failed to create preview for {self.config.name}, retrying..."
+            )
+            time.sleep(2)
+            p = sp.run(
+                self.ffmpeg_cmd.split(" "),
+                input="\n".join(playlist),
+                encoding="ascii",
+                capture_output=True,
+            )
 
         start = self.frame_times[0]
         end = self.frame_times[-1]
