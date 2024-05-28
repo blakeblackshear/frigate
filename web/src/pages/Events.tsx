@@ -12,7 +12,6 @@ import {
   ReviewSummary,
   SegmentedReviewData,
 } from "@/types/review";
-import { getTimestampOffset } from "@/utils/dateUtil";
 import EventView from "@/views/events/EventView";
 import { RecordingView } from "@/views/events/RecordingView";
 import axios from "axios";
@@ -224,18 +223,15 @@ export default function Events() {
 
   // preview videos
   const previewTimes = useMemo(() => {
-    // offset by timezone minutes
-    const timestampOffset = getTimestampOffset(Date.now() / 1000);
-
     const startDate = new Date(selectedTimeRange.after * 1000);
-    startDate.setMinutes(0, 0, 0);
+    startDate.setUTCMinutes(0, 0, 0);
 
     const endDate = new Date(selectedTimeRange.before * 1000);
     endDate.setHours(endDate.getHours() + 1, 0, 0, 0);
 
     return {
-      after: startDate.getTime() / 1000 + timestampOffset,
-      before: endDate.getTime() / 1000 + timestampOffset,
+      after: startDate.getTime() / 1000,
+      before: endDate.getTime() / 1000,
     };
   }, [selectedTimeRange]);
 
