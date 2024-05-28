@@ -197,6 +197,7 @@ function PreviewVideoPlayer({
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [videoSize, setVideoSize] = useState<number[]>([0, 0]);
+  const [changeoverTimeout, setChangeoverTimeout] = useState<NodeJS.Timeout>();
 
   const changeSource = useCallback(
     (newPreview: Preview | undefined, video: HTMLVideoElement | null) => {
@@ -220,6 +221,15 @@ function PreviewVideoPlayer({
       }
 
       setCurrentPreview(newPreview);
+      const timeout = setTimeout(() => {
+        if (timeout) {
+          clearTimeout(timeout);
+          setChangeoverTimeout(undefined);
+        }
+
+        previewRef.current?.load();
+      }, 1000);
+      setChangeoverTimeout(timeout);
 
       // we only want this to change when current preview changes
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -243,6 +253,7 @@ function PreviewVideoPlayer({
     );
 
     if (preview != currentPreview) {
+      controller.newPreviewLoaded = false;
       changeSource(preview, previewRef.current);
     }
 
@@ -267,7 +278,14 @@ function PreviewVideoPlayer({
       <img
         className={`absolute size-full object-contain ${currentHourFrame ? "visible" : "invisible"}`}
         src={currentHourFrame}
-        onLoad={() => previewRef.current?.load()}
+        onLoad={() => {
+          if (changeoverTimeout) {
+            clearTimeout(changeoverTimeout);
+            setChangeoverTimeout(undefined);
+          }
+
+          previewRef.current?.load();
+        }}
       />
       <video
         ref={previewRef}
@@ -327,6 +345,7 @@ class PreviewVideoController extends PreviewController {
   private preview: Preview | undefined = undefined;
   private timeToSeek: number | undefined = undefined;
   public scrubbing = false;
+  public newPreviewLoaded = true;
   private seeking = false;
 
   constructor(
@@ -345,7 +364,12 @@ class PreviewVideoController extends PreviewController {
   }
 
   override scrubToTimestamp(time: number): boolean {
-    if (!this.previewRef.current || !this.preview || !this.timeRange) {
+    if (
+      !this.newPreviewLoaded ||
+      !this.previewRef.current ||
+      !this.preview ||
+      !this.timeRange
+    ) {
       return false;
     }
 
@@ -396,6 +420,7 @@ class PreviewVideoController extends PreviewController {
   }
 
   previewReady() {
+    this.newPreviewLoaded = true;
     this.seeking = false;
     this.previewRef.current?.pause();
 
