@@ -77,7 +77,7 @@ export default function JSMpegPlayer({
     const video = new JSMpeg.VideoElement(
       playerRef.current,
       url,
-      { canvas: "#video-canvas" },
+      { canvas: `#${camera}-canvas` },
       { protocols: [], audio: false, videoBufferSize: 1024 * 1024 * 4 },
     );
 
@@ -90,13 +90,13 @@ export default function JSMpegPlayer({
         playerRef.current = null;
       }
     };
-  }, [url]);
+  }, [url, camera]);
 
   return (
     <div className={className} ref={internalContainerRef}>
       <div ref={playerRef} className="jsmpeg">
         <canvas
-          id="video-canvas"
+          id={`${camera}-canvas`}
           style={{
             width: scaledWidth ?? width,
             height: scaledHeight ?? height,

@@ -73,6 +73,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import useSWR from "swr";
+import { useFullscreen } from "@/hooks/use-fullscreen";
 
 type LiveCameraViewProps = {
   config?: FrigateConfig;
@@ -177,19 +178,7 @@ export default function LiveCameraView({
 
   // fullscreen / pip state
 
-  useEffect(() => {
-    if (mainRef.current == null) {
-      return;
-    }
-    const fsListener = () => {
-      setFullscreen(document.fullscreenElement != null);
-    };
-    document.addEventListener("fullscreenchange", fsListener);
-
-    return () => {
-      document.removeEventListener("fullscreenchange", fsListener);
-    };
-  }, [mainRef]);
+  const { fullscreen, toggleFullscreen } = useFullscreen(mainRef);
 
   useEffect(() => {
     setPip(document.pictureInPictureElement != null);
@@ -201,44 +190,12 @@ export default function LiveCameraView({
 
   const [audio, setAudio] = useState(false);
   const [mic, setMic] = useState(false);
-  const [fullscreen, setFullscreen] = useState(false);
   const [pip, setPip] = useState(false);
 
   const [fullResolution, setFullResolution] = useState<VideoResolutionType>({
     width: 0,
     height: 0,
   });
-
-  const growClassName = useMemo(() => {
-    let aspect;
-    if (fullResolution.width && fullResolution.height) {
-      aspect = fullResolution.width / fullResolution.height;
-    } else {
-      aspect = camera.detect.width / camera.detect.height;
-    }
-
-    if (isMobile) {
-      if (isPortrait) {
-        return "absolute left-2 right-2 top-[50%] -translate-y-[50%]";
-      } else {
-        if (aspect > 1.5) {
-          return "p-2 absolute left-0 top-[50%] -translate-y-[50%]";
-        } else {
-          return "p-2 absolute top-2 bottom-2 left-[50%] -translate-x-[50%]";
-        }
-      }
-    }
-
-    if (fullscreen) {
-      if (aspect > 1.5) {
-        return "absolute inset-x-2 top-[50%] -translate-y-[50%]";
-      } else {
-        return "absolute inset-y-2 left-[50%] -translate-x-[50%]";
-      }
-    } else {
-      return "absolute top-2 bottom-2 left-[50%] -translate-x-[50%]";
-    }
-  }, [camera, fullscreen, isPortrait, fullResolution]);
 
   const preferredLiveMode = useMemo(() => {
     if (isSafari || mic) {
@@ -252,6 +209,14 @@ export default function LiveCameraView({
     return windowWidth / windowHeight;
   }, [windowWidth, windowHeight]);
 
+  const containerAspectRatio = useMemo(() => {
+    if (!containerRef.current) {
+      return windowAspectRatio;
+    }
+
+    return containerRef.current.clientWidth / containerRef.current.clientHeight;
+  }, [windowAspectRatio, containerRef]);
+
   const cameraAspectRatio = useMemo(() => {
     if (fullResolution.width && fullResolution.height) {
       return fullResolution.width / fullResolution.height;
@@ -264,11 +229,42 @@ export default function LiveCameraView({
     if (isMobile || fullscreen) {
       return cameraAspectRatio;
     } else {
-      return windowAspectRatio < cameraAspectRatio
-        ? windowAspectRatio - 0.05
-        : cameraAspectRatio - 0.03;
+      return containerAspectRatio < cameraAspectRatio
+        ? containerAspectRatio
+        : cameraAspectRatio;
     }
-  }, [cameraAspectRatio, windowAspectRatio, fullscreen]);
+  }, [cameraAspectRatio, containerAspectRatio, fullscreen]);
+
+  const growClassName = useMemo(() => {
+    let aspect;
+    if (fullResolution.width && fullResolution.height) {
+      aspect = fullResolution.width / fullResolution.height;
+    } else {
+      aspect = camera.detect.width / camera.detect.height;
+    }
+
+    if (isMobile) {
+      if (isPortrait) {
+        return "absolute left-0.5 right-0.5 top-[50%] -translate-y-[50%]";
+      } else {
+        if (aspect > containerAspectRatio) {
+          return "p-2 absolute left-0 top-[50%] -translate-y-[50%]";
+        } else {
+          return "p-2 absolute top-0.5 bottom-0.5 left-[50%] -translate-x-[50%]";
+        }
+      }
+    }
+
+    if (fullscreen) {
+      if (aspect > containerAspectRatio) {
+        return "absolute inset-x-2 top-[50%] -translate-y-[50%]";
+      } else {
+        return "absolute inset-y-2 left-[50%] -translate-x-[50%]";
+      }
+    } else {
+      return "absolute top-0.5 bottom-0.5 left-[50%] -translate-x-[50%]";
+    }
+  }, [camera, fullscreen, isPortrait, fullResolution, containerAspectRatio]);
 
   return (
     <TransformWrapper minScale={1.0}>
@@ -333,13 +329,7 @@ export default function LiveCameraView({
                   Icon={fullscreen ? FaCompress : FaExpand}
                   isActive={fullscreen}
                   title={fullscreen ? "Close" : "Fullscreen"}
-                  onClick={() => {
-                    if (fullscreen) {
-                      document.exitFullscreen();
-                    } else {
-                      mainRef.current?.requestFullscreen();
-                    }
-                  }}
+                  onClick={toggleFullscreen}
                 />
               )}
               {!isIOS && (
