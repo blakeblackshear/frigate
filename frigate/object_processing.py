@@ -498,6 +498,10 @@ class CameraState:
 
         frame_copy = cv2.cvtColor(frame_copy, cv2.COLOR_YUV2BGR_I420)
         # draw on the frame
+        if draw_options.get("mask"):
+            mask_overlay = np.where(self.camera_config.motion.mask == [0])
+            frame_copy[mask_overlay] = [0, 0, 0]
+
         if draw_options.get("bounding_boxes"):
             # draw the bounding boxes on the frame
             for obj in tracked_objects.values():
@@ -621,10 +625,6 @@ class CameraState:
                     else 2
                 )
                 cv2.drawContours(frame_copy, [zone.contour], -1, zone.color, thickness)
-
-        if draw_options.get("mask"):
-            mask_overlay = np.where(self.camera_config.motion.mask == [0])
-            frame_copy[mask_overlay] = [0, 0, 0]
 
         if draw_options.get("motion_boxes"):
             for m_box in motion_boxes:
