@@ -1232,7 +1232,7 @@ def preview_gif(camera_name: str, start_ts, end_ts, max_cache_age=2592000):
 
 @MediaBp.route("/<camera_name>/start/<int:start_ts>/end/<int:end_ts>/preview.mp4")
 @MediaBp.route("/<camera_name>/start/<float:start_ts>/end/<float:end_ts>/preview.mp4")
-def preview_mp4(camera_name: str, start_ts, end_ts):
+def preview_mp4(camera_name: str, start_ts, end_ts, max_cache_age=2592000):
     file_name = f"clip_{camera_name}_{start_ts}-{end_ts}.mp4"
 
     if len(file_name) > 1000:
@@ -1380,7 +1380,7 @@ def preview_mp4(camera_name: str, start_ts, end_ts):
 
     response = make_response()
     response.headers["Content-Description"] = "File Transfer"
-    response.headers["Cache-Control"] = "no-cache"
+    response.headers["Cache-Control"] = f"private, max-age={max_cache_age}"
     response.headers["Content-Type"] = "video/mp4"
     response.headers["Content-Length"] = os.path.getsize(path)
     response.headers["X-Accel-Redirect"] = (
