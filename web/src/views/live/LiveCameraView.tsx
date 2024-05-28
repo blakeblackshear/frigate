@@ -35,7 +35,6 @@ import {
   isDesktop,
   isIOS,
   isMobile,
-  isSafari,
   isTablet,
   useMobileOrientation,
 } from "react-device-detect";
@@ -198,7 +197,7 @@ export default function LiveCameraView({
   });
 
   const preferredLiveMode = useMemo(() => {
-    if (isSafari || mic) {
+    if (mic) {
       return "webrtc";
     }
 
