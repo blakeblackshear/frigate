@@ -3,6 +3,7 @@ import { Calendar } from "../ui/calendar";
 import { useMemo } from "react";
 import { FaCircle } from "react-icons/fa";
 import { getUTCOffset } from "@/utils/dateUtil";
+import { type DayContentProps } from "react-day-picker";
 
 type ReviewActivityCalendarProps = {
   reviewSummary?: ReviewSummary;
@@ -22,6 +23,28 @@ export default function ReviewActivityCalendar({
     return { from: tomorrow, to: future };
   }, []);
 
+  const modifiers = useMemo(() => {
+    if (!reviewSummary) {
+      return { alerts: [], detections: [] };
+    }
+
+    const unreviewedDetections: Date[] = [];
+    const unreviewedAlerts: Date[] = [];
+
+    Object.entries(reviewSummary).forEach(([date, data]) => {
+      if (data.total_alert > data.reviewed_alert) {
+        unreviewedAlerts.push(new Date(date));
+      } else if (data.total_detection > data.reviewed_detection) {
+        unreviewedDetections.push(new Date(date));
+      }
+    });
+
+    return {
+      alerts: unreviewedAlerts,
+      detections: unreviewedDetections,
+    };
+  }, [reviewSummary]);
+
   return (
     <Calendar
       mode="single"
@@ -29,46 +52,28 @@ export default function ReviewActivityCalendar({
       showOutsideDays={false}
       selected={selectedDay}
       onSelect={onSelect}
+      modifiers={modifiers}
       components={{
-        DayContent: (date) => (
-          <ReviewActivityDay reviewSummary={reviewSummary} day={date.date} />
-        ),
+        DayContent: ReviewActivityDay,
       }}
     />
   );
 }
 
-type ReviewActivityDayProps = {
-  reviewSummary?: ReviewSummary;
-  day: Date;
-};
-function ReviewActivityDay({ reviewSummary, day }: ReviewActivityDayProps) {
+function ReviewActivityDay({ date, activeModifiers }: DayContentProps) {
   const dayActivity = useMemo(() => {
-    if (!reviewSummary) {
-      return "none";
-    }
-
-    const allActivity =
-      reviewSummary[
-        `${day.getFullYear()}-${("0" + (day.getMonth() + 1)).slice(-2)}-${("0" + day.getDate()).slice(-2)}`
-      ];
-
-    if (!allActivity) {
-      return "none";
-    }
-
-    if (allActivity.total_alert > allActivity.reviewed_alert) {
+    if (activeModifiers["alerts"]) {
       return "alert";
-    } else if (allActivity.total_detection > allActivity.reviewed_detection) {
+    } else if (activeModifiers["detections"]) {
       return "detection";
     } else {
       return "none";
     }
-  }, [reviewSummary, day]);
+  }, [activeModifiers]);
 
   return (
-    <div className="flex flex-col items-center justify-center">
-      {day.getDate()}
+    <div className="flex flex-col items-center justify-center gap-0.5">
+      {date.getDate()}
       {dayActivity != "none" && (
         <FaCircle
           className={`size-2 ${dayActivity == "alert" ? "fill-severity_alert" : "fill-severity_detection"}`}
