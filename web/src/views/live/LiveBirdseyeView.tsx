@@ -4,8 +4,9 @@ import BirdseyeLivePlayer from "@/components/player/BirdseyeLivePlayer";
 import { Button } from "@/components/ui/button";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useResizeObserver } from "@/hooks/resize-observer";
+import { useFullscreen } from "@/hooks/use-fullscreen";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef } from "react";
 import {
   isDesktop,
   isMobile,
@@ -29,24 +30,9 @@ export default function LiveBirdseyeView() {
 
   // fullscreen state
 
-  useEffect(() => {
-    if (mainRef.current == null) {
-      return;
-    }
-
-    const listener = () => {
-      setFullscreen(document.fullscreenElement != null);
-    };
-    document.addEventListener("fullscreenchange", listener);
-
-    return () => {
-      document.removeEventListener("fullscreenchange", listener);
-    };
-  }, [mainRef]);
+  const { fullscreen, toggleFullscreen } = useFullscreen(mainRef);
 
   // playback state
-
-  const [fullscreen, setFullscreen] = useState(false);
 
   const cameraAspectRatio = useMemo(() => {
     if (!config) {
@@ -96,15 +82,23 @@ export default function LiveBirdseyeView() {
     return windowWidth / windowHeight;
   }, [windowWidth, windowHeight]);
 
+  const containerAspectRatio = useMemo(() => {
+    if (!containerRef.current) {
+      return windowAspectRatio;
+    }
+
+    return containerRef.current.clientWidth / containerRef.current.clientHeight;
+  }, [windowAspectRatio, containerRef]);
+
   const aspectRatio = useMemo<number>(() => {
     if (isMobile || fullscreen) {
       return cameraAspectRatio;
     } else {
-      return windowAspectRatio < cameraAspectRatio
-        ? windowAspectRatio - 0.05
-        : cameraAspectRatio - 0.03;
+      return containerAspectRatio < cameraAspectRatio
+        ? containerAspectRatio
+        : cameraAspectRatio;
     }
-  }, [cameraAspectRatio, windowAspectRatio, fullscreen]);
+  }, [cameraAspectRatio, containerAspectRatio, fullscreen]);
 
   if (!config) {
     return <ActivityIndicator />;
@@ -149,13 +143,7 @@ export default function LiveBirdseyeView() {
                 Icon={fullscreen ? FaCompress : FaExpand}
                 isActive={fullscreen}
                 title={fullscreen ? "Close" : "Fullscreen"}
-                onClick={() => {
-                  if (fullscreen) {
-                    document.exitFullscreen();
-                  } else {
-                    mainRef.current?.requestFullscreen();
-                  }
-                }}
+                onClick={toggleFullscreen}
               />
             </div>
           </TooltipProvider>
