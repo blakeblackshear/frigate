@@ -49,7 +49,7 @@ export default function JSMpegPlayer({
                 selectedContainerRef.current?.clientHeight,
               ),
             )
-          : aspectRatio > fitAspect
+          : aspectRatio >= fitAspect
             ? Math.floor(containerWidth / aspectRatio)
             : Math.floor(containerWidth / aspectRatio) / 1.5;
       const finalHeight = stretch
