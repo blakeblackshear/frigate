@@ -42,12 +42,24 @@ export default function LiveBirdseyeView() {
     return config.birdseye.width / config.birdseye.height;
   }, [config]);
 
+  const windowAspectRatio = useMemo(() => {
+    return windowWidth / windowHeight;
+  }, [windowWidth, windowHeight]);
+
+  const containerAspectRatio = useMemo(() => {
+    if (!containerRef.current) {
+      return windowAspectRatio;
+    }
+
+    return containerRef.current.clientWidth / containerRef.current.clientHeight;
+  }, [windowAspectRatio, containerRef]);
+
   const growClassName = useMemo(() => {
     if (isMobile) {
       if (isPortrait) {
         return "absolute left-2 right-2 top-[50%] -translate-y-[50%]";
       } else {
-        if (cameraAspectRatio > 16 / 9) {
+        if (cameraAspectRatio > containerAspectRatio) {
           return "absolute left-0 top-[50%] -translate-y-[50%]";
         } else {
           return "absolute top-2 bottom-2 left-[50%] -translate-x-[50%]";
@@ -56,7 +68,7 @@ export default function LiveBirdseyeView() {
     }
 
     if (fullscreen) {
-      if (cameraAspectRatio > 16 / 9) {
+      if (cameraAspectRatio > containerAspectRatio) {
         return "absolute inset-x-2 top-[50%] -translate-y-[50%]";
       } else {
         return "absolute inset-y-2 left-[50%] -translate-x-[50%]";
@@ -64,7 +76,7 @@ export default function LiveBirdseyeView() {
     } else {
       return "absolute top-0 bottom-0 left-[50%] -translate-x-[50%]";
     }
-  }, [cameraAspectRatio, fullscreen, isPortrait]);
+  }, [cameraAspectRatio, containerAspectRatio, fullscreen, isPortrait]);
 
   const preferredLiveMode = useMemo(() => {
     if (!config || !config.birdseye.restream) {
@@ -77,18 +89,6 @@ export default function LiveBirdseyeView() {
 
     return "mse";
   }, [config]);
-
-  const windowAspectRatio = useMemo(() => {
-    return windowWidth / windowHeight;
-  }, [windowWidth, windowHeight]);
-
-  const containerAspectRatio = useMemo(() => {
-    if (!containerRef.current) {
-      return windowAspectRatio;
-    }
-
-    return containerRef.current.clientWidth / containerRef.current.clientHeight;
-  }, [windowAspectRatio, containerRef]);
 
   const aspectRatio = useMemo<number>(() => {
     if (isMobile || fullscreen) {
