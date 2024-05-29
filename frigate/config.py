@@ -1171,11 +1171,19 @@ class LoggerConfig(FrigateBaseModel):
 class CameraGroupConfig(FrigateBaseModel):
     """Represents a group of cameras."""
 
-    cameras: list[str] = Field(
+    cameras: Union[str, List[str]] = Field(
         default_factory=list, title="List of cameras in this group."
     )
     icon: str = Field(default="generic", title="Icon that represents camera group.")
     order: int = Field(default=0, title="Sort order for group.")
+
+    @field_validator("cameras", mode="before")
+    @classmethod
+    def validate_cameras(cls, v):
+        if isinstance(v, str) and "," not in v:
+            return [v]
+
+        return v
 
 
 def verify_config_roles(camera_config: CameraConfig) -> None:
