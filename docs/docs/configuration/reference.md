@@ -645,8 +645,6 @@ cameras:
 
 # Optional
 ui:
-  # Optional: Set the default live mode for cameras in the UI (default: shown below)
-  live_mode: mse
   # Optional: Set a timezone to use in the UI (default: use browser local time)
   # timezone: America/Denver
   # Optional: Set the time format used.

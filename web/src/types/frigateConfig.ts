@@ -1,5 +1,4 @@
 import { IconName } from "@/components/icons/IconPicker";
-import { LivePlayerMode } from "./live";
 
 export interface UiConfig {
   timezone?: string;
@@ -7,8 +6,6 @@ export interface UiConfig {
   date_style?: "full" | "long" | "medium" | "short";
   time_style?: "full" | "long" | "medium" | "short";
   strftime_fmt?: string;
-  live_mode?: LivePlayerMode;
-  use_experimental?: boolean;
   dashboard: boolean;
   order: number;
 }
