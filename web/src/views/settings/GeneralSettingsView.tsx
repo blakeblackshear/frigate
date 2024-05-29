@@ -83,7 +83,9 @@ export default function GeneralSettingsView() {
               </div>
               <div className="my-2 text-sm text-muted-foreground">
                 <p>
-                  Automatically switch to a camera's live view when activity is detected. Disabling this option causes static camera images on the Live dashboard to only update once per minute.
+                  Automatically switch to a camera's live view when activity is
+                  detected. Disabling this option causes static camera images on
+                  the Live dashboard to only update once per minute.
                 </p>
               </div>
             </div>
