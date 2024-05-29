@@ -69,7 +69,7 @@ export default function GeneralSettingsView() {
             Live Dashboard
           </Heading>
 
-          <div className="mb-3 mt-2 space-y-6">
+          <div className="mt-2 space-y-6">
             <div className="space-y-3">
               <div className="flex flex-row items-center justify-start gap-2">
                 <Switch
@@ -90,8 +90,6 @@ export default function GeneralSettingsView() {
               </div>
             </div>
           </div>
-
-          <Separator className="my-2 flex bg-secondary" />
 
           <div className="my-3 flex w-full flex-col space-y-6">
             <div className="mt-2 space-y-6">
