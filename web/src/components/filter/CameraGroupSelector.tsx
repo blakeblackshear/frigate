@@ -555,9 +555,7 @@ export function CameraGroupEdit({
         message: "Invalid camera group name.",
       }),
 
-    cameras: z.array(z.string()).min(2, {
-      message: "You must select at least two cameras.",
-    }),
+    cameras: z.array(z.string()),
     icon: z
       .string()
       .min(1, { message: "You must select an icon." })
