@@ -249,7 +249,7 @@ export default function LivePlayer({
       </div>
 
       <div className="absolute right-2 top-2">
-        {!offline && activeMotion && (
+        {autoLive && !offline && activeMotion && (
           <MdCircle className="mr-2 size-2 animate-pulse text-danger shadow-danger drop-shadow-md" />
         )}
         {offline && (

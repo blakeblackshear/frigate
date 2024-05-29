@@ -93,7 +93,7 @@ export default function LiveDashboardView({
 
   // camera live views
 
-  const [autoLiveView] = usePersistence("autoLiveView");
+  const [autoLiveView] = usePersistence("autoLiveView", true);
   const [windowVisible, setWindowVisible] = useState(true);
   const visibilityListener = useCallback(() => {
     setWindowVisible(document.visibilityState == "visible");
@@ -263,6 +263,7 @@ export default function LiveDashboardView({
                 }
                 cameraConfig={camera}
                 preferredLiveMode={isSafari ? "webrtc" : "mse"}
+                autoLive={autoLiveView}
                 onClick={() => onSelectCamera(camera.name)}
               />
             );
