@@ -6,7 +6,7 @@ import { LivePlayerMode } from "@/types/live";
 
 export default function useCameraLiveMode(
   cameraConfig: CameraConfig,
-  preferredMode?: string,
+  preferredMode?: LivePlayerMode,
 ): LivePlayerMode | undefined {
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -23,18 +23,16 @@ export default function useCameraLiveMode(
     );
   }, [config, cameraConfig]);
   const defaultLiveMode = useMemo<LivePlayerMode | undefined>(() => {
-    if (config && cameraConfig) {
+    if (config) {
       if (restreamEnabled) {
-        return cameraConfig.ui.live_mode || config.ui.live_mode;
+        return preferredMode || "mse";
       }
 
       return "jsmpeg";
     }
 
     return undefined;
-    // config will be updated if camera config is updated
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cameraConfig, restreamEnabled]);
+  }, [config, preferredMode, restreamEnabled]);
   const [viewSource] = usePersistence<LivePlayerMode>(
     `${cameraConfig.name}-source`,
     defaultLiveMode,
