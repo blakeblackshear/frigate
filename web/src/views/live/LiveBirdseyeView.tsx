@@ -48,11 +48,21 @@ export default function LiveBirdseyeView() {
 
   const containerAspectRatio = useMemo(() => {
     if (!containerRef.current) {
-      return windowAspectRatio;
+      return windowAspectRatio ?? 0;
     }
 
     return containerRef.current.clientWidth / containerRef.current.clientHeight;
   }, [windowAspectRatio, containerRef]);
+
+  const constrainedAspectRatio = useMemo<number>(() => {
+    if (isMobile || fullscreen) {
+      return cameraAspectRatio;
+    } else {
+      return containerAspectRatio < cameraAspectRatio
+        ? containerAspectRatio
+        : cameraAspectRatio;
+    }
+  }, [cameraAspectRatio, containerAspectRatio, fullscreen]);
 
   const growClassName = useMemo(() => {
     if (isMobile) {
@@ -89,16 +99,6 @@ export default function LiveBirdseyeView() {
 
     return "mse";
   }, [config]);
-
-  const aspectRatio = useMemo<number>(() => {
-    if (isMobile || fullscreen) {
-      return cameraAspectRatio;
-    } else {
-      return containerAspectRatio < cameraAspectRatio
-        ? containerAspectRatio
-        : cameraAspectRatio;
-    }
-  }, [cameraAspectRatio, containerAspectRatio, fullscreen]);
 
   if (!config) {
     return <ActivityIndicator />;
@@ -163,7 +163,7 @@ export default function LiveBirdseyeView() {
             <div
               className={growClassName}
               style={{
-                aspectRatio: aspectRatio,
+                aspectRatio: constrainedAspectRatio,
               }}
             >
               <BirdseyeLivePlayer
