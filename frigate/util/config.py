@@ -202,10 +202,10 @@ class StreamInfoRetriever:
     def __init__(self) -> None:
         self.stream_cache: dict[str, tuple[int, int]] = {}
 
-    def get_resolution(self, path: str) -> str:
+    def get_stream_info(self, path: str) -> str:
         if path in self.stream_cache:
             return self.stream_cache[path]
 
-        info = asyncio.run(get_video_properties(input.path))
+        info = asyncio.run(get_video_properties(path))
         self.stream_cache[path] = info
         return info
