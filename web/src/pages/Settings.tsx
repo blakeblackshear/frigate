@@ -29,11 +29,11 @@ import { ZoneMaskFilterButton } from "@/components/filter/ZoneMaskFilter";
 import { PolygonType } from "@/types/canvas";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import scrollIntoView from "scroll-into-view-if-needed";
-import Authentication from "@/components/settings/Authentication";
 import GeneralSettingsView from "@/views/settings/GeneralSettingsVIew";
 import ObjectSettingsView from "@/views/settings/ObjectSettingsView";
 import MotionTunerView from "@/views/settings/MotionTunerView";
 import MasksAndZonesView from "@/views/settings/MasksAndZonesView";
+import AuthenticationView from "@/views/settings/AuthenticationView";
 
 export default function Settings() {
   const settingsViews = [
@@ -173,7 +173,7 @@ export default function Settings() {
             setUnsavedChanges={setUnsavedChanges}
           />
         )}
-        {page == "users" && <Authentication />}
+        {page == "users" && <AuthenticationView />}
       </div>
       {confirmationDialogOpen && (
         <AlertDialog
