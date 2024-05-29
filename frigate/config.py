@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 import json
 import logging
 import os
@@ -46,9 +45,9 @@ from frigate.util.builtin import (
     get_ffmpeg_arg_list,
     load_config_with_no_duplicates,
 )
-from frigate.util.config import get_relative_coordinates
+from frigate.util.config import StreamInfoRetriever, get_relative_coordinates
 from frigate.util.image import create_mask
-from frigate.util.services import auto_detect_hwaccel, get_video_properties
+from frigate.util.services import auto_detect_hwaccel
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +71,9 @@ DEFAULT_LISTEN_AUDIO = ["bark", "fire_alarm", "scream", "speech", "yell"]
 DEFAULT_DETECTORS = {"cpu": {"type": "cpu"}}
 DEFAULT_DETECT_DIMENSIONS = {"width": 1280, "height": 720}
 DEFAULT_TIME_LAPSE_FFMPEG_ARGS = "-vf setpts=0.04*PTS -r 30"
+
+# stream info handler
+stream_info_retriever = StreamInfoRetriever()
 
 
 class FrigateBaseModel(BaseModel):
@@ -1416,7 +1418,7 @@ class FrigateConfig(FrigateBaseModel):
                 if need_detect_dimensions or need_record_fourcc:
                     stream_info = {"width": 0, "height": 0, "fourcc": None}
                     try:
-                        stream_info = asyncio.run(get_video_properties(input.path))
+                        stream_info = stream_info_retriever.get_stream_info(input.path)
                     except Exception:
                         logger.warn(
                             f"Error detecting stream parameters automatically for {input.path} Applying default values."
