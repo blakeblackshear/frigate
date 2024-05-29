@@ -20,6 +20,7 @@ import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { cn } from "@/lib/utils";
 import { MdVerticalAlignBottom } from "react-icons/md";
 import { parseLogLines } from "@/utils/logUtil";
+import useKeyboardListener from "@/hooks/use-keyboard-listener";
 
 type LogRange = { start: number; end: number };
 
@@ -225,6 +226,40 @@ function Logs() {
   // log selection
 
   const [selectedLog, setSelectedLog] = useState<LogLine>();
+
+  // interaction
+
+  useKeyboardListener(
+    ["PageDown", "PageUp", "ArrowDown", "ArrowUp"],
+    (key, down, _) => {
+      if (!down) {
+        return;
+      }
+
+      switch (key) {
+        case "PageDown":
+          contentRef.current?.scrollBy({
+            top: 480,
+          });
+          break;
+        case "PageUp":
+          contentRef.current?.scrollBy({
+            top: -480,
+          });
+          break;
+        case "ArrowDown":
+          contentRef.current?.scrollBy({
+            top: 48,
+          });
+          break;
+        case "ArrowUp":
+          contentRef.current?.scrollBy({
+            top: -48,
+          });
+          break;
+      }
+    },
+  );
 
   return (
     <div className="flex size-full flex-col p-2">
