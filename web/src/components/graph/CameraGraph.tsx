@@ -1,51 +1,48 @@
 import { useTheme } from "@/context/theme-provider";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { Threshold } from "@/types/graph";
 import { useCallback, useEffect, useMemo } from "react";
 import Chart from "react-apexcharts";
 import { isMobileOnly } from "react-device-detect";
+import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
 
-type ThresholdBarGraphProps = {
+const GRAPH_COLORS = ["#5C7CFA", "#ED5CFA", "#FAD75C"];
+
+type CameraLineGraphProps = {
   graphId: string;
-  name: string;
   unit: string;
-  threshold: Threshold;
+  dataLabels: string[];
   updateTimes: number[];
   data: ApexAxisChartSeries;
 };
-export function ThresholdBarGraph({
+export function CameraLineGraph({
   graphId,
-  name,
   unit,
-  threshold,
+  dataLabels,
   updateTimes,
   data,
-}: ThresholdBarGraphProps) {
+}: CameraLineGraphProps) {
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
 
-  const lastValue = useMemo<number>(
-    // @ts-expect-error y is valid
-    () => data[0].data[data[0].data.length - 1]?.y ?? 0,
-    [data],
-  );
+  const lastValues = useMemo<number[] | undefined>(() => {
+    if (!dataLabels || !data || data.length == 0) {
+      return undefined;
+    }
+
+    return dataLabels.map(
+      (_, labelIdx) =>
+        // @ts-expect-error y is valid
+        data[labelIdx].data[data[labelIdx].data.length - 1]?.y ?? 0,
+    ) as number[];
+  }, [data, dataLabels]);
 
   const { theme, systemTheme } = useTheme();
 
   const formatTime = useCallback(
     (val: unknown) => {
-      const dateIndex = Math.round(val as number);
-
-      let timeOffset = 0;
-      if (dateIndex < 0) {
-        timeOffset = 5000 * Math.abs(dateIndex);
-      }
-
-      const date = new Date(
-        updateTimes[Math.max(1, dateIndex) - 1] * 1000 - timeOffset,
-      );
+      const date = new Date(updateTimes[Math.round(val as number)] * 1000);
       return date.toLocaleTimeString([], {
         hour12: config?.ui.time_format != "24hour",
         hour: "2-digit",
@@ -69,17 +66,7 @@ export function ThresholdBarGraph({
           enabled: false,
         },
       },
-      colors: [
-        ({ value }: { value: number }) => {
-          if (value >= threshold.error) {
-            return "#FA5252";
-          } else if (value >= threshold.warning) {
-            return "#FF9966";
-          } else {
-            return "#217930";
-          }
-        },
-      ],
+      colors: GRAPH_COLORS,
       grid: {
         show: false,
       },
@@ -89,23 +76,11 @@ export function ThresholdBarGraph({
       dataLabels: {
         enabled: false,
       },
-      plotOptions: {
-        bar: {
-          distributed: true,
-        },
-      },
-      states: {
-        active: {
-          filter: {
-            type: "none",
-          },
-        },
+      stroke: {
+        width: 1,
       },
       tooltip: {
         theme: systemTheme || theme,
-        y: {
-          formatter: (val) => `${val}${unit}`,
-        },
       },
       markers: {
         size: 0,
@@ -132,38 +107,32 @@ export function ThresholdBarGraph({
         min: 0,
       },
     } as ApexCharts.ApexOptions;
-  }, [graphId, threshold, unit, systemTheme, theme, formatTime]);
+  }, [graphId, systemTheme, theme, formatTime]);
 
   useEffect(() => {
     ApexCharts.exec(graphId, "updateOptions", options, true, true);
   }, [graphId, options]);
 
-  const chartData = useMemo(() => {
-    if (data.length > 0 && data[0].data.length >= 30) {
-      return data;
-    }
-
-    const copiedData = [...data];
-    const fakeData = [];
-    for (let i = data.length; i < 30; i++) {
-      fakeData.push({ x: i - 30, y: 0 });
-    }
-
-    // @ts-expect-error data types are not obvious
-    copiedData[0].data = [...fakeData, ...data[0].data];
-    return copiedData;
-  }, [data]);
-
   return (
     <div className="flex w-full flex-col">
-      <div className="flex items-center gap-1">
-        <div className="text-xs text-muted-foreground">{name}</div>
-        <div className="text-xs text-primary">
-          {lastValue}
-          {unit}
+      {lastValues && (
+        <div className="flex items-center gap-2.5">
+          {dataLabels.map((label, labelIdx) => (
+            <div key={label} className="flex items-center gap-1">
+              <MdCircle
+                className="size-2"
+                style={{ color: GRAPH_COLORS[labelIdx] }}
+              />
+              <div className="text-xs text-muted-foreground">{label}</div>
+              <div className="text-xs text-primary">
+                {lastValues[labelIdx]}
+                {unit}
+              </div>
+            </div>
+          ))}
         </div>
-      </div>
-      <Chart type="bar" options={options} series={chartData} height="120" />
+      )}
+      <Chart type="line" options={options} series={data} height="120" />
     </div>
   );
 }

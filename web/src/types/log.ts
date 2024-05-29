@@ -11,3 +11,6 @@ export type LogLine = {
   section: string;
   content: string;
 };
+
+export const logTypes = ["frigate", "go2rtc", "nginx"] as const;
+export type LogType = (typeof logTypes)[number];

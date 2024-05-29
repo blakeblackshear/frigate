@@ -1,5 +1,5 @@
 import { useFrigateStats } from "@/api/ws";
-import { CameraLineGraph } from "@/components/graph/SystemGraph";
+import { CameraLineGraph } from "@/components/graph/CameraGraph";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { FrigateStats } from "@/types/stats";
@@ -43,7 +43,7 @@ export default function CameraMetrics({
     }
 
     if (updatedStats.service.last_updated > lastUpdated) {
-      setStatsHistory([...statsHistory, updatedStats]);
+      setStatsHistory([...statsHistory.slice(1), updatedStats]);
       setLastUpdated(Date.now() / 1000);
     }
   }, [initialStats, updatedStats, statsHistory, lastUpdated, setLastUpdated]);

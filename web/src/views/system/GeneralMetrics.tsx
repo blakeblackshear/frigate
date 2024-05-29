@@ -12,8 +12,8 @@ import {
 } from "@/types/graph";
 import { Button } from "@/components/ui/button";
 import VainfoDialog from "@/components/overlay/VainfoDialog";
-import { ThresholdBarGraph } from "@/components/graph/SystemGraph";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ThresholdBarGraph } from "@/components/graph/SystemGraph";
 
 type GeneralMetricsProps = {
   lastUpdated: number;
@@ -57,7 +57,7 @@ export default function GeneralMetrics({
     }
 
     if (updatedStats.service.last_updated > lastUpdated) {
-      setStatsHistory([...statsHistory, updatedStats]);
+      setStatsHistory([...statsHistory.slice(1), updatedStats]);
       setLastUpdated(Date.now() / 1000);
     }
   }, [initialStats, updatedStats, statsHistory, lastUpdated, setLastUpdated]);

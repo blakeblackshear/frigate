@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { LogData, LogLine, LogSeverity } from "@/types/log";
+import { LogData, LogLine, LogSeverity, LogType, logTypes } from "@/types/log";
 import copy from "copy-to-clipboard";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
@@ -10,24 +10,19 @@ import { LogLevelFilterButton } from "@/components/filter/LogLevelFilter";
 import { FaCopy } from "react-icons/fa6";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
-import { isDesktop } from "react-device-detect";
+import {
+  isDesktop,
+  isMobile,
+  isMobileOnly,
+  isTablet,
+} from "react-device-detect";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { cn } from "@/lib/utils";
 import { MdVerticalAlignBottom } from "react-icons/md";
-
-const logTypes = ["frigate", "go2rtc", "nginx"] as const;
-type LogType = (typeof logTypes)[number];
+import { parseLogLines } from "@/utils/logUtil";
+import useKeyboardListener from "@/hooks/use-keyboard-listener";
 
 type LogRange = { start: number; end: number };
-
-const frigateDateStamp = /\[[\d\s-:]*]/;
-const frigateSeverity = /(DEBUG)|(INFO)|(WARNING)|(ERROR)/;
-const frigateSection = /[\w.]*/;
-
-const goSeverity = /(DEB )|(INF )|(WRN )|(ERR )/;
-const goSection = /\[[\w]*]/;
-
-const ngSeverity = /(GET)|(POST)|(PUT)|(PATCH)|(DELETE)/;
 
 function Logs() {
   const [logService, setLogService] = useState<LogType>("frigate");
@@ -38,24 +33,38 @@ function Logs() {
 
   // log data handling
 
+  const logPageSize = useMemo(() => {
+    if (isMobileOnly) {
+      return 15;
+    }
+
+    if (isTablet) {
+      return 25;
+    }
+
+    return 40;
+  }, []);
+
   const [logRange, setLogRange] = useState<LogRange>({ start: 0, end: 0 });
   const [logs, setLogs] = useState<string[]>([]);
+  const [logLines, setLogLines] = useState<LogLine[]>([]);
 
   useEffect(() => {
     axios
-      .get(`logs/${logService}?start=-100`)
+      .get(`logs/${logService}?start=-${logPageSize}`)
       .then((resp) => {
         if (resp.status == 200) {
           const data = resp.data as LogData;
           setLogRange({
-            start: Math.max(0, data.totalLines - 100),
+            start: Math.max(0, data.totalLines - logPageSize),
             end: data.totalLines,
           });
           setLogs(data.lines);
+          setLogLines(parseLogLines(logService, data.lines));
         }
       })
       .catch(() => {});
-  }, [logService]);
+  }, [logPageSize, logService]);
 
   useEffect(() => {
     if (!logs || logs.length == 0) {
@@ -75,6 +84,10 @@ function Logs() {
                 end: data.totalLines,
               });
               setLogs([...logs, ...data.lines]);
+              setLogLines([
+                ...logLines,
+                ...parseLogLines(logService, data.lines),
+              ]);
             }
           }
         })
@@ -86,136 +99,11 @@ function Logs() {
         clearTimeout(id);
       }
     };
-  }, [logs, logService, logRange]);
+    // we need to listen on the current range of visible items
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [logLines, logService, logRange]);
 
   // convert to log data
-
-  const logLines = useMemo<LogLine[]>(() => {
-    if (!logs) {
-      return [];
-    }
-
-    if (logService == "frigate") {
-      return logs
-        .map((line) => {
-          const match = frigateDateStamp.exec(line);
-
-          if (!match) {
-            const infoIndex = line.indexOf("[INFO]");
-
-            if (infoIndex != -1) {
-              return {
-                dateStamp: line.substring(0, 19),
-                severity: "info",
-                section: "startup",
-                content: line.substring(infoIndex + 6).trim(),
-              };
-            }
-
-            return {
-              dateStamp: line.substring(0, 19),
-              severity: "unknown",
-              section: "unknown",
-              content: line.substring(30).trim(),
-            };
-          }
-
-          const sectionMatch = frigateSection.exec(
-            line.substring(match.index + match[0].length).trim(),
-          );
-
-          if (!sectionMatch) {
-            return null;
-          }
-
-          return {
-            dateStamp: match.toString().slice(1, -1),
-            severity: frigateSeverity
-              .exec(line)
-              ?.at(0)
-              ?.toString()
-              ?.toLowerCase() as LogSeverity,
-            section: sectionMatch.toString(),
-            content: line
-              .substring(line.indexOf(":", match.index + match[0].length) + 2)
-              .trim(),
-          };
-        })
-        .filter((value) => value != null) as LogLine[];
-    } else if (logService == "go2rtc") {
-      return logs
-        .map((line) => {
-          if (line.length == 0) {
-            return null;
-          }
-
-          const severity = goSeverity.exec(line);
-
-          let section =
-            goSection.exec(line)?.toString()?.slice(1, -1) ?? "startup";
-
-          if (frigateSeverity.exec(section)) {
-            section = "startup";
-          }
-
-          let contentStart;
-
-          if (section == "startup") {
-            if (severity) {
-              contentStart = severity.index + severity[0].length;
-            } else {
-              contentStart = line.lastIndexOf("]") + 1;
-            }
-          } else {
-            contentStart = line.indexOf(section) + section.length + 2;
-          }
-
-          let severityCat: LogSeverity;
-          switch (severity?.at(0)?.toString().trim()) {
-            case "INF":
-              severityCat = "info";
-              break;
-            case "WRN":
-              severityCat = "warning";
-              break;
-            case "ERR":
-              severityCat = "error";
-              break;
-            case "DBG":
-            case "TRC":
-              severityCat = "debug";
-              break;
-            default:
-              severityCat = "info";
-          }
-
-          return {
-            dateStamp: line.substring(0, 19),
-            severity: severityCat,
-            section: section,
-            content: line.substring(contentStart).trim(),
-          };
-        })
-        .filter((value) => value != null) as LogLine[];
-    } else if (logService == "nginx") {
-      return logs
-        .map((line) => {
-          if (line.length == 0) {
-            return null;
-          }
-
-          return {
-            dateStamp: line.substring(0, 19),
-            severity: "info",
-            section: ngSeverity.exec(line)?.at(0)?.toString() ?? "META",
-            content: line.substring(line.indexOf(" ", 20)).trim(),
-          };
-        })
-        .filter((value) => value != null) as LogLine[];
-    } else {
-      return [];
-    }
-  }, [logs, logService]);
 
   const handleCopyLogs = useCallback(() => {
     if (logs) {
@@ -261,31 +149,38 @@ function Logs() {
       }
 
       try {
-        startObserver.current = new IntersectionObserver((entries) => {
-          if (entries[0].isIntersecting && logRange.start > 0) {
-            const start = Math.max(0, logRange.start - 100);
+        startObserver.current = new IntersectionObserver(
+          (entries) => {
+            if (entries[0].isIntersecting && logRange.start > 0) {
+              const start = Math.max(0, logRange.start - logPageSize);
 
-            axios
-              .get(`logs/${logService}?start=${start}&end=${logRange.start}`)
-              .then((resp) => {
-                if (resp.status == 200) {
-                  const data = resp.data as LogData;
+              axios
+                .get(`logs/${logService}?start=${start}&end=${logRange.start}`)
+                .then((resp) => {
+                  if (resp.status == 200) {
+                    const data = resp.data as LogData;
 
-                  if (data.lines.length > 0) {
-                    setLogRange({
-                      start: start,
-                      end: logRange.end,
-                    });
-                    setLogs([...data.lines, ...logs]);
+                    if (data.lines.length > 0) {
+                      setLogRange({
+                        start: start,
+                        end: logRange.end,
+                      });
+                      setLogs([...data.lines, ...logs]);
+                      setLogLines([
+                        ...parseLogLines(logService, data.lines),
+                        ...logLines,
+                      ]);
+                    }
                   }
-                }
-              })
-              .catch(() => {});
-            contentRef.current?.scrollBy({
-              top: 10,
-            });
-          }
-        });
+                })
+                .catch(() => {});
+              contentRef.current?.scrollBy({
+                top: 10,
+              });
+            }
+          },
+          { rootMargin: `${10 * (isMobile ? 64 : 48)}px 0px 0px 0px` },
+        );
         if (node) startObserver.current.observe(node);
       } catch (e) {
         // no op
@@ -332,6 +227,40 @@ function Logs() {
 
   const [selectedLog, setSelectedLog] = useState<LogLine>();
 
+  // interaction
+
+  useKeyboardListener(
+    ["PageDown", "PageUp", "ArrowDown", "ArrowUp"],
+    (key, down, _) => {
+      if (!down) {
+        return;
+      }
+
+      switch (key) {
+        case "PageDown":
+          contentRef.current?.scrollBy({
+            top: 480,
+          });
+          break;
+        case "PageUp":
+          contentRef.current?.scrollBy({
+            top: -480,
+          });
+          break;
+        case "ArrowDown":
+          contentRef.current?.scrollBy({
+            top: 48,
+          });
+          break;
+        case "ArrowUp":
+          contentRef.current?.scrollBy({
+            top: -48,
+          });
+          break;
+      }
+    },
+  );
+
   return (
     <div className="flex size-full flex-col p-2">
       <Toaster position="top-center" closeButton={true} />
@@ -346,6 +275,7 @@ function Logs() {
           onValueChange={(value: LogType) => {
             if (value) {
               setLogs([]);
+              setLogLines([]);
               setFilterSeverity(undefined);
               setLogService(value);
             }
