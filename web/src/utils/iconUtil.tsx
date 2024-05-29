@@ -12,7 +12,7 @@ import {
   FaFire,
   FaUps,
 } from "react-icons/fa";
-import { GiHummingbird } from "react-icons/gi";
+import { GiDeer, GiHummingbird } from "react-icons/gi";
 import { LuBox, LuLassoSelect } from "react-icons/lu";
 import * as LuIcons from "react-icons/lu";
 import { MdRecordVoiceOver } from "react-icons/md";
@@ -38,6 +38,8 @@ export function getIconForLabel(label: string, className?: string) {
       return <FaCarSide key={label} className={className} />;
     case "cat":
       return <FaCat key={label} className={className} />;
+    case "deer":
+      return <GiDeer key={label} className={className} />;
     case "animal":
     case "bark":
     case "dog":
