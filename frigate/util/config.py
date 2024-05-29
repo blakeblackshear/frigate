@@ -197,8 +197,8 @@ def get_relative_coordinates(
 
     return mask
 
-class StreamInfoRetriever():
 
+class StreamInfoRetriever:
     def __init__(self) -> None:
         self.stream_cache: dict[str, tuple[int, int]] = {}
 
@@ -209,5 +209,3 @@ class StreamInfoRetriever():
         info = asyncio.run(get_video_properties(input.path))
         self.stream_cache[path] = info
         return info
-
-
