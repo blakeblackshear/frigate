@@ -189,13 +189,16 @@ export default function ObjectMaskEditPane({
 
       axios
         .put(`config/set?${queryString}`, {
-          requires_restart: 1,
+          requires_restart: 0,
         })
         .then((res) => {
           if (res.status === 200) {
-            toast.success(`${polygon.name || "Object Mask"} has been saved.`, {
-              position: "top-center",
-            });
+            toast.success(
+              `${polygon.name || "Object Mask"} has been saved. Restart Frigate to apply changes.`,
+              {
+                position: "top-center",
+              },
+            );
             updateConfig();
           } else {
             toast.error(`Failed to save config changes: ${res.statusText}`, {

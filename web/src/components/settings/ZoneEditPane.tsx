@@ -197,7 +197,7 @@ export default function ZoneEditPane({
           await axios.put(
             `config/set?cameras.${polygon.camera}.zones.${polygon.name}${renameAlertQueries}${renameDetectionQueries}`,
             {
-              requires_restart: 1,
+              requires_restart: 0,
             },
           );
 
@@ -257,13 +257,16 @@ export default function ZoneEditPane({
       axios
         .put(
           `config/set?cameras.${polygon?.camera}.zones.${zoneName}.coordinates=${coordinates}${inertiaQuery}${loiteringTimeQuery}${objectQueries}${alertQueries}${detectionQueries}`,
-          { requires_restart: 1 },
+          { requires_restart: 0 },
         )
         .then((res) => {
           if (res.status === 200) {
-            toast.success(`Zone (${zoneName}) has been saved.`, {
-              position: "top-center",
-            });
+            toast.success(
+              `Zone (${zoneName}) has been saved. Restart Frigate to apply changes.`,
+              {
+                position: "top-center",
+              },
+            );
             updateConfig();
           } else {
             toast.error(`Failed to save config changes: ${res.statusText}`, {

@@ -267,14 +267,27 @@ export default function DraggableGridLayout({
   const [{ width: containerWidth, height: containerHeight }] =
     useResizeObserver(gridContainerRef);
 
+  const scrollBarWidth = useMemo(() => {
+    if (containerWidth && containerHeight && containerRef.current) {
+      return (
+        containerRef.current.offsetWidth - containerRef.current.clientWidth
+      );
+    }
+    return 0;
+  }, [containerRef, containerHeight, containerWidth]);
+
+  const availableWidth = useMemo(
+    () => (scrollBarWidth ? containerWidth + scrollBarWidth : containerWidth),
+    [containerWidth, scrollBarWidth],
+  );
+
   const hasScrollbar = useMemo(() => {
-    return (
-      containerHeight &&
-      containerRef.current &&
-      containerRef.current.offsetHeight <
-        (gridContainerRef.current?.scrollHeight ?? 0)
-    );
-  }, [containerRef, gridContainerRef, containerHeight]);
+    if (containerHeight && containerRef.current) {
+      return (
+        containerRef.current.offsetHeight < containerRef.current.scrollHeight
+      );
+    }
+  }, [containerRef, containerHeight]);
 
   // fullscreen state
 
@@ -295,13 +308,13 @@ export default function DraggableGridLayout({
     // subtract container margin, 1 camera takes up at least 4 rows
     // account for additional margin on bottom of each row
     return (
-      ((containerWidth ?? window.innerWidth) - 2 * marginValue) /
+      ((availableWidth ?? window.innerWidth) - 2 * marginValue) /
         12 /
         aspectRatio -
       marginValue +
       marginValue / 4
     );
-  }, [containerWidth, marginValue]);
+  }, [availableWidth, marginValue]);
 
   const handleResize: ItemCallback = (
     _: Layout[],
@@ -312,7 +325,7 @@ export default function DraggableGridLayout({
     const heightDiff = layoutItem.h - oldLayoutItem.h;
     const widthDiff = layoutItem.w - oldLayoutItem.w;
     const changeCoef = oldLayoutItem.w / oldLayoutItem.h;
-    if (Math.abs(heightDiff) < Math.abs(widthDiff)) {
+    if (Math.abs(heightDiff) < Math.abs(widthDiff) || layoutItem.w == 12) {
       layoutItem.h = layoutItem.w / changeCoef;
       placeholder.h = layoutItem.w / changeCoef;
     } else {
@@ -545,6 +558,7 @@ const BirdseyeLivePlayerGridItem = React.forwardRef<
           birdseyeConfig={birdseyeConfig}
           liveMode={liveMode}
           onClick={onClick}
+          containerRef={ref as React.RefObject<HTMLDivElement>}
         />
         {children}
       </div>
@@ -603,6 +617,7 @@ const LivePlayerGridItem = React.forwardRef<
           cameraConfig={cameraConfig}
           preferredLiveMode={preferredLiveMode}
           onClick={onClick}
+          containerRef={ref as React.RefObject<HTMLDivElement>}
         />
         {children}
       </div>
