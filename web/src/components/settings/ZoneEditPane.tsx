@@ -197,7 +197,7 @@ export default function ZoneEditPane({
           await axios.put(
             `config/set?cameras.${polygon.camera}.zones.${polygon.name}${renameAlertQueries}${renameDetectionQueries}`,
             {
-              requires_restart: 0,
+              requires_restart: 1,
             },
           );
 
@@ -257,7 +257,7 @@ export default function ZoneEditPane({
       axios
         .put(
           `config/set?cameras.${polygon?.camera}.zones.${zoneName}.coordinates=${coordinates}${inertiaQuery}${loiteringTimeQuery}${objectQueries}${alertQueries}${detectionQueries}`,
-          { requires_restart: 0 },
+          { requires_restart: 1 },
         )
         .then((res) => {
           if (res.status === 200) {

@@ -29,7 +29,7 @@ import { ZoneMaskFilterButton } from "@/components/filter/ZoneMaskFilter";
 import { PolygonType } from "@/types/canvas";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import scrollIntoView from "scroll-into-view-if-needed";
-import GeneralSettingsView from "@/views/settings/GeneralSettingsVIew";
+import GeneralSettingsView from "@/views/settings/GeneralSettingsView";
 import ObjectSettingsView from "@/views/settings/ObjectSettingsView";
 import MotionTunerView from "@/views/settings/MotionTunerView";
 import MasksAndZonesView from "@/views/settings/MasksAndZonesView";
