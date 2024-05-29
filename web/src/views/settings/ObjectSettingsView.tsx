@@ -5,19 +5,19 @@ import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import { Toaster } from "@/components/ui/sonner";
 import { Label } from "@/components/ui/label";
 import useSWR from "swr";
-import Heading from "../ui/heading";
-import { Switch } from "../ui/switch";
+import Heading from "@/components/ui/heading";
+import { Switch } from "@/components/ui/switch";
 import { usePersistence } from "@/hooks/use-persistence";
-import { Skeleton } from "../ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useCameraActivity } from "@/hooks/use-camera-activity";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ObjectType } from "@/types/ws";
 import useDeepMemo from "@/hooks/use-deep-memo";
-import { Card } from "../ui/card";
+import { Card } from "@/components/ui/card";
 import { getIconForLabel } from "@/utils/iconUtil";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
 
-type ObjectSettingsProps = {
+type ObjectSettingsViewProps = {
   selectedCamera?: string;
 };
 
@@ -25,9 +25,9 @@ type Options = { [key: string]: boolean };
 
 const emptyObject = Object.freeze({});
 
-export default function ObjectSettings({
+export default function ObjectSettingsView({
   selectedCamera,
-}: ObjectSettingsProps) {
+}: ObjectSettingsViewProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const DEBUG_OPTIONS = [

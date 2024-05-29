@@ -4,8 +4,8 @@ import { Switch } from "@/components/ui/switch";
 import { useCallback, useEffect } from "react";
 import { Toaster } from "sonner";
 import { toast } from "sonner";
-import { Separator } from "../ui/separator";
-import { Button } from "../ui/button";
+import { Separator } from "../../components/ui/separator";
+import { Button } from "../../components/ui/button";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { del as delData } from "idb-keyval";
@@ -17,11 +17,11 @@ import {
   SelectGroup,
   SelectItem,
   SelectTrigger,
-} from "../ui/select";
+} from "../../components/ui/select";
 
 const PLAYBACK_RATE_DEFAULT = isSafari ? [0.5, 1, 2] : [0.5, 1, 2, 4, 8, 16];
 
-export default function General() {
+export default function GeneralSettingsView() {
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const clearStoredLayouts = useCallback(() => {

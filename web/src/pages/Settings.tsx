@@ -17,8 +17,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
-import MotionTuner from "@/components/settings/MotionTuner";
-import MasksAndZones from "@/components/settings/MasksAndZones";
 import { Button } from "@/components/ui/button";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useOptimisticState from "@/hooks/use-optimistic-state";
@@ -26,14 +24,16 @@ import { isMobile } from "react-device-detect";
 import { FaVideo } from "react-icons/fa";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
-import General from "@/components/settings/General";
 import FilterSwitch from "@/components/filter/FilterSwitch";
 import { ZoneMaskFilterButton } from "@/components/filter/ZoneMaskFilter";
 import { PolygonType } from "@/types/canvas";
-import ObjectSettings from "@/components/settings/ObjectSettings";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import scrollIntoView from "scroll-into-view-if-needed";
 import Authentication from "@/components/settings/Authentication";
+import GeneralSettingsView from "@/views/settings/GeneralSettingsVIew";
+import ObjectSettingsView from "@/views/settings/ObjectSettingsView";
+import MotionTunerView from "@/views/settings/MotionTunerView";
+import MasksAndZonesView from "@/views/settings/MasksAndZonesView";
 
 export default function Settings() {
   const settingsViews = [
@@ -156,17 +156,19 @@ export default function Settings() {
         )}
       </div>
       <div className="mt-2 flex h-full w-full flex-col items-start md:h-dvh md:pb-24">
-        {page == "general" && <General />}
-        {page == "debug" && <ObjectSettings selectedCamera={selectedCamera} />}
+        {page == "general" && <GeneralSettingsView />}
+        {page == "debug" && (
+          <ObjectSettingsView selectedCamera={selectedCamera} />
+        )}
         {page == "masks / zones" && (
-          <MasksAndZones
+          <MasksAndZonesView
             selectedCamera={selectedCamera}
             selectedZoneMask={filterZoneMask}
             setUnsavedChanges={setUnsavedChanges}
           />
         )}
         {page == "motion tuner" && (
-          <MotionTuner
+          <MotionTunerView
             selectedCamera={selectedCamera}
             setUnsavedChanges={setUnsavedChanges}
           />
