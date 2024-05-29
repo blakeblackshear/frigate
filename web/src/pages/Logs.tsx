@@ -35,7 +35,7 @@ function Logs() {
 
   const logPageSize = useMemo(() => {
     if (isMobileOnly) {
-      return 10;
+      return 15;
     }
 
     if (isTablet) {
