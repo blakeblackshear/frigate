@@ -88,7 +88,6 @@ def migrate_014(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
             del new_config["record"]
 
         if new_config.get("ui"):
-
             if new_config["ui"].get("use_experimental"):
                 del new_config["ui"]["experimental"]
 

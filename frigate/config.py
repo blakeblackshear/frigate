@@ -100,9 +100,6 @@ class DateTimeStyleEnum(str, Enum):
 
 
 class UIConfig(FrigateBaseModel):
-    live_mode: LiveModeEnum = Field(
-        default=LiveModeEnum.mse, title="Default Live Mode."
-    )
     timezone: Optional[str] = Field(default=None, title="Override UI timezone.")
     time_format: TimeFormatEnum = Field(
         default=TimeFormatEnum.browser, title="Override UI time format."
