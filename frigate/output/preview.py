@@ -180,6 +180,7 @@ class PreviewRecorder:
         # end segment at end of hour
         self.segment_end = (
             (datetime.datetime.now() + datetime.timedelta(hours=1))
+            .astimezone(datetime.timezone.utc)
             .replace(minute=0, second=0, microsecond=0)
             .timestamp()
         )
@@ -192,6 +193,7 @@ class PreviewRecorder:
         # check for existing items in cache
         start_ts = (
             datetime.datetime.now()
+            .astimezone(datetime.timezone.utc)
             .replace(minute=0, second=0, microsecond=0)
             .timestamp()
         )
@@ -300,6 +302,7 @@ class PreviewRecorder:
             # reset frame cache
             self.segment_end = (
                 (datetime.datetime.now() + datetime.timedelta(hours=1))
+                .astimezone(datetime.timezone.utc)
                 .replace(minute=0, second=0, microsecond=0)
                 .timestamp()
             )
