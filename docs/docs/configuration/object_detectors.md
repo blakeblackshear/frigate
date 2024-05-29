@@ -350,6 +350,12 @@ model: # required
   input_tensor: nhwc
 ```
 
+:::note
+
+Some models use a different labelmap than Frigate's default labelmap `/labelmap.txt` that is also shown [in the docs](/configuration/objects) (e.g. `deci-fp16-yolonas_s` uses the labelmap `/labelmap-coco.txt`). If you use one of the models provided by Frigate (e.g. `model: path: deci-fp16-yolonas_s`) **and** don't set the `model: labelmap_path:` option in your `config.yml`, Frigate will automatically load the correct labelmap. Even if you use one of the models provided Frigate, you can provide your own `my_labelmap.txt` and set `model: labelmap_path:` to use a custom labelmap. If you use your own model, you are responsible for providing a correct labelmap and setting the option `model: labelmap_path:` accordingly.
+
+:::
+
 ### Choosing a model
 
 :::warning

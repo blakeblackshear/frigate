@@ -133,6 +133,12 @@ class ModelConfig(BaseModel):
         for key, val in enumerate(enabled_labels):
             self._colormap[val] = tuple(int(round(255 * c)) for c in cmap(key)[:3])
 
+    def load_labelmap(self, path):
+        self._merged_labelmap = {
+            **load_labels(path),
+            **self.labelmap,
+        }
+
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
 

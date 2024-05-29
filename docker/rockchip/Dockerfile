@@ -18,6 +18,8 @@ RUN --mount=type=bind,from=rk-wheels,source=/rk-wheels,target=/deps/rk-wheels \
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
 
+COPY docker/rockchip/labelmap-coco.txt /
+
 ADD https://github.com/MarcA711/rknn-toolkit2/releases/download/v2.0.0/librknnrt.so /usr/lib/
 
 RUN rm -rf /usr/lib/btbn-ffmpeg/bin/ffmpeg

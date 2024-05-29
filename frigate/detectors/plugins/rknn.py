@@ -40,13 +40,15 @@ class Rknn(DetectionApi):
 
         if model_props["preset"]:
             config.model.model_type = model_props["model_type"]
+            if config.model.labelmap_path == None:
+                config.model.load_labelmap("/labelmap-coco.txt")
 
         if model_props["model_type"] == ModelTypeEnum.yolonas:
-            logger.info("""
-                        You are using yolo-nas with weights from DeciAI.
-                        These weights are subject to their license and can't be used commercially.
-                        For more information, see: https://docs.deci.ai/super-gradients/latest/LICENSE.YOLONAS.html
-                        """)
+            logger.info(
+                "You are using yolo-nas with weights from DeciAI. "
+                "These weights are subject to their license and can't be used commercially. "
+                "For more information, see: https://docs.deci.ai/super-gradients/latest/LICENSE.YOLONAS.html"
+            )
 
         from rknnlite.api import RKNNLite
 
