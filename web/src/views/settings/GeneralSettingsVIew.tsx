@@ -66,7 +66,7 @@ export default function GeneralSettingsView() {
           <Separator className="my-2 flex bg-secondary" />
 
           <Heading as="h4" className="my-2">
-            Dashboard
+            Live Dashboard
           </Heading>
 
           <div className="mt-2 space-y-6">
@@ -83,7 +83,7 @@ export default function GeneralSettingsView() {
               </div>
               <div className="my-2 text-sm text-muted-foreground">
                 <p>
-                  Automatically switch to live view when motion is detected.
+                  Automatically switch to a camera's live view when activity is detected. Disabling this option causes static camera images on the Live dashboard to only update once per minute.
                 </p>
               </div>
             </div>
