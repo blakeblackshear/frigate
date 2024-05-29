@@ -588,7 +588,7 @@ function DetectionReview({
                   <Skeleton key={idx} className="aspect-video size-full" />
                 ))}
           {!loading &&
-            (currentItems?.length ?? 0) > 0 &&
+            (currentItems?.filter((seg) => seg.end_time)?.length ?? 0) > 0 &&
             (itemsToReview ?? 0) > 0 && (
               <div className="col-span-full flex items-center justify-center">
                 <Button
