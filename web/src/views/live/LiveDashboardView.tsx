@@ -230,7 +230,7 @@ export default function LiveDashboardView({
       {!cameraGroup || cameraGroup == "default" || isMobileOnly ? (
         <div
           className={cn(
-            "mt-2 grid gap-2 px-2 md:gap-4",
+            "mt-2 grid grid-cols-1 gap-2 px-2 md:gap-4",
             mobileLayout == "grid" &&
               "grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4",
             isMobile && "px-0",
