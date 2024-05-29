@@ -9,7 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { PolygonCanvas } from "./PolygonCanvas";
+import { PolygonCanvas } from "@/components/settings/PolygonCanvas";
 import { Polygon, PolygonType } from "@/types/canvas";
 import { interpolatePoints, parseCoordinates } from "@/utils/canvasUtil";
 import { Skeleton } from "@/components/ui/skeleton";

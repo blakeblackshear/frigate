@@ -49,6 +49,9 @@ export default function GeneralSettingsView() {
     document.title = "General Settings - Frigate";
   }, []);
 
+  // settings
+
+  const [autoLive, setAutoLive] = usePersistence("autoLiveView", true);
   const [playbackRate, setPlaybackRate] = usePersistence("playbackRate", 1);
 
   return (
@@ -60,7 +63,33 @@ export default function GeneralSettingsView() {
             General Settings
           </Heading>
 
-          <div className="flex w-full flex-col space-y-6">
+          <Separator className="my-2 flex bg-secondary" />
+
+          <Heading as="h4" className="my-2">
+            Dashboard
+          </Heading>
+
+          <div className="mt-2 space-y-6">
+            <div className="space-y-3">
+              <div className="flex flex-row items-center justify-start gap-2">
+                <Switch
+                  id="auto-live"
+                  checked={autoLive}
+                  onCheckedChange={setAutoLive}
+                />
+                <Label className="cursor-pointer" htmlFor="auto-live">
+                  Automatic Live View
+                </Label>
+              </div>
+              <div className="my-2 text-sm text-muted-foreground">
+                <p>
+                  Automatically switch to live view when motion is detected.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="my-3 flex w-full flex-col space-y-6">
             <div className="mt-2 space-y-6">
               <div className="space-y-0.5">
                 <div className="text-md">Stored Layouts</div>
@@ -72,11 +101,15 @@ export default function GeneralSettingsView() {
                   </p>
                 </div>
               </div>
-              <div className="flex flex-row items-center justify-start gap-2">
-                <Button onClick={clearStoredLayouts}>Clear All Layouts</Button>
-              </div>
+              <Button onClick={clearStoredLayouts}>Clear All Layouts</Button>
             </div>
+
             <Separator className="my-2 flex bg-secondary" />
+
+            <Heading as="h4" className="my-2">
+              Recordings Viewer
+            </Heading>
+
             <div className="mt-2 space-y-6">
               <div className="space-y-0.5">
                 <div className="text-md">Default Playback Rate</div>
@@ -107,26 +140,6 @@ export default function GeneralSettingsView() {
               </SelectContent>
             </Select>
             <Separator className="my-2 flex bg-secondary" />
-            <div className="mt-2 space-y-6">
-              <div className="space-y-0.5">
-                <div className="text-md">Low Data Mode</div>
-                <div className="my-2 text-sm text-muted-foreground">
-                  <p>
-                    Not yet implemented. <em>Default: disabled</em>
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-row items-center justify-start gap-2">
-                <Switch
-                  id="lowdata"
-                  checked={false}
-                  onCheckedChange={() => {}}
-                />
-                <Label htmlFor="lowdata">
-                  Low Data Mode (this device only)
-                </Label>
-              </div>
-            </div>
           </div>
         </div>
       </div>
