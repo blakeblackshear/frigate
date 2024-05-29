@@ -12,8 +12,8 @@ import {
 } from "@/types/graph";
 import { Button } from "@/components/ui/button";
 import VainfoDialog from "@/components/overlay/VainfoDialog";
-import { ThresholdBarGraph } from "@/components/graph/SystemGraph";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ThresholdBarGraph } from "@/components/graph/SystemGraph";
 
 type GeneralMetricsProps = {
   lastUpdated: number;

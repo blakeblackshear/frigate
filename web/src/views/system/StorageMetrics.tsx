@@ -1,4 +1,4 @@
-import { StorageGraph } from "@/components/graph/SystemGraph";
+import { StorageGraph } from "@/components/graph/StorageGraph";
 import { FrigateStats } from "@/types/stats";
 import { useMemo } from "react";
 import useSWR from "swr";

@@ -1,5 +1,5 @@
 import { useFrigateStats } from "@/api/ws";
-import { CameraLineGraph } from "@/components/graph/SystemGraph";
+import { CameraLineGraph } from "@/components/graph/CameraGraph";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { FrigateStats } from "@/types/stats";
