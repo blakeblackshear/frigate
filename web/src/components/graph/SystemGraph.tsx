@@ -36,7 +36,16 @@ export function ThresholdBarGraph({
 
   const formatTime = useCallback(
     (val: unknown) => {
-      const date = new Date(updateTimes[Math.round(val as number) - 1] * 1000);
+      const dateIndex = Math.round(val as number);
+
+      let timeOffset = 0;
+      if (dateIndex < 0) {
+        timeOffset = 5000 * Math.abs(dateIndex);
+      }
+
+      const date = new Date(
+        updateTimes[Math.max(1, dateIndex) - 1] * 1000 - timeOffset,
+      );
       return date.toLocaleTimeString([], {
         hour12: config?.ui.time_format != "24hour",
         hour: "2-digit",
@@ -129,6 +138,22 @@ export function ThresholdBarGraph({
     ApexCharts.exec(graphId, "updateOptions", options, true, true);
   }, [graphId, options]);
 
+  const chartData = useMemo(() => {
+    if (data.length > 0 && data[0].data.length >= 30) {
+      return data;
+    }
+
+    const copiedData = [...data];
+    const fakeData = [];
+    for (let i = data.length; i < 30; i++) {
+      fakeData.push({ x: i - 30, y: 0 });
+    }
+
+    // @ts-expect-error data types are not obvious
+    copiedData[0].data = [...fakeData, ...data[0].data];
+    return copiedData;
+  }, [data]);
+
   return (
     <div className="flex w-full flex-col">
       <div className="flex items-center gap-1">
@@ -138,7 +163,7 @@ export function ThresholdBarGraph({
           {unit}
         </div>
       </div>
-      <Chart type="bar" options={options} series={data} height="120" />
+      <Chart type="bar" options={options} series={chartData} height="120" />
     </div>
   );
 }

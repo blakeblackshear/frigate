@@ -43,7 +43,7 @@ export default function CameraMetrics({
     }
 
     if (updatedStats.service.last_updated > lastUpdated) {
-      setStatsHistory([...statsHistory, updatedStats]);
+      setStatsHistory([...statsHistory.slice(1), updatedStats]);
       setLastUpdated(Date.now() / 1000);
     }
   }, [initialStats, updatedStats, statsHistory, lastUpdated, setLastUpdated]);
