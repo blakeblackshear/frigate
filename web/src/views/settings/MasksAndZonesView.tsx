@@ -9,10 +9,10 @@ import {
   useRef,
   useState,
 } from "react";
-import { PolygonCanvas } from "./PolygonCanvas";
+import { PolygonCanvas } from "@/components/settings/PolygonCanvas";
 import { Polygon, PolygonType } from "@/types/canvas";
 import { interpolatePoints, parseCoordinates } from "@/utils/canvasUtil";
-import { Skeleton } from "../ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { LuExternalLink, LuPlus } from "react-icons/lu";
 import {
@@ -22,29 +22,33 @@ import {
 } from "@/components/ui/hover-card";
 import copy from "copy-to-clipboard";
 import { toast } from "sonner";
-import { Toaster } from "../ui/sonner";
-import { Button } from "../ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import Heading from "../ui/heading";
-import ZoneEditPane from "./ZoneEditPane";
-import MotionMaskEditPane from "./MotionMaskEditPane";
-import ObjectMaskEditPane from "./ObjectMaskEditPane";
-import PolygonItem from "./PolygonItem";
+import { Toaster } from "@/components/ui/sonner";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import Heading from "@/components/ui/heading";
+import ZoneEditPane from "@/components/settings/ZoneEditPane";
+import MotionMaskEditPane from "@/components/settings/MotionMaskEditPane";
+import ObjectMaskEditPane from "@/components/settings/ObjectMaskEditPane";
+import PolygonItem from "@/components/settings/PolygonItem";
 import { Link } from "react-router-dom";
 import { isDesktop } from "react-device-detect";
 import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 
-type MasksAndZoneProps = {
+type MasksAndZoneViewProps = {
   selectedCamera: string;
   selectedZoneMask?: PolygonType[];
   setUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export default function MasksAndZones({
+export default function MasksAndZonesView({
   selectedCamera,
   selectedZoneMask,
   setUnsavedChanges,
-}: MasksAndZoneProps) {
+}: MasksAndZoneViewProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
   const [allPolygons, setAllPolygons] = useState<Polygon[]>([]);
   const [editingPolygons, setEditingPolygons] = useState<Polygon[]>([]);

@@ -3,20 +3,20 @@ import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Toaster } from "@/components/ui/sonner";
 import useSWR from "swr";
-import Heading from "../ui/heading";
+import Heading from "@/components/ui/heading";
 import { User } from "@/types/user";
-import { Button } from "../ui/button";
-import SetPasswordDialog from "../overlay/SetPasswordDialog";
+import { Button } from "@/components/ui/button";
+import SetPasswordDialog from "@/components/overlay/SetPasswordDialog";
 import axios from "axios";
-import CreateUserDialog from "../overlay/CreateUserDialog";
+import CreateUserDialog from "@/components/overlay/CreateUserDialog";
 import { toast } from "sonner";
-import DeleteUserDialog from "../overlay/DeleteUserDialog";
-import { Card } from "../ui/card";
+import DeleteUserDialog from "@/components/overlay/DeleteUserDialog";
+import { Card } from "@/components/ui/card";
 import { HiTrash } from "react-icons/hi";
 import { FaUserEdit } from "react-icons/fa";
 import { LuPlus } from "react-icons/lu";
 
-export default function Authentication() {
+export default function AuthenticationView() {
   const { data: config } = useSWR<FrigateConfig>("config");
   const { data: users, mutate: mutateUsers } = useSWR<User[]>("users");
 

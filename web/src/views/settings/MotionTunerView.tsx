@@ -12,17 +12,17 @@ import {
   useMotionContourArea,
   useMotionThreshold,
 } from "@/api/ws";
-import { Skeleton } from "../ui/skeleton";
-import { Button } from "../ui/button";
-import { Switch } from "../ui/switch";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
-import { Separator } from "../ui/separator";
+import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";
 import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 
-type MotionTunerProps = {
+type MotionTunerViewProps = {
   selectedCamera: string;
   setUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
 };
@@ -33,10 +33,10 @@ type MotionSettings = {
   improve_contrast?: boolean;
 };
 
-export default function MotionTuner({
+export default function MotionTunerView({
   selectedCamera,
   setUnsavedChanges,
-}: MotionTunerProps) {
+}: MotionTunerViewProps) {
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
   const [changedValue, setChangedValue] = useState(false);
@@ -113,7 +113,7 @@ export default function MotionTuner({
     axios
       .put(
         `config/set?cameras.${selectedCamera}.motion.threshold=${motionSettings.threshold}&cameras.${selectedCamera}.motion.contour_area=${motionSettings.contour_area}&cameras.${selectedCamera}.motion.improve_contrast=${motionSettings.improve_contrast}`,
-        { requires_restart: 0 },
+        { requires_restart: 1 },
       )
       .then((res) => {
         if (res.status === 200) {

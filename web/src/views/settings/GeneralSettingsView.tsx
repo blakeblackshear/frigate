@@ -4,8 +4,8 @@ import { Switch } from "@/components/ui/switch";
 import { useCallback, useEffect } from "react";
 import { Toaster } from "sonner";
 import { toast } from "sonner";
-import { Separator } from "../ui/separator";
-import { Button } from "../ui/button";
+import { Separator } from "../../components/ui/separator";
+import { Button } from "../../components/ui/button";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { del as delData } from "idb-keyval";
@@ -17,11 +17,11 @@ import {
   SelectGroup,
   SelectItem,
   SelectTrigger,
-} from "../ui/select";
+} from "../../components/ui/select";
 
 const PLAYBACK_RATE_DEFAULT = isSafari ? [0.5, 1, 2] : [0.5, 1, 2, 4, 8, 16];
 
-export default function General() {
+export default function GeneralSettingsView() {
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const clearStoredLayouts = useCallback(() => {
@@ -49,6 +49,9 @@ export default function General() {
     document.title = "General Settings - Frigate";
   }, []);
 
+  // settings
+
+  const [autoLive, setAutoLive] = usePersistence("autoLiveView", true);
   const [playbackRate, setPlaybackRate] = usePersistence("playbackRate", 1);
 
   return (
@@ -60,7 +63,35 @@ export default function General() {
             General Settings
           </Heading>
 
-          <div className="flex w-full flex-col space-y-6">
+          <Separator className="my-2 flex bg-secondary" />
+
+          <Heading as="h4" className="my-2">
+            Live Dashboard
+          </Heading>
+
+          <div className="mt-2 space-y-6">
+            <div className="space-y-3">
+              <div className="flex flex-row items-center justify-start gap-2">
+                <Switch
+                  id="auto-live"
+                  checked={autoLive}
+                  onCheckedChange={setAutoLive}
+                />
+                <Label className="cursor-pointer" htmlFor="auto-live">
+                  Automatic Live View
+                </Label>
+              </div>
+              <div className="my-2 text-sm text-muted-foreground">
+                <p>
+                  Automatically switch to a camera's live view when activity is
+                  detected. Disabling this option causes static camera images on
+                  the Live dashboard to only update once per minute.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="my-3 flex w-full flex-col space-y-6">
             <div className="mt-2 space-y-6">
               <div className="space-y-0.5">
                 <div className="text-md">Stored Layouts</div>
@@ -72,11 +103,15 @@ export default function General() {
                   </p>
                 </div>
               </div>
-              <div className="flex flex-row items-center justify-start gap-2">
-                <Button onClick={clearStoredLayouts}>Clear All Layouts</Button>
-              </div>
+              <Button onClick={clearStoredLayouts}>Clear All Layouts</Button>
             </div>
+
             <Separator className="my-2 flex bg-secondary" />
+
+            <Heading as="h4" className="my-2">
+              Recordings Viewer
+            </Heading>
+
             <div className="mt-2 space-y-6">
               <div className="space-y-0.5">
                 <div className="text-md">Default Playback Rate</div>
@@ -107,26 +142,6 @@ export default function General() {
               </SelectContent>
             </Select>
             <Separator className="my-2 flex bg-secondary" />
-            <div className="mt-2 space-y-6">
-              <div className="space-y-0.5">
-                <div className="text-md">Low Data Mode</div>
-                <div className="my-2 text-sm text-muted-foreground">
-                  <p>
-                    Not yet implemented. <em>Default: disabled</em>
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-row items-center justify-start gap-2">
-                <Switch
-                  id="lowdata"
-                  checked={false}
-                  onCheckedChange={() => {}}
-                />
-                <Label htmlFor="lowdata">
-                  Low Data Mode (this device only)
-                </Label>
-              </div>
-            </div>
           </div>
         </div>
       </div>

@@ -189,7 +189,7 @@ export default function ObjectMaskEditPane({
 
       axios
         .put(`config/set?${queryString}`, {
-          requires_restart: 0,
+          requires_restart: 1,
         })
         .then((res) => {
           if (res.status === 200) {

@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 
 type LivePlayerProps = {
   cameraRef?: (ref: HTMLDivElement | null) => void;
+  containerRef?: React.MutableRefObject<HTMLDivElement | null>;
   className?: string;
   cameraConfig: CameraConfig;
   preferredLiveMode?: LivePlayerMode;
@@ -26,13 +27,14 @@ type LivePlayerProps = {
   micEnabled?: boolean; // only webrtc supports mic
   iOSCompatFullScreen?: boolean;
   pip?: boolean;
+  autoLive?: boolean;
   onClick?: () => void;
   setFullResolution?: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
-  containerRef?: React.MutableRefObject<HTMLDivElement | null>;
 };
 
 export default function LivePlayer({
   cameraRef = undefined,
+  containerRef,
   className,
   cameraConfig,
   preferredLiveMode,
@@ -42,9 +44,9 @@ export default function LivePlayer({
   micEnabled = false,
   iOSCompatFullScreen = false,
   pip,
+  autoLive = true,
   onClick,
   setFullResolution,
-  containerRef,
 }: LivePlayerProps) {
   // camera activity
 
@@ -64,6 +66,10 @@ export default function LivePlayer({
 
   const [liveReady, setLiveReady] = useState(false);
   useEffect(() => {
+    if (!autoLive) {
+      return;
+    }
+
     if (!liveReady) {
       if (cameraActive && liveMode == "jsmpeg") {
         setLiveReady(true);
@@ -77,7 +83,7 @@ export default function LivePlayer({
     }
     // live mode won't change
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cameraActive, liveReady]);
+  }, [autoLive, cameraActive, liveReady]);
 
   // camera still state
 
@@ -91,18 +97,31 @@ export default function LivePlayer({
     }
 
     if (activeMotion || activeTracking) {
-      return 200;
+      if (autoLive) {
+        return 200;
+      } else {
+        return 59000;
+      }
     }
 
     return 30000;
-  }, [liveReady, activeMotion, activeTracking, offline, windowVisible]);
+  }, [
+    autoLive,
+    liveReady,
+    activeMotion,
+    activeTracking,
+    offline,
+    windowVisible,
+  ]);
 
   if (!cameraConfig) {
     return <ActivityIndicator />;
   }
 
   let player;
-  if (liveMode == "webrtc") {
+  if (!autoLive) {
+    player = null;
+  } else if (liveMode == "webrtc") {
     player = (
       <WebRtcPlayer
         className={`size-full rounded-lg md:rounded-2xl ${liveReady ? "" : "hidden"}`}
@@ -230,7 +249,7 @@ export default function LivePlayer({
       </div>
 
       <div className="absolute right-2 top-2">
-        {!offline && activeMotion && (
+        {autoLive && !offline && activeMotion && (
           <MdCircle className="mr-2 size-2 animate-pulse text-danger shadow-danger drop-shadow-md" />
         )}
         {offline && (
