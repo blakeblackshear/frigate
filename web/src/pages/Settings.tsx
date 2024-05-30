@@ -284,6 +284,7 @@ function CameraSelectButton({
 
   return (
     <DropdownMenu
+      modal={false}
       open={open}
       onOpenChange={(open: boolean) => {
         if (!open) {

@@ -468,7 +468,7 @@ export function CameraGroupRow({
 
         {isMobile && (
           <>
-            <DropdownMenu>
+            <DropdownMenu modal={false}>
               <DropdownMenuTrigger>
                 <HiOutlineDotsVertical className="size-5" />
               </DropdownMenuTrigger>

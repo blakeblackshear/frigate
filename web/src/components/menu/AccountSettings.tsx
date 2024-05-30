@@ -34,7 +34,7 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
   const MenuItem = isDesktop ? DropdownMenuItem : DialogClose;
 
   return (
-    <Container>
+    <Container modal={!isDesktop}>
       <Trigger>
         <Tooltip>
           <TooltipTrigger asChild>

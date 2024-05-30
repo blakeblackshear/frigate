@@ -230,6 +230,7 @@ export default function VideoControls({
       )}
       {features.playbackRate && (
         <DropdownMenu
+          modal={false}
           onOpenChange={(open) => {
             if (setControlsOpen) {
               setControlsOpen(open);

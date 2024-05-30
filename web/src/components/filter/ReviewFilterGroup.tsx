@@ -365,6 +365,7 @@ export function CamerasFilterButton({
 
   return (
     <DropdownMenu
+      modal={false}
       open={open}
       onOpenChange={(open) => {
         if (!open) {
