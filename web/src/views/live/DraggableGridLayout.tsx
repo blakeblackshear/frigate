@@ -337,7 +337,10 @@ export default function DraggableGridLayout({
   return (
     <>
       <Toaster position="top-center" closeButton={true} />
-      {!isGridLayoutLoaded || !currentGridLayout ? (
+      {!isGridLayoutLoaded ||
+      !currentGridLayout ||
+      !isEqual(cameras, currentCameras) ||
+      includeBirdseye !== currentIncludeBirdseye ? (
         <div className="mt-2 grid grid-cols-2 gap-2 px-2 md:gap-4 xl:grid-cols-3 3xl:grid-cols-4">
           {includeBirdseye && birdseyeConfig?.enabled && (
             <Skeleton className="size-full rounded-lg md:rounded-2xl" />
