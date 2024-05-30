@@ -594,6 +594,7 @@ function PtzControlPanel({
               return (
                 <DropdownMenuItem
                   key={preset}
+                  className="cursor-pointer"
                   onSelect={() => sendPtz(`preset_${preset}`)}
                 >
                   {preset}
