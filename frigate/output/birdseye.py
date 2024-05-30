@@ -134,6 +134,8 @@ class FFMpegConverter(threading.Thread):
 
         ffmpeg_cmd = [
             "ffmpeg",
+            "-threads",
+            "1",
             "-f",
             "rawvideo",
             "-pix_fmt",
@@ -142,6 +144,8 @@ class FFMpegConverter(threading.Thread):
             f"{in_width}x{in_height}",
             "-i",
             "pipe:",
+            "-threads",
+            "1",
             "-f",
             "mpegts",
             "-s",

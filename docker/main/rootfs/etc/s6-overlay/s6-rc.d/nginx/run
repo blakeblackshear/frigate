@@ -8,6 +8,19 @@ set -o errexit -o nounset -o pipefail
 
 echo "[INFO] Starting NGINX..."
 
+function set_worker_processes() {
+    # Capture number of assigned CPUs to calculate worker processes
+    local proc_count
+
+    if proc_count=$(nproc --all) && [[ $proc_count -gt 4 ]]; then
+        proc_count=4;
+    fi
+
+    sed -i "s/worker_processes auto;/worker_processes ${proc_count};/" /usr/local/nginx/conf/nginx.conf
+}
+
+set_worker_processes
+
 # Replace the bash process with the NGINX process, redirecting stderr to stdout
 exec 2>&1
 exec nginx

@@ -139,6 +139,11 @@ export default function VideoControls({
   const onKeyboardShortcut = useCallback(
     (key: string, down: boolean, repeat: boolean) => {
       switch (key) {
+        case "ArrowDown":
+          if (down) {
+            onSeek(-1);
+          }
+          break;
         case "ArrowLeft":
           if (down) {
             onSeek(-10);
@@ -147,6 +152,11 @@ export default function VideoControls({
         case "ArrowRight":
           if (down) {
             onSeek(10);
+          }
+          break;
+        case "ArrowUp":
+          if (down) {
+            onSeek(1);
           }
           break;
         case "f":
@@ -171,7 +181,9 @@ export default function VideoControls({
     [video, isPlaying, fullscreen, setFullscreen, onSeek],
   );
   useKeyboardListener(
-    hotKeys ? ["ArrowLeft", "ArrowRight", "f", "m", " "] : [],
+    hotKeys
+      ? ["ArrowDown", "ArrowLeft", "ArrowRight", "ArrowUp", "f", "m", " "]
+      : [],
     onKeyboardShortcut,
   );
 
