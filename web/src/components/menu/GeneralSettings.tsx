@@ -114,7 +114,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
 
   return (
     <>
-      <Container>
+      <Container modal={!isDesktop}>
         <Trigger>
           <Tooltip>
             <TooltipTrigger asChild>
