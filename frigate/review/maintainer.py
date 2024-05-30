@@ -356,7 +356,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                 if (
                     not severity
                     and (
-                        not camera_config.review.detections.labels
+                        camera_config.review.detections.labels is None
                         or object["label"] in (camera_config.review.detections.labels)
                     )
                     and (
@@ -467,7 +467,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                             current_segment.audio.add(audio)
                             current_segment.severity = SeverityEnum.alert
                         elif (
-                            not camera_config.review.detections.labels
+                            camera_config.review.detections.labels is None
                             or audio in camera_config.review.detections.labels
                         ):
                             current_segment.audio.add(audio)
@@ -510,7 +510,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                             detections.add(audio)
                             severity = SeverityEnum.alert
                         elif (
-                            not camera_config.review.detections.labels
+                            camera_config.review.detections.labels is None
                             or audio in camera_config.review.detections.labels
                         ):
                             detections.add(audio)
@@ -571,7 +571,7 @@ def get_active_objects(
         and (
             o["label"] in camera_config.review.alerts.labels
             or (
-                not camera_config.review.detections.labels
+                camera_config.review.detections.labels is None
                 or o["label"] in camera_config.review.detections.labels
             )
         )  # object must be in the alerts or detections label list
