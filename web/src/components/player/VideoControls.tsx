@@ -331,11 +331,11 @@ function FrigatePlusUploadButton({
           }}
         />
       </AlertDialogTrigger>
-      <AlertDialogContent className="md:max-w-[80%]">
+      <AlertDialogContent className="md:max-w-2xl lg:max-w-3xl xl:max-w-4xl">
         <AlertDialogHeader>
           <AlertDialogTitle>Submit this frame to Frigate+?</AlertDialogTitle>
         </AlertDialogHeader>
-        <img className="w-full object-contain" src={videoImg} />
+        <img className="aspect-video w-full object-contain" src={videoImg} />
         <AlertDialogFooter>
           <AlertDialogAction className="bg-selected" onClick={onUploadFrame}>
             Submit
