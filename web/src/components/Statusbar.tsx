@@ -97,7 +97,7 @@ export default function Statusbar() {
                         : "text-danger"
                   }`}
                 />
-                {gpuTitle} {gpu}%
+                {gpuTitle} {isNaN(gpu) ? 'unknown' : `${gpu}%`}
               </div>
             </Link>
           );
