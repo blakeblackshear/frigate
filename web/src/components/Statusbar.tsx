@@ -81,6 +81,10 @@ export default function Statusbar() {
 
           const gpu = parseInt(stats.gpu);
 
+          if (isNaN(gpu)) {
+            return;
+          }
+
           return (
             <Link key={gpuTitle} to="/system#general">
               {" "}
