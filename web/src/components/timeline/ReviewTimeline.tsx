@@ -258,9 +258,9 @@ export function ReviewTimeline({
       if (isDragging && isMobile && draggableElementType === draggableElement) {
         return "text-lg";
       } else if (dense) {
-        return "text-[8px] md:text-xs";
+        return "text-[8px] md:text-[11px]";
       } else {
-        return "text-xs";
+        return "text-[11px]";
       }
     },
     [dense, isDragging, draggableElementType],
@@ -350,7 +350,7 @@ export function ReviewTimeline({
                       dense
                         ? "w-12 md:w-20"
                         : segmentDuration < 60
-                          ? "w-24"
+                          ? "w-[80px]"
                           : "w-20"
                     } h-5 ${isDraggingHandlebar && isMobile ? "fixed left-1/2 top-[18px] z-20 h-[30px] w-32 -translate-x-1/2 transform bg-destructive/80" : "static"} flex items-center justify-center`}
                   >
@@ -388,7 +388,7 @@ export function ReviewTimeline({
                         dense
                           ? "w-12 md:w-20"
                           : segmentDuration < 60
-                            ? "w-24"
+                            ? "w-[80px]"
                             : "w-20"
                       } h-5 ${isDraggingExportEnd && isMobile ? "fixed left-1/2 top-[18px] z-20 mt-0 h-[30px] w-32 -translate-x-1/2 transform rounded-full bg-selected/80" : "static rounded-tl-lg rounded-tr-lg"} flex items-center justify-center`}
                     >
@@ -430,7 +430,7 @@ export function ReviewTimeline({
                         dense
                           ? "w-12 md:w-20"
                           : segmentDuration < 60
-                            ? "w-24"
+                            ? "w-[80px]"
                             : "w-20"
                       } h-5 ${isDraggingExportStart && isMobile ? "fixed left-1/2 top-[4px] z-20 mt-0 h-[30px] w-32 -translate-x-1/2 transform rounded-full bg-selected/80" : "static rounded-bl-lg rounded-br-lg"} flex items-center justify-center`}
                     >
