@@ -1,4 +1,7 @@
 import { RefObject, useCallback, useEffect, useState } from "react";
+import nosleep from "nosleep.js";
+
+const NoSleep = new nosleep();
 
 function getFullscreenElement(): HTMLElement | null {
   return (
@@ -96,9 +99,11 @@ export function useFullscreen<T extends HTMLElement = HTMLElement>(
   const toggleFullscreen = useCallback(async () => {
     try {
       if (!getFullscreenElement()) {
+        NoSleep.enable();
         await enterFullScreen(elementRef.current!);
       } else {
         await exitFullscreen();
+        NoSleep.disable();
       }
       setError(null);
     } catch (err) {
