@@ -50,11 +50,13 @@ def get_ffmpeg_command(ffmpeg: FfmpegConfig) -> list[str]:
         or get_ffmpeg_arg_list(ffmpeg.input_args)
     )
     return (
-        ["ffmpeg", "-vn"]
+        ["ffmpeg", "-vn", "-threads", "1"]
         + input_args
         + ["-i"]
         + [ffmpeg_input.path]
         + [
+            "-threads",
+            "1",
             "-f",
             f"{AUDIO_FORMAT}",
             "-ar",
