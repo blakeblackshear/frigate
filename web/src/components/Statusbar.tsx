@@ -81,6 +81,10 @@ export default function Statusbar() {
 
           const gpu = parseInt(stats.gpu);
 
+          if (isNaN(gpu)) {
+            return;
+          }
+
           return (
             <Link key={gpuTitle} to="/system#general">
               {" "}
@@ -97,7 +101,7 @@ export default function Statusbar() {
                         : "text-danger"
                   }`}
                 />
-                {gpuTitle} {isNaN(gpu) ? 'unknown' : `${gpu}%`}
+                {gpuTitle} {gpu}%
               </div>
             </Link>
           );
