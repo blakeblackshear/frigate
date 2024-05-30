@@ -104,14 +104,18 @@ export function AnimatedEventCard({ event }: AnimatedEventCardProps) {
               />
             ) : (
               <video
-                src={`${baseUrl}api/review/${event.id}/preview?format=ts`}
                 preload="auto"
                 autoPlay
                 playsInline
                 muted
                 disableRemotePlayback
                 loop
-              />
+              >
+                <source
+                  src={`${baseUrl}api/review/${event.id}/preview?format=mp4`}
+                  type="video/mp4"
+                />
+              </video>
             )}
           </div>
           <div className="absolute inset-x-0 bottom-0 h-6 rounded bg-gradient-to-t from-slate-900/50 to-transparent">

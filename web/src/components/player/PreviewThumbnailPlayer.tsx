@@ -672,7 +672,9 @@ export function InProgressPreview({
         setReviewed(review.id);
       }
 
-      setKey(key + 1);
+      if (previewFrames[key + 1]) {
+        setKey(key + 1);
+      }
     }, MIN_LOAD_TIMEOUT_MS);
 
     // we know that these deps are correct
