@@ -30,3 +30,5 @@ export type LiveStreamMetadata = {
   producers: LiveProducerMetadata[];
   consumers: LiveConsumerMetadata[];
 };
+
+export type LivePlayerError = "stalled" | "startup";

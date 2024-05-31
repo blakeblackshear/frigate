@@ -1,4 +1,5 @@
 import { baseUrl } from "@/api/baseUrl";
+import { LivePlayerError } from "@/types/live";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type WebRtcPlayerProps = {
@@ -10,6 +11,7 @@ type WebRtcPlayerProps = {
   iOSCompatFullScreen?: boolean; // ios doesn't support fullscreen divs so we must support the video element
   pip?: boolean;
   onPlaying?: () => void;
+  onError?: (error: LivePlayerError) => void;
 };
 
 export default function WebRtcPlayer({
@@ -21,6 +23,7 @@ export default function WebRtcPlayer({
   iOSCompatFullScreen = false,
   pip = false,
   onPlaying,
+  onError,
 }: WebRtcPlayerProps) {
   // metadata
 
@@ -32,6 +35,7 @@ export default function WebRtcPlayer({
 
   const pcRef = useRef<RTCPeerConnection | undefined>();
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [receivedData, setReceivedData] = useState(false);
 
   const PeerConnection = useCallback(
     async (media: string) => {
@@ -164,6 +168,8 @@ export default function WebRtcPlayer({
         pcRef.current.close();
         pcRef.current = undefined;
       }
+
+      setReceivedData(false);
     };
   }, [
     camera,
@@ -197,7 +203,17 @@ export default function WebRtcPlayer({
       autoPlay
       playsInline
       muted={!audioEnabled}
-      onLoadedData={onPlaying}
+      onLoadedData={() => {
+        setReceivedData(true);
+        onPlaying?.();
+      }}
+      onStalled={() => {
+        if (receivedData) {
+          onError?.("stalled");
+        } else {
+          onError?.("startup");
+        }
+      }}
       onClick={
         iOSCompatFullScreen
           ? () => setiOSCompatControls(!iOSCompatControls)

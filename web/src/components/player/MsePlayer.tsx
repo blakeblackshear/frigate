@@ -1,5 +1,5 @@
 import { baseUrl } from "@/api/baseUrl";
-import { VideoResolutionType } from "@/types/live";
+import { LivePlayerError, VideoResolutionType } from "@/types/live";
 import {
   SetStateAction,
   useCallback,
@@ -17,6 +17,7 @@ type MSEPlayerProps = {
   pip?: boolean;
   onPlaying?: () => void;
   setFullResolution?: React.Dispatch<SetStateAction<VideoResolutionType>>;
+  onError?: (error: LivePlayerError) => void;
 };
 
 function MSEPlayer({
@@ -27,6 +28,7 @@ function MSEPlayer({
   pip = false,
   onPlaying,
   setFullResolution,
+  onError,
 }: MSEPlayerProps) {
   const RECONNECT_TIMEOUT: number = 30000;
 
@@ -45,6 +47,7 @@ function MSEPlayer({
 
   const [wsState, setWsState] = useState<number>(WebSocket.CLOSED);
   const [connectTS, setConnectTS] = useState<number>(0);
+  const [receivedData, setReceivedData] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -100,6 +103,7 @@ function MSEPlayer({
   const onConnect = useCallback(() => {
     if (!videoRef.current?.isConnected || !wsURL || wsRef.current) return false;
 
+    setReceivedData(false);
     setWsState(WebSocket.CONNECTING);
 
     setConnectTS(Date.now());
@@ -306,9 +310,21 @@ function MSEPlayer({
       onLoadedData={() => {
         handleLoadedMetadata?.();
         onPlaying?.();
+        setReceivedData(true);
       }}
       muted={!audioEnabled}
+      onStalled={() => {
+        if (receivedData) {
+          onError?.("stalled");
+        } else {
+          onError?.("startup");
+        }
+      }}
       onError={() => {
+        if (!receivedData) {
+          onError?.("startup");
+        }
+
         if (wsRef.current) {
           wsRef.current.close();
           wsRef.current = null;
