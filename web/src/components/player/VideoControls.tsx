@@ -68,7 +68,7 @@ type VideoControlsProps = {
   onSeek: (diff: number) => void;
   onSetPlaybackRate: (rate: number) => void;
   onUploadFrame?: () => void;
-  setFullscreen?: (full: boolean) => void;
+  toggleFullscreen?: () => void;
 };
 export default function VideoControls({
   className,
@@ -88,7 +88,7 @@ export default function VideoControls({
   onSeek,
   onSetPlaybackRate,
   onUploadFrame,
-  setFullscreen,
+  toggleFullscreen,
 }: VideoControlsProps) {
   // layout
 
@@ -160,8 +160,8 @@ export default function VideoControls({
           }
           break;
         case "f":
-          if (setFullscreen && down && !repeat) {
-            setFullscreen(!fullscreen);
+          if (toggleFullscreen && down && !repeat) {
+            toggleFullscreen();
           }
           break;
         case "m":
@@ -178,7 +178,7 @@ export default function VideoControls({
     },
     // only update when preview only changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [video, isPlaying, fullscreen, setFullscreen, onSeek],
+    [video, isPlaying, fullscreen, toggleFullscreen, onSeek],
   );
   useKeyboardListener(
     hotKeys
@@ -287,11 +287,8 @@ export default function VideoControls({
           onUploadFrame={onUploadFrame}
         />
       )}
-      {features.fullscreen && setFullscreen && (
-        <div
-          className="cursor-pointer"
-          onClick={() => setFullscreen(!fullscreen)}
-        >
+      {features.fullscreen && toggleFullscreen && (
+        <div className="cursor-pointer" onClick={toggleFullscreen}>
           {fullscreen ? <FaCompress /> : <FaExpand />}
         </div>
       )}

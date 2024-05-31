@@ -45,6 +45,7 @@ import { VideoResolutionType } from "@/types/live";
 import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { cn } from "@/lib/utils";
+import { useFullscreen } from "@/hooks/use-fullscreen";
 
 const SEGMENT_DURATION = 30;
 
@@ -227,32 +228,7 @@ export function RecordingView({
 
   // fullscreen
 
-  const [fullscreen, setFullscreen] = useState(false);
-
-  const onToggleFullscreen = useCallback(
-    (full: boolean) => {
-      if (full) {
-        mainLayoutRef.current?.requestFullscreen();
-      } else {
-        document.exitFullscreen();
-      }
-    },
-    [mainLayoutRef],
-  );
-
-  useEffect(() => {
-    if (mainLayoutRef.current == null) {
-      return;
-    }
-    const fsListener = () => {
-      setFullscreen(document.fullscreenElement != null);
-    };
-    document.addEventListener("fullscreenchange", fsListener);
-
-    return () => {
-      document.removeEventListener("fullscreenchange", fsListener);
-    };
-  }, [mainLayoutRef]);
+  const { fullscreen, toggleFullscreen } = useFullscreen(mainLayoutRef);
 
   // layout
 
@@ -535,7 +511,7 @@ export function RecordingView({
                 }}
                 isScrubbing={scrubbing || exportMode == "timeline"}
                 setFullResolution={setFullResolution}
-                setFullscreen={onToggleFullscreen}
+                toggleFullscreen={toggleFullscreen}
               />
             </div>
             {isDesktop && (
