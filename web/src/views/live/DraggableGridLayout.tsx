@@ -40,8 +40,6 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
-import { useFullscreen } from "@/hooks/use-fullscreen";
-import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 
 type DraggableGridLayoutProps = {
@@ -55,6 +53,8 @@ type DraggableGridLayoutProps = {
   visibleCameras: string[];
   isEditMode: boolean;
   setIsEditMode: React.Dispatch<React.SetStateAction<boolean>>;
+  fullscreen: boolean;
+  toggleFullscreen: () => void;
 };
 export default function DraggableGridLayout({
   cameras,
@@ -67,6 +67,8 @@ export default function DraggableGridLayout({
   visibleCameras,
   isEditMode,
   setIsEditMode,
+  fullscreen,
+  toggleFullscreen,
 }: DraggableGridLayoutProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
@@ -289,20 +291,6 @@ export default function DraggableGridLayout({
     }
   }, [containerRef, containerHeight]);
 
-  // fullscreen state
-
-  const { fullscreen, toggleFullscreen, error, clearError } =
-    useFullscreen(gridContainerRef);
-
-  useEffect(() => {
-    if (error !== null) {
-      toast.error(`Error attempting fullscreen mode: ${error}`, {
-        position: "top-center",
-      });
-      clearError();
-    }
-  }, [error, clearError]);
-
   const cellHeight = useMemo(() => {
     const aspectRatio = 16 / 9;
     // subtract container margin, 1 camera takes up at least 4 rows
@@ -463,21 +451,23 @@ export default function DraggableGridLayout({
               </Tooltip>
               {!isEditMode && (
                 <>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div
-                        className="cursor-pointer rounded-lg bg-secondary text-secondary-foreground opacity-60 transition-all duration-300 hover:bg-muted hover:opacity-100"
-                        onClick={() =>
-                          setEditGroup((prevEditGroup) => !prevEditGroup)
-                        }
-                      >
-                        <LuPencil className="size-5 md:m-[6px]" />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      {isEditMode ? "Exit Editing" : "Edit Camera Group"}
-                    </TooltipContent>
-                  </Tooltip>
+                  {!fullscreen && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div
+                          className="cursor-pointer rounded-lg bg-secondary text-secondary-foreground opacity-60 transition-all duration-300 hover:bg-muted hover:opacity-100"
+                          onClick={() =>
+                            setEditGroup((prevEditGroup) => !prevEditGroup)
+                          }
+                        >
+                          <LuPencil className="size-5 md:m-[6px]" />
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {isEditMode ? "Exit Editing" : "Edit Camera Group"}
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div

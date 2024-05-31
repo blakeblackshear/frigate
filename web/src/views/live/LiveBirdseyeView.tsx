@@ -4,7 +4,6 @@ import BirdseyeLivePlayer from "@/components/player/BirdseyeLivePlayer";
 import { Button } from "@/components/ui/button";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useResizeObserver } from "@/hooks/resize-observer";
-import { useFullscreen } from "@/hooks/use-fullscreen";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { useMemo, useRef } from "react";
 import {
@@ -19,7 +18,15 @@ import { useNavigate } from "react-router-dom";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import useSWR from "swr";
 
-export default function LiveBirdseyeView() {
+type LiveBirdseyeViewProps = {
+  fullscreen: boolean;
+  toggleFullscreen: () => void;
+};
+
+export default function LiveBirdseyeView({
+  fullscreen,
+  toggleFullscreen,
+}: LiveBirdseyeViewProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
   const navigate = useNavigate();
   const { isPortrait } = useMobileOrientation();
@@ -27,10 +34,6 @@ export default function LiveBirdseyeView() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [{ width: windowWidth, height: windowHeight }] =
     useResizeObserver(window);
-
-  // fullscreen state
-
-  const { fullscreen, toggleFullscreen } = useFullscreen(mainRef);
 
   // playback state
 

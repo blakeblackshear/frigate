@@ -72,15 +72,18 @@ import {
 import { useNavigate } from "react-router-dom";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import useSWR from "swr";
-import { useFullscreen } from "@/hooks/use-fullscreen";
 
 type LiveCameraViewProps = {
   config?: FrigateConfig;
   camera: CameraConfig;
+  fullscreen: boolean;
+  toggleFullscreen: () => void;
 };
 export default function LiveCameraView({
   config,
   camera,
+  fullscreen,
+  toggleFullscreen,
 }: LiveCameraViewProps) {
   const navigate = useNavigate();
   const { isPortrait } = useMobileOrientation();
@@ -175,9 +178,7 @@ export default function LiveCameraView({
     [clickOverlayRef, clickOverlay, sendPtz],
   );
 
-  // fullscreen / pip state
-
-  const { fullscreen, toggleFullscreen } = useFullscreen(mainRef);
+  // pip state
 
   useEffect(() => {
     setPip(document.pictureInPictureElement != null);
@@ -314,6 +315,18 @@ export default function LiveCameraView({
             <div
               className={`flex flex-row items-center gap-2 *:rounded-lg ${isMobile ? "landscape:flex-col" : ""}`}
             >
+              {fullscreen && (
+                <Button
+                  className="bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-primary"
+                  size="sm"
+                  onClick={() => navigate(-1)}
+                >
+                  <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
+                  {isDesktop && (
+                    <div className="text-secondary-foreground">Back</div>
+                  )}
+                </Button>
+              )}
               {!isIOS && (
                 <CameraFeatureToggle
                   className="p-2 md:p-0"

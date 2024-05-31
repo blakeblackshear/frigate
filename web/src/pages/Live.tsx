@@ -1,3 +1,4 @@
+import { useFullscreen } from "@/hooks/use-fullscreen";
 import {
   useHashState,
   usePersistedOverlayState,
@@ -6,7 +7,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import LiveBirdseyeView from "@/views/live/LiveBirdseyeView";
 import LiveCameraView from "@/views/live/LiveCameraView";
 import LiveDashboardView from "@/views/live/LiveDashboardView";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import useSWR from "swr";
 
 function Live() {
@@ -19,6 +20,12 @@ function Live() {
     "cameraGroup",
     "default" as string,
   );
+
+  // fullscreen
+
+  const mainRef = useRef<HTMLDivElement | null>(null);
+
+  const { fullscreen, toggleFullscreen } = useFullscreen(mainRef);
 
   // document title
 
@@ -78,21 +85,31 @@ function Live() {
     [cameras, selectedCameraName],
   );
 
-  if (selectedCameraName == "birdseye") {
-    return <LiveBirdseyeView />;
-  }
-
-  if (selectedCamera) {
-    return <LiveCameraView config={config} camera={selectedCamera} />;
-  }
-
   return (
-    <LiveDashboardView
-      cameras={cameras}
-      cameraGroup={cameraGroup}
-      includeBirdseye={includesBirdseye}
-      onSelectCamera={setSelectedCameraName}
-    />
+    <div className="size-full" ref={mainRef}>
+      {selectedCameraName === "birdseye" ? (
+        <LiveBirdseyeView
+          fullscreen={fullscreen}
+          toggleFullscreen={toggleFullscreen}
+        />
+      ) : selectedCamera ? (
+        <LiveCameraView
+          config={config}
+          camera={selectedCamera}
+          fullscreen={fullscreen}
+          toggleFullscreen={toggleFullscreen}
+        />
+      ) : (
+        <LiveDashboardView
+          cameras={cameras}
+          cameraGroup={cameraGroup}
+          includeBirdseye={includesBirdseye}
+          onSelectCamera={setSelectedCameraName}
+          fullscreen={fullscreen}
+          toggleFullscreen={toggleFullscreen}
+        />
+      )}
+    </div>
   );
 }
 

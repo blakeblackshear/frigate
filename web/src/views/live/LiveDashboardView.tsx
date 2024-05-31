@@ -30,12 +30,16 @@ type LiveDashboardViewProps = {
   cameraGroup?: string;
   includeBirdseye: boolean;
   onSelectCamera: (camera: string) => void;
+  fullscreen: boolean;
+  toggleFullscreen: () => void;
 };
 export default function LiveDashboardView({
   cameras,
   cameraGroup,
   includeBirdseye,
   onSelectCamera,
+  fullscreen,
+  toggleFullscreen,
 }: LiveDashboardViewProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -214,7 +218,7 @@ export default function LiveDashboardView({
         </div>
       )}
 
-      {events && events.length > 0 && (
+      {!fullscreen && events && events.length > 0 && (
         <ScrollArea>
           <TooltipProvider>
             <div className="flex items-center gap-2 px-1">
@@ -281,6 +285,8 @@ export default function LiveDashboardView({
           visibleCameras={visibleCameras}
           isEditMode={isEditMode}
           setIsEditMode={setIsEditMode}
+          fullscreen={fullscreen}
+          toggleFullscreen={toggleFullscreen}
         />
       )}
     </div>
