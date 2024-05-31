@@ -47,7 +47,7 @@ function MSEPlayer({
 
   const [wsState, setWsState] = useState<number>(WebSocket.CLOSED);
   const [connectTS, setConnectTS] = useState<number>(0);
-  const [receivedData, setReceivedData] = useState(false);
+  const [bufferTimeout, setBufferTimeout] = useState<NodeJS.Timeout>();
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -103,7 +103,6 @@ function MSEPlayer({
   const onConnect = useCallback(() => {
     if (!videoRef.current?.isConnected || !wsURL || wsRef.current) return false;
 
-    setReceivedData(false);
     setWsState(WebSocket.CONNECTING);
 
     setConnectTS(Date.now());
@@ -310,18 +309,33 @@ function MSEPlayer({
       onLoadedData={() => {
         handleLoadedMetadata?.();
         onPlaying?.();
-        setReceivedData(true);
       }}
       muted={!audioEnabled}
-      onStalled={() => {
-        if (receivedData) {
-          onError?.("stalled");
-        } else {
-          onError?.("startup");
-        }
-      }}
-      onError={() => {
-        if (!receivedData) {
+      onProgress={
+        onError != undefined
+          ? () => {
+              if (videoRef.current?.paused) {
+                return;
+              }
+
+              if (bufferTimeout) {
+                clearTimeout(bufferTimeout);
+                setBufferTimeout(undefined);
+              }
+
+              setBufferTimeout(
+                setTimeout(() => {
+                  onError("stalled");
+                }, 3000),
+              );
+            }
+          : undefined
+      }
+      onError={(e) => {
+        if (
+          // @ts-expect-error code does exist
+          e.target.error.code == MediaError.MEDIA_ERR_NETWORK
+        ) {
           onError?.("startup");
         }
 

@@ -35,7 +35,7 @@ export default function WebRtcPlayer({
 
   const pcRef = useRef<RTCPeerConnection | undefined>();
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const [receivedData, setReceivedData] = useState(false);
+  const [bufferTimeout, setBufferTimeout] = useState<NodeJS.Timeout>();
 
   const PeerConnection = useCallback(
     async (media: string) => {
@@ -168,8 +168,6 @@ export default function WebRtcPlayer({
         pcRef.current.close();
         pcRef.current = undefined;
       }
-
-      setReceivedData(false);
     };
   }, [
     camera,
@@ -203,17 +201,27 @@ export default function WebRtcPlayer({
       autoPlay
       playsInline
       muted={!audioEnabled}
-      onLoadedData={() => {
-        setReceivedData(true);
-        onPlaying?.();
-      }}
-      onStalled={() => {
-        if (receivedData) {
-          onError?.("stalled");
-        } else {
-          onError?.("startup");
-        }
-      }}
+      onLoadedData={onPlaying}
+      onProgress={
+        onError != undefined
+          ? () => {
+              if (videoRef.current?.paused) {
+                return;
+              }
+
+              if (bufferTimeout) {
+                clearTimeout(bufferTimeout);
+                setBufferTimeout(undefined);
+              }
+
+              setBufferTimeout(
+                setTimeout(() => {
+                  onError("stalled");
+                }, 3000),
+              );
+            }
+          : undefined
+      }
       onClick={
         iOSCompatFullScreen
           ? () => setiOSCompatControls(!iOSCompatControls)
