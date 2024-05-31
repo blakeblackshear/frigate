@@ -8,7 +8,11 @@ import JSMpegPlayer from "./JSMpegPlayer";
 import { MdCircle } from "react-icons/md";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { useCameraActivity } from "@/hooks/use-camera-activity";
-import { LivePlayerError, LivePlayerMode, VideoResolutionType } from "@/types/live";
+import {
+  LivePlayerError,
+  LivePlayerMode,
+  VideoResolutionType,
+} from "@/types/live";
 import useCameraLiveMode from "@/hooks/use-camera-live-mode";
 import { getIconForLabel } from "@/utils/iconUtil";
 import Chip from "../indicators/Chip";

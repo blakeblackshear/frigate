@@ -227,6 +227,14 @@ export default function WebRtcPlayer({
           ? () => setiOSCompatControls(!iOSCompatControls)
           : undefined
       }
+      onError={(e) => {
+        if (
+          // @ts-expect-error code does exist
+          e.target.error.code == MediaError.MEDIA_ERR_NETWORK
+        ) {
+          onError?.("startup");
+        }
+      }}
     />
   );
 }
