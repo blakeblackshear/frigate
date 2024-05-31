@@ -8,7 +8,11 @@ import JSMpegPlayer from "./JSMpegPlayer";
 import { MdCircle } from "react-icons/md";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { useCameraActivity } from "@/hooks/use-camera-activity";
-import { LivePlayerMode, VideoResolutionType } from "@/types/live";
+import {
+  LivePlayerError,
+  LivePlayerMode,
+  VideoResolutionType,
+} from "@/types/live";
 import useCameraLiveMode from "@/hooks/use-camera-live-mode";
 import { getIconForLabel } from "@/utils/iconUtil";
 import Chip from "../indicators/Chip";
@@ -30,6 +34,7 @@ type LivePlayerProps = {
   autoLive?: boolean;
   onClick?: () => void;
   setFullResolution?: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
+  onError?: (error: LivePlayerError) => void;
 };
 
 export default function LivePlayer({
@@ -47,6 +52,7 @@ export default function LivePlayer({
   autoLive = true,
   onClick,
   setFullResolution,
+  onError,
 }: LivePlayerProps) {
   // camera activity
 
@@ -145,6 +151,7 @@ export default function LivePlayer({
           onPlaying={() => setLiveReady(true)}
           pip={pip}
           setFullResolution={setFullResolution}
+          onError={onError}
         />
       );
     } else {

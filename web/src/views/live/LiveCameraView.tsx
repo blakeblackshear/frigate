@@ -191,6 +191,7 @@ export default function LiveCameraView({
   const [audio, setAudio] = useState(false);
   const [mic, setMic] = useState(false);
   const [pip, setPip] = useState(false);
+  const [lowBandwidth, setLowBandwidth] = useState(false);
 
   const [fullResolution, setFullResolution] = useState<VideoResolutionType>({
     width: 0,
@@ -202,8 +203,14 @@ export default function LiveCameraView({
       return "webrtc";
     }
 
+    if (lowBandwidth) {
+      return "jsmpeg";
+    }
+
     return "mse";
-  }, [mic]);
+  }, [lowBandwidth, mic]);
+
+  // layout state
 
   const windowAspectRatio = useMemo(() => {
     return windowWidth / windowHeight;
@@ -419,6 +426,7 @@ export default function LiveCameraView({
                 pip={pip}
                 setFullResolution={setFullResolution}
                 containerRef={containerRef}
+                onError={() => setLowBandwidth(true)}
               />
             </div>
             {camera.onvif.host != "" && (

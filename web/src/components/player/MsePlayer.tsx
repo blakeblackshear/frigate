@@ -1,5 +1,5 @@
 import { baseUrl } from "@/api/baseUrl";
-import { VideoResolutionType } from "@/types/live";
+import { LivePlayerError, VideoResolutionType } from "@/types/live";
 import {
   SetStateAction,
   useCallback,
@@ -17,6 +17,7 @@ type MSEPlayerProps = {
   pip?: boolean;
   onPlaying?: () => void;
   setFullResolution?: React.Dispatch<SetStateAction<VideoResolutionType>>;
+  onError?: (error: LivePlayerError) => void;
 };
 
 function MSEPlayer({
@@ -27,6 +28,7 @@ function MSEPlayer({
   pip = false,
   onPlaying,
   setFullResolution,
+  onError,
 }: MSEPlayerProps) {
   const RECONNECT_TIMEOUT: number = 30000;
 
@@ -45,6 +47,7 @@ function MSEPlayer({
 
   const [wsState, setWsState] = useState<number>(WebSocket.CLOSED);
   const [connectTS, setConnectTS] = useState<number>(0);
+  const [bufferTimeout, setBufferTimeout] = useState<NodeJS.Timeout>();
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -308,7 +311,34 @@ function MSEPlayer({
         onPlaying?.();
       }}
       muted={!audioEnabled}
-      onError={() => {
+      onProgress={
+        onError != undefined
+          ? () => {
+              if (videoRef.current?.paused) {
+                return;
+              }
+
+              if (bufferTimeout) {
+                clearTimeout(bufferTimeout);
+                setBufferTimeout(undefined);
+              }
+
+              setBufferTimeout(
+                setTimeout(() => {
+                  onError("stalled");
+                }, 3000),
+              );
+            }
+          : undefined
+      }
+      onError={(e) => {
+        if (
+          // @ts-expect-error code does exist
+          e.target.error.code == MediaError.MEDIA_ERR_NETWORK
+        ) {
+          onError?.("startup");
+        }
+
         if (wsRef.current) {
           wsRef.current.close();
           wsRef.current = null;
