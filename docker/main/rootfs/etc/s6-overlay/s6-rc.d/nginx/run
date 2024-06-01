@@ -16,7 +16,8 @@ function set_worker_processes() {
         proc_count=4;
     fi
 
-    sed -i "s/worker_processes auto;/worker_processes ${proc_count};/" /usr/local/nginx/conf/nginx.conf
+    # we need to catch any errors because sed will fail if user has bind mounted a custom nginx file
+    sed -i "s/worker_processes auto;/worker_processes ${proc_count};/" /usr/local/nginx/conf/nginx.conf || true
 }
 
 set_worker_processes
