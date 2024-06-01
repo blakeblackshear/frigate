@@ -24,7 +24,7 @@ const Logs = lazy(() => import("@/pages/Logs"));
 function App() {
   return (
     <Providers>
-      <BrowserRouter>
+      <BrowserRouter basename={window.baseUrl}>
         <Wrapper>
           <div className="size-full overflow-hidden">
             {isDesktop && <Sidebar />}
