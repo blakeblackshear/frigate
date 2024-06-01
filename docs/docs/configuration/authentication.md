@@ -52,6 +52,27 @@ auth:
     - 172.18.0.0/16 # <---- this is the subnet for the internal docker compose network
 ```
 
+#### JWT Token Secret
+
+The JWT token secret needs to be kept secure. Anyone with this secret can generate valid JWT tokens to authenticate with Frigate. This should be a cryptographically random string of at least 64 characters.
+
+You can generate a token using the Python secret library with the following command:
+
+```shell
+python3 -c 'import secrets; print(secrets.token_hex(64))'
+```
+
+Frigate looks for a JWT token secret in the following order:
+
+1. An environment variable named `FRIGATE_JWT_SECRET`
+2. A docker secret named `FRIGATE_JWT_SECRET` in `/run/secrets/`
+3. A `jwt_secret` option from the Home Assistant Addon options
+4. A `.jwt_secret` file in the config directory
+
+If no secret is found on startup, Frigate generates one and stores it in a `.jwt_secret` file in the config directory.
+
+Changing the secret will invalidate current tokens.
+
 ### Proxy mode
 
 Proxy mode is designed to complement common upstream authentication proxies such as Authelia, Authentik, oauth2_proxy, or traefik-forward-auth.

@@ -22,6 +22,22 @@ function set_worker_processes() {
 
 set_worker_processes
 
+# ensure the directory for ACME challenges exists
+mkdir -p /etc/letsencrypt/www
+
+# Create self signed certs if needed
+letsencrypt_path=/etc/letsencrypt/live/frigate
+mkdir -p $letsencrypt_path
+
+if [ ! \( -f "$letsencrypt_path/privkey.pem" -a -f "$letsencrypt_path/fullchain.pem" \) ]; then
+    echo "[INFO] No TLS certificate found. Generating a self signed certificate..."
+    openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 \
+        -subj "/O=FRIGATE DEFAULT CERT/CN=*" \
+        -keyout "$letsencrypt_path/privkey.pem" -out "$letsencrypt_path/fullchain.pem"
+fi
+
 # Replace the bash process with the NGINX process, redirecting stderr to stdout
 exec 2>&1
-exec nginx
+exec \
+    s6-notifyoncheck -t 30000 -n 1 \
+    nginx
