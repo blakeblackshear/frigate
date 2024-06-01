@@ -22,6 +22,7 @@ function set_worker_processes() {
 
 set_worker_processes
 
+# ensure the directory for ACME challenges exists
 mkdir -p /etc/letsencrypt/www
 
 # Create self signed certs if needed
