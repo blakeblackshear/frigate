@@ -1,0 +1,59 @@
+#!/command/with-contenv bash
+# shellcheck shell=bash
+# Start the CERTSYNC service
+
+set -o errexit -o nounset -o pipefail
+
+# Logs should be sent to stdout so that s6 can collect them
+
+echo "[INFO] Starting certsync..."
+
+lefile="/etc/letsencrypt/live/frigate/fullchain.pem"
+
+if [ ! -e $lefile ]
+then
+    echo "[ERROR] TLS certificate does not exist: $lefile"
+    exit 1
+fi
+
+
+while true
+do
+
+    leprint=`openssl x509 -in $lefile -fingerprint -noout`
+
+    case "$leprint" in
+        *Fingerprint*)
+            ;;
+        *)
+            echo "[ERROR] Missing fingerprint from $lefile"
+            # exit 1
+            ;;
+    esac
+
+    # i think this should work without '-servername "$domain"'
+    liveprint=`echo | openssl s_client -showcerts -connect 127.0.0.1:443 2>&1 | openssl x509 -fingerprint | grep -i fingerprint`
+
+    case "$liveprint" in
+        *Fingerprint*)
+            ;;
+        *)
+            echo "[ERROR] Missing fingerprint from current TLS cert"
+            # exit 1
+            ;;
+    esac
+
+    if [ "$leprint" != "$liveprint" ]
+    then
+        echo "[INFO] Reloading nginx to refresh TLS certificate"
+        echo "$lefile: $leprint"
+        /usr/local/nginx/sbin/nginx -s reload
+    fi
+
+    # certbot certonly --cert-name frigate --webroot -w /etc/letsencrypt/www --keep-until-expiring --deploy-hook "/usr/local/nginx/sbin/nginx -s reload"
+
+    sleep 60
+
+done
+
+exit 0

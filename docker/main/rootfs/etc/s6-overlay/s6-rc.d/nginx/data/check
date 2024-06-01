@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -e
+
+# Wait for PID file to exist.
+while ! test -f /run/nginx.pid; do sleep 1; done
