@@ -33,8 +33,13 @@ if [ ! \( -f "$letsencrypt_path/privkey.pem" -a -f "$letsencrypt_path/fullchain.
     echo "[INFO] No TLS certificate found. Generating a self signed certificate..."
     openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 \
         -subj "/O=FRIGATE DEFAULT CERT/CN=*" \
-        -keyout "$letsencrypt_path/privkey.pem" -out "$letsencrypt_path/fullchain.pem"
+        -keyout "$letsencrypt_path/privkey.pem" -out "$letsencrypt_path/fullchain.pem" 2>/dev/null
 fi
+
+# build templates for optional TLS support
+python3 /usr/local/nginx/get_tls_settings.py | \
+    tempio  -template /usr/local/nginx/templates/listen.gotmpl \
+            -out /usr/local/nginx/conf/listen.conf
 
 # Replace the bash process with the NGINX process, redirecting stderr to stdout
 exec 2>&1

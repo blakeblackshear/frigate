@@ -35,6 +35,11 @@ ARG TARGETARCH
 WORKDIR /rootfs/usr/local/go2rtc/bin
 ADD --link --chmod=755 "https://github.com/AlexxIT/go2rtc/releases/download/v1.9.2/go2rtc_linux_${TARGETARCH}" go2rtc
 
+FROM scratch AS tempio
+ARG TARGETARCH
+WORKDIR /rootfs/usr/local/tempio/bin
+ADD --link --chmod=755 "https://github.com/home-assistant/tempio/releases/download/2021.09.0/tempio_${TARGETARCH}" tempio
+
 
 ####
 #
@@ -131,6 +136,7 @@ RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt
 FROM scratch AS deps-rootfs
 COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
 COPY --from=go2rtc /rootfs/ /
+COPY --from=tempio /rootfs/ /
 COPY --from=s6-overlay /rootfs/ /
 COPY --from=models /rootfs/ /
 COPY docker/main/rootfs/ /
@@ -148,7 +154,7 @@ ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES="compute,video,utility"
 
-ENV PATH="/usr/lib/btbn-ffmpeg/bin:/usr/local/go2rtc/bin:/usr/local/nginx/sbin:${PATH}"
+ENV PATH="/usr/lib/btbn-ffmpeg/bin:/usr/local/go2rtc/bin:/usr/local/tempio/bin:/usr/local/nginx/sbin:${PATH}"
 
 # Install dependencies
 RUN --mount=type=bind,source=docker/main/install_deps.sh,target=/deps/install_deps.sh \
