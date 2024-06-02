@@ -115,6 +115,10 @@ class UIConfig(FrigateBaseModel):
     )
 
 
+class TlsConfig(FrigateBaseModel):
+    enabled: bool = Field(default=True, title="Enable TLS for port 8080")
+
+
 class AuthModeEnum(str, Enum):
     native = "native"
     proxy = "proxy"
@@ -1303,6 +1307,7 @@ class FrigateConfig(FrigateBaseModel):
     database: DatabaseConfig = Field(
         default_factory=DatabaseConfig, title="Database configuration."
     )
+    tls: TlsConfig = Field(default_factory=TlsConfig, title="TLS configuration.")
     auth: AuthConfig = Field(default_factory=AuthConfig, title="Auth configuration.")
     environment_vars: Dict[str, str] = Field(
         default_factory=dict, title="Frigate environment variables."

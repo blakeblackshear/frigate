@@ -1,5 +1,9 @@
-keepalive_timeout   70;
-listen [::]:443 ipv6only=off default_server ssl;
+{{ if not .enabled }}
+# intended for external traffic, protected by auth
+listen [::]:8080 ipv6only=off;
+{{ else }}
+# intended for external traffic, protected by auth
+listen [::]:8080 ipv6only=off ssl;
 
 ssl_certificate /etc/letsencrypt/live/frigate/fullchain.pem;
 ssl_certificate_key /etc/letsencrypt/live/frigate/privkey.pem;
@@ -22,3 +26,5 @@ location /.well-known/acme-challenge/ {
     default_type "text/plain";
     root /etc/letsencrypt/www;
 }
+{{ end }}
+
