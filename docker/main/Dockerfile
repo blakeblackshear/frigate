@@ -35,11 +35,10 @@ ARG TARGETARCH
 WORKDIR /rootfs/usr/local/go2rtc/bin
 ADD --link --chmod=755 "https://github.com/AlexxIT/go2rtc/releases/download/v1.9.2/go2rtc_linux_${TARGETARCH}" go2rtc
 
-FROM scratch AS tempio
+FROM wget AS tempio
 ARG TARGETARCH
-WORKDIR /rootfs/usr/local/tempio/bin
-ADD --link --chmod=755 "https://github.com/home-assistant/tempio/releases/download/2021.09.0/tempio_${TARGETARCH}" tempio
-
+RUN --mount=type=bind,source=docker/main/install_tempio.sh,target=/deps/install_tempio.sh \
+    /deps/install_tempio.sh
 
 ####
 #
