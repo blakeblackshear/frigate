@@ -63,6 +63,11 @@ database:
   # The path to store the SQLite DB (default: shown below)
   path: /config/frigate.db
 
+# Optional: TLS configuration
+tls:
+  # Optional: Enable TLS for port 8080 (default: shown below)
+  enabled: true
+
 # Optional: Authentication configuration
 auth:
   # Optional: Authentication mode (default: shown below)

@@ -137,7 +137,7 @@ cameras:
             - detect
 ```
 
-Now you should be able to start Frigate by running `docker compose up -d` from within the folder containing `docker-compose.yml`. On startup, an admin user and password will be created and outputted in the logs. You can see this by running `docker logs frigate`. Frigate should now be accessible at `server_ip:8080` where you can login with the `admin` user and finish the configuration using the built-in configuration editor.
+Now you should be able to start Frigate by running `docker compose up -d` from within the folder containing `docker-compose.yml`. On startup, an admin user and password will be created and outputted in the logs. You can see this by running `docker logs frigate`. Frigate should now be accessible at `https://server_ip:8080` where you can login with the `admin` user and finish the configuration using the built-in configuration editor.
 
 ## Configuring Frigate
 
