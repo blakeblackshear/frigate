@@ -52,6 +52,7 @@ export default function LiveDashboardView({
 
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const birdseyeContainerRef = useRef<HTMLDivElement>(null);
 
   // recent events
 
@@ -241,11 +242,19 @@ export default function LiveDashboardView({
           )}
         >
           {includeBirdseye && birdseyeConfig?.enabled && (
-            <BirdseyeLivePlayer
-              birdseyeConfig={birdseyeConfig}
-              liveMode={birdseyeConfig.restream ? "mse" : "jsmpeg"}
-              onClick={() => onSelectCamera("birdseye")}
-            />
+            <div
+              style={{
+                aspectRatio: birdseyeConfig.width / birdseyeConfig.height,
+              }}
+              ref={birdseyeContainerRef}
+            >
+              <BirdseyeLivePlayer
+                birdseyeConfig={birdseyeConfig}
+                liveMode={birdseyeConfig.restream ? "mse" : "jsmpeg"}
+                onClick={() => onSelectCamera("birdseye")}
+                containerRef={birdseyeContainerRef}
+              />
+            </div>
           )}
           {cameras.map((camera) => {
             let grow;

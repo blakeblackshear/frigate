@@ -352,7 +352,7 @@ export function ReviewTimeline({
                         : segmentDuration < 60
                           ? "w-[80px]"
                           : "w-20"
-                    } h-5 ${isDraggingHandlebar && isMobile ? "fixed left-1/2 top-[18px] z-20 h-[30px] w-32 -translate-x-1/2 transform bg-destructive/80" : "static"} flex items-center justify-center`}
+                    } h-5 ${isDraggingHandlebar && isMobile ? "fixed left-1/2 top-[18px] z-20 h-[30px] w-auto -translate-x-1/2 transform bg-destructive/80 px-3" : "static"} flex items-center justify-center`}
                   >
                     <div
                       ref={handlebarTimeRef}
@@ -390,7 +390,7 @@ export function ReviewTimeline({
                           : segmentDuration < 60
                             ? "w-[80px]"
                             : "w-20"
-                      } h-5 ${isDraggingExportEnd && isMobile ? "fixed left-1/2 top-[18px] z-20 mt-0 h-[30px] w-32 -translate-x-1/2 transform rounded-full bg-selected/80" : "static rounded-tl-lg rounded-tr-lg"} flex items-center justify-center`}
+                      } h-5 ${isDraggingExportEnd && isMobile ? "fixed left-1/2 top-[18px] z-20 mt-0 h-[30px] w-auto -translate-x-1/2 transform rounded-full bg-selected/80 px-3" : "static rounded-tl-lg rounded-tr-lg"} flex items-center justify-center`}
                     >
                       <div
                         ref={exportEndTimeRef}
@@ -432,7 +432,7 @@ export function ReviewTimeline({
                           : segmentDuration < 60
                             ? "w-[80px]"
                             : "w-20"
-                      } h-5 ${isDraggingExportStart && isMobile ? "fixed left-1/2 top-[4px] z-20 mt-0 h-[30px] w-32 -translate-x-1/2 transform rounded-full bg-selected/80" : "static rounded-bl-lg rounded-br-lg"} flex items-center justify-center`}
+                      } h-5 ${isDraggingExportStart && isMobile ? "fixed left-1/2 top-[4px] z-20 mt-0 h-[30px] w-auto -translate-x-1/2 transform rounded-full bg-selected/80 px-3" : "static rounded-bl-lg rounded-br-lg"} flex items-center justify-center`}
                     >
                       <div
                         ref={exportStartTimeRef}
