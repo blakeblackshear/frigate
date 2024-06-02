@@ -1,3 +1,6 @@
+import { FrigateConfig } from "@/types/frigateConfig";
+import useSWR from "swr";
+
 type MinimapSegmentProps = {
   isFirstSegmentInMinimap: boolean;
   isLastSegmentInMinimap: boolean;
@@ -28,6 +31,8 @@ export function MinimapBounds({
   firstMinimapSegmentRef,
   dense,
 }: MinimapSegmentProps) {
+  const { data: config } = useSWR<FrigateConfig>("config");
+
   return (
     <>
       {isFirstSegmentInMinimap && (
@@ -36,6 +41,7 @@ export function MinimapBounds({
           ref={firstMinimapSegmentRef}
         >
           {new Date(alignedMinimapStartTime * 1000).toLocaleTimeString([], {
+            hour12: config?.ui.time_format != "24hour",
             hour: "2-digit",
             minute: "2-digit",
             ...(!dense && { month: "short", day: "2-digit" }),
@@ -46,6 +52,7 @@ export function MinimapBounds({
       {isLastSegmentInMinimap && (
         <div className="pointer-events-none absolute inset-0 -top-3 z-20 flex w-full select-none items-center justify-center text-center text-[10px] font-medium text-primary">
           {new Date(alignedMinimapEndTime * 1000).toLocaleTimeString([], {
+            hour12: config?.ui.time_format != "24hour",
             hour: "2-digit",
             minute: "2-digit",
             ...(!dense && { month: "short", day: "2-digit" }),
@@ -83,6 +90,8 @@ export function Timestamp({
   timestampSpread,
   segmentKey,
 }: TimestampSegmentProps) {
+  const { data: config } = useSWR<FrigateConfig>("config");
+
   return (
     <div className="absolute left-[15px] z-10 h-[8px]">
       {!isFirstSegmentInMinimap && !isLastSegmentInMinimap && (
@@ -93,6 +102,7 @@ export function Timestamp({
           {timestamp.getMinutes() % timestampSpread === 0 &&
             timestamp.getSeconds() === 0 &&
             timestamp.toLocaleTimeString([], {
+              hour12: config?.ui.time_format != "24hour",
               hour: "2-digit",
               minute: "2-digit",
             })}

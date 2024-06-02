@@ -29,7 +29,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { isDesktop, isMobile } from "react-device-detect";
+import { isDesktop, isMobile, isTablet } from "react-device-detect";
 import { LuFolderCheck } from "react-icons/lu";
 import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
@@ -48,6 +48,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import scrollIntoView from "scroll-into-view-if-needed";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 type EventViewProps = {
   reviewItems?: SegmentedReviewData;
@@ -866,7 +867,12 @@ function MotionReview({
       <div className="no-scrollbar flex flex-1 flex-wrap content-start gap-2 overflow-y-auto md:gap-4">
         <div
           ref={contentRef}
-          className="no-scrollbar grid w-full gap-2 overflow-auto px-1 sm:grid-cols-2 md:mx-2 md:gap-4 xl:grid-cols-3 3xl:grid-cols-4"
+          className={cn(
+            "no-scrollbar grid w-full grid-cols-1",
+            (reviewCameras.length > 3 || isTablet || isDesktop) &&
+              "grid-cols-2",
+            "gap-2 overflow-auto px-1 md:mx-2 md:gap-4 xl:grid-cols-3 3xl:grid-cols-4",
+          )}
         >
           {reviewCameras.map((camera) => {
             let grow;
@@ -874,13 +880,12 @@ function MotionReview({
             const aspectRatio = camera.detect.width / camera.detect.height;
             if (aspectRatio > 2) {
               grow = "aspect-wide";
-              spans = "sm:col-span-2";
+              spans = reviewCameras.length > 3 && "col-span-2";
             } else if (aspectRatio < 1) {
               grow = "md:h-full aspect-tall";
-              spans = "md:row-span-2";
+              spans = "row-span-2";
             } else {
               grow = "aspect-video";
-              spans = "";
             }
             const detectionType = getDetectionType(camera.name);
             return (

@@ -445,7 +445,7 @@ export default function GeneralMetrics({
                 </Button>
               )}
             </div>
-            <div className=" mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
               {statsHistory.length != 0 ? (
                 <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
                   <div className="mb-5">GPU Usage</div>
