@@ -243,9 +243,17 @@ export default function LiveDashboardView({
         >
           {includeBirdseye && birdseyeConfig?.enabled && (
             <div
-              style={{
-                aspectRatio: birdseyeConfig.width / birdseyeConfig.height,
-              }}
+              className={(() => {
+                const aspectRatio =
+                  birdseyeConfig.width / birdseyeConfig.height;
+                if (aspectRatio > 2) {
+                  return `${mobileLayout == "grid" && "col-span-2"} aspect-wide`;
+                } else if (aspectRatio < 1) {
+                  return `${mobileLayout == "grid" && "row-span-2 md:h-full"} aspect-tall`;
+                } else {
+                  return "aspect-video";
+                }
+              })()}
               ref={birdseyeContainerRef}
             >
               <BirdseyeLivePlayer
@@ -260,9 +268,9 @@ export default function LiveDashboardView({
             let grow;
             const aspectRatio = camera.detect.width / camera.detect.height;
             if (aspectRatio > 2) {
-              grow = `${mobileLayout == "grid" ? "col-span-2" : ""} aspect-wide`;
+              grow = `${mobileLayout == "grid" && "col-span-2"} aspect-wide`;
             } else if (aspectRatio < 1) {
-              grow = `${mobileLayout == "grid" ? "row-span-2 aspect-tall md:h-full" : ""} aspect-tall`;
+              grow = `${mobileLayout == "grid" && "row-span-2 md:h-full"} aspect-tall`;
             } else {
               grow = "aspect-video";
             }

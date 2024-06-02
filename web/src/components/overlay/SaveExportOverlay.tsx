@@ -1,6 +1,7 @@
 import { LuX } from "react-icons/lu";
 import { Button } from "../ui/button";
 import { FaCompactDisc } from "react-icons/fa";
+import { cn } from "@/lib/utils";
 
 type SaveExportOverlayProps = {
   className: string;
@@ -17,9 +18,11 @@ export default function SaveExportOverlay({
   return (
     <div className={className}>
       <div
-        className={`pointer-events-auto flex items-center justify-center gap-2 rounded-lg px-2 ${
-          show ? "duration-500 animate-in slide-in-from-top" : "invisible"
-        }  mx-auto mt-5 text-center`}
+        className={cn(
+          "pointer-events-auto flex items-center justify-center gap-2 rounded-lg px-2",
+          show ? "duration-500 animate-in slide-in-from-top" : "invisible",
+          "mx-auto mt-5 text-center",
+        )}
       >
         <Button
           className="flex items-center gap-1"
