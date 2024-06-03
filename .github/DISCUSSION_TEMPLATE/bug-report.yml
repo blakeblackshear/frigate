@@ -8,7 +8,7 @@ body:
     validations:
       required: true
   - type: textarea
-    id: description
+    id: steps
     attributes:
       label: Steps to reproduce
     validations:
