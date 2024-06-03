@@ -352,7 +352,7 @@ model: # required
   labelmap_path: /labelmap.txt # required
 ```
 
-The correct labelmap must be loaded for each model. If you use a custom model (see notes below), you must make sure to provide the correct labelmap. The table below lists the correct paths for the bundeled models:
+The correct labelmap must be loaded for each model. If you use a custom model (see notes below), you must make sure to provide the correct labelmap. The table below lists the correct paths for the bundled models:
 
 | `path`              | `labelmap_path`       |
 | ------------------- | --------------------- |
