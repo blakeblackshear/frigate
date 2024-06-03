@@ -348,7 +348,15 @@ model: # required
   input_pixel_format: bgr # required
   # shape of detection frame
   input_tensor: nhwc
+  # needs to be adjusted to model, see below
+  labelmap_path: /labelmap.txt # required
 ```
+
+The correct labelmap must be loaded for each model. If you use a custom model (see notes below), you must make sure to provide the correct labelmap. The table below lists the correct paths for the bundled models:
+
+| `path`              | `labelmap_path`       |
+| ------------------- | --------------------- |
+| deci-fp16-yolonas_* | /labelmap/coco-80.txt |
 
 ### Choosing a model
 
