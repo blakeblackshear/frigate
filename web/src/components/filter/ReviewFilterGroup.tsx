@@ -263,7 +263,7 @@ export function CamerasFilterButton({
           <DropdownMenuSeparator />
         </>
       )}
-      <div className="h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden p-4">
+      <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden p-4">
         <FilterSwitch
           isChecked={currentCameras == undefined}
           label="All Cameras"
@@ -602,7 +602,7 @@ export function GeneralFilterContent({
 }: GeneralFilterContentProps) {
   return (
     <>
-      <div className="h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
+      <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
         {currentSeverity && setShowAll && (
           <div className="my-2.5 flex flex-col gap-2.5">
             <FilterSwitch

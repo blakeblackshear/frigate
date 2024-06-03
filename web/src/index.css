@@ -24,6 +24,12 @@
   }
 }
 
+@layer utilities {
+  .scrollbar-container {
+    @apply scrollbar-thumb-rounded-full scrollbar-track-rounded-full scrollbar-thin scrollbar-thumb-border scrollbar-track-background_alt;
+  }
+}
+
 /* Hide scrollbar for Chrome, Safari and Opera */
 .no-scrollbar::-webkit-scrollbar {
   display: none;

@@ -142,7 +142,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
             isDesktop ? "mr-5 w-72" : "max-h-[75dvh] overflow-hidden p-2"
           }
         >
-          <div className="w-full flex-col overflow-y-auto overflow-x-hidden">
+          <div className="scrollbar-container w-full flex-col overflow-y-auto overflow-x-hidden">
             <DropdownMenuLabel>System</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup className={isDesktop ? "" : "flex flex-col"}>

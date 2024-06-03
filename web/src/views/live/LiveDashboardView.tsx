@@ -163,7 +163,7 @@ export default function LiveDashboardView({
 
   return (
     <div
-      className="size-full overflow-y-auto px-1 pt-2 md:p-2"
+      className="scrollbar-container size-full overflow-y-auto px-1 pt-2 md:p-2"
       ref={containerRef}
     >
       {isMobile && (

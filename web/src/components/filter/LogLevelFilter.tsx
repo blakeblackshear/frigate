@@ -58,7 +58,7 @@ export function GeneralFilterContent({
 }: GeneralFilterContentProps) {
   return (
     <>
-      <div className="h-auto overflow-y-auto overflow-x-hidden">
+      <div className="scrollbar-container h-auto overflow-y-auto overflow-x-hidden">
         <div className="my-2.5 flex items-center justify-between">
           <Label
             className="mx-2 cursor-pointer text-primary"

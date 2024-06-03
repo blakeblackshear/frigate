@@ -310,7 +310,7 @@ function NewGroupDialog({
         <Content
           className={`min-w-0 ${isMobile ? "max-h-[90%] w-full rounded-t-2xl p-3" : "max-h-dvh w-6/12 overflow-y-hidden"}`}
         >
-          <div className="my-4 flex flex-col overflow-y-auto">
+          <div className="scrollbar-container my-4 flex flex-col overflow-y-auto">
             {editState === "none" && (
               <>
                 <div className="flex flex-row items-center justify-between py-2">
@@ -400,7 +400,7 @@ export function EditGroupDialog({
         <DialogContent
           className={`min-w-0 ${isMobile ? "max-h-[90%] w-full rounded-t-2xl p-3" : "max-h-dvh w-6/12 overflow-y-hidden"}`}
         >
-          <div className="my-4 flex flex-col overflow-y-auto">
+          <div className="scrollbar-container my-4 flex flex-col overflow-y-auto">
             <div className="mb-3 flex flex-row items-center justify-between">
               <DialogTitle>Edit Camera Group</DialogTitle>
             </div>
@@ -651,7 +651,7 @@ export function CameraGroupEdit({
         />
 
         <Separator className="my-2 flex bg-secondary" />
-        <div className="max-h-[25dvh] overflow-y-auto md:max-h-[40dvh]">
+        <div className="scrollbar-container max-h-[25dvh] overflow-y-auto md:max-h-[40dvh]">
           <FormField
             control={form.control}
             name="cameras"
