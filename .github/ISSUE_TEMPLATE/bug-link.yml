@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Frigate Bug Report
+    url: https://github.com/blakeblackshear/frigate/discussions/new/choose
+    about: Report a specific bug.
