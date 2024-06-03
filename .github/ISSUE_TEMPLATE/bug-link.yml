@@ -1,3 +1,5 @@
+name: "Bug Report"
+description: "Submit a specific UI or backend bug report."
 blank_issues_enabled: false
 contact_links:
   - name: Frigate Bug Report
