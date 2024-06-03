@@ -2,7 +2,7 @@ import { baseUrl } from "@/api/baseUrl";
 import { useResizeObserver } from "@/hooks/resize-observer";
 // @ts-expect-error we know this doesn't have types
 import JSMpeg from "@cycjimmy/jsmpeg-player";
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useId } from "react";
 
 type JSMpegPlayerProps = {
   className?: string;
@@ -77,6 +77,8 @@ export default function JSMpegPlayer({
     }
   }, [scaledHeight, aspectRatio]);
 
+  const uniqueId = useId();
+
   useEffect(() => {
     if (!playerRef.current) {
       return;
@@ -85,7 +87,7 @@ export default function JSMpegPlayer({
     const video = new JSMpeg.VideoElement(
       playerRef.current,
       url,
-      { canvas: `#${camera}-canvas` },
+      { canvas: `#${CSS.escape(uniqueId)}` },
       { protocols: [], audio: false, videoBufferSize: 1024 * 1024 * 4 },
     );
 
@@ -98,14 +100,14 @@ export default function JSMpegPlayer({
         playerRef.current = null;
       }
     };
-  }, [url, camera]);
+  }, [url, uniqueId]);
 
   return (
     <div className={className}>
       <div className="size-full" ref={internalContainerRef}>
         <div ref={playerRef} className="jsmpeg">
           <canvas
-            id={`${camera}-canvas`}
+            id={uniqueId}
             style={{
               width: scaledWidth ?? width,
               height: scaledHeight ?? height,
