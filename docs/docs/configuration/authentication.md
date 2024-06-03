@@ -14,7 +14,12 @@ Frigate supports two modes for authentication
 | `native` | (default) Use this mode if you don't implement authentication with a proxy in front of Frigate.                                                                                 |
 | `proxy`  | Use this mode if you have an existing proxy for authentication. Supports passing authenticated user downstream to Frigate for role-based authorization (future implementation). |
 
-Authentication is enforced on port 8080, while port 5000 remains unauthenticated for backwards-compatibility.
+The following ports are used to access the Frigate webUI
+
+| Port   | Description                                                                                                                                                                |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `8080` | Authenticated UI and API access without TLS. Reverse proxies should use this port.                                                                                         |
+| `5000` | Internal unauthenticated UI and API access. Access to this port should be limited. Intended to be used within the docker network for services that integrate with Frigate. |
 
 ### Native mode
 
