@@ -6,6 +6,7 @@ import { useOverlayState, useSearchEffect } from "@/hooks/use-overlay-state";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { RecordingStartingPoint } from "@/types/record";
 import {
+  REVIEW_PADDING,
   ReviewFilter,
   ReviewSegment,
   ReviewSeverity,
@@ -42,7 +43,7 @@ export default function Events() {
           setRecording(
             {
               camera: resp.data.camera,
-              startTime: resp.data.start_time,
+              startTime: resp.data.start_time - REVIEW_PADDING,
               severity: resp.data.severity,
             },
             true,
