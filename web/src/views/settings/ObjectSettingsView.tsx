@@ -162,10 +162,12 @@ export default function ObjectSettingsView({
                         </div>
                       </div>
                       <Switch
-                        key={param}
+                        key={`${param}-${optionsLoaded}`}
                         className="ml-1"
                         id={param}
-                        checked={options && options[param]}
+                        checked={
+                          optionsLoaded ? options && options[param] : false
+                        }
                         onCheckedChange={(isChecked) => {
                           handleSetOption(param, isChecked);
                         }}
