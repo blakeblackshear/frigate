@@ -226,7 +226,7 @@ export default function SubmitPlus() {
 
   return (
     <div className="flex size-full flex-col">
-      <div className="flex h-16 w-full items-center justify-between overflow-x-auto px-2">
+      <div className="scrollbar-container flex h-16 w-full items-center justify-between overflow-x-auto px-2">
         <PlusFilterGroup
           selectedCameras={selectedCameras}
           selectedLabels={selectedLabels}

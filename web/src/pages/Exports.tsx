@@ -139,7 +139,7 @@ function Exports() {
 
       <div className="w-full overflow-hidden">
         {exports && filteredExports && (
-          <div className="grid size-full gap-2 overflow-y-auto sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="scrollbar-container grid size-full gap-2 overflow-y-auto sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {Object.values(exports).map((item) => (
               <ExportCard
                 key={item.name}

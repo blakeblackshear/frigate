@@ -204,7 +204,7 @@ export default function CameraMetrics({
   }, [statsHistory]);
 
   return (
-    <div className="mt-4 flex size-full flex-col gap-3 overflow-y-auto">
+    <div className="scrollbar-container mt-4 flex size-full flex-col gap-3 overflow-y-auto">
       <div className="text-sm font-medium text-muted-foreground">Overview</div>
       <div className="grid grid-cols-1 md:grid-cols-3">
         {statsHistory.length != 0 ? (

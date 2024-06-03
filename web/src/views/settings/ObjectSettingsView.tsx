@@ -113,7 +113,7 @@ export default function ObjectSettingsView({
   return (
     <div className="flex size-full flex-col md:flex-row">
       <Toaster position="top-center" closeButton={true} />
-      <div className="order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0 md:w-3/12">
+      <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0 md:w-3/12">
         <Heading as="h3" className="my-2">
           Debug
         </Heading>
@@ -162,12 +162,10 @@ export default function ObjectSettingsView({
                         </div>
                       </div>
                       <Switch
-                        key={`${param}-${optionsLoaded}`}
+                        key={`${param}-${selectedCamera}`}
                         className="ml-1"
                         id={param}
-                        checked={
-                          optionsLoaded ? options && options[param] : false
-                        }
+                        checked={options && options[param]}
                         onCheckedChange={(isChecked) => {
                           handleSetOption(param, isChecked);
                         }}
@@ -224,7 +222,7 @@ function ObjectList(objects?: ObjectType[]) {
   );
 
   return (
-    <div className="flex w-full flex-col overflow-y-auto">
+    <div className="scrollbar-container flex w-full flex-col overflow-y-auto">
       {objects && objects.length > 0 ? (
         objects.map((obj) => {
           return (

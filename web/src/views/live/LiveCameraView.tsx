@@ -610,7 +610,7 @@ function PtzControlPanel({
               <BsThreeDotsVertical />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="max-h-[40dvh] overflow-y-auto">
+          <DropdownMenuContent className="scrollbar-container max-h-[40dvh] overflow-y-auto">
             {ptz?.presets.map((preset) => {
               return (
                 <DropdownMenuItem

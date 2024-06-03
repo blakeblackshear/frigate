@@ -222,7 +222,7 @@ export default function MobileReviewSettingsDrawer({
     );
   } else if (drawerMode == "filter") {
     content = (
-      <div className="flex h-auto w-full flex-col overflow-y-auto">
+      <div className="scrollbar-container flex h-auto w-full flex-col overflow-y-auto">
         <div className="relative mb-2 h-8 w-full">
           <div
             className="absolute left-0 text-selected"

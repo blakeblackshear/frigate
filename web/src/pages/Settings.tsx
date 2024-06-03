@@ -242,7 +242,7 @@ function CameraSelectButton({
           <DropdownMenuSeparator />
         </>
       )}
-      <div className="mb-5 h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden p-4 md:mb-1">
+      <div className="scrollbar-container mb-5 h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden p-4 md:mb-1">
         <div className="flex flex-col gap-2.5">
           {allCameras.map((item) => (
             <FilterSwitch

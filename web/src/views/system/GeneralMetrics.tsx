@@ -344,7 +344,7 @@ export default function GeneralMetrics({
     <>
       <VainfoDialog showVainfo={showVainfo} setShowVainfo={setShowVainfo} />
 
-      <div className="mt-4 flex size-full flex-col overflow-y-auto">
+      <div className="scrollbar-container mt-4 flex size-full flex-col overflow-y-auto">
         <div className="text-sm font-medium text-muted-foreground">
           Detectors
         </div>

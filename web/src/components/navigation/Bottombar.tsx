@@ -93,7 +93,7 @@ function StatusAlertNav({ className }: StatusAlertNavProps) {
           className,
         )}
       >
-        <div className="flex h-auto w-full flex-col items-center gap-2 overflow-y-auto overflow-x-hidden py-4">
+        <div className="scrollbar-container flex h-auto w-full flex-col items-center gap-2 overflow-y-auto overflow-x-hidden py-4">
           {Object.entries(messages).map(([key, messageArray]) => (
             <div key={key} className="flex w-full items-center gap-2">
               {messageArray.map(({ id, text, color, link }: StatusMessage) => {

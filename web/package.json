@@ -72,6 +72,7 @@
     "strftime": "^0.10.2",
     "swr": "^2.2.5",
     "tailwind-merge": "^2.3.0",
+    "tailwind-scrollbar": "^3.1.0",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.1",
     "vite-plugin-monaco-editor": "^1.1.0",

@@ -115,7 +115,7 @@ export default function IconPicker({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <div className="flex h-full flex-col overflow-y-auto">
+          <div className="scrollbar-container flex h-full flex-col overflow-y-auto">
             <div className="grid grid-cols-6 gap-2 pr-1">
               {icons.map(([name, Icon]) => (
                 <div
