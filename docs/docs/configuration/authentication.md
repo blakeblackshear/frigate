@@ -14,6 +14,8 @@ Frigate supports two modes for authentication
 | `native` | (default) Use this mode if you don't implement authentication with a proxy in front of Frigate.                                                                                 |
 | `proxy`  | Use this mode if you have an existing proxy for authentication. Supports passing authenticated user downstream to Frigate for role-based authorization (future implementation). |
 
+Authentication is enforced on port 8080, while port 5000 remains unauthenticated for backwards-compatibility.
+
 ### Native mode
 
 Frigate stores user information in its database. Password hashes are generated using industry standard PBKDF2-SHA256 with 600,000 iterations. Upon successful login, a JWT token is issued with an expiration date and set as a cookie. The cookie is refreshed as needed automatically. This JWT token can also be passed in the Authorization header as a bearer token.
