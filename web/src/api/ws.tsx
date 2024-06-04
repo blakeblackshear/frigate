@@ -77,6 +77,7 @@ function useValue(): useValueReturn {
       });
     },
     shouldReconnect: () => true,
+    retryOnError: true,
   });
 
   const setState = useCallback(

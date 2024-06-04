@@ -527,7 +527,7 @@ export function RecordingView({
               >
                 <div className="w-2" />
                 {allCameras.map((cam) => {
-                  if (cam == mainCamera) {
+                  if (cam == mainCamera || cam == "birdseye") {
                     return;
                   }
 

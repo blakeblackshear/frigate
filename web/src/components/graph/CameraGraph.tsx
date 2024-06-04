@@ -116,7 +116,7 @@ export function CameraLineGraph({
   return (
     <div className="flex w-full flex-col">
       {lastValues && (
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2.5">
           {dataLabels.map((label, labelIdx) => (
             <div key={label} className="flex items-center gap-1">
               <MdCircle
