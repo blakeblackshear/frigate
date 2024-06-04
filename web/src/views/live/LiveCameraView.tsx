@@ -190,6 +190,7 @@ export default function LiveCameraView({
 
   const [audio, setAudio] = useState(false);
   const [mic, setMic] = useState(false);
+  const [webRTC, setWebRTC] = useState(false);
   const [pip, setPip] = useState(false);
   const [lowBandwidth, setLowBandwidth] = useState(false);
 
@@ -203,12 +204,20 @@ export default function LiveCameraView({
       return "webrtc";
     }
 
+    if (webRTC && isRestreamed) {
+      return "webrtc";
+    }
+
+    if (webRTC && !isRestreamed) {
+      return "jsmpeg";
+    }
+
     if (lowBandwidth) {
       return "jsmpeg";
     }
 
     return "mse";
-  }, [lowBandwidth, mic]);
+  }, [lowBandwidth, mic, webRTC, isRestreamed]);
 
   // layout state
 
@@ -426,7 +435,14 @@ export default function LiveCameraView({
                 pip={pip}
                 setFullResolution={setFullResolution}
                 containerRef={containerRef}
-                onError={() => setLowBandwidth(true)}
+                onError={(e) => {
+                  if (e == "mse-decode") {
+                    setWebRTC(true);
+                  } else {
+                    setWebRTC(false);
+                    setLowBandwidth(true);
+                  }
+                }}
               />
             </div>
             {camera.onvif.host != "" && (

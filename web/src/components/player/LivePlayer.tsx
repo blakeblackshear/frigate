@@ -138,6 +138,7 @@ export default function LivePlayer({
         iOSCompatFullScreen={iOSCompatFullScreen}
         onPlaying={() => setLiveReady(true)}
         pip={pip}
+        onError={onError}
       />
     );
   } else if (liveMode == "mse") {

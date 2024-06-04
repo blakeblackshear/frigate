@@ -36,6 +36,7 @@ export default function WebRtcPlayer({
   const pcRef = useRef<RTCPeerConnection | undefined>();
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [bufferTimeout, setBufferTimeout] = useState<NodeJS.Timeout>();
+  const videoLoadTimeoutRef = useRef<NodeJS.Timeout>();
 
   const PeerConnection = useCallback(
     async (media: string) => {
@@ -193,6 +194,27 @@ export default function WebRtcPlayer({
     videoRef.current.requestPictureInPicture();
   }, [pip, videoRef]);
 
+  useEffect(() => {
+    videoLoadTimeoutRef.current = setTimeout(() => {
+      onError?.("stalled");
+    }, 5000);
+
+    return () => {
+      if (videoLoadTimeoutRef.current) {
+        clearTimeout(videoLoadTimeoutRef.current);
+      }
+    };
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleLoadedData = () => {
+    if (videoLoadTimeoutRef.current) {
+      clearTimeout(videoLoadTimeoutRef.current);
+    }
+    onPlaying?.();
+  };
+
   return (
     <video
       ref={videoRef}
@@ -201,7 +223,7 @@ export default function WebRtcPlayer({
       autoPlay
       playsInline
       muted={!audioEnabled}
-      onLoadedData={onPlaying}
+      onLoadedData={handleLoadedData}
       onProgress={
         onError != undefined
           ? () => {
