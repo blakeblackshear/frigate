@@ -668,27 +668,32 @@ function Timeline({
           <Skeleton className="size-full" />
         )
       ) : (
-        <div
-          className={`grid h-full grid-cols-1 gap-4 overflow-auto bg-secondary p-4 ${isDesktop ? "" : "sm:grid-cols-2"}`}
-        >
-          {mainCameraReviewItems.map((review) => {
-            if (review.severity == "significant_motion") {
-              return;
-            }
+        <div className="h-full overflow-auto bg-secondary">
+          <div
+            className={cn(
+              "grid h-auto grid-cols-1 gap-4 overflow-auto p-4",
+              isMobile && "sm:grid-cols-2",
+            )}
+          >
+            {mainCameraReviewItems.map((review) => {
+              if (review.severity == "significant_motion") {
+                return;
+              }
 
-            return (
-              <ReviewCard
-                key={review.id}
-                event={review}
-                currentTime={currentTime}
-                onClick={() => {
-                  setScrubbing(true);
-                  setCurrentTime(review.start_time - REVIEW_PADDING);
-                  setScrubbing(false);
-                }}
-              />
-            );
-          })}
+              return (
+                <ReviewCard
+                  key={review.id}
+                  event={review}
+                  currentTime={currentTime}
+                  onClick={() => {
+                    setScrubbing(true);
+                    setCurrentTime(review.start_time - REVIEW_PADDING);
+                    setScrubbing(false);
+                  }}
+                />
+              );
+            })}
+          </div>
         </div>
       )}
     </div>
