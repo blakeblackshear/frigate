@@ -41,7 +41,7 @@
     "clsx": "^2.1.1",
     "copy-to-clipboard": "^3.3.3",
     "date-fns": "^3.6.0",
-    "hls.js": "^1.5.8",
+    "hls.js": "^1.5.10",
     "idb-keyval": "^6.2.1",
     "immer": "^10.1.1",
     "konva": "^9.3.9",
