@@ -11,6 +11,8 @@ import threading
 from enum import Enum
 from pathlib import Path
 
+from peewee import DoesNotExist
+
 from frigate.config import FrigateConfig
 from frigate.const import (
     CACHE_DIR,
@@ -72,30 +74,32 @@ class RecordingExporter(threading.Thread):
 
         if datetime.datetime.fromtimestamp(
             self.start_time
-        ) < datetime.datetime.now().replace(minute=0, second=0):
+        ) < datetime.datetime.now().astimezone(datetime.timezone.dst).replace(
+            minute=0, second=0, microsecond=0
+        ):
             # has preview mp4
-            preview: Previews = (
-                Previews.select(
-                    Previews.camera,
-                    Previews.path,
-                    Previews.duration,
-                    Previews.start_time,
-                    Previews.end_time,
-                )
-                .where(
-                    Previews.start_time.between(self.start_time, self.end_time)
-                    | Previews.end_time.between(self.start_time, self.end_time)
-                    | (
-                        (self.start_time > Previews.start_time)
-                        & (self.end_time < Previews.end_time)
+            try:
+                preview: Previews = (
+                    Previews.select(
+                        Previews.camera,
+                        Previews.path,
+                        Previews.duration,
+                        Previews.start_time,
+                        Previews.end_time,
                     )
+                    .where(
+                        Previews.start_time.between(self.start_time, self.end_time)
+                        | Previews.end_time.between(self.start_time, self.end_time)
+                        | (
+                            (self.start_time > Previews.start_time)
+                            & (self.end_time < Previews.end_time)
+                        )
+                    )
+                    .where(Previews.camera == self.camera)
+                    .limit(1)
+                    .get()
                 )
-                .where(Previews.camera == self.camera)
-                .limit(1)
-                .get()
-            )
-
-            if not preview:
+            except DoesNotExist:
                 return ""
 
             diff = self.start_time - preview.start_time

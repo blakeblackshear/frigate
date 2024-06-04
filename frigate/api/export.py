@@ -155,7 +155,6 @@ def export_delete(id: str):
         except psutil.Error:
             continue
 
-    logger.error(f"comparing {export.video_path.split('/')[-1]} to {files_in_use}")
     if export.video_path.split("/")[-1] in files_in_use:
         return make_response(
             jsonify(
