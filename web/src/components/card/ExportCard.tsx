@@ -109,43 +109,38 @@ export default function ExportCard({
           "relative flex aspect-video items-center justify-center rounded-lg bg-black md:rounded-2xl",
           className,
         )}
-        onMouseEnter={
-          isDesktop && !exportedRecording.in_progress
-            ? () => setHovered(true)
-            : undefined
-        }
-        onMouseLeave={
-          isDesktop && !exportedRecording.in_progress
-            ? () => setHovered(false)
-            : undefined
-        }
-        onClick={
-          isDesktop || exportedRecording.in_progress
-            ? undefined
-            : () => setHovered(!hovered)
-        }
+        onMouseEnter={isDesktop ? () => setHovered(true) : undefined}
+        onMouseLeave={isDesktop ? () => setHovered(false) : undefined}
+        onClick={isDesktop ? undefined : () => setHovered(!hovered)}
       >
         {hovered && (
           <>
             <div className="absolute inset-0 z-10 rounded-lg bg-black bg-opacity-60 md:rounded-2xl" />
             <div className="absolute right-1 top-1 flex items-center gap-2">
-              <a
-                className="z-20"
-                download
-                href={`${baseUrl}${exportedRecording.video_path.replace("/media/frigate/", "")}`}
-              >
-                <Chip className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500">
-                  <FaDownload className="size-4 text-white" />
+              {!exportedRecording.in_progress && (
+                <a
+                  className="z-20"
+                  download
+                  href={`${baseUrl}${exportedRecording.video_path.replace("/media/frigate/", "")}`}
+                >
+                  <Chip className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500">
+                    <FaDownload className="size-4 text-white" />
+                  </Chip>
+                </a>
+              )}
+              {!exportedRecording.in_progress && (
+                <Chip
+                  className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
+                  onClick={() =>
+                    setEditName({
+                      original: exportedRecording.name,
+                      update: "",
+                    })
+                  }
+                >
+                  <MdEditSquare className="size-4 text-white" />
                 </Chip>
-              </a>
-              <Chip
-                className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
-                onClick={() =>
-                  setEditName({ original: exportedRecording.name, update: "" })
-                }
-              >
-                <MdEditSquare className="size-4 text-white" />
-              </Chip>
+              )}
               <Chip
                 className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
                 onClick={() =>
@@ -159,15 +154,17 @@ export default function ExportCard({
               </Chip>
             </div>
 
-            <Button
-              className="absolute left-1/2 top-1/2 z-20 h-20 w-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer text-white hover:bg-transparent hover:text-white"
-              variant="ghost"
-              onClick={() => {
-                onSelect(exportedRecording);
-              }}
-            >
-              <FaPlay />
-            </Button>
+            {!exportedRecording.in_progress && (
+              <Button
+                className="absolute left-1/2 top-1/2 z-20 h-20 w-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer text-white hover:bg-transparent hover:text-white"
+                variant="ghost"
+                onClick={() => {
+                  onSelect(exportedRecording);
+                }}
+              >
+                <FaPlay />
+              </Button>
+            )}
           </>
         )}
         {exportedRecording.in_progress ? (
