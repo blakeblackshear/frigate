@@ -316,24 +316,22 @@ function MSEPlayer({
         if (isSafari || isIOS) {
           onPlaying?.();
         }
-        return onError != undefined
-          ? () => {
-              if (videoRef.current?.paused) {
-                return;
-              }
+        if (onError != undefined) {
+          if (videoRef.current?.paused) {
+            return;
+          }
 
-              if (bufferTimeout) {
-                clearTimeout(bufferTimeout);
-                setBufferTimeout(undefined);
-              }
+          if (bufferTimeout) {
+            clearTimeout(bufferTimeout);
+            setBufferTimeout(undefined);
+          }
 
-              setBufferTimeout(
-                setTimeout(() => {
-                  onError("stalled");
-                }, 3000),
-              );
-            }
-          : undefined;
+          setBufferTimeout(
+            setTimeout(() => {
+              onError("stalled");
+            }, 3000),
+          );
+        }
       }}
       onError={(e) => {
         if (
@@ -349,6 +347,8 @@ function MSEPlayer({
           (isSafari || isIOS)
         ) {
           onError?.("mse-decode");
+          clearTimeout(bufferTimeout);
+          setBufferTimeout(undefined);
         }
 
         if (wsRef.current) {
