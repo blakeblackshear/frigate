@@ -200,16 +200,16 @@ export default function LiveCameraView({
   });
 
   const preferredLiveMode = useMemo(() => {
+    if (mic) {
+      return "webrtc";
+    }
+
     if (webRTC && isRestreamed) {
       return "webrtc";
     }
 
     if (webRTC && !isRestreamed) {
       return "jsmpeg";
-    }
-
-    if (mic) {
-      return "webrtc";
     }
 
     if (lowBandwidth) {
