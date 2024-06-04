@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { isIOS, isSafari } from "react-device-detect";
 
 type MSEPlayerProps = {
   camera: string;
@@ -311,8 +312,11 @@ function MSEPlayer({
         onPlaying?.();
       }}
       muted={!audioEnabled}
-      onProgress={
-        onError != undefined
+      onProgress={() => {
+        if (isSafari || isIOS) {
+          onPlaying?.();
+        }
+        return onError != undefined
           ? () => {
               if (videoRef.current?.paused) {
                 return;
@@ -329,14 +333,22 @@ function MSEPlayer({
                 }, 3000),
               );
             }
-          : undefined
-      }
+          : undefined;
+      }}
       onError={(e) => {
         if (
           // @ts-expect-error code does exist
           e.target.error.code == MediaError.MEDIA_ERR_NETWORK
         ) {
           onError?.("startup");
+        }
+
+        if (
+          // @ts-expect-error code does exist
+          e.target.error.code == MediaError.MEDIA_ERR_DECODE &&
+          (isSafari || isIOS)
+        ) {
+          onError?.("mse-decode");
         }
 
         if (wsRef.current) {

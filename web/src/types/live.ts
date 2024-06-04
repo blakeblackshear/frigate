@@ -31,4 +31,4 @@ export type LiveStreamMetadata = {
   consumers: LiveConsumerMetadata[];
 };
 
-export type LivePlayerError = "stalled" | "startup";
+export type LivePlayerError = "stalled" | "startup" | "mse-decode";
