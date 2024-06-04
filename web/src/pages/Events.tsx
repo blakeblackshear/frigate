@@ -68,6 +68,19 @@ export default function Events() {
   const [reviewFilter, setReviewFilter, reviewSearchParams] =
     useApiFilter<ReviewFilter>();
 
+  useSearchEffect("group", (reviewGroup) => {
+    if (config && reviewGroup) {
+      const group = config.camera_groups[reviewGroup];
+
+      if (group) {
+        setReviewFilter({
+          ...reviewFilter,
+          cameras: group.cameras,
+        });
+      }
+    }
+  });
+
   const onUpdateFilter = useCallback(
     (newFilter: ReviewFilter) => {
       setReviewFilter(newFilter);

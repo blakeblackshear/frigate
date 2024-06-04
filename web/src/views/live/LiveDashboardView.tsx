@@ -224,7 +224,13 @@ export default function LiveDashboardView({
           <TooltipProvider>
             <div className="flex items-center gap-2 px-1">
               {events.map((event) => {
-                return <AnimatedEventCard key={event.id} event={event} />;
+                return (
+                  <AnimatedEventCard
+                    key={event.id}
+                    event={event}
+                    selectedGroup={cameraGroup}
+                  />
+                );
               })}
             </div>
           </TooltipProvider>

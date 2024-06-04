@@ -91,7 +91,15 @@ export default function DraggableGridLayout({
     );
   }, [config]);
 
+  // editing
+
   const [editGroup, setEditGroup] = useState(false);
+
+  useEffect(() => {
+    setEditGroup(false);
+  }, [cameraGroup]);
+
+  // camera state
 
   const [currentCameras, setCurrentCameras] = useState<CameraConfig[]>();
   const [currentIncludeBirdseye, setCurrentIncludeBirdseye] =

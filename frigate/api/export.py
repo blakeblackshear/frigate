@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 from typing import Optional
 
+import psutil
 from flask import (
     Blueprint,
     current_app,
@@ -14,6 +15,7 @@ from flask import (
 from peewee import DoesNotExist
 from werkzeug.utils import secure_filename
 
+from frigate.const import EXPORT_DIR
 from frigate.models import Export, Recordings
 from frigate.record.export import PlaybackFactorEnum, RecordingExporter
 
@@ -138,6 +140,27 @@ def export_delete(id: str):
                 }
             ),
             404,
+        )
+
+    files_in_use = []
+    for process in psutil.process_iter():
+        try:
+            if process.name() != "ffmpeg":
+                continue
+            flist = process.open_files()
+            if flist:
+                for nt in flist:
+                    if nt.path.startswith(EXPORT_DIR):
+                        files_in_use.append(nt.path.split("/")[-1])
+        except psutil.Error:
+            continue
+
+    if export.video_path.split("/")[-1] in files_in_use:
+        return make_response(
+            jsonify(
+                {"success": False, "message": "Can not delete in progress export."}
+            ),
+            400,
         )
 
     Path(export.video_path).unlink(missing_ok=True)
