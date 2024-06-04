@@ -78,7 +78,7 @@ class FFMpegConverter(threading.Thread):
         self.ffmpeg_cmd = parse_preset_hardware_acceleration_encode(
             config.ffmpeg.hwaccel_args,
             input="-f concat -y -protocol_whitelist pipe,file -safe 0 -i /dev/stdin",
-            output=f"-g {PREVIEW_KEYFRAME_INTERVAL}{' -fpsmax 2' if int(os.getenv('LIBAVFORMAT_VERSION_MAJOR', '59')) >= 59 else ''} -bf 0 -b:v {PREVIEW_QUALITY_BIT_RATES[self.config.record.preview.quality]} {FPS_VFR_PARAM} -movflags +faststart -pix_fmt yuv420p {self.path}",
+            output=f"-g {PREVIEW_KEYFRAME_INTERVAL} -bf 0 -b:v {PREVIEW_QUALITY_BIT_RATES[self.config.record.preview.quality]} {FPS_VFR_PARAM} -movflags +faststart -pix_fmt yuv420p {self.path}",
             type=EncodeTypeEnum.preview,
         )
 
