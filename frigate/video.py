@@ -446,6 +446,12 @@ def track_camera(
         region_grid,
     )
 
+    # empty the frame queue
+    logger.info(f"{name}: emptying frame queue")
+    while not frame_queue.empty():
+        frame_time = frame_queue.get(False)
+        frame_manager.delete(f"{name}{frame_time}")
+
     logger.info(f"{name}: exiting subprocess")
 
 

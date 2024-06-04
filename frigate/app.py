@@ -731,43 +731,82 @@ class FrigateApp:
             ReviewSegment.end_time == None
         ).execute()
 
-        # Stop Communicators
-        self.inter_process_communicator.stop()
-        self.inter_config_updater.stop()
-        self.inter_detection_proxy.stop()
+        # ensure the capture processes are done
+        for camera in self.camera_metrics.keys():
+            capture_process = self.camera_metrics[camera]["capture_process"]
+            logger.info(f"Waiting for capture process for {camera} to stop")
+            capture_process.join()
 
+        # ensure the detectors are done
         for detector in self.detectors.values():
             detector.stop()
 
         # Empty the detection queue and set the events for all requests
         while not self.detection_queue.empty():
-            connection_id = self.detection_queue.get(timeout=1)
+            connection_id = self.detection_queue.get(False)
             self.detection_out_events[connection_id].set()
-        self.detection_queue.close()
-        self.detection_queue.join_thread()
+
+        # ensure the camera processors are done
+        for camera in self.camera_metrics.keys():
+            camera_process = self.camera_metrics[camera]["process"]
+            logger.info(f"Waiting for process for {camera} to stop")
+            camera_process.join()
+            logger.info(f"Closing frame queue for {camera}")
+            frame_queue = self.camera_metrics[camera]["frame_queue"]
+            frame_queue.close()
+            frame_queue.join_thread()
+
+        # Empty the detection queue
+        while not self.detection_queue.empty():
+            connection_id = self.detection_queue.get(False)
+            self.detection_out_events[connection_id].set()
+
+        # Empty the detected frames queue
+        while not self.detected_frames_queue.empty():
+            self.detected_frames_queue.get(False)
 
         self.external_event_processor.stop()
         self.dispatcher.stop()
         self.detected_frames_processor.join()
         self.ptz_autotracker_thread.join()
         self.event_processor.join()
+
+        # Empty the timeline queue
+        while not self.timeline_queue.empty():
+            self.timeline_queue.get(False)
+
+        self.timeline_processor.join()
         self.event_cleanup.join()
         self.record_cleanup.join()
         self.stats_emitter.join()
         self.frigate_watchdog.join()
         self.db.stop()
 
+        # Stop Communicators
+        self.inter_process_communicator.stop()
+        self.inter_config_updater.stop()
+        self.inter_detection_proxy.stop()
+
         while len(self.detection_shms) > 0:
             shm = self.detection_shms.pop()
             shm.close()
             shm.unlink()
 
+        # Close queues
         for queue in [
+            self.detection_queue,
             self.detected_frames_queue,
-            self.log_queue,
+            self.timeline_queue,
         ]:
             if queue is not None:
                 while not queue.empty():
                     queue.get_nowait()
                 queue.close()
                 queue.join_thread()
+
+        # Empty log queue
+        if self.log_queue is not None:
+            while not self.log_queue.empty():
+                self.log_queue.get_nowait()
+            self.log_queue.close()
+            self.log_queue.join_thread()
