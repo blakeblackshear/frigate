@@ -14,8 +14,12 @@ import { baseUrl } from "@/api/baseUrl";
 
 type AnimatedEventCardProps = {
   event: ReviewSegment;
+  selectedGroup?: string;
 };
-export function AnimatedEventCard({ event }: AnimatedEventCardProps) {
+export function AnimatedEventCard({
+  event,
+  selectedGroup,
+}: AnimatedEventCardProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const currentHour = useMemo(() => isCurrentHour(event.start_time), [event]);
@@ -53,7 +57,8 @@ export function AnimatedEventCard({ event }: AnimatedEventCardProps) {
 
   const navigate = useNavigate();
   const onOpenReview = useCallback(() => {
-    navigate("review", {
+    const url = selectedGroup ? `review?group=${selectedGroup}` : "review";
+    navigate(url, {
       state: {
         severity: event.severity,
         recording: {
@@ -64,7 +69,7 @@ export function AnimatedEventCard({ event }: AnimatedEventCardProps) {
       },
     });
     axios.post(`reviews/viewed`, { ids: [event.id] });
-  }, [navigate, event]);
+  }, [navigate, selectedGroup, event]);
 
   // image behavior
 
