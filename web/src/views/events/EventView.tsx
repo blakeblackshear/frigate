@@ -29,7 +29,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { isDesktop, isMobile, isTablet } from "react-device-detect";
+import { isDesktop, isMobile } from "react-device-detect";
 import { LuFolderCheck } from "react-icons/lu";
 import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
@@ -868,9 +868,10 @@ function MotionReview({
         <div
           ref={contentRef}
           className={cn(
-            "no-scrollbar grid w-full grid-cols-1",
-            (reviewCameras.length > 3 || isTablet || isDesktop) &&
-              "grid-cols-2",
+            "no-scrollbar grid w-full grid-cols-1 landscape:grid-cols-2",
+            reviewCameras.length > 3 &&
+              isMobile &&
+              "portrait:md:grid-cols-2 landscape:md:grid-cols-3",
             "gap-2 overflow-auto px-1 md:mx-2 md:gap-4 xl:grid-cols-3 3xl:grid-cols-4",
           )}
         >
@@ -882,7 +883,7 @@ function MotionReview({
               grow = "aspect-wide";
               spans = reviewCameras.length > 3 && "col-span-2";
             } else if (aspectRatio < 1) {
-              grow = "md:h-full aspect-tall";
+              grow = "h-full aspect-tall";
               spans = "row-span-2";
             } else {
               grow = "aspect-video";

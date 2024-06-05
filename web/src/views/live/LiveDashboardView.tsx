@@ -255,7 +255,7 @@ export default function LiveDashboardView({
                 if (aspectRatio > 2) {
                   return `${mobileLayout == "grid" && "col-span-2"} aspect-wide`;
                 } else if (aspectRatio < 1) {
-                  return `${mobileLayout == "grid" && "row-span-2 md:h-full"} aspect-tall`;
+                  return `${mobileLayout == "grid" && "row-span-2 h-full"} aspect-tall`;
                 } else {
                   return "aspect-video";
                 }
@@ -276,7 +276,7 @@ export default function LiveDashboardView({
             if (aspectRatio > 2) {
               grow = `${mobileLayout == "grid" && "col-span-2"} aspect-wide`;
             } else if (aspectRatio < 1) {
-              grow = `${mobileLayout == "grid" && "row-span-2 md:h-full"} aspect-tall`;
+              grow = `${mobileLayout == "grid" && "row-span-2 h-full"} aspect-tall`;
             } else {
               grow = "aspect-video";
             }
