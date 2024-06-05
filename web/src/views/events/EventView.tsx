@@ -881,10 +881,10 @@ function MotionReview({
             const aspectRatio = camera.detect.width / camera.detect.height;
             if (aspectRatio > 2) {
               grow = "aspect-wide";
-              spans = reviewCameras.length > 3 && "col-span-2";
+              spans = "sm:col-span-2";
             } else if (aspectRatio < 1) {
               grow = "h-full aspect-tall";
-              spans = "row-span-2";
+              spans = "md:row-span-2";
             } else {
               grow = "aspect-video";
             }
