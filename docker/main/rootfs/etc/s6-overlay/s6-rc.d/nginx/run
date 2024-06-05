@@ -8,16 +8,59 @@ set -o errexit -o nounset -o pipefail
 
 echo "[INFO] Starting NGINX..."
 
+# Taken from https://github.com/felipecrs/cgroup-scripts/commits/master/get_cpus.sh
+function get_cpus() {
+    local quota=""
+    local period=""
+
+    if [ -f /sys/fs/cgroup/cgroup.controllers ]; then
+        if [ -f /sys/fs/cgroup/cpu.max ]; then
+            read -r quota period </sys/fs/cgroup/cpu.max
+            if [ "$quota" = "max" ]; then
+                quota=""
+                period=""
+            fi
+        else
+            echo "[WARN] /sys/fs/cgroup/cpu.max not found. Falling back to /proc/cpuinfo." >&2
+        fi
+    else
+        if [ -f /sys/fs/cgroup/cpu/cpu.cfs_quota_us ] && [ -f /sys/fs/cgroup/cpu/cpu.cfs_period_us ]; then
+            quota=$(cat /sys/fs/cgroup/cpu/cpu.cfs_quota_us)
+            period=$(cat /sys/fs/cgroup/cpu/cpu.cfs_period_us)
+
+            if [ "$quota" = "-1" ]; then
+                quota=""
+                period=""
+            fi
+        else
+            echo "[WARN] /sys/fs/cgroup/cpu/cpu.cfs_quota_us or /sys/fs/cgroup/cpu/cpu.cfs_period_us not found. Falling back to /proc/cpuinfo." >&2
+        fi
+    fi
+
+    local cpus
+    if [ -n "${quota}" ] && [ -n "${period}" ]; then
+        cpus=$((quota / period))
+        if [ "$cpus" -eq 0 ]; then
+            cpus=1
+        fi
+    else
+        cpus=$(grep -c processor /proc/cpuinfo)
+    fi
+
+    printf '%s' "$cpus"
+}
+
 function set_worker_processes() {
     # Capture number of assigned CPUs to calculate worker processes
-    local proc_count
+    local cpus
 
-    if proc_count=$(nproc --all) && [[ $proc_count -gt 4 ]]; then
-        proc_count=4;
+    cpus=$(get_cpus)
+    if [[ "${cpus}" -gt 4 ]]; then
+        cpus=4
     fi
 
     # we need to catch any errors because sed will fail if user has bind mounted a custom nginx file
-    sed -i "s/worker_processes auto;/worker_processes ${proc_count};/" /usr/local/nginx/conf/nginx.conf || true
+    sed -i "s/worker_processes auto;/worker_processes ${cpus};/" /usr/local/nginx/conf/nginx.conf || true
 }
 
 set_worker_processes
