@@ -30,6 +30,9 @@ RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=cache,target=/root/.ccache \
     /deps/build_nginx.sh
 
+# https://github.com/felipecrs/cgroup-scripts/commits/master/get_cpus.sh
+ADD --link --chmod=755 "https://github.com/felipecrs/cgroup-scripts/raw/178c3ed0cb55465af6652fbd2b419573ccadea8a/get_cpus.sh" /usr/local/nginx/
+
 FROM scratch AS go2rtc
 ARG TARGETARCH
 WORKDIR /rootfs/usr/local/go2rtc/bin

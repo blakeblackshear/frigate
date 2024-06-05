@@ -12,8 +12,9 @@ function set_worker_processes() {
     # Capture number of assigned CPUs to calculate worker processes
     local proc_count
 
-    if proc_count=$(nproc --all) && [[ $proc_count -gt 4 ]]; then
-        proc_count=4;
+    proc_count=$(/usr/local/nginx/get_cpus.sh)
+    if [[ "$proc_count" -gt 4 ]]; then
+        proc_count=4
     fi
 
     # we need to catch any errors because sed will fail if user has bind mounted a custom nginx file
