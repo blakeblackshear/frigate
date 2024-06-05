@@ -321,7 +321,10 @@ export default function DraggableGridLayout({
     const heightDiff = layoutItem.h - oldLayoutItem.h;
     const widthDiff = layoutItem.w - oldLayoutItem.w;
     const changeCoef = oldLayoutItem.w / oldLayoutItem.h;
-    if (Math.abs(heightDiff) != Math.abs(widthDiff) || layoutItem.w == 12) {
+    if (
+      Math.abs(heightDiff) < Math.abs(widthDiff) ||
+      layoutItem.x + layoutItem.w >= 12
+    ) {
       layoutItem.h = layoutItem.w / changeCoef;
       placeholder.h = layoutItem.w / changeCoef;
     } else {
