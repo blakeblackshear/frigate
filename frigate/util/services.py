@@ -33,7 +33,7 @@ def restart_frigate():
         proc.terminate()
     # otherwise, just try and exit frigate
     else:
-        os.kill(os.getpid(), signal.SIGTERM)
+        os.kill(os.getpid(), signal.SIGINT)
 
 
 def print_stack(sig, frame):

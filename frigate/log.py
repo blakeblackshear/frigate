@@ -57,8 +57,8 @@ def log_process(log_queue: Queue) -> None:
 
     while True:
         try:
-            record = log_queue.get(timeout=1)
-        except (queue.Empty, KeyboardInterrupt):
+            record = log_queue.get(block=True, timeout=1.0)
+        except queue.Empty:
             if stop_event.is_set():
                 break
             continue

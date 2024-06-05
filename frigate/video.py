@@ -360,6 +360,7 @@ def capture_camera(name, config: CameraConfig, process_info):
     stop_event = mp.Event()
 
     def receiveSignal(signalNumber, frame):
+        logger.info(f"Capture camera received signal {signalNumber}")
         stop_event.set()
 
     signal.signal(signal.SIGTERM, receiveSignal)
