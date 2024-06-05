@@ -868,7 +868,8 @@ function MotionReview({
         <div
           ref={contentRef}
           className={cn(
-            "no-scrollbar grid w-full grid-cols-1 landscape:grid-cols-2",
+            "no-scrollbar grid w-full grid-cols-1",
+            isMobile && "landscape:grid-cols-2",
             reviewCameras.length > 3 &&
               isMobile &&
               "portrait:md:grid-cols-2 landscape:md:grid-cols-3",
