@@ -171,4 +171,10 @@
 
 .react-resizable-handle {
   z-index: 30;
+  background-image: none !important;
+}
+
+.react-grid-item.react-grid-placeholder {
+  border: 3px solid #a00000 !important;
+  opacity: 0.5 !important;
 }

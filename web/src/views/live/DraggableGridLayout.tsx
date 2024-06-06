@@ -94,6 +94,7 @@ export default function DraggableGridLayout({
   // editing
 
   const [editGroup, setEditGroup] = useState(false);
+  const [showCircles, setShowCircles] = useState(true);
 
   useEffect(() => {
     setEditGroup(false);
@@ -115,6 +116,7 @@ export default function DraggableGridLayout({
       }
       // save layout to idb
       setGridLayout(currentLayout);
+      setShowCircles(true);
     },
     [setGridLayout, isGridLayoutLoaded, gridLayout, currentGridLayout],
   );
@@ -321,13 +323,37 @@ export default function DraggableGridLayout({
     const heightDiff = layoutItem.h - oldLayoutItem.h;
     const widthDiff = layoutItem.w - oldLayoutItem.w;
     const changeCoef = oldLayoutItem.w / oldLayoutItem.h;
-    if (Math.abs(heightDiff) < Math.abs(widthDiff) || layoutItem.w == 12) {
-      layoutItem.h = layoutItem.w / changeCoef;
-      placeholder.h = layoutItem.w / changeCoef;
+
+    let newWidth, newHeight;
+
+    if (Math.abs(heightDiff) < Math.abs(widthDiff)) {
+      newHeight = Math.round(layoutItem.w / changeCoef);
+      newWidth = Math.round(newHeight * changeCoef);
     } else {
-      layoutItem.w = layoutItem.h * changeCoef;
-      placeholder.w = layoutItem.h * changeCoef;
+      newWidth = Math.round(layoutItem.h * changeCoef);
+      newHeight = Math.round(newWidth / changeCoef);
     }
+
+    // Ensure dimensions maintain aspect ratio and fit within the grid
+    if (layoutItem.x + newWidth > 12) {
+      newWidth = 12 - layoutItem.x;
+      newHeight = Math.round(newWidth / changeCoef);
+    }
+
+    if (changeCoef == 0.5) {
+      // portrait
+      newHeight = Math.ceil(newHeight / 2) * 2;
+    } else if (changeCoef == 2) {
+      // pano/wide
+      newHeight = Math.ceil(newHeight * 2) / 2;
+    }
+
+    newWidth = Math.round(newHeight * changeCoef);
+
+    layoutItem.w = newWidth;
+    layoutItem.h = newHeight;
+    placeholder.w = layoutItem.w;
+    placeholder.h = layoutItem.h;
   };
 
   return (
@@ -378,6 +404,7 @@ export default function DraggableGridLayout({
             resizeHandles={isEditMode ? ["sw", "nw", "se", "ne"] : []}
             onDragStop={handleLayoutChange}
             onResize={handleResize}
+            onResizeStart={() => setShowCircles(false)}
             onResizeStop={handleLayoutChange}
           >
             {includeBirdseye && birdseyeConfig?.enabled && (
@@ -385,13 +412,14 @@ export default function DraggableGridLayout({
                 key="birdseye"
                 className={cn(
                   isEditMode &&
+                    showCircles &&
                     "outline outline-2 outline-muted-foreground hover:cursor-grab hover:outline-4 active:cursor-grabbing",
                 )}
                 birdseyeConfig={birdseyeConfig}
                 liveMode={birdseyeConfig.restream ? "mse" : "jsmpeg"}
                 onClick={() => onSelectCamera("birdseye")}
               >
-                {isEditMode && <CornerCircles />}
+                {isEditMode && showCircles && <CornerCircles />}
               </BirdseyeLivePlayerGridItem>
             )}
             {cameras.map((camera) => {
@@ -412,6 +440,7 @@ export default function DraggableGridLayout({
                     "rounded-lg bg-black md:rounded-2xl",
                     grow,
                     isEditMode &&
+                      showCircles &&
                       "outline-2 outline-muted-foreground hover:cursor-grab hover:outline-4 active:cursor-grabbing",
                   )}
                   windowVisible={
@@ -423,7 +452,7 @@ export default function DraggableGridLayout({
                     !isEditMode && onSelectCamera(camera.name);
                   }}
                 >
-                  {isEditMode && <CornerCircles />}
+                  {isEditMode && showCircles && <CornerCircles />}
                 </LivePlayerGridItem>
               );
             })}
