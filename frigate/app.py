@@ -743,19 +743,21 @@ class FrigateApp:
         # ensure the capture processes are done
         for camera in self.camera_metrics.keys():
             capture_process = self.camera_metrics[camera]["capture_process"]
-            logger.info(f"Waiting for capture process for {camera} to stop")
-            capture_process.terminate()
-            capture_process.join()
+            if capture_process is not None:
+                logger.info(f"Waiting for capture process for {camera} to stop")
+                capture_process.terminate()
+                capture_process.join()
 
         # ensure the camera processors are done
         for camera in self.camera_metrics.keys():
             camera_process = self.camera_metrics[camera]["process"]
-            logger.info(f"Waiting for process for {camera} to stop")
-            camera_process.terminate()
-            camera_process.join()
-            logger.info(f"Closing frame queue for {camera}")
-            frame_queue = self.camera_metrics[camera]["frame_queue"]
-            empty_and_close_queue(frame_queue)
+            if camera_process is not None:
+                logger.info(f"Waiting for process for {camera} to stop")
+                camera_process.terminate()
+                camera_process.join()
+                logger.info(f"Closing frame queue for {camera}")
+                frame_queue = self.camera_metrics[camera]["frame_queue"]
+                empty_and_close_queue(frame_queue)
 
         # ensure the detectors are done
         for detector in self.detectors.values():
