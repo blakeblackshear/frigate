@@ -72,10 +72,11 @@ class RecordingExporter(threading.Thread):
     def save_thumbnail(self, id: str) -> str:
         thumb_path = os.path.join(CLIPS_DIR, f"export/{id}.webp")
 
-        if datetime.datetime.fromtimestamp(
+        if (
             self.start_time
-        ) < datetime.datetime.now().astimezone(datetime.timezone.utc).replace(
-            minute=0, second=0, microsecond=0
+            < datetime.datetime.now(datetime.timezone.utc)
+            .replace(minute=0, second=0, microsecond=0)
+            .timestamp()
         ):
             # has preview mp4
             try:
