@@ -22,7 +22,7 @@ def manage_recordings(config: FrigateConfig) -> None:
     stop_event = mp.Event()
 
     def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:
-        logger.info(f"Recording manager process received signal {signalNumber}")
+        logger.debug(f"Recording manager process received signal {signalNumber}")
         stop_event.set()
 
     signal.signal(signal.SIGTERM, receiveSignal)

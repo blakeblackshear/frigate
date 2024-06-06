@@ -83,7 +83,7 @@ def listen_to_audio(
         logger.info("Exiting audio detector...")
 
     def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:
-        logger.info(f"Audio process received signal {signalNumber}")
+        logger.debug(f"Audio process received signal {signalNumber}")
         stop_event.set()
         exit_process()
 
