@@ -65,7 +65,7 @@ def sync_recordings(limited: bool) -> None:
         ]
 
         if float(len(recordings_to_delete)) / max(1, recordings.count()) > 0.5:
-            logger.debug(
+            logger.warning(
                 f"Deleting {(float(len(recordings_to_delete)) / recordings.count()):2f}% of recordings DB entries, could be due to configuration error. Aborting..."
             )
             return False
