@@ -74,7 +74,7 @@ class RecordingExporter(threading.Thread):
 
         if datetime.datetime.fromtimestamp(
             self.start_time
-        ) < datetime.datetime.now().astimezone(datetime.timezone.dst).replace(
+        ) < datetime.datetime.now().astimezone(datetime.timezone.utc).replace(
             minute=0, second=0, microsecond=0
         ):
             # has preview mp4
