@@ -360,6 +360,7 @@ def capture_camera(name, config: CameraConfig, process_info):
     stop_event = mp.Event()
 
     def receiveSignal(signalNumber, frame):
+        logger.debug(f"Capture camera received signal {signalNumber}")
         stop_event.set()
 
     signal.signal(signal.SIGTERM, receiveSignal)
@@ -445,6 +446,12 @@ def track_camera(
         ptz_metrics,
         region_grid,
     )
+
+    # empty the frame queue
+    logger.info(f"{name}: emptying frame queue")
+    while not frame_queue.empty():
+        frame_time = frame_queue.get(False)
+        frame_manager.delete(f"{name}{frame_time}")
 
     logger.info(f"{name}: exiting subprocess")
 

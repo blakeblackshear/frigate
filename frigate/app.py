@@ -68,7 +68,7 @@ from frigate.stats.util import stats_init
 from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
 from frigate.types import CameraMetricsTypes, PTZMetricsTypes
-from frigate.util.builtin import save_default_config
+from frigate.util.builtin import empty_and_close_queue, save_default_config
 from frigate.util.config import migrate_frigate_config
 from frigate.util.object import get_camera_regions_grid
 from frigate.version import VERSION
@@ -521,8 +521,9 @@ class FrigateApp:
             logger.info(f"Capture process started for {name}: {capture_process.pid}")
 
     def start_audio_processors(self) -> None:
+        self.audio_process = None
         if len([c for c in self.config.cameras.values() if c.audio.enabled]) > 0:
-            audio_process = mp.Process(
+            self.audio_process = mp.Process(
                 target=listen_to_audio,
                 name="audio_capture",
                 args=(
@@ -530,10 +531,10 @@ class FrigateApp:
                     self.camera_metrics,
                 ),
             )
-            audio_process.daemon = True
-            audio_process.start()
-            self.processes["audio_detector"] = audio_process.pid or 0
-            logger.info(f"Audio process started: {audio_process.pid}")
+            self.audio_process.daemon = True
+            self.audio_process.start()
+            self.processes["audio_detector"] = self.audio_process.pid or 0
+            logger.info(f"Audio process started: {self.audio_process.pid}")
 
     def start_timeline_processor(self) -> None:
         self.timeline_processor = TimelineProcessor(
@@ -706,9 +707,9 @@ class FrigateApp:
         self.check_shm()
         self.init_auth()
 
+        # Flask only listens for SIGINT, so we need to catch SIGTERM and send SIGINT
         def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:
-            self.stop()
-            sys.exit()
+            os.kill(os.getpid(), signal.SIGINT)
 
         signal.signal(signal.SIGTERM, receiveSignal)
 
@@ -717,10 +718,13 @@ class FrigateApp:
         except KeyboardInterrupt:
             pass
 
+        logger.info("Flask has exited...")
+
         self.stop()
 
     def stop(self) -> None:
         logger.info("Stopping...")
+
         self.stop_event.set()
 
         # set an end_time on entries without an end_time before exiting
@@ -731,43 +735,76 @@ class FrigateApp:
             ReviewSegment.end_time == None
         ).execute()
 
-        # Stop Communicators
-        self.inter_process_communicator.stop()
-        self.inter_config_updater.stop()
-        self.inter_detection_proxy.stop()
+        # stop the audio process
+        if self.audio_process is not None:
+            self.audio_process.terminate()
+            self.audio_process.join()
 
+        # ensure the capture processes are done
+        for camera in self.camera_metrics.keys():
+            capture_process = self.camera_metrics[camera]["capture_process"]
+            if capture_process is not None:
+                logger.info(f"Waiting for capture process for {camera} to stop")
+                capture_process.terminate()
+                capture_process.join()
+
+        # ensure the camera processors are done
+        for camera in self.camera_metrics.keys():
+            camera_process = self.camera_metrics[camera]["process"]
+            if camera_process is not None:
+                logger.info(f"Waiting for process for {camera} to stop")
+                camera_process.terminate()
+                camera_process.join()
+                logger.info(f"Closing frame queue for {camera}")
+                frame_queue = self.camera_metrics[camera]["frame_queue"]
+                empty_and_close_queue(frame_queue)
+
+        # ensure the detectors are done
         for detector in self.detectors.values():
             detector.stop()
 
-        # Empty the detection queue and set the events for all requests
-        while not self.detection_queue.empty():
-            connection_id = self.detection_queue.get(timeout=1)
-            self.detection_out_events[connection_id].set()
-        self.detection_queue.close()
-        self.detection_queue.join_thread()
+        empty_and_close_queue(self.detection_queue)
+        logger.info("Detection queue closed")
+
+        self.detected_frames_processor.join()
+        empty_and_close_queue(self.detected_frames_queue)
+        logger.info("Detected frames queue closed")
+
+        self.timeline_processor.join()
+        self.event_processor.join()
+        empty_and_close_queue(self.timeline_queue)
+        logger.info("Timeline queue closed")
+
+        self.output_processor.terminate()
+        self.output_processor.join()
+
+        self.recording_process.terminate()
+        self.recording_process.join()
+
+        self.review_segment_process.terminate()
+        self.review_segment_process.join()
 
         self.external_event_processor.stop()
         self.dispatcher.stop()
-        self.detected_frames_processor.join()
         self.ptz_autotracker_thread.join()
-        self.event_processor.join()
+
         self.event_cleanup.join()
         self.record_cleanup.join()
         self.stats_emitter.join()
         self.frigate_watchdog.join()
         self.db.stop()
 
+        # Stop Communicators
+        self.inter_process_communicator.stop()
+        self.inter_config_updater.stop()
+        self.inter_detection_proxy.stop()
+
         while len(self.detection_shms) > 0:
             shm = self.detection_shms.pop()
             shm.close()
             shm.unlink()
 
-        for queue in [
-            self.detected_frames_queue,
-            self.log_queue,
-        ]:
-            if queue is not None:
-                while not queue.empty():
-                    queue.get_nowait()
-                queue.close()
-                queue.join_thread()
+        self.log_process.terminate()
+        self.log_process.join()
+
+        os._exit(os.EX_OK)

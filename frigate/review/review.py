@@ -20,6 +20,7 @@ def manage_review_segments(config: FrigateConfig) -> None:
     stop_event = mp.Event()
 
     def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:
+        logger.debug(f"Manage review segments process received signal {signalNumber}")
         stop_event.set()
 
     signal.signal(signal.SIGTERM, receiveSignal)
