@@ -882,7 +882,7 @@ function MotionReview({
             reviewCameras.length > 3 &&
               isMobile &&
               "portrait:md:grid-cols-2 landscape:md:grid-cols-3",
-            isDesktop && "md:grid-cols-3",
+            isDesktop && "grid-cols-2 lg:grid-cols-3",
             "gap-2 overflow-auto px-1 md:mx-2 md:gap-4 xl:grid-cols-3 3xl:grid-cols-4",
           )}
         >
