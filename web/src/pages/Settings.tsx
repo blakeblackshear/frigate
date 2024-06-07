@@ -81,12 +81,10 @@ export default function Settings() {
   );
 
   useEffect(() => {
-    if (cameras.length) {
+    if (cameras.length > 0 && selectedCamera === "") {
       setSelectedCamera(cameras[0].name);
     }
-    // only run once
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [cameras, selectedCamera]);
 
   useEffect(() => {
     if (tabsRef.current) {
