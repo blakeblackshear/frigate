@@ -69,7 +69,7 @@ export default function AutoUpdatingCameraImage({
       <CameraImage
         camera={camera}
         onload={handleLoad}
-        searchParams={`cache=${key}${searchParams && `&${searchParams}`}`}
+        searchParams={`cache=${key}${searchParams ? `&${searchParams}` : ""}`}
         className={cameraClasses}
       />
       {showFps ? <span className="text-xs">Displaying at {fps}fps</span> : null}
