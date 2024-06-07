@@ -1,5 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
+from typing import List
 
 import numpy as np
 
@@ -10,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 class DetectionApi(ABC):
     type_key: str
+    supported_models: List[ModelTypeEnum]
 
     @abstractmethod
     def __init__(self, detector_config):

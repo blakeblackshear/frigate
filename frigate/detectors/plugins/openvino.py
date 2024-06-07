@@ -20,6 +20,7 @@ class OvDetectorConfig(BaseDetectorConfig):
 
 class OvDetector(DetectionApi):
     type_key = DETECTOR_KEY
+    supported_models = [ModelTypeEnum.ssd, ModelTypeEnum.yolonas, ModelTypeEnum.yolox]
 
     def __init__(self, detector_config: OvDetectorConfig):
         self.ov_core = ov.Core()
@@ -28,11 +29,23 @@ class OvDetector(DetectionApi):
         self.h = detector_config.model.height
         self.w = detector_config.model.width
 
+        if detector_config.device == "AUTO":
+            logger.warning(
+                "OpenVINO AUTO device type is not currently supported. Attempting to use GPU instead."
+            )
+            detector_config.device = "GPU"
+
         self.interpreter = self.ov_core.compile_model(
             model=detector_config.model.path, device_name=detector_config.device
         )
 
         self.model_invalid = False
+
+        if self.ov_model_type not in self.supported_models:
+            logger.error(
+                f"OpenVino detector does not support {self.ov_model_type} models."
+            )
+            self.model_invalid = True
 
         # Ensure the SSD model has the right input and output shapes
         if self.ov_model_type == ModelTypeEnum.ssd:
@@ -59,6 +72,34 @@ class OvDetector(DetectionApi):
             output_shape = model_outputs[0].get_shape()
             if output_shape[0] != 1 or output_shape[1] != 1 or output_shape[3] != 7:
                 logger.error(f"SSD model output doesn't match. Found {output_shape}.")
+                self.model_invalid = True
+
+        if self.ov_model_type == ModelTypeEnum.yolonas:
+            model_inputs = self.interpreter.inputs
+            model_outputs = self.interpreter.outputs
+
+            if len(model_inputs) != 1:
+                logger.error(
+                    f"YoloNAS models must only have 1 input. Found {len(model_inputs)}."
+                )
+                self.model_invalid = True
+            if len(model_outputs) != 1:
+                logger.error(
+                    f"YoloNAS models must be exported in flat format and only have 1 output. Found {len(model_outputs)}."
+                )
+                self.model_invalid = True
+
+            if model_inputs[0].get_shape() != ov.Shape([1, 3, self.w, self.h]):
+                logger.error(
+                    f"YoloNAS model input doesn't match. Found {model_inputs[0].get_shape()}, but expected {[1, 3, self.w, self.h]}."
+                )
+                self.model_invalid = True
+
+            output_shape = model_outputs[0].partial_shape
+            if output_shape[-1] != 7:
+                logger.error(
+                    f"YoloNAS models must be exported in flat format. Model output doesn't match. Found {output_shape}."
+                )
                 self.model_invalid = True
 
         if self.ov_model_type == ModelTypeEnum.yolox:
@@ -113,12 +154,12 @@ class OvDetector(DetectionApi):
         input_tensor = ov.Tensor(array=tensor_input)
         infer_request.infer(input_tensor)
 
+        detections = np.zeros((20, 6), np.float32)
+
+        if self.model_invalid:
+            return detections
+
         if self.ov_model_type == ModelTypeEnum.ssd:
-            detections = np.zeros((20, 6), np.float32)
-
-            if self.model_invalid:
-                return detections
-
             results = infer_request.get_output_tensor(0).data[0][0]
 
             for i, (_, class_id, score, xmin, ymin, xmax, ymax) in enumerate(results):
@@ -131,6 +172,26 @@ class OvDetector(DetectionApi):
                     xmin,
                     ymax,
                     xmax,
+                ]
+            return detections
+
+        if self.ov_model_type == ModelTypeEnum.yolonas:
+            predictions = infer_request.get_output_tensor(0).data
+
+            for i, prediction in enumerate(predictions):
+                if i == 20:
+                    break
+                (_, x_min, y_min, x_max, y_max, confidence, class_id) = prediction
+                # when running in GPU mode, empty predictions in the output have class_id of -1
+                if class_id < 0:
+                    break
+                detections[i] = [
+                    class_id,
+                    confidence,
+                    y_min / self.h,
+                    x_min / self.w,
+                    y_max / self.h,
+                    x_max / self.w,
                 ]
             return detections
 
@@ -154,8 +215,6 @@ class OvDetector(DetectionApi):
             dets = dets[conf_mask]
 
             ordered = dets[dets[:, 5].argsort()[::-1]][:20]
-
-            detections = np.zeros((20, 6), np.float32)
 
             for i, object_detected in enumerate(ordered):
                 detections[i] = self.process_yolo(
