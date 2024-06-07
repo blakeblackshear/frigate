@@ -878,12 +878,7 @@ function MotionReview({
           ref={contentRef}
           className={cn(
             "no-scrollbar grid w-full grid-cols-1",
-            isMobile && "landscape:grid-cols-2",
-            reviewCameras.length > 3 &&
-              isMobile &&
-              "portrait:md:grid-cols-2 landscape:md:grid-cols-3",
-            isDesktop && "md:grid-cols-3",
-            "gap-2 overflow-auto px-1 md:mx-2 md:gap-4 xl:grid-cols-3 3xl:grid-cols-4",
+            "gap-2 overflow-auto px-1 md:mx-2 md:gap-4 sm:grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4",
           )}
         >
           {reviewCameras.map((camera) => {
