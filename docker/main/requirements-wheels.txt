@@ -2,7 +2,7 @@ click == 8.1.*
 Flask == 3.0.*
 Flask_Limiter == 3.7.*
 imutils == 0.5.*
-joserfc == 0.10.*
+joserfc == 0.11.*
 markupsafe == 2.1.*
 matplotlib == 3.8.*
 mypy == 1.6.1
