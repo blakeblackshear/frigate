@@ -109,9 +109,9 @@ detectors:
 
 The OpenVINO detector type runs an OpenVINO IR model on AMD and Intel CPUs, Intel GPUs and Intel VPU hardware. To configure an OpenVINO detector, set the `"type"` attribute to `"openvino"`.
 
-The OpenVINO device to be used is specified using the `"device"` attribute according to the naming conventions in the [Device Documentation](https://docs.openvino.ai/latest/openvino_docs_OV_UG_Working_with_devices.html). Other supported devices could be `AUTO`, `CPU`, `GPU`, `MYRIAD`, etc. If not specified, the default OpenVINO device will be selected by the `AUTO` plugin.
+The OpenVINO device to be used is specified using the `"device"` attribute according to the naming conventions in the [Device Documentation](https://docs.openvino.ai/2024/openvino-workflow/running-inference/inference-devices-and-modes.html). The most common devices are `CPU` and `GPU`. Currently, there is a known issue with using `AUTO`. For backwards compatibility, Frigate will attempt to use `GPU` if `AUTO` is set in your configuration.
 
-OpenVINO is supported on 6th Gen Intel platforms (Skylake) and newer. It will also run on AMD CPUs despite having no official support for it. A supported Intel platform is required to use the `GPU` device with OpenVINO. The `MYRIAD` device may be run on any platform, including Arm devices. For detailed system requirements, see [OpenVINO System Requirements](https://www.intel.com/content/www/us/en/developer/tools/openvino-toolkit/system-requirements.html)
+OpenVINO is supported on 6th Gen Intel platforms (Skylake) and newer. It will also run on AMD CPUs despite having no official support for it. A supported Intel platform is required to use the `GPU` device with OpenVINO. For detailed system requirements, see [OpenVINO System Requirements](https://docs.openvino.ai/2024/about-openvino/release-notes-openvino/system-requirements.html)
 
 ### Supported Models
 
@@ -123,15 +123,14 @@ An OpenVINO model is provided in the container at `/openvino-model/ssdlite_mobil
 detectors:
   ov:
     type: openvino
-    device: AUTO
-    model:
-      path: /openvino-model/ssdlite_mobilenet_v2.xml
+    device: GPU
 
 model:
   width: 300
   height: 300
   input_tensor: nhwc
   input_pixel_format: bgr
+  path: /openvino-model/ssdlite_mobilenet_v2.xml
   labelmap_path: /openvino-model/coco_91cl_bkgr.txt
 ```
 
@@ -143,9 +142,7 @@ This detector also supports YOLOX. Frigate does not come with any YOLOX models p
 detectors:
   ov:
     type: openvino
-    device: AUTO
-    model:
-      path: /path/to/yolox_tiny.xml
+    device: GPU
 
 model:
   width: 416
@@ -153,6 +150,7 @@ model:
   input_tensor: nchw
   input_pixel_format: bgr
   model_type: yolox
+  path: /path/to/yolox_tiny.xml
   labelmap_path: /path/to/coco_80cl.txt
 ```
 
@@ -174,16 +172,19 @@ After placing the downloaded onnx model in your config folder, you can use the f
 detectors:
   ov:
     type: openvino
-    device: AUTO
+    device: GPU
 
 model:
   model_type: yolonas
-  path: /config/yolo_nas_s.onnx
   width: 320 # <--- should match whatever was set in notebook
   height: 320 # <--- should match whatever was set in notebook
   input_tensor: nchw
   input_pixel_format: bgr
+  path: /config/yolo_nas_s.onnx
+  labelmap_path: /labelmap/coco-80.txt
 ```
+
+Note that the labelmap uses a subset of the complete COCO label set that has only 80 objects.
 
 ## NVidia TensorRT Detector
 
@@ -359,9 +360,9 @@ model: # required
 
 The correct labelmap must be loaded for each model. If you use a custom model (see notes below), you must make sure to provide the correct labelmap. The table below lists the correct paths for the bundled models:
 
-| `path`              | `labelmap_path`       |
-| ------------------- | --------------------- |
-| deci-fp16-yolonas_* | /labelmap/coco-80.txt |
+| `path`                | `labelmap_path`       |
+| --------------------- | --------------------- |
+| deci-fp16-yolonas\_\* | /labelmap/coco-80.txt |
 
 ### Choosing a model
 
