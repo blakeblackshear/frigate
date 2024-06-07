@@ -30,7 +30,7 @@ import {
   useState,
 } from "react";
 import { isDesktop, isMobile } from "react-device-detect";
-import { LuFolderCheck } from "react-icons/lu";
+import { LuFolderCheck, LuFolderX } from "react-icons/lu";
 import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
 import MotionReviewTimeline from "@/components/timeline/MotionReviewTimeline";
@@ -857,6 +857,15 @@ function MotionReview({
       alignStartDateToTimeline,
     ],
   );
+
+  if (motionData?.length === 0) {
+    return (
+      <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
+        <LuFolderX className="size-16" />
+        No motion data found
+      </div>
+    );
+  }
 
   if (!relevantPreviews) {
     return <ActivityIndicator />;
