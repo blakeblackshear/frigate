@@ -36,7 +36,7 @@ False positives can also be reduced by filtering a detection based on its shape.
 
 ### Object Area
 
-`min_area` and `max_area` filter on the area of an objects bounding box in pixels and can be used to reduce false positives that are outside the range of expected sizes. For example when a leaf is detected as a dog or when a large tree is detected as a person, these can be reduced by adding a `min_area` / `max_area` filter. The recordings timeline can be used to determine the area of the bounding box in that frame by selecting a timeline item then mousing over or tapping the red box.
+`min_area` and `max_area` filter on the area of an objects bounding box in pixels and can be used to reduce false positives that are outside the range of expected sizes. For example when a leaf is detected as a dog or when a large tree is detected as a person, these can be reduced by adding a `min_area` / `max_area` filter.
 
 ### Object Proportions
 
