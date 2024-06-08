@@ -156,10 +156,6 @@ export default function ObjectMaskEditPane({
             ? 1
             : 0;
 
-        if (editingMask) {
-          index = polygon.typeIndex;
-        }
-
         // editing existing mask, not creating a new one
         if (editingMask) {
           index = polygon.typeIndex;
@@ -308,6 +304,7 @@ export default function ObjectMaskEditPane({
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
+                    disabled={polygon.name.length != 0}
                   >
                     <FormControl>
                       <SelectTrigger>
