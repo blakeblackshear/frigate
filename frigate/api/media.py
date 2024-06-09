@@ -459,7 +459,7 @@ def recording_clip(camera_name, start_ts, end_ts):
         )
 
     file_name = secure_filename(file_name)
-    path = os.path.join(CACHE_DIR, file_name)
+    path = os.path.join(CLIPS_DIR, f"cache/{file_name}")
 
     if not os.path.exists(path):
         ffmpeg_cmd = [
@@ -511,7 +511,7 @@ def recording_clip(camera_name, start_ts, end_ts):
         response.headers["Content-Disposition"] = "attachment; filename=%s" % file_name
     response.headers["Content-Length"] = os.path.getsize(path)
     response.headers["X-Accel-Redirect"] = (
-        f"/cache/{file_name}"  # nginx: https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
+        f"/clips/cache/{file_name}"  # nginx: https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
     )
 
     return response
@@ -1232,8 +1232,8 @@ def preview_gif(camera_name: str, start_ts, end_ts, max_cache_age=2592000):
 
 @MediaBp.route("/<camera_name>/start/<int:start_ts>/end/<int:end_ts>/preview.mp4")
 @MediaBp.route("/<camera_name>/start/<float:start_ts>/end/<float:end_ts>/preview.mp4")
-def preview_mp4(camera_name: str, start_ts, end_ts, max_cache_age=2592000):
-    file_name = f"clip_{camera_name}_{start_ts}-{end_ts}.mp4"
+def preview_mp4(camera_name: str, start_ts, end_ts, max_cache_age=604800):
+    file_name = f"preview_{camera_name}_{start_ts}-{end_ts}.mp4"
 
     if len(file_name) > 1000:
         return make_response(

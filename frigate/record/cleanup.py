@@ -11,7 +11,7 @@ from pathlib import Path
 from playhouse.sqlite_ext import SqliteExtDatabase
 
 from frigate.config import CameraConfig, FrigateConfig, RetainModeEnum
-from frigate.const import CACHE_DIR, MAX_WAL_SIZE, RECORD_DIR
+from frigate.const import CACHE_DIR, CLIPS_DIR, MAX_WAL_SIZE, RECORD_DIR
 from frigate.models import Event, Previews, Recordings, ReviewSegment
 from frigate.record.util import remove_empty_directories, sync_recordings
 from frigate.util.builtin import clear_and_unlink, get_tomorrow_at_time
@@ -28,11 +28,19 @@ class RecordingCleanup(threading.Thread):
         self.config = config
         self.stop_event = stop_event
 
+    def clean_tmp_previews(self) -> None:
+        """delete any previews in the cache that are more than 1 hour old."""
+        for p in Path(CACHE_DIR).rglob("preview_*.mp4"):
+            logger.debug(f"Checking preview {p}.")
+            if p.stat().st_mtime < (datetime.datetime.now().timestamp() - 60 * 60):
+                logger.debug("Deleting preview.")
+                clear_and_unlink(p)
+
     def clean_tmp_clips(self) -> None:
-        """delete any clips in the cache that are more than 5 minutes old."""
-        for p in Path(CACHE_DIR).rglob("clip_*.mp4"):
+        """delete any clips in the cache that are more than 1 hour old."""
+        for p in Path(os.path.join(CLIPS_DIR, "cache")).rglob("clip_*.mp4"):
             logger.debug(f"Checking tmp clip {p}.")
-            if p.stat().st_mtime < (datetime.datetime.now().timestamp() - 60 * 1):
+            if p.stat().st_mtime < (datetime.datetime.now().timestamp() - 60 * 60):
                 logger.debug("Deleting tmp clip.")
                 clear_and_unlink(p)
 
@@ -335,7 +343,7 @@ class RecordingCleanup(threading.Thread):
                 logger.info("Exiting recording cleanup...")
                 break
 
-            self.clean_tmp_clips()
+            self.clean_tmp_previews()
 
             if (
                 self.config.record.sync_recordings
@@ -346,6 +354,7 @@ class RecordingCleanup(threading.Thread):
                 next_sync = get_tomorrow_at_time(3)
 
             if counter == 0:
+                self.clean_tmp_clips()
                 self.expire_recordings()
                 remove_empty_directories(RECORD_DIR)
                 self.truncate_wal()

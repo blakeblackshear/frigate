@@ -100,7 +100,7 @@ class FrigateApp:
         for d in [
             CONFIG_DIR,
             RECORD_DIR,
-            CLIPS_DIR,
+            f"{CLIPS_DIR}/cache",
             CACHE_DIR,
             MODEL_CACHE_DIR,
             EXPORT_DIR,
