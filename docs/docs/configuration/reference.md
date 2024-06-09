@@ -401,10 +401,8 @@ rtmp:
 go2rtc:
 
 # Optional: jsmpeg stream configuration for WebUI
+# NOTE: Can be overridden at the camera level
 live:
-  # Optional: Set the name of the stream that should be used for live view
-  # in frigate WebUI. (default: name of camera)
-  stream_name: camera_name
   # Optional: Set the height of the jsmpeg stream. (default: 720)
   # This must be less than or equal to the height of the detect stream. Lower resolutions
   # reduce bandwidth required for viewing the jsmpeg stream. Width is computed to match known aspect ratio.
@@ -530,6 +528,19 @@ cameras:
       order: 0
       # Optional: Whether or not to show the camera in the Frigate UI (default: shown below)
       dashboard: True
+
+    # Optional: jsmpeg stream configuration for WebUI
+    live:
+      # Optional: Set the name of the stream that should be used for live view
+      # in frigate WebUI. (default: ??)
+      stream_name: go2rtc_stream_name
+      # Optional: Set the height of the jsmpeg stream. (default: 720)
+      # This must be less than or equal to the height of the detect stream. Lower resolutions
+      # reduce bandwidth required for viewing the jsmpeg stream. Width is computed to match known aspect ratio.
+      height: 720
+      # Optional: Set the encode quality of the jsmpeg stream (default: shown below)
+      # 1 is the highest quality, and 31 is the lowest. Lower quality feeds utilize less CPU resources.
+      quality: 8
 
     # Optional: connect to ONVIF camera
     # to enable PTZ controls.
