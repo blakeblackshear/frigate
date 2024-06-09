@@ -82,7 +82,7 @@ class RecordingMaintainer(threading.Thread):
             for d in os.listdir(CACHE_DIR)
             if os.path.isfile(os.path.join(CACHE_DIR, d))
             and d.endswith(".mp4")
-            and not d.startswith("clip_")
+            and not d.startswith("preview_")
         ]
 
         files_in_use = []
