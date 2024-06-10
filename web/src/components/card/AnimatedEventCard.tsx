@@ -74,8 +74,8 @@ export function AnimatedEventCard({
   // image behavior
 
   const aspectRatio = useMemo(() => {
-    if (!config) {
-      return 1;
+    if (!config || !Object.keys(config.cameras).includes(event.camera)) {
+      return 16 / 9;
     }
 
     const detect = config.cameras[event.camera].detect;
