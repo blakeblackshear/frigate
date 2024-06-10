@@ -328,7 +328,6 @@ function MSEPlayer({
 
           setBufferTimeout(
             setTimeout(() => {
-              // only error and fallback if player is visible
               if (document.visibilityState === "visible") {
                 onError("stalled");
               }
