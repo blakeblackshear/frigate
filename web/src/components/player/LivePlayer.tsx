@@ -207,48 +207,49 @@ export default function LivePlayer({
         <ActivityIndicator />
       )}
 
-      {liveReady && objects.length > 0 && (
-        <div className="absolute left-0 top-2 z-40">
-          <Tooltip>
-            <div className="flex">
-              <TooltipTrigger asChild>
-                <div className="mx-3 pb-1 text-sm text-white">
-                  <Chip
-                    className={`z-0 flex items-start justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500`}
-                  >
-                    {[
-                      ...new Set([
-                        ...(objects || []).map(({ label }) => label),
-                      ]),
-                    ]
-                      .map((label) => {
-                        return getIconForLabel(label, "size-3 text-white");
-                      })
-                      .sort()}
-                  </Chip>
-                </div>
-              </TooltipTrigger>
-            </div>
-            <TooltipContent className="capitalize">
-              {[
-                ...new Set([
-                  ...(objects || []).map(({ label, sub_label }) =>
-                    label.endsWith("verified") ? sub_label : label,
-                  ),
-                ]),
-              ]
-                .filter(
-                  (label) =>
-                    label !== undefined && !label.includes("-verified"),
-                )
-                .map((label) => capitalizeFirstLetter(label))
-                .sort()
-                .join(", ")
-                .replaceAll("-verified", "")}
-            </TooltipContent>
-          </Tooltip>
-        </div>
-      )}
+      {((showStillWithoutActivity && !liveReady) || liveReady) &&
+        objects.length > 0 && (
+          <div className="absolute left-0 top-2 z-40">
+            <Tooltip>
+              <div className="flex">
+                <TooltipTrigger asChild>
+                  <div className="mx-3 pb-1 text-sm text-white">
+                    <Chip
+                      className={`z-0 flex items-start justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500`}
+                    >
+                      {[
+                        ...new Set([
+                          ...(objects || []).map(({ label }) => label),
+                        ]),
+                      ]
+                        .map((label) => {
+                          return getIconForLabel(label, "size-3 text-white");
+                        })
+                        .sort()}
+                    </Chip>
+                  </div>
+                </TooltipTrigger>
+              </div>
+              <TooltipContent className="capitalize">
+                {[
+                  ...new Set([
+                    ...(objects || []).map(({ label, sub_label }) =>
+                      label.endsWith("verified") ? sub_label : label,
+                    ),
+                  ]),
+                ]
+                  .filter(
+                    (label) =>
+                      label !== undefined && !label.includes("-verified"),
+                  )
+                  .map((label) => capitalizeFirstLetter(label))
+                  .sort()
+                  .join(", ")
+                  .replaceAll("-verified", "")}
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        )}
 
       <div
         className={`absolute inset-0 w-full ${
