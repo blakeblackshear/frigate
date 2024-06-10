@@ -10,6 +10,7 @@ type JSMpegPlayerProps = {
   width: number;
   height: number;
   containerRef?: React.MutableRefObject<HTMLDivElement | null>;
+  onPlaying?: () => void;
 };
 
 export default function JSMpegPlayer({
@@ -18,6 +19,7 @@ export default function JSMpegPlayer({
   height,
   className,
   containerRef,
+  onPlaying,
 }: JSMpegPlayerProps) {
   const url = `${baseUrl.replace(/^http/, "ws")}live/jsmpeg/${camera}`;
   const playerRef = useRef<HTMLDivElement | null>(null);
@@ -88,7 +90,14 @@ export default function JSMpegPlayer({
       playerRef.current,
       url,
       { canvas: `#${CSS.escape(uniqueId)}` },
-      { protocols: [], audio: false, videoBufferSize: 1024 * 1024 * 4 },
+      {
+        protocols: [],
+        audio: false,
+        videoBufferSize: 1024 * 1024 * 4,
+        onPlay: () => {
+          onPlaying?.();
+        },
+      },
     );
 
     return () => {
@@ -100,7 +109,7 @@ export default function JSMpegPlayer({
         playerRef.current = null;
       }
     };
-  }, [url, uniqueId]);
+  }, [url, uniqueId, onPlaying]);
 
   return (
     <div className={className}>

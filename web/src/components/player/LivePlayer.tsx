@@ -172,6 +172,7 @@ export default function LivePlayer({
           width={cameraConfig.detect.width}
           height={cameraConfig.detect.height}
           containerRef={containerRef}
+          onPlaying={() => setLiveReady(true)}
         />
       );
     } else {
@@ -195,11 +196,18 @@ export default function LivePlayer({
       )}
       onClick={onClick}
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-[30%] w-full rounded-lg bg-gradient-to-b from-black/20 to-transparent md:rounded-2xl"></div>
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[10%] w-full rounded-lg bg-gradient-to-t from-black/20 to-transparent md:rounded-2xl"></div>
+      {liveReady && (
+        <>
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-[30%] w-full rounded-lg bg-gradient-to-b from-black/20 to-transparent md:rounded-2xl"></div>
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[10%] w-full rounded-lg bg-gradient-to-t from-black/20 to-transparent md:rounded-2xl"></div>
+        </>
+      )}
       {player}
+      {!offline && !showStillWithoutActivity && !liveReady && (
+        <ActivityIndicator />
+      )}
 
-      {objects.length > 0 && (
+      {liveReady && objects.length > 0 && (
         <div className="absolute left-0 top-2 z-40">
           <Tooltip>
             <div className="flex">
