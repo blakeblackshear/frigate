@@ -188,7 +188,8 @@ export default function LivePlayer({
       data-camera={cameraConfig.name}
       className={cn(
         "relative flex w-full cursor-pointer justify-center outline",
-        activeTracking
+        activeTracking &&
+          ((showStillWithoutActivity && !liveReady) || liveReady)
           ? "outline-3 rounded-lg shadow-severity_alert outline-severity_alert md:rounded-2xl"
           : "outline-0 outline-background",
         "transition-all duration-500",
@@ -266,9 +267,12 @@ export default function LivePlayer({
       </div>
 
       <div className="absolute right-2 top-2">
-        {autoLive && !offline && activeMotion && (
-          <MdCircle className="mr-2 size-2 animate-pulse text-danger shadow-danger drop-shadow-md" />
-        )}
+        {autoLive &&
+          !offline &&
+          activeMotion &&
+          ((showStillWithoutActivity && !liveReady) || liveReady) && (
+            <MdCircle className="mr-2 size-2 animate-pulse text-danger shadow-danger drop-shadow-md" />
+          )}
         {offline && (
           <Chip
             className={`z-0 flex items-start justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-xs capitalize`}
