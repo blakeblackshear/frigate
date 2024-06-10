@@ -328,7 +328,9 @@ function MSEPlayer({
 
           setBufferTimeout(
             setTimeout(() => {
-              onError("stalled");
+              if (document.visibilityState === "visible") {
+                onError("stalled");
+              }
             }, 3000),
           );
         }
