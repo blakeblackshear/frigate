@@ -559,14 +559,16 @@ function GeneralFilterButton({
   const trigger = (
     <Button
       size="sm"
-      variant={selectedLabels?.length ? "select" : "default"}
+      variant={
+        selectedLabels?.length || selectedZones?.length ? "select" : "default"
+      }
       className="flex items-center gap-2 capitalize"
     >
       <FaFilter
-        className={`${selectedLabels?.length ? "text-selected-foreground" : "text-secondary-foreground"}`}
+        className={`${selectedLabels?.length || selectedZones?.length ? "text-selected-foreground" : "text-secondary-foreground"}`}
       />
       <div
-        className={`hidden md:block ${selectedLabels?.length ? "text-selected-foreground" : "text-primary"}`}
+        className={`hidden md:block ${selectedLabels?.length || selectedZones?.length ? "text-selected-foreground" : "text-primary"}`}
       >
         Filter
       </div>
@@ -641,7 +643,7 @@ type GeneralFilterContentProps = {
   updateLabelFilter: (labels: string[] | undefined) => void;
   setCurrentLabels: (labels: string[] | undefined) => void;
   updateZoneFilter?: (zones: string[] | undefined) => void;
-  setCurrentZones?: (zones: string[] | undefined) => void;
+  setCurrentZones: (zones: string[] | undefined) => void;
   onClose: () => void;
 };
 export function GeneralFilterContent({
@@ -793,6 +795,7 @@ export function GeneralFilterContent({
         <Button
           onClick={() => {
             setCurrentLabels(undefined);
+            setCurrentZones(undefined);
             updateLabelFilter(undefined);
           }}
         >
