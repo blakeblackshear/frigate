@@ -242,6 +242,8 @@ class ReviewSegmentMaintainer(threading.Thread):
         active_objects = get_active_objects(frame_time, camera_config, objects)
 
         if len(active_objects) > 0:
+            should_update = False
+
             if frame_time > segment.last_update:
                 segment.last_update = frame_time
 
@@ -270,12 +272,16 @@ class ReviewSegmentMaintainer(threading.Thread):
                     )
                 ):
                     segment.severity = SeverityEnum.alert
+                    should_update = True
 
                 # keep zones up to date
                 if len(object["current_zones"]) > 0:
                     segment.zones.update(object["current_zones"])
 
             if len(active_objects) > segment.frame_active_count:
+                should_update = True
+
+            if should_update:
                 try:
                     frame_id = f"{camera_config.name}{frame_time}"
                     yuv_frame = self.frame_manager.get(
