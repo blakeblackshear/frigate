@@ -293,7 +293,7 @@ export default function SubmitPlus() {
                       <TooltipTrigger asChild>
                         <div className="mx-3 pb-1 text-sm text-white">
                           <Chip
-                            className={`z-0 flex items-start justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500`}
+                            className={`z-0 flex items-center justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500`}
                           >
                             {[event.label].map((object) => {
                               return getIconForLabel(
@@ -301,6 +301,9 @@ export default function SubmitPlus() {
                                 "size-3 text-white",
                               );
                             })}
+                            <div className="text-xs">
+                              {Math.round(event.data.score * 100)}%
+                            </div>
                           </Chip>
                         </div>
                       </TooltipTrigger>
