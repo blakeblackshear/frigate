@@ -111,6 +111,7 @@ def review_summary():
 
     cameras = request.args.get("cameras", "all")
     labels = request.args.get("labels", "all")
+    zones = request.args.get("zones", "all")
 
     clauses = [(ReviewSegment.start_time > day_ago)]
 
@@ -132,6 +133,20 @@ def review_summary():
 
         label_clause = reduce(operator.or_, label_clauses)
         clauses.append((label_clause))
+
+    if zones != "all":
+        # use matching so segments with multiple zones
+        # still match on a search where any zone matches
+        zone_clauses = []
+        filtered_zones = zones.split(",")
+
+        for zone in filtered_zones:
+            zone_clauses.append(
+                (ReviewSegment.data["zones"].cast("text") % f'*"{zone}"*')
+            )
+
+        zone_clause = reduce(operator.or_, zone_clauses)
+        clauses.append((zone_clause))
 
     last_24 = (
         ReviewSegment.select(
