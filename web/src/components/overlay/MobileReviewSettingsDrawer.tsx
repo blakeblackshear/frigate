@@ -36,6 +36,7 @@ type MobileReviewSettingsDrawerProps = {
   mode: ExportMode;
   reviewSummary?: ReviewSummary;
   allLabels: string[];
+  allZones: string[];
   onUpdateFilter: (filter: ReviewFilter) => void;
   setRange: (range: TimeRange | undefined) => void;
   setMode: (mode: ExportMode) => void;
@@ -51,6 +52,7 @@ export default function MobileReviewSettingsDrawer({
   mode,
   reviewSummary,
   allLabels,
+  allZones,
   onUpdateFilter,
   setRange,
   setMode,
@@ -103,6 +105,9 @@ export default function MobileReviewSettingsDrawer({
 
   const [currentLabels, setCurrentLabels] = useState<string[] | undefined>(
     filter?.labels,
+  );
+  const [currentZones, setCurrentZones] = useState<string[] | undefined>(
+    filter?.zones,
   );
 
   if (!isMobile) {
@@ -222,7 +227,7 @@ export default function MobileReviewSettingsDrawer({
     );
   } else if (drawerMode == "filter") {
     content = (
-      <div className="scrollbar-container flex h-auto w-full flex-col overflow-y-auto">
+      <div className="scrollbar-container flex h-auto w-full flex-col overflow-y-auto overflow-x-hidden">
         <div className="relative mb-2 h-8 w-full">
           <div
             className="absolute left-0 text-selected"
@@ -240,6 +245,13 @@ export default function MobileReviewSettingsDrawer({
           currentLabels={currentLabels}
           currentSeverity={currentSeverity}
           showAll={filter?.showAll == true}
+          allZones={allZones}
+          selectedZones={filter?.zones}
+          currentZones={currentZones}
+          setCurrentZones={setCurrentZones}
+          updateZoneFilter={(newZones) =>
+            onUpdateFilter({ ...filter, zones: newZones })
+          }
           setShowAll={(showAll) => {
             onUpdateFilter({ ...filter, showAll });
           }}

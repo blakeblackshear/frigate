@@ -239,6 +239,7 @@ export default function ReviewFilterGroup({
           currentSeverity={currentSeverity}
           reviewSummary={reviewSummary}
           allLabels={allLabels}
+          allZones={allZones}
           onUpdateFilter={onUpdateFilter}
           // not applicable as exports are not used
           camera=""

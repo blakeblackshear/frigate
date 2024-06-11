@@ -111,7 +111,7 @@ export function RecordingView({
     () => chunkedTimeRange[selectedRangeIdx],
     [selectedRangeIdx, chunkedTimeRange],
   );
-  const reviewLabels = useMemo(() => {
+  const reviewFilterList = useMemo(() => {
     const uniqueLabels = new Set<string>();
 
     reviewItems?.forEach((rev) => {
@@ -121,7 +121,13 @@ export function RecordingView({
       rev.data.audio.forEach((aud) => uniqueLabels.add(aud));
     });
 
-    return [...uniqueLabels];
+    const uniqueZones = new Set<string>();
+
+    reviewItems?.forEach((rev) => {
+      rev.data.zones.forEach((zone) => uniqueZones.add(zone));
+    });
+
+    return { labels: [...uniqueLabels], zones: [...uniqueZones] };
   }, [reviewItems]);
 
   // export
@@ -391,7 +397,7 @@ export function RecordingView({
               reviewSummary={reviewSummary}
               filter={filter}
               motionOnly={false}
-              filterLabels={reviewLabels}
+              filterList={reviewFilterList}
               onUpdateFilter={updateFilter}
               setMotionOnly={() => {}}
             />
@@ -434,7 +440,8 @@ export function RecordingView({
             latestTime={timeRange.before}
             mode={exportMode}
             range={exportRange}
-            allLabels={reviewLabels}
+            allLabels={reviewFilterList.labels}
+            allZones={reviewFilterList.zones}
             onUpdateFilter={updateFilter}
             setRange={setExportRange}
             setMode={setExportMode}
