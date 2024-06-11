@@ -681,7 +681,7 @@ export function GeneralFilterContent({
             <DropdownMenuSeparator />
           </div>
         )}
-        <div className="my-2.5 flex items-center justify-between">
+        <div className="mb-5 mt-2.5 flex items-center justify-between">
           <Label
             className="mx-2 cursor-pointer text-primary"
             htmlFor="allLabels"
@@ -727,7 +727,7 @@ export function GeneralFilterContent({
       {allZones && setCurrentZones && (
         <>
           <DropdownMenuSeparator />
-          <div className="my-2.5 flex items-center justify-between">
+          <div className="mb-5 mt-2.5 flex items-center justify-between">
             <Label
               className="mx-2 cursor-pointer text-primary"
               htmlFor="allZones"
