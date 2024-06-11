@@ -643,7 +643,7 @@ type GeneralFilterContentProps = {
   updateLabelFilter: (labels: string[] | undefined) => void;
   setCurrentLabels: (labels: string[] | undefined) => void;
   updateZoneFilter?: (zones: string[] | undefined) => void;
-  setCurrentZones?: (zones: string[] | undefined) => void;
+  setCurrentZones: (zones: string[] | undefined) => void;
   onClose: () => void;
 };
 export function GeneralFilterContent({
@@ -795,6 +795,7 @@ export function GeneralFilterContent({
         <Button
           onClick={() => {
             setCurrentLabels(undefined);
+            setCurrentZones(undefined);
             updateLabelFilter(undefined);
           }}
         >
