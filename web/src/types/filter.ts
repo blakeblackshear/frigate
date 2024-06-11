@@ -3,3 +3,8 @@
 export type FilterType = { [searchKey: string]: any };
 
 export type ExportMode = "select" | "timeline" | "none";
+
+export type FilterList = {
+  labels?: string[];
+  zones?: string[];
+};

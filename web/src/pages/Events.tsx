@@ -136,6 +136,7 @@ export default function Events() {
     const params = {
       cameras: reviewSearchParams["cameras"],
       labels: reviewSearchParams["labels"],
+      zones: reviewSearchParams["zones"],
       reviewed: 1,
       before: reviewSearchParams["before"] || last24Hours.before,
       after: reviewSearchParams["after"] || last24Hours.after,
@@ -221,6 +222,7 @@ export default function Events() {
         timezone: timezone,
         cameras: reviewSearchParams["cameras"] ?? null,
         labels: reviewSearchParams["labels"] ?? null,
+        zones: reviewSearchParams["zones"] ?? null,
       },
     ],
     {

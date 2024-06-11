@@ -450,6 +450,7 @@ Reviews from the database. Accepts the following query string parameters:
 | `after`    | int  | Epoch time                                                     |
 | `cameras`  | str  | , separated list of cameras                                    |
 | `labels`   | str  | , separated list of labels                                     |
+| `zones`    | str  | , separated list of zones                                      |
 | `reviewed` | int  | Include items that have been reviewed (0 or 1)                 |
 | `limit`    | int  | Limit the number of events returned                            |
 | `severity` | str  | Limit items to severity (alert, detection, significant_motion) |

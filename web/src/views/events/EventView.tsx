@@ -49,6 +49,7 @@ import scrollIntoView from "scroll-into-view-if-needed";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { FilterList } from "@/types/filter";
 
 type EventViewProps = {
   reviewItems?: SegmentedReviewData;
@@ -203,8 +204,9 @@ export default function EventView({
 
   // review filter info
 
-  const reviewLabels = useMemo(() => {
+  const reviewFilterList = useMemo<FilterList>(() => {
     const uniqueLabels = new Set<string>();
+    const uniqueZones = new Set<string>();
 
     reviewItems?.all?.forEach((rev) => {
       rev.data.objects.forEach((obj) =>
@@ -213,7 +215,11 @@ export default function EventView({
       rev.data.audio.forEach((aud) => uniqueLabels.add(aud));
     });
 
-    return [...uniqueLabels];
+    reviewItems?.all?.forEach((rev) => {
+      rev.data.zones.forEach((zone) => uniqueZones.add(zone));
+    });
+
+    return { labels: [...uniqueLabels], zones: [...uniqueZones] };
   }, [reviewItems]);
 
   if (!config) {
@@ -282,7 +288,7 @@ export default function EventView({
             reviewSummary={reviewSummary}
             filter={filter}
             motionOnly={motionOnly}
-            filterLabels={reviewLabels}
+            filterList={reviewFilterList}
             onUpdateFilter={updateFilter}
             setMotionOnly={setMotionOnly}
           />
