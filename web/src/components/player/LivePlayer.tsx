@@ -85,7 +85,7 @@ export default function LivePlayer({
     }
 
     if (!cameraActive) {
-      setLiveReady(false);
+      setTimeout(() => setLiveReady(false), 500);
     }
     // live mode won't change
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -94,7 +94,7 @@ export default function LivePlayer({
   // camera still state
 
   const stillReloadInterval = useMemo(() => {
-    if (!windowVisible || offline) {
+    if (!windowVisible || offline || !showStillWithoutActivity) {
       return -1; // no reason to update the image when the window is not visible
     }
 
@@ -113,6 +113,7 @@ export default function LivePlayer({
     return 30000;
   }, [
     autoLive,
+    showStillWithoutActivity,
     liveReady,
     activeMotion,
     activeTracking,
@@ -262,7 +263,7 @@ export default function LivePlayer({
           camera={cameraConfig.name}
           showFps={false}
           reloadInterval={stillReloadInterval}
-          cameraClasses="relative w-full h-full flex justify-center"
+          cameraClasses="relative size-full flex justify-center"
         />
       </div>
 
