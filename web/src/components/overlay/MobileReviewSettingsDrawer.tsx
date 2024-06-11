@@ -145,11 +145,11 @@ export default function MobileReviewSettingsDrawer({
         {features.includes("filter") && (
           <Button
             className="flex w-full items-center justify-center gap-2"
-            variant={filter?.labels ? "select" : "default"}
+            variant={filter?.labels || filter?.zones ? "select" : "default"}
             onClick={() => setDrawerMode("filter")}
           >
             <FaFilter
-              className={`${filter?.labels ? "text-selected-foreground" : "text-secondary-foreground"}`}
+              className={`${filter?.labels || filter?.zones ? "text-selected-foreground" : "text-secondary-foreground"}`}
             />
             Filter
           </Button>
@@ -284,12 +284,16 @@ export default function MobileReviewSettingsDrawer({
         <DrawerTrigger asChild>
           <Button
             className="rounded-lg capitalize"
-            variant={filter?.labels || filter?.after ? "select" : "default"}
+            variant={
+              filter?.labels || filter?.after || filter?.zones
+                ? "select"
+                : "default"
+            }
             size="sm"
             onClick={() => setDrawerMode("select")}
           >
             <FaCog
-              className={`${filter?.labels || filter?.after ? "text-selected-foreground" : "text-secondary-foreground"}`}
+              className={`${filter?.labels || filter?.after || filter?.zones ? "text-selected-foreground" : "text-secondary-foreground"}`}
             />
           </Button>
         </DrawerTrigger>
