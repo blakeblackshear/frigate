@@ -643,7 +643,7 @@ type GeneralFilterContentProps = {
   updateLabelFilter: (labels: string[] | undefined) => void;
   setCurrentLabels: (labels: string[] | undefined) => void;
   updateZoneFilter?: (zones: string[] | undefined) => void;
-  setCurrentZones: (zones: string[] | undefined) => void;
+  setCurrentZones?: (zones: string[] | undefined) => void;
   onClose: () => void;
 };
 export function GeneralFilterContent({
@@ -726,54 +726,59 @@ export function GeneralFilterContent({
             />
           ))}
         </div>
-      </div>
-      {allZones && setCurrentZones && (
-        <>
-          <DropdownMenuSeparator />
-          <div className="mb-5 mt-2.5 flex items-center justify-between">
-            <Label
-              className="mx-2 cursor-pointer text-primary"
-              htmlFor="allZones"
-            >
-              All Zones
-            </Label>
-            <Switch
-              className="ml-1"
-              id="allZones"
-              checked={currentZones == undefined}
-              onCheckedChange={(isChecked) => {
-                if (isChecked) {
-                  setCurrentZones(undefined);
-                }
-              }}
-            />
-          </div>
-          <div className="my-2.5 flex flex-col gap-2.5">
-            {allZones.map((item) => (
-              <FilterSwitch
-                label={item.replaceAll("_", " ")}
-                isChecked={currentZones?.includes(item) ?? false}
+
+        {allZones && setCurrentZones && (
+          <>
+            <DropdownMenuSeparator />
+            <div className="mb-5 mt-2.5 flex items-center justify-between">
+              <Label
+                className="mx-2 cursor-pointer text-primary"
+                htmlFor="allZones"
+              >
+                All Zones
+              </Label>
+              <Switch
+                className="ml-1"
+                id="allZones"
+                checked={currentZones == undefined}
                 onCheckedChange={(isChecked) => {
                   if (isChecked) {
-                    const updatedZones = currentZones ? [...currentZones] : [];
-
-                    updatedZones.push(item);
-                    setCurrentZones(updatedZones);
-                  } else {
-                    const updatedZones = currentZones ? [...currentZones] : [];
-
-                    // can not deselect the last item
-                    if (updatedZones.length > 1) {
-                      updatedZones.splice(updatedZones.indexOf(item), 1);
-                      setCurrentZones(updatedZones);
-                    }
+                    setCurrentZones(undefined);
                   }
                 }}
               />
-            ))}
-          </div>
-        </>
-      )}
+            </div>
+            <div className="my-2.5 flex flex-col gap-2.5">
+              {allZones.map((item) => (
+                <FilterSwitch
+                  label={item.replaceAll("_", " ")}
+                  isChecked={currentZones?.includes(item) ?? false}
+                  onCheckedChange={(isChecked) => {
+                    if (isChecked) {
+                      const updatedZones = currentZones
+                        ? [...currentZones]
+                        : [];
+
+                      updatedZones.push(item);
+                      setCurrentZones(updatedZones);
+                    } else {
+                      const updatedZones = currentZones
+                        ? [...currentZones]
+                        : [];
+
+                      // can not deselect the last item
+                      if (updatedZones.length > 1) {
+                        updatedZones.splice(updatedZones.indexOf(item), 1);
+                        setCurrentZones(updatedZones);
+                      }
+                    }
+                  }}
+                />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
       <DropdownMenuSeparator />
       <div className="flex items-center justify-evenly p-2">
         <Button
@@ -795,7 +800,7 @@ export function GeneralFilterContent({
         <Button
           onClick={() => {
             setCurrentLabels(undefined);
-            setCurrentZones(undefined);
+            setCurrentZones?.(undefined);
             updateLabelFilter(undefined);
           }}
         >
