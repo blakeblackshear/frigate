@@ -32,6 +32,7 @@ export type SegmentedReviewData =
 export type ReviewFilter = {
   cameras?: string[];
   labels?: string[];
+  zones?: string[];
   before?: number;
   after?: number;
   showReviewed?: 0 | 1;
