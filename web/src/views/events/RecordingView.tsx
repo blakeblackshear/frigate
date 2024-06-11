@@ -525,7 +525,7 @@ export function RecordingView({
               <div
                 ref={previewRowRef}
                 className={cn(
-                  "flex gap-2 overflow-auto",
+                  "scrollbar-container flex gap-2 overflow-auto",
                   mainCameraAspect == "tall"
                     ? "h-full w-72 flex-col"
                     : `h-28 w-full`,
