@@ -140,7 +140,7 @@ class PendingReviewSegment:
                 "zones": list(self.zones),
                 "audio": list(self.audio),
             },
-        }
+        }.copy()
 
 
 class ReviewSegmentMaintainer(threading.Thread):
