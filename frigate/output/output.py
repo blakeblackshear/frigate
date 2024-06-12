@@ -80,7 +80,7 @@ def output_frames(
     websocket_thread.start()
 
     while not stop_event.is_set():
-        (topic, data) = detection_subscriber.get_data(timeout=1)
+        (topic, data) = detection_subscriber.check_for_update(timeout=1)
 
         if not topic:
             continue
@@ -134,7 +134,7 @@ def output_frames(
     move_preview_frames("clips")
 
     while True:
-        (topic, data) = detection_subscriber.get_data(timeout=0)
+        (topic, data) = detection_subscriber.check_for_update(timeout=0)
 
         if not topic:
             break

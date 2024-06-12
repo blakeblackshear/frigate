@@ -454,6 +454,7 @@ def logs(service: str):
         "frigate": "/dev/shm/logs/frigate/current",
         "go2rtc": "/dev/shm/logs/go2rtc/current",
         "nginx": "/dev/shm/logs/nginx/current",
+        "chroma": "/dev/shm/logs/chroma/current",
     }
     service_location = log_locations.get(service)
 
