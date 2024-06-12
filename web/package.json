@@ -69,7 +69,7 @@
     "scroll-into-view-if-needed": "^3.1.0",
     "sonner": "^1.4.41",
     "sort-by": "^1.2.0",
-    "strftime": "^0.10.2",
+    "strftime": "^0.10.3",
     "swr": "^2.2.5",
     "tailwind-merge": "^2.3.0",
     "tailwind-scrollbar": "^3.1.0",
