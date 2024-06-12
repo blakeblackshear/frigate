@@ -3,7 +3,6 @@
 import base64
 import io
 import logging
-import os
 import threading
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Optional
@@ -165,13 +164,7 @@ class EmbeddingMaintainer(threading.Thread):
             ids=[event.id],
         )
 
-        base_dir = f"/tmp/ai/{event.id}"
-        os.makedirs(base_dir, exist_ok=True)
-        for index, thumbnail in enumerate(thumbnails):
-            with open(f"{base_dir}/{index}.jpg", "wb") as f:
-                f.write(thumbnail)
-
-        logger.info(
+        logger.debug(
             "Generated description for %s (%d images): %s",
             event.id,
             len(thumbnails),

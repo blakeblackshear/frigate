@@ -1,4 +1,5 @@
 import faulthandler
+import sys
 import threading
 
 from flask import cli
