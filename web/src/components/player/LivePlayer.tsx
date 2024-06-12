@@ -121,6 +121,10 @@ export default function LivePlayer({
     windowVisible,
   ]);
 
+  useEffect(() => {
+    setLiveReady(false);
+  }, [preferredLiveMode]);
+
   if (!cameraConfig) {
     return <ActivityIndicator />;
   }
