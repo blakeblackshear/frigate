@@ -114,6 +114,8 @@ RUN apt-get -qq update \
     gfortran openexr libatlas-base-dev libssl-dev\
     libtbb2 libtbb-dev libdc1394-22-dev libopenexr-dev \
     libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev \
+    # sqlite3 dependencies
+    tclsh \
     # scipy dependencies
     gcc gfortran libopenblas-dev liblapack-dev && \
     rm -rf /var/lib/apt/lists/*
@@ -126,6 +128,10 @@ RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
 
 COPY docker/main/requirements.txt /requirements.txt
 RUN pip3 install -r /requirements.txt
+
+# Build pysqlite3 from source to support ChromaDB
+COPY docker/main/build_pysqlite3.sh /build_pysqlite3.sh
+RUN /build_pysqlite3.sh
 
 COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
 RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt
