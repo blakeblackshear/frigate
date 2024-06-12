@@ -103,7 +103,7 @@ export default function EventView({
     }
 
     if (!summary) {
-      return { alert: -1, detection: -1, significant_motion: -1 };
+      return { alert: 0, detection: 0, significant_motion: 0 };
     }
 
     if (filter?.showReviewed == 1) {
