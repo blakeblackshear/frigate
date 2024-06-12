@@ -23,7 +23,7 @@ fi
 cp "sqlite/sqlite3.c" pysqlite3/
 cp "sqlite/sqlite3.h" pysqlite3/
 
-# Create the wheels and strip symbols to produce manylinux wheels.
+# Create the wheel and put it in the /wheels dir.
 cd pysqlite3/
 sed -i "s|name='pysqlite3-binary'|name=PACKAGE_NAME|g" setup.py
 python3 setup.py build_static
