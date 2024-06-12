@@ -59,9 +59,9 @@ def manage_embeddings(config: FrigateConfig) -> None:
     embeddings = Embeddings()
 
     # Check if we need to re-index events
-    if os.path.exists(f"{CONFIG_DIR}/.reindex_events"):
+    if os.path.exists(f"{CONFIG_DIR}/.reindex"):
         embeddings.reindex()
-        os.remove(f"{CONFIG_DIR}/.reindex_events")
+        os.remove(f"{CONFIG_DIR}/.reindex")
 
     maintainer = EmbeddingMaintainer(
         config,
