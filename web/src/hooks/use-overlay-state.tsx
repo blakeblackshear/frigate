@@ -109,9 +109,15 @@ export function useSearchEffect(
 
     const params = location.search.substring(1).split("&");
 
-    return params
+    const foundParam = params
       .find((p) => p.includes("=") && p.split("=")[0] == key)
       ?.split("=");
+
+    if (foundParam && foundParam.length === 2) {
+      return [foundParam[0], decodeURIComponent(foundParam[1])];
+    }
+
+    return undefined;
   }, [location, key]);
 
   useEffect(() => {
