@@ -5,7 +5,7 @@ title: Generative AI
 
 Generative AI can be used to automatically generate descriptions based on the thumbnails of your events. This helps with [semantic search](/configuration/semantic_search) in Frigate by providing detailed text descriptions as a basis of the search query.
 
-# Configuration
+## Configuration
 
 Generative AI can be enabled for all cameras or only for specific cameras. There are currently 3 providers available to integrate with Frigate.
 
@@ -92,7 +92,7 @@ genai:
   model: gpt-4o
 ```
 
-# Custom Prompts
+## Custom Prompts
 
 Frigate sends multiple frames from the detection along with a prompt to your Generative AI provider asking it to generate a description. The default prompt is as follows:
 
@@ -120,7 +120,7 @@ genai:
     car: "Label the primary vehicle in these images with just the name of the company if it is a delivery vehicle, or the color make and model."
 ```
 
-## Experiment with prompts
+### Experiment with prompts
 
 Providers also has a public facing chat interface for their models. Download a couple different thumbnails or snapshots from Frigate and try new things in the playground to get descriptions to your liking before updating the prompt in Frigate.
 

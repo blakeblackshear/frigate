@@ -31,7 +31,7 @@ module.exports = {
       ],
       "Semantic Search": [
         "configuration/semantic_search",
-        "configuration/gemini",
+        "configuration/genai",
       ],
       Cameras: [
         "configuration/cameras",
