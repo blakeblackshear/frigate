@@ -44,7 +44,7 @@ function get_cpus() {
             cpus=1
         fi
     else
-        cpus=$(grep -c processor /proc/cpuinfo)
+        cpus=$(grep -c ^processor /proc/cpuinfo)
     fi
 
     printf '%s' "$cpus"
