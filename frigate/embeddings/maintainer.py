@@ -52,9 +52,9 @@ class EmbeddingMaintainer(threading.Thread):
                 continue
 
             source_type, _, camera, data = update
-            camera_config = self.config.cameras[camera]
 
-            if source_type == EventTypeEnum.tracked_object:
+            if camera and source_type == EventTypeEnum.tracked_object:
+                camera_config = self.config.cameras[camera]
                 if data["id"] not in self.tracked_events:
                     self.tracked_events[data["id"]] = []
 
@@ -84,6 +84,10 @@ class EmbeddingMaintainer(threading.Thread):
                     try:
                         event: Event = Event.get(Event.id == event_id)
                     except DoesNotExist:
+                        continue
+
+                    # Skip the event if not an object
+                    if event.data.get("type") != "object":
                         continue
 
                     # Extract valid event metadata
