@@ -33,13 +33,19 @@ cameras:
 
 You must use a vision capable model with Frigate. Current model variants can be found [in their model library](https://ollama.com/library). At the time of writing, this includes `llava`, `llava-llama3`, `llava-phi3`, and `moondream`.
 
+:::note
+
+You should have at least 8 GB of RAM available (or VRAM if running on GPU) to run the 7B models, 16 GB to run the 13B models, and 32 GB to run the 33B models.
+
+:::
+
 ### Configuration
 
 ```yaml
 genai:
   enabled: True
   provider: ollama
-  base_url: http://localhost::11434
+  base_url: http://localhost:11434
   model: llava
 ```
 
@@ -112,7 +118,7 @@ You are also able to define custom prompts in your configuration.
 genai:
   enabled: True
   provider: ollama
-  base_url: http://localhost::11434
+  base_url: http://localhost:11434
   model: llava
   prompt: "Describe the {label} in these images from the {camera} security camera."
   object_prompts:
