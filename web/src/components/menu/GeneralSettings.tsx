@@ -67,6 +67,7 @@ import {
 } from "../ui/dialog";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { cn } from "@/lib/utils";
+import { baseUrl } from "@/api/baseUrl";
 
 type GeneralSettingsProps = {
   className?: string;
@@ -95,12 +96,12 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
 
   useEffect(() => {
     if (countdown === 0) {
-      window.location.href = "/";
+      window.location.href = baseUrl;
     }
   }, [countdown]);
 
   const handleForceReload = () => {
-    window.location.href = "/";
+    window.location.href = baseUrl;
   };
 
   const Container = isDesktop ? DropdownMenu : Drawer;
@@ -324,7 +325,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
               Help
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <a href="https://docs.frigate.video">
+            <a href="https://docs.frigate.video" target="_blank">
               <MenuItem
                 className={
                   isDesktop ? "cursor-pointer" : "flex items-center p-2 text-sm"
@@ -334,7 +335,10 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                 <span>Documentation</span>
               </MenuItem>
             </a>
-            <a href="https://github.com/blakeblackshear/frigate">
+            <a
+              href="https://github.com/blakeblackshear/frigate"
+              target="_blank"
+            >
               <MenuItem
                 className={
                   isDesktop ? "cursor-pointer" : "flex items-center p-2 text-sm"
