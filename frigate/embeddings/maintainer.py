@@ -157,6 +157,10 @@ class EmbeddingMaintainer(threading.Thread):
 
         description = self.genai_client.generate_description(thumbnails, metadata)
 
+        if description is None:
+            logger.debug("Failed to generate description for %s", event.id)
+            return
+
         # Update the event to add the description
         event.data["description"] = description
         event.save()
