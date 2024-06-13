@@ -9,6 +9,13 @@ Frigate's integrated NGINX server supports TLS certificates. By default Frigate 
 
 Frigate is often running behind a reverse proxy that manages TLS certificates for multiple services. You will likely need to set your reverse proxy to allow self signed certificates or you can disable TLS in Frigate's config. However, if you are running on a dedicated device that's separate from your proxy or if you expose Frigate directly to the internet, you may want to configure TLS with valid certificates.
 
+In many deployments, TLS will be unnecessary. It can be disabled in the config with the following yaml:
+
+```yaml
+tls:
+  enabled: False
+```
+
 ## Certificates
 
 TLS certificates can be mounted at `/etc/letsencrypt/live/frigate` using a bind mount or docker volume.
