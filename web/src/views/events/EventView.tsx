@@ -29,7 +29,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { isDesktop, isMobile } from "react-device-detect";
+import { isDesktop, isMobile, isMobileOnly } from "react-device-detect";
 import { LuFolderCheck, LuFolderX } from "react-icons/lu";
 import { MdCircle } from "react-icons/md";
 import useSWR from "swr";
@@ -248,19 +248,7 @@ export default function EventView({
             value="alert"
             aria-label="Select alerts"
           >
-            {isDesktop ? (
-              <>
-                <MdCircle className="size-2 text-severity_alert md:mr-[10px]" />
-                <div className="hidden md:flex md:flex-row md:items-center">
-                  Alerts
-                  {reviewCounts.alert > -1 ? (
-                    ` ∙ ${reviewCounts.alert}`
-                  ) : (
-                    <ActivityIndicator className="ml-2 size-4" />
-                  )}
-                </div>
-              </>
-            ) : (
+            {isMobileOnly ? (
               <div
                 className={cn(
                   "flex size-6 items-center justify-center rounded text-severity_alert",
@@ -273,6 +261,18 @@ export default function EventView({
                   <ActivityIndicator className="size-4" />
                 )}
               </div>
+            ) : (
+              <>
+                <MdCircle className="size-2 text-severity_alert md:mr-[10px]" />
+                <div className="hidden md:flex md:flex-row md:items-center">
+                  Alerts
+                  {reviewCounts.alert > -1 ? (
+                    ` ∙ ${reviewCounts.alert}`
+                  ) : (
+                    <ActivityIndicator className="ml-2 size-4" />
+                  )}
+                </div>
+              </>
             )}
           </ToggleGroupItem>
           <ToggleGroupItem
@@ -282,19 +282,7 @@ export default function EventView({
             value="detection"
             aria-label="Select detections"
           >
-            {isDesktop ? (
-              <>
-                <MdCircle className="size-2 text-severity_detection md:mr-[10px]" />
-                <div className="hidden md:flex md:flex-row md:items-center">
-                  Detections
-                  {reviewCounts.detection > -1 ? (
-                    ` ∙ ${reviewCounts.detection}`
-                  ) : (
-                    <ActivityIndicator className="ml-2 size-4" />
-                  )}
-                </div>
-              </>
-            ) : (
+            {isMobileOnly ? (
               <div
                 className={cn(
                   "flex size-6 items-center justify-center rounded text-severity_detection",
@@ -309,6 +297,18 @@ export default function EventView({
                   <ActivityIndicator className="size-4" />
                 )}
               </div>
+            ) : (
+              <>
+                <MdCircle className="size-2 text-severity_detection md:mr-[10px]" />
+                <div className="hidden md:flex md:flex-row md:items-center">
+                  Detections
+                  {reviewCounts.detection > -1 ? (
+                    ` ∙ ${reviewCounts.detection}`
+                  ) : (
+                    <ActivityIndicator className="ml-2 size-4" />
+                  )}
+                </div>
+              </>
             )}
           </ToggleGroupItem>
           <ToggleGroupItem
@@ -319,13 +319,13 @@ export default function EventView({
             value="significant_motion"
             aria-label="Select motion"
           >
-            {isDesktop ? (
+            {isMobileOnly ? (
+              <GiSoundWaves className="size-6 rotate-90 text-severity_significant_motion" />
+            ) : (
               <>
                 <MdCircle className="size-2 text-severity_significant_motion md:mr-[10px]" />
                 <div className="hidden md:block">Motion</div>
               </>
-            ) : (
-              <GiSoundWaves className="size-6 rotate-90 text-severity_significant_motion" />
             )}
           </ToggleGroupItem>
         </ToggleGroup>
