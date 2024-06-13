@@ -243,41 +243,78 @@ export default function EventView({
           } // don't allow the severity to be unselected
         >
           <ToggleGroupItem
-            className={`${severityToggle == "alert" ? "" : "text-muted-foreground"}`}
+            className={cn(severityToggle != "alert" && "text-muted-foreground")}
             value="alert"
             aria-label="Select alerts"
           >
-            <MdCircle className="size-2 text-severity_alert md:mr-[10px]" />
-            <div className="hidden md:flex md:flex-row md:items-center">
-              Alerts
-              {reviewCounts.alert > -1 ? (
-                ` ∙ ${reviewCounts.alert}`
-              ) : (
-                <ActivityIndicator className="ml-2 size-4" />
-              )}
-            </div>
+            {isDesktop ? (
+              <>
+                <MdCircle className="size-2 text-severity_alert md:mr-[10px]" />
+                <div className="hidden md:flex md:flex-row md:items-center">
+                  Alerts
+                  {reviewCounts.alert > -1 ? (
+                    ` ∙ ${reviewCounts.alert}`
+                  ) : (
+                    <ActivityIndicator className="ml-2 size-4" />
+                  )}
+                </div>
+              </>
+            ) : (
+              <div
+                className={cn(
+                  "flex size-6 items-center justify-center rounded text-severity_alert",
+                  severityToggle == "alert" ? "font-semibold" : "font-medium",
+                )}
+              >
+                {reviewCounts.alert > -1 ? (
+                  reviewCounts.alert
+                ) : (
+                  <ActivityIndicator className="size-4" />
+                )}
+              </div>
+            )}
           </ToggleGroupItem>
           <ToggleGroupItem
-            className={`${severityToggle == "detection" ? "" : "text-muted-foreground"}`}
+            className={cn(
+              severityToggle != "detection" && "text-muted-foreground",
+            )}
             value="detection"
             aria-label="Select detections"
           >
-            <MdCircle className="size-2 text-severity_detection md:mr-[10px]" />
-            <div className="hidden md:flex md:flex-row md:items-center">
-              Detections
-              {reviewCounts.detection > -1 ? (
-                ` ∙ ${reviewCounts.detection}`
-              ) : (
-                <ActivityIndicator className="ml-2 size-4" />
-              )}
-            </div>
+            {isDesktop ? (
+              <>
+                <MdCircle className="size-2 text-severity_detection md:mr-[10px]" />
+                <div className="hidden md:flex md:flex-row md:items-center">
+                  Detections
+                  {reviewCounts.detection > -1 ? (
+                    ` ∙ ${reviewCounts.detection}`
+                  ) : (
+                    <ActivityIndicator className="ml-2 size-4" />
+                  )}
+                </div>
+              </>
+            ) : (
+              <div
+                className={cn(
+                  "flex size-6 items-center justify-center rounded text-severity_detection",
+                  severityToggle == "detection"
+                    ? "font-semibold"
+                    : "font-medium",
+                )}
+              >
+                {reviewCounts.detection > -1 ? (
+                  reviewCounts.detection
+                ) : (
+                  <ActivityIndicator className="size-4" />
+                )}
+              </div>
+            )}
           </ToggleGroupItem>
           <ToggleGroupItem
-            className={`rounded-lg px-3 py-4 ${
-              severityToggle == "significant_motion"
-                ? ""
-                : "text-muted-foreground"
-            }`}
+            className={cn(
+              "rounded-lg px-3 py-4",
+              severityToggle != "significant_motion" && "text-muted-foreground",
+            )}
             value="significant_motion"
             aria-label="Select motion"
           >
