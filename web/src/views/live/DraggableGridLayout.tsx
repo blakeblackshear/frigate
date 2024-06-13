@@ -201,14 +201,6 @@ export default function DraggableGridLayout({
   ]);
 
   useEffect(() => {
-    if (currentGridLayout) {
-      setGridLayout(currentGridLayout);
-    }
-    // we know that these deps are correct
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEditMode, setGridLayout]);
-
-  useEffect(() => {
     if (isGridLayoutLoaded) {
       if (gridLayout) {
         // set current grid layout from loaded
