@@ -50,6 +50,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { FilterList } from "@/types/filter";
+import { GiSoundWaves } from "react-icons/gi";
 
 type EventViewProps = {
   reviewItems?: SegmentedReviewData;
@@ -318,8 +319,14 @@ export default function EventView({
             value="significant_motion"
             aria-label="Select motion"
           >
-            <MdCircle className="size-2 text-severity_significant_motion md:mr-[10px]" />
-            <div className="hidden md:block">Motion</div>
+            {isDesktop ? (
+              <>
+                <MdCircle className="size-2 text-severity_significant_motion md:mr-[10px]" />
+                <div className="hidden md:block">Motion</div>
+              </>
+            ) : (
+              <GiSoundWaves className="size-6 rotate-90 text-severity_significant_motion" />
+            )}
           </ToggleGroupItem>
         </ToggleGroup>
 
