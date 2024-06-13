@@ -324,7 +324,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
               Help
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <a href="https://docs.frigate.video">
+            <a href="https://docs.frigate.video" target="_blank">
               <MenuItem
                 className={
                   isDesktop ? "cursor-pointer" : "flex items-center p-2 text-sm"
@@ -334,7 +334,10 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                 <span>Documentation</span>
               </MenuItem>
             </a>
-            <a href="https://github.com/blakeblackshear/frigate">
+            <a
+              href="https://github.com/blakeblackshear/frigate"
+              target="_blank"
+            >
               <MenuItem
                 className={
                   isDesktop ? "cursor-pointer" : "flex items-center p-2 text-sm"
