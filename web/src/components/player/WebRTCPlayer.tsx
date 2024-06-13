@@ -238,7 +238,10 @@ export default function WebRtcPlayer({
 
               setBufferTimeout(
                 setTimeout(() => {
-                  if (document.visibilityState === "visible") {
+                  if (
+                    document.visibilityState === "visible" &&
+                    pcRef.current != undefined
+                  ) {
                     onError("stalled");
                   }
                 }, 3000),
