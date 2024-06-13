@@ -67,6 +67,7 @@ import {
 } from "../ui/dialog";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { cn } from "@/lib/utils";
+import { baseUrl } from "@/api/baseUrl";
 
 type GeneralSettingsProps = {
   className?: string;
@@ -95,12 +96,12 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
 
   useEffect(() => {
     if (countdown === 0) {
-      window.location.href = "/";
+      window.location.href = baseUrl;
     }
   }, [countdown]);
 
   const handleForceReload = () => {
-    window.location.href = "/";
+    window.location.href = baseUrl;
   };
 
   const Container = isDesktop ? DropdownMenu : Drawer;
