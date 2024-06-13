@@ -282,7 +282,9 @@ class BirdsEyeFrameManager:
         self.canvas = Canvas(width, height, config.birdseye.layout.scaling_factor)
         self.stop_event = stop_event
         self.inactivity_threshold = config.birdseye.inactivity_threshold
-        self.min_display_duration = config.birdseye.min_display_duration  # New parameter
+        self.min_display_duration = (
+            config.birdseye.min_display_duration 
+        )# New parameter
 
         if config.birdseye.layout.max_cameras:
             self.last_refresh_time = 0
@@ -449,7 +451,10 @@ class BirdsEyeFrameManager:
             reset_layout = True
 
         # Ensure the current camera has been displayed for at least min_display_duration seconds
-        if len(self.active_cameras) == 1 and now - self.last_camera_switch_time < self.min_display_duration:
+        if (
+            len(self.active_cameras) == 1 
+            and now - self.last_camera_switch_time < self.min_display_duration
+        ):
             reset_layout = False
 
         # reset the layout if it needs to be different
