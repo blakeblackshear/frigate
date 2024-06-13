@@ -9,16 +9,16 @@ title: Authentication
 
 Frigate supports two modes for authentication
 
-| Mode     | Description                                                                                                                                                                     |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `native` | (default) Use this mode if you don't implement authentication with a proxy in front of Frigate.                                                                                 |
-| `proxy`  | Use this mode if you have an existing proxy for authentication. Supports passing authenticated user downstream to Frigate for role-based authorization (future implementation). |
+| Mode     | Description                                                                                                                                                                                                                            |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `native` | (default) Use this mode if you don't implement authentication with a proxy in front of Frigate.                                                                                                                                        |
+| `proxy`  | Turns off Frigate's authentication. Use this mode if you have an existing proxy for authentication. Supports passing authenticated user downstream via common headers to Frigate for role-based authorization (future implementation). |
 
 The following ports are used to access the Frigate webUI
 
 | Port   | Description                                                                                                                                                                |
 | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `8080` | Authenticated UI and API access without TLS. Reverse proxies should use this port.                                                                                         |
+| `8080` | Authenticated UI and API. Reverse proxies should use this port.                                                                                                            |
 | `5000` | Internal unauthenticated UI and API access. Access to this port should be limited. Intended to be used within the docker network for services that integrate with Frigate. |
 
 ### Native mode
@@ -83,6 +83,12 @@ Changing the secret will invalidate current tokens.
 ### Proxy mode
 
 Proxy mode is designed to complement common upstream authentication proxies such as Authelia, Authentik, oauth2_proxy, or traefik-forward-auth.
+
+:::danger
+
+Note that using proxy mode disables authentication checks in Frigate. This mode will pass headers so Frigate can be aware of the logged in user from the upstream proxy, but it does not validate that the request came from your proxy. If the proxy resides on a different device, you should consider using firewall rules or a VPN between Frigate and the proxy if the network is insecure.
+
+:::
 
 #### Header mapping
 
