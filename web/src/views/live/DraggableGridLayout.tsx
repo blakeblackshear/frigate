@@ -97,8 +97,9 @@ export default function DraggableGridLayout({
   const [showCircles, setShowCircles] = useState(true);
 
   useEffect(() => {
+    setIsEditMode(false);
     setEditGroup(false);
-  }, [cameraGroup]);
+  }, [cameraGroup, setIsEditMode]);
 
   // camera state
 
@@ -185,8 +186,6 @@ export default function DraggableGridLayout({
         y: 0, // don't set y, grid does automatically
         w: width,
         h: height,
-        isDraggable: isEditMode,
-        isResizable: isEditMode,
       };
 
       optionsMap.push(options);
@@ -195,30 +194,11 @@ export default function DraggableGridLayout({
     return optionsMap;
   }, [
     cameras,
-    isEditMode,
     isGridLayoutLoaded,
     currentGridLayout,
     includeBirdseye,
     birdseyeConfig,
   ]);
-
-  useEffect(() => {
-    if (currentGridLayout) {
-      const updatedGridLayout = currentGridLayout.map((layout) => ({
-        ...layout,
-        isDraggable: isEditMode,
-        isResizable: isEditMode,
-      }));
-      if (isEditMode) {
-        setGridLayout(updatedGridLayout);
-        setCurrentGridLayout(updatedGridLayout);
-      } else {
-        setGridLayout(updatedGridLayout);
-      }
-    }
-    // we know that these deps are correct
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEditMode, setGridLayout]);
 
   useEffect(() => {
     if (isGridLayoutLoaded) {
@@ -406,6 +386,8 @@ export default function DraggableGridLayout({
             onResize={handleResize}
             onResizeStart={() => setShowCircles(false)}
             onResizeStop={handleLayoutChange}
+            isDraggable={isEditMode}
+            isResizable={isEditMode}
           >
             {includeBirdseye && birdseyeConfig?.enabled && (
               <BirdseyeLivePlayerGridItem
