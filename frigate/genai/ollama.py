@@ -1,5 +1,6 @@
 """Ollama Provider for Frigate AI."""
 
+import logging
 from typing import Optional
 
 from ollama import Client as ApiClient
@@ -7,6 +8,8 @@ from ollama import ResponseError
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
+
+logger = logging.getLogger(__name__)
 
 
 @register_genai_provider(GenAIProviderEnum.ollama)
@@ -17,7 +20,12 @@ class OllamaClient(GenAIClient):
 
     def _init_provider(self):
         """Initialize the client."""
-        return ApiClient(host=self.genai_config.base_url)
+        client = ApiClient(host=self.genai_config.base_url)
+        response = client.pull(self.genai_config.model)
+        if response["status"] != "success":
+            logger.error("Failed to pull %s model from Ollama", self.genai_config.model)
+            return None
+        return client
 
     def _send(self, prompt: str, images: list[bytes]) -> Optional[str]:
         """Submit a request to Ollama."""
