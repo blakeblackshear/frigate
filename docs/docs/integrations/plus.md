@@ -56,6 +56,12 @@ model:
   path: plus://<your_model_id>
 ```
 
+:::note
+
+Model IDs are not secret values and can be shared freely. Access to your model is protected by your API key.
+
+:::
+
 Models are downloaded into the `/config/model_cache` folder and only downloaded if needed.
 
 If needed, you can override the labelmap for Frigate+ models. This is not recommended as renaming labels will break the Submit to Frigate+ feature if the labels are not available in Frigate+.
