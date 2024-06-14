@@ -5,37 +5,26 @@ title: Authentication
 
 # Authentication
 
-## Modes
-
-Frigate supports two modes for authentication
-
-| Mode     | Description                                                                                                                                                                                                                            |
-| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `native` | (default) Use this mode if you don't implement authentication with a proxy in front of Frigate.                                                                                                                                        |
-| `proxy`  | Turns off Frigate's authentication. Use this mode if you have an existing proxy for authentication. Supports passing authenticated user downstream via common headers to Frigate for role-based authorization (future implementation). |
-
-The following ports are used to access the Frigate webUI
-
-| Port   | Description                                                                                                                                                                |
-| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `8080` | Authenticated UI and API. Reverse proxies should use this port.                                                                                                            |
-| `5000` | Internal unauthenticated UI and API access. Access to this port should be limited. Intended to be used within the docker network for services that integrate with Frigate. |
-
-### Native mode
-
 Frigate stores user information in its database. Password hashes are generated using industry standard PBKDF2-SHA256 with 600,000 iterations. Upon successful login, a JWT token is issued with an expiration date and set as a cookie. The cookie is refreshed as needed automatically. This JWT token can also be passed in the Authorization header as a bearer token.
 
 Users are managed in the UI under Settings > Users.
 
-#### Onboarding
+The following ports are available to access the Frigate web UI.
+
+| Port   | Description                                                                                                                                                                                                  |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `8080` | Authenticated UI and API. Reverse proxies should use this port.                                                                                                                                              |
+| `5000` | Internal unauthenticated UI and API access. Access to this port should be limited. Intended to be used within the docker network for services that integrate with Frigate and do not support authentication. |
+
+## Onboarding
 
 On startup, an admin user and password are generated and printed in the logs. It is recommended to set a new password for the admin account after logging in for the first time under Settings > Users.
 
-#### Resetting admin password
+## Resetting admin password
 
 In the event that you are locked out of your instance, you can tell Frigate to reset the admin password and print it in the logs on next startup using the `reset_admin_password` setting in your config file.
 
-#### Login failure rate limiting
+## Login failure rate limiting
 
 In order to limit the risk of brute force attacks, rate limiting is available for login failures. This is implemented with Flask-Limiter, and the string notation for valid values is available in [the documentation](https://flask-limiter.readthedocs.io/en/stable/configuration.html#rate-limit-string-notation).
 
@@ -53,13 +42,12 @@ If you are running a reverse proxy in the same docker compose file as Frigate, h
 
 ```yaml
 auth:
-  mode: native
   failed_login_rate_limit: "1/second;5/minute;20/hour"
   trusted_proxies:
     - 172.18.0.0/16 # <---- this is the subnet for the internal docker compose network
 ```
 
-#### JWT Token Secret
+## JWT Token Secret
 
 The JWT token secret needs to be kept secure. Anyone with this secret can generate valid JWT tokens to authenticate with Frigate. This should be a cryptographically random string of at least 64 characters.
 
@@ -80,22 +68,34 @@ If no secret is found on startup, Frigate generates one and stores it in a `.jwt
 
 Changing the secret will invalidate current tokens.
 
-### Proxy mode
+## Proxy configuration
 
-Proxy mode is designed to complement common upstream authentication proxies such as Authelia, Authentik, oauth2_proxy, or traefik-forward-auth.
+Frigate can be configured to leverage features of common upstream authentication proxies such as Authelia, Authentik, oauth2_proxy, or traefik-forward-auth.
 
-:::danger
+If you are leveraging the authentication of an upstream proxy, you likely want to disable Frigate's authentication. Optionally, if communication between the reverse proxy and Frigate is over an untrusted network, you should set an `auth_secret` in the `proxy` config and configure the proxy to send the secret value as a header named `X-Proxy-Secret`. Assuming this is an untrusted network, you will also want to [configure a real TLS certificate](tls.md) to ensure the traffic can't simply be sniffed to steal the secret.
 
-Note that using proxy mode disables authentication checks in Frigate. This mode will pass headers so Frigate can be aware of the logged in user from the upstream proxy, but it does not validate that the request came from your proxy. If the proxy resides on a different device, you should consider using firewall rules or a VPN between Frigate and the proxy if the network is insecure.
-
-:::
-
-#### Header mapping
-
-If your proxy supports passing a header with the authenticated username, you can use the `header_map` config to specify the header name so it is passed to Frigate. For example, the following will map the `X-Forwarded-User` value. Header names are not case sensitive.
+Here is an example of how to disable Frigate's authentication and also ensure the requests come only from your known proxy.
 
 ```yaml
 auth:
+  enabled: False
+
+proxy:
+  auth_secret: <some random long string>
+```
+
+You can use the following code to generate a random secret.
+
+```shell
+python3 -c 'import secrets; print(secrets.token_hex(64))'
+```
+
+### Header mapping
+
+If you have disabled Frigate's authentication and your proxy supports passing a header with the authenticated username, you can use the `header_map` config to specify the header name so it is passed to Frigate. For example, the following will map the `X-Forwarded-User` value. Header names are not case sensitive.
+
+```yaml
+proxy:
   ...
   header_map:
     user: x-forwarded-user
@@ -123,10 +123,10 @@ If you would like to add more options, you can overwrite the default file with a
 
 Future versions of Frigate may leverage group and role headers for authorization in Frigate as well.
 
-#### Login page redirection
+### Login page redirection
 
 Frigate gracefully performs login page redirection that should work with most authentication proxies. If your reverse proxy returns a `Location` header on `401`, `302`, or `307` unauthorized responses, Frigate's frontend will automatically detect it and redirect to that URL.
 
-#### Custom logout url
+### Custom logout url
 
 If your reverse proxy has a dedicated logout url, you can specify using the `logout_url` config option. This will update the link for the `Logout` link in the UI.
