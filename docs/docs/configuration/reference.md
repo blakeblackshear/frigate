@@ -66,13 +66,28 @@ database:
 # Optional: TLS configuration
 tls:
   # Optional: Enable TLS for port 8080 (default: shown below)
-  enabled: true
+  enabled: True
+
+# Optional: Proxy configuration
+proxy:
+  # Optional: Mapping for headers from upstream proxies. Only used if Frigate's auth
+  # is disabled.
+  # NOTE: Many authentication proxies pass a header downstream with the authenticated
+  #       user name. Not all values are supported. It must be a whitelisted header.
+  #       See the docs for more info.
+  header_map:
+    user: x-forwarded-user
+  # Optional: Url for logging out a user. This sets the location of the logout url in
+  # the UI.
+  logout_url: /api/logout
+  # Optional: Auth secret that is checked against the X-Proxy-Secret header sent from
+  # the proxy. If not set, all requests are trusted regardless of origin.
+  auth_secret: None
 
 # Optional: Authentication configuration
 auth:
-  # Optional: Authentication mode (default: shown below)
-  # Valid values are: native, proxy
-  mode: native
+  # Optional: Enable authentication
+  enabled: True
   # Optional: Reset the admin user password on startup (default: shown below)
   # New password is printed in the logs
   reset_admin_password: False
@@ -87,23 +102,14 @@ auth:
   # When the session is going to expire in less time than this setting,
   # it will be refreshed back to the session_length.
   refresh_time: 43200 # 12 hours
-  # Optional: Mapping for headers from upstream proxies. Only used in proxy auth mode.
-  # NOTE: Many authentication proxies pass a header downstream with the authenticated
-  #       user name. Not all values are supported. It must be a whitelisted header.
-  #       See the docs for more info.
-  header_map:
-    user: x-forwarded-user
   # Optional: Rate limiting for login failures to help prevent brute force
   # login attacks (default: shown below)
   # See the docs for more information on valid values
   failed_login_rate_limit: None
   # Optional: Trusted proxies for determining IP address to rate limit
   # NOTE: This is only used for rate limiting login attempts and does not bypass
-  # authentication in any way
+  # authentication. See the authentication docs for more details.
   trusted_proxies: []
-  # Optional: Url for logging out a user. This only needs to be set if you are using
-  # proxy mode.
-  logout_url: /api/logout
   # Optional: Number of hashing iterations for user passwords
   # As of Feb 2023, OWASP recommends 600000 iterations for PBKDF2-SHA256
   # NOTE: changing this value will not automatically update password hashes, you

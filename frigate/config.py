@@ -119,19 +119,28 @@ class TlsConfig(FrigateBaseModel):
     enabled: bool = Field(default=True, title="Enable TLS for port 8080")
 
 
-class AuthModeEnum(str, Enum):
-    native = "native"
-    proxy = "proxy"
-
-
 class HeaderMappingConfig(FrigateBaseModel):
     user: str = Field(
         default=None, title="Header name from upstream proxy to identify user."
     )
 
 
+class ProxyConfig(FrigateBaseModel):
+    header_map: HeaderMappingConfig = Field(
+        default_factory=HeaderMappingConfig,
+        title="Header mapping definitions for proxy user passing.",
+    )
+    logout_url: Optional[str] = Field(
+        default=None, title="Redirect url for logging out with proxy."
+    )
+    auth_secret: Optional[str] = Field(
+        default=None,
+        title="Secret value for proxy authentication.",
+    )
+
+
 class AuthConfig(FrigateBaseModel):
-    mode: AuthModeEnum = Field(default=AuthModeEnum.native, title="Authentication mode")
+    enabled: bool = Field(default=True, title="Enable authentication")
     reset_admin_password: bool = Field(
         default=False, title="Reset the admin password on startup"
     )
@@ -147,10 +156,6 @@ class AuthConfig(FrigateBaseModel):
         title="Refresh the session if it is going to expire in this many seconds",
         ge=30,
     )
-    header_map: HeaderMappingConfig = Field(
-        default_factory=HeaderMappingConfig,
-        title="Header mapping definitions for proxy auth mode.",
-    )
     failed_login_rate_limit: Optional[str] = Field(
         default=None,
         title="Rate limits for failed login attempts.",
@@ -158,9 +163,6 @@ class AuthConfig(FrigateBaseModel):
     trusted_proxies: List[str] = Field(
         default=[],
         title="Trusted proxies for determining IP address to rate limit",
-    )
-    logout_url: Optional[str] = Field(
-        default=None, title="Redirect url for logging out in proxy mode."
     )
     # As of Feb 2023, OWASP recommends 600000 iterations for PBKDF2-SHA256
     hash_iterations: int = Field(default=600000, title="Password hash iterations")
@@ -1308,6 +1310,9 @@ class FrigateConfig(FrigateBaseModel):
         default_factory=DatabaseConfig, title="Database configuration."
     )
     tls: TlsConfig = Field(default_factory=TlsConfig, title="TLS configuration.")
+    proxy: ProxyConfig = Field(
+        default_factory=ProxyConfig, title="Proxy configuration."
+    )
     auth: AuthConfig = Field(default_factory=AuthConfig, title="Auth configuration.")
     environment_vars: Dict[str, str] = Field(
         default_factory=dict, title="Frigate environment variables."
@@ -1372,6 +1377,12 @@ class FrigateConfig(FrigateBaseModel):
     def runtime_config(self, plus_api: PlusApi = None) -> FrigateConfig:
         """Merge camera config with globals."""
         config = self.model_copy(deep=True)
+
+        # Proxy secret substitution
+        if config.proxy.auth_secret:
+            config.proxy.auth_secret = config.proxy.auth_secret.format(
+                **FRIGATE_ENV_VARS
+            )
 
         # MQTT user/password substitutions
         if config.mqtt.user or config.mqtt.password:

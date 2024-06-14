@@ -21,7 +21,7 @@ from frigate.api.export import ExportBp
 from frigate.api.media import MediaBp
 from frigate.api.preview import PreviewBp
 from frigate.api.review import ReviewBp
-from frigate.config import AuthModeEnum, FrigateConfig
+from frigate.config import FrigateConfig
 from frigate.const import CONFIG_DIR
 from frigate.events.external import ExternalEventProcessor
 from frigate.models import Event, Timeline
@@ -86,9 +86,7 @@ def create_app(
     app.plus_api = plus_api
     app.camera_error_image = None
     app.stats_emitter = stats_emitter
-    app.jwt_token = (
-        get_jwt_secret() if frigate_config.auth.mode == AuthModeEnum.native else None
-    )
+    app.jwt_token = get_jwt_secret() if frigate_config.auth.enabled else None
     # update the request_address with the x-forwarded-for header from nginx
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1)
     # initialize the rate limiter for the login endpoint
@@ -175,6 +173,9 @@ def config():
 
     # remove the mqtt password
     config["mqtt"].pop("password", None)
+
+    # remove the proxy secret
+    config["proxy"].pop("auth_secret", None)
 
     for camera_name, camera in current_app.frigate_config.cameras.items():
         camera_dict = config["cameras"][camera_name]
