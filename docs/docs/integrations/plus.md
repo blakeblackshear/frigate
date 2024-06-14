@@ -49,11 +49,11 @@ You can view all of your submitted images at [https://plus.frigate.video](https:
 
 ## Use Models
 
-Models available in Frigate+ can be used with a special model path. No other information needs to be configured for Frigate+ models because it fetches the remaining config from Frigate+ automatically.
+Once you have [requested your first model](../plus/first_model.md) and gotten your own model ID, it can be used with a special model path. No other information needs to be configured for Frigate+ models because it fetches the remaining config from Frigate+ automatically.
 
 ```yaml
 model:
-  path: plus://e63b7345cc83a84ed79dedfc99c16616
+  path: plus://<your_model_id>
 ```
 
 Models are downloaded into the `/config/model_cache` folder and only downloaded if needed.
@@ -62,7 +62,7 @@ If needed, you can override the labelmap for Frigate+ models. This is not recomm
 
 ```yaml
 model:
-  path: plus://e63b7345cc83a84ed79dedfc99c16616
+  path: plus://<your_model_id>
   labelmap:
     3: animal
     4: animal
