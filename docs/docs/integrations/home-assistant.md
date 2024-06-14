@@ -150,7 +150,8 @@ Home Assistant > Configuration > Integrations > Frigate > Options
 
 | Platform        | Description                                                                       |
 | --------------- | --------------------------------------------------------------------------------- |
-| `camera`        | Live camera stream (requires RTSP), camera for image of the last detected object. |
+| `camera`        | Live camera stream (requires RTSP).                                               |
+| `image`         | Image of the latest detected object for each camera.                              |
 | `sensor`        | States to monitor Frigate performance, object counts for all zones and cameras.   |
 | `switch`        | Switch entities to toggle detection, recordings and snapshots.                    |
 | `binary_sensor` | A "motion" binary sensor entity per camera/zone/object.                           |

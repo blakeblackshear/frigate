@@ -37,7 +37,7 @@ The USB Coral can become stuck and need to be restarted, this can happen for a n
 
 ## PCIe Coral Not Detected
 
-The most common reason for the PCIe coral not being detected is that the driver has not been installed. See [the coral docs(https://coral.ai/docs/m2/get-started/#2-install-the-pcie-driver-and-edge-tpu-runtime) for how to install the driver for the PCIe based coral.
+The most common reason for the PCIe coral not being detected is that the driver has not been installed. See [the coral docs](https://coral.ai/docs/m2/get-started/#2-install-the-pcie-driver-and-edge-tpu-runtime) for how to install the driver for the PCIe based coral.
 
 ## Only One PCIe Coral Is Detected With Coral Dual EdgeTPU
 

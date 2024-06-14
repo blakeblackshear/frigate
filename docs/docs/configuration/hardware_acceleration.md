@@ -13,7 +13,7 @@ Depending on your system, these parameters may not be compatible. More informati
 
 ## Raspberry Pi 3/4
 
-Ensure you increase the allocated RAM for your GPU to at least 128 (`raspi-config` > Performance Options > GPU Memory).  
+Ensure you increase the allocated RAM for your GPU to at least 128 (`raspi-config` > Performance Options > GPU Memory).
 If you are using the HA addon, you may need to use the full access variant and turn off `Protection mode` for hardware acceleration.
 
 ```yaml
@@ -67,7 +67,7 @@ Or map in all the `/dev/video*` devices.
 
 ### Via VAAPI
 
-VAAPI supports automatic profile selection so it will work automatically with both H.264 and H.265 streams. VAAPI is recommended for all generations of Intel-based CPUs if QSV does not work.
+VAAPI supports automatic profile selection so it will work automatically with both H.264 and H.265 streams. VAAPI is recommended for all generations of Intel-based CPUs.
 
 ```yaml
 ffmpeg:
@@ -82,7 +82,7 @@ With some of the processors, like the J4125, the default driver `iHD` doesn't se
 
 ### Via Quicksync (>=10th Generation only)
 
-QSV must be set specifically based on the video encoding of the stream.
+If VAAPI does not work for you, you can try QSV if your processor supports it. QSV must be set specifically based on the video encoding of the stream.
 
 #### H.264 streams
 
