@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { FaCircle } from "react-icons/fa";
 import { getUTCOffset } from "@/utils/dateUtil";
 import { type DayContentProps } from "react-day-picker";
+import { LAST_24_HOURS_KEY } from "@/types/filter";
 
 type ReviewActivityCalendarProps = {
   reviewSummary?: ReviewSummary;
@@ -32,10 +33,23 @@ export default function ReviewActivityCalendar({
     const unreviewedAlerts: Date[] = [];
 
     Object.entries(reviewSummary).forEach(([date, data]) => {
+      if (date == LAST_24_HOURS_KEY) {
+        return;
+      }
+
+      const parts = date.split("-");
+      const cal = new Date(date);
+
+      cal.setFullYear(
+        parseInt(parts[0]),
+        parseInt(parts[1]) - 1,
+        parseInt(parts[2]),
+      );
+
       if (data.total_alert > data.reviewed_alert) {
-        unreviewedAlerts.push(new Date(date));
+        unreviewedAlerts.push(cal);
       } else if (data.total_detection > data.reviewed_detection) {
-        unreviewedDetections.push(new Date(date));
+        unreviewedDetections.push(cal);
       }
     });
 

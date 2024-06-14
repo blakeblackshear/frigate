@@ -49,7 +49,7 @@ import scrollIntoView from "scroll-into-view-if-needed";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { FilterList } from "@/types/filter";
+import { FilterList, LAST_24_HOURS_KEY } from "@/types/filter";
 import { GiSoundWaves } from "react-icons/gi";
 
 type EventViewProps = {
@@ -96,7 +96,7 @@ export default function EventView({
 
     let summary;
     if (filter?.before == undefined) {
-      summary = reviewSummary["last24Hours"];
+      summary = reviewSummary[LAST_24_HOURS_KEY];
     } else {
       const day = new Date(filter.before * 1000);
       const key = `${day.getFullYear()}-${("0" + (day.getMonth() + 1)).slice(-2)}-${("0" + day.getDate()).slice(-2)}`;
