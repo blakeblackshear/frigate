@@ -196,6 +196,19 @@ export function RecordingView({
     updateSelectedSegment,
   ]);
 
+  const manuallySetCurrentTime = useCallback(
+    (time: number) => {
+      setCurrentTime(time);
+
+      if (currentTimeRange.after <= time && currentTimeRange.before >= time) {
+        mainControllerRef.current?.seekToTimestamp(time, true);
+      } else {
+        updateSelectedSegment(time, true);
+      }
+    },
+    [currentTimeRange, updateSelectedSegment],
+  );
+
   useEffect(() => {
     if (!scrubbing) {
       if (Math.abs(currentTime - playerTime) > 10) {
@@ -580,6 +593,7 @@ export function RecordingView({
           currentTime={currentTime}
           exportRange={exportMode == "timeline" ? exportRange : undefined}
           setCurrentTime={setCurrentTime}
+          manuallySetCurrentTime={manuallySetCurrentTime}
           setScrubbing={setScrubbing}
           setExportRange={setExportRange}
         />
@@ -597,6 +611,7 @@ type TimelineProps = {
   currentTime: number;
   exportRange?: TimeRange;
   setCurrentTime: React.Dispatch<React.SetStateAction<number>>;
+  manuallySetCurrentTime: (time: number, force: boolean) => void;
   setScrubbing: React.Dispatch<React.SetStateAction<boolean>>;
   setExportRange: (range: TimeRange) => void;
 };
@@ -609,6 +624,7 @@ function Timeline({
   currentTime,
   exportRange,
   setCurrentTime,
+  manuallySetCurrentTime,
   setScrubbing,
   setExportRange,
 }: TimelineProps) {
@@ -693,9 +709,10 @@ function Timeline({
                   event={review}
                   currentTime={currentTime}
                   onClick={() => {
-                    setScrubbing(true);
-                    setCurrentTime(review.start_time - REVIEW_PADDING);
-                    setScrubbing(false);
+                    manuallySetCurrentTime(
+                      review.start_time - REVIEW_PADDING,
+                      true,
+                    );
                   }}
                 />
               );
