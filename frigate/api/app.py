@@ -176,6 +176,9 @@ def config():
     # remove the mqtt password
     config["mqtt"].pop("password", None)
 
+    # remove the proxy secret
+    config["proxy"].pop("auth_secret", None)
+
     for camera_name, camera in current_app.frigate_config.cameras.items():
         camera_dict = config["cameras"][camera_name]
 

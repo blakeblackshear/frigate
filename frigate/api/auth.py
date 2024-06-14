@@ -17,7 +17,7 @@ from flask_limiter import Limiter
 from joserfc import jwt
 from peewee import DoesNotExist
 
-from frigate.config import AuthConfig, AuthModeEnum
+from frigate.config import AuthConfig, ProxyConfig
 from frigate.const import CONFIG_DIR, JWT_SECRET_ENV_VAR, PASSWORD_HASH_ALGORITHM
 from frigate.models import User
 
@@ -166,6 +166,9 @@ def set_jwt_cookie(response, cookie_name, encoded_jwt, expiration, secure):
 # Endpoint for use with nginx auth_request
 @AuthBp.route("/auth")
 def auth():
+    auth_config: AuthConfig = current_app.frigate_config.auth
+    proxy_config: ProxyConfig = current_app.frigate_config.proxy
+
     success_response = make_response({}, 202)
 
     # dont require auth if the request is on the internal port
@@ -173,11 +176,22 @@ def auth():
     if request.headers.get("x-server-port", 0, type=int) == 5000:
         return success_response
 
-    # if proxy auth mode
-    if current_app.frigate_config.auth.mode == AuthModeEnum.proxy:
+    fail_response = make_response({}, 401)
+
+    # ensure the proxy secret matches if configured
+    if (
+        proxy_config.auth_secret is not None
+        and request.headers.get("x-proxy-secret", "", type=str)
+        != proxy_config.auth_secret
+    ):
+        logger.debug("X-Proxy-Secret header does not match configured secret value")
+        return fail_response
+
+    # if auth is disabled, just apply the proxy header map and return success
+    if not auth_config.enabled:
         # pass the user header value from the upstream proxy if a mapping is specified
         # or use anonymous if none are specified
-        if current_app.frigate_config.auth.header_map.user is not None:
+        if proxy_config.header_map.user is not None:
             upstream_user_header_value = request.headers.get(
                 current_app.frigate_config.auth.header_map.user,
                 type=str,
@@ -188,7 +202,7 @@ def auth():
             success_response.headers["remote-user"] = "anonymous"
         return success_response
 
-    fail_response = make_response({}, 401)
+    # now apply authentication
     fail_response.headers["location"] = "/login"
 
     JWT_COOKIE_NAME = current_app.frigate_config.auth.cookie_name

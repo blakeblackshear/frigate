@@ -26,7 +26,7 @@ type AccountSettingsProps = {
 export default function AccountSettings({ className }: AccountSettingsProps) {
   const { data: profile } = useSWR("profile");
   const { data: config } = useSWR("config");
-  const logoutUrl = config?.auth.logout_url || "/api/logout";
+  const logoutUrl = config?.proxy.logout_url || "/api/logout";
 
   const Container = isDesktop ? DropdownMenu : Drawer;
   const Trigger = isDesktop ? DropdownMenuTrigger : DrawerTrigger;
