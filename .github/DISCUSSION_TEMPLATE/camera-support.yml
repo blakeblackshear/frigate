@@ -69,14 +69,14 @@ body:
     validations:
       required: true
   - type: dropdown
-    id: coral
+    id: object-detector
     attributes:
-      label: Coral version
+      label: Object Detector
       options:
-        - USB
-        - PCIe
-        - M.2
-        - Dev Board
+        - Coral
+        - OpenVino
+        - TensorRT
+        - RKNN
         - Other
         - CPU (no coral)
     validations:
