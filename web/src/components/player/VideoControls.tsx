@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import { isMobileOnly, isSafari } from "react-device-detect";
+import { isDesktop, isMobileOnly, isSafari } from "react-device-detect";
 import { LuPause, LuPlay } from "react-icons/lu";
 import {
   DropdownMenu,
@@ -242,7 +242,7 @@ export default function VideoControls({
       )}
       {features.playbackRate && (
         <DropdownMenu
-          modal={false}
+          modal={!isDesktop}
           onOpenChange={(open) => {
             if (setControlsOpen) {
               setControlsOpen(open);
