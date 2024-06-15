@@ -152,10 +152,20 @@ class PreviewRecorder:
         self.start_time = 0
         self.last_output_time = 0
         self.output_frames = []
-        self.out_height = PREVIEW_HEIGHT
-        self.out_width = (
-            int((config.detect.width / config.detect.height) * self.out_height) // 4 * 4
-        )
+        if config.detect.width > config.detect.height:
+            self.out_height = PREVIEW_HEIGHT
+            self.out_width = (
+                int((config.detect.width / config.detect.height) * self.out_height)
+                // 4
+                * 4
+            )
+        else:
+            self.out_width = PREVIEW_HEIGHT
+            self.out_height = (
+                int((config.detect.height / config.detect.width) * self.out_width)
+                // 4
+                * 4
+            )
 
         # create communication for finished previews
         self.requestor = InterProcessRequestor()
