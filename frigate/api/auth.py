@@ -193,7 +193,7 @@ def auth():
         # or use anonymous if none are specified
         if proxy_config.header_map.user is not None:
             upstream_user_header_value = request.headers.get(
-                current_app.frigate_config.auth.header_map.user,
+                proxy_config.header_map.user,
                 type=str,
                 default="anonymous",
             )
