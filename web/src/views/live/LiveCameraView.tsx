@@ -620,7 +620,7 @@ function PtzControlPanel({
         </>
       )}
       {(ptz?.presets?.length ?? 0) > 0 && (
-        <DropdownMenu modal={false}>
+        <DropdownMenu modal={!isDesktop}>
           <DropdownMenuTrigger asChild>
             <Button>
               <BsThreeDotsVertical />

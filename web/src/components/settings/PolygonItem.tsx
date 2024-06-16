@@ -19,7 +19,7 @@ import { LuCopy, LuPencil } from "react-icons/lu";
 import { FaDrawPolygon, FaObjectGroup } from "react-icons/fa";
 import { BsPersonBoundingBox } from "react-icons/bs";
 import { HiOutlineDotsVertical, HiTrash } from "react-icons/hi";
-import { isMobile } from "react-device-detect";
+import { isDesktop, isMobile } from "react-device-detect";
 import {
   flattenPoints,
   parseCoordinates,
@@ -266,7 +266,7 @@ export default function PolygonItem({
 
         {isMobile && (
           <>
-            <DropdownMenu modal={false}>
+            <DropdownMenu modal={!isDesktop}>
               <DropdownMenuTrigger>
                 <HiOutlineDotsVertical className="size-5" />
               </DropdownMenuTrigger>
