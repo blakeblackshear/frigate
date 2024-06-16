@@ -34,7 +34,7 @@ class EventEndPublisher(Publisher):
     topic_base = "event/"
 
     def __init__(self) -> None:
-        super().__init__("ended")
+        super().__init__("finalized")
 
     def publish(
         self, payload: tuple[EventTypeEnum, EventStateEnum, str, dict[str, any]]
@@ -48,4 +48,4 @@ class EventEndSubscriber(Subscriber):
     topic_base = "event/"
 
     def __init__(self) -> None:
-        super().__init__("ended")
+        super().__init__("finalized")

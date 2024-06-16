@@ -8,7 +8,7 @@ ARG SLIM_BASE=debian:11-slim
 
 FROM ${BASE_IMAGE} AS base
 
-FROM --platform=${BUILDPLATFORM} ${BASE_IMAGE} AS base_host
+FROM --platform=${BUILDPLATFORM} debian:11 AS base_host
 
 FROM ${SLIM_BASE} AS slim-base
 

@@ -3,7 +3,6 @@
 import base64
 import io
 import logging
-import os
 import time
 
 import numpy as np
@@ -13,7 +12,6 @@ from chromadb.config import Settings
 from PIL import Image
 from playhouse.shortcuts import model_to_dict
 
-from frigate.const import CONFIG_DIR
 from frigate.models import Event
 
 from .functions.clip import ClipEmbedding
@@ -112,5 +110,3 @@ class Embeddings:
             len(descriptions["ids"]),
             time.time() - st,
         )
-
-        os.remove(f"{CONFIG_DIR}/.reindex_events")

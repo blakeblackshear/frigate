@@ -22,11 +22,14 @@ def register_genai_provider(key: GenAIProviderEnum):
 class GenAIClient:
     """Generative AI client for Frigate."""
 
-    def __init__(self, genai_config: GenAIConfig) -> None:
+    def __init__(self, genai_config: GenAIConfig, timeout: int = 60) -> None:
         self.genai_config: GenAIConfig = genai_config
+        self.timeout = timeout
         self.provider = self._init_provider()
 
-    def generate_description(self, thumbnails: list[bytes], metadata: dict[str, any]):
+    def generate_description(
+        self, thumbnails: list[bytes], metadata: dict[str, any]
+    ) -> Optional[str]:
         """Generate a description for the frame."""
         prompt = self.genai_config.object_prompts.get(
             metadata["label"], self.genai_config.prompt

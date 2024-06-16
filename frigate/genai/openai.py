@@ -3,6 +3,7 @@
 import base64
 from typing import Optional
 
+from httpx import TimeoutException
 from openai import OpenAI
 
 from frigate.config import GenAIProviderEnum
@@ -22,25 +23,29 @@ class OpenAIClient(GenAIClient):
     def _send(self, prompt: str, images: list[bytes]) -> Optional[str]:
         """Submit a request to OpenAI."""
         encoded_images = [base64.b64encode(image).decode("utf-8") for image in images]
-        result = self.provider.chat.completions.create(
-            model=self.genai_config.model,
-            messages=[
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:image/jpeg;base64,{image}",
-                                "detail": "low",
-                            },
-                        }
-                        for image in encoded_images
-                    ]
-                    + [prompt],
-                },
-            ],
-        )
+        try:
+            result = self.provider.chat.completions.create(
+                model=self.genai_config.model,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/jpeg;base64,{image}",
+                                    "detail": "low",
+                                },
+                            }
+                            for image in encoded_images
+                        ]
+                        + [prompt],
+                    },
+                ],
+                timeout=self.timeout,
+            )
+        except TimeoutException:
+            return None
         if len(result.choices) > 0:
             return result.choices[0].message.content.strip()
         return None

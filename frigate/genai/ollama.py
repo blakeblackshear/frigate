@@ -3,6 +3,7 @@
 import logging
 from typing import Optional
 
+from httpx import TimeoutException
 from ollama import Client as ApiClient
 from ollama import ResponseError
 
@@ -20,7 +21,7 @@ class OllamaClient(GenAIClient):
 
     def _init_provider(self):
         """Initialize the client."""
-        client = ApiClient(host=self.genai_config.base_url)
+        client = ApiClient(host=self.genai_config.base_url, timeout=self.timeout)
         response = client.pull(self.genai_config.model)
         if response["status"] != "success":
             logger.error("Failed to pull %s model from Ollama", self.genai_config.model)
@@ -28,7 +29,7 @@ class OllamaClient(GenAIClient):
         return client
 
     def _send(self, prompt: str, images: list[bytes]) -> Optional[str]:
-        """Submit a request to Ollama."""
+        """Submit a request to Ollama"""
         try:
             result = self.provider.generate(
                 self.genai_config.model,
@@ -36,5 +37,5 @@ class OllamaClient(GenAIClient):
                 images=images,
             )
             return result["response"].strip()
-        except ResponseError:
+        except (TimeoutException, ResponseError):
             return None

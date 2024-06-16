@@ -3,6 +3,7 @@
 from typing import Optional
 
 import google.generativeai as genai
+from google.api_core.exceptions import DeadlineExceeded
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
@@ -28,12 +29,18 @@ class GeminiClient(GenAIClient):
             }
             for img in images
         ] + [prompt]
-        response = self.provider.generate_content(
-            data,
-            generation_config=genai.types.GenerationConfig(
-                candidate_count=1,
-            ),
-        )
+        try:
+            response = self.provider.generate_content(
+                data,
+                generation_config=genai.types.GenerationConfig(
+                    candidate_count=1,
+                ),
+                request_options=genai.types.RequestOptions(
+                    timeout=self.timeout,
+                ),
+            )
+        except DeadlineExceeded:
+            return None
         try:
             description = response.text.strip()
         except ValueError:

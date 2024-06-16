@@ -46,82 +46,88 @@ class EmbeddingMaintainer(threading.Thread):
     def run(self) -> None:
         """Maintain a Chroma vector database for semantic search."""
         while not self.stop_event.is_set():
-            update = self.event_subscriber.check_for_update()
+            self._process_updates()
+            self._process_finalized()
 
-            if update is None:
-                continue
+    def _process_updates(self) -> None:
+        """Process event updates"""
+        update = self.event_subscriber.check_for_update()
 
-            source_type, _, camera, data = update
+        if update is None:
+            return
 
-            if camera and source_type == EventTypeEnum.tracked_object:
-                camera_config = self.config.cameras[camera]
-                if data["id"] not in self.tracked_events:
-                    self.tracked_events[data["id"]] = []
+        source_type, _, camera, data = update
 
-                # Create our own thumbnail based on the bounding box and the frame time
+        if not camera or source_type != EventTypeEnum.tracked_object:
+            return
+
+        camera_config = self.config.cameras[camera]
+        if data["id"] not in self.tracked_events:
+            self.tracked_events[data["id"]] = []
+
+        # Create our own thumbnail based on the bounding box and the frame time
+        try:
+            frame_id = f"{camera}{data['frame_time']}"
+            yuv_frame = self.frame_manager.get(frame_id, camera_config.frame_shape_yuv)
+            data["thumbnail"] = self._create_thumbnail(yuv_frame, data["box"])
+            self.tracked_events[data["id"]].append(data)
+            self.frame_manager.close(frame_id)
+        except FileNotFoundError:
+            pass
+
+    def _process_finalized(self) -> None:
+        """Process the end of an event."""
+        while True:
+            ended = self.event_end_subscriber.check_for_update()
+
+            if ended == None:
+                break
+
+            event_id, camera, updated_db = ended
+            camera_config = self.config.cameras[camera]
+
+            if updated_db:
                 try:
-                    frame_id = f"{camera}{data['frame_time']}"
-                    yuv_frame = self.frame_manager.get(
-                        frame_id, camera_config.frame_shape_yuv
-                    )
-                    data["thumbnail"] = self._create_thumbnail(yuv_frame, data["box"])
-                    self.tracked_events[data["id"]].append(data)
-                    self.frame_manager.close(frame_id)
-                except FileNotFoundError:
+                    event: Event = Event.get(Event.id == event_id)
+                except DoesNotExist:
                     continue
 
-            # Embed thumbnails when an event ends
-            while True:
-                ended = self.event_end_subscriber.check_for_update()
+                # Skip the event if not an object
+                if event.data.get("type") != "object":
+                    continue
 
-                if ended == None:
-                    break
+                # Extract valid event metadata
+                metadata = get_metadata(event)
+                thumbnail = base64.b64decode(event.thumbnail)
 
-                event_id, camera, updated_db = ended
-                camera_config = self.config.cameras[camera]
+                # Embed the thumbnail
+                self._embed_thumbnail(event_id, thumbnail, metadata)
 
-                if updated_db:
-                    try:
-                        event: Event = Event.get(Event.id == event_id)
-                    except DoesNotExist:
-                        continue
+                if (
+                    camera_config.genai.enabled
+                    and self.genai_client is not None
+                    and event.data.get("description") is None
+                ):
+                    # Generate the description. Call happens in a thread since it is network bound.
+                    threading.Thread(
+                        target=self._embed_description,
+                        name=f"_embed_description_{event.id}",
+                        daemon=True,
+                        args=(
+                            event,
+                            [
+                                data["thumbnail"]
+                                for data in self.tracked_events[event_id]
+                            ]
+                            if len(self.tracked_events.get(event_id, [])) > 0
+                            else [thumbnail],
+                            metadata,
+                        ),
+                    ).start()
 
-                    # Skip the event if not an object
-                    if event.data.get("type") != "object":
-                        continue
-
-                    # Extract valid event metadata
-                    metadata = get_metadata(event)
-                    thumbnail = base64.b64decode(event.thumbnail)
-
-                    # Embed the thumbnail
-                    self._embed_thumbnail(event_id, thumbnail, metadata)
-
-                    if (
-                        camera_config.genai.enabled
-                        and self.genai_client is not None
-                        and event.data.get("description") is None
-                    ):
-                        # Generate the description. Call happens in a thread since it is network bound.
-                        threading.Thread(
-                            target=self._embed_description,
-                            name=f"_embed_description_{event.id}",
-                            daemon=True,
-                            args=(
-                                event,
-                                [
-                                    data["thumbnail"]
-                                    for data in self.tracked_events.get(
-                                        event_id, [{"thumbnail": thumbnail}]
-                                    )
-                                ],
-                                metadata,
-                            ),
-                        ).start()
-
-                # Delete tracked events based on the event_id
-                if event_id in self.tracked_events:
-                    del self.tracked_events[event_id]
+            # Delete tracked events based on the event_id
+            if event_id in self.tracked_events:
+                del self.tracked_events[event_id]
 
     def _create_thumbnail(self, yuv_frame, box, height=500) -> Optional[bytes]:
         """Return jpg thumbnail of a region of the frame."""

@@ -206,10 +206,13 @@ class EventCleanup(threading.Thread):
             )
             events_to_delete = [e.id for e in events]
             if len(events_to_delete) > 0:
-                Event.delete().where(Event.id << events_to_delete).execute()
+                chunk_size = 50
+                for i in range(0, len(events_to_delete), chunk_size):
+                    chunk = events_to_delete[i : i + chunk_size]
+                    Event.delete().where(Event.id << chunk).execute()
 
-                if self.config.semantic_search.enabled:
-                    self.embeddings.thumbnail.delete(ids=events_to_delete)
-                    self.embeddings.description.delete(ids=events_to_delete)
+                    if self.config.semantic_search.enabled:
+                        self.embeddings.thumbnail.delete(ids=chunk)
+                        self.embeddings.description.delete(ids=chunk)
 
         logger.info("Exiting event cleanup...")
