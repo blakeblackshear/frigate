@@ -23,6 +23,6 @@ try:
 except FileNotFoundError:
     config: dict[str, any] = {}
 
-tls_config: dict[str, any] = config.get("tls", {})
+tls_config: dict[str, any] = config.get("tls", {"enabled": True})
 
 print(json.dumps(tls_config))
