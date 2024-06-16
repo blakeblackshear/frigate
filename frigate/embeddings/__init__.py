@@ -2,7 +2,6 @@
 
 import logging
 import multiprocessing as mp
-import os
 import signal
 import sys
 import threading
@@ -13,7 +12,6 @@ from playhouse.sqliteq import SqliteQueueDatabase
 from setproctitle import setproctitle
 
 from frigate.config import FrigateConfig
-from frigate.const import CONFIG_DIR
 from frigate.models import Event
 from frigate.util.services import listen
 
