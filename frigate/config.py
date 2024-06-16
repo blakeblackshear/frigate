@@ -725,6 +725,9 @@ class ReviewConfig(FrigateBaseModel):
 
 class SemanticSearchConfig(FrigateBaseModel):
     enabled: bool = Field(default=True, title="Enable semantic search.")
+    reindex: Optional[bool] = Field(
+        default=False, title="Reindex all detections on startup."
+    )
 
 
 class GenAIProviderEnum(str, Enum):
@@ -746,9 +749,6 @@ class GenAIConfig(FrigateBaseModel):
         title="Default caption prompt.",
     )
     object_prompts: Dict[str, str] = Field(default={}, title="Object specific prompts.")
-    reindex: Optional[bool] = Field(
-        default=False, title="Reindex all detections on startup."
-    )
 
 
 class GenAICameraConfig(FrigateBaseModel):

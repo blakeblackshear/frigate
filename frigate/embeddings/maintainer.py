@@ -13,7 +13,9 @@ from peewee import DoesNotExist
 from PIL import Image
 
 from frigate.comms.events_updater import EventEndSubscriber, EventUpdateSubscriber
+from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
+from frigate.const import UPDATE_EVENT_DESCRIPTION
 from frigate.events.types import EventTypeEnum
 from frigate.genai import get_genai_client
 from frigate.models import Event
@@ -39,6 +41,8 @@ class EmbeddingMaintainer(threading.Thread):
         self.event_subscriber = EventUpdateSubscriber()
         self.event_end_subscriber = EventEndSubscriber()
         self.frame_manager = SharedMemoryFrameManager()
+        # create communication for updating event descriptions
+        self.requestor = InterProcessRequestor()
         self.stop_event = stop_event
         self.tracked_events = {}
         self.genai_client = get_genai_client(config.genai)
@@ -48,6 +52,11 @@ class EmbeddingMaintainer(threading.Thread):
         while not self.stop_event.is_set():
             self._process_updates()
             self._process_finalized()
+
+        self.event_subscriber.stop()
+        self.event_end_subscriber.stop()
+        self.requestor.stop()
+        logger.info("Exiting embeddings maintenance...")
 
     def _process_updates(self) -> None:
         """Process event updates"""
@@ -167,9 +176,11 @@ class EmbeddingMaintainer(threading.Thread):
             logger.debug("Failed to generate description for %s", event.id)
             return
 
-        # Update the event to add the description
-        event.data["description"] = description
-        event.save()
+        # fire and forget description update
+        self.requestor.send_data(
+            UPDATE_EVENT_DESCRIPTION,
+            {"id": event.id, "description": description},
+        )
 
         # Encode the description
         self.embeddings.description.upsert(

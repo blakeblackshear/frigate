@@ -57,7 +57,7 @@ def manage_embeddings(config: FrigateConfig) -> None:
     embeddings = Embeddings()
 
     # Check if we need to re-index events
-    if config.genai.reindex:
+    if config.semantic_search.reindex:
         embeddings.reindex()
 
     maintainer = EmbeddingMaintainer(

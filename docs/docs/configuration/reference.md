@@ -469,6 +469,8 @@ snapshots:
 semantic_search:
   # Optional: Enable semantic search (default: shown below)
   enabled: False
+  # Optional: Re-index embeddings database from historical events (default: shown below)
+  reindex: False
 
 # Optional: Configuration for AI generated event descriptions
 # NOTE: Semantic Search must be enabled for this to do anything.

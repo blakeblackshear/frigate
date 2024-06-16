@@ -12,11 +12,12 @@ Semantic Search is a global configuration setting.
 ```yaml
 semantic_search:
   enabled: True
+  reindex: False
 ```
 
 :::tip
 
-The embeddings database can be re-indexed from the existing detections in your database by adding an empty file named `.reindex` to the root of your configuration directory. Depending on the number of detections you have, it can take up to 30 minutes to complete and may max out your CPU while indexing.
+The embeddings database can be re-indexed from the existing detections in your database by adding `reindex: True` to your `semantic_search` configuration. Depending on the number of detections you have, it can take up to 30 minutes to complete and may max out your CPU while indexing. Make sure to set the config back to `False` before restarting Frigate again.
 
 :::
 
