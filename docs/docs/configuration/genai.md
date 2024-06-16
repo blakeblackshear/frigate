@@ -82,7 +82,7 @@ OpenAI does not have a free tier for their API. With the release of gpt-4o, pric
 
 ### Supported Models
 
-You must use a vision capable model with Frigate. Current model variants can be found [in their documentation](https://platform.openai.com/docs/models). At the time of writing, this includes `gpt-4o`, `gpt-4-turbo`, and `gemini-pro-vision`.
+You must use a vision capable model with Frigate. Current model variants can be found [in their documentation](https://platform.openai.com/docs/models). At the time of writing, this includes `gpt-4o` and `gpt-4-turbo`.
 
 ### Get API Key
 
