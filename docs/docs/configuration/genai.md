@@ -55,7 +55,7 @@ Google Gemini has a free tier allowing [15 queries per minute](https://ai.google
 
 ### Supported Models
 
-You must use a vision capable model with Frigate. Current model variants can be found [in their documentation](https://ai.google.dev/gemini-api/docs/models/gemini). At the time of writing, this includes `gemini-1.5-pro`, `gemini-1.5-flash`, and `gemini-pro-vision`.
+You must use a vision capable model with Frigate. Current model variants can be found [in their documentation](https://ai.google.dev/gemini-api/docs/models/gemini). At the time of writing, this includes `gemini-1.5-pro` and `gemini-1.5-flash`.
 
 ### Get API Key
 
