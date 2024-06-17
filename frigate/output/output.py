@@ -182,6 +182,5 @@ def move_preview_frames(loc: str):
                 return
 
             shutil.move(preview_holdover, preview_cache)
-
     except shutil.Error:
         logger.error("Failed to restore preview cache.")
