@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { useResizeObserver } from "@/hooks/resize-observer";
+import { isDesktop } from "react-device-detect";
 
 type CameraImageProps = {
   className?: string;
@@ -37,7 +38,7 @@ export default function CameraImage({
 
     return Math.min(
       config.cameras[camera].detect.height,
-      Math.round(containerHeight * 1.1),
+      Math.round(containerHeight * (isDesktop ? 1.1 : 1.25)),
     );
   }, [config, camera, containerHeight]);
 
