@@ -330,7 +330,7 @@ function MSEPlayer({
             setTimeout(() => {
               if (
                 document.visibilityState === "visible" &&
-                wsRef.current != undefined
+                wsRef.current != null
               ) {
                 onError("stalled");
               }

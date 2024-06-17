@@ -163,10 +163,14 @@ export default function GeneralMetrics({
           series[key] = { name: key, data: [] };
         }
 
-        series[key].data.push({
-          x: statsIdx + 1,
-          y: stats.cpu_usages[detStats.pid.toString()].cpu,
-        });
+        const data = stats.cpu_usages[detStats.pid.toString()].cpu;
+
+        if (data != undefined) {
+          series[key].data.push({
+            x: statsIdx + 1,
+            y: data,
+          });
+        }
       });
     });
     return Object.values(series);
@@ -300,10 +304,14 @@ export default function GeneralMetrics({
             series[key] = { name: key, data: [] };
           }
 
-          series[key].data.push({
-            x: statsIdx + 1,
-            y: stats.cpu_usages[procStats.pid.toString()].cpu,
-          });
+          const data = stats.cpu_usages[procStats.pid.toString()].cpu;
+
+          if (data != undefined) {
+            series[key].data.push({
+              x: statsIdx + 1,
+              y: data,
+            });
+          }
         }
       });
     });

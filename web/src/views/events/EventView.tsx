@@ -167,9 +167,13 @@ export default function EventView({
         return;
       }
 
+      const endTime = review.end_time
+        ? review.end_time + REVIEW_PADDING
+        : Date.now() / 1000;
+
       axios
         .post(
-          `export/${review.camera}/start/${review.start_time}/end/${review.end_time}`,
+          `export/${review.camera}/start/${review.start_time - REVIEW_PADDING}/end/${endTime}`,
           { playback: "realtime" },
         )
         .then((response) => {
