@@ -112,7 +112,7 @@ def capture_frames(
     # create 10 shms for storing frames
     frame_shms = []
     # TODO: i might have to recreate these in the loop so i know if i am overwriting one that hasnt been deleted yet
-    for frame in range(0, 9):
+    for frame in range(0, 10):
         name = f"{camera_name}{frame:>02}"
         frame_shms.append({"name": name, "shm": frame_manager.create(name, frame_size)})
     frame_index = 0
