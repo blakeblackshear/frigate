@@ -60,4 +60,4 @@ export type MotionData = {
   camera: string;
 };
 
-export const REVIEW_PADDING = 2;
+export const REVIEW_PADDING = 4;
