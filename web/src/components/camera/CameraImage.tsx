@@ -47,7 +47,7 @@ export default function CameraImage({
       return;
     }
 
-    imgRef.current.src = `${apiHost}api/${name}/latest.jpg?h=${requestHeight}${
+    imgRef.current.src = `${apiHost}api/${name}/latest.webp?h=${requestHeight}${
       searchParams ? `&${searchParams}` : ""
     }`;
   }, [apiHost, name, imgRef, searchParams, requestHeight, config]);

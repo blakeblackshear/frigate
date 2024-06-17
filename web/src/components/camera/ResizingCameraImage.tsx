@@ -89,7 +89,7 @@ export default function CameraImage({
     if (!config || scaledHeight === 0 || !canvasRef.current) {
       return;
     }
-    img.src = `${apiHost}api/${name}/latest.jpg?h=${scaledHeight}${
+    img.src = `${apiHost}api/${name}/latest.webp?h=${scaledHeight}${
       searchParams ? `&${searchParams}` : ""
     }`;
   }, [apiHost, canvasRef, name, img, searchParams, scaledHeight, config]);

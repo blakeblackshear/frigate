@@ -146,8 +146,10 @@ def latest_frame(camera_name):
 
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
 
+        extension = os.path.splitext(request.path)[1]
+
         ret, img = cv2.imencode(
-            ".webp", frame, [int(cv2.IMWRITE_WEBP_QUALITY), resize_quality]
+            f".{extension}", frame, [int(cv2.IMWRITE_WEBP_QUALITY), resize_quality]
         )
         response = make_response(img.tobytes())
         response.headers["Content-Type"] = "image/webp"

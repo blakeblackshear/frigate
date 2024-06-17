@@ -39,7 +39,7 @@ export function PolygonCanvas({
       const element = new window.Image();
       element.width = width;
       element.height = height;
-      element.src = `${apiHost}api/${camera}/latest.jpg`;
+      element.src = `${apiHost}api/${camera}/latest.webp`;
       return element;
     }
   }, [camera, width, height, apiHost]);
