@@ -25,6 +25,7 @@ export default function JSMpegPlayer({
   const playerRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef(null);
   const internalContainerRef = useRef<HTMLDivElement | null>(null);
+  const onPlayingRef = useRef(onPlaying);
 
   const selectedContainerRef = useMemo(
     () => containerRef ?? internalContainerRef,
@@ -83,7 +84,11 @@ export default function JSMpegPlayer({
   const uniqueId = useId();
 
   useEffect(() => {
-    if (!playerRef.current) {
+    onPlayingRef.current = onPlaying;
+  }, [onPlaying]);
+
+  useEffect(() => {
+    if (!playerRef.current || videoRef.current) {
       return;
     }
 
@@ -96,12 +101,10 @@ export default function JSMpegPlayer({
         audio: false,
         videoBufferSize: 1024 * 1024 * 4,
         onPlay: () => {
-          onPlaying?.();
+          onPlayingRef.current?.();
         },
       },
     );
-    // we know that these deps are correct
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url, uniqueId]);
 
   return (
