@@ -481,7 +481,7 @@ def logs(service: str):
         for rawLine in contents.splitlines():
             cleanLine = rawLine.strip()
 
-            if len(cleanLine) < 10:
+            if len(cleanLine) < 10 or " " not in cleanLine:
                 continue
 
             if dateEnd == 0:
