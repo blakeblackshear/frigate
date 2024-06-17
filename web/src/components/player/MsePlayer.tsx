@@ -260,10 +260,14 @@ function MSEPlayer({
 
     return () => {
       onDisconnect();
+      if (bufferTimeout) {
+        clearTimeout(bufferTimeout);
+        setBufferTimeout(undefined);
+      }
     };
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playbackEnabled, onDisconnect, onConnect]);
+  }, [playbackEnabled]);
 
   // check visibility
 

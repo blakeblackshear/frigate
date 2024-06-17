@@ -23,6 +23,7 @@ export default function JSMpegPlayer({
 }: JSMpegPlayerProps) {
   const url = `${baseUrl.replace(/^http/, "ws")}live/jsmpeg/${camera}`;
   const playerRef = useRef<HTMLDivElement | null>(null);
+  const videoRef = useRef(null);
   const internalContainerRef = useRef<HTMLDivElement | null>(null);
 
   const selectedContainerRef = useMemo(
@@ -86,7 +87,7 @@ export default function JSMpegPlayer({
       return;
     }
 
-    const video = new JSMpeg.VideoElement(
+    videoRef.current = new JSMpeg.VideoElement(
       playerRef.current,
       url,
       { canvas: `#${CSS.escape(uniqueId)}` },
@@ -99,17 +100,9 @@ export default function JSMpegPlayer({
         },
       },
     );
-
-    return () => {
-      if (playerRef.current) {
-        try {
-          video.destroy();
-          // eslint-disable-next-line no-empty
-        } catch (e) {}
-        playerRef.current = null;
-      }
-    };
-  }, [url, uniqueId, onPlaying]);
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [url, uniqueId]);
 
   return (
     <div className={className}>
