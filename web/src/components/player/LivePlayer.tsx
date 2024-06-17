@@ -2,7 +2,7 @@ import WebRtcPlayer from "./WebRTCPlayer";
 import { CameraConfig } from "@/types/frigateConfig";
 import AutoUpdatingCameraImage from "../camera/AutoUpdatingCameraImage";
 import ActivityIndicator from "../indicators/activity-indicator";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import MSEPlayer from "./MsePlayer";
 import JSMpegPlayer from "./JSMpegPlayer";
 import { MdCircle } from "react-icons/md";
@@ -125,6 +125,10 @@ export default function LivePlayer({
     setLiveReady(false);
   }, [preferredLiveMode]);
 
+  const playerIsPlaying = useCallback(() => {
+    setLiveReady(true);
+  }, []);
+
   if (!cameraConfig) {
     return <ActivityIndicator />;
   }
@@ -141,7 +145,7 @@ export default function LivePlayer({
         audioEnabled={playAudio}
         microphoneEnabled={micEnabled}
         iOSCompatFullScreen={iOSCompatFullScreen}
-        onPlaying={() => setLiveReady(true)}
+        onPlaying={playerIsPlaying}
         pip={pip}
         onError={onError}
       />
@@ -154,7 +158,7 @@ export default function LivePlayer({
           camera={cameraConfig.live.stream_name}
           playbackEnabled={cameraActive}
           audioEnabled={playAudio}
-          onPlaying={() => setLiveReady(true)}
+          onPlaying={playerIsPlaying}
           pip={pip}
           setFullResolution={setFullResolution}
           onError={onError}
@@ -177,7 +181,7 @@ export default function LivePlayer({
           width={cameraConfig.detect.width}
           height={cameraConfig.detect.height}
           containerRef={containerRef}
-          onPlaying={() => setLiveReady(true)}
+          onPlaying={playerIsPlaying}
         />
       );
     } else {
