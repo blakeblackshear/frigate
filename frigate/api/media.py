@@ -105,7 +105,7 @@ def latest_frame(camera_name):
         "regions": request.args.get("regions", type=int),
     }
     resize_quality = request.args.get("quality", default=70, type=int)
-    extension = os.path.splitext(request.path)[1]
+    extension = os.path.splitext(request.path)[1][1:]
 
     if camera_name in current_app.frigate_config.cameras:
         frame = current_app.detected_frames_processor.get_current_frame(
@@ -151,7 +151,7 @@ def latest_frame(camera_name):
             f".{extension}", frame, [int(cv2.IMWRITE_WEBP_QUALITY), resize_quality]
         )
         response = make_response(img.tobytes())
-        response.headers["Content-Type"] = "image/webp"
+        response.headers["Content-Type"] = f"image/{extension}"
         response.headers["Cache-Control"] = "no-store"
         return response
     elif camera_name == "birdseye" and current_app.frigate_config.birdseye.restream:
