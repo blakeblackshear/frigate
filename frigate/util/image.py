@@ -664,6 +664,10 @@ class FrameManager(ABC):
     def delete(self, name):
         pass
 
+    @abstractmethod
+    def cleanup(self):
+        pass
+
 
 class DictFrameManager(FrameManager):
     def __init__(self):
@@ -683,6 +687,9 @@ class DictFrameManager(FrameManager):
 
     def delete(self, name):
         del self.frames[name]
+
+    def cleanup(self):
+        pass
 
 
 class SharedMemoryFrameManager(FrameManager):
@@ -709,6 +716,13 @@ class SharedMemoryFrameManager(FrameManager):
 
     def delete(self, name):
         if name in self.shm_store:
+            self.shm_store[name].close()
+            self.shm_store[name].unlink()
+            del self.shm_store[name]
+
+    def cleanup(self):
+        frames = list(self.shm_store.keys())
+        for name in frames:
             self.shm_store[name].close()
             self.shm_store[name].unlink()
             del self.shm_store[name]

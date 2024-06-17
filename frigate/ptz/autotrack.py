@@ -63,7 +63,7 @@ class PtzMotionEstimator:
         self.ptz_metrics["ptz_reset"].set()
         logger.debug(f"{config.name}: Motion estimator init")
 
-    def motion_estimator(self, detections, frame_time, camera):
+    def motion_estimator(self, detections, frame_name, frame_time, camera):
         # If we've just started up or returned to our preset, reset motion estimator for new tracking session
         if self.ptz_metrics["ptz_reset"].is_set():
             self.ptz_metrics["ptz_reset"].clear()
@@ -94,9 +94,8 @@ class PtzMotionEstimator:
                 f"{camera}: Motion estimator running - frame time: {frame_time}"
             )
 
-            frame_id = f"{camera}{frame_time}"
             yuv_frame = self.frame_manager.get(
-                frame_id, self.camera_config.frame_shape_yuv
+                frame_name, self.camera_config.frame_shape_yuv
             )
 
             frame = cv2.cvtColor(yuv_frame, cv2.COLOR_YUV2GRAY_I420)
@@ -134,7 +133,7 @@ class PtzMotionEstimator:
             except Exception:
                 pass
 
-            self.frame_manager.close(frame_id)
+            self.frame_manager.close(frame_name)
 
         return self.coord_transformations
 

@@ -108,13 +108,22 @@ def capture_frames(
     frame_rate.start()
     skipped_eps = EventsPerSecond()
     skipped_eps.start()
+
+    # create 10 shms for storing frames
+    frame_shms = []
+    # TODO: i might have to recreate these in the loop so i know if i am overwriting one that hasnt been deleted yet
+    for frame in range(0, 9):
+        name = f"{camera_name}{frame:>02}"
+        frame_shms.append({"name": name, "shm": frame_manager.create(name, frame_size)})
+    frame_index = 0
+
     while True:
         fps.value = frame_rate.eps()
         skipped_fps.value = skipped_eps.eps()
 
         current_frame.value = datetime.datetime.now().timestamp()
-        frame_name = f"{camera_name}{current_frame.value}"
-        frame_buffer = frame_manager.create(frame_name, frame_size)
+        frame_name = frame_shms[frame_index]["name"]
+        frame_buffer = frame_shms[frame_index]["shm"]
         try:
             frame_buffer[:] = ffmpeg_process.stdout.read(frame_size)
         except Exception:
@@ -127,7 +136,6 @@ def capture_frames(
                 logger.error(
                     f"{camera_name}: ffmpeg process is not running. exiting capture thread..."
                 )
-                frame_manager.delete(frame_name)
                 break
             continue
 
@@ -136,13 +144,15 @@ def capture_frames(
         # don't lock the queue to check, just try since it should rarely be full
         try:
             # add to the queue
-            frame_queue.put(current_frame.value, False)
-            # close the frame
-            frame_manager.close(frame_name)
+            frame_queue.put((frame_name, current_frame.value), False)
         except queue.Full:
             # if the queue is full, skip this frame
             skipped_eps.update()
-            frame_manager.delete(frame_name)
+
+        # go to the next frame shm
+        frame_index = 0 if frame_index == 9 else frame_index + 1
+
+    frame_manager.cleanup()
 
 
 class CameraWatchdog(threading.Thread):
@@ -450,8 +460,10 @@ def track_camera(
     # empty the frame queue
     logger.info(f"{name}: emptying frame queue")
     while not frame_queue.empty():
-        frame_time = frame_queue.get(False)
-        frame_manager.delete(f"{name}{frame_time}")
+        frame_name, _ = frame_queue.get(False)
+        frame_manager.delete(frame_name)
+
+    frame_manager.cleanup()
 
     logger.info(f"{name}: exiting subprocess")
 
@@ -550,9 +562,9 @@ def process_frames(
 
         try:
             if exit_on_empty:
-                frame_time = frame_queue.get(False)
+                frame_name, frame_time = frame_queue.get(False)
             else:
-                frame_time = frame_queue.get(True, 1)
+                frame_name, frame_time = frame_queue.get(True, 1)
         except queue.Empty:
             if exit_on_empty:
                 logger.info("Exiting track_objects...")
@@ -562,9 +574,7 @@ def process_frames(
         current_frame_time.value = frame_time
         ptz_metrics["ptz_frame_time"].value = frame_time
 
-        frame = frame_manager.get(
-            f"{camera_name}{frame_time}", (frame_shape[0] * 3 // 2, frame_shape[1])
-        )
+        frame = frame_manager.get(frame_name, (frame_shape[0] * 3 // 2, frame_shape[1]))
 
         if frame is None:
             logger.info(f"{camera_name}: frame {frame_time} is not in memory store.")
@@ -705,7 +715,7 @@ def process_frames(
                 object_tracker.match_and_update(frame_time, tracked_detections)
             # else, just update the frame times for the stationary objects
             else:
-                object_tracker.update_frame_times(frame_time)
+                object_tracker.update_frame_times(frame_name, frame_time)
 
         # group the attribute detections based on what label they apply to
         attribute_detections = {}
@@ -805,7 +815,6 @@ def process_frames(
             )
         # add to the queue if not full
         if detected_objects_queue.full():
-            frame_manager.delete(f"{camera_name}{frame_time}")
             continue
         else:
             fps_tracker.update()
@@ -813,6 +822,7 @@ def process_frames(
             detected_objects_queue.put(
                 (
                     camera_name,
+                    frame_name,
                     frame_time,
                     detections,
                     motion_boxes,
@@ -820,7 +830,7 @@ def process_frames(
                 )
             )
             detection_fps.value = object_detector.fps.eps()
-            frame_manager.close(f"{camera_name}{frame_time}")
+            frame_manager.close(frame_name)
 
     motion_detector.stop()
     requestor.stop()

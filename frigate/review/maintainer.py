@@ -233,6 +233,7 @@ class ReviewSegmentMaintainer(threading.Thread):
     def update_existing_segment(
         self,
         segment: PendingReviewSegment,
+        frame_name: str,
         frame_time: float,
         objects: list[TrackedObject],
     ) -> None:
@@ -283,25 +284,23 @@ class ReviewSegmentMaintainer(threading.Thread):
 
             if should_update:
                 try:
-                    frame_id = f"{camera_config.name}{frame_time}"
                     yuv_frame = self.frame_manager.get(
-                        frame_id, camera_config.frame_shape_yuv
+                        frame_name, camera_config.frame_shape_yuv
                     )
                     self.update_segment(
                         segment, camera_config, yuv_frame, active_objects, prev_data
                     )
-                    self.frame_manager.close(frame_id)
+                    self.frame_manager.close(frame_name)
                 except FileNotFoundError:
                     return
         else:
             if not segment.has_frame:
                 try:
-                    frame_id = f"{camera_config.name}{frame_time}"
                     yuv_frame = self.frame_manager.get(
-                        frame_id, camera_config.frame_shape_yuv
+                        frame_name, camera_config.frame_shape_yuv
                     )
                     segment.save_full_frame(camera_config, yuv_frame)
-                    self.frame_manager.close(frame_id)
+                    self.frame_manager.close(frame_name)
                     self.update_segment(segment, camera_config, None, [], prev_data)
                 except FileNotFoundError:
                     return
@@ -316,6 +315,7 @@ class ReviewSegmentMaintainer(threading.Thread):
     def check_if_new_segment(
         self,
         camera: str,
+        frame_name: str,
         frame_time: float,
         objects: list[TrackedObject],
     ) -> None:
@@ -390,14 +390,13 @@ class ReviewSegmentMaintainer(threading.Thread):
                 )
 
                 try:
-                    frame_id = f"{camera_config.name}{frame_time}"
                     yuv_frame = self.frame_manager.get(
-                        frame_id, camera_config.frame_shape_yuv
+                        frame_name, camera_config.frame_shape_yuv
                     )
                     self.active_review_segments[camera].update_frame(
                         camera_config, yuv_frame, active_objects
                     )
-                    self.frame_manager.close(frame_id)
+                    self.frame_manager.close(frame_name)
                     self.new_segment(self.active_review_segments[camera])
                 except FileNotFoundError:
                     return
@@ -425,6 +424,7 @@ class ReviewSegmentMaintainer(threading.Thread):
             if topic == DetectionTypeEnum.video:
                 (
                     camera,
+                    frame_name,
                     frame_time,
                     current_tracked_objects,
                     motion_boxes,
@@ -451,7 +451,9 @@ class ReviewSegmentMaintainer(threading.Thread):
 
             if not self.config.cameras[camera].record.enabled:
                 if current_segment:
-                    self.update_existing_segment(current_segment, frame_time, [])
+                    self.update_existing_segment(
+                        current_segment, frame_name, frame_time, []
+                    )
 
                 continue
 
@@ -459,6 +461,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                 if topic == DetectionTypeEnum.video:
                     self.update_existing_segment(
                         current_segment,
+                        frame_name,
                         frame_time,
                         current_tracked_objects,
                     )
@@ -502,6 +505,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                 if topic == DetectionTypeEnum.video:
                     self.check_if_new_segment(
                         camera,
+                        frame_name,
                         frame_time,
                         current_tracked_objects,
                     )
