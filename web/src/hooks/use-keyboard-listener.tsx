@@ -2,7 +2,10 @@ import { useCallback, useEffect } from "react";
 
 export default function useKeyboardListener(
   keys: string[],
-  listener: (key: string, down: boolean, repeat: boolean) => void,
+  listener: (
+    key: string,
+    modifiers: { down: boolean; repeat: boolean; ctrl: boolean },
+  ) => void,
 ) {
   const keyDownListener = useCallback(
     (e: KeyboardEvent) => {
@@ -12,7 +15,7 @@ export default function useKeyboardListener(
 
       if (keys.includes(e.key)) {
         e.preventDefault();
-        listener(e.key, true, e.repeat);
+        listener(e.key, { down: true, repeat: e.repeat, ctrl: e.ctrlKey });
       }
     },
     [keys, listener],
@@ -26,7 +29,7 @@ export default function useKeyboardListener(
 
       if (keys.includes(e.key)) {
         e.preventDefault();
-        listener(e.key, false, false);
+        listener(e.key, { down: false, repeat: false, ctrl: false });
       }
     },
     [keys, listener],
