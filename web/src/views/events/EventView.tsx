@@ -598,7 +598,11 @@ function DetectionReview({
   // keyboard
 
   useKeyboardListener(["a"], (key, modifiers) => {
-    if (key == "a" && modifiers.down && modifiers.ctrl) {
+    if (modifiers.repeat || !modifiers.down) {
+      return;
+    }
+
+    if (key == "a" && modifiers.ctrl) {
       onSelectAllReviews();
     }
   });

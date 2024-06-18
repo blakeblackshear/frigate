@@ -231,8 +231,8 @@ function Logs() {
 
   useKeyboardListener(
     ["PageDown", "PageUp", "ArrowDown", "ArrowUp"],
-    (key, down, _) => {
-      if (!down) {
+    (key, modifiers) => {
+      if (!modifiers.down) {
         return;
       }
 

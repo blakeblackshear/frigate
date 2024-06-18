@@ -482,12 +482,12 @@ function PtzControlPanel({
 
   useKeyboardListener(
     ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "+", "-"],
-    (key, down, repeat) => {
-      if (repeat) {
+    (key, modifiers) => {
+      if (modifiers.repeat) {
         return;
       }
 
-      if (!down) {
+      if (!modifiers.down) {
         sendPtz("STOP");
         return;
       }

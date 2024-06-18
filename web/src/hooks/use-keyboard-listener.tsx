@@ -1,11 +1,14 @@
 import { useCallback, useEffect } from "react";
 
+export type KeyModifiers = {
+  down: boolean;
+  repeat: boolean;
+  ctrl: boolean;
+};
+
 export default function useKeyboardListener(
   keys: string[],
-  listener: (
-    key: string,
-    modifiers: { down: boolean; repeat: boolean; ctrl: boolean },
-  ) => void,
+  listener: (key: string, modifiers: KeyModifiers) => void,
 ) {
   const keyDownListener = useCallback(
     (e: KeyboardEvent) => {
