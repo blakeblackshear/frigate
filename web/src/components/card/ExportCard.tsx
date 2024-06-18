@@ -49,8 +49,14 @@ export default function ExportCard({
 
   useKeyboardListener(
     editName != undefined ? ["Enter"] : [],
-    (_, down, repeat) => {
-      if (down && !repeat && editName && editName.update.length > 0) {
+    (key, modifiers) => {
+      if (
+        key == "Enter" &&
+        modifiers.down &&
+        !modifiers.repeat &&
+        editName &&
+        editName.update.length > 0
+      ) {
         onRename(exportedRecording.id, editName.update);
         setEditName(undefined);
       }

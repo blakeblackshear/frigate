@@ -51,6 +51,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { FilterList, LAST_24_HOURS_KEY } from "@/types/filter";
 import { GiSoundWaves } from "react-icons/gi";
+import useKeyboardListener from "@/hooks/use-keyboard-listener";
 
 type EventViewProps = {
   reviewItems?: SegmentedReviewData;
@@ -158,6 +159,17 @@ export default function EventView({
     },
     [selectedReviews, setSelectedReviews, onOpenRecording, markItemAsReviewed],
   );
+  const onSelectAllReviews = useCallback(() => {
+    if (!currentReviewItems || currentReviewItems.length == 0) {
+      return;
+    }
+
+    if (selectedReviews.length < currentReviewItems.length) {
+      setSelectedReviews(currentReviewItems.map((seg) => seg.id));
+    } else {
+      setSelectedReviews([]);
+    }
+  }, [currentReviewItems, selectedReviews]);
 
   const exportReview = useCallback(
     (id: string) => {
@@ -376,6 +388,7 @@ export default function EventView({
             markItemAsReviewed={markItemAsReviewed}
             markAllItemsAsReviewed={markAllItemsAsReviewed}
             onSelectReview={onSelectReview}
+            onSelectAllReviews={onSelectAllReviews}
             pullLatestData={pullLatestData}
           />
         )}
@@ -417,6 +430,7 @@ type DetectionReviewProps = {
   markItemAsReviewed: (review: ReviewSegment) => void;
   markAllItemsAsReviewed: (currentItems: ReviewSegment[]) => void;
   onSelectReview: (review: ReviewSegment, ctrl: boolean) => void;
+  onSelectAllReviews: () => void;
   pullLatestData: () => void;
 };
 function DetectionReview({
@@ -434,6 +448,7 @@ function DetectionReview({
   markItemAsReviewed,
   markAllItemsAsReviewed,
   onSelectReview,
+  onSelectAllReviews,
   pullLatestData,
 }: DetectionReviewProps) {
   const reviewTimelineRef = useRef<HTMLDivElement>(null);
@@ -579,6 +594,18 @@ function DetectionReview({
     // only run when start time changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startTime]);
+
+  // keyboard
+
+  useKeyboardListener(["a"], (key, modifiers) => {
+    if (modifiers.repeat || !modifiers.down) {
+      return;
+    }
+
+    if (key == "a" && modifiers.ctrl) {
+      onSelectAllReviews();
+    }
+  });
 
   return (
     <>

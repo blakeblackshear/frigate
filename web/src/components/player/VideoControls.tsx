@@ -16,7 +16,9 @@ import {
   MdVolumeOff,
   MdVolumeUp,
 } from "react-icons/md";
-import useKeyboardListener from "@/hooks/use-keyboard-listener";
+import useKeyboardListener, {
+  KeyModifiers,
+} from "@/hooks/use-keyboard-listener";
 import { VolumeSlider } from "../ui/slider";
 import FrigatePlusIcon from "../icons/FrigatePlusIcon";
 import {
@@ -137,42 +139,36 @@ export default function VideoControls({
   }, [volume, muted]);
 
   const onKeyboardShortcut = useCallback(
-    (key: string, down: boolean, repeat: boolean) => {
+    (key: string, modifiers: KeyModifiers) => {
+      if (!modifiers.down) {
+        return;
+      }
+
       switch (key) {
         case "ArrowDown":
-          if (down) {
-            onSeek(-1);
-          }
+          onSeek(-1);
           break;
         case "ArrowLeft":
-          if (down) {
-            onSeek(-10);
-          }
+          onSeek(-10);
           break;
         case "ArrowRight":
-          if (down) {
-            onSeek(10);
-          }
+          onSeek(10);
           break;
         case "ArrowUp":
-          if (down) {
-            onSeek(1);
-          }
+          onSeek(1);
           break;
         case "f":
-          if (toggleFullscreen && down && !repeat) {
+          if (toggleFullscreen && !modifiers.repeat) {
             toggleFullscreen();
           }
           break;
         case "m":
-          if (setMuted && down && !repeat && video) {
+          if (setMuted && !modifiers.repeat && video) {
             setMuted(!muted);
           }
           break;
         case " ":
-          if (down) {
-            onPlayPause(!isPlaying);
-          }
+          onPlayPause(!isPlaying);
           break;
       }
     },
