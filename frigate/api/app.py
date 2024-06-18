@@ -481,8 +481,12 @@ def logs(service: str):
         for rawLine in contents.splitlines():
             cleanLine = rawLine.strip()
 
-            if len(cleanLine) < 10 or " " not in cleanLine:
+            if len(cleanLine) < 10:
                 continue
+
+            # handle cases where S6 does not include date in log line
+            if "  " not in cleanLine:
+                cleanLine = f"{datetime.now()}  {cleanLine}"
 
             if dateEnd == 0:
                 dateEnd = cleanLine.index("  ")
