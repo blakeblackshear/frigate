@@ -1,8 +1,9 @@
 import { baseUrl } from "@/api/baseUrl";
 import { useResizeObserver } from "@/hooks/resize-observer";
+import { cn } from "@/lib/utils";
 // @ts-expect-error we know this doesn't have types
 import JSMpeg from "@cycjimmy/jsmpeg-player";
-import React, { useEffect, useMemo, useRef, useId } from "react";
+import React, { useEffect, useMemo, useRef, useId, useState } from "react";
 
 type JSMpegPlayerProps = {
   className?: string;
@@ -26,6 +27,7 @@ export default function JSMpegPlayer({
   const videoRef = useRef(null);
   const internalContainerRef = useRef<HTMLDivElement | null>(null);
   const onPlayingRef = useRef(onPlaying);
+  const [showCanvas, setShowCanvas] = useState(false);
 
   const selectedContainerRef = useMemo(
     () => containerRef ?? internalContainerRef,
@@ -101,6 +103,7 @@ export default function JSMpegPlayer({
         audio: false,
         videoBufferSize: 1024 * 1024 * 4,
         onPlay: () => {
+          setShowCanvas(true);
           onPlayingRef.current?.();
         },
       },
@@ -110,7 +113,7 @@ export default function JSMpegPlayer({
   return (
     <div className={className}>
       <div className="size-full" ref={internalContainerRef}>
-        <div ref={playerRef} className="jsmpeg">
+        <div ref={playerRef} className={cn("jsmpeg", !showCanvas && "hidden")}>
           <canvas
             id={uniqueId}
             style={{

@@ -2,6 +2,7 @@ import { useFullscreen } from "@/hooks/use-fullscreen";
 import {
   useHashState,
   usePersistedOverlayState,
+  useSearchEffect,
 } from "@/hooks/use-overlay-state";
 import { FrigateConfig } from "@/types/frigateConfig";
 import LiveBirdseyeView from "@/views/live/LiveBirdseyeView";
@@ -16,10 +17,20 @@ function Live() {
   // selection
 
   const [selectedCameraName, setSelectedCameraName] = useHashState();
-  const [cameraGroup] = usePersistedOverlayState(
+  const [cameraGroup, setCameraGroup] = usePersistedOverlayState(
     "cameraGroup",
     "default" as string,
   );
+
+  useSearchEffect("group", (cameraGroup) => {
+    if (config && cameraGroup) {
+      const group = config.camera_groups[cameraGroup];
+
+      if (group) {
+        setCameraGroup(cameraGroup);
+      }
+    }
+  });
 
   // fullscreen
 

@@ -18,6 +18,7 @@ import { getIconForLabel } from "@/utils/iconUtil";
 import Chip from "../indicators/Chip";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { cn } from "@/lib/utils";
+import { TbExclamationCircle } from "react-icons/tb";
 
 type LivePlayerProps = {
   cameraRef?: (ref: HTMLDivElement | null) => void;
@@ -275,6 +276,16 @@ export default function LivePlayer({
         />
       </div>
 
+      {offline && !showStillWithoutActivity && (
+        <div className="flex size-full flex-col items-center">
+          <p className="mb-5">
+            {capitalizeFirstLetter(cameraConfig.name)} is offline
+          </p>
+          <TbExclamationCircle className="mb-3 size-10" />
+          <p>No frames have been received, check error logs</p>
+        </div>
+      )}
+
       <div className="absolute right-2 top-2">
         {autoLive &&
           !offline &&
@@ -282,7 +293,7 @@ export default function LivePlayer({
           ((showStillWithoutActivity && !liveReady) || liveReady) && (
             <MdCircle className="mr-2 size-2 animate-pulse text-danger shadow-danger drop-shadow-md" />
           )}
-        {offline && (
+        {offline && showStillWithoutActivity && (
           <Chip
             className={`z-0 flex items-start justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-xs capitalize`}
           >
