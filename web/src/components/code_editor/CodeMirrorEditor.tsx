@@ -41,7 +41,7 @@ import { useTheme } from "@/context/theme-provider";
  * Uses `CodeMirror` as a code editor implementation.
  * Currently doesn't support yaml schema validation or linting.
  */
-export function CodeMirrorEditor({
+export default function CodeMirrorEditor({
   initialContent,
   onDidChangeContent,
 }: Omit<CodeEditorProps, "schemaUrl">) {

@@ -1,6 +1,6 @@
 import { isDesktop } from "react-device-detect";
-import { MonacoEditor } from "./MonacoEditor";
-import { CodeMirrorEditor } from "./CodeMirrorEditor";
+import { lazy } from "react";
+import MonacoEditor from "./MonacoEditor";
 
 /**
  * Provides an interface for a Code Editor, to enable easy swapping between different implementations
@@ -18,6 +18,6 @@ export type CodeEditorProps = {
  *
  * It would be great to revisit this in in the future if/when Monaco improves mobile support.
  */
-export const CodeEditor: (props: CodeEditorProps) => JSX.Element = isDesktop
+export const CodeEditor: (props: CodeEditorProps) => React.ReactNode = isDesktop
   ? MonacoEditor
-  : CodeMirrorEditor;
+  : lazy(() => import("./CodeMirrorEditor"));

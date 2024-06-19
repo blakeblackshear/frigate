@@ -4,7 +4,7 @@ import { configureMonacoYaml } from "monaco-yaml";
 import { useEffect, useRef, useState } from "react";
 import type { CodeEditorProps } from "./CodeEditor";
 
-export function MonacoEditor({
+export default function MonacoEditor({
   initialContent,
   yamlSchemaUrl,
   onDidChangeContent,
