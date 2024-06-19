@@ -1,9 +1,8 @@
-import { useEffect, useCallback, useMemo, useRef, RefObject } from "react";
+import { useCallback, useMemo, useRef, RefObject } from "react";
 import MotionSegment from "./MotionSegment";
 import { useTimelineUtils } from "@/hooks/use-timeline-utils";
 import { MotionData, ReviewSegment, ReviewSeverity } from "@/types/review";
 import ReviewTimeline from "./ReviewTimeline";
-import { isDesktop } from "react-device-detect";
 import { useMotionSegmentUtils } from "@/hooks/use-motion-segment-utils";
 
 export type MotionReviewTimelineProps = {
@@ -164,42 +163,6 @@ export function MotionReviewTimeline({
       motionOnly,
     ],
   );
-
-  const segmentsObserver = useRef<IntersectionObserver | null>(null);
-  useEffect(() => {
-    if (selectedTimelineRef.current && segments && isDesktop) {
-      segmentsObserver.current = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              const segmentId = entry.target.getAttribute("data-segment-id");
-
-              const segmentElements =
-                internalTimelineRef.current?.querySelectorAll(
-                  `[data-segment-id="${segmentId}"] .motion-segment`,
-                );
-              segmentElements?.forEach((segmentElement) => {
-                segmentElement.classList.remove("hidden");
-                segmentElement.classList.add("animate-in");
-              });
-            }
-          });
-        },
-        { threshold: 0 },
-      );
-
-      // Get all segment divs and observe each one
-      const segmentDivs =
-        selectedTimelineRef.current.querySelectorAll(".segment.has-data");
-      segmentDivs.forEach((segmentDiv) => {
-        segmentsObserver.current?.observe(segmentDiv);
-      });
-    }
-
-    return () => {
-      segmentsObserver.current?.disconnect();
-    };
-  }, [selectedTimelineRef, segments]);
 
   return (
     <ReviewTimeline

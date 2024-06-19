@@ -1,11 +1,17 @@
 import { useTimelineUtils } from "@/hooks/use-timeline-utils";
 import { useEventSegmentUtils } from "@/hooks/use-event-segment-utils";
 import { ReviewSegment } from "@/types/review";
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import scrollIntoView from "scroll-into-view-if-needed";
 import { MinimapBounds, Tick, Timestamp } from "./segment-metadata";
 import { useMotionSegmentUtils } from "@/hooks/use-motion-segment-utils";
-import { isDesktop, isMobile } from "react-device-detect";
+import { isMobile } from "react-device-detect";
 import useTapUtils from "@/hooks/use-tap-utils";
 import { cn } from "@/lib/utils";
 
@@ -139,11 +145,6 @@ export function MotionSegment({
       : ""
   }`;
 
-  const animationClassesSecondHalf = `motion-segment ${secondHalfSegmentWidth > 0 ? "hidden" : ""}
-    zoom-in-[0.2] ${secondHalfSegmentWidth < 5 ? "duration-200" : "duration-1000"}`;
-  const animationClassesFirstHalf = `motion-segment ${firstHalfSegmentWidth > 0 ? "hidden" : ""}
-    zoom-in-[0.2] ${firstHalfSegmentWidth < 5 ? "duration-200" : "duration-1000"}`;
-
   const severityColorsBg: { [key: number]: string } = {
     1: reviewed
       ? "from-severity_significant_motion-dimmed/10 to-severity_significant_motion/10"
@@ -162,6 +163,44 @@ export function MotionSegment({
     }
   }, [segmentTime, setHandlebarTime]);
 
+  const [segmentRendered, setSegmentRendered] = useState(false);
+  const segmentObserverRef = useRef<IntersectionObserver | null>(null);
+  const segmentRef = useRef(null);
+
+  useEffect(() => {
+    const segmentObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !segmentRendered) {
+          setSegmentRendered(true);
+        }
+      },
+      { threshold: 0 },
+    );
+
+    if (segmentRef.current) {
+      segmentObserver.observe(segmentRef.current);
+    }
+
+    segmentObserverRef.current = segmentObserver;
+
+    return () => {
+      if (segmentObserverRef.current) {
+        segmentObserverRef.current.disconnect();
+      }
+    };
+  }, [segmentRendered]);
+
+  if (!segmentRendered) {
+    return (
+      <div
+        key={segmentKey}
+        ref={segmentRef}
+        data-segment-id={segmentKey}
+        className={`segment ${segmentClasses}`}
+      />
+    );
+  }
+
   return (
     <>
       {(((firstHalfSegmentWidth > 0 || secondHalfSegmentWidth > 0) &&
@@ -171,6 +210,7 @@ export function MotionSegment({
         <div
           key={segmentKey}
           data-segment-id={segmentKey}
+          ref={segmentRef}
           className={cn(
             "segment",
             {
@@ -221,7 +261,6 @@ export function MotionSegment({
                   key={`${segmentKey}_motion_data_1`}
                   data-motion-value={secondHalfSegmentWidth}
                   className={cn(
-                    isDesktop && animationClassesSecondHalf,
                     "h-[2px]",
                     "rounded-full",
                     secondHalfSegmentWidth
@@ -241,7 +280,6 @@ export function MotionSegment({
                   key={`${segmentKey}_motion_data_2`}
                   data-motion-value={firstHalfSegmentWidth}
                   className={cn(
-                    isDesktop && animationClassesFirstHalf,
                     "h-[2px]",
                     "rounded-full",
                     firstHalfSegmentWidth
