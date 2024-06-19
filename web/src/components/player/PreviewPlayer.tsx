@@ -487,6 +487,14 @@ function PreviewFramesPlayer({
 
   // initial state
 
+  const [firstLoad, setFirstLoad] = useState(true);
+
+  useEffect(() => {
+    if (previewFrames != undefined && previewFrames.length == 0) {
+      setFirstLoad(false);
+    }
+  }, [previewFrames]);
+
   useEffect(() => {
     if (!controller) {
       return;
@@ -501,6 +509,8 @@ function PreviewFramesPlayer({
   }, [controller]);
 
   const onImageLoaded = useCallback(() => {
+    setFirstLoad(false);
+
     if (!controller) {
       return;
     }
@@ -536,14 +546,12 @@ function PreviewFramesPlayer({
         className={`size-full rounded-lg bg-black object-contain md:rounded-2xl`}
         onLoad={onImageLoaded}
       />
-      {previewFrames && previewFrames.length === 0 && (
+      {previewFrames?.length === 0 && (
         <div className="-y-translate-1/2 align-center absolute inset-x-0 top-1/2 rounded-lg bg-background_alt text-center text-primary md:rounded-2xl">
           No Preview Found for {camera.replaceAll("_", " ")}
         </div>
       )}
-      {previewFrames == undefined && (
-        <Skeleton className="absolute aspect-video size-full" />
-      )}
+      {firstLoad && <Skeleton className="absolute aspect-video size-full" />}
     </div>
   );
 }
