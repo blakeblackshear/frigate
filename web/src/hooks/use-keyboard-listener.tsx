@@ -18,7 +18,11 @@ export default function useKeyboardListener(
 
       if (keys.includes(e.key)) {
         e.preventDefault();
-        listener(e.key, { down: true, repeat: e.repeat, ctrl: e.ctrlKey });
+        listener(e.key, {
+          down: true,
+          repeat: e.repeat,
+          ctrl: e.ctrlKey || e.metaKey,
+        });
       }
     },
     [keys, listener],
