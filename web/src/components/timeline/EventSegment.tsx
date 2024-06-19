@@ -8,6 +8,7 @@ import React, {
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from "react";
 import {
   HoverCard,
@@ -195,71 +196,100 @@ export function EventSegment({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startTimestamp]);
 
+  const [segmentVisible, setSegmentVisible] = useState(false);
+  const segmentObserverRef = useRef<IntersectionObserver | null>(null);
+  const segmentRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const segmentObserver = new IntersectionObserver(
+      ([entry]) => {
+        setSegmentVisible(entry.isIntersecting);
+      },
+      { threshold: 0 },
+    );
+
+    if (segmentRef.current) {
+      segmentObserver.observe(segmentRef.current);
+    }
+
+    segmentObserverRef.current = segmentObserver;
+
+    return () => {
+      if (segmentObserverRef.current) {
+        segmentObserverRef.current.disconnect();
+      }
+    };
+  }, []);
+
   return (
     <div
       key={segmentKey}
+      ref={segmentRef}
       data-segment-id={segmentKey}
       className={`segment ${segmentClasses}`}
       onClick={segmentClick}
       onTouchEnd={(event) => handleTouchStart(event, segmentClick)}
     >
-      {showMinimap && (
-        <MinimapBounds
-          isFirstSegmentInMinimap={isFirstSegmentInMinimap}
-          isLastSegmentInMinimap={isLastSegmentInMinimap}
-          alignedMinimapStartTime={alignedMinimapStartTime}
-          alignedMinimapEndTime={alignedMinimapEndTime}
-          firstMinimapSegmentRef={firstMinimapSegmentRef}
-          dense={dense}
-        />
-      )}
+      {segmentVisible && (
+        <>
+          {showMinimap && (
+            <MinimapBounds
+              isFirstSegmentInMinimap={isFirstSegmentInMinimap}
+              isLastSegmentInMinimap={isLastSegmentInMinimap}
+              alignedMinimapStartTime={alignedMinimapStartTime}
+              alignedMinimapEndTime={alignedMinimapEndTime}
+              firstMinimapSegmentRef={firstMinimapSegmentRef}
+              dense={dense}
+            />
+          )}
 
-      <Tick timestamp={timestamp} timestampSpread={timestampSpread} />
+          <Tick timestamp={timestamp} timestampSpread={timestampSpread} />
 
-      <Timestamp
-        isFirstSegmentInMinimap={isFirstSegmentInMinimap}
-        isLastSegmentInMinimap={isLastSegmentInMinimap}
-        timestamp={timestamp}
-        timestampSpread={timestampSpread}
-        segmentKey={segmentKey}
-      />
+          <Timestamp
+            isFirstSegmentInMinimap={isFirstSegmentInMinimap}
+            isLastSegmentInMinimap={isLastSegmentInMinimap}
+            timestamp={timestamp}
+            timestampSpread={timestampSpread}
+            segmentKey={segmentKey}
+          />
 
-      {severity.map((severityValue: number, index: number) => (
-        <React.Fragment key={index}>
-          {severityValue === displaySeverityType && (
-            <HoverCard openDelay={200} closeDelay={100}>
-              <HoverCardTrigger asChild>
-                <div className="absolute left-1/2 z-10 h-[8px] w-[20px] -translate-x-1/2 transform cursor-pointer md:w-[40px]">
-                  <div className="flex w-[20px] flex-row justify-center md:w-[40px]">
-                    <div className="flex justify-center">
-                      <div
-                        className="absolute left-1/2 z-10 ml-[2px] h-[8px] w-[8px] -translate-x-1/2 transform cursor-pointer"
-                        data-severity={severityValue}
-                      >
-                        <div
-                          key={`${segmentKey}_${index}_primary_data`}
-                          className={`h-[8px] w-full bg-gradient-to-r ${roundBottomPrimary ? "rounded-bl-full rounded-br-full" : ""} ${roundTopPrimary ? "rounded-tl-full rounded-tr-full" : ""} ${severityColors[severityValue]}`}
-                        ></div>
+          {severity.map((severityValue: number, index: number) => (
+            <React.Fragment key={index}>
+              {severityValue === displaySeverityType && (
+                <HoverCard openDelay={200} closeDelay={100}>
+                  <HoverCardTrigger asChild>
+                    <div className="absolute left-1/2 z-10 h-[8px] w-[20px] -translate-x-1/2 transform cursor-pointer md:w-[40px]">
+                      <div className="flex w-[20px] flex-row justify-center md:w-[40px]">
+                        <div className="flex justify-center">
+                          <div
+                            className="absolute left-1/2 z-10 ml-[2px] h-[8px] w-[8px] -translate-x-1/2 transform cursor-pointer"
+                            data-severity={severityValue}
+                          >
+                            <div
+                              key={`${segmentKey}_${index}_primary_data`}
+                              className={`h-[8px] w-full bg-gradient-to-r ${roundBottomPrimary ? "rounded-bl-full rounded-br-full" : ""} ${roundTopPrimary ? "rounded-tl-full rounded-tr-full" : ""} ${severityColors[severityValue]}`}
+                            ></div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </HoverCardTrigger>
-              <HoverCardPortal>
-                <HoverCardContent
-                  className="w-[250px] rounded-lg p-2 md:rounded-2xl"
-                  side="left"
-                >
-                  <img
-                    className="rounded-lg"
-                    src={`${apiHost}${eventThumbnail.replace("/media/frigate/", "")}`}
-                  />
-                </HoverCardContent>
-              </HoverCardPortal>
-            </HoverCard>
-          )}
-        </React.Fragment>
-      ))}
+                  </HoverCardTrigger>
+                  <HoverCardPortal>
+                    <HoverCardContent
+                      className="w-[250px] rounded-lg p-2 md:rounded-2xl"
+                      side="left"
+                    >
+                      <img
+                        className="rounded-lg"
+                        src={`${apiHost}${eventThumbnail.replace("/media/frigate/", "")}`}
+                      />
+                    </HoverCardContent>
+                  </HoverCardPortal>
+                </HoverCard>
+              )}
+            </React.Fragment>
+          ))}
+        </>
+      )}
     </div>
   );
 }
