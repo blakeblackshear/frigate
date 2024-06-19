@@ -172,6 +172,12 @@ function PreviewVideoPlayer({
 
   const [firstLoad, setFirstLoad] = useState(true);
 
+  useEffect(() => {
+    if (cameraPreviews && cameraPreviews.length > 0) {
+      setFirstLoad(false);
+    }
+  }, [cameraPreviews]);
+
   const [currentPreview, setCurrentPreview] = useState(initialPreview);
 
   const onPreviewSeeked = useCallback(() => {
