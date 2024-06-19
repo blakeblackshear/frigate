@@ -8,6 +8,7 @@ import React, {
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from "react";
 import {
   HoverCard,
@@ -195,9 +196,48 @@ export function EventSegment({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startTimestamp]);
 
+  const [segmentRendered, setSegmentRendered] = useState(false);
+  const segmentObserverRef = useRef<IntersectionObserver | null>(null);
+  const segmentRef = useRef(null);
+
+  useEffect(() => {
+    const segmentObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !segmentRendered) {
+          setSegmentRendered(true);
+        }
+      },
+      { threshold: 0 },
+    );
+
+    if (segmentRef.current) {
+      segmentObserver.observe(segmentRef.current);
+    }
+
+    segmentObserverRef.current = segmentObserver;
+
+    return () => {
+      if (segmentObserverRef.current) {
+        segmentObserverRef.current.disconnect();
+      }
+    };
+  }, [segmentRendered]);
+
+  if (!segmentRendered) {
+    return (
+      <div
+        key={segmentKey}
+        ref={segmentRef}
+        data-segment-id={segmentKey}
+        className={`segment ${segmentClasses}`}
+      />
+    );
+  }
+
   return (
     <div
       key={segmentKey}
+      ref={segmentRef}
       data-segment-id={segmentKey}
       className={`segment ${segmentClasses}`}
       onClick={segmentClick}
