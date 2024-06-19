@@ -490,6 +490,12 @@ function PreviewFramesPlayer({
   const [firstLoad, setFirstLoad] = useState(true);
 
   useEffect(() => {
+    if (previewFrames != undefined && previewFrames.length == 0) {
+      setFirstLoad(false);
+    }
+  }, [previewFrames]);
+
+  useEffect(() => {
     if (!controller) {
       return;
     }
