@@ -18,4 +18,6 @@ export type CodeEditorProps = {
  *
  * It would be great to revisit this in in the future if/when Monaco improves mobile support.
  */
-export const CodeEditor: (props: CodeEditorProps) => JSX.Element = isDesktop ? MonacoEditor : CodeMirrorEditor;
+export const CodeEditor: (props: CodeEditorProps) => JSX.Element = isDesktop
+  ? MonacoEditor
+  : CodeMirrorEditor;
