@@ -1,7 +1,7 @@
 import { baseUrl } from "@/api/baseUrl";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { ReviewSegment } from "@/types/review";
+import { REVIEW_PADDING, ReviewSegment } from "@/types/review";
 import { getIconForLabel } from "@/utils/iconUtil";
 import { isDesktop, isIOS, isSafari } from "react-device-detect";
 import useSWR from "swr";
@@ -54,9 +54,13 @@ export default function ReviewCard({
   }, [event]);
 
   const onExport = useCallback(async () => {
+    const endTime = event.end_time
+      ? event.end_time + REVIEW_PADDING
+      : Date.now() / 1000;
+
     axios
       .post(
-        `export/${event.camera}/start/${event.start_time}/end/${event.end_time}`,
+        `export/${event.camera}/start/${event.start_time + REVIEW_PADDING}/end/${endTime}`,
         { playback: "realtime" },
       )
       .then((response) => {
