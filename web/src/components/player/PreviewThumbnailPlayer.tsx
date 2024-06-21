@@ -71,7 +71,13 @@ export default function PreviewThumbnailPlayer({
   );
 
   const swipeHandlers = useSwipeable({
-    onSwipedLeft: () => (setReviewed ? setReviewed(review) : null),
+    onSwipedLeft: () => {
+      setPlayback(false);
+
+      if (setReviewed && !review.has_been_reviewed) {
+        setReviewed(review);
+      }
+    },
     onSwipedRight: () => setPlayback(true),
     preventScrollOnSwipe: true,
   });
