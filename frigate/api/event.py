@@ -25,7 +25,8 @@ from playhouse.shortcuts import model_to_dict
 from frigate.const import (
     CLIPS_DIR,
 )
-from frigate.embeddings import EmbeddingsContext, get_metadata
+from frigate.embeddings import EmbeddingsContext
+from frigate.embeddings.embeddings import get_metadata
 from frigate.models import Event, ReviewSegment, Timeline
 from frigate.object_processing import TrackedObject
 from frigate.util.builtin import get_tz_modifiers

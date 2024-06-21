@@ -17,7 +17,7 @@ from frigate.const import CONFIG_DIR
 from frigate.models import Event
 from frigate.util.services import listen
 
-from .embeddings import Embeddings, get_metadata
+from .embeddings import Embeddings
 from .maintainer import EmbeddingMaintainer
 from .util import ZScoreNormalization
 
