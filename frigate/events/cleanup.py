@@ -10,6 +10,7 @@ from pathlib import Path
 
 from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR
+from frigate.embeddings.embeddings import Embeddings
 from frigate.models import Event, Timeline
 
 logger = logging.getLogger(__name__)
@@ -26,6 +27,7 @@ class EventCleanup(threading.Thread):
         self.name = "event_cleanup"
         self.config = config
         self.stop_event = stop_event
+        self.embeddings = Embeddings()
         self.camera_keys = list(self.config.cameras.keys())
         self.removed_camera_labels: list[str] = None
         self.camera_labels: dict[str, dict[str, any]] = {}
@@ -197,9 +199,20 @@ class EventCleanup(threading.Thread):
             self.expire(EventCleanupType.snapshots)
 
             # drop events from db where has_clip and has_snapshot are false
-            delete_query = Event.delete().where(
-                Event.has_clip == False, Event.has_snapshot == False
+            events = (
+                Event.select()
+                .where(Event.has_clip == False, Event.has_snapshot == False)
+                .iterator()
             )
-            delete_query.execute()
+            events_to_delete = [e.id for e in events]
+            if len(events_to_delete) > 0:
+                chunk_size = 50
+                for i in range(0, len(events_to_delete), chunk_size):
+                    chunk = events_to_delete[i : i + chunk_size]
+                    Event.delete().where(Event.id << chunk).execute()
+
+                    if self.config.semantic_search.enabled:
+                        self.embeddings.thumbnail.delete(ids=chunk)
+                        self.embeddings.description.delete(ids=chunk)
 
         logger.info("Exiting event cleanup...")
