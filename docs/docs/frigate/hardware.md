@@ -95,6 +95,18 @@ Frigate supports all Jetson boards, from the inexpensive Jetson Nano to the powe
 
 Inference speed will vary depending on the YOLO model, jetson platform and jetson nvpmodel (GPU/DLA/EMC clock speed). It is typically 20-40 ms for most models. The DLA is more efficient than the GPU, but not faster, so using the DLA will reduce power consumption but will slightly increase inference time.
 
+#### Rockchip platform
+
+Frigate supports hardware video processing on all Rockchip boards. However, hardware object detection is only supported on these boards:
+
+- RK3562
+- RK3566
+- RK3568
+- RK3576
+- RK3588
+
+The inference time of a rk3588 with all 3 cores enabled is typically 25-30 ms for yolo-nas s.
+
 ## What does Frigate use the CPU for and what does it use a detector for? (ELI5 Version)
 
 This is taken from a [user question on reddit](https://www.reddit.com/r/homeassistant/comments/q8mgau/comment/hgqbxh5/?utm_source=share&utm_medium=web2x&context=3). Modified slightly for clarity.

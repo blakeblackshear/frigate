@@ -8,6 +8,84 @@ set -o errexit -o nounset -o pipefail
 
 echo "[INFO] Starting NGINX..."
 
+# Taken from https://github.com/felipecrs/cgroup-scripts/commits/master/get_cpus.sh
+function get_cpus() {
+    local quota=""
+    local period=""
+
+    if [ -f /sys/fs/cgroup/cgroup.controllers ]; then
+        if [ -f /sys/fs/cgroup/cpu.max ]; then
+            read -r quota period </sys/fs/cgroup/cpu.max
+            if [ "$quota" = "max" ]; then
+                quota=""
+                period=""
+            fi
+        else
+            echo "[WARN] /sys/fs/cgroup/cpu.max not found. Falling back to /proc/cpuinfo." >&2
+        fi
+    else
+        if [ -f /sys/fs/cgroup/cpu/cpu.cfs_quota_us ] && [ -f /sys/fs/cgroup/cpu/cpu.cfs_period_us ]; then
+            quota=$(cat /sys/fs/cgroup/cpu/cpu.cfs_quota_us)
+            period=$(cat /sys/fs/cgroup/cpu/cpu.cfs_period_us)
+
+            if [ "$quota" = "-1" ]; then
+                quota=""
+                period=""
+            fi
+        else
+            echo "[WARN] /sys/fs/cgroup/cpu/cpu.cfs_quota_us or /sys/fs/cgroup/cpu/cpu.cfs_period_us not found. Falling back to /proc/cpuinfo." >&2
+        fi
+    fi
+
+    local cpus
+    if [ -n "${quota}" ] && [ -n "${period}" ]; then
+        cpus=$((quota / period))
+        if [ "$cpus" -eq 0 ]; then
+            cpus=1
+        fi
+    else
+        cpus=$(grep -c ^processor /proc/cpuinfo)
+    fi
+
+    printf '%s' "$cpus"
+}
+
+function set_worker_processes() {
+    # Capture number of assigned CPUs to calculate worker processes
+    local cpus
+
+    cpus=$(get_cpus)
+    if [[ "${cpus}" -gt 4 ]]; then
+        cpus=4
+    fi
+
+    # we need to catch any errors because sed will fail if user has bind mounted a custom nginx file
+    sed -i "s/worker_processes auto;/worker_processes ${cpus};/" /usr/local/nginx/conf/nginx.conf || true
+}
+
+set_worker_processes
+
+# ensure the directory for ACME challenges exists
+mkdir -p /etc/letsencrypt/www
+
+# Create self signed certs if needed
+letsencrypt_path=/etc/letsencrypt/live/frigate
+mkdir -p $letsencrypt_path
+
+if [ ! \( -f "$letsencrypt_path/privkey.pem" -a -f "$letsencrypt_path/fullchain.pem" \) ]; then
+    echo "[INFO] No TLS certificate found. Generating a self signed certificate..."
+    openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 \
+        -subj "/O=FRIGATE DEFAULT CERT/CN=*" \
+        -keyout "$letsencrypt_path/privkey.pem" -out "$letsencrypt_path/fullchain.pem" 2>/dev/null
+fi
+
+# build templates for optional TLS support
+python3 /usr/local/nginx/get_tls_settings.py | \
+    tempio  -template /usr/local/nginx/templates/listen.gotmpl \
+            -out /usr/local/nginx/conf/listen.conf
+
 # Replace the bash process with the NGINX process, redirecting stderr to stdout
 exec 2>&1
-exec nginx
+exec \
+    s6-notifyoncheck -t 30000 -n 1 \
+    nginx

@@ -10,23 +10,16 @@ from frigate.object_detection import ObjectDetectProcess
 class CameraMetricsTypes(TypedDict):
     camera_fps: Synchronized
     capture_process: Optional[Process]
-    detection_enabled: Synchronized
     detection_fps: Synchronized
     detection_frame: Synchronized
     ffmpeg_pid: Synchronized
     frame_queue: Queue
-    motion_enabled: Synchronized
-    improve_contrast_enabled: Synchronized
-    motion_threshold: Synchronized
-    motion_contour_area: Synchronized
     process: Optional[Process]
     process_fps: Synchronized
     read_start: Synchronized
     skipped_fps: Synchronized
     audio_rms: Synchronized
     audio_dBFS: Synchronized
-    birdseye_enabled: Synchronized
-    birdseye_mode: Synchronized
 
 
 class PTZMetricsTypes(TypedDict):
@@ -40,11 +33,6 @@ class PTZMetricsTypes(TypedDict):
     ptz_zoom_level: Synchronized
     ptz_max_zoom: Synchronized
     ptz_min_zoom: Synchronized
-
-
-class FeatureMetricsTypes(TypedDict):
-    audio_enabled: Synchronized
-    record_enabled: Synchronized
 
 
 class StatsTrackingTypes(TypedDict):

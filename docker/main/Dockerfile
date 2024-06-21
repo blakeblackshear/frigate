@@ -33,15 +33,18 @@ RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/var/cache/apt \
 FROM scratch AS go2rtc
 ARG TARGETARCH
 WORKDIR /rootfs/usr/local/go2rtc/bin
-ADD --link --chmod=755 "https://github.com/AlexxIT/go2rtc/releases/download/v1.8.4/go2rtc_linux_${TARGETARCH}" go2rtc
+ADD --link --chmod=755 "https://github.com/AlexxIT/go2rtc/releases/download/v1.9.4/go2rtc_linux_${TARGETARCH}" go2rtc
 
+FROM wget AS tempio
+ARG TARGETARCH
+RUN --mount=type=bind,source=docker/main/install_tempio.sh,target=/deps/install_tempio.sh \
+    /deps/install_tempio.sh
 
 ####
 #
 # OpenVino Support
 #
 # 1. Download and convert a model from Intel's Public Open Model Zoo
-# 2. Build libUSB without udev to handle NCS2 enumeration
 #
 ####
 # Download and Convert OpenVino model
@@ -51,44 +54,17 @@ ARG DEBIAN_FRONTEND
 # Install OpenVino Runtime and Dev library
 COPY docker/main/requirements-ov.txt /requirements-ov.txt
 RUN apt-get -qq update \
-    && apt-get -qq install -y wget python3 python3-distutils \
+    && apt-get -qq install -y wget python3 python3-dev python3-distutils gcc pkg-config libhdf5-dev \
     && wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && python3 get-pip.py "pip" \
     && pip install -r /requirements-ov.txt
 
 # Get OpenVino Model
-RUN mkdir /models \
-    && cd /models && omz_downloader --name ssdlite_mobilenet_v2 \
-    && cd /models && omz_converter --name ssdlite_mobilenet_v2 --precision FP16
-
-
-# libUSB - No Udev
-FROM wget as libusb-build
-ARG TARGETARCH
-ARG DEBIAN_FRONTEND
-ENV CCACHE_DIR /root/.ccache
-ENV CCACHE_MAXSIZE 2G
-
-# Build libUSB without udev.  Needed for Openvino NCS2 support
-WORKDIR /opt
-RUN apt-get update && apt-get install -y unzip build-essential automake libtool ccache pkg-config
-RUN --mount=type=cache,target=/root/.ccache wget -q https://github.com/libusb/libusb/archive/v1.0.26.zip -O v1.0.26.zip && \
-    unzip v1.0.26.zip && cd libusb-1.0.26 && \
-    ./bootstrap.sh && \
-    ./configure CC='ccache gcc' CCX='ccache g++' --disable-udev --enable-shared && \
-    make -j $(nproc --all)
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends libusb-1.0-0-dev && \
-    rm -rf /var/lib/apt/lists/*
-WORKDIR /opt/libusb-1.0.26/libusb
-RUN /bin/mkdir -p '/usr/local/lib' && \
-    /bin/bash ../libtool  --mode=install /usr/bin/install -c libusb-1.0.la '/usr/local/lib' && \
-    /bin/mkdir -p '/usr/local/include/libusb-1.0' && \
-    /usr/bin/install -c -m 644 libusb.h '/usr/local/include/libusb-1.0' && \
-    /bin/mkdir -p '/usr/local/lib/pkgconfig' && \
-    cd  /opt/libusb-1.0.26/ && \
-    /usr/bin/install -c -m 644 libusb-1.0.pc '/usr/local/lib/pkgconfig' && \
-    ldconfig
+RUN --mount=type=bind,source=docker/main/build_ov_model.py,target=/build_ov_model.py \
+    mkdir /models && cd /models \
+    && wget http://download.tensorflow.org/models/object_detection/ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz \
+    && tar -xvf ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz \
+    && python3 /build_ov_model.py
 
 FROM wget AS models
 
@@ -97,7 +73,8 @@ RUN wget -qO edgetpu_model.tflite https://github.com/google-coral/test_data/raw/
 RUN wget -qO cpu_model.tflite https://github.com/google-coral/test_data/raw/release-frogfish/ssdlite_mobiledet_coco_qat_postprocess.tflite
 COPY labelmap.txt .
 # Copy OpenVino model
-COPY --from=ov-converter /models/public/ssdlite_mobilenet_v2/FP16 openvino-model
+COPY --from=ov-converter /models/ssdlite_mobilenet_v2.xml openvino-model/
+COPY --from=ov-converter /models/ssdlite_mobilenet_v2.bin openvino-model/
 RUN wget -q https://github.com/openvinotoolkit/open_model_zoo/raw/master/data/dataset_classes/coco_91cl_bkgr.txt -O openvino-model/coco_91cl_bkgr.txt && \
     sed -i 's/truck/car/g' openvino-model/coco_91cl_bkgr.txt
 # Get Audio Model and labels
@@ -158,7 +135,7 @@ RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt
 FROM scratch AS deps-rootfs
 COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
 COPY --from=go2rtc /rootfs/ /
-COPY --from=libusb-build /usr/local/lib /usr/local/lib
+COPY --from=tempio /rootfs/ /
 COPY --from=s6-overlay /rootfs/ /
 COPY --from=models /rootfs/ /
 COPY docker/main/rootfs/ /
@@ -176,7 +153,7 @@ ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES="compute,video,utility"
 
-ENV PATH="/usr/lib/btbn-ffmpeg/bin:/usr/local/go2rtc/bin:/usr/local/nginx/sbin:${PATH}"
+ENV PATH="/usr/lib/btbn-ffmpeg/bin:/usr/local/go2rtc/bin:/usr/local/tempio/bin:/usr/local/nginx/sbin:${PATH}"
 
 # Install dependencies
 RUN --mount=type=bind,source=docker/main/install_deps.sh,target=/deps/install_deps.sh \
@@ -188,15 +165,14 @@ RUN --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels \
 
 COPY --from=deps-rootfs / /
 
-RUN ldconfig
-
 EXPOSE 5000
-EXPOSE 1935
 EXPOSE 8554
 EXPOSE 8555/tcp 8555/udp
 
 # Configure logging to prepend timestamps, log to stdout, keep 0 archives and rotate on 10MB
 ENV S6_LOGGING_SCRIPT="T 1 n0 s10000000 T"
+# Do not fail on long-running download scripts
+ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
 
 ENTRYPOINT ["/init"]
 CMD []
@@ -232,12 +208,14 @@ RUN apt-get update \
 RUN --mount=type=bind,source=./docker/main/requirements-dev.txt,target=/workspace/frigate/requirements-dev.txt \
     pip3 install -r requirements-dev.txt
 
+HEALTHCHECK NONE
+
 CMD ["sleep", "infinity"]
 
 
 # Frigate web build
 # This should be architecture agnostic, so speed up the build on multiarch by not using QEMU.
-FROM --platform=$BUILDPLATFORM node:16 AS web-build
+FROM --platform=$BUILDPLATFORM node:20 AS web-build
 
 WORKDIR /work
 COPY web/package.json web/package-lock.json ./

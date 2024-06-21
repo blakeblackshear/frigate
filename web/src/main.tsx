@@ -1,8 +1,10 @@
-import { render } from 'preact'
-import App from './app'
-import { ApiProvider } from './api';
-import './index.css'
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App.tsx";
+import "./index.css";
 
-render(<ApiProvider>
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
     <App />
-  </ApiProvider>, document.getElementById('app') as HTMLElement)
+  </React.StrictMode>,
+);

@@ -54,6 +54,7 @@ class EdgeTpuTfl(DetectionApi):
 
         self.tensor_input_details = self.interpreter.get_input_details()
         self.tensor_output_details = self.interpreter.get_output_details()
+        self.model_type = detector_config.model.model_type
 
     def detect_raw(self, tensor_input):
         self.interpreter.set_tensor(self.tensor_input_details[0]["index"], tensor_input)

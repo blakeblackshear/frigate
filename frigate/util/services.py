@@ -13,7 +13,14 @@ from typing import Optional
 import cv2
 import psutil
 import py3nvml.py3nvml as nvml
+import requests
 
+from frigate.const import (
+    DRIVER_AMD,
+    DRIVER_ENV_VAR,
+    FFMPEG_HWACCEL_NVIDIA,
+    FFMPEG_HWACCEL_VAAPI,
+)
 from frigate.util.builtin import clean_camera_user_pass, escape_special_characters
 
 logger = logging.getLogger(__name__)
@@ -26,7 +33,7 @@ def restart_frigate():
         proc.terminate()
     # otherwise, just try and exit frigate
     else:
-        os.kill(os.getpid(), signal.SIGTERM)
+        os.kill(os.getpid(), signal.SIGINT)
 
 
 def print_stack(sig, frame):
@@ -96,8 +103,17 @@ def get_cpu_stats() -> dict[str, dict]:
     docker_memlimit = get_docker_memlimit_bytes() / 1024
     total_mem = os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") / 1024
 
+    system_cpu = psutil.cpu_percent(
+        interval=None
+    )  # no interval as we don't want to be blocking
+    system_mem = psutil.virtual_memory()
+    usages["frigate.full_system"] = {
+        "cpu": str(system_cpu),
+        "mem": str(system_mem.percent),
+    }
+
     for process in psutil.process_iter(["pid", "name", "cpu_percent", "cmdline"]):
-        pid = process.info["pid"]
+        pid = str(process.info["pid"])
         try:
             cpu_percent = process.info["cpu_percent"]
             cmdline = process.info["cmdline"]
@@ -192,6 +208,25 @@ def get_bandwidth_stats(config) -> dict[str, dict]:
                 continue
 
     return usages
+
+
+def is_vaapi_amd_driver() -> bool:
+    # Use the explicitly configured driver, if available
+    driver = os.environ.get(DRIVER_ENV_VAR)
+    if driver:
+        return driver == DRIVER_AMD
+
+    # Otherwise, ask vainfo what is has autodetected
+    p = vainfo_hwaccel()
+
+    if p.returncode != 0:
+        logger.error(f"Unable to poll vainfo: {p.stderr}")
+        return False
+    else:
+        output = p.stdout.decode("unicode_escape").split("\n")
+
+        # VA Info will print out the friendly name of the driver
+        return any("AMD Radeon Graphics" in line for line in output)
 
 
 def get_amd_gpu_stats() -> dict[str, str]:
@@ -371,6 +406,38 @@ def vainfo_hwaccel(device_name: Optional[str] = None) -> sp.CompletedProcess:
     return sp.run(ffprobe_cmd, capture_output=True)
 
 
+def auto_detect_hwaccel() -> str:
+    """Detect hwaccel args by default."""
+    try:
+        cuda = False
+        vaapi = False
+        resp = requests.get("http://127.0.0.1:1984/api/ffmpeg/hardware", timeout=3)
+
+        if resp.status_code == 200:
+            data: dict[str, list[dict[str, str]]] = resp.json()
+            for source in data.get("sources", []):
+                if "cuda" in source.get("url", "") and source.get("name") == "OK":
+                    cuda = True
+
+                if "vaapi" in source.get("url", "") and source.get("name") == "OK":
+                    vaapi = True
+    except requests.RequestException:
+        pass
+
+    if cuda:
+        logger.info("Automatically detected nvidia hwaccel for video decoding")
+        return FFMPEG_HWACCEL_NVIDIA
+
+    if vaapi:
+        logger.info("Automatically detected vaapi hwaccel for video decoding")
+        return FFMPEG_HWACCEL_VAAPI
+
+    logger.warning(
+        "Did not detect hwaccel, using a GPU for accelerated video decoding is highly recommended"
+    )
+    return ""
+
+
 async def get_video_properties(url, get_duration=False) -> dict[str, any]:
     async def calculate_duration(video: Optional[any]) -> float:
         duration = None
@@ -438,10 +505,20 @@ async def get_video_properties(url, get_duration=False) -> dict[str, any]:
         # Get the height of frames in the video stream
         height = video.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
+        # Get the stream encoding
+        fourcc_int = int(video.get(cv2.CAP_PROP_FOURCC))
+        fourcc = (
+            chr((fourcc_int >> 0) & 255)
+            + chr((fourcc_int >> 8) & 255)
+            + chr((fourcc_int >> 16) & 255)
+            + chr((fourcc_int >> 24) & 255)
+        )
+
         # Release the video stream
         video.release()
 
         result["width"] = round(width)
         result["height"] = round(height)
+        result["fourcc"] = fourcc
 
     return result

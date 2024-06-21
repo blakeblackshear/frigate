@@ -117,7 +117,7 @@ services:
         tmpfs:
           size: 1000000000
     ports:
-      - "5000:5000"
+      - "8080:8080"
       - "8554:8554" # RTSP feeds
 ```
 
@@ -137,7 +137,7 @@ cameras:
             - detect
 ```
 
-Now you should be able to start Frigate by running `docker compose up -d` from within the folder containing `docker-compose.yml`. Frigate should now be accessible at `server_ip:5000` and you can finish the configuration using the built-in configuration editor.
+Now you should be able to start Frigate by running `docker compose up -d` from within the folder containing `docker-compose.yml`. On startup, an admin user and password will be created and outputted in the logs. You can see this by running `docker logs frigate`. Frigate should now be accessible at `https://server_ip:8080` where you can login with the `admin` user and finish the configuration using the built-in configuration editor.
 
 ## Configuring Frigate
 
@@ -165,7 +165,7 @@ cameras:
 
 ### Step 2: Start Frigate
 
-At this point you should be able to start Frigate and see the the video feed in the UI.
+At this point you should be able to start Frigate and see the video feed in the UI.
 
 If you get an error image from the camera, this means ffmpeg was not able to get the video feed from your camera. Check the logs for error messages from ffmpeg. The default ffmpeg arguments are designed to work with H264 RTSP cameras that support TCP connections.
 
@@ -245,7 +245,7 @@ Now that you have optimized your configuration for decoding the video stream, yo
 
 Now that you know where you need to mask, use the "Mask & Zone creator" in the options pane to generate the coordinates needed for your config file. More information about masks can be found [here](../configuration/masks.md).
 
-:::caution
+:::warning
 
 Note that motion masks should not be used to mark out areas where you do not want objects to be detected or to reduce false positives. They do not alter the image sent to object detection, so you can still get events and detections in areas with motion masks. These only prevent motion in these areas from initiating object detection.
 

@@ -8,6 +8,8 @@ ARG TRT_BASE=nvcr.io/nvidia/tensorrt:23.03-py3
 # Build TensorRT-specific library
 FROM ${TRT_BASE} AS trt-deps
 
+ARG COMPUTE_LEVEL
+
 RUN apt-get update \
     && apt-get install -y git build-essential cuda-nvcc-* cuda-nvtx-* libnvinfer-dev libnvinfer-plugin-dev libnvparsers-dev libnvonnxparsers-dev \
     && rm -rf /var/lib/apt/lists/*

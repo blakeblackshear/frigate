@@ -3,7 +3,13 @@ import random
 import string
 
 import numpy as np
-from norfair import Detection, Drawable, Tracker, draw_boxes
+from norfair import (
+    Detection,
+    Drawable,
+    OptimizedKalmanFilterFactory,
+    Tracker,
+    draw_boxes,
+)
 from norfair.drawing.drawer import Drawer
 
 from frigate.config import CameraConfig
@@ -11,8 +17,15 @@ from frigate.ptz.autotrack import PtzMotionEstimator
 from frigate.track import ObjectTracker
 from frigate.types import PTZMetricsTypes
 from frigate.util.image import intersection_over_union
+from frigate.util.object import average_boxes, median_of_boxes
 
 logger = logging.getLogger(__name__)
+
+
+THRESHOLD_KNOWN_ACTIVE_IOU = 0.2
+THRESHOLD_STATIONARY_CHECK_IOU = 0.6
+THRESHOLD_ACTIVE_CHECK_IOU = 0.9
+MAX_STATIONARY_HISTORY = 10
 
 
 # Normalizes distance from estimate relative to object size
@@ -68,6 +81,7 @@ class NorfairTracker(ObjectTracker):
         self.untracked_object_boxes: list[list[int]] = []
         self.disappeared = {}
         self.positions = {}
+        self.stationary_box_history: dict[str, list[list[int, int, int, int]]] = {}
         self.camera_config = config
         self.detect_config = config.detect
         self.ptz_metrics = ptz_metrics
@@ -82,6 +96,13 @@ class NorfairTracker(ObjectTracker):
             distance_threshold=2.5,
             initialization_delay=self.detect_config.min_initialized,
             hit_counter_max=self.detect_config.max_disappeared,
+            # use default filter factory with custom values
+            # R is the multiplier for the sensor measurement noise matrix, default of 4.0
+            # lowering R means that we trust the position of the bounding boxes more
+            # testing shows that the prediction was being relied on a bit too much
+            # TODO: could use different kalman filter values along with
+            #       the different tracker per object class
+            filter_factory=OptimizedKalmanFilterFactory(R=3.4),
         )
         if self.ptz_autotracker_enabled.value:
             self.ptz_motion_estimator = PtzMotionEstimator(
@@ -114,6 +135,7 @@ class NorfairTracker(ObjectTracker):
             "xmax": self.detect_config.width,
             "ymax": self.detect_config.height,
         }
+        self.stationary_box_history[id] = []
 
     def deregister(self, id, track_id):
         del self.tracked_objects[id]
@@ -125,22 +147,23 @@ class NorfairTracker(ObjectTracker):
 
     # tracks the current position of the object based on the last N bounding boxes
     # returns False if the object has moved outside its previous position
-    def update_position(self, id, box):
+    def update_position(self, id: str, box: list[int, int, int, int], stationary: bool):
+        xmin, ymin, xmax, ymax = box
         position = self.positions[id]
-        position_box = (
-            position["xmin"],
-            position["ymin"],
-            position["xmax"],
-            position["ymax"],
+        self.stationary_box_history[id].append(box)
+
+        if len(self.stationary_box_history[id]) > MAX_STATIONARY_HISTORY:
+            self.stationary_box_history[id] = self.stationary_box_history[id][
+                -MAX_STATIONARY_HISTORY:
+            ]
+
+        avg_iou = intersection_over_union(
+            box, average_boxes(self.stationary_box_history[id])
         )
 
-        xmin, ymin, xmax, ymax = box
-
-        iou = intersection_over_union(position_box, box)
-
-        # if the iou drops below the threshold
-        # assume the object has moved to a new position and reset the computed box
-        if iou < 0.6:
+        # object has minimal or zero iou
+        # assume object is active
+        if avg_iou < THRESHOLD_KNOWN_ACTIVE_IOU:
             self.positions[id] = {
                 "xmins": [xmin],
                 "ymins": [ymin],
@@ -152,6 +175,37 @@ class NorfairTracker(ObjectTracker):
                 "ymax": ymax,
             }
             return False
+
+        threshold = (
+            THRESHOLD_STATIONARY_CHECK_IOU if stationary else THRESHOLD_ACTIVE_CHECK_IOU
+        )
+
+        # object has iou below threshold, check median to reduce outliers
+        if avg_iou < threshold:
+            median_iou = intersection_over_union(
+                (
+                    position["xmin"],
+                    position["ymin"],
+                    position["xmax"],
+                    position["ymax"],
+                ),
+                median_of_boxes(self.stationary_box_history[id]),
+            )
+
+            # if the median iou drops below the threshold
+            # assume object is no longer stationary
+            if median_iou < threshold:
+                self.positions[id] = {
+                    "xmins": [xmin],
+                    "ymins": [ymin],
+                    "xmaxs": [xmax],
+                    "ymaxs": [ymax],
+                    "xmin": xmin,
+                    "ymin": ymin,
+                    "xmax": xmax,
+                    "ymax": ymax,
+                }
+                return False
 
         # if there are less than 10 entries for the position, add the bounding box
         # and recompute the position box
@@ -191,8 +245,12 @@ class NorfairTracker(ObjectTracker):
     def update(self, track_id, obj):
         id = self.track_id_map[track_id]
         self.disappeared[id] = 0
+        stationary = (
+            self.tracked_objects[id]["motionless_count"]
+            >= self.detect_config.stationary.threshold
+        )
         # update the motionless count if the object has not moved to a new position
-        if self.update_position(id, obj["box"]):
+        if self.update_position(id, obj["box"], stationary):
             self.tracked_objects[id]["motionless_count"] += 1
             if self.is_expired(id):
                 self.deregister(id, track_id)
@@ -207,6 +265,7 @@ class NorfairTracker(ObjectTracker):
             ):
                 self.tracked_objects[id]["position_changes"] += 1
             self.tracked_objects[id]["motionless_count"] = 0
+            self.stationary_box_history[id] = []
 
         self.tracked_objects[id].update(obj)
 

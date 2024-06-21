@@ -13,7 +13,6 @@ module.exports = {
       "guides/configuring_go2rtc",
       "guides/ha_notifications",
       "guides/ha_network_storage",
-      "guides/parked_cars",
       "guides/reverse_proxy",
     ],
     Configuration: {
@@ -23,7 +22,7 @@ module.exports = {
         {
           type: "link",
           label: "Go2RTC Configuration Reference",
-          href: "https://github.com/AlexxIT/go2rtc/tree/v1.8.4#configuration",
+          href: "https://github.com/AlexxIT/go2rtc/tree/v1.9.4#configuration",
         },
       ],
       Detectors: [
@@ -32,6 +31,7 @@ module.exports = {
       ],
       Cameras: [
         "configuration/cameras",
+        "configuration/review",
         "configuration/record",
         "configuration/snapshots",
         "configuration/motion_detection",
@@ -49,8 +49,10 @@ module.exports = {
         "configuration/stationary_objects",
       ],
       "Extra Configuration": [
+        "configuration/authentication",
         "configuration/hardware_acceleration",
         "configuration/ffmpeg_presets",
+        "configuration/tls",
         "configuration/advanced",
       ],
     },

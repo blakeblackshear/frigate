@@ -96,7 +96,7 @@ model:
 
 Note that if you rename objects in the labelmap, you will also need to update your `objects -> track` list as well.
 
-:::caution
+:::warning
 
 Some labels have special handling and modifications can disable functionality.
 
@@ -120,7 +120,7 @@ NOTE: The folder that is mapped from the host needs to be the folder that contai
 
 ## Custom go2rtc version
 
-Frigate currently includes go2rtc v1.8.4, there may be certain cases where you want to run a different version of go2rtc.
+Frigate currently includes go2rtc v1.9.4, there may be certain cases where you want to run a different version of go2rtc.
 
 To do this:
 

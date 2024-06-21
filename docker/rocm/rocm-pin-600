@@ -1,0 +1,3 @@
+Package: *
+Pin: release o=repo.radeon.com
+Pin-Priority: 600

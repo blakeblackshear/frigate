@@ -6,24 +6,34 @@ import logging
 import os
 import random
 import string
-from multiprocessing import Queue
+from enum import Enum
 from typing import Optional
 
 import cv2
 
+from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
+from frigate.comms.events_updater import EventUpdatePublisher
 from frigate.config import CameraConfig, FrigateConfig
 from frigate.const import CLIPS_DIR
-from frigate.events.maintainer import EventTypeEnum
+from frigate.events.types import EventStateEnum, EventTypeEnum
 from frigate.util.image import draw_box_with_label
 
 logger = logging.getLogger(__name__)
 
 
+class ManualEventState(str, Enum):
+    complete = "complete"
+    start = "start"
+    end = "end"
+
+
 class ExternalEventProcessor:
-    def __init__(self, config: FrigateConfig, queue: Queue) -> None:
+    def __init__(self, config: FrigateConfig) -> None:
         self.config = config
-        self.queue = queue
         self.default_thumbnail = None
+        self.event_sender = EventUpdatePublisher()
+        self.detection_updater = DetectionPublisher(DetectionTypeEnum.api)
+        self.event_camera = {}
 
     def create_manual_event(
         self,
@@ -47,12 +57,17 @@ class ExternalEventProcessor:
         thumbnail = self._write_images(
             camera_config, label, event_id, draw, snapshot_frame
         )
+        end = (
+            now + duration + camera_config.record.events.post_capture
+            if duration is not None
+            else None
+        )
 
-        self.queue.put(
+        self.event_sender.publish(
             (
                 EventTypeEnum.api,
-                "new",
-                camera_config,
+                EventStateEnum.start,
+                camera,
                 {
                     "id": event_id,
                     "label": label,
@@ -60,11 +75,7 @@ class ExternalEventProcessor:
                     "score": score,
                     "camera": camera,
                     "start_time": now - camera_config.record.events.pre_capture,
-                    "end_time": now
-                    + duration
-                    + camera_config.record.events.post_capture
-                    if duration is not None
-                    else None,
+                    "end_time": end,
                     "thumbnail": thumbnail,
                     "has_clip": camera_config.record.enabled and include_recording,
                     "has_snapshot": True,
@@ -73,13 +84,49 @@ class ExternalEventProcessor:
             )
         )
 
+        if source_type == "api":
+            self.event_camera[event_id] = camera
+            self.detection_updater.send_data(
+                (
+                    camera,
+                    now,
+                    {
+                        "state": (
+                            ManualEventState.complete if end else ManualEventState.start
+                        ),
+                        "label": f"{label}: {sub_label}" if sub_label else label,
+                        "event_id": event_id,
+                        "end_time": end,
+                    },
+                )
+            )
+
         return event_id
 
     def finish_manual_event(self, event_id: str, end_time: float) -> None:
         """Finish external event with indeterminate duration."""
-        self.queue.put(
-            (EventTypeEnum.api, "end", None, {"id": event_id, "end_time": end_time})
+        self.event_sender.publish(
+            (
+                EventTypeEnum.api,
+                EventStateEnum.end,
+                None,
+                {"id": event_id, "end_time": end_time},
+            )
         )
+
+        if event_id in self.event_camera:
+            self.detection_updater.send_data(
+                (
+                    self.event_camera[event_id],
+                    end_time,
+                    {
+                        "state": ManualEventState.end,
+                        "event_id": event_id,
+                        "end_time": end_time,
+                    },
+                )
+            )
+            self.event_camera.pop(event_id)
 
     def _write_images(
         self,
@@ -135,3 +182,7 @@ class ExternalEventProcessor:
         thumb = cv2.resize(img_frame, dsize=(width, 175), interpolation=cv2.INTER_AREA)
         ret, jpg = cv2.imencode(".jpg", thumb)
         return base64.b64encode(jpg.tobytes()).decode("utf-8")
+
+    def stop(self):
+        self.event_sender.stop()
+        self.detection_updater.stop()

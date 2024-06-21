@@ -159,7 +159,7 @@ This is often caused by the same reason as above - the `MoveStatus` ONVIF parame
 
 ### I'm seeing this error in the logs: "Autotracker: motion estimator couldn't get transformations". What does this mean?
 
-To maintain object tracking during PTZ moves, Frigate tracks the motion of your camera based on the details of the frame. If you are seeing this message, it could mean that your `zoom_factor` may be set too high, the scene around your detected object does not have enough details (like hard edges or color variatons), or your camera's shutter speed is too slow and motion blur is occurring. Try reducing `zoom_factor`, finding a way to alter the scene around your object, or changing your camera's shutter speed.
+To maintain object tracking during PTZ moves, Frigate tracks the motion of your camera based on the details of the frame. If you are seeing this message, it could mean that your `zoom_factor` may be set too high, the scene around your detected object does not have enough details (like hard edges or color variations), or your camera's shutter speed is too slow and motion blur is occurring. Try reducing `zoom_factor`, finding a way to alter the scene around your object, or changing your camera's shutter speed.
 
 ### Calibration seems to have completed, but the camera is not actually moving to track my object. Why?
 

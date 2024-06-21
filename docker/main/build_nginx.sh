@@ -5,7 +5,8 @@ set -euxo pipefail
 NGINX_VERSION="1.25.3"
 VOD_MODULE_VERSION="1.31"
 SECURE_TOKEN_MODULE_VERSION="1.5"
-RTMP_MODULE_VERSION="1.2.2"
+SET_MISC_MODULE_VERSION="v0.33"
+NGX_DEVEL_KIT_VERSION="v0.3.3"
 
 cp /etc/apt/sources.list /etc/apt/sources.list.d/sources-src.list
 sed -i 's|deb http|deb-src http|g' /etc/apt/sources.list.d/sources-src.list
@@ -49,10 +50,16 @@ mkdir /tmp/nginx-secure-token-module
 wget https://github.com/kaltura/nginx-secure-token-module/archive/refs/tags/${SECURE_TOKEN_MODULE_VERSION}.tar.gz
 tar -zxf ${SECURE_TOKEN_MODULE_VERSION}.tar.gz -C /tmp/nginx-secure-token-module --strip-components=1
 rm ${SECURE_TOKEN_MODULE_VERSION}.tar.gz
-mkdir /tmp/nginx-rtmp-module
-wget -nv https://github.com/arut/nginx-rtmp-module/archive/refs/tags/v${RTMP_MODULE_VERSION}.tar.gz
-tar -zxf v${RTMP_MODULE_VERSION}.tar.gz -C /tmp/nginx-rtmp-module --strip-components=1
-rm v${RTMP_MODULE_VERSION}.tar.gz
+
+mkdir /tmp/ngx_devel_kit
+wget https://github.com/vision5/ngx_devel_kit/archive/refs/tags/${NGX_DEVEL_KIT_VERSION}.tar.gz
+tar -zxf ${NGX_DEVEL_KIT_VERSION}.tar.gz -C /tmp/ngx_devel_kit --strip-components=1
+rm ${NGX_DEVEL_KIT_VERSION}.tar.gz
+
+mkdir /tmp/nginx-set-misc-module
+wget https://github.com/openresty/set-misc-nginx-module/archive/refs/tags/${SET_MISC_MODULE_VERSION}.tar.gz
+tar -zxf ${SET_MISC_MODULE_VERSION}.tar.gz -C /tmp/nginx-set-misc-module --strip-components=1
+rm ${SET_MISC_MODULE_VERSION}.tar.gz
 
 cd /tmp/nginx
 
@@ -60,10 +67,13 @@ cd /tmp/nginx
     --with-file-aio \
     --with-http_sub_module \
     --with-http_ssl_module \
+    --with-http_auth_request_module \
+    --with-http_realip_module \
     --with-threads \
+    --add-module=../ngx_devel_kit \
+    --add-module=../nginx-set-misc-module \
     --add-module=../nginx-vod-module \
     --add-module=../nginx-secure-token-module \
-    --add-module=../nginx-rtmp-module \
     --with-cc-opt="-O3 -Wno-error=implicit-fallthrough"
 
 make CC="ccache gcc" -j$(nproc) && make install

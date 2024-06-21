@@ -56,4 +56,4 @@ SQLite does not work well on a network share, if the `/media` folder is mapped t
 
 If MQTT isn't working in docker try using the IP of the device hosting the MQTT server instead of `localhost`, `127.0.0.1`, or `mosquitto.ix-mosquitto.svc.cluster.local`.
 
-This is because, by default, Frigate does not run in host mode so localhost points to the Frigate container and not the host device's network. 
+This is because, by default, Frigate does not run in host mode so localhost points to the Frigate container and not the host device's network.

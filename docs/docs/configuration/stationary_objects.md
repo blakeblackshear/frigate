@@ -23,10 +23,6 @@ NOTE: There is no way to disable stationary object tracking with this value.
 
 `threshold` is the number of frames an object needs to remain relatively still before it is considered stationary.
 
-## Handling stationary objects
-
-In some cases, like a driveway, you may prefer to only have an event when a car is coming & going vs a constant event of it stationary in the driveway. You can reference [this guide](../guides/parked_cars.md) for recommended approaches.
-
 ## Why does Frigate track stationary objects?
 
 Frigate didn't always track stationary objects. In fact, it didn't even track objects at all initially.

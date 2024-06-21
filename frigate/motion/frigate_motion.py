@@ -87,7 +87,7 @@ class FrigateMotionDetector(MotionDetector):
                 frameDelta, self.threshold.value, 255, cv2.THRESH_BINARY
             )[1]
 
-            # black out everything in the avg_delta where there isnt motion in the current frame
+            # black out everything in the avg_delta where there isn't motion in the current frame
             avg_delta_image = cv2.convertScaleAbs(self.avg_delta)
             avg_delta_image = cv2.bitwise_and(avg_delta_image, current_thresh)
 

@@ -1,5 +1,3 @@
 numpy
-# Openvino Library - Custom built with MYRIAD support
-openvino @ https://github.com/NateMeyer/openvino-wheels/releases/download/multi-arch_2022.3.1/openvino-2022.3.1-1-cp39-cp39-manylinux_2_31_x86_64.whl; platform_machine == 'x86_64'
-openvino @ https://github.com/NateMeyer/openvino-wheels/releases/download/multi-arch_2022.3.1/openvino-2022.3.1-1-cp39-cp39-linux_aarch64.whl; platform_machine == 'aarch64'
-openvino-dev[tensorflow2] @ https://github.com/NateMeyer/openvino-wheels/releases/download/multi-arch_2022.3.1/openvino_dev-2022.3.1-1-py3-none-any.whl
+tensorflow
+openvino-dev>=2024.0.0

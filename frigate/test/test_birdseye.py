@@ -2,7 +2,7 @@
 
 import unittest
 
-from frigate.output import get_canvas_shape
+from frigate.output.birdseye import get_canvas_shape
 
 
 class TestBirdseye(unittest.TestCase):

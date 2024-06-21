@@ -10,12 +10,16 @@ variable "SLIM_BASE" {
 variable "TRT_BASE" {
   default = null
 }
+variable "COMPUTE_LEVEL" {
+  default = ""
+}
 
 target "_build_args" {
   args = {
     BASE_IMAGE = BASE_IMAGE,
     SLIM_BASE = SLIM_BASE,
-    TRT_BASE = TRT_BASE
+    TRT_BASE = TRT_BASE,
+    COMPUTE_LEVEL = COMPUTE_LEVEL
   }
   platforms = ["linux/${ARCH}"]
 }
