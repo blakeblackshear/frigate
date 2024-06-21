@@ -223,7 +223,7 @@ class AudioEventMaintainer(threading.Thread):
                     audio_detections.append(label)
 
             # send audio detection data
-            self.detection_publisher.send_data(
+            self.detection_publisher.publish(
                 (
                     self.config.name,
                     datetime.datetime.now().timestamp(),

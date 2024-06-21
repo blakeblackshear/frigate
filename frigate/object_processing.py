@@ -1187,7 +1187,7 @@ class TrackedObjectProcessor(threading.Thread):
             ]
 
             # publish info on this frame
-            self.detection_publisher.send_data(
+            self.detection_publisher.publish(
                 (
                     camera,
                     frame_time,
@@ -1274,7 +1274,7 @@ class TrackedObjectProcessor(threading.Thread):
                 if not update:
                     break
 
-                event_id, camera = update
+                event_id, camera, _ = update
                 self.camera_states[camera].finished(event_id)
 
         self.requestor.stop()

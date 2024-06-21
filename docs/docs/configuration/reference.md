@@ -465,6 +465,35 @@ snapshots:
   # Optional: quality of the encoded jpeg, 0-100 (default: shown below)
   quality: 70
 
+# Optional: Configuration for semantic search capability
+semantic_search:
+  # Optional: Enable semantic search (default: shown below)
+  enabled: False
+  # Optional: Re-index embeddings database from historical events (default: shown below)
+  reindex: False
+
+# Optional: Configuration for AI generated event descriptions
+# NOTE: Semantic Search must be enabled for this to do anything.
+# WARNING: Depending on the provider, this will send thumbnails over the internet
+# to Google or OpenAI's LLMs to generate descriptions. It can be overridden at
+# the camera level (enabled: False) to enhance privacy for indoor cameras.
+genai:
+  # Optional: Enable Google Gemini description generation (default: shown below)
+  enabled: False
+  # Required if enabled: Provider must be one of ollama, gemini, or openai
+  provider: ollama
+  # Required if provider is ollama. May also be used for an OpenAI API compatible backend with the openai provider.
+  base_url: http://localhost::11434
+  # Required if gemini or openai
+  api_key: "{FRIGATE_GENAI_API_KEY}"
+  # Optional: The default prompt for generating descriptions. Can use replacement
+  # variables like "label", "sub_label", "camera" to make more dynamic. (default: shown below)
+  prompt: "Describe the {label} in the sequence of images with as much detail as possible. Do not describe the background."
+  # Optional: Object specific prompts to customize description results
+  # Format: {label}: {prompt}
+  object_prompts:
+    person: "My special person prompt."
+
 # Optional: Restream configuration
 # Uses https://github.com/AlexxIT/go2rtc (v1.9.2)
 go2rtc:
