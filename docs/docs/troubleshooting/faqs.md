@@ -58,9 +58,9 @@ If MQTT isn't working in docker try using the IP of the device hosting the MQTT 
 
 This is because, by default, Frigate does not run in host mode so localhost points to the Frigate container and not the host device's network. 
 
-### How can I view  the Frigate log files without using the Web UI?
+### How can I view the Frigate log files without using the Web UI?
 
-Frigate uses Docker to manage logs. So to view these logs from the CLI, follow these steps:
+Frigate manages logs internally as well as outputs directly to Docker via standard output. To view these logs using the CLI, follow these steps:
 * Open a terminal or command prompt on the host running your Frigate container.
 * Type the following command and press Enter:
   ```
@@ -70,6 +70,7 @@ Frigate uses Docker to manage logs. So to view these logs from the CLI, follow t
   Note: If you've given your Frigate container a different name, replace "frigate" in the command with your container's actual name. The "-f" option means the logs will continue to update in real-time as new entries are added. To stop viewing the logs, press `Ctrl+C`. If you'd like to learn more about using Docker logs, including additional options and features, you can explore Docker's [official documentation](https://docs.docker.com/engine/reference/commandline/logs/).
 
 Alternatively, when you create the Frigate Docker container, you can bind a directory on the host to the mountpoint `/dev/shm/logs` to not only be able to persist the logs to disk, but also to be able to query them directly from the host using your fav log parsing/query util.
+
 ```
 docker run -d \
   --name frigate \
