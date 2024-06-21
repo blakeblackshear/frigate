@@ -219,12 +219,15 @@ class PreviewRecorder:
                 os.unlink(os.path.join(PREVIEW_CACHE_DIR, file))
                 continue
 
-            file_time = file.split("-")[1][: -(len(PREVIEW_FRAME_TYPE) + 1)]
+            try:
+                file_time = file.split("-")[-1][: -(len(PREVIEW_FRAME_TYPE) + 1)]
 
-            if not file_time:
+                if not file_time:
+                    continue
+
+                ts = float(file_time)
+            except ValueError:
                 continue
-
-            ts = float(file_time)
 
             if self.start_time == 0:
                 self.start_time = ts
