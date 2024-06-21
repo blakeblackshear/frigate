@@ -424,7 +424,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                 camera_name = updated_topic.rpartition("/")[-1]
                 self.config.cameras[camera_name].record = updated_record_config
 
-            (topic, data) = self.detection_subscriber.get_data(timeout=1)
+            (topic, data) = self.detection_subscriber.check_for_update(timeout=1)
 
             if not topic:
                 continue
