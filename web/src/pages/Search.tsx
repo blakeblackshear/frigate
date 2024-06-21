@@ -1,3 +1,4 @@
+import SearchFilterGroup from "@/components/filter/SearchFilterGroup";
 import { Input } from "@/components/ui/input";
 import { Toaster } from "@/components/ui/sonner";
 import { useState } from "react";
@@ -16,7 +17,9 @@ export default function Search() {
           placeholder="Search for a specific detection..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-        />
+              />
+
+              <SearchFilterGroup />
       </div>
 
       <div className="no-scrollbar flex flex-1 flex-wrap content-start gap-2 overflow-y-auto md:gap-4">

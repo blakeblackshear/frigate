@@ -4,9 +4,9 @@ import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { useCallback, useMemo, useState } from "react";
 import { DropdownMenuSeparator } from "../ui/dropdown-menu";
-import { ReviewFilter, ReviewSeverity, ReviewSummary } from "@/types/review";
+import { ReviewFilter, ReviewSeverity } from "@/types/review";
 import { getEndOfDayTimestamp } from "@/utils/dateUtil";
-import { FaCheckCircle, FaFilter, FaRunning } from "react-icons/fa";
+import { FaFilter } from "react-icons/fa";
 import { isDesktop, isMobile } from "react-device-detect";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { Switch } from "../ui/switch";
@@ -14,49 +14,29 @@ import { Label } from "../ui/label";
 import MobileReviewSettingsDrawer, {
   DrawerFeatures,
 } from "../overlay/MobileReviewSettingsDrawer";
-import useOptimisticState from "@/hooks/use-optimistic-state";
 import FilterSwitch from "./FilterSwitch";
 import { FilterList } from "@/types/filter";
 import CalendarFilterButton from "./CalendarFilterButton";
 import { CamerasFilterButton } from "./CamerasFilterButton";
 
-const REVIEW_FILTERS = [
-  "cameras",
-  "reviewed",
-  "date",
-  "general",
-  "motionOnly",
-] as const;
-type ReviewFilters = (typeof REVIEW_FILTERS)[number];
-const DEFAULT_REVIEW_FILTERS: ReviewFilters[] = [
-  "cameras",
-  "reviewed",
-  "date",
-  "general",
-  "motionOnly",
-];
+const SEARCH_FILTERS = ["cameras", "date", "general"] as const;
+type SearchFilters = (typeof SEARCH_FILTERS)[number];
+const DEFAULT_REVIEW_FILTERS: SearchFilters[] = ["cameras", "date", "general"];
 
-type ReviewFilterGroupProps = {
-  filters?: ReviewFilters[];
-  currentSeverity?: ReviewSeverity;
-  reviewSummary?: ReviewSummary;
+type SearchFilterGroupProps = {
+  filters?: SearchFilters[];
   filter?: ReviewFilter;
-  motionOnly: boolean;
   filterList?: FilterList;
   onUpdateFilter: (filter: ReviewFilter) => void;
   setMotionOnly: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export default function ReviewFilterGroup({
+export default function SearchFilterGroup({
   filters = DEFAULT_REVIEW_FILTERS,
-  currentSeverity,
-  reviewSummary,
   filter,
-  motionOnly,
   filterList,
   onUpdateFilter,
-  setMotionOnly,
-}: ReviewFilterGroupProps) {
+}: SearchFilterGroupProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const allLabels = useMemo<string[]>(() => {
@@ -176,37 +156,21 @@ export default function ReviewFilterGroup({
           }}
         />
       )}
-      {filters.includes("reviewed") && (
-        <ShowReviewFilter
-          showReviewed={filter?.showReviewed || 0}
-          setShowReviewed={(reviewed) =>
-            onUpdateFilter({ ...filter, showReviewed: reviewed })
-          }
-        />
-      )}
       {isDesktop && filters.includes("date") && (
         <CalendarFilterButton
-          reviewSummary={reviewSummary}
           day={
             filter?.after == undefined
               ? undefined
               : new Date(filter.after * 1000)
           }
-          defaultText="Last 24 Hours"
+          defaultText="All Dates"
           updateSelectedDay={onUpdateSelectedDay}
-        />
-      )}
-      {filters.includes("motionOnly") && (
-        <ShowMotionOnlyButton
-          motionOnly={motionOnly}
-          setMotionOnly={setMotionOnly}
         />
       )}
       {isDesktop && filters.includes("general") && (
         <GeneralFilterButton
           allLabels={filterValues.labels}
           selectedLabels={filter?.labels}
-          currentSeverity={currentSeverity}
           showAll={filter?.showAll == true}
           allZones={filterValues.zones}
           selectedZones={filter?.zones}
@@ -225,8 +189,6 @@ export default function ReviewFilterGroup({
         <MobileReviewSettingsDrawer
           features={mobileSettingsFeatures}
           filter={filter}
-          currentSeverity={currentSeverity}
-          reviewSummary={reviewSummary}
           allLabels={allLabels}
           allZones={allZones}
           onUpdateFilter={onUpdateFilter}
@@ -240,47 +202,6 @@ export default function ReviewFilterGroup({
         />
       )}
     </div>
-  );
-}
-
-type ShowReviewedFilterProps = {
-  showReviewed?: 0 | 1;
-  setShowReviewed: (reviewed?: 0 | 1) => void;
-};
-function ShowReviewFilter({
-  showReviewed,
-  setShowReviewed,
-}: ShowReviewedFilterProps) {
-  const [showReviewedSwitch, setShowReviewedSwitch] = useOptimisticState(
-    showReviewed,
-    setShowReviewed,
-  );
-  return (
-    <>
-      <div className="hidden h-9 cursor-pointer items-center justify-start rounded-md bg-secondary p-2 text-sm hover:bg-secondary/80 md:flex">
-        <Switch
-          id="reviewed"
-          checked={showReviewedSwitch == 1}
-          onCheckedChange={() =>
-            setShowReviewedSwitch(showReviewedSwitch == 0 ? 1 : 0)
-          }
-        />
-        <Label className="ml-2 cursor-pointer text-primary" htmlFor="reviewed">
-          Show Reviewed
-        </Label>
-      </div>
-
-      <Button
-        className="block duration-0 md:hidden"
-        variant={showReviewedSwitch == 1 ? "select" : "default"}
-        size="sm"
-        onClick={() => setShowReviewedSwitch(showReviewedSwitch == 0 ? 1 : 0)}
-      >
-        <FaCheckCircle
-          className={`${showReviewedSwitch == 1 ? "text-selected-foreground" : "text-secondary-foreground"}`}
-        />
-      </Button>
-    </>
   );
 }
 
@@ -563,52 +484,6 @@ export function GeneralFilterContent({
           }}
         >
           Reset
-        </Button>
-      </div>
-    </>
-  );
-}
-
-type ShowMotionOnlyButtonProps = {
-  motionOnly: boolean;
-  setMotionOnly: React.Dispatch<React.SetStateAction<boolean>>;
-};
-function ShowMotionOnlyButton({
-  motionOnly,
-  setMotionOnly,
-}: ShowMotionOnlyButtonProps) {
-  const [motionOnlyButton, setMotionOnlyButton] = useOptimisticState(
-    motionOnly,
-    setMotionOnly,
-  );
-
-  return (
-    <>
-      <div className="mx-1 hidden h-9 cursor-pointer items-center justify-center whitespace-nowrap rounded-md bg-secondary px-3 text-sm text-primary hover:bg-secondary/80 md:inline-flex">
-        <Switch
-          className="ml-1"
-          id="collapse-motion"
-          checked={motionOnlyButton}
-          onCheckedChange={setMotionOnlyButton}
-        />
-        <Label
-          className="mx-2 cursor-pointer text-primary"
-          htmlFor="collapse-motion"
-        >
-          Motion only
-        </Label>
-      </div>
-
-      <div className="block md:hidden">
-        <Button
-          size="sm"
-          className="duration-0"
-          variant={motionOnlyButton ? "select" : "default"}
-          onClick={() => setMotionOnlyButton(!motionOnlyButton)}
-        >
-          <FaRunning
-            className={`${motionOnlyButton ? "text-selected-foreground" : "text-secondary-foreground"}`}
-          />
         </Button>
       </div>
     </>
