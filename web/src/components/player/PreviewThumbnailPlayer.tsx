@@ -70,18 +70,21 @@ export default function PreviewThumbnailPlayer({
     [ignoreClick, review, onClick],
   );
 
-  const swipeHandlers = useSwipeable({
-    onSwipedLeft: () => (setReviewed ? setReviewed(review) : null),
-    onSwipedRight: () => setPlayback(true),
-    preventScrollOnSwipe: true,
-  });
-
   const handleSetReviewed = useCallback(() => {
     if (review.end_time && !review.has_been_reviewed) {
       review.has_been_reviewed = true;
       setReviewed(review);
     }
   }, [review, setReviewed]);
+
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: () => {
+      setPlayback(false);
+      handleSetReviewed();
+    },
+    onSwipedRight: () => setPlayback(true),
+    preventScrollOnSwipe: true,
+  });
 
   useContextMenu(imgRef, () => {
     onClick(review, true);
