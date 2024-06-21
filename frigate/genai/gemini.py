@@ -3,7 +3,7 @@
 from typing import Optional
 
 import google.generativeai as genai
-from google.api_core.exceptions import DeadlineExceeded
+from google.api_core.exceptions import GoogleAPICallError
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
@@ -39,7 +39,7 @@ class GeminiClient(GenAIClient):
                     timeout=self.timeout,
                 ),
             )
-        except DeadlineExceeded:
+        except GoogleAPICallError:
             return None
         try:
             description = response.text.strip()

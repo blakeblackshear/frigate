@@ -23,22 +23,32 @@ logger = logging.getLogger(__name__)
 def get_metadata(event: Event) -> dict:
     """Extract valid event metadata."""
     event_dict = model_to_dict(event)
-    return {
-        k: ",".join(str(x) for x in v) if isinstance(v, list) else v
-        for k, v in event_dict.items()
-        if k not in ["id", "thumbnail"]
-        and v is not None
-        and (
-            isinstance(v, (str, int, float, bool))
-            or (isinstance(v, list) and len(v) > 0)
-        )
-    } | {
-        k: v
-        for k, v in event_dict["data"].items()
-        if k not in ["description"]
-        and v is not None
-        and isinstance(v, (str, int, float, bool))
-    }
+    return (
+        {
+            k: v
+            for k, v in event_dict.items()
+            if k not in ["id", "thumbnail"]
+            and v is not None
+            and isinstance(v, (str, int, float, bool))
+        }
+        | {
+            k: v
+            for k, v in event_dict["data"].items()
+            if k not in ["description"]
+            and v is not None
+            and isinstance(v, (str, int, float, bool))
+        }
+        | {
+            # Metadata search doesn't support $contains
+            # and an event can have multiple zones, so
+            # we need to create a key for each zone
+            f"{k}_{x}": True
+            for k, v in event_dict.items()
+            if isinstance(v, list) and len(v) > 0
+            for x in v
+            if isinstance(x, str)
+        }
+    )
 
 
 class Embeddings:
