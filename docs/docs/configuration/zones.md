@@ -69,15 +69,6 @@ Sometimes you want to limit a zone to specific object types to have more granula
 ```yaml
 cameras:
   name_of_your_camera:
-    record:
-      events:
-        required_zones:
-          - entire_yard
-          - front_yard_street
-    snapshots:
-      required_zones:
-        - entire_yard
-        - front_yard_street
     zones:
       entire_yard:
         coordinates: ... (everywhere you want a person)
