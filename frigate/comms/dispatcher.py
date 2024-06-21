@@ -14,9 +14,10 @@ from frigate.const import (
     INSERT_PREVIEW,
     REQUEST_REGION_GRID,
     UPDATE_CAMERA_ACTIVITY,
+    UPDATE_EVENT_DESCRIPTION,
     UPSERT_REVIEW_SEGMENT,
 )
-from frigate.models import Previews, Recordings, ReviewSegment
+from frigate.models import Event, Previews, Recordings, ReviewSegment
 from frigate.ptz.onvif import OnvifCommandEnum, OnvifController
 from frigate.types import PTZMetricsTypes
 from frigate.util.object import get_camera_regions_grid
@@ -128,6 +129,10 @@ class Dispatcher:
             ).execute()
         elif topic == UPDATE_CAMERA_ACTIVITY:
             self.camera_activity = payload
+        elif topic == UPDATE_EVENT_DESCRIPTION:
+            event: Event = Event.get(Event.id == payload["id"])
+            event.data["description"] = payload["description"]
+            event.save()
         elif topic == "onConnect":
             camera_status = self.camera_activity.copy()
 
