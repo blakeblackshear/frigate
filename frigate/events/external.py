@@ -86,7 +86,7 @@ class ExternalEventProcessor:
 
         if source_type == "api":
             self.event_camera[event_id] = camera
-            self.detection_updater.send_data(
+            self.detection_updater.publish(
                 (
                     camera,
                     now,
@@ -115,7 +115,7 @@ class ExternalEventProcessor:
         )
 
         if event_id in self.event_camera:
-            self.detection_updater.send_data(
+            self.detection_updater.publish(
                 (
                     self.event_camera[event_id],
                     end_time,
