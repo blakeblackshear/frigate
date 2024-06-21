@@ -56,6 +56,11 @@ go2rtc:
     password: "{FRIGATE_GO2RTC_RTSP_PASSWORD}"
 ```
 
+```yaml
+genai:
+  api_key: "{FRIGATE_GENAI_API_KEY}"
+```
+
 ## Common configuration examples
 
 Here are some common starter configuration examples. Refer to the [reference config](./reference.md) for detailed information about all the config values.
