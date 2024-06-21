@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useApiHost } from "@/api";
 import { isCurrentHour } from "@/utils/dateUtil";
-import { ReviewSegment } from "@/types/review";
 import { getIconForLabel } from "@/utils/iconUtil";
 import TimeAgo from "../dynamic/TimeAgo";
 import useSWR from "swr";
@@ -13,32 +12,27 @@ import useImageLoaded from "@/hooks/use-image-loaded";
 import { useSwipeable } from "react-swipeable";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import ImageLoadingIndicator from "../indicators/ImageLoadingIndicator";
-import useContextMenu from "@/hooks/use-contextmenu";
 import ActivityIndicator from "../indicators/activity-indicator";
-import { TimeRange } from "@/types/timeline";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
-import { InProgressPreview, VideoPreview } from "../preview/ScrubbablePreview";
+import { VideoPreview } from "../preview/ScrubbablePreview";
 import { Preview } from "@/types/preview";
+import { SearchResult } from "@/types/search";
 
-type PreviewPlayerProps = {
-  review: ReviewSegment;
+type SearchPlayerProps = {
+  searchResult: SearchResult;
   allPreviews?: Preview[];
   scrollLock?: boolean;
-  timeRange: TimeRange;
   onTimeUpdate?: (time: number | undefined) => void;
-  setReviewed: (review: ReviewSegment) => void;
-  onClick: (review: ReviewSegment, ctrl: boolean) => void;
+  onClick: (searchResult: SearchResult, ctrl: boolean) => void;
 };
 
-export default function PreviewThumbnailPlayer({
-  review,
+export default function SearchThumbnailPlayer({
+  searchResult,
   allPreviews,
   scrollLock = false,
-  timeRange,
-  setReviewed,
   onClick,
   onTimeUpdate,
-}: PreviewPlayerProps) {
+}: SearchPlayerProps) {
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
@@ -49,27 +43,16 @@ export default function PreviewThumbnailPlayer({
   const handleOnClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (!ignoreClick) {
-        onClick(review, e.metaKey);
+        onClick(searchResult, e.metaKey);
       }
     },
-    [ignoreClick, review, onClick],
+    [ignoreClick, searchResult, onClick],
   );
 
   const swipeHandlers = useSwipeable({
-    onSwipedLeft: () => (setReviewed ? setReviewed(review) : null),
+    onSwipedLeft: () => setPlayback(false),
     onSwipedRight: () => setPlayback(true),
     preventScrollOnSwipe: true,
-  });
-
-  const handleSetReviewed = useCallback(() => {
-    if (review.end_time && !review.has_been_reviewed) {
-      review.has_been_reviewed = true;
-      setReviewed(review);
-    }
-  }, [review, setReviewed]);
-
-  useContextMenu(imgRef, () => {
-    onClick(review, true);
   });
 
   // playback
@@ -81,11 +64,14 @@ export default function PreviewThumbnailPlayer({
 
     let multiHour = false;
     const firstIndex = Object.values(allPreviews).findIndex((preview) => {
-      if (preview.camera != review.camera || preview.end < review.start_time) {
+      if (
+        preview.camera != searchResult.camera ||
+        preview.end < searchResult.start_time
+      ) {
         return false;
       }
 
-      if ((review.end_time ?? timeRange.before) > preview.end) {
+      if ((searchResult.end_time ?? Date.now() / 1000) > preview.end) {
         multiHour = true;
       }
 
@@ -101,9 +87,9 @@ export default function PreviewThumbnailPlayer({
     }
 
     const firstPrev = allPreviews[firstIndex];
-    const firstDuration = firstPrev.end - review.start_time;
+    const firstDuration = firstPrev.end - searchResult.start_time;
     const secondDuration =
-      (review.end_time ?? timeRange.before) - firstPrev.end;
+      (searchResult.end_time ?? Date.now() / 1000) - firstPrev.end;
 
     if (firstDuration > secondDuration) {
       // the first preview is longer than the second, return the first
@@ -112,13 +98,14 @@ export default function PreviewThumbnailPlayer({
       // the second preview is longer, return the second if it exists
       if (firstIndex < allPreviews.length - 1) {
         return allPreviews.find(
-          (preview, idx) => idx > firstIndex && preview.camera == review.camera,
+          (preview, idx) =>
+            idx > firstIndex && preview.camera == searchResult.camera,
         );
       }
 
       return undefined;
     }
-  }, [allPreviews, review, timeRange]);
+  }, [allPreviews, searchResult]);
 
   // Hover Playback
 
@@ -161,7 +148,7 @@ export default function PreviewThumbnailPlayer({
   // date
 
   const formattedDate = useFormattedTimestamp(
-    review.start_time,
+    searchResult.start_time,
     config?.ui.time_format == "24hour" ? "%b %-d, %H:%M" : "%b %-d, %I:%M %p",
   );
 
@@ -176,10 +163,8 @@ export default function PreviewThumbnailPlayer({
       {playingBack && (
         <div className="absolute inset-0 animate-in fade-in">
           <PreviewContent
-            review={review}
+            searchResult={searchResult}
             relevantPreview={relevantPreview}
-            timeRange={timeRange}
-            setReviewed={handleSetReviewed}
             setIgnoreClick={setIgnoreClick}
             isPlayingBack={setPlayback}
             onTimeUpdate={onTimeUpdate}
@@ -205,7 +190,11 @@ export default function PreviewThumbnailPlayer({
               : undefined
           }
           draggable={false}
-          src={`${apiHost}${review.thumb_path.replace("/media/frigate/", "")}`}
+          src={
+            searchResult.thumb_path
+              ? `${apiHost}${searchResult.thumb_path.replace("/media/frigate/", "")}`
+              : ""
+          }
           loading={isSafari ? "eager" : "lazy"}
           onLoad={() => {
             onImgLoad();
@@ -221,32 +210,23 @@ export default function PreviewThumbnailPlayer({
             >
               <TooltipTrigger asChild>
                 <div className="mx-3 pb-1 text-sm text-white">
-                  {(review.severity == "alert" ||
-                    review.severity == "detection") && (
+                  {
                     <>
                       <Chip
-                        className={`flex items-start justify-between space-x-1 ${playingBack ? "hidden" : ""} bg-gradient-to-br ${review.has_been_reviewed ? "bg-green-600 from-green-600 to-green-700" : "bg-gray-500 from-gray-400 to-gray-500"} z-0`}
+                        className={`flex items-start justify-between space-x-1 ${playingBack ? "hidden" : ""} "bg-gray-500 z-0 bg-gradient-to-br from-gray-400 to-gray-500`}
                       >
-                        {review.data.objects.sort().map((object) => {
-                          return getIconForLabel(object, "size-3 text-white");
-                        })}
-                        {review.data.audio.map((audio) => {
-                          return getIconForLabel(audio, "size-3 text-white");
-                        })}
+                        {getIconForLabel(
+                          searchResult.label,
+                          "size-3 text-white",
+                        )}
                       </Chip>
                     </>
-                  )}
+                  }
                 </div>
               </TooltipTrigger>
             </div>
             <TooltipContent className="capitalize">
-              {[
-                ...new Set([
-                  ...(review.data.objects || []),
-                  ...(review.data.sub_labels || []),
-                  ...(review.data.audio || []),
-                ]),
-              ]
+              {[...new Set([searchResult.label])]
                 .filter(
                   (item) => item !== undefined && !item.includes("-verified"),
                 )
@@ -262,8 +242,8 @@ export default function PreviewThumbnailPlayer({
             <div className="rounded-t-l pointer-events-none absolute inset-x-0 top-0 z-10 h-[30%] w-full bg-gradient-to-b from-black/60 to-transparent"></div>
             <div className="rounded-b-l pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[20%] w-full bg-gradient-to-t from-black/60 to-transparent">
               <div className="mx-3 flex h-full items-end justify-between pb-1 text-sm text-white">
-                {review.end_time ? (
-                  <TimeAgo time={review.start_time * 1000} dense />
+                {searchResult.end_time ? (
+                  <TimeAgo time={searchResult.start_time * 1000} dense />
                 ) : (
                   <div>
                     <ActivityIndicator size={24} />
@@ -280,19 +260,15 @@ export default function PreviewThumbnailPlayer({
 }
 
 type PreviewContentProps = {
-  review: ReviewSegment;
+  searchResult: SearchResult;
   relevantPreview: Preview | undefined;
-  timeRange: TimeRange;
-  setReviewed: () => void;
   setIgnoreClick: (ignore: boolean) => void;
   isPlayingBack: (ended: boolean) => void;
   onTimeUpdate?: (time: number | undefined) => void;
 };
 function PreviewContent({
-  review,
+  searchResult,
   relevantPreview,
-  timeRange,
-  setReviewed,
   setIgnoreClick,
   isPlayingBack,
   onTimeUpdate,
@@ -303,26 +279,27 @@ function PreviewContent({
     return (
       <VideoPreview
         relevantPreview={relevantPreview}
-        startTime={review.start_time}
-        endTime={review.end_time}
-        setReviewed={setReviewed}
+        startTime={searchResult.start_time}
+        endTime={searchResult.end_time}
         setIgnoreClick={setIgnoreClick}
         isPlayingBack={isPlayingBack}
         onTimeUpdate={onTimeUpdate}
         windowVisible={true}
+        setReviewed={() => {}}
       />
     );
-  } else if (isCurrentHour(review.start_time)) {
+  } else if (isCurrentHour(searchResult.start_time)) {
     return (
-      <InProgressPreview
+      /*<InProgressPreview
         review={review}
         timeRange={timeRange}
-        setReviewed={setReviewed}
         setIgnoreClick={setIgnoreClick}
         isPlayingBack={isPlayingBack}
         onTimeUpdate={onTimeUpdate}
-        windowVisible={true}
-      />
+            windowVisible={true}
+            setReviewed={() => { }}
+      />*/
+      <div />
     );
   }
 }

@@ -28,7 +28,6 @@ type SearchFilterGroupProps = {
   filter?: ReviewFilter;
   filterList?: FilterList;
   onUpdateFilter: (filter: ReviewFilter) => void;
-  setMotionOnly: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export default function SearchFilterGroup({
