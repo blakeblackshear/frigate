@@ -92,6 +92,61 @@ Message published for each changed event. The first message is published when th
 }
 ```
 
+### `frigate/reviews`
+
+Message published for each changed review item. The first message is published when the `detection` or `alert` is initiated. When additional objects are detected or when a zone change occurs, it will publish a, `update` message with the same id. When the review activity has ended a final `end` message is published.
+
+```json
+{
+  "type": "update",  // new, update, end
+  "before": {
+    "id": "1718987129.308396-fqk5ka",  // review_id
+    "camera": "front_cam",
+    "start_time": 1718987129.308396,
+    "end_time": null,
+    "severity": "detection",
+    "thumb_path": "/media/frigate/clips/review/thumb-front_cam-1718987129.308396-fqk5ka.webp",
+    "data": {
+      "detections": [  // list of event IDs
+        "1718987128.947436-g92ztx",
+        "1718987148.879516-d7oq7r",
+        "1718987126.934663-q5ywpt"
+      ],
+      "objects": [
+        "person",
+        "car"
+      ],
+      "sub_labels": [],
+      "zones": [],
+      "audio": []
+    }
+  },
+  "after": {
+    "id": "1718987129.308396-fqk5ka",
+    "camera": "front_cam",
+    "start_time": 1718987129.308396,
+    "end_time": null,
+    "severity": "alert",
+    "thumb_path": "/media/frigate/clips/review/thumb-front_cam-1718987129.308396-fqk5ka.webp",
+    "data": {
+      "detections": [
+        "1718987128.947436-g92ztx",
+        "1718987148.879516-d7oq7r",
+        "1718987126.934663-q5ywpt"
+      ],
+      "objects": [
+        "person",
+        "car"
+      ],
+      "sub_labels": [],
+      "zones": [
+        "front_yard"
+      ],
+      "audio": []
+    }
+  }
+```
+
 ### `frigate/stats`
 
 Same data available at `/api/stats` published at a configurable interval.
