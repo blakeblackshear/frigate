@@ -237,7 +237,7 @@ class EventProcessor(threading.Thread):
 
         if event_type == EventStateEnum.end:
             del self.events_in_process[event_data["id"]]
-            self.event_end_publisher.publish((event_data["id"], camera))
+            self.event_end_publisher.publish((event_data["id"], camera, updated_db))
 
     def handle_external_detection(
         self, event_type: EventStateEnum, event_data: Event

@@ -29,6 +29,10 @@ module.exports = {
         "configuration/object_detectors",
         "configuration/audio_detectors",
       ],
+      "Semantic Search": [
+        "configuration/semantic_search",
+        "configuration/genai",
+      ],
       Cameras: [
         "configuration/cameras",
         "configuration/review",
