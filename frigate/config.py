@@ -723,6 +723,38 @@ class ReviewConfig(FrigateBaseModel):
     )
 
 
+class SemanticSearchConfig(FrigateBaseModel):
+    enabled: bool = Field(default=True, title="Enable semantic search.")
+    reindex: Optional[bool] = Field(
+        default=False, title="Reindex all detections on startup."
+    )
+
+
+class GenAIProviderEnum(str, Enum):
+    openai = "openai"
+    gemini = "gemini"
+    ollama = "ollama"
+
+
+class GenAIConfig(FrigateBaseModel):
+    enabled: bool = Field(default=False, title="Enable GenAI.")
+    provider: GenAIProviderEnum = Field(
+        default=GenAIProviderEnum.openai, title="GenAI provider."
+    )
+    base_url: Optional[str] = Field(None, title="Provider base url.")
+    api_key: Optional[str] = Field(None, title="Provider API key.")
+    model: str = Field(default="gpt-4o", title="GenAI model.")
+    prompt: str = Field(
+        default="Describe the {label} in the sequence of images with as much detail as possible. Do not describe the background.",
+        title="Default caption prompt.",
+    )
+    object_prompts: Dict[str, str] = Field(default={}, title="Object specific prompts.")
+
+
+class GenAICameraConfig(FrigateBaseModel):
+    enabled: bool = Field(default=False, title="Enable GenAI for camera.")
+
+
 class AudioConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable audio events.")
     max_not_heard: int = Field(
@@ -1003,6 +1035,9 @@ class CameraConfig(FrigateBaseModel):
     )
     review: ReviewConfig = Field(
         default_factory=ReviewConfig, title="Review configuration."
+    )
+    genai: GenAICameraConfig = Field(
+        default_factory=GenAICameraConfig, title="Generative AI configuration."
     )
     audio: AudioConfig = Field(
         default_factory=AudioConfig, title="Audio events configuration."
@@ -1355,6 +1390,12 @@ class FrigateConfig(FrigateBaseModel):
     review: ReviewConfig = Field(
         default_factory=ReviewConfig, title="Review configuration."
     )
+    semantic_search: SemanticSearchConfig = Field(
+        default_factory=SemanticSearchConfig, title="Semantic search configuration."
+    )
+    genai: GenAIConfig = Field(
+        default_factory=GenAIConfig, title="Generative AI configuration."
+    )
     audio: AudioConfig = Field(
         default_factory=AudioConfig, title="Global Audio events configuration."
     )
@@ -1389,6 +1430,10 @@ class FrigateConfig(FrigateBaseModel):
             config.mqtt.user = config.mqtt.user.format(**FRIGATE_ENV_VARS)
             config.mqtt.password = config.mqtt.password.format(**FRIGATE_ENV_VARS)
 
+        # GenAI substitution
+        if config.genai.api_key:
+            config.genai.api_key = config.genai.api_key.format(**FRIGATE_ENV_VARS)
+
         # set default min_score for object attributes
         for attribute in ALL_ATTRIBUTE_LABELS:
             if not config.objects.filters.get(attribute):
@@ -1410,6 +1455,7 @@ class FrigateConfig(FrigateBaseModel):
                 "live": ...,
                 "objects": ...,
                 "review": ...,
+                "genai": {"enabled"},
                 "motion": ...,
                 "detect": ...,
                 "ffmpeg": ...,
