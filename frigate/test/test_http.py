@@ -2,6 +2,7 @@ import datetime
 import json
 import logging
 import os
+import sys
 import unittest
 from unittest.mock import Mock
 
@@ -10,12 +11,17 @@ from playhouse.shortcuts import model_to_dict
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
-from frigate.api.app import create_app
 from frigate.config import FrigateConfig
 from frigate.models import Event, Recordings
 from frigate.plus import PlusApi
 from frigate.stats.emitter import StatsEmitter
 from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
+
+# Have to replace pysqlite3 before importing create_app
+__import__("pysqlite3")
+sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
+
+from frigate.api.app import create_app  # noqa: E402
 
 
 class TestHttp(unittest.TestCase):
@@ -120,6 +126,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
             PlusApi(),
             None,
         )
@@ -156,6 +163,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
             PlusApi(),
             None,
         )
@@ -177,6 +185,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
             PlusApi(),
             None,
         )
@@ -193,6 +202,7 @@ class TestHttp(unittest.TestCase):
         app = create_app(
             FrigateConfig(**self.minimal_config),
             self.db,
+            None,
             None,
             None,
             None,
@@ -219,6 +229,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
             PlusApi(),
             None,
         )
@@ -241,6 +252,7 @@ class TestHttp(unittest.TestCase):
         app = create_app(
             FrigateConfig(**self.minimal_config),
             self.db,
+            None,
             None,
             None,
             None,
@@ -283,6 +295,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
             PlusApi(),
             None,
         )
@@ -318,6 +331,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
             PlusApi(),
             None,
         )
@@ -343,6 +357,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
             PlusApi(),
             None,
         )
@@ -356,6 +371,7 @@ class TestHttp(unittest.TestCase):
         app = create_app(
             FrigateConfig(**self.minimal_config).runtime_config(),
             self.db,
+            None,
             None,
             None,
             None,
@@ -377,6 +393,7 @@ class TestHttp(unittest.TestCase):
         app = create_app(
             FrigateConfig(**self.minimal_config).runtime_config(),
             self.db,
+            None,
             None,
             None,
             None,
