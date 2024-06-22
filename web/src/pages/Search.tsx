@@ -89,17 +89,13 @@ export default function Search() {
 
   // selection
 
-  const onSelectSearch = useCallback(
-    (item: SearchResult, detail: boolean) => {
-      if (detail) {
-        // TODO open detail
-      } else {
-        setRecording({
-          camera: item.camera,
-          startTime: item.start_time,
-          severity: "alert",
-        });
-      }
+  const onOpenSearch = useCallback(
+    (item: SearchResult) => {
+      setRecording({
+        camera: item.camera,
+        startTime: item.start_time,
+        severity: "alert",
+      });
     },
     [setRecording],
   );
@@ -169,7 +165,7 @@ export default function Search() {
         isLoading={isLoading}
         setSearch={setSearch}
         onUpdateFilter={onUpdateFilter}
-        onSelectItem={onSelectSearch}
+        onOpenSearch={onOpenSearch}
       />
     );
   }

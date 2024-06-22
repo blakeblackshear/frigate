@@ -244,6 +244,7 @@ export default function SearchThumbnailPlayer({
                     <>
                       <Chip
                         className={`flex items-start justify-between space-x-1 ${playingBack ? "hidden" : ""} "bg-gray-500 z-0 bg-gradient-to-br from-gray-400 to-gray-500`}
+                        onClick={() => onClick(searchResult, true)}
                       >
                         <LuInfo className="size-3" />
                       </Chip>

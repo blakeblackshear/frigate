@@ -1,11 +1,13 @@
 import SearchFilterGroup from "@/components/filter/SearchFilterGroup";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import SearchDetailDialog from "@/components/overlay/SearchDetailDialog";
 import SearchThumbnailPlayer from "@/components/player/SearchThumbnailPlayer";
 import { Input } from "@/components/ui/input";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
 import { Preview } from "@/types/preview";
 import { SearchFilter, SearchResult } from "@/types/search";
+import { useCallback, useState } from "react";
 import { LuSearchCheck, LuSearchX } from "react-icons/lu";
 
 type SearchViewProps = {
@@ -17,7 +19,7 @@ type SearchViewProps = {
   isLoading: boolean;
   setSearch: (search: string) => void;
   onUpdateFilter: (filter: SearchFilter) => void;
-  onSelectItem: (item: SearchResult, detail: boolean) => void;
+  onOpenSearch: (item: SearchResult) => void;
 };
 export default function SearchView({
   search,
@@ -28,11 +30,29 @@ export default function SearchView({
   isLoading,
   setSearch,
   onUpdateFilter,
-  onSelectItem,
+  onOpenSearch,
 }: SearchViewProps) {
+  // detail
+
+  const [searchDetail, setSearchDetail] = useState<SearchResult>();
+
+  // search interaction
+
+  const onSelectSearch = useCallback(
+    (item: SearchResult, detail: boolean) => {
+      if (detail) {
+        setSearchDetail(item);
+      } else {
+        onOpenSearch(item);
+      }
+    },
+    [onOpenSearch],
+  );
+
   return (
     <div className="flex size-full flex-col pt-2 md:py-2">
       <Toaster closeButton={true} />
+      <SearchDetailDialog search={searchDetail} setSearch={setSearchDetail} />
 
       <div className="relative mb-2 flex h-11 items-center justify-between pl-2 pr-2 md:pl-3">
         <Input
@@ -83,7 +103,7 @@ export default function SearchView({
                       searchResult={value}
                       allPreviews={allPreviews}
                       scrollLock={false}
-                      onClick={(item, detail) => onSelectItem(item, detail)}
+                      onClick={onSelectSearch}
                     />
                   </div>
                   <div
