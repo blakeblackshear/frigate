@@ -4,7 +4,6 @@ import json
 import logging
 import multiprocessing as mp
 import signal
-import sys
 import threading
 from types import FrameType
 from typing import Optional
