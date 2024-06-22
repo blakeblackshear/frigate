@@ -83,7 +83,7 @@ export default function SearchDetailDialog({
     >
       <Content
         className={
-          isDesktop ? "sm:max-w-xl" : "max-h-[75dvh] overflow-hidden p-2 pb-4"
+          isDesktop ? "sm:max-w-xl" : "max-h-[75dvh] overflow-hidden p-2 py-4"
         }
       >
         {search && (
@@ -116,7 +116,7 @@ export default function SearchDetailDialog({
               </div>
               <div className="flex w-full flex-col gap-2 px-6">
                 <img
-                  className="aspect-video select-none transition-opacity"
+                  className="aspect-video select-none rounded-lg object-contain transition-opacity"
                   style={
                     isIOS
                       ? {
