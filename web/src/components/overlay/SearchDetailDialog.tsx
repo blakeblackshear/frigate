@@ -9,7 +9,9 @@ import { getIconForLabel } from "@/utils/iconUtil";
 import { useApiHost } from "@/api";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import axios from "axios";
+import { toast } from "sonner";
 
 type SearchDetailDialogProps = {
   search?: SearchResult;
@@ -28,12 +30,39 @@ export default function SearchDetailDialog({
   // data
 
   const [desc, setDesc] = useState(search?.description);
+
+  useEffect(() => setDesc(search?.description), [search]);
+
   const formattedDate = useFormattedTimestamp(
     search?.start_time ?? 0,
     config?.ui.time_format == "24hour"
       ? "%b %-d %Y, %H:%M"
       : "%b %-d %Y, %I:%M %p",
   );
+
+  // api
+
+  const updateDescription = useCallback(() => {
+    if (!search) {
+      return;
+    }
+
+    axios
+      .post(`events/${search.id}/description`, { description: desc })
+      .then((resp) => {
+        if (resp.status == 200) {
+          toast.success("Successfully saved description", {
+            position: "top-center",
+          });
+        }
+      })
+      .catch(() => {
+        toast.error("Failed to update the description", {
+          position: "top-center",
+        });
+        setDesc(search.description);
+      });
+  }, [desc, search]);
 
   // content
 
@@ -111,7 +140,9 @@ export default function SearchDetailDialog({
                 onChange={(e) => setDesc(e.target.value)}
               />
               <div className="flex w-full flex-row justify-end">
-                <Button variant="select">Save</Button>
+                <Button variant="select" onClick={updateDescription}>
+                  Save
+                </Button>
               </div>
             </div>
           </div>
