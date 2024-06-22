@@ -15,9 +15,10 @@ import MobileReviewSettingsDrawer, {
 } from "../overlay/MobileReviewSettingsDrawer";
 import FilterSwitch from "./FilterSwitch";
 import { FilterList } from "@/types/filter";
-import CalendarFilterButton from "./CalendarFilterButton";
+import { CalendarRangeFilterButton } from "./CalendarFilterButton";
 import { CamerasFilterButton } from "./CamerasFilterButton";
 import { SearchFilter } from "@/types/search";
+import { DateRange } from "react-day-picker";
 
 const SEARCH_FILTERS = ["cameras", "date", "general"] as const;
 type SearchFilters = (typeof SEARCH_FILTERS)[number];
@@ -132,12 +133,14 @@ export default function SearchFilterGroup({
 
   // handle updating filters
 
-  const onUpdateSelectedDay = useCallback(
-    (day?: Date) => {
+  const onUpdateSelectedRange = useCallback(
+    (range?: DateRange) => {
       onUpdateFilter({
         ...filter,
-        after: day == undefined ? undefined : day.getTime() / 1000,
-        before: day == undefined ? undefined : getEndOfDayTimestamp(day),
+        after:
+          range?.from == undefined ? undefined : range.from.getTime() / 1000,
+        before:
+          range?.to == undefined ? undefined : getEndOfDayTimestamp(range.to),
       });
     },
     [filter, onUpdateFilter],
@@ -156,14 +159,17 @@ export default function SearchFilterGroup({
         />
       )}
       {isDesktop && filters.includes("date") && (
-        <CalendarFilterButton
-          day={
-            filter?.after == undefined
+        <CalendarRangeFilterButton
+          range={
+            filter?.after == undefined || filter?.before == undefined
               ? undefined
-              : new Date(filter.after * 1000)
+              : {
+                  from: new Date(filter.after * 1000),
+                  to: new Date(filter.before * 1000),
+                }
           }
           defaultText="All Dates"
-          updateSelectedDay={onUpdateSelectedDay}
+          updateSelectedRange={onUpdateSelectedRange}
         />
       )}
       {isDesktop && filters.includes("general") && (
