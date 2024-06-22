@@ -18,6 +18,7 @@ type SearchViewProps = {
   allPreviews?: Preview[];
   isLoading: boolean;
   setSearch: (search: string) => void;
+  setSimilaritySearch: (search: SearchResult) => void;
   onUpdateFilter: (filter: SearchFilter) => void;
   onOpenSearch: (item: SearchResult) => void;
 };
@@ -29,6 +30,7 @@ export default function SearchView({
   allPreviews,
   isLoading,
   setSearch,
+  setSimilaritySearch,
   onUpdateFilter,
   onOpenSearch,
 }: SearchViewProps) {
@@ -52,7 +54,13 @@ export default function SearchView({
   return (
     <div className="flex size-full flex-col pt-2 md:py-2">
       <Toaster closeButton={true} />
-      <SearchDetailDialog search={searchDetail} setSearch={setSearchDetail} />
+      <SearchDetailDialog
+        search={searchDetail}
+        setSearch={setSearchDetail}
+        setSimilarity={
+          searchDetail && (() => setSimilaritySearch(searchDetail))
+        }
+      />
 
       <div className="relative mb-2 flex h-11 items-center justify-between pl-2 pr-2 md:pl-3">
         <Input

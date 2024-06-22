@@ -16,10 +16,12 @@ import { toast } from "sonner";
 type SearchDetailDialogProps = {
   search?: SearchResult;
   setSearch: (search: SearchResult | undefined) => void;
+  setSimilarity?: () => void;
 };
 export default function SearchDetailDialog({
   search,
   setSearch,
+  setSimilarity,
 }: SearchDetailDialogProps) {
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
@@ -31,6 +33,7 @@ export default function SearchDetailDialog({
 
   const [desc, setDesc] = useState(search?.description);
 
+  // we have to make sure the current selected search item stays in sync
   useEffect(() => setDesc(search?.description), [search]);
 
   const formattedDate = useFormattedTimestamp(
@@ -129,7 +132,17 @@ export default function SearchDetailDialog({
                       : `${apiHost}api/events/${search.id}/thumbnail.jpg`
                   }
                 />
-                <Button>Find Similar</Button>
+                <Button
+                  onClick={() => {
+                    setSearch(undefined);
+
+                    if (setSimilarity) {
+                      setSimilarity();
+                    }
+                  }}
+                >
+                  Find Similar
+                </Button>
               </div>
             </div>
             <div className="flex flex-col gap-1.5">

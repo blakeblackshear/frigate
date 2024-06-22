@@ -38,7 +38,13 @@ export default function Search() {
 
   // search api
 
+  const [similaritySearch, setSimilaritySearch] = useState<SearchResult>();
+
   useEffect(() => {
+    if (similaritySearch) {
+      setSimilaritySearch(undefined);
+    }
+
     if (searchTimeout) {
       clearTimeout(searchTimeout);
     }
@@ -53,22 +59,43 @@ export default function Search() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
-  const { data: searchResults, isLoading } = useSWR<SearchResult[]>(
-    searchTerm.length > 0
-      ? [
-          "events/search",
-          {
-            query: searchTerm,
-            cameras: searchSearchParams["cameras"],
-            labels: searchSearchParams["labels"],
-            zones: searchSearchParams["zones"],
-            before: searchSearchParams["before"],
-            after: searchSearchParams["after"],
-            include_thumbnails: 0,
-          },
-        ]
-      : null,
-  );
+  const searchQuery = useMemo(() => {
+    if (searchTerm.length == 0) {
+      return null;
+    }
+
+    if (similaritySearch) {
+      return [
+        "events/search",
+        {
+          query: similaritySearch.id,
+          cameras: searchSearchParams["cameras"],
+          labels: searchSearchParams["labels"],
+          zones: searchSearchParams["zones"],
+          before: searchSearchParams["before"],
+          after: searchSearchParams["after"],
+          include_thumbnails: 0,
+          search_type: "thumbnail",
+        },
+      ];
+    }
+
+    return [
+      "events/search",
+      {
+        query: searchTerm,
+        cameras: searchSearchParams["cameras"],
+        labels: searchSearchParams["labels"],
+        zones: searchSearchParams["zones"],
+        before: searchSearchParams["before"],
+        after: searchSearchParams["after"],
+        include_thumbnails: 0,
+      },
+    ];
+  }, [searchTerm, searchSearchParams, similaritySearch]);
+
+  const { data: searchResults, isLoading } =
+    useSWR<SearchResult[]>(searchQuery);
 
   const previewTimeRange = useMemo<TimeRange>(() => {
     if (!searchResults) {
@@ -164,6 +191,7 @@ export default function Search() {
         allPreviews={allPreviews}
         isLoading={isLoading}
         setSearch={setSearch}
+        setSimilaritySearch={setSimilaritySearch}
         onUpdateFilter={onUpdateFilter}
         onOpenSearch={onOpenSearch}
       />
