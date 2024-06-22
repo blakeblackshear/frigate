@@ -3,8 +3,9 @@ import ActivityIndicator from "@/components/indicators/activity-indicator";
 import SearchThumbnailPlayer from "@/components/player/SearchThumbnailPlayer";
 import { Input } from "@/components/ui/input";
 import { Toaster } from "@/components/ui/sonner";
-import { SearchResult } from "@/types/search";
-import { useEffect, useState } from "react";
+import useApiFilter from "@/hooks/use-api-filter";
+import { SearchFilter, SearchResult } from "@/types/search";
+import { useCallback, useEffect, useState } from "react";
 import { LuSearchCheck, LuSearchX } from "react-icons/lu";
 import useSWR from "swr";
 
@@ -14,6 +15,18 @@ export default function Search() {
   const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout>();
   const [search, setSearch] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+
+  // search filter
+
+  const [searchFilter, setSearchFilter, searchSearchParams] =
+    useApiFilter<SearchFilter>();
+
+  const onUpdateFilter = useCallback(
+    (newFilter: SearchFilter) => {
+      setSearchFilter(newFilter);
+    },
+    [setSearchFilter],
+  );
 
   // search api
 
@@ -33,7 +46,19 @@ export default function Search() {
   }, [search]);
 
   const { data: searchResults, isLoading } = useSWR<SearchResult[]>(
-    searchTerm.length > 0 ? ["events/search", { query: searchTerm }] : null,
+    searchTerm.length > 0
+      ? [
+          "events/search",
+          {
+            query: searchTerm,
+            cameras: searchSearchParams["cameras"],
+            labels: searchSearchParams["labels"],
+            zones: searchSearchParams["zones"],
+            before: searchSearchParams["before"],
+            after: searchSearchParams["after"],
+          },
+        ]
+      : null,
   );
 
   return (
@@ -48,7 +73,10 @@ export default function Search() {
           onChange={(e) => setSearch(e.target.value)}
         />
 
-        <SearchFilterGroup onUpdateFilter={() => {}} />
+        <SearchFilterGroup
+          filter={searchFilter}
+          onUpdateFilter={onUpdateFilter}
+        />
       </div>
 
       <div className="no-scrollbar flex flex-1 flex-wrap content-start gap-2 overflow-y-auto md:gap-4">

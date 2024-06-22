@@ -10,3 +10,11 @@ export type SearchResult = {
   thumb_path?: string;
   zones: string[];
 };
+
+export type SearchFilter = {
+  cameras?: string[];
+  labels?: string[];
+  zones?: string[];
+  before?: number;
+  after?: number;
+};
