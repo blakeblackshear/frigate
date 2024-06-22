@@ -4,7 +4,6 @@ import SearchDetailDialog from "@/components/overlay/SearchDetailDialog";
 import SearchThumbnailPlayer from "@/components/player/SearchThumbnailPlayer";
 import { Input } from "@/components/ui/input";
 import { Toaster } from "@/components/ui/sonner";
-import { cn } from "@/lib/utils";
 import { Preview } from "@/types/preview";
 import { SearchFilter, SearchResult } from "@/types/search";
 import { useCallback, useState } from "react";
@@ -64,7 +63,7 @@ export default function SearchView({
 
       <div className="relative mb-2 flex h-11 items-center justify-between pl-2 pr-2 md:pl-3">
         <Input
-          className={cn("mr-2 w-full bg-muted md:mr-0 md:w-1/3")}
+          className={"text-md mr-2 w-full bg-muted md:mr-0 md:w-1/3"}
           placeholder="Search for a specific detection..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
