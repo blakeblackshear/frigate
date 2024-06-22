@@ -18,6 +18,7 @@ import { VideoPreview } from "../preview/ScrubbablePreview";
 import { Preview } from "@/types/preview";
 import { SearchResult } from "@/types/search";
 import { LuInfo } from "react-icons/lu";
+import useContextMenu from "@/hooks/use-contextmenu";
 
 type SearchPlayerProps = {
   searchResult: SearchResult;
@@ -52,6 +53,10 @@ export default function SearchThumbnailPlayer({
     onSwipedLeft: () => setPlayback(false),
     onSwipedRight: () => setPlayback(true),
     preventScrollOnSwipe: true,
+  });
+
+  useContextMenu(imgRef, () => {
+    onClick(searchResult, true);
   });
 
   // playback
