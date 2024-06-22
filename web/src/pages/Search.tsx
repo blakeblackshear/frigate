@@ -1,23 +1,28 @@
-import SearchFilterGroup from "@/components/filter/SearchFilterGroup";
-import ActivityIndicator from "@/components/indicators/activity-indicator";
-import SearchThumbnailPlayer from "@/components/player/SearchThumbnailPlayer";
-import { Input } from "@/components/ui/input";
-import { Toaster } from "@/components/ui/sonner";
 import useApiFilter from "@/hooks/use-api-filter";
 import { useCameraPreviews } from "@/hooks/use-camera-previews";
-import { cn } from "@/lib/utils";
+import { useOverlayState } from "@/hooks/use-overlay-state";
+import { FrigateConfig } from "@/types/frigateConfig";
+import { RecordingStartingPoint } from "@/types/record";
 import { SearchFilter, SearchResult } from "@/types/search";
 import { TimeRange } from "@/types/timeline";
+import { RecordingView } from "@/views/recording/RecordingView";
+import SearchView from "@/views/search/SearchView";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { LuSearchCheck, LuSearchX } from "react-icons/lu";
 import useSWR from "swr";
 
 export default function Search() {
+  const { data: config } = useSWR<FrigateConfig>("config", {
+    revalidateOnFocus: false,
+  });
+
   // search field handler
 
   const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout>();
   const [search, setSearch] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+
+  const [recording, setRecording] =
+    useOverlayState<RecordingStartingPoint>("recording");
 
   // search filter
 
@@ -82,72 +87,90 @@ export default function Search() {
     autoRefresh: false,
   });
 
-  return (
-    <div className="flex size-full flex-col pt-2 md:py-2">
-      <Toaster closeButton={true} />
+  // selection
 
-      <div className="relative mb-2 flex h-11 items-center justify-between pl-2 pr-2 md:pl-3">
-        <Input
-          className={cn("mr-2 w-full bg-muted md:mr-0 md:w-1/3")}
-          placeholder="Search for a specific detection..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-
-        <SearchFilterGroup
-          filter={searchFilter}
-          onUpdateFilter={onUpdateFilter}
-        />
-      </div>
-
-      <div className="no-scrollbar flex flex-1 flex-wrap content-start gap-2 overflow-y-auto md:gap-4">
-        {searchTerm.length == 0 && (
-          <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
-            <LuSearchCheck className="size-16" />
-            Search For Detections
-          </div>
-        )}
-
-        {searchTerm.length > 0 && searchResults?.length == 0 && (
-          <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
-            <LuSearchX className="size-16" />
-            No Detections Found
-          </div>
-        )}
-
-        {isLoading && (
-          <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
-        )}
-
-        <div className="grid w-full gap-2 px-1 sm:grid-cols-2 md:mx-2 md:grid-cols-3 md:gap-4 3xl:grid-cols-4">
-          {searchResults &&
-            searchResults.map((value) => {
-              const selected = false;
-
-              return (
-                <div
-                  key={value.id}
-                  data-start={value.start_time}
-                  className="review-item relative rounded-lg"
-                >
-                  <div className="aspect-video overflow-hidden rounded-lg">
-                    <SearchThumbnailPlayer
-                      searchResult={value}
-                      allPreviews={allPreviews}
-                      scrollLock={false}
-                      onClick={() => {}}
-                      //onTimeUpdate={onPreviewTimeUpdate}
-                      //onClick={onSelectReview}
-                    />
-                  </div>
-                  <div
-                    className={`review-item-ring pointer-events-none absolute inset-0 z-10 size-full rounded-lg outline outline-[3px] -outline-offset-[2.8px] ${selected ? `shadow-severity_alert outline-severity_alert` : "outline-transparent duration-500"}`}
-                  />
-                </div>
-              );
-            })}
-        </div>
-      </div>
-    </div>
+  const onSelectSearch = useCallback(
+    (item: SearchResult, detail: boolean) => {
+      if (detail) {
+        // TODO open detail
+      } else {
+        setRecording({
+          camera: item.camera,
+          startTime: item.start_time,
+          severity: "alert",
+        });
+      }
+    },
+    [setRecording],
   );
+
+  const selectedReviewData = useMemo(() => {
+    if (!recording) {
+      return undefined;
+    }
+
+    if (!config) {
+      return undefined;
+    }
+
+    if (!searchResults) {
+      return undefined;
+    }
+
+    const allCameras = searchFilter?.cameras ?? Object.keys(config.cameras);
+
+    return {
+      camera: recording.camera,
+      start_time: recording.startTime,
+      allCameras: allCameras,
+    };
+
+    // previews will not update after item is selected
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recording, searchResults]);
+
+  const selectedTimeRange = useMemo(() => {
+    if (!recording) {
+      return undefined;
+    }
+
+    const time = new Date(recording.startTime * 1000);
+    time.setUTCMinutes(0, 0, 0);
+    const start = time.getTime() / 1000;
+    time.setHours(time.getHours() + 2);
+    const end = time.getTime() / 1000;
+    return {
+      after: start,
+      before: end,
+    };
+  }, [recording]);
+
+  if (recording) {
+    if (selectedReviewData && selectedTimeRange) {
+      return (
+        <RecordingView
+          startCamera={selectedReviewData.camera}
+          startTime={selectedReviewData.start_time}
+          allCameras={selectedReviewData.allCameras}
+          allPreviews={allPreviews}
+          timeRange={selectedTimeRange}
+          updateFilter={onUpdateFilter}
+        />
+      );
+    }
+  } else {
+    return (
+      <SearchView
+        search={search}
+        searchTerm={searchTerm}
+        searchFilter={searchFilter}
+        searchResults={searchResults}
+        allPreviews={allPreviews}
+        isLoading={isLoading}
+        setSearch={setSearch}
+        onUpdateFilter={onUpdateFilter}
+        onSelectItem={onSelectSearch}
+      />
+    );
+  }
 }
