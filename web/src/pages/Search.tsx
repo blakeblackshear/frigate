@@ -1,10 +1,11 @@
 import SearchFilterGroup from "@/components/filter/SearchFilterGroup";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 import SearchThumbnailPlayer from "@/components/player/SearchThumbnailPlayer";
 import { Input } from "@/components/ui/input";
 import { Toaster } from "@/components/ui/sonner";
 import { SearchResult } from "@/types/search";
 import { useEffect, useState } from "react";
-import { LuSearchCheck } from "react-icons/lu";
+import { LuSearchCheck, LuSearchX } from "react-icons/lu";
 import useSWR from "swr";
 
 export default function Search() {
@@ -27,9 +28,11 @@ export default function Search() {
         setSearchTerm(search);
       }, 500),
     );
+    // we only want to update the searchTerm when search changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
-  const { data: searchResults } = useSWR<SearchResult[]>(
+  const { data: searchResults, isLoading } = useSWR<SearchResult[]>(
     searchTerm.length > 0 ? ["events/search", { query: searchTerm }] : null,
   );
 
@@ -49,39 +52,52 @@ export default function Search() {
       </div>
 
       <div className="no-scrollbar flex flex-1 flex-wrap content-start gap-2 overflow-y-auto md:gap-4">
-        {searchTerm == "" && (
+        {searchTerm.length == 0 && (
           <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
             <LuSearchCheck className="size-16" />
             Search For Detections
           </div>
         )}
 
-        {searchResults &&
-          searchResults.map((value) => {
-            const selected = false;
+        {searchTerm.length > 0 && searchResults?.length == 0 && (
+          <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
+            <LuSearchX className="size-16" />
+            No Detections Found
+          </div>
+        )}
 
-            return (
-              <div
-                key={value.id}
-                data-start={value.start_time}
-                className="review-item relative rounded-lg"
-              >
-                <div className="aspect-video overflow-hidden rounded-lg">
-                  <SearchThumbnailPlayer
-                    searchResult={value}
-                    allPreviews={[]}
-                    scrollLock={false}
-                    onClick={() => {}}
-                    //onTimeUpdate={onPreviewTimeUpdate}
-                    //onClick={onSelectReview}
+        {isLoading && (
+          <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+        )}
+
+        <div className="grid w-full gap-2 px-1 sm:grid-cols-2 md:mx-2 md:grid-cols-3 md:gap-4 3xl:grid-cols-4">
+          {searchResults &&
+            searchResults.map((value) => {
+              const selected = false;
+
+              return (
+                <div
+                  key={value.id}
+                  data-start={value.start_time}
+                  className="review-item relative rounded-lg"
+                >
+                  <div className="aspect-video overflow-hidden rounded-lg">
+                    <SearchThumbnailPlayer
+                      searchResult={value}
+                      allPreviews={[]}
+                      scrollLock={false}
+                      onClick={() => {}}
+                      //onTimeUpdate={onPreviewTimeUpdate}
+                      //onClick={onSelectReview}
+                    />
+                  </div>
+                  <div
+                    className={`review-item-ring pointer-events-none absolute inset-0 z-10 size-full rounded-lg outline outline-[3px] -outline-offset-[2.8px] ${selected ? `shadow-severity_alert outline-severity_alert` : "outline-transparent duration-500"}`}
                   />
                 </div>
-                <div
-                  className={`review-item-ring pointer-events-none absolute inset-0 z-10 size-full rounded-lg outline outline-[3px] -outline-offset-[2.8px] ${selected ? `shadow-severity_alert outline-severity_alert` : "outline-transparent duration-500"}`}
-                />
-              </div>
-            );
-          })}
+              );
+            })}
+        </div>
       </div>
     </div>
   );
