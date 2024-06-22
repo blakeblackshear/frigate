@@ -256,7 +256,7 @@ def events_search():
     query = request.args.get("query", type=str)
     search_type = request.args.get("search_type", "text", type=str)
     include_thumbnails = request.args.get("include_thumbnails", default=1, type=int)
-    limit = request.args.get("limit", 100, type=int)
+    limit = request.args.get("limit", 50, type=int)
 
     # Filters
     cameras = request.args.get("cameras", "all", type=str)
@@ -356,7 +356,7 @@ def events_search():
         img = np.array(Image.open(io.BytesIO(thumbnail)).convert("RGB"))
         thumb_result = context.embeddings.thumbnail.query(
             query_images=[img],
-            n_results=int(limit),
+            n_results=limit,
             where=where,
         )
         thumb_ids = dict(zip(thumb_result["ids"][0], thumb_result["distances"][0]))
