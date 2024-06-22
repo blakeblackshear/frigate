@@ -7,7 +7,6 @@ import { useFrigateStats } from "@/api/ws";
 import { useContext, useEffect, useMemo } from "react";
 import useStats from "@/hooks/use-stats";
 import GeneralSettings from "../menu/GeneralSettings";
-import AccountSettings from "../menu/AccountSettings";
 import useNavigation from "@/hooks/use-navigation";
 import {
   StatusBarMessagesContext,
