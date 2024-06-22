@@ -54,10 +54,6 @@ def manage_embeddings(config: FrigateConfig) -> None:
     models = [Event]
     db.bind(models)
 
-    # Hotsawp the sqlite3 module for Chroma compatibility
-    __import__("pysqlite3")
-    sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
-
     embeddings = Embeddings()
 
     # Check if we need to re-index events
