@@ -4,8 +4,11 @@ import SearchThumbnailPlayer from "@/components/player/SearchThumbnailPlayer";
 import { Input } from "@/components/ui/input";
 import { Toaster } from "@/components/ui/sonner";
 import useApiFilter from "@/hooks/use-api-filter";
+import { useCameraPreviews } from "@/hooks/use-camera-previews";
+import { cn } from "@/lib/utils";
 import { SearchFilter, SearchResult } from "@/types/search";
-import { useCallback, useEffect, useState } from "react";
+import { TimeRange } from "@/types/timeline";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { LuSearchCheck, LuSearchX } from "react-icons/lu";
 import useSWR from "swr";
 
@@ -62,13 +65,30 @@ export default function Search() {
       : null,
   );
 
+  const previewTimeRange = useMemo<TimeRange>(() => {
+    if (!searchResults) {
+      return { after: 0, before: 0 };
+    }
+
+    return {
+      after: Math.min(...searchResults.map((res) => res.start_time)),
+      before: Math.max(
+        ...searchResults.map((res) => res.end_time ?? Date.now() / 1000),
+      ),
+    };
+  }, [searchResults]);
+
+  const allPreviews = useCameraPreviews(previewTimeRange, {
+    autoRefresh: false,
+  });
+
   return (
     <div className="flex size-full flex-col pt-2 md:py-2">
       <Toaster closeButton={true} />
 
       <div className="relative mb-2 flex h-11 items-center justify-between pl-2 pr-2 md:pl-3">
         <Input
-          className="w-full bg-muted md:w-1/3"
+          className={cn("mr-2 w-full bg-muted md:mr-0 md:w-1/3")}
           placeholder="Search for a specific detection..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -113,7 +133,7 @@ export default function Search() {
                   <div className="aspect-video overflow-hidden rounded-lg">
                     <SearchThumbnailPlayer
                       searchResult={value}
-                      allPreviews={[]}
+                      allPreviews={allPreviews}
                       scrollLock={false}
                       onClick={() => {}}
                       //onTimeUpdate={onPreviewTimeUpdate}
