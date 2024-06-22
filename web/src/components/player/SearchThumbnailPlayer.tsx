@@ -193,7 +193,7 @@ export default function SearchThumbnailPlayer({
           src={
             searchResult.thumb_path
               ? `${apiHost}${searchResult.thumb_path.replace("/media/frigate/", "")}`
-              : ""
+              : `${apiHost}api/events/${searchResult.id}/thumbnail.jpg`
           }
           loading={isSafari ? "eager" : "lazy"}
           onLoad={() => {

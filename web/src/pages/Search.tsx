@@ -56,6 +56,7 @@ export default function Search() {
             zones: searchSearchParams["zones"],
             before: searchSearchParams["before"],
             after: searchSearchParams["after"],
+            include_thumbnails: 0,
           },
         ]
       : null,
