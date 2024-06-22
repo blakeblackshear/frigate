@@ -35,7 +35,6 @@ function Bottombar() {
         <NavItem key={item.id} className="p-2" item={item} Icon={item.icon} />
       ))}
       <GeneralSettings className="p-2" />
-      <AccountSettings className="p-2" />
       <StatusAlertNav className="p-2" />
     </div>
   );
