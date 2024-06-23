@@ -37,8 +37,7 @@ from frigate.const import (
     MODEL_CACHE_DIR,
     RECORD_DIR,
 )
-from frigate.embeddings import manage_embeddings
-from frigate.embeddings.embeddings import Embeddings
+from frigate.embeddings import EmbeddingsContext, manage_embeddings
 from frigate.events.audio import listen_to_audio
 from frigate.events.cleanup import EventCleanup
 from frigate.events.external import ExternalEventProcessor
@@ -322,7 +321,7 @@ class FrigateApp:
 
     def init_embeddings_manager(self) -> None:
         # Create a client for other processes to use
-        self.embeddings = Embeddings()
+        self.embeddings = EmbeddingsContext()
         embedding_process = mp.Process(
             target=manage_embeddings,
             name="embeddings_manager",
@@ -384,6 +383,7 @@ class FrigateApp:
         self.flask_app = create_app(
             self.config,
             self.db,
+            self.embeddings,
             self.detected_frames_processor,
             self.storage_maintainer,
             self.onvif_controller,
@@ -810,6 +810,9 @@ class FrigateApp:
         self.stats_emitter.join()
         self.frigate_watchdog.join()
         self.db.stop()
+
+        # Save embeddings stats to disk
+        self.embeddings.save_stats()
 
         # Stop Communicators
         self.inter_process_communicator.stop()

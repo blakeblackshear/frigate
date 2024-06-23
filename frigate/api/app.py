@@ -23,6 +23,7 @@ from frigate.api.preview import PreviewBp
 from frigate.api.review import ReviewBp
 from frigate.config import FrigateConfig
 from frigate.const import CONFIG_DIR
+from frigate.embeddings import EmbeddingsContext
 from frigate.events.external import ExternalEventProcessor
 from frigate.models import Event, Timeline
 from frigate.plus import PlusApi
@@ -52,6 +53,7 @@ bp.register_blueprint(AuthBp)
 def create_app(
     frigate_config,
     database: SqliteQueueDatabase,
+    embeddings: EmbeddingsContext,
     detected_frames_processor,
     storage_maintainer: StorageMaintainer,
     onvif: OnvifController,
@@ -79,6 +81,7 @@ def create_app(
             database.close()
 
     app.frigate_config = frigate_config
+    app.embeddings = embeddings
     app.detected_frames_processor = detected_frames_processor
     app.storage_maintainer = storage_maintainer
     app.onvif = onvif
