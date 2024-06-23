@@ -15,7 +15,7 @@ import {
   SegmentedReviewData,
 } from "@/types/review";
 import EventView from "@/views/events/EventView";
-import { RecordingView } from "@/views/events/RecordingView";
+import { RecordingView } from "@/views/recording/RecordingView";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";

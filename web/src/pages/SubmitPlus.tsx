@@ -1,8 +1,6 @@
 import { baseUrl } from "@/api/baseUrl";
-import {
-  CamerasFilterButton,
-  GeneralFilterContent,
-} from "@/components/filter/ReviewFilterGroup";
+import { CamerasFilterButton } from "@/components/filter/CamerasFilterButton";
+import { GeneralFilterContent } from "@/components/filter/ReviewFilterGroup";
 import Chip from "@/components/indicators/Chip";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { Button } from "@/components/ui/button";

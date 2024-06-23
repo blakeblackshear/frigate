@@ -39,7 +39,13 @@ export default function Chip({
           className,
           !isIOS && "z-10",
         )}
-        onClick={onClick}
+        onClick={(e) => {
+          e.stopPropagation();
+
+          if (onClick) {
+            onClick();
+          }
+        }}
       >
         {children}
       </div>
