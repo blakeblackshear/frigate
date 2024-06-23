@@ -8,10 +8,10 @@ import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import { getIconForLabel } from "@/utils/iconUtil";
 import { useApiHost } from "@/api";
 import { Button } from "../ui/button";
-import { Input } from "../ui/input";
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
+import { Textarea } from "../ui/textarea";
 
 type SearchDetailDialogProps = {
   search?: SearchResult;
@@ -147,7 +147,8 @@ export default function SearchDetailDialog({
             </div>
             <div className="flex flex-col gap-1.5">
               <div className="text-sm text-primary/40">Description</div>
-              <Input
+              <Textarea
+                className="md:h-64"
                 placeholder="Description of the event"
                 value={desc}
                 onChange={(e) => setDesc(e.target.value)}
