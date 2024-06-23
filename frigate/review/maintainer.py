@@ -213,7 +213,11 @@ class ReviewSegmentMaintainer(threading.Thread):
             ),
         )
 
-    def end_segment(self, segment: PendingReviewSegment) -> None:
+    def end_segment(
+        self,
+        segment: PendingReviewSegment,
+        prev_data: dict[str, any],
+    ) -> None:
         """End segment."""
         final_data = segment.get_data(ended=True)
         self.requestor.send_data(UPSERT_REVIEW_SEGMENT, final_data)
@@ -223,7 +227,7 @@ class ReviewSegmentMaintainer(threading.Thread):
             json.dumps(
                 {
                     "type": "end",
-                    "before": end_data,
+                    "before": prev_data,
                     "after": end_data,
                 }
             ),
@@ -309,9 +313,9 @@ class ReviewSegmentMaintainer(threading.Thread):
             if segment.severity == SeverityEnum.alert and frame_time > (
                 segment.last_update + THRESHOLD_ALERT_ACTIVITY
             ):
-                self.end_segment(segment)
+                self.end_segment(segment, prev_data)
             elif frame_time > (segment.last_update + THRESHOLD_DETECTION_ACTIVITY):
-                self.end_segment(segment)
+                self.end_segment(segment, prev_data)
 
     def check_if_new_segment(
         self,
