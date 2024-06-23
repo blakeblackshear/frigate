@@ -4,9 +4,17 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { NavData } from "@/types/navigation";
 import { useMemo } from "react";
 import { FaCompactDisc, FaVideo } from "react-icons/fa";
+import { IoSearch } from "react-icons/io5";
 import { LuConstruction } from "react-icons/lu";
 import { MdVideoLibrary } from "react-icons/md";
 import useSWR from "swr";
+
+export const ID_LIVE = 1;
+export const ID_REVIEW = 2;
+export const ID_SEARCH = 3;
+export const ID_EXPORT = 4;
+export const ID_PLUS = 5;
+export const ID_PLAYGROUND = 6;
 
 export default function useNavigation(
   variant: "primary" | "secondary" = "primary",
@@ -17,28 +25,36 @@ export default function useNavigation(
     () =>
       [
         {
-          id: 1,
+          id: ID_LIVE,
           variant,
           icon: FaVideo,
           title: "Live",
           url: "/",
         },
         {
-          id: 2,
+          id: ID_REVIEW,
           variant,
           icon: MdVideoLibrary,
           title: "Review",
           url: "/review",
         },
         {
-          id: 3,
+          id: ID_SEARCH,
+          variant,
+          icon: IoSearch,
+          title: "Search",
+          url: "/search",
+          enabled: config?.semantic_search?.enabled,
+        },
+        {
+          id: ID_EXPORT,
           variant,
           icon: FaCompactDisc,
           title: "Export",
           url: "/export",
         },
         {
-          id: 5,
+          id: ID_PLUS,
           variant,
           icon: Logo,
           title: "Frigate+",
@@ -46,7 +62,7 @@ export default function useNavigation(
           enabled: config?.plus?.enabled == true,
         },
         {
-          id: 4,
+          id: ID_PLAYGROUND,
           variant,
           icon: LuConstruction,
           title: "UI Playground",
@@ -54,6 +70,6 @@ export default function useNavigation(
           enabled: ENV !== "production",
         },
       ] as NavData[],
-    [config?.plus.enabled, variant],
+    [config?.plus.enabled, config?.semantic_search.enabled, variant],
   );
 }
