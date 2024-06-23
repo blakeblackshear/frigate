@@ -201,7 +201,6 @@ class ReviewSegmentMaintainer(threading.Thread):
             segment.update_frame(camera_config, frame, objects)
 
         new_data = segment.get_data(ended=False)
-        logger.error(f"comparing prev {prev_data} to new {new_data}")
         self.requestor.send_data(UPSERT_REVIEW_SEGMENT, new_data)
         self.requestor.send_data(
             "reviews",
