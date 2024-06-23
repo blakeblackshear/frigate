@@ -3,19 +3,32 @@
 import base64
 import io
 import logging
+import sys
 import time
 
 import numpy as np
-from chromadb import Collection
-from chromadb import HttpClient as ChromaClient
-from chromadb.config import Settings
 from PIL import Image
 from playhouse.shortcuts import model_to_dict
 
 from frigate.models import Event
 
-from .functions.clip import ClipEmbedding
-from .functions.minilm_l6_v2 import MiniLMEmbedding
+# Hotsawp the sqlite3 module for Chroma compatibility
+try:
+    from chromadb import Collection
+    from chromadb import HttpClient as ChromaClient
+    from chromadb.config import Settings
+
+    from .functions.clip import ClipEmbedding
+    from .functions.minilm_l6_v2 import MiniLMEmbedding
+except RuntimeError:
+    __import__("pysqlite3")
+    sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
+    from chromadb import Collection
+    from chromadb import HttpClient as ChromaClient
+    from chromadb.config import Settings
+
+    from .functions.clip import ClipEmbedding
+    from .functions.minilm_l6_v2 import MiniLMEmbedding
 
 logger = logging.getLogger(__name__)
 
