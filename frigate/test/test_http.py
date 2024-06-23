@@ -120,6 +120,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
             PlusApi(),
             None,
         )
@@ -156,6 +157,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
             PlusApi(),
             None,
         )
@@ -177,6 +179,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
             PlusApi(),
             None,
         )
@@ -193,6 +196,7 @@ class TestHttp(unittest.TestCase):
         app = create_app(
             FrigateConfig(**self.minimal_config),
             self.db,
+            None,
             None,
             None,
             None,
@@ -219,6 +223,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
             PlusApi(),
             None,
         )
@@ -241,6 +246,7 @@ class TestHttp(unittest.TestCase):
         app = create_app(
             FrigateConfig(**self.minimal_config),
             self.db,
+            None,
             None,
             None,
             None,
@@ -283,6 +289,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
             PlusApi(),
             None,
         )
@@ -318,6 +325,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
             PlusApi(),
             None,
         )
@@ -343,6 +351,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
             PlusApi(),
             None,
         )
@@ -356,6 +365,7 @@ class TestHttp(unittest.TestCase):
         app = create_app(
             FrigateConfig(**self.minimal_config).runtime_config(),
             self.db,
+            None,
             None,
             None,
             None,
@@ -377,6 +387,7 @@ class TestHttp(unittest.TestCase):
         app = create_app(
             FrigateConfig(**self.minimal_config).runtime_config(),
             self.db,
+            None,
             None,
             None,
             None,
