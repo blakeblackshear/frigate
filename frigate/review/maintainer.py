@@ -221,14 +221,13 @@ class ReviewSegmentMaintainer(threading.Thread):
         """End segment."""
         final_data = segment.get_data(ended=True)
         self.requestor.send_data(UPSERT_REVIEW_SEGMENT, final_data)
-        end_data = {k.name: v for k, v in final_data.items()}
         self.requestor.send_data(
             "reviews",
             json.dumps(
                 {
                     "type": "end",
-                    "before": prev_data,
-                    "after": end_data,
+                    "before": {k.name: v for k, v in prev_data.items()},
+                    "after": {k.name: v for k, v in final_data.items()},
                 }
             ),
         )
