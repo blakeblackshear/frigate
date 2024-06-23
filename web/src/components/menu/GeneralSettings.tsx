@@ -3,6 +3,7 @@ import {
   LuGithub,
   LuLifeBuoy,
   LuList,
+  LuLogOut,
   LuMoon,
   LuPenSquare,
   LuRotateCw,
@@ -56,7 +57,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import ActivityIndicator from "../indicators/activity-indicator";
-import { isDesktop } from "react-device-detect";
+import { isDesktop, isMobile } from "react-device-detect";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import {
   Dialog,
@@ -68,11 +69,18 @@ import {
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { cn } from "@/lib/utils";
 import { baseUrl } from "@/api/baseUrl";
+import useSWR from "swr";
 
 type GeneralSettingsProps = {
   className?: string;
 };
 export default function GeneralSettings({ className }: GeneralSettingsProps) {
+  const { data: profile } = useSWR("profile");
+  const { data: config } = useSWR("config");
+  const logoutUrl = config?.proxy?.logout_url || "/api/logout";
+
+  // settings
+
   const { theme, colorScheme, setTheme, setColorScheme } = useTheme();
   const [restartDialogOpen, setRestartDialogOpen] = useState(false);
   const [restartingSheetOpen, setRestartingSheetOpen] = useState(false);
@@ -154,6 +162,28 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
           }
         >
           <div className="scrollbar-container w-full flex-col overflow-y-auto overflow-x-hidden">
+            {isMobile && (
+              <>
+                <DropdownMenuLabel>
+                  Current User: {profile?.username || "anonymous"}
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator
+                  className={isDesktop ? "mt-3" : "mt-1"}
+                />
+                <MenuItem
+                  className={
+                    isDesktop
+                      ? "cursor-pointer"
+                      : "flex items-center p-2 text-sm"
+                  }
+                >
+                  <a className="flex" href={logoutUrl}>
+                    <LuLogOut className="mr-2 size-4" />
+                    <span>Logout</span>
+                  </a>
+                </MenuItem>
+              </>
+            )}
             <DropdownMenuLabel>System</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup className={isDesktop ? "" : "flex flex-col"}>

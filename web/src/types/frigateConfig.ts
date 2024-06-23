@@ -398,6 +398,10 @@ export interface FrigateConfig {
     enabled: boolean;
   };
 
+  semantic_search: {
+    enabled: boolean;
+  }
+
   snapshots: {
     bounding_box: boolean;
     clean_copy: boolean;
