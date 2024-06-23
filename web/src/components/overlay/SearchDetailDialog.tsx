@@ -83,11 +83,11 @@ export default function SearchDetailDialog({
     >
       <Content
         className={
-          isDesktop ? "sm:max-w-xl" : "max-h-[75dvh] overflow-hidden p-2 py-4"
+          isDesktop ? "sm:max-w-xl" : "max-h-[75dvh] overflow-hidden p-2 pb-4"
         }
       >
         {search && (
-          <div className="flex size-full flex-col gap-5">
+          <div className="mt-3 flex size-full flex-col gap-5 md:mt-0">
             <div className="flex w-full flex-row">
               <div className="flex w-full flex-col gap-3">
                 <div className="flex flex-col gap-1.5">
