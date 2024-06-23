@@ -37,7 +37,13 @@ export default function Chip({
           "z-10 flex items-center rounded-2xl px-2 py-1.5",
           className,
         )}
-        onClick={onClick}
+        onClick={(e) => {
+          e.stopPropagation();
+
+          if (onClick) {
+            onClick();
+          }
+        }}
       >
         {children}
       </div>
