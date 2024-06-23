@@ -399,38 +399,37 @@ def events_search():
             else "description",
         }
 
-        # Get the event data
-        events = (
-            Event.select(*selected_columns)
-            .join(
-                ReviewSegment,
-                JOIN.LEFT_OUTER,
-                on=(
-                    fn.json_extract(ReviewSegment.data, "$.detections").contains(
-                        Event.id
-                    )
-                ),
-            )
-            .where(Event.id << list(results.keys()))
-            .dicts()
-            .iterator()
-        )
-        events = list(events)
+    if not results:
+        return jsonify([])
 
-        events = [
-            {k: v for k, v in event.items() if k != "data"}
-            | {
-                k: v
-                for k, v in event["data"].items()
-                if k in ["type", "score", "top_score", "description"]
-            }
-            | {
-                "search_distance": results[event["id"]]["distance"],
-                "search_source": results[event["id"]]["source"],
-            }
-            for event in events
-        ]
-        events = sorted(events, key=lambda x: x["search_distance"])[:limit]
+    # Get the event data
+    events = (
+        Event.select(*selected_columns)
+        .join(
+            ReviewSegment,
+            JOIN.LEFT_OUTER,
+            on=(fn.json_extract(ReviewSegment.data, "$.detections").contains(Event.id)),
+        )
+        .where(Event.id << list(results.keys()))
+        .dicts()
+        .iterator()
+    )
+    events = list(events)
+
+    events = [
+        {k: v for k, v in event.items() if k != "data"}
+        | {
+            k: v
+            for k, v in event["data"].items()
+            if k in ["type", "score", "top_score", "description"]
+        }
+        | {
+            "search_distance": results[event["id"]]["distance"],
+            "search_source": results[event["id"]]["source"],
+        }
+        for event in events
+    ]
+    events = sorted(events, key=lambda x: x["search_distance"])[:limit]
 
     return jsonify(events)
 
