@@ -112,6 +112,7 @@ export default function Search() {
 
   const allPreviews = useCameraPreviews(previewTimeRange, {
     autoRefresh: false,
+    fetchPreviews: searchResults != undefined,
   });
 
   // selection
