@@ -12,6 +12,21 @@ export function useFormattedTimestamp(timestamp: number, format: string) {
   return formattedTimestamp;
 }
 
+export function useFormattedRange(start: number, end: number, format: string) {
+  const formattedStart = useMemo(() => {
+    return formatUnixTimestampToDateTime(start, {
+      strftime_fmt: format,
+    });
+  }, [format, start]);
+  const formattedEnd = useMemo(() => {
+    return formatUnixTimestampToDateTime(end, {
+      strftime_fmt: format,
+    });
+  }, [format, end]);
+
+  return `${formattedStart} - ${formattedEnd}`;
+}
+
 export function useTimezone(config: FrigateConfig | undefined) {
   return useMemo(() => {
     if (!config) {
