@@ -12,6 +12,9 @@ from playhouse.shortcuts import model_to_dict
 
 from frigate.models import Event
 
+# Squelch posthog logging
+logging.getLogger("chromadb.telemetry.product.posthog").setLevel(logging.CRITICAL)
+
 # Hotsawp the sqlite3 module for Chroma compatibility
 try:
     from chromadb import Collection
@@ -91,45 +94,70 @@ class Embeddings:
         self.client.reset()
 
         st = time.time()
+        totals = {
+            "thumb": 0,
+            "desc": 0,
+        }
 
-        thumbnails = {"ids": [], "images": [], "metadatas": []}
-        descriptions = {"ids": [], "documents": [], "metadatas": []}
-
-        events = Event.select().where(
-            (Event.has_clip == True | Event.has_snapshot == True)
-            & Event.thumbnail.is_null(False)
+        batch_size = 100
+        current_page = 1
+        events = (
+            Event.select()
+            .where(
+                (Event.has_clip == True | Event.has_snapshot == True)
+                & Event.thumbnail.is_null(False)
+            )
+            .order_by(Event.start_time.desc())
+            .paginate(current_page, batch_size)
         )
 
-        event: Event
-        for event in events.iterator():
-            metadata = get_metadata(event)
-            thumbnail = base64.b64decode(event.thumbnail)
-            img = np.array(Image.open(io.BytesIO(thumbnail)).convert("RGB"))
-            thumbnails["ids"].append(event.id)
-            thumbnails["images"].append(img)
-            thumbnails["metadatas"].append(metadata)
-            if event.data.get("description") is not None:
-                descriptions["ids"].append(event.id)
-                descriptions["documents"].append(event.data["description"])
-                descriptions["metadatas"].append(metadata)
+        while len(events) > 0:
+            thumbnails = {"ids": [], "images": [], "metadatas": []}
+            descriptions = {"ids": [], "documents": [], "metadatas": []}
 
-        if len(thumbnails["ids"]) > 0:
-            self.thumbnail.upsert(
-                images=thumbnails["images"],
-                metadatas=thumbnails["metadatas"],
-                ids=thumbnails["ids"],
-            )
+            event: Event
+            for event in events:
+                metadata = get_metadata(event)
+                thumbnail = base64.b64decode(event.thumbnail)
+                img = np.array(Image.open(io.BytesIO(thumbnail)).convert("RGB"))
+                thumbnails["ids"].append(event.id)
+                thumbnails["images"].append(img)
+                thumbnails["metadatas"].append(metadata)
+                if event.data.get("description") is not None:
+                    descriptions["ids"].append(event.id)
+                    descriptions["documents"].append(event.data["description"])
+                    descriptions["metadatas"].append(metadata)
 
-        if len(descriptions["ids"]) > 0:
-            self.description.upsert(
-                documents=descriptions["documents"],
-                metadatas=descriptions["metadatas"],
-                ids=descriptions["ids"],
+            if len(thumbnails["ids"]) > 0:
+                totals["thumb"] += len(thumbnails["ids"])
+                self.thumbnail.upsert(
+                    images=thumbnails["images"],
+                    metadatas=thumbnails["metadatas"],
+                    ids=thumbnails["ids"],
+                )
+
+            if len(descriptions["ids"]) > 0:
+                totals["desc"] += len(descriptions["ids"])
+                self.description.upsert(
+                    documents=descriptions["documents"],
+                    metadatas=descriptions["metadatas"],
+                    ids=descriptions["ids"],
+                )
+
+            current_page += 1
+            events = (
+                Event.select()
+                .where(
+                    (Event.has_clip == True | Event.has_snapshot == True)
+                    & Event.thumbnail.is_null(False)
+                )
+                .order_by(Event.start_time.desc())
+                .paginate(current_page, batch_size)
             )
 
         logger.info(
             "Embedded %d thumbnails and %d descriptions in %s seconds",
-            len(thumbnails["ids"]),
-            len(descriptions["ids"]),
+            totals["thumb"],
+            totals["desc"],
             time.time() - st,
         )
