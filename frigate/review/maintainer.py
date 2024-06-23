@@ -213,7 +213,11 @@ class ReviewSegmentMaintainer(threading.Thread):
             ),
         )
 
-    def end_segment(self, segment: PendingReviewSegment, prev_data: dict[str, any],) -> None:
+    def end_segment(
+        self,
+        segment: PendingReviewSegment,
+        prev_data: dict[str, any],
+    ) -> None:
         """End segment."""
         final_data = segment.get_data(ended=True)
         self.requestor.send_data(UPSERT_REVIEW_SEGMENT, final_data)
