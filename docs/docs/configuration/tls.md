@@ -24,12 +24,22 @@ TLS certificates can be mounted at `/etc/letsencrypt/live/frigate` using a bind 
 frigate:
   ...
   volumes:
-    - /path/to/your/certificate_folder:/etc/letsencrypt/live/frigate
+    - /path/to/your/certificate_folder:/etc/letsencrypt/live/frigate:ro
   ...
 ```
 
 Within the folder, the private key is expected to be named `privkey.pem` and the certificate is expected to be named `fullchain.pem`.
 
+Note that certbot uses symlinks, and those can't be followed by the container unless it has access to the targets as well, so if using certbot you'll also have to mount the `archive` folder for your domain, e.g.:
+```yaml
+frigate:
+  ...
+  volumes:
+    - /etc/letsencrypt/live/frigate:/etc/letsencrypt/live/frigate:ro
+    - /etc/letsencrypt/archive/frigate:/etc/letsencrypt/archive/frigate:ro
+  ...
+
+```
 Frigate automatically compares the fingerprint of the certificate at `/etc/letsencrypt/live/frigate/fullchain.pem` against the fingerprint of the TLS cert in NGINX every minute. If these differ, the NGINX config is reloaded to pick up the updated certificate.
 
 If you issue Frigate valid certificates you will likely want to configure it to run on port 443 so you can access it without a port number like `https://your-frigate-domain.com` by mapping 8080 to 443.
