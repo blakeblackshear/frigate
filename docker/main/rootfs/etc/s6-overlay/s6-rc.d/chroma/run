@@ -13,4 +13,4 @@ echo "[INFO] Starting ChromaDB..."
 
 # Replace the bash process with the Frigate process, redirecting stderr to stdout
 exec 2>&1
-exec /usr/local/chroma run --path /config/chroma --host 0.0.0.0
+exec /usr/local/chroma run --path /config/chroma --host 127.0.0.1
