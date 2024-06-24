@@ -154,9 +154,7 @@ export function parseLogLines(logService: LogType, logs: string[]) {
           line.indexOf("Started") !== -1 ||
           line.indexOf("Uvicorn") !== -1;
         const api = !!httpMethods.exec(line);
-        const tag = startup
-          ? "startup"
-          : api ? "API" : "server";
+        const tag = startup ? "startup" : api ? "API" : "server";
 
         return {
           dateStamp: match.toString().slice(1, -1),
