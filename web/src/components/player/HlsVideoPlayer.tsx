@@ -202,7 +202,7 @@ export default function HlsVideoPlayer({
           videoRef.current.currentTime = Math.max(0, currentTime + diff);
         }}
         onSetPlaybackRate={(rate) => {
-          setPlaybackRate(rate);
+          setPlaybackRate(rate, true);
 
           if (videoRef.current) {
             videoRef.current.playbackRate = rate;
