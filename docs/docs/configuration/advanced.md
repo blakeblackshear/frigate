@@ -118,25 +118,36 @@ services:
     volumes:
       ...
       - /path/to/your/nginx.conf:/usr/local/nginx/conf/nginx.conf
-
 ```
 
 ### Enabling IPv6
 
-IPv6 is disabled by default, to enable IPv6 nginx.conf needs to be bind mounted as described above with the IPv6 enabled. For example:
+IPv6 is disabled by default, to enable IPv6 listen.gotmpl needs to be bind mounted with IPv6 enabled. For example:
 
 ```
-server {
-  listen: 5000;
-}
+{{ if not .enabled }}
+# intended for external traffic, protected by auth
+listen 8971;
+{{ else }}
+# intended for external traffic, protected by auth
+listen 8971 ssl;
+
+# intended for internal traffic, not protected by auth
+listen 5000;
 ```
 
 becomes
 
 ```
-server {
-  listen [::]:5000 ipv6only=off;
-}
+{{ if not .enabled }}
+# intended for external traffic, protected by auth
+listen [::]:8971 ipv6only=off;
+{{ else }}
+# intended for external traffic, protected by auth
+listen [::]:8971 ipv6only=off ssl;
+
+# intended for internal traffic, not protected by auth
+listen [::]:5000 ipv6only=off;
 ```
 
 ## Custom Dependencies
