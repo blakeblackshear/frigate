@@ -34,7 +34,7 @@ The following ports are used by Frigate and can be mapped via docker as required
 
 | Port   | Description                                                                                                                                                                |
 | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `8080` | Authenticated UI and API access without TLS. Reverse proxies should use this port.                                                                                         |
+| `8971` | Authenticated UI and API access without TLS. Reverse proxies should use this port.                                                                                         |
 | `5000` | Internal unauthenticated UI and API access. Access to this port should be limited. Intended to be used within the docker network for services that integrate with Frigate. |
 | `8554` | RTSP restreaming. By default, these streams are unauthenticated. Authentication can be configured in go2rtc section of config.                                             |
 | `8555` | WebRTC connections for low latency live views.                                                                                                                             |
@@ -171,7 +171,7 @@ services:
         tmpfs:
           size: 1000000000
     ports:
-      - "8080:8080"
+      - "8971:8971"
       # - "5000:5000" # Internal unauthenticated access. Expose carefully.
       - "8554:8554" # RTSP feeds
       - "8555:8555/tcp" # WebRTC over tcp
@@ -194,7 +194,7 @@ docker run -d \
   -v /path/to/your/config:/config \
   -v /etc/localtime:/etc/localtime:ro \
   -e FRIGATE_RTSP_PASSWORD='password' \
-  -p 8080:8080 \
+  -p 8971:8971 \
   -p 8554:8554 \
   -p 8555:8555/tcp \
   -p 8555:8555/udp \
@@ -370,7 +370,7 @@ docker run \
   --network=bridge \
   --privileged \
   --workdir=/opt/frigate \
-  -p 8080:8080 \
+  -p 8971:8971 \
   -p 8554:8554 \
   -p 8555:8555 \
   -p 8555:8555/udp \

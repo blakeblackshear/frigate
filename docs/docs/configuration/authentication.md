@@ -13,7 +13,7 @@ The following ports are available to access the Frigate web UI.
 
 | Port   | Description                                                                                                                                                                                                  |
 | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `8080` | Authenticated UI and API. Reverse proxies should use this port.                                                                                                                                              |
+| `8971` | Authenticated UI and API. Reverse proxies should use this port.                                                                                                                                              |
 | `5000` | Internal unauthenticated UI and API access. Access to this port should be limited. Intended to be used within the docker network for services that integrate with Frigate and do not support authentication. |
 
 ## Onboarding
