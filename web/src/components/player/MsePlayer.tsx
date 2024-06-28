@@ -31,7 +31,7 @@ function MSEPlayer({
   setFullResolution,
   onError,
 }: MSEPlayerProps) {
-  const RECONNECT_TIMEOUT: number = 30000;
+  const RECONNECT_TIMEOUT: number = 10000;
 
   const CODECS: string[] = [
     "avc1.640029", // H.264 high 4.1 (Chromecast 1st and 2nd Gen)
@@ -45,10 +45,12 @@ function MSEPlayer({
   ];
 
   const visibilityCheck: boolean = !pip;
+  const [safariPlaying, setSafariPlaying] = useState(false);
 
   const [wsState, setWsState] = useState<number>(WebSocket.CLOSED);
   const [connectTS, setConnectTS] = useState<number>(0);
   const [bufferTimeout, setBufferTimeout] = useState<NodeJS.Timeout>();
+  const [errorCount, setErrorCount] = useState<number>(0);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -117,12 +119,21 @@ function MSEPlayer({
   }, [wsURL]);
 
   const onDisconnect = useCallback(() => {
-    if (wsRef.current && wsState == WebSocket.OPEN) {
+    if (bufferTimeout) {
+      clearTimeout(bufferTimeout);
+      setBufferTimeout(undefined);
+    }
+
+    if ((isSafari || isIOS) && safariPlaying) {
+      setSafariPlaying(false);
+    }
+
+    if (wsRef.current && wsState != WebSocket.CLOSED) {
       setWsState(WebSocket.CLOSED);
       wsRef.current.close();
       wsRef.current = null;
     }
-  }, [wsState]);
+  }, [wsState, bufferTimeout, safariPlaying]);
 
   const onOpen = () => {
     setWsState(WebSocket.OPEN);
@@ -162,6 +173,26 @@ function MSEPlayer({
     reconnect();
   };
 
+  const sendWithTimeout = (value: object, timeout: number) => {
+    return new Promise<void>((resolve, reject) => {
+      const timeoutId = setTimeout(() => {
+        reject(new Error("Timeout waiting for response"));
+      }, timeout);
+
+      send(value);
+
+      // Override the onmessageRef handler for mse type to resolve the promise on response
+      const originalHandler = onmessageRef.current["mse"];
+      onmessageRef.current["mse"] = (msg) => {
+        if (msg.type === "mse") {
+          clearTimeout(timeoutId);
+          if (originalHandler) originalHandler(msg);
+          resolve();
+        }
+      };
+    });
+  };
+
   const onMse = () => {
     if ("ManagedMediaSource" in window) {
       const MediaSource = window.ManagedMediaSource;
@@ -169,10 +200,22 @@ function MSEPlayer({
       msRef.current?.addEventListener(
         "sourceopen",
         () => {
-          send({
-            type: "mse",
-            // @ts-expect-error for typing
-            value: codecs(MediaSource.isTypeSupported),
+          sendWithTimeout(
+            {
+              type: "mse",
+              // @ts-expect-error for typing
+              value: codecs(MediaSource.isTypeSupported),
+            },
+            3000,
+          ).catch(() => {
+            if (wsRef.current) {
+              onDisconnect();
+            }
+            if (isIOS || isSafari) {
+              onError?.("mse-decode");
+            } else {
+              onError?.("startup");
+            }
           });
         },
         { once: true },
@@ -187,9 +230,21 @@ function MSEPlayer({
         "sourceopen",
         () => {
           URL.revokeObjectURL(videoRef.current?.src || "");
-          send({
-            type: "mse",
-            value: codecs(MediaSource.isTypeSupported),
+          sendWithTimeout(
+            {
+              type: "mse",
+              value: codecs(MediaSource.isTypeSupported),
+            },
+            3000,
+          ).catch(() => {
+            if (wsRef.current) {
+              onDisconnect();
+            }
+            if (isIOS || isSafari) {
+              onError?.("mse-decode");
+            } else {
+              onError?.("startup");
+            }
           });
         },
         { once: true },
@@ -260,10 +315,6 @@ function MSEPlayer({
 
     return () => {
       onDisconnect();
-      if (bufferTimeout) {
-        clearTimeout(bufferTimeout);
-        setBufferTimeout(undefined);
-      }
     };
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -305,6 +356,23 @@ function MSEPlayer({
     videoRef.current.requestPictureInPicture();
   }, [pip, videoRef]);
 
+  // ensure we disconnect for slower connections
+
+  useEffect(() => {
+    if (wsState === WebSocket.OPEN && !playbackEnabled) {
+      if (bufferTimeout) {
+        clearTimeout(bufferTimeout);
+        setBufferTimeout(undefined);
+      }
+
+      setTimeout(() => {
+        if (!playbackEnabled) onDisconnect();
+      }, 10000);
+    }
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playbackEnabled]);
+
   return (
     <video
       ref={videoRef}
@@ -317,7 +385,8 @@ function MSEPlayer({
       }}
       muted={!audioEnabled}
       onProgress={() => {
-        if (isSafari || isIOS) {
+        if ((isSafari || isIOS) && !safariPlaying) {
+          setSafariPlaying(true);
           onPlaying?.();
         }
         if (onError != undefined) {
@@ -334,8 +403,10 @@ function MSEPlayer({
             setTimeout(() => {
               if (
                 document.visibilityState === "visible" &&
-                wsRef.current != null
+                wsRef.current != null &&
+                videoRef.current
               ) {
+                onDisconnect();
                 onError("stalled");
               }
             }, 3000),
@@ -347,6 +418,9 @@ function MSEPlayer({
           // @ts-expect-error code does exist
           e.target.error.code == MediaError.MEDIA_ERR_NETWORK
         ) {
+          if (wsRef.current) {
+            onDisconnect();
+          }
           onError?.("startup");
         }
 
@@ -355,15 +429,22 @@ function MSEPlayer({
           e.target.error.code == MediaError.MEDIA_ERR_DECODE &&
           (isSafari || isIOS)
         ) {
+          if (wsRef.current) {
+            onDisconnect();
+          }
           onError?.("mse-decode");
-          clearTimeout(bufferTimeout);
-          setBufferTimeout(undefined);
         }
 
+        setErrorCount((prevCount) => prevCount + 1);
+
         if (wsRef.current) {
-          wsRef.current.close();
-          wsRef.current = null;
-          reconnect(5000);
+          onDisconnect();
+          if (errorCount >= 3) {
+            // too many mse errors, try jsmpeg
+            onError?.("startup");
+          } else {
+            reconnect(5000);
+          }
         }
       }}
     />

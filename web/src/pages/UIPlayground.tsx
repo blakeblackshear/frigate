@@ -130,6 +130,7 @@ const generateRandomEvent = (): ReviewSegment => {
 function UIPlayground() {
   const { data: config } = useSWR<FrigateConfig>("config");
   const contentRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const reviewTimelineRef = useRef<HTMLDivElement>(null);
   const [mockEvents, setMockEvents] = useState<ReviewSegment[]>([]);
   const [mockMotionData, setMockMotionData] = useState<MotionData[]>([]);
@@ -344,11 +345,12 @@ function UIPlayground() {
                   Zoom In
                 </Button>
               </p>
-              <div className="">
+              <div ref={containerRef} className="">
                 {birdseyeConfig && (
                   <BirdseyeLivePlayer
                     birdseyeConfig={birdseyeConfig}
                     liveMode={birdseyeConfig.restream ? "mse" : "jsmpeg"}
+                    containerRef={containerRef}
                   />
                 )}
               </div>

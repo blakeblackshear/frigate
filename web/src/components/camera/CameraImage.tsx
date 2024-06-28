@@ -26,13 +26,12 @@ export default function CameraImage({
 
   const { name } = config ? config.cameras[camera] : "";
   const enabled = config ? config.cameras[camera].enabled : "True";
-  const [isPortraitImage, setIsPortraitImage] = useState(false);
 
   const [{ width: containerWidth, height: containerHeight }] =
     useResizeObserver(containerRef);
 
   const requestHeight = useMemo(() => {
-    if (!config || containerHeight == 0) {
+    if (!config || containerHeight == 0 || !hasLoaded) {
       return 360;
     }
 
@@ -40,7 +39,14 @@ export default function CameraImage({
       config.cameras[camera].detect.height,
       Math.round(containerHeight * (isDesktop ? 1.1 : 1.25)),
     );
-  }, [config, camera, containerHeight]);
+  }, [config, camera, containerHeight, hasLoaded]);
+
+  const isPortraitImage = useMemo(() => {
+    if (imgRef.current && containerWidth && containerHeight && hasLoaded) {
+      const { naturalHeight, naturalWidth } = imgRef.current;
+      return naturalWidth / naturalHeight < containerWidth / containerHeight;
+    }
+  }, [containerWidth, containerHeight, hasLoaded]);
 
   useEffect(() => {
     if (!config || !imgRef.current) {
@@ -60,13 +66,6 @@ export default function CameraImage({
           className={`object-contain ${isPortraitImage ? "h-full w-auto" : "h-auto w-full"} rounded-lg md:rounded-2xl`}
           onLoad={() => {
             setHasLoaded(true);
-
-            if (imgRef.current) {
-              const { naturalHeight, naturalWidth } = imgRef.current;
-              setIsPortraitImage(
-                naturalWidth / naturalHeight < containerWidth / containerHeight,
-              );
-            }
 
             if (onload) {
               onload();

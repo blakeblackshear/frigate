@@ -16,7 +16,6 @@ import {
   isDesktop,
   isMobile,
   isMobileOnly,
-  isSafari,
   isTablet,
 } from "react-device-detect";
 import useSWR from "swr";
@@ -24,6 +23,7 @@ import DraggableGridLayout from "./DraggableGridLayout";
 import { IoClose } from "react-icons/io5";
 import { LuLayoutDashboard } from "react-icons/lu";
 import { cn } from "@/lib/utils";
+import { LivePlayerMode } from "@/types/live";
 
 type LiveDashboardViewProps = {
   cameras: CameraConfig[];
@@ -99,6 +99,29 @@ export default function LiveDashboardView({
   // camera live views
 
   const [autoLiveView] = usePersistence("autoLiveView", true);
+  const [preferredLiveModes, setPreferredLiveModes] = useState<{
+    [key: string]: LivePlayerMode;
+  }>({});
+
+  useEffect(() => {
+    if (!cameras) return;
+    const newPreferredLiveModes = cameras.reduce(
+      (acc, camera) => {
+        const isRestreamed =
+          config &&
+          Object.keys(config.go2rtc.streams || {}).includes(
+            camera.live.stream_name,
+          );
+
+        acc[camera.name] = isRestreamed ? "mse" : "jsmpeg";
+        return acc;
+      },
+      {} as { [key: string]: LivePlayerMode },
+    );
+
+    setPreferredLiveModes(newPreferredLiveModes);
+  }, [cameras, config]);
+
   const [windowVisible, setWindowVisible] = useState(true);
   const visibilityListener = useCallback(() => {
     setWindowVisible(document.visibilityState == "visible");
@@ -289,9 +312,20 @@ export default function LiveDashboardView({
                   windowVisible && visibleCameras.includes(camera.name)
                 }
                 cameraConfig={camera}
-                preferredLiveMode={isSafari ? "webrtc" : "mse"}
+                preferredLiveMode={preferredLiveModes[camera.name] ?? "mse"}
                 autoLive={autoLiveView}
                 onClick={() => onSelectCamera(camera.name)}
+                onError={(e) => {
+                  setPreferredLiveModes((prevModes) => {
+                    const newModes = { ...prevModes };
+                    if (e === "mse-decode") {
+                      newModes[camera.name] = "webrtc";
+                    } else {
+                      newModes[camera.name] = "jsmpeg";
+                    }
+                    return newModes;
+                  });
+                }}
               />
             );
           })}
