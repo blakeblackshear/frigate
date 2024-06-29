@@ -7,13 +7,15 @@ Frigate intelligently displays your camera streams on the Live view dashboard. Y
 
 ## Live View technologies
 
-Frigate intelligently uses three different streaming technologies to display your camera streams. The highest quality and fluency of the Live view requires the bundled `go2rtc` to be configured as shown in the [step by step guide](/guides/configuring_go2rtc).
+Frigate intelligently uses three different streaming technologies to display your camera streams on the dashboard and the single camera view, switching between available modes based on network bandwidth, player errors, or required features like two-way talk. The highest quality and fluency of the Live view requires the bundled `go2rtc` to be configured as shown in the [step by step guide](/guides/configuring_go2rtc).
 
-| Source | Latency | Frame Rate                            | Resolution     | Audio                        | Requires go2rtc | Other Limitations                                |
-| ------ | ------- | ------------------------------------- | -------------- | ---------------------------- | --------------- | ------------------------------------------------ |
-| jsmpeg | low     | same as `detect -> fps`, capped at 10 | same as detect | no                           | no              | none                                             |
-| mse    | low     | native                                | native         | yes (depends on audio codec) | yes             | iPhone requires iOS 17.1+, Firefox is h.264 only |
-| webrtc | lowest  | native                                | native         | yes (depends on audio codec) | yes             | requires extra config, doesn't support h.265     |
+The jsmpeg live view will use more browser and client GPU resources. Using go2rtc is highly recommended and will provide a superior experience.
+
+| Source | Latency | Frame Rate                            | Resolution | Audio                        | Requires go2rtc | Other Limitations                                                                    |
+| ------ | ------- | ------------------------------------- | ---------- | ---------------------------- | --------------- | ------------------------------------------------------------------------------------ |
+| jsmpeg | low     | same as `detect -> fps`, capped at 10 | 720p       | no                           | no              | resolution is configurable, but go2rtc is recommended if you want higher resolutions |
+| mse    | low     | native                                | native     | yes (depends on audio codec) | yes             | iPhone requires iOS 17.1+, Firefox is h.264 only                                     |
+| webrtc | lowest  | native                                | native     | yes (depends on audio codec) | yes             | requires extra config, doesn't support h.265                                         |
 
 ### Audio Support
 

@@ -2,7 +2,7 @@ import WebRtcPlayer from "./WebRTCPlayer";
 import { CameraConfig } from "@/types/frigateConfig";
 import AutoUpdatingCameraImage from "../camera/AutoUpdatingCameraImage";
 import ActivityIndicator from "../indicators/activity-indicator";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import MSEPlayer from "./MsePlayer";
 import JSMpegPlayer from "./JSMpegPlayer";
 import { MdCircle } from "react-icons/md";
@@ -55,6 +55,7 @@ export default function LivePlayer({
   setFullResolution,
   onError,
 }: LivePlayerProps) {
+  const internalContainerRef = useRef<HTMLDivElement | null>(null);
   // camera activity
 
   const { activeMotion, activeTracking, objects, offline } =
@@ -73,20 +74,12 @@ export default function LivePlayer({
 
   const [liveReady, setLiveReady] = useState(false);
   useEffect(() => {
-    if (!autoLive) {
-      return;
-    }
-
-    if (!liveReady) {
-      if (cameraActive && liveMode == "jsmpeg") {
-        setLiveReady(true);
-      }
-
+    if (!autoLive || !liveReady) {
       return;
     }
 
     if (!cameraActive) {
-      setTimeout(() => setLiveReady(false), 500);
+      setLiveReady(false);
     }
     // live mode won't change
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -181,7 +174,8 @@ export default function LivePlayer({
           camera={cameraConfig.live.stream_name}
           width={cameraConfig.detect.width}
           height={cameraConfig.detect.height}
-          containerRef={containerRef}
+          playbackEnabled={cameraActive || !showStillWithoutActivity}
+          containerRef={containerRef ?? internalContainerRef}
           onPlaying={playerIsPlaying}
         />
       );
@@ -194,7 +188,7 @@ export default function LivePlayer({
 
   return (
     <div
-      ref={cameraRef}
+      ref={cameraRef ?? internalContainerRef}
       data-camera={cameraConfig.name}
       className={cn(
         "relative flex w-full cursor-pointer justify-center outline",

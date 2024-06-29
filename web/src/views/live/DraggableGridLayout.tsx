@@ -20,13 +20,13 @@ import {
 } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
-import { LivePlayerMode } from "@/types/live";
+import { LivePlayerError, LivePlayerMode } from "@/types/live";
 import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { isEqual } from "lodash";
 import useSWR from "swr";
-import { isDesktop, isMobile, isSafari } from "react-device-detect";
+import { isDesktop, isMobile } from "react-device-detect";
 import BirdseyeLivePlayer from "@/components/player/BirdseyeLivePlayer";
 import LivePlayer from "@/components/player/LivePlayer";
 import { IoClose } from "react-icons/io5";
@@ -72,6 +72,31 @@ export default function DraggableGridLayout({
 }: DraggableGridLayoutProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
+
+  // preferred live modes per camera
+
+  const [preferredLiveModes, setPreferredLiveModes] = useState<{
+    [key: string]: LivePlayerMode;
+  }>({});
+
+  useEffect(() => {
+    if (!cameras) return;
+    const newPreferredLiveModes = cameras.reduce(
+      (acc, camera) => {
+        const isRestreamed =
+          config &&
+          Object.keys(config.go2rtc.streams || {}).includes(
+            camera.live.stream_name,
+          );
+
+        acc[camera.name] = isRestreamed ? "mse" : "jsmpeg";
+        return acc;
+      },
+      {} as { [key: string]: LivePlayerMode },
+    );
+
+    setPreferredLiveModes(newPreferredLiveModes);
+  }, [cameras, config]);
 
   const ResponsiveGridLayout = useMemo(() => WidthProvider(Responsive), []);
 
@@ -429,9 +454,20 @@ export default function DraggableGridLayout({
                     windowVisible && visibleCameras.includes(camera.name)
                   }
                   cameraConfig={camera}
-                  preferredLiveMode={isSafari ? "webrtc" : "mse"}
+                  preferredLiveMode={preferredLiveModes[camera.name] ?? "mse"}
                   onClick={() => {
                     !isEditMode && onSelectCamera(camera.name);
+                  }}
+                  onError={(e) => {
+                    setPreferredLiveModes((prevModes) => {
+                      const newModes = { ...prevModes };
+                      if (e === "mse-decode") {
+                        newModes[camera.name] = "webrtc";
+                      } else {
+                        newModes[camera.name] = "jsmpeg";
+                      }
+                      return newModes;
+                    });
                   }}
                 >
                   {isEditMode && showCircles && <CornerCircles />}
@@ -590,6 +626,7 @@ type LivePlayerGridItemProps = {
   cameraConfig: CameraConfig;
   preferredLiveMode: LivePlayerMode;
   onClick: () => void;
+  onError: (e: LivePlayerError) => void;
 };
 
 const LivePlayerGridItem = React.forwardRef<
@@ -609,6 +646,7 @@ const LivePlayerGridItem = React.forwardRef<
       cameraConfig,
       preferredLiveMode,
       onClick,
+      onError,
       ...props
     },
     ref,
@@ -629,6 +667,7 @@ const LivePlayerGridItem = React.forwardRef<
           cameraConfig={cameraConfig}
           preferredLiveMode={preferredLiveMode}
           onClick={onClick}
+          onError={onError}
           containerRef={ref as React.RefObject<HTMLDivElement>}
         />
         {children}
