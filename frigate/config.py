@@ -116,7 +116,7 @@ class UIConfig(FrigateBaseModel):
 
 
 class TlsConfig(FrigateBaseModel):
-    enabled: bool = Field(default=True, title="Enable TLS for port 8080")
+    enabled: bool = Field(default=True, title="Enable TLS for port 8971")
 
 
 class HeaderMappingConfig(FrigateBaseModel):

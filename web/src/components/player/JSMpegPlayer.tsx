@@ -3,14 +3,15 @@ import { useResizeObserver } from "@/hooks/resize-observer";
 import { cn } from "@/lib/utils";
 // @ts-expect-error we know this doesn't have types
 import JSMpeg from "@cycjimmy/jsmpeg-player";
-import React, { useEffect, useMemo, useRef, useId, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 type JSMpegPlayerProps = {
   className?: string;
   camera: string;
   width: number;
   height: number;
-  containerRef?: React.MutableRefObject<HTMLDivElement | null>;
+  containerRef: React.MutableRefObject<HTMLDivElement | null>;
+  playbackEnabled: boolean;
   onPlaying?: () => void;
 };
 
@@ -20,18 +21,21 @@ export default function JSMpegPlayer({
   height,
   className,
   containerRef,
+  playbackEnabled,
   onPlaying,
 }: JSMpegPlayerProps) {
   const url = `${baseUrl.replace(/^http/, "ws")}live/jsmpeg/${camera}`;
-  const playerRef = useRef<HTMLDivElement | null>(null);
-  const videoRef = useRef(null);
+  const videoRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const internalContainerRef = useRef<HTMLDivElement | null>(null);
   const onPlayingRef = useRef(onPlaying);
   const [showCanvas, setShowCanvas] = useState(false);
 
   const selectedContainerRef = useMemo(
-    () => containerRef ?? internalContainerRef,
-    [containerRef, internalContainerRef],
+    () => (containerRef.current ? containerRef : internalContainerRef),
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [containerRef, containerRef.current, internalContainerRef],
   );
 
   const [{ width: containerWidth, height: containerHeight }] =
@@ -83,39 +87,64 @@ export default function JSMpegPlayer({
     }
   }, [scaledHeight, aspectRatio]);
 
-  const uniqueId = useId();
-
   useEffect(() => {
     onPlayingRef.current = onPlaying;
   }, [onPlaying]);
 
   useEffect(() => {
-    if (!playerRef.current || videoRef.current) {
+    if (!selectedContainerRef?.current || !url) {
       return;
     }
 
-    videoRef.current = new JSMpeg.VideoElement(
-      playerRef.current,
-      url,
-      { canvas: `#${CSS.escape(uniqueId)}` },
-      {
-        protocols: [],
-        audio: false,
-        videoBufferSize: 1024 * 1024 * 4,
-        onPlay: () => {
-          setShowCanvas(true);
-          onPlayingRef.current?.();
-        },
-      },
-    );
-  }, [url, uniqueId]);
+    const videoWrapper = videoRef.current;
+    const canvas = canvasRef.current;
+    let hasData = false;
+    let videoElement: JSMpeg.VideoElement | null = null;
+
+    if (videoWrapper && playbackEnabled) {
+      // Delayed init to avoid issues with react strict mode
+      const initPlayer = setTimeout(() => {
+        videoElement = new JSMpeg.VideoElement(
+          videoWrapper,
+          url,
+          { canvas: canvas },
+          {
+            protocols: [],
+            audio: false,
+            videoBufferSize: 1024 * 1024 * 4,
+            onVideoDecode: () => {
+              if (!hasData) {
+                hasData = true;
+                setShowCanvas(true);
+                onPlayingRef.current?.();
+              }
+            },
+          },
+        );
+      }, 0);
+
+      return () => {
+        clearTimeout(initPlayer);
+        if (videoElement) {
+          try {
+            // this causes issues in react strict mode
+            // https://stackoverflow.com/questions/76822128/issue-with-cycjimmy-jsmpeg-player-in-react-18-cannot-read-properties-of-null-o
+            videoElement.destroy();
+            // eslint-disable-next-line no-empty
+          } catch (e) {}
+        }
+      };
+    }
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playbackEnabled, url]);
 
   return (
-    <div className={className}>
-      <div className="size-full" ref={internalContainerRef}>
-        <div ref={playerRef} className={cn("jsmpeg", !showCanvas && "hidden")}>
+    <div className={cn(className, !containerRef.current && "size-full")}>
+      <div className="internal-jsmpeg-container" ref={internalContainerRef}>
+        <div ref={videoRef} className={cn("jsmpeg", !showCanvas && "hidden")}>
           <canvas
-            id={uniqueId}
+            ref={canvasRef}
             style={{
               width: scaledWidth ?? width,
               height: scaledHeight ?? height,

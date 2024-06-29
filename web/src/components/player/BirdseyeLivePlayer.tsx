@@ -12,7 +12,7 @@ type LivePlayerProps = {
   birdseyeConfig: BirdseyeConfig;
   liveMode: LivePlayerMode;
   onClick?: () => void;
-  containerRef?: React.MutableRefObject<HTMLDivElement | null>;
+  containerRef: React.MutableRefObject<HTMLDivElement | null>;
 };
 
 export default function BirdseyeLivePlayer({
@@ -54,6 +54,7 @@ export default function BirdseyeLivePlayer({
         width={birdseyeConfig.width}
         height={birdseyeConfig.height}
         containerRef={containerRef}
+        playbackEnabled={true}
       />
     );
   } else {
@@ -62,6 +63,7 @@ export default function BirdseyeLivePlayer({
 
   return (
     <div
+      ref={containerRef}
       className={cn(
         "relative flex w-full cursor-pointer justify-center",
         className,
