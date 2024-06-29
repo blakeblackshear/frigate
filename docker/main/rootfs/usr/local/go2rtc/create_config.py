@@ -8,11 +8,16 @@ from pathlib import Path
 import yaml
 
 sys.path.insert(0, "/opt/frigate")
-from frigate.const import BIRDSEYE_PIPE  # noqa: E402
+from frigate.const import (  # noqa: E402
+    BIRDSEYE_PIPE,
+    YAML_EXT,
+)
 from frigate.ffmpeg_presets import (  # noqa: E402
     parse_preset_hardware_acceleration_encode,
 )
-
+from frigate.util.builtin import (
+    load_config_with_no_duplicates,
+)
 sys.path.remove("/opt/frigate")
 
 
@@ -36,8 +41,8 @@ try:
     with open(config_file) as f:
         raw_config = f.read()
 
-    if config_file.endswith((".yaml", ".yml")):
-        config: dict[str, any] = yaml.safe_load(raw_config)
+    if config_file.endswith(YAML_EXT):
+        config: dict[str, any] = load_config_with_no_duplicates(raw_config)
     elif config_file.endswith(".json"):
         config: dict[str, any] = json.loads(raw_config)
 except FileNotFoundError:
