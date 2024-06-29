@@ -112,7 +112,6 @@ export default function JSMpegPlayer({
             protocols: [],
             audio: false,
             videoBufferSize: 1024 * 1024 * 4,
-            // disableGl: isSafari,
             onVideoDecode: () => {
               if (!hasData) {
                 hasData = true;
