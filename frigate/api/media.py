@@ -637,7 +637,7 @@ def vod_event(id):
         # If the recordings are not found and the event started more than 5 minutes ago, set has_clip to false
         if (
             event.start_time < datetime.now().timestamp() - 300
-            and type(vod_response) == tuple
+            and type(vod_response) is tuple
             and len(vod_response) == 2
             and vod_response[1] == 404
         ):

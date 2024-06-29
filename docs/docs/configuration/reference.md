@@ -65,7 +65,7 @@ database:
 
 # Optional: TLS configuration
 tls:
-  # Optional: Enable TLS for port 8080 (default: shown below)
+  # Optional: Enable TLS for port 8971 (default: shown below)
   enabled: True
 
 # Optional: Proxy configuration
