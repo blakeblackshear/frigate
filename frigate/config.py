@@ -56,15 +56,6 @@ DEFAULT_TIME_FORMAT = "%m/%d/%Y %H:%M:%S"
 # German Style:
 # DEFAULT_TIME_FORMAT = "%d.%m.%Y %H:%M:%S"
 
-FRIGATE_ENV_VARS = {k: v for k, v in os.environ.items() if k.startswith("FRIGATE_")}
-# read docker secret files as env vars too
-if os.path.isdir("/run/secrets") and os.access("/run/secrets", os.R_OK):
-    for secret_file in os.listdir("/run/secrets"):
-        if secret_file.startswith("FRIGATE_"):
-            FRIGATE_ENV_VARS[secret_file] = Path(
-                os.path.join("/run/secrets", secret_file)
-            ).read_text()
-
 DEFAULT_TRACKED_OBJECTS = ["person"]
 DEFAULT_ALERT_OBJECTS = ["person", "car"]
 DEFAULT_LISTEN_AUDIO = ["bark", "fire_alarm", "scream", "speech", "yell"]
@@ -1378,17 +1369,6 @@ class FrigateConfig(FrigateBaseModel):
         """Merge camera config with globals."""
         config = self.model_copy(deep=True)
 
-        # Proxy secret substitution
-        if config.proxy.auth_secret:
-            config.proxy.auth_secret = config.proxy.auth_secret.format(
-                **FRIGATE_ENV_VARS
-            )
-
-        # MQTT user/password substitutions
-        if config.mqtt.user or config.mqtt.password:
-            config.mqtt.user = config.mqtt.user.format(**FRIGATE_ENV_VARS)
-            config.mqtt.password = config.mqtt.password.format(**FRIGATE_ENV_VARS)
-
         # set default min_score for object attributes
         for attribute in ALL_ATTRIBUTE_LABELS:
             if not config.objects.filters.get(attribute):
@@ -1490,18 +1470,6 @@ class FrigateConfig(FrigateBaseModel):
             if camera_config.detect.stationary.interval is None:
                 camera_config.detect.stationary.interval = stationary_threshold
 
-            # FFMPEG input substitution
-            for input in camera_config.ffmpeg.inputs:
-                input.path = input.path.format(**FRIGATE_ENV_VARS)
-
-            # ONVIF substitution
-            if camera_config.onvif.user or camera_config.onvif.password:
-                camera_config.onvif.user = camera_config.onvif.user.format(
-                    **FRIGATE_ENV_VARS
-                )
-                camera_config.onvif.password = camera_config.onvif.password.format(
-                    **FRIGATE_ENV_VARS
-                )
             # set config pre-value
             camera_config.audio.enabled_in_config = camera_config.audio.enabled
             camera_config.record.enabled_in_config = camera_config.record.enabled
