@@ -5,6 +5,7 @@ import datetime
 import logging
 import multiprocessing as mp
 import queue
+import os
 import re
 import shlex
 import urllib.parse
@@ -96,6 +97,18 @@ def load_config_with_no_duplicates(raw_config) -> dict:
     class PreserveDuplicatesLoader(yaml.loader.SafeLoader):
         pass
 
+    env_var_pattern = re.compile(r'\$\{FRIGATE_[A-Z0-9_]+\}')
+
+    def env_var_constructor(loader, node):
+        value = loader.construct_scalar(node)
+        matches = env_var_pattern.findall(value)
+        for match in matches:
+            env_var_name = match[2:-1]  # Strip '${' and '}'
+            env_var_value = os.getenv(env_var_name)
+            if env_var_value is not None:
+                value = value.replace(match, env_var_value)
+        return value
+
     def map_constructor(loader, node, deep=False):
         keys = [loader.construct_object(node, deep=deep) for node, _ in node.value]
         vals = [loader.construct_object(node, deep=deep) for _, node in node.value]
@@ -109,6 +122,13 @@ def load_config_with_no_duplicates(raw_config) -> dict:
             else:
                 data[key] = val
         return data
+
+    PreserveDuplicatesLoader.add_implicit_resolver(
+        '!env_var', env_var_pattern, None
+    )
+    PreserveDuplicatesLoader.add_constructor(
+        '!env_var', env_var_constructor
+    )
 
     PreserveDuplicatesLoader.add_constructor(
         yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, map_constructor
