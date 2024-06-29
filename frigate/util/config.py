@@ -3,6 +3,7 @@
 import asyncio
 import logging
 import os
+import re
 import shutil
 from typing import Optional, Union
 
@@ -13,7 +14,7 @@ from frigate.util.services import get_video_properties
 
 logger = logging.getLogger(__name__)
 
-CURRENT_CONFIG_VERSION = 0.14
+CURRENT_CONFIG_VERSION = 0.15
 
 
 def migrate_frigate_config(config_file: str):
@@ -54,6 +55,13 @@ def migrate_frigate_config(config_file: str):
             os.rename(
                 os.path.join(EXPORT_DIR, file), os.path.join(EXPORT_DIR, new_name)
             )
+
+    if previous_version < 0.15:
+        logger.info(f"Migrating frigate config from {previous_version} to 0.15...")
+        new_config = migrate_015(config)
+        with open(config_file, "w") as f:
+            yaml.dump(new_config, f)
+        previous_version = 0.15
 
     logger.info("Finished frigate config migration...")
 
@@ -141,6 +149,36 @@ def migrate_014(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
         new_config["cameras"][name] = camera_config
 
     new_config["version"] = 0.14
+    return new_config
+
+
+def migrate_015(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
+    """Handle migrating frigate config to 0.15"""
+
+    def update_placeholders(value):
+        pattern = re.compile(r"(\"|')?\{FRIGATE_[^\}]+\}(\"|')?")
+        if isinstance(value, str):
+            return pattern.sub(replacer, value)
+        elif isinstance(value, dict):
+            return {k: update_placeholders(v) for k, v in value.items()}
+        elif isinstance(value, list):
+            return [update_placeholders(v) for v in value]
+        return value
+
+    def replacer(match):
+        matched_string = match.group(0)
+        # Remove surrounding quotes if they exist
+        if matched_string.startswith(("'", '"')):
+            matched_string = matched_string[1:]
+        if matched_string.endswith(("'", '"')):
+            matched_string = matched_string[:-1]
+        # Replace the prefix
+        return '${' + matched_string[1:]
+
+    new_config = config.copy()
+    new_config = update_placeholders(new_config)
+    new_config["version"] = 0.15
+
     return new_config
 
 
