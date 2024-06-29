@@ -9,7 +9,7 @@ Frigate intelligently displays your camera streams on the Live view dashboard. Y
 
 Frigate intelligently uses three different streaming technologies to display your camera streams on the dashboard and the single camera view, switching between available modes based on network bandwidth, player errors, or required features like two-way talk. The highest quality and fluency of the Live view requires the bundled `go2rtc` to be configured as shown in the [step by step guide](/guides/configuring_go2rtc).
 
-The jsmpeg view uses your browser's WebGL context, so the ability to view many streams at once highly depends on your browser and/or GPU. Using go2rtc for MSE and WebRTC will avoid many of the WebGL context limitations.
+The jsmpeg live view will use more browser and client GPU resources. Using go2rtc is highly recommended and will provide a superior experience.
 
 | Source | Latency | Frame Rate                            | Resolution | Audio                        | Requires go2rtc | Other Limitations                                                                    |
 | ------ | ------- | ------------------------------------- | ---------- | ---------------------------- | --------------- | ------------------------------------------------------------------------------------ |
