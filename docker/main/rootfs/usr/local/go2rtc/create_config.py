@@ -2,6 +2,7 @@
 
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -20,15 +21,6 @@ from frigate.util.builtin import (
 )
 sys.path.remove("/opt/frigate")
 
-
-FRIGATE_ENV_VARS = {k: v for k, v in os.environ.items() if k.startswith("FRIGATE_")}
-# read docker secret files as env vars too
-if os.path.isdir("/run/secrets"):
-    for secret_file in os.listdir("/run/secrets"):
-        if secret_file.startswith("FRIGATE_"):
-            FRIGATE_ENV_VARS[secret_file] = Path(
-                os.path.join("/run/secrets", secret_file)
-            ).read_text()
 
 config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
 
@@ -100,16 +92,6 @@ else:
     if go2rtc_config["rtsp"].get("default_query") is None:
         go2rtc_config["rtsp"]["default_query"] = "mp4"
 
-    if go2rtc_config["rtsp"].get("username") is not None:
-        go2rtc_config["rtsp"]["username"] = go2rtc_config["rtsp"]["username"].format(
-            **FRIGATE_ENV_VARS
-        )
-
-    if go2rtc_config["rtsp"].get("password") is not None:
-        go2rtc_config["rtsp"]["password"] = go2rtc_config["rtsp"]["password"].format(
-            **FRIGATE_ENV_VARS
-        )
-
 # need to replace ffmpeg command when using ffmpeg4
 if int(os.environ["LIBAVFORMAT_VERSION_MAJOR"]) < 59:
     if go2rtc_config.get("ffmpeg") is None:
@@ -124,12 +106,10 @@ if int(os.environ["LIBAVFORMAT_VERSION_MAJOR"]) < 59:
 for name in go2rtc_config.get("streams", {}):
     stream = go2rtc_config["streams"][name]
 
+    pattern = re.compile(r'\$\{.+?\}');
+
     if isinstance(stream, str):
-        try:
-            go2rtc_config["streams"][name] = go2rtc_config["streams"][name].format(
-                **FRIGATE_ENV_VARS
-            )
-        except KeyError as e:
+        if pattern.findall(stream):
             print(
                 "[ERROR] Invalid substitution found, see https://docs.frigate.video/configuration/restream#advanced-restream-configurations for more info."
             )
@@ -137,9 +117,7 @@ for name in go2rtc_config.get("streams", {}):
 
     elif isinstance(stream, list):
         for i, stream in enumerate(stream):
-            try:
-                go2rtc_config["streams"][name][i] = stream.format(**FRIGATE_ENV_VARS)
-            except KeyError as e:
+            if pattern.findall(stream[i]):
                 print(
                     "[ERROR] Invalid substitution found, see https://docs.frigate.video/configuration/restream#advanced-restream-configurations for more info."
                 )
