@@ -78,7 +78,7 @@ COPY --from=ov-converter /models/ssdlite_mobilenet_v2.bin openvino-model/
 RUN wget -q https://github.com/openvinotoolkit/open_model_zoo/raw/master/data/dataset_classes/coco_91cl_bkgr.txt -O openvino-model/coco_91cl_bkgr.txt && \
     sed -i 's/truck/car/g' openvino-model/coco_91cl_bkgr.txt
 # Get Audio Model and labels
-RUN wget -qO cpu_audio_model.tflite https://tfhub.dev/google/lite-model/yamnet/classification/tflite/1?lite-format=tflite
+RUN wget -qO cpu_audio_model.tflite https://www.kaggle.com/api/v1/models/google/yamnet/tfLite/classification-tflite/1/download
 COPY audio-labelmap.txt .
 
 
