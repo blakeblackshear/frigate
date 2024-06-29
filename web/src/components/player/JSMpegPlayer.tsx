@@ -30,6 +30,8 @@ export default function JSMpegPlayer({
   const internalContainerRef = useRef<HTMLDivElement | null>(null);
   const onPlayingRef = useRef(onPlaying);
   const [showCanvas, setShowCanvas] = useState(false);
+  const [hasData, setHasData] = useState(false);
+  const [dimensionsReady, setDimensionsReady] = useState(false);
 
   const selectedContainerRef = useMemo(
     () => (containerRef.current ? containerRef : internalContainerRef),
@@ -70,6 +72,7 @@ export default function JSMpegPlayer({
         return finalHeight;
       }
     }
+    return undefined;
   }, [
     aspectRatio,
     containerWidth,
@@ -85,7 +88,14 @@ export default function JSMpegPlayer({
     if (aspectRatio && scaledHeight) {
       return Math.ceil(scaledHeight * aspectRatio);
     }
+    return undefined;
   }, [scaledHeight, aspectRatio]);
+
+  useEffect(() => {
+    if (scaledWidth && scaledHeight) {
+      setDimensionsReady(true);
+    }
+  }, [scaledWidth, scaledHeight]);
 
   useEffect(() => {
     onPlayingRef.current = onPlaying;
@@ -98,7 +108,6 @@ export default function JSMpegPlayer({
 
     const videoWrapper = videoRef.current;
     const canvas = canvasRef.current;
-    let hasData = false;
     let videoElement: JSMpeg.VideoElement | null = null;
 
     if (videoWrapper && playbackEnabled) {
@@ -114,8 +123,7 @@ export default function JSMpegPlayer({
             videoBufferSize: 1024 * 1024 * 4,
             onVideoDecode: () => {
               if (!hasData) {
-                hasData = true;
-                setShowCanvas(true);
+                setHasData(true);
                 onPlayingRef.current?.();
               }
             },
@@ -139,15 +147,29 @@ export default function JSMpegPlayer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playbackEnabled, url]);
 
+  useEffect(() => {
+    setShowCanvas(hasData && dimensionsReady);
+  }, [hasData, dimensionsReady]);
+
   return (
     <div className={cn(className, !containerRef.current && "size-full")}>
-      <div className="internal-jsmpeg-container" ref={internalContainerRef}>
-        <div ref={videoRef} className={cn("jsmpeg", !showCanvas && "hidden")}>
+      <div
+        className="internal-jsmpeg-container size-full"
+        ref={internalContainerRef}
+      >
+        <div
+          ref={videoRef}
+          className={cn(
+            "jsmpeg flex h-full w-auto items-center justify-center",
+            !showCanvas && "hidden",
+          )}
+        >
           <canvas
             ref={canvasRef}
+            className="rounded-lg md:rounded-2xl"
             style={{
-              width: scaledWidth ?? width,
-              height: scaledHeight ?? height,
+              width: scaledWidth,
+              height: scaledHeight,
             }}
           ></canvas>
         </div>
