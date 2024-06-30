@@ -171,7 +171,7 @@ export default function LivePlayer({
       player = (
         <JSMpegPlayer
           className="flex justify-center overflow-hidden rounded-lg md:rounded-2xl"
-          camera={cameraConfig.live.stream_name}
+          camera={cameraConfig.name}
           width={cameraConfig.detect.width}
           height={cameraConfig.detect.height}
           playbackEnabled={cameraActive || !showStillWithoutActivity}
