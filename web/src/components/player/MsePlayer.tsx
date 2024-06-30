@@ -384,6 +384,7 @@ function MSEPlayer({
         onPlaying?.();
       }}
       muted={!audioEnabled}
+      onPause={() => videoRef.current?.play()}
       onProgress={() => {
         if ((isSafari || isIOS) && !safariPlaying) {
           setSafariPlaying(true);
