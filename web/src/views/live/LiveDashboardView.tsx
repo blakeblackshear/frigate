@@ -23,7 +23,7 @@ import DraggableGridLayout from "./DraggableGridLayout";
 import { IoClose } from "react-icons/io5";
 import { LuLayoutDashboard } from "react-icons/lu";
 import { cn } from "@/lib/utils";
-import { LivePlayerMode } from "@/types/live";
+import { LivePlayerError, LivePlayerMode } from "@/types/live";
 
 type LiveDashboardViewProps = {
   cameras: CameraConfig[];
@@ -184,6 +184,21 @@ export default function LiveDashboardView({
 
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
 
+  const handleError = useCallback(
+    (cameraName: string, error: LivePlayerError) => {
+      setPreferredLiveModes((prevModes) => {
+        const newModes = { ...prevModes };
+        if (error === "mse-decode") {
+          newModes[cameraName] = "webrtc";
+        } else {
+          newModes[cameraName] = "jsmpeg";
+        }
+        return newModes;
+      });
+    },
+    [setPreferredLiveModes],
+  );
+
   return (
     <div
       className="scrollbar-container size-full overflow-y-auto px-1 pt-2 md:p-2"
@@ -315,17 +330,7 @@ export default function LiveDashboardView({
                 preferredLiveMode={preferredLiveModes[camera.name] ?? "mse"}
                 autoLive={autoLiveView}
                 onClick={() => onSelectCamera(camera.name)}
-                onError={(e) => {
-                  setPreferredLiveModes((prevModes) => {
-                    const newModes = { ...prevModes };
-                    if (e === "mse-decode") {
-                      newModes[camera.name] = "webrtc";
-                    } else {
-                      newModes[camera.name] = "jsmpeg";
-                    }
-                    return newModes;
-                  });
-                }}
+                onError={(e) => handleError(camera.name, e)}
               />
             );
           })}
