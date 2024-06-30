@@ -128,12 +128,12 @@ function MSEPlayer({
       setSafariPlaying(false);
     }
 
-    if (wsRef.current && wsState != WebSocket.CLOSED) {
+    if (wsRef.current) {
       setWsState(WebSocket.CLOSED);
       wsRef.current.close();
       wsRef.current = null;
     }
-  }, [wsState, bufferTimeout, safariPlaying]);
+  }, [bufferTimeout, safariPlaying]);
 
   const onOpen = () => {
     setWsState(WebSocket.OPEN);
@@ -359,7 +359,7 @@ function MSEPlayer({
   // ensure we disconnect for slower connections
 
   useEffect(() => {
-    if (wsState === WebSocket.OPEN && !playbackEnabled) {
+    if (wsRef.current?.readyState === WebSocket.OPEN && !playbackEnabled) {
       if (bufferTimeout) {
         clearTimeout(bufferTimeout);
         setBufferTimeout(undefined);

@@ -21,7 +21,11 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
-import { LiveStreamMetadata, VideoResolutionType } from "@/types/live";
+import {
+  LivePlayerError,
+  LiveStreamMetadata,
+  VideoResolutionType,
+} from "@/types/live";
 import { CameraPtzInfo } from "@/types/ptz";
 import { RecordingStartingPoint } from "@/types/record";
 import React, {
@@ -33,6 +37,7 @@ import React, {
 } from "react";
 import {
   isDesktop,
+  isFirefox,
   isIOS,
   isMobile,
   isTablet,
@@ -275,6 +280,15 @@ export default function LiveCameraView({
     }
   }, [fullscreen, isPortrait, cameraAspectRatio, containerAspectRatio]);
 
+  const handleError = useCallback((e: LivePlayerError) => {
+    if (e == "mse-decode") {
+      setWebRTC(true);
+    } else {
+      setWebRTC(false);
+      setLowBandwidth(true);
+    }
+  }, []);
+
   return (
     <TransformWrapper minScale={1.0}>
       <div
@@ -353,7 +367,7 @@ export default function LiveCameraView({
                   onClick={toggleFullscreen}
                 />
               )}
-              {!isIOS && (
+              {!isIOS && !isFirefox && (
                 <CameraFeatureToggle
                   className="p-2 md:p-0"
                   variant={fullscreen ? "overlay" : "primary"}
@@ -435,26 +449,21 @@ export default function LiveCameraView({
                 pip={pip}
                 setFullResolution={setFullResolution}
                 containerRef={containerRef}
-                onError={(e) => {
-                  if (e == "mse-decode") {
-                    setWebRTC(true);
-                  } else {
-                    setWebRTC(false);
-                    setLowBandwidth(true);
-                  }
-                }}
+                onError={handleError}
               />
             </div>
-            {camera.onvif.host != "" && (
-              <PtzControlPanel
-                camera={camera.name}
-                clickOverlay={clickOverlay}
-                setClickOverlay={setClickOverlay}
-              />
-            )}
           </TransformComponent>
         </div>
       </div>
+      {camera.onvif.host != "" && (
+        <div className="flex flex-col items-center justify-center">
+          <PtzControlPanel
+            camera={camera.name}
+            clickOverlay={clickOverlay}
+            setClickOverlay={setClickOverlay}
+          />
+        </div>
+      )}
     </TransformWrapper>
   );
 }
