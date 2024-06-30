@@ -202,7 +202,7 @@ export default function VideoControls({
       {video && features.volume && (
         <div className="flex cursor-pointer items-center justify-normal gap-2">
           <VolumeIcon
-            className="size-5"
+            className="size-5 4k:size-8"
             onClick={(e: React.MouseEvent) => {
               e.stopPropagation();
 
@@ -213,7 +213,7 @@ export default function VideoControls({
           />
           {muted == false && (
             <VolumeSlider
-              className="w-20"
+              className="4k:w-18 w-20"
               value={[volume ?? 1.0]}
               min={0}
               max={1}
@@ -224,17 +224,23 @@ export default function VideoControls({
         </div>
       )}
       {features.seek && (
-        <MdReplay10 className="size-5 cursor-pointer" onClick={onReplay} />
+        <MdReplay10
+          className="size-5 cursor-pointer 4k:size-8"
+          onClick={onReplay}
+        />
       )}
       <div className="cursor-pointer" onClick={onTogglePlay}>
         {isPlaying ? (
-          <LuPause className="size-5 fill-primary text-primary" />
+          <LuPause className="size-5 fill-primary text-primary 4k:size-8" />
         ) : (
-          <LuPlay className="size-5 fill-primary text-primary" />
+          <LuPlay className="size-5 fill-primary text-primary 4k:size-8" />
         )}
       </div>
       {features.seek && (
-        <MdForward10 className="size-5 cursor-pointer" onClick={onSkip} />
+        <MdForward10
+          className="size-5 cursor-pointer 4k:size-8"
+          onClick={onSkip}
+        />
       )}
       {features.playbackRate && (
         <DropdownMenu
@@ -245,7 +251,7 @@ export default function VideoControls({
             }
           }}
         >
-          <DropdownMenuTrigger>{`${playbackRate}x`}</DropdownMenuTrigger>
+          <DropdownMenuTrigger className="4k:text-2xl">{`${playbackRate}x`}</DropdownMenuTrigger>
           <DropdownMenuContent
             portalProps={{ container: containerRef.current }}
           >
@@ -285,7 +291,11 @@ export default function VideoControls({
       )}
       {features.fullscreen && toggleFullscreen && (
         <div className="cursor-pointer" onClick={toggleFullscreen}>
-          {fullscreen ? <FaCompress /> : <FaExpand />}
+          {fullscreen ? (
+            <FaCompress className="4k:size-8" />
+          ) : (
+            <FaExpand className="4k:size-8" />
+          )}
         </div>
       )}
     </div>
@@ -316,7 +326,7 @@ function FrigatePlusUploadButton({
     >
       <AlertDialogTrigger asChild>
         <FrigatePlusIcon
-          className="size-5 cursor-pointer"
+          className="size-5 cursor-pointer 4k:size-8"
           onClick={() => {
             onOpen();
 
