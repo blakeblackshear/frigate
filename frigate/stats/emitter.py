@@ -10,6 +10,7 @@ from typing import Optional
 
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
+from frigate.const import FREQUENCY_STATS_POINTS
 from frigate.stats.util import stats_snapshot
 from frigate.types import StatsTrackingTypes
 
@@ -17,7 +18,6 @@ logger = logging.getLogger(__name__)
 
 
 MAX_STATS_POINTS = 80
-FREQUENCY_STATS_POINTS = 15
 
 
 class StatsEmitter(threading.Thread):
