@@ -333,6 +333,7 @@ class BirdsEyeFrameManager:
             self.cameras[camera] = {
                 "dimensions": [settings.detect.width, settings.detect.height],
                 "last_active_frame": 0.0,
+                "current_frame_name": "",
                 "current_frame": 0.0,
                 "layout_frame": 0.0,
                 "channel_dims": {
@@ -352,20 +353,18 @@ class BirdsEyeFrameManager:
         logger.debug("Clearing the birdseye frame")
         self.frame[:] = self.blank_frame
 
-    def copy_to_position(self, position, camera=None, frame_time=None):
+    def copy_to_position(self, position, camera=None, frame_name=None):
         if camera is None:
             frame = None
             channel_dims = None
         else:
             try:
                 frame = self.frame_manager.get(
-                    f"{camera}{frame_time}", self.config.cameras[camera].frame_shape_yuv
+                    frame_name, self.config.cameras[camera].frame_shape_yuv
                 )
             except FileNotFoundError:
                 # TODO: better frame management would prevent this edge case
-                logger.warning(
-                    f"Unable to copy frame {camera}{frame_time} to birdseye."
-                )
+                logger.warning(f"Unable to copy frame {frame_name} to birdseye.")
                 return
             channel_dims = self.cameras[camera]["channel_dims"]
 
@@ -523,7 +522,9 @@ class BirdsEyeFrameManager:
         for row in self.camera_layout:
             for position in row:
                 self.copy_to_position(
-                    position[1], position[0], self.cameras[position[0]]["current_frame"]
+                    position[1],
+                    position[0],
+                    self.cameras[position[0]]["current_frame_name"],
                 )
 
         return True
@@ -671,7 +672,9 @@ class BirdsEyeFrameManager:
         else:
             return standard_candidate_layout
 
-    def update(self, camera, object_count, motion_count, frame_time, frame) -> bool:
+    def update(
+        self, camera, object_count, motion_count, frame_name, frame_time
+    ) -> bool:
         # don't process if birdseye is disabled for this camera
         camera_config = self.config.cameras[camera].birdseye
 
@@ -688,6 +691,7 @@ class BirdsEyeFrameManager:
             return False
 
         # update the last active frame for the camera
+        self.cameras[camera]["current_frame_name"] = frame_name
         self.cameras[camera]["current_frame"] = frame_time
         if self.camera_active(camera_config.mode, object_count, motion_count):
             self.cameras[camera]["last_active_frame"] = frame_time
@@ -754,8 +758,8 @@ class Birdseye:
         camera: str,
         current_tracked_objects: list[dict[str, any]],
         motion_boxes: list[list[int]],
+        frame_name: str,
         frame_time: float,
-        frame,
     ) -> None:
         # check if there is an updated config
         while True:
@@ -774,8 +778,8 @@ class Birdseye:
             camera,
             len([o for o in current_tracked_objects if not o["stationary"]]),
             len(motion_boxes),
+            frame_name,
             frame_time,
-            frame,
         ):
             frame_bytes = self.birdseye_manager.frame.tobytes()
 

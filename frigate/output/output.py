@@ -45,7 +45,6 @@ def output_frames(
     signal.signal(signal.SIGINT, receiveSignal)
 
     frame_manager = SharedMemoryFrameManager()
-    previous_frames = {}
 
     # start a websocket server on 8082
     WebSocketWSGIHandler.http_version = "1.1"
@@ -87,15 +86,14 @@ def output_frames(
 
         (
             camera,
+            frame_name,
             frame_time,
             current_tracked_objects,
             motion_boxes,
             regions,
         ) = data
 
-        frame_id = f"{camera}{frame_time}"
-
-        frame = frame_manager.get(frame_id, config.cameras[camera].frame_shape_yuv)
+        frame = frame_manager.get(frame_name, config.cameras[camera].frame_shape_yuv)
 
         # send camera frame to ffmpeg process if websockets are connected
         if any(
@@ -116,20 +114,14 @@ def output_frames(
                 camera,
                 current_tracked_objects,
                 motion_boxes,
+                frame_name,
                 frame_time,
-                frame,
             )
 
         # send frames for low fps recording
         preview_recorders[camera].write_data(
             current_tracked_objects, motion_boxes, frame_time, frame
         )
-
-        # delete frames after they have been used for output
-        if camera in previous_frames:
-            frame_manager.delete(f"{camera}{previous_frames[camera]}")
-
-        previous_frames[camera] = frame_time
 
     move_preview_frames("clips")
 
@@ -141,15 +133,15 @@ def output_frames(
 
         (
             camera,
+            frame_name,
             frame_time,
             current_tracked_objects,
             motion_boxes,
             regions,
         ) = data
 
-        frame_id = f"{camera}{frame_time}"
-        frame = frame_manager.get(frame_id, config.cameras[camera].frame_shape_yuv)
-        frame_manager.delete(frame_id)
+        frame = frame_manager.get(frame_name, config.cameras[camera].frame_shape_yuv)
+        frame_manager.close(frame_name)
 
     detection_subscriber.stop()
 

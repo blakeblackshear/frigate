@@ -269,7 +269,7 @@ class NorfairTracker(ObjectTracker):
 
         self.tracked_objects[id].update(obj)
 
-    def update_frame_times(self, frame_time):
+    def update_frame_times(self, frame_name, frame_time):
         # if the object was there in the last frame, assume it's still there
         detections = [
             (
@@ -283,9 +283,9 @@ class NorfairTracker(ObjectTracker):
             for id, obj in self.tracked_objects.items()
             if self.disappeared[id] == 0
         ]
-        self.match_and_update(frame_time, detections=detections)
+        self.match_and_update(frame_name, frame_time, detections=detections)
 
-    def match_and_update(self, frame_time, detections):
+    def match_and_update(self, frame_name, frame_time, detections):
         norfair_detections = []
 
         for obj in detections:
@@ -323,7 +323,7 @@ class NorfairTracker(ObjectTracker):
                 )
 
             coord_transformations = self.ptz_motion_estimator.motion_estimator(
-                detections, frame_time, self.camera_name
+                detections, frame_name, frame_time, self.camera_name
             )
 
         tracked_objects = self.tracker.update(
