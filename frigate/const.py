@@ -82,6 +82,10 @@ UPSERT_REVIEW_SEGMENT = "upsert_review_segment"
 CLEAR_ONGOING_REVIEW_SEGMENTS = "clear_ongoing_review_segments"
 UPDATE_CAMERA_ACTIVITY = "update_camera_activity"
 
+# Stats Values
+
+FREQUENCY_STATS_POINTS = 15
+
 # Autotracking
 
 AUTOTRACKING_MAX_AREA_RATIO = 0.6

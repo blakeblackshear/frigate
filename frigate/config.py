@@ -26,6 +26,7 @@ from frigate.const import (
     CACHE_DIR,
     CACHE_SEGMENT_FORMAT,
     DEFAULT_DB_PATH,
+    FREQUENCY_STATS_POINTS,
     MAX_PRE_CAPTURE,
     REGEX_CAMERA_NAME,
     YAML_EXT,
@@ -193,7 +194,9 @@ class MqttConfig(FrigateBaseModel):
     port: int = Field(default=1883, title="MQTT Port")
     topic_prefix: str = Field(default="frigate", title="MQTT Topic Prefix")
     client_id: str = Field(default="frigate", title="MQTT Client ID")
-    stats_interval: int = Field(default=60, title="MQTT Camera Stats Interval")
+    stats_interval: int = Field(
+        default=60, ge=FREQUENCY_STATS_POINTS, title="MQTT Camera Stats Interval"
+    )
     user: Optional[str] = Field(None, title="MQTT Username")
     password: Optional[str] = Field(None, title="MQTT Password", validate_default=True)
     tls_ca_certs: Optional[str] = Field(None, title="MQTT TLS CA Certificates")
