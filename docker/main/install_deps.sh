@@ -48,7 +48,7 @@ fi
 # ffmpeg -> arm64
 if [[ "${TARGETARCH}" == "arm64" ]]; then
     mkdir -p /usr/lib/btbn-ffmpeg
-    wget -qO btbn-ffmpeg.tar.xz "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2024-06-30-12-49/ffmpeg-n5.1.5-linux64-gpl-5.1.tar.xz"
+    wget -qO btbn-ffmpeg.tar.xz "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2024-06-30-12-49/ffmpeg-n5.1.5-linuxarm64-gpl-5.1.tar.xz"
     tar -xf btbn-ffmpeg.tar.xz -C /usr/lib/btbn-ffmpeg --strip-components 1
     rm -rf btbn-ffmpeg.tar.xz /usr/lib/btbn-ffmpeg/doc /usr/lib/btbn-ffmpeg/bin/ffplay
 fi
