@@ -7,7 +7,12 @@ import BirdseyeLivePlayer from "@/components/player/BirdseyeLivePlayer";
 import LivePlayer from "@/components/player/LivePlayer";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { usePersistence } from "@/hooks/use-persistence";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import { ReviewSegment } from "@/types/review";
@@ -24,6 +29,8 @@ import { IoClose } from "react-icons/io5";
 import { LuLayoutDashboard } from "react-icons/lu";
 import { cn } from "@/lib/utils";
 import { LivePlayerError, LivePlayerMode } from "@/types/live";
+import { FaCompress, FaExpand } from "react-icons/fa";
+import { useResizeObserver } from "@/hooks/resize-observer";
 
 type LiveDashboardViewProps = {
   cameras: CameraConfig[];
@@ -121,6 +128,16 @@ export default function LiveDashboardView({
 
     setPreferredLiveModes(newPreferredLiveModes);
   }, [cameras, config]);
+
+  const [{ height: containerHeight }] = useResizeObserver(containerRef);
+
+  const hasScrollbar = useMemo(() => {
+    if (containerHeight && containerRef.current) {
+      return (
+        containerRef.current.offsetHeight < containerRef.current.scrollHeight
+      );
+    }
+  }, [containerRef, containerHeight]);
 
   const [windowVisible, setWindowVisible] = useState(true);
   const visibilityListener = useCallback(() => {
@@ -277,64 +294,95 @@ export default function LiveDashboardView({
       )}
 
       {!cameraGroup || cameraGroup == "default" || isMobileOnly ? (
-        <div
-          className={cn(
-            "mt-2 grid grid-cols-1 gap-2 px-2 md:gap-4",
-            mobileLayout == "grid" &&
-              "grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4",
-            isMobile && "px-0",
-          )}
-        >
-          {includeBirdseye && birdseyeConfig?.enabled && (
+        <>
+          <div
+            className={cn(
+              "mt-2 grid grid-cols-1 gap-2 px-2 md:gap-4",
+              mobileLayout == "grid" &&
+                "grid-cols-2 xl:grid-cols-3 3xl:grid-cols-4",
+              isMobile && "px-0",
+            )}
+          >
+            {includeBirdseye && birdseyeConfig?.enabled && (
+              <div
+                className={(() => {
+                  const aspectRatio =
+                    birdseyeConfig.width / birdseyeConfig.height;
+                  if (aspectRatio > 2) {
+                    return `${mobileLayout == "grid" && "col-span-2"} aspect-wide`;
+                  } else if (aspectRatio < 1) {
+                    return `${mobileLayout == "grid" && "row-span-2 h-full"} aspect-tall`;
+                  } else {
+                    return "aspect-video";
+                  }
+                })()}
+                ref={birdseyeContainerRef}
+              >
+                <BirdseyeLivePlayer
+                  birdseyeConfig={birdseyeConfig}
+                  liveMode={birdseyeConfig.restream ? "mse" : "jsmpeg"}
+                  onClick={() => onSelectCamera("birdseye")}
+                  containerRef={birdseyeContainerRef}
+                />
+              </div>
+            )}
+            {cameras.map((camera) => {
+              let grow;
+              const aspectRatio = camera.detect.width / camera.detect.height;
+              if (aspectRatio > 2) {
+                grow = `${mobileLayout == "grid" && "col-span-2"} aspect-wide`;
+              } else if (aspectRatio < 1) {
+                grow = `${mobileLayout == "grid" && "row-span-2 h-full"} aspect-tall`;
+              } else {
+                grow = "aspect-video";
+              }
+              return (
+                <LivePlayer
+                  cameraRef={cameraRef}
+                  key={camera.name}
+                  className={`${grow} rounded-lg bg-black md:rounded-2xl`}
+                  windowVisible={
+                    windowVisible && visibleCameras.includes(camera.name)
+                  }
+                  cameraConfig={camera}
+                  preferredLiveMode={preferredLiveModes[camera.name] ?? "mse"}
+                  autoLive={autoLiveView}
+                  onClick={() => onSelectCamera(camera.name)}
+                  onError={(e) => handleError(camera.name, e)}
+                />
+              );
+            })}
+          </div>
+          {isDesktop && (
             <div
-              className={(() => {
-                const aspectRatio =
-                  birdseyeConfig.width / birdseyeConfig.height;
-                if (aspectRatio > 2) {
-                  return `${mobileLayout == "grid" && "col-span-2"} aspect-wide`;
-                } else if (aspectRatio < 1) {
-                  return `${mobileLayout == "grid" && "row-span-2 h-full"} aspect-tall`;
-                } else {
-                  return "aspect-video";
-                }
-              })()}
-              ref={birdseyeContainerRef}
+              className={cn(
+                "fixed",
+                isDesktop && "bottom-12 lg:bottom-9",
+                isMobile && "bottom-12 lg:bottom-16",
+                hasScrollbar && isDesktop ? "right-6" : "right-3",
+                "z-50 flex flex-row gap-2",
+              )}
             >
-              <BirdseyeLivePlayer
-                birdseyeConfig={birdseyeConfig}
-                liveMode={birdseyeConfig.restream ? "mse" : "jsmpeg"}
-                onClick={() => onSelectCamera("birdseye")}
-                containerRef={birdseyeContainerRef}
-              />
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div
+                    className="cursor-pointer rounded-lg bg-secondary text-secondary-foreground opacity-60 transition-all duration-300 hover:bg-muted hover:opacity-100"
+                    onClick={toggleFullscreen}
+                  >
+                    {fullscreen ? (
+                      <FaCompress className="size-5 md:m-[6px]" />
+                    ) : (
+                      <FaExpand className="size-5 md:m-[6px]" />
+                    )}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {fullscreen ? "Exit Fullscreen" : "Fullscreen"}
+                </TooltipContent>
+              </Tooltip>
             </div>
           )}
-          {cameras.map((camera) => {
-            let grow;
-            const aspectRatio = camera.detect.width / camera.detect.height;
-            if (aspectRatio > 2) {
-              grow = `${mobileLayout == "grid" && "col-span-2"} aspect-wide`;
-            } else if (aspectRatio < 1) {
-              grow = `${mobileLayout == "grid" && "row-span-2 h-full"} aspect-tall`;
-            } else {
-              grow = "aspect-video";
-            }
-            return (
-              <LivePlayer
-                cameraRef={cameraRef}
-                key={camera.name}
-                className={`${grow} rounded-lg bg-black md:rounded-2xl`}
-                windowVisible={
-                  windowVisible && visibleCameras.includes(camera.name)
-                }
-                cameraConfig={camera}
-                preferredLiveMode={preferredLiveModes[camera.name] ?? "mse"}
-                autoLive={autoLiveView}
-                onClick={() => onSelectCamera(camera.name)}
-                onError={(e) => handleError(camera.name, e)}
-              />
-            );
-          })}
-        </div>
+        </>
       ) : (
         <DraggableGridLayout
           cameras={cameras}
