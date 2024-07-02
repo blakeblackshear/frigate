@@ -77,6 +77,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import useSWR from "swr";
+import { cn } from "@/lib/utils";
 
 type LiveCameraViewProps = {
   config?: FrigateConfig;
@@ -525,7 +526,12 @@ function PtzControlPanel({
   );
 
   return (
-    <div className="absolute inset-x-2 bottom-[10%] flex select-none flex-wrap items-center justify-center gap-1 md:left-[50%] md:-translate-x-[50%] md:flex-nowrap sm:landscape:ml-12">
+    <div
+      className={cn(
+        "absolute inset-x-2 bottom-[10%] flex select-none flex-wrap items-center justify-center gap-1 md:left-[50%] md:-translate-x-[50%] md:flex-nowrap",
+        isMobile && "landscape:ml-12",
+      )}
+    >
       {ptz?.features?.includes("pt") && (
         <>
           <Button
