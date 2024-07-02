@@ -387,6 +387,7 @@ function MSEPlayer({
       onProgress={() => {
         if (!isPlaying) {
           setIsPlaying(true);
+          handleLoadedMetadata?.();
           onPlaying?.();
         }
         if (onError != undefined) {
