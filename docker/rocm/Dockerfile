@@ -69,7 +69,6 @@ RUN apt-get -y install libnuma1
 
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
-COPY docker/rocm/rootfs/ /
 
 #######################################################################
 FROM scratch AS rocm-dist
