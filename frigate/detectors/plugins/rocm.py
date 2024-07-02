@@ -10,7 +10,11 @@ from pydantic import Field
 from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
-from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
+from frigate.detectors.detector_config import (
+    BaseDetectorConfig,
+    ModelTypeEnum,
+    PixelFormatEnum,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -78,10 +82,13 @@ class ROCmDetector(DetectionApi):
             logger.info("AMD/ROCm: switching HIP to blocking mode to conserve CPU")
             ctypes.CDLL("/opt/rocm/lib/libamdhip64.so").hipSetDeviceFlags(4)
 
+        self.h = detector_config.model.height
+        self.w = detector_config.model.width
         self.rocm_model_type = detector_config.model.model_type
+        self.rocm_model_px = detector_config.model.input_pixel_format
         path = detector_config.model.path
-        mxr_path = os.path.splitext(path)[0] + ".mxr"
 
+        mxr_path = os.path.splitext(path)[0] + ".mxr"
         if path.endswith(".mxr"):
             logger.info(f"AMD/ROCm: loading parsed model from {mxr_path}")
             self.model = migraphx.load(mxr_path)
@@ -121,27 +128,43 @@ class ROCmDetector(DetectionApi):
         model_input_shape = tuple(
             self.model.get_parameter_shapes()[model_input_name].lens()
         )
-        logger.info(f"the model input shape is {model_input_shape}")
 
         tensor_input = cv2.dnn.blobFromImage(
             tensor_input[0],
-            1.0 / 255,
-            (model_input_shape[2], model_input_shape[3]),
+            1.0,
+            (model_input_shape[3], model_input_shape[2]),
             None,
-            swapRB=False,
-        )
+            swapRB=self.rocm_model_px == PixelFormatEnum.bgr,
+        ).astype(np.uint8)
 
         detector_result = self.model.run({model_input_name: tensor_input})[0]
         addr = ctypes.cast(detector_result.data_ptr(), ctypes.POINTER(ctypes.c_float))
 
-        # ruff: noqa: F841
         tensor_output = np.ctypeslib.as_array(
             addr, shape=detector_result.get_shape().lens()
         )
 
         if self.rocm_model_type == ModelTypeEnum.yolonas:
-            logger.info(f"ROCM output has {tensor_output.shape[2]} boxes")
-            return np.zeros((20, 6), np.float32)
+            predictions = tensor_output
+
+            detections = np.zeros((20, 6), np.float32)
+
+            for i, prediction in enumerate(predictions):
+                if i == 20:
+                    break
+                (_, x_min, y_min, x_max, y_max, confidence, class_id) = prediction
+                # when running in GPU mode, empty predictions in the output have class_id of -1
+                if class_id < 0:
+                    break
+                detections[i] = [
+                    class_id,
+                    confidence,
+                    y_min / self.h,
+                    x_min / self.w,
+                    y_max / self.h,
+                    x_max / self.w,
+                ]
+            return detections
         else:
             raise Exception(
                 f"{self.rocm_model_type} is currently not supported for rocm. See the docs for more info on supported models."
