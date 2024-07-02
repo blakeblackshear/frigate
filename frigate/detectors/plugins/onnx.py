@@ -77,6 +77,7 @@ class ONNXDetector(DetectionApi):
 
         logger.info(f"ONNX: {path} loaded")
 
+    # ruff: noqa: F841
     def detect_raw(self, tensor_input):
         model_input_name = self.model.get_inputs()[0].name
         model_input_shape = self.model.get_inputs()[0].shape

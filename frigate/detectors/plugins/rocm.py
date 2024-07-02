@@ -126,7 +126,7 @@ class ROCmDetector(DetectionApi):
         tensor_input = cv2.dnn.blobFromImage(
             tensor_input[0],
             1.0 / 255,
-            model_input_shape,
+            (model_input_shape[2], model_input_shape[3]),
             None,
             swapRB=False,
         )
