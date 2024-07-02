@@ -45,7 +45,7 @@ function MSEPlayer({
   ];
 
   const visibilityCheck: boolean = !pip;
-  const [safariPlaying, setSafariPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const [wsState, setWsState] = useState<number>(WebSocket.CLOSED);
   const [connectTS, setConnectTS] = useState<number>(0);
@@ -124,16 +124,14 @@ function MSEPlayer({
       setBufferTimeout(undefined);
     }
 
-    if ((isSafari || isIOS) && safariPlaying) {
-      setSafariPlaying(false);
-    }
+    setIsPlaying(false);
 
     if (wsRef.current) {
       setWsState(WebSocket.CLOSED);
       wsRef.current.close();
       wsRef.current = null;
     }
-  }, [bufferTimeout, safariPlaying]);
+  }, [bufferTimeout]);
 
   const onOpen = () => {
     setWsState(WebSocket.OPEN);
@@ -382,12 +380,14 @@ function MSEPlayer({
       onLoadedData={() => {
         handleLoadedMetadata?.();
         onPlaying?.();
+        setIsPlaying(true);
       }}
       muted={!audioEnabled}
       onPause={() => videoRef.current?.play()}
       onProgress={() => {
-        if ((isSafari || isIOS) && !safariPlaying) {
-          setSafariPlaying(true);
+        if (!isPlaying) {
+          setIsPlaying(true);
+          handleLoadedMetadata?.();
           onPlaying?.();
         }
         if (onError != undefined) {
