@@ -159,12 +159,8 @@ export default function LivePlayer({
         />
       );
     } else {
-      player = (
-        <div className="w-5xl text-center text-sm">
-          MSE is only supported on iOS 17.1+. You'll need to update if available
-          or use jsmpeg / webRTC streams. See the docs for more info.
-        </div>
-      );
+      onError("mse-decode");
+      player = null;
     }
   } else if (liveMode == "jsmpeg") {
     if (cameraActive || !showStillWithoutActivity) {
