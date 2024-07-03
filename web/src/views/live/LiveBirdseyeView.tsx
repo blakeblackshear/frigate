@@ -96,7 +96,10 @@ export default function LiveBirdseyeView({
       return "jsmpeg";
     }
 
-    if (isSafari) {
+    if (
+      isSafari ||
+      !("MediaSource" in window || "ManagedMediaSource" in window)
+    ) {
       return "webrtc";
     }
 

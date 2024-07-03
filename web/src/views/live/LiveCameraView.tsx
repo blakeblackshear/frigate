@@ -222,6 +222,10 @@ export default function LiveCameraView({
       return "jsmpeg";
     }
 
+    if (!("MediaSource" in window || "ManagedMediaSource" in window)) {
+      return "webrtc";
+    }
+
     return "mse";
   }, [lowBandwidth, mic, webRTC, isRestreamed]);
 
