@@ -41,8 +41,7 @@ export default function BirdseyeLivePlayer({
     } else {
       player = (
         <div className="w-5xl text-center text-sm">
-          MSE is only supported on iOS 17.1+. You'll need to update if available
-          or use jsmpeg / webRTC streams. See the docs for more info.
+          iOS 17.1 or greater is required for this live stream type.
         </div>
       );
     }

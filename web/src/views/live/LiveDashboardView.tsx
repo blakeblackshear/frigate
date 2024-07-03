@@ -112,6 +112,10 @@ export default function LiveDashboardView({
 
   useEffect(() => {
     if (!cameras) return;
+
+    const mseSupported =
+      "MediaSource" in window || "ManagedMediaSource" in window;
+
     const newPreferredLiveModes = cameras.reduce(
       (acc, camera) => {
         const isRestreamed =
@@ -120,7 +124,11 @@ export default function LiveDashboardView({
             camera.live.stream_name,
           );
 
-        acc[camera.name] = isRestreamed ? "mse" : "jsmpeg";
+        if (!mseSupported) {
+          acc[camera.name] = isRestreamed ? "webrtc" : "jsmpeg";
+        } else {
+          acc[camera.name] = isRestreamed ? "mse" : "jsmpeg";
+        }
         return acc;
       },
       {} as { [key: string]: LivePlayerMode },

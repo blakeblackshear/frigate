@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { DeleteClipType, Export } from "@/types/export";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { LuFolderX } from "react-icons/lu";
 import useSWR from "swr";
 
 function Exports() {
@@ -128,17 +129,19 @@ function Exports() {
         </DialogContent>
       </Dialog>
 
-      <div className="flex w-full items-center justify-center p-2">
-        <Input
-          className="w-full bg-muted md:w-1/3"
-          placeholder="Search"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
+      {exports && (
+        <div className="flex w-full items-center justify-center p-2">
+          <Input
+            className="w-full bg-muted md:w-1/3"
+            placeholder="Search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+      )}
 
       <div className="w-full overflow-hidden">
-        {exports && filteredExports && (
+        {exports && filteredExports && filteredExports.length > 0 ? (
           <div className="scrollbar-container grid size-full gap-2 overflow-y-auto sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {Object.values(exports).map((item) => (
               <ExportCard
@@ -154,6 +157,11 @@ function Exports() {
                 }
               />
             ))}
+          </div>
+        ) : (
+          <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
+            <LuFolderX className="size-16" />
+            No exports found
           </div>
         )}
       </div>
