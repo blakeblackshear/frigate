@@ -46,6 +46,7 @@ function MSEPlayer({
 
   const visibilityCheck: boolean = !pip;
   const [isPlaying, setIsPlaying] = useState(false);
+  const playTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [wsState, setWsState] = useState<number>(WebSocket.CLOSED);
   const [connectTS, setConnectTS] = useState<number>(0);
@@ -371,49 +372,65 @@ function MSEPlayer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playbackEnabled]);
 
+  const handleLoadedData = useCallback(() => {
+    handleLoadedMetadata?.();
+    if (playTimeoutRef.current) {
+      clearTimeout(playTimeoutRef.current);
+      playTimeoutRef.current = null;
+    }
+    onPlaying?.();
+    setIsPlaying(true);
+  }, [handleLoadedMetadata, onPlaying]);
+
+  const handleProgress = useCallback(() => {
+    if (!isPlaying && !playTimeoutRef.current && playbackEnabled) {
+      playTimeoutRef.current = setTimeout(() => {
+        handleLoadedData();
+      }, 5000);
+    }
+    if (onError != undefined) {
+      if (videoRef.current?.paused) {
+        return;
+      }
+
+      if (bufferTimeout) {
+        clearTimeout(bufferTimeout);
+        setBufferTimeout(undefined);
+      }
+
+      setBufferTimeout(
+        setTimeout(() => {
+          if (
+            document.visibilityState === "visible" &&
+            wsRef.current != null &&
+            videoRef.current
+          ) {
+            onDisconnect();
+            onError("stalled");
+          }
+        }, 3000),
+      );
+    }
+  }, [
+    isPlaying,
+    onError,
+    videoRef,
+    bufferTimeout,
+    onDisconnect,
+    handleLoadedData,
+    playbackEnabled,
+  ]);
+
   return (
     <video
       ref={videoRef}
       className={className}
       playsInline
       preload="auto"
-      onLoadedData={() => {
-        handleLoadedMetadata?.();
-        onPlaying?.();
-        setIsPlaying(true);
-      }}
+      onLoadedData={handleLoadedData}
       muted={!audioEnabled}
       onPause={() => videoRef.current?.play()}
-      onProgress={() => {
-        if (!isPlaying) {
-          setIsPlaying(true);
-          handleLoadedMetadata?.();
-          onPlaying?.();
-        }
-        if (onError != undefined) {
-          if (videoRef.current?.paused) {
-            return;
-          }
-
-          if (bufferTimeout) {
-            clearTimeout(bufferTimeout);
-            setBufferTimeout(undefined);
-          }
-
-          setBufferTimeout(
-            setTimeout(() => {
-              if (
-                document.visibilityState === "visible" &&
-                wsRef.current != null &&
-                videoRef.current
-              ) {
-                onDisconnect();
-                onError("stalled");
-              }
-            }, 3000),
-          );
-        }
-      }}
+      onProgress={handleProgress}
       onError={(e) => {
         if (
           // @ts-expect-error code does exist
