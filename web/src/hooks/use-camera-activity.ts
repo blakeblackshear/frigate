@@ -133,7 +133,7 @@ export function useCameraActivity(
       return false;
     }
 
-    return cameras[camera.name].camera_fps == 0;
+    return cameras[camera.name].camera_fps == 0 && stats["service"].uptime > 60;
   }, [camera, stats]);
 
   return {
