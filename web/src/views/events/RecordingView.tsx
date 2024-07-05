@@ -542,6 +542,7 @@ export function RecordingView({
                 isScrubbing={scrubbing || exportMode == "timeline"}
                 setFullResolution={setFullResolution}
                 toggleFullscreen={toggleFullscreen}
+                containerRef={mainLayoutRef}
               />
             </div>
             {isDesktop && (

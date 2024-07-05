@@ -40,6 +40,7 @@ type HlsVideoPlayerProps = {
   setFullResolution?: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
   onUploadFrame?: (playTime: number) => Promise<AxiosResponse> | undefined;
   toggleFullscreen?: () => void;
+  containerRef?: React.MutableRefObject<HTMLDivElement | null>;
 };
 export default function HlsVideoPlayer({
   videoRef,
@@ -54,6 +55,7 @@ export default function HlsVideoPlayer({
   setFullResolution,
   onUploadFrame,
   toggleFullscreen,
+  containerRef,
 }: HlsVideoPlayerProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -225,6 +227,7 @@ export default function HlsVideoPlayer({
         }}
         fullscreen={fullscreen}
         toggleFullscreen={toggleFullscreen}
+        containerRef={containerRef}
       />
       <TransformComponent
         wrapperStyle={{
