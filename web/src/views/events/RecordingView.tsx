@@ -314,10 +314,7 @@ export function RecordingView({
       return undefined;
     }
 
-    const aspect =
-      fullResolution.width && fullResolution.height
-        ? fullResolution.width / fullResolution.height
-        : camera.detect.width / camera.detect.height;
+    const aspect = getCameraAspect(mainCamera);
 
     if (!aspect) {
       return undefined;
@@ -345,7 +342,7 @@ export function RecordingView({
     mainWidth,
     mainHeight,
     mainCamera,
-    fullResolution,
+    getCameraAspect,
   ]);
 
   const previewRowOverflows = useMemo(() => {
