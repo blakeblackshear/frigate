@@ -36,10 +36,8 @@ class OvDetector(DetectionApi):
             )
             detector_config.device = "GPU"
 
-        if(not os.path.isfile(detector_config.model.path)):
-            logger.error(
-                f"OpenVino model file {detector_config.model.path} not found."
-            )
+        if not os.path.isfile(detector_config.model.path):
+            logger.error(f"OpenVino model file {detector_config.model.path} not found.")
             raise FileNotFoundError
 
         self.interpreter = self.ov_core.compile_model(
