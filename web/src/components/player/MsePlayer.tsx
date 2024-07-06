@@ -394,7 +394,7 @@ function MSEPlayer({
           playTimeoutRef.current = setTimeout(() => {
             setIsPlaying(true);
             onPlaying?.();
-          }, 5000);
+          }, 7000);
         }
         if (onError != undefined) {
           if (videoRef.current?.paused) {
