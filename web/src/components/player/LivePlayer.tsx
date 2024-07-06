@@ -256,9 +256,10 @@ export default function LivePlayer({
         )}
 
       <div
-        className={`absolute inset-0 w-full ${
-          showStillWithoutActivity && !liveReady ? "visible" : "invisible"
-        }`}
+        className={cn(
+          "absolute inset-0 w-full",
+          showStillWithoutActivity && !liveReady ? "visible" : "invisible",
+        )}
       >
         <AutoUpdatingCameraImage
           className="size-full"
