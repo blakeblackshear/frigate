@@ -4,7 +4,6 @@ Flask_Limiter == 3.7.*
 imutils == 0.5.*
 joserfc == 0.11.*
 markupsafe == 2.1.*
-matplotlib == 3.8.*
 mypy == 1.6.1
 numpy == 1.26.*
 onvif_zeep == 0.2.12

@@ -7,7 +7,6 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import matplotlib.pyplot as plt
 import numpy as np
 from pydantic import (
     BaseModel,
@@ -43,6 +42,7 @@ from frigate.plus import PlusApi
 from frigate.util.builtin import (
     deep_merge,
     escape_special_characters,
+    generate_color_palette,
     get_ffmpeg_arg_list,
     load_config_with_no_duplicates,
 )
@@ -1033,10 +1033,11 @@ class CameraConfig(FrigateBaseModel):
     def __init__(self, **config):
         # Set zone colors
         if "zones" in config:
-            colors = plt.cm.get_cmap("tab10", len(config["zones"]))
+            colors = generate_color_palette(len(config["zones"]))
+
             config["zones"] = {
-                name: {**z, "color": tuple(round(255 * c) for c in colors(idx)[:3])}
-                for idx, (name, z) in enumerate(config["zones"].items())
+                name: {**z, "color": color}
+                for (name, z), color in zip(config["zones"].items(), colors)
             }
 
         # add roles to the input if there is only one
