@@ -1033,7 +1033,7 @@ class CameraConfig(FrigateBaseModel):
     def __init__(self, **config):
         # Set zone colors
         if "zones" in config:
-            colors = plt.cm.get_cmap("tab10", len(config["zones"]))
+            colors = plt.colormaps["tab10"].resampled(len(config["zones"]))
             config["zones"] = {
                 name: {**z, "color": tuple(round(255 * c) for c in colors(idx)[:3])}
                 for idx, (name, z) in enumerate(config["zones"].items())

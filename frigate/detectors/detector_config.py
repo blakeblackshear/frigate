@@ -128,7 +128,7 @@ class ModelConfig(BaseModel):
 
     def create_colormap(self, enabled_labels: set[str]) -> None:
         """Get a list of colors for enabled labels."""
-        cmap = plt.cm.get_cmap("tab10", len(enabled_labels))
+        cmap = plt.colormaps["tab10"].resampled(len(enabled_labels))
 
         for key, val in enumerate(enabled_labels):
             self._colormap[val] = tuple(int(round(255 * c)) for c in cmap(key)[:3])
