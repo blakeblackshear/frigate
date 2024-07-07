@@ -399,7 +399,7 @@ export default function LiveCameraView({
                   onClick={() => setMic(!mic)}
                 />
               )}
-              {supportsAudioOutput && (
+              {supportsAudioOutput && preferredLiveMode != "jsmpeg" && (
                 <CameraFeatureToggle
                   className="p-2 md:p-0"
                   variant={fullscreen ? "overlay" : "primary"}

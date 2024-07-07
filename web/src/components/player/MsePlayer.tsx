@@ -46,7 +46,6 @@ function MSEPlayer({
 
   const visibilityCheck: boolean = !pip;
   const [isPlaying, setIsPlaying] = useState(false);
-  const playTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [wsState, setWsState] = useState<number>(WebSocket.CLOSED);
   const [connectTS, setConnectTS] = useState<number>(0);
@@ -298,6 +297,11 @@ function MSEPlayer({
     };
   };
 
+  const getBufferedTime = (video: HTMLVideoElement | null) => {
+    if (!video || video.buffered.length === 0) return 0;
+    return video.buffered.end(video.buffered.length - 1) - video.currentTime;
+  };
+
   useEffect(() => {
     if (!playbackEnabled) {
       return;
@@ -380,21 +384,22 @@ function MSEPlayer({
       preload="auto"
       onLoadedData={() => {
         handleLoadedMetadata?.();
-        if (playTimeoutRef.current) {
-          clearTimeout(playTimeoutRef.current);
-          playTimeoutRef.current = null;
-        }
         onPlaying?.();
         setIsPlaying(true);
       }}
       muted={!audioEnabled}
       onPause={() => videoRef.current?.play()}
       onProgress={() => {
-        if (!isPlaying && !playTimeoutRef.current && playbackEnabled) {
-          playTimeoutRef.current = setTimeout(() => {
-            setIsPlaying(true);
-            onPlaying?.();
-          }, 7000);
+        // if we have > 3 seconds of buffered data and we're still not playing,
+        // something might be wrong - maybe codec issue, no audio, etc
+        // so mark the player as playing so that error handlers will fire
+        if (
+          !isPlaying &&
+          playbackEnabled &&
+          getBufferedTime(videoRef.current) > 3
+        ) {
+          setIsPlaying(true);
+          onPlaying?.();
         }
         if (onError != undefined) {
           if (videoRef.current?.paused) {
