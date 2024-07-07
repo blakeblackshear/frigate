@@ -349,3 +349,39 @@ def empty_and_close_queue(q: mp.Queue):
             q.close()
             q.join_thread()
             return
+
+
+def generate_color_palette(n):
+    # mimic matplotlib's color scheme
+    base_colors = [
+        (31, 119, 180),  # blue
+        (255, 127, 14),  # orange
+        (44, 160, 44),  # green
+        (214, 39, 40),  # red
+        (148, 103, 189),  # purple
+        (140, 86, 75),  # brown
+        (227, 119, 194),  # pink
+        (127, 127, 127),  # gray
+        (188, 189, 34),  # olive
+        (23, 190, 207),  # cyan
+    ]
+
+    def interpolate(color1, color2, factor):
+        return tuple(int(c1 + (c2 - c1) * factor) for c1, c2 in zip(color1, color2))
+
+    if n <= len(base_colors):
+        return base_colors[:n]
+
+    colors = base_colors.copy()
+    step = 1 / (n - len(base_colors) + 1)
+    extra_colors_needed = n - len(base_colors)
+
+    # interpolate between the base colors to generate more if needed
+    for i in range(extra_colors_needed):
+        index = i % (len(base_colors) - 1)
+        factor = (i + 1) * step
+        color1 = base_colors[index]
+        color2 = base_colors[index + 1]
+        colors.append(interpolate(color1, color2, factor))
+
+    return colors

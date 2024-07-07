@@ -5,13 +5,12 @@ import os
 from enum import Enum
 from typing import Dict, Optional, Tuple
 
-import matplotlib.pyplot as plt
 import requests
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic.fields import PrivateAttr
 
 from frigate.plus import PlusApi
-from frigate.util.builtin import load_labels
+from frigate.util.builtin import generate_color_palette, load_labels
 
 logger = logging.getLogger(__name__)
 
@@ -128,10 +127,9 @@ class ModelConfig(BaseModel):
 
     def create_colormap(self, enabled_labels: set[str]) -> None:
         """Get a list of colors for enabled labels."""
-        cmap = plt.cm.get_cmap("tab10", len(enabled_labels))
+        colors = generate_color_palette(len(enabled_labels))
 
-        for key, val in enumerate(enabled_labels):
-            self._colormap[val] = tuple(int(round(255 * c)) for c in cmap(key)[:3])
+        self._colormap = {label: color for label, color in zip(enabled_labels, colors)}
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
