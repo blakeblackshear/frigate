@@ -658,9 +658,14 @@ class CameraState:
 
     def update(self, frame_name, frame_time, current_detections, motion_boxes, regions):
         # get the new frame
-        current_frame = self.frame_manager.get(
-            frame_name, self.camera_config.frame_shape_yuv
-        )
+        try:
+            current_frame = self.frame_manager.get(
+                frame_name, self.camera_config.frame_shape_yuv
+            )
+        except FileNotFoundError:
+            logger.warning(f"Frame for {self.camera_config.name} missing in SHM, this is expected when shutting down.")
+            return
+
 
         tracked_objects = self.tracked_objects.copy()
         current_ids = set(current_detections.keys())
