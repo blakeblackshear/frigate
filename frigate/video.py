@@ -153,6 +153,10 @@ def capture_frames(
             # if the queue is full, skip this frame
             skipped_eps.update()
 
+    # clear out frames
+    for frame in shm_frames:
+        frame_manager.delete(frame)
+
 
 class CameraWatchdog(threading.Thread):
     def __init__(
