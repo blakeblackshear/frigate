@@ -285,7 +285,9 @@ class NorfairTracker(ObjectTracker):
         ]
         self.match_and_update(frame_name, frame_time, detections=detections)
 
-    def match_and_update(self, frame_name, frame_time, detections):
+    def match_and_update(
+        self, frame_name: str, frame_time: float, detections: list[tuple]
+    ):
         norfair_detections = []
 
         for obj in detections:

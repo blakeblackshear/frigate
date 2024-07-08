@@ -591,7 +591,7 @@ def process_frames(
 
         # if detection is disabled
         if not detect_config.enabled:
-            object_tracker.match_and_update(frame_time, [])
+            object_tracker.match_and_update(frame_name, frame_time, [])
         else:
             # get stationary object ids
             # check every Nth frame for stationary objects
@@ -715,7 +715,7 @@ def process_frames(
                     if d[0] not in ALL_ATTRIBUTE_LABELS
                 ]
                 # now that we have refined our detections, we need to track objects
-                object_tracker.match_and_update(frame_time, tracked_detections)
+                object_tracker.match_and_update(frame_name, frame_time, tracked_detections)
             # else, just update the frame times for the stationary objects
             else:
                 object_tracker.update_frame_times(frame_name, frame_time)
