@@ -724,7 +724,14 @@ class SharedMemoryFrameManager(FrameManager):
         frames = list(self.shm_store.keys())
         for name in frames:
             self.shm_store[name].close()
-            self.shm_store[name].unlink()
+
+            try:
+                self.shm_store[name].unlink()
+            except FileNotFoundError:
+                logger.warning(
+                    f"Frame {name} missing in SHM, this is expected when shutting down."
+                )
+
             del self.shm_store[name]
 
 
