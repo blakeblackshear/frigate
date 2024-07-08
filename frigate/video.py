@@ -109,7 +109,7 @@ def capture_frames(
     skipped_eps = EventsPerSecond()
     skipped_eps.start()
 
-    shm_count = max(10, config.detect.fps * 2)
+    shm_count = 5
     shm_frames: list[str] = []
 
     while True:
@@ -128,6 +128,8 @@ def capture_frames(
                 expired_frame_name = shm_frames.pop(0)
                 frame_manager.delete(expired_frame_name)
         except Exception:
+            frame_manager.delete(frame_name)
+
             # shutdown has been initiated
             if stop_event.is_set():
                 break
@@ -150,7 +152,6 @@ def capture_frames(
         except queue.Full:
             # if the queue is full, skip this frame
             skipped_eps.update()
-            frame_manager.delete(frame_name)
 
 
 class CameraWatchdog(threading.Thread):

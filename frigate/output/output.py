@@ -127,6 +127,7 @@ def output_frames(
         preview_recorders[camera].write_data(
             current_tracked_objects, motion_boxes, frame_time, frame
         )
+        frame_manager.close(frame_id)
 
     move_preview_frames("clips")
 
