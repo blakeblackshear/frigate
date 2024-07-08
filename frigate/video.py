@@ -109,7 +109,7 @@ def capture_frames(
     skipped_eps = EventsPerSecond()
     skipped_eps.start()
 
-    shm_count = 5
+    shm_count = max(10, config.detect.fps * 2)
     shm_frames: list[str] = []
 
     while True:
