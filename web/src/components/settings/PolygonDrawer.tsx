@@ -131,10 +131,18 @@ export default function PolygonDrawer({
         closed={isFinished}
         fill={colorString(isActive || isHovered ? true : false)}
         onMouseOver={() =>
-          isFinished ? setCursor("move") : setCursor("crosshair")
+          isActive
+            ? isFinished
+              ? setCursor("move")
+              : setCursor("crosshair")
+            : setCursor("default")
         }
         onMouseOut={() =>
-          isFinished ? setCursor("default") : setCursor("crosshair")
+          isActive
+            ? isFinished
+              ? setCursor("default")
+              : setCursor("crosshair")
+            : setCursor("default")
         }
       />
       {isFinished && isActive && (

@@ -61,6 +61,7 @@ export default function ReviewActivityCalendar({
 
   return (
     <Calendar
+      key={selectedDay ? selectedDay.toISOString() : "reset"}
       mode="single"
       disabled={disabledDates}
       showOutsideDays={false}
@@ -70,6 +71,7 @@ export default function ReviewActivityCalendar({
       components={{
         DayContent: ReviewActivityDay,
       }}
+      defaultMonth={selectedDay ?? new Date()}
     />
   );
 }
@@ -152,12 +154,14 @@ export function TimezoneAwareCalendar({
 
   return (
     <Calendar
+      key={selectedDay ? selectedDay.toISOString() : "reset"}
       mode="single"
       disabled={disabledDates}
       showOutsideDays={false}
       today={today}
       selected={selectedDay}
       onSelect={onSelect}
+      defaultMonth={selectedDay ?? new Date()}
     />
   );
 }

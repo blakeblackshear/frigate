@@ -71,6 +71,7 @@ type VideoControlsProps = {
   onSetPlaybackRate: (rate: number) => void;
   onUploadFrame?: () => void;
   toggleFullscreen?: () => void;
+  containerRef?: React.MutableRefObject<HTMLDivElement | null>;
 };
 export default function VideoControls({
   className,
@@ -91,10 +92,11 @@ export default function VideoControls({
   onSetPlaybackRate,
   onUploadFrame,
   toggleFullscreen,
+  containerRef,
 }: VideoControlsProps) {
   // layout
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const controlsContainerRef = useRef<HTMLDivElement | null>(null);
 
   // controls
 
@@ -197,7 +199,7 @@ export default function VideoControls({
             MIN_ITEMS_WRAP &&
           "min-w-[75%] flex-wrap",
       )}
-      ref={containerRef}
+      ref={controlsContainerRef}
     >
       {video && features.volume && (
         <div className="flex cursor-pointer items-center justify-normal gap-2">
@@ -247,7 +249,7 @@ export default function VideoControls({
         >
           <DropdownMenuTrigger>{`${playbackRate}x`}</DropdownMenuTrigger>
           <DropdownMenuContent
-            portalProps={{ container: containerRef.current }}
+            portalProps={{ container: controlsContainerRef.current }}
           >
             <DropdownMenuRadioGroup
               onValueChange={(rate) => onSetPlaybackRate(parseFloat(rate))}
@@ -281,6 +283,7 @@ export default function VideoControls({
             }
           }}
           onUploadFrame={onUploadFrame}
+          containerRef={containerRef}
         />
       )}
       {features.fullscreen && toggleFullscreen && (
@@ -297,12 +300,14 @@ type FrigatePlusUploadButtonProps = {
   onOpen: () => void;
   onClose: () => void;
   onUploadFrame: () => void;
+  containerRef?: React.MutableRefObject<HTMLDivElement | null>;
 };
 function FrigatePlusUploadButton({
   video,
   onOpen,
   onClose,
   onUploadFrame,
+  containerRef,
 }: FrigatePlusUploadButtonProps) {
   const [videoImg, setVideoImg] = useState<string>();
 
@@ -336,7 +341,10 @@ function FrigatePlusUploadButton({
           }}
         />
       </AlertDialogTrigger>
-      <AlertDialogContent className="md:max-w-2xl lg:max-w-3xl xl:max-w-4xl">
+      <AlertDialogContent
+        portalProps={{ container: containerRef?.current }}
+        className="md:max-w-2xl lg:max-w-3xl xl:max-w-4xl"
+      >
         <AlertDialogHeader>
           <AlertDialogTitle>Submit this frame to Frigate+?</AlertDialogTitle>
         </AlertDialogHeader>

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import CameraImage from "./CameraImage";
 
 type AutoUpdatingCameraImageProps = {
@@ -22,7 +22,7 @@ export default function AutoUpdatingCameraImage({
 }: AutoUpdatingCameraImageProps) {
   const [key, setKey] = useState(Date.now());
   const [fps, setFps] = useState<string>("0");
-  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (reloadInterval == -1) {
@@ -32,9 +32,9 @@ export default function AutoUpdatingCameraImage({
     setKey(Date.now());
 
     return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-        setTimeoutId(undefined);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
       }
     };
     // we know that these deps are correct
@@ -46,19 +46,21 @@ export default function AutoUpdatingCameraImage({
       return;
     }
 
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
     const loadTime = Date.now() - key;
 
     if (showFps) {
       setFps((1000 / Math.max(loadTime, reloadInterval)).toFixed(1));
     }
 
-    setTimeoutId(
-      setTimeout(
-        () => {
-          setKey(Date.now());
-        },
-        loadTime > reloadInterval ? 1 : reloadInterval,
-      ),
+    timeoutRef.current = setTimeout(
+      () => {
+        setKey(Date.now());
+      },
+      loadTime > reloadInterval ? 1 : reloadInterval,
     );
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -30,6 +30,7 @@ type DynamicVideoPlayerProps = {
   onClipEnded?: () => void;
   setFullResolution: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
   toggleFullscreen: () => void;
+  containerRef?: React.MutableRefObject<HTMLDivElement | null>;
 };
 export default function DynamicVideoPlayer({
   className,
@@ -45,6 +46,7 @@ export default function DynamicVideoPlayer({
   onClipEnded,
   setFullResolution,
   toggleFullscreen,
+  containerRef,
 }: DynamicVideoPlayerProps) {
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -208,6 +210,7 @@ export default function DynamicVideoPlayer({
         setFullResolution={setFullResolution}
         onUploadFrame={onUploadFrameToPlus}
         toggleFullscreen={toggleFullscreen}
+        containerRef={containerRef}
       />
       <PreviewPlayer
         className={cn(

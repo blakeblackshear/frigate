@@ -297,6 +297,11 @@ function MSEPlayer({
     };
   };
 
+  const getBufferedTime = (video: HTMLVideoElement | null) => {
+    if (!video || video.buffered.length === 0) return 0;
+    return video.buffered.end(video.buffered.length - 1) - video.currentTime;
+  };
+
   useEffect(() => {
     if (!playbackEnabled) {
       return;
@@ -385,9 +390,15 @@ function MSEPlayer({
       muted={!audioEnabled}
       onPause={() => videoRef.current?.play()}
       onProgress={() => {
-        if (!isPlaying) {
+        // if we have > 3 seconds of buffered data and we're still not playing,
+        // something might be wrong - maybe codec issue, no audio, etc
+        // so mark the player as playing so that error handlers will fire
+        if (
+          !isPlaying &&
+          playbackEnabled &&
+          getBufferedTime(videoRef.current) > 3
+        ) {
           setIsPlaying(true);
-          handleLoadedMetadata?.();
           onPlaying?.();
         }
         if (onError != undefined) {
