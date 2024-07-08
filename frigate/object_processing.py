@@ -663,9 +663,10 @@ class CameraState:
                 frame_name, self.camera_config.frame_shape_yuv
             )
         except FileNotFoundError:
-            logger.warning(f"Frame for {self.camera_config.name} missing in SHM, this is expected when shutting down.")
+            logger.warning(
+                f"Frame for {self.camera_config.name} missing in SHM, this is expected when shutting down."
+            )
             return
-
 
         tracked_objects = self.tracked_objects.copy()
         current_ids = set(current_detections.keys())
