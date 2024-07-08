@@ -94,7 +94,11 @@ def output_frames(
 
         frame_id = f"{camera}{frame_time}"
 
-        frame = frame_manager.get(frame_id, config.cameras[camera].frame_shape_yuv)
+        try:
+            frame = frame_manager.get(frame_id, config.cameras[camera].frame_shape_yuv)
+        except FileNotFoundError:
+            logger.error(f"Failed to get {frame_id} from SHM")
+            continue
 
         # send camera frame to ffmpeg process if websockets are connected
         if any(

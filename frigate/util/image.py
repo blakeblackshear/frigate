@@ -712,6 +712,8 @@ class SharedMemoryFrameManager(FrameManager):
             self.shm_store[name].close()
             self.shm_store[name].unlink()
             del self.shm_store[name]
+        else:
+            logger.error(f"Could not delete {name} the store is {self.shm_store}")
 
 
 def create_mask(frame_shape, mask):

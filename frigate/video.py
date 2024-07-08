@@ -147,8 +147,6 @@ def capture_frames(
         try:
             # add to the queue
             frame_queue.put(current_frame.value, False)
-            # close the frame
-            frame_manager.close(frame_name)
         except queue.Full:
             # if the queue is full, skip this frame
             skipped_eps.update()
@@ -572,9 +570,12 @@ def process_frames(
         current_frame_time.value = frame_time
         ptz_metrics["ptz_frame_time"].value = frame_time
 
-        frame = frame_manager.get(
-            f"{camera_name}{frame_time}", (frame_shape[0] * 3 // 2, frame_shape[1])
-        )
+        try:
+            frame = frame_manager.get(
+                f"{camera_name}{frame_time}", (frame_shape[0] * 3 // 2, frame_shape[1])
+            )
+        except FileNotFoundError:
+            frame = None
 
         if frame is None:
             logger.info(f"{camera_name}: frame {frame_time} is not in memory store.")
