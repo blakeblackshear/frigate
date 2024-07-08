@@ -715,7 +715,9 @@ def process_frames(
                     if d[0] not in ALL_ATTRIBUTE_LABELS
                 ]
                 # now that we have refined our detections, we need to track objects
-                object_tracker.match_and_update(frame_name, frame_time, tracked_detections)
+                object_tracker.match_and_update(
+                    frame_name, frame_time, tracked_detections
+                )
             # else, just update the frame times for the stationary objects
             else:
                 object_tracker.update_frame_times(frame_name, frame_time)
