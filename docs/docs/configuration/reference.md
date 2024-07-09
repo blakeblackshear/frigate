@@ -613,7 +613,7 @@ cameras:
       user: admin
       # Optional: password for login.
       password: admin
-      # Optional: Ignores time synchronization mismatchs between the camera and the server during authentication. 
+      # Optional: Ignores time synchronization mismatches between the camera and the server during authentication. 
       # Using NTP on both ends is recommended and this should only be set to True in a "safe" environment due to the security risk it represents. 
       ignore_time_mismatch: False
       # Optional: PTZ camera object autotracking. Keeps a moving object in
