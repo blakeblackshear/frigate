@@ -80,7 +80,7 @@
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.7",
-    "@testing-library/jest-dom": "^6.4.5",
+    "@testing-library/jest-dom": "^6.4.6",
     "@types/lodash": "^4.17.4",
     "@types/node": "^20.12.12",
     "@types/react": "^18.3.2",
