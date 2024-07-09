@@ -94,7 +94,7 @@ def start_or_restart_ffmpeg(
 
 def capture_frames(
     ffmpeg_process,
-    camera_name,
+    config: CameraConfig,
     frame_shape,
     frame_manager: FrameManager,
     frame_queue,
@@ -108,24 +108,36 @@ def capture_frames(
     frame_rate.start()
     skipped_eps = EventsPerSecond()
     skipped_eps.start()
+
+    shm_count = max(10, config.detect.fps * 2)
+    shm_frames: list[str] = []
+
     while True:
         fps.value = frame_rate.eps()
         skipped_fps.value = skipped_eps.eps()
-
         current_frame.value = datetime.datetime.now().timestamp()
-        frame_name = f"{camera_name}{current_frame.value}"
+        frame_name = f"{config.name}{current_frame.value}"
         frame_buffer = frame_manager.create(frame_name, frame_size)
         try:
             frame_buffer[:] = ffmpeg_process.stdout.read(frame_size)
+
+            # update frame cache and cleanup existing frames
+            shm_frames.append(frame_name)
+
+            if len(shm_frames) > shm_count:
+                expired_frame_name = shm_frames.pop(0)
+                frame_manager.delete(expired_frame_name)
         except Exception:
+            frame_manager.delete(frame_name)
+
             # shutdown has been initiated
             if stop_event.is_set():
                 break
-            logger.error(f"{camera_name}: Unable to read frames from ffmpeg process.")
+            logger.error(f"{config.name}: Unable to read frames from ffmpeg process.")
 
             if ffmpeg_process.poll() is not None:
                 logger.error(
-                    f"{camera_name}: ffmpeg process is not running. exiting capture thread..."
+                    f"{config.name}: ffmpeg process is not running. exiting capture thread..."
                 )
                 frame_manager.delete(frame_name)
                 break
@@ -137,12 +149,13 @@ def capture_frames(
         try:
             # add to the queue
             frame_queue.put(current_frame.value, False)
-            # close the frame
-            frame_manager.close(frame_name)
         except queue.Full:
             # if the queue is full, skip this frame
             skipped_eps.update()
-            frame_manager.delete(frame_name)
+
+    # clear out frames
+    for frame in shm_frames:
+        frame_manager.delete(frame)
 
 
 class CameraWatchdog(threading.Thread):
@@ -282,7 +295,7 @@ class CameraWatchdog(threading.Thread):
         )
         self.ffmpeg_pid.value = self.ffmpeg_detect_process.pid
         self.capture_thread = CameraCapture(
-            self.camera_name,
+            self.config,
             self.ffmpeg_detect_process,
             self.frame_shape,
             self.frame_queue,
@@ -321,7 +334,7 @@ class CameraWatchdog(threading.Thread):
 class CameraCapture(threading.Thread):
     def __init__(
         self,
-        camera_name,
+        config: CameraConfig,
         ffmpeg_process,
         frame_shape,
         frame_queue,
@@ -330,8 +343,8 @@ class CameraCapture(threading.Thread):
         stop_event,
     ):
         threading.Thread.__init__(self)
-        self.name = f"capture:{camera_name}"
-        self.camera_name = camera_name
+        self.name = f"capture:{config.name}"
+        self.config = config
         self.frame_shape = frame_shape
         self.frame_queue = frame_queue
         self.fps = fps
@@ -345,7 +358,7 @@ class CameraCapture(threading.Thread):
     def run(self):
         capture_frames(
             self.ffmpeg_process,
-            self.camera_name,
+            self.config,
             self.frame_shape,
             self.frame_manager,
             self.frame_queue,
