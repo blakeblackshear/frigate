@@ -673,6 +673,9 @@ class CameraState:
             frame_id, self.camera_config.frame_shape_yuv
         )
 
+        if current_frame is None:
+            logger.warning(f"Failed to get frame {frame_id} from SHM")
+
         tracked_objects = self.tracked_objects.copy()
         current_ids = set(current_detections.keys())
         previous_ids = set(tracked_objects.keys())

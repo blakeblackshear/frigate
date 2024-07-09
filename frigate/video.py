@@ -109,7 +109,7 @@ def capture_frames(
     skipped_eps = EventsPerSecond()
     skipped_eps.start()
 
-    shm_count = max(10, config.detect.fps * 2)
+    shm_count = max(10, config.detect.fps)
     shm_frames: list[str] = []
 
     while True:
@@ -127,8 +127,10 @@ def capture_frames(
             if len(shm_frames) > shm_count:
                 expired_frame_name = shm_frames.pop(0)
                 frame_manager.delete(expired_frame_name)
-        except Exception:
+        except Exception as e:
+            logger.error(f"something video bad happened :: {e}")
             frame_manager.delete(frame_name)
+
 
             # shutdown has been initiated
             if stop_event.is_set():
@@ -149,6 +151,7 @@ def capture_frames(
         try:
             # add to the queue
             frame_queue.put(current_frame.value, False)
+            frame_manager.close(frame_name)
         except queue.Full:
             # if the queue is full, skip this frame
             skipped_eps.update()
