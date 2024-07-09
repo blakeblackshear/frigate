@@ -131,7 +131,6 @@ def capture_frames(
             logger.error(f"something video bad happened :: {e}")
             frame_manager.delete(frame_name)
 
-
             # shutdown has been initiated
             if stop_event.is_set():
                 break

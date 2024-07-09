@@ -1,7 +1,6 @@
 """Utilities for creating and manipulating image frames."""
 
 import datetime
-import inspect
 import logging
 import subprocess as sp
 from abc import ABC, abstractmethod
@@ -696,7 +695,6 @@ class SharedMemoryFrameManager(FrameManager):
         return shm.buf
 
     def get(self, name: str, shape) -> Optional[np.ndarray]:
-        logger.info(f"retrieving {name} from {inspect.stack()[1].filename} {inspect.stack()[1].function}")
         try:
             if name in self.shm_store:
                 shm = self.shm_store[name]
@@ -708,13 +706,11 @@ class SharedMemoryFrameManager(FrameManager):
             return None
 
     def close(self, name: str):
-        logger.info(f"closing {name}")
         if name in self.shm_store:
             self.shm_store[name].close()
             del self.shm_store[name]
 
     def delete(self, name: str):
-        logger.info(f"deleting expired {name}")
         if name in self.shm_store:
             self.shm_store[name].close()
 
@@ -725,10 +721,9 @@ class SharedMemoryFrameManager(FrameManager):
 
             del self.shm_store[name]
         else:
-            shm = shared_memory.SharedMemory(name=name)
-            shm.close()
-
             try:
+                shm = shared_memory.SharedMemory(name=name)
+                shm.close()
                 shm.unlink()
             except FileNotFoundError:
                 pass
