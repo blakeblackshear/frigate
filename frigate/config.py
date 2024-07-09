@@ -281,7 +281,7 @@ class OnvifConfig(FrigateBaseModel):
     )
     ignore_time_mismatch: bool = Field(
         default=False, 
-        title="Onvif Ignore Time Synchronization Mismatch Between Camera and Server"
+        title="Onvif Ignore Time Synchronization Mismatch Between Camera and Server",
     )
 
 
