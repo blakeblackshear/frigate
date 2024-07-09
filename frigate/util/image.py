@@ -694,13 +694,17 @@ class SharedMemoryFrameManager(FrameManager):
         self.shm_store[name] = shm
         return shm.buf
 
-    def get(self, name: str, shape):
-        if name in self.shm_store:
-            shm = self.shm_store[name]
-        else:
-            shm = shared_memory.SharedMemory(name=name)
-            self.shm_store[name] = shm
-        return np.ndarray(shape, dtype=np.uint8, buffer=shm.buf)
+    def get(self, name: str, shape) -> Optional[np.ndarray]:
+        try:
+            if name in self.shm_store:
+                shm = self.shm_store[name]
+            else:
+                shm = shared_memory.SharedMemory(name=name)
+                self.shm_store[name] = shm
+            return np.ndarray(shape, dtype=np.uint8, buffer=shm.buf)
+        except FileNotFoundError:
+            logger.error(f"Failed to get {name} from SHM")
+            return None
 
     def close(self, name: str):
         if name in self.shm_store:

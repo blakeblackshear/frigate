@@ -660,13 +660,9 @@ class CameraState:
         # get the new frame
         frame_id = f"{self.name}{frame_time}"
 
-        try:
-            current_frame = self.frame_manager.get(
-                frame_id, self.camera_config.frame_shape_yuv
-            )
-        except FileNotFoundError:
-            logger.error(f"Failed to get {frame_id} from SHM")
-            return
+        current_frame = self.frame_manager.get(
+            frame_id, self.camera_config.frame_shape_yuv
+        )
 
         tracked_objects = self.tracked_objects.copy()
         current_ids = set(current_detections.keys())
@@ -698,7 +694,7 @@ class CameraState:
                 for c in self.callbacks["autotrack"]:
                     c(self.name, updated_obj, frame_time)
 
-            if thumb_update:
+            if thumb_update and current_frame is not None:
                 # ensure this frame is stored in the cache
                 if (
                     updated_obj.thumbnail_data["frame_time"] == frame_time
@@ -858,7 +854,10 @@ class CameraState:
             self.current_frame_time = frame_time
             self.motion_boxes = motion_boxes
             self.regions = regions
-            self._current_frame = current_frame
+
+            if current_frame is not None:
+                self._current_frame = current_frame
+
             if self.previous_frame_id is not None:
                 self.frame_manager.close(self.previous_frame_id)
             self.previous_frame_id = frame_id
