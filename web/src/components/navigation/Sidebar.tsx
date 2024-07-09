@@ -5,9 +5,12 @@ import { useLocation } from "react-router-dom";
 import GeneralSettings from "../menu/GeneralSettings";
 import AccountSettings from "../menu/AccountSettings";
 import useNavigation from "@/hooks/use-navigation";
+import { baseUrl } from "@/api/baseUrl";
+import { useMemo } from "react";
 
 function Sidebar() {
   const location = useLocation();
+  const basePath = useMemo(() => new URL(baseUrl).pathname, []);
 
   const navbarLinks = useNavigation();
 
@@ -18,7 +21,8 @@ function Sidebar() {
         <Logo className="mb-6 h-8 w-8" />
         {navbarLinks.map((item) => {
           const showCameraGroups =
-            item.id == 1 && item.url == location.pathname;
+            item.id == 1 &&
+            (location.pathname === "/" || location.pathname === basePath);
 
           return (
             <div key={item.id}>

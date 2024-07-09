@@ -161,7 +161,7 @@ export default function HlsVideoPlayer({
   }, [videoRef, controlsOpen]);
 
   return (
-    <TransformWrapper minScale={1.0}>
+    <TransformWrapper minScale={1.0} wheel={{ smoothStep: 0.005 }}>
       <VideoControls
         className={cn(
           "absolute left-1/2 z-50 -translate-x-1/2",

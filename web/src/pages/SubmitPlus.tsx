@@ -456,7 +456,7 @@ function PlusFilterGroup({
             <div className="hidden text-primary md:block">
               {selectedScoreRange == undefined
                 ? "Score Range"
-                : `${selectedScoreRange[0] * 100}% - ${selectedScoreRange[1] * 100}%`}
+                : `${Math.round(selectedScoreRange[0] * 100)}% - ${Math.round(selectedScoreRange[1] * 100)}%`}
             </div>
           </Button>
         </Trigger>
