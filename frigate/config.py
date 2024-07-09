@@ -279,6 +279,7 @@ class OnvifConfig(FrigateBaseModel):
         default_factory=PtzAutotrackConfig,
         title="PTZ auto tracking config.",
     )
+    adjust_time: Optional[bool] = Field(default=False, title="Onvif Adjust Time WSSE Authentication")
 
 
 class RetainModeEnum(str, Enum):

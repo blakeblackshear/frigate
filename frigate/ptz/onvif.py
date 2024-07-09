@@ -54,6 +54,7 @@ class OnvifController:
                             wsdl_dir=str(
                                 Path(find_spec("onvif").origin).parent / "wsdl"
                             ).replace("dist-packages/onvif", "site-packages"),
+                            adjust_time=cam.onvif.adjust_time,
                         ),
                         "init": False,
                         "active": False,
