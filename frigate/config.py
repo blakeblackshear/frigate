@@ -279,6 +279,10 @@ class OnvifConfig(FrigateBaseModel):
         default_factory=PtzAutotrackConfig,
         title="PTZ auto tracking config.",
     )
+    ignore_time_mismatch: bool = Field(
+        default=False,
+        title="Onvif Ignore Time Synchronization Mismatch Between Camera and Server",
+    )
 
 
 class RetainModeEnum(str, Enum):
