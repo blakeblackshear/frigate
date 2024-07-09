@@ -687,27 +687,31 @@ class DictFrameManager(FrameManager):
 
 class SharedMemoryFrameManager(FrameManager):
     def __init__(self):
-        self.shm_store = {}
+        self.shm_store: dict[str, shared_memory.SharedMemory] = {}
 
-    def create(self, name, size) -> AnyStr:
+    def create(self, name: str, size) -> AnyStr:
         shm = shared_memory.SharedMemory(name=name, create=True, size=size)
         self.shm_store[name] = shm
         return shm.buf
 
-    def get(self, name, shape):
-        if name in self.shm_store:
-            shm = self.shm_store[name]
-        else:
-            shm = shared_memory.SharedMemory(name=name)
-            self.shm_store[name] = shm
-        return np.ndarray(shape, dtype=np.uint8, buffer=shm.buf)
+    def get(self, name: str, shape) -> Optional[np.ndarray]:
+        try:
+            if name in self.shm_store:
+                shm = self.shm_store[name]
+            else:
+                shm = shared_memory.SharedMemory(name=name)
+                self.shm_store[name] = shm
+            return np.ndarray(shape, dtype=np.uint8, buffer=shm.buf)
+        except FileNotFoundError:
+            logger.error(f"Failed to get {name} from SHM")
+            return None
 
-    def close(self, name):
+    def close(self, name: str):
         if name in self.shm_store:
             self.shm_store[name].close()
             del self.shm_store[name]
 
-    def delete(self, name):
+    def delete(self, name: str):
         if name in self.shm_store:
             self.shm_store[name].close()
             self.shm_store[name].unlink()
