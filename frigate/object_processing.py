@@ -659,7 +659,6 @@ class CameraState:
     def update(self, frame_time, current_detections, motion_boxes, regions):
         # get the new frame
         frame_id = f"{self.name}{frame_time}"
-
         current_frame = self.frame_manager.get(
             frame_id, self.camera_config.frame_shape_yuv
         )
@@ -694,7 +693,7 @@ class CameraState:
                 for c in self.callbacks["autotrack"]:
                     c(self.name, updated_obj, frame_time)
 
-            if thumb_update and current_frame is not None:
+            if thumb_update:
                 # ensure this frame is stored in the cache
                 if (
                     updated_obj.thumbnail_data["frame_time"] == frame_time
@@ -851,16 +850,12 @@ class CameraState:
 
         with self.current_frame_lock:
             self.tracked_objects = tracked_objects
+            self.current_frame_time = frame_time
             self.motion_boxes = motion_boxes
             self.regions = regions
-
-            if current_frame is not None:
-                self.current_frame_time = frame_time
-                self._current_frame = current_frame
-
-                if self.previous_frame_id is not None:
-                    self.frame_manager.close(self.previous_frame_id)
-
+            self._current_frame = current_frame
+            if self.previous_frame_id is not None:
+                self.frame_manager.close(self.previous_frame_id)
             self.previous_frame_id = frame_id
 
 
