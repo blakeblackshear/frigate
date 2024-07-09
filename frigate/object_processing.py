@@ -851,15 +851,16 @@ class CameraState:
 
         with self.current_frame_lock:
             self.tracked_objects = tracked_objects
-            self.current_frame_time = frame_time
             self.motion_boxes = motion_boxes
             self.regions = regions
 
             if current_frame is not None:
+                self.current_frame_time = frame_time
                 self._current_frame = current_frame
 
-            if self.previous_frame_id is not None:
-                self.frame_manager.close(self.previous_frame_id)
+                if self.previous_frame_id is not None:
+                    self.frame_manager.close(self.previous_frame_id)
+
             self.previous_frame_id = frame_id
 
 
