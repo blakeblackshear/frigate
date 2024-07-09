@@ -295,7 +295,7 @@ export default function LiveCameraView({
   }, []);
 
   return (
-    <TransformWrapper minScale={1.0}>
+    <TransformWrapper minScale={1.0} wheel={{ smoothStep: 0.005 }}>
       <div
         ref={mainRef}
         className={
