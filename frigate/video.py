@@ -127,21 +127,22 @@ def capture_frames(
             if len(shm_frames) > shm_count:
                 expired_frame_name = shm_frames.pop(0)
                 frame_manager.delete(expired_frame_name)
-        except Exception as e:
-            logger.error(f"something video bad happened :: {e}")
+        except Exception:
+            # always delete the frame
             frame_manager.delete(frame_name)
 
             # shutdown has been initiated
             if stop_event.is_set():
                 break
+
             logger.error(f"{config.name}: Unable to read frames from ffmpeg process.")
 
             if ffmpeg_process.poll() is not None:
                 logger.error(
                     f"{config.name}: ffmpeg process is not running. exiting capture thread..."
                 )
-                frame_manager.delete(frame_name)
                 break
+
             continue
 
         frame_rate.update()

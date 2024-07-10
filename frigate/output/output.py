@@ -99,7 +99,7 @@ def output_frames(
         frame = frame_manager.get(frame_id, config.cameras[camera].frame_shape_yuv)
 
         if frame is None:
-            logger.warning(f"Failed to get frame {frame_id} from SHM")
+            logger.debug(f"Failed to get frame {frame_id} from SHM")
             continue
 
         # send camera frame to ffmpeg process if websockets are connected
