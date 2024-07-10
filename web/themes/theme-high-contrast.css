@@ -42,8 +42,8 @@
     --neutral: hsl(0, 0%, 45.1%);
     --neutral: 0 0% 45.1%;
 
-    --neutral-variant: hsl(0, 0%, 32.2%);
-    --neutral-variant: 0 0% 32.2%;
+    --neutral_variant: hsl(0, 0%, 32.2%);
+    --neutral_variant: 0 0% 32.2%;
 
     --muted: hsl(210, 40%, 96.1%);
     --muted: 210 40% 96.1%;
@@ -143,11 +143,11 @@
     --secondary-highlight: hsl(0, 0%, 65%);
     --secondary-highlight: 0 0% 65%;
 
-    --neutral: hsl(0, 0%, 65.1%);
-    --neutral: 0 0% 65.1%;
+    --neutral: hsl(0, 0%, 95.1%);
+    --neutral: 0 0% 95.1%;
 
-    --neutral-variant: hsl(0, 0%, 52.2%);
-    --neutral-variant: 0 0% 52.2%;
+    --neutral_variant: hsl(0, 0%, 82.2%);
+    --neutral_variant: 0 0% 82.2%;
 
     --muted: hsl(0, 0%, 32%);
     --muted: 0 0% 32%;

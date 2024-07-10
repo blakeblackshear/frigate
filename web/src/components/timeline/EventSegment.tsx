@@ -152,7 +152,7 @@ export function EventSegment({
       : ""
   } ${
     isFirstSegmentInMinimap || isLastSegmentInMinimap
-      ? "relative h-[8px] border-b-2 border-neutral-600"
+      ? "relative h-[8px] border-b-2 border-neutral_variant"
       : ""
   }`;
 
