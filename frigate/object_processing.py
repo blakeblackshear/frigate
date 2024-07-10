@@ -147,7 +147,7 @@ class TrackedObject:
         """get median of scores for object."""
         return median(self.score_history)
 
-    def update(self, current_frame_time, obj_data):
+    def update(self, current_frame_time: float, obj_data, has_valid_frame: bool):
         thumb_update = False
         significant_change = False
         autotracker_update = False
@@ -168,7 +168,7 @@ class TrackedObject:
         self.false_positive = self._is_false_positive()
         self.active = self.is_active()
 
-        if not self.false_positive:
+        if not self.false_positive and has_valid_frame:
             # determine if this frame is a better thumbnail
             if self.thumbnail_data is None or is_better_thumbnail(
                 self.obj_data["label"],
@@ -699,7 +699,7 @@ class CameraState:
         for id in updated_ids:
             updated_obj = tracked_objects[id]
             thumb_update, significant_update, autotracker_update = updated_obj.update(
-                frame_time, current_detections[id]
+                frame_time, current_detections[id], current_frame is not None
             )
 
             if autotracker_update or significant_update:
