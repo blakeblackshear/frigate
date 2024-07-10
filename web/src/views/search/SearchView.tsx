@@ -4,6 +4,7 @@ import SearchDetailDialog from "@/components/overlay/SearchDetailDialog";
 import SearchThumbnailPlayer from "@/components/player/SearchThumbnailPlayer";
 import { Input } from "@/components/ui/input";
 import { Toaster } from "@/components/ui/sonner";
+import { cn } from "@/lib/utils";
 import { Preview } from "@/types/preview";
 import { SearchFilter, SearchResult } from "@/types/search";
 import { useCallback, useState } from "react";
@@ -94,7 +95,7 @@ export default function SearchView({
           <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
         )}
 
-        <div className="grid w-full gap-2 px-1 sm:grid-cols-2 md:mx-2 md:grid-cols-3 md:gap-4 3xl:grid-cols-4">
+        <div className="flex w-full flex-wrap gap-2 px-1 md:mx-2 md:gap-4">
           {searchResults &&
             searchResults.map((value) => {
               const selected = false;
@@ -105,7 +106,11 @@ export default function SearchView({
                   data-start={value.start_time}
                   className="review-item relative rounded-lg"
                 >
-                  <div className="aspect-video overflow-hidden rounded-lg">
+                  <div
+                    className={cn(
+                      "aspect-square h-80 overflow-hidden rounded-lg",
+                    )}
+                  >
                     <SearchThumbnailPlayer
                       searchResult={value}
                       allPreviews={allPreviews}
