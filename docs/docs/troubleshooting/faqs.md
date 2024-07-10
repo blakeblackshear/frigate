@@ -57,3 +57,9 @@ SQLite does not work well on a network share, if the `/media` folder is mapped t
 If MQTT isn't working in docker try using the IP of the device hosting the MQTT server instead of `localhost`, `127.0.0.1`, or `mosquitto.ix-mosquitto.svc.cluster.local`.
 
 This is because, by default, Frigate does not run in host mode so localhost points to the Frigate container and not the host device's network.
+
+### How do I know if my camera is offline
+
+A camera being offline can be detected via MQTT or /api/stats, the camera_fps for any offline camera will be 0.
+
+Also, Home Assistant will mark any offline camera as being unavailable when the camera is offline
