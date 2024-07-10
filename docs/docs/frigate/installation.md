@@ -85,7 +85,7 @@ $ python -c 'print("{:.2f}MB".format((<width> * <height> * 1.5 * 10 + 270480) / 
 
 # Example for 1280x720
 $ python -c 'print("{:.2f}MB".format((1280 * 720 * 1.5 * 10 + 270480) / 1048576))'
-12.12MB
+13.44MB
 
 # Example for eight cameras detecting at 1280x720, including logs
 $ python -c 'print("{:.2f}MB".format(((1280 * 720 * 1.5 * 10 + 270480) / 1048576) * 8 + 40))'
