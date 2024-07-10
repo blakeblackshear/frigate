@@ -126,11 +126,7 @@ export default function SearchDetailDialog({
                       : undefined
                   }
                   draggable={false}
-                  src={
-                    search.thumb_path
-                      ? `${apiHost}${search.thumb_path.replace("/media/frigate/", "")}`
-                      : `${apiHost}api/events/${search.id}/thumbnail.jpg`
-                  }
+                  src={`${apiHost}api/events/${search.id}/thumbnail.jpg`}
                 />
                 <Button
                   onClick={() => {
