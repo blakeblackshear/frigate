@@ -35,6 +35,7 @@ import ObjectSettingsView from "@/views/settings/ObjectSettingsView";
 import MotionTunerView from "@/views/settings/MotionTunerView";
 import MasksAndZonesView from "@/views/settings/MasksAndZonesView";
 import AuthenticationView from "@/views/settings/AuthenticationView";
+import NotificationView from "@/views/settings/NotificationsSettingsView";
 
 export default function Settings() {
   const settingsViews = [
@@ -44,6 +45,7 @@ export default function Settings() {
     "motion tuner",
     "debug",
     "users",
+    "notifications",
   ] as const;
 
   type SettingsType = (typeof settingsViews)[number];
@@ -181,6 +183,7 @@ export default function Settings() {
           />
         )}
         {page == "users" && <AuthenticationView />}
+        {page == "notifications" && <NotificationView />}
       </div>
       {confirmationDialogOpen && (
         <AlertDialog
