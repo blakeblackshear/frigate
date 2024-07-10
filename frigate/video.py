@@ -583,7 +583,7 @@ def process_frames(
         )
 
         if frame is None:
-            logger.info(f"{camera_name}: frame {frame_time} is not in memory store.")
+            logger.debug(f"{camera_name}: frame {frame_time} is not in memory store.")
             continue
 
         # look for motion if enabled
