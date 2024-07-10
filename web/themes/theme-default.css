@@ -39,6 +39,12 @@
     --secondary-highlight: hsl(0, 0%, 94%);
     --secondary-highlight: 0 0% 94%;
 
+    --neutral: hsl(0, 0%, 45.1%);
+    --neutral: 0 0% 45.1%;
+
+    --neutral_variant: hsl(0, 0%, 32.2%);
+    --neutral_variant: 0 0% 32.2%;
+
     --muted: hsl(210, 40%, 96.1%);
     --muted: 210 40% 96.1%;
 
@@ -136,6 +142,12 @@
 
     --secondary-highlight: hsl(0, 0%, 25%);
     --secondary-highlight: 0 0% 25%;
+
+    --neutral: hsl(0, 0%, 45.1%);
+    --neutral: 0 0% 45.1%;
+
+    --neutral_variant: hsl(0, 0%, 32.2%);
+    --neutral_variant: 0 0% 32.2%;
 
     --muted: hsl(0, 0%, 12%);
     --muted: 0 0% 12%;
