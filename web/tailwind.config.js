@@ -103,6 +103,12 @@ module.exports = {
         audio_review: {
           DEFAULT: "hsl(var(--audio_review))",
         },
+        neutral: {
+          DEFAULT: "hsl(var(--neutral))",
+        },
+        neutral_variant: {
+          DEFAULT: "hsl(var(--neutral_variant))",
+        },
       },
       keyframes: {
         "accordion-down": {

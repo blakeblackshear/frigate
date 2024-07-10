@@ -1,12 +1,9 @@
 @import "/themes/tailwind-base.css";
 @import "/themes/theme-default.css";
 @import "/themes/theme-blue.css";
-@import "/themes/theme-gold.css";
 @import "/themes/theme-green.css";
-@import "/themes/theme-nature.css";
-@import "/themes/theme-netflix.css";
+@import "/themes/theme-high-contrast.css";
 @import "/themes/theme-nord.css";
-@import "/themes/theme-orange.css";
 @import "/themes/theme-red.css";
 
 @tailwind base;
@@ -26,7 +23,7 @@
 
 @layer utilities {
   .scrollbar-container {
-    @apply scrollbar-thumb-rounded-full scrollbar-track-rounded-full scrollbar-thin scrollbar-thumb-border scrollbar-track-background_alt;
+    @apply scrollbar-thin scrollbar-track-background_alt scrollbar-thumb-border scrollbar-track-rounded-full scrollbar-thumb-rounded-full;
   }
 }
 

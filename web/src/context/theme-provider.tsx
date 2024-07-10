@@ -3,25 +3,19 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 type Theme = "dark" | "light" | "system";
 type ColorScheme =
   | "theme-blue"
-  | "theme-gold"
   | "theme-green"
-  | "theme-nature"
-  | "theme-netflix"
   | "theme-nord"
-  | "theme-orange"
   | "theme-red"
+  | "theme-high-contrast"
   | "theme-default";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const colorSchemes: ColorScheme[] = [
   "theme-blue",
-  "theme-gold",
   "theme-green",
-  "theme-nature",
-  "theme-netflix",
   "theme-nord",
-  "theme-orange",
   "theme-red",
+  "theme-high-contrast",
   "theme-default",
 ];
 

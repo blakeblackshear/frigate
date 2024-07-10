@@ -13,6 +13,8 @@
     --secondary: 210 40% 90.1%;
     --secondary-foreground: 222.2 47.4% 61.2%;
     --secondary-highlight: 210 40% 94%;
+    --neutral: 0 0% 45.1%;
+    --neutral_variant: 0 0% 32.2%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 46.3% 46.9%;
     --accent: 210 40% 80.1%;
@@ -42,6 +44,8 @@
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 60% 78%;
     --secondary-highlight: 217.2 32.6% 25.5%;
+    --neutral: 0 0% 45.1%;
+    --neutral_variant: 0 0% 32.2%;
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
     --accent: 217.2 32.6% 17.5%;

@@ -17,6 +17,8 @@
     --secondary: 215 14% 80%;
     --secondary-foreground: 222 20% 16%;
     --secondary-highlight: 215 14% 88%;
+    --neutral: 0 0% 45.1%;
+    --neutral_variant: 0 0% 32.2%;
     --accent: 215 14% 80%;
     --accent-foreground: 222 20% 16%;
     --destructive: 0 80% 50%;
@@ -46,6 +48,8 @@
     --secondary: 215 14% 25%;
     --secondary-foreground: 222 20% 86%;
     --secondary-highlight: 215 14% 35%;
+    --neutral: 0 0% 45.1%;
+    --neutral_variant: 0 0% 32.2%;
     --accent: 215 14% 25%;
     --accent-foreground: 222 20% 96%;
     --destructive: 0 80% 50%;
