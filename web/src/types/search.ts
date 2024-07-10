@@ -1,3 +1,5 @@
+type SearchSource = "thumbnail" | "description";
+
 export type SearchResult = {
   id: string;
   camera: string;
@@ -9,6 +11,7 @@ export type SearchResult = {
   sub_label?: string;
   thumb_path?: string;
   zones: string[];
+  search_source: SearchSource;
 };
 
 export type SearchFilter = {
