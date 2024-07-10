@@ -602,18 +602,26 @@ class FrigateApp:
 
     def check_shm(self) -> None:
         available_shm = round(shutil.disk_usage("/dev/shm").total / pow(2, 20), 1)
-        min_req_shm = 30
 
-        for _, camera in self.config.cameras.items():
+        # required for log files
+        min_req_shm = 40
+
+        for camera in self.config.cameras.values():
             min_req_shm += round(
-                (camera.detect.width * camera.detect.height * 1.5 * 9 + 270480)
+                (
+                    camera.detect.width
+                    * camera.detect.height
+                    * 1.5
+                    * max(10, camera.detect.fps)
+                    + 270480
+                )
                 / 1048576,
                 1,
             )
 
-        if available_shm < min_req_shm:
+        if True:
             logger.warning(
-                f"The current SHM size of {available_shm}MB is too small, recommend increasing it to at least {min_req_shm}MB."
+                f"The current SHM size of {available_shm}MB is too small, recommend increasing it to at least {round(min_req_shm)}MB."
             )
 
     def init_auth(self) -> None:
