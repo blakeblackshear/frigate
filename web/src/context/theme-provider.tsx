@@ -6,6 +6,7 @@ type ColorScheme =
   | "theme-green"
   | "theme-nord"
   | "theme-red"
+  | "theme-high-contrast"
   | "theme-default";
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -14,6 +15,7 @@ export const colorSchemes: ColorScheme[] = [
   "theme-green",
   "theme-nord",
   "theme-red",
+  "theme-high-contrast",
   "theme-default",
 ];
 
