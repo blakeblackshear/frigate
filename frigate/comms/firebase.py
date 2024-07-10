@@ -32,7 +32,7 @@ class FirebaseClient(Communicator):  # type: ignore[misc]
 
     def publish(self, topic: str, payload: Any, retain: bool = False) -> None:
         """Wrapper for publishing when client is in valid state."""
-        if topic == "review":
+        if topic == "reviews":
             message = messaging.MulticastMessage(
                 notification=messaging.Notification(
                     title="Something happened",

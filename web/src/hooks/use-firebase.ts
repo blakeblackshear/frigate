@@ -1,4 +1,5 @@
 import { firebaseConfig } from "@/types/notifications";
+import { getMessaging, getToken } from "firebase/messaging";
 import { initializeApp } from "firebase/app";
 import { useMemo } from "react";
 
@@ -8,4 +9,8 @@ export function useFirebaseApp() {
     app.automaticDataCollectionEnabled = false;
     return app;
   }, []);
+}
+
+export function useFirebaseMessaging() {
+  return useMemo(() => getMessaging(), []);
 }
