@@ -19,6 +19,7 @@ import { Preview } from "@/types/preview";
 import { SearchResult } from "@/types/search";
 import { LuInfo } from "react-icons/lu";
 import useContextMenu from "@/hooks/use-contextmenu";
+import { cn } from "@/lib/utils";
 
 type SearchPlayerProps = {
   searchResult: SearchResult;
@@ -177,9 +178,11 @@ export default function SearchThumbnailPlayer({
       <div className={`${imgLoaded ? "visible" : "invisible"}`}>
         <img
           ref={imgRef}
-          className={`size-full select-none transition-opacity ${
-            playingBack ? "opacity-0" : "opacity-100"
-          }`}
+          className={cn(
+            "size-full select-none transition-opacity",
+            playingBack ? "opacity-0" : "opacity-100",
+            searchResult.search_source == "thumbnail" && "object-contain",
+          )}
           style={
             isIOS
               ? {
@@ -189,11 +192,7 @@ export default function SearchThumbnailPlayer({
               : undefined
           }
           draggable={false}
-          src={
-            searchResult.thumb_path
-              ? `${apiHost}${searchResult.thumb_path.replace("/media/frigate/", "")}`
-              : `${apiHost}api/events/${searchResult.id}/thumbnail.jpg`
-          }
+          src={`${apiHost}api/events/${searchResult.id}/thumbnail.jpg`}
           loading={isSafari ? "eager" : "lazy"}
           onLoad={() => {
             onImgLoad();
