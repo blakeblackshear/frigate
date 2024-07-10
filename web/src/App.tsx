@@ -41,7 +41,7 @@ function App() {
             >
               <Suspense>
                 <Routes>
-                  <Route path="/" element={<Live />} />
+                  <Route index element={<Live />} />
                   <Route path="/events" element={<Redirect to="/review" />} />
                   <Route path="/review" element={<Events />} />
                   <Route path="/export" element={<Exports />} />
