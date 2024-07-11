@@ -48,6 +48,8 @@ export default function CameraImage({
     }
   }, [containerWidth, containerHeight, hasLoaded]);
 
+  useEffect(() => setHasLoaded(false), [camera]);
+
   useEffect(() => {
     if (!config || !imgRef.current) {
       return;
