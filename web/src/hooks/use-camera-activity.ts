@@ -27,13 +27,10 @@ export function useCameraActivity(
 
   // init camera activity
 
-  const { payload: initialCameraState } = useInitialCameraState(
+  const { payload: updatedCameraState } = useInitialCameraState(
     camera.name,
     revalidateOnFocus,
   );
-
-  const updatedCameraState = useDeepMemo(initialCameraState);
-
   useEffect(() => {
     if (updatedCameraState) {
       setObjects(updatedCameraState.objects);
@@ -140,7 +137,7 @@ export function useCameraActivity(
     activeTracking: hasActiveObjects,
     activeMotion: detectingMotion
       ? detectingMotion === "ON"
-      : initialCameraState?.motion === true,
+      : updatedCameraState?.motion === true,
     objects,
     offline,
   };

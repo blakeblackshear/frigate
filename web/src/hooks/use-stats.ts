@@ -97,7 +97,7 @@ export function useAutoFrigateStats() {
   const { data: initialStats } = useSWR<FrigateStats>("stats", {
     revalidateOnFocus: false,
   });
-  const { payload: latestStats } = useFrigateStats();
+  const latestStats = useFrigateStats();
 
   const stats = useMemo(() => {
     if (latestStats) {
