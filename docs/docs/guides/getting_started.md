@@ -3,6 +3,8 @@ id: getting_started
 title: Getting started
 ---
 
+# Getting Started
+
 :::tip
 
 If you already have an environment with Linux and Docker installed, you can continue to [Installing Frigate](#installing-frigate) below.
@@ -10,8 +12,6 @@ If you already have an environment with Linux and Docker installed, you can cont
 If you already have Frigate installed, you can continue to [Configuring Frigate](#configuring-frigate) below.
 
 :::
-
-# Getting Started
 
 ## Setting up hardware
 
