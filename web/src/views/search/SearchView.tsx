@@ -95,7 +95,7 @@ export default function SearchView({
           <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
         )}
 
-        <div className="flex w-full flex-wrap gap-2 px-1 md:mx-2 md:gap-4">
+        <div className="grid w-full gap-2 px-1 sm:grid-cols-2 md:mx-2 md:grid-cols-4 md:gap-4 3xl:grid-cols-6">
           {searchResults &&
             searchResults.map((value) => {
               const selected = false;
@@ -108,7 +108,7 @@ export default function SearchView({
                 >
                   <div
                     className={cn(
-                      "aspect-square h-80 overflow-hidden rounded-lg",
+                      "aspect-square size-full overflow-hidden rounded-lg",
                     )}
                   >
                     <SearchThumbnailPlayer
