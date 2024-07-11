@@ -26,7 +26,7 @@ export default function CameraMetrics({
   );
 
   const [statsHistory, setStatsHistory] = useState<FrigateStats[]>([]);
-  const { payload: updatedStats } = useFrigateStats();
+  const updatedStats = useFrigateStats();
 
   useEffect(() => {
     if (initialStats == undefined || initialStats.length == 0) {

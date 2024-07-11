@@ -48,7 +48,7 @@ function StatusAlertNav({ className }: StatusAlertNavProps) {
   const { data: initialStats } = useSWR<FrigateStats>("stats", {
     revalidateOnFocus: false,
   });
-  const { payload: latestStats } = useFrigateStats();
+  const latestStats = useFrigateStats();
 
   const { messages, addMessage, clearMessages } = useContext(
     StatusBarMessagesContext,

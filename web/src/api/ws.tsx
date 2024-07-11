@@ -207,20 +207,18 @@ export function useFrigateEvents(): { payload: FrigateEvent } {
   return { payload: JSON.parse(payload as string) };
 }
 
-export function useFrigateReviews(): { payload: FrigateReview } {
+export function useFrigateReviews(): FrigateReview {
   const {
     value: { payload },
   } = useWs("reviews", "");
-  const review = useDeepMemo(JSON.parse(payload as string));
-  return { payload: review };
+  return useDeepMemo(JSON.parse(payload as string));
 }
 
-export function useFrigateStats(): { payload: FrigateStats } {
+export function useFrigateStats(): FrigateStats {
   const {
     value: { payload },
   } = useWs("stats", "");
-  const stats = useDeepMemo(JSON.parse(payload as string));
-  return { payload: stats };
+  return useDeepMemo(JSON.parse(payload as string));
 }
 
 export function useInitialCameraState(
