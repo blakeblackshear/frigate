@@ -3,11 +3,19 @@ id: getting_started
 title: Getting started
 ---
 
+:::tip
+
+If you already have an environment with Linux and Docker installed, you can continue to [Installing Frigate](#installing-frigate) below.
+
+If you already have Frigate installed, you can continue to [Configuring Frigate](#configuring-frigate) below.
+
+:::
+
 # Getting Started
 
 ## Setting up hardware
 
-This section guides you through setting up a server with Debian Bookworm and Docker. If you already have an environment with Linux and Docker installed, you can continue to [Installing Frigate](#installing-frigate) below.
+This section guides you through setting up a server with Debian Bookworm and Docker.
 
 ### Install Debian 12 (Bookworm)
 
