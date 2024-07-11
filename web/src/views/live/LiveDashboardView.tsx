@@ -64,13 +64,11 @@ export default function LiveDashboardView({
 
   // recent events
 
-  const { payload: reviewTopic } = useFrigateReviews();
+  const { payload: eventUpdate } = useFrigateReviews();
   const { data: allEvents, mutate: updateEvents } = useSWR<ReviewSegment[]>([
     "review",
     { limit: 10, severity: "alert" },
   ]);
-
-  const eventUpdate = useDeepMemo(reviewTopic);
 
   useEffect(() => {
     if (!eventUpdate) {

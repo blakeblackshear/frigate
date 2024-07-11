@@ -11,6 +11,7 @@ import {
 import { FrigateStats } from "@/types/stats";
 import useSWR from "swr";
 import { createContainer } from "react-tracked";
+import useDeepMemo from "@/hooks/use-deep-memo";
 
 type Update = {
   topic: string;
@@ -210,14 +211,16 @@ export function useFrigateReviews(): { payload: FrigateReview } {
   const {
     value: { payload },
   } = useWs("reviews", "");
-  return { payload: JSON.parse(payload as string) };
+  const review = useDeepMemo(JSON.parse(payload as string));
+  return { payload: review };
 }
 
 export function useFrigateStats(): { payload: FrigateStats } {
   const {
     value: { payload },
   } = useWs("stats", "");
-  return { payload: JSON.parse(payload as string) };
+  const stats = useDeepMemo(JSON.parse(payload as string));
+  return { payload: stats };
 }
 
 export function useInitialCameraState(
@@ -230,7 +233,8 @@ export function useInitialCameraState(
     value: { payload },
     send: sendCommand,
   } = useWs("camera_activity", "onConnect");
-  const data = JSON.parse(payload as string);
+
+  const data = useDeepMemo(JSON.parse(payload as string));
 
   useEffect(() => {
     let listener = undefined;
