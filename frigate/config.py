@@ -64,7 +64,7 @@ if os.path.isdir("/run/secrets") and os.access("/run/secrets", os.R_OK):
         if secret_file.startswith("FRIGATE_"):
             FRIGATE_ENV_VARS[secret_file] = Path(
                 os.path.join("/run/secrets", secret_file)
-            ).read_text()
+            ).read_text().strip()
 
 DEFAULT_TRACKED_OBJECTS = ["person"]
 DEFAULT_ALERT_OBJECTS = ["person", "car"]

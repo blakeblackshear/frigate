@@ -23,7 +23,7 @@ if os.path.isdir("/run/secrets"):
         if secret_file.startswith("FRIGATE_"):
             FRIGATE_ENV_VARS[secret_file] = Path(
                 os.path.join("/run/secrets", secret_file)
-            ).read_text()
+            ).read_text().strip()
 
 config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
 
