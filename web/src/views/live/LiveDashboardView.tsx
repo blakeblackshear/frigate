@@ -31,6 +31,7 @@ import { cn } from "@/lib/utils";
 import { LivePlayerError, LivePlayerMode } from "@/types/live";
 import { FaCompress, FaExpand } from "react-icons/fa";
 import { useResizeObserver } from "@/hooks/resize-observer";
+import useDeepMemo from "@/hooks/use-deep-memo";
 
 type LiveDashboardViewProps = {
   cameras: CameraConfig[];
@@ -63,11 +64,13 @@ export default function LiveDashboardView({
 
   // recent events
 
-  const { payload: eventUpdate } = useFrigateReviews();
+  const { payload: reviewTopic } = useFrigateReviews();
   const { data: allEvents, mutate: updateEvents } = useSWR<ReviewSegment[]>([
     "review",
     { limit: 10, severity: "alert" },
   ]);
+
+  const eventUpdate = useDeepMemo(reviewTopic);
 
   useEffect(() => {
     if (!eventUpdate) {
