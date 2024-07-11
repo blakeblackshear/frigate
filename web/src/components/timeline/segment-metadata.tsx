@@ -71,11 +71,11 @@ export function Tick({ timestamp, timestampSpread }: TickSegmentProps) {
           className={`pointer-events-none h-0.5 select-none ${
             timestamp.getMinutes() % timestampSpread === 0 &&
             timestamp.getSeconds() === 0
-              ? "dark:bg-neutral bg-neutral_variant w-[12px]"
+              ? "w-[12px] bg-neutral_variant dark:bg-neutral"
               : timestamp.getMinutes() % (timestampSpread == 15 ? 5 : 1) ===
                     0 && timestamp.getSeconds() === 0
-                ? "bg-neutral w-[8px]" // Minor tick mark
-                : "dark:bg-neutral_variant w-[5px] bg-neutral-400"
+                ? "w-[8px] bg-neutral" // Minor tick mark
+                : "w-[5px] bg-neutral-400 dark:bg-neutral_variant"
           }`}
         ></div>
       </div>
@@ -97,7 +97,7 @@ export function Timestamp({
       {!isFirstSegmentInMinimap && !isLastSegmentInMinimap && (
         <div
           key={`${segmentKey}_timestamp`}
-          className="dark:text-neutral text-neutral_variant pointer-events-none select-none text-[8px]"
+          className="pointer-events-none select-none text-[8px] text-neutral_variant dark:text-neutral"
         >
           {timestamp.getMinutes() % timestampSpread === 0 &&
             timestamp.getSeconds() === 0 &&
