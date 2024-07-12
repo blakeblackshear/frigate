@@ -72,13 +72,17 @@ export default function CameraSettingsView({
 
   const alertsLabels = useMemo(() => {
     return cameraConfig?.review.alerts.labels
-      ? cameraConfig.review.alerts.labels.join(", ")
+      ? cameraConfig.review.alerts.labels
+          .map((label) => label.replaceAll("_", " "))
+          .join(", ")
       : "";
   }, [cameraConfig]);
 
   const detectionsLabels = useMemo(() => {
     return cameraConfig?.review.detections.labels
-      ? cameraConfig.review.detections.labels.join(", ")
+      ? cameraConfig.review.detections.labels
+          .map((label) => label.replaceAll("_", " "))
+          .join(", ")
       : "";
   }, [cameraConfig]);
 
