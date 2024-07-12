@@ -62,6 +62,6 @@ By default a review item will be created if any `review -> alerts -> labels` and
 
 :::info
 
-Because zones don't apply to audio, audio labels will always be marked as an alert.
+Because zones don't apply to audio, audio labels will always be marked as a detection by default.
 
 :::
