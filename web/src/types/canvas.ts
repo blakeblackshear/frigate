@@ -18,8 +18,6 @@ export type ZoneFormValuesType = {
   loitering_time: number;
   isFinished: boolean;
   objects: string[];
-  review_alerts: boolean;
-  review_detections: boolean;
 };
 
 export type ObjectMaskFormValuesType = {
