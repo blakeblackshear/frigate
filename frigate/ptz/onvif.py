@@ -95,8 +95,12 @@ class OnvifController:
                 onvif_profile.VideoEncoderConfiguration
                 and onvif_profile.VideoEncoderConfiguration.Encoding == "H264"
                 and onvif_profile.PTZConfiguration
-                and onvif_profile.PTZConfiguration.DefaultContinuousPanTiltVelocitySpace
-                is not None
+                and (
+                    onvif_profile.PTZConfiguration.DefaultContinuousPanTiltVelocitySpace
+                    is not None
+                    or onvif_profile.PTZConfiguration.DefaultContinuousZoomVelocitySpace
+                    is not None
+                )
             ):
                 profile = onvif_profile
                 logger.debug(f"Selected Onvif profile for {camera_name}: {profile}")
