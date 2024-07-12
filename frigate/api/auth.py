@@ -89,7 +89,9 @@ def get_jwt_secret() -> str:
     # check docker secrets
     elif os.path.isfile(os.path.join("/run/secrets", JWT_SECRET_ENV_VAR)):
         logger.debug(f"Using jwt secret from {JWT_SECRET_ENV_VAR} docker secret file.")
-        jwt_secret = Path(os.path.join("/run/secrets", JWT_SECRET_ENV_VAR)).read_text()
+        jwt_secret = (
+            Path(os.path.join("/run/secrets", JWT_SECRET_ENV_VAR)).read_text().strip()
+        )
     # check for the addon options file
     elif os.path.isfile("/data/options.json"):
         with open("/data/options.json") as f:

@@ -62,9 +62,9 @@ FRIGATE_ENV_VARS = {k: v for k, v in os.environ.items() if k.startswith("FRIGATE
 if os.path.isdir("/run/secrets") and os.access("/run/secrets", os.R_OK):
     for secret_file in os.listdir("/run/secrets"):
         if secret_file.startswith("FRIGATE_"):
-            FRIGATE_ENV_VARS[secret_file] = Path(
-                os.path.join("/run/secrets", secret_file)
-            ).read_text()
+            FRIGATE_ENV_VARS[secret_file] = (
+                Path(os.path.join("/run/secrets", secret_file)).read_text().strip()
+            )
 
 DEFAULT_TRACKED_OBJECTS = ["person"]
 DEFAULT_ALERT_OBJECTS = ["person", "car"]
