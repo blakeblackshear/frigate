@@ -204,7 +204,6 @@ export default function DynamicVideoPlayer({
             clearTimeout(loadingTimeout);
           }
 
-          setIsLoading(false);
           setNoRecording(false);
         }}
         setFullResolution={setFullResolution}

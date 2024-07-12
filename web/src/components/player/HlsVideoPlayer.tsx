@@ -110,6 +110,8 @@ export default function HlsVideoPlayer({
     if (!hlsRef.current) {
       hlsRef.current = new Hls();
       hlsRef.current.attachMedia(videoRef.current);
+    } else {
+      hlsRef.current.detachMedia();
     }
 
     hlsRef.current.loadSource(currentSource);
