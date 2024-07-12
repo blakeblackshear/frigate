@@ -30,6 +30,7 @@ import { PolygonType } from "@/types/canvas";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import scrollIntoView from "scroll-into-view-if-needed";
 import GeneralSettingsView from "@/views/settings/GeneralSettingsView";
+import CameraSettingsView from "@/views/settings/CameraSettingsView";
 import ObjectSettingsView from "@/views/settings/ObjectSettingsView";
 import MotionTunerView from "@/views/settings/MotionTunerView";
 import MasksAndZonesView from "@/views/settings/MasksAndZonesView";
@@ -38,6 +39,7 @@ import AuthenticationView from "@/views/settings/AuthenticationView";
 export default function Settings() {
   const settingsViews = [
     "general",
+    "camera settings",
     "masks / zones",
     "motion tuner",
     "debug",
@@ -136,6 +138,7 @@ export default function Settings() {
           </div>
         </ScrollArea>
         {(page == "debug" ||
+          page == "camera settings" ||
           page == "masks / zones" ||
           page == "motion tuner") && (
           <div className="ml-2 flex flex-shrink-0 items-center gap-2">
@@ -157,6 +160,12 @@ export default function Settings() {
         {page == "general" && <GeneralSettingsView />}
         {page == "debug" && (
           <ObjectSettingsView selectedCamera={selectedCamera} />
+        )}
+        {page == "camera settings" && (
+          <CameraSettingsView
+            selectedCamera={selectedCamera}
+            setUnsavedChanges={setUnsavedChanges}
+          />
         )}
         {page == "masks / zones" && (
           <MasksAndZonesView

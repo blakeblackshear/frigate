@@ -172,9 +172,11 @@ export interface CameraConfig {
   review: {
     alerts: {
       required_zones: string[];
+      labels: string[];
     };
     detections: {
       required_zones: string[];
+      labels: string[];
     };
   };
   rtmp: {

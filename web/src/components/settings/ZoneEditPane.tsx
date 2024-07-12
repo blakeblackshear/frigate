@@ -143,20 +143,6 @@ export default function ZoneEditPane({
         config?.cameras[polygon.camera]?.zones[polygon.name]?.loitering_time,
       isFinished: polygon?.isFinished ?? false,
       objects: polygon?.objects ?? [],
-      review_alerts:
-        (polygon?.camera &&
-          polygon?.name &&
-          config?.cameras[
-            polygon.camera
-          ]?.review.alerts.required_zones.includes(polygon.name)) ||
-        false,
-      review_detections:
-        (polygon?.camera &&
-          polygon?.name &&
-          config?.cameras[
-            polygon.camera
-          ]?.review.detections.required_zones.includes(polygon.name)) ||
-        false,
     },
   });
 
@@ -167,8 +153,6 @@ export default function ZoneEditPane({
         inertia,
         loitering_time,
         objects: form_objects,
-        review_alerts,
-        review_detections,
       }: ZoneFormValuesType, // values submitted via the form
       objects: string[],
     ) => {
@@ -176,11 +160,21 @@ export default function ZoneEditPane({
         return;
       }
       let mutatedConfig = config;
+      let alertQueries = "";
+      let detectionQueries = "";
 
       const renamingZone = zoneName != polygon.name && polygon.name != "";
 
       if (renamingZone) {
         // rename - delete old zone and replace with new
+        const zoneInAlerts =
+          cameraConfig?.review.alerts.required_zones.includes(polygon.name) ??
+          false;
+        const zoneInDetections =
+          cameraConfig?.review.detections.required_zones.includes(
+            polygon.name,
+          ) ?? false;
+
         const {
           alertQueries: renameAlertQueries,
           detectionQueries: renameDetectionQueries,
@@ -209,6 +203,18 @@ export default function ZoneEditPane({
           });
           return;
         }
+
+        // make sure new zone name is readded to review
+        ({ alertQueries, detectionQueries } = reviewQueries(
+          zoneName,
+          zoneInAlerts,
+          zoneInDetections,
+          polygon.camera,
+          mutatedConfig?.cameras[polygon.camera]?.review.alerts
+            .required_zones || [],
+          mutatedConfig?.cameras[polygon.camera]?.review.detections
+            .required_zones || [],
+        ));
       }
 
       const coordinates = flattenPoints(
@@ -232,17 +238,6 @@ export default function ZoneEditPane({
       if (!objectQueries && !same_objects && !renamingZone) {
         objectQueries = `&cameras.${polygon?.camera}.zones.${zoneName}.objects`;
       }
-
-      const { alertQueries, detectionQueries } = reviewQueries(
-        zoneName,
-        review_alerts,
-        review_detections,
-        polygon.camera,
-        mutatedConfig?.cameras[polygon.camera]?.review.alerts.required_zones ||
-          [],
-        mutatedConfig?.cameras[polygon.camera]?.review.detections
-          .required_zones || [],
-      );
 
       let inertiaQuery = "";
       if (inertia) {
@@ -449,52 +444,6 @@ export default function ZoneEditPane({
             />
           </FormItem>
 
-          <Separator className="my-2 flex bg-secondary" />
-
-          <FormField
-            control={form.control}
-            name="review_alerts"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between">
-                <div className="space-y-0.5">
-                  <FormLabel>Alerts</FormLabel>
-                  <FormDescription>
-                    When an object enters this zone, ensure it is marked as an
-                    alert.
-                  </FormDescription>
-                </div>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    className="ml-3"
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="review_detections"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between">
-                <div className="space-y-0.5">
-                  <FormLabel className="text-base">Detections</FormLabel>
-                  <FormDescription>
-                    When an object enters this zone, ensure it is marked as a
-                    detection.
-                  </FormDescription>
-                </div>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    className="ml-3"
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
           <FormField
             control={form.control}
             name="isFinished"
