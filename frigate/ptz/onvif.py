@@ -98,7 +98,8 @@ class OnvifController:
                 and (
                     onvif_profile.PTZConfiguration.DefaultContinuousPanTiltVelocitySpace
                     is not None
-                    or onvif_profile.DefaultContinuousZoomVelocitySpace is not None
+                    or onvif_profile.PTZConfiguration.DefaultContinuousZoomVelocitySpace
+                    is not None
                 )
             ):
                 profile = onvif_profile
