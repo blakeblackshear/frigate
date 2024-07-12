@@ -343,7 +343,7 @@ export default function CameraSettingsView({
                       <div className="text-sm">
                         All {alertsLabels} objects
                         {watchedAlertsZones && watchedAlertsZones.length > 0
-                          ? ` detected in ${watchedAlertsZones.map((zone) => capitalizeFirstLetter(zone)).join(", ")}`
+                          ? ` detected in ${watchedAlertsZones.map((zone) => capitalizeFirstLetter(zone).replaceAll("_", " ")).join(", ")}`
                           : ""}{" "}
                         on{" "}
                         {capitalizeFirstLetter(
@@ -444,7 +444,7 @@ export default function CameraSettingsView({
                         <em>not classified as Alerts</em>{" "}
                         {watchedDetectionsZones &&
                         watchedDetectionsZones.length > 0
-                          ? ` that are detected in ${watchedDetectionsZones.map((zone) => capitalizeFirstLetter(zone)).join(", ")}`
+                          ? ` that are detected in ${watchedDetectionsZones.map((zone) => capitalizeFirstLetter(zone).replaceAll("_", " ")).join(", ")}`
                           : ""}{" "}
                         on{" "}
                         {capitalizeFirstLetter(
