@@ -5,6 +5,7 @@ import Konva from "konva";
 import type { KonvaEventObject } from "konva/lib/Node";
 import { Polygon, PolygonType } from "@/types/canvas";
 import { useApiHost } from "@/api";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 
 type PolygonCanvasProps = {
   containerRef: RefObject<HTMLDivElement>;
@@ -29,6 +30,7 @@ export function PolygonCanvas({
   hoveredPolygonIndex,
   selectedZoneMask,
 }: PolygonCanvasProps) {
+  const [isLoaded, setIsLoaded] = useState(false);
   const [image, setImage] = useState<HTMLImageElement | undefined>();
   const imageRef = useRef<Konva.Image | null>(null);
   const stageRef = useRef<Konva.Stage>(null);
@@ -36,13 +38,16 @@ export function PolygonCanvas({
 
   const videoElement = useMemo(() => {
     if (camera && width && height) {
+      setIsLoaded(false);
       const element = new window.Image();
       element.width = width;
       element.height = height;
       element.src = `${apiHost}api/${camera}/latest.webp?cache=${Date.now()}`;
       return element;
     }
-  }, [camera, width, height, apiHost]);
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [camera, apiHost]);
 
   useEffect(() => {
     if (!videoElement) {
@@ -50,6 +55,7 @@ export function PolygonCanvas({
     }
     const onload = function () {
       setImage(videoElement);
+      setIsLoaded(true);
     };
     videoElement.addEventListener("load", onload);
     return () => {
@@ -217,6 +223,10 @@ export function PolygonCanvas({
       setPolygons(updatedPolygons);
     }
   }, [activePolygonIndex, polygons, setPolygons]);
+
+  if (!isLoaded) {
+    return <ActivityIndicator />;
+  }
 
   return (
     <Stage
