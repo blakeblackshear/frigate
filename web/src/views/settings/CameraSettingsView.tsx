@@ -110,33 +110,36 @@ export default function CameraSettingsView({
       if (!isChecked) {
         form.reset({
           alerts_zones: watchedAlertsZones,
-          detections_zones:
-            cameraConfig?.review.detections.required_zones || [],
+          detections_zones: [],
         });
       }
       setChangedValue(true);
       setSelectDetections(isChecked as boolean);
     },
-    [watchedAlertsZones, cameraConfig, form],
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [watchedAlertsZones],
   );
 
   const saveToConfig = useCallback(
     async (
       { alerts_zones, detections_zones }: CameraReviewSettingsValueType, // values submitted via the form
     ) => {
-      const alertQueries = [...alerts_zones]
-        .map(
-          (zone) =>
-            `&cameras.${selectedCamera}.review.alerts.required_zones=${zone}`,
-        )
-        .join("");
+      const createQuery = (zones: string[], type: "alerts" | "detections") =>
+        zones.length
+          ? zones
+              .map(
+                (zone) =>
+                  `&cameras.${selectedCamera}.review.${type}.required_zones=${zone}`,
+              )
+              .join("")
+          : cameraConfig?.review[type]?.required_zones &&
+              cameraConfig?.review[type]?.required_zones.length > 0
+            ? `&cameras.${selectedCamera}.review.${type}.required_zones`
+            : "";
 
-      const detectionQueries = [...detections_zones]
-        .map(
-          (zone) =>
-            `&cameras.${selectedCamera}.review.detections.required_zones=${zone}`,
-        )
-        .join("");
+      const alertQueries = createQuery(alerts_zones, "alerts");
+      const detectionQueries = createQuery(detections_zones, "detections");
 
       axios
         .put(`config/set?${alertQueries}${detectionQueries}`, {
@@ -167,7 +170,7 @@ export default function CameraSettingsView({
           setIsLoading(false);
         });
     },
-    [updateConfig, setIsLoading, selectedCamera],
+    [updateConfig, setIsLoading, selectedCamera, cameraConfig],
   );
 
   const onCancel = useCallback(() => {
@@ -188,7 +191,9 @@ export default function CameraSettingsView({
     setSelectDetections(
       !!cameraConfig?.review.detections.required_zones?.length,
     );
-  }, [removeMessage, selectedCamera, setUnsavedChanges, form, cameraConfig]);
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [removeMessage, selectedCamera, setUnsavedChanges, cameraConfig]);
 
   useEffect(() => {
     onCancel();
