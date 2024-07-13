@@ -98,16 +98,33 @@ Additionally, the USB Coral draws a considerable amount of power. If using any o
 
 The Hailo-8L is an M.2 card typically connected to a carrier board for PCIe, which then connects to the Raspberry Pi 5 as part of the AI Kit. However, it can also be used on other boards equipped with an M.2 M key edge connector.
 
-#### Installation 
+#### Installation
 
 For Raspberry Pi 5 users with the AI Kit, installation is straightforward. Simply follow this [guide](https://www.raspberrypi.com/documentation/accessories/ai-kit.html#ai-kit-installation) to install the driver and software.
 
 For other boards, follow these steps for installation:
 
-1. Install the driver from the Hailo GitHub repository. A convenient script for Linux is available to clone the repository, build the driver, and install it.
+1. Install the driver from the [Hailo GitHub repository](https://github.com/hailo-ai/hailort-drivers). A convenient script for Linux is available to clone the repository, build the driver, and install it.
 2. Copy or download [this script](https://gist.github.com/spanner3003/4b85751d671d4ac55f926e564f1abc3e#file-install_hailo8l_driver-sh).
-3. Ensure it has execution permissions with `sudo chmod +x install_hailo_driver.sh`.
-4. Run the script with `./install_hailo_driver.sh`.
+3. Ensure it has execution permissions with `sudo chmod +x install_hailo8l_driver.sh`
+4. Run the script with `./install_hailo8l_driver.sh`
+
+#### Setup
+
+To set up Frigate, follow the default installation instructions, but use a Docker image with the `-h8l` suffix, for example: `ghcr.io/blakeblackshear/frigate:stable-h8l`
+
+Next, grant Docker permissions to access your hardware by adding the following lines to your `docker-compose.yml` file:
+
+```yaml
+devices:
+  - /dev/hailo0
+```
+
+If you are using `docker run`, add this option to your command `--device /dev/hailo0`
+
+#### Configuration
+
+Finally, configure [hardware object detection](/configuration/object_detectors#hailo-8l) to complete the setup.
 
 ### Rockchip platform
 
