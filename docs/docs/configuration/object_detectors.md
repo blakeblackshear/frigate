@@ -398,7 +398,7 @@ $ cat /sys/kernel/debug/rknpu/load
 
 This detector is available if you are using the Raspberry Pi 5 with Hailo-8L AI Kit. This has not been tested using the Hailo-8L with other hardware.
 
-### Configuration 
+### Configuration
 
 ```yaml
 detectors:
@@ -406,7 +406,7 @@ detectors:
     type: hailo8l
     device: PCIe
     model:
-      path: /hailo8l_models/ssd_mobilenet_v1.hef
+      path: /config/model_cache/h8l_cache/ssd_mobilenet_v1.hef
 
 model:
   width: 300

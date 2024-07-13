@@ -77,8 +77,6 @@ FROM deps AS h8l-frigate
 COPY --from=h8l-wheels /h8l-wheels /deps/h8l-wheels
 COPY --from=build-hailort /hailo-wheels /deps/hailo-wheels
 COPY --from=build-hailort /etc/environment /etc/environment
-RUN mkdir /hailo8l_models
-RUN wget -O /hailo8l_models/ssd_mobilenet_v1.hef https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.11.0/hailo8l/ssd_mobilenet_v1.hef
 RUN CC=$(python3 -c "import sysconfig; import shlex; cc = sysconfig.get_config_var('CC'); cc_cmd = shlex.split(cc)[0]; print(cc_cmd[:-4] if cc_cmd.endswith('-gcc') else cc_cmd)") && \
     echo "CC=$CC" >> /etc/environment
 

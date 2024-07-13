@@ -1,4 +1,6 @@
 import logging
+import os
+import urllib.request
 
 import numpy as np
 from hailo_platform import (
@@ -50,9 +52,13 @@ class HailoDetector(DetectionApi):
         self.h8l_model_type = detector_config.model.model_type
         self.h8l_tensor_format = detector_config.model.input_tensor
         self.h8l_pixel_format = detector_config.model.input_pixel_format
+        self.model_url = "https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.11.0/hailo8l/ssd_mobilenet_v1.hef"
+        self.cache_dir = "/config/model_cache/h8l_cache"
+        self.expected_model_filename = "ssd_mobilenet_v1.hef"
         output_type = "FLOAT32"
 
         logger.info(f"Initializing Hailo device as {self.h8l_device_type}")
+        self.check_and_prepare_model()
         try:
             # Validate device type
             if self.h8l_device_type not in ["PCIe", "M.2"]:
@@ -98,6 +104,24 @@ class HailoDetector(DetectionApi):
         except Exception as e:
             logger.error(f"Failed to initialize Hailo device: {e}")
             raise
+
+    def check_and_prepare_model(self):
+        # Ensure cache directory exists
+        if not os.path.exists(self.cache_dir):
+            os.makedirs(self.cache_dir)
+
+        # Check for the expected model file
+        model_file_path = os.path.join(self.cache_dir, self.expected_model_filename)
+        if not os.path.isfile(model_file_path):
+            logger.info(
+                f"A model file was not found at {model_file_path}, Downloading one from {self.model_url}."
+            )
+            urllib.request.urlretrieve(self.model_url, model_file_path)
+            logger.info(f"A model file was downloaded to {model_file_path}.")
+        else:
+            logger.info(
+                f"A model file already exists at {model_file_path} not downloading one."
+            )
 
     def detect_raw(self, tensor_input):
         logger.debug("[detect_raw] Entering function")
