@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { LogSeverity } from "@/types/log";
 import { ReactNode, useMemo, useRef } from "react";
+import { isIOS } from "react-device-detect";
 import { CSSTransition } from "react-transition-group";
 
 type ChipProps = {
@@ -34,8 +35,9 @@ export default function Chip({
       <div
         ref={nodeRef}
         className={cn(
-          "z-10 flex items-center rounded-2xl px-2 py-1.5",
+          "flex items-center rounded-2xl px-2 py-1.5",
           className,
+          !isIOS && "z-10",
         )}
         onClick={onClick}
       >
