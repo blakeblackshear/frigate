@@ -86,8 +86,8 @@ jobs:
           files: docker/hailo8l/h8l.hcl
           set: |
             h8l.tags=${{ steps.setup.outputs.image-name }}-h8l
-            *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64
-            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64,mode=max
+            *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-h8l
+            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-h8l,mode=max
   jetson_jp4_build:
     runs-on: ubuntu-latest
     name: Jetson Jetpack 4
