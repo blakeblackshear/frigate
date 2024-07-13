@@ -1,37 +1,24 @@
-import os
 import json
-from setuptools import setup, find_packages
-from setuptools.command.install import install as _install
+import os
+
+from setuptools import find_packages, setup
 from wheel.bdist_wheel import bdist_wheel as orig_bdist_wheel
+
 
 class NonPurePythonBDistWheel(orig_bdist_wheel):
     """Makes the wheel platform-dependent so it can be based on the _pyhailort architecture"""
+
     def finalize_options(self):
         orig_bdist_wheel.finalize_options(self)
         self.root_is_pure = False
 
 
-def _get_arch():
-    conf_file_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "wheel_conf.json")
-    with open(conf_file_path, "r") as conf_file:
-        content = json.load(conf_file)
-    return content['arch']
-
-def _get_system():
-    conf_file_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "wheel_conf.json")
-    with open(conf_file_path, "r") as conf_file:
-        content = json.load(conf_file)
-    return content['system']
-
-def _get_abi():
-    conf_file_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "wheel_conf.json")
-    with open(conf_file_path, "r") as conf_file:
-        content = json.load(conf_file)
-    return content['abi']
-
 def _get_hailort_lib_path():
-    lib_filename = f"libhailort.so"
-    lib_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), f"hailo_platform/pyhailort/{lib_filename}")
+    lib_filename = "libhailort.so"
+    lib_path = os.path.join(
+        os.path.abspath(os.path.dirname(__file__)),
+        f"hailo_platform/pyhailort/{lib_filename}",
+    )
     if os.path.exists(lib_path):
         print(f"Found libhailort shared library at: {lib_path}")
     else:
@@ -39,35 +26,44 @@ def _get_hailort_lib_path():
         raise FileNotFoundError(f"libhailort shared library not found at: {lib_path}")
     return lib_path
 
+
 def _get_pyhailort_lib_path():
-    conf_file_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), "wheel_conf.json")
+    conf_file_path = os.path.join(
+        os.path.abspath(os.path.dirname(__file__)), "wheel_conf.json"
+    )
     if not os.path.isfile(conf_file_path):
         raise FileNotFoundError(f"Configuration file not found: {conf_file_path}")
 
     with open(conf_file_path, "r") as conf_file:
         content = json.load(conf_file)
-        py_version = content['py_version']
-        arch = content['arch']
-        system = content['system']
-        extension = content['extension']
-        abi = content['abi']
-        
+        py_version = content["py_version"]
+        arch = content["arch"]
+        system = content["system"]
+        extension = content["extension"]
+        abi = content["abi"]
+
         # Construct the filename directly
         lib_filename = f"_pyhailort.cpython-{py_version.split('cp')[1]}-{arch}-{system}-{abi}.{extension}"
-        lib_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), f"hailo_platform/pyhailort/{lib_filename}")
+        lib_path = os.path.join(
+            os.path.abspath(os.path.dirname(__file__)),
+            f"hailo_platform/pyhailort/{lib_filename}",
+        )
 
         if os.path.exists(lib_path):
             print(f"Found _pyhailort shared library at: {lib_path}")
         else:
             print(f"Error: _pyhailort shared library not found at: {lib_path}")
-            raise FileNotFoundError(f"_pyhailort shared library not found at: {lib_path}")
+            raise FileNotFoundError(
+                f"_pyhailort shared library not found at: {lib_path}"
+            )
 
         return lib_path
+
 
 def _get_package_paths():
     packages = []
     pyhailort_lib = _get_pyhailort_lib_path()
-    hailort_lib =  _get_hailort_lib_path()
+    hailort_lib = _get_hailort_lib_path()
     if pyhailort_lib:
         packages.append(pyhailort_lib)
     if hailort_lib:
@@ -75,6 +71,7 @@ def _get_package_paths():
     packages.append(os.path.abspath("hailo_tutorials/notebooks/*"))
     packages.append(os.path.abspath("hailo_tutorials/hefs/*"))
     return packages
+
 
 if __name__ == "__main__":
     setup(
