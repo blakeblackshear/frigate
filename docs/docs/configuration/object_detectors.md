@@ -5,7 +5,7 @@ title: Object Detectors
 
 # Officially Supported Detectors
 
-Frigate provides the following builtin detector types: `cpu`, `edgetpu`, `openvino`, `tensorrt`, and `rknn`. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
+Frigate provides the following builtin detector types: `cpu`, `edgetpu`, `openvino`, `tensorrt`, `rknn`, and `hailo8l`. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
 
 ## CPU Detector (not recommended)
 
@@ -393,3 +393,25 @@ $ cat /sys/kernel/debug/rknpu/load
 
 - All models are automatically downloaded and stored in the folder `config/model_cache/rknn_cache`. After upgrading Frigate, you should remove older models to free up space.
 - You can also provide your own `.rknn` model. You should not save your own models in the `rknn_cache` folder, store them directly in the `model_cache` folder or another subfolder. To convert a model to `.rknn` format see the `rknn-toolkit2` (requires a x86 machine). Note, that there is only post-processing for the supported models.
+
+## Hailo-8l
+
+This detector is availability if you are using the Raspberry pi 5 with ai kit and currently not tested if you are using the Hailo-8L with other hardware.
+
+### Configuration 
+
+```yaml
+detectors:
+  hailo8l:
+    type: hailo8l
+    device: PCIe
+    model:
+      path: /hailo8l_models/ssd_mobilenet_v1.hef
+
+model:
+  width: 300
+  height: 300
+  input_tensor: nhwc
+  input_pixel_format: bgr
+  model_type: ssd
+```

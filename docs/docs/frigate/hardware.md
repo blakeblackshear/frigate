@@ -107,6 +107,10 @@ Frigate supports hardware video processing on all Rockchip boards. However, hard
 
 The inference time of a rk3588 with all 3 cores enabled is typically 25-30 ms for yolo-nas s.
 
+#### Hailo-8l PCIe
+
+Frigate supports the Hailo-8l M.2 card on any harware but currently it is only tested on the Raspberry pi5 PCIe hat from the AI kit.
+
 ## What does Frigate use the CPU for and what does it use a detector for? (ELI5 Version)
 
 This is taken from a [user question on reddit](https://www.reddit.com/r/homeassistant/comments/q8mgau/comment/hgqbxh5/?utm_source=share&utm_medium=web2x&context=3). Modified slightly for clarity.
