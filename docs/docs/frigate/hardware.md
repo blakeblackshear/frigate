@@ -111,7 +111,7 @@ The inference time of a rk3588 with all 3 cores enabled is typically 25-30 ms fo
 
 Frigate supports the Hailo-8l M.2 card on any hardware but currently it is only tested on the Raspberry Pi5 PCIe hat from the AI kit.
 
-The inference time for the Hailo-8L chip at time of writing is round 17-21 ms for the SSD MobileNet Version 1.
+The inference time for the Hailo-8L chip at time of writing is around 17-21 ms for the SSD MobileNet Version 1 model.
 
 ## What does Frigate use the CPU for and what does it use a detector for? (ELI5 Version)
 
