@@ -26,6 +26,7 @@ import { NoThumbSlider } from "../ui/slider";
 import { PREVIEW_FPS, PREVIEW_PADDING } from "@/types/preview";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { baseUrl } from "@/api/baseUrl";
+import { cn } from "@/lib/utils";
 
 type PreviewPlayerProps = {
   review: ReviewSegment;
@@ -229,8 +230,15 @@ export default function PreviewThumbnailPlayer({
             onImgLoad();
           }}
         />
-
-        <div className="absolute left-0 top-2 z-40">
+        {!playingBack && (
+          <div
+            className={cn(
+              "rounded-t-l pointer-events-none absolute inset-x-0 top-0 h-[30%] w-full bg-gradient-to-b from-black/60 to-transparent",
+              !isIOS && "z-10",
+            )}
+          />
+        )}
+        <div className={cn("absolute left-0 top-2", !isIOS && "z-40")}>
           <Tooltip>
             <div
               className="flex"
@@ -276,21 +284,23 @@ export default function PreviewThumbnailPlayer({
           </Tooltip>
         </div>
         {!playingBack && (
-          <>
-            <div className="rounded-t-l pointer-events-none absolute inset-x-0 top-0 z-10 h-[30%] w-full bg-gradient-to-b from-black/60 to-transparent"></div>
-            <div className="rounded-b-l pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[20%] w-full bg-gradient-to-t from-black/60 to-transparent">
-              <div className="mx-3 flex h-full items-end justify-between pb-1 text-sm text-white">
-                {review.end_time ? (
-                  <TimeAgo time={review.start_time * 1000} dense />
-                ) : (
-                  <div>
-                    <ActivityIndicator size={24} />
-                  </div>
-                )}
-                {formattedDate}
-              </div>
+          <div
+            className={cn(
+              "rounded-b-l pointer-events-none absolute inset-x-0 bottom-0 h-[20%] w-full bg-gradient-to-t from-black/60 to-transparent",
+              !isIOS && "z-10",
+            )}
+          >
+            <div className="mx-3 flex h-full items-end justify-between pb-1 text-sm text-white">
+              {review.end_time ? (
+                <TimeAgo time={review.start_time * 1000} dense />
+              ) : (
+                <div>
+                  <ActivityIndicator size={24} />
+                </div>
+              )}
+              {formattedDate}
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>
