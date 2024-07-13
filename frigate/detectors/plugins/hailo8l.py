@@ -1,7 +1,6 @@
 import logging
 
 import numpy as np
-import cv2  # Ensure you have OpenCV installed for resizing and color space conversion
 from hailo_platform import (
     HEF,
     ConfigureParams,
@@ -13,12 +12,12 @@ from hailo_platform import (
     OutputVStreamParams,
     VDevice,
 )
-from frigate.detectors.util import preprocess  # Assuming this function is available
 from pydantic import BaseModel, Field
 from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
+from frigate.detectors.util import preprocess  # Assuming this function is available
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -26,14 +25,17 @@ logger = logging.getLogger(__name__)
 # Define the detector key for Hailo
 DETECTOR_KEY = "hailo8l"
 
+
 # Configuration class for model settings
 class ModelConfig(BaseModel):
     path: str = Field(default=None, title="Model Path")  # Path to the HEF file
+
 
 # Configuration class for Hailo detector
 class HailoDetectorConfig(BaseDetectorConfig):
     type: Literal[DETECTOR_KEY]  # Type of the detector
     device: str = Field(default="PCIe", title="Device Type")  # Device type (e.g., PCIe)
+
 
 # Hailo detector class implementation
 class HailoDetector(DetectionApi):
@@ -48,7 +50,7 @@ class HailoDetector(DetectionApi):
         self.h8l_model_type = detector_config.model.model_type
         self.h8l_tensor_format = detector_config.model.input_tensor
         self.h8l_pixel_format = detector_config.model.input_pixel_format
-        output_type='FLOAT32'
+        output_type = "FLOAT32"
 
         logger.info(f"Initializing Hailo device as {self.h8l_device_type}")
         try:
@@ -71,7 +73,8 @@ class HailoDetector(DetectionApi):
 
             # Create input and output virtual stream parameters
             self.input_vstreams_params = InputVStreamParams.make(
-                self.network_group, format_type=self.hef.get_input_vstream_infos()[0].format.type
+                self.network_group,
+                format_type=self.hef.get_input_vstream_infos()[0].format.type,
             )
             self.output_vstreams_params = OutputVStreamParams.make(
                 self.network_group, format_type=getattr(FormatType, output_type)
@@ -86,7 +89,9 @@ class HailoDetector(DetectionApi):
             logger.debug(f"[__init__] Input Tensor Format: {self.h8l_tensor_format}")
             logger.debug(f"[__init__] Input Pixel Format: {self.h8l_pixel_format}")
             logger.debug(f"[__init__] Input VStream Info: {self.input_vstream_info[0]}")
-            logger.debug(f"[__init__] Output VStream Info: {self.output_vstream_info[0]}")
+            logger.debug(
+                f"[__init__] Output VStream Info: {self.output_vstream_info[0]}"
+            )
         except HailoRTException as e:
             logger.error(f"HailoRTException during initialization: {e}")
             raise
@@ -94,33 +99,43 @@ class HailoDetector(DetectionApi):
             logger.error(f"Failed to initialize Hailo device: {e}")
             raise
 
-
     def detect_raw(self, tensor_input):
         logger.debug("[detect_raw] Entering function")
-        logger.debug(f"[detect_raw] The `tensor_input` = {tensor_input} tensor_input shape = {tensor_input.shape}")
+        logger.debug(
+            f"[detect_raw] The `tensor_input` = {tensor_input} tensor_input shape = {tensor_input.shape}"
+        )
 
         if tensor_input is None:
-            raise ValueError("[detect_raw] The 'tensor_input' argument must be provided")
+            raise ValueError(
+                "[detect_raw] The 'tensor_input' argument must be provided"
+            )
 
         # Ensure tensor_input is a numpy array
         if isinstance(tensor_input, list):
             tensor_input = np.array(tensor_input)
-            logger.debug(f"[detect_raw] Converted tensor_input to numpy array: shape {tensor_input.shape}")
+            logger.debug(
+                f"[detect_raw] Converted tensor_input to numpy array: shape {tensor_input.shape}"
+            )
 
         # Preprocess the tensor input using Frigate's preprocess function
         processed_tensor = preprocess(
-            tensor_input, 
-            (1, self.h8l_model_height, self.h8l_model_width, 3), 
-            np.uint8
+            tensor_input, (1, self.h8l_model_height, self.h8l_model_width, 3), np.uint8
         )
-        logger.debug(f"[detect_raw] Tensor data and shape after preprocessing: {processed_tensor} {processed_tensor.shape}")
-
+        logger.debug(
+            f"[detect_raw] Tensor data and shape after preprocessing: {processed_tensor} {processed_tensor.shape}"
+        )
 
         input_data = processed_tensor
-        logger.debug(f"[detect_raw] Input data for inference shape: {processed_tensor.shape}, dtype: {processed_tensor.dtype}")
+        logger.debug(
+            f"[detect_raw] Input data for inference shape: {processed_tensor.shape}, dtype: {processed_tensor.dtype}"
+        )
 
         try:
-            with InferVStreams(self.network_group, self.input_vstreams_params, self.output_vstreams_params) as infer_pipeline:
+            with InferVStreams(
+                self.network_group,
+                self.input_vstreams_params,
+                self.output_vstreams_params,
+            ) as infer_pipeline:
                 input_dict = {}
                 if isinstance(input_data, dict):
                     input_dict = input_data
@@ -135,28 +150,40 @@ class HailoDetector(DetectionApi):
                         logger.debug("[detect_raw] converted from an array.")
                     input_dict[self.input_vstream_info[0].name] = input_data
 
-                logger.debug(f"[detect_raw] Input dictionary for inference keys: {input_dict.keys()}")
+                logger.debug(
+                    f"[detect_raw] Input dictionary for inference keys: {input_dict.keys()}"
+                )
 
                 with self.network_group.activate(self.network_group_params):
                     raw_output = infer_pipeline.infer(input_dict)
                     logger.debug(f"[detect_raw] Raw inference output: {raw_output}")
 
                     if self.output_vstream_info[0].name not in raw_output:
-                        logger.error(f"[detect_raw] Missing output stream {self.output_vstream_info[0].name} in inference results")
+                        logger.error(
+                            f"[detect_raw] Missing output stream {self.output_vstream_info[0].name} in inference results"
+                        )
                         return np.zeros((20, 6), np.float32)
 
                     raw_output = raw_output[self.output_vstream_info[0].name][0]
-                    logger.debug(f"[detect_raw] Raw output for stream {self.output_vstream_info[0].name}: {raw_output}")
+                    logger.debug(
+                        f"[detect_raw] Raw output for stream {self.output_vstream_info[0].name}: {raw_output}"
+                    )
 
             # Process the raw output
             detections = self.process_detections(raw_output)
             if len(detections) == 0:
-                logger.debug(f"[detect_raw] No detections found after processing. Setting default values.")
+                logger.debug(
+                    "[detect_raw] No detections found after processing. Setting default values."
+                )
                 return np.zeros((20, 6), np.float32)
             else:
                 formatted_detections = detections
-                if formatted_detections.shape[1] != 6:  # Ensure the formatted detections have 6 columns
-                    logger.error(f"[detect_raw] Unexpected shape for formatted detections: {formatted_detections.shape}. Expected (20, 6).")
+                if (
+                    formatted_detections.shape[1] != 6
+                ):  # Ensure the formatted detections have 6 columns
+                    logger.error(
+                        f"[detect_raw] Unexpected shape for formatted detections: {formatted_detections.shape}. Expected (20, 6)."
+                    )
                     return np.zeros((20, 6), np.float32)
                 return formatted_detections
         except HailoRTException as e:
@@ -176,45 +203,63 @@ class HailoDetector(DetectionApi):
 
         for i, detection_set in enumerate(raw_detections):
             if not isinstance(detection_set, np.ndarray) or detection_set.size == 0:
-                logger.debug(f"[process_detections] Detection set {i} is empty or not an array, skipping.")
+                logger.debug(
+                    f"[process_detections] Detection set {i} is empty or not an array, skipping."
+                )
                 continue
 
-            logger.debug(f"[process_detections] Detection set {i} shape: {detection_set.shape}")
+            logger.debug(
+                f"[process_detections] Detection set {i} shape: {detection_set.shape}"
+            )
 
             for detection in detection_set:
                 if detection.shape[0] == 0:
-                    logger.debug(f"[process_detections] Detection in set {i} is empty, skipping.")
+                    logger.debug(
+                        f"[process_detections] Detection in set {i} is empty, skipping."
+                    )
                     continue
 
                 ymin, xmin, ymax, xmax = detection[:4]
                 score = np.clip(detection[4], 0, 1)  # Use np.clip for clarity
 
                 if score < threshold:
-                   logger.debug(f"[process_detections] Detection in set {i} has a score {score} below threshold {threshold}. Skipping.")
-                   continue
+                    logger.debug(
+                        f"[process_detections] Detection in set {i} has a score {score} below threshold {threshold}. Skipping."
+                    )
+                    continue
 
-                logger.debug(f"[process_detections] Adding detection with coordinates: ({xmin}, {ymin}), ({xmax}, {ymax}) and score: {score}")
+                logger.debug(
+                    f"[process_detections] Adding detection with coordinates: ({xmin}, {ymin}), ({xmax}, {ymax}) and score: {score}"
+                )
                 boxes.append([ymin, xmin, ymax, xmax])
                 scores.append(score)
                 classes.append(i)
                 num_detections += 1
 
-        logger.debug(f"[process_detections] Boxes: {boxes}, Scores: {scores}, Classes: {classes}, Num detections: {num_detections}")
+        logger.debug(
+            f"[process_detections] Boxes: {boxes}, Scores: {scores}, Classes: {classes}, Num detections: {num_detections}"
+        )
 
         if num_detections == 0:
             logger.debug("[process_detections] No valid detections found.")
             return np.zeros((20, 6), np.float32)
 
-        combined = np.hstack((
-            np.array(classes)[:, np.newaxis],
-            np.array(scores)[:, np.newaxis],
-            np.array(boxes)
-        ))
+        combined = np.hstack(
+            (
+                np.array(classes)[:, np.newaxis],
+                np.array(scores)[:, np.newaxis],
+                np.array(boxes),
+            )
+        )
 
         if combined.shape[0] < 20:
-            padding = np.zeros((20 - combined.shape[0], combined.shape[1]), dtype=combined.dtype)
+            padding = np.zeros(
+                (20 - combined.shape[0], combined.shape[1]), dtype=combined.dtype
+            )
             combined = np.vstack((combined, padding))
 
-        logger.debug(f"[process_detections] Combined detections (padded to 20 if necessary): {np.array_str(combined, precision=4, suppress_small=True)}")
+        logger.debug(
+            f"[process_detections] Combined detections (padded to 20 if necessary): {np.array_str(combined, precision=4, suppress_small=True)}"
+        )
 
         return combined[:20, :6]
