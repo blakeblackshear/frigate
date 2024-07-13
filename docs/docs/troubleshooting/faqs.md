@@ -28,6 +28,7 @@ You can open `chrome://media-internals/` in another tab and then try to playback
 Frigate generally [recommends cameras with configurable sub streams](/frigate/hardware.md). However, if your camera does not have a sub stream that a suitable resolution, the main stream can be resized.
 
 To do this efficiently the following setup is required:
+
 1. A GPU or iGPU must be available to do the scaling.
 2. [ffmpeg presets for hwaccel](/configuration/hardware_acceleration.md) must be used
 3. Set the desired detection resolution for `detect -> width` and `detect -> height`.
@@ -56,10 +57,44 @@ SQLite does not work well on a network share, if the `/media` folder is mapped t
 
 If MQTT isn't working in docker try using the IP of the device hosting the MQTT server instead of `localhost`, `127.0.0.1`, or `mosquitto.ix-mosquitto.svc.cluster.local`.
 
-This is because, by default, Frigate does not run in host mode so localhost points to the Frigate container and not the host device's network.
+This is because Frigate does not run in host mode so localhost points to the Frigate container and not the host device's network.
 
 ### How do I know if my camera is offline
 
 A camera being offline can be detected via MQTT or /api/stats, the camera_fps for any offline camera will be 0.
 
-Also, Home Assistant will mark any offline camera as being unavailable when the camera is offline
+Also, Home Assistant will mark any offline camera as being unavailable when the camera is offline.
+
+### How can I view the Frigate log files without using the Web UI?
+
+Frigate manages logs internally as well as outputs directly to Docker via standard output. To view these logs using the CLI, follow these steps:
+
+- Open a terminal or command prompt on the host running your Frigate container.
+- Type the following command and press Enter:
+  ```
+  docker logs -f frigate
+  ```
+  This command tells Docker to show you the logs from the Frigate container.
+  Note: If you've given your Frigate container a different name, replace "frigate" in the command with your container's actual name. The "-f" option means the logs will continue to update in real-time as new entries are added. To stop viewing the logs, press `Ctrl+C`. If you'd like to learn more about using Docker logs, including additional options and features, you can explore Docker's [official documentation](https://docs.docker.com/engine/reference/commandline/logs/).
+
+Alternatively, when you create the Frigate Docker container, you can bind a directory on the host to the mountpoint `/dev/shm/logs` to not only be able to persist the logs to disk, but also to be able to query them directly from the host using your favorite log parsing/query utility.
+
+```
+docker run -d \
+  --name frigate \
+  --restart=unless-stopped \
+  --mount type=tmpfs,target=/tmp/cache,tmpfs-size=1000000000 \
+  --device /dev/bus/usb:/dev/bus/usb \
+  --device /dev/dri/renderD128 \
+  --shm-size=64m \
+  -v /path/to/your/storage:/media/frigate \
+  -v /path/to/your/config:/config \
+  -v /etc/localtime:/etc/localtime:ro \
+  -v /path/to/local/log/dir:/dev/shm/logs \
+  -e FRIGATE_RTSP_PASSWORD='password' \
+  -p 5000:5000 \
+  -p 8554:8554 \
+  -p 8555:8555/tcp \
+  -p 8555:8555/udp \
+  ghcr.io/blakeblackshear/frigate:stable
+```
