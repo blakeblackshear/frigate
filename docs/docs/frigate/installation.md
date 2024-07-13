@@ -248,7 +248,7 @@ The community supported docker image tags for the current stable version are:
   - `stable-rocm-gfx900` - AMD gfx900 driver only
   - `stable-rocm-gfx1030` - AMD gfx1030 driver only
   - `stable-rocm-gfx1100` - AMD gfx1100 driver only
-- `stable-h8l` - Frigate build for the Hailo-8L M.2 PICe Raspberry pi5 hat
+  - `stable-h8l` - Frigate build for the Hailo-8L M.2 PICe Raspberry Pi 5 hat
 
 ## Home Assistant Addon
 

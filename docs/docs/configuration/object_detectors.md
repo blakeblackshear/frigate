@@ -396,7 +396,7 @@ $ cat /sys/kernel/debug/rknpu/load
 
 ## Hailo-8l
 
-This detector is availability if you are using the Raspberry pi 5 with ai kit and currently not tested if you are using the Hailo-8L with other hardware.
+This detector is available if you are using the Raspberry Pi 5 with Hailo-8L AI Kit. This has not been tested using the Hailo-8L with other hardware.
 
 ### Configuration 
 
