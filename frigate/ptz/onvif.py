@@ -83,6 +83,7 @@ class OnvifController:
 
         try:
             profiles = media.GetProfiles()
+            logger.debug(f"Onvif profiles for {camera_name}: {profiles}")
         except (ONVIFError, Fault, TransportError) as e:
             logger.error(
                 f"Unable to get Onvif media profiles for camera: {camera_name}: {e}"
