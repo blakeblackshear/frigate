@@ -100,6 +100,38 @@ By default, the Raspberry Pi limits the amount of memory available to the GPU. I
 
 Additionally, the USB Coral draws a considerable amount of power. If using any other USB devices such as an SSD, you will experience instability due to the Pi not providing enough power to USB devices. You will need to purchase an external USB hub with it's own power supply. Some have reported success with <a href="https://amzn.to/3a2mH0P" target="_blank" rel="nofollow noopener sponsored">this</a> (affiliate link).
 
+### Hailo-8L
+
+The Hailo-8L is an M.2 card typically connected to a carrier board for PCIe, which then connects to the Raspberry Pi 5 as part of the AI Kit. However, it can also be used on other boards equipped with an M.2 M key edge connector.
+
+#### Installation
+
+For Raspberry Pi 5 users with the AI Kit, installation is straightforward. Simply follow this [guide](https://www.raspberrypi.com/documentation/accessories/ai-kit.html#ai-kit-installation) to install the driver and software.
+
+For other boards, follow these steps for installation:
+
+1. Install the driver from the [Hailo GitHub repository](https://github.com/hailo-ai/hailort-drivers). A convenient script for Linux is available to clone the repository, build the driver, and install it.
+2. Copy or download [this script](https://gist.github.com/spanner3003/4b85751d671d4ac55f926e564f1abc3e#file-install_hailo8l_driver-sh).
+3. Ensure it has execution permissions with `sudo chmod +x install_hailo8l_driver.sh`
+4. Run the script with `./install_hailo8l_driver.sh`
+
+#### Setup
+
+To set up Frigate, follow the default installation instructions, but use a Docker image with the `-h8l` suffix, for example: `ghcr.io/blakeblackshear/frigate:stable-h8l`
+
+Next, grant Docker permissions to access your hardware by adding the following lines to your `docker-compose.yml` file:
+
+```yaml
+devices:
+  - /dev/hailo0
+```
+
+If you are using `docker run`, add this option to your command `--device /dev/hailo0`
+
+#### Configuration
+
+Finally, configure [hardware object detection](/configuration/object_detectors#hailo-8l) to complete the setup.
+
 ### Rockchip platform
 
 Make sure that you use a linux distribution that comes with the rockchip BSP kernel 5.10 or 6.1 and necessary drivers (especially rkvdec2 and rknpu). To check, enter the following commands:
@@ -222,6 +254,7 @@ The community supported docker image tags for the current stable version are:
   - `stable-rocm-gfx900` - AMD gfx900 driver only
   - `stable-rocm-gfx1030` - AMD gfx1030 driver only
   - `stable-rocm-gfx1100` - AMD gfx1100 driver only
+  - `stable-h8l` - Frigate build for the Hailo-8L M.2 PICe Raspberry Pi 5 hat
 
 ## Home Assistant Addon
 
