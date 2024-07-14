@@ -7,6 +7,16 @@ The Review page of the Frigate UI is for quickly reviewing historical footage of
 
 Review items are filterable by date, object type, and camera.
 
+### Review items vs. events
+
+In Frigate 0.13 and earlier versions, the UI presented "events". An event was synonymous with a tracked or detected object. In Frigate 0.14 and later, a review item is a time period where any number of tracked objects were active.
+
+For example, consider a situation where two people walked past your house. One was walking a dog. At the same time, a car drove by on the street behind them.
+
+In this scenario, Frigate 0.13 and earlier would show 4 events in the UI - one for each person, another for the dog, and yet another for the car. You would have had 4 separate videos to watch even though they would have all overlapped.
+
+In 0.14 and later, all of that is bundled into a single review item which starts and ends to capture all of that activity. Reviews for a single camera cannot overlap. Once you have watched that time period on that camera, it is marked as reviewed.
+
 ## Alerts and Detections
 
 Not every segment of video captured by Frigate may be of the same level of interest to you. Video of people who enter your property may be a different priority than those walking by on the sidewalk. For this reason, Frigate 0.14 categorizes review items as _alerts_ and _detections_. By default, all person and car objects are considered alerts. You can refine categorization of your review items by configuring required zones for them.

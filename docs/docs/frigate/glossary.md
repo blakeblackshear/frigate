@@ -48,6 +48,10 @@ When pixels in the current camera frame are different than previous frames. When
 
 A portion of the camera frame that is sent to object detection, regions can be sent due to motion, active objects, or occasionally for stationary objects. These are represented by green boxes in the debug live view.
 
+## Review Item
+
+A review item is a time period where any number of events/tracked objects were active. [See the review docs for more info](/configuration/review)
+
 ## Snapshot Score
 
 The score shown in a snapshot is the score of that object at that specific moment in time.

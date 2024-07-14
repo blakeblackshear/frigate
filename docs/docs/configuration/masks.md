@@ -78,7 +78,7 @@ It is, but the definition of "unnecessary" varies. I want to ignore areas of mot
 
 > For me, giving my masks ANY padding results in a lot of people detection I'm not interested in. I live in the city and catch a lot of the sidewalk on my camera. People walk by my front door all the time and the margin between the sidewalk and actually walking onto my stoop is very thin, so I basically have everything but the exact contours of my stoop masked out. This results in very tidy detections but this info keeps throwing me off. Am I just overthinking it?
 
-This is what `required_zones` are for. You should define a zone (remember this is evaluated based on the bottom center of the bounding box) and make it required to save snapshots and clips (now events in 0.9.0). You can also use this in your conditions for a notification.
+This is what `required_zones` are for. You should define a zone (remember this is evaluated based on the bottom center of the bounding box) and make it required to save snapshots and clips (previously events in 0.9.0 to 0.13.0 and review items in 0.14.0 and later). You can also use this in your conditions for a notification.
 
 > Maybe my specific situation just warrants this. I've just been having a hard time understanding the relevance of this information - it seems to be that it's exactly what would be expected when "masking out" an area of ANY image.
 
