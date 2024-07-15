@@ -57,7 +57,10 @@ export function AnimatedEventCard({
 
   const navigate = useNavigate();
   const onOpenReview = useCallback(() => {
-    const url = selectedGroup ? `review?group=${selectedGroup}` : "review";
+    const url =
+      selectedGroup && selectedGroup != "default"
+        ? `review?group=${selectedGroup}`
+        : "review";
     navigate(url, {
       state: {
         severity: event.severity,
