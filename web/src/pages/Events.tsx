@@ -71,8 +71,10 @@ export default function Events() {
   useSearchEffect("group", (reviewGroup) => {
     if (config && reviewGroup) {
       const group = config.camera_groups[reviewGroup];
+      const isBirdseyeOnly =
+        group.cameras.length == 1 && group.cameras[0] == "birdseye";
 
-      if (group) {
+      if (group && !isBirdseyeOnly) {
         setReviewFilter({
           ...reviewFilter,
           cameras: group.cameras,
