@@ -113,7 +113,7 @@ function Live() {
       ) : (
         <LiveDashboardView
           cameras={cameras}
-          cameraGroup={cameraGroup}
+          cameraGroup={cameraGroup ?? "default"}
           includeBirdseye={includesBirdseye}
           onSelectCamera={setSelectedCameraName}
           fullscreen={fullscreen}

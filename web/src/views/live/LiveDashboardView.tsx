@@ -73,10 +73,10 @@ export default function LiveDashboardView({
         config == undefined || cameraGroup == "default"
           ? null
           : cameras
-              .filter((cam) =>
-                config.camera_groups[cameraGroup].cameras.includes(cam.name),
-              )
               .map((cam) => cam.name)
+              .filter((cam) =>
+                config.camera_groups[cameraGroup].cameras.includes(cam),
+              )
               .join(","),
     },
   ]);
