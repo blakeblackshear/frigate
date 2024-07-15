@@ -34,7 +34,7 @@ import { useResizeObserver } from "@/hooks/resize-observer";
 
 type LiveDashboardViewProps = {
   cameras: CameraConfig[];
-  cameraGroup?: string;
+  cameraGroup: string;
   includeBirdseye: boolean;
   onSelectCamera: (camera: string) => void;
   fullscreen: boolean;
@@ -69,7 +69,15 @@ export default function LiveDashboardView({
     {
       limit: 10,
       severity: "alert",
-      cameras: cameraGroup && cameras.filter((cam) => cam.name).join(","),
+      cameras:
+        config == undefined || cameraGroup == "default"
+          ? null
+          : cameras
+              .filter((cam) =>
+                config.camera_groups[cameraGroup].cameras.includes(cam.name),
+              )
+              .map((cam) => cam.name)
+              .join(","),
     },
   ]);
 
