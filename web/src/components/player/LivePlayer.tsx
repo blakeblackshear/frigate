@@ -79,7 +79,15 @@ export default function LivePlayer({
     }
 
     if (!cameraActive) {
-      setTimeout(() => setLiveReady(false), 500);
+      const timer = setTimeout(() => {
+        if (!cameraActive) {
+          setLiveReady(false);
+        }
+      }, 500);
+
+      return () => {
+        clearTimeout(timer);
+      };
     }
     // live mode won't change
     // eslint-disable-next-line react-hooks/exhaustive-deps
