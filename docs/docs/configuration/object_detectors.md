@@ -87,7 +87,7 @@ detectors:
 detectors:
   coral:
     type: edgetpu
-    device: pci:0
+    device: pci
 ```
 
 ### Multiple PCIE/M.2 Corals
