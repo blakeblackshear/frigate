@@ -66,7 +66,11 @@ export default function LiveDashboardView({
   const eventUpdate = useFrigateReviews();
   const { data: allEvents, mutate: updateEvents } = useSWR<ReviewSegment[]>([
     "review",
-    { limit: 10, severity: "alert" },
+    {
+      limit: 10,
+      severity: "alert",
+      cameras: cameraGroup && cameras.filter((cam) => cam.name).join(","),
+    },
   ]);
 
   useEffect(() => {
