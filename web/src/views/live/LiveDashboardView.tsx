@@ -64,20 +64,31 @@ export default function LiveDashboardView({
   // recent events
 
   const eventUpdate = useFrigateReviews();
+
+  const alertCameras = useMemo(() => {
+    if (!config || cameraGroup == "default") {
+      return null;
+    }
+
+    if (includeBirdseye && cameras.length == 0) {
+      return Object.values(config.cameras)
+        .filter((cam) => cam.birdseye.enabled)
+        .map((cam) => cam.name)
+        .join(",");
+    }
+
+    return cameras
+      .map((cam) => cam.name)
+      .filter((cam) => config.camera_groups[cameraGroup].cameras.includes(cam))
+      .join(",");
+  }, [cameras, cameraGroup, config, includeBirdseye]);
+
   const { data: allEvents, mutate: updateEvents } = useSWR<ReviewSegment[]>([
     "review",
     {
       limit: 10,
       severity: "alert",
-      cameras:
-        config == undefined || cameraGroup == "default"
-          ? null
-          : cameras
-              .map((cam) => cam.name)
-              .filter((cam) =>
-                config.camera_groups[cameraGroup].cameras.includes(cam),
-              )
-              .join(","),
+      cameras: alertCameras,
     },
   ]);
 
