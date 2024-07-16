@@ -87,15 +87,16 @@ def migrate_014(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
         if not new_config["record"]:
             del new_config["record"]
 
-        if new_config.get("ui"):
-            if new_config["ui"].get("use_experimental"):
-                del new_config["ui"]["experimental"]
+    # Remove UI fields
+    if new_config.get("ui"):
+        if new_config["ui"].get("use_experimental"):
+            del new_config["ui"]["experimental"]
 
-            if new_config["ui"].get("live_mode"):
-                del new_config["ui"]["live_mode"]
+        if new_config["ui"].get("live_mode"):
+            del new_config["ui"]["live_mode"]
 
-            if not new_config["ui"]:
-                del new_config["ui"]
+        if not new_config["ui"]:
+            del new_config["ui"]
 
     # remove rtmp
     if new_config.get("ffmpeg", {}).get("output_args", {}).get("rtmp"):
