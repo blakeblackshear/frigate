@@ -73,6 +73,15 @@ export default function LivePlayer({
   const liveMode = useCameraLiveMode(cameraConfig, preferredLiveMode);
 
   const [liveReady, setLiveReady] = useState(false);
+
+  const liveReadyRef = useRef(liveReady);
+  const cameraActiveRef = useRef(cameraActive);
+
+  useEffect(() => {
+    liveReadyRef.current = liveReady;
+    cameraActiveRef.current = cameraActive;
+  }, [liveReady, cameraActive]);
+
   useEffect(() => {
     if (!autoLive || !liveReady) {
       return;
@@ -80,7 +89,7 @@ export default function LivePlayer({
 
     if (!cameraActive) {
       const timer = setTimeout(() => {
-        if (!cameraActive) {
+        if (liveReadyRef.current && !cameraActiveRef.current) {
           setLiveReady(false);
         }
       }, 500);

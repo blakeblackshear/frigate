@@ -79,7 +79,7 @@ export default function LiveDashboardView({
 
     return cameras
       .map((cam) => cam.name)
-      .filter((cam) => config.camera_groups[cameraGroup].cameras.includes(cam))
+      .filter((cam) => config.camera_groups[cameraGroup]?.cameras.includes(cam))
       .join(",");
   }, [cameras, cameraGroup, config, includeBirdseye]);
 
