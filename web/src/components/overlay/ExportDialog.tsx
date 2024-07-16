@@ -63,6 +63,13 @@ export default function ExportDialog({
       return;
     }
 
+    if (range.before < range.after) {
+      toast.error("End time must be after start time", {
+        position: "top-center",
+      });
+      return;
+    }
+
     axios
       .post(
         `export/${camera}/start/${Math.round(range.after)}/end/${Math.round(range.before)}`,
