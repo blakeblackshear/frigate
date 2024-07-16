@@ -554,7 +554,9 @@ def vod_ts(camera_name, start_ts, end_ts):
             logger.warning(f"Recording clip is missing or empty: {recording.path}")
 
     if not clips:
-        logger.error("No recordings found for the requested time range")
+        logger.error(
+            f"No recordings found for {camera_name} during the requested time range"
+        )
         return make_response(
             jsonify(
                 {
