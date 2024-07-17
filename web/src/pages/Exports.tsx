@@ -66,7 +66,7 @@ function Exports() {
   const onHandleRename = useCallback(
     (id: string, update: string) => {
       axios
-        .patch(`export/${id}/${update}`)
+        .patch(`export/${id}/${encodeURIComponent(update)}`)
         .then((response) => {
           if (response.status == 200) {
             setDeleteClip(undefined);
