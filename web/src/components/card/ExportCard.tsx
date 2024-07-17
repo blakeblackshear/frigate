@@ -92,7 +92,7 @@ export default function ExportCard({
                 className="mt-3"
                 type="search"
                 placeholder={editName?.original}
-                value={editName?.update}
+                value={editName?.update || editName?.original}
                 onChange={(e) =>
                   setEditName({
                     original: editName.original ?? "",
@@ -105,9 +105,7 @@ export default function ExportCard({
                   size="sm"
                   variant="select"
                   disabled={(editName?.update?.length ?? 0) == 0}
-                  onClick={() => {
-                    submitRename();
-                  }}
+                  onClick={() => submitRename()}
                 >
                   Save
                 </Button>
