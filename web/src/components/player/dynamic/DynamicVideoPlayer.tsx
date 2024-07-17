@@ -91,6 +91,7 @@ export default function DynamicVideoPlayer({
   // initial state
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isBuffering, setIsBuffering] = useState(false);
   const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout>();
   const [source, setSource] = useState(
     `${apiHost}vod/${camera}/start/${timeRange.after}/end/${timeRange.before}/master.m3u8`,
@@ -130,9 +131,13 @@ export default function DynamicVideoPlayer({
         setIsLoading(false);
       }
 
+      if (isBuffering) {
+        setIsBuffering(false);
+      }
+
       onTimestampUpdate(controller.getProgress(time));
     },
-    [controller, onTimestampUpdate, isScrubbing, isLoading],
+    [controller, onTimestampUpdate, isBuffering, isLoading, isScrubbing],
   );
 
   const onUploadFrameToPlus = useCallback(
@@ -188,6 +193,7 @@ export default function DynamicVideoPlayer({
     <>
       <HlsVideoPlayer
         videoRef={playerRef}
+        containerRef={containerRef}
         visible={!(isScrubbing || isLoading)}
         currentSource={source}
         hotKeys={hotKeys}
@@ -209,7 +215,11 @@ export default function DynamicVideoPlayer({
         setFullResolution={setFullResolution}
         onUploadFrame={onUploadFrameToPlus}
         toggleFullscreen={toggleFullscreen}
-        containerRef={containerRef}
+        onError={(error) => {
+          if (error == "stalled" && !isScrubbing) {
+            setIsBuffering(true);
+          }
+        }}
       />
       <PreviewPlayer
         className={cn(
@@ -221,11 +231,11 @@ export default function DynamicVideoPlayer({
         cameraPreviews={cameraPreviews}
         startTime={startTimestamp}
         isScrubbing={isScrubbing}
-        onControllerReady={(previewController) => {
-          setPreviewController(previewController);
-        }}
+        onControllerReady={(previewController) =>
+          setPreviewController(previewController)
+        }
       />
-      {!isScrubbing && isLoading && !noRecording && (
+      {!isScrubbing && (isLoading || isBuffering) && !noRecording && (
         <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
       )}
       {!isScrubbing && noRecording && (

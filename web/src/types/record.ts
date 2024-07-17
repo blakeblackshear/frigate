@@ -39,5 +39,7 @@ export type RecordingStartingPoint = {
   severity: ReviewSeverity;
 };
 
+export type RecordingPlayerError = "stalled" | "startup";
+
 export const ASPECT_VERTICAL_LAYOUT = 1.5;
 export const ASPECT_WIDE_LAYOUT = 2;
