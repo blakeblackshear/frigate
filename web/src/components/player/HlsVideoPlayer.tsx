@@ -268,9 +268,28 @@ export default function HlsVideoPlayer({
           onPlaying={onPlaying}
           onPause={() => {
             setIsPlaying(false);
+            clearTimeout(bufferTimeout);
 
             if (isMobile && mobileCtrlTimeout) {
               clearTimeout(mobileCtrlTimeout);
+            }
+          }}
+          onWaiting={() => {
+            if (onError != undefined) {
+              if (videoRef.current?.paused) {
+                return;
+              }
+
+              setBufferTimeout(
+                setTimeout(() => {
+                  if (
+                    document.visibilityState === "visible" &&
+                    videoRef.current
+                  ) {
+                    onError("stalled");
+                  }
+                }, 3000),
+              );
             }
           }}
           onProgress={() => {
@@ -283,18 +302,6 @@ export default function HlsVideoPlayer({
                 clearTimeout(bufferTimeout);
                 setBufferTimeout(undefined);
               }
-
-              setBufferTimeout(
-                setTimeout(() => {
-                  if (
-                    document.visibilityState === "visible" &&
-                    videoRef.current &&
-                    !videoRef.current.paused
-                  ) {
-                    onError("stalled");
-                  }
-                }, 3000),
-              );
             }
           }}
           onTimeUpdate={() =>
