@@ -288,7 +288,8 @@ export default function HlsVideoPlayer({
                 setTimeout(() => {
                   if (
                     document.visibilityState === "visible" &&
-                    videoRef.current
+                    videoRef.current &&
+                    !videoRef.current.paused
                   ) {
                     onError("stalled");
                   }

@@ -13,7 +13,6 @@ from flask import (
     request,
 )
 from peewee import DoesNotExist
-from werkzeug.utils import secure_filename
 
 from frigate.const import EXPORT_DIR
 from frigate.models import Export, Recordings
@@ -48,9 +47,9 @@ def export_recording(camera_name: str, start_time, end_time):
 
     json: dict[str, any] = request.get_json(silent=True) or {}
     playback_factor = json.get("playback", "realtime")
-    name: Optional[str] = json.get("name")
+    friendly_name: Optional[str] = json.get("name")
 
-    if len(name or "") > 256:
+    if len(friendly_name or "") > 256:
         return make_response(
             jsonify({"success": False, "message": "File name is too long."}),
             401,
@@ -78,7 +77,7 @@ def export_recording(camera_name: str, start_time, end_time):
     exporter = RecordingExporter(
         current_app.frigate_config,
         camera_name,
-        secure_filename(name) if name else None,
+        friendly_name,
         int(start_time),
         int(end_time),
         (
