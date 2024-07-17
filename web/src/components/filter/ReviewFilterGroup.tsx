@@ -521,7 +521,7 @@ function CalendarFilterButton({
   return (
     <Popover>
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-      <PopoverContent>{content}</PopoverContent>
+      <PopoverContent className="w-auto">{content}</PopoverContent>
     </Popover>
   );
 }

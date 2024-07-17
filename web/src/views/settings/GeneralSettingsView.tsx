@@ -20,6 +20,7 @@ import {
 } from "../../components/ui/select";
 
 const PLAYBACK_RATE_DEFAULT = isSafari ? [0.5, 1, 2] : [0.5, 1, 2, 4, 8, 16];
+const WEEK_STARTS_ON = ["Sunday", "Monday"];
 
 export default function GeneralSettingsView() {
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -53,6 +54,7 @@ export default function GeneralSettingsView() {
 
   const [autoLive, setAutoLive] = usePersistence("autoLiveView", true);
   const [playbackRate, setPlaybackRate] = usePersistence("playbackRate", 1);
+  const [weekStartsOn, setWeekStartsOn] = usePersistence("weekStartsOn", 0);
 
   return (
     <>
@@ -136,6 +138,41 @@ export default function GeneralSettingsView() {
                       value={rate.toString()}
                     >
                       {rate}x
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            <Separator className="my-2 flex bg-secondary" />
+
+            <Heading as="h4" className="my-2">
+              Calendar
+            </Heading>
+
+            <div className="mt-2 space-y-6">
+              <div className="space-y-0.5">
+                <div className="text-md">First Weekday</div>
+                <div className="my-2 text-sm text-muted-foreground">
+                  <p>The day that the weeks of the review calendar begin on.</p>
+                </div>
+              </div>
+            </div>
+            <Select
+              value={weekStartsOn?.toString()}
+              onValueChange={(value) => setWeekStartsOn(parseInt(value))}
+            >
+              <SelectTrigger className="w-32">
+                {WEEK_STARTS_ON[weekStartsOn ?? 0]}
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {WEEK_STARTS_ON.map((day, index) => (
+                    <SelectItem
+                      key={index}
+                      className="cursor-pointer"
+                      value={index.toString()}
+                    >
+                      {day}
                     </SelectItem>
                   ))}
                 </SelectGroup>

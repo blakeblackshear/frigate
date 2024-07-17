@@ -5,6 +5,9 @@ import { FaCircle } from "react-icons/fa";
 import { getUTCOffset } from "@/utils/dateUtil";
 import { type DayContentProps } from "react-day-picker";
 import { LAST_24_HOURS_KEY } from "@/types/filter";
+import { usePersistence } from "@/hooks/use-persistence";
+
+type WeekStartsOnType = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
 type ReviewActivityCalendarProps = {
   reviewSummary?: ReviewSummary;
@@ -16,6 +19,8 @@ export default function ReviewActivityCalendar({
   selectedDay,
   onSelect,
 }: ReviewActivityCalendarProps) {
+  const [weekStartsOn] = usePersistence("weekStartsOn", 0);
+
   const disabledDates = useMemo(() => {
     const tomorrow = new Date();
     tomorrow.setHours(tomorrow.getHours() + 24, -1, 0, 0);
@@ -72,6 +77,7 @@ export default function ReviewActivityCalendar({
         DayContent: ReviewActivityDay,
       }}
       defaultMonth={selectedDay ?? new Date()}
+      weekStartsOn={(weekStartsOn ?? 0) as WeekStartsOnType}
     />
   );
 }
@@ -109,6 +115,8 @@ export function TimezoneAwareCalendar({
   selectedDay,
   onSelect,
 }: TimezoneAwareCalendarProps) {
+  const [weekStartsOn] = usePersistence("weekStartsOn", 0);
+
   const timezoneOffset = useMemo(
     () =>
       timezone ? Math.round(getUTCOffset(new Date(), timezone)) : undefined,
@@ -162,6 +170,7 @@ export function TimezoneAwareCalendar({
       selected={selectedDay}
       onSelect={onSelect}
       defaultMonth={selectedDay ?? new Date()}
+      weekStartsOn={(weekStartsOn ?? 0) as WeekStartsOnType}
     />
   );
 }
