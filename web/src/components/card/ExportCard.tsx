@@ -1,7 +1,7 @@
 import ActivityIndicator from "../indicators/activity-indicator";
 import { LuTrash } from "react-icons/lu";
 import { Button } from "../ui/button";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { isDesktop } from "react-device-detect";
 import { FaDownload, FaPlay } from "react-icons/fa";
 import Chip from "../indicators/Chip";
@@ -47,6 +47,15 @@ export default function ExportCard({
     update: string;
   }>();
 
+  const submitRename = useCallback(() => {
+    if (editName == undefined) {
+      return;
+    }
+
+    onRename(exportedRecording.id, editName.update);
+    setEditName(undefined);
+  }, [editName, exportedRecording, onRename, setEditName]);
+
   useKeyboardListener(
     editName != undefined ? ["Enter"] : [],
     (key, modifiers) => {
@@ -57,8 +66,7 @@ export default function ExportCard({
         editName &&
         editName.update.length > 0
       ) {
-        onRename(exportedRecording.id, editName.update);
-        setEditName(undefined);
+        submitRename();
       }
     },
   );
@@ -98,8 +106,7 @@ export default function ExportCard({
                   variant="select"
                   disabled={(editName?.update?.length ?? 0) == 0}
                   onClick={() => {
-                    onRename(exportedRecording.id, editName.update);
-                    setEditName(undefined);
+                    submitRename();
                   }}
                 >
                   Save
