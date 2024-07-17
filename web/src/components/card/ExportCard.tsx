@@ -1,7 +1,7 @@
 import ActivityIndicator from "../indicators/activity-indicator";
 import { LuTrash } from "react-icons/lu";
 import { Button } from "../ui/button";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { isDesktop } from "react-device-detect";
 import { FaDownload, FaPlay } from "react-icons/fa";
 import Chip from "../indicators/Chip";
@@ -47,6 +47,15 @@ export default function ExportCard({
     update: string;
   }>();
 
+  const submitRename = useCallback(() => {
+    if (editName == undefined) {
+      return;
+    }
+
+    onRename(exportedRecording.id, editName.update);
+    setEditName(undefined);
+  }, [editName, exportedRecording, onRename, setEditName]);
+
   useKeyboardListener(
     editName != undefined ? ["Enter"] : [],
     (key, modifiers) => {
@@ -57,8 +66,7 @@ export default function ExportCard({
         editName &&
         editName.update.length > 0
       ) {
-        onRename(exportedRecording.id, editName.update);
-        setEditName(undefined);
+        submitRename();
       }
     },
   );
@@ -84,7 +92,7 @@ export default function ExportCard({
                 className="mt-3"
                 type="search"
                 placeholder={editName?.original}
-                value={editName?.update}
+                value={editName?.update || editName?.original}
                 onChange={(e) =>
                   setEditName({
                     original: editName.original ?? "",
@@ -97,10 +105,7 @@ export default function ExportCard({
                   size="sm"
                   variant="select"
                   disabled={(editName?.update?.length ?? 0) == 0}
-                  onClick={() => {
-                    onRename(exportedRecording.id, editName.update);
-                    setEditName(undefined);
-                  }}
+                  onClick={() => submitRename()}
                 >
                   Save
                 </Button>

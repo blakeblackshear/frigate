@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { useOverlayState } from "@/hooks/use-overlay-state";
 import { usePersistence } from "@/hooks/use-persistence";
 import { cn } from "@/lib/utils";
-import { ASPECT_VERTICAL_LAYOUT } from "@/types/record";
+import { ASPECT_VERTICAL_LAYOUT, RecordingPlayerError } from "@/types/record";
 
 // Android native hls does not seek correctly
 const USE_NATIVE_HLS = !isAndroid;
@@ -29,6 +29,7 @@ const unsupportedErrorCodes = [
 
 type HlsVideoPlayerProps = {
   videoRef: MutableRefObject<HTMLVideoElement | null>;
+  containerRef?: React.MutableRefObject<HTMLDivElement | null>;
   visible: boolean;
   currentSource: string;
   hotKeys: boolean;
@@ -40,10 +41,11 @@ type HlsVideoPlayerProps = {
   setFullResolution?: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
   onUploadFrame?: (playTime: number) => Promise<AxiosResponse> | undefined;
   toggleFullscreen?: () => void;
-  containerRef?: React.MutableRefObject<HTMLDivElement | null>;
+  onError?: (error: RecordingPlayerError) => void;
 };
 export default function HlsVideoPlayer({
   videoRef,
+  containerRef,
   visible,
   currentSource,
   hotKeys,
@@ -55,7 +57,7 @@ export default function HlsVideoPlayer({
   setFullResolution,
   onUploadFrame,
   toggleFullscreen,
-  containerRef,
+  onError,
 }: HlsVideoPlayerProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -64,6 +66,7 @@ export default function HlsVideoPlayer({
   const hlsRef = useRef<Hls>();
   const [useHlsCompat, setUseHlsCompat] = useState(false);
   const [loadedMetadata, setLoadedMetadata] = useState(false);
+  const [bufferTimeout, setBufferTimeout] = useState<NodeJS.Timeout>();
 
   const handleLoadedMetadata = useCallback(() => {
     setLoadedMetadata(true);
@@ -265,9 +268,40 @@ export default function HlsVideoPlayer({
           onPlaying={onPlaying}
           onPause={() => {
             setIsPlaying(false);
+            clearTimeout(bufferTimeout);
 
             if (isMobile && mobileCtrlTimeout) {
               clearTimeout(mobileCtrlTimeout);
+            }
+          }}
+          onWaiting={() => {
+            if (onError != undefined) {
+              if (videoRef.current?.paused) {
+                return;
+              }
+
+              setBufferTimeout(
+                setTimeout(() => {
+                  if (
+                    document.visibilityState === "visible" &&
+                    videoRef.current
+                  ) {
+                    onError("stalled");
+                  }
+                }, 3000),
+              );
+            }
+          }}
+          onProgress={() => {
+            if (onError != undefined) {
+              if (videoRef.current?.paused) {
+                return;
+              }
+
+              if (bufferTimeout) {
+                clearTimeout(bufferTimeout);
+                setBufferTimeout(undefined);
+              }
             }
           }}
           onTimeUpdate={() =>

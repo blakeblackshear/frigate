@@ -12,10 +12,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Toaster } from "@/components/ui/sonner";
 import { DeleteClipType, Export } from "@/types/export";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { LuFolderX } from "react-icons/lu";
+import { toast } from "sonner";
 import useSWR from "swr";
 
 function Exports() {
@@ -63,12 +65,26 @@ function Exports() {
 
   const onHandleRename = useCallback(
     (id: string, update: string) => {
-      axios.patch(`export/${id}/${update}`).then((response) => {
-        if (response.status == 200) {
-          setDeleteClip(undefined);
-          mutate();
-        }
-      });
+      axios
+        .patch(`export/${id}/${encodeURIComponent(update)}`)
+        .then((response) => {
+          if (response.status == 200) {
+            setDeleteClip(undefined);
+            mutate();
+          }
+        })
+        .catch((error) => {
+          if (error.response?.data?.message) {
+            toast.error(
+              `Failed to rename export: ${error.response.data.message}`,
+              { position: "top-center" },
+            );
+          } else {
+            toast.error(`Failed to rename export: ${error.message}`, {
+              position: "top-center",
+            });
+          }
+        });
     },
     [mutate],
   );
@@ -79,6 +95,8 @@ function Exports() {
 
   return (
     <div className="flex size-full flex-col gap-2 overflow-hidden px-1 pt-2 md:p-2">
+      <Toaster closeButton={true} />
+
       <AlertDialog
         open={deleteClip != undefined}
         onOpenChange={() => setDeleteClip(undefined)}
