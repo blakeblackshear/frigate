@@ -7,7 +7,7 @@ Frigate is a Docker container that can be run on any Docker host including as a 
 
 :::tip
 
-If you already have Frigate installed, check out the [getting started guide](../guides/getting_started#configuring-frigate) to configure Frigate.
+If you already have Frigate installed as a Home Assistant addon, check out the [getting started guide](../guides/getting_started#configuring-frigate) to configure Frigate.
 
 :::
 
