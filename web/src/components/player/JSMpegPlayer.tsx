@@ -124,6 +124,7 @@ export default function JSMpegPlayer({
             protocols: [],
             audio: false,
             disableGl: true,
+            disableWebAssembly: true,
             videoBufferSize: 1024 * 1024 * 4,
             onVideoDecode: () => {
               if (!hasDataRef.current) {
