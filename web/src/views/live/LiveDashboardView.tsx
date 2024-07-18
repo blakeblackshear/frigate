@@ -133,33 +133,6 @@ export default function LiveDashboardView({
     [key: string]: LivePlayerMode;
   }>({});
 
-  useEffect(() => {
-    if (!cameras) return;
-
-    const mseSupported =
-      "MediaSource" in window || "ManagedMediaSource" in window;
-
-    const newPreferredLiveModes = cameras.reduce(
-      (acc, camera) => {
-        const isRestreamed =
-          config &&
-          Object.keys(config.go2rtc.streams || {}).includes(
-            camera.live.stream_name,
-          );
-
-        if (!mseSupported) {
-          acc[camera.name] = isRestreamed ? "webrtc" : "jsmpeg";
-        } else {
-          acc[camera.name] = isRestreamed ? "mse" : "jsmpeg";
-        }
-        return acc;
-      },
-      {} as { [key: string]: LivePlayerMode },
-    );
-
-    setPreferredLiveModes(newPreferredLiveModes);
-  }, [cameras, config]);
-
   const [{ height: containerHeight }] = useResizeObserver(containerRef);
 
   const hasScrollbar = useMemo(() => {
@@ -212,6 +185,33 @@ export default function LiveDashboardView({
       visibleCameraObserver.current?.disconnect();
     };
   }, []);
+
+  useEffect(() => {
+    if (!cameras) return;
+
+    const mseSupported =
+      "MediaSource" in window || "ManagedMediaSource" in window;
+
+    const newPreferredLiveModes = cameras.reduce(
+      (acc, camera) => {
+        const isRestreamed =
+          config &&
+          Object.keys(config.go2rtc.streams || {}).includes(
+            camera.live.stream_name,
+          );
+
+        if (!mseSupported) {
+          acc[camera.name] = isRestreamed ? "webrtc" : "jsmpeg";
+        } else {
+          acc[camera.name] = isRestreamed ? "mse" : "jsmpeg";
+        }
+        return acc;
+      },
+      {} as { [key: string]: LivePlayerMode },
+    );
+
+    setPreferredLiveModes(newPreferredLiveModes);
+  }, [cameras, config, windowVisible]);
 
   const cameraRef = useCallback(
     (node: HTMLElement | null) => {

@@ -104,7 +104,7 @@ export default function DraggableGridLayout({
     );
 
     setPreferredLiveModes(newPreferredLiveModes);
-  }, [cameras, config]);
+  }, [cameras, config, windowVisible]);
 
   const ResponsiveGridLayout = useMemo(() => WidthProvider(Responsive), []);
 
