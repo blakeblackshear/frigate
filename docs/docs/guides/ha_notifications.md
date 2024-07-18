@@ -17,7 +17,7 @@ automation:
       topic: frigate/events
     action:
       - service: notify.mobile_app_pixel_3
-        data_template:
+        data:
           message: 'A {{trigger.payload_json["after"]["label"]}} was detected.'
           data:
             image: 'https://your.public.hass.address.com/api/frigate/notifications/{{trigger.payload_json["after"]["id"]}}/thumbnail.jpg?format=android'
