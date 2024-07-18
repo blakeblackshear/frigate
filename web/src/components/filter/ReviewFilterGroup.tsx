@@ -198,7 +198,6 @@ export default function ReviewFilterGroup({
               ? undefined
               : new Date(filter.after * 1000)
           }
-          defaultText="Last 24 Hours"
           updateSelectedDay={onUpdateSelectedDay}
         />
       )}
