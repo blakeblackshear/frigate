@@ -10,9 +10,13 @@ import {
   FaDog,
   FaFedex,
   FaFire,
+  FaFootballBall,
+  FaMotorcycle,
+  FaMouse,
   FaUps,
+  FaUsps,
 } from "react-icons/fa";
-import { GiDeer, GiHummingbird } from "react-icons/gi";
+import { GiDeer, GiHummingbird, GiPolarBear, GiSailboat } from "react-icons/gi";
 import { LuBox, LuLassoSelect } from "react-icons/lu";
 import * as LuIcons from "react-icons/lu";
 import { MdRecordVoiceOver } from "react-icons/md";
@@ -27,10 +31,15 @@ export function getIconForLabel(label: string, className?: string) {
   }
 
   switch (label) {
+    // objects
+    case "bear":
+      return <GiPolarBear key={label} className={className} />;
     case "bicycle":
       return <FaBicycle key={label} className={className} />;
     case "bird":
       return <GiHummingbird key={label} className={className} />;
+    case "boat":
+      return <GiSailboat key={label} className={className} />;
     case "bus":
       return <FaBus key={label} className={className} />;
     case "car":
@@ -46,10 +55,16 @@ export function getIconForLabel(label: string, className?: string) {
       return <FaDog key={label} className={className} />;
     case "fire_alarm":
       return <FaFire key={label} className={className} />;
+    case "motorcycle":
+      return <FaMotorcycle key={label} className={className} />;
+    case "mouse":
+      return <FaMouse key={label} className={className} />;
     case "package":
       return <LuBox key={label} className={className} />;
     case "person":
       return <BsPersonWalking key={label} className={className} />;
+    case "sports_ball":
+      return <FaFootballBall key={label} className={className} />;
     // audio
     case "crying":
     case "laughter":
@@ -64,6 +79,8 @@ export function getIconForLabel(label: string, className?: string) {
       return <FaFedex key={label} className={className} />;
     case "ups":
       return <FaUps key={label} className={className} />;
+    case "usps":
+      return <FaUsps key={label} className={className} />;
     default:
       return <LuLassoSelect key={label} className={className} />;
   }
