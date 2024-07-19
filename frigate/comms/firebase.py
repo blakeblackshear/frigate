@@ -50,9 +50,16 @@ class FirebaseMessenger(threading.Thread):
         state = payload["type"]
 
         # Don't notify if message is an update and important fields don't have an update
-        if state == "update" and len(payload["before"]["objects"]) == len(payload["after"]["objects"]) and len(payload["before"]["zones"]) == len(payload["after"]["zones"]):
+        if (
+            state == "update"
+            and len(payload["before"]["data"]["objects"])
+            == len(payload["after"]["data"]["objects"])
+            and len(payload["before"]["data"]["zones"])
+            == len(payload["after"]["data"]["zones"])
+        ):
             return
 
+        reviewId = payload["after"]["id"]
         sorted_objects: set[str] = set()
 
         for obj in payload["after"]["data"]["objects"]:
@@ -66,6 +73,12 @@ class FirebaseMessenger(threading.Thread):
                 title=f"{', '.join(sorted_objects).replace('_', ' ').title()}{' was' if state == 'end' else ''} detected in {', '.join(payload['after']['data']['zones']).replace('_', ' ').title()}",
                 body=f"Detected on {payload['after']['camera'].replace('_', ' ').title()}",
             ),
+            webpush=messaging.WebpushConfig(
+                fcm_options=messaging.WebpushFCMOptions(
+                    link=f"https://localhost:5173/review?id={reviewId}"
+                )
+            ),
+            data={"id": reviewId, "imageUrl": f'https://localhost:5173{payload["after"]["thumb_path"].replace("/media/frigate", "")}'},
             tokens=[
                 "cNNicZp6S92qn4kAVJnzd7:APA91bGv-MvDmNoZ2xqJTkPyCTmyv2WG0tfwIqWUuNtq3SXlpQJpdPCCjTEehOLDa0Yphv__KdxOQYEfaFvYfTW2qQevX-tSnRCVa_sJazQ_rfTervpo_zBVJD1T5GfYaY6kr41Wr_fP"
             ],

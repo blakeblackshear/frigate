@@ -29,7 +29,8 @@ messaging.onBackgroundMessage((payload) => {
   // Customize notification here
   const notificationOptions = {
     body: payload.notification.body,
-    icon: '/images/maskable-icon.png',
+    icon: ,
+    tag: payload.data.id, // ensure that the notifications for same items are written over
   };
 
   self.registration.showNotification(
