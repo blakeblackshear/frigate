@@ -37,23 +37,36 @@ import MasksAndZonesView from "@/views/settings/MasksAndZonesView";
 import AuthenticationView from "@/views/settings/AuthenticationView";
 import NotificationView from "@/views/settings/NotificationsSettingsView";
 
-export default function Settings() {
-  const settingsViews = [
-    "general",
-    "camera settings",
-    "masks / zones",
-    "motion tuner",
-    "debug",
-    "users",
-    "notifications",
-  ] as const;
+const allSettingsViews = [
+  "general",
+  "camera settings",
+  "masks / zones",
+  "motion tuner",
+  "debug",
+  "users",
+  "notifications",
+] as const;
+type SettingsType = (typeof allSettingsViews)[number];
 
-  type SettingsType = (typeof settingsViews)[number];
+export default function Settings() {
   const [page, setPage] = useState<SettingsType>("general");
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
   const tabsRef = useRef<HTMLDivElement | null>(null);
 
   const { data: config } = useSWR<FrigateConfig>("config");
+
+  // available settings views
+
+  const settingsViews = useMemo(() => {
+    const views = [...allSettingsViews];
+
+    if (!("Notification" in window) || !window.isSecureContext) {
+      const index = views.indexOf("notifications");
+      views.splice(index, 1);
+    }
+
+    return views;
+  }, []);
 
   // TODO: confirm leave page
   const [unsavedChanges, setUnsavedChanges] = useState(false);

@@ -1,27 +1,80 @@
 import { Button } from "@/components/ui/button";
-import { useFirebaseApp, useFirebaseMessaging } from "@/hooks/use-firebase";
-import { getToken } from "firebase/messaging";
+import Heading from "@/components/ui/heading";
+import { Label } from "@/components/ui/label";
+import { Toaster } from "@/components/ui/sonner";
+import { Switch } from "@/components/ui/switch";
+import { FrigateConfig } from "@/types/frigateConfig";
+import axios from "axios";
+import useSWR from "swr";
 
 export default function NotificationView() {
-  useFirebaseApp();
-  const firebaseMessaging = useFirebaseMessaging();
+  const { data: config } = useSWR<FrigateConfig>("config");
 
   return (
-    <div className="flex size-full flex-col md:flex-row">
-      <Button
-        onClick={() => {
-          Notification.requestPermission().then((permission) => {
-            if (permission === "granted") {
-              getToken(firebaseMessaging, {
-                vapidKey:
-                  "BDd7XT7ElEhLApcxFvrBEs1H-6kfbmjTXhfxRIOXSWUIXOpffl_rlKHOe-qPjzp8Gyqv6tgrWX9-xwSTt2ImKPM",
-              }).then((token) => console.log(`the token is ${token}`));
-            }
-          });
-        }}
-      >
-        Enable Notifications
-      </Button>
-    </div>
+    <>
+      <div className="flex size-full flex-col md:flex-row">
+        <Toaster position="top-center" closeButton={true} />
+        <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
+          <Heading as="h3" className="my-2">
+            Notification Settings
+          </Heading>
+
+          <div className="mt-2 space-y-6">
+            <div className="space-y-3">
+              <div className="flex flex-row items-center justify-start gap-2">
+                <Switch
+                  id="auto-live"
+                  checked={config?.notifications?.enabled}
+                  onCheckedChange={() => {}}
+                />
+                <Label className="cursor-pointer" htmlFor="auto-live">
+                  Notifications
+                </Label>
+              </div>
+              <div className="my-2 text-sm text-muted-foreground">
+                <p>
+                  Enable notifications for Frigate alerts. This requires Frigate
+                  to be externally accessible.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {config?.notifications.enabled && (
+            <div className="mt-2 space-y-6">
+              <div className="space-y-3">
+                {
+                  // TODO need to register the worker before enabling the notifications button
+                  // TODO make the notifications button show enable / disable depending on current state
+                }
+                <Button
+                  onClick={() => {
+                    Notification.requestPermission().then((permission) => {
+                      console.log("notification permissions are ", permission);
+                      if (permission === "granted") {
+                        navigator.serviceWorker
+                          .register("notifications-worker.ts")
+                          .then((registration) => {
+                            registration.pushManager
+                              .subscribe()
+                              .then((pushSubscription) => {
+                                console.log(pushSubscription.endpoint);
+                                axios.post("notifications/register", {
+                                  sub: pushSubscription,
+                                });
+                              });
+                          });
+                      }
+                    });
+                  }}
+                >
+                  Enable Notifications
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
   );
 }

@@ -171,7 +171,9 @@ class AuthConfig(FrigateBaseModel):
 
 class NotificationConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable notifications")
-    base_url: Optional[str] = Field(default=None, title="Base url for notification link and image.")
+    base_url: Optional[str] = Field(
+        default=None, title="Base url for notification link and image."
+    )
 
 
 class StatsConfig(FrigateBaseModel):
@@ -1366,7 +1368,9 @@ class FrigateConfig(FrigateBaseModel):
         default_factory=dict, title="Frigate environment variables."
     )
     ui: UIConfig = Field(default_factory=UIConfig, title="UI configuration.")
-    notifications: NotificationConfig = Field(default_factory=NotificationConfig, title="Notification Config")
+    notifications: NotificationConfig = Field(
+        default_factory=NotificationConfig, title="Notification Config"
+    )
     telemetry: TelemetryConfig = Field(
         default_factory=TelemetryConfig, title="Telemetry configuration."
     )

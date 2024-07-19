@@ -23,9 +23,9 @@ from frigate.api.app import create_app
 from frigate.api.auth import hash_password
 from frigate.comms.config_updater import ConfigPublisher
 from frigate.comms.dispatcher import Communicator, Dispatcher
-from frigate.comms.firebase import FirebaseClient
 from frigate.comms.inter_process import InterProcessCommunicator
 from frigate.comms.mqtt import MqttClient
+from frigate.comms.webpush import WebPushClient
 from frigate.comms.ws import WebSocketClient
 from frigate.comms.zmq_proxy import ZmqProxy
 from frigate.config import FrigateConfig
@@ -403,7 +403,7 @@ class FrigateApp:
             comms.append(MqttClient(self.config))
 
         if self.config.notifications.enabled:
-            comms.append(FirebaseClient(self.config, self.stop_event))
+            comms.append(WebPushClient(self.config))
 
         comms.append(WebSocketClient(self.config))
         comms.append(self.inter_process_communicator)
