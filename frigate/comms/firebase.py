@@ -28,7 +28,6 @@ class FirebaseClient(Communicator):  # type: ignore[misc]
 
     def publish(self, topic: str, payload: Any, retain: bool = False) -> None:
         """Wrapper for publishing when client is in valid state."""
-        logger.info(f"got a message on {topic}")
         if topic == "reviews":
             self.messenger.send_message(json.loads(payload))
 
@@ -44,7 +43,16 @@ class FirebaseMessenger(threading.Thread):
         self.stop_event = stop_event
 
     def send_message(self, payload: dict[str, any]) -> None:
+        # Only notify for alerts
+        if payload["after"]["severity"] != "alert":
+            return
+
         state = payload["type"]
+
+        # Don't notify if message is an update and important fields don't have an update
+        if state == "update" and len(payload["before"]["objects"]) == len(payload["after"]["objects"]) and len(payload["before"]["zones"]) == len(payload["after"]["zones"]):
+            return
+
         sorted_objects: set[str] = set()
 
         for obj in payload["after"]["data"]["objects"]:
@@ -53,12 +61,10 @@ class FirebaseMessenger(threading.Thread):
 
         sorted_objects.update(payload["after"]["data"]["sub_labels"])
 
-        title = f"{', '.join(sorted_objects).replace('_', ' ')}{' was' if state == 'end' else ''} detected in {', '.join(payload['after']['data']['zones']).replace('_', ' ')}"
-        logger.info(f"sending message with title {title}")
         message = messaging.MulticastMessage(
             notification=messaging.Notification(
-                title=f"{', '.join(sorted_objects).replace('_', ' ')}{' was' if state == 'end' else ''} detected in {', '.join(payload['after']['data']['zones']).replace('_', ' ')}",
-                body=f"Detected on {payload['after']['camera']}",
+                title=f"{', '.join(sorted_objects).replace('_', ' ').title()}{' was' if state == 'end' else ''} detected in {', '.join(payload['after']['data']['zones']).replace('_', ' ').title()}",
+                body=f"Detected on {payload['after']['camera'].replace('_', ' ').title()}",
             ),
             tokens=[
                 "cNNicZp6S92qn4kAVJnzd7:APA91bGv-MvDmNoZ2xqJTkPyCTmyv2WG0tfwIqWUuNtq3SXlpQJpdPCCjTEehOLDa0Yphv__KdxOQYEfaFvYfTW2qQevX-tSnRCVa_sJazQ_rfTervpo_zBVJD1T5GfYaY6kr41Wr_fP"
@@ -67,15 +73,11 @@ class FirebaseMessenger(threading.Thread):
         messaging.send_multicast(message)
 
     def run(self) -> None:
-        logger.info("Starting notifications setup")
-
         try:
             firebase_admin.get_app()
         except ValueError:
             cred = credentials.Certificate("/config/firebase-priv-key.json")
             firebase_admin.initialize_app(credential=cred)
-
-        logger.info("finished notifications startup")
 
         while self.stop_event.wait(0.1):
             # TODO check for a delete invalid tokens
