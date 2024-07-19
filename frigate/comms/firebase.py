@@ -75,10 +75,10 @@ class FirebaseMessenger(threading.Thread):
             ),
             webpush=messaging.WebpushConfig(
                 fcm_options=messaging.WebpushFCMOptions(
-                    link=f"https://localhost:5173/review?id={reviewId}"
+                    link=f"{self.config.notifications.base_url}/review?id={reviewId}"
                 )
             ),
-            data={"id": reviewId, "imageUrl": f'https://localhost:5173{payload["after"]["thumb_path"].replace("/media/frigate", "")}'},
+            data={"id": reviewId, "imageUrl": f'{self.config.notifications.base_url}{payload["after"]["thumb_path"].replace("/media/frigate", "")}'},
             tokens=[
                 "cNNicZp6S92qn4kAVJnzd7:APA91bGv-MvDmNoZ2xqJTkPyCTmyv2WG0tfwIqWUuNtq3SXlpQJpdPCCjTEehOLDa0Yphv__KdxOQYEfaFvYfTW2qQevX-tSnRCVa_sJazQ_rfTervpo_zBVJD1T5GfYaY6kr41Wr_fP"
             ],

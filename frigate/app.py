@@ -402,8 +402,8 @@ class FrigateApp:
         if self.config.mqtt.enabled:
             comms.append(MqttClient(self.config))
 
-        # TODO check if notifications are enabled
-        comms.append(FirebaseClient(self.config, self.stop_event))
+        if self.config.notifications.enabled:
+            comms.append(FirebaseClient(self.config, self.stop_event))
 
         comms.append(WebSocketClient(self.config))
         comms.append(self.inter_process_communicator)

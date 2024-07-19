@@ -169,6 +169,11 @@ class AuthConfig(FrigateBaseModel):
     hash_iterations: int = Field(default=600000, title="Password hash iterations")
 
 
+class NotificationConfig(FrigateBaseModel):
+    enabled: bool = Field(default=False, title="Enable notifications")
+    base_url: Optional[str] = Field(default=None, title="Base url for notification link and image.")
+
+
 class StatsConfig(FrigateBaseModel):
     amd_gpu_stats: bool = Field(default=True, title="Enable AMD GPU stats.")
     intel_gpu_stats: bool = Field(default=True, title="Enable Intel GPU stats.")
@@ -1361,6 +1366,7 @@ class FrigateConfig(FrigateBaseModel):
         default_factory=dict, title="Frigate environment variables."
     )
     ui: UIConfig = Field(default_factory=UIConfig, title="UI configuration.")
+    notifications: NotificationConfig = Field(default_factory=NotificationConfig, title="Notification Config")
     telemetry: TelemetryConfig = Field(
         default_factory=TelemetryConfig, title="Telemetry configuration."
     )
