@@ -656,9 +656,12 @@ function PlusSortSelector({
           <div className="flex items-center justify-evenly p-2">
             <Button
               variant="select"
+              disabled={!currentSort}
               onClick={() => {
-                setSelectedSort(`${currentSort}_${currentDir}`);
-                setOpen(false);
+                if (currentSort) {
+                  setSelectedSort(`${currentSort}_${currentDir}`);
+                  setOpen(false);
+                }
               }}
             >
               Apply
