@@ -1,19 +1,36 @@
 """Notification apis."""
 
 import logging
+import os
 
 from flask import (
     Blueprint,
+    current_app,
     jsonify,
+    make_response,
     request,
 )
 from peewee import DoesNotExist
+from py_vapid import Vapid01
 
+from frigate.const import CONFIG_DIR
 from frigate.models import User
 
 logger = logging.getLogger(__name__)
 
 NotificationBp = Blueprint("notifications", __name__)
+
+
+@NotificationBp.route("/notifications/pubkey", methods=["GET"])
+def get_vapid_pub_key():
+    if not current_app.frigate_config.notifications.enabled:
+        return make_response(
+            jsonify({"success": False, "message": "Notifications are not enabled."}),
+            400,
+        )
+
+    key = Vapid01.from_file(os.path.join(CONFIG_DIR, "notifications.pem"))
+    return jsonify(key.public_key), 200
 
 
 @NotificationBp.route("/notifications/register", methods=["POST"])
@@ -29,6 +46,10 @@ def register_notifications():
         User.update(notification_tokens=User.notification_tokens.append(token)).where(
             User.username == username
         ).execute()
-        return jsonify({"success": True, "message": "Successfully saved token."}), 200
+        return make_response(
+            jsonify({"success": True, "message": "Successfully saved token."}), 200
+        )
     except DoesNotExist:
-        return jsonify({"success": False, "message": "Could not find user."}), 404
+        return make_response(
+            jsonify({"success": False, "message": "Could not find user."}), 404
+        )

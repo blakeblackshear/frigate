@@ -5,10 +5,26 @@ import { Toaster } from "@/components/ui/sonner";
 import { Switch } from "@/components/ui/switch";
 import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
+import { useEffect, useState } from "react";
 import useSWR from "swr";
+
+const NOTIFICATION_SERVICE_WORKER = "notifications-worker.ts";
 
 export default function NotificationView() {
   const { data: config } = useSWR<FrigateConfig>("config");
+
+  // notification state
+
+  const [notificationsSubscribed, setNotificationsSubscribed] =
+    useState<boolean>();
+
+  useEffect(() => {
+    navigator.serviceWorker
+      .getRegistration(NOTIFICATION_SERVICE_WORKER)
+      .then((worker) => {
+        setNotificationsSubscribed(worker != null);
+      });
+  }, []);
 
   return (
     <>
@@ -48,12 +64,13 @@ export default function NotificationView() {
                   // TODO make the notifications button show enable / disable depending on current state
                 }
                 <Button
+                  disabled={notificationsSubscribed == undefined}
                   onClick={() => {
                     Notification.requestPermission().then((permission) => {
                       console.log("notification permissions are ", permission);
                       if (permission === "granted") {
                         navigator.serviceWorker
-                          .register("notifications-worker.ts")
+                          .register(NOTIFICATION_SERVICE_WORKER)
                           .then((registration) => {
                             registration.pushManager
                               .subscribe()
@@ -68,7 +85,7 @@ export default function NotificationView() {
                     });
                   }}
                 >
-                  Enable Notifications
+                  {`${notificationsSubscribed ? "Disable" : "Enable"} Notifications`}
                 </Button>
               </div>
             </div>

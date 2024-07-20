@@ -2,10 +2,14 @@
 
 import json
 import logging
+import os
 from typing import Any, Callable
+
+from py_vapid import Vapid01
 
 from frigate.comms.dispatcher import Communicator
 from frigate.config import FrigateConfig
+from frigate.const import CONFIG_DIR
 from frigate.models import User
 
 logger = logging.getLogger(__name__)
@@ -16,7 +20,9 @@ class WebPushClient(Communicator):  # type: ignore[misc]
 
     def __init__(self, config: FrigateConfig) -> None:
         self.config = config
-        # TODO check for VAPID key
+
+        # Pull keys from PEM or generate if they do not exist
+        self.key = Vapid01.from_file(os.path.join(CONFIG_DIR, "notifications.pem"))
 
         self.tokens = []
         self.invalid_tokens = []
