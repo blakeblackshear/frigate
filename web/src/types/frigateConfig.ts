@@ -343,6 +343,7 @@ export interface FrigateConfig {
 
   notifications: {
     enabled: boolean;
+    email?: string;
   };
 
   objects: {

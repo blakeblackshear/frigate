@@ -1,17 +1,53 @@
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import Heading from "@/components/ui/heading";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { Toaster } from "@/components/ui/sonner";
+import { Switch } from "@/components/ui/switch";
+import { StatusBarMessagesContext } from "@/context/statusbar-provider";
 import { FrigateConfig } from "@/types/frigateConfig";
+import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import useSWR from "swr";
+import { z } from "zod";
 
 const NOTIFICATION_SERVICE_WORKER = "notifications-worker.ts";
 
-export default function NotificationView() {
-  const { data: config } = useSWR<FrigateConfig>("config", {
-    revalidateOnFocus: false,
-  });
+type NotificationSettingsValueType = {
+  enabled: boolean;
+  email?: string;
+};
+
+type NotificationsSettingsViewProps = {
+  setUnsavedChanges: React.Dispatch<React.SetStateAction<boolean>>;
+};
+export default function NotificationView({
+  setUnsavedChanges,
+}: NotificationsSettingsViewProps) {
+  const { data: config, mutate: updateConfig } = useSWR<FrigateConfig>(
+    "config",
+    {
+      revalidateOnFocus: false,
+    },
+  );
+
+  // status bar
+
+  const { addMessage, removeMessage } = useContext(StatusBarMessagesContext)!;
 
   // notification key handling
 
@@ -23,6 +59,13 @@ export default function NotificationView() {
   const subscribeToNotifications = useCallback(
     (registration: ServiceWorkerRegistration) => {
       if (registration) {
+        addMessage(
+          "notification_settings",
+          "Unsaved Notification Registrations",
+          undefined,
+          "registration",
+        );
+
         registration.pushManager
           .subscribe({
             userVisibleOnly: true,
@@ -32,10 +75,16 @@ export default function NotificationView() {
             axios.post("notifications/register", {
               sub: pushSubscription,
             });
+            toast.success(
+              "Successfully registered for notifications. Restart to start receiving notifications.",
+              {
+                position: "top-center",
+              },
+            );
           });
       }
     },
-    [publicKey],
+    [publicKey, addMessage],
   );
 
   // notification state
@@ -58,6 +107,78 @@ export default function NotificationView() {
       });
   }, []);
 
+  // form
+
+  const [isLoading, setIsLoading] = useState(false);
+  const formSchema = z.object({
+    enabled: z.boolean(),
+    email: z.string(),
+  });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    mode: "onChange",
+    defaultValues: {
+      enabled: config?.notifications.enabled,
+      email: config?.notifications.email,
+    },
+  });
+
+  const onCancel = useCallback(() => {
+    if (!config) {
+      return;
+    }
+
+    setUnsavedChanges(false);
+    form.reset({
+      enabled: config.notifications.enabled,
+      email: config.notifications.email || "",
+    });
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config, removeMessage, setUnsavedChanges]);
+
+  const saveToConfig = useCallback(
+    async (
+      { enabled, email }: NotificationSettingsValueType, // values submitted via the form
+    ) => {
+      axios
+        .put(
+          `config/set?notifications.enabled=${enabled}&notifications.email=${email}`,
+          {
+            requires_restart: 0,
+          },
+        )
+        .then((res) => {
+          if (res.status === 200) {
+            toast.success("Notification settings have been saved.", {
+              position: "top-center",
+            });
+            updateConfig();
+          } else {
+            toast.error(`Failed to save config changes: ${res.statusText}`, {
+              position: "top-center",
+            });
+          }
+        })
+        .catch((error) => {
+          toast.error(
+            `Failed to save config changes: ${error.response.data.message}`,
+            { position: "top-center" },
+          );
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    },
+    [updateConfig, setIsLoading],
+  );
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
+    saveToConfig(values as NotificationSettingsValueType);
+  }
+
   return (
     <>
       <div className="flex size-full flex-col md:flex-row">
@@ -67,13 +188,85 @@ export default function NotificationView() {
             Notification Settings
           </Heading>
 
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="mt-2 space-y-6"
+            >
+              <FormField
+                control={form.control}
+                name="enabled"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <div className="flex flex-row items-center justify-start gap-2">
+                        <Label className="cursor-pointer" htmlFor="auto-live">
+                          Notifications
+                        </Label>
+                        <Switch
+                          id="auto-live"
+                          checked={field.value}
+                          onCheckedChange={(checked) => {
+                            return field.onChange(checked);
+                          }}
+                        />
+                      </div>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Loitering Time</FormLabel>
+                    <FormControl>
+                      <Input
+                        className="w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                        placeholder="0"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Entering a valid email is required, as this is used by the
+                      push server in case problems occur.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex w-full flex-row items-center gap-2 pt-2 md:w-[25%]">
+                <Button
+                  className="flex flex-1"
+                  onClick={onCancel}
+                  type="button"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="select"
+                  disabled={isLoading}
+                  className="flex flex-1"
+                  type="submit"
+                >
+                  {isLoading ? (
+                    <div className="flex flex-row items-center gap-2">
+                      <ActivityIndicator />
+                      <span>Saving...</span>
+                    </div>
+                  ) : (
+                    "Save"
+                  )}
+                </Button>
+              </div>
+            </form>
+          </Form>
+
           {config?.notifications.enabled && (
-            <div className="mt-2 space-y-6">
+            <div className="mt-4 space-y-6">
               <div className="space-y-3">
-                {
-                  // TODO need to register the worker before enabling the notifications button
-                  // TODO make the notifications button show enable / disable depending on current state
-                }
+                <Separator className="my-2 flex bg-secondary" />
                 <Button
                   disabled={publicKey == undefined}
                   onClick={() => {
@@ -99,6 +292,7 @@ export default function NotificationView() {
                     } else {
                       registration.unregister();
                       setRegistration(null);
+                      removeMessage("notification_settings", "registration");
                     }
                   }}
                 >

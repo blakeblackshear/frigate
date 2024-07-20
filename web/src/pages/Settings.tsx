@@ -60,17 +60,13 @@ export default function Settings() {
   const settingsViews = useMemo(() => {
     const views = [...allSettingsViews];
 
-    if (
-      !("Notification" in window) ||
-      !window.isSecureContext ||
-      !config?.notifications.enabled
-    ) {
+    if (!("Notification" in window) || !window.isSecureContext) {
       const index = views.indexOf("notifications");
       views.splice(index, 1);
     }
 
     return views;
-  }, [config]);
+  }, []);
 
   // TODO: confirm leave page
   const [unsavedChanges, setUnsavedChanges] = useState(false);
@@ -200,7 +196,9 @@ export default function Settings() {
           />
         )}
         {page == "users" && <AuthenticationView />}
-        {page == "notifications" && <NotificationView />}
+        {page == "notifications" && (
+          <NotificationView setUnsavedChanges={setUnsavedChanges} />
+        )}
       </div>
       {confirmationDialogOpen && (
         <AlertDialog

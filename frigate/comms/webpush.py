@@ -62,7 +62,6 @@ class WebPushClient(Communicator):  # type: ignore[misc]
                 ).timestamp(),
             }
             self.claim_headers = self.vapid.sign(self.claim)
-            logger.info(f"Updated claim with new headers {self.claim_headers}")
 
         # Only notify for alerts
         if payload["after"]["severity"] != "alert":
@@ -93,8 +92,6 @@ class WebPushClient(Communicator):  # type: ignore[misc]
         message = f"Detected on {payload['after']['camera'].replace('_', ' ').title()}"
         direct_url = f"/review?id={reviewId}"
         image = f'{payload["after"]["thumb_path"].replace("/media/frigate", "")}'
-
-        logger.info(f"the image for testing is {image}")
 
         for pusher in self.web_pushers:
             pusher.send(
