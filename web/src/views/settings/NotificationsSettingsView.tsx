@@ -5,30 +5,58 @@ import { Toaster } from "@/components/ui/sonner";
 import { Switch } from "@/components/ui/switch";
 import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import useSWR from "swr";
 
 const NOTIFICATION_SERVICE_WORKER = "notifications-worker.ts";
 
 export default function NotificationView() {
-  const { data: config } = useSWR<FrigateConfig>("config");
+  const { data: config } = useSWR<FrigateConfig>("config", {
+    revalidateOnFocus: false,
+  });
 
   // notification key handling
 
   const { data: publicKey } = useSWR(
     config?.notifications?.enabled ? "notifications/pubkey" : null,
+    { revalidateOnFocus: false },
+  );
+
+  const subscribeToNotifications = useCallback(
+    (registration: ServiceWorkerRegistration) => {
+      if (registration) {
+        registration.pushManager
+          .subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: publicKey,
+          })
+          .then((pushSubscription) => {
+            axios.post("notifications/register", {
+              sub: pushSubscription,
+            });
+          });
+      }
+    },
+    [publicKey],
   );
 
   // notification state
 
-  const [notificationsSubscribed, setNotificationsSubscribed] =
-    useState<boolean>();
+  const [registration, setRegistration] =
+    useState<ServiceWorkerRegistration | null>();
 
   useEffect(() => {
     navigator.serviceWorker
       .getRegistration(NOTIFICATION_SERVICE_WORKER)
       .then((worker) => {
-        setNotificationsSubscribed(worker != null);
+        if (worker) {
+          setRegistration(worker);
+        } else {
+          setRegistration(null);
+        }
+      })
+      .catch(() => {
+        setRegistration(null);
       });
   }, []);
 
@@ -70,34 +98,34 @@ export default function NotificationView() {
                   // TODO make the notifications button show enable / disable depending on current state
                 }
                 <Button
-                  disabled={
-                    notificationsSubscribed == undefined ||
-                    publicKey == undefined
-                  }
+                  disabled={publicKey == undefined}
                   onClick={() => {
-                    Notification.requestPermission().then((permission) => {
-                      console.log("notification permissions are ", permission);
-                      if (permission === "granted") {
-                        navigator.serviceWorker
-                          .register(NOTIFICATION_SERVICE_WORKER)
-                          .then((registration) => {
-                            registration.pushManager
-                              .subscribe({
-                                userVisibleOnly: true,
-                                applicationServerKey: publicKey,
-                              })
-                              .then((pushSubscription) => {
-                                console.log(pushSubscription.endpoint);
-                                axios.post("notifications/register", {
-                                  sub: pushSubscription,
-                                });
-                              });
-                          });
-                      }
-                    });
+                    if (registration == null) {
+                      Notification.requestPermission().then((permission) => {
+                        if (permission === "granted") {
+                          navigator.serviceWorker
+                            .register(NOTIFICATION_SERVICE_WORKER)
+                            .then((registration) => {
+                              setRegistration(registration);
+
+                              if (registration.active) {
+                                subscribeToNotifications(registration);
+                              } else {
+                                setTimeout(
+                                  () => subscribeToNotifications(registration),
+                                  1000,
+                                );
+                              }
+                            });
+                        }
+                      });
+                    } else {
+                      registration.unregister();
+                      setRegistration(null);
+                    }
                   }}
                 >
-                  {`${notificationsSubscribed ? "Disable" : "Enable"} Notifications`}
+                  {`${registration != null ? "Unregister" : "Register"} for Notifications`}
                 </Button>
               </div>
             </div>

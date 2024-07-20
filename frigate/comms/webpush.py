@@ -85,19 +85,24 @@ class WebPushClient(Communicator):  # type: ignore[misc]
 
         title = f"{', '.join(sorted_objects).replace('_', ' ').title()}{' was' if state == 'end' else ''} detected in {', '.join(payload['after']['data']['zones']).replace('_', ' ').title()}"
         message = f"Detected on {payload['after']['camera'].replace('_', ' ').title()}"
-        direct_url = f"{self.config.notifications.base_url}/review?id={reviewId}"
-        image = f'{self.config.notifications.base_url}{payload["after"]["thumb_path"].replace("/media/frigate", "")}'
+        direct_url = f"/review?id={reviewId}"
+        image = f'{payload["after"]["thumb_path"].replace("/media/frigate", "")}'
+
+        logger.info(f"the image for testing is {image}")
 
         for pusher in self.web_pushers:
             pusher.send(
                 headers=self.claim_headers,
                 ttl=0,
-                data=json.dumps({
-                    "title": title,
-                    "message": message,
-                    "direct_url": direct_url,
-                    "image": image,
-                }),
+                data=json.dumps(
+                    {
+                        "title": title,
+                        "message": message,
+                        "direct_url": direct_url,
+                        "image": image,
+                        "id": reviewId,
+                    }
+                ),
             )
 
     def stop(self) -> None:

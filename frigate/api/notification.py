@@ -44,7 +44,9 @@ def register_notifications():
     sub = json.get("sub")
 
     if not sub:
-        return jsonify({"success": False, "message": "Subscription must be provided."}), 400
+        return jsonify(
+            {"success": False, "message": "Subscription must be provided."}
+        ), 400
 
     try:
         User.update(notification_tokens=User.notification_tokens.append(sub)).where(
