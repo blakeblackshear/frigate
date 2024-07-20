@@ -7,15 +7,15 @@ title: Notifications
 
 Frigate offers native notifications using the [WebPush Protocol](https://web.dev/articles/push-notifications-web-push-protocol) which uses the [VAPID spec](https://tools.ietf.org/html/draft-thomson-webpush-vapid) to deliver notifications to web apps using encryption.
 
+In order to use notifications the following requirements must be met:
+
+- Frigate must be accessed via a secure https connection
+- A supported browser must be used. Currently Chrome, Firefox, and Safari are known to be supported.
+- In order for notifications to be usable externally, Frigate must be accessible externally
+
 ## Configuration
 
 To configure notifications, go to the Frigate WebUI -> Settings -> Notifications and enable, then fill out the fields and save.
-
-:::note
-
-Currently, notifications are only supported in Chrome and Firefox browsers.
-
-:::
 
 ## Registration
 

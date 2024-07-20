@@ -22,8 +22,8 @@ class WebPushClient(Communicator):  # type: ignore[misc]
 
     def __init__(self, config: FrigateConfig) -> None:
         self.config = config
-        self.claim = None
-        self.claim_headers = None
+        self.claim_headers: dict[str, dict[str, str]] = {}
+        self.refresh = 0
         self.web_pushers: list[WebPusher] = []
 
         if not self.config.notifications.email:
@@ -41,27 +41,39 @@ class WebPushClient(Communicator):  # type: ignore[misc]
         """Wrapper for allowing dispatcher to subscribe."""
         pass
 
+    def check_registrations(self) -> None:
+        # check for valid claim or create new one
+        now = datetime.datetime.now().timestamp()
+        if len(self.claim_headers) == 0 or self.refresh < now:
+            self.refresh = (
+                datetime.datetime.now() + datetime.timedelta(hours=1)
+            ).timestamp()
+            endpoints: set[str] = set()
+
+            # get a unique set of push endpoints
+            for push in self.web_pushers:
+                endpoint: str = push.subscription_info["endpoint"]
+                endpoints.add(endpoint[0 : endpoint.index("/", 10)])
+
+            # create new claim
+            for endpoint in endpoints:
+                claim = {
+                    "sub": f"mailto:{self.config.notifications.email}",
+                    "aud": endpoint,
+                    "exp": self.refresh,
+                }
+                self.claim_headers[endpoint] = self.vapid.sign(claim)
+
     def publish(self, topic: str, payload: Any, retain: bool = False) -> None:
         """Wrapper for publishing when client is in valid state."""
         if topic == "reviews":
-            self.send_message(json.loads(payload))
+            self.send_alert(json.loads(payload))
 
-    def send_message(self, payload: dict[str, any]) -> None:
+    def send_alert(self, payload: dict[str, any]) -> None:
         if not self.config.notifications.email:
             return
 
-        # check for valid claim or create new one
-        now = datetime.datetime.now().timestamp()
-        if self.claim is None or self.claim["exp"] < now:
-            # create new claim
-            self.claim = {
-                "sub": f"mailto:{self.config.notifications.email}",
-                "aud": "https://fcm.googleapis.com",
-                "exp": (
-                    datetime.datetime.now() + datetime.timedelta(hours=1)
-                ).timestamp(),
-            }
-            self.claim_headers = self.vapid.sign(self.claim)
+        self.check_registrations()
 
         # Only notify for alerts
         if payload["after"]["severity"] != "alert":
@@ -88,15 +100,25 @@ class WebPushClient(Communicator):  # type: ignore[misc]
 
         sorted_objects.update(payload["after"]["data"]["sub_labels"])
 
+        camera: str = payload["after"]["camera"]
         title = f"{', '.join(sorted_objects).replace('_', ' ').title()}{' was' if state == 'end' else ''} detected in {', '.join(payload['after']['data']['zones']).replace('_', ' ').title()}"
-        message = f"Detected on {payload['after']['camera'].replace('_', ' ').title()}"
-        direct_url = f"/review?id={reviewId}"
+        message = f"Detected on {camera.replace('_', ' ').title()}"
         image = f'{payload["after"]["thumb_path"].replace("/media/frigate", "")}'
 
+        # if event is ongoing open to live view otherwise open to recordings view
+        direct_url = f"/review?id={reviewId}" if state == "end" else f"/#{camera}"
+
         for pusher in self.web_pushers:
+            endpoint = pusher.subscription_info["endpoint"]
+
+            # set headers for notification behavior
+            headers = self.claim_headers[endpoint[0 : endpoint.index("/", 10)]].copy()
+            headers["urgency"] = "high"
+
+            # send message
             pusher.send(
-                headers=self.claim_headers,
-                ttl=0,
+                headers=headers,
+                ttl=3600,
                 data=json.dumps(
                     {
                         "title": title,
