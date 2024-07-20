@@ -29,24 +29,11 @@ self.addEventListener("notificationclick", (event) => {
     // @ts-expect-error we know this exists
     if (event.notification.data) {
       const url = event.notification.data.link;
-
       // eslint-disable-next-line no-undef
-      clients.matchAll({ type: "window" }).then((windowClients) => {
-        // Check if there is already a window/tab open with the target URL
-        for (let i = 0; i < windowClients.length; i++) {
-          const client = windowClients[i];
-          // If so, just focus it.
-          if (client.url === url && "focus" in client) {
-            return client.focus();
-          }
-        }
-        // If not, then open the target URL in a new window/tab.
+      if (clients.openWindow) {
         // eslint-disable-next-line no-undef
-        if (clients.openWindow) {
-          // eslint-disable-next-line no-undef
-          return clients.openWindow(url);
-        }
-      });
+        return clients.openWindow(url);
+      }
     }
   }
 });
