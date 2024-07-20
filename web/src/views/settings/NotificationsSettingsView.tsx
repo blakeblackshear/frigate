@@ -1,8 +1,6 @@
 import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/heading";
-import { Label } from "@/components/ui/label";
 import { Toaster } from "@/components/ui/sonner";
-import { Switch } from "@/components/ui/switch";
 import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
@@ -68,27 +66,6 @@ export default function NotificationView() {
           <Heading as="h3" className="my-2">
             Notification Settings
           </Heading>
-
-          <div className="mt-2 space-y-6">
-            <div className="space-y-3">
-              <div className="flex flex-row items-center justify-start gap-2">
-                <Switch
-                  id="auto-live"
-                  checked={config?.notifications?.enabled}
-                  onCheckedChange={() => {}}
-                />
-                <Label className="cursor-pointer" htmlFor="auto-live">
-                  Notifications
-                </Label>
-              </div>
-              <div className="my-2 text-sm text-muted-foreground">
-                <p>
-                  Enable notifications for Frigate alerts. This requires Frigate
-                  to be externally accessible.
-                </p>
-              </div>
-            </div>
-          </div>
 
           {config?.notifications.enabled && (
             <div className="mt-2 space-y-6">

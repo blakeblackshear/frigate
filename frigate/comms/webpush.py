@@ -26,6 +26,9 @@ class WebPushClient(Communicator):  # type: ignore[misc]
         self.claim_headers = None
         self.web_pushers: list[WebPusher] = []
 
+        if not self.config.notifications.email:
+            logger.warning("Email must be provided for push notifications to be sent.")
+
         # Pull keys from PEM or generate if they do not exist
         self.vapid = Vapid01.from_file(os.path.join(CONFIG_DIR, "notifications.pem"))
 
@@ -44,12 +47,15 @@ class WebPushClient(Communicator):  # type: ignore[misc]
             self.send_message(json.loads(payload))
 
     def send_message(self, payload: dict[str, any]) -> None:
+        if not self.config.notifications.email:
+            return
+
         # check for valid claim or create new one
         now = datetime.datetime.now().timestamp()
         if self.claim is None or self.claim["exp"] < now:
             # create new claim
             self.claim = {
-                "sub": "mailto:test@example.com",
+                "sub": f"mailto:{self.config.notifications.email}",
                 "aud": "https://fcm.googleapis.com",
                 "exp": (
                     datetime.datetime.now() + datetime.timedelta(hours=1)

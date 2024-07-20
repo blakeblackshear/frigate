@@ -60,13 +60,17 @@ export default function Settings() {
   const settingsViews = useMemo(() => {
     const views = [...allSettingsViews];
 
-    if (!("Notification" in window) || !window.isSecureContext) {
+    if (
+      !("Notification" in window) ||
+      !window.isSecureContext ||
+      !config?.notifications.enabled
+    ) {
       const index = views.indexOf("notifications");
       views.splice(index, 1);
     }
 
     return views;
-  }, []);
+  }, [config]);
 
   // TODO: confirm leave page
   const [unsavedChanges, setUnsavedChanges] = useState(false);

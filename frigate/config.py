@@ -171,8 +171,8 @@ class AuthConfig(FrigateBaseModel):
 
 class NotificationConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable notifications")
-    base_url: Optional[str] = Field(
-        default=None, title="Base url for notification link and image."
+    email: Optional[str] = Field(
+        default=None, title="Email required for push."
     )
 
 
