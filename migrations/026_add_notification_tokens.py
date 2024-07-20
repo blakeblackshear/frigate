@@ -33,7 +33,6 @@ def migrate(migrator, database, fake=False, **kwargs):
     migrator.add_fields(
         User,
         notification_tokens=JSONField(default=[]),
-
     )
 
 

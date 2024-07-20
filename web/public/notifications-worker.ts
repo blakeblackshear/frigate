@@ -8,16 +8,11 @@ self.addEventListener("push", function (event) {
     // @ts-expect-error we know this exists
     self.registration.showNotification(data.title, {
       body: data.message,
-      icon: data.image,
+      icon: "/images/maskable-icon.png",
       image: data.image,
+      badge: "/images/maskable-badge.png",
       tag: data.id,
       data: { id: data.id, link: data.direct_url },
-      actions: [
-        {
-          action: `view-${data.id}`,
-          title: "View",
-        },
-      ],
     });
   } else {
     // pass
