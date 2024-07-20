@@ -90,7 +90,7 @@ class WebPushClient(Communicator):  # type: ignore[misc]
 
         title = f"{', '.join(sorted_objects).replace('_', ' ').title()}{' was' if state == 'end' else ''} detected in {', '.join(payload['after']['data']['zones']).replace('_', ' ').title()}"
         message = f"Detected on {payload['after']['camera'].replace('_', ' ').title()}"
-        direct_url = f"/review?id={reviewId}"
+        link = f"/review?id={reviewId}"
         image = f'{payload["after"]["thumb_path"].replace("/media/frigate", "")}'
 
         for pusher in self.web_pushers:
@@ -101,7 +101,7 @@ class WebPushClient(Communicator):  # type: ignore[misc]
                     {
                         "title": title,
                         "message": message,
-                        "direct_url": direct_url,
+                        "link": link,
                         "image": image,
                         "id": reviewId,
                     }

@@ -28,10 +28,9 @@ self.addEventListener("notificationclick", (event) => {
 
     // @ts-expect-error we know this exists
     if (event.notification.data) {
-      // @ts-expect-error we know this exists
       const url = event.notification.data.link;
 
-      // @ts-expect-error we know this exists
+      // eslint-disable-next-line no-undef
       clients.matchAll({ type: "window" }).then((windowClients) => {
         // Check if there is already a window/tab open with the target URL
         for (let i = 0; i < windowClients.length; i++) {
@@ -42,9 +41,9 @@ self.addEventListener("notificationclick", (event) => {
           }
         }
         // If not, then open the target URL in a new window/tab.
-        // @ts-expect-error we know this exists
+        // eslint-disable-next-line no-undef
         if (clients.openWindow) {
-          // @ts-expect-error we know this exists
+          // eslint-disable-next-line no-undef
           return clients.openWindow(url);
         }
       });

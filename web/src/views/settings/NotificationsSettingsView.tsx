@@ -25,7 +25,7 @@ import { toast } from "sonner";
 import useSWR from "swr";
 import { z } from "zod";
 
-const NOTIFICATION_SERVICE_WORKER = "notifications-worker.ts";
+const NOTIFICATION_SERVICE_WORKER = "notifications-worker.js";
 
 type NotificationSettingsValueType = {
   enabled: boolean;
@@ -220,11 +220,11 @@ export default function NotificationView({
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Loitering Time</FormLabel>
+                    <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input
                         className="w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
-                        placeholder="0"
+                        placeholder="example@email.com"
                         {...field}
                       />
                     </FormControl>
