@@ -70,7 +70,10 @@ export default function NotificationView() {
                   // TODO make the notifications button show enable / disable depending on current state
                 }
                 <Button
-                  disabled={notificationsSubscribed == undefined}
+                  disabled={
+                    notificationsSubscribed == undefined ||
+                    publicKey == undefined
+                  }
                   onClick={() => {
                     Notification.requestPermission().then((permission) => {
                       console.log("notification permissions are ", permission);
@@ -79,7 +82,10 @@ export default function NotificationView() {
                           .register(NOTIFICATION_SERVICE_WORKER)
                           .then((registration) => {
                             registration.pushManager
-                              .subscribe()
+                              .subscribe({
+                                userVisibleOnly: true,
+                                applicationServerKey: publicKey,
+                              })
                               .then((pushSubscription) => {
                                 console.log(pushSubscription.endpoint);
                                 axios.post("notifications/register", {

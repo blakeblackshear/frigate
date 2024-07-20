@@ -41,13 +41,13 @@ def get_vapid_pub_key():
 def register_notifications():
     username = request.headers.get("remote-user", type=str) or "admin"
     json: dict[str, any] = request.get_json(silent=True) or {}
-    token = json["token"]
+    sub = json.get("sub")
 
-    if not token:
-        return jsonify({"success": False, "message": "Token must be provided."}), 400
+    if not sub:
+        return jsonify({"success": False, "message": "Subscription must be provided."}), 400
 
     try:
-        User.update(notification_tokens=User.notification_tokens.append(token)).where(
+        User.update(notification_tokens=User.notification_tokens.append(sub)).where(
             User.username == username
         ).execute()
         return make_response(

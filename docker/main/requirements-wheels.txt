@@ -39,3 +39,4 @@ ollama == 0.2.*
 openai == 1.30.*
 # push notifications
 py-vapid == 1.9.*
+pywebpush == 2.0.*
