@@ -3,6 +3,7 @@
 import logging
 import os
 
+from cryptography.hazmat.primitives import serialization
 from flask import (
     Blueprint,
     current_app,
@@ -11,7 +12,7 @@ from flask import (
     request,
 )
 from peewee import DoesNotExist
-from py_vapid import Vapid01
+from py_vapid import Vapid01, utils
 
 from frigate.const import CONFIG_DIR
 from frigate.models import User
@@ -30,7 +31,10 @@ def get_vapid_pub_key():
         )
 
     key = Vapid01.from_file(os.path.join(CONFIG_DIR, "notifications.pem"))
-    return jsonify(key.public_key), 200
+    raw_pub = key.public_key.public_bytes(
+        serialization.Encoding.X962, serialization.PublicFormat.UncompressedPoint
+    )
+    return jsonify(utils.b64urlencode(raw_pub)), 200
 
 
 @NotificationBp.route("/notifications/register", methods=["POST"])

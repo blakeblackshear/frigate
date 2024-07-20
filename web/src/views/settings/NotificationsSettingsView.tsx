@@ -13,6 +13,12 @@ const NOTIFICATION_SERVICE_WORKER = "notifications-worker.ts";
 export default function NotificationView() {
   const { data: config } = useSWR<FrigateConfig>("config");
 
+  // notification key handling
+
+  const { data: publicKey } = useSWR(
+    config?.notifications?.enabled ? "notifications/pubkey" : null,
+  );
+
   // notification state
 
   const [notificationsSubscribed, setNotificationsSubscribed] =
