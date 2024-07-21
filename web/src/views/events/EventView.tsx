@@ -957,7 +957,7 @@ function MotionReview({
     );
   }
 
-  if (!relevantPreviews) {
+  if (relevantPreviews == undefined) {
     return <ActivityIndicator />;
   }
 
@@ -999,7 +999,7 @@ function MotionReview({
                       camera={camera.name}
                       timeRange={currentTimeRange}
                       startTime={previewStart}
-                      cameraPreviews={relevantPreviews || []}
+                      cameraPreviews={relevantPreviews}
                       isScrubbing={scrubbing}
                       onControllerReady={(controller) => {
                         videoPlayersRef.current[camera.name] = controller;
