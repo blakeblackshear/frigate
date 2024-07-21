@@ -290,9 +290,17 @@ export default function NotificationView({
                         }
                       });
                     } else {
-                      registration.unregister();
-                      setRegistration(null);
-                      removeMessage("notification_settings", "registration");
+                      registration.pushManager
+                        .getSubscription()
+                        .then((pushSubscription) => {
+                          pushSubscription?.unsubscribe();
+                          registration.unregister();
+                          setRegistration(null);
+                          removeMessage(
+                            "notification_settings",
+                            "registration",
+                          );
+                        });
                     }
                   }}
                 >

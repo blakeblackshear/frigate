@@ -170,7 +170,8 @@ class WebPushClient(Communicator):  # type: ignore[misc]
 
                 if resp.status_code == 201:
                     pass
-                elif resp.status_code == 410:
+                elif resp.status_code == 404 or resp.status_code == 410:
+                    # subscription is not found or has been unsubscribed
                     if not self.expired_subs.get(user):
                         self.expired_subs[user] = []
 
