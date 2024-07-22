@@ -372,6 +372,14 @@ motion:
   # Optional: Delay when updating camera motion through MQTT from ON -> OFF (default: shown below).
   mqtt_off_delay: 30
 
+# Optional: Notification Configuration
+notifications:
+  # Optional: Enable notification service (default: shown below)
+  enabled: False
+  # Optional: Email for push service to reach out to
+  # NOTE: This is required to use notifications
+  email: "admin@example.com"
+
 # Optional: Record configuration
 # NOTE: Can be overridden at the camera level
 record:
@@ -642,8 +650,8 @@ cameras:
       user: admin
       # Optional: password for login.
       password: admin
-      # Optional: Ignores time synchronization mismatches between the camera and the server during authentication. 
-      # Using NTP on both ends is recommended and this should only be set to True in a "safe" environment due to the security risk it represents. 
+      # Optional: Ignores time synchronization mismatches between the camera and the server during authentication.
+      # Using NTP on both ends is recommended and this should only be set to True in a "safe" environment due to the security risk it represents.
       ignore_time_mismatch: False
       # Optional: PTZ camera object autotracking. Keeps a moving object in
       # the center of the frame by automatically moving the PTZ camera.
