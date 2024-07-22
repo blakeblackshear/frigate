@@ -35,23 +35,38 @@ import ObjectSettingsView from "@/views/settings/ObjectSettingsView";
 import MotionTunerView from "@/views/settings/MotionTunerView";
 import MasksAndZonesView from "@/views/settings/MasksAndZonesView";
 import AuthenticationView from "@/views/settings/AuthenticationView";
+import NotificationView from "@/views/settings/NotificationsSettingsView";
+
+const allSettingsViews = [
+  "general",
+  "camera settings",
+  "masks / zones",
+  "motion tuner",
+  "debug",
+  "users",
+  "notifications",
+] as const;
+type SettingsType = (typeof allSettingsViews)[number];
 
 export default function Settings() {
-  const settingsViews = [
-    "general",
-    "camera settings",
-    "masks / zones",
-    "motion tuner",
-    "debug",
-    "users",
-  ] as const;
-
-  type SettingsType = (typeof settingsViews)[number];
   const [page, setPage] = useState<SettingsType>("general");
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
   const tabsRef = useRef<HTMLDivElement | null>(null);
 
   const { data: config } = useSWR<FrigateConfig>("config");
+
+  // available settings views
+
+  const settingsViews = useMemo(() => {
+    const views = [...allSettingsViews];
+
+    if (!("Notification" in window) || !window.isSecureContext) {
+      const index = views.indexOf("notifications");
+      views.splice(index, 1);
+    }
+
+    return views;
+  }, []);
 
   // TODO: confirm leave page
   const [unsavedChanges, setUnsavedChanges] = useState(false);
@@ -181,6 +196,9 @@ export default function Settings() {
           />
         )}
         {page == "users" && <AuthenticationView />}
+        {page == "notifications" && (
+          <NotificationView setUnsavedChanges={setUnsavedChanges} />
+        )}
       </div>
       {confirmationDialogOpen && (
         <AlertDialog
