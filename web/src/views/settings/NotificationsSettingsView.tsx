@@ -74,9 +74,18 @@ export default function NotificationView({
             applicationServerKey: publicKey,
           })
           .then((pushSubscription) => {
-            axios.post("notifications/register", {
-              sub: pushSubscription,
-            });
+            axios
+              .post("notifications/register", {
+                sub: pushSubscription,
+              })
+              .catch(() => {
+                toast.error("Failed to save notification registration.", {
+                  position: "top-center",
+                });
+                pushSubscription.unsubscribe();
+                registration.unregister();
+                setRegistration(null);
+              });
             toast.success(
               "Successfully registered for notifications. Restart to start receiving notifications.",
               {
