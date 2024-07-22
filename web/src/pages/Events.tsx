@@ -3,6 +3,7 @@ import useApiFilter from "@/hooks/use-api-filter";
 import { useCameraPreviews } from "@/hooks/use-camera-previews";
 import { useTimezone } from "@/hooks/use-date-utils";
 import { useOverlayState, useSearchEffect } from "@/hooks/use-overlay-state";
+import { usePersistence } from "@/hooks/use-persistence";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { RecordingStartingPoint } from "@/types/record";
 import {
@@ -31,6 +32,8 @@ export default function Events() {
     "severity",
     "alert",
   );
+
+  const [showReviewed, setShowReviewed] = usePersistence("showReviewed", false);
 
   const [recording, setRecording] =
     useOverlayState<RecordingStartingPoint>("recording");
@@ -206,14 +209,14 @@ export default function Events() {
       return [];
     }
 
-    if (reviewFilter?.showReviewed != 1) {
+    if (!showReviewed) {
       return current.filter((seg) => !seg.has_been_reviewed);
     } else {
       return current;
     }
     // only refresh when severity or filter changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [severity, reviewFilter, reviewItems?.all.length]);
+  }, [severity, reviewFilter, showReviewed, reviewItems?.all.length]);
 
   // review summary
 
@@ -436,6 +439,8 @@ export default function Events() {
         filter={reviewFilter}
         severity={severity ?? "alert"}
         startTime={startTime}
+        showReviewed={showReviewed ?? false}
+        setShowReviewed={setShowReviewed}
         setSeverity={setSeverity}
         markItemAsReviewed={markItemAsReviewed}
         markAllItemsAsReviewed={markAllItemsAsReviewed}
