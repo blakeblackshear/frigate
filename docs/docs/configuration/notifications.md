@@ -20,3 +20,21 @@ To configure notifications, go to the Frigate WebUI -> Settings -> Notifications
 ## Registration
 
 Once notifications are enabled, press the `Register for Notifications` button on all devices that you would like to receive notifications on. This will register the background worker. After this Frigate must be restarted and then notifications will begin to be sent.
+
+## Supported Notifications
+
+Currently notifications are only supported for review alerts. More notifications will be supported in the future.
+
+:::note
+
+Currently, only Chrome supports images in notifications. Safari and FireFox will only show a title and message in the notification.
+
+:::
+
+## Reduce Notification Latency
+
+Different platforms handle notifications differently, some settings changes may be required to get optimal notification delivery.
+
+### Android
+
+Most Android phones have battery optimization settings. To get reliable Notification delivery the browser (Chrome, FireFox) should have battery optimizations disabled. If Frigate is running as a PWA then the Frigate app should have battery optimizations disabled as well.
