@@ -118,3 +118,4 @@ class RecordingsToDelete(Model):  # type: ignore[misc]
 class User(Model):  # type: ignore[misc]
     username = CharField(null=False, primary_key=True, max_length=30)
     password_hash = CharField(null=False, max_length=120)
+    notification_tokens = JSONField()

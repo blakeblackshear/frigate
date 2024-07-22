@@ -346,6 +346,11 @@ export interface FrigateConfig {
     user: string | null;
   };
 
+  notifications: {
+    enabled: boolean;
+    email?: string;
+  };
+
   objects: {
     filters: {
       [objectName: string]: {
@@ -400,7 +405,7 @@ export interface FrigateConfig {
 
   semantic_search: {
     enabled: boolean;
-  }
+  };
 
   snapshots: {
     bounding_box: boolean;
