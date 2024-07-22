@@ -3,17 +3,22 @@ import os
 import urllib.request
 
 import numpy as np
-from hailo_platform import (
-    HEF,
-    ConfigureParams,
-    FormatType,
-    HailoRTException,
-    HailoStreamInterface,
-    InferVStreams,
-    InputVStreamParams,
-    OutputVStreamParams,
-    VDevice,
-)
+
+try:
+    from hailo_platform import (
+        HEF,
+        ConfigureParams,
+        FormatType,
+        HailoRTException,
+        HailoStreamInterface,
+        InferVStreams,
+        InputVStreamParams,
+        OutputVStreamParams,
+        VDevice,
+    )
+except ModuleNotFoundError:
+    pass
+
 from pydantic import BaseModel, Field
 from typing_extensions import Literal
 
