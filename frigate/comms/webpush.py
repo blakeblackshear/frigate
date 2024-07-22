@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class WebPushClient(Communicator):  # type: ignore[misc]
-    """Frigate wrapper for firebase client."""
+    """Frigate wrapper for webpush client."""
 
     def __init__(self, config: FrigateConfig) -> None:
         self.config = config
