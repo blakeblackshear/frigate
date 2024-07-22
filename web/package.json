@@ -93,7 +93,7 @@
     "@typescript-eslint/eslint-plugin": "^7.5.0",
     "@typescript-eslint/parser": "^7.5.0",
     "@vitejs/plugin-react-swc": "^3.6.0",
-    "@vitest/coverage-v8": "^2.0.2",
+    "@vitest/coverage-v8": "^2.0.4",
     "autoprefixer": "^10.4.19",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
