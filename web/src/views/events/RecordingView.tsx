@@ -701,10 +701,10 @@ function Timeline({
           <Skeleton className="size-full" />
         )
       ) : (
-        <div className="h-full overflow-auto bg-secondary">
+        <div className="scrollbar-container h-full overflow-auto bg-secondary">
           <div
             className={cn(
-              "grid h-auto grid-cols-1 gap-4 overflow-auto p-4",
+              "scrollbar-container grid h-auto grid-cols-1 gap-4 overflow-auto p-4",
               isMobile && "sm:grid-cols-2",
             )}
           >
