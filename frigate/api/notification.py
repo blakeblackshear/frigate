@@ -39,7 +39,11 @@ def get_vapid_pub_key():
 
 @NotificationBp.route("/notifications/register", methods=["POST"])
 def register_notifications():
-    username = request.headers.get("remote-user", type=str) or "admin"
+    if current_app.frigate_config.auth.enabled:
+        username = request.headers.get("remote-user", type=str) or "admin"
+    else:
+        username = "admin"
+
     json: dict[str, any] = request.get_json(silent=True) or {}
     sub = json.get("sub")
 
