@@ -418,6 +418,8 @@ export function RecordingView({
               filter={filter}
               motionOnly={false}
               filterList={reviewFilterList}
+              showReviewed
+              setShowReviewed={() => {}}
               onUpdateFilter={updateFilter}
               setMotionOnly={() => {}}
             />
