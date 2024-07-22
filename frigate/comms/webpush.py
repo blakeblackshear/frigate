@@ -23,7 +23,7 @@ class WebPushClient(Communicator):  # type: ignore[misc]
     def __init__(self, config: FrigateConfig) -> None:
         self.config = config
         self.claim_headers: dict[str, dict[str, str]] = {}
-        self.refresh = 0
+        self.refresh: int = 0
         self.web_pushers: dict[str, list[WebPusher]] = {}
         self.expired_subs: dict[str, list[str]] = {}
 
@@ -49,9 +49,9 @@ class WebPushClient(Communicator):  # type: ignore[misc]
         # check for valid claim or create new one
         now = datetime.datetime.now().timestamp()
         if len(self.claim_headers) == 0 or self.refresh < now:
-            self.refresh = (
-                datetime.datetime.now() + datetime.timedelta(hours=1)
-            ).timestamp()
+            self.refresh = int(
+                (datetime.datetime.now() + datetime.timedelta(hours=1)).timestamp()
+            )
             endpoints: set[str] = set()
 
             # get a unique set of push endpoints
