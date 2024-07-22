@@ -54,6 +54,7 @@ module.exports = {
       ],
       "Extra Configuration": [
         "configuration/authentication",
+        "configuration/notifications",
         "configuration/hardware_acceleration",
         "configuration/ffmpeg_presets",
         "configuration/tls",
