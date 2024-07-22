@@ -21,6 +21,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { LuExternalLink } from "react-icons/lu";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
 import { z } from "zod";
@@ -188,6 +190,26 @@ export default function NotificationView({
             Notification Settings
           </Heading>
 
+          <div className="max-w-6xl">
+            <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
+              <p>
+                Frigate can natively send push notifications to Frigate when it
+                is running in the browser or installed as a PWA.
+              </p>
+              <div className="flex items-center text-primary">
+                <Link
+                  to="https://docs.frigate.video/configuration/notifications"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline"
+                >
+                  Read the Documentation{" "}
+                  <LuExternalLink className="ml-2 inline-flex size-3" />
+                </Link>
+              </div>
+            </div>
+          </div>
+
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
@@ -223,7 +245,7 @@ export default function NotificationView({
                     <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input
-                        className="w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                        className="w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark] md:w-72"
                         placeholder="example@email.com"
                         {...field}
                       />
@@ -304,7 +326,7 @@ export default function NotificationView({
                     }
                   }}
                 >
-                  {`${registration != null ? "Unregister" : "Register"} for Notifications`}
+                  {`${registration != null ? "Unregister" : "Register"} for notifications on this device`}
                 </Button>
               </div>
             </div>
