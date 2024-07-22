@@ -35,7 +35,6 @@ export type ReviewFilter = {
   zones?: string[];
   before?: number;
   after?: number;
-  showReviewed?: 0 | 1;
   showAll?: boolean;
 };
 

@@ -55,6 +55,8 @@ type ReviewFilterGroupProps = {
   filter?: ReviewFilter;
   motionOnly: boolean;
   filterList?: FilterList;
+  showReviewed: boolean;
+  setShowReviewed: (show: boolean) => void;
   onUpdateFilter: (filter: ReviewFilter) => void;
   setMotionOnly: React.Dispatch<React.SetStateAction<boolean>>;
 };
@@ -66,6 +68,8 @@ export default function ReviewFilterGroup({
   filter,
   motionOnly,
   filterList,
+  showReviewed,
+  setShowReviewed,
   onUpdateFilter,
   setMotionOnly,
 }: ReviewFilterGroupProps) {
@@ -190,10 +194,8 @@ export default function ReviewFilterGroup({
       )}
       {filters.includes("reviewed") && (
         <ShowReviewFilter
-          showReviewed={filter?.showReviewed || 0}
-          setShowReviewed={(reviewed) =>
-            onUpdateFilter({ ...filter, showReviewed: reviewed })
-          }
+          showReviewed={showReviewed}
+          setShowReviewed={setShowReviewed}
         />
       )}
       {isDesktop && filters.includes("date") && (
@@ -418,8 +420,8 @@ export function CamerasFilterButton({
 }
 
 type ShowReviewedFilterProps = {
-  showReviewed?: 0 | 1;
-  setShowReviewed: (reviewed?: 0 | 1) => void;
+  showReviewed: boolean;
+  setShowReviewed: (reviewed: boolean) => void;
 };
 function ShowReviewFilter({
   showReviewed,
@@ -434,9 +436,9 @@ function ShowReviewFilter({
       <div className="hidden h-9 cursor-pointer items-center justify-start rounded-md bg-secondary p-2 text-sm hover:bg-secondary/80 md:flex">
         <Switch
           id="reviewed"
-          checked={showReviewedSwitch == 1}
+          checked={showReviewedSwitch}
           onCheckedChange={() =>
-            setShowReviewedSwitch(showReviewedSwitch == 0 ? 1 : 0)
+            setShowReviewedSwitch(showReviewedSwitch == false ? true : false)
           }
         />
         <Label className="ml-2 cursor-pointer text-primary" htmlFor="reviewed">
@@ -446,12 +448,14 @@ function ShowReviewFilter({
 
       <Button
         className="block duration-0 md:hidden"
-        variant={showReviewedSwitch == 1 ? "select" : "default"}
+        variant={showReviewedSwitch ? "select" : "default"}
         size="sm"
-        onClick={() => setShowReviewedSwitch(showReviewedSwitch == 0 ? 1 : 0)}
+        onClick={() =>
+          setShowReviewedSwitch(showReviewedSwitch == false ? true : false)
+        }
       >
         <FaCheckCircle
-          className={`${showReviewedSwitch == 1 ? "text-selected-foreground" : "text-secondary-foreground"}`}
+          className={`${showReviewedSwitch ? "text-selected-foreground" : "text-secondary-foreground"}`}
         />
       </Button>
     </>

@@ -62,6 +62,8 @@ type EventViewProps = {
   filter?: ReviewFilter;
   severity: ReviewSeverity;
   startTime?: number;
+  showReviewed: boolean;
+  setShowReviewed: (show: boolean) => void;
   setSeverity: (severity: ReviewSeverity) => void;
   markItemAsReviewed: (review: ReviewSegment) => void;
   markAllItemsAsReviewed: (currentItems: ReviewSegment[]) => void;
@@ -78,6 +80,8 @@ export default function EventView({
   filter,
   severity,
   startTime,
+  showReviewed,
+  setShowReviewed,
   setSeverity,
   markItemAsReviewed,
   markAllItemsAsReviewed,
@@ -108,7 +112,7 @@ export default function EventView({
       return { alert: 0, detection: 0, significant_motion: 0 };
     }
 
-    if (filter?.showReviewed == 1) {
+    if (showReviewed) {
       return {
         alert: summary.total_alert ?? 0,
         detection: summary.total_detection ?? 0,
@@ -121,7 +125,7 @@ export default function EventView({
         significant_motion: summary.total_motion - summary.reviewed_motion,
       };
     }
-  }, [filter, reviewSummary]);
+  }, [filter, showReviewed, reviewSummary]);
 
   // review interaction
 
@@ -358,6 +362,8 @@ export default function EventView({
             filter={filter}
             motionOnly={motionOnly}
             filterList={reviewFilterList}
+            showReviewed={showReviewed}
+            setShowReviewed={setShowReviewed}
             onUpdateFilter={updateFilter}
             setMotionOnly={setMotionOnly}
           />
