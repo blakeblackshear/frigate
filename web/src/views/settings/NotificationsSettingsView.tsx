@@ -193,8 +193,8 @@ export default function NotificationView({
           <div className="max-w-6xl">
             <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
               <p>
-                Frigate can natively send push notifications to Frigate when it
-                is running in the browser or installed as a PWA.
+                Frigate can natively send push notifications to your device when
+                it is running in the browser or installed as a PWA.
               </p>
               <div className="flex items-center text-primary">
                 <Link
@@ -285,52 +285,49 @@ export default function NotificationView({
             </form>
           </Form>
 
-          {config?.notifications.enabled && (
-            <div className="mt-4 space-y-6">
-              <div className="space-y-3">
-                <Separator className="my-2 flex bg-secondary" />
-                <Button
-                  disabled={publicKey == undefined}
-                  onClick={() => {
-                    if (registration == null) {
-                      Notification.requestPermission().then((permission) => {
-                        if (permission === "granted") {
-                          navigator.serviceWorker
-                            .register(NOTIFICATION_SERVICE_WORKER)
-                            .then((registration) => {
-                              setRegistration(registration);
+          <div className="mt-4 space-y-6">
+            <div className="space-y-3">
+              <Separator className="my-2 flex bg-secondary" />
+              <Button
+                disabled={
+                  !config?.notifications.enabled || publicKey == undefined
+                }
+                onClick={() => {
+                  if (registration == null) {
+                    Notification.requestPermission().then((permission) => {
+                      if (permission === "granted") {
+                        navigator.serviceWorker
+                          .register(NOTIFICATION_SERVICE_WORKER)
+                          .then((registration) => {
+                            setRegistration(registration);
 
-                              if (registration.active) {
-                                subscribeToNotifications(registration);
-                              } else {
-                                setTimeout(
-                                  () => subscribeToNotifications(registration),
-                                  1000,
-                                );
-                              }
-                            });
-                        }
+                            if (registration.active) {
+                              subscribeToNotifications(registration);
+                            } else {
+                              setTimeout(
+                                () => subscribeToNotifications(registration),
+                                1000,
+                              );
+                            }
+                          });
+                      }
+                    });
+                  } else {
+                    registration.pushManager
+                      .getSubscription()
+                      .then((pushSubscription) => {
+                        pushSubscription?.unsubscribe();
+                        registration.unregister();
+                        setRegistration(null);
+                        removeMessage("notification_settings", "registration");
                       });
-                    } else {
-                      registration.pushManager
-                        .getSubscription()
-                        .then((pushSubscription) => {
-                          pushSubscription?.unsubscribe();
-                          registration.unregister();
-                          setRegistration(null);
-                          removeMessage(
-                            "notification_settings",
-                            "registration",
-                          );
-                        });
-                    }
-                  }}
-                >
-                  {`${registration != null ? "Unregister" : "Register"} for notifications on this device`}
-                </Button>
-              </div>
+                  }
+                }}
+              >
+                {`${registration != null ? "Unregister" : "Register"} for notifications on this device`}
+              </Button>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </>
