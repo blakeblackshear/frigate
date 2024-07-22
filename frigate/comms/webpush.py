@@ -152,11 +152,12 @@ class WebPushClient(Communicator):  # type: ignore[misc]
                     endpoint[0 : endpoint.index("/", 10)]
                 ].copy()
                 headers["urgency"] = "high"
+                ttl = 3600 if state == "end" else 0
 
                 # send message
                 resp = pusher.send(
                     headers=headers,
-                    ttl=3600,
+                    ttl=ttl,
                     data=json.dumps(
                         {
                             "title": title,
