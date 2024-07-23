@@ -11,16 +11,18 @@ type LivePlayerProps = {
   className?: string;
   birdseyeConfig: BirdseyeConfig;
   liveMode: LivePlayerMode;
-  onClick?: () => void;
+  pip?: boolean;
   containerRef: React.MutableRefObject<HTMLDivElement | null>;
+  onClick?: () => void;
 };
 
 export default function BirdseyeLivePlayer({
   className,
   birdseyeConfig,
   liveMode,
-  onClick,
+  pip,
   containerRef,
+  onClick,
 }: LivePlayerProps) {
   let player;
   if (liveMode == "webrtc") {
@@ -28,6 +30,7 @@ export default function BirdseyeLivePlayer({
       <WebRtcPlayer
         className={`size-full rounded-lg md:rounded-2xl`}
         camera="birdseye"
+        pip={pip}
       />
     );
   } else if (liveMode == "mse") {
@@ -36,6 +39,7 @@ export default function BirdseyeLivePlayer({
         <MSEPlayer
           className={`size-full rounded-lg md:rounded-2xl`}
           camera="birdseye"
+          pip={pip}
         />
       );
     } else {

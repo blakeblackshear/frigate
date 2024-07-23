@@ -5,15 +5,18 @@ import { Button } from "@/components/ui/button";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   isDesktop,
+  isFirefox,
+  isIOS,
   isMobile,
   isSafari,
   useMobileOrientation,
 } from "react-device-detect";
 import { FaCompress, FaExpand } from "react-icons/fa";
 import { IoMdArrowBack } from "react-icons/io";
+import { LuPictureInPicture } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import useSWR from "swr";
@@ -35,8 +38,17 @@ export default function LiveBirdseyeView({
   const [{ width: windowWidth, height: windowHeight }] =
     useResizeObserver(window);
 
+  // pip state
+
+  useEffect(() => {
+    setPip(document.pictureInPictureElement != null);
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [document.pictureInPictureElement]);
+
   // playback state
 
+  const [pip, setPip] = useState(false);
   const cameraAspectRatio = useMemo(() => {
     if (!config) {
       return 16 / 9;
@@ -151,6 +163,23 @@ export default function LiveBirdseyeView({
                 title={fullscreen ? "Close" : "Fullscreen"}
                 onClick={toggleFullscreen}
               />
+              {!isIOS && !isFirefox && config.birdseye.restream && (
+                <CameraFeatureToggle
+                  className="p-2 md:p-0"
+                  variant={fullscreen ? "overlay" : "primary"}
+                  Icon={LuPictureInPicture}
+                  isActive={pip}
+                  title={pip ? "Close" : "Picture in Picture"}
+                  onClick={() => {
+                    if (!pip) {
+                      setPip(true);
+                    } else {
+                      document.exitPictureInPicture();
+                      setPip(false);
+                    }
+                  }}
+                />
+              )}
             </div>
           </TooltipProvider>
         </div>
@@ -177,6 +206,7 @@ export default function LiveBirdseyeView({
                 birdseyeConfig={config.birdseye}
                 liveMode={preferredLiveMode}
                 containerRef={containerRef}
+                pip={pip}
               />
             </div>
           </TransformComponent>
