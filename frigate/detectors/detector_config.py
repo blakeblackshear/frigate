@@ -51,6 +51,9 @@ class ModelConfig(BaseModel):
     model_type: ModelTypeEnum = Field(
         default=ModelTypeEnum.ssd, title="Object Detection Model Type"
     )
+    tfl_detector_output_tensor_order: list[int] = Field(
+        default=[0,1,2,3], title="Order Output Tensors of TFL models [0=boxes,1=scores,2=class_ids,3=count]"
+    )
     _merged_labelmap: Optional[Dict[int, str]] = PrivateAttr()
     _colormap: Dict[int, Tuple[int, int, int]] = PrivateAttr()
     _model_hash: str = PrivateAttr()

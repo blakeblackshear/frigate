@@ -37,15 +37,17 @@ class CpuTfl(DetectionApi):
         self.tensor_input_details = self.interpreter.get_input_details()
         self.tensor_output_details = self.interpreter.get_output_details()
 
+        self.tfl_detector_output_tensor_order = detector_config.model.tfl_detector_output_tensor_order
+
     def detect_raw(self, tensor_input):
         self.interpreter.set_tensor(self.tensor_input_details[0]["index"], tensor_input)
         self.interpreter.invoke()
 
-        boxes = self.interpreter.tensor(self.tensor_output_details[0]["index"])()[0]
-        class_ids = self.interpreter.tensor(self.tensor_output_details[1]["index"])()[0]
-        scores = self.interpreter.tensor(self.tensor_output_details[2]["index"])()[0]
+        boxes = self.interpreter.tensor(self.tensor_output_details[self.tfl_detector_output_tensor_order[0]]["index"])()[0]
+        class_ids = self.interpreter.tensor(self.tensor_output_details[self.tfl_detector_output_tensor_order[1]]["index"])()[0]
+        scores = self.interpreter.tensor(self.tensor_output_details[self.tfl_detector_output_tensor_order[2]]["index"])()[0]
         count = int(
-            self.interpreter.tensor(self.tensor_output_details[3]["index"])()[0]
+            self.interpreter.tensor(self.tensor_output_details[self.tfl_detector_output_tensor_order[3]]["index"])()[0]
         )
 
         detections = np.zeros((20, 6), np.float32)
