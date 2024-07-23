@@ -372,7 +372,7 @@ export default function LiveCameraView({
                   onClick={toggleFullscreen}
                 />
               )}
-              {!isIOS && !isFirefox && (
+              {!isIOS && !isFirefox && preferredLiveMode != "jsmpeg" && (
                 <CameraFeatureToggle
                   className="p-2 md:p-0"
                   variant={fullscreen ? "overlay" : "primary"}
@@ -452,8 +452,8 @@ export default function LiveCameraView({
                 iOSCompatFullScreen={isIOS}
                 preferredLiveMode={preferredLiveMode}
                 pip={pip}
-                setFullResolution={setFullResolution}
                 containerRef={containerRef}
+                setFullResolution={setFullResolution}
                 onError={handleError}
               />
             </div>
