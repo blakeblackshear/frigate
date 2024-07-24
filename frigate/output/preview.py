@@ -129,12 +129,12 @@ class FFMpegConverter(threading.Thread):
             self.requestor.send_data(
                 INSERT_PREVIEW,
                 {
-                    Previews.id: f"{self.config.name}_{end}",
-                    Previews.camera: self.config.name,
-                    Previews.path: self.path,
-                    Previews.start_time: start,
-                    Previews.end_time: end,
-                    Previews.duration: end - start,
+                    Previews.id.name: f"{self.config.name}_{end}",
+                    Previews.camera.name: self.config.name,
+                    Previews.path.name: self.path,
+                    Previews.start_time.name: start,
+                    Previews.end_time.name: end,
+                    Previews.duration.name: end - start,
                 },
             )
         else:
