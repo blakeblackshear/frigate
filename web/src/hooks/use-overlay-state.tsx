@@ -38,11 +38,21 @@ export function usePersistedOverlayState<S extends string>(
   (value: S | undefined, replace?: boolean) => void,
   () => void,
 ] {
-  const [persistedValue, setPersistedValue, , deletePersistedValue] =
-    usePersistence<S>(key, defaultValue);
   const location = useLocation();
   const navigate = useNavigate();
   const currentLocationState = useMemo(() => location.state, [location]);
+
+  // currently selected value
+
+  const overlayStateValue = useMemo<S | undefined>(
+    () => location.state && location.state[key],
+    [location, key],
+  );
+
+  // saved value from previous session
+
+  const [persistedValue, setPersistedValue, , deletePersistedValue] =
+    usePersistence<S>(key, overlayStateValue);
 
   const setOverlayStateValue = useCallback(
     (value: S | undefined, replace: boolean = false) => {
@@ -54,11 +64,6 @@ export function usePersistedOverlayState<S extends string>(
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [key, currentLocationState, navigate],
-  );
-
-  const overlayStateValue = useMemo<S | undefined>(
-    () => location.state && location.state[key],
-    [location, key],
   );
 
   return [
