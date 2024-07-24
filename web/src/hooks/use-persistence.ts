@@ -34,7 +34,6 @@ export function usePersistence<S>(
 
   useEffect(() => {
     setLoaded(false);
-    setInternalValue(defaultValue);
 
     async function load() {
       const value = await getData(key);
