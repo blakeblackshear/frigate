@@ -245,7 +245,7 @@ export default function ZoneEditPane({
       }
 
       let loiteringTimeQuery = "";
-      if (loitering_time) {
+      if (loitering_time >= 0) {
         loiteringTimeQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.loitering_time=${loitering_time}`;
       }
 
