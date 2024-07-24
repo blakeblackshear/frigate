@@ -21,7 +21,7 @@ class ConfigPublisher:
     def publish(self, topic: str, payload: any) -> None:
         """There is no communication back to the processes."""
         self.socket.send_string(topic, flags=zmq.SNDMORE)
-        self.socket.send_pyobj(payload)
+        self.socket.send_json(payload)
 
     def stop(self) -> None:
         self.stop_event.set()
@@ -42,7 +42,7 @@ class ConfigSubscriber:
         """Returns updated config or None if no update."""
         try:
             topic = self.socket.recv_string(flags=zmq.NOBLOCK)
-            return (topic, self.socket.recv_pyobj())
+            return (topic, self.socket.recv_json())
         except zmq.ZMQError:
             return (None, None)
 

@@ -68,7 +68,7 @@ class DetectionPublisher:
     def send_data(self, payload: any) -> None:
         """Publish detection."""
         self.socket.send_string(self.topic.value, flags=zmq.SNDMORE)
-        self.socket.send_pyobj(payload)
+        self.socket.send_json(payload)
 
     def stop(self) -> None:
         self.socket.close()
@@ -91,7 +91,7 @@ class DetectionSubscriber:
 
             if has_update:
                 topic = DetectionTypeEnum[self.socket.recv_string(flags=zmq.NOBLOCK)]
-                return (topic, self.socket.recv_pyobj())
+                return (topic, self.socket.recv_json())
         except zmq.ZMQError:
             pass
 

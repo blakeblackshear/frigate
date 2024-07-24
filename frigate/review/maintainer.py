@@ -127,13 +127,13 @@ class PendingReviewSegment:
 
     def get_data(self, ended: bool) -> dict:
         return {
-            ReviewSegment.id: self.id,
-            ReviewSegment.camera: self.camera,
-            ReviewSegment.start_time: self.start_time,
-            ReviewSegment.end_time: self.last_update if ended else None,
-            ReviewSegment.severity: self.severity.value,
-            ReviewSegment.thumb_path: self.frame_path,
-            ReviewSegment.data: {
+            ReviewSegment.id.name: self.id,
+            ReviewSegment.camera.name: self.camera,
+            ReviewSegment.start_time.name: self.start_time,
+            ReviewSegment.end_time.name: self.last_update if ended else None,
+            ReviewSegment.severity.name: self.severity.value,
+            ReviewSegment.thumb_path.name: self.frame_path,
+            ReviewSegment.data.name: {
                 "detections": list(set(self.detections.keys())),
                 "objects": list(set(self.detections.values())),
                 "sub_labels": list(self.sub_labels),
@@ -176,7 +176,7 @@ class ReviewSegmentMaintainer(threading.Thread):
         """New segment."""
         new_data = segment.get_data(ended=False)
         self.requestor.send_data(UPSERT_REVIEW_SEGMENT, new_data)
-        start_data = {k.name: v for k, v in new_data.items()}
+        start_data = {k: v for k, v in new_data.items()}
         self.requestor.send_data(
             "reviews",
             json.dumps(
@@ -207,8 +207,8 @@ class ReviewSegmentMaintainer(threading.Thread):
             json.dumps(
                 {
                     "type": "update",
-                    "before": {k.name: v for k, v in prev_data.items()},
-                    "after": {k.name: v for k, v in new_data.items()},
+                    "before": {k: v for k, v in prev_data.items()},
+                    "after": {k: v for k, v in new_data.items()},
                 }
             ),
         )
@@ -226,8 +226,8 @@ class ReviewSegmentMaintainer(threading.Thread):
             json.dumps(
                 {
                     "type": "end",
-                    "before": {k.name: v for k, v in prev_data.items()},
-                    "after": {k.name: v for k, v in final_data.items()},
+                    "before": {k: v for k, v in prev_data.items()},
+                    "after": {k: v for k, v in final_data.items()},
                 }
             ),
         )

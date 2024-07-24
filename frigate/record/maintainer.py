@@ -419,19 +419,19 @@ class RecordingMaintainer(threading.Thread):
                 )
 
                 return {
-                    Recordings.id: f"{start_time.timestamp()}-{rand_id}",
-                    Recordings.camera: camera,
-                    Recordings.path: file_path,
-                    Recordings.start_time: start_time.timestamp(),
-                    Recordings.end_time: end_time.timestamp(),
-                    Recordings.duration: duration,
-                    Recordings.motion: segment_info.motion_count,
+                    Recordings.id.name: f"{start_time.timestamp()}-{rand_id}",
+                    Recordings.camera.name: camera,
+                    Recordings.path.name: file_path,
+                    Recordings.start_time.name: start_time.timestamp(),
+                    Recordings.end_time.name: end_time.timestamp(),
+                    Recordings.duration.name: duration,
+                    Recordings.motion.name: segment_info.motion_count,
                     # TODO: update this to store list of active objects at some point
-                    Recordings.objects: segment_info.active_object_count
+                    Recordings.objects.name: segment_info.active_object_count
                     + (1 if manual_event else 0),
-                    Recordings.regions: segment_info.region_count,
-                    Recordings.dBFS: segment_info.average_dBFS,
-                    Recordings.segment_size: segment_size,
+                    Recordings.regions.name: segment_info.region_count,
+                    Recordings.dBFS.name: segment_info.average_dBFS,
+                    Recordings.segment_size.name: segment_size,
                 }
         except Exception as e:
             logger.error(f"Unable to store recording segment {cache_path}")

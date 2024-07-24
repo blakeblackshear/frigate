@@ -20,7 +20,7 @@ class EventUpdatePublisher:
         self, payload: tuple[EventTypeEnum, EventStateEnum, str, dict[str, any]]
     ) -> None:
         """There is no communication back to the processes."""
-        self.socket.send_pyobj(payload)
+        self.socket.send_json(payload)
 
     def stop(self) -> None:
         self.socket.close()
@@ -43,7 +43,7 @@ class EventUpdateSubscriber:
             has_update, _, _ = zmq.select([self.socket], [], [], timeout)
 
             if has_update:
-                return self.socket.recv_pyobj()
+                return self.socket.recv_json()
         except zmq.ZMQError:
             pass
 
@@ -66,7 +66,7 @@ class EventEndPublisher:
         self, payload: tuple[EventTypeEnum, EventStateEnum, str, dict[str, any]]
     ) -> None:
         """There is no communication back to the processes."""
-        self.socket.send_pyobj(payload)
+        self.socket.send_json(payload)
 
     def stop(self) -> None:
         self.socket.close()
@@ -89,7 +89,7 @@ class EventEndSubscriber:
             has_update, _, _ = zmq.select([self.socket], [], [], timeout)
 
             if has_update:
-                return self.socket.recv_pyobj()
+                return self.socket.recv_json()
         except zmq.ZMQError:
             pass
 
