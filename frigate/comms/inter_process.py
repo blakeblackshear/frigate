@@ -37,14 +37,14 @@ class InterProcessCommunicator(Communicator):
                     break
 
                 try:
-                    (topic, value) = self.socket.recv_pyobj(flags=zmq.NOBLOCK)
+                    (topic, value) = self.socket.recv_json(flags=zmq.NOBLOCK)
 
                     response = self._dispatcher(topic, value)
 
                     if response is not None:
-                        self.socket.send_pyobj(response)
+                        self.socket.send_json(response)
                     else:
-                        self.socket.send_pyobj([])
+                        self.socket.send_json([])
                 except zmq.ZMQError:
                     break
 
@@ -65,8 +65,8 @@ class InterProcessRequestor:
 
     def send_data(self, topic: str, data: any) -> any:
         """Sends data and then waits for reply."""
-        self.socket.send_pyobj((topic, data))
-        return self.socket.recv_pyobj()
+        self.socket.send_json((topic, data))
+        return self.socket.recv_json()
 
     def stop(self) -> None:
         self.socket.close()
