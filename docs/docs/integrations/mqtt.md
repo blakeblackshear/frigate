@@ -138,13 +138,14 @@ Message published for each changed review item. The first message is published w
         "person",
         "car"
       ],
-      "sub_labels": [],
+      "sub_labels": ["Bob"],
       "zones": [
         "front_yard"
       ],
       "audio": []
     }
   }
+}
 ```
 
 ### `frigate/stats`
