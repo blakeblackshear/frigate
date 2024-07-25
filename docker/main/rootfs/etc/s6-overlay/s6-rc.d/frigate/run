@@ -16,8 +16,8 @@ function migrate_db_path() {
     if [[ -f "${config_file_yaml}" ]]; then
         config_file="${config_file_yaml}"
     elif [[ ! -f "${config_file}" ]]; then
-        echo "[ERROR] Frigate config file not found"
-        return 1
+        # Frigate will create the config file on startup
+        return 0
     fi
     unset config_file_yaml
 
