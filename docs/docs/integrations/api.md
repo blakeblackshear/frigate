@@ -381,9 +381,13 @@ List of frames in the preview cache for the time range. Previews are only kept i
 
 Specific preview frame from preview cache.
 
-### `GET /<camera>/start/<start-timestamp>/end/<end-timestamp>/preview.gif`
+### `GET /<camera>/start/<start-timestamp>/end/<end-timestamp>/preview`
 
-Gif made from preview video / frames during this time range
+Looping image made from preview video / frames during this time range.
+
+| param     | Type | Description                      |
+| --------- | ---- | -------------------------------- |
+| `format`  | str  | Format of preview [`gif`, `mp4`] |
 
 ## Recordings
 
@@ -454,6 +458,10 @@ Reviews from the database. Accepts the following query string parameters:
 | `reviewed` | int  | Include items that have been reviewed (0 or 1)                 |
 | `limit`    | int  | Limit the number of events returned                            |
 | `severity` | str  | Limit items to severity (alert, detection, significant_motion) |
+
+### `GET /api/review/<id>`
+
+Get review with `id` from the database.
 
 ### `GET /api/review/summary`
 
