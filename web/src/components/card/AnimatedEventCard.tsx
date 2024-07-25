@@ -11,6 +11,9 @@ import { VideoPreview } from "../player/PreviewThumbnailPlayer";
 import { isCurrentHour } from "@/utils/dateUtil";
 import { useCameraPreviews } from "@/hooks/use-camera-previews";
 import { baseUrl } from "@/api/baseUrl";
+import { useApiHost } from "@/api";
+import { isSafari } from "react-device-detect";
+import { usePersistence } from "@/hooks/use-persistence";
 
 type AnimatedEventCardProps = {
   event: ReviewSegment;
@@ -21,6 +24,7 @@ export function AnimatedEventCard({
   selectedGroup,
 }: AnimatedEventCardProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
+  const apiHost = useApiHost();
 
   const currentHour = useMemo(() => isCurrentHour(event.start_time), [event]);
 
@@ -76,6 +80,8 @@ export function AnimatedEventCard({
 
   // image behavior
 
+  const [alertVideos] = usePersistence("alertVideos", true);
+
   const aspectRatio = useMemo(() => {
     if (!config || !Object.keys(config.cameras).includes(event.camera)) {
       return 16 / 9;
@@ -98,32 +104,42 @@ export function AnimatedEventCard({
             className="size-full cursor-pointer overflow-hidden rounded md:rounded-lg"
             onClick={onOpenReview}
           >
-            {previews ? (
-              <VideoPreview
-                relevantPreview={previews[previews.length - 1]}
-                startTime={event.start_time}
-                endTime={event.end_time}
-                loop
-                showProgress={false}
-                setReviewed={() => {}}
-                setIgnoreClick={() => {}}
-                isPlayingBack={() => {}}
-                windowVisible={windowVisible}
+            {!alertVideos ? (
+              <img
+                className="size-full select-none"
+                src={`${apiHost}${event.thumb_path.replace("/media/frigate/", "")}`}
+                loading={isSafari ? "eager" : "lazy"}
               />
             ) : (
-              <video
-                preload="auto"
-                autoPlay
-                playsInline
-                muted
-                disableRemotePlayback
-                loop
-              >
-                <source
-                  src={`${baseUrl}api/review/${event.id}/preview?format=mp4`}
-                  type="video/mp4"
-                />
-              </video>
+              <>
+                {previews ? (
+                  <VideoPreview
+                    relevantPreview={previews[previews.length - 1]}
+                    startTime={event.start_time}
+                    endTime={event.end_time}
+                    loop
+                    showProgress={false}
+                    setReviewed={() => {}}
+                    setIgnoreClick={() => {}}
+                    isPlayingBack={() => {}}
+                    windowVisible={windowVisible}
+                  />
+                ) : (
+                  <video
+                    preload="auto"
+                    autoPlay
+                    playsInline
+                    muted
+                    disableRemotePlayback
+                    loop
+                  >
+                    <source
+                      src={`${baseUrl}api/review/${event.id}/preview?format=mp4`}
+                      type="video/mp4"
+                    />
+                  </video>
+                )}
+              </>
             )}
           </div>
           <div className="absolute inset-x-0 bottom-0 h-6 rounded bg-gradient-to-t from-slate-900/50 to-transparent">

@@ -55,6 +55,7 @@ export default function GeneralSettingsView() {
   const [autoLive, setAutoLive] = usePersistence("autoLiveView", true);
   const [playbackRate, setPlaybackRate] = usePersistence("playbackRate", 1);
   const [weekStartsOn, setWeekStartsOn] = usePersistence("weekStartsOn", 0);
+  const [alertVideos, setAlertVideos] = usePersistence("alertVideos", true);
 
   return (
     <>
@@ -88,6 +89,25 @@ export default function GeneralSettingsView() {
                   Automatically switch to a camera's live view when activity is
                   detected. Disabling this option causes static camera images on
                   the Live dashboard to only update once per minute.
+                </p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="flex flex-row items-center justify-start gap-2">
+                <Switch
+                  id="images-only"
+                  checked={alertVideos}
+                  onCheckedChange={setAlertVideos}
+                />
+                <Label className="cursor-pointer" htmlFor="images-only">
+                  Play Alert Videos
+                </Label>
+              </div>
+              <div className="my-2 text-sm text-muted-foreground">
+                <p>
+                  By default, recent alerts on the Live dashboard play as small
+                  looping videos. Disable this option to only show a static
+                  image of recent alerts on this device/browser.
                 </p>
               </div>
             </div>
