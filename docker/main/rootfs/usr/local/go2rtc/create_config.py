@@ -116,11 +116,12 @@ if int(os.environ["LIBAVFORMAT_VERSION_MAJOR"]) < 59:
             "-fflags nobuffer -flags low_delay -stimeout 5000000 -user_agent go2rtc/ffmpeg -rtsp_transport tcp -i {input}"
         )
 
-# add stream for each camera if user has not configured a stream already.
-# this will ensure that all features are available to the user
+# create blank streams list
 if not go2rtc_config.get("streams"):
     go2rtc_config["streams"] = {}
 
+# add stream for each camera if user has not configured a stream already.
+# this will ensure that all features are available to the user
 for camera_name, camera in config.get("cameras", {}).items():
     name = camera.get("live", {}).get("stream_name") or camera_name
 
@@ -133,11 +134,11 @@ for camera_name, camera in config.get("cameras", {}).items():
     if not inputs:
         continue
     elif len(inputs) == 1:
-        go2rtc_config["streams"][name] = [inputs[0]["path"]]
+        go2rtc_config["streams"][name] = [f"ffmpeg:{inputs[0]["path"]}"]
     else:
         for input in inputs:
             if "detect" in input["roles"]:
-                go2rtc_config["streams"][name] = [input["path"]]
+                go2rtc_config["streams"][name] = [f"ffmpeg:{input["path"]}"]
                 break
 
 # apply variable substitution to streams
