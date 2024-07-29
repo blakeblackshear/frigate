@@ -116,6 +116,31 @@ if int(os.environ["LIBAVFORMAT_VERSION_MAJOR"]) < 59:
             "-fflags nobuffer -flags low_delay -stimeout 5000000 -user_agent go2rtc/ffmpeg -rtsp_transport tcp -i {input}"
         )
 
+# add stream for each camera if user has not configured a stream already.
+# this will ensure that all features are available to the user
+if not go2rtc_config.get("streams"):
+    go2rtc_config["streams"] = {}
+
+for camera_name, camera in config.get("cameras", {}).items():
+    name = camera.get("live", {}).get("stream_name") or camera_name
+
+    # user already has the stream configured
+    if not name or name in go2rtc_config.get("streams", {}):
+        continue
+
+    inputs = camera.get("ffmpeg", {}).get("inputs")
+
+    if not inputs:
+        continue
+    elif len(inputs) == 1:
+        go2rtc_config["streams"][name] = [inputs[0]["path"]]
+    else:
+        for input in inputs:
+            if "detect" in input["roles"]:
+                go2rtc_config["streams"][name] = [input["path"]]
+                break
+
+# apply variable substitution to streams
 for name in go2rtc_config.get("streams", {}):
     stream = go2rtc_config["streams"][name]
 
@@ -153,5 +178,5 @@ if config.get("birdseye", {}).get("restream", False):
         go2rtc_config["streams"] = {"birdseye": ffmpeg_cmd}
 
 # Write go2rtc_config to /dev/shm/go2rtc.yaml
-with open("/dev/shm/go2rtc.yaml", "w") as f:
+with open("/workspace/frigate/go2rtc.yaml", "w") as f:
     yaml.dump(go2rtc_config, f)
