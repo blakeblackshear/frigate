@@ -234,11 +234,11 @@ export default function PreviewThumbnailPlayer({
           <div
             className={cn(
               "rounded-t-l pointer-events-none absolute inset-x-0 top-0 h-[30%] w-full bg-gradient-to-b from-black/60 to-transparent",
-              !isIOS && "z-10",
+              !isSafari && "z-10",
             )}
           />
         )}
-        <div className={cn("absolute left-0 top-2", !isIOS && "z-40")}>
+        <div className={cn("absolute left-0 top-2", !isSafari && "z-40")}>
           <Tooltip>
             <div
               className="flex"
@@ -287,7 +287,7 @@ export default function PreviewThumbnailPlayer({
           <div
             className={cn(
               "rounded-b-l pointer-events-none absolute inset-x-0 bottom-0 h-[20%] w-full bg-gradient-to-t from-black/60 to-transparent",
-              !isIOS && "z-10",
+              !isSafari && "z-10",
             )}
           >
             <div className="mx-3 flex h-full items-end justify-between pb-1 text-sm text-white">
