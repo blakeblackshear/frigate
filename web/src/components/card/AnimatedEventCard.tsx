@@ -14,6 +14,7 @@ import { baseUrl } from "@/api/baseUrl";
 import { useApiHost } from "@/api";
 import { isSafari } from "react-device-detect";
 import { usePersistence } from "@/hooks/use-persistence";
+import { Skeleton } from "../ui/skeleton";
 
 type AnimatedEventCardProps = {
   event: ReviewSegment;
@@ -56,6 +57,8 @@ export function AnimatedEventCard({
       removeEventListener("visibilitychange", visibilityListener);
     };
   }, [visibilityListener]);
+
+  const [isLoaded, setIsLoaded] = useState(false);
 
   // interaction
 
@@ -109,6 +112,7 @@ export function AnimatedEventCard({
                 className="size-full select-none"
                 src={`${apiHost}${event.thumb_path.replace("/media/frigate/", "")}`}
                 loading={isSafari ? "eager" : "lazy"}
+                onLoad={() => setIsLoaded(true)}
               />
             ) : (
               <>
@@ -122,6 +126,11 @@ export function AnimatedEventCard({
                     setReviewed={() => {}}
                     setIgnoreClick={() => {}}
                     isPlayingBack={() => {}}
+                    onTimeUpdate={() => {
+                      if (!isLoaded) {
+                        setIsLoaded(true);
+                      }
+                    }}
                     windowVisible={windowVisible}
                   />
                 ) : (
@@ -132,6 +141,11 @@ export function AnimatedEventCard({
                     muted
                     disableRemotePlayback
                     loop
+                    onTimeUpdate={() => {
+                      if (!isLoaded) {
+                        setIsLoaded(true);
+                      }
+                    }}
                   >
                     <source
                       src={`${baseUrl}api/review/${event.id}/preview?format=mp4`}
@@ -142,11 +156,14 @@ export function AnimatedEventCard({
               </>
             )}
           </div>
-          <div className="absolute inset-x-0 bottom-0 h-6 rounded bg-gradient-to-t from-slate-900/50 to-transparent">
-            <div className="absolute bottom-0 left-1 w-full text-xs text-white">
-              <TimeAgo time={event.start_time * 1000} dense />
+          {isLoaded && (
+            <div className="absolute inset-x-0 bottom-0 h-6 rounded bg-gradient-to-t from-slate-900/50 to-transparent">
+              <div className="absolute bottom-0 left-1 w-full text-xs text-white">
+                <TimeAgo time={event.start_time * 1000} dense />
+              </div>
             </div>
-          </div>
+          )}
+          {!isLoaded && <Skeleton className="absolute inset-0" />}
         </div>
       </TooltipTrigger>
       <TooltipContent>
