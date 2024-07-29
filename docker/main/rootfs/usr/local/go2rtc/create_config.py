@@ -178,5 +178,5 @@ if config.get("birdseye", {}).get("restream", False):
         go2rtc_config["streams"] = {"birdseye": ffmpeg_cmd}
 
 # Write go2rtc_config to /dev/shm/go2rtc.yaml
-with open("/workspace/frigate/go2rtc.yaml", "w") as f:
+with open("/dev/shm/go2rtc.yaml", "w") as f:
     yaml.dump(go2rtc_config, f)
