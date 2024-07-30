@@ -66,6 +66,40 @@ RUN --mount=type=bind,source=docker/main/build_ov_model.py,target=/build_ov_mode
     && tar -xvf ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz \
     && python3 /build_ov_model.py
 
+####
+#
+# Coral Compatibility
+#
+# Builds libusb without udev. Needed for synology and other devices with USB coral
+####
+# libUSB - No Udev
+FROM wget as libusb-build
+ARG TARGETARCH
+ARG DEBIAN_FRONTEND
+ENV CCACHE_DIR /root/.ccache
+ENV CCACHE_MAXSIZE 2G
+
+# Build libUSB without udev.  Needed for Openvino NCS2 support
+WORKDIR /opt
+RUN apt-get update && apt-get install -y unzip build-essential automake libtool ccache pkg-config
+RUN --mount=type=cache,target=/root/.ccache wget -q https://github.com/libusb/libusb/archive/v1.0.26.zip -O v1.0.26.zip && \
+    unzip v1.0.26.zip && cd libusb-1.0.26 && \
+    ./bootstrap.sh && \
+    ./configure CC='ccache gcc' CCX='ccache g++' --disable-udev --enable-shared && \
+    make -j $(nproc --all)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends libusb-1.0-0-dev && \
+    rm -rf /var/lib/apt/lists/*
+WORKDIR /opt/libusb-1.0.26/libusb
+RUN /bin/mkdir -p '/usr/local/lib' && \
+    /bin/bash ../libtool  --mode=install /usr/bin/install -c libusb-1.0.la '/usr/local/lib' && \
+    /bin/mkdir -p '/usr/local/include/libusb-1.0' && \
+    /usr/bin/install -c -m 644 libusb.h '/usr/local/include/libusb-1.0' && \
+    /bin/mkdir -p '/usr/local/lib/pkgconfig' && \
+    cd  /opt/libusb-1.0.26/ && \
+    /usr/bin/install -c -m 644 libusb-1.0.pc '/usr/local/lib/pkgconfig' && \
+    ldconfig
+
 FROM wget AS models
 
 # Get model and labels
@@ -78,7 +112,7 @@ COPY --from=ov-converter /models/ssdlite_mobilenet_v2.bin openvino-model/
 RUN wget -q https://github.com/openvinotoolkit/open_model_zoo/raw/master/data/dataset_classes/coco_91cl_bkgr.txt -O openvino-model/coco_91cl_bkgr.txt && \
     sed -i 's/truck/car/g' openvino-model/coco_91cl_bkgr.txt
 # Get Audio Model and labels
-RUN wget -qO - https://www.kaggle.com/api/v1/models/google/yamnet/tfLite/classification-tflite/1/download | tar xvz && mv 1.tflite cpu_audio_model.tflite 
+RUN wget -qO - https://www.kaggle.com/api/v1/models/google/yamnet/tfLite/classification-tflite/1/download | tar xvz && mv 1.tflite cpu_audio_model.tflite
 COPY audio-labelmap.txt .
 
 
@@ -135,6 +169,7 @@ RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt
 FROM scratch AS deps-rootfs
 COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
 COPY --from=go2rtc /rootfs/ /
+COPY --from=libusb-build /usr/local/lib /usr/local/lib
 COPY --from=tempio /rootfs/ /
 COPY --from=s6-overlay /rootfs/ /
 COPY --from=models /rootfs/ /
@@ -164,6 +199,8 @@ RUN --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels \
     pip3 install -U /deps/wheels/*.whl
 
 COPY --from=deps-rootfs / /
+
+RUN ldconfig
 
 EXPOSE 5000
 EXPOSE 8554
