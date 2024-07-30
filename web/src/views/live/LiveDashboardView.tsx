@@ -81,7 +81,8 @@ export default function LiveDashboardView({
       .map((cam) => cam.name)
       .filter((cam) =>
         config.camera_groups[cameraGroup]?.cameras?.includes(cam),
-      )      .join(",");
+      )      
+      .join(",");
   }, [cameras, cameraGroup, config, includeBirdseye]);
 
   const { data: allEvents, mutate: updateEvents } = useSWR<ReviewSegment[]>([
