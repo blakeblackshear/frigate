@@ -77,7 +77,7 @@ export default function DraggableGridLayout({
   const [preferredLiveModes, setPreferredLiveModes] = useState<{
     [key: string]: LivePlayerMode;
   }>({});
-  const [liveViewMode] = usePersistence<LiveViewMode>("liveViewMode", "Auto");
+  const [liveViewMode] = usePersistence<LiveViewMode>("liveViewMode", "auto");
 
   useEffect(() => {
     if (!cameras) return;
@@ -680,8 +680,8 @@ const LivePlayerGridItem = React.forwardRef<
           onClick={onClick}
           onError={onError}
           containerRef={ref as React.RefObject<HTMLDivElement>}
-          autoLive={liveViewMode == "Auto" || liveViewMode == "Continuous"}
-          showStillWithoutActivity={liveViewMode != "Continuous"}
+          autoLive={liveViewMode != "static"}
+          showStillWithoutActivity={liveViewMode != "continuous"}
         />
         {children}
       </div>

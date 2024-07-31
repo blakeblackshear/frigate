@@ -128,7 +128,7 @@ export default function LiveDashboardView({
 
   // camera live views
 
-  const [liveViewMode] = usePersistence<LiveViewMode>("liveViewMode", "Auto");
+  const [liveViewMode] = usePersistence<LiveViewMode>("liveViewMode", "auto");
   const [preferredLiveModes, setPreferredLiveModes] = useState<{
     [key: string]: LivePlayerMode;
   }>({});
@@ -377,10 +377,8 @@ export default function LiveDashboardView({
                   }
                   cameraConfig={camera}
                   preferredLiveMode={preferredLiveModes[camera.name] ?? "mse"}
-                  autoLive={
-                    liveViewMode == "Auto" || liveViewMode == "Continuous"
-                  }
-                  showStillWithoutActivity={liveViewMode != "Continuous"}
+                  autoLive={liveViewMode != "static"}
+                  showStillWithoutActivity={liveViewMode != "continuous"}
                   onClick={() => onSelectCamera(camera.name)}
                   onError={(e) => handleError(camera.name, e)}
                 />

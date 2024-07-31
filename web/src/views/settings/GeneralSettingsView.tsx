@@ -55,7 +55,7 @@ export default function GeneralSettingsView() {
 
   const [liveViewMode, setLiveViewMode] = usePersistence<LiveViewMode>(
     "liveViewMode",
-    "Auto",
+    "auto",
   );
   const [playbackRate, setPlaybackRate] = usePersistence("playbackRate", 1);
   const [weekStartsOn, setWeekStartsOn] = usePersistence("weekStartsOn", 0);
@@ -88,7 +88,7 @@ export default function GeneralSettingsView() {
                 value={liveViewMode}
                 onValueChange={(value: LiveViewMode) => setLiveViewMode(value)}
             >
-              <SelectTrigger className="w-100">
+              <SelectTrigger className="w-100" style={{textTransform: "capitalize"}}>
                 {liveViewMode}
               </SelectTrigger>
               <SelectContent>
@@ -98,6 +98,7 @@ export default function GeneralSettingsView() {
                           key={mode}
                           className="cursor-pointer"
                           value={mode}
+                          style={{textTransform: "capitalize"}}
                       >
                         {mode}
                       </SelectItem>
