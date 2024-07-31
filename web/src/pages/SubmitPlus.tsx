@@ -241,7 +241,9 @@ export default function SubmitPlus() {
         <PlusSortSelector selectedSort={sort} setSelectedSort={setSort} />
       </div>
       <div className="no-scrollbar flex size-full flex-1 flex-wrap content-start gap-2 overflow-y-auto md:gap-4">
-        {events?.length === 0 && !isValidating ? (
+        {isValidating ? (
+          <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+        ) : events?.length === 0 ? (
           <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
             <LuFolderX className="size-16" />
             No events found
@@ -337,7 +339,6 @@ export default function SubmitPlus() {
             {!isValidating && !isDone && <div ref={lastEventRef} />}
           </div>
         )}
-        {isValidating && <ActivityIndicator />}
       </div>
     </div>
   );
