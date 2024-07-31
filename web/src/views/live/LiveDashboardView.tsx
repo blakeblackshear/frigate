@@ -28,7 +28,7 @@ import DraggableGridLayout from "./DraggableGridLayout";
 import { IoClose } from "react-icons/io5";
 import { LuLayoutDashboard } from "react-icons/lu";
 import { cn } from "@/lib/utils";
-import {LivePlayerError, LivePlayerMode, LiveViewMode} from "@/types/live";
+import { LivePlayerError, LivePlayerMode, LiveViewMode } from "@/types/live";
 import { FaCompress, FaExpand } from "react-icons/fa";
 import { useResizeObserver } from "@/hooks/resize-observer";
 

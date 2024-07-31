@@ -33,5 +33,5 @@ export type LiveStreamMetadata = {
 
 export type LivePlayerError = "stalled" | "startup" | "mse-decode";
 
-export const LiveViewModes = ["auto", "static", "continuous"] as const
+export const LiveViewModes = ["auto", "static", "continuous"] as const;
 export type LiveViewMode = (typeof LiveViewModes)[number];
