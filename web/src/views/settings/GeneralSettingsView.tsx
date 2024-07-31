@@ -80,10 +80,9 @@ export default function GeneralSettingsView() {
           <div className="mt-2 space-y-6">
             <div className="text-md">Live View Modes</div>
             <div className="my-2 text-sm text-muted-foreground">
-              <p>The mode for live streams. <br/> Auto mode (default) will begin streaming when motion is
-                detected.<br/> Static mode will update images on live streams once per minute.<br/> Continuous mode
-                will stream cameras regardless of motion. Caution: Continuous mode will increase bandwidth
-                usage and may affect performance.</p>
+              <p>Live stream behavior:<br/>Auto mode (default) will begin streaming when activity is
+                detected.<br/>Static mode will update camera images on the live dashboard once per minute.<br/>Continuous mode
+                will stream cameras regardless of activity. Caution: Continuous mode will increase bandwidth usage and may affect performance.</p>
             </div>
             <Select
                 value={liveViewMode}
