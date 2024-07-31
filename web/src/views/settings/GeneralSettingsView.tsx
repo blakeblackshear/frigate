@@ -77,7 +77,7 @@ export default function GeneralSettingsView() {
           </Heading>
 
           <div className="mt-2 space-y-6">
-            <div className="text-md">Live View Modes</div>
+            <div className="text-md">Live View Mode</div>
             <div className="my-2 text-sm text-muted-foreground">
               <p>
                 Live stream behavior:
