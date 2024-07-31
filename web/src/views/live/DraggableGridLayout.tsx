@@ -20,7 +20,7 @@ import {
 } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
-import { LivePlayerError, LivePlayerMode } from "@/types/live";
+import { LivePlayerError, LivePlayerMode, LiveViewMode } from "@/types/live";
 import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useResizeObserver } from "@/hooks/resize-observer";
@@ -74,10 +74,10 @@ export default function DraggableGridLayout({
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
 
   // preferred live modes per camera
-
   const [preferredLiveModes, setPreferredLiveModes] = useState<{
     [key: string]: LivePlayerMode;
   }>({});
+  const [liveViewMode] = usePersistence<LiveViewMode>("liveViewMode", "Auto");
 
   useEffect(() => {
     if (!cameras) return;
@@ -463,6 +463,7 @@ export default function DraggableGridLayout({
                   }
                   cameraConfig={camera}
                   preferredLiveMode={preferredLiveModes[camera.name] ?? "mse"}
+                  liveViewMode={liveViewMode}
                   onClick={() => {
                     !isEditMode && onSelectCamera(camera.name);
                   }}
@@ -635,6 +636,7 @@ type LivePlayerGridItemProps = {
   preferredLiveMode: LivePlayerMode;
   onClick: () => void;
   onError: (e: LivePlayerError) => void;
+  liveViewMode?: LiveViewMode;
 };
 
 const LivePlayerGridItem = React.forwardRef<
@@ -655,6 +657,7 @@ const LivePlayerGridItem = React.forwardRef<
       preferredLiveMode,
       onClick,
       onError,
+      liveViewMode,
       ...props
     },
     ref,
@@ -677,6 +680,8 @@ const LivePlayerGridItem = React.forwardRef<
           onClick={onClick}
           onError={onError}
           containerRef={ref as React.RefObject<HTMLDivElement>}
+          autoLive={liveViewMode == "Auto" || liveViewMode == "Continuous"}
+          showStillWithoutActivity={liveViewMode != "Continuous"}
         />
         {children}
       </div>

@@ -18,6 +18,7 @@ import {
   SelectItem,
   SelectTrigger,
 } from "../../components/ui/select";
+import { LiveViewMode, LiveViewModes } from "@/types/live.ts";
 
 const PLAYBACK_RATE_DEFAULT = isSafari ? [0.5, 1, 2] : [0.5, 1, 2, 4, 8, 16];
 const WEEK_STARTS_ON = ["Sunday", "Monday"];
@@ -52,52 +53,65 @@ export default function GeneralSettingsView() {
 
   // settings
 
-  const [autoLive, setAutoLive] = usePersistence("autoLiveView", true);
+  const [liveViewMode, setLiveViewMode] = usePersistence<LiveViewMode>(
+    "liveViewMode",
+    "Auto",
+  );
   const [playbackRate, setPlaybackRate] = usePersistence("playbackRate", 1);
   const [weekStartsOn, setWeekStartsOn] = usePersistence("weekStartsOn", 0);
   const [alertVideos, setAlertVideos] = usePersistence("alertVideos", true);
 
   return (
-    <>
+      <>
       <div className="flex size-full flex-col md:flex-row">
-        <Toaster position="top-center" closeButton={true} />
-        <div className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
+        <Toaster position="top-center" closeButton={true}/>
+        <div
+            className="scrollbar-container order-last mb-10 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mb-0 md:mr-2 md:mt-0">
           <Heading as="h3" className="my-2">
             General Settings
           </Heading>
 
-          <Separator className="my-2 flex bg-secondary" />
+          <Separator className="my-2 flex bg-secondary"/>
 
           <Heading as="h4" className="my-2">
             Live Dashboard
           </Heading>
 
           <div className="mt-2 space-y-6">
-            <div className="space-y-3">
-              <div className="flex flex-row items-center justify-start gap-2">
-                <Switch
-                  id="auto-live"
-                  checked={autoLive}
-                  onCheckedChange={setAutoLive}
-                />
-                <Label className="cursor-pointer" htmlFor="auto-live">
-                  Automatic Live View
-                </Label>
-              </div>
-              <div className="my-2 text-sm text-muted-foreground">
-                <p>
-                  Automatically switch to a camera's live view when activity is
-                  detected. Disabling this option causes static camera images on
-                  the Live dashboard to only update once per minute.
-                </p>
-              </div>
+            <div className="text-md">Live View Modes</div>
+            <div className="my-2 text-sm text-muted-foreground">
+              <p>The mode for live streams. <br/> Auto mode (default) will begin streaming when motion is
+                detected.<br/> Static mode will update images on live streams once per minute.<br/> Continuous mode
+                will stream cameras regardless of motion. Caution: Continuous mode will increase bandwidth
+                usage and may affect performance.</p>
             </div>
+            <Select
+                value={liveViewMode}
+                onValueChange={(value: LiveViewMode) => setLiveViewMode(value)}
+            >
+              <SelectTrigger className="w-100">
+                {liveViewMode}
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {LiveViewModes.map((mode) => (
+                      <SelectItem
+                          key={mode}
+                          className="cursor-pointer"
+                          value={mode}
+                      >
+                        {mode}
+                      </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
             <div className="space-y-3">
               <div className="flex flex-row items-center justify-start gap-2">
                 <Switch
-                  id="images-only"
-                  checked={alertVideos}
-                  onCheckedChange={setAlertVideos}
+                    id="images-only"
+                    checked={alertVideos}
+                    onCheckedChange={setAlertVideos}
                 />
                 <Label className="cursor-pointer" htmlFor="images-only">
                   Play Alert Videos
@@ -128,7 +142,7 @@ export default function GeneralSettingsView() {
               <Button onClick={clearStoredLayouts}>Clear All Layouts</Button>
             </div>
 
-            <Separator className="my-2 flex bg-secondary" />
+            <Separator className="my-2 flex bg-secondary"/>
 
             <Heading as="h4" className="my-2">
               Recordings Viewer
@@ -143,65 +157,66 @@ export default function GeneralSettingsView() {
               </div>
             </div>
             <Select
-              value={playbackRate?.toString()}
-              onValueChange={(value) => setPlaybackRate(parseFloat(value))}
-            >
-              <SelectTrigger className="w-20">
-                {`${playbackRate}x`}
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {PLAYBACK_RATE_DEFAULT.map((rate) => (
-                    <SelectItem
+                value={playbackRate?.toString()}
+                onValueChange={(value) => setPlaybackRate(parseFloat(value))}
+        >
+          <SelectTrigger className="w-20">
+            {`${playbackRate}x`}
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {PLAYBACK_RATE_DEFAULT.map((rate) => (
+                  <SelectItem
                       key={rate}
                       className="cursor-pointer"
                       value={rate.toString()}
-                    >
-                      {rate}x
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            <Separator className="my-2 flex bg-secondary" />
+                  >
+                    {rate}x
+                  </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+        <Separator className="my-2 flex bg-secondary"/>
 
-            <Heading as="h4" className="my-2">
-              Calendar
-            </Heading>
+        <Heading as="h4" className="my-2">
+          Calendar
+        </Heading>
 
-            <div className="mt-2 space-y-6">
-              <div className="space-y-0.5">
-                <div className="text-md">First Weekday</div>
-                <div className="my-2 text-sm text-muted-foreground">
-                  <p>The day that the weeks of the review calendar begin on.</p>
-                </div>
-              </div>
+        <div className="mt-2 space-y-6">
+          <div className="space-y-0.5">
+            <div className="text-md">First Weekday</div>
+            <div className="my-2 text-sm text-muted-foreground">
+              <p>The day that the weeks of the review calendar begin on.</p>
             </div>
-            <Select
-              value={weekStartsOn?.toString()}
-              onValueChange={(value) => setWeekStartsOn(parseInt(value))}
-            >
-              <SelectTrigger className="w-32">
-                {WEEK_STARTS_ON[weekStartsOn ?? 0]}
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {WEEK_STARTS_ON.map((day, index) => (
-                    <SelectItem
+          </div>
+        </div>
+        <Select
+            value={weekStartsOn?.toString()}
+            onValueChange={(value) => setWeekStartsOn(parseInt(value))}
+        >
+          <SelectTrigger className="w-32">
+            {WEEK_STARTS_ON[weekStartsOn ?? 0]}
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {WEEK_STARTS_ON.map((day, index) => (
+                  <SelectItem
                       key={index}
                       className="cursor-pointer"
                       value={index.toString()}
-                    >
-                      {day}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            <Separator className="my-2 flex bg-secondary" />
-          </div>
-        </div>
+                  >
+                    {day}
+                  </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+        <Separator className="my-2 flex bg-secondary"/>
       </div>
-    </>
-  );
+      </div>
+</div>
+</>
+)
+  ;
 }
