@@ -246,7 +246,7 @@ export default function SubmitPlus() {
         ) : events?.length === 0 ? (
           <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
             <LuFolderX className="size-16" />
-            No events found
+            No snapshots found
           </div>
         ) : (
           <div className="grid w-full gap-2 p-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
