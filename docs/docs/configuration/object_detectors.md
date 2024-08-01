@@ -136,23 +136,7 @@ model:
 
 #### YOLOX
 
-This detector also supports YOLOX. Frigate does not come with any YOLOX models preloaded, so you will need to supply your own models. This detector has been verified to work with the [yolox_tiny](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/yolox-tiny) model from Intel's Open Model Zoo. You can follow [these instructions](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/yolox-tiny#download-a-model-and-convert-it-into-openvino-ir-format) to retrieve the OpenVINO-compatible `yolox_tiny` model. Make sure that the model input dimensions match the `width` and `height` parameters, and `model_type` is set accordingly. See [Full Configuration Reference](/configuration/reference.md) for a list of possible `model_type` options. Below is an example of how `yolox_tiny` can be used in Frigate:
-
-```yaml
-detectors:
-  ov:
-    type: openvino
-    device: GPU
-
-model:
-  width: 416
-  height: 416
-  input_tensor: nchw
-  input_pixel_format: bgr
-  model_type: yolox
-  path: /path/to/yolox_tiny.xml
-  labelmap_path: /path/to/coco_80cl.txt
-```
+This detector also supports YOLOX. Frigate does not come with any YOLOX models preloaded, so you will need to supply your own models.
 
 #### YOLO-NAS
 
