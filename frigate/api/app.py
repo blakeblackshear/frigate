@@ -36,6 +36,8 @@ from frigate.util.builtin import (
 )
 from frigate.util.services import ffprobe_stream, restart_frigate, vainfo_hwaccel
 from frigate.version import VERSION
+from flask_cors import CORS, cross_origin
+from flask_cors import CORS, cross_origin
 
 logger = logging.getLogger(__name__)
 
@@ -60,13 +62,7 @@ def create_app(
     stats_emitter: StatsEmitter,
 ):
     app = Flask(__name__)
-
-    @app.before_request
-    def check_csrf():
-        if request.method in ["GET", "HEAD", "OPTIONS", "TRACE"]:
-            pass
-        if "origin" in request.headers and "x-csrf-token" not in request.headers:
-            return jsonify({"success": False, "message": "Missing CSRF header"}), 401
+    CORS(app)
 
     @app.before_request
     def _db_connect():

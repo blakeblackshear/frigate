@@ -26,7 +26,7 @@ services:
       YOLO_MODELS: yolov7-320
     devices:
       - /dev/bus/usb:/dev/bus/usb
-      # - /dev/dri:/dev/dri # for intel hwaccel, needs to be updated for your hardware
+      #- /dev/dri:/dev/dri # for intel hwaccel, needs to be updated for your hardware
     volumes:
       - .:/workspace/frigate:cached
       - ./web/dist:/opt/frigate/web:cached
