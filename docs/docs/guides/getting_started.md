@@ -274,13 +274,11 @@ cameras:
         - 0,461,3,0,1919,0,1919,843,1699,492,1344,458,1346,336,973,317,869,375,866,432
 ```
 
-### Step 6: Enable recording and/or snapshots
+### Step 6: Enable recordings
 
-In order to see Events in the Frigate UI, either snapshots or record will need to be enabled.
+In order to review activity in the Frigate UI, recordings need to be enabled.
 
-#### Record
-
-To enable recording video, add the `record` role to a stream and enable it in the config. If record is disabled in the config, turning it on via the UI will not have any effect.
+To enable recording video, add the `record` role to a stream and enable it in the config. If record is disabled in the config, it won't be possible to enable it in the UI.
 
 ```yaml
 mqtt: ...
@@ -307,26 +305,6 @@ If you don't have separate streams for detect and record, you would just add the
 
 By default, Frigate will retain video of all events for 10 days. The full set of options for recording can be found [here](../configuration/reference.md).
 
-#### Snapshots
-
-To enable snapshots of your events, just enable it in the config. Snapshots are taken from the detect stream because it is the only stream decoded.
-
-```yaml
-mqtt: ...
-
-detectors: ...
-
-cameras:
-  name_of_your_camera: ...
-    detect: ...
-    record: ...
-    snapshots: # <----- Enable snapshots
-      enabled: True
-    motion: ...
-```
-
-By default, Frigate will retain snapshots of all events for 10 days. The full set of options for snapshots can be found [here](../configuration/reference.md).
-
 ### Step 7: Complete config
 
 At this point you have a complete config with basic functionality. You can see the [full config reference](../configuration/reference.md) for a complete list of configuration options.
@@ -336,6 +314,8 @@ At this point you have a complete config with basic functionality. You can see t
 Now that you have a working install, you can use the following documentation for additional features:
 
 1. [Configuring go2rtc](configuring_go2rtc.md) - Additional live view options and RTSP relay
-2. [Home Assistant Integration](../integrations/home-assistant.md) - Integrate with Home Assistant
-3. [Masks](../configuration/masks.md)
-4. [Zones](../configuration/zones.md)
+2. [Zones](../configuration/zones.md)
+3. [Review](../configuration/review.md)
+4. [Masks](../configuration/masks.md)
+5. [Home Assistant Integration](../integrations/home-assistant.md) - Integrate with Home Assistant
+
