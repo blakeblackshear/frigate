@@ -548,6 +548,7 @@ def vod_ts(camera_name, start_ts, end_ts):
 
         if 0 < duration < max_duration_ms:
             clip["keyFrameDurations"] = [duration]
+            clip["id"] = "san"
             clips.append(clip)
             durations.append(duration)
         else:

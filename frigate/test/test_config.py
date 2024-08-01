@@ -21,13 +21,11 @@ class TestConfig(unittest.TestCase):
                 "back": {
                     "ffmpeg": {
                         "inputs": [
-                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                            {
+                                "path": "rtsp://admin:12publico34@elpinarfutbol.ddns.net:554/cam/realmonitor?channel=1&subtype=0",
+                                "roles": ["record"],
+                            }
                         ]
-                    },
-                    "detect": {
-                        "height": 1080,
-                        "width": 1920,
-                        "fps": 5,
                     },
                 }
             },
