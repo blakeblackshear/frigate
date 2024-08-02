@@ -13,9 +13,11 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Toaster } from "@/components/ui/sonner";
+import { cn } from "@/lib/utils";
 import { DeleteClipType, Export } from "@/types/export";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { isMobile } from "react-device-detect";
 import { LuFolderX } from "react-icons/lu";
 import { toast } from "sonner";
 import useSWR from "swr";
@@ -92,6 +94,7 @@ function Exports() {
   // Viewing
 
   const [selected, setSelected] = useState<Export>();
+  const [selectedAspect, setSelectedAspect] = useState(0.0);
 
   return (
     <div className="flex size-full flex-col gap-2 overflow-hidden px-1 pt-2 md:p-2">
@@ -129,15 +132,27 @@ function Exports() {
           }
         }}
       >
-        <DialogContent className="max-w-7xl">
-          <DialogTitle>{selected?.name}</DialogTitle>
+        <DialogContent
+          className={cn("max-w-[80%]", isMobile && "landscape:max-w-[60%]")}
+        >
+          <DialogTitle className="capitalize">
+            {selected?.name?.replaceAll("_", " ")}
+          </DialogTitle>
           <video
-            className="size-full rounded-lg md:rounded-2xl"
+            className={cn(
+              "size-full rounded-lg md:rounded-2xl",
+              selectedAspect < 1.5 && "aspect-video h-full",
+            )}
             playsInline
             preload="auto"
             autoPlay
             controls
             muted
+            onLoadedData={(e) =>
+              setSelectedAspect(
+                e.currentTarget.videoWidth / e.currentTarget.videoHeight,
+              )
+            }
           >
             <source
               src={`${baseUrl}${selected?.video_path?.replace("/media/frigate/", "")}`}
