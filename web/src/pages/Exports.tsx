@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { DeleteClipType, Export } from "@/types/export";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { isMobile } from "react-device-detect";
 import { LuFolderX } from "react-icons/lu";
 import { toast } from "sonner";
 import useSWR from "swr";
@@ -131,14 +132,16 @@ function Exports() {
           }
         }}
       >
-        <DialogContent className="max-w-[80%]">
+        <DialogContent
+          className={cn("max-w-[80%]", isMobile && "landscape:max-w-[60%]")}
+        >
           <DialogTitle className="capitalize">
             {selected?.name?.replaceAll("_", " ")}
           </DialogTitle>
           <video
             className={cn(
               "size-full rounded-lg md:rounded-2xl",
-              selectedAspect < 1.5 ? "aspect-video h-full" : "",
+              selectedAspect < 1.5 && "aspect-video h-full",
             )}
             playsInline
             preload="auto"
