@@ -1,14 +1,14 @@
 import { useCallback, useState } from "react";
 
-type useSessionStorageReturn<S> = [
+type useSessionPersistenceReturn<S> = [
   value: S | undefined,
   setValue: (value: S | undefined) => void,
 ];
 
-export function useSessionStorage<S>(
+export function useSessionPersistence<S>(
   key: string,
   defaultValue: S | undefined = undefined,
-): useSessionStorageReturn<S> {
+): useSessionPersistenceReturn<S> {
   const [storedValue, setStoredValue] = useState(() => {
     try {
       const value = window.sessionStorage.getItem(key);
