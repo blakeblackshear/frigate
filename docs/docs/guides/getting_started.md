@@ -5,9 +5,17 @@ title: Getting started
 
 # Getting Started
 
+:::tip
+
+If you already have an environment with Linux and Docker installed, you can continue to [Installing Frigate](#installing-frigate) below.
+
+If you already have Frigate installed in Docker or as a Home Assistant addon, you can continue to [Configuring Frigate](#configuring-frigate) below.
+
+:::
+
 ## Setting up hardware
 
-This section guides you through setting up a server with Debian Bookworm and Docker. If you already have an environment with Linux and Docker installed, you can continue to [Installing Frigate](#installing-frigate) below.
+This section guides you through setting up a server with Debian Bookworm and Docker.
 
 ### Install Debian 12 (Bookworm)
 
@@ -77,20 +85,19 @@ This section shows how to create a minimal directory structure for a Docker inst
 
 ### Setup directories
 
-Frigate requires a valid config file to start. The following directory structure is the bare minimum to get started. Once Frigate is running, you can use the built-in config editor which supports config validation.
+Frigate will create a config file if one does not exist on the initial startup. The following directory structure is the bare minimum to get started. Once Frigate is running, you can use the built-in config editor which supports config validation.
 
 ```
 .
 ├── docker-compose.yml
 ├── config/
-│   └── config.yml
 └── storage/
 ```
 
 This will create the above structure:
 
 ```bash
-mkdir storage config && touch docker-compose.yml config/config.yml
+mkdir storage config && touch docker-compose.yml
 ```
 
 If you are setting up Frigate on a Linux device via SSH, you can use [nano](https://itsfoss.com/nano-editor-guide/) to edit the following files. If you prefer to edit remote files with a full editor instead of a terminal, I recommend using [Visual Studio Code](https://code.visualstudio.com/) with the [Remote SSH extension](https://code.visualstudio.com/docs/remote/ssh-tutorial).
@@ -119,22 +126,6 @@ services:
     ports:
       - "8971:8971"
       - "8554:8554" # RTSP feeds
-```
-
-`config.yml`
-
-```yaml
-mqtt:
-  enabled: False
-
-cameras:
-  dummy_camera: # <--- this will be changed to your actual camera later
-    enabled: False
-    ffmpeg:
-      inputs:
-        - path: rtsp://127.0.0.1:554/rtsp
-          roles:
-            - detect
 ```
 
 Now you should be able to start Frigate by running `docker compose up -d` from within the folder containing `docker-compose.yml`. On startup, an admin user and password will be created and outputted in the logs. You can see this by running `docker logs frigate`. Frigate should now be accessible at `https://server_ip:8971` where you can login with the `admin` user and finish the configuration using the built-in configuration editor.
