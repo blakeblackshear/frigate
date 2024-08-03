@@ -9,7 +9,7 @@ title: Getting started
 
 If you already have an environment with Linux and Docker installed, you can continue to [Installing Frigate](#installing-frigate) below.
 
-If you already have Frigate installed, you can continue to [Configuring Frigate](#configuring-frigate) below.
+If you already have Frigate installed in Docker or as a Home Assistant addon, you can continue to [Configuring Frigate](#configuring-frigate) below.
 
 :::
 
