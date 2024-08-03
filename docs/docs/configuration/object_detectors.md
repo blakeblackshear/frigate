@@ -81,6 +81,15 @@ detectors:
     device: ""
 ```
 
+### Single PCIE/M.2 Coral
+
+```yaml
+detectors:
+  coral:
+    type: edgetpu
+    device: pci
+```
+
 ### Multiple PCIE/M.2 Corals
 
 ```yaml
