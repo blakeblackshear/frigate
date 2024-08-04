@@ -507,7 +507,7 @@ export function RecordingView({
                       "pt-2 portrait:w-full",
                       mainCameraAspect == "wide"
                         ? "aspect-wide landscape:w-full"
-                        : "aspect-video landscape:h-[94%]",
+                        : "aspect-video landscape:h-[94%] landscape:xl:h-[65%]",
                     ),
               )}
               style={{
