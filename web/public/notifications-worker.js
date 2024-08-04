@@ -46,7 +46,7 @@ self.addEventListener("notificationclick", (event) => {
         if (event.notification.data) {
           fetch("/api/reviews/viewed", {
             method: "POST",
-            headers: { "X-CSRF-TOKEN": 1 },
+            headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": 1 },
             body: JSON.stringify({ ids: [event.notification.data.id] }),
           });
         }
