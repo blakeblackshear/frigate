@@ -139,8 +139,18 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
           </Tooltip>
         </Trigger>
         <Content
+          style={
+            isDesktop
+              ? {
+                  maxHeight:
+                    "var(--radix-dropdown-menu-content-available-height)",
+                }
+              : {}
+          }
           className={
-            isDesktop ? "mr-5 w-72" : "max-h-[75dvh] overflow-hidden p-2"
+            isDesktop
+              ? "scrollbar-container mr-5 w-72 overflow-y-auto"
+              : "max-h-[75dvh] overflow-hidden p-2"
           }
         >
           <div className="scrollbar-container w-full flex-col overflow-y-auto overflow-x-hidden">
