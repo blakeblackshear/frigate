@@ -736,7 +736,7 @@ class ReviewConfig(FrigateBaseModel):
 
 
 class SemanticSearchConfig(FrigateBaseModel):
-    enabled: bool = Field(default=True, title="Enable semantic search.")
+    enabled: bool = Field(default=False, title="Enable semantic search.")
     reindex: Optional[bool] = Field(
         default=False, title="Reindex all detections on startup."
     )

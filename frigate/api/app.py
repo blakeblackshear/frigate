@@ -7,6 +7,7 @@ import os
 import traceback
 from datetime import datetime, timedelta
 from functools import reduce
+from typing import Optional
 
 import requests
 from flask import Blueprint, Flask, current_app, jsonify, make_response, request
@@ -55,7 +56,7 @@ bp.register_blueprint(NotificationBp)
 def create_app(
     frigate_config,
     database: SqliteQueueDatabase,
-    embeddings: EmbeddingsContext,
+    embeddings: Optional[EmbeddingsContext],
     detected_frames_processor,
     storage_maintainer: StorageMaintainer,
     onvif: OnvifController,
