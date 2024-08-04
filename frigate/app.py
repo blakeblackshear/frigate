@@ -321,6 +321,10 @@ class FrigateApp:
         logger.info(f"Review process started: {review_segment_process.pid}")
 
     def init_embeddings_manager(self) -> None:
+        if not self.config.semantic_search.enabled:
+            self.embeddings = None
+            return
+
         # Create a client for other processes to use
         self.embeddings = EmbeddingsContext()
         embedding_process = mp.Process(
@@ -816,7 +820,8 @@ class FrigateApp:
         self.db.stop()
 
         # Save embeddings stats to disk
-        self.embeddings.save_stats()
+        if self.embeddings:
+            self.embeddings.save_stats()
 
         # Stop Communicators
         self.inter_process_communicator.stop()
