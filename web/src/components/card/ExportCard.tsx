@@ -141,7 +141,7 @@ export default function ExportCard({
               )}
               {!exportedRecording.in_progress && (
                 <Chip
-                  className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
+                  className="z-20 cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
                   onClick={() =>
                     setEditName({
                       original: exportedRecording.name,
@@ -153,7 +153,7 @@ export default function ExportCard({
                 </Chip>
               )}
               <Chip
-                className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
+                className="z-20 cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
                 onClick={() =>
                   onDelete({
                     file: exportedRecording.id,
