@@ -1,7 +1,6 @@
 // Notifications Worker
 
 self.addEventListener("push", function (event) {
-  console.log(`received push at ${new Date()}`)
   // @ts-expect-error we know this exists
   if (event.data) {
     // @ts-expect-error we know this exists
@@ -15,10 +14,6 @@ self.addEventListener("push", function (event) {
           {
             action: "markReviewed",
             title: "Mark as Reviewed",
-          },
-          {
-            action: "snooze",
-            title: "Snooze",
           },
         ];
         break;
@@ -54,8 +49,6 @@ self.addEventListener("notificationclick", (event) => {
             body: JSON.stringify({ ids: [event.notification.data.id] }),
           });
         }
-        break;
-      case "snooze":
         break;
       default:
         // @ts-expect-error we know this exists
