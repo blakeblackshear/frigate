@@ -124,60 +124,6 @@ export default function ExportCard({
         onMouseLeave={isDesktop ? () => setHovered(false) : undefined}
         onClick={isDesktop ? undefined : () => setHovered(!hovered)}
       >
-        {hovered && (
-          <>
-            <div className="absolute inset-0 z-10 rounded-lg bg-black bg-opacity-60 md:rounded-2xl" />
-            <div className="absolute right-1 top-1 flex items-center gap-2">
-              {!exportedRecording.in_progress && (
-                <a
-                  className="z-20"
-                  download
-                  href={`${baseUrl}${exportedRecording.video_path.replace("/media/frigate/", "")}`}
-                >
-                  <Chip className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500">
-                    <FaDownload className="size-4 text-white" />
-                  </Chip>
-                </a>
-              )}
-              {!exportedRecording.in_progress && (
-                <Chip
-                  className="z-20 cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
-                  onClick={() =>
-                    setEditName({
-                      original: exportedRecording.name,
-                      update: "",
-                    })
-                  }
-                >
-                  <MdEditSquare className="size-4 text-white" />
-                </Chip>
-              )}
-              <Chip
-                className="z-20 cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
-                onClick={() =>
-                  onDelete({
-                    file: exportedRecording.id,
-                    exportName: exportedRecording.name,
-                  })
-                }
-              >
-                <LuTrash className="size-4 fill-destructive text-destructive" />
-              </Chip>
-            </div>
-
-            {!exportedRecording.in_progress && (
-              <Button
-                className="absolute left-1/2 top-1/2 z-20 h-20 w-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer text-white hover:bg-transparent hover:text-white"
-                variant="ghost"
-                onClick={() => {
-                  onSelect(exportedRecording);
-                }}
-              >
-                <FaPlay />
-              </Button>
-            )}
-          </>
-        )}
         {exportedRecording.in_progress ? (
           <ActivityIndicator />
         ) : (
@@ -193,10 +139,63 @@ export default function ExportCard({
             )}
           </>
         )}
+        {hovered && (
+          <div>
+            <div className="absolute inset-0 rounded-lg bg-black bg-opacity-60 md:rounded-2xl" />
+            <div className="absolute right-1 top-1 flex items-center gap-2">
+              {!exportedRecording.in_progress && (
+                <a
+                  download
+                  href={`${baseUrl}${exportedRecording.video_path.replace("/media/frigate/", "")}`}
+                >
+                  <Chip className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500">
+                    <FaDownload className="size-4 text-white" />
+                  </Chip>
+                </a>
+              )}
+              {!exportedRecording.in_progress && (
+                <Chip
+                  className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
+                  onClick={() =>
+                    setEditName({
+                      original: exportedRecording.name,
+                      update: "",
+                    })
+                  }
+                >
+                  <MdEditSquare className="size-4 text-white" />
+                </Chip>
+              )}
+              <Chip
+                className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
+                onClick={() =>
+                  onDelete({
+                    file: exportedRecording.id,
+                    exportName: exportedRecording.name,
+                  })
+                }
+              >
+                <LuTrash className="size-4 fill-destructive text-destructive" />
+              </Chip>
+            </div>
+
+            {!exportedRecording.in_progress && (
+              <Button
+                className="absolute left-1/2 top-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer text-white hover:bg-transparent hover:text-white"
+                variant="ghost"
+                onClick={() => {
+                  onSelect(exportedRecording);
+                }}
+              >
+                <FaPlay />
+              </Button>
+            )}
+          </div>
+        )}
         {loading && (
           <Skeleton className="absolute inset-0 aspect-video rounded-lg md:rounded-2xl" />
         )}
-        <div className="rounded-b-l pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[20%] rounded-lg bg-gradient-to-t from-black/60 to-transparent md:rounded-2xl">
+        <div className="rounded-b-l pointer-events-none absolute inset-x-0 bottom-0 h-[20%] rounded-lg bg-gradient-to-t from-black/60 to-transparent md:rounded-2xl">
           <div className="mx-3 flex h-full items-end justify-between pb-1 text-sm capitalize text-white">
             {exportedRecording.name.replaceAll("_", " ")}
           </div>
