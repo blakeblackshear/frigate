@@ -165,6 +165,7 @@ class WebPushClient(Communicator):  # type: ignore[misc]
                             "direct_url": direct_url,
                             "image": image,
                             "id": reviewId,
+                            "type": "alert",
                         }
                     ),
                 )
