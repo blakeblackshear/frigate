@@ -124,13 +124,27 @@ export default function ExportCard({
         onMouseLeave={isDesktop ? () => setHovered(false) : undefined}
         onClick={isDesktop ? undefined : () => setHovered(!hovered)}
       >
-        {hovered && (
+        {exportedRecording.in_progress ? (
+          <ActivityIndicator />
+        ) : (
           <>
-            <div className="absolute inset-0 z-10 rounded-lg bg-black bg-opacity-60 md:rounded-2xl" />
+            {exportedRecording.thumb_path.length > 0 ? (
+              <img
+                className="absolute inset-0 aspect-video size-full rounded-lg object-contain md:rounded-2xl"
+                src={`${baseUrl}${exportedRecording.thumb_path.replace("/media/frigate/", "")}`}
+                onLoad={() => setLoading(false)}
+              />
+            ) : (
+              <div className="absolute inset-0 rounded-lg bg-secondary md:rounded-2xl" />
+            )}
+          </>
+        )}
+        {hovered && (
+          <div>
+            <div className="absolute inset-0 rounded-lg bg-black bg-opacity-60 md:rounded-2xl" />
             <div className="absolute right-1 top-1 flex items-center gap-2">
               {!exportedRecording.in_progress && (
                 <a
-                  className="z-20"
                   download
                   href={`${baseUrl}${exportedRecording.video_path.replace("/media/frigate/", "")}`}
                 >
@@ -167,7 +181,7 @@ export default function ExportCard({
 
             {!exportedRecording.in_progress && (
               <Button
-                className="absolute left-1/2 top-1/2 z-20 h-20 w-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer text-white hover:bg-transparent hover:text-white"
+                className="absolute left-1/2 top-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer text-white hover:bg-transparent hover:text-white"
                 variant="ghost"
                 onClick={() => {
                   onSelect(exportedRecording);
@@ -176,27 +190,12 @@ export default function ExportCard({
                 <FaPlay />
               </Button>
             )}
-          </>
-        )}
-        {exportedRecording.in_progress ? (
-          <ActivityIndicator />
-        ) : (
-          <>
-            {exportedRecording.thumb_path.length > 0 ? (
-              <img
-                className="absolute inset-0 aspect-video size-full rounded-lg object-contain md:rounded-2xl"
-                src={`${baseUrl}${exportedRecording.thumb_path.replace("/media/frigate/", "")}`}
-                onLoad={() => setLoading(false)}
-              />
-            ) : (
-              <div className="absolute inset-0 rounded-lg bg-secondary md:rounded-2xl" />
-            )}
-          </>
+          </div>
         )}
         {loading && (
           <Skeleton className="absolute inset-0 aspect-video rounded-lg md:rounded-2xl" />
         )}
-        <div className="rounded-b-l pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[20%] rounded-lg bg-gradient-to-t from-black/60 to-transparent md:rounded-2xl">
+        <div className="rounded-b-l pointer-events-none absolute inset-x-0 bottom-0 h-[20%] rounded-lg bg-gradient-to-t from-black/60 to-transparent md:rounded-2xl">
           <div className="mx-3 flex h-full items-end justify-between pb-1 text-sm capitalize text-white">
             {exportedRecording.name.replaceAll("_", " ")}
           </div>
