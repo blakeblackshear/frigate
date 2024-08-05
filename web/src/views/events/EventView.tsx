@@ -1057,7 +1057,7 @@ function MotionReview({
 
               setScrubbing(scrubbing);
             }}
-            dense={isMobile}
+            dense={isMobileOnly}
           />
         ) : (
           <Skeleton className="size-full" />
