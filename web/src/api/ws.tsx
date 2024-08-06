@@ -1,7 +1,6 @@
 import { baseUrl } from "./baseUrl";
 import { useCallback, useEffect, useState } from "react";
 import useWebSocket, { ReadyState } from "react-use-websocket";
-import { FrigateConfig } from "@/types/frigateConfig";
 import {
   FrigateCameraState,
   FrigateEvent,
@@ -9,7 +8,6 @@ import {
   ToggleableSetting,
 } from "@/types/ws";
 import { FrigateStats } from "@/types/stats";
-import useSWR from "swr";
 import { createContainer } from "react-tracked";
 import useDeepMemo from "@/hooks/use-deep-memo";
 
@@ -26,40 +24,50 @@ type WsState = {
 type useValueReturn = [WsState, (update: Update) => void];
 
 function useValue(): useValueReturn {
-  // basic config
-  const { data: config } = useSWR<FrigateConfig>("config", {
-    revalidateOnFocus: false,
-  });
   const wsUrl = `${baseUrl.replace(/^http/, "ws")}ws`;
 
   // main state
+
+  const [hasCameraState, setHasCameraState] = useState(false);
   const [wsState, setWsState] = useState<WsState>({});
 
   useEffect(() => {
-    if (!config) {
+    if (hasCameraState) {
+      return;
+    }
+
+    const activityValue: string = wsState["camera_activity"] as string;
+
+    if (!activityValue) {
+      return;
+    }
+
+    const cameraActivity: { [key: string]: object } = JSON.parse(activityValue);
+
+    if (!cameraActivity) {
       return;
     }
 
     const cameraStates: WsState = {};
 
-    Object.keys(config.cameras).forEach((camera) => {
-      const { name, record, detect, snapshots, audio, onvif } =
-        config.cameras[camera];
-      cameraStates[`${name}/recordings/state`] = record.enabled ? "ON" : "OFF";
-      cameraStates[`${name}/detect/state`] = detect.enabled ? "ON" : "OFF";
-      cameraStates[`${name}/snapshots/state`] = snapshots.enabled
-        ? "ON"
-        : "OFF";
-      cameraStates[`${name}/audio/state`] = audio.enabled ? "ON" : "OFF";
-      cameraStates[`${name}/ptz_autotracker/state`] = onvif.autotracking.enabled
+    Object.entries(cameraActivity).forEach(([name, state]) => {
+      const { record, detect, snapshots, audio, autotracking } =
+        // @ts-expect-error we know this is correct
+        state["config"];
+      cameraStates[`${name}/recordings/state`] = record ? "ON" : "OFF";
+      cameraStates[`${name}/detect/state`] = detect ? "ON" : "OFF";
+      cameraStates[`${name}/snapshots/state`] = snapshots ? "ON" : "OFF";
+      cameraStates[`${name}/audio/state`] = audio ? "ON" : "OFF";
+      cameraStates[`${name}/ptz_autotracker/state`] = autotracking
         ? "ON"
         : "OFF";
     });
 
     setWsState({ ...wsState, ...cameraStates });
+    setHasCameraState(true);
     // we only want this to run initially when the config is loaded
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config]);
+  }, [wsState]);
 
   // ws handler
   const { sendJsonMessage, readyState } = useWebSocket(wsUrl, {
