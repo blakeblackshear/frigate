@@ -28,7 +28,7 @@ function useValue(): useValueReturn {
 
   // main state
 
-  const [hasCameraState, setHasCameraStates] = useState(false);
+  const [hasCameraState, setHasCameraState] = useState(false);
   const [wsState, setWsState] = useState<WsState>({});
 
   useEffect(() => {
@@ -64,7 +64,7 @@ function useValue(): useValueReturn {
     });
 
     setWsState({ ...wsState, ...cameraStates });
-    setHasCameraStates(true);
+    setHasCameraState(true);
     // we only want this to run initially when the config is loaded
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wsState]);
