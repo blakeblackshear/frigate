@@ -21,7 +21,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import ImageLoadingIndicator from "../indicators/ImageLoadingIndicator";
 import useContextMenu from "@/hooks/use-contextmenu";
 import ActivityIndicator from "../indicators/activity-indicator";
-import { TimeRange } from "@/types/timeline";
+import { TimelineScrubMode, TimeRange } from "@/types/timeline";
 import { NoThumbSlider } from "../ui/slider";
 import { PREVIEW_FPS, PREVIEW_PADDING } from "@/types/preview";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
@@ -414,7 +414,7 @@ export function VideoPreview({
 
     if (isSafari || (isFirefox && isMobile)) {
       playerRef.current.pause();
-      setManualPlayback(true);
+      setPlaybackMode("compat");
     } else {
       playerRef.current.currentTime = playerStartTime;
       playerRef.current.playbackRate = PREVIEW_FPS;
@@ -453,9 +453,9 @@ export function VideoPreview({
       setReviewed();
 
       if (loop && playerRef.current) {
-        if (manualPlayback) {
-          setManualPlayback(false);
-          setTimeout(() => setManualPlayback(true), 100);
+        if (playbackMode != "auto") {
+          setPlaybackMode("auto");
+          setTimeout(() => setPlaybackMode("compat"), 100);
         }
 
         playerRef.current.currentTime = playerStartTime;
@@ -472,7 +472,7 @@ export function VideoPreview({
         playerRef.current?.pause();
       }
 
-      setManualPlayback(false);
+      setPlaybackMode("auto");
       setProgress(100.0);
     } else {
       setProgress(playerPercent);
@@ -486,9 +486,10 @@ export function VideoPreview({
   // safari is incapable of playing at a speed > 2x
   // so manual seeking is required on iOS
 
-  const [manualPlayback, setManualPlayback] = useState(false);
+  const [playbackMode, setPlaybackMode] = useState<TimelineScrubMode>("auto");
+
   useEffect(() => {
-    if (!manualPlayback || !playerRef.current) {
+    if (playbackMode != "compat" || !playerRef.current) {
       return;
     }
 
@@ -503,9 +504,13 @@ export function VideoPreview({
 
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [manualPlayback, playerRef]);
+  }, [playbackMode, playerRef]);
 
   // user interaction
+
+  useEffect(() => {
+    setIgnoreClick(playbackMode != "auto" && playbackMode != "compat");
+  }, [playbackMode, setIgnoreClick]);
 
   const onManualSeek = useCallback(
     (values: number[]) => {
@@ -515,14 +520,8 @@ export function VideoPreview({
         return;
       }
 
-      if (manualPlayback) {
-        setManualPlayback(false);
-        setIgnoreClick(true);
-      }
-
       if (playerRef.current.paused == false) {
         playerRef.current.pause();
-        setIgnoreClick(true);
       }
 
       if (setReviewed) {
@@ -536,27 +535,21 @@ export function VideoPreview({
 
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      manualPlayback,
-      playerDuration,
-      playerRef,
-      playerStartTime,
-      setIgnoreClick,
-    ],
+    [playerDuration, playerRef, playerStartTime, setIgnoreClick],
   );
 
   const onStopManualSeek = useCallback(() => {
     setTimeout(() => {
-      setIgnoreClick(false);
       setHoverTimeout(undefined);
 
       if (isSafari || (isFirefox && isMobile)) {
-        setManualPlayback(true);
+        setPlaybackMode("compat");
       } else {
+        setPlaybackMode("auto");
         playerRef.current?.play();
       }
     }, 500);
-  }, [playerRef, setIgnoreClick]);
+  }, [playerRef]);
 
   const onProgressHover = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
@@ -572,10 +565,8 @@ export function VideoPreview({
       if (hoverTimeout) {
         clearTimeout(hoverTimeout);
       }
-
-      setHoverTimeout(setTimeout(() => onStopManualSeek(), 500));
     },
-    [sliderRef, hoverTimeout, onManualSeek, onStopManualSeek, setHoverTimeout],
+    [sliderRef, hoverTimeout, onManualSeek],
   );
 
   return (
@@ -597,14 +588,37 @@ export function VideoPreview({
       {showProgress && (
         <NoThumbSlider
           ref={sliderRef}
-          className={`absolute inset-x-0 bottom-0 z-30 cursor-col-resize ${hoverTimeout != undefined ? "h-4" : "h-2"}`}
+          className={`absolute inset-x-0 bottom-0 z-30 cursor-col-resize ${playbackMode == "hover" || playbackMode == "drag" ? "h-4" : "h-2"}`}
           value={[progress]}
-          onValueChange={onManualSeek}
+          onValueChange={(event) => {
+            setPlaybackMode("drag");
+            onManualSeek(event);
+          }}
           onValueCommit={onStopManualSeek}
           min={0}
           step={1}
           max={100}
-          onMouseMove={isMobile ? undefined : onProgressHover}
+          onMouseMove={
+            isMobile
+              ? undefined
+              : (event) => {
+                  if (playbackMode != "drag") {
+                    setPlaybackMode("hover");
+                    onProgressHover(event);
+                  }
+                }
+          }
+          onMouseLeave={
+            isMobile
+              ? undefined
+              : () => {
+                  if (!sliderRef.current) {
+                    return;
+                  }
+
+                  setHoverTimeout(setTimeout(() => onStopManualSeek(), 500));
+                }
+          }
         />
       )}
     </div>
@@ -642,7 +656,8 @@ export function InProgressPreview({
     }/frames`,
     { revalidateOnFocus: false },
   );
-  const [manualFrame, setManualFrame] = useState(false);
+
+  const [playbackMode, setPlaybackMode] = useState<TimelineScrubMode>("auto");
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout>();
   const [key, setKey] = useState(0);
 
@@ -655,7 +670,7 @@ export function InProgressPreview({
       onTimeUpdate(review.start_time - PREVIEW_PADDING + key);
     }
 
-    if (manualFrame) {
+    if (playbackMode != "auto") {
       return;
     }
 
@@ -692,18 +707,17 @@ export function InProgressPreview({
 
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, manualFrame, previewFrames]);
+  }, [key, playbackMode, previewFrames]);
 
   // user interaction
+
+  useEffect(() => {
+    setIgnoreClick(playbackMode != "auto");
+  }, [playbackMode, setIgnoreClick]);
 
   const onManualSeek = useCallback(
     (values: number[]) => {
       const value = values[0];
-
-      if (!manualFrame) {
-        setManualFrame(true);
-        setIgnoreClick(true);
-      }
 
       if (!review.has_been_reviewed) {
         setReviewed(review.id);
@@ -714,19 +728,18 @@ export function InProgressPreview({
 
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [manualFrame, setIgnoreClick, setManualFrame, setKey],
+    [setIgnoreClick, setKey],
   );
 
   const onStopManualSeek = useCallback(
     (values: number[]) => {
       const value = values[0];
       setTimeout(() => {
-        setIgnoreClick(false);
-        setManualFrame(false);
+        setPlaybackMode("auto");
         setKey(value - 1);
       }, 500);
     },
-    [setManualFrame, setIgnoreClick],
+    [setPlaybackMode],
   );
 
   const onProgressHover = useCallback(
@@ -744,17 +757,8 @@ export function InProgressPreview({
       if (hoverTimeout) {
         clearTimeout(hoverTimeout);
       }
-
-      setHoverTimeout(setTimeout(() => onStopManualSeek(progress), 500));
     },
-    [
-      sliderRef,
-      hoverTimeout,
-      previewFrames,
-      onManualSeek,
-      onStopManualSeek,
-      setHoverTimeout,
-    ],
+    [sliderRef, hoverTimeout, previewFrames, onManualSeek],
   );
 
   if (!previewFrames || previewFrames.length == 0) {
@@ -776,14 +780,46 @@ export function InProgressPreview({
       {showProgress && (
         <NoThumbSlider
           ref={sliderRef}
-          className={`absolute inset-x-0 bottom-0 z-30 cursor-col-resize ${manualFrame ? "h-4" : "h-2"}`}
+          className={`absolute inset-x-0 bottom-0 z-30 cursor-col-resize ${playbackMode != "auto" ? "h-4" : "h-2"}`}
           value={[key]}
-          onValueChange={onManualSeek}
+          onValueChange={(event) => {
+            setPlaybackMode("drag");
+            onManualSeek(event);
+          }}
           onValueCommit={onStopManualSeek}
           min={0}
           step={1}
           max={previewFrames.length - 1}
-          onMouseMove={isMobile ? undefined : onProgressHover}
+          onMouseMove={
+            isMobile
+              ? undefined
+              : (event) => {
+                  if (playbackMode != "drag") {
+                    setPlaybackMode("hover");
+                    onProgressHover(event);
+                  }
+                }
+          }
+          onMouseLeave={
+            isMobile
+              ? undefined
+              : (event) => {
+                  if (!sliderRef.current || !previewFrames) {
+                    return;
+                  }
+
+                  const rect = sliderRef.current.getBoundingClientRect();
+                  const positionX = event.clientX - rect.left;
+                  const width = sliderRef.current.clientWidth;
+                  const progress = [
+                    Math.round((positionX / width) * previewFrames.length),
+                  ];
+
+                  setHoverTimeout(
+                    setTimeout(() => onStopManualSeek(progress), 500),
+                  );
+                }
+          }
         />
       )}
     </div>
