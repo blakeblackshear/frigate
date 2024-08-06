@@ -129,7 +129,20 @@ class Dispatcher:
         elif topic == UPDATE_CAMERA_ACTIVITY:
             self.camera_activity = payload
         elif topic == "onConnect":
-            self.publish("camera_activity", json.dumps(self.camera_activity))
+            camera_status = self.camera_activity.copy()
+
+            for camera in camera_status.keys():
+                camera_status[camera]["config"] = {
+                    "detect": self.config.cameras[camera].detect.enabled,
+                    "snapshots": self.config.cameras[camera].snapshots.enabled,
+                    "record": self.config.cameras[camera].record.enabled,
+                    "audio": self.config.cameras[camera].audio.enabled,
+                    "autotracking": self.config.cameras[
+                        camera
+                    ].onvif.autotracking.enabled,
+                }
+
+            self.publish("camera_activity", json.dumps(camera_status))
         else:
             self.publish(topic, payload, retain=False)
 
