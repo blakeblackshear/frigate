@@ -26,3 +26,5 @@ export type Timeline = {
 export type TimeRange = { before: number; after: number };
 
 export type TimelineType = "timeline" | "events";
+
+export type TimelineScrubMode = "auto" | "drag" | "hover" | "compat";
