@@ -266,10 +266,7 @@ export default function LivePlayer({
                     ),
                   ]),
                 ]
-                  .filter(
-                    (label) =>
-                      label !== undefined && !label.includes("-verified"),
-                  )
+                  .filter((label) => label?.includes("-verified") == false)
                   .map((label) => capitalizeFirstLetter(label))
                   .sort()
                   .join(", ")
