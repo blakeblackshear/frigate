@@ -2,6 +2,7 @@
 
 import * as React from "react";
 
+import { baseUrl } from "../../api/baseUrl";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -43,7 +44,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     setIsLoading(true);
     try {
       await axios.post(
-        "/api/login",
+        "/login",
         {
           user: values.user,
           password: values.password,
@@ -54,7 +55,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           },
         },
       );
-      window.location.href = "/";
+      window.location.href = baseUrl;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const err = error as AxiosError;
