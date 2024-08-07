@@ -130,10 +130,16 @@ export default function ReviewCard({
       <div className="flex items-center justify-between">
         <div className="flex items-center justify-evenly gap-1">
           {event.data.objects.map((object) => {
-            return getIconForLabel(object, "size-3 text-white");
+            return getIconForLabel(
+              object,
+              "size-3 text-primary dark:text-white",
+            );
           })}
           {event.data.audio.map((audio) => {
-            return getIconForLabel(audio, "size-3 text-white");
+            return getIconForLabel(
+              audio,
+              "size-3 text-primary dark:text-white",
+            );
           })}
           <div className="font-extra-light text-xs">{formattedDate}</div>
         </div>
