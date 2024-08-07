@@ -3,7 +3,7 @@ id: record
 title: Recording
 ---
 
-Recordings can be enabled and are stored at `/media/frigate/recordings`. The folder structure for the recordings is `YYYY-MM-DD/HH/<camera_name>/MM.SS.mp4` in **UTC time**. These recordings are written directly from your camera stream without re-encoding. Each camera supports a configurable retention policy in the config. Frigate chooses the largest matching retention value between the recording retention and the event retention when determining if a recording should be removed.
+Recordings can be enabled and are stored at `/media/frigate/recordings`. The folder structure for the recordings is `YYYY-MM-DD/HH/<camera_name>/MM.SS.mp4` in **UTC time**. These recordings are written directly from your camera stream without re-encoding. Each camera supports a configurable retention policy in the config. Frigate chooses the largest matching retention value between the recording retention and the review item retention when determining if a recording should be removed.
 
 New recording segments are written from the camera stream to cache, they are only moved to disk if they match the setup recording retention policy.
 
@@ -13,7 +13,8 @@ H265 recordings can be viewed in Chrome 108+, Edge and Safari only. All other br
 
 ### Most conservative: Ensure all video is saved
 
-For users deploying Frigate in environments where it is important to have contiguous video stored even if there was no detectable motion, the following config will store all video for 3 days. After 3 days, only video containing motion and overlapping with events will be retained until 30 days have passed.
+For users deploying Frigate in environments where it is important to have contiguous video stored even if there was no detectable motion, the following config will store all video for 3 days. After 3 days, only video containing motion and overlapping with review items will be retained until 30 days have passed.
+Note: For backwards compatibility reasons, recording of review items is configured using the `events` key in the recording configuration.
 
 ```yaml
 record:
@@ -43,9 +44,9 @@ record:
       mode: motion
 ```
 
-### Minimum: Events only
+### Minimum: Review items only
 
-If you only want to retain video that occurs during an event, this config will discard video unless an event is ongoing.
+If you only want to retain video that occurs during an review item, this config will discard video unless a review item is ongoing.
 
 ```yaml
 record:
@@ -65,7 +66,7 @@ As of Frigate 0.12 if there is less than an hour left of storage, the oldest 2 h
 
 ## Configuring Recording Retention
 
-Frigate supports both continuous and event based recordings with separate retention modes and retention periods.
+Frigate supports both continuous and review item based recordings with separate retention modes and retention periods.
 
 :::tip
 
@@ -86,7 +87,7 @@ record:
 
 Continuous recording supports different retention modes [which are described below](#what-do-the-different-retain-modes-mean)
 
-### Event Recording
+### Review Item Recording
 
 If you only used clips in previous versions with recordings disabled, you can use the following config to get the same behavior. This is also the default behavior when recordings are enabled.
 
@@ -98,7 +99,7 @@ record:
       default: 10 # <- number of days to keep event recordings
 ```
 
-This configuration will retain recording segments that overlap with events and have active tracked objects for 10 days. Because multiple events can reference the same recording segments, this avoids storing duplicate footage for overlapping events and reduces overall storage needs.
+This configuration will retain recording segments that overlap with review items and have active tracked objects for 10 days.
 
 **WARNING**: Recordings still must be enabled in the config. If a camera has recordings disabled in the config, enabling via the methods listed above will have no effect.
 
@@ -112,11 +113,11 @@ Let's say you have Frigate configured so that your doorbell camera would retain 
 - With the `motion` option the only parts of those 48 hours would be segments that Frigate detected motion. This is the middle ground option that won't keep all 48 hours, but will likely keep all segments of interest along with the potential for some extra segments.
 - With the `active_objects` option the only segments that would be kept are those where there was a true positive object that was not considered stationary.
 
-The same options are available with events. Let's consider a scenario where you drive up and park in your driveway, go inside, then come back out 4 hours later.
+The same options are available with review items. Let's consider a scenario where you drive up and park in your driveway, go inside, then come back out 4 hours later.
 
-- With the `all` option all segments for the duration of the event would be saved for the event. This event would have 4 hours of footage.
-- With the `motion` option all segments for the duration of the event with motion would be saved. This means any segment where a car drove by in the street, person walked by, lighting changed, etc. would be saved.
-- With the `active_objects` it would only keep segments where the object was active. In this case the only segments that would be saved would be the ones where the car was driving up, you going inside, you coming outside, and the car driving away. Essentially reducing the 4 hours to a minute or two of event footage.
+- With the `all` option all segments for the duration of the review item would be saved for the review item. This review item would have 4 hours of footage.
+- With the `motion` option all segments for the duration of the review item with motion would be saved. This means any segment where a car drove by in the street, person walked by, lighting changed, etc. would be saved.
+- With the `active_objects` it would only keep segments where the object was active. In this case the only segments that would be saved would be the ones where the car was driving up, you going inside, you coming outside, and the car driving away. Essentially reducing the 4 hours to a minute or two of review item footage.
 
 A configuration example of the above retain modes where all `motion` segments are stored for 7 days and `active objects` are stored for 14 days would be as follows:
 
