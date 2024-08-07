@@ -23,7 +23,6 @@ model_chache_dir = "/config/model_cache/rknn_cache/"
 class RknnDetectorConfig(BaseDetectorConfig):
     type: Literal[DETECTOR_KEY]
     num_cores: int = Field(default=0, ge=0, le=3, title="Number of NPU cores to use.")
-    purge_model_cache: bool = Field(default=True)
 
 
 class Rknn(DetectionApi):
@@ -36,7 +35,9 @@ class Rknn(DetectionApi):
         core_mask = 2**config.num_cores - 1
         soc = self.get_soc()
 
-        model_props = self.parse_model_input(config.model.path, soc)
+        model_path = config.model.path or "deci-fp16-yolonas_s"
+
+        model_props = self.parse_model_input(model_path, soc)
 
         if model_props["preset"]:
             config.model.model_type = model_props["model_type"]
