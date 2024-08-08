@@ -78,16 +78,6 @@ jobs:
           set: |
             rk.tags=${{ steps.setup.outputs.image-name }}-rk
             *.cache-from=type=gha
-      - name: Build and push Hailo-8l build
-        uses: docker/bake-action@v4
-        with:
-          push: true
-          targets: h8l
-          files: docker/hailo8l/h8l.hcl
-          set: |
-            h8l.tags=${{ steps.setup.outputs.image-name }}-h8l
-            *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-h8l
-            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-h8l,mode=max
   jetson_jp4_build:
     runs-on: ubuntu-latest
     name: Jetson Jetpack 4
@@ -165,6 +155,30 @@ jobs:
             tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-amd64,mode=max
+  combined_extra_builds:
+    runs-on: ubuntu-latest
+    name: Combined Extra Builds
+    needs:
+      - amd64_build
+      - arm64_build
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Set up QEMU and Buildx
+        id: setup
+        uses: ./.github/actions/setup
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push Hailo-8l build
+        uses: docker/bake-action@v4
+        with:
+          push: true
+          targets: h8l
+          files: docker/hailo8l/h8l.hcl
+          set: |
+            h8l.tags=${{ steps.setup.outputs.image-name }}-h8l
+            *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-h8l
+            *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-h8l,mode=max
       #- name: AMD/ROCm general build
       #  env:
       #    AMDGPU: gfx
