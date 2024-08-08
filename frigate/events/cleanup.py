@@ -27,10 +27,12 @@ class EventCleanup(threading.Thread):
         self.name = "event_cleanup"
         self.config = config
         self.stop_event = stop_event
-        self.embeddings = Embeddings()
         self.camera_keys = list(self.config.cameras.keys())
         self.removed_camera_labels: list[str] = None
         self.camera_labels: dict[str, dict[str, any]] = {}
+
+        if self.config.semantic_search.enabled:
+            self.embeddings = Embeddings()
 
     def get_removed_camera_labels(self) -> list[Event]:
         """Get a list of distinct labels for removed cameras."""
