@@ -80,6 +80,14 @@ model:
   input_pixel_format: "bgr"
 ```
 
+#### `labelmap`
+
+:::warning
+
+If the labelmap is customized then the labels used for alerts will need to be adjusted as well. See [alert labels](../configuration/review.md#restricting-alerts-to-specific-labels) for more info.
+
+:::
+
 The labelmap can be customized to your needs. A common reason to do this is to combine multiple object types that are easily confused when you don't need to be as granular such as car/truck. By default, truck is renamed to car because they are often confused. You cannot add new object types, but you can change the names of existing objects in the model.
 
 ```yaml

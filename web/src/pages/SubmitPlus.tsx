@@ -43,6 +43,7 @@ import {
   FaSortAmountDown,
   FaSortAmountUp,
 } from "react-icons/fa";
+import { LuFolderX } from "react-icons/lu";
 import { PiSlidersHorizontalFill } from "react-icons/pi";
 import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
@@ -240,96 +241,104 @@ export default function SubmitPlus() {
         <PlusSortSelector selectedSort={sort} setSelectedSort={setSort} />
       </div>
       <div className="no-scrollbar flex size-full flex-1 flex-wrap content-start gap-2 overflow-y-auto md:gap-4">
-        <div className="grid w-full gap-2 p-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          <Dialog
-            open={upload != undefined}
-            onOpenChange={(open) => (!open ? setUpload(undefined) : null)}
-          >
-            <DialogContent className="md:max-w-2xl lg:max-w-3xl xl:max-w-4xl">
-              <DialogHeader>
-                <DialogTitle>Submit To Frigate+</DialogTitle>
-                <DialogDescription>
-                  Objects in locations you want to avoid are not false
-                  positives. Submitting them as false positives will confuse the
-                  model.
-                </DialogDescription>
-              </DialogHeader>
-              <img
-                className={`w-full ${grow} bg-black`}
-                src={`${baseUrl}api/events/${upload?.id}/snapshot.jpg`}
-                alt={`${upload?.label}`}
-              />
-              <DialogFooter>
-                <Button onClick={() => setUpload(undefined)}>Cancel</Button>
-                <Button
-                  className="bg-success"
-                  onClick={() => onSubmitToPlus(false)}
-                >
-                  This is a {upload?.label}
-                </Button>
-                <Button
-                  className="text-white"
-                  variant="destructive"
-                  onClick={() => onSubmitToPlus(true)}
-                >
-                  This is not a {upload?.label}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-
-          {events?.map((event) => {
-            if (event.data.type != "object" || event.plus_id) {
-              return;
-            }
-
-            return (
-              <div
-                key={event.id}
-                className="relative flex aspect-video w-full cursor-pointer items-center justify-center rounded-lg bg-black md:rounded-2xl"
-                onClick={() => setUpload(event)}
-              >
-                <div className="absolute left-0 top-2 z-40">
-                  <Tooltip>
-                    <div className="flex">
-                      <TooltipTrigger asChild>
-                        <div className="mx-3 pb-1 text-sm text-white">
-                          <Chip
-                            className={`z-0 flex items-center justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500`}
-                          >
-                            {[event.label].map((object) => {
-                              return getIconForLabel(
-                                object,
-                                "size-3 text-white",
-                              );
-                            })}
-                            <div className="text-xs">
-                              {Math.round(event.data.score * 100)}%
-                            </div>
-                          </Chip>
-                        </div>
-                      </TooltipTrigger>
-                    </div>
-                    <TooltipContent className="capitalize">
-                      {[event.label]
-                        .map((text) => capitalizeFirstLetter(text))
-                        .sort()
-                        .join(", ")
-                        .replaceAll("-verified", "")}
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
+        {isValidating ? (
+          <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+        ) : events?.length === 0 ? (
+          <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
+            <LuFolderX className="size-16" />
+            No snapshots found
+          </div>
+        ) : (
+          <div className="grid w-full gap-2 p-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            <Dialog
+              open={upload != undefined}
+              onOpenChange={(open) => (!open ? setUpload(undefined) : null)}
+            >
+              <DialogContent className="md:max-w-2xl lg:max-w-3xl xl:max-w-4xl">
+                <DialogHeader>
+                  <DialogTitle>Submit To Frigate+</DialogTitle>
+                  <DialogDescription>
+                    Objects in locations you want to avoid are not false
+                    positives. Submitting them as false positives will confuse
+                    the model.
+                  </DialogDescription>
+                </DialogHeader>
                 <img
-                  className="aspect-video h-full rounded-lg object-contain md:rounded-2xl"
-                  src={`${baseUrl}api/events/${event.id}/snapshot.jpg`}
-                  loading="lazy"
+                  className={`w-full ${grow} bg-black`}
+                  src={`${baseUrl}api/events/${upload?.id}/snapshot.jpg`}
+                  alt={`${upload?.label}`}
                 />
-              </div>
-            );
-          })}
-          {!isValidating && !isDone && <div ref={lastEventRef} />}
-          {isValidating && <ActivityIndicator />}
-        </div>
+                <DialogFooter>
+                  <Button onClick={() => setUpload(undefined)}>Cancel</Button>
+                  <Button
+                    className="bg-success"
+                    onClick={() => onSubmitToPlus(false)}
+                  >
+                    This is a {upload?.label}
+                  </Button>
+                  <Button
+                    className="text-white"
+                    variant="destructive"
+                    onClick={() => onSubmitToPlus(true)}
+                  >
+                    This is not a {upload?.label}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            {events?.map((event) => {
+              if (event.data.type != "object" || event.plus_id) {
+                return;
+              }
+
+              return (
+                <div
+                  key={event.id}
+                  className="relative flex aspect-video w-full cursor-pointer items-center justify-center rounded-lg bg-black md:rounded-2xl"
+                  onClick={() => setUpload(event)}
+                >
+                  <div className="absolute left-0 top-2 z-40">
+                    <Tooltip>
+                      <div className="flex">
+                        <TooltipTrigger asChild>
+                          <div className="mx-3 pb-1 text-sm text-white">
+                            <Chip
+                              className={`z-0 flex items-center justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500`}
+                            >
+                              {[event.label].map((object) => {
+                                return getIconForLabel(
+                                  object,
+                                  "size-3 text-white",
+                                );
+                              })}
+                              <div className="text-xs">
+                                {Math.round(event.data.score * 100)}%
+                              </div>
+                            </Chip>
+                          </div>
+                        </TooltipTrigger>
+                      </div>
+                      <TooltipContent className="capitalize">
+                        {[event.label]
+                          .map((text) => capitalizeFirstLetter(text))
+                          .sort()
+                          .join(", ")
+                          .replaceAll("-verified", "")}
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <img
+                    className="aspect-video h-full rounded-lg object-contain md:rounded-2xl"
+                    src={`${baseUrl}api/events/${event.id}/snapshot.jpg`}
+                    loading="lazy"
+                  />
+                </div>
+              );
+            })}
+            {!isValidating && !isDone && <div ref={lastEventRef} />}
+          </div>
+        )}
       </div>
     </div>
   );

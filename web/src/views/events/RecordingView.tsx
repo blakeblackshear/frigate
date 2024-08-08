@@ -708,25 +708,31 @@ function Timeline({
               isMobile && "sm:grid-cols-2",
             )}
           >
-            {mainCameraReviewItems.map((review) => {
-              if (review.severity == "significant_motion") {
-                return;
-              }
+            {mainCameraReviewItems.length === 0 ? (
+              <div className="mt-5 text-center text-primary">
+                No events found for this time period.
+              </div>
+            ) : (
+              mainCameraReviewItems.map((review) => {
+                if (review.severity === "significant_motion") {
+                  return;
+                }
 
-              return (
-                <ReviewCard
-                  key={review.id}
-                  event={review}
-                  currentTime={currentTime}
-                  onClick={() => {
-                    manuallySetCurrentTime(
-                      review.start_time - REVIEW_PADDING,
-                      true,
-                    );
-                  }}
-                />
-              );
-            })}
+                return (
+                  <ReviewCard
+                    key={review.id}
+                    event={review}
+                    currentTime={currentTime}
+                    onClick={() => {
+                      manuallySetCurrentTime(
+                        review.start_time - REVIEW_PADDING,
+                        true,
+                      );
+                    }}
+                  />
+                );
+              })
+            )}
           </div>
         </div>
       )}

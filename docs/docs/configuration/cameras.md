@@ -111,6 +111,6 @@ camera_groups:
     cameras:
       - driveway_cam
       - garage_cam
-    icon: car
+    icon: LuCar
     order: 0
 ```

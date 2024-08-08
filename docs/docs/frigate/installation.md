@@ -5,6 +5,12 @@ title: Installation
 
 Frigate is a Docker container that can be run on any Docker host including as a [HassOS Addon](https://www.home-assistant.io/addons/). Note that a Home Assistant Addon is **not** the same thing as the integration. The [integration](/integrations/home-assistant) is required to integrate Frigate into Home Assistant.
 
+:::tip
+
+If you already have Frigate installed as a Home Assistant addon, check out the [getting started guide](../guides/getting_started#configuring-frigate) to configure Frigate.
+
+:::
+
 ## Dependencies
 
 **MQTT broker (optional)** - An MQTT broker is optional with Frigate, but is required for the Home Assistant integration. If using Home Assistant, Frigate and Home Assistant must be connected to the same MQTT broker.
