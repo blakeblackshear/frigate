@@ -28,6 +28,7 @@ You can open `chrome://media-internals/` in another tab and then try to playback
 Frigate generally [recommends cameras with configurable sub streams](/frigate/hardware.md). However, if your camera does not have a sub stream that a suitable resolution, the main stream can be resized.
 
 To do this efficiently the following setup is required:
+
 1. A GPU or iGPU must be available to do the scaling.
 2. [ffmpeg presets for hwaccel](/configuration/hardware_acceleration.md) must be used
 3. Set the desired detection resolution for `detect -> width` and `detect -> height`.
@@ -56,13 +57,20 @@ SQLite does not work well on a network share, if the `/media` folder is mapped t
 
 If MQTT isn't working in docker try using the IP of the device hosting the MQTT server instead of `localhost`, `127.0.0.1`, or `mosquitto.ix-mosquitto.svc.cluster.local`.
 
-This is because, by default, Frigate does not run in host mode so localhost points to the Frigate container and not the host device's network. 
+This is because Frigate does not run in host mode so localhost points to the Frigate container and not the host device's network.
+
+### How do I know if my camera is offline
+
+A camera being offline can be detected via MQTT or /api/stats, the camera_fps for any offline camera will be 0.
+
+Also, Home Assistant will mark any offline camera as being unavailable when the camera is offline.
 
 ### How can I view the Frigate log files without using the Web UI?
 
 Frigate manages logs internally as well as outputs directly to Docker via standard output. To view these logs using the CLI, follow these steps:
-* Open a terminal or command prompt on the host running your Frigate container.
-* Type the following command and press Enter:
+
+- Open a terminal or command prompt on the host running your Frigate container.
+- Type the following command and press Enter:
   ```
   docker logs -f frigate
   ```

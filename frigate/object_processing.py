@@ -6,22 +6,27 @@ import os
 import queue
 import threading
 from collections import Counter, defaultdict
+from multiprocessing.synchronize import Event as MpEvent
 from statistics import median
 from typing import Callable
 
 import cv2
 import numpy as np
 
+from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
 from frigate.comms.dispatcher import Dispatcher
+from frigate.comms.events_updater import EventEndSubscriber, EventUpdatePublisher
+from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import (
     CameraConfig,
     FrigateConfig,
     MqttConfig,
     RecordConfig,
     SnapshotsConfig,
+    ZoomingModeEnum,
 )
-from frigate.const import CLIPS_DIR
-from frigate.events.maintainer import EventTypeEnum
+from frigate.const import ALL_ATTRIBUTE_LABELS, CLIPS_DIR, UPDATE_CAMERA_ACTIVITY
+from frigate.events.types import EventStateEnum, EventTypeEnum
 from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.util.image import (
     SharedMemoryFrameManager,
@@ -114,7 +119,8 @@ class TrackedObject:
         self.colormap = colormap
         self.camera_config = camera_config
         self.frame_cache = frame_cache
-        self.zone_presence = {}
+        self.zone_presence: dict[str, int] = {}
+        self.zone_loitering: dict[str, int] = {}
         self.current_zones = []
         self.entered_zones = []
         self.attributes = defaultdict(float)
@@ -187,19 +193,28 @@ class TrackedObject:
             if len(zone.objects) > 0 and obj_data["label"] not in zone.objects:
                 continue
             contour = zone.contour
-            zone_score = self.zone_presence.get(name, 0)
+            zone_score = self.zone_presence.get(name, 0) + 1
             # check if the object is in the zone
             if cv2.pointPolygonTest(contour, bottom_center, False) >= 0:
                 # if the object passed the filters once, dont apply again
                 if name in self.current_zones or not zone_filtered(self, zone.filters):
-                    self.zone_presence[name] = zone_score + 1
-
                     # an object is only considered present in a zone if it has a zone inertia of 3+
-                    if self.zone_presence[name] >= zone.inertia:
-                        current_zones.append(name)
+                    if zone_score >= zone.inertia:
+                        loitering_score = self.zone_loitering.get(name, 0) + 1
 
-                        if name not in self.entered_zones:
-                            self.entered_zones.append(name)
+                        # loitering time is configured as seconds, convert to count of frames
+                        if loitering_score >= (
+                            self.camera_config.zones[name].loitering_time
+                            * self.camera_config.detect.fps
+                        ):
+                            current_zones.append(name)
+
+                            if name not in self.entered_zones:
+                                self.entered_zones.append(name)
+                        else:
+                            self.zone_loitering[name] = loitering_score
+                    else:
+                        self.zone_presence[name] = zone_score
             else:
                 # once an object has a zone inertia of 3+ it is not checked anymore
                 if 0 < zone_score < zone.inertia:
@@ -483,12 +498,20 @@ class CameraState:
 
         frame_copy = cv2.cvtColor(frame_copy, cv2.COLOR_YUV2BGR_I420)
         # draw on the frame
+        if draw_options.get("mask"):
+            mask_overlay = np.where(self.camera_config.motion.mask == [0])
+            frame_copy[mask_overlay] = [0, 0, 0]
+
         if draw_options.get("bounding_boxes"):
             # draw the bounding boxes on the frame
             for obj in tracked_objects.values():
                 if obj["frame_time"] == frame_time:
-                    thickness = 2
-                    color = self.config.model.colormap[obj["label"]]
+                    if obj["stationary"]:
+                        color = (220, 220, 220)
+                        thickness = 1
+                    else:
+                        thickness = 2
+                        color = self.config.model.colormap[obj["label"]]
                 else:
                     thickness = 1
                     color = (255, 0, 0)
@@ -511,6 +534,39 @@ class CameraState:
                 ):
                     thickness = 5
                     color = self.config.model.colormap[obj["label"]]
+
+                    # debug autotracking zooming - show the zoom factor box
+                    if (
+                        self.camera_config.onvif.autotracking.zooming
+                        != ZoomingModeEnum.disabled
+                    ):
+                        max_target_box = self.ptz_autotracker_thread.ptz_autotracker.tracked_object_metrics[
+                            self.name
+                        ]["max_target_box"]
+                        side_length = max_target_box * (
+                            max(
+                                self.camera_config.detect.width,
+                                self.camera_config.detect.height,
+                            )
+                        )
+
+                        centroid_x = (obj["box"][0] + obj["box"][2]) // 2
+                        centroid_y = (obj["box"][1] + obj["box"][3]) // 2
+                        top_left = (
+                            int(centroid_x - side_length // 2),
+                            int(centroid_y - side_length // 2),
+                        )
+                        bottom_right = (
+                            int(centroid_x + side_length // 2),
+                            int(centroid_y + side_length // 2),
+                        )
+                        cv2.rectangle(
+                            frame_copy,
+                            top_left,
+                            bottom_right,
+                            (255, 255, 0),
+                            2,
+                        )
 
                 # draw the bounding boxes on the frame
                 box = obj["box"]
@@ -569,10 +625,6 @@ class CameraState:
                     else 2
                 )
                 cv2.drawContours(frame_copy, [zone.contour], -1, zone.color, thickness)
-
-        if draw_options.get("mask"):
-            mask_overlay = np.where(self.camera_config.motion.mask == [0])
-            frame_copy[mask_overlay] = [0, 0, 0]
 
         if draw_options.get("motion_boxes"):
             for m_box in motion_boxes:
@@ -673,8 +725,41 @@ class CameraState:
 
         # TODO: can i switch to looking this up and only changing when an event ends?
         # maintain best objects
+        camera_activity: dict[str, list[any]] = {
+            "motion": len(motion_boxes) > 0,
+            "objects": [],
+        }
+
         for obj in tracked_objects.values():
             object_type = obj.obj_data["label"]
+            active = (
+                obj.obj_data["motionless_count"]
+                < self.camera_config.detect.stationary.threshold
+            )
+
+            if not obj.false_positive:
+                label = object_type
+                sub_label = None
+
+                if obj.obj_data.get("sub_label"):
+                    if obj.obj_data.get("sub_label")[0] in ALL_ATTRIBUTE_LABELS:
+                        label = obj.obj_data["sub_label"][0]
+                    else:
+                        label = f"{object_type}-verified"
+                        sub_label = obj.obj_data["sub_label"][0]
+
+                camera_activity["objects"].append(
+                    {
+                        "id": obj.obj_data["id"],
+                        "label": label,
+                        "stationary": not active,
+                        "area": obj.obj_data["area"],
+                        "ratio": obj.obj_data["ratio"],
+                        "score": obj.obj_data["score"],
+                        "sub_label": sub_label,
+                    }
+                )
+
             # if the object's thumbnail is not from the current frame
             if obj.false_positive or obj.thumbnail_data["frame_time"] != frame_time:
                 continue
@@ -700,6 +785,9 @@ class CameraState:
                 self.best_objects[object_type] = obj
                 for c in self.callbacks["snapshot"]:
                     c(self.name, self.best_objects[object_type], frame_time)
+
+        for c in self.callbacks["camera_activity"]:
+            c(self.name, camera_activity)
 
         # update overall camera state for each object type
         obj_counter = Counter(
@@ -777,10 +865,6 @@ class TrackedObjectProcessor(threading.Thread):
         config: FrigateConfig,
         dispatcher: Dispatcher,
         tracked_objects_queue,
-        event_queue,
-        event_processed_queue,
-        video_output_queue,
-        recordings_info_queue,
         ptz_autotracker_thread,
         stop_event,
     ):
@@ -789,19 +873,27 @@ class TrackedObjectProcessor(threading.Thread):
         self.config = config
         self.dispatcher = dispatcher
         self.tracked_objects_queue = tracked_objects_queue
-        self.event_queue = event_queue
-        self.event_processed_queue = event_processed_queue
-        self.video_output_queue = video_output_queue
-        self.recordings_info_queue = recordings_info_queue
-        self.stop_event = stop_event
+        self.stop_event: MpEvent = stop_event
         self.camera_states: dict[str, CameraState] = {}
         self.frame_manager = SharedMemoryFrameManager()
         self.last_motion_detected: dict[str, float] = {}
         self.ptz_autotracker_thread = ptz_autotracker_thread
 
+        self.requestor = InterProcessRequestor()
+        self.detection_publisher = DetectionPublisher(DetectionTypeEnum.video)
+        self.event_sender = EventUpdatePublisher()
+        self.event_end_subscriber = EventEndSubscriber()
+
+        self.camera_activity: dict[str, dict[str, any]] = {}
+
         def start(camera, obj: TrackedObject, current_frame_time):
-            self.event_queue.put(
-                (EventTypeEnum.tracked_object, "start", camera, obj.to_dict())
+            self.event_sender.publish(
+                (
+                    EventTypeEnum.tracked_object,
+                    EventStateEnum.start,
+                    camera,
+                    obj.to_dict(),
+                )
             )
 
         def update(camera, obj: TrackedObject, current_frame_time):
@@ -815,10 +907,10 @@ class TrackedObjectProcessor(threading.Thread):
             }
             self.dispatcher.publish("events", json.dumps(message), retain=False)
             obj.previous = after
-            self.event_queue.put(
+            self.event_sender.publish(
                 (
                     EventTypeEnum.tracked_object,
-                    "update",
+                    EventStateEnum.update,
                     camera,
                     obj.to_dict(include_thumbnail=True),
                 )
@@ -877,10 +969,10 @@ class TrackedObjectProcessor(threading.Thread):
                 self.dispatcher.publish("events", json.dumps(message), retain=False)
                 self.ptz_autotracker_thread.ptz_autotracker.end_object(camera, obj)
 
-            self.event_queue.put(
+            self.event_sender.publish(
                 (
                     EventTypeEnum.tracked_object,
-                    "end",
+                    EventStateEnum.end,
                     camera,
                     obj.to_dict(include_thumbnail=True),
                 )
@@ -911,6 +1003,13 @@ class TrackedObjectProcessor(threading.Thread):
         def object_status(camera, object_name, status):
             self.dispatcher.publish(f"{camera}/{object_name}", status, retain=False)
 
+        def camera_activity(camera, activity):
+            last_activity = self.camera_activity.get(camera)
+
+            if not last_activity or activity != last_activity:
+                self.camera_activity[camera] = activity
+                self.requestor.send_data(UPDATE_CAMERA_ACTIVITY, self.camera_activity)
+
         for camera in self.config.cameras.keys():
             camera_state = CameraState(
                 camera, self.config, self.frame_manager, self.ptz_autotracker_thread
@@ -921,6 +1020,7 @@ class TrackedObjectProcessor(threading.Thread):
             camera_state.on("end", end)
             camera_state.on("snapshot", snapshot)
             camera_state.on("object_status", object_status)
+            camera_state.on("camera_activity", camera_activity)
             self.camera_states[camera] = camera_state
 
         # {
@@ -956,7 +1056,7 @@ class TrackedObjectProcessor(threading.Thread):
 
         return True
 
-    def should_retain_recording(self, camera, obj: TrackedObject):
+    def should_retain_recording(self, camera: str, obj: TrackedObject):
         if obj.false_positive:
             return False
 
@@ -971,7 +1071,11 @@ class TrackedObjectProcessor(threading.Thread):
             return False
 
         # If there are required zones and there is no overlap
-        required_zones = record_config.events.required_zones
+        review_config = self.config.cameras[camera].review
+        required_zones = (
+            review_config.alerts.required_zones
+            + review_config.detections.required_zones
+        )
         if len(required_zones) > 0 and not set(obj.entered_zones) & set(required_zones):
             logger.debug(
                 f"Not creating clip for {obj.obj_data['id']} because it did not enter required zones"
@@ -1082,18 +1186,8 @@ class TrackedObjectProcessor(threading.Thread):
                 o.to_dict() for o in camera_state.tracked_objects.values()
             ]
 
-            self.video_output_queue.put(
-                (
-                    camera,
-                    frame_time,
-                    tracked_objects,
-                    motion_boxes,
-                    regions,
-                )
-            )
-
-            # send info on this frame to the recordings maintainer
-            self.recordings_info_queue.put(
+            # publish info on this frame
+            self.detection_publisher.send_data(
                 (
                     camera,
                     frame_time,
@@ -1174,8 +1268,17 @@ class TrackedObjectProcessor(threading.Thread):
                     )
 
             # cleanup event finished queue
-            while not self.event_processed_queue.empty():
-                event_id, camera = self.event_processed_queue.get()
+            while not self.stop_event.is_set():
+                update = self.event_end_subscriber.check_for_update(timeout=0.01)
+
+                if not update:
+                    break
+
+                event_id, camera = update
                 self.camera_states[camera].finished(event_id)
 
+        self.requestor.stop()
+        self.detection_publisher.stop()
+        self.event_sender.stop()
+        self.event_end_subscriber.stop()
         logger.info("Exiting object processor...")

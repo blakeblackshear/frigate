@@ -13,7 +13,7 @@ The suggested steps are:
 - **Encrypt** content from the proxy webserver by installing SSL (such as with [Let's Encrypt](https://letsencrypt.org/)). Note that SSL is then not required on your Frigate webserver as the proxy encrypts all requests for you
 - **Restrict** access to your Frigate instance at the proxy using, for example, password authentication
 
-:::caution
+:::warning
 A reverse proxy can be used to secure access to an internal webserver but the user will be entirely reliant
 on the steps they have taken. You must ensure you are following security best practices.
 This page does not attempt to outline the specific steps needed to secure your internal website.
@@ -38,20 +38,20 @@ Here we access Frigate via https://cctv.mydomain.co.uk
     ServerName cctv.mydomain.co.uk
 
     ProxyPreserveHost On
-    ProxyPass "/"  "http://frigatepi.local:5000/"
-    ProxyPassReverse "/"  "http://frigatepi.local:5000/"
+    ProxyPass "/"  "http://frigatepi.local:8971/"
+    ProxyPassReverse "/"  "http://frigatepi.local:8971/"
 
-    ProxyPass /ws ws://frigatepi.local:5000/ws
-    ProxyPassReverse /ws ws://frigatepi.local:5000/ws
+    ProxyPass /ws ws://frigatepi.local:8971/ws
+    ProxyPassReverse /ws ws://frigatepi.local:8971/ws
 
-    ProxyPass /live/ ws://frigatepi.local:5000/live/
-    ProxyPassReverse /live/ ws://frigatepi.local:5000/live/
+    ProxyPass /live/ ws://frigatepi.local:8971/live/
+    ProxyPassReverse /live/ ws://frigatepi.local:8971/live/
 
     RewriteEngine on
     RewriteCond %{HTTP:Upgrade} =websocket [NC]
-    RewriteRule /(.*)  ws://frigatepi.local:5000/$1 [P,L]
+    RewriteRule /(.*)  ws://frigatepi.local:8971/$1 [P,L]
     RewriteCond %{HTTP:Upgrade} !=websocket [NC]
-    RewriteRule /(.*)  http://frigatepi.local:5000/$1 [P,L]
+    RewriteRule /(.*)  http://frigatepi.local:8971/$1 [P,L]
 </VirtualHost>
 ```
 
@@ -87,11 +87,11 @@ There are many ways to authenticate a website but a straightforward approach is 
 
 ## Nginx Reverse Proxy
 
-This method shows a working example for subdomain type reverse proxy with SSL enabled. 
+This method shows a working example for subdomain type reverse proxy with SSL enabled.
 
 ### Setup server and port to reverse proxy
 
-This is set in `$server` and `$port` this should match your ports you have exposed to your docker container.  Optionally you listen on port `443` and enable `SSL`
+This is set in `$server` and `$port` this should match your ports you have exposed to your docker container. Optionally you listen on port `443` and enable `SSL`
 
 ```
 # ------------------------------------------------------------
@@ -101,7 +101,7 @@ This is set in `$server` and `$port` this should match your ports you have expos
 server {
   set $forward_scheme http;
   set $server         "192.168.100.2"; # FRIGATE SERVER LOCATION
-  set $port           5000;
+  set $port           8971;
 
   listen 80;
   listen 443 ssl http2;
@@ -112,7 +112,7 @@ server {
 
 ### Setup SSL (optional)
 
-This section points to your SSL files, the example below shows locations to a default Lets Encrypt SSL certificate. 
+This section points to your SSL files, the example below shows locations to a default Lets Encrypt SSL certificate.
 
 ```
   # Let's Encrypt SSL
@@ -122,8 +122,7 @@ This section points to your SSL files, the example below shows locations to a de
   ssl_certificate_key /etc/letsencrypt/live/npm-1/privkey.pem;
 ```
 
-
-### Setup reverse proxy settings 
+### Setup reverse proxy settings
 
 The settings below enabled connection upgrade, sets up logging (optional) and proxies everything from the `/` context to the docker host and port specified earlier in the configuration
 

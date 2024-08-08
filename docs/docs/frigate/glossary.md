@@ -9,6 +9,13 @@ The glossary explains terms commonly used in Frigate's documentation.
 
 A box returned from the object detection model that outlines an object in the frame. These have multiple colors depending on object type in the debug live view.
 
+### Bounding Box Colors
+
+- At startup different colors will be assigned to each object label
+- A dark blue thin line indicates that object is not detected at this current point in time
+- A gray thin line indicates that object is detected as being stationary
+- A thick line indicates that object is the subject of autotracking (when enabled).
+
 ## Event
 
 The time period starting when a tracked object entered the frame and ending when it left the frame, including any time that the object remained still. Events are saved when it is considered a [true positive](#threshold) and meets the requirements for a snapshot or recording to be saved.
@@ -40,6 +47,10 @@ When pixels in the current camera frame are different than previous frames. When
 ## Region
 
 A portion of the camera frame that is sent to object detection, regions can be sent due to motion, active objects, or occasionally for stationary objects. These are represented by green boxes in the debug live view.
+
+## Review Item
+
+A review item is a time period where any number of events/tracked objects were active. [See the review docs for more info](/configuration/review)
 
 ## Snapshot Score
 

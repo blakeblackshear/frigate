@@ -11,12 +11,11 @@ A camera is enabled by default but can be temporarily disabled by using `enabled
 
 Each role can only be assigned to one input per camera. The options for roles are as follows:
 
-| Role     | Description                                                                              |
-| -------- | ---------------------------------------------------------------------------------------- |
-| `detect` | Main feed for object detection. [docs](object_detectors.md)                              |
-| `record` | Saves segments of the video feed based on configuration settings. [docs](record.md)      |
-| `audio`  | Feed for audio based detection. [docs](audio_detectors.md)                               |
-| `rtmp`   | Deprecated: Broadcast as an RTMP feed for other services to consume. [docs](restream.md) |
+| Role     | Description                                                                         |
+| -------- | ----------------------------------------------------------------------------------- |
+| `detect` | Main feed for object detection. [docs](object_detectors.md)                         |
+| `record` | Saves segments of the video feed based on configuration settings. [docs](record.md) |
+| `audio`  | Feed for audio based detection. [docs](audio_detectors.md)                          |
 
 ```yaml
 mqtt:
@@ -29,7 +28,6 @@ cameras:
         - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/cam/realmonitor?channel=1&subtype=2
           roles:
             - detect
-            - rtmp # <- deprecated, recommend using restream instead
         - path: rtsp://viewer:{FRIGATE_RTSP_PASSWORD}@10.0.10.10:554/live
           roles:
             - record
@@ -52,7 +50,7 @@ For camera model specific settings check the [camera specific](camera_specific.m
 
 ## Setting up camera PTZ controls
 
-:::caution
+:::warning
 
 Not every PTZ supports ONVIF, which is the standard protocol Frigate uses to communicate with your camera. Check the [official list of ONVIF conformant products](https://www.onvif.org/conformant-products/), your camera documentation, or camera manufacturer's website to ensure your PTZ supports ONVIF. Also, ensure your camera is running the latest firmware.
 
@@ -81,7 +79,7 @@ This list of working and non-working PTZ cameras is based on user feedback.
 
 | Brand or specific camera | PTZ Controls | Autotracking | Notes                                                                                                                                           |
 | ------------------------ | :----------: | :----------: | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| Amcrest                  |      ✅      |      ✅      | ⛔️ Generally, Amcrest should work, but some older models (like the common IP2M-841) don't support auto tracking                                  |
+| Amcrest                  |      ✅      |      ✅      | ⛔️ Generally, Amcrest should work, but some older models (like the common IP2M-841) don't support autotracking                                 |
 | Amcrest ASH21            |      ❌      |      ❌      | No ONVIF support                                                                                                                                |
 | Ctronics PTZ             |      ✅      |      ❌      |                                                                                                                                                 |
 | Dahua                    |      ✅      |      ✅      |                                                                                                                                                 |
@@ -93,10 +91,26 @@ This list of working and non-working PTZ cameras is based on user feedback.
 | Reolink E1 Zoom          |      ✅      |      ❌      |                                                                                                                                                 |
 | Reolink RLC-823A 16x     |      ✅      |      ❌      |                                                                                                                                                 |
 | Sunba 405-D20X           |      ✅      |      ❌      |                                                                                                                                                 |
-| Tapo C200                |      ✅      |      ❌      | Incomplete ONVIF support                                                                                                                        |
-| Tapo C210                |      ✅      |      ❌      | Incomplete ONVIF support, ONVIF Service Port: 2020                                                                                              |
-| Tapo C220                |      ✅      |      ❌      | Incomplete ONVIF support, ONVIF Service Port: 2020                                                                                              |
-| Tapo C225                |      ✅      |      ❌      | Incomplete ONVIF support, ONVIF Service Port: 2020                                                                                              |
-| Tapo C520WS              |      ✅      |      ❌      | Incomplete ONVIF support, ONVIF Service Port: 2020                                                                                              |
+| Tapo                     |      ✅      |      ❌      | Many models supported, ONVIF Service Port: 2020                                                                                                 |
 | Uniview IPC672LR-AX4DUPK |      ✅      |      ❌      | Firmware says FOV relative movement is supported, but camera doesn't actually move when sending ONVIF commands                                  |
 | Vikylin PTZ-2804X-I2     |      ❌      |      ❌      | Incomplete ONVIF support                                                                                                                        |
+
+## Setting up camera groups
+
+:::tip
+
+It is recommended to set up camera groups using the UI.
+
+:::
+
+Cameras can be grouped together and assigned a name and icon, this allows them to be reviewed and filtered together. There will always be the default group for all cameras.
+
+```yaml
+camera_groups:
+  front:
+    cameras:
+      - driveway_cam
+      - garage_cam
+    icon: LuCar
+    order: 0
+```

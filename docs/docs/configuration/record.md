@@ -159,11 +159,14 @@ Using Frigate UI, HomeAssistant, or MQTT, cameras can be automated to only recor
 
 ## How do I export recordings?
 
-The export page in the Frigate WebUI allows for exporting real time clips with a designated start and stop time as well as exporting a time-lapse for a designated start and stop time. These exports can take a while so it is important to leave the file until it is no longer in progress.
+Footage can be exported from Frigate by right-clicking (desktop) or long pressing (mobile) on a review item in the Review pane or by clicking the Export button in the History view. Exported footage is then organized and searchable through the Export view, accessible from the main navigation bar.
 
 ### Time-lapse export
 
+Time lapse exporting is available only via the [HTTP API](../integrations/api.md#post-apiexportcamerastartstart-timestampendend-timestamp).
+
 When exporting a time-lapse the default speed-up is 25x with 30 FPS. This means that every 25 seconds of (real-time) recording is condensed into 1 second of time-lapse video (always without audio) with a smoothness of 30 FPS.
+
 To configure the speed-up factor, the frame rate and further custom settings, the configuration parameter `timelapse_args` can be used. The below configuration example would change the time-lapse speed to 60x (for fitting 1 hour of recording into 1 minute of time-lapse) with 25 FPS:
 
 ```yaml

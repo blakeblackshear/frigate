@@ -81,6 +81,15 @@ detectors:
     device: ""
 ```
 
+### Single PCIE/M.2 Coral
+
+```yaml
+detectors:
+  coral:
+    type: edgetpu
+    device: pci
+```
+
 ### Multiple PCIE/M.2 Corals
 
 ```yaml
@@ -109,9 +118,13 @@ detectors:
 
 The OpenVINO detector type runs an OpenVINO IR model on AMD and Intel CPUs, Intel GPUs and Intel VPU hardware. To configure an OpenVINO detector, set the `"type"` attribute to `"openvino"`.
 
-The OpenVINO device to be used is specified using the `"device"` attribute according to the naming conventions in the [Device Documentation](https://docs.openvino.ai/latest/openvino_docs_OV_UG_Working_with_devices.html). Other supported devices could be `AUTO`, `CPU`, `GPU`, `MYRIAD`, etc. If not specified, the default OpenVINO device will be selected by the `AUTO` plugin.
+The OpenVINO device to be used is specified using the `"device"` attribute according to the naming conventions in the [Device Documentation](https://docs.openvino.ai/2024/openvino-workflow/running-inference/inference-devices-and-modes.html). The most common devices are `CPU` and `GPU`. Currently, there is a known issue with using `AUTO`. For backwards compatibility, Frigate will attempt to use `GPU` if `AUTO` is set in your configuration.
 
-OpenVINO is supported on 6th Gen Intel platforms (Skylake) and newer. It will also run on AMD CPUs despite having no official support for it. A supported Intel platform is required to use the `GPU` device with OpenVINO. The `MYRIAD` device may be run on any platform, including Arm devices. For detailed system requirements, see [OpenVINO System Requirements](https://www.intel.com/content/www/us/en/developer/tools/openvino-toolkit/system-requirements.html)
+OpenVINO is supported on 6th Gen Intel platforms (Skylake) and newer. It will also run on AMD CPUs despite having no official support for it. A supported Intel platform is required to use the `GPU` device with OpenVINO. For detailed system requirements, see [OpenVINO System Requirements](https://docs.openvino.ai/2024/about-openvino/release-notes-openvino/system-requirements.html)
+
+### Supported Models
+
+#### SSDLite MobileNet v2
 
 An OpenVINO model is provided in the container at `/openvino-model/ssdlite_mobilenet_v2.xml` and is used by this detector type by default. The model comes from Intel's Open Model Zoo [SSDLite MobileNet V2](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/ssdlite_mobilenet_v2) and is converted to an FP16 precision IR model. Use the model configuration shown below when using the OpenVINO detector with the default model.
 
@@ -119,66 +132,52 @@ An OpenVINO model is provided in the container at `/openvino-model/ssdlite_mobil
 detectors:
   ov:
     type: openvino
-    device: AUTO
-    model:
-      path: /openvino-model/ssdlite_mobilenet_v2.xml
+    device: GPU
 
 model:
   width: 300
   height: 300
   input_tensor: nhwc
   input_pixel_format: bgr
+  path: /openvino-model/ssdlite_mobilenet_v2.xml
   labelmap_path: /openvino-model/coco_91cl_bkgr.txt
 ```
 
-This detector also supports YOLOX. Other YOLO variants are not officially supported/tested. Frigate does not come with any yolo models preloaded, so you will need to supply your own models. This detector has been verified to work with the [yolox_tiny](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/yolox-tiny) model from Intel's Open Model Zoo. You can follow [these instructions](https://github.com/openvinotoolkit/open_model_zoo/tree/master/models/public/yolox-tiny#download-a-model-and-convert-it-into-openvino-ir-format) to retrieve the OpenVINO-compatible `yolox_tiny` model. Make sure that the model input dimensions match the `width` and `height` parameters, and `model_type` is set accordingly. See [Full Configuration Reference](/configuration/reference.md) for a list of possible `model_type` options. Below is an example of how `yolox_tiny` can be used in Frigate:
+#### YOLOX
+
+This detector also supports YOLOX. Frigate does not come with any YOLOX models preloaded, so you will need to supply your own models.
+
+#### YOLO-NAS
+
+[YOLO-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) models are supported, but not included by default. You can build and download a compatible model with pre-trained weights using [this notebook](https://github.com/frigate/blob/dev/notebooks/YOLO_NAS_Pretrained_Export.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/blakeblackshear/frigate/blob/dev/notebooks/YOLO_NAS_Pretrained_Export.ipynb).
+
+:::warning
+
+The pre-trained YOLO-NAS weights from DeciAI are subject to their license and can't be used commercially. For more information, see: https://docs.deci.ai/super-gradients/latest/LICENSE.YOLONAS.html
+
+:::
+
+The input image size in this notebook is set to 320x320. This results in lower CPU usage and faster inference times without impacting performance in most cases due to the way Frigate crops video frames to areas of interest before running detection. The notebook and config can be updated to 640x640 if desired.
+
+After placing the downloaded onnx model in your config folder, you can use the following configuration:
 
 ```yaml
 detectors:
   ov:
     type: openvino
-    device: AUTO
-    model:
-      path: /path/to/yolox_tiny.xml
+    device: GPU
 
 model:
-  width: 416
-  height: 416
+  model_type: yolonas
+  width: 320 # <--- should match whatever was set in notebook
+  height: 320 # <--- should match whatever was set in notebook
   input_tensor: nchw
   input_pixel_format: bgr
-  model_type: yolox
-  labelmap_path: /path/to/coco_80cl.txt
+  path: /config/yolo_nas_s.onnx
+  labelmap_path: /labelmap/coco-80.txt
 ```
 
-### Intel NCS2 VPU and Myriad X Setup
-
-Intel produces a neural net inference accelleration chip called Myriad X. This chip was sold in their Neural Compute Stick 2 (NCS2) which has been discontinued. If intending to use the MYRIAD device for accelleration, additional setup is required to pass through the USB device. The host needs a udev rule installed to handle the NCS2 device.
-
-```bash
-sudo usermod -a -G users "$(whoami)"
-cat <<EOF > 97-myriad-usbboot.rules
-SUBSYSTEM=="usb", ATTRS{idProduct}=="2485", ATTRS{idVendor}=="03e7", GROUP="users", MODE="0666", ENV{ID_MM_DEVICE_IGNORE}="1"
-SUBSYSTEM=="usb", ATTRS{idProduct}=="f63b", ATTRS{idVendor}=="03e7", GROUP="users", MODE="0666", ENV{ID_MM_DEVICE_IGNORE}="1"
-EOF
-sudo cp 97-myriad-usbboot.rules /etc/udev/rules.d/
-sudo udevadm control --reload-rules
-sudo udevadm trigger
-```
-
-Additionally, the Frigate docker container needs to run with the following configuration:
-
-```bash
---device-cgroup-rule='c 189:\* rmw' -v /dev/bus/usb:/dev/bus/usb
-```
-
-or in your compose file:
-
-```yml
-device_cgroup_rules:
-  - "c 189:* rmw"
-volumes:
-  - /dev/bus/usb:/dev/bus/usb
-```
+Note that the labelmap uses a subset of the complete COCO label set that has only 80 objects.
 
 ## NVidia TensorRT Detector
 
@@ -261,7 +260,7 @@ frigate:
 
 ### Configuration Parameters
 
-The TensorRT detector can be selected by specifying `tensorrt` as the model type. The GPU will need to be passed through to the docker container using the same methods described in the [Hardware Acceleration](hardware_acceleration.md#nvidia-gpu) section. If you pass through multiple GPUs, you can select which GPU is used for a detector with the `device` configuration parameter. The `device` parameter is an integer value of the GPU index, as shown by `nvidia-smi` within the container.
+The TensorRT detector can be selected by specifying `tensorrt` as the model type. The GPU will need to be passed through to the docker container using the same methods described in the [Hardware Acceleration](hardware_acceleration.md#nvidia-gpus) section. If you pass through multiple GPUs, you can select which GPU is used for a detector with the `device` configuration parameter. The `device` parameter is an integer value of the GPU index, as shown by `nvidia-smi` within the container.
 
 The TensorRT detector uses `.trt` model files that are located in `/config/model_cache/tensorrt` by default. These model path and dimensions used will depend on which model you have generated.
 
@@ -302,3 +301,88 @@ Replace `<your_codeproject_ai_server_ip>` and `<port>` with the IP address and p
 To verify that the integration is working correctly, start Frigate and observe the logs for any error messages related to CodeProject.AI. Additionally, you can check the Frigate web interface to see if the objects detected by CodeProject.AI are being displayed and tracked properly.
 
 # Community Supported Detectors
+
+## Rockchip platform
+
+Hardware accelerated object detection is supported on the following SoCs:
+
+- RK3562
+- RK3566
+- RK3568
+- RK3576
+- RK3588
+
+This implementation uses the [Rockchip's RKNN-Toolkit2](https://github.com/airockchip/rknn-toolkit2/), version v2.0.0.beta0. Currently, only [Yolo-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) is supported as object detection model.
+
+### Prerequisites
+
+Make sure to follow the [Rockchip specific installation instrucitions](/frigate/installation#rockchip-platform).
+
+### Configuration
+
+This `config.yml` shows all relevant options to configure the detector and explains them. All values shown are the default values (except for two). Lines that are required at least to use the detector are labeled as required, all other lines are optional.
+
+```yaml
+detectors: # required
+  rknn: # required
+    type: rknn # required
+    # number of NPU cores to use
+    # 0 means choose automatically
+    # increase for better performance if you have a multicore NPU e.g. set to 3 on rk3588
+    num_cores: 0
+
+model: # required
+  # name of model (will be automatically downloaded) or path to your own .rknn model file
+  # possible values are:
+  # - deci-fp16-yolonas_s
+  # - deci-fp16-yolonas_m
+  # - deci-fp16-yolonas_l
+  # - /config/model_cache/your_custom_model.rknn
+  path: deci-fp16-yolonas_s
+  # width and height of detection frames
+  width: 320
+  height: 320
+  # pixel format of detection frame
+  # default value is rgb but yolo models usually use bgr format
+  input_pixel_format: bgr # required
+  # shape of detection frame
+  input_tensor: nhwc
+  # needs to be adjusted to model, see below
+  labelmap_path: /labelmap.txt # required
+```
+
+The correct labelmap must be loaded for each model. If you use a custom model (see notes below), you must make sure to provide the correct labelmap. The table below lists the correct paths for the bundled models:
+
+| `path`                | `labelmap_path`       |
+| --------------------- | --------------------- |
+| deci-fp16-yolonas\_\* | /labelmap/coco-80.txt |
+
+### Choosing a model
+
+:::warning
+
+The pre-trained YOLO-NAS weights from DeciAI are subject to their license and can't be used commercially. For more information, see: https://docs.deci.ai/super-gradients/latest/LICENSE.YOLONAS.html
+
+:::
+
+The inference time was determined on a rk3588 with 3 NPU cores.
+
+| Model               | Size in mb | Inference time in ms |
+| ------------------- | ---------- | -------------------- |
+| deci-fp16-yolonas_s | 24         | 25                   |
+| deci-fp16-yolonas_m | 62         | 35                   |
+| deci-fp16-yolonas_l | 81         | 45                   |
+
+:::tip
+
+You can get the load of your NPU with the following command:
+
+```bash
+$ cat /sys/kernel/debug/rknpu/load
+>> NPU load:  Core0:  0%, Core1:  0%, Core2:  0%,
+```
+
+:::
+
+- All models are automatically downloaded and stored in the folder `config/model_cache/rknn_cache`. After upgrading Frigate, you should remove older models to free up space.
+- You can also provide your own `.rknn` model. You should not save your own models in the `rknn_cache` folder, store them directly in the `model_cache` folder or another subfolder. To convert a model to `.rknn` format see the `rknn-toolkit2` (requires a x86 machine). Note, that there is only post-processing for the supported models.

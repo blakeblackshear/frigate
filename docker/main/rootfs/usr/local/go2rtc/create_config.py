@@ -21,9 +21,9 @@ FRIGATE_ENV_VARS = {k: v for k, v in os.environ.items() if k.startswith("FRIGATE
 if os.path.isdir("/run/secrets"):
     for secret_file in os.listdir("/run/secrets"):
         if secret_file.startswith("FRIGATE_"):
-            FRIGATE_ENV_VARS[secret_file] = Path(
-                os.path.join("/run/secrets", secret_file)
-            ).read_text()
+            FRIGATE_ENV_VARS[secret_file] = (
+                Path(os.path.join("/run/secrets", secret_file)).read_text().strip()
+            )
 
 config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
 
@@ -32,13 +32,16 @@ config_file_yaml = config_file.replace(".yml", ".yaml")
 if os.path.isfile(config_file_yaml):
     config_file = config_file_yaml
 
-with open(config_file) as f:
-    raw_config = f.read()
+try:
+    with open(config_file) as f:
+        raw_config = f.read()
 
-if config_file.endswith((".yaml", ".yml")):
-    config: dict[str, any] = yaml.safe_load(raw_config)
-elif config_file.endswith(".json"):
-    config: dict[str, any] = json.loads(raw_config)
+    if config_file.endswith((".yaml", ".yml")):
+        config: dict[str, any] = yaml.safe_load(raw_config)
+    elif config_file.endswith(".json"):
+        config: dict[str, any] = json.loads(raw_config)
+except FileNotFoundError:
+    config: dict[str, any] = {}
 
 go2rtc_config: dict[str, any] = config.get("go2rtc", {})
 
@@ -109,23 +112,9 @@ if int(os.environ["LIBAVFORMAT_VERSION_MAJOR"]) < 59:
             "rtsp": "-fflags nobuffer -flags low_delay -stimeout 5000000 -user_agent go2rtc/ffmpeg -rtsp_transport tcp -i {input}"
         }
     elif go2rtc_config["ffmpeg"].get("rtsp") is None:
-        go2rtc_config["ffmpeg"][
-            "rtsp"
-        ] = "-fflags nobuffer -flags low_delay -stimeout 5000000 -user_agent go2rtc/ffmpeg -rtsp_transport tcp -i {input}"
-
-# add hardware acceleration presets for rockchip devices
-# may be removed if frigate uses a go2rtc version that includes these presets
-if go2rtc_config.get("ffmpeg") is None:
-    go2rtc_config["ffmpeg"] = {
-        "h264/rk": "-c:v h264_rkmpp_encoder -g 50 -bf 0",
-        "h265/rk": "-c:v hevc_rkmpp_encoder -g 50 -bf 0",
-    }
-else:
-    if go2rtc_config["ffmpeg"].get("h264/rk") is None:
-        go2rtc_config["ffmpeg"]["h264/rk"] = "-c:v h264_rkmpp_encoder -g 50 -bf 0"
-
-    if go2rtc_config["ffmpeg"].get("h265/rk") is None:
-        go2rtc_config["ffmpeg"]["h265/rk"] = "-c:v hevc_rkmpp_encoder -g 50 -bf 0"
+        go2rtc_config["ffmpeg"]["rtsp"] = (
+            "-fflags nobuffer -flags low_delay -stimeout 5000000 -user_agent go2rtc/ffmpeg -rtsp_transport tcp -i {input}"
+        )
 
 for name in go2rtc_config.get("streams", {}):
     stream = go2rtc_config["streams"][name]

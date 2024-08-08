@@ -5,7 +5,9 @@ title: Masks
 
 ## Motion masks
 
-Motion masks are used to prevent unwanted types of motion from triggering detection. Try watching the debug feed with `Motion Boxes` enabled to see what may be regularly detected as motion. For example, you want to mask out your timestamp, the sky, rooftops, etc. Keep in mind that this mask only prevents motion from being detected and does not prevent objects from being detected if object detection was started due to motion in unmasked areas. Motion is also used during object tracking to refine the object detection area in the next frame. Over masking will make it more difficult for objects to be tracked. To see this effect, create a mask, and then watch the video feed with `Motion Boxes` enabled again.
+Motion masks are used to prevent unwanted types of motion from triggering detection. Try watching the Debug feed (Settings --> Debug) with `Motion Boxes` enabled to see what may be regularly detected as motion. For example, you want to mask out your timestamp, the sky, rooftops, etc. Keep in mind that this mask only prevents motion from being detected and does not prevent objects from being detected if object detection was started due to motion in unmasked areas. Motion is also used during object tracking to refine the object detection area in the next frame. _Over-masking will make it more difficult for objects to be tracked._
+
+See [further clarification](#further-clarification) below on why you may not want to use a motion mask.
 
 ## Object filter masks
 
@@ -20,31 +22,29 @@ Object filter masks can be used to filter out stubborn false positives in fixed 
 To create a poly mask:
 
 1. Visit the Web UI
-1. Click the camera you wish to create a mask for
-1. Select "Debug" at the top
-1. Expand the "Options" below the video feed
-1. Click "Mask & Zone creator"
-1. Click "Add" on the type of mask or zone you would like to create
-1. Click on the camera's latest image to create a masked area. The yaml representation will be updated in real-time
-1. When you've finished creating your mask, click "Copy" and paste the contents into your config file and restart Frigate
+2. Click/tap the gear icon and open "Settings"
+3. Select "Mask / zone editor"
+4. At the top right, select the camera you wish to create a mask or zone for
+5. Click the plus icon under the type of mask or zone you would like to create
+6. Click on the camera's latest image to create the points for a masked area. Click the first point again to close the polygon.
+7. When you've finished creating your mask, press Save.
+8. Restart Frigate to apply your changes.
 
-Example of a finished row corresponding to the below example image:
+Your config file will be updated with the relative coordinates of the mask/zone:
 
 ```yaml
 motion:
-  mask: "0,461,3,0,1919,0,1919,843,1699,492,1344,458,1346,336,973,317,869,375,866,432"
+  mask: "0.000,0.427,0.002,0.000,0.999,0.000,0.999,0.781,0.885,0.456,0.700,0.424,0.701,0.311,0.507,0.294,0.453,0.347,0.451,0.400"
 ```
 
-Multiple masks can be listed.
+Multiple masks can be listed in your config.
 
 ```yaml
 motion:
   mask:
-    - 458,1346,336,973,317,869,375,866,432
-    - 0,461,3,0,1919,0,1919,843,1699,492,1344
+    - 0.239,1.246,0.175,0.901,0.165,0.805,0.195,0.802
+    - 0.000,0.427,0.002,0.000,0.999,0.000,0.999,0.781,0.885,0.456
 ```
-
-![poly](/img/example-mask-poly-min.png)
 
 ### Further Clarification
 
@@ -78,7 +78,7 @@ It is, but the definition of "unnecessary" varies. I want to ignore areas of mot
 
 > For me, giving my masks ANY padding results in a lot of people detection I'm not interested in. I live in the city and catch a lot of the sidewalk on my camera. People walk by my front door all the time and the margin between the sidewalk and actually walking onto my stoop is very thin, so I basically have everything but the exact contours of my stoop masked out. This results in very tidy detections but this info keeps throwing me off. Am I just overthinking it?
 
-This is what `required_zones` are for. You should define a zone (remember this is evaluated based on the bottom center of the bounding box) and make it required to save snapshots and clips (now events in 0.9.0). You can also use this in your conditions for a notification.
+This is what `required_zones` are for. You should define a zone (remember this is evaluated based on the bottom center of the bounding box) and make it required to save snapshots and clips (previously events in 0.9.0 to 0.13.0 and review items in 0.14.0 and later). You can also use this in your conditions for a notification.
 
 > Maybe my specific situation just warrants this. I've just been having a hard time understanding the relevance of this information - it seems to be that it's exactly what would be expected when "masking out" an area of ANY image.
 

@@ -3,17 +3,18 @@ import json
 import logging
 import os
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock
 
 from peewee_migrate import Router
 from playhouse.shortcuts import model_to_dict
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
+from frigate.api.app import create_app
 from frigate.config import FrigateConfig
-from frigate.http import create_app
 from frigate.models import Event, Recordings
 from frigate.plus import PlusApi
+from frigate.stats.emitter import StatsEmitter
 from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
 
 
@@ -119,8 +120,8 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
-            None,
             PlusApi(),
+            None,
         )
         id = "123456.random"
         id2 = "7890.random"
@@ -155,8 +156,8 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
-            None,
             PlusApi(),
+            None,
         )
         id = "123456.random"
 
@@ -176,8 +177,8 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
-            None,
             PlusApi(),
+            None,
         )
         id = "123456.random"
         bad_id = "654321.other"
@@ -196,8 +197,8 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
-            None,
             PlusApi(),
+            None,
         )
         id = "123456.random"
 
@@ -218,8 +219,8 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
-            None,
             PlusApi(),
+            None,
         )
         id = "123456.random"
 
@@ -244,8 +245,8 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
-            None,
             PlusApi(),
+            None,
         )
         morning_id = "123456.random"
         evening_id = "654321.random"
@@ -282,8 +283,8 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
-            None,
             PlusApi(),
+            None,
         )
         id = "123456.random"
         sub_label = "sub"
@@ -317,8 +318,8 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
-            None,
             PlusApi(),
+            None,
         )
         id = "123456.random"
         sub_label = "sub"
@@ -342,8 +343,8 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
-            None,
             PlusApi(),
+            None,
         )
 
         with app.test_client() as client:
@@ -359,8 +360,8 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
-            None,
             PlusApi(),
+            None,
         )
         id = "123456.random"
 
@@ -370,8 +371,9 @@ class TestHttp(unittest.TestCase):
             assert recording
             assert recording[0]["id"] == id
 
-    @patch("frigate.http.stats_snapshot")
-    def test_stats(self, mock_stats):
+    def test_stats(self):
+        stats = Mock(spec=StatsEmitter)
+        stats.get_latest_stats.return_value = self.test_stats
         app = create_app(
             FrigateConfig(**self.minimal_config).runtime_config(),
             self.db,
@@ -379,14 +381,13 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
-            None,
             PlusApi(),
+            stats,
         )
-        mock_stats.return_value = self.test_stats
 
         with app.test_client() as client:
-            stats = client.get("/stats").json
-            assert stats == self.test_stats
+            full_stats = client.get("/stats").json
+            assert full_stats == self.test_stats
 
 
 def _insert_mock_event(

@@ -33,7 +33,6 @@ Fork [blakeblackshear/frigate-hass-integration](https://github.com/blakeblackshe
 
 ### Prerequisites
 
-- [Frigate source code](#frigate-core-web-and-docs)
 - GNU make
 - Docker
 - An extra detector (Coral, OpenVINO, etc.) is optional but recommended to simulate real world performance.
@@ -129,7 +128,6 @@ ffmpeg -c:v h264_qsv -re -stream_loop -1 -i https://streams.videolan.org/ffmpeg/
 
 ### Prerequisites
 
-- [Frigate source code](#frigate-core-web-and-docs)
 - All [core](#core) prerequisites _or_ another running Frigate instance locally available
 - Node.js 20
 
@@ -154,6 +152,12 @@ cd web && npm install
 ```console
 cd web && npm run dev
 ```
+
+##### 3a. Run the development server against a non-local instance
+
+To run the development server against a non-local instance, you will need to
+replace the `localhost` values in `vite.config.ts` with the IP address of the
+non-local backend server.
 
 #### 4. Making changes
 
@@ -182,7 +186,6 @@ npm run test
 
 ### Prerequisites
 
-- [Frigate source code](#frigate-core-web-and-docs)
 - Node.js 20
 
 ### Making changes
@@ -221,4 +224,14 @@ docker run --privileged --rm tonistiigi/binfmt --install all
 docker buildx create --name builder --driver docker-container --driver-opt network=host --use
 docker buildx inspect builder --bootstrap
 make push
+```
+
+## Other
+
+### Nginx
+
+When testing nginx config changes from within the dev container, the following command can be used to copy and reload the config for testing without rebuilding the container:
+
+```console
+sudo cp docker/main/rootfs/usr/local/nginx/conf/* /usr/local/nginx/conf/ && sudo /usr/local/nginx/sbin/nginx -s reload
 ```

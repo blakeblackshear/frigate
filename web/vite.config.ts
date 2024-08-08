@@ -1,52 +1,74 @@
 /// <reference types="vitest" />
-import path from 'path';
-import { defineConfig } from 'vite';
-import preact from '@preact/preset-vite';
-import monacoEditorPlugin from 'vite-plugin-monaco-editor';
+import path, { resolve } from "path";
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react-swc";
+import monacoEditorPlugin from "vite-plugin-monaco-editor";
+
+const proxyHost = process.env.PROXY_HOST || "localhost:5000";
 
 // https://vitejs.dev/config/
 export default defineConfig({
   define: {
-    'import.meta.vitest': 'undefined',
+    "import.meta.vitest": "undefined",
   },
   server: {
     proxy: {
-      '/api': {
-        target: 'http://localhost:5000'
-      },
-      '/vod': {
-        target: 'http://localhost:5000'
-      },
-      '/exports': {
-        target: 'http://localhost:5000'
-      },
-      '/ws': {
-        target: 'ws://localhost:5000',
+      "/api": {
+        target: `http://${proxyHost}`,
         ws: true,
       },
-      '/live': {
-        target: 'ws://localhost:5000',
+      "/vod": {
+        target: `http://${proxyHost}`,
+      },
+      "/clips": {
+        target: `http://${proxyHost}`,
+      },
+      "/exports": {
+        target: `http://${proxyHost}`,
+      },
+      "/ws": {
+        target: `ws://${proxyHost}`,
+        ws: true,
+      },
+      "/live": {
+        target: `ws://${proxyHost}`,
         changeOrigin: true,
         ws: true,
       },
-    }
+    },
+  },
+  build: {
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, "index.html"),
+        login: resolve(__dirname, "login.html"),
+      },
+    },
   },
   plugins: [
-    preact(),
+    react(),
     monacoEditorPlugin.default({
-      customWorkers: [{ label: 'yaml', entry: 'monaco-yaml/yaml.worker' }],
-      languageWorkers: ['editorWorkerService'], // we don't use any of the default languages
+      customWorkers: [{ label: "yaml", entry: "monaco-yaml/yaml.worker" }],
+      languageWorkers: ["editorWorkerService"], // we don't use any of the default languages
     }),
   ],
-  test: {
-    environment: 'jsdom',
+  resolve: {
     alias: {
-      'testing-library': path.resolve(__dirname, './__test__/testing-library.js'),
+      "@": path.resolve(__dirname, "./src"),
     },
-    setupFiles: ['./__test__/test-setup.ts'],
-    includeSource: ['src/**/*.{js,jsx,ts,tsx}'],
+  },
+  test: {
+    environment: "jsdom",
+    alias: {
+      "testing-library": path.resolve(
+        __dirname,
+        "./__test__/testing-library.js",
+      ),
+    },
+    setupFiles: ["./__test__/test-setup.ts"],
+    includeSource: ["src/**/*.{js,jsx,ts,tsx}"],
     coverage: {
-      reporter: ['text-summary', 'text'],
+      reporter: ["text-summary", "text"],
     },
     mockReset: true,
     restoreMocks: true,

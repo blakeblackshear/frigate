@@ -25,7 +25,7 @@ cameras:
 
 ## VSCode Configuration Schema
 
-VSCode supports JSON schemas for automatically validating configuration files. You can enable this feature by adding `# yaml-language-server: $schema=http://frigate_host:5000/api/config/schema.json` to the beginning of the configuration file. Replace `frigate_host` with the IP address or hostname of your Frigate server. If you're using both VSCode and Frigate as an add-on, you should use `ccab4aaf-frigate` instead. Make sure to expose port `5000` for the Web Interface when accessing the config from VSCode on another machine.
+VSCode supports JSON schemas for automatically validating configuration files. You can enable this feature by adding `# yaml-language-server: $schema=http://frigate_host:5000/api/config/schema.json` to the beginning of the configuration file. Replace `frigate_host` with the IP address or hostname of your Frigate server. If you're using both VSCode and Frigate as an add-on, you should use `ccab4aaf-frigate` instead. Make sure to expose the internal unauthenticated port `5000` when accessing the config from VSCode on another machine.
 
 ## Environment Variable Substitution
 
@@ -113,7 +113,7 @@ cameras:
             - detect
     motion:
       mask:
-        - 0,461,3,0,1919,0,1919,843,1699,492,1344,458,1346,336,973,317,869,375,866,432
+        - 0.000,0.427,0.002,0.000,0.999,0.000,0.999,0.781,0.885,0.456,0.700,0.424,0.701,0.311,0.507,0.294,0.453,0.347,0.451,0.400
 ```
 
 ### Standalone Intel Mini PC with USB Coral
@@ -167,7 +167,7 @@ cameras:
             - detect
     motion:
       mask:
-        - 0,461,3,0,1919,0,1919,843,1699,492,1344,458,1346,336,973,317,869,375,866,432
+        - 0.000,0.427,0.002,0.000,0.999,0.000,0.999,0.781,0.885,0.456,0.700,0.424,0.701,0.311,0.507,0.294,0.453,0.347,0.451,0.400
 ```
 
 ### Home Assistant integrated Intel Mini PC with OpenVino
@@ -232,5 +232,5 @@ cameras:
             - detect
     motion:
       mask:
-        - 0,461,3,0,1919,0,1919,843,1699,492,1344,458,1346,336,973,317,869,375,866,432
+        - 0.000,0.427,0.002,0.000,0.999,0.000,0.999,0.781,0.885,0.456,0.700,0.424,0.701,0.311,0.507,0.294,0.453,0.347,0.451,0.400
 ```

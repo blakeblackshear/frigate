@@ -148,8 +148,8 @@ class TestRegion(unittest.TestCase):
 
     def test_combine_boxes(self):
         boxes = [
-            (460, 0, 561, 144),
-            (565, 0, 586, 71),
+            (480, 0, 540, 128),
+            (536, 0, 558, 99),
         ]
 
         # boundary_boxes = [get_cluster_boundary(box) for box in boxes]
@@ -167,8 +167,32 @@ class TestRegion(unittest.TestCase):
         # save_clusters_image("combine", boxes, cluster_candidates, regions)
         assert len(regions) == 1
 
+    def test_dont_combine_smaller_boxes(self):
+        boxes = [
+            (460, 0, 561, 144),
+            (565, 0, 586, 71),
+        ]
+
+        # boundary_boxes = [get_cluster_boundary(box) for box in boxes]
+        # save_cluster_boundary_image("combine_bound", boxes, boundary_boxes)
+
+        cluster_candidates = get_cluster_candidates(
+            self.frame_shape, self.min_region_size, boxes
+        )
+
+        regions = [
+            get_cluster_region(self.frame_shape, self.min_region_size, candidate, boxes)
+            for candidate in cluster_candidates
+        ]
+
+        # save_clusters_image("combine", boxes, cluster_candidates, regions)
+        assert len(regions) == 2
+
     def test_dont_combine_boxes(self):
-        boxes = [(460, 0, 532, 129), (586, 0, 606, 46)]
+        boxes = [
+            (460, 0, 532, 129),
+            (586, 0, 606, 46),
+        ]
 
         # boundary_boxes = [get_cluster_boundary(box) for box in boxes]
         # save_cluster_boundary_image("dont_combine_bound", boxes, boundary_boxes)

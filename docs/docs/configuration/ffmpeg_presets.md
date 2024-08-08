@@ -18,13 +18,11 @@ See [the hwaccel docs](/configuration/hardware_acceleration.md) for more info on
 | preset-vaapi          | Intel & AMD VAAPI              | Check hwaccel docs to ensure correct driver is chosen |
 | preset-intel-qsv-h264 | Intel QSV with h264 stream     | If issues occur recommend using vaapi preset instead  |
 | preset-intel-qsv-h265 | Intel QSV with h265 stream     | If issues occur recommend using vaapi preset instead  |
-| preset-nvidia-h264    | Nvidia GPU with h264 stream    |                                                       |
-| preset-nvidia-h265    | Nvidia GPU with h265 stream    |                                                       |
-| preset-nvidia-mjpeg   | Nvidia GPU with mjpeg stream   | Recommend restreaming mjpeg and using nvidia-h264     |
+| preset-nvidia         | Nvidia GPU                     |                                                       |
 | preset-jetson-h264    | Nvidia Jetson with h264 stream |                                                       |
 | preset-jetson-h265    | Nvidia Jetson with h265 stream |                                                       |
-| preset-rk-h264        | Rockchip MPP with h264 stream  | Use image with *-rk suffix and privileged mode        |
-| preset-rk-h265        | Rockchip MPP with h265 stream  | Use image with *-rk suffix and privileged mode        |
+| preset-rk-h264        | Rockchip MPP with h264 stream  | Use image with \*-rk suffix and privileged mode       |
+| preset-rk-h265        | Rockchip MPP with h265 stream  | Use image with \*-rk suffix and privileged mode       |
 
 ### Input Args Presets
 
@@ -44,7 +42,7 @@ See [the camera specific docs](/configuration/camera_specific.md) for more info 
 | preset-rtsp-udp                  | RTSP Stream via UDP       | Use when camera is UDP only                                                                      |
 | preset-rtsp-blue-iris            | Blue Iris RTSP Stream     | Use when consuming a stream from Blue Iris                                                       |
 
-:::caution
+:::warning
 
 It is important to be mindful of input args when using restream because you can have a mix of protocols. `http` and `rtmp` presets cannot be used with `rtsp` streams. For example, when using a reolink cam with the rtsp restream as a source for record the preset-http-reolink will cause a crash. In this case presets will need to be set at the stream level. See the example below.
 
@@ -73,11 +71,11 @@ cameras:
 
 Output args presets help make the config more readable and handle use cases for different types of streams to ensure consistent recordings.
 
-| Preset                           | Usage                             | Other Notes                                   |
-| -------------------------------- | --------------------------------- | --------------------------------------------- |
-| preset-record-generic            | Record WITHOUT audio              | This is the default when nothing is specified |
-| preset-record-generic-audio-copy | Record WITH original audio        | Use this to enable audio in recordings        |
+| Preset                           | Usage                             | Other Notes                                                                                                                          |
+| -------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| preset-record-generic            | Record WITHOUT audio              | This is the default when nothing is specified                                                                                        |
+| preset-record-generic-audio-copy | Record WITH original audio        | Use this to enable audio in recordings                                                                                               |
 | preset-record-generic-audio-aac  | Record WITH transcoded aac audio  | Use this to transcode to aac audio. If your source is already aac, use preset-record-generic-audio-copy instead to avoid re-encoding |
-| preset-record-mjpeg              | Record an mjpeg stream            | Recommend restreaming mjpeg stream instead    |
-| preset-record-jpeg               | Record live jpeg                  | Recommend restreaming live jpeg instead       |
-| preset-record-ubiquiti           | Record ubiquiti stream with audio | Recordings with ubiquiti non-standard audio   |
+| preset-record-mjpeg              | Record an mjpeg stream            | Recommend restreaming mjpeg stream instead                                                                                           |
+| preset-record-jpeg               | Record live jpeg                  | Recommend restreaming live jpeg instead                                                                                              |
+| preset-record-ubiquiti           | Record ubiquiti stream with audio | Recordings with ubiquiti non-standard audio                                                                                          |

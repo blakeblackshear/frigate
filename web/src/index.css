@@ -1,55 +1,181 @@
+@import "/themes/tailwind-base.css";
+@import "/themes/theme-default.css";
+@import "/themes/theme-blue.css";
+@import "/themes/theme-green.css";
+@import "/themes/theme-high-contrast.css";
+@import "/themes/theme-nord.css";
+@import "/themes/theme-red.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-.activityindicator {
-  border-top-color: currentColor;
-  -webkit-animation: spinner 0.75s linear infinite;
-  animation: spinner 0.75s linear infinite;
-}
+/* Duplicated var names with color space modifiers for swatches in vscode. See https://github.com/tailwindlabs/tailwindcss/discussions/10619 */
 
-@-webkit-keyframes spinner {
-  0% {
-    -webkit-transform: rotate(0deg);
+@layer base {
+  * {
+    @apply border-border;
   }
-  100% {
-    -webkit-transform: rotate(360deg);
+  body {
+    @apply bg-background text-foreground;
   }
 }
 
-@keyframes spinner {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
+@layer utilities {
+  .scrollbar-container {
+    @apply scrollbar-thin scrollbar-track-background_alt scrollbar-thumb-border scrollbar-track-rounded-full scrollbar-thumb-rounded-full;
   }
 }
 
-.jsmpeg canvas {
-  position: static !important;
+html {
+  overscroll-behavior: none;
 }
 
-.hide-scroll::-webkit-scrollbar {
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
   display: none;
 }
 
-.hide-scroll {
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
 
-/*
- Hide some videoplayer controls on mobile devices to
- align the video player and bottom control bar properly.
-*/
-@media only screen and (max-width: 700px) {
-  .small-player .vjs-time-control,
-  .small-player .vjs-time-divider {
-    display: none;
-  }
-  div.vjs-control-bar > .skip-back.skip-5,
-  div.vjs-control-bar > .skip-forward.skip-10 {
-    display: none;
-  }
+/* static fonts */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100;
+  font-display: swap;
+  src: url("../fonts/Inter-Thin.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-weight: 100;
+  font-display: swap;
+  src: url("../fonts/Inter-ThinItalic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 200;
+  font-display: swap;
+  src: url("../fonts/Inter-ExtraLight.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-weight: 200;
+  font-display: swap;
+  src: url("../fonts/Inter-ExtraLightItalic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("../fonts/Inter-Light.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-weight: 300;
+  font-display: swap;
+  src: url("../fonts/Inter-LightItalic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/Inter-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/Inter-Italic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../fonts/Inter-Medium.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-weight: 500;
+  font-display: swap;
+  src: url("../fonts/Inter-MediumItalic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../fonts/Inter-SemiBold.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../fonts/Inter-SemiBoldItalic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../fonts/Inter-Bold.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../fonts/Inter-BoldItalic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("../fonts/Inter-ExtraBold.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-weight: 800;
+  font-display: swap;
+  src: url("../fonts/Inter-ExtraBoldItalic.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url("../fonts/Inter-Black.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: italic;
+  font-weight: 900;
+  font-display: swap;
+  src: url("../fonts/Inter-BlackItalic.woff2") format("woff2");
+}
+
+.react-resizable-handle {
+  z-index: 30;
+  background-image: none !important;
+}
+
+.react-grid-item.react-grid-placeholder {
+  border: 3px solid #a00000 !important;
+  opacity: 0.5 !important;
 }

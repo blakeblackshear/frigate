@@ -5,45 +5,15 @@ title: HTTP API
 
 A web server is available on port 5000 with the following endpoints.
 
-### `GET /api/<camera_name>`
+## Management & Information
 
-An mjpeg stream for debugging. Keep in mind the mjpeg endpoint is for debugging only and will put additional load on the system when in use.
+### `GET /api/config`
 
-Accepts the following query string parameters:
+A json representation of your configuration
 
-| param       | Type | Description                                                        |
-| ----------- | ---- | ------------------------------------------------------------------ |
-| `fps`       | int  | Frame rate                                                         |
-| `h`         | int  | Height in pixels                                                   |
-| `bbox`      | int  | Show bounding boxes for detected objects (0 or 1)                  |
-| `timestamp` | int  | Print the timestamp in the upper left (0 or 1)                     |
-| `zones`     | int  | Draw the zones on the image (0 or 1)                               |
-| `mask`      | int  | Overlay the mask on the image (0 or 1)                             |
-| `motion`    | int  | Draw blue boxes for areas with detected motion (0 or 1)            |
-| `regions`   | int  | Draw green boxes for areas where object detection was run (0 or 1) |
+### `POST /api/restart`
 
-You can access a higher resolution mjpeg stream by appending `h=height-in-pixels` to the endpoint. For example `http://localhost:5000/api/back?h=1080`. You can also increase the FPS by appending `fps=frame-rate` to the URL such as `http://localhost:5000/api/back?fps=10` or both with `?fps=10&h=1000`.
-
-### `GET /api/<camera_name>/latest.jpg[?h=300]`
-
-The most recent frame that Frigate has finished processing. It is a full resolution image by default.
-
-Accepts the following query string parameters:
-
-| param       | Type | Description                                                        |
-| ----------- | ---- | ------------------------------------------------------------------ |
-| `h`         | int  | Height in pixels                                                   |
-| `bbox`      | int  | Show bounding boxes for detected objects (0 or 1)                  |
-| `timestamp` | int  | Print the timestamp in the upper left (0 or 1)                     |
-| `zones`     | int  | Draw the zones on the image (0 or 1)                               |
-| `mask`      | int  | Overlay the mask on the image (0 or 1)                             |
-| `motion`    | int  | Draw blue boxes for areas with detected motion (0 or 1)            |
-| `regions`   | int  | Draw green boxes for areas where object detection was run (0 or 1) |
-| `quality`   | int  | Jpeg encoding quality (0-100). Defaults to 70.                     |
-
-Example parameters:
-
-- `h=300`: resizes the image to 300 pixes tall
+Restarts Frigate process.
 
 ### `GET /api/stats`
 
@@ -54,35 +24,37 @@ Sample response:
 ```json
 {
   /* Per Camera Stats */
-  "back": {
-    /***************
-     * Frames per second being consumed from your camera. If this is higher
-     * than it is supposed to be, you should set -r FPS in your input_args.
-     * camera_fps = process_fps + skipped_fps
-     ***************/
-    "camera_fps": 5.0,
-    /***************
-     * Number of times detection is run per second. This can be higher than
-     * your camera FPS because Frigate often looks at the same frame multiple times
-     * or in multiple locations
-     ***************/
-    "detection_fps": 1.5,
-    /***************
-     * PID for the ffmpeg process that consumes this camera
-     ***************/
-    "capture_pid": 27,
-    /***************
-     * PID for the process that runs detection for this camera
-     ***************/
-    "pid": 34,
-    /***************
-     * Frames per second being processed by Frigate.
-     ***************/
-    "process_fps": 5.1,
-    /***************
-     * Frames per second skip for processing by Frigate.
-     ***************/
-    "skipped_fps": 0.0
+  "cameras": {
+    "back": {
+      /***************
+       * Frames per second being consumed from your camera. If this is higher
+       * than it is supposed to be, you should set -r FPS in your input_args.
+       * camera_fps = process_fps + skipped_fps
+       ***************/
+      "camera_fps": 5.0,
+      /***************
+       * Number of times detection is run per second. This can be higher than
+       * your camera FPS because Frigate often looks at the same frame multiple times
+       * or in multiple locations
+       ***************/
+      "detection_fps": 1.5,
+      /***************
+       * PID for the ffmpeg process that consumes this camera
+       ***************/
+      "capture_pid": 27,
+      /***************
+       * PID for the process that runs detection for this camera
+       ***************/
+      "pid": 34,
+      /***************
+       * Frames per second being processed by Frigate.
+       ***************/
+      "process_fps": 5.1,
+      /***************
+       * Frames per second skip for processing by Frigate.
+       ***************/
+      "skipped_fps": 0.0
+    }
   },
   /***************
    * Sum of detection_fps across all cameras and detectors.
@@ -139,17 +111,108 @@ Sample response:
         "mnt_type": "tmpfs"
       }
     }
+  },
+  "cpu_usages": {
+    "pid": {
+      "cmdline": "ffmpeg...",
+      "cpu": "5.0",
+      "cpu_average": "3.0",
+      "mem": "0.5"
+    }
+  },
+  "gpu_usages": {
+    "gpu-type": {
+      "gpu": "17%",
+      "mem": "18%"
+    }
   }
 }
 ```
 
-### `GET /api/config`
-
-A json representation of your configuration
-
 ### `GET /api/version`
 
 Version info
+
+### `GET /api/ffprobe`
+
+Get ffprobe output for camera feed paths.
+
+| param   | Type   | Description                        |
+| ------- | ------ | ---------------------------------- |
+| `paths` | string | `,` separated list of camera paths |
+
+### `GET /api/<camera_name>/ptz/info`
+
+Get PTZ info for the camera.
+
+## Camera Media
+
+### `GET /api/<camera_name>`
+
+An mjpeg stream for debugging. Keep in mind the mjpeg endpoint is for debugging only and will put additional load on the system when in use.
+
+Accepts the following query string parameters:
+
+| param       | Type | Description                                                        |
+| ----------- | ---- | ------------------------------------------------------------------ |
+| `fps`       | int  | Frame rate                                                         |
+| `h`         | int  | Height in pixels                                                   |
+| `bbox`      | int  | Show bounding boxes for detected objects (0 or 1)                  |
+| `timestamp` | int  | Print the timestamp in the upper left (0 or 1)                     |
+| `zones`     | int  | Draw the zones on the image (0 or 1)                               |
+| `mask`      | int  | Overlay the mask on the image (0 or 1)                             |
+| `motion`    | int  | Draw blue boxes for areas with detected motion (0 or 1)            |
+| `regions`   | int  | Draw green boxes for areas where object detection was run (0 or 1) |
+
+You can access a higher resolution mjpeg stream by appending `h=height-in-pixels` to the endpoint. For example `/api/back?h=1080`. You can also increase the FPS by appending `fps=frame-rate` to the URL such as `/api/back?fps=10` or both with `?fps=10&h=1000`.
+
+### `GET /api/<camera_name>/latest.jpg[?h=300]`
+
+The most recent frame that Frigate has finished processing. It is a full resolution image by default.
+
+Accepts the following query string parameters:
+
+| param       | Type | Description                                                        |
+| ----------- | ---- | ------------------------------------------------------------------ |
+| `h`         | int  | Height in pixels                                                   |
+| `bbox`      | int  | Show bounding boxes for detected objects (0 or 1)                  |
+| `timestamp` | int  | Print the timestamp in the upper left (0 or 1)                     |
+| `zones`     | int  | Draw the zones on the image (0 or 1)                               |
+| `mask`      | int  | Overlay the mask on the image (0 or 1)                             |
+| `motion`    | int  | Draw blue boxes for areas with detected motion (0 or 1)            |
+| `regions`   | int  | Draw green boxes for areas where object detection was run (0 or 1) |
+| `quality`   | int  | Jpeg encoding quality (0-100). Defaults to 70.                     |
+
+Example parameters:
+
+- `h=300`: resizes the image to 300 pixels tall
+
+### `GET /api/<camera_name>/<label>/thumbnail.jpg`
+
+Returns the thumbnail from the latest event for the given camera and label combo. Using `any` as the label will return the latest thumbnail regardless of type.
+
+### `GET /api/<camera_name>/<label>/clip.mp4`
+
+Returns the clip from the latest event for the given camera and label combo. Using `any` as the label will return the latest clip regardless of type.
+
+### `GET /api/<camera_name>/<label>/snapshot.jpg`
+
+Returns the snapshot image from the latest event for the given camera and label combo. Using `any` as the label will return the latest thumbnail regardless of type.
+
+### `GET /api/<camera_name>/grid.jpg`
+
+Returns the latest camera image with the regions grid overlaid.
+
+| param        | Type  | Description                                                                                |
+| ------------ | ----- | ------------------------------------------------------------------------------------------ |
+| `color`      | str   | The color of the grid (red,green,blue,black,white). Defaults to "green".                   |
+| `font_scale` | float | Font scale. Can be used to increase font size on high resolution cameras. Defaults to 0.5. |
+
+### `GET /clips/<camera>-<id>.jpg`
+
+JPG snapshot for the given camera and event id.
+
+## Events
 
 ### `GET /api/events`
 
@@ -174,16 +237,6 @@ Events from the database. Accepts the following query string parameters:
 | `is_submitted`       | int   | Filter events that are submitted to Frigate+ (0 or 1) |
 | `min_length`         | float | Minimum length of the event                           |
 | `max_length`         | float | Maximum length of the event                           |
-
-### `GET /api/timeline`
-
-Timeline of key moments of an event(s) from the database. Accepts the following query string parameters:
-
-| param       | Type | Description                         |
-| ----------- | ---- | ----------------------------------- |
-| `camera`    | str  | Name of camera                      |
-| `source_id` | str  | ID of tracked object                |
-| `limit`     | int  | Limit the number of events returned |
 
 ### `GET /api/events/summary`
 
@@ -225,7 +278,7 @@ Sub labels must be 100 characters or shorter.
 ```json
 {
   "subLabel": "some_string",
-  "subLabelScore": 0.79,
+  "subLabelScore": 0.79
 }
 ```
 
@@ -233,13 +286,17 @@ Sub labels must be 100 characters or shorter.
 
 Returns a thumbnail for the event id optimized for notifications. Works while the event is in progress and after completion. Passing `?format=android` will convert the thumbnail to 2:1 aspect ratio.
 
-### `GET /api/<camera_name>/<label>/thumbnail.jpg`
-
-Returns the thumbnail from the latest event for the given camera and label combo. Using `any` as the label will return the latest thumbnail regardless of type.
-
 ### `GET /api/events/<id>/clip.mp4`
 
 Returns the clip for the event id. Works after the event has ended.
+
+### `GET /api/events/<id>/snapshot-clean.png`
+
+Returns the clean snapshot image for the event id. Only works if `snapshots` and `clean_copy` are enabled in the config.
+
+| param      | Type | Description        |
+| ---------- | ---- | ------------------ |
+| `download` | bool | Download the image |
 
 ### `GET /api/events/<id>/snapshot.jpg`
 
@@ -254,92 +311,13 @@ Accepts the following query string parameters, but they are only applied when an
 | `timestamp` | int  | Print the timestamp in the upper left (0 or 1)    |
 | `crop`      | int  | Crop the snapshot to the (0 or 1)                 |
 | `quality`   | int  | Jpeg encoding quality (0-100). Defaults to 70.    |
-
-### `GET /api/<camera_name>/<label>/snapshot.jpg`
-
-Returns the snapshot image from the latest event for the given camera and label combo. Using `any` as the label will return the latest thumbnail regardless of type.
-
-### `GET /api/<camera_name>/recordings/<frame_time>/snapshot.png`
-
-Returns the snapshot image from the specific point in that cameras recordings.
-
-### `GET /api/<camera_name>/grid.jpg`
-
-Returns the latest camera image with the regions grid overlaid.
-
-| param        | Type  | Description                                                                                |
-| ------------ | ----- | ------------------------------------------------------------------------------------------ |
-| `color`      | str   | The color of the grid (red,green,blue,black,white). Defaults to "green".                   |
-| `font_scale` | float | Font scale. Can be used to increase font size on high resolution cameras. Defaults to 0.5. |
-
-### `GET /clips/<camera>-<id>.jpg`
-
-JPG snapshot for the given camera and event id.
-
-### `GET /vod/<year>-<month>/<day>/<hour>/<camera>/master.m3u8`
-
-HTTP Live Streaming Video on Demand URL for the specified hour and camera. Can be viewed in an application like VLC.
-
-### `GET /vod/event/<event-id>/index.m3u8`
-
-HTTP Live Streaming Video on Demand URL for the specified event. Can be viewed in an application like VLC.
-
-### `GET /vod/<camera>/start/<start-timestamp>/end/<end-timestamp>/index.m3u8`
-
-HTTP Live Streaming Video on Demand URL for the camera with the specified time range. Can be viewed in an application like VLC.
-
-### `POST /api/export/<camera>/start/<start-timestamp>/end/<end-timestamp>`
-
-Export recordings from `start-timestamp` to `end-timestamp` for `camera` as a single mp4 file. These recordings will be exported to the `/media/frigate/exports` folder.
-
-It is also possible to export this recording as a timelapse.
-
-**Optional Body:**
-
-```json
-{
-  "playback": "realtime", // playback factor: realtime or timelapse_25x
-}
-```
-
-### `DELETE /api/export/<export_name>`
-
-Delete an export from disk.
-
-### `PATCH /api/export/<export_name_current>/<export_name_new>`
-
-Renames an export.
-
-### `GET /api/<camera_name>/recordings/summary`
-
-Hourly summary of recordings data for a camera.
-
-### `GET /api/<camera_name>/recordings`
-
-Get recording segment details for the given timestamp range.
-
-| param    | Type | Description                           |
-| -------- | ---- | ------------------------------------- |
-| `after`  | int  | Unix timestamp for beginning of range |
-| `before` | int  | Unix timestamp for end of range       |
-
-### `GET /api/ffprobe`
-
-Get ffprobe output for camera feed paths.
-
-| param   | Type   | Description                        |
-| ------- | ------ | ---------------------------------- |
-| `paths` | string | `,` separated list of camera paths |
-
-### `GET /api/<camera_name>/ptz/info`
-
-Get PTZ info for the camera.
+| `download`  | bool | Download the image                                |
 
 ### `POST /api/events/<camera_name>/<label>/create`
 
 Create a manual event with a given `label` (ex: doorbell press) to capture a specific event besides an object being detected.
 
-:::caution
+:::warning
 
 Recording retention config still applies to manual events, if frigate is configured with `mode: motion` then the manual event will only keep recording segments when motion occurred.
 
@@ -379,6 +357,178 @@ Recording retention config still applies to manual events, if frigate is configu
 
 End a specific manual event without a predetermined length.
 
-### `POST /api/restart`
+### `GET /api/events/<id>/preview.gif`
 
-Restarts Frigate process.
+Gif covering the first 20 seconds of a specific event.
+
+## Previews
+
+Previews are low res / fps videos that are quickly scrubbable and can be used for notifications or time-lapses.
+
+### `GET /api/preview/<camera>/start/<start-timestamp>/end/<end-timestamp>`
+
+Metadata about previews for this time range.
+
+### `GET /api/preview/<year>-<month>/<day>/<hour>/<camera>/<timezone>`
+
+Metadata about previews for this hour
+
+### `GET /api/preview/<camera>/start/<start-timestamp>/end/<end-timestamp>`
+
+List of frames in the preview cache for the time range. Previews are only kept in the cache until they are combined into an mp4 at the end of the hour.
+
+### `GET /api/preview/<file_name>/thumbnail.jpg`
+
+Specific preview frame from preview cache.
+
+### `GET /<camera>/start/<start-timestamp>/end/<end-timestamp>/preview`
+
+Looping image made from preview video / frames during this time range.
+
+| param     | Type | Description                      |
+| --------- | ---- | -------------------------------- |
+| `format`  | str  | Format of preview [`gif`, `mp4`] |
+
+## Recordings
+
+### `GET /vod/<year>-<month>/<day>/<hour>/<camera>/master.m3u8`
+
+HTTP Live Streaming Video on Demand URL for the specified hour and camera. Can be viewed in an application like VLC.
+
+### `GET /vod/event/<event-id>/index.m3u8`
+
+HTTP Live Streaming Video on Demand URL for the specified event. Can be viewed in an application like VLC.
+
+### `GET /vod/<camera>/start/<start-timestamp>/end/<end-timestamp>/index.m3u8`
+
+HTTP Live Streaming Video on Demand URL for the camera with the specified time range. Can be viewed in an application like VLC.
+
+### `POST /api/export/<camera>/start/<start-timestamp>/end/<end-timestamp>`
+
+Export recordings from `start-timestamp` to `end-timestamp` for `camera` as a single mp4 file. These recordings will be exported to the `/media/frigate/exports` folder.
+
+It is also possible to export this recording as a time-lapse.
+
+**Optional Body:**
+
+```json
+{
+  "playback": "realtime" // playback factor: realtime or timelapse_25x
+}
+```
+
+### `DELETE /api/export/<export_name>`
+
+Delete an export from disk.
+
+### `PATCH /api/export/<export_name_current>/<export_name_new>`
+
+Renames an export.
+
+### `GET /api/<camera_name>/recordings/summary`
+
+Hourly summary of recordings data for a camera.
+
+### `GET /api/<camera_name>/recordings`
+
+Get recording segment details for the given timestamp range.
+
+| param    | Type | Description                           |
+| -------- | ---- | ------------------------------------- |
+| `after`  | int  | Unix timestamp for beginning of range |
+| `before` | int  | Unix timestamp for end of range       |
+
+### `GET /api/<camera_name>/recordings/<frame_time>/snapshot.png`
+
+Returns the snapshot image from the specific point in that cameras recordings.
+
+## Reviews
+
+### `GET /api/review`
+
+Reviews from the database. Accepts the following query string parameters:
+
+| param      | Type | Description                                                    |
+| ---------- | ---- | -------------------------------------------------------------- |
+| `before`   | int  | Epoch time                                                     |
+| `after`    | int  | Epoch time                                                     |
+| `cameras`  | str  | , separated list of cameras                                    |
+| `labels`   | str  | , separated list of labels                                     |
+| `zones`    | str  | , separated list of zones                                      |
+| `reviewed` | int  | Include items that have been reviewed (0 or 1)                 |
+| `limit`    | int  | Limit the number of events returned                            |
+| `severity` | str  | Limit items to severity (alert, detection, significant_motion) |
+
+### `GET /api/review/<id>`
+
+Get review with `id` from the database.
+
+### `GET /api/review/summary`
+
+Summary of reviews for the last 30 days. Accepts the following query string parameters:
+
+| param      | Type | Description                 |
+| ---------- | ---- | --------------------------- |
+| `cameras`  | str  | , separated list of cameras |
+| `labels`   | str  | , separated list of labels  |
+| `timezone` | str  | Timezone name               |
+
+### `POST /api/reviews/viewed`
+
+Mark item(s) as reviewed.
+
+**Required Body:**
+
+```json
+{
+  "ids": ["123", "456"] // , separated list of review IDs
+}
+```
+
+### `DELETE /api/review/<id>/viewed`
+
+Mark an item as not reviewed.
+
+### `POST /api/reviews/delete`
+
+Delete review items.
+
+**Required Body:**
+
+```json
+{
+  "ids": ["123", "456"] // , separated list of review IDs
+}
+```
+
+### `GET /review/activity/motion`
+
+Get the motion activity for camera(s) during a specified time period.
+
+| param     | Type | Description                 |
+| --------- | ---- | --------------------------- |
+| `before`  | int  | Epoch time                  |
+| `after`   | int  | Epoch time                  |
+| `cameras` | str  | , separated list of cameras |
+
+### `GET /review/activity/audio`
+
+Get the audio activity for camera(s) during a specified time period.
+
+| param     | Type | Description                 |
+| --------- | ---- | --------------------------- |
+| `before`  | int  | Epoch time                  |
+| `after`   | int  | Epoch time                  |
+| `cameras` | str  | , separated list of cameras |
+
+## Timeline
+
+### `GET /api/timeline`
+
+Timeline of key moments of an event(s) from the database. Accepts the following query string parameters:
+
+| param       | Type | Description                         |
+| ----------- | ---- | ----------------------------------- |
+| `camera`    | str  | Name of camera                      |
+| `source_id` | str  | ID of tracked object                |
+| `limit`     | int  | Limit the number of events returned |

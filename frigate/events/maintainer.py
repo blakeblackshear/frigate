@@ -1,23 +1,16 @@
-import datetime
 import logging
-import queue
 import threading
-from enum import Enum
 from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Dict
 
+from frigate.comms.events_updater import EventEndPublisher, EventUpdateSubscriber
 from frigate.config import EventsConfig, FrigateConfig
+from frigate.events.types import EventStateEnum, EventTypeEnum
 from frigate.models import Event
-from frigate.types import CameraMetricsTypes
 from frigate.util.builtin import to_relative_box
 
 logger = logging.getLogger(__name__)
-
-
-class EventTypeEnum(str, Enum):
-    api = "api"
-    tracked_object = "tracked_object"
 
 
 def should_update_db(prev_event: Event, current_event: Event) -> bool:
@@ -45,6 +38,12 @@ def should_update_state(prev_event: Event, current_event: Event) -> bool:
     if prev_event["attributes"] != current_event["attributes"]:
         return True
 
+    if prev_event["sub_label"] != current_event["sub_label"]:
+        return True
+
+    if len(prev_event["current_zones"]) < len(current_event["current_zones"]):
+        return True
+
     return False
 
 
@@ -52,21 +51,18 @@ class EventProcessor(threading.Thread):
     def __init__(
         self,
         config: FrigateConfig,
-        camera_processes: dict[str, CameraMetricsTypes],
-        event_queue: Queue,
-        event_processed_queue: Queue,
         timeline_queue: Queue,
         stop_event: MpEvent,
     ):
         threading.Thread.__init__(self)
         self.name = "event_processor"
         self.config = config
-        self.camera_processes = camera_processes
-        self.event_queue = event_queue
-        self.event_processed_queue = event_processed_queue
         self.timeline_queue = timeline_queue
         self.events_in_process: Dict[str, Event] = {}
         self.stop_event = stop_event
+
+        self.event_receiver = EventUpdateSubscriber()
+        self.event_end_publisher = EventEndPublisher()
 
     def run(self) -> None:
         # set an end_time on events without an end_time on startup
@@ -75,12 +71,12 @@ class EventProcessor(threading.Thread):
         ).execute()
 
         while not self.stop_event.is_set():
-            try:
-                source_type, event_type, camera, event_data = self.event_queue.get(
-                    timeout=1
-                )
-            except queue.Empty:
+            update = self.event_receiver.check_for_update()
+
+            if update == None:
                 continue
+
+            source_type, event_type, camera, event_data = update
 
             logger.debug(
                 f"Event received: {source_type} {event_type} {camera} {event_data['id']}"
@@ -97,18 +93,26 @@ class EventProcessor(threading.Thread):
                     )
                 )
 
-                if event_type == "start":
+                if event_type == EventStateEnum.start:
                     self.events_in_process[event_data["id"]] = event_data
                     continue
 
                 self.handle_object_detection(event_type, camera, event_data)
             elif source_type == EventTypeEnum.api:
+                self.timeline_queue.put(
+                    (
+                        camera,
+                        source_type,
+                        event_type,
+                        {},
+                        event_data,
+                    )
+                )
+
                 self.handle_external_detection(event_type, event_data)
 
-        # set an end_time on events without an end_time before exiting
-        Event.update(end_time=datetime.datetime.now().timestamp()).where(
-            Event.end_time == None
-        ).execute()
+        self.event_receiver.stop()
+        self.event_end_publisher.stop()
         logger.info("Exiting event processor...")
 
     def handle_object_detection(
@@ -231,12 +235,14 @@ class EventProcessor(threading.Thread):
             # update the stored copy for comparison on future update messages
             self.events_in_process[event_data["id"]] = event_data
 
-        if event_type == "end":
+        if event_type == EventStateEnum.end:
             del self.events_in_process[event_data["id"]]
-            self.event_processed_queue.put((event_data["id"], camera))
+            self.event_end_publisher.publish((event_data["id"], camera))
 
-    def handle_external_detection(self, event_type: str, event_data: Event) -> None:
-        if event_type == "new":
+    def handle_external_detection(
+        self, event_type: EventStateEnum, event_data: Event
+    ) -> None:
+        if event_type == EventStateEnum.start:
             event = {
                 Event.id: event_data["id"],
                 Event.label: event_data["label"],
@@ -255,7 +261,7 @@ class EventProcessor(threading.Thread):
                 },
             }
             Event.insert(event).execute()
-        elif event_type == "end":
+        elif event_type == EventStateEnum.end:
             event = {
                 Event.id: event_data["id"],
                 Event.end_time: event_data["end_time"],

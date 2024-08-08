@@ -25,7 +25,7 @@ The USB coral can draw up to 900mA and this can be too much for some on-device U
 
 The USB coral has different IDs when it is uninitialized and initialized.
 
-- When running Frigate in a VM, Proxmox lxc, etc. you must ensure both device IDs are mapped. 
+- When running Frigate in a VM, Proxmox lxc, etc. you must ensure both device IDs are mapped.
 - When running HA OS you may need to run the Full Access version of the Frigate addon with the `Protected Mode` switch disabled so that the coral can be accessed.
 
 ## USB Coral Detection Appears to be Stuck
@@ -43,6 +43,6 @@ The most common reason for the PCIe coral not being detected is that the driver 
 
 Coral Dual EdgeTPU is one card with two identical TPU cores. Each core has it's own PCIe interface and motherboard needs to have two PCIe busses on the m.2 slot to make them both work.
 
-E-key slot implemented to full m.2 electomechanical specification has two PCIe busses. Most motherboard manufacturers implement only one PCIe bus in m.2 E-key connector (this is why only one TPU is working). Some SBCs can have only USB bus on m.2 connector, ie none of TPUs will work.
+E-key slot implemented to full m.2 electromechanical specification has two PCIe busses. Most motherboard manufacturers implement only one PCIe bus in m.2 E-key connector (this is why only one TPU is working). Some SBCs can have only USB bus on m.2 connector, ie none of TPUs will work.
 
 In this case it is recommended to use a Dual EdgeTPU Adapter [like the one from MagicBlueSmoke](https://github.com/magic-blue-smoke/Dual-Edge-TPU-Adapter)

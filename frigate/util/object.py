@@ -323,6 +323,28 @@ def reduce_boxes(boxes, iou_threshold=0.0):
     return [tuple(c) for c in clusters]
 
 
+def average_boxes(boxes: list[list[int, int, int, int]]) -> list[int, int, int, int]:
+    """Return a box that is the average of a list of boxes."""
+    x_mins = []
+    y_mins = []
+    x_max = []
+    y_max = []
+
+    for box in boxes:
+        x_mins.append(box[0])
+        y_mins.append(box[1])
+        x_max.append(box[2])
+        y_max.append(box[3])
+
+    return [np.mean(x_mins), np.mean(y_mins), np.mean(x_max), np.mean(y_max)]
+
+
+def median_of_boxes(boxes: list[list[int, int, int, int]]) -> list[int, int, int, int]:
+    """Return a box that is the median of a list of boxes."""
+    sorted_boxes = sorted(boxes, key=lambda x: area(x))
+    return sorted_boxes[int(len(sorted_boxes) / 2.0)]
+
+
 def intersects_any(box_a, boxes):
     for box in boxes:
         if box_overlaps(box_a, box):
@@ -419,7 +441,7 @@ def get_cluster_region(frame_shape, min_region, cluster, boxes):
         max_x = max(boxes[b][2], max_x)
         max_y = max(boxes[b][3], max_y)
     return calculate_region(
-        frame_shape, min_x, min_y, max_x, max_y, min_region, multiplier=1.2
+        frame_shape, min_x, min_y, max_x, max_y, min_region, multiplier=1.35
     )
 
 

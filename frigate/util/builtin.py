@@ -3,13 +3,15 @@
 import copy
 import datetime
 import logging
+import multiprocessing as mp
+import queue
 import re
 import shlex
 import urllib.parse
 from collections import Counter
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Tuple
+from typing import Any, Optional, Tuple
 
 import numpy as np
 import pytz
@@ -122,6 +124,9 @@ def clean_camera_user_pass(line: str) -> str:
 
 def escape_special_characters(path: str) -> str:
     """Cleans reserved characters to encodings for ffmpeg."""
+    if len(path) > 1000:
+        return ValueError("Input too long to check")
+
     try:
         found = re.search(REGEX_RTSP_CAMERA_USER_PASS, path).group(0)[3:-1]
         pw = found[(found.index(":") + 1) :]
@@ -136,7 +141,7 @@ def get_ffmpeg_arg_list(arg: Any) -> list:
     return arg if isinstance(arg, list) else shlex.split(arg)
 
 
-def load_labels(path, encoding="utf-8", prefill=91):
+def load_labels(path: Optional[str], encoding="utf-8", prefill=91):
     """Loads labels from file (with or without index numbers).
     Args:
       path: path to label file.
@@ -144,6 +149,9 @@ def load_labels(path, encoding="utf-8", prefill=91):
     Returns:
       Dictionary mapping indices to labels.
     """
+    if path is None:
+        return {}
+
     with open(path, "r", encoding=encoding) as f:
         labels = {index: "unknown" for index in range(prefill)}
         lines = f.readlines()
@@ -198,17 +206,25 @@ def update_yaml_from_url(file_path, url):
                 key_path.pop(i - 1)
             except ValueError:
                 pass
-        new_value = new_value_list[0]
-        update_yaml_file(file_path, key_path, new_value)
+
+        if len(new_value_list) > 1:
+            update_yaml_file(file_path, key_path, new_value_list)
+        else:
+            value = str(new_value_list[0])
+
+            if value.isnumeric():
+                value = int(value)
+
+            update_yaml_file(file_path, key_path, value)
 
 
 def update_yaml_file(file_path, key_path, new_value):
     yaml = YAML()
+    yaml.indent(mapping=2, sequence=4, offset=2)
     with open(file_path, "r") as f:
         data = yaml.load(f)
 
     data = update_yaml(data, key_path, new_value)
-
     with open(file_path, "w") as f:
         yaml.dump(data, f)
 
@@ -223,7 +239,7 @@ def update_yaml(data, key_path, new_value):
                 temp[key[0]] += [{}] * (key[1] - len(temp[key[0]]) + 1)
             temp = temp[key[0]][key[1]]
         else:
-            if key not in temp:
+            if key not in temp or temp[key] is None:
                 temp[key] = {}
             temp = temp[key]
 
@@ -265,6 +281,37 @@ def find_by_key(dictionary, target_key):
     return None
 
 
+def save_default_config(location: str) -> None:
+    try:
+        with open(location, "w") as f:
+            f.write(
+                """
+mqtt:
+  enabled: False
+
+cameras:
+  name_of_your_camera: # <------ Name the camera
+    enabled: True
+    ffmpeg:
+      inputs:
+        - path: rtsp://10.0.10.10:554/rtsp # <----- The stream you want to use for detection
+          roles:
+            - detect
+    detect:
+      enabled: False # <---- disable detection until you have a working camera feed
+      width: 1280
+      height: 720
+                    """
+            )
+    except PermissionError:
+        logger.error("Unable to write default config to /config")
+        return
+
+    logger.info(
+        "Created default config file, see the getting started docs for configuration https://docs.frigate.video/guides/getting_started"
+    )
+
+
 def get_tomorrow_at_time(hour: int) -> datetime.datetime:
     """Returns the datetime of the following day at 2am."""
     try:
@@ -292,3 +339,49 @@ def clear_and_unlink(file: Path, missing_ok: bool = True) -> None:
         pass
 
     file.unlink(missing_ok=missing_ok)
+
+
+def empty_and_close_queue(q: mp.Queue):
+    while True:
+        try:
+            q.get(block=True, timeout=0.5)
+        except queue.Empty:
+            q.close()
+            q.join_thread()
+            return
+
+
+def generate_color_palette(n):
+    # mimic matplotlib's color scheme
+    base_colors = [
+        (31, 119, 180),  # blue
+        (255, 127, 14),  # orange
+        (44, 160, 44),  # green
+        (214, 39, 40),  # red
+        (148, 103, 189),  # purple
+        (140, 86, 75),  # brown
+        (227, 119, 194),  # pink
+        (127, 127, 127),  # gray
+        (188, 189, 34),  # olive
+        (23, 190, 207),  # cyan
+    ]
+
+    def interpolate(color1, color2, factor):
+        return tuple(int(c1 + (c2 - c1) * factor) for c1, c2 in zip(color1, color2))
+
+    if n <= len(base_colors):
+        return base_colors[:n]
+
+    colors = base_colors.copy()
+    step = 1 / (n - len(base_colors) + 1)
+    extra_colors_needed = n - len(base_colors)
+
+    # interpolate between the base colors to generate more if needed
+    for i in range(extra_colors_needed):
+        index = i % (len(base_colors) - 1)
+        factor = (i + 1) * step
+        color1 = base_colors[index]
+        color2 = base_colors[index + 1]
+        colors.append(interpolate(color1, color2, factor))
+
+    return colors

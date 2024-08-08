@@ -5,9 +5,17 @@ title: Getting started
 
 # Getting Started
 
+:::tip
+
+If you already have an environment with Linux and Docker installed, you can continue to [Installing Frigate](#installing-frigate) below.
+
+If you already have Frigate installed in Docker or as a Home Assistant addon, you can continue to [Configuring Frigate](#configuring-frigate) below.
+
+:::
+
 ## Setting up hardware
 
-This section guides you through setting up a server with Debian Bookworm and Docker. If you already have an environment with Linux and Docker installed, you can continue to [Installing Frigate](#installing-frigate) below.
+This section guides you through setting up a server with Debian Bookworm and Docker.
 
 ### Install Debian 12 (Bookworm)
 
@@ -77,20 +85,19 @@ This section shows how to create a minimal directory structure for a Docker inst
 
 ### Setup directories
 
-Frigate requires a valid config file to start. The following directory structure is the bare minimum to get started. Once Frigate is running, you can use the built-in config editor which supports config validation.
+Frigate will create a config file if one does not exist on the initial startup. The following directory structure is the bare minimum to get started. Once Frigate is running, you can use the built-in config editor which supports config validation.
 
 ```
 .
 ├── docker-compose.yml
 ├── config/
-│   └── config.yml
 └── storage/
 ```
 
 This will create the above structure:
 
 ```bash
-mkdir storage config && touch docker-compose.yml config/config.yml
+mkdir storage config && touch docker-compose.yml
 ```
 
 If you are setting up Frigate on a Linux device via SSH, you can use [nano](https://itsfoss.com/nano-editor-guide/) to edit the following files. If you prefer to edit remote files with a full editor instead of a terminal, I recommend using [Visual Studio Code](https://code.visualstudio.com/) with the [Remote SSH extension](https://code.visualstudio.com/docs/remote/ssh-tutorial).
@@ -117,27 +124,11 @@ services:
         tmpfs:
           size: 1000000000
     ports:
-      - "5000:5000"
+      - "8971:8971"
       - "8554:8554" # RTSP feeds
 ```
 
-`config.yml`
-
-```yaml
-mqtt:
-  enabled: False
-
-cameras:
-  dummy_camera: # <--- this will be changed to your actual camera later
-    enabled: False
-    ffmpeg:
-      inputs:
-        - path: rtsp://127.0.0.1:554/rtsp
-          roles:
-            - detect
-```
-
-Now you should be able to start Frigate by running `docker compose up -d` from within the folder containing `docker-compose.yml`. Frigate should now be accessible at `server_ip:5000` and you can finish the configuration using the built-in configuration editor.
+Now you should be able to start Frigate by running `docker compose up -d` from within the folder containing `docker-compose.yml`. On startup, an admin user and password will be created and outputted in the logs. You can see this by running `docker logs frigate`. Frigate should now be accessible at `https://server_ip:8971` where you can login with the `admin` user and finish the configuration using the built-in configuration editor.
 
 ## Configuring Frigate
 
@@ -165,7 +156,7 @@ cameras:
 
 ### Step 2: Start Frigate
 
-At this point you should be able to start Frigate and see the the video feed in the UI.
+At this point you should be able to start Frigate and see the video feed in the UI.
 
 If you get an error image from the camera, this means ffmpeg was not able to get the video feed from your camera. Check the logs for error messages from ffmpeg. The default ffmpeg arguments are designed to work with H264 RTSP cameras that support TCP connections.
 
@@ -245,7 +236,7 @@ Now that you have optimized your configuration for decoding the video stream, yo
 
 Now that you know where you need to mask, use the "Mask & Zone creator" in the options pane to generate the coordinates needed for your config file. More information about masks can be found [here](../configuration/masks.md).
 
-:::caution
+:::warning
 
 Note that motion masks should not be used to mark out areas where you do not want objects to be detected or to reduce false positives. They do not alter the image sent to object detection, so you can still get events and detections in areas with motion masks. These only prevent motion in these areas from initiating object detection.
 
@@ -274,13 +265,11 @@ cameras:
         - 0,461,3,0,1919,0,1919,843,1699,492,1344,458,1346,336,973,317,869,375,866,432
 ```
 
-### Step 6: Enable recording and/or snapshots
+### Step 6: Enable recordings
 
-In order to see Events in the Frigate UI, either snapshots or record will need to be enabled.
+In order to review activity in the Frigate UI, recordings need to be enabled.
 
-#### Record
-
-To enable recording video, add the `record` role to a stream and enable it in the config. If record is disabled in the config, turning it on via the UI will not have any effect.
+To enable recording video, add the `record` role to a stream and enable it in the config. If record is disabled in the config, it won't be possible to enable it in the UI.
 
 ```yaml
 mqtt: ...
@@ -307,26 +296,6 @@ If you don't have separate streams for detect and record, you would just add the
 
 By default, Frigate will retain video of all events for 10 days. The full set of options for recording can be found [here](../configuration/reference.md).
 
-#### Snapshots
-
-To enable snapshots of your events, just enable it in the config. Snapshots are taken from the detect stream because it is the only stream decoded.
-
-```yaml
-mqtt: ...
-
-detectors: ...
-
-cameras:
-  name_of_your_camera: ...
-    detect: ...
-    record: ...
-    snapshots: # <----- Enable snapshots
-      enabled: True
-    motion: ...
-```
-
-By default, Frigate will retain snapshots of all events for 10 days. The full set of options for snapshots can be found [here](../configuration/reference.md).
-
 ### Step 7: Complete config
 
 At this point you have a complete config with basic functionality. You can see the [full config reference](../configuration/reference.md) for a complete list of configuration options.
@@ -336,6 +305,8 @@ At this point you have a complete config with basic functionality. You can see t
 Now that you have a working install, you can use the following documentation for additional features:
 
 1. [Configuring go2rtc](configuring_go2rtc.md) - Additional live view options and RTSP relay
-2. [Home Assistant Integration](../integrations/home-assistant.md) - Integrate with Home Assistant
-3. [Masks](../configuration/masks.md)
-4. [Zones](../configuration/zones.md)
+2. [Zones](../configuration/zones.md)
+3. [Review](../configuration/review.md)
+4. [Masks](../configuration/masks.md)
+5. [Home Assistant Integration](../integrations/home-assistant.md) - Integrate with Home Assistant
+

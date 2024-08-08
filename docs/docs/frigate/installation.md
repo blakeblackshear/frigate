@@ -5,6 +5,12 @@ title: Installation
 
 Frigate is a Docker container that can be run on any Docker host including as a [HassOS Addon](https://www.home-assistant.io/addons/). Note that a Home Assistant Addon is **not** the same thing as the integration. The [integration](/integrations/home-assistant) is required to integrate Frigate into Home Assistant.
 
+:::tip
+
+If you already have Frigate installed as a Home Assistant addon, check out the [getting started guide](../guides/getting_started#configuring-frigate) to configure Frigate.
+
+:::
+
 ## Dependencies
 
 **MQTT broker (optional)** - An MQTT broker is optional with Frigate, but is required for the Home Assistant integration. If using Home Assistant, Frigate and Home Assistant must be connected to the same MQTT broker.
@@ -28,18 +34,22 @@ Frigate uses the following locations for read/write operations in the container.
 - `/tmp/cache`: Cache location for recording segments. Initial recordings are written here before being checked and converted to mp4 and moved to the recordings folder. Segments generated via the `clip.mp4` endpoints are also concatenated and processed here. It is recommended to use a [`tmpfs`](https://docs.docker.com/storage/tmpfs/) mount for this.
 - `/dev/shm`: Internal cache for raw decoded frames in shared memory. It is not recommended to modify this directory or map it with docker. The minimum size is impacted by the `shm-size` calculations below.
 
-:::warning
+### Ports
 
-For Frigate to start, it requires a valid configuration file inside the `/config/` directory mentioned above. There is a step by step guide to creating a minimal configuration in the [getting started guide](https://docs.frigate.video/guides/getting_started#configuring-frigate).
+The following ports are used by Frigate and can be mapped via docker as required.
 
-:::
+| Port   | Description                                                                                                                                                                |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `8971` | Authenticated UI and API access without TLS. Reverse proxies should use this port.                                                                                         |
+| `5000` | Internal unauthenticated UI and API access. Access to this port should be limited. Intended to be used within the docker network for services that integrate with Frigate. |
+| `8554` | RTSP restreaming. By default, these streams are unauthenticated. Authentication can be configured in go2rtc section of config.                                             |
+| `8555` | WebRTC connections for low latency live views.                                                                                                                             |
 
 #### Common docker compose storage configurations
 
 Writing to a local disk or external USB drive:
 
 ```yaml
-version: "3.9"
 services:
   frigate:
     ...
@@ -53,9 +63,9 @@ services:
     ...
 ```
 
-:::caution
+:::warning
 
-Users of the Snapcraft build of Docker cannot use storage locations outside your $HOME folder. 
+Users of the Snapcraft build of Docker cannot use storage locations outside your $HOME folder.
 
 :::
 
@@ -90,6 +100,56 @@ By default, the Raspberry Pi limits the amount of memory available to the GPU. I
 
 Additionally, the USB Coral draws a considerable amount of power. If using any other USB devices such as an SSD, you will experience instability due to the Pi not providing enough power to USB devices. You will need to purchase an external USB hub with it's own power supply. Some have reported success with <a href="https://amzn.to/3a2mH0P" target="_blank" rel="nofollow noopener sponsored">this</a> (affiliate link).
 
+### Rockchip platform
+
+Make sure that you use a linux distribution that comes with the rockchip BSP kernel 5.10 or 6.1 and necessary drivers (especially rkvdec2 and rknpu). To check, enter the following commands:
+
+```
+$ uname -r
+5.10.xxx-rockchip # or 6.1.xxx; the -rockchip suffix is important
+$ ls /dev/dri
+by-path  card0  card1  renderD128  renderD129 # should list renderD128 (VPU) and renderD129 (NPU)
+$ sudo cat /sys/kernel/debug/rknpu/version
+RKNPU driver: v0.9.2 # or later version
+```
+
+I recommend [Joshua Riek's Ubuntu for Rockchip](https://github.com/Joshua-Riek/ubuntu-rockchip), if your board is supported.
+
+#### Setup
+
+Follow Frigate's default installation instructions, but use a docker image with `-rk` suffix for example `ghcr.io/blakeblackshear/frigate:stable-rk`.
+
+Next, you need to grant docker permissions to access your hardware:
+
+- During the configuration process, you should run docker in privileged mode to avoid any errors due to insufficient permissions. To do so, add `privileged: true` to your `docker-compose.yml` file or the `--privileged` flag to your docker run command.
+- After everything works, you should only grant necessary permissions to increase security. Disable the privileged mode and add the lines below to your `docker-compose.yml` file:
+
+```yaml
+security_opt:
+  - apparmor=unconfined
+  - systempaths=unconfined
+devices:
+  - /dev/dri
+  - /dev/dma_heap
+  - /dev/rga
+  - /dev/mpp_service
+```
+
+or add these options to your `docker run` command:
+
+```
+--security-opt systempaths=unconfined \
+--security-opt apparmor=unconfined \
+--device /dev/dri \
+--device /dev/dma_heap \
+--device /dev/rga \
+--device /dev/mpp_service
+```
+
+#### Configuration
+
+Next, you should configure [hardware object detection](/configuration/object_detectors#rockchip-platform) and [hardware video processing](/configuration/hardware_acceleration#rockchip-platform).
+
 ## Docker
 
 Running in Docker with compose is the recommended install method.
@@ -104,9 +164,9 @@ services:
     image: ghcr.io/blakeblackshear/frigate:stable
     shm_size: "64mb" # update for your cameras based on calculation above
     devices:
-      - /dev/bus/usb:/dev/bus/usb  # Passes the USB Coral, needs to be modified for other versions
-      - /dev/apex_0:/dev/apex_0    # Passes a PCIe Coral, follow driver instructions here https://coral.ai/docs/m2/get-started/#2a-on-linux
-      - /dev/video11:/dev/video11  # For Raspberry Pi 4B
+      - /dev/bus/usb:/dev/bus/usb # Passes the USB Coral, needs to be modified for other versions
+      - /dev/apex_0:/dev/apex_0 # Passes a PCIe Coral, follow driver instructions here https://coral.ai/docs/m2/get-started/#2a-on-linux
+      - /dev/video11:/dev/video11 # For Raspberry Pi 4B
       - /dev/dri/renderD128:/dev/dri/renderD128 # For intel hwaccel, needs to be updated for your hardware
     volumes:
       - /etc/localtime:/etc/localtime:ro
@@ -117,7 +177,8 @@ services:
         tmpfs:
           size: 1000000000
     ports:
-      - "5000:5000"
+      - "8971:8971"
+      # - "5000:5000" # Internal unauthenticated access. Expose carefully.
       - "8554:8554" # RTSP feeds
       - "8555:8555/tcp" # WebRTC over tcp
       - "8555:8555/udp" # WebRTC over udp
@@ -139,7 +200,7 @@ docker run -d \
   -v /path/to/your/config:/config \
   -v /etc/localtime:/etc/localtime:ro \
   -e FRIGATE_RTSP_PASSWORD='password' \
-  -p 5000:5000 \
+  -p 8971:8971 \
   -p 8554:8554 \
   -p 8555:8555/tcp \
   -p 8555:8555/udp \
@@ -157,10 +218,14 @@ The community supported docker image tags for the current stable version are:
 - `stable-tensorrt-jp5` - Frigate build optimized for nvidia Jetson devices running Jetpack 5
 - `stable-tensorrt-jp4` - Frigate build optimized for nvidia Jetson devices running Jetpack 4.6
 - `stable-rk` - Frigate build for SBCs with Rockchip SoC
+- `stable-rocm` - Frigate build for [AMD GPUs and iGPUs](../configuration/object_detectors.md#amdrocm-gpu-detector), all drivers
+  - `stable-rocm-gfx900` - AMD gfx900 driver only
+  - `stable-rocm-gfx1030` - AMD gfx1030 driver only
+  - `stable-rocm-gfx1100` - AMD gfx1100 driver only
 
 ## Home Assistant Addon
 
-:::caution
+:::warning
 
 As of HomeAssistant OS 10.2 and Core 2023.6 defining separate network storage for media is supported.
 
@@ -223,7 +288,7 @@ See the [Proxmox LXC discussion](https://github.com/blakeblackshear/frigate/disc
 
 For details on running Frigate using ESXi, please see the instructions [here](https://williamlam.com/2023/05/frigate-nvr-with-coral-tpu-igpu-passthrough-using-esxi-on-intel-nuc.html).
 
-If you're running Frigate on a rack mounted server and want to passthough the Google Coral, [read this.](https://github.com/blakeblackshear/frigate/issues/305)
+If you're running Frigate on a rack mounted server and want to passthrough the Google Coral, [read this.](https://github.com/blakeblackshear/frigate/issues/305)
 
 ## Synology NAS on DSM 7
 
@@ -293,8 +358,8 @@ mkdir -p /share/Container/frigate/config
 # Copy the config file prepared in step 2 into the newly created config directory.
 cp path/to/your/config/file /share/Container/frigate/config
 # Create directory to host Frigate media files on QNAP file system.
-# (if you have a surveilliance disk, create media directory on the surveilliance disk.
-# Example command assumes share_vol2 is the surveilliance drive
+# (if you have a surveillance disk, create media directory on the surveillance disk.
+# Example command assumes share_vol2 is the surveillance drive
 mkdir -p /share/share_vol2/frigate/media
 # Create Frigate docker container.  Replace shm-size value with the value from preparation step 3.
 # Also replace the time zone value for 'TZ' in the sample command.
@@ -311,8 +376,7 @@ docker run \
   --network=bridge \
   --privileged \
   --workdir=/opt/frigate \
-  -p 1935:1935 \
-  -p 5000:5000 \
+  -p 8971:8971 \
   -p 8554:8554 \
   -p 8555:8555 \
   -p 8555:8555/udp \

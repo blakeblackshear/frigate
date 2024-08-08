@@ -2,6 +2,7 @@
 
 import datetime
 import logging
+import subprocess as sp
 from abc import ABC, abstractmethod
 from multiprocessing import shared_memory
 from string import printable
@@ -211,6 +212,54 @@ def calculate_region(frame_shape, xmin, ymin, xmax, ymax, model_size, multiplier
     return (x_offset, y_offset, x_offset + size, y_offset + size)
 
 
+def calculate_16_9_crop(frame_shape, xmin, ymin, xmax, ymax, multiplier=1.25):
+    min_size = 200
+
+    # size is the longest edge and divisible by 4
+    x_size = int((xmax - xmin) * multiplier)
+
+    if x_size < min_size:
+        x_size = min_size
+
+    y_size = int((ymax - ymin) * multiplier)
+
+    if y_size < min_size:
+        y_size = min_size
+
+    if frame_shape[1] / frame_shape[0] > 16 / 9 and x_size / y_size > 4:
+        return None
+
+    # calculate 16x9 using height
+    aspect_y_size = int(9 / 16 * x_size)
+
+    # if 16:9 by height is too small
+    if aspect_y_size < y_size or aspect_y_size > frame_shape[0]:
+        x_size = int((16 / 9) * y_size) // 4 * 4
+
+        if x_size / y_size > 1.8:
+            return None
+    else:
+        y_size = aspect_y_size // 4 * 4
+
+    # x_offset is midpoint of bounding box minus half the size
+    x_offset = int((xmax - xmin) / 2.0 + xmin - x_size / 2.0)
+    # if outside the image
+    if x_offset < 0:
+        x_offset = 0
+    elif x_offset > (frame_shape[1] - x_size):
+        x_offset = max(0, (frame_shape[1] - x_size))
+
+    # y_offset is midpoint of bounding box minus half the size
+    y_offset = int((ymax - ymin) / 2.0 + ymin - y_size / 2.0)
+    # # if outside the image
+    if y_offset < 0:
+        y_offset = 0
+    elif y_offset > (frame_shape[0] - y_size):
+        y_offset = max(0, (frame_shape[0] - y_size))
+
+    return (x_offset, y_offset, x_offset + x_size, y_offset + y_size)
+
+
 def get_yuv_crop(frame_shape, crop):
     # crop should be (x1,y1,x2,y2)
     frame_height = frame_shape[0] // 3 * 2
@@ -347,7 +396,7 @@ def yuv_to_3_channel_yuv(yuv_frame):
     # flatten the image into array
     yuv_data = yuv_frame.ravel()
 
-    # create a numpy array to hold all the 3 chanel yuv data
+    # create a numpy array to hold all the 3 channel yuv data
     all_yuv_data = np.empty((height, width, 3), dtype=np.uint8)
 
     y_count = height * width
@@ -387,6 +436,7 @@ def copy_yuv_to_position(
     destination_shape,
     source_frame=None,
     source_channel_dim=None,
+    interpolation=cv2.INTER_LINEAR,
 ):
     # get the coordinates of the channels for this position in the layout
     y, u1, u2, v1, v2 = get_yuv_crop(
@@ -435,7 +485,6 @@ def copy_yuv_to_position(
         uv_y_offset = y_y_offset // 4
         uv_x_offset = y_x_offset // 2
 
-        interpolation = cv2.INTER_LINEAR
         # resize/copy y channel
         destination_frame[
             y[1] + y_y_offset : y[1] + y_y_offset + y_resize_height,
@@ -575,7 +624,7 @@ def intersection_over_union(box_a, box_b):
 
     # compute the intersection over union by taking the intersection
     # area and dividing it by the sum of prediction + ground-truth
-    # areas - the interesection area
+    # areas - the intersection area
     iou = inter_area / float(box_a_area + box_b_area - inter_area)
 
     # return the intersection over union value
@@ -679,9 +728,56 @@ def create_mask(frame_shape, mask):
     return mask_img
 
 
-def add_mask(mask, mask_img):
+def add_mask(mask: str, mask_img: np.ndarray):
     points = mask.split(",")
+
+    # masks and zones are saved as relative coordinates
+    # we know if any points are > 1 then it is using the
+    # old native resolution coordinates
+    if any(x > "1.0" for x in points):
+        raise Exception("add mask expects relative coordinates only")
+
     contour = np.array(
-        [[int(points[i]), int(points[i + 1])] for i in range(0, len(points), 2)]
+        [
+            [
+                int(float(points[i]) * mask_img.shape[1]),
+                int(float(points[i + 1]) * mask_img.shape[0]),
+            ]
+            for i in range(0, len(points), 2)
+        ]
     )
     cv2.fillPoly(mask_img, pts=[contour], color=(0))
+
+
+def get_image_from_recording(
+    file_path: str, relative_frame_time: float
+) -> Optional[any]:
+    """retrieve a frame from given time in recording file."""
+
+    ffmpeg_cmd = [
+        "ffmpeg",
+        "-hide_banner",
+        "-loglevel",
+        "warning",
+        "-ss",
+        f"00:00:{relative_frame_time}",
+        "-i",
+        file_path,
+        "-frames:v",
+        "1",
+        "-c:v",
+        "png",
+        "-f",
+        "image2pipe",
+        "-",
+    ]
+
+    process = sp.run(
+        ffmpeg_cmd,
+        capture_output=True,
+    )
+
+    if process.returncode == 0:
+        return process.stdout
+    else:
+        return None

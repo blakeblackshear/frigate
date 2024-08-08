@@ -16,22 +16,32 @@ jobs:
         with:
           string: ${{ github.repository }}
       - name: Log in to the Container registry
-        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d
+        uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Create tag variables
         run: |
-          BRANCH=$([[ "${{ github.ref_name }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] && echo "master" || echo "dev")
+          BRANCH=dev
+          echo "BRANCH=${BRANCH}" >> $GITHUB_ENV
           echo "BASE=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}" >> $GITHUB_ENV
           echo "BUILD_TAG=${BRANCH}-${GITHUB_SHA::7}" >> $GITHUB_ENV
           echo "CLEAN_VERSION=$(echo ${GITHUB_REF##*/} | tr '[:upper:]' '[:lower:]' | sed 's/^[v]//')" >> $GITHUB_ENV
       - name: Tag and push the main image
         run: |
           VERSION_TAG=${BASE}:${CLEAN_VERSION}
+          STABLE_TAG=${BASE}:stable
           PULL_TAG=${BASE}:${BUILD_TAG}
           docker run --rm -v $HOME/.docker/config.json:/config.json quay.io/skopeo/stable:latest copy --authfile /config.json --multi-arch all docker://${PULL_TAG} docker://${VERSION_TAG}
           for variant in standard-arm64 tensorrt tensorrt-jp4 tensorrt-jp5 rk; do
             docker run --rm -v $HOME/.docker/config.json:/config.json quay.io/skopeo/stable:latest copy --authfile /config.json --multi-arch all docker://${PULL_TAG}-${variant} docker://${VERSION_TAG}-${variant}
           done
+
+          # stable tag
+          if [[ "${BRANCH}" == "master" ]]; then
+            docker run --rm -v $HOME/.docker/config.json:/config.json quay.io/skopeo/stable:latest copy --authfile /config.json --multi-arch all docker://${PULL_TAG} docker://${STABLE_TAG}
+            for variant in standard-arm64 tensorrt tensorrt-jp4 tensorrt-jp5 rk; do
+              docker run --rm -v $HOME/.docker/config.json:/config.json quay.io/skopeo/stable:latest copy --authfile /config.json --multi-arch all docker://${PULL_TAG}-${variant} docker://${STABLE_TAG}-${variant}
+            done
+          fi

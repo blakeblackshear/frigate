@@ -3,17 +3,19 @@ id: live
 title: Live View
 ---
 
-Frigate has different live view options, some of which require the bundled `go2rtc` to be configured as shown in the [step by step guide](/guides/configuring_go2rtc).
+Frigate intelligently displays your camera streams on the Live view dashboard. Your camera images update once per minute when no detectable activity is occurring to conserve bandwidth and resources. As soon as any motion is detected, cameras seamlessly switch to a live stream.
 
-## Live View Options
+## Live View technologies
 
-Live view options can be selected while viewing the live stream. The options are:
+Frigate intelligently uses three different streaming technologies to display your camera streams on the dashboard and the single camera view, switching between available modes based on network bandwidth, player errors, or required features like two-way talk. The highest quality and fluency of the Live view requires the bundled `go2rtc` to be configured as shown in the [step by step guide](/guides/configuring_go2rtc).
 
-| Source | Latency | Frame Rate                            | Resolution     | Audio                        | Requires go2rtc | Other Limitations                                |
-| ------ | ------- | ------------------------------------- | -------------- | ---------------------------- | --------------- | ------------------------------------------------ |
-| jsmpeg | low     | same as `detect -> fps`, capped at 10 | same as detect | no                           | no              | none                                             |
-| mse    | low     | native                                | native         | yes (depends on audio codec) | yes             | iPhone requires iOS 17.1+, Firefox is h.264 only |
-| webrtc | lowest  | native                                | native         | yes (depends on audio codec) | yes             | requires extra config, doesn't support h.265     |
+The jsmpeg live view will use more browser and client GPU resources. Using go2rtc is highly recommended and will provide a superior experience.
+
+| Source | Latency | Frame Rate                            | Resolution | Audio                        | Requires go2rtc | Other Limitations                                                                    |
+| ------ | ------- | ------------------------------------- | ---------- | ---------------------------- | --------------- | ------------------------------------------------------------------------------------ |
+| jsmpeg | low     | same as `detect -> fps`, capped at 10 | 720p       | no                           | no              | resolution is configurable, but go2rtc is recommended if you want higher resolutions |
+| mse    | low     | native                                | native     | yes (depends on audio codec) | yes             | iPhone requires iOS 17.1+, Firefox is h.264 only                                     |
+| webrtc | lowest  | native                                | native     | yes (depends on audio codec) | yes             | requires extra config, doesn't support h.265                                         |
 
 ### Audio Support
 
@@ -79,7 +81,7 @@ WebRTC works by creating a TCP or UDP connection on port `8555`. However, it req
         - stun:8555
   ```
 
-- For access through Tailscale, the Frigate system's Tailscale IP must be added as a WebRTC candidate. Tailscale IPs all start with `100.`, and are reserved within the `100.0.0.0/8` CIDR block.
+- For access through Tailscale, the Frigate system's Tailscale IP must be added as a WebRTC candidate. Tailscale IPs all start with `100.`, and are reserved within the `100.64.0.0/10` CIDR block.
 
 :::tip
 

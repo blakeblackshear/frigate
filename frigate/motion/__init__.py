@@ -24,3 +24,7 @@ class MotionDetector(ABC):
     @abstractmethod
     def is_calibrating(self):
         pass
+
+    @abstractmethod
+    def stop(self):
+        pass

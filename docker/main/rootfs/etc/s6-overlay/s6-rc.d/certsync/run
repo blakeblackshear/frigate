@@ -1,0 +1,58 @@
+#!/command/with-contenv bash
+# shellcheck shell=bash
+# Start the CERTSYNC service
+
+set -o errexit -o nounset -o pipefail
+
+# Logs should be sent to stdout so that s6 can collect them
+
+echo "[INFO] Starting certsync..."
+
+lefile="/etc/letsencrypt/live/frigate/fullchain.pem"
+
+tls_enabled=`python3 /usr/local/nginx/get_tls_settings.py | jq -r .enabled`
+
+while true
+do
+    if [[ "$tls_enabled" == 'false' ]]; then
+        sleep 9999
+        continue
+    fi
+
+    if [ ! -e $lefile ]
+    then
+        echo "[ERROR] TLS certificate does not exist: $lefile"
+    fi
+
+    leprint=`openssl x509 -in $lefile -fingerprint -noout 2>&1 || echo 'failed'`
+
+    case "$leprint" in
+        *Fingerprint*)
+            ;;
+        *)
+            echo "[ERROR] Missing fingerprint from $lefile"
+            ;;
+    esac
+
+    liveprint=`echo | openssl s_client -showcerts -connect 127.0.0.1:8971 2>&1 | openssl x509 -fingerprint 2>&1 | grep -i fingerprint  || echo 'failed'`
+
+    case "$liveprint" in
+        *Fingerprint*)
+            ;;
+        *)
+            echo "[ERROR] Missing fingerprint from current nginx TLS cert"
+            ;;
+    esac
+
+    if [[ "$leprint" != "failed" && "$liveprint" != "failed" && "$leprint" != "$liveprint" ]]
+    then
+        echo "[INFO] Reloading nginx to refresh TLS certificate"
+        echo "$lefile: $leprint"
+        /usr/local/nginx/sbin/nginx -s reload
+    fi
+
+    sleep 60
+
+done
+
+exit 0

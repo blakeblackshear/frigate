@@ -80,6 +80,14 @@ model:
   input_pixel_format: "bgr"
 ```
 
+#### `labelmap`
+
+:::warning
+
+If the labelmap is customized then the labels used for alerts will need to be adjusted as well. See [alert labels](../configuration/review.md#restricting-alerts-to-specific-labels) for more info.
+
+:::
+
 The labelmap can be customized to your needs. A common reason to do this is to combine multiple object types that are easily confused when you don't need to be as granular such as car/truck. By default, truck is renamed to car because they are often confused. You cannot add new object types, but you can change the names of existing objects in the model.
 
 ```yaml
@@ -96,7 +104,7 @@ model:
 
 Note that if you rename objects in the labelmap, you will also need to update your `objects -> track` list as well.
 
-:::caution
+:::warning
 
 Some labels have special handling and modifications can disable functionality.
 
@@ -106,7 +114,53 @@ Some labels have special handling and modifications can disable functionality.
 
 :::
 
-## Custom ffmpeg build
+## Network Configuration
+
+Changes to Frigate's internal network configuration can be made by bind mounting nginx.conf into the container. For example:
+
+```yaml
+services:
+  frigate:
+    container_name: frigate
+    ...
+    volumes:
+      ...
+      - /path/to/your/nginx.conf:/usr/local/nginx/conf/nginx.conf
+```
+
+### Enabling IPv6
+
+IPv6 is disabled by default, to enable IPv6 listen.gotmpl needs to be bind mounted with IPv6 enabled. For example:
+
+```
+{{ if not .enabled }}
+# intended for external traffic, protected by auth
+listen 8971;
+{{ else }}
+# intended for external traffic, protected by auth
+listen 8971 ssl;
+
+# intended for internal traffic, not protected by auth
+listen 5000;
+```
+
+becomes
+
+```
+{{ if not .enabled }}
+# intended for external traffic, protected by auth
+listen [::]:8971 ipv6only=off;
+{{ else }}
+# intended for external traffic, protected by auth
+listen [::]:8971 ipv6only=off ssl;
+
+# intended for internal traffic, not protected by auth
+listen [::]:5000 ipv6only=off;
+```
+
+## Custom Dependencies
+
+### Custom ffmpeg build
 
 Included with Frigate is a build of ffmpeg that works for the vast majority of users. However, there exists some hardware setups which have incompatibilities with the included build. In this case, a docker volume mapping can be used to overwrite the included ffmpeg build with an ffmpeg build that works for your specific hardware setup.
 
@@ -118,9 +172,9 @@ To do this:
 
 NOTE: The folder that is mapped from the host needs to be the folder that contains `/bin`. So if the full structure is `/home/appdata/frigate/custom-ffmpeg/bin/ffmpeg` then `/home/appdata/frigate/custom-ffmpeg` needs to be mapped to `/usr/lib/btbn-ffmpeg`.
 
-## Custom go2rtc version
+### Custom go2rtc version
 
-Frigate currently includes go2rtc v1.8.4, there may be certain cases where you want to run a different version of go2rtc.
+Frigate currently includes go2rtc v1.9.4, there may be certain cases where you want to run a different version of go2rtc.
 
 To do this:
 
