@@ -148,16 +148,24 @@ export default function VideoControls({
 
       switch (key) {
         case "ArrowDown":
-          onSeek(-1);
+          if (modifiers.ctrl) {
+            onSeek(-0.1);
+          } else {
+            onSeek(-1);
+          }
           break;
         case "ArrowLeft":
           onSeek(-10);
           break;
+        case "ArrowUp":
+          if (modifiers.ctrl) {
+            onSeek(1 / 30);
+          } else {
+            onSeek(1);
+          }
+          break;
         case "ArrowRight":
           onSeek(10);
-          break;
-        case "ArrowUp":
-          onSeek(1);
           break;
         case "f":
           if (toggleFullscreen && !modifiers.repeat) {
