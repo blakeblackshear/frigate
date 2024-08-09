@@ -118,6 +118,7 @@ def run_detector(
         )
 
         if input_frame is None:
+            logger.warning(f"Failed to get frame {connection_id} from SHM")
             continue
 
         # detect and send the output
