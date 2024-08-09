@@ -214,8 +214,7 @@ def parse_preset_hardware_acceleration_encode(
 
 
 PRESETS_INPUT = {
-    "preset-http-jpeg-generic": _user_agent_args
-    + [
+    "preset-http-jpeg-generic": [
         "-r",
         "{}",
         "-stream_loop",
