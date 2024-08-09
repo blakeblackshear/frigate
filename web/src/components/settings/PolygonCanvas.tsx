@@ -114,6 +114,29 @@ export function PolygonCanvas({
     const mousePos = stage.getPointerPosition() ?? { x: 0, y: 0 };
     const intersection = stage.getIntersection(mousePos);
 
+    // right click on desktops to delete a point
+    if (
+      e.evt instanceof MouseEvent &&
+      e.evt.button === 2 &&
+      intersection?.getClassName() == "Circle"
+    ) {
+      const pointIndex = parseInt(intersection.name()?.split("-")[1]);
+      if (!isNaN(pointIndex)) {
+        const updatedPoints = activePolygon.points.filter(
+          (_, index) => index !== pointIndex,
+        );
+        updatedPolygons[activePolygonIndex] = {
+          ...activePolygon,
+          points: updatedPoints,
+          pointsOrder: activePolygon.pointsOrder?.filter(
+            (_, index) => index !== pointIndex,
+          ),
+        };
+        setPolygons(updatedPolygons);
+      }
+      return;
+    }
+
     if (
       activePolygon.points.length >= 3 &&
       intersection?.getClassName() == "Circle" &&
@@ -236,6 +259,9 @@ export function PolygonCanvas({
       onMouseDown={handleMouseDown}
       onTouchStart={handleMouseDown}
       onMouseOver={handleStageMouseOver}
+      onContextMenu={(e) => {
+        e.evt.preventDefault();
+      }}
     >
       <Layer>
         <Image
