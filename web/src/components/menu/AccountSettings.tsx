@@ -3,6 +3,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { baseUrl } from "../../api/baseUrl";
 import { cn } from "@/lib/utils";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { isDesktop } from "react-device-detect";
@@ -26,7 +27,7 @@ type AccountSettingsProps = {
 export default function AccountSettings({ className }: AccountSettingsProps) {
   const { data: profile } = useSWR("profile");
   const { data: config } = useSWR("config");
-  const logoutUrl = config?.proxy?.logout_url || "/api/logout";
+  const logoutUrl = config?.proxy?.logout_url || `${baseUrl}api/logout`;
 
   const Container = isDesktop ? DropdownMenu : Drawer;
   const Trigger = isDesktop ? DropdownMenuTrigger : DrawerTrigger;
