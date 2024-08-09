@@ -90,7 +90,7 @@ def migrate_014(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
     # Remove UI fields
     if new_config.get("ui"):
         if new_config["ui"].get("use_experimental"):
-            del new_config["ui"]["experimental"]
+            del new_config["ui"]["use_experimental"]
 
         if new_config["ui"].get("live_mode"):
             del new_config["ui"]["live_mode"]
