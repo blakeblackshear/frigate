@@ -18,6 +18,7 @@ import {
   SelectItem,
   SelectTrigger,
 } from "../../components/ui/select";
+import { LiveViewMode, LiveViewModes } from "@/types/live.ts";
 
 const PLAYBACK_RATE_DEFAULT = isSafari ? [0.5, 1, 2] : [0.5, 1, 2, 4, 8, 16];
 const WEEK_STARTS_ON = ["Sunday", "Monday"];
@@ -52,7 +53,10 @@ export default function GeneralSettingsView() {
 
   // settings
 
-  const [autoLive, setAutoLive] = usePersistence("autoLiveView", true);
+  const [liveViewMode, setLiveViewMode] = usePersistence<LiveViewMode>(
+    "liveViewMode",
+    "auto",
+  );
   const [playbackRate, setPlaybackRate] = usePersistence("playbackRate", 1);
   const [weekStartsOn, setWeekStartsOn] = usePersistence("weekStartsOn", 0);
   const [alertVideos, setAlertVideos] = usePersistence("alertVideos", true);
@@ -73,25 +77,47 @@ export default function GeneralSettingsView() {
           </Heading>
 
           <div className="mt-2 space-y-6">
-            <div className="space-y-3">
-              <div className="flex flex-row items-center justify-start gap-2">
-                <Switch
-                  id="auto-live"
-                  checked={autoLive}
-                  onCheckedChange={setAutoLive}
-                />
-                <Label className="cursor-pointer" htmlFor="auto-live">
-                  Automatic Live View
-                </Label>
-              </div>
-              <div className="my-2 text-sm text-muted-foreground">
-                <p>
-                  Automatically switch to a camera's live view when activity is
-                  detected. Disabling this option causes static camera images on
-                  the Live dashboard to only update once per minute.
-                </p>
-              </div>
+            <div className="text-md">Live View Mode</div>
+            <div className="my-2 text-sm text-muted-foreground">
+              <p>
+                Live stream behavior:
+                <br />
+                Auto mode (default) will begin streaming when activity is
+                detected.
+                <br />
+                Static mode will update camera images on the live dashboard once
+                per minute.
+                <br />
+                Continuous mode will stream cameras regardless of activity.
+                Caution: Continuous mode will increase bandwidth usage and may
+                affect performance.
+              </p>
             </div>
+            <Select
+              value={liveViewMode}
+              onValueChange={(value: LiveViewMode) => setLiveViewMode(value)}
+            >
+              <SelectTrigger
+                className="w-100"
+                style={{ textTransform: "capitalize" }}
+              >
+                {liveViewMode}
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {LiveViewModes.map((mode) => (
+                    <SelectItem
+                      key={mode}
+                      className="cursor-pointer"
+                      value={mode}
+                      style={{ textTransform: "capitalize" }}
+                    >
+                      {mode}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
             <div className="space-y-3">
               <div className="flex flex-row items-center justify-start gap-2">
                 <Switch

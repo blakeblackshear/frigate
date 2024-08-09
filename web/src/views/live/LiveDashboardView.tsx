@@ -28,7 +28,7 @@ import DraggableGridLayout from "./DraggableGridLayout";
 import { IoClose } from "react-icons/io5";
 import { LuLayoutDashboard } from "react-icons/lu";
 import { cn } from "@/lib/utils";
-import { LivePlayerError, LivePlayerMode } from "@/types/live";
+import { LivePlayerError, LivePlayerMode, LiveViewMode } from "@/types/live";
 import { FaCompress, FaExpand } from "react-icons/fa";
 import { useResizeObserver } from "@/hooks/resize-observer";
 
@@ -128,7 +128,7 @@ export default function LiveDashboardView({
 
   // camera live views
 
-  const [autoLiveView] = usePersistence("autoLiveView", true);
+  const [liveViewMode] = usePersistence<LiveViewMode>("liveViewMode", "auto");
   const [preferredLiveModes, setPreferredLiveModes] = useState<{
     [key: string]: LivePlayerMode;
   }>({});
@@ -378,7 +378,8 @@ export default function LiveDashboardView({
                   }
                   cameraConfig={camera}
                   preferredLiveMode={preferredLiveModes[camera.name] ?? "mse"}
-                  autoLive={autoLiveView}
+                  autoLive={liveViewMode != "static"}
+                  showStillWithoutActivity={liveViewMode != "continuous"}
                   onClick={() => onSelectCamera(camera.name)}
                   onError={(e) => handleError(camera.name, e)}
                 />
