@@ -111,16 +111,21 @@ export function AnimatedEventCard({
           onMouseLeave={isDesktop ? () => setIsHovered(false) : undefined}
         >
           {isHovered && (
-            <Button
-              className="absolute right-2 top-1 z-40 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
-              size="xs"
-              onClick={async () => {
-                await axios.post(`reviews/viewed`, { ids: [event.id] });
-                updateEvents();
-              }}
-            >
-              <FaCircleCheck className="size-3 text-white" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  className="absolute right-2 top-1 z-40 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
+                  size="xs"
+                  onClick={async () => {
+                    await axios.post(`reviews/viewed`, { ids: [event.id] });
+                    updateEvents();
+                  }}
+                >
+                  <FaCircleCheck className="size-3 text-white" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Mark as Reviewed</TooltipContent>
+            </Tooltip>
           )}
           <div
             className="size-full cursor-pointer overflow-hidden rounded md:rounded-lg"
