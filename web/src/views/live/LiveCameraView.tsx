@@ -78,6 +78,7 @@ import { useNavigate } from "react-router-dom";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import useSWR from "swr";
 import { cn } from "@/lib/utils";
+import { useSessionPersistence } from "@/hooks/use-session-persistence";
 
 type LiveCameraViewProps = {
   config?: FrigateConfig;
@@ -194,7 +195,7 @@ export default function LiveCameraView({
 
   // playback state
 
-  const [audio, setAudio] = useState(false);
+  const [audio, setAudio] = useSessionPersistence("liveAudio", false);
   const [mic, setMic] = useState(false);
   const [webRTC, setWebRTC] = useState(false);
   const [pip, setPip] = useState(false);
@@ -404,7 +405,7 @@ export default function LiveCameraView({
                   className="p-2 md:p-0"
                   variant={fullscreen ? "overlay" : "primary"}
                   Icon={audio ? GiSpeaker : GiSpeakerOff}
-                  isActive={audio}
+                  isActive={audio ?? false}
                   title={`${audio ? "Disable" : "Enable"} Camera Audio`}
                   onClick={() => setAudio(!audio)}
                 />
