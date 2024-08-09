@@ -80,7 +80,7 @@ export default function PolygonEditControls({
             <MdUndo className="text-secondary-foreground" />
           </Button>
         </TooltipTrigger>
-        <TooltipContent>Undo</TooltipContent>
+        <TooltipContent>Remove last point</TooltipContent>
       </Tooltip>
       <Tooltip>
         <TooltipTrigger asChild>
