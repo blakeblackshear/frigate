@@ -315,6 +315,7 @@ export default function LiveDashboardView({
                     key={event.id}
                     event={event}
                     selectedGroup={cameraGroup}
+                    updateEvents={updateEvents}
                   />
                 );
               })}
