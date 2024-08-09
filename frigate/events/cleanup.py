@@ -194,9 +194,13 @@ class EventCleanup(threading.Thread):
             events_with_expired_clips = self.expire(EventCleanupType.clips)
 
             # delete timeline entries for events that have expired recordings
-            Timeline.delete().where(
-                Timeline.source_id << events_with_expired_clips
-            ).execute()
+            # delete up to 100,000 at a time
+            max_deletes = 100000
+            deleted_events_list = list(events_with_expired_clips)
+            for i in range(0, len(deleted_events_list), max_deletes):
+                Timeline.delete().where(
+                    Timeline.source_id << deleted_events_list[i : i + max_deletes]
+                ).execute()
 
             self.expire(EventCleanupType.snapshots)
 
