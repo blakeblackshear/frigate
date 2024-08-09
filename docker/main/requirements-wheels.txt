@@ -11,7 +11,7 @@ opencv-python-headless == 4.9.0.*
 paho-mqtt == 2.1.*
 pandas == 2.2.*
 peewee == 3.17.*
-peewee_migrate == 1.12.*
+peewee_migrate == 1.13.*
 psutil == 5.9.*
 pydantic == 2.7.*
 git+https://github.com/fbcotter/py3nvml#egg=py3nvml
