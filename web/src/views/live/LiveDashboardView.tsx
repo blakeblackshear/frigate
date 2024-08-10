@@ -34,7 +34,6 @@ import { useResizeObserver } from "@/hooks/resize-observer";
 import useKeyboardListener, {
   KeyModifiers,
 } from "@/hooks/use-keyboard-listener";
-import { useSearchEffect } from "@/hooks/use-overlay-state";
 
 type LiveDashboardViewProps = {
   cameras: CameraConfig[];
@@ -267,15 +266,6 @@ export default function LiveDashboardView({
   );
 
   useKeyboardListener(["f"], onKeyboardShortcut);
-  const handleFullScreenQuery = useCallback(
-    () => {
-      if (!fullscreen) {
-        toggleFullscreen();
-      }
-    },
-    [fullscreen, toggleFullscreen],
-  );
-  useSearchEffect("fullscreen", handleFullScreenQuery);
 
   return (
     <div
