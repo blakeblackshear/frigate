@@ -268,9 +268,9 @@ export default function LiveDashboardView({
 
   useKeyboardListener(["f"], onKeyboardShortcut);
   const handleFullScreenQuery = useCallback(
-    (value: string) => {
+    () => {
       if (!fullscreen) {
-          toggleFullscreen();
+        toggleFullscreen();
       }
     },
     [fullscreen, toggleFullscreen],
