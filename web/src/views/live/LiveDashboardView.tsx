@@ -34,7 +34,6 @@ import { useResizeObserver } from "@/hooks/resize-observer";
 import useKeyboardListener, {
   KeyModifiers,
 } from "@/hooks/use-keyboard-listener";
-import { useSearchParams } from "react-router-dom";
 import { useSearchEffect } from "@/hooks/use-overlay-state";
 
 type LiveDashboardViewProps = {
