@@ -31,6 +31,11 @@ import { cn } from "@/lib/utils";
 import { LivePlayerError, LivePlayerMode } from "@/types/live";
 import { FaCompress, FaExpand } from "react-icons/fa";
 import { useResizeObserver } from "@/hooks/resize-observer";
+import useKeyboardListener, {
+  KeyModifiers,
+} from "@/hooks/use-keyboard-listener";
+import { useSearchParams } from "react-router-dom";
+import { useSearchEffect } from "@/hooks/use-overlay-state";
 
 type LiveDashboardViewProps = {
   cameras: CameraConfig[];
@@ -246,6 +251,34 @@ export default function LiveDashboardView({
     },
     [setPreferredLiveModes],
   );
+
+  const onKeyboardShortcut = useCallback(
+    (key: string, modifiers: KeyModifiers) => {
+      if (!modifiers.down) {
+        return;
+      }
+
+      switch (key) {
+        case "f":
+          toggleFullscreen();
+          break;
+      }
+    },
+    [toggleFullscreen],
+  );
+
+  useKeyboardListener(["f"], onKeyboardShortcut);
+  const handleFullScreenQuery = useCallback(
+    (value: string) => {
+      const desiredState = value === "true";
+      if (fullscreen === desiredState) {
+        return;
+      }
+      toggleFullscreen;
+    },
+    [fullscreen, toggleFullscreen],
+  );
+  useSearchEffect("fullscreen", handleFullScreenQuery);
 
   return (
     <div
