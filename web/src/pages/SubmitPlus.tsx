@@ -47,6 +47,7 @@ import { LuFolderX } from "react-icons/lu";
 import { PiSlidersHorizontalFill } from "react-icons/pi";
 import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 const API_LIMIT = 100;
 
@@ -254,36 +255,52 @@ export default function SubmitPlus() {
               open={upload != undefined}
               onOpenChange={(open) => (!open ? setUpload(undefined) : null)}
             >
-              <DialogContent className="md:max-w-2xl lg:max-w-3xl xl:max-w-4xl">
-                <DialogHeader>
-                  <DialogTitle>Submit To Frigate+</DialogTitle>
-                  <DialogDescription>
-                    Objects in locations you want to avoid are not false
-                    positives. Submitting them as false positives will confuse
-                    the model.
-                  </DialogDescription>
-                </DialogHeader>
-                <img
-                  className={`w-full ${grow} bg-black`}
-                  src={`${baseUrl}api/events/${upload?.id}/snapshot.jpg`}
-                  alt={`${upload?.label}`}
-                />
-                <DialogFooter>
-                  <Button onClick={() => setUpload(undefined)}>Cancel</Button>
-                  <Button
-                    className="bg-success"
-                    onClick={() => onSubmitToPlus(false)}
+              <DialogContent className="md:max-w-3xl lg:max-w-4xl xl:max-w-7xl">
+                <TransformWrapper minScale={1.0} wheel={{ smoothStep: 0.005 }}>
+                  <DialogHeader>
+                    <DialogTitle>Submit To Frigate+</DialogTitle>
+                    <DialogDescription>
+                      Objects in locations you want to avoid are not false
+                      positives. Submitting them as false positives will confuse
+                      the model.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <TransformComponent
+                    wrapperStyle={{
+                      width: "100%",
+                      height: "100%",
+                    }}
+                    contentStyle={{
+                      position: "relative",
+                      width: "100%",
+                      height: "100%",
+                    }}
                   >
-                    This is a {upload?.label}
-                  </Button>
-                  <Button
-                    className="text-white"
-                    variant="destructive"
-                    onClick={() => onSubmitToPlus(true)}
-                  >
-                    This is not a {upload?.label}
-                  </Button>
-                </DialogFooter>
+                    {upload?.id && (
+                      <img
+                        className={`w-full ${grow} bg-black`}
+                        src={`${baseUrl}api/events/${upload?.id}/snapshot.jpg`}
+                        alt={`${upload?.label}`}
+                      />
+                    )}
+                  </TransformComponent>
+                  <DialogFooter>
+                    <Button onClick={() => setUpload(undefined)}>Cancel</Button>
+                    <Button
+                      className="bg-success"
+                      onClick={() => onSubmitToPlus(false)}
+                    >
+                      This is a {upload?.label}
+                    </Button>
+                    <Button
+                      className="text-white"
+                      variant="destructive"
+                      onClick={() => onSubmitToPlus(true)}
+                    >
+                      This is not a {upload?.label}
+                    </Button>
+                  </DialogFooter>
+                </TransformWrapper>
               </DialogContent>
             </Dialog>
 
