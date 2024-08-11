@@ -141,7 +141,7 @@ export default function VideoControls({
   }, [volume, muted]);
 
   const onKeyboardShortcut = useCallback(
-    (key: string, modifiers: KeyModifiers) => {
+    (key: string | null, modifiers: KeyModifiers) => {
       if (!modifiers.down) {
         return;
       }

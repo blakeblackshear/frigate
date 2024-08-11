@@ -4,11 +4,12 @@ export type KeyModifiers = {
   down: boolean;
   repeat: boolean;
   ctrl: boolean;
+  shift: boolean;
 };
 
 export default function useKeyboardListener(
   keys: string[],
-  listener: (key: string, modifiers: KeyModifiers) => void,
+  listener: (key: string | null, modifiers: KeyModifiers) => void,
 ) {
   const keyDownListener = useCallback(
     (e: KeyboardEvent) => {
@@ -16,13 +17,18 @@ export default function useKeyboardListener(
         return;
       }
 
+      const modifiers = {
+        down: true,
+        repeat: e.repeat,
+        ctrl: e.ctrlKey || e.metaKey,
+        shift: e.shiftKey,
+      };
+
       if (keys.includes(e.key)) {
         e.preventDefault();
-        listener(e.key, {
-          down: true,
-          repeat: e.repeat,
-          ctrl: e.ctrlKey || e.metaKey,
-        });
+        listener(e.key, modifiers);
+      } else if (e.key === "Shift" || e.key === "Control" || e.key === "Meta") {
+        listener(null, modifiers);
       }
     },
     [keys, listener],
@@ -34,9 +40,18 @@ export default function useKeyboardListener(
         return;
       }
 
+      const modifiers = {
+        down: false,
+        repeat: false,
+        ctrl: false,
+        shift: false,
+      };
+
       if (keys.includes(e.key)) {
         e.preventDefault();
-        listener(e.key, { down: false, repeat: false, ctrl: false });
+        listener(e.key, modifiers);
+      } else if (e.key === "Shift" || e.key === "Control" || e.key === "Meta") {
+        listener(null, modifiers);
       }
     },
     [keys, listener],
