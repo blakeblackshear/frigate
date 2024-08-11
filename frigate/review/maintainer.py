@@ -509,7 +509,9 @@ class ReviewSegmentMaintainer(threading.Thread):
                             self.indefinite_events[camera].pop(event_id)
                             current_segment.last_update = manual_info["end_time"]
                         else:
-                            logger.error(f"Event with ID {event_id} has a set duration and can not be ended manually.")
+                            logger.error(
+                                f"Event with ID {event_id} has a set duration and can not be ended manually."
+                            )
             else:
                 if topic == DetectionTypeEnum.video:
                     self.check_if_new_segment(
