@@ -6,7 +6,7 @@ import { getIconForLabel } from "@/utils/iconUtil";
 import { isDesktop, isIOS, isSafari } from "react-device-detect";
 import useSWR from "swr";
 import TimeAgo from "../dynamic/TimeAgo";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import useImageLoaded from "@/hooks/use-image-loaded";
 import ImageLoadingIndicator from "../indicators/ImageLoadingIndicator";
 import { FaCompactDisc } from "react-icons/fa";
@@ -18,9 +18,20 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "../ui/context-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../ui/alert-dialog";
 import { Drawer, DrawerContent } from "../ui/drawer";
 import axios from "axios";
 import { toast } from "sonner";
+import useKeyboardListener from "@/hooks/use-keyboard-listener";
 
 type ReviewCardProps = {
   event: ReviewSegment;
@@ -46,6 +57,8 @@ export default function ReviewCard({
   );
 
   const [optionsOpen, setOptionsOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const bypassDialogRef = useRef(false);
 
   const onMarkAsReviewed = useCallback(async () => {
     await axios.post(`reviews/viewed`, { ids: [event.id] });
@@ -91,6 +104,18 @@ export default function ReviewCard({
     event.id = "";
     setOptionsOpen(false);
   }, [event]);
+
+  useKeyboardListener(["Shift"], (_, modifiers) => {
+    bypassDialogRef.current = modifiers.shift;
+  });
+
+  const handleDelete = useCallback(() => {
+    if (bypassDialogRef.current) {
+      onDelete();
+    } else {
+      setDeleteDialogOpen(true);
+    }
+  }, [bypassDialogRef, onDelete]);
 
   const content = (
     <div
@@ -158,71 +183,129 @@ export default function ReviewCard({
 
   if (isDesktop) {
     return (
-      <ContextMenu>
-        <ContextMenuTrigger asChild>{content}</ContextMenuTrigger>
-        <ContextMenuContent>
-          <ContextMenuItem>
-            <div
-              className="flex w-full cursor-pointer items-center justify-start gap-2 p-2"
-              onClick={onExport}
-            >
-              <FaCompactDisc className="text-secondary-foreground" />
-              <div className="text-primary">Export</div>
-            </div>
-          </ContextMenuItem>
-          {!event.has_been_reviewed && (
+      <>
+        <AlertDialog
+          open={deleteDialogOpen}
+          onOpenChange={() => setDeleteDialogOpen(!deleteDialogOpen)}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
+            </AlertDialogHeader>
+            <AlertDialogDescription>
+              Are you sure you want to delete all recorded video associated with
+              this review item?
+              <br />
+              <br />
+              Hold the <em>Shift</em> key to bypass this dialog in the future.
+            </AlertDialogDescription>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setOptionsOpen(false)}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction className="bg-destructive" onClick={onDelete}>
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+        <ContextMenu key={event.id}>
+          <ContextMenuTrigger asChild>{content}</ContextMenuTrigger>
+          <ContextMenuContent>
             <ContextMenuItem>
               <div
                 className="flex w-full cursor-pointer items-center justify-start gap-2 p-2"
-                onClick={onMarkAsReviewed}
+                onClick={onExport}
               >
-                <FaCircleCheck className="text-secondary-foreground" />
-                <div className="text-primary">Mark as reviewed</div>
+                <FaCompactDisc className="text-secondary-foreground" />
+                <div className="text-primary">Export</div>
               </div>
             </ContextMenuItem>
-          )}
-          <ContextMenuItem>
-            <div
-              className="flex w-full cursor-pointer items-center justify-start gap-2 p-2"
-              onClick={onDelete}
-            >
-              <HiTrash className="text-secondary-foreground" />
-              <div className="text-primary">Delete</div>
-            </div>
-          </ContextMenuItem>
-        </ContextMenuContent>
-      </ContextMenu>
+            {!event.has_been_reviewed && (
+              <ContextMenuItem>
+                <div
+                  className="flex w-full cursor-pointer items-center justify-start gap-2 p-2"
+                  onClick={onMarkAsReviewed}
+                >
+                  <FaCircleCheck className="text-secondary-foreground" />
+                  <div className="text-primary">Mark as reviewed</div>
+                </div>
+              </ContextMenuItem>
+            )}
+            <ContextMenuItem>
+              <div
+                className="flex w-full cursor-pointer items-center justify-start gap-2 p-2"
+                onClick={handleDelete}
+              >
+                <HiTrash className="text-secondary-foreground" />
+                <div className="text-primary">
+                  {bypassDialogRef.current ? "Delete Now" : "Delete"}
+                </div>
+              </div>
+            </ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
+      </>
     );
   }
 
   return (
-    <Drawer open={optionsOpen} onOpenChange={setOptionsOpen}>
-      {content}
-      <DrawerContent>
-        <div
-          className="flex w-full items-center justify-start gap-2 p-2"
-          onClick={onExport}
-        >
-          <FaCompactDisc className="text-secondary-foreground" />
-          <div className="text-primary">Export</div>
-        </div>
-        {!event.has_been_reviewed && (
+    <>
+      <AlertDialog
+        open={deleteDialogOpen}
+        onOpenChange={() => setDeleteDialogOpen(!deleteDialogOpen)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogDescription>
+            Are you sure you want to delete all recorded video associated with
+            this review item?
+            <br />
+            <br />
+            Hold the <em>Shift</em> key to bypass this dialog in the future.
+          </AlertDialogDescription>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setOptionsOpen(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive" onClick={onDelete}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <Drawer open={optionsOpen} onOpenChange={setOptionsOpen}>
+        {content}
+        <DrawerContent>
           <div
             className="flex w-full items-center justify-start gap-2 p-2"
-            onClick={onMarkAsReviewed}
+            onClick={onExport}
           >
-            <FaCircleCheck className="text-secondary-foreground" />
-            <div className="text-primary">Mark as reviewed</div>
+            <FaCompactDisc className="text-secondary-foreground" />
+            <div className="text-primary">Export</div>
           </div>
-        )}
-        <div
-          className="flex w-full items-center justify-start gap-2 p-2"
-          onClick={onDelete}
-        >
-          <HiTrash className="text-secondary-foreground" />
-          <div className="text-primary">Delete</div>
-        </div>
-      </DrawerContent>
-    </Drawer>
+          {!event.has_been_reviewed && (
+            <div
+              className="flex w-full items-center justify-start gap-2 p-2"
+              onClick={onMarkAsReviewed}
+            >
+              <FaCircleCheck className="text-secondary-foreground" />
+              <div className="text-primary">Mark as reviewed</div>
+            </div>
+          )}
+          <div
+            className="flex w-full items-center justify-start gap-2 p-2"
+            onClick={handleDelete}
+          >
+            <HiTrash className="text-secondary-foreground" />
+            <div className="text-primary">
+              {bypassDialogRef.current ? "Delete Now" : "Delete"}
+            </div>
+          </div>
+        </DrawerContent>
+      </Drawer>
+    </>
   );
 }
