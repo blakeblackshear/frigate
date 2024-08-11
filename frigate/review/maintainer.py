@@ -503,8 +503,15 @@ class ReviewSegmentMaintainer(threading.Thread):
                         # temporarily make it so this event can not end
                         current_segment.last_update = sys.maxsize
                     elif manual_info["state"] == ManualEventState.end:
-                        self.indefinite_events[camera].pop(manual_info["event_id"])
-                        current_segment.last_update = manual_info["end_time"]
+                        event_id = manual_info["event_id"]
+
+                        if event_id in self.indefinite_events[camera]:
+                            self.indefinite_events[camera].pop(event_id)
+                            current_segment.last_update = manual_info["end_time"]
+                        else:
+                            logger.error(
+                                f"Event with ID {event_id} has a set duration and can not be ended manually."
+                            )
             else:
                 if topic == DetectionTypeEnum.video:
                     self.check_if_new_segment(
