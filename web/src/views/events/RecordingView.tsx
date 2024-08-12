@@ -46,7 +46,6 @@ import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { cn } from "@/lib/utils";
 import { useFullscreen } from "@/hooks/use-fullscreen";
-import ActivityIndicator from "@/components/indicators/activity-indicator";
 
 const SEGMENT_DURATION = 30;
 
