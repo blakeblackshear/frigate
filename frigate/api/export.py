@@ -55,6 +55,8 @@ def export_recording(camera_name: str, start_time, end_time):
             401,
         )
 
+    existing_image = json.get("image_path")
+
     recordings_count = (
         Recordings.select()
         .where(
@@ -78,6 +80,7 @@ def export_recording(camera_name: str, start_time, end_time):
         current_app.frigate_config,
         camera_name,
         friendly_name,
+        existing_image,
         int(start_time),
         int(end_time),
         (
