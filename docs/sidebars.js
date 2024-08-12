@@ -52,6 +52,7 @@ module.exports = {
         "configuration/authentication",
         "configuration/hardware_acceleration",
         "configuration/ffmpeg_presets",
+        "configuration/pwa",
         "configuration/tls",
         "configuration/advanced",
       ],
