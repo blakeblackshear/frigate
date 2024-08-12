@@ -168,7 +168,10 @@ export default function DynamicVideoPlayer({
 
   useEffect(() => {
     if (!controller || !recordings) {
-      setNoRecording(true);
+      if (recordings?.length == 0) {
+        setNoRecording(true);
+      }
+
       return;
     }
 
