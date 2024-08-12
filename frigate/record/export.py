@@ -10,6 +10,7 @@ import subprocess as sp
 import threading
 from enum import Enum
 from pathlib import Path
+from typing import Optional
 
 from peewee import DoesNotExist
 
@@ -49,7 +50,8 @@ class RecordingExporter(threading.Thread):
         self,
         config: FrigateConfig,
         camera: str,
-        name: str,
+        name: Optional[str],
+        image: Optional[str],
         start_time: int,
         end_time: int,
         playback_factor: PlaybackFactorEnum,
@@ -58,6 +60,7 @@ class RecordingExporter(threading.Thread):
         self.config = config
         self.camera = camera
         self.user_provided_name = name
+        self.user_provided_image = image
         self.start_time = start_time
         self.end_time = end_time
         self.playback_factor = playback_factor
@@ -71,6 +74,12 @@ class RecordingExporter(threading.Thread):
 
     def save_thumbnail(self, id: str) -> str:
         thumb_path = os.path.join(CLIPS_DIR, f"export/{id}.webp")
+
+        if self.user_provided_image is not None and os.path.isfile(
+            self.user_provided_image
+        ):
+            shutil.copy(self.user_provided_image, thumb_path)
+            return thumb_path
 
         if (
             self.start_time

@@ -190,7 +190,7 @@ export default function EventView({
       axios
         .post(
           `export/${review.camera}/start/${review.start_time - REVIEW_PADDING}/end/${endTime}`,
-          { playback: "realtime" },
+          { playback: "realtime", image_path: review.thumb_path },
         )
         .then((response) => {
           if (response.status == 200) {
