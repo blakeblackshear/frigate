@@ -430,7 +430,18 @@ export function RecordingView({
               filterList={reviewFilterList}
               showReviewed
               setShowReviewed={() => {}}
-              onUpdateFilter={updateFilter}
+              onUpdateFilter={(newFilter) => {
+                // if we are resetting the date to last 24 hours
+                // then we need to reset the playbackStart time
+                if (
+                  filter?.before != undefined &&
+                  newFilter?.before == undefined
+                ) {
+                  setPlaybackStart(Date.now() / 1000 - 360);
+                }
+
+                updateFilter(newFilter);
+              }}
               setMotionOnly={() => {}}
             />
           )}
