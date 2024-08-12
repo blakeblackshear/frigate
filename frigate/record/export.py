@@ -75,7 +75,9 @@ class RecordingExporter(threading.Thread):
     def save_thumbnail(self, id: str) -> str:
         thumb_path = os.path.join(CLIPS_DIR, f"export/{id}.webp")
 
-        if self.user_provided_image is not None and os.path.isfile(self.user_provided_image):
+        if self.user_provided_image is not None and os.path.isfile(
+            self.user_provided_image
+        ):
             shutil.copy(self.user_provided_image, thumb_path)
             return thumb_path
 
