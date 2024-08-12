@@ -1,6 +1,6 @@
 ---
-id: mobile_app
-title: Mobile App
+id: pwa
+title: Installing Frigate App
 ---
 
 Frigate supports being installed as a [Progressive Web App](https://web.dev/explore/progressive-web-apps) on Desktop, Android, and iOS.
