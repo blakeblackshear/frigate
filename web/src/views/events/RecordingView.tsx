@@ -46,7 +46,6 @@ import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { cn } from "@/lib/utils";
 import { useFullscreen } from "@/hooks/use-fullscreen";
-import { LuFolderX } from "react-icons/lu";
 
 const SEGMENT_DURATION = 30;
 
