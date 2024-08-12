@@ -108,7 +108,7 @@ export function RecordingView({
       return chunk.after <= startTime && chunk.before >= startTime;
     }),
   );
-  const currentTimeRange = useMemo<TimeRange | undefined>(
+  const currentTimeRange = useMemo<TimeRange>(
     () =>
       chunkedTimeRange[selectedRangeIdx] ??
       chunkedTimeRange[chunkedTimeRange.length - 1],
@@ -174,10 +174,6 @@ export function RecordingView({
   );
 
   useEffect(() => {
-    if (!currentTimeRange) {
-      return;
-    }
-
     if (scrubbing || exportRange) {
       if (
         currentTime > currentTimeRange.before + 60 ||
@@ -221,10 +217,6 @@ export function RecordingView({
   );
 
   useEffect(() => {
-    if (!currentTimeRange) {
-      return;
-    }
-
     if (!scrubbing) {
       if (Math.abs(currentTime - playerTime) > 10) {
         if (
@@ -486,153 +478,143 @@ export function RecordingView({
         </div>
       </div>
 
-      {currentTimeRange ? (
+      <div
+        ref={mainLayoutRef}
+        className={cn(
+          "flex h-full justify-center overflow-hidden",
+          isDesktop ? "" : "flex-col gap-2 landscape:flex-row",
+        )}
+      >
         <div
-          ref={mainLayoutRef}
-          className={cn(
-            "flex h-full justify-center overflow-hidden",
-            isDesktop ? "" : "flex-col gap-2 landscape:flex-row",
-          )}
+          ref={cameraLayoutRef}
+          className={cn("flex flex-1 flex-wrap", isDesktop ? "w-[80%]" : "")}
         >
           <div
-            ref={cameraLayoutRef}
-            className={cn("flex flex-1 flex-wrap", isDesktop ? "w-[80%]" : "")}
+            className={cn(
+              "flex size-full items-center",
+              mainCameraAspect == "tall"
+                ? "flex-row justify-evenly"
+                : "flex-col justify-center gap-2",
+            )}
           >
             <div
+              key={mainCamera}
               className={cn(
-                "flex size-full items-center",
-                mainCameraAspect == "tall"
-                  ? "flex-row justify-evenly"
-                  : "flex-col justify-center gap-2",
+                "relative",
+                isDesktop
+                  ? cn(
+                      "flex justify-center px-4",
+                      mainCameraAspect == "tall"
+                        ? "h-[50%] md:h-[60%] lg:h-[75%] xl:h-[90%]"
+                        : mainCameraAspect == "wide"
+                          ? "w-full"
+                          : "",
+                    )
+                  : cn(
+                      "pt-2 portrait:w-full",
+                      mainCameraAspect == "wide"
+                        ? "aspect-wide landscape:w-full"
+                        : "aspect-video landscape:h-[94%] landscape:xl:h-[65%]",
+                    ),
               )}
+              style={{
+                width: mainCameraStyle ? mainCameraStyle.width : undefined,
+                aspectRatio: isDesktop
+                  ? mainCameraAspect == "tall"
+                    ? getCameraAspect(mainCamera)
+                    : undefined
+                  : Math.max(1, getCameraAspect(mainCamera) ?? 0),
+              }}
             >
-              <div
-                key={mainCamera}
-                className={cn(
-                  "relative",
-                  isDesktop
-                    ? cn(
-                        "flex justify-center px-4",
-                        mainCameraAspect == "tall"
-                          ? "h-[50%] md:h-[60%] lg:h-[75%] xl:h-[90%]"
-                          : mainCameraAspect == "wide"
-                            ? "w-full"
-                            : "",
-                      )
-                    : cn(
-                        "pt-2 portrait:w-full",
-                        mainCameraAspect == "wide"
-                          ? "aspect-wide landscape:w-full"
-                          : "aspect-video landscape:h-[94%] landscape:xl:h-[65%]",
-                      ),
-                )}
-                style={{
-                  width: mainCameraStyle ? mainCameraStyle.width : undefined,
-                  aspectRatio: isDesktop
-                    ? mainCameraAspect == "tall"
-                      ? getCameraAspect(mainCamera)
-                      : undefined
-                    : Math.max(1, getCameraAspect(mainCamera) ?? 0),
+              <DynamicVideoPlayer
+                className={grow}
+                camera={mainCamera}
+                timeRange={currentTimeRange}
+                cameraPreviews={allPreviews ?? []}
+                startTimestamp={playbackStart}
+                hotKeys={exportMode != "select"}
+                fullscreen={fullscreen}
+                onTimestampUpdate={(timestamp) => {
+                  setPlayerTime(timestamp);
+                  setCurrentTime(timestamp);
+                  Object.values(previewRefs.current ?? {}).forEach((prev) =>
+                    prev.scrubToTimestamp(Math.floor(timestamp)),
+                  );
                 }}
-              >
-                <DynamicVideoPlayer
-                  className={grow}
-                  camera={mainCamera}
-                  timeRange={currentTimeRange}
-                  cameraPreviews={allPreviews ?? []}
-                  startTimestamp={playbackStart}
-                  hotKeys={exportMode != "select"}
-                  fullscreen={fullscreen}
-                  onTimestampUpdate={(timestamp) => {
-                    setPlayerTime(timestamp);
-                    setCurrentTime(timestamp);
-                    Object.values(previewRefs.current ?? {}).forEach((prev) =>
-                      prev.scrubToTimestamp(Math.floor(timestamp)),
-                    );
-                  }}
-                  onClipEnded={onClipEnded}
-                  onControllerReady={(controller) => {
-                    mainControllerRef.current = controller;
-                  }}
-                  isScrubbing={scrubbing || exportMode == "timeline"}
-                  setFullResolution={setFullResolution}
-                  toggleFullscreen={toggleFullscreen}
-                  containerRef={mainLayoutRef}
-                />
-              </div>
-              {isDesktop && (
-                <div
-                  ref={previewRowRef}
-                  className={cn(
-                    "scrollbar-container flex gap-2 overflow-auto",
-                    mainCameraAspect == "tall"
-                      ? "h-full w-72 flex-col"
-                      : `h-28 w-full`,
-                    previewRowOverflows ? "" : "items-center justify-center",
-                  )}
-                >
-                  <div className="w-2" />
-                  {allCameras.map((cam) => {
-                    if (cam == mainCamera || cam == "birdseye") {
-                      return;
-                    }
-
-                    return (
-                      <div
-                        key={cam}
-                        className={
-                          mainCameraAspect == "tall" ? "w-full" : "h-full"
-                        }
-                        style={{
-                          aspectRatio: getCameraAspect(cam),
-                        }}
-                      >
-                        <PreviewPlayer
-                          className="size-full"
-                          camera={cam}
-                          timeRange={currentTimeRange}
-                          cameraPreviews={allPreviews ?? []}
-                          startTime={startTime}
-                          isScrubbing={scrubbing}
-                          onControllerReady={(controller) => {
-                            previewRefs.current[cam] = controller;
-                            controller.scrubToTimestamp(startTime);
-                          }}
-                          onClick={() => onSelectCamera(cam)}
-                        />
-                      </div>
-                    );
-                  })}
-                  <div className="w-2" />
-                </div>
-              )}
+                onClipEnded={onClipEnded}
+                onControllerReady={(controller) => {
+                  mainControllerRef.current = controller;
+                }}
+                isScrubbing={scrubbing || exportMode == "timeline"}
+                setFullResolution={setFullResolution}
+                toggleFullscreen={toggleFullscreen}
+                containerRef={mainLayoutRef}
+              />
             </div>
+            {isDesktop && (
+              <div
+                ref={previewRowRef}
+                className={cn(
+                  "scrollbar-container flex gap-2 overflow-auto",
+                  mainCameraAspect == "tall"
+                    ? "h-full w-72 flex-col"
+                    : `h-28 w-full`,
+                  previewRowOverflows ? "" : "items-center justify-center",
+                )}
+              >
+                <div className="w-2" />
+                {allCameras.map((cam) => {
+                  if (cam == mainCamera || cam == "birdseye") {
+                    return;
+                  }
+
+                  return (
+                    <div
+                      key={cam}
+                      className={
+                        mainCameraAspect == "tall" ? "w-full" : "h-full"
+                      }
+                      style={{
+                        aspectRatio: getCameraAspect(cam),
+                      }}
+                    >
+                      <PreviewPlayer
+                        className="size-full"
+                        camera={cam}
+                        timeRange={currentTimeRange}
+                        cameraPreviews={allPreviews ?? []}
+                        startTime={startTime}
+                        isScrubbing={scrubbing}
+                        onControllerReady={(controller) => {
+                          previewRefs.current[cam] = controller;
+                          controller.scrubToTimestamp(startTime);
+                        }}
+                        onClick={() => onSelectCamera(cam)}
+                      />
+                    </div>
+                  );
+                })}
+                <div className="w-2" />
+              </div>
+            )}
           </div>
-          <Timeline
-            contentRef={contentRef}
-            mainCamera={mainCamera}
-            timelineType={
-              (exportRange == undefined ? timelineType : "timeline") ??
-              "timeline"
-            }
-            timeRange={timeRange}
-            mainCameraReviewItems={mainCameraReviewItems}
-            currentTime={currentTime}
-            exportRange={exportMode == "timeline" ? exportRange : undefined}
-            setCurrentTime={setCurrentTime}
-            manuallySetCurrentTime={manuallySetCurrentTime}
-            setScrubbing={setScrubbing}
-            setExportRange={setExportRange}
-          />
         </div>
-      ) : (
-        <div className="relative size-full">
-          <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
-            <LuFolderX className="size-16" />
-            No recordings or previews found for this time
-          </div>
-        </div>
-      )}
+        <Timeline
+          contentRef={contentRef}
+          mainCamera={mainCamera}
+          timelineType={
+            (exportRange == undefined ? timelineType : "timeline") ?? "timeline"
+          }
+          timeRange={timeRange}
+          mainCameraReviewItems={mainCameraReviewItems}
+          currentTime={currentTime}
+          exportRange={exportMode == "timeline" ? exportRange : undefined}
+          setCurrentTime={setCurrentTime}
+          manuallySetCurrentTime={manuallySetCurrentTime}
+          setScrubbing={setScrubbing}
+          setExportRange={setExportRange}
+        />
+      </div>
     </div>
   );
 }
