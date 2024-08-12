@@ -46,6 +46,7 @@ import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { cn } from "@/lib/utils";
 import { useFullscreen } from "@/hooks/use-fullscreen";
+import { LuFolderX } from "react-icons/lu";
 
 const SEGMENT_DURATION = 30;
 
@@ -624,7 +625,8 @@ export function RecordingView({
         </div>
       ) : (
         <div className="relative size-full">
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
+            <LuFolderX className="size-16" />
             No recordings or previews found for this time
           </div>
         </div>
