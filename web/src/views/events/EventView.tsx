@@ -395,6 +395,7 @@ export default function EventView({
             markAllItemsAsReviewed={markAllItemsAsReviewed}
             onSelectReview={onSelectReview}
             onSelectAllReviews={onSelectAllReviews}
+            setSelectedReviews={setSelectedReviews}
             pullLatestData={pullLatestData}
           />
         )}
@@ -437,6 +438,7 @@ type DetectionReviewProps = {
   markAllItemsAsReviewed: (currentItems: ReviewSegment[]) => void;
   onSelectReview: (review: ReviewSegment, ctrl: boolean) => void;
   onSelectAllReviews: () => void;
+  setSelectedReviews: (reviewIds: string[]) => void;
   pullLatestData: () => void;
 };
 function DetectionReview({
@@ -455,6 +457,7 @@ function DetectionReview({
   markAllItemsAsReviewed,
   onSelectReview,
   onSelectAllReviews,
+  setSelectedReviews,
   pullLatestData,
 }: DetectionReviewProps) {
   const reviewTimelineRef = useRef<HTMLDivElement>(null);
@@ -692,6 +695,7 @@ function DetectionReview({
                   className="text-white"
                   variant="select"
                   onClick={() => {
+                    setSelectedReviews([]);
                     markAllItemsAsReviewed(currentItems ?? []);
                   }}
                 >
