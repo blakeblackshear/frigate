@@ -416,6 +416,7 @@ export default function Events() {
     if (selectedReviewData) {
       return (
         <RecordingView
+          key={selectedTimeRange.before}
           startCamera={selectedReviewData.camera}
           startTime={selectedReviewData.start_time}
           allCameras={selectedReviewData.allCameras}
