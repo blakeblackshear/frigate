@@ -109,7 +109,9 @@ export function RecordingView({
     }),
   );
   const currentTimeRange = useMemo<TimeRange | undefined>(
-    () => chunkedTimeRange[selectedRangeIdx],
+    () =>
+      chunkedTimeRange[selectedRangeIdx] ??
+      chunkedTimeRange[chunkedTimeRange.length - 1],
     [selectedRangeIdx, chunkedTimeRange],
   );
   const reviewFilterList = useMemo(() => {
