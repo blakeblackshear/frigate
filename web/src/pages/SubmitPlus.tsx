@@ -494,12 +494,16 @@ function PlusFilterGroup({
               className="w-12"
               inputMode="numeric"
               value={Math.round((currentScoreRange?.at(0) ?? 0.5) * 100)}
-              onChange={(e) =>
-                setCurrentScoreRange([
-                  parseInt(e.target.value) / 100.0,
-                  currentScoreRange?.at(1) ?? 1.0,
-                ])
-              }
+              onChange={(e) => {
+                const value = e.target.value;
+
+                if (value) {
+                  setCurrentScoreRange([
+                    parseInt(value) / 100.0,
+                    currentScoreRange?.at(1) ?? 1.0,
+                  ]);
+                }
+              }}
             />
             <DualThumbSlider
               className="w-full"
@@ -513,12 +517,16 @@ function PlusFilterGroup({
               className="w-12"
               inputMode="numeric"
               value={Math.round((currentScoreRange?.at(1) ?? 1.0) * 100)}
-              onChange={(e) =>
-                setCurrentScoreRange([
-                  currentScoreRange?.at(0) ?? 0.5,
-                  parseInt(e.target.value) / 100.0,
-                ])
-              }
+              onChange={(e) => {
+                const value = e.target.value;
+
+                if (value) {
+                  setCurrentScoreRange([
+                    currentScoreRange?.at(0) ?? 0.5,
+                    parseInt(value) / 100.0,
+                  ]);
+                }
+              }}
             />
           </div>
           <DropdownMenuSeparator />
