@@ -212,6 +212,7 @@ export default function SearchThumbnailPlayer({
                     <>
                       <Chip
                         className={`flex items-start justify-between space-x-1 ${playingBack ? "hidden" : ""} "bg-gray-500 z-0 bg-gradient-to-br from-gray-400 to-gray-500`}
+                        onClick={() => onClick(searchResult, true)}
                       >
                         {getIconForLabel(
                           searchResult.label,
@@ -231,7 +232,8 @@ export default function SearchThumbnailPlayer({
                 .map((text) => capitalizeFirstLetter(text))
                 .sort()
                 .join(", ")
-                .replaceAll("-verified", "")}
+                .replaceAll("-verified", "")}{" "}
+              Click To View Detection Details
             </TooltipContent>
           </Tooltip>
         </div>
@@ -257,9 +259,7 @@ export default function SearchThumbnailPlayer({
                 </div>
               </TooltipTrigger>
             </div>
-            <TooltipContent className="capitalize">
-              View Detection Details
-            </TooltipContent>
+            <TooltipContent className="capitalize"></TooltipContent>
           </Tooltip>
         </div>
         {!playingBack && (
