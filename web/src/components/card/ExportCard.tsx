@@ -44,7 +44,7 @@ export default function ExportCard({
 
   const [editName, setEditName] = useState<{
     original: string;
-    update: string;
+    update?: string;
   }>();
 
   const submitRename = useCallback(() => {
@@ -52,7 +52,7 @@ export default function ExportCard({
       return;
     }
 
-    onRename(exportedRecording.id, editName.update);
+    onRename(exportedRecording.id, editName.update ?? "");
     setEditName(undefined);
   }, [editName, exportedRecording, onRename, setEditName]);
 
@@ -64,7 +64,7 @@ export default function ExportCard({
         modifiers.down &&
         !modifiers.repeat &&
         editName &&
-        editName.update.length > 0
+        (editName.update?.length ?? 0) > 0
       ) {
         submitRename();
       }
@@ -92,7 +92,11 @@ export default function ExportCard({
                 className="mt-3"
                 type="search"
                 placeholder={editName?.original}
-                value={editName?.update || editName?.original}
+                value={
+                  editName?.update == undefined
+                    ? editName?.original
+                    : editName?.update
+                }
                 onChange={(e) =>
                   setEditName({
                     original: editName.original ?? "",
@@ -159,7 +163,7 @@ export default function ExportCard({
                   onClick={() =>
                     setEditName({
                       original: exportedRecording.name,
-                      update: "",
+                      update: undefined,
                     })
                   }
                 >
