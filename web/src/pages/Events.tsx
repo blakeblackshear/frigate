@@ -111,7 +111,7 @@ export default function Events() {
     }
 
     return {
-      before: Math.floor(reviewSearchParams["before"]),
+      before: Math.ceil(reviewSearchParams["before"]),
       after: Math.floor(reviewSearchParams["after"]),
     };
   }, [last24Hours, reviewSearchParams]);
