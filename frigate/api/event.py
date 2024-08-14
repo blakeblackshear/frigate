@@ -251,6 +251,26 @@ def events():
     return jsonify(list(events))
 
 
+@EventBp.route("/event_ids")
+def event_ids():
+    idString = request.args.get("ids")
+    ids = idString.split(",")
+
+    if not ids:
+        return make_response(
+            jsonify({"success": False, "message": "Valid list of ids must be sent"}),
+            400,
+        )
+
+    try:
+        events = Event.select().where(Event.id << ids).dicts().iterator()
+        return jsonify(list(events))
+    except Exception:
+        return make_response(
+            jsonify({"success": False, "message": "Events not found"}), 400
+        )
+
+
 @EventBp.route("/events/search")
 def events_search():
     query = request.args.get("query", type=str)
