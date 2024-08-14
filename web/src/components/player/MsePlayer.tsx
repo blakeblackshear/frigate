@@ -308,26 +308,6 @@ function MSEPlayer({
     return video.buffered.end(video.buffered.length - 1) - video.currentTime;
   };
 
-  const jumpToLive = () => {
-    if (!videoRef.current) return;
-
-    const now = Date.now();
-
-    // we either recently just started streaming or recently
-    // jumped to live, so don't jump to live again right away
-    if (now - lastJumpTimeRef.current < BUFFERING_COOLDOWN_TIMEOUT) {
-      return;
-    }
-
-    const buffered = videoRef.current.buffered;
-    if (buffered.length > 0) {
-      const liveEdge = buffered.end(buffered.length - 1);
-      // Jump to the live edge
-      videoRef.current.currentTime = liveEdge;
-      lastJumpTimeRef.current = now;
-    }
-  };
-
   const calculateAdaptiveBufferThreshold = () => {
     const filledEntries = bufferTimes.current.length;
     const sum = bufferTimes.current.reduce((a, b) => a + b, 0);
@@ -457,7 +437,6 @@ function MSEPlayer({
           (bufferTime > bufferThreshold || bufferTime > 3) &&
           Date.now() - lastJumpTimeRef.current > BUFFERING_COOLDOWN_TIMEOUT
         ) {
-          // jumpToLive();
           videoRef.current.playbackRate = 1.1;
           console.log(
             camera,
