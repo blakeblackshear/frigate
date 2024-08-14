@@ -173,7 +173,7 @@ services:
       - "traefik.http.routers.frigate.rule=Host(`traefik.example.com`)"
 ```
 
-The above configuration will create a "service" in Traefik, automatically adding your container's IP on port 8791 as a backend.
+The above configuration will create a "service" in Traefik, automatically adding your container's IP on port 8971 as a backend.
 It will also add a router, routing requests to "traefik.example.com" to your local container.
 
 Note that with this approach, you don't need to expose any ports for the Frigate instance since all traffic will be routed over the internal Docker network.
