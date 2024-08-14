@@ -8,7 +8,7 @@ This guide outlines the basic configuration steps needed to set up a reverse pro
 A reverse proxy is typically needed if you want to set up Frigate on a custom URL, on a subdomain or on a host serving multiple sites. It could also be used to set up your own authentication provider or for more advanced HTTP routing.
 
 Before setting up a reverse proxy, check if any of the built-in functionality in Frigate suits your needs:
-|||
+|Topic|Docs|
 |-|-|
 |TLS|Please see the  `tls` [configuration option](../configuration/tls.md)|
 |Authentication|Please see the [authentication](../configuration/authentication.md) documentation|
