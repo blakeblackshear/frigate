@@ -3,15 +3,8 @@ import { CamerasFilterButton } from "@/components/filter/CamerasFilterButton";
 import { GeneralFilterContent } from "@/components/filter/ReviewFilterGroup";
 import Chip from "@/components/indicators/Chip";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import { FrigatePlusDialog } from "@/components/overlay/dialog/FrigatePlusDialog";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
   DropdownMenu,
@@ -45,12 +38,11 @@ import { LuFolderX } from "react-icons/lu";
 import { PiSlidersHorizontalFill } from "react-icons/pi";
 import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
-import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 const API_LIMIT = 100;
 
 export default function SubmitPlus() {
-  const { data: config } = useSWR<FrigateConfig>("config");
+  // title
 
   useEffect(() => {
     document.title = "Plus - Frigate";
@@ -155,77 +147,6 @@ export default function SubmitPlus() {
     [isValidating, isDone, size, setSize],
   );
 
-  // layout
-
-  const grow = useMemo(() => {
-    if (!config || !upload) {
-      return "";
-    }
-
-    const camera = config.cameras[upload.camera];
-
-    if (!camera) {
-      return "";
-    }
-
-    if (camera.detect.width / camera.detect.height < 16 / 9) {
-      return "aspect-video object-contain";
-    }
-
-    return "";
-  }, [config, upload]);
-
-  const onSubmitToPlus = useCallback(
-    async (falsePositive: boolean) => {
-      if (!upload) {
-        return;
-      }
-
-      falsePositive
-        ? axios.put(`events/${upload.id}/false_positive`)
-        : axios.post(`events/${upload.id}/plus`, {
-            include_annotation: 1,
-          });
-
-      refresh(
-        (data: Event[][] | undefined) => {
-          if (!data) {
-            return data;
-          }
-
-          let pageIndex = -1;
-          let index = -1;
-
-          data.forEach((page, pIdx) => {
-            const search = page.findIndex((e) => e.id == upload.id);
-
-            if (search != -1) {
-              pageIndex = pIdx;
-              index = search;
-            }
-          });
-
-          if (index == -1) {
-            return data;
-          }
-
-          return [
-            ...data.slice(0, pageIndex),
-            [
-              ...data[pageIndex].slice(0, index),
-              { ...data[pageIndex][index], plus_id: "new_upload" },
-              ...data[pageIndex].slice(index + 1),
-            ],
-            ...data.slice(pageIndex + 1),
-          ];
-        },
-        { revalidate: false, populateCache: true },
-      );
-      setUpload(undefined);
-    },
-    [refresh, upload],
-  );
-
   return (
     <div className="flex size-full flex-col">
       <div className="scrollbar-container flex h-16 w-full items-center justify-between overflow-x-auto px-2">
@@ -254,63 +175,46 @@ export default function SubmitPlus() {
         ) : (
           <>
             <div className="grid w-full gap-2 p-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-              <Dialog
-                open={upload != undefined}
-                onOpenChange={(open) => (!open ? setUpload(undefined) : null)}
-              >
-                <DialogContent className="md:max-w-3xl lg:max-w-4xl xl:max-w-7xl">
-                  <TransformWrapper
-                    minScale={1.0}
-                    wheel={{ smoothStep: 0.005 }}
-                  >
-                    <DialogHeader>
-                      <DialogTitle>Submit To Frigate+</DialogTitle>
-                      <DialogDescription>
-                        Objects in locations you want to avoid are not false
-                        positives. Submitting them as false positives will
-                        confuse the model.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <TransformComponent
-                      wrapperStyle={{
-                        width: "100%",
-                        height: "100%",
-                      }}
-                      contentStyle={{
-                        position: "relative",
-                        width: "100%",
-                        height: "100%",
-                      }}
-                    >
-                      {upload?.id && (
-                        <img
-                          className={`w-full ${grow} bg-black`}
-                          src={`${baseUrl}api/events/${upload?.id}/snapshot.jpg`}
-                          alt={`${upload?.label}`}
-                        />
-                      )}
-                    </TransformComponent>
-                    <DialogFooter>
-                      <Button onClick={() => setUpload(undefined)}>
-                        Cancel
-                      </Button>
-                      <Button
-                        className="bg-success"
-                        onClick={() => onSubmitToPlus(false)}
-                      >
-                        This is a {upload?.label}
-                      </Button>
-                      <Button
-                        className="text-white"
-                        variant="destructive"
-                        onClick={() => onSubmitToPlus(true)}
-                      >
-                        This is not a {upload?.label}
-                      </Button>
-                    </DialogFooter>
-                  </TransformWrapper>
-                </DialogContent>
-              </Dialog>
+              <FrigatePlusDialog
+                upload={upload}
+                onClose={() => setUpload(undefined)}
+                onEventUploaded={() => {
+                  refresh(
+                    (data: Event[][] | undefined) => {
+                      if (!data || !upload) {
+                        return data;
+                      }
+
+                      let pageIndex = -1;
+                      let index = -1;
+
+                      data.forEach((page, pIdx) => {
+                        const search = page.findIndex((e) => e.id == upload.id);
+
+                        if (search != -1) {
+                          pageIndex = pIdx;
+                          index = search;
+                        }
+                      });
+
+                      if (index == -1) {
+                        return data;
+                      }
+
+                      return [
+                        ...data.slice(0, pageIndex),
+                        [
+                          ...data[pageIndex].slice(0, index),
+                          { ...data[pageIndex][index], plus_id: "new_upload" },
+                          ...data[pageIndex].slice(index + 1),
+                        ],
+                        ...data.slice(pageIndex + 1),
+                      ];
+                    },
+                    { revalidate: false, populateCache: true },
+                  );
+                }}
+              />
 
               {events?.map((event) => {
                 if (event.data.type != "object" || event.plus_id) {
