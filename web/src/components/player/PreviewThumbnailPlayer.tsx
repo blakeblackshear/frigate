@@ -266,7 +266,7 @@ export default function PreviewThumbnailPlayer({
                 .sort()
                 .join(", ")
                 .replaceAll("-verified", "")}
-              {` Click To View Detection Details`}
+              {` • Click To View Detection Details`}
             </TooltipContent>
           </Tooltip>
         </div>
