@@ -28,7 +28,7 @@ type PreviewPlayerProps = {
   timeRange: TimeRange;
   onTimeUpdate?: (time: number | undefined) => void;
   setReviewed: (review: ReviewSegment) => void;
-  onClick: (review: ReviewSegment, ctrl: boolean) => void;
+  onClick: (review: ReviewSegment, ctrl: boolean, detail: boolean) => void;
 };
 
 export default function PreviewThumbnailPlayer({
@@ -50,7 +50,7 @@ export default function PreviewThumbnailPlayer({
   const handleOnClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (!ignoreClick) {
-        onClick(review, e.metaKey);
+        onClick(review, e.metaKey, false);
       }
     },
     [ignoreClick, review, onClick],
@@ -73,7 +73,7 @@ export default function PreviewThumbnailPlayer({
   });
 
   useContextMenu(imgRef, () => {
-    onClick(review, true);
+    onClick(review, true, false);
   });
 
   // playback
@@ -237,6 +237,7 @@ export default function PreviewThumbnailPlayer({
                     <>
                       <Chip
                         className={`flex items-start justify-between space-x-1 ${playingBack ? "hidden" : ""} bg-gradient-to-br ${review.has_been_reviewed ? "bg-green-600 from-green-600 to-green-700" : "bg-gray-500 from-gray-400 to-gray-500"} z-0`}
+                        onClick={() => onClick(review, false, true)}
                       >
                         {review.data.objects.sort().map((object) => {
                           return getIconForLabel(object, "size-3 text-white");
@@ -265,6 +266,7 @@ export default function PreviewThumbnailPlayer({
                 .sort()
                 .join(", ")
                 .replaceAll("-verified", "")}
+              {` Click To View Detection Details`}
             </TooltipContent>
           </Tooltip>
         </div>

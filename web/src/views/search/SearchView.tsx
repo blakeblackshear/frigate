@@ -1,6 +1,6 @@
 import SearchFilterGroup from "@/components/filter/SearchFilterGroup";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
-import SearchDetailDialog from "@/components/overlay/SearchDetailDialog";
+import SearchDetailDialog from "@/components/overlay/detail/SearchDetailDialog";
 import SearchThumbnailPlayer from "@/components/player/SearchThumbnailPlayer";
 import { Input } from "@/components/ui/input";
 import { Toaster } from "@/components/ui/sonner";
