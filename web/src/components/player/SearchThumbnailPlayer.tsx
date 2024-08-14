@@ -17,7 +17,6 @@ import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { VideoPreview } from "../preview/ScrubbablePreview";
 import { Preview } from "@/types/preview";
 import { SearchResult } from "@/types/search";
-import { LuInfo } from "react-icons/lu";
 import useContextMenu from "@/hooks/use-contextmenu";
 import { cn } from "@/lib/utils";
 
@@ -212,6 +211,7 @@ export default function SearchThumbnailPlayer({
                     <>
                       <Chip
                         className={`flex items-start justify-between space-x-1 ${playingBack ? "hidden" : ""} "bg-gray-500 z-0 bg-gradient-to-br from-gray-400 to-gray-500`}
+                        onClick={() => onClick(searchResult, true)}
                       >
                         {getIconForLabel(
                           searchResult.label,
@@ -231,34 +231,8 @@ export default function SearchThumbnailPlayer({
                 .map((text) => capitalizeFirstLetter(text))
                 .sort()
                 .join(", ")
-                .replaceAll("-verified", "")}
-            </TooltipContent>
-          </Tooltip>
-        </div>
-        <div className="absolute right-0 top-2 z-40">
-          <Tooltip>
-            <div
-              className="flex"
-              onMouseEnter={() => setTooltipHovering(true)}
-              onMouseLeave={() => setTooltipHovering(false)}
-            >
-              <TooltipTrigger asChild>
-                <div className="mx-3 pb-1 text-sm text-white">
-                  {
-                    <>
-                      <Chip
-                        className={`flex items-start justify-between space-x-1 ${playingBack ? "hidden" : ""} "bg-gray-500 z-0 bg-gradient-to-br from-gray-400 to-gray-500`}
-                        onClick={() => onClick(searchResult, true)}
-                      >
-                        <LuInfo className="size-3" />
-                      </Chip>
-                    </>
-                  }
-                </div>
-              </TooltipTrigger>
-            </div>
-            <TooltipContent className="capitalize">
-              View Detection Details
+                .replaceAll("-verified", "")}{" "}
+              {` Click To View Detection Details`}
             </TooltipContent>
           </Tooltip>
         </div>
