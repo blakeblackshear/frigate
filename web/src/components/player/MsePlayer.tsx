@@ -32,6 +32,7 @@ function MSEPlayer({
   onError,
 }: MSEPlayerProps) {
   const RECONNECT_TIMEOUT: number = 10000;
+  const BUFFERING_COOLDOWN_TIMEOUT: number = 5000;
 
   const CODECS: string[] = [
     "avc1.640029", // H.264 high 4.1 (Chromecast 1st and 2nd Gen)
@@ -46,6 +47,7 @@ function MSEPlayer({
 
   const visibilityCheck: boolean = !pip;
   const [isPlaying, setIsPlaying] = useState(false);
+  const lastJumpTimeRef = useRef(0);
 
   const [wsState, setWsState] = useState<number>(WebSocket.CLOSED);
   const [connectTS, setConnectTS] = useState<number>(0);
@@ -302,6 +304,25 @@ function MSEPlayer({
     return video.buffered.end(video.buffered.length - 1) - video.currentTime;
   };
 
+  const jumpToLive = () => {
+    if (!videoRef.current) return;
+
+    const now = Date.now();
+    if (now - lastJumpTimeRef.current < BUFFERING_COOLDOWN_TIMEOUT) {
+      console.log("Cooldown period active, skipping jump");
+      return;
+    }
+
+    const buffered = videoRef.current.buffered;
+    if (buffered.length > 0) {
+      const liveEdge = buffered.end(buffered.length - 1);
+      // Jump to the live edge
+      videoRef.current.currentTime = liveEdge;
+      lastJumpTimeRef.current = now;
+      console.log("Jumped to live");
+    }
+  };
+
   useEffect(() => {
     if (!playbackEnabled) {
       return;
@@ -386,21 +407,34 @@ function MSEPlayer({
         handleLoadedMetadata?.();
         onPlaying?.();
         setIsPlaying(true);
+        lastJumpTimeRef.current = Date.now();
       }}
       muted={!audioEnabled}
       onPause={() => videoRef.current?.play()}
       onProgress={() => {
+        const bufferTime = getBufferedTime(videoRef.current);
+        console.log(bufferTime);
+
         // if we have > 3 seconds of buffered data and we're still not playing,
         // something might be wrong - maybe codec issue, no audio, etc
         // so mark the player as playing so that error handlers will fire
-        if (
-          !isPlaying &&
-          playbackEnabled &&
-          getBufferedTime(videoRef.current) > 3
-        ) {
+        if (!isPlaying && playbackEnabled && bufferTime > 3) {
           setIsPlaying(true);
+          lastJumpTimeRef.current = Date.now();
           onPlaying?.();
         }
+
+        // if we have > 1 second of buffered data and we're playing, we may have
+        // drifted from actual live time, so seek to the end of buffered data
+        if (
+          videoRef.current &&
+          isPlaying &&
+          playbackEnabled &&
+          bufferTime > 2
+        ) {
+          jumpToLive();
+        }
+
         if (onError != undefined) {
           if (videoRef.current?.paused) {
             return;
