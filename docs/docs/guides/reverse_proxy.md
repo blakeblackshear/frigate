@@ -23,6 +23,10 @@ Please use your own knowledge to assess and vet the reverse proxy software befor
 
 There are many solutions available to implement reverse proxies and the community is invited to help out documenting others through a contribution to this page.
 
+* [Apache2](#apache2-reverse-proxy)
+* [Nginx](#nginx-reverse-proxy)
+* [Traefik](#traefik-reverse-proxy)
+
 ## Apache2 Reverse Proxy
 
 In the configuration examples below, only the directives relevant to the reverse proxy approach above are included.
@@ -141,3 +145,26 @@ The settings below enabled connection upgrade, sets up logging (optional) and pr
   }
 
 ```
+
+## Traefik Reverse Proxy
+
+This example shows how to add a `label` to the Frigate Docker compose file, enabling Traefik to automatically discover your Frigate instance.  
+Before using the example below, you must first set up Traefik with the [Docker provider](https://doc.traefik.io/traefik/providers/docker/)
+
+```yml
+services:
+  frigate:
+    container_name: frigate
+    image: ghcr.io/blakeblackshear/frigate:stable
+    ...
+    ...
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.frigate.loadbalancer.server.port=8971"
+      - "traefik.http.routers.frigate.rule=Host(`traefik.example.com`)"
+```
+
+The above configuration will create a "service" in Traefik, automatically adding your container's IP on port 8791 as a backend.
+It will also add a router, routing requests to "traefik.example.com" to your local container.
+
+Note that with this approach, you don't need to expose any ports for the Frigate instance since all traffic will be routed over the internal Docker network.
