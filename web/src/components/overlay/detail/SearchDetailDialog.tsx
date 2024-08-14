@@ -1,17 +1,17 @@
 import { isDesktop, isIOS } from "react-device-detect";
-import { Sheet, SheetContent } from "../ui/sheet";
-import { Drawer, DrawerContent } from "../ui/drawer";
+import { Sheet, SheetContent } from "../../ui/sheet";
+import { Drawer, DrawerContent } from "../../ui/drawer";
 import { SearchResult } from "@/types/search";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import { getIconForLabel } from "@/utils/iconUtil";
 import { useApiHost } from "@/api";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
-import { Textarea } from "../ui/textarea";
+import { Textarea } from "../../ui/textarea";
 
 type SearchDetailDialogProps = {
   search?: SearchResult;
