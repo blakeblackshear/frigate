@@ -12,7 +12,7 @@ Before setting up a reverse proxy, check if any of the built-in functionality in
 |-|-|
 |TLS|Please see the  `tls` [configuration option](../configuration/tls.md)|
 |Authentication|Please see the [authentication](../configuration/authentication.md) documentation|
-|IPv6|[Advanced configuration #enabling-ipv6](../configuration/advanced.md#enabling-ipv6)
+|IPv6|[Enabling IPv6](../configuration/advanced.md#enabling-ipv6)
 
 **Note about TLS**  
 When using a reverse proxy, the TLS session is usually terminated at the proxy, sending the internal request over plain HTTP. If this is the desired behavior, TLS must first be disabled in Frigate, or you will encounter an HTTP 400 error: "The plain HTTP request was sent to HTTPS port."  
