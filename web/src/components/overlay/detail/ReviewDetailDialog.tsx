@@ -70,7 +70,7 @@ export default function ReviewDetailDialog({
         onClose={() => setUpload(undefined)}
         onEventUploaded={() => {
           if (upload) {
-            upload.plus_id = "1234";
+            upload.plus_id = "new_upload";
           }
         }}
       />
