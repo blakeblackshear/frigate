@@ -7,6 +7,8 @@ import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import { getIconForLabel } from "@/utils/iconUtil";
 import { useApiHost } from "@/api";
 import { ReviewSegment } from "@/types/review";
+import { Event } from "@/types/event";
+import { useMemo } from "react";
 
 type ReviewDetailDialogProps = {
   review?: ReviewSegment;
@@ -23,6 +25,18 @@ export default function ReviewDetailDialog({
   const apiHost = useApiHost();
 
   // data
+
+  const { data: events } = useSWR<Event[]>(
+    review ? ["event_ids", { ids: review.data.detections.join(",") }] : null,
+  );
+
+  const hasMismatch = useMemo(() => {
+    if (!review || !events) {
+      return false;
+    }
+
+    return events.length != review?.data.detections.length;
+  }, [review, events]);
 
   const formattedDate = useFormattedTimestamp(
     review?.start_time ?? 0,
@@ -55,34 +69,6 @@ export default function ReviewDetailDialog({
             <div className="flex w-full flex-row">
               <div className="flex w-full flex-col gap-3">
                 <div className="flex flex-col gap-1.5">
-                  <div className="text-sm text-primary/40">Labels</div>
-                  <div className="flex flex-col items-start gap-2 text-sm capitalize">
-                    {[
-                      ...new Set([
-                        ...(review.data.objects || []),
-                        ...(review.data.sub_labels || []),
-                        ...(review.data.audio || []),
-                      ]),
-                    ]
-                      .filter(
-                        (item) =>
-                          item !== undefined && !item.includes("-verified"),
-                      )
-                      .sort()
-                      .map((obj) => {
-                        return (
-                          <div
-                            key={obj}
-                            className="flex flex-row items-center gap-2 text-sm capitalize"
-                          >
-                            {getIconForLabel(obj, "size-3 text-white")}
-                            {obj}
-                          </div>
-                        );
-                      })}
-                  </div>
-                </div>
-                <div className="flex flex-col gap-1.5">
                   <div className="text-sm text-primary/40">Camera</div>
                   <div className="text-sm capitalize">
                     {review.camera.replaceAll("_", " ")}
@@ -94,25 +80,69 @@ export default function ReviewDetailDialog({
                 </div>
               </div>
               <div className="flex w-full flex-col gap-2 px-6">
-                {review.data.detections.map((eventId) => {
-                  return (
-                    <img
-                      key={eventId}
-                      className="aspect-video select-none rounded-lg object-contain transition-opacity"
-                      style={
-                        isIOS
-                          ? {
-                              WebkitUserSelect: "none",
-                              WebkitTouchCallout: "none",
-                            }
-                          : undefined
-                      }
-                      draggable={false}
-                      src={`${apiHost}api/events/${eventId}/thumbnail.jpg`}
-                    />
-                  );
-                })}
+                <div className="flex flex-col gap-1.5">
+                  <div className="text-sm text-primary/40">Objects</div>
+                  <div className="flex flex-col items-start gap-2 text-sm capitalize">
+                    {events?.map((event) => {
+                      return (
+                        <div
+                          key={event.id}
+                          className="flex flex-row items-center gap-2 text-sm capitalize"
+                        >
+                          {getIconForLabel(event.label, "size-3 text-white")}
+                          {event.sub_label ?? event.label} (
+                          {Math.round(event.data.top_score * 100)}%)
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <div className="text-sm text-primary/40">Zones</div>
+                  <div className="flex flex-col items-start gap-2 text-sm capitalize">
+                    {review.data.zones.map((zone) => {
+                      return (
+                        <div
+                          key={zone}
+                          className="flex flex-row items-center gap-2 text-sm capitalize"
+                        >
+                          {zone.replaceAll("_", " ")}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
+            </div>
+            {hasMismatch && (
+              <div className="p-4 text-center text-sm">
+                Some objects that were detected are not included in this list
+                because the object does not have a snapshot
+              </div>
+            )}
+            <div className="flex w-full flex-col gap-2 px-6">
+              {events?.map((event) => {
+                return (
+                  <img
+                    key={event.id}
+                    className="aspect-video select-none rounded-lg object-contain transition-opacity"
+                    style={
+                      isIOS
+                        ? {
+                            WebkitUserSelect: "none",
+                            WebkitTouchCallout: "none",
+                          }
+                        : undefined
+                    }
+                    draggable={false}
+                    src={
+                      event.has_snapshot
+                        ? `${apiHost}api/events/${event.id}/thumbnail.jpg`
+                        : `${apiHost}api/events/${event.id}/thumbnail.jpg`
+                    }
+                  />
+                );
+              })}
             </div>
           </div>
         )}
