@@ -8,7 +8,9 @@ import { getIconForLabel } from "@/utils/iconUtil";
 import { useApiHost } from "@/api";
 import { ReviewSegment } from "@/types/review";
 import { Event } from "@/types/event";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { cn } from "@/lib/utils";
+import { FrigatePlusDialog } from "../dialog/FrigatePlusDialog";
 
 type ReviewDetailDialogProps = {
   review?: ReviewSegment;
@@ -23,6 +25,10 @@ export default function ReviewDetailDialog({
   });
 
   const apiHost = useApiHost();
+
+  // upload
+
+  const [upload, setUpload] = useState<Event>();
 
   // data
 
@@ -59,6 +65,16 @@ export default function ReviewDetailDialog({
         }
       }}
     >
+      <FrigatePlusDialog
+        upload={upload}
+        onClose={() => setUpload(undefined)}
+        onEventUploaded={() => {
+          if (upload) {
+            upload.plus_id = "new_upload";
+          }
+        }}
+      />
+
       <Content
         className={
           isDesktop ? "sm:max-w-xl" : "max-h-[75dvh] overflow-hidden p-2 pb-4"
@@ -127,7 +143,12 @@ export default function ReviewDetailDialog({
                 return (
                   <img
                     key={event.id}
-                    className="aspect-video select-none rounded-lg object-contain transition-opacity"
+                    className={cn(
+                      "aspect-video select-none rounded-lg object-contain transition-opacity",
+                      event.has_snapshot &&
+                        event.plus_id == undefined &&
+                        "cursor-pointer",
+                    )}
                     style={
                       isIOS
                         ? {
@@ -142,6 +163,11 @@ export default function ReviewDetailDialog({
                         ? `${apiHost}api/events/${event.id}/snapshot.jpg`
                         : `${apiHost}api/events/${event.id}/thumbnail.jpg`
                     }
+                    onClick={() => {
+                      if (event.has_snapshot && event.plus_id == undefined) {
+                        setUpload(event);
+                      }
+                    }}
                   />
                 );
               })}
