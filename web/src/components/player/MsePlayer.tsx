@@ -308,8 +308,10 @@ function MSEPlayer({
     if (!videoRef.current) return;
 
     const now = Date.now();
+
+    // we either recently just started streaming or recently
+    // jumped to live, so don't jump to live again right away
     if (now - lastJumpTimeRef.current < BUFFERING_COOLDOWN_TIMEOUT) {
-      console.log("Cooldown period active, skipping jump");
       return;
     }
 
@@ -319,7 +321,6 @@ function MSEPlayer({
       // Jump to the live edge
       videoRef.current.currentTime = liveEdge;
       lastJumpTimeRef.current = now;
-      console.log("Jumped to live");
     }
   };
 
@@ -413,7 +414,6 @@ function MSEPlayer({
       onPause={() => videoRef.current?.play()}
       onProgress={() => {
         const bufferTime = getBufferedTime(videoRef.current);
-        console.log(bufferTime);
 
         // if we have > 3 seconds of buffered data and we're still not playing,
         // something might be wrong - maybe codec issue, no audio, etc
@@ -424,7 +424,7 @@ function MSEPlayer({
           onPlaying?.();
         }
 
-        // if we have > 1 second of buffered data and we're playing, we may have
+        // if we have > 2 seconds of buffered data and we're playing, we may have
         // drifted from actual live time, so seek to the end of buffered data
         if (
           videoRef.current &&
