@@ -49,6 +49,10 @@ function MSEPlayer({
   const [isPlaying, setIsPlaying] = useState(false);
   const lastJumpTimeRef = useRef(0);
 
+  const MAX_BUFFER_ENTRIES = 10; // Size of the rolling window
+  const bufferTimes = useRef<number[]>([]);
+  const bufferIndex = useRef(0);
+
   const [wsState, setWsState] = useState<number>(WebSocket.CLOSED);
   const [connectTS, setConnectTS] = useState<number>(0);
   const [bufferTimeout, setBufferTimeout] = useState<NodeJS.Timeout>();
@@ -324,6 +328,13 @@ function MSEPlayer({
     }
   };
 
+  const calculateAdaptiveBufferThreshold = () => {
+    const filledEntries = bufferTimes.current.length;
+    const sum = bufferTimes.current.reduce((a, b) => a + b, 0);
+    const averageBufferTime = filledEntries ? sum / filledEntries : 0;
+    return averageBufferTime * 1.5;
+  };
+
   useEffect(() => {
     if (!playbackEnabled) {
       return;
@@ -415,6 +426,18 @@ function MSEPlayer({
       onProgress={() => {
         const bufferTime = getBufferedTime(videoRef.current);
 
+        if (videoRef.current && videoRef.current.playbackRate === 1) {
+          if (bufferTimes.current.length < MAX_BUFFER_ENTRIES) {
+            bufferTimes.current.push(bufferTime);
+          } else {
+            bufferTimes.current[bufferIndex.current] = bufferTime;
+            bufferIndex.current =
+              (bufferIndex.current + 1) % MAX_BUFFER_ENTRIES;
+          }
+        }
+
+        const bufferThreshold = calculateAdaptiveBufferThreshold();
+
         // if we have > 3 seconds of buffered data and we're still not playing,
         // something might be wrong - maybe codec issue, no audio, etc
         // so mark the player as playing so that error handlers will fire
@@ -424,15 +447,34 @@ function MSEPlayer({
           onPlaying?.();
         }
 
-        // if we have > 2 seconds of buffered data and we're playing, we may have
-        // drifted from actual live time, so seek to the end of buffered data
+        // if we're above our rolling average threshold or have > 3 seconds of
+        // buffered data and we're playing, we may have drifted from actual live
+        // time, so increase playback rate to compensate
         if (
           videoRef.current &&
           isPlaying &&
           playbackEnabled &&
-          bufferTime > 2
+          (bufferTime > bufferThreshold || bufferTime > 3) &&
+          Date.now() - lastJumpTimeRef.current > BUFFERING_COOLDOWN_TIMEOUT
         ) {
-          jumpToLive();
+          // jumpToLive();
+          videoRef.current.playbackRate = 1.1;
+          console.log(
+            camera,
+            "increasing playback rate",
+            bufferTime,
+            bufferThreshold,
+          );
+        } else {
+          if (videoRef.current) {
+            console.log(
+              camera,
+              "normal playback rate",
+              bufferTime,
+              bufferThreshold,
+            );
+            videoRef.current.playbackRate = 1;
+          }
         }
 
         if (onError != undefined) {
