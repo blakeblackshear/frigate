@@ -14,12 +14,21 @@ Before setting up a reverse proxy, check if any of the built-in functionality in
 |Authentication|Please see the [authentication](../configuration/authentication.md) documentation|
 |IPv6|[Advanced configuration #enabling-ipv6](../configuration/advanced.md#enabling-ipv6)
 
+**Note about TLS**  
+When using a reverse proxy, the TLS session is usually terminated at the proxy, sending the internal request over plain HTTP. If this is the desired behavior, TLS must first be disabled in Frigate, or you will encounter an HTTP 400 error: "The plain HTTP request was sent to HTTPS port."  
+To disable TLS, set the following in your Frigate configuration:
+```yml
+tls:
+  enabled: false
+```
 
 :::warning
 A reverse proxy can be used to secure access to an internal web server, but the user will be entirely reliant on the steps they have taken. You must ensure you are following security best practices.
 This page does not attempt to outline the specific steps needed to secure your internal website.  
 Please use your own knowledge to assess and vet the reverse proxy software before you install anything on your system.
 :::
+
+## Proxies
 
 There are many solutions available to implement reverse proxies and the community is invited to help out documenting others through a contribution to this page.
 
