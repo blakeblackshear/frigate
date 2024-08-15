@@ -4,6 +4,7 @@ import asyncio
 import os
 import shutil
 import time
+from json import JSONDecodeError
 from typing import Any, Optional
 
 import psutil
@@ -35,7 +36,7 @@ def get_latest_version(config: FrigateConfig) -> str:
             "https://api.github.com/repos/blakeblackshear/frigate/releases/latest",
             timeout=10,
         )
-    except RequestException:
+    except (RequestException, JSONDecodeError):
         return "unknown"
 
     response = request.json()
