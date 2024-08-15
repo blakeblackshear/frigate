@@ -294,10 +294,8 @@ export default function LiveCameraView({
           config &&
           config.go2rtc?.webrtc?.candidates?.length > 0
         ) {
-          // console.log(camera.name, "switching to webrtc");
           setWebRTC(true);
         } else {
-          // console.log(camera.name, "switching to jsmpeg");
           setWebRTC(false);
           setLowBandwidth(true);
         }
