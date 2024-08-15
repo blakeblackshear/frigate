@@ -606,13 +606,23 @@ function DetectionReview({
 
   // keyboard
 
-  useKeyboardListener(["a"], (key, modifiers) => {
+  useKeyboardListener(["a", "r"], (key, modifiers) => {
     if (modifiers.repeat || !modifiers.down) {
       return;
     }
 
     if (key == "a" && modifiers.ctrl) {
       onSelectAllReviews();
+    }
+
+    if (key == "r" && selectedReviews.length > 0) {
+      currentItems?.forEach((item) => {
+        if (selectedReviews.includes(item.id)) {
+          item.has_been_reviewed = true;
+          markItemAsReviewed(item);
+        }
+      });
+      setSelectedReviews([]);
     }
   });
 
