@@ -622,6 +622,7 @@ function DetectionReview({
           markItemAsReviewed(item);
         }
       });
+      setSelectedReviews([]);
     }
   });
 
