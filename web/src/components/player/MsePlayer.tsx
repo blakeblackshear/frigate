@@ -32,7 +32,7 @@ function MSEPlayer({
   onError,
 }: MSEPlayerProps) {
   const RECONNECT_TIMEOUT: number = 10000;
-  const BUFFERING_COOLDOWN_TIMEOUT: number = 5000;
+  // const BUFFERING_COOLDOWN_TIMEOUT: number = 5000;
 
   const CODECS: string[] = [
     "avc1.640029", // H.264 high 4.1 (Chromecast 1st and 2nd Gen)
@@ -49,9 +49,9 @@ function MSEPlayer({
   const [isPlaying, setIsPlaying] = useState(false);
   const lastJumpTimeRef = useRef(0);
 
-  const MAX_BUFFER_ENTRIES = 10; // Size of the rolling window
-  const bufferTimes = useRef<number[]>([]);
-  const bufferIndex = useRef(0);
+  // const MAX_BUFFER_ENTRIES = 10; // Size of the rolling window
+  // const bufferTimes = useRef<number[]>([]);
+  // const bufferIndex = useRef(0);
 
   const [wsState, setWsState] = useState<number>(WebSocket.CLOSED);
   const [connectTS, setConnectTS] = useState<number>(0);
@@ -315,12 +315,12 @@ function MSEPlayer({
     return video.buffered.end(video.buffered.length - 1) - video.currentTime;
   };
 
-  const calculateAdaptiveBufferThreshold = () => {
-    const filledEntries = bufferTimes.current.length;
-    const sum = bufferTimes.current.reduce((a, b) => a + b, 0);
-    const averageBufferTime = filledEntries ? sum / filledEntries : 0;
-    return averageBufferTime * 1.5;
-  };
+  // const calculateAdaptiveBufferThreshold = () => {
+  //   const filledEntries = bufferTimes.current.length;
+  //   const sum = bufferTimes.current.reduce((a, b) => a + b, 0);
+  //   const averageBufferTime = filledEntries ? sum / filledEntries : 0;
+  //   return averageBufferTime * 1.5;
+  // };
 
   useEffect(() => {
     if (!playbackEnabled) {
@@ -413,17 +413,17 @@ function MSEPlayer({
       onProgress={() => {
         const bufferTime = getBufferedTime(videoRef.current);
 
-        if (videoRef.current && videoRef.current.playbackRate === 1) {
-          if (bufferTimes.current.length < MAX_BUFFER_ENTRIES) {
-            bufferTimes.current.push(bufferTime);
-          } else {
-            bufferTimes.current[bufferIndex.current] = bufferTime;
-            bufferIndex.current =
-              (bufferIndex.current + 1) % MAX_BUFFER_ENTRIES;
-          }
-        }
+        // if (videoRef.current && videoRef.current.playbackRate === 1) {
+        //   if (bufferTimes.current.length < MAX_BUFFER_ENTRIES) {
+        //     bufferTimes.current.push(bufferTime);
+        //   } else {
+        //     bufferTimes.current[bufferIndex.current] = bufferTime;
+        //     bufferIndex.current =
+        //       (bufferIndex.current + 1) % MAX_BUFFER_ENTRIES;
+        //   }
+        // }
 
-        const bufferThreshold = calculateAdaptiveBufferThreshold();
+        // const bufferThreshold = calculateAdaptiveBufferThreshold();
 
         // if we have > 3 seconds of buffered data and we're still not playing,
         // something might be wrong - maybe codec issue, no audio, etc
@@ -437,31 +437,31 @@ function MSEPlayer({
         // if we're above our rolling average threshold or have > 3 seconds of
         // buffered data and we're playing, we may have drifted from actual live
         // time, so increase playback rate to compensate
-        if (
-          videoRef.current &&
-          isPlaying &&
-          playbackEnabled &&
-          (bufferTime > bufferThreshold || bufferTime > 3) &&
-          Date.now() - lastJumpTimeRef.current > BUFFERING_COOLDOWN_TIMEOUT
-        ) {
-          videoRef.current.playbackRate = 1.1;
-          console.log(
-            camera,
-            "increasing playback rate",
-            bufferTime,
-            bufferThreshold,
-          );
-        } else {
-          if (videoRef.current) {
-            console.log(
-              camera,
-              "normal playback rate",
-              bufferTime,
-              bufferThreshold,
-            );
-            videoRef.current.playbackRate = 1;
-          }
-        }
+        // if (
+        //   videoRef.current &&
+        //   isPlaying &&
+        //   playbackEnabled &&
+        //   (bufferTime > bufferThreshold || bufferTime > 3) &&
+        //   Date.now() - lastJumpTimeRef.current > BUFFERING_COOLDOWN_TIMEOUT
+        // ) {
+        //   videoRef.current.playbackRate = 1.1;
+        //   console.log(
+        //     camera,
+        //     "increasing playback rate",
+        //     bufferTime,
+        //     bufferThreshold,
+        //   );
+        // } else {
+        //   if (videoRef.current) {
+        //     console.log(
+        //       camera,
+        //       "normal playback rate",
+        //       bufferTime,
+        //       bufferThreshold,
+        //     );
+        //     videoRef.current.playbackRate = 1;
+        //   }
+        // }
 
         if (onError != undefined) {
           if (videoRef.current?.paused) {
