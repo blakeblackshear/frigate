@@ -286,14 +286,25 @@ export default function LiveCameraView({
     }
   }, [fullscreen, isPortrait, cameraAspectRatio, containerAspectRatio]);
 
-  const handleError = useCallback((e: LivePlayerError) => {
-    if (e == "mse-decode") {
-      setWebRTC(true);
-    } else {
-      setWebRTC(false);
-      setLowBandwidth(true);
-    }
-  }, []);
+  const handleError = useCallback(
+    (e: LivePlayerError) => {
+      if (e) {
+        if (
+          !webRTC &&
+          config &&
+          config.go2rtc?.webrtc?.candidates?.length > 0
+        ) {
+          // console.log(camera.name, "switching to webrtc");
+          setWebRTC(true);
+        } else {
+          // console.log(camera.name, "switching to jsmpeg");
+          setWebRTC(false);
+          setLowBandwidth(true);
+        }
+      }
+    },
+    [config, webRTC],
+  );
 
   return (
     <TransformWrapper minScale={1.0} wheel={{ smoothStep: 0.005 }}>

@@ -139,6 +139,13 @@ function MSEPlayer({
     }
   }, [bufferTimeout]);
 
+  const handlePause = useCallback(() => {
+    // don't let the user pause the live stream
+    if (isPlaying && playbackEnabled) {
+      videoRef.current?.play();
+    }
+  }, [isPlaying, playbackEnabled]);
+
   const onOpen = () => {
     setWsState(WebSocket.OPEN);
 
@@ -402,7 +409,7 @@ function MSEPlayer({
         lastJumpTimeRef.current = Date.now();
       }}
       muted={!audioEnabled}
-      onPause={() => videoRef.current?.play()}
+      onPause={handlePause}
       onProgress={() => {
         const bufferTime = getBufferedTime(videoRef.current);
 
