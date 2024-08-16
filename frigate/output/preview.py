@@ -245,6 +245,9 @@ class PreviewRecorder:
         frame_time: float,
     ) -> bool:
         """Decide if this frame should be added to PREVIEW."""
+        if not self.config.record.enabled:
+            return False
+
         active_objs = get_active_objects(
             frame_time, self.config, current_tracked_objects
         )
