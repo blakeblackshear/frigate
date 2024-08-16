@@ -274,7 +274,7 @@ function MSEPlayer({
     onmessageRef.current["mse"] = (msg) => {
       if (msg.type !== "mse") return;
 
-      console.log(msg.value);
+      console.log(camera, "codecs", msg.value);
 
       let sb: SourceBuffer | undefined;
       try {
@@ -346,12 +346,6 @@ function MSEPlayer({
     if (!videoRef.current) return;
 
     const now = Date.now();
-
-    // we either recently just started streaming or recently
-    // jumped to live, so don't jump to live again right away
-    if (now - lastJumpTimeRef.current < BUFFERING_COOLDOWN_TIMEOUT) {
-      return;
-    }
 
     const buffered = videoRef.current.buffered;
     if (buffered.length > 0) {
