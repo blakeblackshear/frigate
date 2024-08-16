@@ -216,6 +216,7 @@ function MSEPlayer({
               type: "mse",
               // @ts-expect-error for typing
               value: codecs(MediaSource.isTypeSupported),
+              duration: Number.POSITIVE_INFINITY, // https://stackoverflow.com/questions/74461792/mediasource-api-safari-pauses-video-on-buffer-underflow
             },
             3000,
           ).catch(() => {
@@ -245,6 +246,7 @@ function MSEPlayer({
             {
               type: "mse",
               value: codecs(MediaSource.isTypeSupported),
+              duration: Number.POSITIVE_INFINITY, // https://stackoverflow.com/questions/74461792/mediasource-api-safari-pauses-video-on-buffer-underflow
             },
             3000,
           ).catch(() => {
@@ -268,7 +270,23 @@ function MSEPlayer({
     onmessageRef.current["mse"] = (msg) => {
       if (msg.type !== "mse") return;
 
-      const sb = msRef.current?.addSourceBuffer(msg.value);
+      let sb: SourceBuffer | undefined;
+      try {
+        sb = msRef.current?.addSourceBuffer(msg.value);
+      } catch (e) {
+        // Safari sometimes throws this error
+        if (e instanceof DOMException && e.name === "InvalidStateError") {
+          if (wsRef.current) {
+            onDisconnect();
+          }
+          console.log(camera, "threw InvalidStateError");
+          onError?.("mse-decode");
+          return;
+        } else {
+          throw e; // Re-throw if it's not the error we're handling
+        }
+      }
+
       sb?.addEventListener("updateend", () => {
         if (sb.updating) return;
 
@@ -320,6 +338,24 @@ function MSEPlayer({
     const sum = bufferTimes.current.reduce((a, b) => a + b, 0);
     const averageBufferTime = filledEntries ? sum / filledEntries : 0;
     return averageBufferTime * 1.5;
+  };
+
+  const calculateAdaptivePlaybackRate = (
+    bufferTime: number,
+    bufferThreshold: number,
+  ) => {
+    const alpha = 0.2; // aggressiveness of playback rate increase
+    const beta = 0.5; // steepness of exponential growth
+
+    // don't adjust playback rate if we're close enough to live
+    if (
+      (bufferTime <= bufferThreshold && bufferThreshold < 3) ||
+      bufferTime < 3
+    ) {
+      return 1;
+    }
+    const rate = 1 + alpha * Math.exp(beta * bufferTime - bufferThreshold);
+    return Math.min(rate, 2);
   };
 
   useEffect(() => {
@@ -407,13 +443,17 @@ function MSEPlayer({
         onPlaying?.();
         setIsPlaying(true);
         lastJumpTimeRef.current = Date.now();
+        console.log(camera, "loaded mse data");
       }}
       muted={!audioEnabled}
       onPause={handlePause}
       onProgress={() => {
         const bufferTime = getBufferedTime(videoRef.current);
 
-        if (videoRef.current && videoRef.current.playbackRate === 1) {
+        if (
+          videoRef.current &&
+          (videoRef.current.playbackRate === 1 || bufferTime < 3)
+        ) {
           if (bufferTimes.current.length < MAX_BUFFER_ENTRIES) {
             bufferTimes.current.push(bufferTime);
           } else {
@@ -434,6 +474,21 @@ function MSEPlayer({
           onPlaying?.();
         }
 
+        // if we have more than 10 seconds of buffer, something's wrong so error out
+        if (
+          isPlaying &&
+          playbackEnabled &&
+          (bufferThreshold > 10 || bufferTime > 10)
+        ) {
+          onDisconnect();
+          onError?.("stalled");
+        }
+
+        const playbackRate = calculateAdaptivePlaybackRate(
+          bufferTime,
+          bufferThreshold,
+        );
+
         // if we're above our rolling average threshold or have > 3 seconds of
         // buffered data and we're playing, we may have drifted from actual live
         // time, so increase playback rate to compensate
@@ -441,15 +496,24 @@ function MSEPlayer({
           videoRef.current &&
           isPlaying &&
           playbackEnabled &&
-          (bufferTime > bufferThreshold || bufferTime > 3) &&
           Date.now() - lastJumpTimeRef.current > BUFFERING_COOLDOWN_TIMEOUT
         ) {
-          videoRef.current.playbackRate = 1.1;
-        } else {
-          if (videoRef.current) {
-            videoRef.current.playbackRate = 1;
-          }
+          videoRef.current.playbackRate = playbackRate;
         }
+
+        console.log(
+          camera,
+          "isPlaying?",
+          isPlaying,
+          "playbackEnabled?",
+          playbackEnabled,
+          "bufferTime",
+          bufferTime,
+          "bufferThreshold",
+          bufferThreshold,
+          "playbackRate",
+          playbackRate,
+        );
 
         if (onError != undefined) {
           if (videoRef.current?.paused) {
