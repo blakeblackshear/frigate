@@ -77,7 +77,7 @@ export default function ReviewDetailDialog({
 
       <Content
         className={
-          isDesktop ? "sm:max-w-xl" : "max-h-[75dvh] overflow-hidden p-2 pb-4"
+          isDesktop ? "sm:max-w-xl" : "max-h-[75dvh] overflow-x-hidden p-2 pb-4"
         }
       >
         {review && (
@@ -147,6 +147,7 @@ export default function ReviewDetailDialog({
                       "aspect-video select-none rounded-lg object-contain transition-opacity",
                       event.has_snapshot &&
                         event.plus_id == undefined &&
+                        config?.plus.enabled &&
                         "cursor-pointer",
                     )}
                     style={
@@ -164,7 +165,11 @@ export default function ReviewDetailDialog({
                         : `${apiHost}api/events/${event.id}/thumbnail.jpg`
                     }
                     onClick={() => {
-                      if (event.has_snapshot && event.plus_id == undefined) {
+                      if (
+                        event.has_snapshot &&
+                        event.plus_id == undefined &&
+                        config?.plus.enabled
+                      ) {
                         setUpload(event);
                       }
                     }}
