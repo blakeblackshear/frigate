@@ -345,8 +345,10 @@ class PreviewRecorder:
             self.output_frames: list[float] = []
 
             # include first frame to ensure consistent duration
-            self.output_frames.append(frame_time)
-            self.write_frame_to_cache(frame_time, frame)
+            if self.config.record.enabled:
+                self.output_frames.append(frame_time)
+                self.write_frame_to_cache(frame_time, frame)
+
             return True
         elif self.should_write_frame(current_tracked_objects, motion_boxes, frame_time):
             self.output_frames.append(frame_time)
