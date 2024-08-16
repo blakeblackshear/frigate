@@ -117,7 +117,7 @@ server {
   set $port           8971;
 
   listen 80;
-  listen 443 ssl http2;
+  listen 443 ssl;
 
   server_name frigate.domain.com;
 }
@@ -151,6 +151,8 @@ The settings below enabled connection upgrade, sets up logging (optional) and pr
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection $http_connection;
     proxy_http_version 1.1;
+
+    proxy_pass $forward_scheme://$server:$port;
   }
 
 ```
