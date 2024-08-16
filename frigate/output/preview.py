@@ -12,6 +12,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
+from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, RecordQualityEnum
 from frigate.const import CACHE_DIR, CLIPS_DIR, INSERT_PREVIEW, PREVIEW_FRAME_TYPE
@@ -170,6 +171,7 @@ class PreviewRecorder:
 
         # create communication for finished previews
         self.requestor = InterProcessRequestor()
+        self.config_subscriber = ConfigSubscriber(f"config/record/{self.config.name}")
 
         y, u1, u2, v1, v2 = get_yuv_crop(
             self.config.frame_shape_yuv,
@@ -300,6 +302,12 @@ class PreviewRecorder:
         frame_time: float,
         frame,
     ) -> bool:
+        # check for updated record config
+        _, updated_record_config = self.config_subscriber.check_for_update()
+
+        if updated_record_config:
+            self.config.record = updated_record_config
+
         # always write the first frame
         if self.start_time == 0:
             self.start_time = frame_time
@@ -309,14 +317,18 @@ class PreviewRecorder:
 
         # check if PREVIEW clip should be generated and cached frames reset
         if frame_time >= self.segment_end:
-            # save last frame to ensure consistent duration
-            self.output_frames.append(frame_time)
-            self.write_frame_to_cache(frame_time, frame)
-            FFMpegConverter(
-                self.config,
-                self.output_frames,
-                self.requestor,
-            ).start()
+            if len(self.output_frames) > 0:
+                # save last frame to ensure consistent duration
+                if self.config.record:
+                    self.output_frames.append(frame_time)
+                    self.write_frame_to_cache(frame_time, frame)
+
+                # write the preview if any frames exist for this hour
+                FFMpegConverter(
+                    self.config,
+                    self.output_frames,
+                    self.requestor,
+                ).start()
 
             # reset frame cache
             self.segment_end = (
