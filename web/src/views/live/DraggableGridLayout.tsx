@@ -55,6 +55,7 @@ type DraggableGridLayoutProps = {
   setIsEditMode: React.Dispatch<React.SetStateAction<boolean>>;
   fullscreen: boolean;
   toggleFullscreen: () => void;
+  resetPreferredLiveMode: (camera: string) => void;
 };
 export default function DraggableGridLayout({
   cameras,
@@ -69,6 +70,7 @@ export default function DraggableGridLayout({
   setIsEditMode,
   fullscreen,
   toggleFullscreen,
+  resetPreferredLiveMode,
 }: DraggableGridLayoutProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
@@ -477,6 +479,7 @@ export default function DraggableGridLayout({
                       return newModes;
                     });
                   }}
+                  onResetLiveMode={() => resetPreferredLiveMode(camera.name)}
                 >
                   {isEditMode && showCircles && <CornerCircles />}
                 </LivePlayerGridItem>
@@ -635,6 +638,7 @@ type LivePlayerGridItemProps = {
   preferredLiveMode: LivePlayerMode;
   onClick: () => void;
   onError: (e: LivePlayerError) => void;
+  onResetLiveMode: () => void;
 };
 
 const LivePlayerGridItem = React.forwardRef<
@@ -655,6 +659,7 @@ const LivePlayerGridItem = React.forwardRef<
       preferredLiveMode,
       onClick,
       onError,
+      onResetLiveMode,
       ...props
     },
     ref,
@@ -676,6 +681,7 @@ const LivePlayerGridItem = React.forwardRef<
           preferredLiveMode={preferredLiveMode}
           onClick={onClick}
           onError={onError}
+          onResetLiveMode={onResetLiveMode}
           containerRef={ref as React.RefObject<HTMLDivElement>}
         />
         {children}

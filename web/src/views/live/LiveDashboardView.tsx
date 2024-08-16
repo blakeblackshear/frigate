@@ -214,6 +214,30 @@ export default function LiveDashboardView({
     setPreferredLiveModes(newPreferredLiveModes);
   }, [cameras, config, windowVisible]);
 
+  const resetPreferredLiveMode = useCallback(
+    (cameraName: string) => {
+      const mseSupported =
+        "MediaSource" in window || "ManagedMediaSource" in window;
+      const isRestreamed =
+        config && Object.keys(config.go2rtc.streams || {}).includes(cameraName);
+
+      setPreferredLiveModes((prevModes) => {
+        const newModes = { ...prevModes };
+
+        if (!mseSupported) {
+          newModes[cameraName] = isRestreamed ? "webrtc" : "jsmpeg";
+        } else {
+          newModes[cameraName] = isRestreamed ? "mse" : "jsmpeg";
+        }
+
+        console.log("resetting", cameraName, "to", newModes[cameraName]);
+
+        return newModes;
+      });
+    },
+    [config],
+  );
+
   const cameraRef = useCallback(
     (node: HTMLElement | null) => {
       if (!visibleCameraObserver.current) {
@@ -394,6 +418,7 @@ export default function LiveDashboardView({
                   autoLive={autoLiveView}
                   onClick={() => onSelectCamera(camera.name)}
                   onError={(e) => handleError(camera.name, e)}
+                  onResetLiveMode={() => resetPreferredLiveMode(camera.name)}
                 />
               );
             })}
@@ -442,6 +467,7 @@ export default function LiveDashboardView({
           setIsEditMode={setIsEditMode}
           fullscreen={fullscreen}
           toggleFullscreen={toggleFullscreen}
+          resetPreferredLiveMode={resetPreferredLiveMode}
         />
       )}
     </div>

@@ -224,8 +224,10 @@ function MSEPlayer({
               onDisconnect();
             }
             if (isIOS || isSafari) {
+              console.log(camera, "Safari MSE sourceopen error");
               onError?.("mse-decode");
             } else {
+              console.log(camera, "MSE sourceopen error");
               onError?.("startup");
             }
           });
@@ -254,8 +256,10 @@ function MSEPlayer({
               onDisconnect();
             }
             if (isIOS || isSafari) {
+              console.log(camera, "Safari MSE sourceopen error");
               onError?.("mse-decode");
             } else {
+              console.log(camera, "MSE sourceopen error");
               onError?.("startup");
             }
           });
@@ -481,6 +485,7 @@ function MSEPlayer({
           (bufferThreshold > 10 || bufferTime > 10)
         ) {
           onDisconnect();
+          console.log(camera, "MSE stream buffer is > 10 seconds");
           onError?.("stalled");
         }
 
@@ -533,6 +538,7 @@ function MSEPlayer({
                 videoRef.current
               ) {
                 onDisconnect();
+                console.log(camera, "MSE buffer timeout > 3 seconds");
                 onError("stalled");
               }
             }, 3000),
@@ -547,6 +553,7 @@ function MSEPlayer({
           if (wsRef.current) {
             onDisconnect();
           }
+          console.log(camera, "MSE network error");
           onError?.("startup");
         }
 
@@ -558,6 +565,7 @@ function MSEPlayer({
           if (wsRef.current) {
             onDisconnect();
           }
+          console.log(camera, "Safari MSE decoding error");
           onError?.("mse-decode");
         }
 
@@ -567,6 +575,7 @@ function MSEPlayer({
           onDisconnect();
           if (errorCount >= 3) {
             // too many mse errors, try jsmpeg
+            console.log(camera, "too many MSE errors");
             onError?.("startup");
           } else {
             reconnect(5000);

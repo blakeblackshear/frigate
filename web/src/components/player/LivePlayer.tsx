@@ -35,6 +35,7 @@ type LivePlayerProps = {
   onClick?: () => void;
   setFullResolution?: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
   onError?: (error: LivePlayerError) => void;
+  onResetLiveMode?: () => void;
 };
 
 export default function LivePlayer({
@@ -53,6 +54,7 @@ export default function LivePlayer({
   onClick,
   setFullResolution,
   onError,
+  onResetLiveMode,
 }: LivePlayerProps) {
   const internalContainerRef = useRef<HTMLDivElement | null>(null);
   // camera activity
@@ -88,6 +90,7 @@ export default function LivePlayer({
       const timer = setTimeout(() => {
         if (liveReadyRef.current && !cameraActiveRef.current) {
           setLiveReady(false);
+          onResetLiveMode?.();
         }
       }, 500);
 
@@ -207,7 +210,12 @@ export default function LivePlayer({
   }
 
   useEffect(() => {
-    console.log(cameraConfig.name, "switching to", preferredLiveMode);
+    console.log(
+      cameraConfig.name,
+      cameraConfig.live.stream_name,
+      "switching to",
+      preferredLiveMode,
+    );
   }, [preferredLiveMode]);
 
   return (
