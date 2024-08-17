@@ -32,6 +32,7 @@ function MSEPlayer({
   onError,
 }: MSEPlayerProps) {
   const RECONNECT_TIMEOUT: number = 10000;
+  const BUFFERING_COOLDOWN_TIMEOUT: number = 5000;
 
   const CODECS: string[] = [
     "avc1.640029", // H.264 high 4.1 (Chromecast 1st and 2nd Gen)
@@ -46,6 +47,11 @@ function MSEPlayer({
 
   const visibilityCheck: boolean = !pip;
   const [isPlaying, setIsPlaying] = useState(false);
+  const lastJumpTimeRef = useRef(0);
+
+  const MAX_BUFFER_ENTRIES = 10; // Size of the rolling window  of buffered times
+  const bufferTimes = useRef<number[]>([]);
+  const bufferIndex = useRef(0);
 
   const [wsState, setWsState] = useState<number>(WebSocket.CLOSED);
   const [connectTS, setConnectTS] = useState<number>(0);
@@ -133,6 +139,13 @@ function MSEPlayer({
     }
   }, [bufferTimeout]);
 
+  const handlePause = useCallback(() => {
+    // don't let the user pause the live stream
+    if (isPlaying && playbackEnabled) {
+      videoRef.current?.play();
+    }
+  }, [isPlaying, playbackEnabled]);
+
   const onOpen = () => {
     setWsState(WebSocket.OPEN);
 
@@ -193,6 +206,7 @@ function MSEPlayer({
 
   const onMse = () => {
     if ("ManagedMediaSource" in window) {
+      // safari
       const MediaSource = window.ManagedMediaSource;
 
       msRef.current?.addEventListener(
@@ -224,6 +238,7 @@ function MSEPlayer({
         videoRef.current.srcObject = msRef.current;
       }
     } else {
+      // non safari
       msRef.current?.addEventListener(
         "sourceopen",
         () => {
@@ -247,15 +262,35 @@ function MSEPlayer({
         },
         { once: true },
       );
-      videoRef.current!.src = URL.createObjectURL(msRef.current!);
-      videoRef.current!.srcObject = null;
+      if (videoRef.current && msRef.current) {
+        videoRef.current.src = URL.createObjectURL(msRef.current);
+        videoRef.current.srcObject = null;
+      }
     }
     play();
 
     onmessageRef.current["mse"] = (msg) => {
       if (msg.type !== "mse") return;
 
-      const sb = msRef.current?.addSourceBuffer(msg.value);
+      let sb: SourceBuffer | undefined;
+      try {
+        sb = msRef.current?.addSourceBuffer(msg.value);
+        if (sb?.mode) {
+          sb.mode = "segments";
+        }
+      } catch (e) {
+        // Safari sometimes throws this error
+        if (e instanceof DOMException && e.name === "InvalidStateError") {
+          if (wsRef.current) {
+            onDisconnect();
+          }
+          onError?.("mse-decode");
+          return;
+        } else {
+          throw e; // Re-throw if it's not the error we're handling
+        }
+      }
+
       sb?.addEventListener("updateend", () => {
         if (sb.updating) return;
 
@@ -300,6 +335,43 @@ function MSEPlayer({
   const getBufferedTime = (video: HTMLVideoElement | null) => {
     if (!video || video.buffered.length === 0) return 0;
     return video.buffered.end(video.buffered.length - 1) - video.currentTime;
+  };
+
+  const jumpToLive = () => {
+    if (!videoRef.current) return;
+
+    const buffered = videoRef.current.buffered;
+    if (buffered.length > 0) {
+      const liveEdge = buffered.end(buffered.length - 1);
+      // Jump to the live edge
+      videoRef.current.currentTime = liveEdge - 0.75;
+      lastJumpTimeRef.current = Date.now();
+    }
+  };
+
+  const calculateAdaptiveBufferThreshold = () => {
+    const filledEntries = bufferTimes.current.length;
+    const sum = bufferTimes.current.reduce((a, b) => a + b, 0);
+    const averageBufferTime = filledEntries ? sum / filledEntries : 0;
+    return averageBufferTime * (isSafari || isIOS ? 3 : 1.5);
+  };
+
+  const calculateAdaptivePlaybackRate = (
+    bufferTime: number,
+    bufferThreshold: number,
+  ) => {
+    const alpha = 0.2; // aggressiveness of playback rate increase
+    const beta = 0.5; // steepness of exponential growth
+
+    // don't adjust playback rate if we're close enough to live
+    if (
+      (bufferTime <= bufferThreshold && bufferThreshold < 3) ||
+      bufferTime < 3
+    ) {
+      return 1;
+    }
+    const rate = 1 + alpha * Math.exp(beta * bufferTime - bufferThreshold);
+    return Math.min(rate, 2);
   };
 
   useEffect(() => {
@@ -386,21 +458,71 @@ function MSEPlayer({
         handleLoadedMetadata?.();
         onPlaying?.();
         setIsPlaying(true);
+        lastJumpTimeRef.current = Date.now();
       }}
       muted={!audioEnabled}
-      onPause={() => videoRef.current?.play()}
+      onPause={handlePause}
       onProgress={() => {
+        const bufferTime = getBufferedTime(videoRef.current);
+
+        if (
+          videoRef.current &&
+          (videoRef.current.playbackRate === 1 || bufferTime < 3)
+        ) {
+          if (bufferTimes.current.length < MAX_BUFFER_ENTRIES) {
+            bufferTimes.current.push(bufferTime);
+          } else {
+            bufferTimes.current[bufferIndex.current] = bufferTime;
+            bufferIndex.current =
+              (bufferIndex.current + 1) % MAX_BUFFER_ENTRIES;
+          }
+        }
+
+        const bufferThreshold = calculateAdaptiveBufferThreshold();
+
         // if we have > 3 seconds of buffered data and we're still not playing,
         // something might be wrong - maybe codec issue, no audio, etc
         // so mark the player as playing so that error handlers will fire
-        if (
-          !isPlaying &&
-          playbackEnabled &&
-          getBufferedTime(videoRef.current) > 3
-        ) {
+        if (!isPlaying && playbackEnabled && bufferTime > 3) {
           setIsPlaying(true);
+          lastJumpTimeRef.current = Date.now();
           onPlaying?.();
         }
+
+        // if we have more than 10 seconds of buffer, something's wrong so error out
+        if (
+          isPlaying &&
+          playbackEnabled &&
+          (bufferThreshold > 10 || bufferTime > 10)
+        ) {
+          onDisconnect();
+          onError?.("stalled");
+        }
+
+        const playbackRate = calculateAdaptivePlaybackRate(
+          bufferTime,
+          bufferThreshold,
+        );
+
+        // if we're above our rolling average threshold or have > 3 seconds of
+        // buffered data and we're playing, we may have drifted from actual live
+        // time, so increase playback rate to compensate - non safari/ios only
+        if (
+          videoRef.current &&
+          isPlaying &&
+          playbackEnabled &&
+          Date.now() - lastJumpTimeRef.current > BUFFERING_COOLDOWN_TIMEOUT
+        ) {
+          // Jump to live on Safari/iOS due to a change of playback rate causing re-buffering
+          if (isSafari || isIOS) {
+            if (bufferTime > 3) {
+              jumpToLive();
+            }
+          } else {
+            videoRef.current.playbackRate = playbackRate;
+          }
+        }
+
         if (onError != undefined) {
           if (videoRef.current?.paused) {
             return;

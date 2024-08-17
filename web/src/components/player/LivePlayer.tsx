@@ -13,7 +13,6 @@ import {
   LivePlayerMode,
   VideoResolutionType,
 } from "@/types/live";
-import useCameraLiveMode from "@/hooks/use-camera-live-mode";
 import { getIconForLabel } from "@/utils/iconUtil";
 import Chip from "../indicators/Chip";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
@@ -25,7 +24,7 @@ type LivePlayerProps = {
   containerRef?: React.MutableRefObject<HTMLDivElement | null>;
   className?: string;
   cameraConfig: CameraConfig;
-  preferredLiveMode?: LivePlayerMode;
+  preferredLiveMode: LivePlayerMode;
   showStillWithoutActivity?: boolean;
   windowVisible?: boolean;
   playAudio?: boolean;
@@ -36,6 +35,7 @@ type LivePlayerProps = {
   onClick?: () => void;
   setFullResolution?: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
   onError?: (error: LivePlayerError) => void;
+  onResetLiveMode?: () => void;
 };
 
 export default function LivePlayer({
@@ -54,6 +54,7 @@ export default function LivePlayer({
   onClick,
   setFullResolution,
   onError,
+  onResetLiveMode,
 }: LivePlayerProps) {
   const internalContainerRef = useRef<HTMLDivElement | null>(null);
   // camera activity
@@ -69,8 +70,6 @@ export default function LivePlayer({
   );
 
   // camera live state
-
-  const liveMode = useCameraLiveMode(cameraConfig, preferredLiveMode);
 
   const [liveReady, setLiveReady] = useState(false);
 
@@ -91,6 +90,7 @@ export default function LivePlayer({
       const timer = setTimeout(() => {
         if (liveReadyRef.current && !cameraActiveRef.current) {
           setLiveReady(false);
+          onResetLiveMode?.();
         }
       }, 500);
 
@@ -152,7 +152,7 @@ export default function LivePlayer({
   let player;
   if (!autoLive) {
     player = null;
-  } else if (liveMode == "webrtc") {
+  } else if (preferredLiveMode == "webrtc") {
     player = (
       <WebRtcPlayer
         className={`size-full rounded-lg md:rounded-2xl ${liveReady ? "" : "hidden"}`}
@@ -166,7 +166,7 @@ export default function LivePlayer({
         onError={onError}
       />
     );
-  } else if (liveMode == "mse") {
+  } else if (preferredLiveMode == "mse") {
     if ("MediaSource" in window || "ManagedMediaSource" in window) {
       player = (
         <MSEPlayer
@@ -187,7 +187,7 @@ export default function LivePlayer({
         </div>
       );
     }
-  } else if (liveMode == "jsmpeg") {
+  } else if (preferredLiveMode == "jsmpeg") {
     if (cameraActive || !showStillWithoutActivity || liveReady) {
       player = (
         <JSMpegPlayer
