@@ -30,8 +30,8 @@ import { LuLayoutDashboard } from "react-icons/lu";
 import { cn } from "@/lib/utils";
 import { LivePlayerError } from "@/types/live";
 import { FaCompress, FaExpand } from "react-icons/fa";
-import { useResizeObserver } from "@/hooks/resize-observer";
 import useCameraLiveMode from "@/hooks/use-camera-live-mode";
+import { useResizeObserver } from "@/hooks/resize-observer";
 
 type LiveDashboardViewProps = {
   cameras: CameraConfig[];
