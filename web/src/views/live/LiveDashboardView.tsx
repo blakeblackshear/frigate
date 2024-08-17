@@ -230,8 +230,6 @@ export default function LiveDashboardView({
           newModes[cameraName] = isRestreamed ? "mse" : "jsmpeg";
         }
 
-        console.log("resetting", cameraName, "to", newModes[cameraName]);
-
         return newModes;
       });
     },

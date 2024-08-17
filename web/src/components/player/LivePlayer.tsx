@@ -209,15 +209,6 @@ export default function LivePlayer({
     player = <ActivityIndicator />;
   }
 
-  useEffect(() => {
-    console.log(
-      cameraConfig.name,
-      cameraConfig.live.stream_name,
-      "switching to",
-      preferredLiveMode,
-    );
-  }, [preferredLiveMode]);
-
   return (
     <div
       ref={cameraRef ?? internalContainerRef}

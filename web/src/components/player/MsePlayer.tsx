@@ -206,6 +206,7 @@ function MSEPlayer({
 
   const onMse = () => {
     if ("ManagedMediaSource" in window) {
+      // safari
       const MediaSource = window.ManagedMediaSource;
 
       msRef.current?.addEventListener(
@@ -223,10 +224,8 @@ function MSEPlayer({
               onDisconnect();
             }
             if (isIOS || isSafari) {
-              console.log(camera, "Safari MSE sourceopen error");
               onError?.("mse-decode");
             } else {
-              console.log(camera, "MSE sourceopen error");
               onError?.("startup");
             }
           });
@@ -239,6 +238,7 @@ function MSEPlayer({
         videoRef.current.srcObject = msRef.current;
       }
     } else {
+      // non safari
       msRef.current?.addEventListener(
         "sourceopen",
         () => {
@@ -254,10 +254,8 @@ function MSEPlayer({
               onDisconnect();
             }
             if (isIOS || isSafari) {
-              console.log(camera, "Safari MSE sourceopen error");
               onError?.("mse-decode");
             } else {
-              console.log(camera, "MSE sourceopen error");
               onError?.("startup");
             }
           });
@@ -274,8 +272,6 @@ function MSEPlayer({
     onmessageRef.current["mse"] = (msg) => {
       if (msg.type !== "mse") return;
 
-      console.log(camera, "codecs", msg.value);
-
       let sb: SourceBuffer | undefined;
       try {
         sb = msRef.current?.addSourceBuffer(msg.value);
@@ -288,7 +284,6 @@ function MSEPlayer({
           if (wsRef.current) {
             onDisconnect();
           }
-          console.log(camera, "threw InvalidStateError");
           onError?.("mse-decode");
           return;
         } else {
@@ -345,15 +340,12 @@ function MSEPlayer({
   const jumpToLive = () => {
     if (!videoRef.current) return;
 
-    const now = Date.now();
-
     const buffered = videoRef.current.buffered;
     if (buffered.length > 0) {
       const liveEdge = buffered.end(buffered.length - 1);
       // Jump to the live edge
-      videoRef.current.currentTime = liveEdge;
-      lastJumpTimeRef.current = now;
-      console.log(camera, "jumped to live");
+      videoRef.current.currentTime = liveEdge - 0.75;
+      lastJumpTimeRef.current = Date.now();
     }
   };
 
@@ -361,7 +353,7 @@ function MSEPlayer({
     const filledEntries = bufferTimes.current.length;
     const sum = bufferTimes.current.reduce((a, b) => a + b, 0);
     const averageBufferTime = filledEntries ? sum / filledEntries : 0;
-    return averageBufferTime * (isSafari || isIOS ? 2 : 1.5);
+    return averageBufferTime * (isSafari || isIOS ? 3 : 1.5);
   };
 
   const calculateAdaptivePlaybackRate = (
@@ -467,7 +459,6 @@ function MSEPlayer({
         onPlaying?.();
         setIsPlaying(true);
         lastJumpTimeRef.current = Date.now();
-        console.log(camera, "loaded mse data");
       }}
       muted={!audioEnabled}
       onPause={handlePause}
@@ -505,7 +496,6 @@ function MSEPlayer({
           (bufferThreshold > 10 || bufferTime > 10)
         ) {
           onDisconnect();
-          console.log(camera, "MSE stream buffer is > 10 seconds");
           onError?.("stalled");
         }
 
@@ -525,27 +515,13 @@ function MSEPlayer({
         ) {
           // Jump to live on Safari/iOS due to a change of playback rate causing re-buffering
           if (isSafari || isIOS) {
-            if (bufferTime > bufferThreshold) {
+            if (bufferTime > 3) {
               jumpToLive();
             }
           } else {
             videoRef.current.playbackRate = playbackRate;
           }
         }
-
-        console.log(
-          camera,
-          "isPlaying?",
-          isPlaying,
-          "playbackEnabled?",
-          playbackEnabled,
-          "bufferTime",
-          bufferTime,
-          "bufferThreshold",
-          bufferThreshold,
-          "playbackRate",
-          playbackRate,
-        );
 
         if (onError != undefined) {
           if (videoRef.current?.paused) {
@@ -565,7 +541,6 @@ function MSEPlayer({
                 videoRef.current
               ) {
                 onDisconnect();
-                console.log(camera, "MSE buffer timeout > 3 seconds");
                 onError("stalled");
               }
             }, 3000),
@@ -580,7 +555,6 @@ function MSEPlayer({
           if (wsRef.current) {
             onDisconnect();
           }
-          console.log(camera, "MSE network error");
           onError?.("startup");
         }
 
@@ -592,7 +566,6 @@ function MSEPlayer({
           if (wsRef.current) {
             onDisconnect();
           }
-          console.log(camera, "Safari MSE decoding error");
           onError?.("mse-decode");
         }
 
@@ -602,7 +575,6 @@ function MSEPlayer({
           onDisconnect();
           if (errorCount >= 3) {
             // too many mse errors, try jsmpeg
-            console.log(camera, "too many MSE errors");
             onError?.("startup");
           } else {
             reconnect(5000);
