@@ -1,49 +1,65 @@
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
-import { useMemo } from "react";
+import { useCallback, useEffect, useState } from "react";
 import useSWR from "swr";
-import { usePersistence } from "./use-persistence";
 import { LivePlayerMode } from "@/types/live";
 
 export default function useCameraLiveMode(
-  cameraConfig: CameraConfig,
-  preferredMode?: LivePlayerMode,
-): LivePlayerMode | undefined {
+  cameras: CameraConfig[],
+  windowVisible: boolean,
+) {
   const { data: config } = useSWR<FrigateConfig>("config");
+  const [preferredLiveModes, setPreferredLiveModes] = useState<{
+    [key: string]: LivePlayerMode;
+  }>({});
 
-  const restreamEnabled = useMemo(() => {
-    if (!config) {
-      return false;
-    }
+  useEffect(() => {
+    if (!cameras) return;
 
-    return (
-      cameraConfig &&
-      Object.keys(config.go2rtc.streams || {}).includes(
-        cameraConfig.live.stream_name,
-      )
+    const mseSupported =
+      "MediaSource" in window || "ManagedMediaSource" in window;
+
+    const newPreferredLiveModes = cameras.reduce(
+      (acc, camera) => {
+        const isRestreamed =
+          config &&
+          Object.keys(config.go2rtc.streams || {}).includes(
+            camera.live.stream_name,
+          );
+
+        if (!mseSupported) {
+          acc[camera.name] = isRestreamed ? "webrtc" : "jsmpeg";
+        } else {
+          acc[camera.name] = isRestreamed ? "mse" : "jsmpeg";
+        }
+        return acc;
+      },
+      {} as { [key: string]: LivePlayerMode },
     );
-  }, [config, cameraConfig]);
-  const defaultLiveMode = useMemo<LivePlayerMode | undefined>(() => {
-    if (config) {
-      if (restreamEnabled) {
-        return preferredMode || "mse";
-      }
 
-      return "jsmpeg";
-    }
+    setPreferredLiveModes(newPreferredLiveModes);
+  }, [cameras, config, windowVisible]);
 
-    return undefined;
-  }, [config, preferredMode, restreamEnabled]);
-  const [viewSource] = usePersistence<LivePlayerMode>(
-    `${cameraConfig.name}-source`,
-    defaultLiveMode,
+  const resetPreferredLiveMode = useCallback(
+    (cameraName: string) => {
+      const mseSupported =
+        "MediaSource" in window || "ManagedMediaSource" in window;
+      const isRestreamed =
+        config && Object.keys(config.go2rtc.streams || {}).includes(cameraName);
+
+      setPreferredLiveModes((prevModes) => {
+        const newModes = { ...prevModes };
+
+        if (!mseSupported) {
+          newModes[cameraName] = isRestreamed ? "webrtc" : "jsmpeg";
+        } else {
+          newModes[cameraName] = isRestreamed ? "mse" : "jsmpeg";
+        }
+
+        return newModes;
+      });
+    },
+    [config],
   );
 
-  if (
-    restreamEnabled &&
-    (preferredMode == "mse" || preferredMode == "webrtc")
-  ) {
-    return preferredMode;
-  } else {
-    return viewSource;
-  }
+  return { preferredLiveModes, setPreferredLiveModes, resetPreferredLiveMode };
 }
