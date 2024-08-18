@@ -5,19 +5,22 @@ import { ApiProvider } from "@/api";
 import { IconContext } from "react-icons";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { StatusBarMessagesProvider } from "@/context/statusbar-provider";
+import { GlobalStateProvider } from "@/context/global-state-provider";
 
 type TProvidersProps = {
   children: ReactNode;
 };
 
-function providers({ children }: TProvidersProps) {
+function Providers({ children }: TProvidersProps) {
   return (
     <RecoilRoot>
       <ApiProvider>
         <ThemeProvider defaultTheme="system" storageKey="frigate-ui-theme">
           <TooltipProvider>
             <IconContext.Provider value={{ size: "20" }}>
-              <StatusBarMessagesProvider>{children}</StatusBarMessagesProvider>
+              <StatusBarMessagesProvider>
+                <GlobalStateProvider>{children}</GlobalStateProvider>
+              </StatusBarMessagesProvider>
             </IconContext.Provider>
           </TooltipProvider>
         </ThemeProvider>
@@ -26,4 +29,4 @@ function providers({ children }: TProvidersProps) {
   );
 }
 
-export default providers;
+export default Providers;
