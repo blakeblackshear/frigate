@@ -364,15 +364,109 @@ function MSEPlayer({
     const beta = 0.5; // steepness of exponential growth
 
     // don't adjust playback rate if we're close enough to live
+    // or if we just started streaming
     if (
-      (bufferTime <= bufferThreshold && bufferThreshold < 3) ||
-      bufferTime < 3
+      ((bufferTime <= bufferThreshold && bufferThreshold < 3) ||
+        bufferTime < 3) &&
+      bufferTimes.current.length <= MAX_BUFFER_ENTRIES
     ) {
       return 1;
     }
     const rate = 1 + alpha * Math.exp(beta * bufferTime - bufferThreshold);
     return Math.min(rate, 2);
   };
+
+  const onProgress = useCallback(() => {
+    const bufferTime = getBufferedTime(videoRef.current);
+
+    if (
+      videoRef.current &&
+      (videoRef.current.playbackRate === 1 || bufferTime < 3)
+    ) {
+      if (bufferTimes.current.length < MAX_BUFFER_ENTRIES) {
+        bufferTimes.current.push(bufferTime);
+      } else {
+        bufferTimes.current[bufferIndex.current] = bufferTime;
+        bufferIndex.current = (bufferIndex.current + 1) % MAX_BUFFER_ENTRIES;
+      }
+    }
+
+    const bufferThreshold = calculateAdaptiveBufferThreshold();
+
+    // if we have > 3 seconds of buffered data and we're still not playing,
+    // something might be wrong - maybe codec issue, no audio, etc
+    // so mark the player as playing so that error handlers will fire
+    if (!isPlaying && playbackEnabled && bufferTime > 3) {
+      setIsPlaying(true);
+      lastJumpTimeRef.current = Date.now();
+      onPlaying?.();
+    }
+
+    // if we have more than 10 seconds of buffer, something's wrong so error out
+    if (
+      isPlaying &&
+      playbackEnabled &&
+      (bufferThreshold > 10 || bufferTime > 10)
+    ) {
+      onDisconnect();
+      onError?.("stalled");
+    }
+
+    const playbackRate = calculateAdaptivePlaybackRate(
+      bufferTime,
+      bufferThreshold,
+    );
+
+    // if we're above our rolling average threshold or have > 3 seconds of
+    // buffered data and we're playing, we may have drifted from actual live
+    // time
+    if (videoRef.current && isPlaying && playbackEnabled) {
+      if (
+        (isSafari || isIOS) &&
+        bufferTime > 3 &&
+        Date.now() - lastJumpTimeRef.current > BUFFERING_COOLDOWN_TIMEOUT
+      ) {
+        // Jump to live on Safari/iOS due to a change of playback rate causing re-buffering
+        jumpToLive();
+      } else {
+        // increase/decrease playback rate to compensate - non Safari/iOS only
+        if (videoRef.current.playbackRate !== playbackRate) {
+          videoRef.current.playbackRate = playbackRate;
+        }
+      }
+    }
+
+    if (onError != undefined) {
+      if (videoRef.current?.paused) {
+        return;
+      }
+
+      if (bufferTimeout) {
+        clearTimeout(bufferTimeout);
+        setBufferTimeout(undefined);
+      }
+
+      setBufferTimeout(
+        setTimeout(() => {
+          if (
+            document.visibilityState === "visible" &&
+            wsRef.current != null &&
+            videoRef.current
+          ) {
+            onDisconnect();
+            onError("stalled");
+          }
+        }, 3000),
+      );
+    }
+  }, [
+    bufferTimeout,
+    isPlaying,
+    onDisconnect,
+    onError,
+    onPlaying,
+    playbackEnabled,
+  ]);
 
   useEffect(() => {
     if (!playbackEnabled) {
@@ -462,91 +556,7 @@ function MSEPlayer({
       }}
       muted={!audioEnabled}
       onPause={handlePause}
-      onProgress={() => {
-        const bufferTime = getBufferedTime(videoRef.current);
-
-        if (
-          videoRef.current &&
-          (videoRef.current.playbackRate === 1 || bufferTime < 3)
-        ) {
-          if (bufferTimes.current.length < MAX_BUFFER_ENTRIES) {
-            bufferTimes.current.push(bufferTime);
-          } else {
-            bufferTimes.current[bufferIndex.current] = bufferTime;
-            bufferIndex.current =
-              (bufferIndex.current + 1) % MAX_BUFFER_ENTRIES;
-          }
-        }
-
-        const bufferThreshold = calculateAdaptiveBufferThreshold();
-
-        // if we have > 3 seconds of buffered data and we're still not playing,
-        // something might be wrong - maybe codec issue, no audio, etc
-        // so mark the player as playing so that error handlers will fire
-        if (!isPlaying && playbackEnabled && bufferTime > 3) {
-          setIsPlaying(true);
-          lastJumpTimeRef.current = Date.now();
-          onPlaying?.();
-        }
-
-        // if we have more than 10 seconds of buffer, something's wrong so error out
-        if (
-          isPlaying &&
-          playbackEnabled &&
-          (bufferThreshold > 10 || bufferTime > 10)
-        ) {
-          onDisconnect();
-          onError?.("stalled");
-        }
-
-        const playbackRate = calculateAdaptivePlaybackRate(
-          bufferTime,
-          bufferThreshold,
-        );
-
-        // if we're above our rolling average threshold or have > 3 seconds of
-        // buffered data and we're playing, we may have drifted from actual live
-        // time, so increase playback rate to compensate - non safari/ios only
-        if (
-          videoRef.current &&
-          isPlaying &&
-          playbackEnabled &&
-          Date.now() - lastJumpTimeRef.current > BUFFERING_COOLDOWN_TIMEOUT
-        ) {
-          // Jump to live on Safari/iOS due to a change of playback rate causing re-buffering
-          if (isSafari || isIOS) {
-            if (bufferTime > 3) {
-              jumpToLive();
-            }
-          } else {
-            videoRef.current.playbackRate = playbackRate;
-          }
-        }
-
-        if (onError != undefined) {
-          if (videoRef.current?.paused) {
-            return;
-          }
-
-          if (bufferTimeout) {
-            clearTimeout(bufferTimeout);
-            setBufferTimeout(undefined);
-          }
-
-          setBufferTimeout(
-            setTimeout(() => {
-              if (
-                document.visibilityState === "visible" &&
-                wsRef.current != null &&
-                videoRef.current
-              ) {
-                onDisconnect();
-                onError("stalled");
-              }
-            }, 3000),
-          );
-        }
-      }}
+      onProgress={onProgress}
       onError={(e) => {
         if (
           // @ts-expect-error code does exist
