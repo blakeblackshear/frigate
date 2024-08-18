@@ -506,19 +506,17 @@ function MSEPlayer({
 
         // if we're above our rolling average threshold or have > 3 seconds of
         // buffered data and we're playing, we may have drifted from actual live
-        // time, so increase playback rate to compensate - non safari/ios only
-        if (
-          videoRef.current &&
-          isPlaying &&
-          playbackEnabled &&
-          Date.now() - lastJumpTimeRef.current > BUFFERING_COOLDOWN_TIMEOUT
-        ) {
-          // Jump to live on Safari/iOS due to a change of playback rate causing re-buffering
-          if (isSafari || isIOS) {
-            if (bufferTime > 3) {
-              jumpToLive();
-            }
+        // time
+        if (videoRef.current && isPlaying && playbackEnabled) {
+          if (
+            (isSafari || isIOS) &&
+            bufferTime > 3 &&
+            Date.now() - lastJumpTimeRef.current > BUFFERING_COOLDOWN_TIMEOUT
+          ) {
+            // Jump to live on Safari/iOS due to a change of playback rate causing re-buffering
+            jumpToLive();
           } else {
+            // increase/decrease playback rate to compensate - non Safari/iOS only
             videoRef.current.playbackRate = playbackRate;
           }
         }
