@@ -364,9 +364,11 @@ function MSEPlayer({
     const beta = 0.5; // steepness of exponential growth
 
     // don't adjust playback rate if we're close enough to live
+    // or if we just started streaming
     if (
-      (bufferTime <= bufferThreshold && bufferThreshold < 3) ||
-      bufferTime < 3
+      ((bufferTime <= bufferThreshold && bufferThreshold < 3) ||
+        bufferTime < 3) &&
+      bufferTimes.current.length <= MAX_BUFFER_ENTRIES
     ) {
       return 1;
     }
@@ -517,7 +519,9 @@ function MSEPlayer({
             jumpToLive();
           } else {
             // increase/decrease playback rate to compensate - non Safari/iOS only
-            videoRef.current.playbackRate = playbackRate;
+            if (videoRef.current.playbackRate !== playbackRate) {
+              videoRef.current.playbackRate = playbackRate;
+            }
           }
         }
 
