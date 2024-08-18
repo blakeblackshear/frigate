@@ -35,6 +35,7 @@ import ObjectSettingsView from "@/views/settings/ObjectSettingsView";
 import MotionTunerView from "@/views/settings/MotionTunerView";
 import MasksAndZonesView from "@/views/settings/MasksAndZonesView";
 import AuthenticationView from "@/views/settings/AuthenticationView";
+import { useGlobalState } from "@/context/global-state-provider";
 
 export default function Settings() {
   const settingsViews = [
@@ -52,6 +53,7 @@ export default function Settings() {
   const tabsRef = useRef<HTMLDivElement | null>(null);
 
   const { data: config } = useSWR<FrigateConfig>("config");
+  const { lastSelectedCamera } = useGlobalState();
 
   // TODO: confirm leave page
   const [unsavedChanges, setUnsavedChanges] = useState(false);
@@ -67,7 +69,8 @@ export default function Settings() {
       .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
   }, [config]);
 
-  const [selectedCamera, setSelectedCamera] = useState<string>("");
+  const [selectedCamera, setSelectedCamera] =
+    useState<string>(lastSelectedCamera);
 
   const [filterZoneMask, setFilterZoneMask] = useState<PolygonType[]>();
 
