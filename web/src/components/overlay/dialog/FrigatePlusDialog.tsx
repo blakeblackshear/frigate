@@ -13,6 +13,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
 import { useCallback, useMemo } from "react";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
+import { toast } from "sonner";
 import useSWR from "swr";
 
 type FrigatePlusDialogProps = {
@@ -55,14 +56,24 @@ export function FrigatePlusDialog({
         return;
       }
 
-      falsePositive
+      const req = falsePositive
         ? axios.put(`events/${upload.id}/false_positive`)
         : axios.post(`events/${upload.id}/plus`, {
             include_annotation: 1,
           });
 
-      onEventUploaded();
-      onClose();
+      req
+        .then((resp) => {
+          if (resp.status == 200) {
+            onEventUploaded();
+            onClose();
+          }
+        })
+        .catch(() => {
+          toast.error("Failed to upload image.", {
+            position: "top-center",
+          });
+        });
     },
     [upload, onClose, onEventUploaded],
   );
