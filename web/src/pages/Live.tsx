@@ -8,11 +8,14 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import LiveBirdseyeView from "@/views/live/LiveBirdseyeView";
 import LiveCameraView from "@/views/live/LiveCameraView";
 import LiveDashboardView from "@/views/live/LiveDashboardView";
+import { useGlobalState } from "@/context/global-state-provider";
 import { useEffect, useMemo, useRef } from "react";
 import useSWR from "swr";
 
 function Live() {
   const { data: config } = useSWR<FrigateConfig>("config");
+
+  const { setLastSelectedCamera } = useGlobalState();
 
   // selection
 
@@ -21,6 +24,11 @@ function Live() {
     "cameraGroup",
     "default" as string,
   );
+
+  const handleCameraChange = (camera: string) => {
+    setLastSelectedCamera(camera);
+    setSelectedCameraName(camera);
+  };
 
   useSearchEffect("group", (cameraGroup) => {
     if (config && cameraGroup) {
@@ -115,7 +123,7 @@ function Live() {
           cameras={cameras}
           cameraGroup={cameraGroup ?? "default"}
           includeBirdseye={includesBirdseye}
-          onSelectCamera={setSelectedCameraName}
+          onSelectCamera={handleCameraChange}
           fullscreen={fullscreen}
           toggleFullscreen={toggleFullscreen}
         />
