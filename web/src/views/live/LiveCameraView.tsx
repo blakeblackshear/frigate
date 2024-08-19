@@ -83,12 +83,14 @@ import { useSessionPersistence } from "@/hooks/use-session-persistence";
 type LiveCameraViewProps = {
   config?: FrigateConfig;
   camera: CameraConfig;
+  supportsFullscreen: boolean;
   fullscreen: boolean;
   toggleFullscreen: () => void;
 };
 export default function LiveCameraView({
   config,
   camera,
+  supportsFullscreen,
   fullscreen,
   toggleFullscreen,
 }: LiveCameraViewProps) {
@@ -376,7 +378,7 @@ export default function LiveCameraView({
                   )}
                 </Button>
               )}
-              {!isIOS && (
+              {supportsFullscreen && (
                 <CameraFeatureToggle
                   className="p-2 md:p-0"
                   variant={fullscreen ? "overlay" : "primary"}

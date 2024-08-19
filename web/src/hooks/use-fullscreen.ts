@@ -1,4 +1,4 @@
-import { RefObject, useCallback, useEffect, useState } from "react";
+import { RefObject, useCallback, useEffect, useMemo, useState } from "react";
 import nosleep from "nosleep.js";
 
 const NoSleep = new nosleep();
@@ -147,5 +147,31 @@ export function useFullscreen<T extends HTMLElement = HTMLElement>(
     }
   }, [elementRef, handleFullscreenChange, handleFullscreenError]);
 
-  return { fullscreen, toggleFullscreen, error, clearError };
+  // compatibility
+
+  const supportsFullScreen = useMemo<boolean>(() => {
+    // @ts-expect-error we need to check that fullscreen exists
+    if (document.exitFullscreen) return true;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((document as any).msExitFullscreen)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return true;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((document as any).webkitExitFullscreen)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return true;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((document as any).mozCancelFullScreen)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return true;
+    return false;
+  }, []);
+
+  return {
+    fullscreen,
+    toggleFullscreen,
+    supportsFullScreen,
+    error,
+    clearError,
+  };
 }
