@@ -769,13 +769,6 @@ class Birdseye:
                 break
 
             camera_name = updated_topic.rpartition("/")[-1]
-
-            if (
-                self.config.cameras[camera_name].birdseye.enabled
-                and not updated_birdseye_config.enabled
-            ):
-                self
-
             self.config.cameras[camera_name].birdseye = updated_birdseye_config
 
         if self.birdseye_manager.update(
