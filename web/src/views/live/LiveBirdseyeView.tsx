@@ -22,11 +22,13 @@ import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import useSWR from "swr";
 
 type LiveBirdseyeViewProps = {
+  supportsFullscreen: boolean;
   fullscreen: boolean;
   toggleFullscreen: () => void;
 };
 
 export default function LiveBirdseyeView({
+  supportsFullscreen,
   fullscreen,
   toggleFullscreen,
 }: LiveBirdseyeViewProps) {
@@ -155,14 +157,16 @@ export default function LiveBirdseyeView({
             <div
               className={`mr-1 flex flex-row items-center gap-2 *:rounded-lg ${isMobile ? "landscape:flex-col" : ""}`}
             >
-              <CameraFeatureToggle
-                className="p-2 md:p-0"
-                variant={fullscreen ? "overlay" : "primary"}
-                Icon={fullscreen ? FaCompress : FaExpand}
-                isActive={fullscreen}
-                title={fullscreen ? "Close" : "Fullscreen"}
-                onClick={toggleFullscreen}
-              />
+              {supportsFullscreen && (
+                <CameraFeatureToggle
+                  className="p-2 md:p-0"
+                  variant={fullscreen ? "overlay" : "primary"}
+                  Icon={fullscreen ? FaCompress : FaExpand}
+                  isActive={fullscreen}
+                  title={fullscreen ? "Close" : "Fullscreen"}
+                  onClick={toggleFullscreen}
+                />
+              )}
               {!isIOS && !isFirefox && config.birdseye.restream && (
                 <CameraFeatureToggle
                   className="p-2 md:p-0"
