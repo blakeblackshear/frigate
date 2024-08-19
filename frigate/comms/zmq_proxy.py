@@ -1,5 +1,6 @@
 """Facilitates communication over zmq proxy."""
 
+import json
 import threading
 from typing import Optional
 
@@ -58,8 +59,7 @@ class Publisher:
 
     def publish(self, payload: any, sub_topic: str = "") -> None:
         """Publish message."""
-        self.socket.send_string(f"{self.topic}{sub_topic}", flags=zmq.SNDMORE)
-        self.socket.send_json(payload)
+        self.socket.send_string(f"{self.topic}{sub_topic} {json.dumps(payload)}")
 
     def stop(self) -> None:
         self.socket.close()
@@ -84,9 +84,8 @@ class Subscriber:
             has_update, _, _ = zmq.select([self.socket], [], [], timeout)
 
             if has_update:
-                topic = self.socket.recv_string(flags=zmq.NOBLOCK)
-                payload = self.socket.recv_json()
-                return self._return_object(topic, payload)
+                parts = self.socket.recv_string(flags=zmq.NOBLOCK).split(maxsplit=1)
+                return self._return_object(parts[0], json.loads(parts[1]))
         except zmq.ZMQError:
             pass
 
