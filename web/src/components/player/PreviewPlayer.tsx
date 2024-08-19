@@ -16,6 +16,7 @@ import { isAndroid, isChrome, isMobile } from "react-device-detect";
 import { TimeRange } from "@/types/timeline";
 import { Skeleton } from "../ui/skeleton";
 import { cn } from "@/lib/utils";
+import { usePreviewForTimeRange } from "@/hooks/use-camera-previews";
 
 type PreviewPlayerProps = {
   className?: string;
@@ -39,15 +40,11 @@ export default function PreviewPlayer({
   onClick,
 }: PreviewPlayerProps) {
   const [currentHourFrame, setCurrentHourFrame] = useState<string>();
-
-  const currentPreview = useMemo(() => {
-    return cameraPreviews.find(
-      (preview) =>
-        preview.camera == camera &&
-        Math.round(preview.start) >= timeRange.after &&
-        Math.floor(preview.end) <= timeRange.before,
-    );
-  }, [cameraPreviews, camera, timeRange]);
+  const currentPreview = usePreviewForTimeRange(
+    cameraPreviews,
+    camera,
+    timeRange,
+  );
 
   if (currentPreview) {
     return (
