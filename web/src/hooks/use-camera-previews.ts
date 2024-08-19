@@ -32,11 +32,11 @@ export function useCameraPreviews(
   return allPreviews;
 }
 
-// we need to add a buffer of 5 minutes to the end preview times
+// we need to add a buffer of 5 seconds to the end preview times
 // this ensures that if preview generation is running slowly
-// and the previews are generated 1-5 minutes late
+// and the previews are generated 1-5 seconds late
 // it is not falsely thrown out.
-const PREVIEW_END_BUFFER = 300;
+const PREVIEW_END_BUFFER = 5; // seconds
 
 export function usePreviewForTimeRange(
   allPreviews: Preview[],
