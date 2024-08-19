@@ -77,11 +77,11 @@ export default function ReviewDetailDialog({
 
       <Content
         className={
-          isDesktop ? "sm:max-w-xl" : "max-h-[75dvh] overflow-x-hidden p-2 pb-4"
+          isDesktop ? "sm:max-w-xl" : "max-h-[75dvh] overflow-hidden p-2 pb-4"
         }
       >
         {review && (
-          <div className="mt-3 flex size-full flex-col gap-5 md:mt-0">
+          <div className="scrollbar-container mt-3 flex size-full flex-col gap-5 overflow-y-auto md:mt-0">
             <div className="flex w-full flex-row">
               <div className="flex w-full flex-col gap-3">
                 <div className="flex flex-col gap-1.5">
@@ -138,7 +138,7 @@ export default function ReviewDetailDialog({
                 because the object does not have a snapshot
               </div>
             )}
-            <div className="scrollbar-container flex w-full flex-col gap-2 overflow-y-auto px-6">
+            <div className="flex size-full flex-col gap-2 px-6">
               {events?.map((event) => {
                 return (
                   <img
