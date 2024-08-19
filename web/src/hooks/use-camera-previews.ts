@@ -1,6 +1,6 @@
 import { Preview } from "@/types/preview";
 import { TimeRange } from "@/types/timeline";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 
 type OptionalCameraPreviewProps = {
@@ -8,7 +8,6 @@ type OptionalCameraPreviewProps = {
   autoRefresh?: boolean;
   fetchPreviews?: boolean;
 };
-
 export function useCameraPreviews(
   initialTimeRange: TimeRange,
   {
@@ -31,4 +30,25 @@ export function useCameraPreviews(
   );
 
   return allPreviews;
+}
+
+// we need to add a buffer of 5 seconds to the end preview times
+// this ensures that if preview generation is running slowly
+// and the previews are generated 1-5 seconds late
+// it is not falsely thrown out.
+const PREVIEW_END_BUFFER = 5; // seconds
+
+export function usePreviewForTimeRange(
+  allPreviews: Preview[],
+  camera: string,
+  timeRange: TimeRange,
+) {
+  return useMemo(() => {
+    return allPreviews.find(
+      (preview) =>
+        preview.camera == camera &&
+        Math.ceil(preview.start) >= timeRange.after &&
+        Math.floor(preview.end) <= timeRange.before + PREVIEW_END_BUFFER,
+    );
+  }, [allPreviews, camera, timeRange]);
 }
