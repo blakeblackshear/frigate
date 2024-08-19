@@ -395,7 +395,8 @@ class BirdsEyeFrameManager:
             [
                 cam
                 for cam, cam_data in self.cameras.items()
-                if cam_data["last_active_frame"] > 0
+                if self.config.cameras[cam].birdseye.enabled
+                and cam_data["last_active_frame"] > 0
                 and cam_data["current_frame"] - cam_data["last_active_frame"]
                 < self.inactivity_threshold
             ]
@@ -768,6 +769,13 @@ class Birdseye:
                 break
 
             camera_name = updated_topic.rpartition("/")[-1]
+
+            if (
+                self.config.cameras[camera_name].birdseye.enabled
+                and not updated_birdseye_config.enabled
+            ):
+                self
+
             self.config.cameras[camera_name].birdseye = updated_birdseye_config
 
         if self.birdseye_manager.update(
