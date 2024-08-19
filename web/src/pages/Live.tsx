@@ -36,7 +36,8 @@ function Live() {
 
   const mainRef = useRef<HTMLDivElement | null>(null);
 
-  const { fullscreen, toggleFullscreen } = useFullscreen(mainRef);
+  const { fullscreen, toggleFullscreen, supportsFullScreen } =
+    useFullscreen(mainRef);
 
   // document title
 
@@ -100,6 +101,7 @@ function Live() {
     <div className="size-full" ref={mainRef}>
       {selectedCameraName === "birdseye" ? (
         <LiveBirdseyeView
+          supportsFullscreen={supportsFullScreen}
           fullscreen={fullscreen}
           toggleFullscreen={toggleFullscreen}
         />
@@ -107,6 +109,7 @@ function Live() {
         <LiveCameraView
           config={config}
           camera={selectedCamera}
+          supportsFullscreen={supportsFullScreen}
           fullscreen={fullscreen}
           toggleFullscreen={toggleFullscreen}
         />

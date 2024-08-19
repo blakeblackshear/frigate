@@ -257,7 +257,8 @@ export function RecordingView({
 
   // fullscreen
 
-  const { fullscreen, toggleFullscreen } = useFullscreen(mainLayoutRef);
+  const { fullscreen, toggleFullscreen, supportsFullScreen } =
+    useFullscreen(mainLayoutRef);
 
   // layout
 
@@ -549,6 +550,7 @@ export function RecordingView({
                   mainControllerRef.current = controller;
                 }}
                 isScrubbing={scrubbing || exportMode == "timeline"}
+                supportsFullscreen={supportsFullScreen}
                 setFullResolution={setFullResolution}
                 toggleFullscreen={toggleFullscreen}
                 containerRef={mainLayoutRef}
