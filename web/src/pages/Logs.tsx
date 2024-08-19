@@ -21,15 +21,33 @@ import { cn } from "@/lib/utils";
 import { MdVerticalAlignBottom } from "react-icons/md";
 import { parseLogLines } from "@/utils/logUtil";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import scrollIntoView from "scroll-into-view-if-needed";
+import { FaDownload } from "react-icons/fa";
 
 type LogRange = { start: number; end: number };
 
 function Logs() {
   const [logService, setLogService] = useState<LogType>("frigate");
+  const tabsRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     document.title = `${logService[0].toUpperCase()}${logService.substring(1)} Logs - Frigate`;
   }, [logService]);
+
+  useEffect(() => {
+    if (tabsRef.current) {
+      const element = tabsRef.current.querySelector(
+        `[data-nav-item="${logService}"]`,
+      );
+      if (element instanceof HTMLElement) {
+        scrollIntoView(element, {
+          behavior: "smooth",
+          inline: "start",
+        });
+      }
+    }
+  }, [tabsRef, logService]);
 
   // log data handling
 
@@ -117,6 +135,27 @@ function Logs() {
       toast.error("Could not copy logs to clipboard");
     }
   }, [logs, logRange]);
+
+  const handleDownloadLogs = useCallback(() => {
+    axios
+      .get(`logs/${logService}?download=true`)
+      .then((resp) => {
+        const element = document.createElement("a");
+        element.setAttribute(
+          "href",
+          "data:text/plain;charset=utf-8," + encodeURIComponent(resp.data),
+        );
+        element.setAttribute("download", `${logService}-logs.txt`);
+
+        element.style.display = "none";
+        document.body.appendChild(element);
+
+        element.click();
+
+        document.body.removeChild(element);
+      })
+      .catch(() => {});
+  }, [logService]);
 
   // scroll to bottom
 
@@ -266,33 +305,37 @@ function Logs() {
       <Toaster position="top-center" closeButton={true} />
       <LogInfoDialog logLine={selectedLog} setLogLine={setSelectedLog} />
 
-      <div className="flex items-center justify-between">
-        <ToggleGroup
-          className="*:rounded-md *:px-3 *:py-4"
-          type="single"
-          size="sm"
-          value={logService}
-          onValueChange={(value: LogType) => {
-            if (value) {
-              setLogs([]);
-              setLogLines([]);
-              setFilterSeverity(undefined);
-              setLogService(value);
-            }
-          }} // don't allow the severity to be unselected
-        >
-          {Object.values(logTypes).map((item) => (
-            <ToggleGroupItem
-              key={item}
-              className={`flex items-center justify-between gap-2 ${logService == item ? "" : "text-muted-foreground"}`}
-              value={item}
-              data-nav-item={item}
-              aria-label={`Select ${item}`}
+      <div className="relative flex h-11 w-full items-center justify-between">
+        <ScrollArea className="w-full whitespace-nowrap">
+          <div ref={tabsRef} className="flex flex-row">
+            <ToggleGroup
+              type="single"
+              size="sm"
+              value={logService}
+              onValueChange={(value: LogType) => {
+                if (value) {
+                  setLogs([]);
+                  setLogLines([]);
+                  setFilterSeverity(undefined);
+                  setLogService(value);
+                }
+              }} // don't allow the severity to be unselected
             >
-              <div className="capitalize">{item}</div>
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
+              {Object.values(logTypes).map((item) => (
+                <ToggleGroupItem
+                  key={item}
+                  className={`flex items-center justify-between gap-2 ${logService == item ? "" : "text-muted-foreground"}`}
+                  value={item}
+                  data-nav-item={item}
+                  aria-label={`Select ${item}`}
+                >
+                  <div className="capitalize">{item}</div>
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+            <ScrollBar orientation="horizontal" className="h-0" />
+          </div>
+        </ScrollArea>
         <div className="flex items-center gap-2">
           <Button
             className="flex items-center justify-between gap-2"
@@ -303,6 +346,14 @@ function Logs() {
             <div className="hidden text-primary md:block">
               Copy to Clipboard
             </div>
+          </Button>
+          <Button
+            className="flex items-center justify-between gap-2"
+            size="sm"
+            onClick={handleDownloadLogs}
+          >
+            <FaDownload className="text-secondary-foreground" />
+            <div className="hidden text-primary md:block">Download</div>
           </Button>
           <LogLevelFilterButton
             selectedLabels={filterSeverity}
