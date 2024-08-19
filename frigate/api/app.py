@@ -456,6 +456,19 @@ def vainfo():
 
 @bp.route("/logs/<service>", methods=["GET"])
 def logs(service: str):
+    def download_logs(service_location: str):
+        try:
+            file = open(service_location, "r")
+            contents = file.read()
+            file.close()
+            return jsonify(contents)
+        except FileNotFoundError as e:
+            logger.error(e)
+            return make_response(
+                jsonify({"success": False, "message": "Could not find log file"}),
+                500,
+            )
+
     log_locations = {
         "frigate": "/dev/shm/logs/frigate/current",
         "go2rtc": "/dev/shm/logs/go2rtc/current",
@@ -469,6 +482,9 @@ def logs(service: str):
             jsonify({"success": False, "message": "Not a valid service"}),
             404,
         )
+
+    if request.args.get("download", type=bool, default=False):
+        return download_logs(service_location)
 
     start = request.args.get("start", type=int, default=0)
     end = request.args.get("end", type=int)
