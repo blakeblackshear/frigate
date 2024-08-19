@@ -395,7 +395,8 @@ class BirdsEyeFrameManager:
             [
                 cam
                 for cam, cam_data in self.cameras.items()
-                if cam_data["last_active_frame"] > 0
+                if self.config.cameras[cam].birdseye.enabled
+                and cam_data["last_active_frame"] > 0
                 and cam_data["current_frame"] - cam_data["last_active_frame"]
                 < self.inactivity_threshold
             ]
