@@ -83,6 +83,7 @@ This list of working and non-working PTZ cameras is based on user feedback.
 | Amcrest ASH21            |      ❌      |      ❌      | No ONVIF support                                                                                                                                |
 | Ctronics PTZ             |      ✅      |      ❌      |                                                                                                                                                 |
 | Dahua                    |      ✅      |      ✅      |                                                                                                                                                 |
+| Dahua DH-SD2A500HB       |      ✅      |      ❌      |                                                                                                                                                 |
 | Foscam R5                |      ✅      |      ❌      |                                                                                                                                                 |
 | Hanwha XNP-6550RH        |      ✅      |      ❌      |                                                                                                                                                 |
 | Hikvision                |      ✅      |      ❌      | Incomplete ONVIF support (MoveStatus won't update even on latest firmware) - reported with HWP-N4215IH-DE and DS-2DE3304W-DE, but likely others |
