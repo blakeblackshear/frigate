@@ -15,7 +15,7 @@ The jsmpeg live view will use more browser and client GPU resources. Using go2rt
 | ------ | ------------------------------------- | ---------- | ---------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | jsmpeg | same as `detect -> fps`, capped at 10 | 720p       | no                           | no              | Resolution is configurable, but go2rtc is recommended if you want higher resolutions and better frame rates. jsmpeg is Frigate's default without go2rtc configured. |
 | mse    | native                                | native     | yes (depends on audio codec) | yes             | iPhone requires iOS 17.1+, Firefox is h.264 only. This is Frigate's default when go2rtc is configured.                                                              |
-| webrtc | native                                | native     | yes (depends on audio codec) | yes             | Requires extra configuration, doesn't support h.265. Frigate uses WebRTC when MSE fails or when using a camera's two-way talk feature.                              |
+| webrtc | native                                | native     | yes (depends on audio codec) | yes             | Requires extra configuration, doesn't support h.265. Frigate attempts to use WebRTC when MSE fails or when using a camera's two-way talk feature.                   |
 
 ### Audio Support
 
