@@ -124,11 +124,48 @@ function ConfigEditor() {
     };
   });
 
+  // monitoring state
+
+  const [hasChanges, setHasChanges] = useState(false);
+
+  useEffect(() => {
+    if (!config || !modelRef.current) {
+      return;
+    }
+
+    modelRef.current.onDidChangeContent(() => {
+      if (modelRef.current?.getValue() != config) {
+        setHasChanges(true);
+      } else {
+        setHasChanges(false);
+      }
+    });
+  }, [config]);
+
   useEffect(() => {
     if (config && modelRef.current) {
       modelRef.current.setValue(config);
+      setHasChanges(false);
     }
   }, [config]);
+
+  useEffect(() => {
+    let listener: ((e: BeforeUnloadEvent) => void) | undefined;
+    if (hasChanges) {
+      listener = (e) => {
+        e.preventDefault();
+        e.returnValue = true;
+        return "Exit without saving?";
+      };
+      window.addEventListener("beforeunload", listener);
+    }
+
+    return () => {
+      if (listener) {
+        window.removeEventListener("beforeunload", listener);
+      }
+    };
+  }, [hasChanges]);
 
   if (!config) {
     return <ActivityIndicator />;
