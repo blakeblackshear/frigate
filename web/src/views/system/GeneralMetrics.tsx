@@ -163,7 +163,7 @@ export default function GeneralMetrics({
           series[key] = { name: key, data: [] };
         }
 
-        const data = stats.cpu_usages[detStats.pid.toString()].cpu;
+        const data = stats.cpu_usages[detStats.pid.toString()]?.cpu;
 
         if (data != undefined) {
           series[key].data.push({
@@ -304,7 +304,7 @@ export default function GeneralMetrics({
             series[key] = { name: key, data: [] };
           }
 
-          const data = stats.cpu_usages[procStats.pid.toString()].cpu;
+          const data = stats.cpu_usages[procStats.pid.toString()]?.cpu;
 
           if (data != undefined) {
             series[key].data.push({
@@ -338,10 +338,14 @@ export default function GeneralMetrics({
             series[key] = { name: key, data: [] };
           }
 
-          series[key].data.push({
-            x: statsIdx + 1,
-            y: stats.cpu_usages[procStats.pid.toString()].mem,
-          });
+          const data = stats.cpu_usages[procStats.pid.toString()]?.mem;
+
+          if (data) {
+            series[key].data.push({
+              x: statsIdx + 1,
+              y: data,
+            });
+          }
         }
       });
     });
