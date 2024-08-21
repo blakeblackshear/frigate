@@ -286,6 +286,7 @@ function Logs() {
               key={item}
               className={`flex items-center justify-between gap-2 ${logService == item ? "" : "text-muted-foreground"}`}
               value={item}
+              data-nav-item={item}
               aria-label={`Select ${item}`}
             >
               <div className="capitalize">{item}</div>
