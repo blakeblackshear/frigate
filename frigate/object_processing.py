@@ -166,6 +166,9 @@ class TrackedObject:
         if self.computed_score > self.top_score:
             self.top_score = self.computed_score
         self.false_positive = self._is_false_positive()
+        if not self.active == self.is_active(): 
+            # State transition between stationary/active.
+            significant_change = True
         self.active = self.is_active()
 
         if not self.false_positive:
@@ -251,16 +254,7 @@ class TrackedObject:
             if self.obj_data["attributes"] != obj_data["attributes"]:
                 significant_change = True
 
-            # if the motionless_count reaches the stationary threshold
-            if (
-                self.obj_data["motionless_count"]
-                == self.camera_config.detect.stationary.threshold
-            ):
-                significant_change = True
 
-            # or if the motionless_count resets
-            if self.obj_data["motionless_count"] == 0:
-                significant_change = True
 
             # update at least once per minute
             if self.obj_data["frame_time"] - self.previous["frame_time"] > 60:
@@ -311,7 +305,7 @@ class TrackedObject:
         return not self.is_stationary()
 
     def is_stationary(self):
-        return self.obj_data["motionless_count"] >= self.camera_config.detect.stationary.threshold
+        return self.obj_data["motionless_count"] > self.camera_config.detect.stationary.threshold
     
     def get_thumbnail(self):
         if (
@@ -744,10 +738,7 @@ class CameraState:
 
         for obj in tracked_objects.values():
             object_type = obj.obj_data["label"]
-            active = (
-                obj.obj_data["motionless_count"]
-                < self.camera_config.detect.stationary.threshold
-            )
+            active = obj.is_active()
 
             if not obj.false_positive:
                 label = object_type
