@@ -166,9 +166,8 @@ class TrackedObject:
         if self.computed_score > self.top_score:
             self.top_score = self.computed_score
         self.false_positive = self._is_false_positive()
-        if not self.active == self.is_active(): 
-            # State transition between stationary/active.
-            significant_change = True
+        # Hold previous active state for checking further down.
+        previously_active = self.active
         self.active = self.is_active()
 
         if not self.false_positive:
@@ -254,7 +253,9 @@ class TrackedObject:
             if self.obj_data["attributes"] != obj_data["attributes"]:
                 significant_change = True
 
-
+            # if the state changed between stationary and active
+            if previously_active != self.active: 
+                significant_change = True
 
             # update at least once per minute
             if self.obj_data["frame_time"] - self.previous["frame_time"] > 60:
