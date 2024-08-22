@@ -832,7 +832,7 @@ class CameraState:
             for c in self.callbacks["object_status"]:
                 c(self.name, "all", total_label_count)
     
-        # publish activel label counts for this camera
+        # publish active label counts for this camera
         if total_active_label_count != self.active_object_counts.get("all"):
             self.active_object_counts["all"] = total_active_label_count
             for c in self.callbacks["active_object_status"]:
@@ -1239,7 +1239,11 @@ class TrackedObjectProcessor(threading.Thread):
                 active_obj_counter = Counter(
                     obj.obj_data["label"]
                     for obj in camera_state.tracked_objects.values()
-                    if zone in obj.current_zones and not obj.false_positive and obj.active
+                    if (
+                        zone in obj.current_zones 
+                        and not obj.false_positive
+                        and obj.active
+                    )
                 )
                 total_label_count = 0
                 total_active_label_count = 0
@@ -1285,7 +1289,6 @@ class TrackedObjectProcessor(threading.Thread):
                     else:
                         if label in obj_counter:
                             zone_label[camera] = obj_counter[label]
-                            # Since this is a new combo, it is by definition active and will be present
                             active_zone_label[camera] = active_obj_counter[label]
                             self.dispatcher.publish(
                                 f"{zone}/{label}",
