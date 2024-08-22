@@ -320,6 +320,9 @@ review:
       - car
       - person
     # Optional: required zones for an object to be marked as an alert (default: none)
+    # NOTE: when settings required zones globally, this zone must exist on all cameras
+    #       or the config will be considered invalid. In that case the required_zones
+    #       should be configured at the camera level.
     required_zones:
       - driveway
   # Optional: detections configuration
@@ -329,6 +332,9 @@ review:
       - car
       - person
     # Optional: required zones for an object to be marked as a detection (default: none)
+    # NOTE: when settings required zones globally, this zone must exist on all cameras
+    #       or the config will be considered invalid. In that case the required_zones
+    #       should be configured at the camera level.
     required_zones:
       - driveway
 
