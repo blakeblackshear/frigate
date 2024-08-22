@@ -335,6 +335,11 @@ review:
 # Optional: Motion configuration
 # NOTE: Can be overridden at the camera level
 motion:
+  # Optional: enables detection for the camera (default: True)
+  # NOTE: Motion detection is required for object detection,
+  #       setting this to False and leaving detect enabled
+  #       will result in an error on startup.
+  enabled: False
   # Optional: The threshold passed to cv2.threshold to determine if a pixel is different enough to be counted as motion. (default: shown below)
   # Increasing this value will make motion detection less sensitive and decreasing it will make motion detection more sensitive.
   # The value should be between 1 and 255.
