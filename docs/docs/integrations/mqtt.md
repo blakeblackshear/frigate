@@ -159,10 +159,24 @@ Same data available at `/api/stats` published at a configurable interval.
 Publishes the count of objects for the camera for use as a sensor in Home Assistant.
 `all` can be used as the object_name for the count of all objects for the camera.
 
+### `frigate/<camera_name>/<object_name>/active`
+
+Publishes the count of active objects for the camera for use as a sensor in Home
+Assistant. `all` can be used as the object_name for the count of all active objects
+for the camera.
+
+
 ### `frigate/<zone_name>/<object_name>`
 
 Publishes the count of objects for the zone for use as a sensor in Home Assistant.
 `all` can be used as the object_name for the count of all objects for the zone.
+
+
+### `frigate/<zone_name>/<object_name>/active`
+
+Publishes the count of active objects for the zone for use as a sensor in Home
+Assistant. `all` can be used as the object_name for the count of all objects for the
+zone.
 
 ### `frigate/<camera_name>/<object_name>/snapshot`
 
