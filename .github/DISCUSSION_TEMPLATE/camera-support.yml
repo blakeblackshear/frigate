@@ -55,6 +55,14 @@ body:
     validations:
       required: true
   - type: textarea
+    id: ffprobe
+    attributes:
+      label: FFprobe output from your camera
+      description: Run `ffprobe <camera_url>` from within the Frigate container if possible, and provide output below
+      render: shell
+    validations:
+      required: true
+  - type: textarea
     id: stats
     attributes:
       label: Frigate stats
