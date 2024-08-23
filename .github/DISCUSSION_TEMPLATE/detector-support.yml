@@ -1,6 +1,16 @@
 title: "[Detector Support]: "
 labels: ["support", "triage"]
 body:
+ - type: markdown
+    attributes:
+      value: |
+        Use this form for support or questions related to Frigate's object detectors.
+
+        Before submitting your support request, please [search the discussions][discussions], read the [official Frigate documentation][docs], and read the [Frigate FAQ][faq] pinned at the Discussion page to see if your question has already been answered by the community.
+
+        [discussions]: https://www.github.com/blakeblackshear/frigate/discussions
+        [docs]: https://docs.frigate.video
+        [faq]: https://github.com/blakeblackshear/frigate/discussions/12724
   - type: textarea
     id: description
     attributes:
@@ -11,9 +21,15 @@ body:
     id: version
     attributes:
       label: Version
-      description: Visible on the System page in the Web UI
+      description: Visible on the System page in the Web UI. Please include the full version including the build identifier (eg. 0.14.0-ea36ds1)
     validations:
       required: true
+  - type: input
+    attributes:
+      label: What browser(s) are you using?
+      placeholder: Google Chrome 88.0.4324.150
+      description: >
+        Provide the full name and don't forget to add the version!
   - type: textarea
     id: config
     attributes:
@@ -31,10 +47,18 @@ body:
     validations:
       required: true
   - type: textarea
-    id: logs
+    id: frigatelogs
     attributes:
-      label: Relevant log output
-      description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
+      label: Relevant Frigate log output
+      description: Please copy and paste any relevant Frigate log output. Include logs before and after your exact error when possible. This will be automatically formatted into code, so no need for backticks.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: go2rtclogs
+    attributes:
+      label: Relevant go2rtc log output
+      description: Please copy and paste any relevant go2rtc log output. Include logs before and after your exact error when possible. This will be automatically formatted into code, so no need for backticks.
       render: shell
     validations:
       required: true
@@ -75,6 +99,11 @@ body:
         - CPU (no coral)
     validations:
       required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots of the Frigate UI's System metrics pages and any other screenshots pertinent to your issue.
+      description: Drag and drop for images is possible in this field.
   - type: textarea
     id: other
     attributes:

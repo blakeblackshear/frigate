@@ -1,6 +1,16 @@
 title: "[Config Support]: "
 labels: ["support", "triage"]
 body:
+ - type: markdown
+    attributes:
+      value: |
+        Use this form for support or questions related to Frigate's configuration and config file.
+
+        Before submitting your support request, please [search the discussions][discussions], read the [official Frigate documentation][docs], and read the [Frigate FAQ][faq] pinned at the Discussion page to see if your question has already been answered by the community.
+
+        [discussions]: https://www.github.com/blakeblackshear/frigate/discussions
+        [docs]: https://docs.frigate.video
+        [faq]: https://github.com/blakeblackshear/frigate/discussions/12724
   - type: textarea
     id: description
     attributes:
@@ -11,7 +21,7 @@ body:
     id: version
     attributes:
       label: Version
-      description: Visible on the System page in the Web UI
+      description: Visible on the System page in the Web UI. Please include the full version including the build identifier (eg. 0.14.0-ea36ds1)
     validations:
       required: true
   - type: textarea
@@ -26,7 +36,7 @@ body:
     id: logs
     attributes:
       label: Relevant log output
-      description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
+      description: Please copy and paste any relevant log output, including any go2rtc and Frigate logs. Include logs before and after your exact error when possible. This will be automatically formatted into code, so no need for backticks.
       render: shell
     validations:
       required: true
@@ -73,6 +83,10 @@ body:
         - CPU (no coral)
     validations:
       required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots of the Frigate UI's System metrics pages and any other screenshots pertinent to your issue. Drag and drop or simple cut/paste is possible in this field.
   - type: textarea
     id: other
     attributes:
