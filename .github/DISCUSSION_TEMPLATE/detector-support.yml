@@ -52,7 +52,7 @@ body:
     id: go2rtclogs
     attributes:
       label: Relevant go2rtc log output
-      description: Please copy and paste any relevant go2rtc log output. Include logs before and after your exact error when possible. This will be automatically formatted into code, so no need for backticks.
+      description: Please copy and paste any relevant go2rtc log output. Include logs before and after your exact error when possible. Logs can be viewed via the Frigate UI, Docker, or the go2rtc dashboard. This will be automatically formatted into code, so no need for backticks.
       render: shell
     validations:
       required: true
@@ -96,8 +96,10 @@ body:
   - type: textarea
     id: screenshots
     attributes:
-      label: Screenshots of the Frigate UI's System metrics pages and any other screenshots pertinent to your issue.
-      description: Drag and drop for images is possible in this field.
+      label: Screenshots of the Frigate UI's System metrics pages
+      description: Drag and drop for images is possible in this field. Please post screenshots of at least General and Cameras tabs.
+    validations:
+      required: true
   - type: textarea
     id: other
     attributes:

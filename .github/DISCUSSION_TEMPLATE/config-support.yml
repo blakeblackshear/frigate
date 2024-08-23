@@ -94,7 +94,8 @@ body:
   - type: textarea
     id: screenshots
     attributes:
-      label: Screenshots of the Frigate UI's System metrics pages and any other screenshots pertinent to your issue. Drag and drop or simple cut/paste is possible in this field.
+      label: Screenshots of the Frigate UI's System metrics pages
+      description: Drag and drop or simple cut/paste is possible in this field
   - type: textarea
     id: other
     attributes:
