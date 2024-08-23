@@ -1,7 +1,7 @@
 title: "[Config Support]: "
 labels: ["support", "triage"]
 body:
- - type: markdown
+  - type: markdown
     attributes:
       value: |
         Use this form for support or questions related to Frigate's configuration and config file.
@@ -33,10 +33,18 @@ body:
     validations:
       required: true
   - type: textarea
-    id: logs
+    id: frigatelogs
     attributes:
-      label: Relevant log output
-      description: Please copy and paste any relevant log output, including any go2rtc and Frigate logs. Include logs before and after your exact error when possible. This will be automatically formatted into code, so no need for backticks.
+      label: Relevant Frigate log output
+      description: Please copy and paste any relevant Frigate log output. Include logs before and after your exact error when possible. This will be automatically formatted into code, so no need for backticks.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: go2rtclogs
+    attributes:
+      label: Relevant go2rtc log output
+      description: Please copy and paste any relevant go2rtc log output. Include logs before and after your exact error when possible. This will be automatically formatted into code, so no need for backticks.
       render: shell
     validations:
       required: true
