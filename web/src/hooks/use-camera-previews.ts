@@ -38,17 +38,26 @@ export function useCameraPreviews(
 // it is not falsely thrown out.
 const PREVIEW_END_BUFFER = 5; // seconds
 
+export function getPreviewForTimeRange(
+  allPreviews: Preview[],
+  camera: string,
+  timeRange: TimeRange,
+) {
+  return allPreviews.find(
+    (preview) =>
+      preview.camera == camera &&
+      Math.ceil(preview.start) >= timeRange.after &&
+      Math.floor(preview.end) <= timeRange.before + PREVIEW_END_BUFFER,
+  );
+}
+
 export function usePreviewForTimeRange(
   allPreviews: Preview[],
   camera: string,
   timeRange: TimeRange,
 ) {
-  return useMemo(() => {
-    return allPreviews.find(
-      (preview) =>
-        preview.camera == camera &&
-        Math.ceil(preview.start) >= timeRange.after &&
-        Math.floor(preview.end) <= timeRange.before + PREVIEW_END_BUFFER,
-    );
-  }, [allPreviews, camera, timeRange]);
+  return useMemo(
+    () => getPreviewForTimeRange(allPreviews, camera, timeRange),
+    [allPreviews, camera, timeRange],
+  );
 }
