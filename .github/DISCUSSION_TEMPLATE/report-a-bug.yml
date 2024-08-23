@@ -1,25 +1,65 @@
 title: "[Bug]: "
 labels: ["bug", "triage"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form to submit a reproducible bug in Frigate or Frigate's UI.
+
+        Before submitting your bug report, please [search the discussions][discussions], look at recent open and closed [pull requests][prs], read the [official Frigate documentation][docs], and read the [Frigate FAQ][faq] pinned at the Discussion page to see if your bug has already been fixed by the developers or reported by the community.
+
+        **If you are unsure if your issue is actually a bug or not, please submit a support request first.**
+
+        [discussions]: https://www.github.com/blakeblackshear/frigate/discussions
+        [prs]: https://www.github.com/blakeblackshear/frigate/pulls
+        [docs]: https://docs.frigate.video
+        [faq]: https://github.com/blakeblackshear/frigate/discussions/12724
+  - type: checkboxes
+    attributes:
+      label: Checklist
+      description: Please verify that you've followed these steps
+      options:
+        - label: I have updated to the latest available Frigate version.
+          required: true
+        - label: I have cleared the cache of my browser.
+          required: true
+        - label: I have tried a different browser to see if it is related to my browser.
+          required: true
+        - label: I have tried reproducing the issue in [incognito mode](https://www.computerworld.com/article/1719851/how-to-go-incognito-in-chrome-firefox-safari-and-edge.html) to rule out problems with any third party extensions or plugins I have installed.
   - type: textarea
     id: description
     attributes:
       label: Describe the problem you are having
+      description: Provide a clear and concise description of what the bug is.
     validations:
       required: true
   - type: textarea
     id: steps
     attributes:
       label: Steps to reproduce
+      description: |
+        Please tell us exactly how to reproduce your issue.
+        Provide clear and concise step by step instructions and add code snippets if needed.
+      value: |
+        1.
+        2.
+        3.
+        ...
     validations:
       required: true
   - type: input
     id: version
     attributes:
       label: Version
-      description: Visible on the System page in the Web UI
+      description: Visible on the System page in the Web UI. Please include the full version including the build identifier (eg. 0.14.0-ea36ds1)
     validations:
       required: true
+  - type: input
+    attributes:
+      label: In which browser(s) are you experiencing the issue with?
+      placeholder: Google Chrome 88.0.4324.150
+      description: >
+        Provide the full name and don't forget to add the version!
   - type: textarea
     id: config
     attributes:
@@ -29,10 +69,18 @@ body:
     validations:
       required: true
   - type: textarea
-    id: logs
+    id: frigatelogs
     attributes:
-      label: Relevant log output
-      description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
+      label: Relevant Frigate log output
+      description: Please copy and paste any relevant Frigate log output. Include logs before and after your exact error when possible. This will be automatically formatted into code, so no need for backticks.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: go2rtclogs
+    attributes:
+      label: Relevant go2rtc log output
+      description: Please copy and paste any relevant go2rtc log output. Include logs before and after your exact error when possible. This will be automatically formatted into code, so no need for backticks.
       render: shell
     validations:
       required: true
@@ -77,6 +125,11 @@ body:
       description: Dahua, hikvision, amcrest, reolink, etc and model number
     validations:
       required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots of the Frigate UI's System metrics pages and any other screenshots pertinent to your issue.
+      description: Drag and drop for images is possible in this field.
   - type: textarea
     id: other
     attributes:
