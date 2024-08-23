@@ -4,7 +4,13 @@ body:
  - type: markdown
     attributes:
       value: |
-        Use this form for support or questions related to Frigate's configuration and config file. Before submitting your support request, please search the discussions, read the [official Frigate documentation](https://docs.frigate.video), and read the Frigate FAQ pinned at the Discussion page to see if your question has already been answered by the developers of by the community.
+        Use this form for support or questions related to Frigate's configuration and config file.
+
+        Before submitting your support request, please [search the discussions][discussions], read the [official Frigate documentation][docs], and read the [Frigate FAQ][faq] pinned at the Discussion page to see if your question has already been answered by the community.
+
+        [discussions]: https://www.github.com/blakeblackshear/frigate/discussions
+        [docs]: https://docs.frigate.video
+        [faq]: https://github.com/blakeblackshear/frigate/discussions/12724
   - type: textarea
     id: description
     attributes:
