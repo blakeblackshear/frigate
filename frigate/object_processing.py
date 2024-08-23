@@ -166,8 +166,6 @@ class TrackedObject:
         if self.computed_score > self.top_score:
             self.top_score = self.computed_score
         self.false_positive = self._is_false_positive()
-        # Hold previous active state for checking further down.
-        previously_active = self.active
         self.active = self.is_active()
 
         if not self.false_positive:
@@ -254,7 +252,7 @@ class TrackedObject:
                 significant_change = True
 
             # if the state changed between stationary and active
-            if previously_active != self.active: 
+            if self.previous["active"] != self.active:
                 significant_change = True
 
             # update at least once per minute
@@ -286,6 +284,7 @@ class TrackedObject:
             "area": self.obj_data["area"],
             "ratio": self.obj_data["ratio"],
             "region": self.obj_data["region"],
+            "active": self.active,
             "stationary": not self.active,
             "motionless_count": self.obj_data["motionless_count"],
             "position_changes": self.obj_data["position_changes"],
@@ -306,8 +305,11 @@ class TrackedObject:
         return not self.is_stationary()
 
     def is_stationary(self):
-        return self.obj_data["motionless_count"] > self.camera_config.detect.stationary.threshold
-    
+        return (
+            self.obj_data["motionless_count"]
+            > self.camera_config.detect.stationary.threshold
+        )
+
     def get_thumbnail(self):
         if (
             self.thumbnail_data is None
@@ -810,7 +812,7 @@ class CameraState:
         total_label_count = 0
         total_active_label_count = 0
 
-        # report on detected objects
+        # report on all detected objects
         for obj_name, count in obj_counter.items():
             total_label_count += count
 
@@ -819,7 +821,11 @@ class CameraState:
                 for c in self.callbacks["object_status"]:
                     c(self.name, obj_name, count)
 
-        for obj_name, count in active_obj_counter.items():
+        # update the active count on all detected objects
+        # To ensure we emit 0's if all objects are stationary, we need to loop
+        # over the set of all objects, not just active ones.
+        for obj_name in set(obj_counter):
+            count = active_obj_counter[obj_name]
             total_active_label_count += count
 
             if count != self.active_object_counts[obj_name]:
@@ -832,7 +838,7 @@ class CameraState:
             self.object_counts["all"] = total_label_count
             for c in self.callbacks["object_status"]:
                 c(self.name, "all", total_label_count)
-    
+
         # publish active label counts for this camera
         if total_active_label_count != self.active_object_counts.get("all"):
             self.active_object_counts["all"] = total_active_label_count
@@ -853,6 +859,11 @@ class CameraState:
             self.object_counts[obj_name] = 0
             for c in self.callbacks["object_status"]:
                 c(self.name, obj_name, 0)
+            # Only publish if the object was previously active.
+            if self.active_object_counts[obj_name] > 0:
+                for c in self.callbacks["active_object_status"]:
+                    c(self.name, obj_name, 0)
+                self.active_object_counts[obj_name] = 0
             for c in self.callbacks["snapshot"]:
                 c(self.name, self.best_objects[obj_name], frame_time)
 
@@ -921,7 +932,6 @@ class TrackedObjectProcessor(threading.Thread):
         # }
         self.zone_data = defaultdict(lambda: defaultdict(dict))
         self.active_zone_data = defaultdict(lambda: defaultdict(dict))
-
 
         def start(camera, obj: TrackedObject, current_frame_time):
             self.event_sender.publish(
@@ -1041,7 +1051,9 @@ class TrackedObjectProcessor(threading.Thread):
             self.dispatcher.publish(f"{camera}/{object_name}", status, retain=False)
 
         def active_object_status(camera, object_name, status):
-            self.dispatcher.publish(f"{camera}/{object_name}/active", status, retain=False)
+            self.dispatcher.publish(
+                f"{camera}/{object_name}/active", status, retain=False
+            )
 
         def camera_activity(camera, activity):
             last_activity = self.camera_activity.get(camera)
@@ -1241,7 +1253,7 @@ class TrackedObjectProcessor(threading.Thread):
                     obj.obj_data["label"]
                     for obj in camera_state.tracked_objects.values()
                     if (
-                        zone in obj.current_zones 
+                        zone in obj.current_zones
                         and not obj.false_positive
                         and obj.active
                     )
@@ -1265,7 +1277,9 @@ class TrackedObjectProcessor(threading.Thread):
                             obj_counter[label] if label in obj_counter else 0
                         )
                         active_zone_label[camera] = (
-                            active_obj_counter[label] if label in active_obj_counter else 0
+                            active_obj_counter[label]
+                            if label in active_obj_counter
+                            else 0
                         )
                         new_count = sum(zone_label.values())
                         new_active_count = sum(active_zone_label.values())
