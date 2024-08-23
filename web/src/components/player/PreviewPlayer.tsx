@@ -16,7 +16,10 @@ import { isAndroid, isChrome, isMobile } from "react-device-detect";
 import { TimeRange } from "@/types/timeline";
 import { Skeleton } from "../ui/skeleton";
 import { cn } from "@/lib/utils";
-import { usePreviewForTimeRange } from "@/hooks/use-camera-previews";
+import {
+  getPreviewForTimeRange,
+  usePreviewForTimeRange,
+} from "@/hooks/use-camera-previews";
 
 type PreviewPlayerProps = {
   className?: string;
@@ -243,12 +246,7 @@ function PreviewVideoPlayer({
       return;
     }
 
-    const preview = cameraPreviews.find(
-      (preview) =>
-        preview.camera == camera &&
-        Math.round(preview.start) >= timeRange.after &&
-        Math.floor(preview.end) <= timeRange.before,
-    );
+    const preview = getPreviewForTimeRange(cameraPreviews, camera, timeRange);
 
     if (preview != currentPreview) {
       controller.newPreviewLoaded = false;
