@@ -10,6 +10,9 @@ from functools import reduce
 from typing import Optional
 
 import requests
+from fastapi import APIRouter
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
 from flask import Blueprint, Flask, current_app, jsonify, make_response, request
 from markupsafe import escape
 from peewee import operator
@@ -21,7 +24,6 @@ from frigate.api.event import EventBp
 from frigate.api.export import ExportBp
 from frigate.api.media import MediaBp
 from frigate.api.notification import NotificationBp
-from frigate.api.preview import PreviewBp
 from frigate.api.review import ReviewBp
 from frigate.config import FrigateConfig
 from frigate.const import CONFIG_DIR
@@ -47,10 +49,11 @@ bp = Blueprint("frigate", __name__)
 bp.register_blueprint(EventBp)
 bp.register_blueprint(ExportBp)
 bp.register_blueprint(MediaBp)
-bp.register_blueprint(PreviewBp)
 bp.register_blueprint(ReviewBp)
 bp.register_blueprint(AuthBp)
 bp.register_blueprint(NotificationBp)
+
+router = APIRouter()
 
 
 def create_app(
@@ -454,19 +457,26 @@ def vainfo():
     )
 
 
-@bp.route("/logs/<service>", methods=["GET"])
-def logs(service: str):
+@router.get("/logs/{service}", tags=["Logs"])
+def logs(
+        service: str,
+        download: Optional[str] = None,
+        start: Optional[int] = 0,
+        end: Optional[int] = None,
+):
+    """Get logs for the requested service (frigate/nginx/go2rtc/chroma)"""
+
     def download_logs(service_location: str):
         try:
             file = open(service_location, "r")
             contents = file.read()
             file.close()
-            return jsonify(contents)
+            return JSONResponse(jsonable_encoder(contents))
         except FileNotFoundError as e:
             logger.error(e)
-            return make_response(
-                jsonify({"success": False, "message": "Could not find log file"}),
-                500,
+            return JSONResponse(
+                content={"success": False, "message": "Could not find log file"},
+                status_code=500,
             )
 
     log_locations = {
@@ -478,16 +488,13 @@ def logs(service: str):
     service_location = log_locations.get(service)
 
     if not service_location:
-        return make_response(
-            jsonify({"success": False, "message": "Not a valid service"}),
-            404,
+        return JSONResponse(
+            content={"success": False, "message": "Not a valid service"},
+            status_code=404,
         )
 
-    if request.args.get("download", type=bool, default=False):
+    if download:
         return download_logs(service_location)
-
-    start = request.args.get("start", type=int, default=0)
-    end = request.args.get("end", type=int)
 
     try:
         file = open(service_location, "r")
@@ -529,15 +536,15 @@ def logs(service: str):
 
         logLines.append(currentLine)
 
-        return make_response(
-            jsonify({"totalLines": len(logLines), "lines": logLines[start:end]}),
-            200,
+        return JSONResponse(
+            content={"totalLines": len(logLines), "lines": logLines[start:end]},
+            status_code=200,
         )
     except FileNotFoundError as e:
         logger.error(e)
-        return make_response(
-            jsonify({"success": False, "message": "Could not find log file"}),
-            500,
+        return JSONResponse(
+            content={"success": False, "message": "Could not find log file"},
+            status_code=500,
         )
 
 
