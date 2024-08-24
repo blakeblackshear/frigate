@@ -44,7 +44,6 @@ from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
 
-
 bp = Blueprint("frigate", __name__)
 bp.register_blueprint(EventBp)
 bp.register_blueprint(ExportBp)
@@ -57,15 +56,15 @@ router = APIRouter()
 
 
 def create_app(
-        frigate_config,
-        database: SqliteQueueDatabase,
-        embeddings: Optional[EmbeddingsContext],
-        detected_frames_processor,
-        storage_maintainer: StorageMaintainer,
-        onvif: OnvifController,
-        external_processor: ExternalEventProcessor,
-        plus_api: PlusApi,
-        stats_emitter: StatsEmitter,
+    frigate_config,
+    database: SqliteQueueDatabase,
+    embeddings: Optional[EmbeddingsContext],
+    detected_frames_processor,
+    storage_maintainer: StorageMaintainer,
+    onvif: OnvifController,
+    external_processor: ExternalEventProcessor,
+    plus_api: PlusApi,
+    stats_emitter: StatsEmitter,
 ):
     app = Flask(__name__)
 
