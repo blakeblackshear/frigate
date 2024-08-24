@@ -5,7 +5,7 @@ inputs:
     required: true
 outputs:
   image-name:
-    value: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ github.ref_name }}-${{ steps.create-short-sha.outputs.SHORT_SHA }}
+    value: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ steps.create-short-sha.outputs.SHORT_SHA }}
   cache-name:
     value: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:cache
 runs:

@@ -23,10 +23,10 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Create tag variables
         run: |
-          BRANCH=dev
-          echo "BRANCH=${BRANCH}" >> $GITHUB_ENV
+          BUILD_TYPE=$([[ "${{ github.ref_name }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] && echo "stable" || echo "beta")
+          echo "BUILD_TYPE=${BUILD_TYPE}" >> $GITHUB_ENV
           echo "BASE=ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}" >> $GITHUB_ENV
-          echo "BUILD_TAG=${BRANCH}-${GITHUB_SHA::7}" >> $GITHUB_ENV
+          echo "BUILD_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
           echo "CLEAN_VERSION=$(echo ${GITHUB_REF##*/} | tr '[:upper:]' '[:lower:]' | sed 's/^[v]//')" >> $GITHUB_ENV
       - name: Tag and push the main image
         run: |
@@ -39,7 +39,7 @@ jobs:
           done
 
           # stable tag
-          if [[ "${BRANCH}" == "master" ]]; then
+          if [[ "${BUILD_TYPE}" == "stable" ]]; then
             docker run --rm -v $HOME/.docker/config.json:/config.json quay.io/skopeo/stable:latest copy --authfile /config.json --multi-arch all docker://${PULL_TAG} docker://${STABLE_TAG}
             for variant in standard-arm64 tensorrt tensorrt-jp4 tensorrt-jp5 rk; do
               docker run --rm -v $HOME/.docker/config.json:/config.json quay.io/skopeo/stable:latest copy --authfile /config.json --multi-arch all docker://${PULL_TAG}-${variant} docker://${STABLE_TAG}-${variant}
