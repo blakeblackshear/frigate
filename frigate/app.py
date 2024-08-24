@@ -14,6 +14,8 @@ from types import FrameType
 from typing import Optional
 
 import psutil
+import uvicorn
+from fastapi.middleware.wsgi import WSGIMiddleware
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
@@ -21,6 +23,7 @@ from pydantic import ValidationError
 
 from frigate.api.app import create_app
 from frigate.api.auth import hash_password
+from frigate.api.new_app import create_fastapi_app
 from frigate.comms.config_updater import ConfigPublisher
 from frigate.comms.dispatcher import Communicator, Dispatcher
 from frigate.comms.inter_process import InterProcessCommunicator
@@ -397,6 +400,8 @@ class FrigateApp:
             self.stats_emitter,
         )
 
+        self.fastapi_app = create_fastapi_app(self.config, self.detected_frames_processor)
+
     def init_onvif(self) -> None:
         self.onvif_controller = OnvifController(self.config, self.ptz_metrics)
 
@@ -739,11 +744,17 @@ class FrigateApp:
         signal.signal(signal.SIGTERM, receiveSignal)
 
         try:
-            self.flask_app.run(host="127.0.0.1", port=5001, debug=False, threaded=True)
+            # Run the flask app inside fastapi: https://fastapi.tiangolo.com/advanced/sub-applications/
+            self.fastapi_app.mount("", WSGIMiddleware(self.flask_app))
+            uvicorn.run(
+                self.fastapi_app,
+                host="127.0.0.1",
+                port=5001,
+            )
         except KeyboardInterrupt:
             pass
 
-        logger.info("Flask has exited...")
+        logger.info("FastAPI/Flask has exited...")
 
         self.stop()
 

@@ -2,16 +2,20 @@
 
 import base64
 import glob
+import io
 import logging
 import os
 import subprocess as sp
 import time
 from datetime import datetime, timedelta, timezone
+from typing import Optional
 from urllib.parse import unquote
 
 import cv2
 import numpy as np
 import pytz
+from fastapi import APIRouter, Request
+from fastapi.responses import JSONResponse, StreamingResponse
 from flask import Blueprint, Response, current_app, jsonify, make_response, request
 from peewee import DoesNotExist, fn
 from tzlocal import get_localzone_name
@@ -31,6 +35,8 @@ from frigate.util.image import get_image_from_recording
 logger = logging.getLogger(__name__)
 
 MediaBp = Blueprint("media", __name__)
+
+router = APIRouter(tags=["Media"])
 
 
 @MediaBp.route("/<camera_name>")
@@ -92,90 +98,102 @@ def camera_ptz_info(camera_name):
             404,
         )
 
-
-@MediaBp.route("/<camera_name>/latest.jpg")
-@MediaBp.route("/<camera_name>/latest.webp")
-def latest_frame(camera_name):
+@router.get("/{camera_name}/latest.{extension}")
+def latest_frame(
+        request: Request,
+        camera_name: str,
+        extension: str,  # jpg/jpeg/png/webp
+        bbox: Optional[int] = None,
+        timestamp: Optional[int] = None,
+        zones: Optional[int] = None,
+        mask: Optional[int] = None,
+        motion: Optional[int] = None,
+        regions: Optional[int] = None,
+        quality: Optional[int] = 70,
+        h: Optional[int] = None,
+):
     draw_options = {
-        "bounding_boxes": request.args.get("bbox", type=int),
-        "timestamp": request.args.get("timestamp", type=int),
-        "zones": request.args.get("zones", type=int),
-        "mask": request.args.get("mask", type=int),
-        "motion_boxes": request.args.get("motion", type=int),
-        "regions": request.args.get("regions", type=int),
+        "bounding_boxes": bbox,
+        "timestamp": timestamp,
+        "zones": zones,
+        "mask": mask,
+        "motion_boxes": motion,
+        "regions": regions,
     }
-    resize_quality = request.args.get("quality", default=70, type=int)
-    extension = os.path.splitext(request.path)[1][1:]
 
-    if camera_name in current_app.frigate_config.cameras:
-        frame = current_app.detected_frames_processor.get_current_frame(
+    if camera_name in request.app.frigate_config.cameras:
+        frame = request.app.detected_frames_processor.get_current_frame(
             camera_name, draw_options
         )
         retry_interval = float(
-            current_app.frigate_config.cameras.get(camera_name).ffmpeg.retry_interval
+            request.app.frigate_config.cameras.get(camera_name).ffmpeg.retry_interval
             or 10
         )
 
         if frame is None or datetime.now().timestamp() > (
-            current_app.detected_frames_processor.get_current_frame_time(camera_name)
-            + retry_interval
+                request.app.detected_frames_processor.get_current_frame_time(camera_name)
+                + retry_interval
         ):
-            if current_app.camera_error_image is None:
+            if request.app.camera_error_image is None:
                 error_image = glob.glob("/opt/frigate/frigate/images/camera-error.jpg")
 
                 if len(error_image) > 0:
-                    current_app.camera_error_image = cv2.imread(
+                    request.app.camera_error_image = cv2.imread(
                         error_image[0], cv2.IMREAD_UNCHANGED
                     )
 
-            frame = current_app.camera_error_image
+            frame = request.app.camera_error_image
 
-        height = int(request.args.get("h", str(frame.shape[0])))
+        height = int(h or str(frame.shape[0]))
         width = int(height * frame.shape[1] / frame.shape[0])
 
         if frame is None:
-            return make_response(
-                jsonify({"success": False, "message": "Unable to get valid frame"}),
-                500,
+            return JSONResponse(
+                content={"success": False, "message": "Unable to get valid frame"},
+                status_code=500,
             )
 
         if height < 1 or width < 1:
-            return (
-                "Invalid height / width requested :: {} / {}".format(height, width),
-                400,
+            return JSONResponse(
+                content="Invalid height / width requested :: {} / {}".format(
+                    height, width
+                ),
+                status_code=400,
             )
 
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
 
         ret, img = cv2.imencode(
-            f".{extension}", frame, [int(cv2.IMWRITE_WEBP_QUALITY), resize_quality]
+            f".{extension}", frame, [int(cv2.IMWRITE_WEBP_QUALITY), quality]
         )
-        response = make_response(img.tobytes())
-        response.headers["Content-Type"] = f"image/{extension}"
-        response.headers["Cache-Control"] = "no-store"
-        return response
-    elif camera_name == "birdseye" and current_app.frigate_config.birdseye.restream:
+        return StreamingResponse(
+            io.BytesIO(img.tobytes()),
+            media_type=f"image/{extension}",
+            headers={"Content-Type": f"image/{extension}", "Cache-Control": "no-store"},
+        )
+    elif camera_name == "birdseye" and request.app.frigate_config.birdseye.restream:
         frame = cv2.cvtColor(
-            current_app.detected_frames_processor.get_current_frame(camera_name),
+            request.app.detected_frames_processor.get_current_frame(camera_name),
             cv2.COLOR_YUV2BGR_I420,
         )
 
-        height = int(request.args.get("h", str(frame.shape[0])))
+        height = int(h or str(frame.shape[0]))
         width = int(height * frame.shape[1] / frame.shape[0])
 
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
 
         ret, img = cv2.imencode(
-            f".{extension}", frame, [int(cv2.IMWRITE_WEBP_QUALITY), resize_quality]
+            f".{extension}", frame, [int(cv2.IMWRITE_WEBP_QUALITY), quality]
         )
-        response = make_response(img.tobytes())
-        response.headers["Content-Type"] = f"image/{extension}"
-        response.headers["Cache-Control"] = "no-store"
-        return response
+        return StreamingResponse(
+            io.BytesIO(img.tobytes()),
+            media_type=f"image/{extension}",
+            headers={"Content-Type": f"image/{extension}", "Cache-Control": "no-store"},
+        )
     else:
-        return make_response(
-            jsonify({"success": False, "message": "Camera not found"}),
-            404,
+        return JSONResponse(
+            content={"success": False, "message": "Camera not found"},
+            status_code=404,
         )
 
 
