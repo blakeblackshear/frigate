@@ -57,15 +57,15 @@ router = APIRouter()
 
 
 def create_app(
-    frigate_config,
-    database: SqliteQueueDatabase,
-    embeddings: Optional[EmbeddingsContext],
-    detected_frames_processor,
-    storage_maintainer: StorageMaintainer,
-    onvif: OnvifController,
-    external_processor: ExternalEventProcessor,
-    plus_api: PlusApi,
-    stats_emitter: StatsEmitter,
+        frigate_config,
+        database: SqliteQueueDatabase,
+        embeddings: Optional[EmbeddingsContext],
+        detected_frames_processor,
+        storage_maintainer: StorageMaintainer,
+        onvif: OnvifController,
+        external_processor: ExternalEventProcessor,
+        plus_api: PlusApi,
+        stats_emitter: StatsEmitter,
 ):
     app = Flask(__name__)
 
