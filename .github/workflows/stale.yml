@@ -25,17 +25,17 @@ jobs:
       - name: Print outputs
         run: echo ${{ join(steps.stale.outputs.*, ',') }}
 
-  clean_ghcr:
-    name: Delete outdated dev container images
-    runs-on: ubuntu-latest
-    steps:
-      - name: Delete old images
-        uses: snok/container-retention-policy@v2
-        with:
-          image-names: dev-*
-          cut-off: 60 days ago UTC
-          keep-at-least: 5
-          account-type: personal
-          token: ${{ secrets.GITHUB_TOKEN }}
-          token-type: github-token
+  # clean_ghcr:
+  #   name: Delete outdated dev container images
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Delete old images
+  #       uses: snok/container-retention-policy@v2
+  #       with:
+  #         image-names: dev-*
+  #         cut-off: 60 days ago UTC
+  #         keep-at-least: 5
+  #         account-type: personal
+  #         token: ${{ secrets.GITHUB_TOKEN }}
+  #         token-type: github-token
 
