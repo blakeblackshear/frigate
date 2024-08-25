@@ -32,6 +32,8 @@ import { Drawer, DrawerContent } from "../ui/drawer";
 import axios from "axios";
 import { toast } from "sonner";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { capitalizeFirstLetter } from "@/utils/stringUtil";
 
 type ReviewCardProps = {
   event: ReviewSegment;
@@ -153,21 +155,43 @@ export default function ReviewCard({
         }}
       />
       <div className="flex items-center justify-between">
-        <div className="flex items-center justify-evenly gap-1">
-          {event.data.objects.map((object) => {
-            return getIconForLabel(
-              object,
-              "size-3 text-primary dark:text-white",
-            );
-          })}
-          {event.data.audio.map((audio) => {
-            return getIconForLabel(
-              audio,
-              "size-3 text-primary dark:text-white",
-            );
-          })}
-          <div className="font-extra-light text-xs">{formattedDate}</div>
-        </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex items-center justify-evenly gap-1">
+              <>
+                {event.data.objects.map((object) => {
+                  return getIconForLabel(
+                    object,
+                    "size-3 text-primary dark:text-white",
+                  );
+                })}
+                {event.data.audio.map((audio) => {
+                  return getIconForLabel(
+                    audio,
+                    "size-3 text-primary dark:text-white",
+                  );
+                })}
+              </>
+              <div className="font-extra-light text-xs">{formattedDate}</div>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent className="capitalize">
+            {[
+              ...new Set([
+                ...(event.data.objects || []),
+                ...(event.data.sub_labels || []),
+                ...(event.data.audio || []),
+              ]),
+            ]
+              .filter(
+                (item) => item !== undefined && !item.includes("-verified"),
+              )
+              .map((text) => capitalizeFirstLetter(text))
+              .sort()
+              .join(", ")
+              .replaceAll("-verified", "")}
+          </TooltipContent>
+        </Tooltip>
         <TimeAgo
           className="text-xs text-muted-foreground"
           time={event.start_time * 1000}
