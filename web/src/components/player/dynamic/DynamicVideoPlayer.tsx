@@ -24,6 +24,7 @@ type DynamicVideoPlayerProps = {
   startTimestamp?: number;
   isScrubbing: boolean;
   hotKeys: boolean;
+  supportsFullscreen: boolean;
   fullscreen: boolean;
   onControllerReady: (controller: DynamicVideoController) => void;
   onTimestampUpdate?: (timestamp: number) => void;
@@ -40,6 +41,7 @@ export default function DynamicVideoPlayer({
   startTimestamp,
   isScrubbing,
   hotKeys,
+  supportsFullscreen,
   fullscreen,
   onControllerReady,
   onTimestampUpdate,
@@ -167,7 +169,11 @@ export default function DynamicVideoPlayer({
   );
 
   useEffect(() => {
-    if (!controller || !recordings) {
+    if (!controller || !recordings?.length) {
+      if (recordings?.length == 0) {
+        setNoRecording(true);
+      }
+
       return;
     }
 
@@ -197,6 +203,7 @@ export default function DynamicVideoPlayer({
         visible={!(isScrubbing || isLoading)}
         currentSource={source}
         hotKeys={hotKeys}
+        supportsFullscreen={supportsFullscreen}
         fullscreen={fullscreen}
         onTimeUpdate={onTimeUpdate}
         onPlayerLoaded={onPlayerLoaded}

@@ -546,6 +546,11 @@ def vod_ts(camera_name, start_ts, end_ts):
         if recording.end_time > end_ts:
             duration -= int((recording.end_time - end_ts) * 1000)
 
+            if duration == 0:
+                # this means the segment starts right at the end of the requested time range
+                # and it does not need to be included
+                continue
+
         if 0 < duration < max_duration_ms:
             clip["keyFrameDurations"] = [duration]
             clips.append(clip)

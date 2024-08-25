@@ -101,7 +101,7 @@ export default function Events() {
 
   // review paging
 
-  const [beforeTs, setBeforeTs] = useState(Date.now() / 1000);
+  const [beforeTs, setBeforeTs] = useState(Math.ceil(Date.now() / 1000));
   const last24Hours = useMemo(() => {
     return { before: beforeTs, after: getHoursAgo(24) };
   }, [beforeTs]);
@@ -111,7 +111,7 @@ export default function Events() {
     }
 
     return {
-      before: Math.floor(reviewSearchParams["before"]),
+      before: Math.ceil(reviewSearchParams["before"]),
       after: Math.floor(reviewSearchParams["after"]),
     };
   }, [last24Hours, reviewSearchParams]);
@@ -416,6 +416,7 @@ export default function Events() {
     if (selectedReviewData) {
       return (
         <RecordingView
+          key={selectedTimeRange.before}
           startCamera={selectedReviewData.camera}
           startTime={selectedReviewData.start_time}
           allCameras={selectedReviewData.allCameras}
@@ -455,5 +456,5 @@ export default function Events() {
 function getHoursAgo(hours: number): number {
   const now = new Date();
   now.setHours(now.getHours() - hours);
-  return now.getTime() / 1000;
+  return Math.ceil(now.getTime() / 1000);
 }

@@ -395,6 +395,7 @@ export default function EventView({
             markAllItemsAsReviewed={markAllItemsAsReviewed}
             onSelectReview={onSelectReview}
             onSelectAllReviews={onSelectAllReviews}
+            setSelectedReviews={setSelectedReviews}
             pullLatestData={pullLatestData}
           />
         )}
@@ -437,6 +438,7 @@ type DetectionReviewProps = {
   markAllItemsAsReviewed: (currentItems: ReviewSegment[]) => void;
   onSelectReview: (review: ReviewSegment, ctrl: boolean) => void;
   onSelectAllReviews: () => void;
+  setSelectedReviews: (reviewIds: string[]) => void;
   pullLatestData: () => void;
 };
 function DetectionReview({
@@ -455,6 +457,7 @@ function DetectionReview({
   markAllItemsAsReviewed,
   onSelectReview,
   onSelectAllReviews,
+  setSelectedReviews,
   pullLatestData,
 }: DetectionReviewProps) {
   const reviewTimelineRef = useRef<HTMLDivElement>(null);
@@ -603,13 +606,23 @@ function DetectionReview({
 
   // keyboard
 
-  useKeyboardListener(["a"], (key, modifiers) => {
+  useKeyboardListener(["a", "r"], (key, modifiers) => {
     if (modifiers.repeat || !modifiers.down) {
       return;
     }
 
     if (key == "a" && modifiers.ctrl) {
       onSelectAllReviews();
+    }
+
+    if (key == "r" && selectedReviews.length > 0) {
+      currentItems?.forEach((item) => {
+        if (selectedReviews.includes(item.id)) {
+          item.has_been_reviewed = true;
+          markItemAsReviewed(item);
+        }
+      });
+      setSelectedReviews([]);
     }
   });
 
@@ -692,6 +705,7 @@ function DetectionReview({
                   className="text-white"
                   variant="select"
                   onClick={() => {
+                    setSelectedReviews([]);
                     markAllItemsAsReviewed(currentItems ?? []);
                   }}
                 >
@@ -1057,7 +1071,7 @@ function MotionReview({
 
               setScrubbing(scrubbing);
             }}
-            dense={isMobile}
+            dense={isMobileOnly}
           />
         ) : (
           <Skeleton className="size-full" />

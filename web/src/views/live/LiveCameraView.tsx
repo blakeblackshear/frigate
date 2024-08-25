@@ -78,16 +78,19 @@ import { useNavigate } from "react-router-dom";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import useSWR from "swr";
 import { cn } from "@/lib/utils";
+import { useSessionPersistence } from "@/hooks/use-session-persistence";
 
 type LiveCameraViewProps = {
   config?: FrigateConfig;
   camera: CameraConfig;
+  supportsFullscreen: boolean;
   fullscreen: boolean;
   toggleFullscreen: () => void;
 };
 export default function LiveCameraView({
   config,
   camera,
+  supportsFullscreen,
   fullscreen,
   toggleFullscreen,
 }: LiveCameraViewProps) {
@@ -194,7 +197,7 @@ export default function LiveCameraView({
 
   // playback state
 
-  const [audio, setAudio] = useState(false);
+  const [audio, setAudio] = useSessionPersistence("liveAudio", false);
   const [mic, setMic] = useState(false);
   const [webRTC, setWebRTC] = useState(false);
   const [pip, setPip] = useState(false);
@@ -224,6 +227,10 @@ export default function LiveCameraView({
 
     if (!("MediaSource" in window || "ManagedMediaSource" in window)) {
       return "webrtc";
+    }
+
+    if (!isRestreamed) {
+      return "jsmpeg";
     }
 
     return "mse";
@@ -285,14 +292,23 @@ export default function LiveCameraView({
     }
   }, [fullscreen, isPortrait, cameraAspectRatio, containerAspectRatio]);
 
-  const handleError = useCallback((e: LivePlayerError) => {
-    if (e == "mse-decode") {
-      setWebRTC(true);
-    } else {
-      setWebRTC(false);
-      setLowBandwidth(true);
-    }
-  }, []);
+  const handleError = useCallback(
+    (e: LivePlayerError) => {
+      if (e) {
+        if (
+          !webRTC &&
+          config &&
+          config.go2rtc?.webrtc?.candidates?.length > 0
+        ) {
+          setWebRTC(true);
+        } else {
+          setWebRTC(false);
+          setLowBandwidth(true);
+        }
+      }
+    },
+    [config, webRTC],
+  );
 
   return (
     <TransformWrapper minScale={1.0} wheel={{ smoothStep: 0.005 }}>
@@ -362,7 +378,7 @@ export default function LiveCameraView({
                   )}
                 </Button>
               )}
-              {!isIOS && (
+              {supportsFullscreen && (
                 <CameraFeatureToggle
                   className="p-2 md:p-0"
                   variant={fullscreen ? "overlay" : "primary"}
@@ -404,13 +420,14 @@ export default function LiveCameraView({
                   className="p-2 md:p-0"
                   variant={fullscreen ? "overlay" : "primary"}
                   Icon={audio ? GiSpeaker : GiSpeakerOff}
-                  isActive={audio}
+                  isActive={audio ?? false}
                   title={`${audio ? "Disable" : "Enable"} Camera Audio`}
                   onClick={() => setAudio(!audio)}
                 />
               )}
               <FrigateCameraFeatures
                 camera={camera.name}
+                recordingEnabled={camera.record.enabled_in_config}
                 audioDetectEnabled={camera.audio.enabled_in_config}
                 autotrackingEnabled={
                   camera.onvif.autotracking.enabled_in_config
@@ -669,12 +686,14 @@ function PtzControlPanel({
 
 type FrigateCameraFeaturesProps = {
   camera: string;
+  recordingEnabled: boolean;
   audioDetectEnabled: boolean;
   autotrackingEnabled: boolean;
   fullscreen: boolean;
 };
 function FrigateCameraFeatures({
   camera,
+  recordingEnabled,
   audioDetectEnabled,
   autotrackingEnabled,
   fullscreen,
@@ -763,11 +782,15 @@ function FrigateCameraFeatures({
           isChecked={detectState == "ON"}
           onCheckedChange={() => sendDetect(detectState == "ON" ? "OFF" : "ON")}
         />
-        <FilterSwitch
-          label="Recording"
-          isChecked={recordState == "ON"}
-          onCheckedChange={() => sendRecord(recordState == "ON" ? "OFF" : "ON")}
-        />
+        {recordingEnabled && (
+          <FilterSwitch
+            label="Recording"
+            isChecked={recordState == "ON"}
+            onCheckedChange={() =>
+              sendRecord(recordState == "ON" ? "OFF" : "ON")
+            }
+          />
+        )}
         <FilterSwitch
           label="Snapshots"
           isChecked={snapshotState == "ON"}

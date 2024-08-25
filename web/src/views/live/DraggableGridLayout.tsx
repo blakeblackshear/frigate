@@ -41,6 +41,7 @@ import {
   TooltipContent,
 } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
+import useCameraLiveMode from "@/hooks/use-camera-live-mode";
 
 type DraggableGridLayoutProps = {
   cameras: CameraConfig[];
@@ -74,37 +75,10 @@ export default function DraggableGridLayout({
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
 
   // preferred live modes per camera
-  const [preferredLiveModes, setPreferredLiveModes] = useState<{
-    [key: string]: LivePlayerMode;
-  }>({});
+
+  const { preferredLiveModes, setPreferredLiveModes, resetPreferredLiveMode } =
+    useCameraLiveMode(cameras, windowVisible);
   const [liveViewMode] = usePersistence<LiveViewMode>("liveViewMode", "auto");
-
-  useEffect(() => {
-    if (!cameras) return;
-
-    const mseSupported =
-      "MediaSource" in window || "ManagedMediaSource" in window;
-
-    const newPreferredLiveModes = cameras.reduce(
-      (acc, camera) => {
-        const isRestreamed =
-          config &&
-          Object.keys(config.go2rtc.streams || {}).includes(
-            camera.live.stream_name,
-          );
-
-        if (!mseSupported) {
-          acc[camera.name] = isRestreamed ? "webrtc" : "jsmpeg";
-        } else {
-          acc[camera.name] = isRestreamed ? "mse" : "jsmpeg";
-        }
-        return acc;
-      },
-      {} as { [key: string]: LivePlayerMode },
-    );
-
-    setPreferredLiveModes(newPreferredLiveModes);
-  }, [cameras, config, windowVisible]);
 
   const ResponsiveGridLayout = useMemo(() => WidthProvider(Responsive), []);
 
@@ -478,6 +452,7 @@ export default function DraggableGridLayout({
                       return newModes;
                     });
                   }}
+                  onResetLiveMode={() => resetPreferredLiveMode(camera.name)}
                 >
                   {isEditMode && showCircles && <CornerCircles />}
                 </LivePlayerGridItem>
@@ -636,6 +611,7 @@ type LivePlayerGridItemProps = {
   preferredLiveMode: LivePlayerMode;
   onClick: () => void;
   onError: (e: LivePlayerError) => void;
+  onResetLiveMode: () => void;
   liveViewMode?: LiveViewMode;
 };
 
@@ -657,6 +633,7 @@ const LivePlayerGridItem = React.forwardRef<
       preferredLiveMode,
       onClick,
       onError,
+      onResetLiveMode,
       liveViewMode,
       ...props
     },
@@ -679,6 +656,7 @@ const LivePlayerGridItem = React.forwardRef<
           preferredLiveMode={preferredLiveMode}
           onClick={onClick}
           onError={onError}
+          onResetLiveMode={onResetLiveMode}
           containerRef={ref as React.RefObject<HTMLDivElement>}
           autoLive={liveViewMode != "static"}
           showStillWithoutActivity={liveViewMode != "continuous"}
