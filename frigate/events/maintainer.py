@@ -5,7 +5,7 @@ from multiprocessing.synchronize import Event as MpEvent
 from typing import Dict
 
 from frigate.comms.events_updater import EventEndPublisher, EventUpdateSubscriber
-from frigate.config import EventsConfig, FrigateConfig
+from frigate.config import FrigateConfig
 from frigate.events.types import EventStateEnum, EventTypeEnum
 from frigate.models import Event
 from frigate.util.builtin import to_relative_box

@@ -381,9 +381,7 @@ class TestConfig(unittest.TestCase):
     def test_motion_mask_relative_matches_explicit(self):
         config = {
             "mqtt": {"host": "mqtt"},
-            "record": {
-                "events": {"retain": {"default": 20, "objects": {"person": 30}}}
-            },
+            "record": {"alerts": {"retain": {"days": 20}}},
             "cameras": {
                 "explicit": {
                     "ffmpeg": {
@@ -581,7 +579,11 @@ class TestConfig(unittest.TestCase):
         config = {
             "mqtt": {"host": "mqtt"},
             "record": {
-                "events": {"retain": {"default": 20, "objects": {"person": 30}}}
+                "alerts": {
+                    "retain": {
+                        "days": 20,
+                    }
+                }
             },
             "cameras": {
                 "back": {
@@ -605,7 +607,11 @@ class TestConfig(unittest.TestCase):
         config = {
             "mqtt": {"host": "mqtt"},
             "record": {
-                "events": {"retain": {"default": 20, "objects": {"person": 30}}}
+                "alerts": {
+                    "retain": {
+                        "days": 20,
+                    }
+                }
             },
             "cameras": {
                 "back": {
@@ -629,7 +635,11 @@ class TestConfig(unittest.TestCase):
         config = {
             "mqtt": {"host": "mqtt"},
             "record": {
-                "events": {"retain": {"default": 20, "objects": {"person": 30}}}
+                "alerts": {
+                    "retain": {
+                        "days": 20,
+                    }
+                }
             },
             "cameras": {
                 "back": {
@@ -660,7 +670,11 @@ class TestConfig(unittest.TestCase):
         config = {
             "mqtt": {"host": "mqtt"},
             "record": {
-                "events": {"retain": {"default": 20, "objects": {"person": 30}}}
+                "alerts": {
+                    "retain": {
+                        "days": 20,
+                    }
+                }
             },
             "cameras": {
                 "back": {

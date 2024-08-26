@@ -69,22 +69,27 @@ class RecordingCleanup(threading.Thread):
         detection_expire_date = (
             now - datetime.timedelta(days=config.record.detections.retain.days)
         ).timestamp()
-        expired_reviews: ReviewSegment = ReviewSegment.select(ReviewSegment.id).where(
-            ReviewSegment.camera == config.name
-            and (
-                (
-                    ReviewSegment.severity == "alert"
-                    and ReviewSegment.end_time < alert_expire_date
-                )
-                or (
-                    ReviewSegment.severity == "detection"
-                    and ReviewSegment.end_time < detection_expire_date
+        expired_reviews: ReviewSegment = (
+            ReviewSegment.select(ReviewSegment.id)
+            .where(
+                ReviewSegment.camera == config.name
+                and (
+                    (
+                        ReviewSegment.severity == "alert"
+                        and ReviewSegment.end_time < alert_expire_date
+                    )
+                    or (
+                        ReviewSegment.severity == "detection"
+                        and ReviewSegment.end_time < detection_expire_date
+                    )
                 )
             )
+            .namedtuples()
         )
 
         max_deletes = 100000
-        deleted_reviews_list = list(expired_reviews)
+        deleted_reviews_list = list(map(lambda x: x[0], expired_reviews))
+        logger.info(f"the list is {deleted_reviews_list}")
         for i in range(0, len(deleted_reviews_list), max_deletes):
             ReviewSegment.delete().where(
                 ReviewSegment.id << deleted_reviews_list[i : i + max_deletes]

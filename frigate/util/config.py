@@ -13,7 +13,7 @@ from frigate.util.services import get_video_properties
 
 logger = logging.getLogger(__name__)
 
-CURRENT_CONFIG_VERSION = "0.14.1-0"
+CURRENT_CONFIG_VERSION = "0.15-0"
 
 
 def migrate_frigate_config(config_file: str):
@@ -55,12 +55,12 @@ def migrate_frigate_config(config_file: str):
                 os.path.join(EXPORT_DIR, file), os.path.join(EXPORT_DIR, new_name)
             )
 
-    if previous_version < "0.14.1-0":
-        logger.info(f"Migrating frigate config from {previous_version} to 0.14.1-0...")
-        new_config = migrate_0141_0(config)
+    if previous_version < "0.15-0":
+        logger.info(f"Migrating frigate config from {previous_version} to 0.15-0...")
+        new_config = migrate_015_0(config)
         with open(config_file, "w") as f:
             yaml.dump(new_config, f)
-        previous_version = "0.14.1-0"
+        previous_version = "0.15-0"
 
     logger.info("Finished frigate config migration...")
 
@@ -152,8 +152,8 @@ def migrate_014(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
     return new_config
 
 
-def migrate_0141_0(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
-    """Handle migrating frigate config to 0.14.1-0"""
+def migrate_015_0(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
+    """Handle migrating frigate config to 0.15-0"""
     new_config = config.copy()
 
     # migrate record.events to record.alerts and record.detections
@@ -240,7 +240,7 @@ def migrate_0141_0(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any
 
         new_config["cameras"][name] = camera_config
 
-    new_config["version"] = "0.14.1-0"
+    new_config["version"] = "0.15-0"
     return new_config
 
 
