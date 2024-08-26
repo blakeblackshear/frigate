@@ -56,7 +56,11 @@ def migrate_frigate_config(config_file: str):
             )
 
     if previous_version < "0.14.1-0":
-        logger.info(f"Migrating frigate config from {previous_version} to 0.14...")
+        logger.info(f"Migrating frigate config from {previous_version} to 0.14.1-0...")
+        new_config = migrate_0141_0(config)
+        with open(config_file, "w") as f:
+            yaml.dump(new_config, f)
+        previous_version = "0.14.1-0"
 
     logger.info("Finished frigate config migration...")
 
@@ -144,7 +148,99 @@ def migrate_014(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
 
         new_config["cameras"][name] = camera_config
 
-    new_config["version"] = 0.14
+    new_config["version"] = "0.14"
+    return new_config
+
+
+def migrate_0141_0(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
+    """Handle migrating frigate config to 0.14.1-0"""
+    new_config = config.copy()
+
+    # migrate record.events to record.alerts and record.detections
+    global_record_events = config.get("record", {}).get("events")
+    if global_record_events:
+        alerts_retention = {"retain": {}}
+        detections_retention = {"retain": {}}
+
+        if global_record_events["pre_capture"]:
+            alerts_retention["pre_capture"] = global_record_events["pre_capture"]
+
+        if global_record_events["post_capture"]:
+            alerts_retention["post_capture"] = global_record_events["post_capture"]
+
+        if global_record_events["retain"]["default"]:
+            alerts_retention["retain"]["days"] = global_record_events["retain"][
+                "default"
+            ]
+
+        # decide logical detections retention based on current detections config
+        if not config.get("review", {}).get("alerts", {}).get(
+            "required_zones"
+        ) or config.get("review", {}).get("detections"):
+            if global_record_events["pre_capture"]:
+                detections_retention["pre_capture"] = global_record_events[
+                    "pre_capture"
+                ]
+
+            if global_record_events["post_capture"]:
+                detections_retention["post_capture"] = global_record_events[
+                    "post_capture"
+                ]
+
+            if global_record_events["retain"]["default"]:
+                detections_retention["retain"]["days"] = global_record_events["retain"][
+                    "default"
+                ]
+        else:
+            detections_retention["retain"]["days"] = 0
+
+        new_config["record"]["alerts"] = alerts_retention
+        new_config["record"]["detections"] = detections_retention
+
+        del new_config["record"]["events"]
+
+    for name, camera in config.get("cameras", {}).items():
+        camera_config: dict[str, dict[str, any]] = camera.copy()
+
+        record_events = camera_config.get("record", {}).get("events")
+        if record_events:
+            alerts_retention = {"retain": {}}
+            detections_retention = {"retain": {}}
+
+            if record_events["pre_capture"]:
+                alerts_retention["pre_capture"] = record_events["pre_capture"]
+
+            if record_events["post_capture"]:
+                alerts_retention["post_capture"] = record_events["post_capture"]
+
+            if record_events["retain"]["default"]:
+                alerts_retention["retain"]["days"] = record_events["retain"]["default"]
+
+            # decide logical detections retention based on current detections config
+            if not camera_config.get("review", {}).get("alerts", {}).get(
+                "required_zones"
+            ) or camera_config.get("review", {}).get("detections"):
+                if record_events["pre_capture"]:
+                    detections_retention["pre_capture"] = record_events["pre_capture"]
+
+                if record_events["post_capture"]:
+                    detections_retention["post_capture"] = record_events["post_capture"]
+
+                if record_events["retain"]["default"]:
+                    detections_retention["retain"]["days"] = record_events["retain"][
+                        "default"
+                    ]
+            else:
+                detections_retention["retain"]["days"] = 0
+
+            new_config["record"]["alerts"] = alerts_retention
+            new_config["record"]["detections"] = detections_retention
+
+            del new_config["record"]["events"]
+
+        new_config["cameras"][name] = camera_config
+
+    new_config["version"] = "0.14.1-0"
     return new_config
 
 

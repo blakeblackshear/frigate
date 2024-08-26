@@ -268,7 +268,10 @@ class RecordingMaintainer(threading.Thread):
             # if it doesn't overlap with an event, go ahead and drop the segment
             # if it ends more than the configured pre_capture for the camera
             else:
-                pre_capture = max(record_config.alerts.pre_capture, record_config.detections.pre_capture)
+                pre_capture = max(
+                    record_config.alerts.pre_capture,
+                    record_config.detections.pre_capture,
+                )
                 camera_info = self.object_recordings_info[camera]
                 most_recently_processed_frame_time = (
                     camera_info[-1][0] if len(camera_info) > 0 else 0

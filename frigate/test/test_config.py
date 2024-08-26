@@ -555,9 +555,7 @@ class TestConfig(unittest.TestCase):
     def test_inherit_clips_retention(self):
         config = {
             "mqtt": {"host": "mqtt"},
-            "record": {
-                "alerts": {"retain": {"days": 20 }}
-            },
+            "record": {"alerts": {"retain": {"days": 20}}},
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -577,9 +575,7 @@ class TestConfig(unittest.TestCase):
         assert config == frigate_config.model_dump(exclude_unset=True)
 
         runtime_config = frigate_config.runtime_config()
-        assert (
-            runtime_config.cameras["back"].record.alerts.retain.days == 20
-        )
+        assert runtime_config.cameras["back"].record.alerts.retain.days == 20
 
     def test_roles_listed_twice_throws_error(self):
         config = {
