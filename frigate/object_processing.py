@@ -1070,25 +1070,27 @@ class TrackedObjectProcessor(threading.Thread):
         if obj.obj_data["position_changes"] == 0:
             return False
 
-        # If there are required zones and there is no overlap
+        # If the object is not considered an alert or detection
         review_config = self.config.cameras[camera].review
-        required_zones = (
-            review_config.alerts.required_zones
-            + review_config.detections.required_zones
-        )
-        if len(required_zones) > 0 and not set(obj.entered_zones) & set(required_zones):
-            logger.debug(
-                f"Not creating clip for {obj.obj_data['id']} because it did not enter required zones"
+        if not (
+            (
+                obj.obj_data["label"] in review_config.alerts.labels
+                and (
+                    not review_config.alerts.required_zones
+                    or set(obj.entered_zones) & set(review_config.alerts.required_zones)
+                )
             )
-            return False
-
-        # If the required objects are not present
-        if (
-            record_config.events.objects is not None
-            and obj.obj_data["label"] not in record_config.events.objects
+            or (
+                not review_config.detections.labels
+                or obj.obj_data["label"] in review_config.detections.labels
+            )
+            and (
+                not review_config.detections.required_zones
+                or set(obj.entered_zones) & set(review_config.alerts.required_zones)
+            )
         ):
             logger.debug(
-                f"Not creating clip for {obj.obj_data['id']} because it did not contain required objects"
+                f"Not creating clip for {obj.obj_data['id']} because it did not qualify as an alert or detection"
             )
             return False
 
