@@ -1277,10 +1277,19 @@ def verify_recording_retention(camera_config: CameraConfig) -> None:
     if (
         camera_config.record.retain.days != 0
         and rank_map[camera_config.record.retain.mode]
-        > rank_map[camera_config.record.events.retain.mode]
+        > rank_map[camera_config.record.alerts.retain.mode]
     ):
         logger.warning(
-            f"{camera_config.name}: Recording retention is configured for {camera_config.record.retain.mode} and event retention is configured for {camera_config.record.events.retain.mode}. The more restrictive retention policy will be applied."
+            f"{camera_config.name}: Recording retention is configured for {camera_config.record.retain.mode} and alert retention is configured for {camera_config.record.alerts.retain.mode}. The more restrictive retention policy will be applied."
+        )
+
+    if (
+        camera_config.record.retain.days != 0
+        and rank_map[camera_config.record.retain.mode]
+        > rank_map[camera_config.record.detections.retain.mode]
+    ):
+        logger.warning(
+            f"{camera_config.name}: Recording retention is configured for {camera_config.record.retain.mode} and detection retention is configured for {camera_config.record.detections.retain.mode}. The more restrictive retention policy will be applied."
         )
 
 
