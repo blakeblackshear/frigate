@@ -42,6 +42,15 @@ go2rtc:
       - "ffmpeg:http_cam#audio=opus" # <- copy of the stream which transcodes audio to the missing codec (usually will be opus)
 ```
 
+If your camera does not have audio and you are having problems with Live view, you should have go2rtc send video only:
+
+```yaml
+go2rtc:
+  streams:
+    no_audio_camera:
+      - ffmpeg:rtsp://192.168.1.5:554/live0#video=copy
+```
+
 ### Setting Stream For Live UI
 
 There may be some cameras that you would prefer to use the sub stream for live view, but the main stream for recording. This can be done via `live -> stream_name`.
