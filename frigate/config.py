@@ -296,12 +296,9 @@ class RetainModeEnum(str, Enum):
     active_objects = "active_objects"
 
 
-class RetainConfig(FrigateBaseModel):
-    default: float = Field(default=10, title="Default retention period.")
-    mode: RetainModeEnum = Field(default=RetainModeEnum.motion, title="Retain mode.")
-    objects: Dict[str, float] = Field(
-        default_factory=dict, title="Object retention period."
-    )
+class RecordRetainConfig(FrigateBaseModel):
+    days: float = Field(default=0, title="Default retention period.")
+    mode: RetainModeEnum = Field(default=RetainModeEnum.all, title="Retain mode.")
 
 
 class EventsConfig(FrigateBaseModel):
@@ -309,18 +306,9 @@ class EventsConfig(FrigateBaseModel):
         default=5, title="Seconds to retain before event starts.", le=MAX_PRE_CAPTURE
     )
     post_capture: int = Field(default=5, title="Seconds to retain after event ends.")
-    objects: Optional[List[str]] = Field(
-        None,
-        title="List of objects to be detected in order to save the event.",
+    retain: RecordRetainConfig = Field(
+        default_factory=RecordRetainConfig, title="Event retention settings."
     )
-    retain: RetainConfig = Field(
-        default_factory=RetainConfig, title="Event retention settings."
-    )
-
-
-class RecordRetainConfig(FrigateBaseModel):
-    days: float = Field(default=0, title="Default retention period.")
-    mode: RetainModeEnum = Field(default=RetainModeEnum.all, title="Retain mode.")
 
 
 class RecordExportConfig(FrigateBaseModel):
@@ -355,8 +343,11 @@ class RecordConfig(FrigateBaseModel):
     retain: RecordRetainConfig = Field(
         default_factory=RecordRetainConfig, title="Record retention settings."
     )
-    events: EventsConfig = Field(
-        default_factory=EventsConfig, title="Event specific settings."
+    detections: EventsConfig = Field(
+        default_factory=EventsConfig, title="Detection specific retention settings."
+    )
+    alerts: EventsConfig = Field(
+        default_factory=EventsConfig, title="Alert specific retention settings."
     )
     export: RecordExportConfig = Field(
         default_factory=RecordExportConfig, title="Recording Export Config"
@@ -922,6 +913,14 @@ class CameraFfmpegConfig(FfmpegConfig):
             raise ValueError("The detect role is required.")
 
         return v
+
+
+class RetainConfig(FrigateBaseModel):
+    default: float = Field(default=10, title="Default retention period.")
+    mode: RetainModeEnum = Field(default=RetainModeEnum.motion, title="Retain mode.")
+    objects: Dict[str, float] = Field(
+        default_factory=dict, title="Object retention period."
+    )
 
 
 class SnapshotsConfig(FrigateBaseModel):

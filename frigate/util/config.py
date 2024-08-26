@@ -13,7 +13,7 @@ from frigate.util.services import get_video_properties
 
 logger = logging.getLogger(__name__)
 
-CURRENT_CONFIG_VERSION = 0.14
+CURRENT_CONFIG_VERSION = "0.14.1-0"
 
 
 def migrate_frigate_config(config_file: str):
@@ -29,7 +29,7 @@ def migrate_frigate_config(config_file: str):
     with open(config_file, "r") as f:
         config: dict[str, dict[str, any]] = yaml.load(f)
 
-    previous_version = config.get("version", 0.13)
+    previous_version = str(config.get("version", "0.13"))
 
     if previous_version == CURRENT_CONFIG_VERSION:
         logger.info("frigate config does not need migration...")
@@ -38,12 +38,12 @@ def migrate_frigate_config(config_file: str):
     logger.info("copying config as backup...")
     shutil.copy(config_file, os.path.join(CONFIG_DIR, "backup_config.yaml"))
 
-    if previous_version < 0.14:
+    if previous_version < "0.14":
         logger.info(f"Migrating frigate config from {previous_version} to 0.14...")
         new_config = migrate_014(config)
         with open(config_file, "w") as f:
             yaml.dump(new_config, f)
-        previous_version = 0.14
+        previous_version = "0.14"
 
         logger.info("Migrating export file names...")
         for file in os.listdir(EXPORT_DIR):
@@ -54,6 +54,9 @@ def migrate_frigate_config(config_file: str):
             os.rename(
                 os.path.join(EXPORT_DIR, file), os.path.join(EXPORT_DIR, new_name)
             )
+
+    if previous_version < "0.14.1-0":
+        logger.info(f"Migrating frigate config from {previous_version} to 0.14...")
 
     logger.info("Finished frigate config migration...")
 
