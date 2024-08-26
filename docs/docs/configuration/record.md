@@ -95,7 +95,7 @@ Continuous recording supports different retention modes [which are described bel
 
 ### Object Recording
 
-If you only used clips in previous versions with recordings disabled, you can use the following config to get the same behavior. This is also the default behavior when recordings are enabled.
+The number of days to record review items can be specified for review items classified as alerts as well as events.
 
 ```yaml
 record:
