@@ -466,7 +466,7 @@ snapshots:
   quality: 70
 
 # Optional: Restream configuration
-# Uses https://github.com/AlexxIT/go2rtc (v1.8.3)
+# Uses https://github.com/AlexxIT/go2rtc (v1.9.2)
 go2rtc:
 
 # Optional: jsmpeg stream configuration for WebUI
