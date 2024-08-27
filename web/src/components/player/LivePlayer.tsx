@@ -18,6 +18,7 @@ import Chip from "../indicators/Chip";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { cn } from "@/lib/utils";
 import { TbExclamationCircle } from "react-icons/tb";
+import { TooltipPortal } from "@radix-ui/react-tooltip";
 
 type LivePlayerProps = {
   cameraRef?: (ref: HTMLDivElement | null) => void;
@@ -258,20 +259,22 @@ export default function LivePlayer({
                   </div>
                 </TooltipTrigger>
               </div>
-              <TooltipContent className="capitalize">
-                {[
-                  ...new Set([
-                    ...(objects || []).map(({ label, sub_label }) =>
-                      label.endsWith("verified") ? sub_label : label,
-                    ),
-                  ]),
-                ]
-                  .filter((label) => label?.includes("-verified") == false)
-                  .map((label) => capitalizeFirstLetter(label))
-                  .sort()
-                  .join(", ")
-                  .replaceAll("-verified", "")}
-              </TooltipContent>
+              <TooltipPortal>
+                <TooltipContent className="capitalize">
+                  {[
+                    ...new Set([
+                      ...(objects || []).map(({ label, sub_label }) =>
+                        label.endsWith("verified") ? sub_label : label,
+                      ),
+                    ]),
+                  ]
+                    .filter((label) => label?.includes("-verified") == false)
+                    .map((label) => capitalizeFirstLetter(label))
+                    .sort()
+                    .join(", ")
+                    .replaceAll("-verified", "")}
+                </TooltipContent>
+              </TooltipPortal>
             </Tooltip>
           </div>
         )}
