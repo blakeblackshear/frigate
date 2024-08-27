@@ -23,7 +23,7 @@ If you are using go2rtc, you should adjust the following settings in your camera
 
 - Video codec: H.264 - provides the most compatible video codec with all Live view technologies and browsers.
 - Audio codec: AAC - provides the most compatible audio codec with all Live view technologies and browsers.
-- I-frame interval (sometimes called the keyframe interval, the interframe space, or the GOP length): match your camera's frame rate, or choose "1x" (for interframe space on Reolink cameras). For example, if your stream outputs 20fps, your i-frame interval should be 20 (or 1x on Reolink). Values higher than the frame rate will cause the stream to take longer to load. See [this page](https://gardinal.net/understanding-the-keyframe-interval/) for more on keyframes.
+- I-frame interval (sometimes called the keyframe interval, the interframe space, or the GOP length): match your camera's frame rate, or choose "1x" (for interframe space on Reolink cameras). For example, if your stream outputs 20fps, your i-frame interval should be 20 (or 1x on Reolink). Values higher than the frame rate will cause the stream to take longer begin playback. See [this page](https://gardinal.net/understanding-the-keyframe-interval/) for more on keyframes.
 
 The default video and audio codec on your camera may not always be compatible with your browser, which is why setting them to H.264 and AAC is recommended. See the [go2rtc docs](https://github.com/AlexxIT/go2rtc?tab=readme-ov-file#codecs-madness) for codec support information.
 
