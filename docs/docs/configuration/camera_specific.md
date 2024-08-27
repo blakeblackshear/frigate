@@ -11,7 +11,7 @@ This page makes use of presets of FFmpeg args. For more information on presets, 
 
 :::note
 
-Live view for many of these cameras may require some additional configuration, see the [Live view](/configuration/live) page.
+Many cameras support encoding options which greatly affect the live view experience, see the [Live view](/configuration/live) page for more info.
 
 :::
 
