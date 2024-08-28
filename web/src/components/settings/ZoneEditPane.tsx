@@ -106,6 +106,14 @@ export default function ZoneEditPane({
         {
           message: "Zone name already exists on this camera.",
         },
+      )
+      .refine(
+        (value: string) => {
+          return !value.includes(".");
+        },
+        {
+          message: "Zone name must not contain a period.",
+        },
       ),
     inertia: z.coerce
       .number()

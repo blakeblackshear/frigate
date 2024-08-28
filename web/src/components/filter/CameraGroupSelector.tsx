@@ -551,6 +551,14 @@ export function CameraGroupEdit({
           message: "Camera group name already exists.",
         },
       )
+      .refine(
+        (value: string) => {
+          return !value.includes(".");
+        },
+        {
+          message: "Camera group name must not contain a period.",
+        },
+      )
       .refine((value: string) => value.toLowerCase() !== "default", {
         message: "Invalid camera group name.",
       }),
