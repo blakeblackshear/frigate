@@ -41,8 +41,6 @@ review:
 
 By default all detections that do not qualify as an alert qualify as a detection. However, detections can further be filtered to only include certain labels or certain zones.
 
-By default a review item will only be marked as an alert if a person or car is detected. This can be configured to include any object or audio label using the following config:
-
 ```yaml
 # can be overridden at the camera level
 review:
