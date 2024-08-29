@@ -1,8 +1,8 @@
 click == 8.1.*
 Flask == 3.0.*
-Flask_Limiter == 3.7.*
+Flask_Limiter == 3.8.*
 imutils == 0.5.*
-joserfc == 0.11.*
+joserfc == 1.0.*
 markupsafe == 2.1.*
 mypy == 1.6.1
 numpy == 1.26.*
@@ -11,13 +11,13 @@ opencv-python-headless == 4.9.0.*
 paho-mqtt == 2.1.*
 pandas == 2.2.*
 peewee == 3.17.*
-peewee_migrate == 1.12.*
+peewee_migrate == 1.13.*
 psutil == 5.9.*
-pydantic == 2.7.*
+pydantic == 2.8.*
 git+https://github.com/fbcotter/py3nvml#egg=py3nvml
 PyYAML == 6.0.*
 pytz == 2024.1
-pyzmq == 26.0.*
+pyzmq == 26.2.*
 ruamel.yaml == 0.18.*
 tzlocal == 5.2
 types-PyYAML == 6.0.*
