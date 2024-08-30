@@ -64,6 +64,8 @@ def output_frames(
     jsmpeg_cameras: dict[str, JsmpegCamera] = {}
     birdseye: Optional[Birdseye] = None
     preview_recorders: dict[str, PreviewRecorder] = {}
+    preview_write_times: dict[str, float] = {}
+    frame_time: float = 0
 
     move_preview_frames("cache")
 
@@ -73,6 +75,7 @@ def output_frames(
 
         jsmpeg_cameras[camera] = JsmpegCamera(cam_config, stop_event, websocket_server)
         preview_recorders[camera] = PreviewRecorder(cam_config)
+        preview_write_times[camera] = 0
 
     if config.birdseye.enabled:
         birdseye = Birdseye(config, frame_manager, stop_event, websocket_server)
@@ -83,6 +86,13 @@ def output_frames(
         (topic, data) = detection_subscriber.check_for_update(timeout=1)
 
         if not topic:
+            # all queued images have been written,
+            # check if any cameras have stale frames
+
+            for camera, time in preview_write_times.items():
+                if time != 0 and frame_time - time > 10:
+                    preview_recorders[camera].flag_offline(frame_time)
+
             continue
 
         (
