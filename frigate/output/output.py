@@ -65,7 +65,7 @@ def output_frames(
     birdseye: Optional[Birdseye] = None
     preview_recorders: dict[str, PreviewRecorder] = {}
     preview_write_times: dict[str, float] = {}
-    frame_time: float = 0
+    last_preview_health_check: float = 0
 
     move_preview_frames("cache")
 
@@ -86,13 +86,6 @@ def output_frames(
         (topic, data) = detection_subscriber.check_for_update(timeout=1)
 
         if not topic:
-            # all queued images have been written,
-            # check if any cameras have stale frames
-
-            for camera, time in preview_write_times.items():
-                if time != 0 and frame_time - time > 10:
-                    preview_recorders[camera].flag_offline(frame_time)
-
             continue
 
         (
@@ -134,10 +127,18 @@ def output_frames(
         preview_recorders[camera].write_data(
             current_tracked_objects, motion_boxes, frame_time, frame
         )
+        preview_write_times[camera] = frame_time
 
         # delete frames after they have been used for output
         if camera in previous_frames:
             frame_manager.delete(f"{camera}{previous_frames[camera]}")
+
+        # every 10 seconds check if any cameras have stale frames
+        if frame_time - last_preview_health_check > 10:
+            last_preview_health_check = frame_time
+            for camera, time in preview_write_times.items():
+                if time != 0 and frame_time - time > 10:
+                    preview_recorders[camera].flag_offline(frame_time)
 
         previous_frames[camera] = frame_time
 
