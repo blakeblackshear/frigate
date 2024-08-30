@@ -299,13 +299,13 @@ class PreviewRecorder:
         motion_boxes: list[list[int]],
         frame_time: float,
         frame,
-    ) -> None:
+    ) -> bool:
         # always write the first frame
         if self.start_time == 0:
             self.start_time = frame_time
             self.output_frames.append(frame_time)
             self.write_frame_to_cache(frame_time, frame)
-            return
+            return False
 
         # check if PREVIEW clip should be generated and cached frames reset
         if frame_time >= self.segment_end:
@@ -332,9 +332,11 @@ class PreviewRecorder:
             # include first frame to ensure consistent duration
             self.output_frames.append(frame_time)
             self.write_frame_to_cache(frame_time, frame)
+            return True
         elif self.should_write_frame(current_tracked_objects, motion_boxes, frame_time):
             self.output_frames.append(frame_time)
             self.write_frame_to_cache(frame_time, frame)
+            return False
 
     def flag_offline(self, frame_time: float) -> None:
         # check if PREVIEW clip should be generated and cached frames reset

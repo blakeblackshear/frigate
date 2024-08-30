@@ -1,5 +1,6 @@
 """Handle outputting raw frigate frames"""
 
+import datetime
 import logging
 import multiprocessing as mp
 import os
@@ -65,7 +66,6 @@ def output_frames(
     birdseye: Optional[Birdseye] = None
     preview_recorders: dict[str, PreviewRecorder] = {}
     preview_write_times: dict[str, float] = {}
-    last_preview_health_check: float = 0
 
     move_preview_frames("cache")
 
@@ -124,7 +124,7 @@ def output_frames(
             )
 
         # send frames for low fps recording
-        preview_recorders[camera].write_data(
+        generated_preview = preview_recorders[camera].write_data(
             current_tracked_objects, motion_boxes, frame_time, frame
         )
         preview_write_times[camera] = frame_time
@@ -133,12 +133,14 @@ def output_frames(
         if camera in previous_frames:
             frame_manager.delete(f"{camera}{previous_frames[camera]}")
 
-        # every 10 seconds check if any cameras have stale frames
-        if frame_time - last_preview_health_check > 10:
-            last_preview_health_check = frame_time
-            for camera, time in preview_write_times.items():
+        # if another camera generated a preview,
+        # check for any cameras that are currently offline
+        # and need to generate a preview
+        if generated_preview:
+            for camera, time in preview_write_times.copy().items():
                 if time != 0 and frame_time - time > 10:
                     preview_recorders[camera].flag_offline(frame_time)
+                    preview_write_times[camera] = frame_time
 
         previous_frames[camera] = frame_time
 
