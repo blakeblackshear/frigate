@@ -344,7 +344,9 @@ class PreviewRecorder:
             if len(self.output_frames) == 0:
                 return
 
-            old_frame_path = get_cache_image_name(self.config.name, self.output_frames[-1])
+            old_frame_path = get_cache_image_name(
+                self.config.name, self.output_frames[-1]
+            )
             new_frame_path = get_cache_image_name(self.config.name, frame_time)
             shutil.copy(old_frame_path, new_frame_path)
 
