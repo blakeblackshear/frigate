@@ -94,8 +94,6 @@ export function CombinedStorageGraph({
       plotOptions: {
         bar: {
           horizontal: true,
-          borderRadius: 6,
-          barHeight: "15px",
         },
       },
       states: {
