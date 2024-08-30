@@ -73,6 +73,29 @@ export default function MotionMaskEditPane({
     return `Motion Mask ${count + 1}`;
   }, [polygons]);
 
+  const polygonArea = useMemo(() => {
+    if (polygon && polygon.isFinished && scaledWidth && scaledHeight) {
+      const points = interpolatePoints(
+        polygon.points,
+        scaledWidth,
+        scaledHeight,
+        1,
+        1,
+      );
+
+      const n = points.length;
+      let area = 0;
+
+      for (let i = 0; i < n; i++) {
+        const [x1, y1] = points[i];
+        const [x2, y2] = points[(i + 1) % n];
+        area += x1 * y2 - y1 * x2;
+      }
+
+      return Math.abs(area) / 2;
+    }
+  }, [polygon, scaledWidth, scaledHeight]);
+
   const formSchema = z
     .object({
       polygon: z.object({ name: z.string(), isFinished: z.boolean() }),
@@ -237,6 +260,28 @@ export default function MotionMaskEditPane({
       </div>
 
       <Separator className="my-3 bg-secondary" />
+
+      {polygonArea && polygonArea >= 0.35 && (
+        <>
+          <div className="mb-3 text-sm text-danger">
+            The motion mask is covering {Math.round(polygonArea * 100)}% of the
+            camera frame. Large motion masks are not recommended.
+          </div>
+          <div className="mb-3 text-sm text-primary">
+            Motion masks do not prevent objects from being detected. You should
+            use a required zone instead.
+            <Link
+              to="https://github.com/blakeblackshear/frigate/discussions/13040"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="my-3 block"
+            >
+              Read the documentation{" "}
+              <LuExternalLink className="ml-2 inline-flex size-3" />
+            </Link>
+          </div>
+        </>
+      )}
 
       <Form {...form}>
         <form
