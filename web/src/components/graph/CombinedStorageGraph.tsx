@@ -187,7 +187,7 @@ export function CombinedStorageGraph({
                     className="size-3 rounded-md"
                     style={{ backgroundColor: item.color }}
                   ></div>
-                  {item.name}
+                  {item.name.replaceAll("_", " ")}
                 </TableCell>
                 <TableCell>{getUnitSize(item.usage)}</TableCell>
                 <TableCell>{item.data[0].toFixed(2)}%</TableCell>
