@@ -1,6 +1,6 @@
+import { CombinedStorageGraph } from "@/components/graph/CombinedStorageGraph";
 import { StorageGraph } from "@/components/graph/StorageGraph";
 import { FrigateStats } from "@/types/stats";
-import { getUnitSize } from "@/utils/storageUtil";
 import { useMemo } from "react";
 import useSWR from "swr";
 
@@ -74,22 +74,12 @@ export default function StorageMetrics({
       <div className="mt-4 text-sm font-medium text-muted-foreground">
         Camera Storage
       </div>
-      <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
-        {Object.keys(cameraStorage).map((camera) => (
-          <div className="flex-col rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-            <div className="mb-5 flex flex-row items-center justify-between">
-              <div className="capitalize">{camera.replaceAll("_", " ")}</div>
-              <div className="text-xs text-muted-foreground">
-                {getUnitSize(cameraStorage[camera].bandwidth)} / hour
-              </div>
-            </div>
-            <StorageGraph
-              graphId={`${camera}-storage`}
-              used={cameraStorage[camera].usage}
-              total={totalStorage.used}
-            />
-          </div>
-        ))}
+      <div className="mt-4 bg-background_alt p-2.5 md:rounded-2xl">
+        <CombinedStorageGraph
+          graphId={`single-storage`}
+          cameraStorage={cameraStorage}
+          totalStorage={totalStorage}
+        />
       </div>
     </div>
   );
