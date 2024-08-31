@@ -64,6 +64,7 @@ def output_frames(
     jsmpeg_cameras: dict[str, JsmpegCamera] = {}
     birdseye: Optional[Birdseye] = None
     preview_recorders: dict[str, PreviewRecorder] = {}
+    preview_write_times: dict[str, float] = {}
 
     move_preview_frames("cache")
 
@@ -73,6 +74,7 @@ def output_frames(
 
         jsmpeg_cameras[camera] = JsmpegCamera(cam_config, stop_event, websocket_server)
         preview_recorders[camera] = PreviewRecorder(cam_config)
+        preview_write_times[camera] = 0
 
     if config.birdseye.enabled:
         birdseye = Birdseye(config, frame_manager, stop_event, websocket_server)
@@ -121,13 +123,23 @@ def output_frames(
             )
 
         # send frames for low fps recording
-        preview_recorders[camera].write_data(
+        generated_preview = preview_recorders[camera].write_data(
             current_tracked_objects, motion_boxes, frame_time, frame
         )
+        preview_write_times[camera] = frame_time
 
         # delete frames after they have been used for output
         if camera in previous_frames:
             frame_manager.delete(f"{camera}{previous_frames[camera]}")
+
+        # if another camera generated a preview,
+        # check for any cameras that are currently offline
+        # and need to generate a preview
+        if generated_preview:
+            for camera, time in preview_write_times.copy().items():
+                if time != 0 and frame_time - time > 10:
+                    preview_recorders[camera].flag_offline(frame_time)
+                    preview_write_times[camera] = frame_time
 
         previous_frames[camera] = frame_time
 

@@ -3,6 +3,7 @@
 import datetime
 import logging
 import os
+import shutil
 import subprocess as sp
 import threading
 import time
@@ -298,13 +299,13 @@ class PreviewRecorder:
         motion_boxes: list[list[int]],
         frame_time: float,
         frame,
-    ) -> None:
+    ) -> bool:
         # always write the first frame
         if self.start_time == 0:
             self.start_time = frame_time
             self.output_frames.append(frame_time)
             self.write_frame_to_cache(frame_time, frame)
-            return
+            return False
 
         # check if PREVIEW clip should be generated and cached frames reset
         if frame_time >= self.segment_end:
@@ -326,14 +327,47 @@ class PreviewRecorder:
             )
             self.start_time = frame_time
             self.last_output_time = frame_time
-            self.output_frames = []
+            self.output_frames: list[float] = []
 
             # include first frame to ensure consistent duration
             self.output_frames.append(frame_time)
             self.write_frame_to_cache(frame_time, frame)
+            return True
         elif self.should_write_frame(current_tracked_objects, motion_boxes, frame_time):
             self.output_frames.append(frame_time)
             self.write_frame_to_cache(frame_time, frame)
+            return False
+
+    def flag_offline(self, frame_time: float) -> None:
+        # check if PREVIEW clip should be generated and cached frames reset
+        if frame_time >= self.segment_end:
+            if len(self.output_frames) == 0:
+                return
+
+            old_frame_path = get_cache_image_name(
+                self.config.name, self.output_frames[-1]
+            )
+            new_frame_path = get_cache_image_name(self.config.name, frame_time)
+            shutil.copy(old_frame_path, new_frame_path)
+
+            # save last frame to ensure consistent duration
+            self.output_frames.append(frame_time)
+            FFMpegConverter(
+                self.config,
+                self.output_frames,
+                self.requestor,
+            ).start()
+
+            # reset frame cache
+            self.segment_end = (
+                (datetime.datetime.now() + datetime.timedelta(hours=1))
+                .astimezone(datetime.timezone.utc)
+                .replace(minute=0, second=0, microsecond=0)
+                .timestamp()
+            )
+            self.start_time = frame_time
+            self.last_output_time = frame_time
+            self.output_frames = []
 
     def stop(self) -> None:
         self.requestor.stop()
