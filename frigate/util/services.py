@@ -296,7 +296,7 @@ def get_intel_gpu_stats() -> dict[str, str]:
 
         # video is used for vaapi
         video = []
-        for result in re.findall('"Video/\d":{[a-z":\d.,%]+}', reading):
+        for result in re.findall(r'"Video/\d":{[a-z":\d.,%]+}', reading):
             packet = json.loads(result[10:])
             single = packet.get("busy", 0.0)
             video.append(float(single))
