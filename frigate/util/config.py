@@ -162,13 +162,13 @@ def migrate_015_0(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]
         alerts_retention = {"retain": {}}
         detections_retention = {"retain": {}}
 
-        if global_record_events["pre_capture"]:
+        if global_record_events.get("pre_capture"):
             alerts_retention["pre_capture"] = global_record_events["pre_capture"]
 
-        if global_record_events["post_capture"]:
+        if global_record_events.get("post_capture"):
             alerts_retention["post_capture"] = global_record_events["post_capture"]
 
-        if global_record_events["retain"]["default"]:
+        if global_record_events.get("retain", {}).get("default"):
             alerts_retention["retain"]["days"] = global_record_events["retain"][
                 "default"
             ]
@@ -177,17 +177,17 @@ def migrate_015_0(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]
         if not config.get("review", {}).get("alerts", {}).get(
             "required_zones"
         ) or config.get("review", {}).get("detections"):
-            if global_record_events["pre_capture"]:
+            if global_record_events.get("pre_capture"):
                 detections_retention["pre_capture"] = global_record_events[
                     "pre_capture"
                 ]
 
-            if global_record_events["post_capture"]:
+            if global_record_events.get("post_capture"):
                 detections_retention["post_capture"] = global_record_events[
                     "post_capture"
                 ]
 
-            if global_record_events["retain"]["default"]:
+            if global_record_events.get("retain", {}).get("default"):
                 detections_retention["retain"]["days"] = global_record_events["retain"][
                     "default"
                 ]
@@ -221,13 +221,13 @@ def migrate_015_0(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]
             if not camera_config.get("review", {}).get("alerts", {}).get(
                 "required_zones"
             ) or camera_config.get("review", {}).get("detections"):
-                if record_events["pre_capture"]:
+                if record_events.get("pre_capture"):
                     detections_retention["pre_capture"] = record_events["pre_capture"]
 
-                if record_events["post_capture"]:
+                if record_events.get("post_capture"):
                     detections_retention["post_capture"] = record_events["post_capture"]
 
-                if record_events["retain"]["default"]:
+                if record_events.get("retain", {}).get("default"):
                     detections_retention["retain"]["days"] = record_events["retain"][
                         "default"
                     ]
