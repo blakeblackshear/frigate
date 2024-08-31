@@ -234,10 +234,9 @@ def migrate_015_0(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]
             else:
                 detections_retention["retain"]["days"] = 0
 
-            new_config["record"]["alerts"] = alerts_retention
-            new_config["record"]["detections"] = detections_retention
-
-            del new_config["record"]["events"]
+            camera_config["record"]["alerts"] = alerts_retention
+            camera_config["record"]["detections"] = detections_retention
+            del camera_config["record"]["events"]
 
         new_config["cameras"][name] = camera_config
 
