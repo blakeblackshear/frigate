@@ -202,18 +202,19 @@ def migrate_015_0(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]
     for name, camera in config.get("cameras", {}).items():
         camera_config: dict[str, dict[str, any]] = camera.copy()
 
-        record_events = camera_config.get("record", {}).get("events")
+        record_events: dict[str, any] = camera_config.get("record", {}).get("events")
+
         if record_events:
             alerts_retention = {"retain": {}}
             detections_retention = {"retain": {}}
 
-            if record_events["pre_capture"]:
+            if record_events.get("pre_capture"):
                 alerts_retention["pre_capture"] = record_events["pre_capture"]
 
-            if record_events["post_capture"]:
+            if record_events.get("post_capture"):
                 alerts_retention["post_capture"] = record_events["post_capture"]
 
-            if record_events["retain"]["default"]:
+            if record_events.get("retain", {}).get("default"):
                 alerts_retention["retain"]["days"] = record_events["retain"]["default"]
 
             # decide logical detections retention based on current detections config
