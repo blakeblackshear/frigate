@@ -8,6 +8,7 @@ from pathlib import Path
 import numpy
 from onvif import ONVIFCamera, ONVIFError
 from zeep.exceptions import Fault, TransportError
+from zeep.transports import Transport
 
 from frigate.config import FrigateConfig, ZoomingModeEnum
 from frigate.types import PTZMetricsTypes
@@ -45,6 +46,7 @@ class OnvifController:
 
             if cam.onvif.host:
                 try:
+                    transport = Transport(timeout=10, operation_timeout=10)
                     self.cams[cam_name] = {
                         "onvif": ONVIFCamera(
                             cam.onvif.host,
@@ -55,6 +57,7 @@ class OnvifController:
                                 Path(find_spec("onvif").origin).parent / "wsdl"
                             ).replace("dist-packages/onvif", "site-packages"),
                             adjust_time=cam.onvif.ignore_time_mismatch,
+                            transport=transport,
                         ),
                         "init": False,
                         "active": False,
