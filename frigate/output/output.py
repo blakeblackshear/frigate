@@ -1,6 +1,5 @@
 """Handle outputting raw frigate frames"""
 
-import datetime
 import logging
 import multiprocessing as mp
 import os
