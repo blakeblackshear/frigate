@@ -45,6 +45,7 @@ Message published for each changed event. The first message is published when th
     "thumbnail": null,
     "has_snapshot": false,
     "has_clip": false,
+    "active": true, // convenience attribute, this is strictly opposite of "stationary"
     "stationary": false, // whether or not the object is considered stationary
     "motionless_count": 0, // number of frames the object has been motionless
     "position_changes": 2, // number of times the object has moved from a stationary position
@@ -74,6 +75,7 @@ Message published for each changed event. The first message is published when th
     "thumbnail": null,
     "has_snapshot": false,
     "has_clip": false,
+    "active": true, // convenience attribute, this is strictly opposite of "stationary"
     "stationary": false, // whether or not the object is considered stationary
     "motionless_count": 0, // number of frames the object has been motionless
     "position_changes": 2, // number of times the object has changed position
@@ -159,10 +161,24 @@ Same data available at `/api/stats` published at a configurable interval.
 Publishes the count of objects for the camera for use as a sensor in Home Assistant.
 `all` can be used as the object_name for the count of all objects for the camera.
 
+### `frigate/<camera_name>/<object_name>/active`
+
+Publishes the count of active objects for the camera for use as a sensor in Home
+Assistant. `all` can be used as the object_name for the count of all active objects
+for the camera.
+
+
 ### `frigate/<zone_name>/<object_name>`
 
 Publishes the count of objects for the zone for use as a sensor in Home Assistant.
 `all` can be used as the object_name for the count of all objects for the zone.
+
+
+### `frigate/<zone_name>/<object_name>/active`
+
+Publishes the count of active objects for the zone for use as a sensor in Home
+Assistant. `all` can be used as the object_name for the count of all objects for the
+zone.
 
 ### `frigate/<camera_name>/<object_name>/snapshot`
 

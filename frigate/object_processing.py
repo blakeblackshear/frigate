@@ -132,6 +132,7 @@ class TrackedObject:
         self.last_updated = 0
         self.last_published = 0
         self.frame = None
+        self.active = True
         self.previous = self.to_dict()
 
     def _is_false_positive(self):
@@ -165,6 +166,7 @@ class TrackedObject:
         if self.computed_score > self.top_score:
             self.top_score = self.computed_score
         self.false_positive = self._is_false_positive()
+        self.active = self.is_active()
 
         if not self.false_positive:
             # determine if this frame is a better thumbnail
@@ -249,11 +251,8 @@ class TrackedObject:
             if self.obj_data["attributes"] != obj_data["attributes"]:
                 significant_change = True
 
-            # if the motionless_count reaches the stationary threshold
-            if (
-                self.obj_data["motionless_count"]
-                == self.camera_config.detect.stationary.threshold
-            ):
+            # if the state changed between stationary and active
+            if self.previous["active"] != self.active:
                 significant_change = True
 
             # update at least once per minute
@@ -285,8 +284,8 @@ class TrackedObject:
             "area": self.obj_data["area"],
             "ratio": self.obj_data["ratio"],
             "region": self.obj_data["region"],
-            "stationary": self.obj_data["motionless_count"]
-            > self.camera_config.detect.stationary.threshold,
+            "active": self.active,
+            "stationary": not self.active,
             "motionless_count": self.obj_data["motionless_count"],
             "position_changes": self.obj_data["position_changes"],
             "current_zones": self.current_zones.copy(),
@@ -301,6 +300,15 @@ class TrackedObject:
             event["thumbnail"] = base64.b64encode(self.get_thumbnail()).decode("utf-8")
 
         return event
+
+    def is_active(self):
+        return not self.is_stationary()
+
+    def is_stationary(self):
+        return (
+            self.obj_data["motionless_count"]
+            > self.camera_config.detect.stationary.threshold
+        )
 
     def get_thumbnail(self):
         if (
@@ -476,6 +484,7 @@ class CameraState:
         self.frame_manager = frame_manager
         self.best_objects: dict[str, TrackedObject] = {}
         self.object_counts = defaultdict(int)
+        self.active_object_counts = defaultdict(int)
         self.tracked_objects: dict[str, TrackedObject] = {}
         self.frame_cache = {}
         self.zone_objects = defaultdict(list)
@@ -732,10 +741,7 @@ class CameraState:
 
         for obj in tracked_objects.values():
             object_type = obj.obj_data["label"]
-            active = (
-                obj.obj_data["motionless_count"]
-                < self.camera_config.detect.stationary.threshold
-            )
+            active = obj.is_active()
 
             if not obj.false_positive:
                 label = object_type
@@ -796,10 +802,17 @@ class CameraState:
             if not obj.false_positive
         )
 
+        active_obj_counter = Counter(
+            obj.obj_data["label"]
+            for obj in tracked_objects.values()
+            if not obj.false_positive and obj.active
+        )
+
         # keep track of all labels detected for this camera
         total_label_count = 0
+        total_active_label_count = 0
 
-        # report on detected objects
+        # report on all detected objects
         for obj_name, count in obj_counter.items():
             total_label_count += count
 
@@ -808,11 +821,29 @@ class CameraState:
                 for c in self.callbacks["object_status"]:
                     c(self.name, obj_name, count)
 
+        # update the active count on all detected objects
+        # To ensure we emit 0's if all objects are stationary, we need to loop
+        # over the set of all objects, not just active ones.
+        for obj_name in set(obj_counter):
+            count = active_obj_counter[obj_name]
+            total_active_label_count += count
+
+            if count != self.active_object_counts[obj_name]:
+                self.active_object_counts[obj_name] = count
+                for c in self.callbacks["active_object_status"]:
+                    c(self.name, obj_name, count)
+
         # publish for all labels detected for this camera
         if total_label_count != self.object_counts.get("all"):
             self.object_counts["all"] = total_label_count
             for c in self.callbacks["object_status"]:
                 c(self.name, "all", total_label_count)
+
+        # publish active label counts for this camera
+        if total_active_label_count != self.active_object_counts.get("all"):
+            self.active_object_counts["all"] = total_active_label_count
+            for c in self.callbacks["active_object_status"]:
+                c(self.name, "all", total_active_label_count)
 
         # expire any objects that are >0 and no longer detected
         expired_objects = [
@@ -828,6 +859,11 @@ class CameraState:
             self.object_counts[obj_name] = 0
             for c in self.callbacks["object_status"]:
                 c(self.name, obj_name, 0)
+            # Only publish if the object was previously active.
+            if self.active_object_counts[obj_name] > 0:
+                for c in self.callbacks["active_object_status"]:
+                    c(self.name, obj_name, 0)
+                self.active_object_counts[obj_name] = 0
             for c in self.callbacks["snapshot"]:
                 c(self.name, self.best_objects[obj_name], frame_time)
 
@@ -885,6 +921,17 @@ class TrackedObjectProcessor(threading.Thread):
         self.event_end_subscriber = EventEndSubscriber()
 
         self.camera_activity: dict[str, dict[str, any]] = {}
+
+        # {
+        #   'zone_name': {
+        #       'person': {
+        #           'camera_1': 2,
+        #           'camera_2': 1
+        #       }
+        #   }
+        # }
+        self.zone_data = defaultdict(lambda: defaultdict(dict))
+        self.active_zone_data = defaultdict(lambda: defaultdict(dict))
 
         def start(camera, obj: TrackedObject, current_frame_time):
             self.event_sender.publish(
@@ -1003,6 +1050,11 @@ class TrackedObjectProcessor(threading.Thread):
         def object_status(camera, object_name, status):
             self.dispatcher.publish(f"{camera}/{object_name}", status, retain=False)
 
+        def active_object_status(camera, object_name, status):
+            self.dispatcher.publish(
+                f"{camera}/{object_name}/active", status, retain=False
+            )
+
         def camera_activity(camera, activity):
             last_activity = self.camera_activity.get(camera)
 
@@ -1020,18 +1072,9 @@ class TrackedObjectProcessor(threading.Thread):
             camera_state.on("end", end)
             camera_state.on("snapshot", snapshot)
             camera_state.on("object_status", object_status)
+            camera_state.on("active_object_status", active_object_status)
             camera_state.on("camera_activity", camera_activity)
             self.camera_states[camera] = camera_state
-
-        # {
-        #   'zone_name': {
-        #       'person': {
-        #           'camera_1': 2,
-        #           'camera_2': 1
-        #       }
-        #   }
-        # }
-        self.zone_data = defaultdict(lambda: defaultdict(dict))
 
     def should_save_snapshot(self, camera, obj: TrackedObject):
         if obj.false_positive:
@@ -1208,7 +1251,17 @@ class TrackedObjectProcessor(threading.Thread):
                     for obj in camera_state.tracked_objects.values()
                     if zone in obj.current_zones and not obj.false_positive
                 )
+                active_obj_counter = Counter(
+                    obj.obj_data["label"]
+                    for obj in camera_state.tracked_objects.values()
+                    if (
+                        zone in obj.current_zones
+                        and not obj.false_positive
+                        and obj.active
+                    )
+                )
                 total_label_count = 0
+                total_active_label_count = 0
 
                 # update counts and publish status
                 for label in set(self.zone_data[zone].keys()) | set(obj_counter.keys()):
@@ -1218,41 +1271,67 @@ class TrackedObjectProcessor(threading.Thread):
 
                     # if we have previously published a count for this zone/label
                     zone_label = self.zone_data[zone][label]
+                    active_zone_label = self.active_zone_data[zone][label]
                     if camera in zone_label:
                         current_count = sum(zone_label.values())
+                        current_active_count = sum(active_zone_label.values())
                         zone_label[camera] = (
                             obj_counter[label] if label in obj_counter else 0
                         )
+                        active_zone_label[camera] = (
+                            active_obj_counter[label]
+                            if label in active_obj_counter
+                            else 0
+                        )
                         new_count = sum(zone_label.values())
+                        new_active_count = sum(active_zone_label.values())
                         if new_count != current_count:
                             self.dispatcher.publish(
                                 f"{zone}/{label}",
                                 new_count,
                                 retain=False,
                             )
+                        if new_active_count != current_active_count:
+                            self.dispatcher.publish(
+                                f"{zone}/{label}/active",
+                                new_active_count,
+                                retain=False,
+                            )
 
                         # Set the count for the /zone/all topic.
                         total_label_count += new_count
+                        total_active_label_count += new_active_count
 
                     # if this is a new zone/label combo for this camera
                     else:
                         if label in obj_counter:
                             zone_label[camera] = obj_counter[label]
+                            active_zone_label[camera] = active_obj_counter[label]
                             self.dispatcher.publish(
                                 f"{zone}/{label}",
                                 obj_counter[label],
                                 retain=False,
                             )
+                            self.dispatcher.publish(
+                                f"{zone}/{label}/active",
+                                active_obj_counter[label],
+                                retain=False,
+                            )
 
                             # Set the count for the /zone/all topic.
                             total_label_count += obj_counter[label]
+                            total_active_label_count += active_obj_counter[label]
 
                 # if we have previously published a count for this zone all labels
                 zone_label = self.zone_data[zone]["all"]
+                active_zone_label = self.active_zone_data[zone]["all"]
                 if camera in zone_label:
                     current_count = sum(zone_label.values())
+                    current_active_count = sum(active_zone_label.values())
                     zone_label[camera] = total_label_count
+                    active_zone_label[camera] = total_active_label_count
                     new_count = sum(zone_label.values())
+                    new_active_count = sum(active_zone_label.values())
 
                     if new_count != current_count:
                         self.dispatcher.publish(
@@ -1260,12 +1339,24 @@ class TrackedObjectProcessor(threading.Thread):
                             new_count,
                             retain=False,
                         )
+                    if new_active_count != current_active_count:
+                        self.dispatcher.publish(
+                            f"{zone}/all/active",
+                            new_active_count,
+                            retain=False,
+                        )
                 # if this is a new zone all label for this camera
                 else:
                     zone_label[camera] = total_label_count
+                    active_zone_label[camera] = total_active_label_count
                     self.dispatcher.publish(
                         f"{zone}/all",
                         total_label_count,
+                        retain=False,
+                    )
+                    self.dispatcher.publish(
+                        f"{zone}/all/active",
+                        total_active_label_count,
                         retain=False,
                     )
 
