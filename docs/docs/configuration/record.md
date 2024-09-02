@@ -13,7 +13,7 @@ H265 recordings can be viewed in Chrome 108+, Edge and Safari only. All other br
 
 ### Most conservative: Ensure all video is saved
 
-For users deploying Frigate in environments where it is important to have contiguous video stored even if there was no detectable motion, the following config will store all video for 3 days. After 3 days, only video containing motion and overlapping with events will be retained until 30 days have passed.
+For users deploying Frigate in environments where it is important to have contiguous video stored even if there was no detectable motion, the following config will store all video for 3 days. After 3 days, only video containing motion and overlapping with alerts or detections will be retained until 30 days have passed.
 
 ```yaml
 record:
@@ -21,9 +21,13 @@ record:
   retain:
     days: 3
     mode: all
-  events:
+  alerts:
     retain:
-      default: 30
+      days: 30
+      mode: motion
+  detections:
+    retain:
+      days: 30
       mode: motion
 ```
 
@@ -37,25 +41,28 @@ record:
   retain:
     days: 3
     mode: motion
-  events:
+  alerts:
     retain:
-      default: 30
+      days: 30
+      mode: motion
+  detections:
+    retain:
+      days: 30
       mode: motion
 ```
 
-### Minimum: Events only
+### Minimum: Alerts only
 
-If you only want to retain video that occurs during an event, this config will discard video unless an event is ongoing.
+If you only want to retain video that occurs during an event, this config will discard video unless an alert is ongoing.
 
 ```yaml
 record:
   enabled: True
   retain:
     days: 0
-    mode: all
-  events:
+  alerts:
     retain:
-      default: 30
+      days: 30
       mode: motion
 ```
 
@@ -86,19 +93,22 @@ record:
 
 Continuous recording supports different retention modes [which are described below](#what-do-the-different-retain-modes-mean)
 
-### Event Recording
+### Object Recording
 
-If you only used clips in previous versions with recordings disabled, you can use the following config to get the same behavior. This is also the default behavior when recordings are enabled.
+The number of days to record review items can be specified for review items classified as alerts as well as events.
 
 ```yaml
 record:
   enabled: True
-  events:
+  alerts:
     retain:
-      default: 10 # <- number of days to keep event recordings
+      days: 10 # <- number of days to keep alert recordings
+  detections:
+    retain:
+      days: 10 # <- number of days to keep detections recordings
 ```
 
-This configuration will retain recording segments that overlap with events and have active tracked objects for 10 days. Because multiple events can reference the same recording segments, this avoids storing duplicate footage for overlapping events and reduces overall storage needs.
+This configuration will retain recording segments that overlap with alerts and detections for 10 days. Because multiple events can reference the same recording segments, this avoids storing duplicate footage for overlapping events and reduces overall storage needs.
 
 **WARNING**: Recordings still must be enabled in the config. If a camera has recordings disabled in the config, enabling via the methods listed above will have no effect.
 
@@ -112,11 +122,7 @@ Let's say you have Frigate configured so that your doorbell camera would retain 
 - With the `motion` option the only parts of those 48 hours would be segments that Frigate detected motion. This is the middle ground option that won't keep all 48 hours, but will likely keep all segments of interest along with the potential for some extra segments.
 - With the `active_objects` option the only segments that would be kept are those where there was a true positive object that was not considered stationary.
 
-The same options are available with events. Let's consider a scenario where you drive up and park in your driveway, go inside, then come back out 4 hours later.
-
-- With the `all` option all segments for the duration of the event would be saved for the event. This event would have 4 hours of footage.
-- With the `motion` option all segments for the duration of the event with motion would be saved. This means any segment where a car drove by in the street, person walked by, lighting changed, etc. would be saved.
-- With the `active_objects` it would only keep segments where the object was active. In this case the only segments that would be saved would be the ones where the car was driving up, you going inside, you coming outside, and the car driving away. Essentially reducing the 4 hours to a minute or two of event footage.
+The same options are available with alerts and detections, except it will only save the recordings when it overlaps with a review item of that type.
 
 A configuration example of the above retain modes where all `motion` segments are stored for 7 days and `active objects` are stored for 14 days would be as follows:
 
@@ -126,32 +132,17 @@ record:
   retain:
     days: 7
     mode: motion
-  events:
+  alerts:
     retain:
-      default: 14
+      days: 14
+      mode: active_objects
+  detections:
+    retain:
+      days: 14
       mode: active_objects
 ```
 
 The above configuration example can be added globally or on a per camera basis.
-
-### Object Specific Retention
-
-You can also set specific retention length for an object type. The below configuration example builds on from above but also specifies that recordings of dogs only need to be kept for 2 days and recordings of cars should be kept for 7 days.
-
-```yaml
-record:
-  enabled: True
-  retain:
-    days: 7
-    mode: motion
-  events:
-    retain:
-      default: 14
-      mode: active_objects
-      objects:
-        dog: 2
-        car: 7
-```
 
 ## Can I have "continuous" recordings, but only at certain times?
 

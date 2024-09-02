@@ -419,32 +419,46 @@ record:
     # Optional: Quality of recording preview (default: shown below).
     # Options are: very_low, low, medium, high, very_high
     quality: medium
-  # Optional: Event recording settings
-  events:
-    # Optional: Number of seconds before the event to include (default: shown below)
+  # Optional: alert recording settings
+  alerts:
+    # Optional: Number of seconds before the alert to include (default: shown below)
     pre_capture: 5
-    # Optional: Number of seconds after the event to include (default: shown below)
+    # Optional: Number of seconds after the alert to include (default: shown below)
     post_capture: 5
-    # Optional: Objects to save recordings for. (default: all tracked objects)
-    objects:
-      - person
-    # Optional: Retention settings for recordings of events
+    # Optional: Retention settings for recordings of alerts
     retain:
-      # Required: Default retention days (default: shown below)
-      default: 10
+      # Required: Retention days (default: shown below)
+      days: 14
       # Optional: Mode for retention. (default: shown below)
-      #   all - save all recording segments for events regardless of activity
-      #   motion - save all recordings segments for events with any detected motion
-      #   active_objects - save all recording segments for event with active/moving objects
+      #   all - save all recording segments for alerts regardless of activity
+      #   motion - save all recordings segments for alerts with any detected motion
+      #   active_objects - save all recording segments for alerts with active/moving objects
       #
       # NOTE: If the retain mode for the camera is more restrictive than the mode configured
       #       here, the segments will already be gone by the time this mode is applied.
       #       For example, if the camera retain mode is "motion", the segments without motion are
       #       never stored, so setting the mode to "all" here won't bring them back.
       mode: motion
-      # Optional: Per object retention days
-      objects:
-        person: 15
+  # Optional: detection recording settings
+  detections:
+    # Optional: Number of seconds before the detection to include (default: shown below)
+    pre_capture: 5
+    # Optional: Number of seconds after the detection to include (default: shown below)
+    post_capture: 5
+    # Optional: Retention settings for recordings of detections
+    retain:
+      # Required: Retention days (default: shown below)
+      days: 14
+      # Optional: Mode for retention. (default: shown below)
+      #   all - save all recording segments for detections regardless of activity
+      #   motion - save all recordings segments for detections with any detected motion
+      #   active_objects - save all recording segments for detections with active/moving objects
+      #
+      # NOTE: If the retain mode for the camera is more restrictive than the mode configured
+      #       here, the segments will already be gone by the time this mode is applied.
+      #       For example, if the camera retain mode is "motion", the segments without motion are
+      #       never stored, so setting the mode to "all" here won't bring them back.
+      mode: motion
 
 # Optional: Configuration for the jpg snapshots written to the clips directory for each event
 # NOTE: Can be overridden at the camera level

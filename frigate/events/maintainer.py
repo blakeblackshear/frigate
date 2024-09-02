@@ -5,7 +5,7 @@ from multiprocessing.synchronize import Event as MpEvent
 from typing import Dict
 
 from frigate.comms.events_updater import EventEndPublisher, EventUpdateSubscriber
-from frigate.config import EventsConfig, FrigateConfig
+from frigate.config import FrigateConfig
 from frigate.events.types import EventStateEnum, EventTypeEnum
 from frigate.models import Event
 from frigate.util.builtin import to_relative_box
@@ -128,16 +128,13 @@ class EventProcessor(threading.Thread):
         if should_update_db(self.events_in_process[event_data["id"]], event_data):
             updated_db = True
             camera_config = self.config.cameras[camera]
-            event_config: EventsConfig = camera_config.record.events
             width = camera_config.detect.width
             height = camera_config.detect.height
             first_detector = list(self.config.detectors.values())[0]
 
-            start_time = event_data["start_time"] - event_config.pre_capture
+            start_time = event_data["start_time"]
             end_time = (
-                None
-                if event_data["end_time"] is None
-                else event_data["end_time"] + event_config.post_capture
+                None if event_data["end_time"] is None else event_data["end_time"]
             )
             # score of the snapshot
             score = (

@@ -13,7 +13,7 @@ from frigate.util.services import get_video_properties
 
 logger = logging.getLogger(__name__)
 
-CURRENT_CONFIG_VERSION = 0.14
+CURRENT_CONFIG_VERSION = "0.15-0"
 
 
 def migrate_frigate_config(config_file: str):
@@ -29,7 +29,7 @@ def migrate_frigate_config(config_file: str):
     with open(config_file, "r") as f:
         config: dict[str, dict[str, any]] = yaml.load(f)
 
-    previous_version = config.get("version", 0.13)
+    previous_version = str(config.get("version", "0.13"))
 
     if previous_version == CURRENT_CONFIG_VERSION:
         logger.info("frigate config does not need migration...")
@@ -38,12 +38,12 @@ def migrate_frigate_config(config_file: str):
     logger.info("copying config as backup...")
     shutil.copy(config_file, os.path.join(CONFIG_DIR, "backup_config.yaml"))
 
-    if previous_version < 0.14:
+    if previous_version < "0.14":
         logger.info(f"Migrating frigate config from {previous_version} to 0.14...")
         new_config = migrate_014(config)
         with open(config_file, "w") as f:
             yaml.dump(new_config, f)
-        previous_version = 0.14
+        previous_version = "0.14"
 
         logger.info("Migrating export file names...")
         for file in os.listdir(EXPORT_DIR):
@@ -54,6 +54,13 @@ def migrate_frigate_config(config_file: str):
             os.rename(
                 os.path.join(EXPORT_DIR, file), os.path.join(EXPORT_DIR, new_name)
             )
+
+    if previous_version < "0.15-0":
+        logger.info(f"Migrating frigate config from {previous_version} to 0.15-0...")
+        new_config = migrate_015_0(config)
+        with open(config_file, "w") as f:
+            yaml.dump(new_config, f)
+        previous_version = "0.15-0"
 
     logger.info("Finished frigate config migration...")
 
@@ -141,7 +148,99 @@ def migrate_014(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
 
         new_config["cameras"][name] = camera_config
 
-    new_config["version"] = 0.14
+    new_config["version"] = "0.14"
+    return new_config
+
+
+def migrate_015_0(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]]:
+    """Handle migrating frigate config to 0.15-0"""
+    new_config = config.copy()
+
+    # migrate record.events to record.alerts and record.detections
+    global_record_events = config.get("record", {}).get("events")
+    if global_record_events:
+        alerts_retention = {"retain": {}}
+        detections_retention = {"retain": {}}
+
+        if global_record_events.get("pre_capture"):
+            alerts_retention["pre_capture"] = global_record_events["pre_capture"]
+
+        if global_record_events.get("post_capture"):
+            alerts_retention["post_capture"] = global_record_events["post_capture"]
+
+        if global_record_events.get("retain", {}).get("default"):
+            alerts_retention["retain"]["days"] = global_record_events["retain"][
+                "default"
+            ]
+
+        # decide logical detections retention based on current detections config
+        if not config.get("review", {}).get("alerts", {}).get(
+            "required_zones"
+        ) or config.get("review", {}).get("detections"):
+            if global_record_events.get("pre_capture"):
+                detections_retention["pre_capture"] = global_record_events[
+                    "pre_capture"
+                ]
+
+            if global_record_events.get("post_capture"):
+                detections_retention["post_capture"] = global_record_events[
+                    "post_capture"
+                ]
+
+            if global_record_events.get("retain", {}).get("default"):
+                detections_retention["retain"]["days"] = global_record_events["retain"][
+                    "default"
+                ]
+        else:
+            detections_retention["retain"]["days"] = 0
+
+        new_config["record"]["alerts"] = alerts_retention
+        new_config["record"]["detections"] = detections_retention
+
+        del new_config["record"]["events"]
+
+    for name, camera in config.get("cameras", {}).items():
+        camera_config: dict[str, dict[str, any]] = camera.copy()
+
+        record_events: dict[str, any] = camera_config.get("record", {}).get("events")
+
+        if record_events:
+            alerts_retention = {"retain": {}}
+            detections_retention = {"retain": {}}
+
+            if record_events.get("pre_capture"):
+                alerts_retention["pre_capture"] = record_events["pre_capture"]
+
+            if record_events.get("post_capture"):
+                alerts_retention["post_capture"] = record_events["post_capture"]
+
+            if record_events.get("retain", {}).get("default"):
+                alerts_retention["retain"]["days"] = record_events["retain"]["default"]
+
+            # decide logical detections retention based on current detections config
+            if not camera_config.get("review", {}).get("alerts", {}).get(
+                "required_zones"
+            ) or camera_config.get("review", {}).get("detections"):
+                if record_events.get("pre_capture"):
+                    detections_retention["pre_capture"] = record_events["pre_capture"]
+
+                if record_events.get("post_capture"):
+                    detections_retention["post_capture"] = record_events["post_capture"]
+
+                if record_events.get("retain", {}).get("default"):
+                    detections_retention["retain"]["days"] = record_events["retain"][
+                        "default"
+                    ]
+            else:
+                detections_retention["retain"]["days"] = 0
+
+            camera_config["record"]["alerts"] = alerts_retention
+            camera_config["record"]["detections"] = detections_retention
+            del camera_config["record"]["events"]
+
+        new_config["cameras"][name] = camera_config
+
+    new_config["version"] = "0.15-0"
     return new_config
 
 

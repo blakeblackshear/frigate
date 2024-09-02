@@ -12,7 +12,7 @@ from playhouse.sqlite_ext import SqliteExtDatabase
 
 from frigate.config import CameraConfig, FrigateConfig, RetainModeEnum
 from frigate.const import CACHE_DIR, CLIPS_DIR, MAX_WAL_SIZE, RECORD_DIR
-from frigate.models import Event, Previews, Recordings, ReviewSegment
+from frigate.models import Previews, Recordings, ReviewSegment
 from frigate.record.util import remove_empty_directories, sync_recordings
 from frigate.util.builtin import clear_and_unlink, get_tomorrow_at_time
 
@@ -61,8 +61,42 @@ class RecordingCleanup(threading.Thread):
             db.execute_sql("PRAGMA wal_checkpoint(TRUNCATE);")
             db.close()
 
+    def expire_review_segments(self, config: CameraConfig, now: datetime) -> None:
+        """Delete review segments that are expired"""
+        alert_expire_date = (
+            now - datetime.timedelta(days=config.record.alerts.retain.days)
+        ).timestamp()
+        detection_expire_date = (
+            now - datetime.timedelta(days=config.record.detections.retain.days)
+        ).timestamp()
+        expired_reviews: ReviewSegment = (
+            ReviewSegment.select(ReviewSegment.id)
+            .where(
+                ReviewSegment.camera == config.name
+                and (
+                    (
+                        ReviewSegment.severity == "alert"
+                        and ReviewSegment.end_time < alert_expire_date
+                    )
+                    or (
+                        ReviewSegment.severity == "detection"
+                        and ReviewSegment.end_time < detection_expire_date
+                    )
+                )
+            )
+            .namedtuples()
+        )
+
+        max_deletes = 100000
+        deleted_reviews_list = list(map(lambda x: x[0], expired_reviews))
+        logger.info(f"the list is {deleted_reviews_list}")
+        for i in range(0, len(deleted_reviews_list), max_deletes):
+            ReviewSegment.delete().where(
+                ReviewSegment.id << deleted_reviews_list[i : i + max_deletes]
+            ).execute()
+
     def expire_existing_camera_recordings(
-        self, expire_date: float, config: CameraConfig, events: Event
+        self, expire_date: float, config: CameraConfig, reviews: ReviewSegment
     ) -> None:
         """Delete recordings for existing camera based on retention config."""
         # Get the timestamp for cutoff of retained days
@@ -86,47 +120,47 @@ class RecordingCleanup(threading.Thread):
             .iterator()
         )
 
-        # loop over recordings and see if they overlap with any non-expired events
+        # loop over recordings and see if they overlap with any non-expired reviews
         # TODO: expire segments based on segment stats according to config
-        event_start = 0
+        review_start = 0
         deleted_recordings = set()
         kept_recordings: list[tuple[float, float]] = []
         for recording in recordings:
             keep = False
+            mode = None
             # Now look for a reason to keep this recording segment
-            for idx in range(event_start, len(events)):
-                event: Event = events[idx]
+            for idx in range(review_start, len(reviews)):
+                review: ReviewSegment = reviews[idx]
 
-                # if the event starts in the future, stop checking events
+                # if the review starts in the future, stop checking reviews
                 # and let this recording segment expire
-                if event.start_time > recording.end_time:
+                if review.start_time > recording.end_time:
                     keep = False
                     break
 
-                # if the event is in progress or ends after the recording starts, keep it
-                # and stop looking at events
-                if event.end_time is None or event.end_time >= recording.start_time:
+                # if the review is in progress or ends after the recording starts, keep it
+                # and stop looking at reviews
+                if review.end_time is None or review.end_time >= recording.start_time:
                     keep = True
+                    mode = (
+                        config.record.alerts.retain.mode
+                        if review.severity == "alert"
+                        else config.record.detections.retain.mode
+                    )
                     break
 
-                # if the event ends before this recording segment starts, skip
-                # this event and check the next event for an overlap.
-                # since the events and recordings are sorted, we can skip events
+                # if the review ends before this recording segment starts, skip
+                # this review and check the next review for an overlap.
+                # since the review and recordings are sorted, we can skip review
                 # that end before the previous recording segment started on future segments
-                if event.end_time < recording.start_time:
-                    event_start = idx
+                if review.end_time < recording.start_time:
+                    review_start = idx
 
             # Delete recordings outside of the retention window or based on the retention mode
             if (
                 not keep
-                or (
-                    config.record.events.retain.mode == RetainModeEnum.motion
-                    and recording.motion == 0
-                )
-                or (
-                    config.record.events.retain.mode == RetainModeEnum.active_objects
-                    and recording.objects == 0
-                )
+                or (mode == RetainModeEnum.motion and recording.motion == 0)
+                or (mode == RetainModeEnum.active_objects and recording.objects == 0)
             ):
                 Path(recording.path).unlink(missing_ok=True)
                 deleted_recordings.add(recording.id)
@@ -202,65 +236,6 @@ class RecordingCleanup(threading.Thread):
                 Previews.id << deleted_previews_list[i : i + max_deletes]
             ).execute()
 
-        review_segments: list[ReviewSegment] = (
-            ReviewSegment.select(
-                ReviewSegment.id,
-                ReviewSegment.start_time,
-                ReviewSegment.end_time,
-                ReviewSegment.thumb_path,
-            )
-            .where(
-                ReviewSegment.camera == config.name,
-                ReviewSegment.end_time < expire_date,
-            )
-            .order_by(ReviewSegment.start_time)
-            .namedtuples()
-            .iterator()
-        )
-
-        # expire review segments
-        recording_start = 0
-        deleted_segments = set()
-        for segment in review_segments:
-            keep = False
-            # look for a reason to keep this segment
-            for idx in range(recording_start, len(kept_recordings)):
-                start_time, end_time = kept_recordings[idx]
-
-                # if the recording starts in the future, stop checking recordings
-                # and let this segment expire
-                if start_time > segment.end_time:
-                    keep = False
-                    break
-
-                # if the recording ends after the segment starts, keep it
-                # and stop looking at recordings
-                if end_time >= segment.start_time:
-                    keep = True
-                    break
-
-                # if the recording ends before this segment starts, skip
-                # this recording and check the next recording for an overlap.
-                # since the kept recordings and segments are sorted, we can skip recordings
-                # that end before the current segment started
-                if end_time < segment.start_time:
-                    recording_start = idx
-
-            # Delete segments without any relevant recordings
-            if not keep:
-                Path(segment.thumb_path).unlink(missing_ok=True)
-                deleted_segments.add(segment.id)
-
-        # expire segments
-        logger.debug(f"Expiring {len(deleted_segments)} segments")
-        # delete up to 100,000 at a time
-        max_deletes = 100000
-        deleted_segments_list = list(deleted_segments)
-        for i in range(0, len(deleted_segments_list), max_deletes):
-            ReviewSegment.delete().where(
-                ReviewSegment.id << deleted_segments_list[i : i + max_deletes]
-            ).execute()
-
     def expire_recordings(self) -> None:
         """Delete recordings based on retention config."""
         logger.debug("Start expire recordings.")
@@ -302,30 +277,31 @@ class RecordingCleanup(threading.Thread):
         logger.debug("Start all cameras.")
         for camera, config in self.config.cameras.items():
             logger.debug(f"Start camera: {camera}.")
+            now = datetime.datetime.now()
+
+            self.expire_review_segments(config, now)
 
             expire_days = config.record.retain.days
-            expire_date = (
-                datetime.datetime.now() - datetime.timedelta(days=expire_days)
-            ).timestamp()
+            expire_date = (now - datetime.timedelta(days=expire_days)).timestamp()
 
-            # Get all the events to check against
-            events: Event = (
-                Event.select(
-                    Event.start_time,
-                    Event.end_time,
+            # Get all the reviews to check against
+            reviews: ReviewSegment = (
+                ReviewSegment.select(
+                    ReviewSegment.start_time,
+                    ReviewSegment.end_time,
+                    ReviewSegment.severity,
                 )
                 .where(
-                    Event.camera == camera,
-                    # need to ensure segments for all events starting
+                    ReviewSegment.camera == camera,
+                    # need to ensure segments for all reviews starting
                     # before the expire date are included
-                    Event.start_time < expire_date,
-                    Event.has_clip,
+                    ReviewSegment.start_time < expire_date,
                 )
-                .order_by(Event.start_time)
+                .order_by(ReviewSegment.start_time)
                 .namedtuples()
             )
 
-            self.expire_existing_camera_recordings(expire_date, config, events)
+            self.expire_existing_camera_recordings(expire_date, config, reviews)
             logger.debug(f"End camera: {camera}.")
 
         logger.debug("End all cameras.")

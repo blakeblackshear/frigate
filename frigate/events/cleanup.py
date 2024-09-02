@@ -68,7 +68,10 @@ class EventCleanup(threading.Thread):
     def expire(self, media_type: EventCleanupType) -> list[str]:
         ## Expire events from unlisted cameras based on the global config
         if media_type == EventCleanupType.clips:
-            retain_config = self.config.record.events.retain
+            expire_days = max(
+                self.config.record.alerts.retain.days,
+                self.config.record.detections.retain.days,
+            )
             file_extension = None  # mp4 clips are no longer stored in /clips
             update_params = {"has_clip": False}
         else:
@@ -82,7 +85,11 @@ class EventCleanup(threading.Thread):
         # loop over object types in db
         for event in distinct_labels:
             # get expiration time for this label
-            expire_days = retain_config.objects.get(event.label, retain_config.default)
+            if media_type == EventCleanupType.snapshots:
+                expire_days = retain_config.objects.get(
+                    event.label, retain_config.default
+                )
+
             expire_after = (
                 datetime.datetime.now() - datetime.timedelta(days=expire_days)
             ).timestamp()
@@ -132,7 +139,10 @@ class EventCleanup(threading.Thread):
         ## Expire events from cameras based on the camera config
         for name, camera in self.config.cameras.items():
             if media_type == EventCleanupType.clips:
-                retain_config = camera.record.events.retain
+                expire_days = max(
+                    camera.record.alerts.retain.days,
+                    camera.record.detections.retain.days,
+                )
             else:
                 retain_config = camera.snapshots.retain
 
@@ -142,9 +152,11 @@ class EventCleanup(threading.Thread):
             # loop over object types in db
             for event in distinct_labels:
                 # get expiration time for this label
-                expire_days = retain_config.objects.get(
-                    event.label, retain_config.default
-                )
+                if media_type == EventCleanupType.snapshots:
+                    expire_days = retain_config.objects.get(
+                        event.label, retain_config.default
+                    )
+
                 expire_after = (
                     datetime.datetime.now() - datetime.timedelta(days=expire_days)
                 ).timestamp()

@@ -296,12 +296,9 @@ class RetainModeEnum(str, Enum):
     active_objects = "active_objects"
 
 
-class RetainConfig(FrigateBaseModel):
-    default: float = Field(default=10, title="Default retention period.")
-    mode: RetainModeEnum = Field(default=RetainModeEnum.motion, title="Retain mode.")
-    objects: Dict[str, float] = Field(
-        default_factory=dict, title="Object retention period."
-    )
+class RecordRetainConfig(FrigateBaseModel):
+    days: float = Field(default=0, title="Default retention period.")
+    mode: RetainModeEnum = Field(default=RetainModeEnum.all, title="Retain mode.")
 
 
 class EventsConfig(FrigateBaseModel):
@@ -309,18 +306,9 @@ class EventsConfig(FrigateBaseModel):
         default=5, title="Seconds to retain before event starts.", le=MAX_PRE_CAPTURE
     )
     post_capture: int = Field(default=5, title="Seconds to retain after event ends.")
-    objects: Optional[List[str]] = Field(
-        None,
-        title="List of objects to be detected in order to save the event.",
+    retain: RecordRetainConfig = Field(
+        default_factory=RecordRetainConfig, title="Event retention settings."
     )
-    retain: RetainConfig = Field(
-        default_factory=RetainConfig, title="Event retention settings."
-    )
-
-
-class RecordRetainConfig(FrigateBaseModel):
-    days: float = Field(default=0, title="Default retention period.")
-    mode: RetainModeEnum = Field(default=RetainModeEnum.all, title="Retain mode.")
 
 
 class RecordExportConfig(FrigateBaseModel):
@@ -355,8 +343,11 @@ class RecordConfig(FrigateBaseModel):
     retain: RecordRetainConfig = Field(
         default_factory=RecordRetainConfig, title="Record retention settings."
     )
-    events: EventsConfig = Field(
-        default_factory=EventsConfig, title="Event specific settings."
+    detections: EventsConfig = Field(
+        default_factory=EventsConfig, title="Detection specific retention settings."
+    )
+    alerts: EventsConfig = Field(
+        default_factory=EventsConfig, title="Alert specific retention settings."
     )
     export: RecordExportConfig = Field(
         default_factory=RecordExportConfig, title="Recording Export Config"
@@ -924,6 +915,14 @@ class CameraFfmpegConfig(FfmpegConfig):
         return v
 
 
+class RetainConfig(FrigateBaseModel):
+    default: float = Field(default=10, title="Default retention period.")
+    mode: RetainModeEnum = Field(default=RetainModeEnum.motion, title="Retain mode.")
+    objects: Dict[str, float] = Field(
+        default_factory=dict, title="Object retention period."
+    )
+
+
 class SnapshotsConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Snapshots enabled.")
     clean_copy: bool = Field(
@@ -1278,10 +1277,19 @@ def verify_recording_retention(camera_config: CameraConfig) -> None:
     if (
         camera_config.record.retain.days != 0
         and rank_map[camera_config.record.retain.mode]
-        > rank_map[camera_config.record.events.retain.mode]
+        > rank_map[camera_config.record.alerts.retain.mode]
     ):
         logger.warning(
-            f"{camera_config.name}: Recording retention is configured for {camera_config.record.retain.mode} and event retention is configured for {camera_config.record.events.retain.mode}. The more restrictive retention policy will be applied."
+            f"{camera_config.name}: Recording retention is configured for {camera_config.record.retain.mode} and alert retention is configured for {camera_config.record.alerts.retain.mode}. The more restrictive retention policy will be applied."
+        )
+
+    if (
+        camera_config.record.retain.days != 0
+        and rank_map[camera_config.record.retain.mode]
+        > rank_map[camera_config.record.detections.retain.mode]
+    ):
+        logger.warning(
+            f"{camera_config.name}: Recording retention is configured for {camera_config.record.retain.mode} and detection retention is configured for {camera_config.record.detections.retain.mode}. The more restrictive retention policy will be applied."
         )
 
 
@@ -1429,7 +1437,7 @@ class FrigateConfig(FrigateBaseModel):
         default_factory=TimestampStyleConfig,
         title="Global timestamp style configuration.",
     )
-    version: Optional[float] = Field(default=None, title="Current config version.")
+    version: Optional[str] = Field(default=None, title="Current config version.")
 
     def runtime_config(self, plus_api: PlusApi = None) -> FrigateConfig:
         """Merge camera config with globals."""
