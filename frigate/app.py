@@ -610,16 +610,21 @@ class FrigateApp:
             min_req_shm += 8
 
         available_shm = total_shm - min_req_shm
-        cam_average_shm = 0
+        cam_total_frame_size = 0
 
         for camera in self.config.cameras.values():
-            cam_average_shm += round(
-                (camera.detect.width * camera.detect.height * 1.5 + 270480) / 1048576,
-                1,
-            )
+            if camera.enabled:
+                cam_total_frame_size += round(
+                    (camera.detect.width * camera.detect.height * 1.5 + 270480) / 1048576,
+                    1,
+                )
 
-        self.shm_frame_count = max(
-            50, int(available_shm / (cam_average_shm / len(self.config.cameras)))
+        self.shm_frame_count = min(
+            50, int(available_shm / (cam_total_frame_size))
+        )
+
+        logger.info(
+            f"Calculated total camera size {available_shm} / {cam_total_frame_size} :: {self.shm_frame_count} frames for each camera in SHM"
         )
 
         logger.info(
@@ -628,7 +633,7 @@ class FrigateApp:
 
         if self.shm_frame_count < 10:
             logger.warning(
-                f"The current SHM size of {total_shm}MB is too small, recommend increasing it to at least {round(min_req_shm + (cam_average_shm * 10))}MB."
+                f"The current SHM size of {total_shm}MB is too small, recommend increasing it to at least {round(min_req_shm + cam_total_frame_size)}MB."
             )
 
     def init_auth(self) -> None:
