@@ -294,7 +294,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                     )
 
                     if yuv_frame is None:
-                        logger.warning(f"Failed to get frame {frame_id} from SHM")
+                        logger.debug(f"Failed to get frame {frame_id} from SHM")
                         return
 
                     self.update_segment(
@@ -312,7 +312,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                     )
 
                     if yuv_frame is None:
-                        logger.warning(f"Failed to get frame {frame_id} from SHM")
+                        logger.debug(f"Failed to get frame {frame_id} from SHM")
                         return
 
                     segment.save_full_frame(camera_config, yuv_frame)
@@ -413,7 +413,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                     )
 
                     if yuv_frame is None:
-                        logger.warning(f"Failed to get frame {frame_id} from SHM")
+                        logger.debug(f"Failed to get frame {frame_id} from SHM")
                         return
 
                     self.active_review_segments[camera].update_frame(

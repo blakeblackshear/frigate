@@ -95,6 +95,7 @@ def start_or_restart_ffmpeg(
 def capture_frames(
     ffmpeg_process,
     config: CameraConfig,
+    shm_frame_count: int,
     frame_shape,
     frame_manager: FrameManager,
     frame_queue,
@@ -109,7 +110,6 @@ def capture_frames(
     skipped_eps = EventsPerSecond()
     skipped_eps.start()
 
-    shm_count = max(10, config.detect.fps)
     shm_frames: list[str] = []
 
     while True:
@@ -124,7 +124,7 @@ def capture_frames(
             # update frame cache and cleanup existing frames
             shm_frames.append(frame_name)
 
-            if len(shm_frames) > shm_count:
+            if len(shm_frames) > shm_frame_count:
                 expired_frame_name = shm_frames.pop(0)
                 frame_manager.delete(expired_frame_name)
         except Exception:
@@ -166,6 +166,7 @@ class CameraWatchdog(threading.Thread):
         self,
         camera_name,
         config: CameraConfig,
+        shm_frame_count: int,
         frame_queue,
         camera_fps,
         skipped_fps,
@@ -176,6 +177,7 @@ class CameraWatchdog(threading.Thread):
         self.logger = logging.getLogger(f"watchdog.{camera_name}")
         self.camera_name = camera_name
         self.config = config
+        self.shm_frame_count = shm_frame_count
         self.capture_thread = None
         self.ffmpeg_detect_process = None
         self.logpipe = LogPipe(f"ffmpeg.{self.camera_name}.detect")
@@ -299,6 +301,7 @@ class CameraWatchdog(threading.Thread):
         self.ffmpeg_pid.value = self.ffmpeg_detect_process.pid
         self.capture_thread = CameraCapture(
             self.config,
+            self.shm_frame_count,
             self.ffmpeg_detect_process,
             self.frame_shape,
             self.frame_queue,
@@ -338,6 +341,7 @@ class CameraCapture(threading.Thread):
     def __init__(
         self,
         config: CameraConfig,
+        shm_frame_count: int,
         ffmpeg_process,
         frame_shape,
         frame_queue,
@@ -348,6 +352,7 @@ class CameraCapture(threading.Thread):
         threading.Thread.__init__(self)
         self.name = f"capture:{config.name}"
         self.config = config
+        self.shm_frame_count = shm_frame_count
         self.frame_shape = frame_shape
         self.frame_queue = frame_queue
         self.fps = fps
@@ -362,6 +367,7 @@ class CameraCapture(threading.Thread):
         capture_frames(
             self.ffmpeg_process,
             self.config,
+            self.shm_frame_count,
             self.frame_shape,
             self.frame_manager,
             self.frame_queue,
@@ -372,7 +378,7 @@ class CameraCapture(threading.Thread):
         )
 
 
-def capture_camera(name, config: CameraConfig, process_info):
+def capture_camera(name, config: CameraConfig, shm_frame_count: int, process_info):
     stop_event = mp.Event()
 
     def receiveSignal(signalNumber, frame):
@@ -389,6 +395,7 @@ def capture_camera(name, config: CameraConfig, process_info):
     camera_watchdog = CameraWatchdog(
         name,
         config,
+        shm_frame_count,
         frame_queue,
         process_info["camera_fps"],
         process_info["skipped_fps"],

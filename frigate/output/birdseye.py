@@ -362,8 +362,7 @@ class BirdsEyeFrameManager:
             )
 
             if frame is None:
-                # TODO: better frame management would prevent this edge case
-                logger.warning(
+                logger.debug(
                     f"Unable to copy frame {camera}{frame_time} to birdseye."
                 )
                 return
