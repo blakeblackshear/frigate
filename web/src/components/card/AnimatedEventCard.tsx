@@ -127,59 +127,61 @@ export function AnimatedEventCard({
               <TooltipContent>Mark as Reviewed</TooltipContent>
             </Tooltip>
           )}
-          <div
-            className="size-full cursor-pointer overflow-hidden rounded md:rounded-lg"
-            onClick={onOpenReview}
-          >
-            {!alertVideos ? (
-              <img
-                className="size-full select-none"
-                src={`${apiHost}${event.thumb_path.replace("/media/frigate/", "")}`}
-                loading={isSafari ? "eager" : "lazy"}
-                onLoad={() => setIsLoaded(true)}
-              />
-            ) : (
-              <>
-                {previews ? (
-                  <VideoPreview
-                    relevantPreview={previews[previews.length - 1]}
-                    startTime={event.start_time}
-                    endTime={event.end_time}
-                    loop
-                    showProgress={false}
-                    setReviewed={() => {}}
-                    setIgnoreClick={() => {}}
-                    isPlayingBack={() => {}}
-                    onTimeUpdate={() => {
-                      if (!isLoaded) {
-                        setIsLoaded(true);
-                      }
-                    }}
-                    windowVisible={windowVisible}
-                  />
-                ) : (
-                  <video
-                    preload="auto"
-                    autoPlay
-                    playsInline
-                    muted
-                    disableRemotePlayback
-                    loop
-                    onTimeUpdate={() => {
-                      if (!isLoaded) {
-                        setIsLoaded(true);
-                      }
-                    }}
-                  >
-                    <source
-                      src={`${baseUrl}api/review/${event.id}/preview?format=mp4`}
-                      type="video/mp4"
+          {previews != undefined && (
+            <div
+              className="size-full cursor-pointer overflow-hidden rounded md:rounded-lg"
+              onClick={onOpenReview}
+            >
+              {!alertVideos ? (
+                <img
+                  className="size-full select-none"
+                  src={`${apiHost}${event.thumb_path.replace("/media/frigate/", "")}`}
+                  loading={isSafari ? "eager" : "lazy"}
+                  onLoad={() => setIsLoaded(true)}
+                />
+              ) : (
+                <>
+                  {previews.length ? (
+                    <VideoPreview
+                      relevantPreview={previews[previews.length - 1]}
+                      startTime={event.start_time}
+                      endTime={event.end_time}
+                      loop
+                      showProgress={false}
+                      setReviewed={() => {}}
+                      setIgnoreClick={() => {}}
+                      isPlayingBack={() => {}}
+                      onTimeUpdate={() => {
+                        if (!isLoaded) {
+                          setIsLoaded(true);
+                        }
+                      }}
+                      windowVisible={windowVisible}
                     />
-                  </video>
-                )}
-              </>
-            )}
-          </div>
+                  ) : (
+                    <video
+                      preload="auto"
+                      autoPlay
+                      playsInline
+                      muted
+                      disableRemotePlayback
+                      loop
+                      onTimeUpdate={() => {
+                        if (!isLoaded) {
+                          setIsLoaded(true);
+                        }
+                      }}
+                    >
+                      <source
+                        src={`${baseUrl}api/review/${event.id}/preview?format=mp4`}
+                        type="video/mp4"
+                      />
+                    </video>
+                  )}
+                </>
+              )}
+            </div>
+          )}
           {isLoaded && (
             <div className="absolute inset-x-0 bottom-0 h-6 rounded bg-gradient-to-t from-slate-900/50 to-transparent">
               <div className="absolute bottom-0 left-1 w-full text-xs text-white">
