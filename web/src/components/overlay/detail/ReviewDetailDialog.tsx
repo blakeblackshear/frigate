@@ -223,16 +223,16 @@ function EventItem({
         onMouseLeave={isDesktop ? () => setHovered(false) : undefined}
         key={event.id}
       >
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-[30%] w-full rounded-lg bg-gradient-to-b from-black/20 to-transparent md:rounded-2xl"></div>
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[10%] w-full rounded-lg bg-gradient-to-t from-black/20 to-transparent md:rounded-2xl"></div>
+        {event.has_snapshot && (
+          <>
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-[30%] w-full rounded-lg bg-gradient-to-b from-black/20 to-transparent md:rounded-2xl"></div>
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[10%] w-full rounded-lg bg-gradient-to-t from-black/20 to-transparent md:rounded-2xl"></div>
+          </>
+        )}
         <img
           ref={imgRef}
           className={cn(
-            "aspect-video select-none rounded-lg object-contain transition-opacity",
-            event.has_snapshot &&
-              event.plus_id == undefined &&
-              config?.plus.enabled &&
-              "cursor-pointer",
+            "select-none rounded-lg object-contain transition-opacity",
           )}
           style={
             isIOS
@@ -251,7 +251,13 @@ function EventItem({
         />
         {hovered && (
           <div>
-            <div className="absolute right-1 top-1 flex items-center gap-2">
+            <div
+              className={cn(
+                "absolute",
+                event.has_snapshot ? "right-1" : "left-1",
+                "top-1 flex items-center gap-2",
+              )}
+            >
               <Tooltip>
                 <TooltipTrigger asChild>
                   <a

@@ -119,9 +119,7 @@ export default function ObjectLifecycle({
       return 0;
     }
 
-    return (
-      (config.cameras[event.camera]?.detect?.annotation_offset || 0) / 1000
-    );
+    return config.cameras[event.camera]?.detect?.annotation_offset || 0;
   }, [config, event]);
 
   const [annotationOffset, setAnnotationOffset] = useState<number>(
