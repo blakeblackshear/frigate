@@ -5,9 +5,11 @@ import itertools
 import logging
 import os
 import threading
+from functools import reduce
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
 
+from peewee import operator
 from playhouse.sqlite_ext import SqliteExtDatabase
 
 from frigate.config import CameraConfig, FrigateConfig, RetainModeEnum
@@ -71,17 +73,26 @@ class RecordingCleanup(threading.Thread):
         ).timestamp()
         expired_reviews: ReviewSegment = (
             ReviewSegment.select(ReviewSegment.id)
+            .where(ReviewSegment.camera == "front_cam")
             .where(
-                ReviewSegment.camera == config.name
-                and (
-                    (
-                        ReviewSegment.severity == "alert"
-                        and ReviewSegment.end_time < alert_expire_date
-                    )
-                    or (
-                        ReviewSegment.severity == "detection"
-                        and ReviewSegment.end_time < detection_expire_date
-                    )
+                reduce(
+                    operator.or_,
+                    [
+                        reduce(
+                            operator.and_,
+                            [
+                                (ReviewSegment.severity == "alert"),
+                                (ReviewSegment.end_time < alert_expire_date),
+                            ],
+                        ),
+                        reduce(
+                            operator.and_,
+                            [
+                                (ReviewSegment.severity == "detection"),
+                                (ReviewSegment.end_time < detection_expire_date),
+                            ],
+                        ),
+                    ],
                 )
             )
             .namedtuples()
@@ -89,7 +100,6 @@ class RecordingCleanup(threading.Thread):
 
         max_deletes = 100000
         deleted_reviews_list = list(map(lambda x: x[0], expired_reviews))
-        logger.info(f"the list is {deleted_reviews_list}")
         for i in range(0, len(deleted_reviews_list), max_deletes):
             ReviewSegment.delete().where(
                 ReviewSegment.id << deleted_reviews_list[i : i + max_deletes]

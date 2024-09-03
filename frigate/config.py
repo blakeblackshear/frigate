@@ -301,13 +301,18 @@ class RecordRetainConfig(FrigateBaseModel):
     mode: RetainModeEnum = Field(default=RetainModeEnum.all, title="Retain mode.")
 
 
+class ReviewRetainConfig(FrigateBaseModel):
+    days: float = Field(default=10, title="Default retention period.")
+    mode: RetainModeEnum = Field(default=RetainModeEnum.motion, title="Retain mode.")
+
+
 class EventsConfig(FrigateBaseModel):
     pre_capture: int = Field(
         default=5, title="Seconds to retain before event starts.", le=MAX_PRE_CAPTURE
     )
     post_capture: int = Field(default=5, title="Seconds to retain after event ends.")
-    retain: RecordRetainConfig = Field(
-        default_factory=RecordRetainConfig, title="Event retention settings."
+    retain: ReviewRetainConfig = Field(
+        default_factory=ReviewRetainConfig, title="Event retention settings."
     )
 
 
