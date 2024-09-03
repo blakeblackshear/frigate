@@ -99,6 +99,10 @@ class PtzMotionEstimator:
                 frame_id, self.camera_config.frame_shape_yuv
             )
 
+            if yuv_frame is None:
+                self.coord_transformations = None
+                return None
+
             frame = cv2.cvtColor(yuv_frame, cv2.COLOR_YUV2GRAY_I420)
 
             # mask out detections for better motion estimation
