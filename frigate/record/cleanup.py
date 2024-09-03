@@ -73,7 +73,7 @@ class RecordingCleanup(threading.Thread):
         ).timestamp()
         expired_reviews: ReviewSegment = (
             ReviewSegment.select(ReviewSegment.id)
-            .where(ReviewSegment.camera == "front_cam")
+            .where(ReviewSegment.camera == config.name)
             .where(
                 reduce(
                     operator.or_,
