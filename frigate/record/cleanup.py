@@ -5,11 +5,9 @@ import itertools
 import logging
 import os
 import threading
-from functools import reduce
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
 
-from peewee import operator
 from playhouse.sqlite_ext import SqliteExtDatabase
 
 from frigate.config import CameraConfig, FrigateConfig, RetainModeEnum
@@ -75,24 +73,15 @@ class RecordingCleanup(threading.Thread):
             ReviewSegment.select(ReviewSegment.id)
             .where(ReviewSegment.camera == config.name)
             .where(
-                reduce(
-                    operator.or_,
-                    [
-                        reduce(
-                            operator.and_,
-                            [
-                                (ReviewSegment.severity == "alert"),
-                                (ReviewSegment.end_time < alert_expire_date),
-                            ],
-                        ),
-                        reduce(
-                            operator.and_,
-                            [
-                                (ReviewSegment.severity == "detection"),
-                                (ReviewSegment.end_time < detection_expire_date),
-                            ],
-                        ),
-                    ],
+                (
+                    ReviewSegment.severity
+                    == "alert" & ReviewSegment.end_time
+                    < alert_expire_date
+                )
+                | (
+                    ReviewSegment.severity
+                    == "detection" & ReviewSegment.end_time
+                    < detection_expire_date
                 )
             )
             .namedtuples()
