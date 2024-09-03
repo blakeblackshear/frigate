@@ -615,13 +615,12 @@ class FrigateApp:
         for camera in self.config.cameras.values():
             if camera.enabled:
                 cam_total_frame_size += round(
-                    (camera.detect.width * camera.detect.height * 1.5 + 270480) / 1048576,
+                    (camera.detect.width * camera.detect.height * 1.5 + 270480)
+                    / 1048576,
                     1,
                 )
 
-        self.shm_frame_count = min(
-            50, int(available_shm / (cam_total_frame_size))
-        )
+        self.shm_frame_count = min(50, int(available_shm / (cam_total_frame_size)))
 
         logger.debug(
             f"Calculated total camera size {available_shm} / {cam_total_frame_size} :: {self.shm_frame_count} frames for each camera in SHM"

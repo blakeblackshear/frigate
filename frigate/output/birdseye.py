@@ -362,9 +362,7 @@ class BirdsEyeFrameManager:
             )
 
             if frame is None:
-                logger.debug(
-                    f"Unable to copy frame {camera}{frame_time} to birdseye."
-                )
+                logger.debug(f"Unable to copy frame {camera}{frame_time} to birdseye.")
                 return
 
             channel_dims = self.cameras[camera]["channel_dims"]
