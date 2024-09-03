@@ -288,9 +288,7 @@ class AudioEventMaintainer(threading.Thread):
 
                 resp = requests.put(
                     f"{FRIGATE_LOCALHOST}/api/events/{detection['id']}/end",
-                    json={
-                        "end_time": detection["last_detection"]
-                    },
+                    json={"end_time": detection["last_detection"]},
                 )
 
                 if resp.status_code == 200:
