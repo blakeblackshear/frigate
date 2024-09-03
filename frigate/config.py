@@ -305,6 +305,7 @@ class ReviewRetainConfig(FrigateBaseModel):
     days: float = Field(default=0, title="Default retention period.")
     mode: RetainModeEnum = Field(default=RetainModeEnum.motion, title="Retain mode.")
 
+
 class EventsConfig(FrigateBaseModel):
     pre_capture: int = Field(
         default=5, title="Seconds to retain before event starts.", le=MAX_PRE_CAPTURE
