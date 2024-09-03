@@ -89,7 +89,6 @@ class RecordingCleanup(threading.Thread):
 
         max_deletes = 100000
         deleted_reviews_list = list(map(lambda x: x[0], expired_reviews))
-        logger.info(f"the list is {deleted_reviews_list}")
         for i in range(0, len(deleted_reviews_list), max_deletes):
             ReviewSegment.delete().where(
                 ReviewSegment.id << deleted_reviews_list[i : i + max_deletes]
