@@ -623,12 +623,8 @@ class FrigateApp:
             50, int(available_shm / (cam_total_frame_size))
         )
 
-        logger.info(
+        logger.debug(
             f"Calculated total camera size {available_shm} / {cam_total_frame_size} :: {self.shm_frame_count} frames for each camera in SHM"
-        )
-
-        logger.info(
-            f"Calculated {self.shm_frame_count} frames for each camera in SHM"
         )
 
         if self.shm_frame_count < 10:

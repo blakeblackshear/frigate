@@ -78,9 +78,11 @@ class EmbeddingMaintainer(threading.Thread):
         try:
             frame_id = f"{camera}{data['frame_time']}"
             yuv_frame = self.frame_manager.get(frame_id, camera_config.frame_shape_yuv)
-            data["thumbnail"] = self._create_thumbnail(yuv_frame, data["box"])
-            self.tracked_events[data["id"]].append(data)
-            self.frame_manager.close(frame_id)
+
+            if yuv_frame is not None:
+                data["thumbnail"] = self._create_thumbnail(yuv_frame, data["box"])
+                self.tracked_events[data["id"]].append(data)
+                self.frame_manager.close(frame_id)
         except FileNotFoundError:
             pass
 
