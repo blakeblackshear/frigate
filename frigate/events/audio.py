@@ -290,7 +290,6 @@ class AudioEventMaintainer(threading.Thread):
                     f"{FRIGATE_LOCALHOST}/api/events/{detection['id']}/end",
                     json={
                         "end_time": detection["last_detection"]
-                        + self.config.record.events.post_capture
                     },
                 )
 
