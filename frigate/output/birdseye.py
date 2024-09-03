@@ -357,16 +357,14 @@ class BirdsEyeFrameManager:
             frame = None
             channel_dims = None
         else:
-            try:
-                frame = self.frame_manager.get(
-                    f"{camera}{frame_time}", self.config.cameras[camera].frame_shape_yuv
-                )
-            except FileNotFoundError:
-                # TODO: better frame management would prevent this edge case
-                logger.warning(
-                    f"Unable to copy frame {camera}{frame_time} to birdseye."
-                )
+            frame = self.frame_manager.get(
+                f"{camera}{frame_time}", self.config.cameras[camera].frame_shape_yuv
+            )
+
+            if frame is None:
+                logger.debug(f"Unable to copy frame {camera}{frame_time} to birdseye.")
                 return
+
             channel_dims = self.cameras[camera]["channel_dims"]
 
         copy_yuv_to_position(

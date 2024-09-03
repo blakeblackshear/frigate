@@ -537,7 +537,7 @@ class FrigateApp:
             capture_process = mp.Process(
                 target=capture_camera,
                 name=f"camera_capture:{name}",
-                args=(name, config, self.camera_metrics[name]),
+                args=(name, config, self.shm_frame_count, self.camera_metrics[name]),
             )
             capture_process.daemon = True
             self.camera_metrics[name]["capture_process"] = capture_process
@@ -601,19 +601,34 @@ class FrigateApp:
         self.frigate_watchdog.start()
 
     def check_shm(self) -> None:
-        available_shm = round(shutil.disk_usage("/dev/shm").total / pow(2, 20), 1)
-        min_req_shm = 30
+        total_shm = round(shutil.disk_usage("/dev/shm").total / pow(2, 20), 1)
 
-        for _, camera in self.config.cameras.items():
-            min_req_shm += round(
-                (camera.detect.width * camera.detect.height * 1.5 * 9 + 270480)
-                / 1048576,
-                1,
-            )
+        # required for log files + nginx cache
+        min_req_shm = 40 + 10
 
-        if available_shm < min_req_shm:
+        if self.config.birdseye.restream:
+            min_req_shm += 8
+
+        available_shm = total_shm - min_req_shm
+        cam_total_frame_size = 0
+
+        for camera in self.config.cameras.values():
+            if camera.enabled:
+                cam_total_frame_size += round(
+                    (camera.detect.width * camera.detect.height * 1.5 + 270480)
+                    / 1048576,
+                    1,
+                )
+
+        self.shm_frame_count = min(50, int(available_shm / (cam_total_frame_size)))
+
+        logger.debug(
+            f"Calculated total camera size {available_shm} / {cam_total_frame_size} :: {self.shm_frame_count} frames for each camera in SHM"
+        )
+
+        if self.shm_frame_count < 10:
             logger.warning(
-                f"The current SHM size of {available_shm}MB is too small, recommend increasing it to at least {min_req_shm}MB."
+                f"The current SHM size of {total_shm}MB is too small, recommend increasing it to at least {round(min_req_shm + cam_total_frame_size)}MB."
             )
 
     def init_auth(self) -> None:
@@ -718,6 +733,7 @@ class FrigateApp:
         self.init_historical_regions()
         self.start_detected_frames_processor()
         self.start_camera_processors()
+        self.check_shm()
         self.start_camera_capture_processes()
         self.start_audio_processors()
         self.start_storage_maintainer()
@@ -729,7 +745,6 @@ class FrigateApp:
         self.start_event_cleanup()
         self.start_record_cleanup()
         self.start_watchdog()
-        self.check_shm()
         self.init_auth()
 
         # Flask only listens for SIGINT, so we need to catch SIGTERM and send SIGINT

@@ -147,7 +147,7 @@ class TrackedObject:
         """get median of scores for object."""
         return median(self.score_history)
 
-    def update(self, current_frame_time, obj_data):
+    def update(self, current_frame_time: float, obj_data, has_valid_frame: bool):
         thumb_update = False
         significant_change = False
         autotracker_update = False
@@ -168,7 +168,7 @@ class TrackedObject:
         self.false_positive = self._is_false_positive()
         self.active = self.is_active()
 
-        if not self.false_positive:
+        if not self.false_positive and has_valid_frame:
             # determine if this frame is a better thumbnail
             if self.thumbnail_data is None or is_better_thumbnail(
                 self.obj_data["label"],
@@ -668,9 +668,13 @@ class CameraState:
     def update(self, frame_time, current_detections, motion_boxes, regions):
         # get the new frame
         frame_id = f"{self.name}{frame_time}"
+
         current_frame = self.frame_manager.get(
             frame_id, self.camera_config.frame_shape_yuv
         )
+
+        if current_frame is None:
+            logger.debug(f"Failed to get frame {frame_id} from SHM")
 
         tracked_objects = self.tracked_objects.copy()
         current_ids = set(current_detections.keys())
@@ -695,14 +699,14 @@ class CameraState:
         for id in updated_ids:
             updated_obj = tracked_objects[id]
             thumb_update, significant_update, autotracker_update = updated_obj.update(
-                frame_time, current_detections[id]
+                frame_time, current_detections[id], current_frame is not None
             )
 
             if autotracker_update or significant_update:
                 for c in self.callbacks["autotrack"]:
                     c(self.name, updated_obj, frame_time)
 
-            if thumb_update:
+            if thumb_update and current_frame is not None:
                 # ensure this frame is stored in the cache
                 if (
                     updated_obj.thumbnail_data["frame_time"] == frame_time
@@ -886,12 +890,16 @@ class CameraState:
 
         with self.current_frame_lock:
             self.tracked_objects = tracked_objects
-            self.current_frame_time = frame_time
             self.motion_boxes = motion_boxes
             self.regions = regions
-            self._current_frame = current_frame
-            if self.previous_frame_id is not None:
-                self.frame_manager.close(self.previous_frame_id)
+
+            if current_frame is not None:
+                self.current_frame_time = frame_time
+                self._current_frame = current_frame
+
+                if self.previous_frame_id is not None:
+                    self.frame_manager.close(self.previous_frame_id)
+
             self.previous_frame_id = frame_id
 
 

@@ -687,31 +687,46 @@ class DictFrameManager(FrameManager):
 
 class SharedMemoryFrameManager(FrameManager):
     def __init__(self):
-        self.shm_store = {}
+        self.shm_store: dict[str, shared_memory.SharedMemory] = {}
 
-    def create(self, name, size) -> AnyStr:
+    def create(self, name: str, size) -> AnyStr:
         shm = shared_memory.SharedMemory(name=name, create=True, size=size)
         self.shm_store[name] = shm
         return shm.buf
 
-    def get(self, name, shape):
+    def get(self, name: str, shape) -> Optional[np.ndarray]:
+        try:
+            if name in self.shm_store:
+                shm = self.shm_store[name]
+            else:
+                shm = shared_memory.SharedMemory(name=name)
+                self.shm_store[name] = shm
+            return np.ndarray(shape, dtype=np.uint8, buffer=shm.buf)
+        except FileNotFoundError:
+            return None
+
+    def close(self, name: str):
         if name in self.shm_store:
-            shm = self.shm_store[name]
+            self.shm_store[name].close()
+            del self.shm_store[name]
+
+    def delete(self, name: str):
+        if name in self.shm_store:
+            self.shm_store[name].close()
+
+            try:
+                self.shm_store[name].unlink()
+            except FileNotFoundError:
+                pass
+
+            del self.shm_store[name]
         else:
-            shm = shared_memory.SharedMemory(name=name)
-            self.shm_store[name] = shm
-        return np.ndarray(shape, dtype=np.uint8, buffer=shm.buf)
-
-    def close(self, name):
-        if name in self.shm_store:
-            self.shm_store[name].close()
-            del self.shm_store[name]
-
-    def delete(self, name):
-        if name in self.shm_store:
-            self.shm_store[name].close()
-            self.shm_store[name].unlink()
-            del self.shm_store[name]
+            try:
+                shm = shared_memory.SharedMemory(name=name)
+                shm.close()
+                shm.unlink()
+            except FileNotFoundError:
+                pass
 
 
 def create_mask(frame_shape, mask):

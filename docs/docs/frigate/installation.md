@@ -73,23 +73,23 @@ Users of the Snapcraft build of Docker cannot use storage locations outside your
 
 Frigate utilizes shared memory to store frames during processing. The default `shm-size` provided by Docker is **64MB**.
 
-The default shm size of **64MB** is fine for setups with **2 cameras** detecting at **720p**. If Frigate is exiting with "Bus error" messages, it is likely because you have too many high resolution cameras and you need to specify a higher shm size, using [`--shm-size`](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources) (or [`service.shm_size`](https://docs.docker.com/compose/compose-file/compose-file-v2/#shm_size) in docker-compose).
+The default shm size of **128MB** is fine for setups with **2 cameras** detecting at **720p**. If Frigate is exiting with "Bus error" messages, it is likely because you have too many high resolution cameras and you need to specify a higher shm size, using [`--shm-size`](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources) (or [`service.shm_size`](https://docs.docker.com/compose/compose-file/compose-file-v2/#shm_size) in docker-compose).
 
-The Frigate container also stores logs in shm, which can take up to **30MB**, so make sure to take this into account in your math as well.
+The Frigate container also stores logs in shm, which can take up to **40MB**, so make sure to take this into account in your math as well.
 
-You can calculate the necessary shm size for each camera with the following formula using the resolution specified for detect:
+You can calculate the **minimum** shm size for each camera with the following formula using the resolution specified for detect:
 
 ```console
 # Replace <width> and <height>
-$ python -c 'print("{:.2f}MB".format((<width> * <height> * 1.5 * 9 + 270480) / 1048576))'
+$ python -c 'print("{:.2f}MB".format((<width> * <height> * 1.5 * 10 + 270480) / 1048576))'
 
 # Example for 1280x720
-$ python -c 'print("{:.2f}MB".format((1280 * 720 * 1.5 * 9 + 270480) / 1048576))'
-12.12MB
+$ python -c 'print("{:.2f}MB".format((1280 * 720 * 1.5 * 10 + 270480) / 1048576))'
+13.44MB
 
 # Example for eight cameras detecting at 1280x720, including logs
-$ python -c 'print("{:.2f}MB".format(((1280 * 720 * 1.5 * 9 + 270480) / 1048576) * 8 + 30))'
-126.99MB
+$ python -c 'print("{:.2f}MB".format(((1280 * 720 * 1.5 * 10 + 270480) / 1048576) * 8 + 40))'
+136.99MB
 ```
 
 The shm size cannot be set per container for Home Assistant add-ons. However, this is probably not required since by default Home Assistant Supervisor allocates `/dev/shm` with half the size of your total memory. If your machine has 8GB of memory, chances are that Frigate will have access to up to 4GB without any additional configuration.
