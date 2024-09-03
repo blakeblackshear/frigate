@@ -74,14 +74,12 @@ class RecordingCleanup(threading.Thread):
             .where(ReviewSegment.camera == config.name)
             .where(
                 (
-                    ReviewSegment.severity
-                    == "alert" & ReviewSegment.end_time
-                    < alert_expire_date
+                    (ReviewSegment.severity == "alert")
+                    & (ReviewSegment.end_time < alert_expire_date)
                 )
                 | (
-                    ReviewSegment.severity
-                    == "detection" & ReviewSegment.end_time
-                    < detection_expire_date
+                    (ReviewSegment.severity == "detection")
+                    & (ReviewSegment.end_time < detection_expire_date)
                 )
             )
             .namedtuples()
