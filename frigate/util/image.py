@@ -765,7 +765,7 @@ def add_mask(mask: str, mask_img: np.ndarray):
 
 
 def get_image_from_recording(
-    file_path: str, relative_frame_time: float, codec: str, height: int
+    file_path: str, relative_frame_time: float, codec: str, height: Optional[int] = None
 ) -> Optional[any]:
     """retrieve a frame from given time in recording file."""
 
@@ -787,7 +787,7 @@ def get_image_from_recording(
         "-",
     ]
 
-    if height:
+    if height is not None:
         ffmpeg_cmd.insert(-3, "-vf")
         ffmpeg_cmd.insert(-3, f"scale=-1:{height}")
 

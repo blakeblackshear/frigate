@@ -275,7 +275,7 @@ def submit_recording_snapshot_to_plus(camera_name: str, frame_time: str):
     try:
         recording: Recordings = recording_query.get()
         time_in_segment = frame_time - recording.start_time
-        image_data = get_image_from_recording(recording.path, time_in_segment, "png", 0)
+        image_data = get_image_from_recording(recording.path, time_in_segment, "png")
 
         if not image_data:
             return make_response(
