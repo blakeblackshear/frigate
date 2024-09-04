@@ -1,8 +1,8 @@
-import { Timeline } from "@/types/timeline";
+import { ObjectLifecycleSequence } from "@/types/timeline";
 import { useState } from "react";
 
 type TimelineEventOverlayProps = {
-  timeline: Timeline;
+  timeline: ObjectLifecycleSequence;
   cameraConfig: {
     detect: {
       width: number;
