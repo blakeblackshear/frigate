@@ -76,7 +76,7 @@ def output_frames(
         preview_write_times[camera] = 0
 
     if config.birdseye.enabled:
-        birdseye = Birdseye(config, frame_manager, stop_event, websocket_server)
+        birdseye = Birdseye(config, stop_event, websocket_server)
 
     websocket_thread.start()
 

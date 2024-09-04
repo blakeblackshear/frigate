@@ -357,8 +357,9 @@ class BirdsEyeFrameManager:
             frame = None
             channel_dims = None
         else:
+            frame_id = f"{camera}{frame_time}"
             frame = self.frame_manager.get(
-                f"{camera}{frame_time}", self.config.cameras[camera].frame_shape_yuv
+                frame_id, self.config.cameras[camera].frame_shape_yuv
             )
 
             if frame is None:
@@ -374,6 +375,8 @@ class BirdsEyeFrameManager:
             frame,
             channel_dims,
         )
+
+        self.frame_manager.close(frame_id)
 
     def camera_active(self, mode, object_box_count, motion_box_count):
         if mode == BirdseyeModeEnum.continuous:
@@ -716,7 +719,6 @@ class Birdseye:
     def __init__(
         self,
         config: FrigateConfig,
-        frame_manager: SharedMemoryFrameManager,
         stop_event: mp.Event,
         websocket_server,
     ) -> None:
@@ -736,6 +738,7 @@ class Birdseye:
         self.broadcaster = BroadcastThread(
             "birdseye", self.converter, websocket_server, stop_event
         )
+        frame_manager = SharedMemoryFrameManager()
         self.birdseye_manager = BirdsEyeFrameManager(config, frame_manager, stop_event)
         self.config_subscriber = ConfigSubscriber("config/birdseye/")
 
