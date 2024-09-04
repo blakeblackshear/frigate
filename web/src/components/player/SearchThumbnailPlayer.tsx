@@ -231,8 +231,7 @@ export default function SearchThumbnailPlayer({
                 .map((text) => capitalizeFirstLetter(text))
                 .sort()
                 .join(", ")
-                .replaceAll("-verified", "")}{" "}
-              {` • Click To View Detection Details`}
+                .replaceAll("-verified", "")}
             </TooltipContent>
           </Tooltip>
         </div>

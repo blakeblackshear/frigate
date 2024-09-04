@@ -42,6 +42,7 @@
     "clsx": "^2.1.1",
     "copy-to-clipboard": "^3.3.3",
     "date-fns": "^3.6.0",
+    "embla-carousel-react": "^8.2.0",
     "hls.js": "^1.5.14",
     "idb-keyval": "^6.2.1",
     "immer": "^10.1.1",

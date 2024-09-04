@@ -1,7 +1,7 @@
 import { Recording } from "@/types/record";
 import { DynamicPlayback } from "@/types/playback";
 import { PreviewController } from "../PreviewPlayer";
-import { TimeRange, Timeline } from "@/types/timeline";
+import { TimeRange, ObjectLifecycleSequence } from "@/types/timeline";
 
 type PlayerMode = "playback" | "scrubbing";
 
@@ -11,7 +11,7 @@ export class DynamicVideoController {
   private playerController: HTMLVideoElement;
   private previewController: PreviewController;
   private setNoRecording: (noRecs: boolean) => void;
-  private setFocusedItem: (timeline: Timeline) => void;
+  private setFocusedItem: (timeline: ObjectLifecycleSequence) => void;
   private playerMode: PlayerMode = "playback";
 
   // playback
@@ -27,7 +27,7 @@ export class DynamicVideoController {
     annotationOffset: number,
     defaultMode: PlayerMode,
     setNoRecording: (noRecs: boolean) => void,
-    setFocusedItem: (timeline: Timeline) => void,
+    setFocusedItem: (timeline: ObjectLifecycleSequence) => void,
   ) {
     this.camera = camera;
     this.playerController = playerController;
@@ -119,7 +119,7 @@ export class DynamicVideoController {
     });
   }
 
-  seekToTimelineItem(timeline: Timeline) {
+  seekToTimelineItem(timeline: ObjectLifecycleSequence) {
     this.playerController.pause();
     this.seekToTimestamp(timeline.timestamp + this.annotationOffset);
     this.setFocusedItem(timeline);

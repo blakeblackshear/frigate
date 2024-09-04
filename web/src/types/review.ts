@@ -60,3 +60,5 @@ export type MotionData = {
 };
 
 export const REVIEW_PADDING = 4;
+
+export type ReviewDetailPaneType = "overview" | "details";

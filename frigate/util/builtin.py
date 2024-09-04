@@ -1,5 +1,6 @@
 """Utilities for builtin types manipulation."""
 
+import ast
 import copy
 import datetime
 import logging
@@ -210,10 +211,16 @@ def update_yaml_from_url(file_path, url):
         if len(new_value_list) > 1:
             update_yaml_file(file_path, key_path, new_value_list)
         else:
-            value = str(new_value_list[0])
-
-            if value.isnumeric():
-                value = int(value)
+            value = new_value_list[0]
+            if "," in value:
+                # Skip conversion if we're a mask or zone string
+                update_yaml_file(file_path, key_path, value)
+            else:
+                try:
+                    value = ast.literal_eval(value)
+                except (ValueError, SyntaxError):
+                    pass
+                update_yaml_file(file_path, key_path, value)
 
             update_yaml_file(file_path, key_path, value)
 
