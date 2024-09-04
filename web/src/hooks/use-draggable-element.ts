@@ -1,4 +1,11 @@
-import { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import scrollIntoView from "scroll-into-view-if-needed";
 import { useTimelineUtils } from "./use-timeline-utils";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -65,6 +72,12 @@ function useDraggableElement({
       timelineDuration: timelineDuration,
       timelineRef,
     });
+
+  // track user interaction and adjust scrolling behavior
+
+  const [userInteracting, setUserInteracting] = useState(false);
+  const interactionTimeout = useRef<NodeJS.Timeout>();
+  const isProgrammaticScroll = useRef(false);
 
   const draggingAtTopEdge = useMemo(() => {
     if (clientYPosition && timelineRef.current && scrollEdgeSize) {
@@ -179,7 +192,7 @@ function useDraggableElement({
               minute: "2-digit",
               ...(segmentDuration < 60 && !dense && { second: "2-digit" }),
             });
-            if (scrollTimeline) {
+            if (scrollTimeline && !userInteracting) {
               scrollIntoView(thumb, {
                 block: "center",
                 behavior: "smooth",
@@ -202,6 +215,7 @@ function useDraggableElement({
       setDraggableElementPosition,
       dense,
       config,
+      userInteracting,
     ],
   );
 
@@ -509,6 +523,38 @@ function useDraggableElement({
       );
     }
   }, [timelineRef, segmentsRef, segments]);
+
+  useEffect(() => {
+    const handleUserInteraction = () => {
+      if (!isProgrammaticScroll.current) {
+        setUserInteracting(true);
+
+        if (interactionTimeout.current) {
+          clearTimeout(interactionTimeout.current);
+        }
+
+        interactionTimeout.current = setTimeout(() => {
+          setUserInteracting(false);
+        }, 3000);
+      } else {
+        isProgrammaticScroll.current = false;
+      }
+    };
+
+    const timelineElement = timelineRef.current;
+
+    if (timelineElement) {
+      timelineElement.addEventListener("scroll", handleUserInteraction);
+      timelineElement.addEventListener("mousedown", handleUserInteraction);
+      timelineElement.addEventListener("mouseup", handleUserInteraction);
+
+      return () => {
+        timelineElement.removeEventListener("scroll", handleUserInteraction);
+        timelineElement.removeEventListener("mousedown", handleUserInteraction);
+        timelineElement.removeEventListener("mouseup", handleUserInteraction);
+      };
+    }
+  }, [timelineRef]);
 
   return { handleMouseDown, handleMouseUp, handleMouseMove };
 }

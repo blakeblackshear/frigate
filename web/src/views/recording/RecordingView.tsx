@@ -702,7 +702,6 @@ function Timeline({
             setExportEndTime={setExportEndTime}
             handlebarTime={currentTime}
             setHandlebarTime={setCurrentTime}
-            onlyInitialHandlebarScroll={true}
             events={mainCameraReviewItems}
             motion_events={motionData ?? []}
             severityType="significant_motion"
