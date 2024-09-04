@@ -179,12 +179,18 @@ def latest_frame(camera_name):
         )
 
 
-@MediaBp.route("/<camera_name>/recordings/<frame_time>/snapshot.png")
-def get_snapshot_from_recording(camera_name: str, frame_time: str):
+@MediaBp.route("/<camera_name>/recordings/<frame_time>/snapshot.<format>")
+def get_snapshot_from_recording(camera_name: str, frame_time: str, format: str):
     if camera_name not in current_app.frigate_config.cameras:
         return make_response(
             jsonify({"success": False, "message": "Camera not found"}),
             404,
+        )
+
+    if format not in ["png", "jpg"]:
+        return make_response(
+            jsonify({"success": False, "message": "Invalid format"}),
+            400,
         )
 
     frame_time = float(frame_time)
@@ -207,7 +213,41 @@ def get_snapshot_from_recording(camera_name: str, frame_time: str):
     try:
         recording: Recordings = recording_query.get()
         time_in_segment = frame_time - recording.start_time
-        image_data = get_image_from_recording(recording.path, time_in_segment)
+
+        height = request.args.get("height", type=int)
+        codec = "png" if format == "png" else "mjpeg"
+
+        ffmpeg_cmd = [
+            "ffmpeg",
+            "-hide_banner",
+            "-loglevel",
+            "warning",
+            "-ss",
+            f"00:00:{time_in_segment}",
+            "-i",
+            recording.path,
+            "-frames:v",
+            "1",
+            "-c:v",
+            codec,
+            "-f",
+            "image2pipe",
+            "-",
+        ]
+
+        if height:
+            ffmpeg_cmd.insert(-3, "-vf")
+            ffmpeg_cmd.insert(-3, f"scale=-1:{height}")
+
+        process = sp.run(
+            ffmpeg_cmd,
+            capture_output=True,
+        )
+
+        if process.returncode == 0:
+            image_data = process.stdout
+        else:
+            image_data = None
 
         if not image_data:
             return make_response(
@@ -221,7 +261,7 @@ def get_snapshot_from_recording(camera_name: str, frame_time: str):
             )
 
         response = make_response(image_data)
-        response.headers["Content-Type"] = "image/png"
+        response.headers["Content-Type"] = f"image/{format}"
         return response
     except DoesNotExist:
         return make_response(

@@ -159,15 +159,21 @@ export default function ObjectLifecycle({
 
   // image
 
-  const [src, setSrc] = useState("");
+  const [src, setSrc] = useState(
+    `${apiHost}api/${event.camera}/recordings/${event.start_time + annotationOffset / 1000}/snapshot.jpg?height=500`,
+  );
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
-    const newSrc = `${apiHost}api/${event.camera}/recordings/${timeIndex + annotationOffset / 1000}/snapshot.png`;
-    setSrc(newSrc);
+    if (timeIndex) {
+      const newSrc = `${apiHost}api/${event.camera}/recordings/${timeIndex + annotationOffset / 1000}/snapshot.jpg?height=500`;
+      setSrc(newSrc);
+    }
     setImgLoaded(false);
     setHasError(false);
-  }, [timeIndex, annotationOffset, apiHost, event.camera]);
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeIndex, annotationOffset]);
 
   // carousels
 
@@ -310,10 +316,8 @@ export default function ObjectLifecycle({
         </div>
       </div>
 
-      <div className="flex flex-row items-center justify-between">
-        <Heading as="h4" className="mt-3">
-          Object Lifecycle
-        </Heading>
+      <div className="mt-3 flex flex-row items-center justify-between">
+        <Heading as="h4">Object Lifecycle</Heading>
 
         <div className="flex flex-row gap-2">
           <Tooltip>
@@ -464,7 +468,7 @@ export default function ObjectLifecycle({
           opts={{
             align: "center",
           }}
-          className="w-full max-w-[75%] md:max-w-[85%]"
+          className="w-full max-w-[72%] md:max-w-[85%]"
           setApi={setThumbnailApi}
         >
           <CarouselContent className="flex flex-row justify-center">

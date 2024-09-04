@@ -114,7 +114,10 @@ export default function ZoneEditPane({
         {
           message: "Zone name must not contain a period.",
         },
-      ),
+      )
+      .refine((value: string) => /^[a-zA-Z0-9_-]+$/.test(value), {
+        message: "Zone name has an illegal character.",
+      }),
     inertia: z.coerce
       .number()
       .min(1, {

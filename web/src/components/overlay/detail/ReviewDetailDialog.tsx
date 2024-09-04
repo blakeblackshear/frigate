@@ -99,7 +99,7 @@ export default function ReviewDetailDialog({
               ? pane == "overview"
                 ? "sm:max-w-xl"
                 : "pt-2 sm:max-w-4xl"
-              : "max-h-[75dvh] overflow-hidden p-2 pb-4",
+              : "max-h-[80dvh] overflow-hidden p-2 pb-4",
           )}
         >
           {pane == "overview" && (
@@ -178,7 +178,7 @@ export default function ReviewDetailDialog({
           )}
 
           {pane == "details" && selectedEvent && (
-            <div className="scrollbar-container overflow-x-none mt-0 flex size-full flex-col gap-2 overflow-y-auto">
+            <div className="scrollbar-container overflow-x-none mt-0 flex size-full flex-col gap-2 overflow-y-auto overflow-x-hidden">
               <ObjectLifecycle
                 review={review}
                 event={selectedEvent}
@@ -218,7 +218,10 @@ function EventItem({
   return (
     <>
       <div
-        className="relative"
+        className={cn(
+          "relative",
+          !event.has_snapshot && "flex flex-row items-center justify-center",
+        )}
         onMouseEnter={isDesktop ? () => setHovered(true) : undefined}
         onMouseLeave={isDesktop ? () => setHovered(false) : undefined}
         key={event.id}
@@ -252,11 +255,7 @@ function EventItem({
         {hovered && (
           <div>
             <div
-              className={cn(
-                "absolute",
-                event.has_snapshot ? "right-1" : "left-1",
-                "top-1 flex items-center gap-2",
-              )}
+              className={cn("absolute right-1 top-1 flex items-center gap-2")}
             >
               <Tooltip>
                 <TooltipTrigger asChild>
