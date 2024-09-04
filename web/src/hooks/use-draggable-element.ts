@@ -547,11 +547,20 @@ function useDraggableElement({
       timelineElement.addEventListener("scroll", handleUserInteraction);
       timelineElement.addEventListener("mousedown", handleUserInteraction);
       timelineElement.addEventListener("mouseup", handleUserInteraction);
+      timelineElement.addEventListener("touchstart", handleUserInteraction);
+      timelineElement.addEventListener("touchmove", handleUserInteraction);
+      timelineElement.addEventListener("touchend", handleUserInteraction);
 
       return () => {
         timelineElement.removeEventListener("scroll", handleUserInteraction);
         timelineElement.removeEventListener("mousedown", handleUserInteraction);
         timelineElement.removeEventListener("mouseup", handleUserInteraction);
+        timelineElement.removeEventListener(
+          "touchstart",
+          handleUserInteraction,
+        );
+        timelineElement.removeEventListener("touchmove", handleUserInteraction);
+        timelineElement.removeEventListener("touchend", handleUserInteraction);
       };
     }
   }, [timelineRef]);
