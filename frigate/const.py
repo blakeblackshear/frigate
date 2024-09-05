@@ -47,6 +47,7 @@ MAX_WAL_SIZE = 10  # MB
 
 FFMPEG_HWACCEL_NVIDIA = "preset-nvidia"
 FFMPEG_HWACCEL_VAAPI = "preset-vaapi"
+FFMPEG_HWACCEL_VULKAN = "preset-vulkan"
 
 # Regex Consts
 
