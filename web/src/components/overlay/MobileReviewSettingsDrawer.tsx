@@ -13,7 +13,7 @@ import { GeneralFilterContent } from "../filter/ReviewFilterGroup";
 import { toast } from "sonner";
 import axios from "axios";
 import SaveExportOverlay from "./SaveExportOverlay";
-import { isMobile } from "react-device-detect";
+import { isIOS, isMobile } from "react-device-detect";
 
 type DrawerMode = "none" | "select" | "export" | "calendar" | "filter";
 
@@ -281,6 +281,7 @@ export default function MobileReviewSettingsDrawer({
         onCancel={() => setMode("none")}
       />
       <Drawer
+        modal={!(isIOS && drawerMode == "export")}
         open={drawerMode != "none"}
         onOpenChange={(open) => {
           if (!open) {
