@@ -70,3 +70,17 @@ export type Vainfo = {
   stdout: string;
   stderr: string;
 };
+
+export type Ffprobe = {
+  return_code: number;
+  stderr: string;
+  stdout: {
+    programs: string[];
+    streams: {
+      avg_frame_rate: string;
+      codec_long_name: string;
+      height?: number;
+      width?: number;
+    }[];
+  };
+};

@@ -1,9 +1,16 @@
 import { useFrigateStats } from "@/api/ws";
 import { CameraLineGraph } from "@/components/graph/CameraGraph";
+import CameraInfoDialog from "@/components/overlay/CameraInfoDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { FrigateStats } from "@/types/stats";
 import { useEffect, useMemo, useState } from "react";
+import { MdInfo } from "react-icons/md";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import useSWR from "swr";
 
 type CameraMetricsProps = {
@@ -15,6 +22,11 @@ export default function CameraMetrics({
   setLastUpdated,
 }: CameraMetricsProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
+
+  // camera info dialog
+
+  const [showCameraInfoDialog, setShowCameraInfoDialog] = useState(false);
+  const [probeCameraName, setProbeCameraName] = useState<string>();
 
   // stats
 
@@ -203,6 +215,12 @@ export default function CameraMetrics({
     return series;
   }, [statsHistory]);
 
+  useEffect(() => {
+    if (!showCameraInfoDialog) {
+      setProbeCameraName("");
+    }
+  }, [showCameraInfoDialog]);
+
   return (
     <div className="scrollbar-container mt-4 flex size-full flex-col gap-3 overflow-y-auto">
       <div className="text-sm font-medium text-muted-foreground">Overview</div>
@@ -227,45 +245,72 @@ export default function CameraMetrics({
           Object.values(config.cameras).map((camera) => {
             if (camera.enabled) {
               return (
-                <div className="flex w-full flex-col gap-3">
-                  <div className="text-sm font-medium capitalize text-muted-foreground">
-                    {camera.name.replaceAll("_", " ")}
-                  </div>
-                  <div key={camera.name} className="grid gap-2 sm:grid-cols-2">
-                    {Object.keys(cameraCpuSeries).includes(camera.name) ? (
-                      <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-                        <div className="mb-5">CPU</div>
-                        <CameraLineGraph
-                          graphId={`${camera.name}-cpu`}
-                          unit="%"
-                          dataLabels={["ffmpeg", "capture", "detect"]}
-                          updateTimes={updateTimes}
-                          data={Object.values(
-                            cameraCpuSeries[camera.name] || {},
-                          )}
-                        />
+                <>
+                  {probeCameraName == camera.name && (
+                    <CameraInfoDialog
+                      key={camera.name}
+                      camera={camera}
+                      showCameraInfoDialog={showCameraInfoDialog}
+                      setShowCameraInfoDialog={setShowCameraInfoDialog}
+                    />
+                  )}
+                  <div className="flex w-full flex-col gap-3">
+                    <div className="flex flex-row items-center justify-between">
+                      <div className="text-sm font-medium capitalize text-muted-foreground">
+                        {camera.name.replaceAll("_", " ")}
                       </div>
-                    ) : (
-                      <Skeleton className="aspect-video size-full" />
-                    )}
-                    {Object.keys(cameraFpsSeries).includes(camera.name) ? (
-                      <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-                        <div className="mb-5">Frames / Detections</div>
-                        <CameraLineGraph
-                          graphId={`${camera.name}-dps`}
-                          unit=""
-                          dataLabels={["camera", "detect", "skipped"]}
-                          updateTimes={updateTimes}
-                          data={Object.values(
-                            cameraFpsSeries[camera.name] || {},
-                          )}
-                        />
-                      </div>
-                    ) : (
-                      <Skeleton className="aspect-video size-full" />
-                    )}
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <MdInfo
+                            className="size-5 cursor-pointer text-muted-foreground"
+                            onClick={() => {
+                              setShowCameraInfoDialog(true);
+                              setProbeCameraName(camera.name);
+                            }}
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent>Camera Probe Info</TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <div
+                      key={camera.name}
+                      className="grid gap-2 sm:grid-cols-2"
+                    >
+                      {Object.keys(cameraCpuSeries).includes(camera.name) ? (
+                        <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
+                          <div className="mb-5">CPU</div>
+                          <CameraLineGraph
+                            graphId={`${camera.name}-cpu`}
+                            unit="%"
+                            dataLabels={["ffmpeg", "capture", "detect"]}
+                            updateTimes={updateTimes}
+                            data={Object.values(
+                              cameraCpuSeries[camera.name] || {},
+                            )}
+                          />
+                        </div>
+                      ) : (
+                        <Skeleton className="aspect-video size-full" />
+                      )}
+                      {Object.keys(cameraFpsSeries).includes(camera.name) ? (
+                        <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
+                          <div className="mb-5">Frames / Detections</div>
+                          <CameraLineGraph
+                            graphId={`${camera.name}-dps`}
+                            unit=""
+                            dataLabels={["camera", "detect", "skipped"]}
+                            updateTimes={updateTimes}
+                            data={Object.values(
+                              cameraFpsSeries[camera.name] || {},
+                            )}
+                          />
+                        </div>
+                      ) : (
+                        <Skeleton className="aspect-video size-full" />
+                      )}
+                    </div>
                   </div>
-                </div>
+                </>
               );
             }
 
