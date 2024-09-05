@@ -1,6 +1,7 @@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -74,6 +75,9 @@ export default function CameraInfoDialog({
               {camera.name.replaceAll("_", " ")} Camera Probe Info
             </DialogTitle>
           </DialogHeader>
+          <DialogDescription>
+            Stream data is obtained with <code>ffprobe</code>.
+          </DialogDescription>
 
           <div className="mb-2 p-4">
             {ffprobeInfo ? (
