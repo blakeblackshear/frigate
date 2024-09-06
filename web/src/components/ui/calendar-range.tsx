@@ -1,7 +1,4 @@
-/* eslint-disable max-lines */
-"use client";
-
-import { type FC, useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "./button";
 import { Calendar } from "./calendar";
 import { Label } from "./label";
@@ -19,6 +16,7 @@ import { LuCheck } from "react-icons/lu";
 export interface DateRangePickerProps {
   /** Click handler for applying the updates from DateRangePicker. */
   onUpdate?: (values: { range: DateRange; rangeCompare?: DateRange }) => void;
+  onReset?: () => void;
   /** Initial value for start date */
   initialDateFrom?: Date | string;
   /** Initial value for end date */
@@ -73,14 +71,15 @@ const PRESETS: Preset[] = [
 ];
 
 /** The DateRangePicker component allows a user to select a range of dates */
-export const DateRangePicker: FC<DateRangePickerProps> = ({
+export function DateRangePicker({
   initialDateFrom = new Date(new Date().setHours(0, 0, 0, 0)),
   initialDateTo,
   initialCompareFrom,
   initialCompareTo,
   onUpdate,
+  onReset,
   showCompare = true,
-}): JSX.Element => {
+}: DateRangePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const [range, setRange] = useState<DateRange>({
@@ -283,7 +282,7 @@ export const DateRangePicker: FC<DateRangePickerProps> = ({
     isSelected: boolean;
   }): JSX.Element => (
     <Button
-      className={cn(isSelected && "pointer-events-none text-white")}
+      className={cn(isSelected && "pointer-events-none text-primary")}
       variant="ghost"
       onClick={() => {
         setPreset(preset);
@@ -415,17 +414,19 @@ export const DateRangePicker: FC<DateRangePickerProps> = ({
           </div>
         )}
       </div>
-      <div className="flex justify-end gap-2 py-2 pr-4">
+      <div className="flex justify-center gap-2 py-2 pr-4">
         <Button
           onClick={() => {
             setIsOpen(false);
             resetValues();
+            onReset?.();
           }}
           variant="ghost"
         >
-          Cancel
+          Reset
         </Button>
         <Button
+          variant="select"
           onClick={() => {
             setIsOpen(false);
             if (
@@ -436,9 +437,9 @@ export const DateRangePicker: FC<DateRangePickerProps> = ({
             }
           }}
         >
-          Update
+          Apply
         </Button>
       </div>
     </div>
   );
-};
+}

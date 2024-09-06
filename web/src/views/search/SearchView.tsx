@@ -8,7 +8,13 @@ import { cn } from "@/lib/utils";
 import { Preview } from "@/types/preview";
 import { SearchFilter, SearchResult } from "@/types/search";
 import { useCallback, useState } from "react";
-import { LuSearchCheck, LuSearchX } from "react-icons/lu";
+import {
+  LuExternalLink,
+  LuSearchCheck,
+  LuSearchX,
+  LuXCircle,
+} from "react-icons/lu";
+import { Link } from "react-router-dom";
 
 type SearchViewProps = {
   search: string;
@@ -63,12 +69,20 @@ export default function SearchView({
       />
 
       <div className="relative mb-2 flex h-11 items-center justify-between pl-2 pr-2 md:pl-3">
-        <Input
-          className={"text-md mr-2 w-full bg-muted md:mr-0 md:w-1/3"}
-          placeholder="Search for a specific detection..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+        <div className="relative w-full md:w-1/3">
+          <Input
+            className="text-md w-full bg-muted pr-10"
+            placeholder="Search for a specific detected object..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          {search && (
+            <LuXCircle
+              className="absolute right-2 top-1/2 h-5 w-5 -translate-y-1/2 cursor-pointer text-muted-foreground hover:text-primary"
+              onClick={() => setSearch("")}
+            />
+          )}
+        </div>
 
         <SearchFilterGroup
           filter={searchFilter}
@@ -80,14 +94,28 @@ export default function SearchView({
         {searchTerm.length == 0 && (
           <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
             <LuSearchCheck className="size-16" />
-            Search For Detections
+            Search
+            <div className="mt-2 max-w-64 text-sm text-secondary-foreground">
+              Frigate can find detected objects in your review items.
+            </div>
+            <div className="mt-2 flex items-center text-center text-sm text-primary">
+              <Link
+                to="https://docs.frigate.video/configuration/semantic_search"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline"
+              >
+                Read the Documentation{" "}
+                <LuExternalLink className="ml-2 inline-flex size-3" />
+              </Link>
+            </div>
           </div>
         )}
 
         {searchTerm.length > 0 && searchResults?.length == 0 && (
           <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
             <LuSearchX className="size-16" />
-            No Detections Found
+            No Detected Objects Found
           </div>
         )}
 
