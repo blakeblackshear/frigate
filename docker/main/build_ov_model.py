@@ -3,8 +3,10 @@ from openvino.tools import mo
 from pathlib import Path
 from site import getsitepackages
 
+
 def transformations_config_location(path: Path):
     return path / 'openvino' / 'tools' / 'mo' / 'front' / 'tf' / 'ssd_v2_support.json'
+
 
 configs = [transformations_config_location(Path(path)) for path in getsitepackages()]
 assert len(configs) > 0, 'Expected at least one transformations config to exist but none existed.'

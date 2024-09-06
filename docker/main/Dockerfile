@@ -286,7 +286,7 @@ RUN set -eux; \
     DEBIAN_FRONTEND=noninteractive; \
     export DEBIAN_FRONTEND; \
     apt -y update; \
-    apt -y install nodejs make; \
+    apt -y install nodejs npm make; \
     rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*; \
     npm install -g npm@10
 
