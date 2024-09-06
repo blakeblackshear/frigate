@@ -294,6 +294,14 @@ cameras:
 
 If you don't have separate streams for detect and record, you would just add the record role to the list on the first input.
 
+:::note
+
+If you only define one stream in your `inputs` and do not assign a `detect` role to it, Frigate will automatically assign it the `detect` role. Frigate will always decode a stream to support motion detection, Birdseye, the API image endpoints, and other features, even if you have disabled object detection with `enabled: False` in your config's `detect` section.
+
+If you only plan to use Frigate for recording, it is still recommended to define a `detect` role for a low resolution stream to minimize resource usage from the required stream decoding.
+
+:::
+
 By default, Frigate will retain video of all events for 10 days. The full set of options for recording can be found [here](../configuration/reference.md).
 
 ### Step 7: Complete config
@@ -309,4 +317,3 @@ Now that you have a working install, you can use the following documentation for
 3. [Review](../configuration/review.md)
 4. [Masks](../configuration/masks.md)
 5. [Home Assistant Integration](../integrations/home-assistant.md) - Integrate with Home Assistant
-

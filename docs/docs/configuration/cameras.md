@@ -46,6 +46,14 @@ cameras:
   side: ...
 ```
 
+:::note
+
+If you only define one stream in your `inputs` and do not assign a `detect` role to it, Frigate will automatically assign it the `detect` role. Frigate will always decode a stream to support motion detection, Birdseye, the API image endpoints, and other features, even if you have disabled object detection with `enabled: False` in your config's `detect` section.
+
+If you plan to use Frigate for recording only, it is still recommended to define a `detect` role for a low resolution stream to minimize resource usage from the required stream decoding.
+
+:::
+
 For camera model specific settings check the [camera specific](camera_specific.md) infos.
 
 ## Setting up camera PTZ controls
