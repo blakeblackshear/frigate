@@ -8,15 +8,22 @@ SECURE_TOKEN_MODULE_VERSION="1.5"
 SET_MISC_MODULE_VERSION="v0.33"
 NGX_DEVEL_KIT_VERSION="v0.3.3"
 
-cp /etc/apt/sources.list /etc/apt/sources.list.d/sources-src.list
-sed -i 's|deb http|deb-src http|g' /etc/apt/sources.list.d/sources-src.list
-apt-get update
+DEBIAN_FRONTEND=noninteractive
+export DEBIAN_FRONTEND
 
-apt-get -yqq build-dep nginx
-
-apt-get -yqq install --no-install-recommends ca-certificates wget
+cat <<EOF > /etc/apt/sources.list.d/debian-src.list
+deb-src http://cdn-aws.deb.debian.org/debian testing main contrib non-free non-free-firmware
+EOF
+apt -y update
+apt -y install --no-install-recommends ca-certificates wget
+cat <<EOF > /etc/apt/sources.list.d/debian-src.list
+deb-src https://cdn-aws.deb.debian.org/debian testing main contrib non-free non-free-firmware
+EOF
 update-ca-certificates -f
-apt install -y ccache
+
+apt -y update
+apt -yqq build-dep nginx
+apt -y install ccache
 
 export PATH="/usr/lib/ccache:$PATH"
 
