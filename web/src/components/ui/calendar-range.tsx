@@ -1,7 +1,4 @@
-/* eslint-disable max-lines */
-"use client";
-
-import { type FC, useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "./button";
 import { Calendar } from "./calendar";
 import { Label } from "./label";
