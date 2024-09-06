@@ -12,6 +12,7 @@ import { isMobile } from "react-device-detect";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { DateRangePicker } from "../ui/calendar-range";
 import { DateRange } from "react-day-picker";
+import { useState } from "react";
 
 type CalendarFilterButtonProps = {
   reviewSummary?: ReviewSummary;
@@ -91,6 +92,8 @@ export function CalendarRangeFilterButton({
   defaultText,
   updateSelectedRange,
 }: CalendarRangeFilterButtonProps) {
+  const [open, setOpen] = useState(false);
+
   const selectedDate = useFormattedRange(
     range?.from == undefined ? 0 : range.from.getTime() / 1000 + 1,
     range?.to == undefined ? 0 : range.to.getTime() / 1000 - 1,
@@ -119,24 +122,18 @@ export function CalendarRangeFilterButton({
         initialDateFrom={range?.from}
         initialDateTo={range?.to}
         showCompare={false}
-        onUpdate={(range) => updateSelectedRange(range.range)}
+        onUpdate={(range) => {
+          updateSelectedRange(range.range);
+          setOpen(false);
+        }}
+        onReset={() => updateSelectedRange(undefined)}
       />
-      <DropdownMenuSeparator />
-      <div className="flex items-center justify-center p-2">
-        <Button
-          onClick={() => {
-            updateSelectedRange(undefined);
-          }}
-        >
-          Reset
-        </Button>
-      </div>
     </>
   );
 
   if (isMobile) {
     return (
-      <Drawer>
+      <Drawer open={open} onOpenChange={setOpen}>
         <DrawerTrigger asChild>{trigger}</DrawerTrigger>
         <DrawerContent>{content}</DrawerContent>
       </Drawer>
@@ -144,9 +141,9 @@ export function CalendarRangeFilterButton({
   }
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-      <PopoverContent className="w-[840px]">{content}</PopoverContent>
+      <PopoverContent className="w-auto">{content}</PopoverContent>
     </Popover>
   );
 }
