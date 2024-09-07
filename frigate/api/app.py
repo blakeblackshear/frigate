@@ -10,7 +10,7 @@ from functools import reduce
 from typing import Optional
 
 import requests
-from fastapi import APIRouter, Path
+from fastapi import APIRouter, Path, Request, Response
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from flask import Blueprint, Flask, current_app, jsonify, make_response, request
@@ -109,15 +109,15 @@ def create_app(
     return app
 
 
-@bp.route("/")
+@router.get("/", tags=[Tags.app])
 def is_healthy():
     return "Frigate is running. Alive and healthy!"
 
 
-@bp.route("/config/schema.json")
-def config_schema():
-    return current_app.response_class(
-        current_app.frigate_config.schema_json(), mimetype="application/json"
+@router.get("/config/schema.json", tags=[Tags.app])
+def config_schema(request: Request):
+    return Response(
+        content=request.app.frigate_config.schema_json(), media_type="application/json"
     )
 
 
