@@ -76,8 +76,8 @@ def preview_hour(year_month: str, day: int, hour: int, camera_name: str, tz_name
     """Get all mp4 previews relevant for time period given the timezone"""
     parts = year_month.split("-")
     start_date = (
-            datetime(int(parts[0]), int(parts[1]), int(day), int(hour), tzinfo=timezone.utc)
-            - datetime.now(pytz.timezone(tz_name.replace(",", "/"))).utcoffset()
+        datetime(int(parts[0]), int(parts[1]), int(day), int(hour), tzinfo=timezone.utc)
+        - datetime.now(pytz.timezone(tz_name.replace(",", "/"))).utcoffset()
     )
     end_date = start_date + timedelta(hours=1) - timedelta(milliseconds=1)
     start_ts = start_date.timestamp()
