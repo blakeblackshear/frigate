@@ -25,7 +25,6 @@ from frigate.api.event import EventBp
 from frigate.api.export import ExportBp
 from frigate.api.media import MediaBp
 from frigate.api.notification import NotificationBp
-from frigate.api.preview import PreviewBp
 from frigate.api.review import ReviewBp
 from frigate.config import FrigateConfig
 from frigate.const import CONFIG_DIR
@@ -51,7 +50,6 @@ bp = Blueprint("frigate", __name__)
 bp.register_blueprint(EventBp)
 bp.register_blueprint(ExportBp)
 bp.register_blueprint(MediaBp)
-bp.register_blueprint(PreviewBp)
 bp.register_blueprint(ReviewBp)
 bp.register_blueprint(AuthBp)
 bp.register_blueprint(NotificationBp)

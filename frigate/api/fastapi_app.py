@@ -4,6 +4,7 @@ from fastapi import FastAPI
 
 from frigate.api import app as main_app
 from frigate.api.defs.tags import Tags
+from frigate.api import preview
 from frigate.plus import PlusApi
 from frigate.ptz.onvif import OnvifController
 from frigate.stats.emitter import StatsEmitter
@@ -41,6 +42,7 @@ def create_fastapi_app(
     app = FastAPI(debug=False, tags_metadata=tags_metadata)
     # Routes
     app.include_router(main_app.router)
+    app.include_router(preview.router)
     # App Properties
     app.frigate_config = frigate_config
     app.detected_frames_processor = detected_frames_processor
