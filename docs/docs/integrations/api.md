@@ -463,6 +463,10 @@ Reviews from the database. Accepts the following query string parameters:
 
 Get review with `id` from the database.
 
+###  `GET /api/review/<id>/preview
+
+Get clip for preview. Use format (mp4 or gif) to specify clip format. 
+
 ### `GET /api/review/summary`
 
 Summary of reviews for the last 30 days. Accepts the following query string parameters:
