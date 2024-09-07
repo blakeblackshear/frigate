@@ -381,6 +381,14 @@ List of frames in the preview cache for the time range. Previews are only kept i
 
 Specific preview frame from preview cache.
 
+### `GET /review/<review_id>/preview`
+
+Looping image made from preview video / frames during this review item.
+
+| param     | Type | Description                      |
+| --------- | ---- | -------------------------------- |
+| `format`  | str  | Format of preview [`gif`, `mp4`] |
+
 ### `GET /<camera>/start/<start-timestamp>/end/<end-timestamp>/preview`
 
 Looping image made from preview video / frames during this time range.
