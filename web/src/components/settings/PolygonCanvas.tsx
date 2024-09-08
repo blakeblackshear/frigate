@@ -42,7 +42,7 @@ export function PolygonCanvas({
       const element = new window.Image();
       element.width = width;
       element.height = height;
-      element.src = `${apiHost}api/${camera}/latest.webp?cache=${Date.now()}`;
+      element.src = `${apiHost}api/media/camera/${camera}/frame/latest?extension=webp&?cache=${Date.now()}`;
       return element;
     }
     // we know that these deps are correct

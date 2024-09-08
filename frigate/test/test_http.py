@@ -5,12 +5,14 @@ import os
 import unittest
 from unittest.mock import Mock
 
+from fastapi.testclient import TestClient
 from peewee_migrate import Router
 from playhouse.shortcuts import model_to_dict
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.api.app import create_app
+from frigate.api.fastapi_app import create_fastapi_app
 from frigate.config import FrigateConfig
 from frigate.models import Event, Recordings
 from frigate.plus import PlusApi
@@ -362,24 +364,23 @@ class TestHttp(unittest.TestCase):
             assert config["cameras"]["front_door"]
 
     def test_recordings(self):
-        app = create_app(
+        app_fastapi = create_fastapi_app(
             FrigateConfig(**self.minimal_config).runtime_config(),
-            self.db,
-            None,
-            None,
             None,
             None,
             None,
             PlusApi(),
             None,
         )
+        client = TestClient(app_fastapi)
         id = "123456.random"
 
-        with app.test_client() as client:
-            _insert_mock_recording(id)
-            recording = client.get("/front_door/recordings").json
-            assert recording
-            assert recording[0]["id"] == id
+        _insert_mock_recording(id)
+        response = client.get("/media/camera/front_door/recordings")
+        assert response.status_code == 200
+        recording = response.json()
+        assert recording
+        assert recording[0]["id"] == id
 
     def test_stats(self):
         stats = Mock(spec=StatsEmitter)

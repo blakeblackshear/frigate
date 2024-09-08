@@ -433,7 +433,7 @@ export function InProgressPreview({
     <div className="relative flex size-full items-center bg-black">
       <img
         className="pointer-events-none size-full object-contain"
-        src={`${apiHost}api/preview/${previewFrames[key]}/thumbnail.webp`}
+        src={`${apiHost}api/media/preview/${previewFrames[key]}/thumbnail.webp`}
         onLoad={handleLoad}
       />
       {showProgress && (

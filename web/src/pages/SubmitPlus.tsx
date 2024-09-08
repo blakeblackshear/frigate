@@ -259,7 +259,7 @@ export default function SubmitPlus() {
                     </div>
                     <img
                       className="aspect-video h-full rounded-lg object-contain md:rounded-2xl"
-                      src={`${baseUrl}api/events/${event.id}/snapshot.jpg`}
+                      src={`${baseUrl}api/media/events/${event.id}/snapshot.jpg`}
                       loading="lazy"
                     />
                   </div>

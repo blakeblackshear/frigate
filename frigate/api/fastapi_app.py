@@ -3,7 +3,7 @@ import logging
 from fastapi import FastAPI
 
 from frigate.api import app as main_app
-from frigate.api import preview
+from frigate.api import media, preview
 from frigate.plus import PlusApi
 from frigate.ptz.onvif import OnvifController
 from frigate.stats.emitter import StatsEmitter
@@ -21,9 +21,13 @@ def create_fastapi_app(
     stats_emitter: StatsEmitter,
 ):
     logger.info("Starting FastAPI app")
-    app = FastAPI(debug=False)
+    app = FastAPI(
+        debug=False,
+        swagger_ui_parameters={"apisSorter": "alpha", "operationsSorter": "alpha"},
+    )
     # Routes
     app.include_router(main_app.router)
+    app.include_router(media.router)
     app.include_router(preview.router)
     # App Properties
     app.frigate_config = frigate_config
