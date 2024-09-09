@@ -19,7 +19,9 @@ export const ID_PLAYGROUND = 6;
 export default function useNavigation(
   variant: "primary" | "secondary" = "primary",
 ) {
-  const { data: config } = useSWR<FrigateConfig>("config");
+  const { data: config } = useSWR<FrigateConfig>("config", {
+    revalidateOnFocus: false,
+  });
 
   return useMemo(
     () =>
@@ -44,7 +46,6 @@ export default function useNavigation(
           icon: IoSearch,
           title: "Search",
           url: "/search",
-          enabled: config?.semantic_search?.enabled,
         },
         {
           id: ID_EXPORT,
@@ -70,6 +71,6 @@ export default function useNavigation(
           enabled: ENV !== "production",
         },
       ] as NavData[],
-    [config?.plus.enabled, config?.semantic_search.enabled, variant],
+    [config?.plus.enabled, variant],
   );
 }
