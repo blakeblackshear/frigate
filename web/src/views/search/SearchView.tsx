@@ -116,7 +116,7 @@ export default function SearchView({
           config?.semantic_search?.enabled
             ? "justify-between"
             : "justify-center",
-          isMobileOnly && "h-20 flex-wrap gap-2",
+          isMobileOnly && "h-[88px] flex-wrap gap-2",
         )}
       >
         {config?.semantic_search?.enabled && (

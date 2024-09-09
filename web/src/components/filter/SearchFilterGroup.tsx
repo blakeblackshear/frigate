@@ -477,7 +477,7 @@ function ZoneFilterButton({
       <div
         className={`hidden md:block ${selectedZones?.length ? "text-selected-foreground" : "text-primary"}`}
       >
-        Filter
+        {selectedZones?.length ? `${selectedZones.length} Zones` : "All Zones"}
       </div>
     </Button>
   );
@@ -654,7 +654,9 @@ function SubFilterButton({
       <div
         className={`hidden md:block ${selectedSubLabels?.length ? "text-selected-foreground" : "text-primary"}`}
       >
-        Filter
+        {selectedSubLabels?.length
+          ? `${selectedSubLabels.length} Sub Labels`
+          : "All Sub Labels"}
       </div>
     </Button>
   );
