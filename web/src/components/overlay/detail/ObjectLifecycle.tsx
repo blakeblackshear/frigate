@@ -44,6 +44,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { AnnotationSettingsPane } from "./AnnotationSettingsPane";
+import { TooltipPortal } from "@radix-ui/react-tooltip";
 
 type ObjectLifecycleProps = {
   review: ReviewSegment;
@@ -185,7 +186,6 @@ export default function ObjectLifecycle({
     if (!mainApi || !thumbnailApi) {
       return;
     }
-    thumbnailApi.scrollTo(index);
     mainApi.scrollTo(index);
     setCurrent(index);
   };
@@ -210,18 +210,10 @@ export default function ObjectLifecycle({
       thumbnailApi.scrollTo(selected);
     };
 
-    const handleBottomSelect = () => {
-      const selected = thumbnailApi.selectedScrollSnap();
-      setCurrent(selected);
-      mainApi.scrollTo(selected);
-    };
-
-    mainApi.on("select", handleTopSelect);
-    thumbnailApi.on("select", handleBottomSelect);
+    mainApi.on("select", handleTopSelect).on("reInit", handleTopSelect);
 
     return () => {
       mainApi.off("select", handleTopSelect);
-      thumbnailApi.off("select", handleBottomSelect);
     };
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -467,15 +459,22 @@ export default function ObjectLifecycle({
         <Carousel
           opts={{
             align: "center",
+            containScroll: "keepSnaps",
+            dragFree: true,
           }}
           className="w-full max-w-[72%] md:max-w-[85%]"
           setApi={setThumbnailApi}
         >
-          <CarouselContent className="flex flex-row justify-center">
+          <CarouselContent
+            className={cn(
+              "-ml-1 flex select-none flex-row",
+              eventSequence.length > 4 ? "justify-start" : "justify-center",
+            )}
+          >
             {eventSequence.map((item, index) => (
               <CarouselItem
                 key={index}
-                className={cn("basis-1/4 cursor-pointer md:basis-[10%]")}
+                className={cn("basis-1/4 cursor-pointer pl-1 md:basis-[10%]")}
                 onClick={() => handleThumbnailClick(index)}
               >
                 <div className="p-1">
@@ -486,15 +485,24 @@ export default function ObjectLifecycle({
                         index === current && "bg-selected",
                       )}
                     >
-                      <LifecycleIcon
-                        className={cn(
-                          "size-8",
-                          index === current
-                            ? "bg-selected text-white"
-                            : "text-muted-foreground",
-                        )}
-                        lifecycleItem={item}
-                      />
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <LifecycleIcon
+                            className={cn(
+                              "size-8",
+                              index === current
+                                ? "bg-selected text-white"
+                                : "text-muted-foreground",
+                            )}
+                            lifecycleItem={item}
+                          />
+                        </TooltipTrigger>
+                        <TooltipPortal>
+                          <TooltipContent className="capitalize">
+                            {getLifecycleItemDescription(item)}
+                          </TooltipContent>
+                        </TooltipPortal>
+                      </Tooltip>
                     </CardContent>
                   </Card>
                 </div>

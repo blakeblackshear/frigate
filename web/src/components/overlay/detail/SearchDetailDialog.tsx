@@ -93,7 +93,7 @@ export default function SearchDetailDialog({
                 <div className="flex flex-col gap-1.5">
                   <div className="text-sm text-primary/40">Label</div>
                   <div className="flex flex-row items-center gap-2 text-sm capitalize">
-                    {getIconForLabel(search.label, "size-4 text-white")}
+                    {getIconForLabel(search.label, "size-4 text-primary")}
                     {search.label}
                   </div>
                 </div>
