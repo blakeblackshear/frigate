@@ -597,7 +597,8 @@ def vod_ts(camera_name, start_ts, end_ts):
     )
 
 
-@MediaBp.route("/vod/<year_month>/<day>/<hour>/<camera_name>")
+@MediaBp.route("/vod/<year_month>/<int:day>/<int:hour>/<camera_name>")
+@MediaBp.route("/vod/<year_month>/<float:day>/<float:hour>/<camera_name>")
 def vod_hour_no_timezone(year_month, day, hour, camera_name):
     return vod_hour(
         year_month, day, hour, camera_name, get_localzone_name().replace("/", ",")
