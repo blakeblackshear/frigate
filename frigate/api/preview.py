@@ -76,7 +76,9 @@ def preview_ts(camera_name, start_ts, end_ts):
 
 
 @PreviewBp.route("/preview/<year_month>/<int:day>/<int:hour>/<camera_name>/<tz_name>")
-@PreviewBp.route("/preview/<year_month>/<float:day>/<float:hour>/<camera_name>/<tz_name>")
+@PreviewBp.route(
+    "/preview/<year_month>/<float:day>/<float:hour>/<camera_name>/<tz_name>"
+)
 def preview_hour(year_month, day, hour, camera_name, tz_name):
     parts = year_month.split("-")
     start_date = (
