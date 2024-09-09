@@ -17,13 +17,16 @@ import { CamerasFilterButton } from "./CamerasFilterButton";
 import { SearchFilter, SearchSource } from "@/types/search";
 import { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
+import SubFilterIcon from "../icons/SubFilterIcon";
+import { FaLocationDot } from "react-icons/fa6";
 
-const SEARCH_FILTERS = ["cameras", "date", "general", "sub"] as const;
+const SEARCH_FILTERS = ["cameras", "date", "general", "zone", "sub"] as const;
 type SearchFilters = (typeof SEARCH_FILTERS)[number];
 const DEFAULT_REVIEW_FILTERS: SearchFilters[] = [
   "cameras",
   "date",
   "general",
+  "zone",
   "sub",
 ];
 
@@ -172,19 +175,23 @@ export default function SearchFilterGroup({
         <GeneralFilterButton
           allLabels={filterValues.labels}
           selectedLabels={filter?.labels}
-          allZones={filterValues.zones}
-          selectedZones={filter?.zones}
           selectedSearchSources={
             filter?.search_type ?? ["thumbnail", "description"]
           }
           updateLabelFilter={(newLabels) => {
             onUpdateFilter({ ...filter, labels: newLabels });
           }}
-          updateZoneFilter={(newZones) =>
-            onUpdateFilter({ ...filter, zones: newZones })
-          }
           updateSearchSourceFilter={(newSearchSource) =>
             onUpdateFilter({ ...filter, search_type: newSearchSource })
+          }
+        />
+      )}
+      {filters.includes("zone") && allZones.length > 0 && (
+        <ZoneFilterButton
+          allZones={filterValues.zones}
+          selectedZones={filter?.zones}
+          updateZoneFilter={(newZones) =>
+            onUpdateFilter({ ...filter, zones: newZones })
           }
         />
       )}
@@ -204,29 +211,20 @@ export default function SearchFilterGroup({
 type GeneralFilterButtonProps = {
   allLabels: string[];
   selectedLabels: string[] | undefined;
-  allZones: string[];
-  selectedZones?: string[];
   selectedSearchSources: SearchSource[];
   updateLabelFilter: (labels: string[] | undefined) => void;
-  updateZoneFilter: (zones: string[] | undefined) => void;
   updateSearchSourceFilter: (sources: SearchSource[]) => void;
 };
 function GeneralFilterButton({
   allLabels,
   selectedLabels,
-  allZones,
-  selectedZones,
   selectedSearchSources,
   updateLabelFilter,
-  updateZoneFilter,
   updateSearchSourceFilter,
 }: GeneralFilterButtonProps) {
   const [open, setOpen] = useState(false);
   const [currentLabels, setCurrentLabels] = useState<string[] | undefined>(
     selectedLabels,
-  );
-  const [currentZones, setCurrentZones] = useState<string[] | undefined>(
-    selectedZones,
   );
   const [currentSearchSources, setCurrentSearchSources] = useState<
     SearchSource[]
@@ -235,16 +233,14 @@ function GeneralFilterButton({
   const trigger = (
     <Button
       size="sm"
-      variant={
-        selectedLabels?.length || selectedZones?.length ? "select" : "default"
-      }
+      variant={selectedLabels?.length ? "select" : "default"}
       className="flex items-center gap-2 capitalize"
     >
       <FaFilter
-        className={`${selectedLabels?.length || selectedZones?.length ? "text-selected-foreground" : "text-secondary-foreground"}`}
+        className={`${selectedLabels?.length ? "text-selected-foreground" : "text-secondary-foreground"}`}
       />
       <div
-        className={`hidden md:block ${selectedLabels?.length || selectedZones?.length ? "text-selected-foreground" : "text-primary"}`}
+        className={`hidden md:block ${selectedLabels?.length ? "text-selected-foreground" : "text-primary"}`}
       >
         Filter
       </div>
@@ -255,13 +251,8 @@ function GeneralFilterButton({
       allLabels={allLabels}
       selectedLabels={selectedLabels}
       currentLabels={currentLabels}
-      allZones={allZones}
-      selectedZones={selectedZones}
-      currentZones={currentZones}
       selectedSearchSources={selectedSearchSources}
       currentSearchSources={currentSearchSources}
-      setCurrentZones={setCurrentZones}
-      updateZoneFilter={updateZoneFilter}
       setCurrentLabels={setCurrentLabels}
       updateLabelFilter={updateLabelFilter}
       setCurrentSearchSources={setCurrentSearchSources}
@@ -311,15 +302,10 @@ type GeneralFilterContentProps = {
   allLabels: string[];
   selectedLabels: string[] | undefined;
   currentLabels: string[] | undefined;
-  allZones?: string[];
-  selectedZones?: string[];
-  currentZones?: string[];
   selectedSearchSources: SearchSource[];
   currentSearchSources: SearchSource[];
   updateLabelFilter: (labels: string[] | undefined) => void;
   setCurrentLabels: (labels: string[] | undefined) => void;
-  updateZoneFilter?: (zones: string[] | undefined) => void;
-  setCurrentZones?: (zones: string[] | undefined) => void;
   setCurrentSearchSources: (sources: SearchSource[]) => void;
   updateSearchSourceFilter: (sources: SearchSource[]) => void;
   onClose: () => void;
@@ -328,15 +314,10 @@ export function GeneralFilterContent({
   allLabels,
   selectedLabels,
   currentLabels,
-  allZones,
-  selectedZones,
-  currentZones,
   selectedSearchSources,
   currentSearchSources,
   updateLabelFilter,
   setCurrentLabels,
-  updateZoneFilter,
-  setCurrentZones,
   setCurrentSearchSources,
   updateSearchSourceFilter,
   onClose,
@@ -436,7 +417,137 @@ export function GeneralFilterContent({
             />
           ))}
         </div>
+      </div>
+      <DropdownMenuSeparator />
+      <div className="flex items-center justify-evenly p-2">
+        <Button
+          variant="select"
+          onClick={() => {
+            if (selectedLabels != currentLabels) {
+              updateLabelFilter(currentLabels);
+            }
 
+            if (selectedSearchSources != currentSearchSources) {
+              updateSearchSourceFilter(currentSearchSources);
+            }
+
+            onClose();
+          }}
+        >
+          Apply
+        </Button>
+        <Button
+          onClick={() => {
+            setCurrentLabels(undefined);
+            updateLabelFilter(undefined);
+          }}
+        >
+          Reset
+        </Button>
+      </div>
+    </>
+  );
+}
+
+type ZoneFilterButtonProps = {
+  allZones: string[];
+  selectedZones?: string[];
+  updateZoneFilter: (zones: string[] | undefined) => void;
+};
+function ZoneFilterButton({
+  allZones,
+  selectedZones,
+  updateZoneFilter,
+}: ZoneFilterButtonProps) {
+  const [open, setOpen] = useState(false);
+
+  const [currentZones, setCurrentZones] = useState<string[] | undefined>(
+    selectedZones,
+  );
+
+  const trigger = (
+    <Button
+      size="sm"
+      variant={selectedZones?.length ? "select" : "default"}
+      className="flex items-center gap-2 capitalize"
+    >
+      <FaLocationDot
+        className={`${selectedZones?.length ? "text-selected-foreground" : "text-secondary-foreground"}`}
+      />
+      <div
+        className={`hidden md:block ${selectedZones?.length ? "text-selected-foreground" : "text-primary"}`}
+      >
+        Filter
+      </div>
+    </Button>
+  );
+  const content = (
+    <ZoneFilterContent
+      allZones={allZones}
+      selectedZones={selectedZones}
+      currentZones={currentZones}
+      setCurrentZones={setCurrentZones}
+      updateZoneFilter={updateZoneFilter}
+      onClose={() => setOpen(false)}
+    />
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer
+        open={open}
+        onOpenChange={(open) => {
+          if (!open) {
+            setCurrentZones(selectedZones);
+          }
+
+          setOpen(open);
+        }}
+      >
+        <DrawerTrigger asChild>{trigger}</DrawerTrigger>
+        <DrawerContent className="max-h-[75dvh] overflow-hidden">
+          {content}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  return (
+    <Popover
+      open={open}
+      onOpenChange={(open) => {
+        if (!open) {
+          setCurrentZones(selectedZones);
+        }
+
+        setOpen(open);
+      }}
+    >
+      <PopoverTrigger asChild>{trigger}</PopoverTrigger>
+      <PopoverContent>{content}</PopoverContent>
+    </Popover>
+  );
+}
+
+type ZoneFilterContentProps = {
+  allZones?: string[];
+  selectedZones?: string[];
+  currentZones?: string[];
+  updateZoneFilter?: (zones: string[] | undefined) => void;
+  setCurrentZones?: (zones: string[] | undefined) => void;
+  onClose: () => void;
+};
+export function ZoneFilterContent({
+  allZones,
+  selectedZones,
+  currentZones,
+  updateZoneFilter,
+  setCurrentZones,
+  onClose,
+}: ZoneFilterContentProps) {
+  return (
+    <>
+      <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
         {allZones && setCurrentZones && (
           <>
             <DropdownMenuSeparator />
@@ -495,16 +606,8 @@ export function GeneralFilterContent({
         <Button
           variant="select"
           onClick={() => {
-            if (selectedLabels != currentLabels) {
-              updateLabelFilter(currentLabels);
-            }
-
             if (updateZoneFilter && selectedZones != currentZones) {
               updateZoneFilter(currentZones);
-            }
-
-            if (selectedSearchSources != currentSearchSources) {
-              updateSearchSourceFilter(currentSearchSources);
             }
 
             onClose();
@@ -514,9 +617,7 @@ export function GeneralFilterContent({
         </Button>
         <Button
           onClick={() => {
-            setCurrentLabels(undefined);
             setCurrentZones?.(undefined);
-            updateLabelFilter(undefined);
           }}
         >
           Reset
@@ -547,7 +648,7 @@ function SubFilterButton({
       variant={selectedSubLabels?.length ? "select" : "default"}
       className="flex items-center gap-2 capitalize"
     >
-      <FaFilter
+      <SubFilterIcon
         className={`${selectedSubLabels?.length || selectedSubLabels?.length ? "text-selected-foreground" : "text-secondary-foreground"}`}
       />
       <div

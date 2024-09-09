@@ -16,15 +16,7 @@ import { Preview } from "@/types/preview";
 import { SearchFilter, SearchResult } from "@/types/search";
 import { useCallback, useMemo, useState } from "react";
 import { isMobileOnly } from "react-device-detect";
-import {
-  LuExternalLink,
-  LuImage,
-  LuSearchCheck,
-  LuSearchX,
-  LuText,
-  LuXCircle,
-} from "react-icons/lu";
-import { Link } from "react-router-dom";
+import { LuImage, LuSearchX, LuText, LuXCircle } from "react-icons/lu";
 import useSWR from "swr";
 
 type SearchViewProps = {
@@ -153,7 +145,7 @@ export default function SearchView({
 
         {hasExistingSearch && (
           <SearchFilterGroup
-            className={cn("", isMobileOnly && "w-full")}
+            className={cn("", isMobileOnly && "w-full justify-between")}
             filter={searchFilter}
             onUpdateFilter={onUpdateFilter}
           />

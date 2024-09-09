@@ -13,6 +13,16 @@ export type SearchResult = {
   zones: string[];
   search_source: SearchSource;
   search_distance: number;
+  data: {
+    top_score: number;
+    score: number;
+    sub_label_score?: number;
+    region: number[];
+    box: number[];
+    area: number;
+    ratio: number;
+    type: "object" | "audio" | "manual";
+  };
 };
 
 export type SearchFilter = {
