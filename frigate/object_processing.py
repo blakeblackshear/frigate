@@ -770,9 +770,11 @@ class CameraState:
                     }
                 )
 
-            # if the object's thumbnail is not from the current frame
-            if obj.false_positive or obj.thumbnail_data["frame_time"] != frame_time:
+            # if we don't have access to the current frame or
+            # if the object's thumbnail is not from the current frame, skip
+            if not current_frame or obj.false_positive or obj.thumbnail_data["frame_time"] != frame_time:
                 continue
+
             if object_type in self.best_objects:
                 current_best = self.best_objects[object_type]
                 now = datetime.datetime.now().timestamp()
