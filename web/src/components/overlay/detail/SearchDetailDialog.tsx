@@ -1,6 +1,18 @@
 import { isDesktop, isIOS } from "react-device-detect";
-import { Sheet, SheetContent } from "../../ui/sheet";
-import { Drawer, DrawerContent } from "../../ui/drawer";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "../../ui/sheet";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from "../../ui/drawer";
 import { SearchResult } from "@/types/search";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -71,6 +83,9 @@ export default function SearchDetailDialog({
 
   const Overlay = isDesktop ? Sheet : Drawer;
   const Content = isDesktop ? SheetContent : DrawerContent;
+  const Header = isDesktop ? SheetHeader : DrawerHeader;
+  const Title = isDesktop ? SheetTitle : DrawerTitle;
+  const Description = isDesktop ? SheetDescription : DrawerDescription;
 
   return (
     <Overlay
@@ -86,6 +101,10 @@ export default function SearchDetailDialog({
           isDesktop ? "sm:max-w-xl" : "max-h-[75dvh] overflow-hidden p-2 pb-4"
         }
       >
+        <Header className="sr-only">
+          <Title>Tracked Object Details</Title>
+          <Description>Tracked object details</Description>
+        </Header>
         {search && (
           <div className="mt-3 flex size-full flex-col gap-5 md:mt-0">
             <div className="flex w-full flex-row">

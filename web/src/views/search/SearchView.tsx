@@ -49,7 +49,7 @@ export default function SearchView({
   onUpdateFilter,
   onOpenSearch,
 }: SearchViewProps) {
-  // remove duplicate review items
+  // remove duplicate event ids
 
   const uniqueResults = useMemo(() => {
     return searchResults?.filter(
