@@ -96,6 +96,11 @@ export default function SearchView({
     return Math.round(confidence * 100);
   };
 
+  const hasExistingSearch = useMemo(
+    () => searchResults != undefined || searchFilter != undefined,
+    [searchResults, searchFilter],
+  );
+
   return (
     <div className="flex size-full flex-col pt-2 md:py-2">
       <Toaster closeButton={true} />
@@ -108,7 +113,12 @@ export default function SearchView({
       />
 
       <div className="relative mb-2 flex h-11 items-center justify-between pl-2 pr-2 md:pl-3">
-        <div className="relative mr-3 w-full md:w-1/3">
+        <div
+          className={cn(
+            "relative w-full",
+            hasExistingSearch ? "mr-3 md:w-1/3" : "md:ml-[25%] md:w-1/2",
+          )}
+        >
           <Input
             className="text-md w-full bg-muted pr-10"
             placeholder={
@@ -125,10 +135,12 @@ export default function SearchView({
           )}
         </div>
 
-        <SearchFilterGroup
-          filter={searchFilter}
-          onUpdateFilter={onUpdateFilter}
-        />
+        {hasExistingSearch && (
+          <SearchFilterGroup
+            filter={searchFilter}
+            onUpdateFilter={onUpdateFilter}
+          />
+        )}
       </div>
 
       <div className="no-scrollbar flex flex-1 flex-wrap content-start gap-2 overflow-y-auto md:gap-4">
@@ -186,34 +198,36 @@ export default function SearchView({
                       scrollLock={false}
                       onClick={onSelectSearch}
                     />
-                    <div className={cn("absolute right-2 top-2 z-40")}>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Chip
-                            className={`flex select-none items-center justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-xs capitalize text-white`}
-                          >
-                            {value.search_source == "thumbnail" ? (
-                              <LuImage className="mr-1 size-3" />
-                            ) : (
-                              <LuText className="mr-1 size-3" />
-                            )}
+                    {searchTerm && (
+                      <div className={cn("absolute right-2 top-2 z-40")}>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <Chip
+                              className={`flex select-none items-center justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-xs capitalize text-white`}
+                            >
+                              {value.search_source == "thumbnail" ? (
+                                <LuImage className="mr-1 size-3" />
+                              ) : (
+                                <LuText className="mr-1 size-3" />
+                              )}
+                              {zScoreToConfidence(
+                                value.search_distance,
+                                value.search_source,
+                              )}
+                              %
+                            </Chip>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            Matched {value.search_source} at{" "}
                             {zScoreToConfidence(
                               value.search_distance,
                               value.search_source,
                             )}
                             %
-                          </Chip>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          Matched {value.search_source} at{" "}
-                          {zScoreToConfidence(
-                            value.search_distance,
-                            value.search_source,
-                          )}
-                          %
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                    )}
                   </div>
                   <div
                     className={`review-item-ring pointer-events-none absolute inset-0 z-10 size-full rounded-lg outline outline-[3px] -outline-offset-[2.8px] ${selected ? `shadow-severity_alert outline-severity_alert` : "outline-transparent duration-500"}`}

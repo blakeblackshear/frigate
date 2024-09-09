@@ -60,10 +60,6 @@ export default function Search() {
   }, [search]);
 
   const searchQuery = useMemo(() => {
-    if (searchTerm.length == 0) {
-      return null;
-    }
-
     if (similaritySearch) {
       return [
         "events/search",
@@ -80,10 +76,25 @@ export default function Search() {
       ];
     }
 
+    if (searchTerm) {
+      return [
+        "events/search",
+        {
+          query: searchTerm,
+          cameras: searchSearchParams["cameras"],
+          labels: searchSearchParams["labels"],
+          zones: searchSearchParams["zones"],
+          before: searchSearchParams["before"],
+          after: searchSearchParams["after"],
+          search_type: searchSearchParams["search_type"],
+          include_thumbnails: 0,
+        },
+      ];
+    }
+
     return [
-      "events/search",
+      "events",
       {
-        query: searchTerm,
         cameras: searchSearchParams["cameras"],
         labels: searchSearchParams["labels"],
         zones: searchSearchParams["zones"],
