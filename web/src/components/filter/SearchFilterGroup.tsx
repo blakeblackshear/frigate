@@ -6,25 +6,24 @@ import { useCallback, useMemo, useState } from "react";
 import { DropdownMenuSeparator } from "../ui/dropdown-menu";
 import { getEndOfDayTimestamp } from "@/utils/dateUtil";
 import { FaFilter } from "react-icons/fa";
-import { isDesktop, isMobile } from "react-device-detect";
+import { isMobile } from "react-device-detect";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
-import MobileReviewSettingsDrawer, {
-  DrawerFeatures,
-} from "../overlay/MobileReviewSettingsDrawer";
 import FilterSwitch from "./FilterSwitch";
 import { FilterList } from "@/types/filter";
 import { CalendarRangeFilterButton } from "./CalendarFilterButton";
 import { CamerasFilterButton } from "./CamerasFilterButton";
 import { SearchFilter, SearchSource } from "@/types/search";
 import { DateRange } from "react-day-picker";
+import { cn } from "@/lib/utils";
 
 const SEARCH_FILTERS = ["cameras", "date", "general"] as const;
 type SearchFilters = (typeof SEARCH_FILTERS)[number];
 const DEFAULT_REVIEW_FILTERS: SearchFilters[] = ["cameras", "date", "general"];
 
 type SearchFilterGroupProps = {
+  className: string;
   filters?: SearchFilters[];
   filter?: SearchFilter;
   filterList?: FilterList;
@@ -32,6 +31,7 @@ type SearchFilterGroupProps = {
 };
 
 export default function SearchFilterGroup({
+  className,
   filters = DEFAULT_REVIEW_FILTERS,
   filter,
   filterList,
@@ -120,20 +120,6 @@ export default function SearchFilterGroup({
     );
   }, [config]);
 
-  const mobileSettingsFeatures = useMemo<DrawerFeatures[]>(() => {
-    const features: DrawerFeatures[] = [];
-
-    if (filters.includes("date")) {
-      features.push("calendar");
-    }
-
-    if (filters.includes("general")) {
-      features.push("filter");
-    }
-
-    return features;
-  }, [filters]);
-
   // handle updating filters
 
   const onUpdateSelectedRange = useCallback(
@@ -149,13 +135,8 @@ export default function SearchFilterGroup({
     [filter, onUpdateFilter],
   );
 
-  const showAllFilters = useMemo(
-    () => isDesktop || !config?.semantic_search?.enabled,
-    [config],
-  );
-
   return (
-    <div className="flex justify-center gap-2">
+    <div className={cn("flex justify-center gap-2", className)}>
       {filters.includes("cameras") && (
         <CamerasFilterButton
           allCameras={filterValues.cameras}
@@ -166,7 +147,7 @@ export default function SearchFilterGroup({
           }}
         />
       )}
-      {showAllFilters && filters.includes("date") && (
+      {filters.includes("date") && (
         <CalendarRangeFilterButton
           range={
             filter?.after == undefined || filter?.before == undefined
@@ -180,7 +161,7 @@ export default function SearchFilterGroup({
           updateSelectedRange={onUpdateSelectedRange}
         />
       )}
-      {showAllFilters && filters.includes("general") && (
+      {filters.includes("general") && (
         <GeneralFilterButton
           allLabels={filterValues.labels}
           selectedLabels={filter?.labels}
@@ -198,22 +179,6 @@ export default function SearchFilterGroup({
           updateSearchSourceFilter={(newSearchSource) =>
             onUpdateFilter({ ...filter, search_type: newSearchSource })
           }
-        />
-      )}
-      {!showAllFilters && mobileSettingsFeatures.length > 0 && (
-        <MobileReviewSettingsDrawer
-          features={mobileSettingsFeatures}
-          filter={filter}
-          allLabels={allLabels}
-          allZones={allZones}
-          onUpdateFilter={onUpdateFilter}
-          // not applicable as exports are not used
-          camera=""
-          latestTime={0}
-          currentTime={0}
-          mode="none"
-          setMode={() => {}}
-          setRange={() => {}}
         />
       )}
     </div>
@@ -360,52 +325,58 @@ export function GeneralFilterContent({
   updateSearchSourceFilter,
   onClose,
 }: GeneralFilterContentProps) {
+  const { data: config } = useSWR<FrigateConfig>("config", {
+    revalidateOnFocus: false,
+  });
+
   return (
     <>
       <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
-        <div className="my-2.5 flex flex-col gap-2.5">
-          <FilterSwitch
-            label="Thumbnail Image"
-            isChecked={currentSearchSources?.includes("thumbnail") ?? false}
-            onCheckedChange={(isChecked) => {
-              const updatedSources = currentSearchSources
-                ? [...currentSearchSources]
-                : [];
+        {config?.semantic_search?.enabled && (
+          <div className="my-2.5 flex flex-col gap-2.5">
+            <FilterSwitch
+              label="Thumbnail Image"
+              isChecked={currentSearchSources?.includes("thumbnail") ?? false}
+              onCheckedChange={(isChecked) => {
+                const updatedSources = currentSearchSources
+                  ? [...currentSearchSources]
+                  : [];
 
-              if (isChecked) {
-                updatedSources.push("thumbnail");
-                setCurrentSearchSources(updatedSources);
-              } else {
-                if (updatedSources.length > 1) {
-                  const index = updatedSources.indexOf("thumbnail");
-                  if (index !== -1) updatedSources.splice(index, 1);
+                if (isChecked) {
+                  updatedSources.push("thumbnail");
                   setCurrentSearchSources(updatedSources);
+                } else {
+                  if (updatedSources.length > 1) {
+                    const index = updatedSources.indexOf("thumbnail");
+                    if (index !== -1) updatedSources.splice(index, 1);
+                    setCurrentSearchSources(updatedSources);
+                  }
                 }
-              }
-            }}
-          />
-          <FilterSwitch
-            label="Description"
-            isChecked={currentSearchSources?.includes("description") ?? false}
-            onCheckedChange={(isChecked) => {
-              const updatedSources = currentSearchSources
-                ? [...currentSearchSources]
-                : [];
+              }}
+            />
+            <FilterSwitch
+              label="Description"
+              isChecked={currentSearchSources?.includes("description") ?? false}
+              onCheckedChange={(isChecked) => {
+                const updatedSources = currentSearchSources
+                  ? [...currentSearchSources]
+                  : [];
 
-              if (isChecked) {
-                updatedSources.push("description");
-                setCurrentSearchSources(updatedSources);
-              } else {
-                if (updatedSources.length > 1) {
-                  const index = updatedSources.indexOf("description");
-                  if (index !== -1) updatedSources.splice(index, 1);
+                if (isChecked) {
+                  updatedSources.push("description");
                   setCurrentSearchSources(updatedSources);
+                } else {
+                  if (updatedSources.length > 1) {
+                    const index = updatedSources.indexOf("description");
+                    if (index !== -1) updatedSources.splice(index, 1);
+                    setCurrentSearchSources(updatedSources);
+                  }
                 }
-              }
-            }}
-          />
-          <DropdownMenuSeparator />
-        </div>
+              }}
+            />
+            <DropdownMenuSeparator />
+          </div>
+        )}
         <div className="mb-5 mt-2.5 flex items-center justify-between">
           <Label
             className="mx-2 cursor-pointer text-primary"

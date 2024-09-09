@@ -124,6 +124,7 @@ export default function SearchView({
           config?.semantic_search?.enabled
             ? "justify-between"
             : "justify-center",
+          isMobileOnly && "h-20 flex-wrap gap-2",
         )}
       >
         {config?.semantic_search?.enabled && (
@@ -152,6 +153,7 @@ export default function SearchView({
 
         {hasExistingSearch && (
           <SearchFilterGroup
+            className={cn("", isMobileOnly && "w-full")}
             filter={searchFilter}
             onUpdateFilter={onUpdateFilter}
           />

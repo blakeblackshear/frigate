@@ -102,6 +102,7 @@ export default function Search() {
         after: searchSearchParams["after"],
         search_type: searchSearchParams["search_type"],
         limit: Object.keys(searchSearchParams).length == 0 ? 20 : null,
+        in_progress: 0,
         include_thumbnails: 0,
       },
     ];
