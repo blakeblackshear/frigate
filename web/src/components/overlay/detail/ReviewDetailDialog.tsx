@@ -1,6 +1,18 @@
 import { isDesktop, isIOS, isMobile } from "react-device-detect";
-import { Sheet, SheetContent } from "../../ui/sheet";
-import { Drawer, DrawerContent } from "../../ui/drawer";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "../../ui/sheet";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from "../../ui/drawer";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
@@ -66,6 +78,9 @@ export default function ReviewDetailDialog({
 
   const Overlay = isDesktop ? Sheet : Drawer;
   const Content = isDesktop ? SheetContent : DrawerContent;
+  const Header = isDesktop ? SheetHeader : DrawerHeader;
+  const Title = isDesktop ? SheetTitle : DrawerTitle;
+  const Description = isDesktop ? SheetDescription : DrawerDescription;
 
   if (!review) {
     return;
@@ -102,6 +117,10 @@ export default function ReviewDetailDialog({
               : "max-h-[80dvh] overflow-hidden p-2 pb-4",
           )}
         >
+          <Header className="sr-only">
+            <Title>Review Item Details</Title>
+            <Description>Review item details</Description>
+          </Header>
           {pane == "overview" && (
             <div className="scrollbar-container mt-3 flex size-full flex-col gap-5 overflow-y-auto">
               <div className="flex w-full flex-row">

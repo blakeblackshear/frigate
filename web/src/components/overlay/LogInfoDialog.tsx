@@ -1,7 +1,19 @@
 import { LogLine } from "@/types/log";
 import { isDesktop } from "react-device-detect";
-import { Sheet, SheetContent } from "../ui/sheet";
-import { Drawer, DrawerContent } from "../ui/drawer";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "../ui/sheet";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from "../ui/drawer";
 import { LogChip } from "../indicators/Chip";
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
@@ -16,6 +28,9 @@ export default function LogInfoDialog({
 }: LogInfoDialogProps) {
   const Overlay = isDesktop ? Sheet : Drawer;
   const Content = isDesktop ? SheetContent : DrawerContent;
+  const Header = isDesktop ? SheetHeader : DrawerHeader;
+  const Title = isDesktop ? SheetTitle : DrawerTitle;
+  const Description = isDesktop ? SheetDescription : DrawerDescription;
 
   const helpfulLinks = useHelpfulLinks(logLine?.content);
 
@@ -31,6 +46,10 @@ export default function LogInfoDialog({
       <Content
         className={isDesktop ? "" : "max-h-[75dvh] overflow-hidden p-2 pb-4"}
       >
+        <Header className="sr-only">
+          <Title>Log Details</Title>
+          <Description>Log details</Description>
+        </Header>
         {logLine && (
           <div className="flex size-full flex-col gap-5">
             <div className="flex w-min flex-col gap-1.5">

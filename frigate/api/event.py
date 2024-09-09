@@ -379,7 +379,12 @@ def events_search():
             n_results=limit,
             where=where,
         )
-        thumb_ids = dict(zip(thumb_result["ids"][0], thumb_result["distances"][0]))
+        thumb_ids = dict(
+            zip(
+                thumb_result["ids"][0],
+                context.thumb_stats.normalize(thumb_result["distances"][0]),
+            )
+        )
     else:
         thumb_result = context.embeddings.thumbnail.query(
             query_texts=[query],
