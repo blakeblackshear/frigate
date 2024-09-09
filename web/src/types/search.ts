@@ -1,4 +1,4 @@
-type SearchSource = "thumbnail" | "description";
+export type SearchSource = "similarity" | "thumbnail" | "description";
 
 export type SearchResult = {
   id: string;
@@ -21,4 +21,5 @@ export type SearchFilter = {
   zones?: string[];
   before?: number;
   after?: number;
+  search_type?: SearchSource[];
 };
