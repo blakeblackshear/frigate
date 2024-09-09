@@ -144,27 +144,6 @@ export default function SearchView({
       </div>
 
       <div className="no-scrollbar flex flex-1 flex-wrap content-start gap-2 overflow-y-auto md:gap-4">
-        {searchTerm.length == 0 && (
-          <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
-            <LuSearchCheck className="size-16" />
-            Search
-            <div className="mt-2 max-w-64 text-sm text-secondary-foreground">
-              Frigate can find detected objects in your review items.
-            </div>
-            <div className="mt-2 flex items-center text-center text-sm text-primary">
-              <Link
-                to="https://docs.frigate.video/configuration/semantic_search"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline"
-              >
-                Read the Documentation{" "}
-                <LuExternalLink className="ml-2 inline-flex size-3" />
-              </Link>
-            </div>
-          </div>
-        )}
-
         {searchTerm.length > 0 && searchResults?.length == 0 && (
           <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
             <LuSearchX className="size-16" />
