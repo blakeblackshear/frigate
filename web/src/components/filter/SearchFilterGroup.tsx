@@ -37,7 +37,9 @@ export default function SearchFilterGroup({
   filterList,
   onUpdateFilter,
 }: SearchFilterGroupProps) {
-  const { data: config } = useSWR<FrigateConfig>("config");
+  const { data: config } = useSWR<FrigateConfig>("config", {
+    revalidateOnFocus: false,
+  });
 
   const allLabels = useMemo<string[]>(() => {
     if (filterList?.labels) {
@@ -147,6 +149,11 @@ export default function SearchFilterGroup({
     [filter, onUpdateFilter],
   );
 
+  const showAllFilters = useMemo(
+    () => isDesktop || !config?.semantic_search?.enabled,
+    [config],
+  );
+
   return (
     <div className="flex justify-center gap-2">
       {filters.includes("cameras") && (
@@ -159,7 +166,7 @@ export default function SearchFilterGroup({
           }}
         />
       )}
-      {isDesktop && filters.includes("date") && (
+      {showAllFilters && filters.includes("date") && (
         <CalendarRangeFilterButton
           range={
             filter?.after == undefined || filter?.before == undefined
@@ -173,7 +180,7 @@ export default function SearchFilterGroup({
           updateSelectedRange={onUpdateSelectedRange}
         />
       )}
-      {isDesktop && filters.includes("general") && (
+      {showAllFilters && filters.includes("general") && (
         <GeneralFilterButton
           allLabels={filterValues.labels}
           selectedLabels={filter?.labels}
@@ -193,7 +200,7 @@ export default function SearchFilterGroup({
           }
         />
       )}
-      {isMobile && mobileSettingsFeatures.length > 0 && (
+      {!showAllFilters && mobileSettingsFeatures.length > 0 && (
         <MobileReviewSettingsDrawer
           features={mobileSettingsFeatures}
           filter={filter}

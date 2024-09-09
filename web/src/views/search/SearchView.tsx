@@ -11,6 +11,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
 import { SearchFilter, SearchResult } from "@/types/search";
 import { useCallback, useMemo, useState } from "react";
@@ -24,6 +25,7 @@ import {
   LuXCircle,
 } from "react-icons/lu";
 import { Link } from "react-router-dom";
+import useSWR from "swr";
 
 type SearchViewProps = {
   search: string;
@@ -51,6 +53,10 @@ export default function SearchView({
   onUpdateFilter,
   onOpenSearch,
 }: SearchViewProps) {
+  const { data: config } = useSWR<FrigateConfig>("config", {
+    revalidateOnFocus: false,
+  });
+
   // remove duplicate event ids
 
   const uniqueResults = useMemo(() => {
@@ -112,28 +118,37 @@ export default function SearchView({
         }
       />
 
-      <div className="relative mb-2 flex h-11 items-center justify-between pl-2 pr-2 md:pl-3">
-        <div
-          className={cn(
-            "relative w-full",
-            hasExistingSearch ? "mr-3 md:w-1/3" : "md:ml-[25%] md:w-1/2",
-          )}
-        >
-          <Input
-            className="text-md w-full bg-muted pr-10"
-            placeholder={
-              isMobileOnly ? "Search" : "Search for a detected object..."
-            }
-            value={similaritySearch ? "" : search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          {search && (
-            <LuXCircle
-              className="absolute right-2 top-1/2 h-5 w-5 -translate-y-1/2 cursor-pointer text-muted-foreground hover:text-primary"
-              onClick={() => setSearch("")}
+      <div
+        className={cn(
+          "relative mb-2 flex h-11 items-center pl-2 pr-2 md:pl-3",
+          config?.semantic_search?.enabled
+            ? "justify-between"
+            : "justify-center",
+        )}
+      >
+        {config?.semantic_search?.enabled && (
+          <div
+            className={cn(
+              "relative w-full",
+              hasExistingSearch ? "mr-3 md:w-1/3" : "md:ml-[25%] md:w-1/2",
+            )}
+          >
+            <Input
+              className="text-md w-full bg-muted pr-10"
+              placeholder={
+                isMobileOnly ? "Search" : "Search for a detected object..."
+              }
+              value={similaritySearch ? "" : search}
+              onChange={(e) => setSearch(e.target.value)}
             />
-          )}
-        </div>
+            {search && (
+              <LuXCircle
+                className="absolute right-2 top-1/2 h-5 w-5 -translate-y-1/2 cursor-pointer text-muted-foreground hover:text-primary"
+                onClick={() => setSearch("")}
+              />
+            )}
+          </div>
+        )}
 
         {hasExistingSearch && (
           <SearchFilterGroup
