@@ -3,7 +3,7 @@ id: genai
 title: Generative AI
 ---
 
-Generative AI can be used to automatically generate descriptions based on the thumbnails of your events. This helps with [semantic search](/configuration/semantic_search) in Frigate by providing detailed text descriptions as a basis of the search query.
+Generative AI can be used to automatically generate descriptions based on the thumbnails of your tracked objects. This helps with [Semantic Search](/configuration/semantic_search) in Frigate by providing detailed text descriptions as a basis of the search query.
 
 ## Configuration
 
@@ -100,7 +100,7 @@ genai:
 
 ## Custom Prompts
 
-Frigate sends multiple frames from the detection along with a prompt to your Generative AI provider asking it to generate a description. The default prompt is as follows:
+Frigate sends multiple frames from the tracked object along with a prompt to your Generative AI provider asking it to generate a description. The default prompt is as follows:
 
 ```
 Describe the {label} in the sequence of images with as much detail as possible. Do not describe the background.
@@ -108,7 +108,7 @@ Describe the {label} in the sequence of images with as much detail as possible. 
 
 :::tip
 
-Prompts can use variable replacements like `{label}`, `{sub_label}`, and `{camera}` to substitute information from the detection as part of the prompt.
+Prompts can use variable replacements like `{label}`, `{sub_label}`, and `{camera}` to substitute information from the tracked object as part of the prompt.
 
 :::
 
