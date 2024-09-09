@@ -17,7 +17,7 @@ import FilterSwitch from "./FilterSwitch";
 import { FilterList } from "@/types/filter";
 import { CalendarRangeFilterButton } from "./CalendarFilterButton";
 import { CamerasFilterButton } from "./CamerasFilterButton";
-import { SearchFilter } from "@/types/search";
+import { SearchFilter, SearchSource } from "@/types/search";
 import { DateRange } from "react-day-picker";
 
 const SEARCH_FILTERS = ["cameras", "date", "general"] as const;
@@ -103,6 +103,7 @@ export default function SearchFilterGroup({
       cameras: Object.keys(config?.cameras || {}),
       labels: Object.values(allLabels || {}),
       zones: Object.values(allZones || {}),
+      search_type: ["thumbnail", "description"] as SearchSource[],
     }),
     [config, allLabels, allZones],
   );
@@ -178,11 +179,17 @@ export default function SearchFilterGroup({
           selectedLabels={filter?.labels}
           allZones={filterValues.zones}
           selectedZones={filter?.zones}
+          selectedSearchSources={
+            filter?.search_type ?? ["thumbnail", "description"]
+          }
           updateLabelFilter={(newLabels) => {
             onUpdateFilter({ ...filter, labels: newLabels });
           }}
           updateZoneFilter={(newZones) =>
             onUpdateFilter({ ...filter, zones: newZones })
+          }
+          updateSearchSourceFilter={(newSearchSource) =>
+            onUpdateFilter({ ...filter, search_type: newSearchSource })
           }
         />
       )}
@@ -211,16 +218,20 @@ type GeneralFilterButtonProps = {
   selectedLabels: string[] | undefined;
   allZones: string[];
   selectedZones?: string[];
+  selectedSearchSources: SearchSource[];
   updateLabelFilter: (labels: string[] | undefined) => void;
   updateZoneFilter: (zones: string[] | undefined) => void;
+  updateSearchSourceFilter: (sources: SearchSource[]) => void;
 };
 function GeneralFilterButton({
   allLabels,
   selectedLabels,
   allZones,
   selectedZones,
+  selectedSearchSources,
   updateLabelFilter,
   updateZoneFilter,
+  updateSearchSourceFilter,
 }: GeneralFilterButtonProps) {
   const [open, setOpen] = useState(false);
   const [currentLabels, setCurrentLabels] = useState<string[] | undefined>(
@@ -229,6 +240,9 @@ function GeneralFilterButton({
   const [currentZones, setCurrentZones] = useState<string[] | undefined>(
     selectedZones,
   );
+  const [currentSearchSources, setCurrentSearchSources] = useState<
+    SearchSource[]
+  >(selectedSearchSources);
 
   const trigger = (
     <Button
@@ -256,10 +270,14 @@ function GeneralFilterButton({
       allZones={allZones}
       selectedZones={selectedZones}
       currentZones={currentZones}
+      selectedSearchSources={selectedSearchSources}
+      currentSearchSources={currentSearchSources}
       setCurrentZones={setCurrentZones}
       updateZoneFilter={updateZoneFilter}
-      updateLabelFilter={updateLabelFilter}
       setCurrentLabels={setCurrentLabels}
+      updateLabelFilter={updateLabelFilter}
+      setCurrentSearchSources={setCurrentSearchSources}
+      updateSearchSourceFilter={updateSearchSourceFilter}
       onClose={() => setOpen(false)}
     />
   );
@@ -308,10 +326,14 @@ type GeneralFilterContentProps = {
   allZones?: string[];
   selectedZones?: string[];
   currentZones?: string[];
+  selectedSearchSources: SearchSource[];
+  currentSearchSources: SearchSource[];
   updateLabelFilter: (labels: string[] | undefined) => void;
   setCurrentLabels: (labels: string[] | undefined) => void;
   updateZoneFilter?: (zones: string[] | undefined) => void;
   setCurrentZones?: (zones: string[] | undefined) => void;
+  setCurrentSearchSources: (sources: SearchSource[]) => void;
+  updateSearchSourceFilter: (sources: SearchSource[]) => void;
   onClose: () => void;
 };
 export function GeneralFilterContent({
@@ -321,15 +343,62 @@ export function GeneralFilterContent({
   allZones,
   selectedZones,
   currentZones,
+  selectedSearchSources,
+  currentSearchSources,
   updateLabelFilter,
   setCurrentLabels,
   updateZoneFilter,
   setCurrentZones,
+  setCurrentSearchSources,
+  updateSearchSourceFilter,
   onClose,
 }: GeneralFilterContentProps) {
   return (
     <>
       <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
+        <div className="my-2.5 flex flex-col gap-2.5">
+          <FilterSwitch
+            label="Thumbnail Image"
+            isChecked={currentSearchSources?.includes("thumbnail") ?? false}
+            onCheckedChange={(isChecked) => {
+              const updatedSources = currentSearchSources
+                ? [...currentSearchSources]
+                : [];
+
+              if (isChecked) {
+                updatedSources.push("thumbnail");
+                setCurrentSearchSources(updatedSources);
+              } else {
+                if (updatedSources.length > 1) {
+                  const index = updatedSources.indexOf("thumbnail");
+                  if (index !== -1) updatedSources.splice(index, 1);
+                  setCurrentSearchSources(updatedSources);
+                }
+              }
+            }}
+          />
+          <FilterSwitch
+            label="Description"
+            isChecked={currentSearchSources?.includes("description") ?? false}
+            onCheckedChange={(isChecked) => {
+              const updatedSources = currentSearchSources
+                ? [...currentSearchSources]
+                : [];
+
+              if (isChecked) {
+                updatedSources.push("description");
+                setCurrentSearchSources(updatedSources);
+              } else {
+                if (updatedSources.length > 1) {
+                  const index = updatedSources.indexOf("description");
+                  if (index !== -1) updatedSources.splice(index, 1);
+                  setCurrentSearchSources(updatedSources);
+                }
+              }
+            }}
+          />
+          <DropdownMenuSeparator />
+        </div>
         <div className="mb-5 mt-2.5 flex items-center justify-between">
           <Label
             className="mx-2 cursor-pointer text-primary"
@@ -351,6 +420,7 @@ export function GeneralFilterContent({
         <div className="my-2.5 flex flex-col gap-2.5">
           {allLabels.map((item) => (
             <FilterSwitch
+              key={item}
               label={item.replaceAll("_", " ")}
               isChecked={currentLabels?.includes(item) ?? false}
               onCheckedChange={(isChecked) => {
@@ -397,6 +467,7 @@ export function GeneralFilterContent({
             <div className="my-2.5 flex flex-col gap-2.5">
               {allZones.map((item) => (
                 <FilterSwitch
+                  key={item}
                   label={item.replaceAll("_", " ")}
                   isChecked={currentZones?.includes(item) ?? false}
                   onCheckedChange={(isChecked) => {
@@ -436,6 +507,10 @@ export function GeneralFilterContent({
 
             if (updateZoneFilter && selectedZones != currentZones) {
               updateZoneFilter(currentZones);
+            }
+
+            if (selectedSearchSources != currentSearchSources) {
+              updateSearchSourceFilter(currentSearchSources);
             }
 
             onClose();
