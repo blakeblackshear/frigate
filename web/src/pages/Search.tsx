@@ -53,7 +53,7 @@ export default function Search() {
       setTimeout(() => {
         setSearchTimeout(undefined);
         setSearchTerm(search);
-      }, 500),
+      }, 750),
     );
     // we only want to update the searchTerm when search changes
     // eslint-disable-next-line react-hooks/exhaustive-deps

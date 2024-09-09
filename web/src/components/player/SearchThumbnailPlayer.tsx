@@ -287,17 +287,6 @@ function PreviewContent({
       />
     );
   } else if (isCurrentHour(searchResult.start_time)) {
-    return (
-      /*<InProgressPreview
-        review={review}
-        timeRange={timeRange}
-        setIgnoreClick={setIgnoreClick}
-        isPlayingBack={isPlayingBack}
-        onTimeUpdate={onTimeUpdate}
-            windowVisible={true}
-            setReviewed={() => { }}
-      />*/
-      <div />
-    );
+    return <div />;
   }
 }
