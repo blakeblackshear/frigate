@@ -6,7 +6,6 @@ import React, {
   useState,
 } from "react";
 import { useApiHost } from "@/api";
-import { ReviewSegment } from "@/types/review";
 import useSWR from "swr";
 import { isFirefox, isMobile, isSafari } from "react-device-detect";
 import { TimelineScrubMode, TimeRange } from "@/types/timeline";
@@ -286,21 +285,27 @@ export function VideoPreview({
 
 const MIN_LOAD_TIMEOUT_MS = 200;
 type InProgressPreviewProps = {
-  review: ReviewSegment;
+  camera: string;
+  startTime: number;
+  endTime?: number;
   timeRange: TimeRange;
   showProgress?: boolean;
   loop?: boolean;
-  setReviewed: (reviewId: string) => void;
+  defaultImageUrl?: string;
+  setReviewed: () => void;
   setIgnoreClick: (ignore: boolean) => void;
   isPlayingBack: (ended: boolean) => void;
   onTimeUpdate?: (time: number | undefined) => void;
   windowVisible: boolean;
 };
 export function InProgressPreview({
-  review,
+  camera,
+  startTime,
+  endTime,
   timeRange,
   showProgress = true,
   loop = false,
+  defaultImageUrl,
   setReviewed,
   setIgnoreClick,
   isPlayingBack,
@@ -310,8 +315,8 @@ export function InProgressPreview({
   const apiHost = useApiHost();
   const sliderRef = useRef<HTMLDivElement | null>(null);
   const { data: previewFrames } = useSWR<string[]>(
-    `preview/${review.camera}/start/${Math.floor(review.start_time) - PREVIEW_PADDING}/end/${
-      Math.ceil(review.end_time ?? timeRange.before) + PREVIEW_PADDING
+    `preview/${camera}/start/${Math.floor(startTime) - PREVIEW_PADDING}/end/${
+      Math.ceil(endTime ?? timeRange.before) + PREVIEW_PADDING
     }/frames`,
     { revalidateOnFocus: false },
   );
@@ -326,7 +331,7 @@ export function InProgressPreview({
     }
 
     if (onTimeUpdate) {
-      onTimeUpdate(review.start_time - PREVIEW_PADDING + key);
+      onTimeUpdate(startTime - PREVIEW_PADDING + key);
     }
 
     if (playbackMode != "auto") {
@@ -334,9 +339,7 @@ export function InProgressPreview({
     }
 
     if (key == previewFrames.length - 1) {
-      if (!review.has_been_reviewed) {
-        setReviewed(review.id);
-      }
+      setReviewed();
 
       if (loop) {
         setKey(0);
@@ -356,7 +359,7 @@ export function InProgressPreview({
 
     setTimeout(() => {
       if (setReviewed && key == Math.floor(previewFrames.length / 2)) {
-        setReviewed(review.id);
+        setReviewed();
       }
 
       if (previewFrames[key + 1]) {
@@ -377,11 +380,7 @@ export function InProgressPreview({
   const onManualSeek = useCallback(
     (values: number[]) => {
       const value = values[0];
-
-      if (!review.has_been_reviewed) {
-        setReviewed(review.id);
-      }
-
+      setReviewed();
       setKey(value);
     },
 
@@ -424,7 +423,7 @@ export function InProgressPreview({
     return (
       <img
         className="size-full"
-        src={`${apiHost}${review.thumb_path.replace("/media/frigate/", "")}`}
+        src={defaultImageUrl} //{`${apiHost}${review.thumb_path.replace("/media/frigate/", "")}`}
       />
     );
   }

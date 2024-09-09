@@ -20,7 +20,14 @@ import { cn } from "@/lib/utils";
 import SubFilterIcon from "../icons/SubFilterIcon";
 import { FaLocationDot } from "react-icons/fa6";
 
-const SEARCH_FILTERS = ["cameras", "date", "general", "zone", "sub"] as const;
+const SEARCH_FILTERS = [
+  "cameras",
+  "date",
+  "general",
+  "zone",
+  "sub",
+  "source",
+] as const;
 type SearchFilters = (typeof SEARCH_FILTERS)[number];
 const DEFAULT_REVIEW_FILTERS: SearchFilters[] = [
   "cameras",
@@ -28,6 +35,7 @@ const DEFAULT_REVIEW_FILTERS: SearchFilters[] = [
   "general",
   "zone",
   "sub",
+  "source",
 ];
 
 type SearchFilterGroupProps = {
@@ -175,15 +183,9 @@ export default function SearchFilterGroup({
         <GeneralFilterButton
           allLabels={filterValues.labels}
           selectedLabels={filter?.labels}
-          selectedSearchSources={
-            filter?.search_type ?? ["thumbnail", "description"]
-          }
           updateLabelFilter={(newLabels) => {
             onUpdateFilter({ ...filter, labels: newLabels });
           }}
-          updateSearchSourceFilter={(newSearchSource) =>
-            onUpdateFilter({ ...filter, search_type: newSearchSource })
-          }
         />
       )}
       {filters.includes("zone") && allZones.length > 0 && (
@@ -204,6 +206,16 @@ export default function SearchFilterGroup({
           }
         />
       )}
+      {config?.semantic_search?.enabled && filters.includes("source") && (
+        <SearchTypeButton
+          selectedSearchSources={
+            filter?.search_type ?? ["thumbnail", "description"]
+          }
+          updateSearchSourceFilter={(newSearchSource) =>
+            onUpdateFilter({ ...filter, search_type: newSearchSource })
+          }
+        />
+      )}
     </div>
   );
 }
@@ -211,24 +223,17 @@ export default function SearchFilterGroup({
 type GeneralFilterButtonProps = {
   allLabels: string[];
   selectedLabels: string[] | undefined;
-  selectedSearchSources: SearchSource[];
   updateLabelFilter: (labels: string[] | undefined) => void;
-  updateSearchSourceFilter: (sources: SearchSource[]) => void;
 };
 function GeneralFilterButton({
   allLabels,
   selectedLabels,
-  selectedSearchSources,
   updateLabelFilter,
-  updateSearchSourceFilter,
 }: GeneralFilterButtonProps) {
   const [open, setOpen] = useState(false);
   const [currentLabels, setCurrentLabels] = useState<string[] | undefined>(
     selectedLabels,
   );
-  const [currentSearchSources, setCurrentSearchSources] = useState<
-    SearchSource[]
-  >(selectedSearchSources);
 
   const trigger = (
     <Button
@@ -251,12 +256,8 @@ function GeneralFilterButton({
       allLabels={allLabels}
       selectedLabels={selectedLabels}
       currentLabels={currentLabels}
-      selectedSearchSources={selectedSearchSources}
-      currentSearchSources={currentSearchSources}
       setCurrentLabels={setCurrentLabels}
       updateLabelFilter={updateLabelFilter}
-      setCurrentSearchSources={setCurrentSearchSources}
-      updateSearchSourceFilter={updateSearchSourceFilter}
       onClose={() => setOpen(false)}
     />
   );
@@ -302,78 +303,21 @@ type GeneralFilterContentProps = {
   allLabels: string[];
   selectedLabels: string[] | undefined;
   currentLabels: string[] | undefined;
-  selectedSearchSources: SearchSource[];
-  currentSearchSources: SearchSource[];
   updateLabelFilter: (labels: string[] | undefined) => void;
   setCurrentLabels: (labels: string[] | undefined) => void;
-  setCurrentSearchSources: (sources: SearchSource[]) => void;
-  updateSearchSourceFilter: (sources: SearchSource[]) => void;
   onClose: () => void;
 };
 export function GeneralFilterContent({
   allLabels,
   selectedLabels,
   currentLabels,
-  selectedSearchSources,
-  currentSearchSources,
   updateLabelFilter,
   setCurrentLabels,
-  setCurrentSearchSources,
-  updateSearchSourceFilter,
   onClose,
 }: GeneralFilterContentProps) {
-  const { data: config } = useSWR<FrigateConfig>("config", {
-    revalidateOnFocus: false,
-  });
-
   return (
     <>
       <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
-        {config?.semantic_search?.enabled && (
-          <div className="my-2.5 flex flex-col gap-2.5">
-            <FilterSwitch
-              label="Thumbnail Image"
-              isChecked={currentSearchSources?.includes("thumbnail") ?? false}
-              onCheckedChange={(isChecked) => {
-                const updatedSources = currentSearchSources
-                  ? [...currentSearchSources]
-                  : [];
-
-                if (isChecked) {
-                  updatedSources.push("thumbnail");
-                  setCurrentSearchSources(updatedSources);
-                } else {
-                  if (updatedSources.length > 1) {
-                    const index = updatedSources.indexOf("thumbnail");
-                    if (index !== -1) updatedSources.splice(index, 1);
-                    setCurrentSearchSources(updatedSources);
-                  }
-                }
-              }}
-            />
-            <FilterSwitch
-              label="Description"
-              isChecked={currentSearchSources?.includes("description") ?? false}
-              onCheckedChange={(isChecked) => {
-                const updatedSources = currentSearchSources
-                  ? [...currentSearchSources]
-                  : [];
-
-                if (isChecked) {
-                  updatedSources.push("description");
-                  setCurrentSearchSources(updatedSources);
-                } else {
-                  if (updatedSources.length > 1) {
-                    const index = updatedSources.indexOf("description");
-                    if (index !== -1) updatedSources.splice(index, 1);
-                    setCurrentSearchSources(updatedSources);
-                  }
-                }
-              }}
-            />
-            <DropdownMenuSeparator />
-          </div>
-        )}
         <div className="mb-5 mt-2.5 flex items-center justify-between">
           <Label
             className="mx-2 cursor-pointer text-primary"
@@ -425,10 +369,6 @@ export function GeneralFilterContent({
           onClick={() => {
             if (selectedLabels != currentLabels) {
               updateLabelFilter(currentLabels);
-            }
-
-            if (selectedSearchSources != currentSearchSources) {
-              updateSearchSourceFilter(currentSearchSources);
             }
 
             onClose();
@@ -796,6 +736,173 @@ export function SubFilterContent({
         >
           Reset
         </Button>
+      </div>
+    </>
+  );
+}
+
+type SearchTypeButtonProps = {
+  selectedSearchSources: SearchSource[];
+  updateSearchSourceFilter: (sources: SearchSource[]) => void;
+};
+function SearchTypeButton({
+  selectedSearchSources,
+  updateSearchSourceFilter,
+}: SearchTypeButtonProps) {
+  const [open, setOpen] = useState(false);
+  const [currentSearchSources, setCurrentSearchSources] = useState<
+    SearchSource[]
+  >(selectedSearchSources);
+
+  const trigger = (
+    <Button
+      size="sm"
+      variant={selectedSearchSources?.length != 2 ? "select" : "default"}
+      className="flex items-center gap-2 capitalize"
+    >
+      <FaFilter
+        className={`${selectedSearchSources?.length != 2 ? "text-selected-foreground" : "text-secondary-foreground"}`}
+      />
+      <div
+        className={`hidden md:block ${selectedSearchSources?.length != 2 ? "text-selected-foreground" : "text-primary"}`}
+      >
+        {selectedSearchSources?.length != 2
+          ? `${selectedSearchSources[0]}`
+          : "All Search Sources"}
+      </div>
+    </Button>
+  );
+  const content = (
+    <SearchTypeContent
+      selectedSearchSources={selectedSearchSources}
+      currentSearchSources={currentSearchSources}
+      setCurrentSearchSources={setCurrentSearchSources}
+      updateSearchSourceFilter={updateSearchSourceFilter}
+      onClose={() => setOpen(false)}
+    />
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer
+        open={open}
+        onOpenChange={(open) => {
+          if (!open) {
+            setCurrentSearchSources(selectedSearchSources);
+          }
+
+          setOpen(open);
+        }}
+      >
+        <DrawerTrigger asChild>{trigger}</DrawerTrigger>
+        <DrawerContent className="max-h-[75dvh] overflow-hidden">
+          {content}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  return (
+    <Popover
+      open={open}
+      onOpenChange={(open) => {
+        if (!open) {
+          setCurrentSearchSources(selectedSearchSources);
+        }
+
+        setOpen(open);
+      }}
+    >
+      <PopoverTrigger asChild>{trigger}</PopoverTrigger>
+      <PopoverContent>{content}</PopoverContent>
+    </Popover>
+  );
+}
+
+type SearchTypeContentProps = {
+  selectedSearchSources: SearchSource[];
+  currentSearchSources: SearchSource[];
+  setCurrentSearchSources: (sources: SearchSource[]) => void;
+  updateSearchSourceFilter: (sources: SearchSource[]) => void;
+  onClose: () => void;
+};
+export function SearchTypeContent({
+  selectedSearchSources,
+  currentSearchSources,
+  setCurrentSearchSources,
+  updateSearchSourceFilter,
+  onClose,
+}: SearchTypeContentProps) {
+  return (
+    <>
+      <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
+        <div className="my-2.5 flex flex-col gap-2.5">
+          <FilterSwitch
+            label="Thumbnail Image"
+            isChecked={currentSearchSources?.includes("thumbnail") ?? false}
+            onCheckedChange={(isChecked) => {
+              const updatedSources = currentSearchSources
+                ? [...currentSearchSources]
+                : [];
+
+              if (isChecked) {
+                updatedSources.push("thumbnail");
+                setCurrentSearchSources(updatedSources);
+              } else {
+                if (updatedSources.length > 1) {
+                  const index = updatedSources.indexOf("thumbnail");
+                  if (index !== -1) updatedSources.splice(index, 1);
+                  setCurrentSearchSources(updatedSources);
+                }
+              }
+            }}
+          />
+          <FilterSwitch
+            label="Description"
+            isChecked={currentSearchSources?.includes("description") ?? false}
+            onCheckedChange={(isChecked) => {
+              const updatedSources = currentSearchSources
+                ? [...currentSearchSources]
+                : [];
+
+              if (isChecked) {
+                updatedSources.push("description");
+                setCurrentSearchSources(updatedSources);
+              } else {
+                if (updatedSources.length > 1) {
+                  const index = updatedSources.indexOf("description");
+                  if (index !== -1) updatedSources.splice(index, 1);
+                  setCurrentSearchSources(updatedSources);
+                }
+              }
+            }}
+          />
+        </div>
+        <DropdownMenuSeparator />
+        <div className="flex items-center justify-evenly p-2">
+          <Button
+            variant="select"
+            onClick={() => {
+              if (selectedSearchSources != currentSearchSources) {
+                updateSearchSourceFilter(currentSearchSources);
+              }
+
+              onClose();
+            }}
+          >
+            Apply
+          </Button>
+          <Button
+            onClick={() => {
+              setCurrentSearchSources([
+                "thumbnail",
+                "description",
+              ] as SearchSource[]);
+            }}
+          >
+            Reset
+          </Button>
+        </div>
       </div>
     </>
   );
