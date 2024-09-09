@@ -12,6 +12,7 @@ export type SearchResult = {
   thumb_path?: string;
   zones: string[];
   search_source: SearchSource;
+  search_distance: number;
 };
 
 export type SearchFilter = {
