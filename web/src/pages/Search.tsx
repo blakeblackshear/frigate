@@ -67,6 +67,7 @@ export default function Search() {
           query: similaritySearch.id,
           cameras: searchSearchParams["cameras"],
           labels: searchSearchParams["labels"],
+          sub_labels: searchSearchParams["subLabels"],
           zones: searchSearchParams["zones"],
           before: searchSearchParams["before"],
           after: searchSearchParams["after"],
@@ -83,6 +84,7 @@ export default function Search() {
           query: searchTerm,
           cameras: searchSearchParams["cameras"],
           labels: searchSearchParams["labels"],
+          sub_labels: searchSearchParams["subLabels"],
           zones: searchSearchParams["zones"],
           before: searchSearchParams["before"],
           after: searchSearchParams["after"],
@@ -97,6 +99,7 @@ export default function Search() {
       {
         cameras: searchSearchParams["cameras"],
         labels: searchSearchParams["labels"],
+        sub_labels: searchSearchParams["subLabels"],
         zones: searchSearchParams["zones"],
         before: searchSearchParams["before"],
         after: searchSearchParams["after"],

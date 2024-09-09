@@ -18,9 +18,14 @@ import { SearchFilter, SearchSource } from "@/types/search";
 import { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
 
-const SEARCH_FILTERS = ["cameras", "date", "general"] as const;
+const SEARCH_FILTERS = ["cameras", "date", "general", "sub"] as const;
 type SearchFilters = (typeof SEARCH_FILTERS)[number];
-const DEFAULT_REVIEW_FILTERS: SearchFilters[] = ["cameras", "date", "general"];
+const DEFAULT_REVIEW_FILTERS: SearchFilters[] = [
+  "cameras",
+  "date",
+  "general",
+  "sub",
+];
 
 type SearchFilterGroupProps = {
   className: string;
@@ -71,6 +76,8 @@ export default function SearchFilterGroup({
 
     return [...labels].sort();
   }, [config, filterList, filter]);
+
+  const { data: allSubLabels } = useSWR("sub_labels");
 
   const allZones = useMemo<string[]>(() => {
     if (filterList?.zones) {
@@ -178,6 +185,15 @@ export default function SearchFilterGroup({
           }
           updateSearchSourceFilter={(newSearchSource) =>
             onUpdateFilter({ ...filter, search_type: newSearchSource })
+          }
+        />
+      )}
+      {filters.includes("sub") && (
+        <SubFilterButton
+          allSubLabels={allSubLabels}
+          selectedSubLabels={filter?.subLabels}
+          updateSubLabelFilter={(newSubLabels) =>
+            onUpdateFilter({ ...filter, subLabels: newSubLabels })
           }
         />
       )}
@@ -501,6 +517,178 @@ export function GeneralFilterContent({
             setCurrentLabels(undefined);
             setCurrentZones?.(undefined);
             updateLabelFilter(undefined);
+          }}
+        >
+          Reset
+        </Button>
+      </div>
+    </>
+  );
+}
+
+type SubFilterButtonProps = {
+  allSubLabels: string[];
+  selectedSubLabels: string[] | undefined;
+  updateSubLabelFilter: (labels: string[] | undefined) => void;
+};
+function SubFilterButton({
+  allSubLabels,
+  selectedSubLabels,
+  updateSubLabelFilter,
+}: SubFilterButtonProps) {
+  const [open, setOpen] = useState(false);
+  const [currentSubLabels, setCurrentSubLabels] = useState<
+    string[] | undefined
+  >(selectedSubLabels);
+
+  const trigger = (
+    <Button
+      size="sm"
+      variant={selectedSubLabels?.length ? "select" : "default"}
+      className="flex items-center gap-2 capitalize"
+    >
+      <FaFilter
+        className={`${selectedSubLabels?.length || selectedSubLabels?.length ? "text-selected-foreground" : "text-secondary-foreground"}`}
+      />
+      <div
+        className={`hidden md:block ${selectedSubLabels?.length ? "text-selected-foreground" : "text-primary"}`}
+      >
+        Filter
+      </div>
+    </Button>
+  );
+  const content = (
+    <SubFilterContent
+      allSubLabels={allSubLabels}
+      selectedSubLabels={selectedSubLabels}
+      currentSubLabels={currentSubLabels}
+      setCurrentSubLabels={setCurrentSubLabels}
+      updateSubLabelFilter={updateSubLabelFilter}
+      onClose={() => setOpen(false)}
+    />
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer
+        open={open}
+        onOpenChange={(open) => {
+          if (!open) {
+            setCurrentSubLabels(selectedSubLabels);
+          }
+
+          setOpen(open);
+        }}
+      >
+        <DrawerTrigger asChild>{trigger}</DrawerTrigger>
+        <DrawerContent className="max-h-[75dvh] overflow-hidden">
+          {content}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  return (
+    <Popover
+      open={open}
+      onOpenChange={(open) => {
+        if (!open) {
+          setCurrentSubLabels(selectedSubLabels);
+        }
+
+        setOpen(open);
+      }}
+    >
+      <PopoverTrigger asChild>{trigger}</PopoverTrigger>
+      <PopoverContent>{content}</PopoverContent>
+    </Popover>
+  );
+}
+
+type SubFilterContentProps = {
+  allSubLabels: string[];
+  selectedSubLabels: string[] | undefined;
+  currentSubLabels: string[] | undefined;
+  updateSubLabelFilter: (labels: string[] | undefined) => void;
+  setCurrentSubLabels: (labels: string[] | undefined) => void;
+  onClose: () => void;
+};
+export function SubFilterContent({
+  allSubLabels,
+  selectedSubLabels,
+  currentSubLabels,
+  updateSubLabelFilter,
+  setCurrentSubLabels,
+  onClose,
+}: SubFilterContentProps) {
+  return (
+    <>
+      <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
+        <div className="mb-5 mt-2.5 flex items-center justify-between">
+          <Label
+            className="mx-2 cursor-pointer text-primary"
+            htmlFor="allLabels"
+          >
+            All Sub Labels
+          </Label>
+          <Switch
+            className="ml-1"
+            id="allLabels"
+            checked={currentSubLabels == undefined}
+            onCheckedChange={(isChecked) => {
+              if (isChecked) {
+                setCurrentSubLabels(undefined);
+              }
+            }}
+          />
+        </div>
+        <div className="my-2.5 flex flex-col gap-2.5">
+          {allSubLabels.map((item) => (
+            <FilterSwitch
+              key={item}
+              label={item.replaceAll("_", " ")}
+              isChecked={currentSubLabels?.includes(item) ?? false}
+              onCheckedChange={(isChecked) => {
+                if (isChecked) {
+                  const updatedLabels = currentSubLabels
+                    ? [...currentSubLabels]
+                    : [];
+
+                  updatedLabels.push(item);
+                  setCurrentSubLabels(updatedLabels);
+                } else {
+                  const updatedLabels = currentSubLabels
+                    ? [...currentSubLabels]
+                    : [];
+
+                  // can not deselect the last item
+                  if (updatedLabels.length > 1) {
+                    updatedLabels.splice(updatedLabels.indexOf(item), 1);
+                    setCurrentSubLabels(updatedLabels);
+                  }
+                }
+              }}
+            />
+          ))}
+        </div>
+      </div>
+      <DropdownMenuSeparator />
+      <div className="flex items-center justify-evenly p-2">
+        <Button
+          variant="select"
+          onClick={() => {
+            if (selectedSubLabels != currentSubLabels) {
+              updateSubLabelFilter(currentSubLabels);
+            }
+
+            onClose();
+          }}
+        >
+          Apply
+        </Button>
+        <Button
+          onClick={() => {
+            setCurrentSubLabels(undefined);
           }}
         >
           Reset

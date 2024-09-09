@@ -18,6 +18,7 @@ export type SearchResult = {
 export type SearchFilter = {
   cameras?: string[];
   labels?: string[];
+  subLabels?: string[];
   zones?: string[];
   before?: number;
   after?: number;
