@@ -20,7 +20,7 @@ import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import { getIconForLabel } from "@/utils/iconUtil";
 import { useApiHost } from "@/api";
 import { Button } from "../../ui/button";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
 import { Textarea } from "../../ui/textarea";
@@ -54,6 +54,28 @@ export default function SearchDetailDialog({
       ? "%b %-d %Y, %H:%M"
       : "%b %-d %Y, %I:%M %p",
   );
+
+  const score = useMemo(() => {
+    if (!search) {
+      return 0;
+    }
+
+    const value = search.score ?? search.data.top_score;
+
+    return Math.round(value * 100);
+  }, [search]);
+
+  const subLabelScore = useMemo(() => {
+    if (!search) {
+      return undefined;
+    }
+
+    if (search.sub_label) {
+      return Math.round((search.data?.top_score ?? 0) * 100);
+    } else {
+      return undefined;
+    }
+  }, [search]);
 
   // api
 
@@ -120,9 +142,7 @@ export default function SearchDetailDialog({
                 <div className="flex flex-col gap-1.5">
                   <div className="text-sm text-primary/40">Score</div>
                   <div className="text-sm">
-                    {Math.round(search.data.top_score * 100)}%
-                    {search.sub_label &&
-                      ` (${Math.round((search.data.sub_label_score ?? 0) * 100)}%)`}
+                    {score}%{subLabelScore && ` (${subLabelScore}%)`}
                   </div>
                 </div>
                 <div className="flex flex-col gap-1.5">
