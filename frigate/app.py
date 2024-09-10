@@ -406,7 +406,7 @@ class FrigateApp:
         if self.config.mqtt.enabled:
             comms.append(MqttClient(self.config))
 
-        if self.config.notifications.enabled:
+        if self.config.notifications.enabled_in_config:
             comms.append(WebPushClient(self.config))
 
         comms.append(WebSocketClient(self.config))

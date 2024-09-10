@@ -154,6 +154,14 @@ Message published for each changed review item. The first message is published w
 
 Same data available at `/api/stats` published at a configurable interval.
 
+### `frigate/notifications/set`
+
+Topic to turn notifications on and off. Expected values are `ON` and `OFF`.
+
+### `frigate/notifications/state`
+
+Topic with current state of notifications. Published values are `ON` and `OFF`.
+
 ## Frigate Camera Topics
 
 ### `frigate/<camera_name>/<object_name>`

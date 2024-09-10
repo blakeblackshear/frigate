@@ -172,6 +172,9 @@ class AuthConfig(FrigateBaseModel):
 class NotificationConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable notifications")
     email: Optional[str] = Field(default=None, title="Email required for push.")
+    enabled_in_config: Optional[bool] = Field(
+        default=None, title="Keep track of original state of notifications."
+    )
 
 
 class StatsConfig(FrigateBaseModel):
@@ -1458,6 +1461,9 @@ class FrigateConfig(FrigateBaseModel):
         if config.mqtt.user or config.mqtt.password:
             config.mqtt.user = config.mqtt.user.format(**FRIGATE_ENV_VARS)
             config.mqtt.password = config.mqtt.password.format(**FRIGATE_ENV_VARS)
+
+        # set notifications state
+        config.notifications.enabled_in_config = config.notifications.enabled
 
         # GenAI substitution
         if config.genai.api_key:

@@ -9,6 +9,7 @@ from typing import Any, Callable
 from py_vapid import Vapid01
 from pywebpush import WebPusher
 
+from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.dispatcher import Communicator
 from frigate.config import FrigateConfig
 from frigate.const import CONFIG_DIR
@@ -40,6 +41,9 @@ class WebPushClient(Communicator):  # type: ignore[misc]
             self.web_pushers[user["username"]] = []
             for sub in user["notification_tokens"]:
                 self.web_pushers[user["username"]].append(WebPusher(sub))
+
+        # notification config updater
+        self.config_subscriber = ConfigSubscriber("config/notifications")
 
     def subscribe(self, receiver: Callable) -> None:
         """Wrapper for allowing dispatcher to subscribe."""
@@ -101,6 +105,15 @@ class WebPushClient(Communicator):  # type: ignore[misc]
 
     def publish(self, topic: str, payload: Any, retain: bool = False) -> None:
         """Wrapper for publishing when client is in valid state."""
+        # check for updated notification config
+        _, updated_notif_config = self.config_subscriber.check_for_update()
+
+        if updated_notif_config:
+            self.config.notifications = updated_notif_config
+
+        if not self.config.notifications.enabled:
+            return
+
         if topic == "reviews":
             self.send_alert(json.loads(payload))
 
