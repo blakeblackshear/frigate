@@ -3,7 +3,11 @@ import { useCameraPreviews } from "@/hooks/use-camera-previews";
 import { useOverlayState } from "@/hooks/use-overlay-state";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { RecordingStartingPoint } from "@/types/record";
-import { SearchFilter, SearchResult } from "@/types/search";
+import {
+  PartialSearchResult,
+  SearchFilter,
+  SearchResult,
+} from "@/types/search";
 import { TimeRange } from "@/types/timeline";
 import { RecordingView } from "@/views/recording/RecordingView";
 import SearchView from "@/views/search/SearchView";
@@ -38,7 +42,27 @@ export default function Search() {
 
   // search api
 
-  const [similaritySearch, setSimilaritySearch] = useState<SearchResult>();
+  const [similaritySearch, setSimilaritySearch] =
+    useState<PartialSearchResult>();
+
+  useEffect(() => {
+    if (
+      config?.semantic_search.enabled &&
+      searchSearchParams["search_type"] == "similarity" &&
+      searchSearchParams["event_id"]?.length != 0 &&
+      searchFilter
+    ) {
+      setSimilaritySearch({
+        id: searchSearchParams["event_id"],
+      });
+
+      // remove event id from url params
+      const { event_id: _event_id, ...newFilter } = searchFilter;
+      setSearchFilter(newFilter);
+    }
+    // only run similarity search with event_id in the url when coming from review
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (similaritySearch) {

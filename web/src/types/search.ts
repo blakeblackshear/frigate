@@ -25,6 +25,9 @@ export type SearchResult = {
   };
 };
 
+
+export type PartialSearchResult = Partial<SearchResult> & { id: string };
+
 export type SearchFilter = {
   cameras?: string[];
   labels?: string[];
@@ -33,4 +36,5 @@ export type SearchFilter = {
   before?: number;
   after?: number;
   search_type?: SearchSource[];
+  event_id?: string;
 };
