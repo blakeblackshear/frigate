@@ -75,7 +75,7 @@ export default function Search() {
           before: searchSearchParams["before"],
           after: searchSearchParams["after"],
           include_thumbnails: 0,
-          search_type: "thumbnail",
+          search_type: "similarity",
         },
       ];
     }
@@ -89,6 +89,7 @@ export default function Search() {
         zones: searchSearchParams["zones"],
         before: searchSearchParams["before"],
         after: searchSearchParams["after"],
+        search_type: searchSearchParams["search_type"],
         include_thumbnails: 0,
       },
     ];
@@ -192,6 +193,7 @@ export default function Search() {
         allPreviews={allPreviews}
         isLoading={isLoading}
         setSearch={setSearch}
+        similaritySearch={similaritySearch}
         setSimilaritySearch={setSimilaritySearch}
         onUpdateFilter={onUpdateFilter}
         onOpenSearch={onOpenSearch}

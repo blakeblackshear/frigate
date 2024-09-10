@@ -32,6 +32,7 @@ type SearchViewProps = {
   searchResults?: SearchResult[];
   allPreviews?: Preview[];
   isLoading: boolean;
+  similaritySearch?: SearchResult;
   setSearch: (search: string) => void;
   setSimilaritySearch: (search: SearchResult) => void;
   onUpdateFilter: (filter: SearchFilter) => void;
@@ -44,6 +45,7 @@ export default function SearchView({
   searchResults,
   allPreviews,
   isLoading,
+  similaritySearch,
   setSearch,
   setSimilaritySearch,
   onUpdateFilter,
@@ -112,7 +114,7 @@ export default function SearchView({
             placeholder={
               isMobileOnly ? "Search" : "Search for a detected object..."
             }
-            value={search}
+            value={similaritySearch ? "" : search}
             onChange={(e) => setSearch(e.target.value)}
           />
           {search && (
