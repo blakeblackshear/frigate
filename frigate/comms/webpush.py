@@ -101,6 +101,11 @@ class WebPushClient(Communicator):  # type: ignore[misc]
 
     def publish(self, topic: str, payload: Any, retain: bool = False) -> None:
         """Wrapper for publishing when client is in valid state."""
+        ## TODO update notification config
+
+        if not self.config.notifications.enabled:
+            return
+
         if topic == "reviews":
             self.send_alert(json.loads(payload))
 
