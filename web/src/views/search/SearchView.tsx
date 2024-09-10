@@ -190,7 +190,7 @@ export default function SearchView({
                       scrollLock={false}
                       onClick={onSelectSearch}
                     />
-                    {searchTerm && (
+                    {(searchTerm || similaritySearch) && (
                       <div className={cn("absolute right-2 top-2 z-40")}>
                         <Tooltip>
                           <TooltipTrigger>
