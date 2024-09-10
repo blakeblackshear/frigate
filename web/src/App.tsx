@@ -13,7 +13,7 @@ import { isPWA } from "./utils/isPWA";
 
 const Live = lazy(() => import("@/pages/Live"));
 const Events = lazy(() => import("@/pages/Events"));
-const Search = lazy(() => import("@/pages/Search"));
+const Explore = lazy(() => import("@/pages/Explore"));
 const Exports = lazy(() => import("@/pages/Exports"));
 const SubmitPlus = lazy(() => import("@/pages/SubmitPlus"));
 const ConfigEditor = lazy(() => import("@/pages/ConfigEditor"));
@@ -45,7 +45,7 @@ function App() {
                   <Route index element={<Live />} />
                   <Route path="/events" element={<Redirect to="/review" />} />
                   <Route path="/review" element={<Events />} />
-                  <Route path="/search" element={<Search />} />
+                  <Route path="/explore" element={<Explore />} />
                   <Route path="/export" element={<Exports />} />
                   <Route path="/plus" element={<SubmitPlus />} />
                   <Route path="/system" element={<System />} />
