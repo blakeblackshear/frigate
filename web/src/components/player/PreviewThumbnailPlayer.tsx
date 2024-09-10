@@ -329,7 +329,9 @@ function PreviewContent({
   } else if (isCurrentHour(review.start_time)) {
     return (
       <InProgressPreview
-        review={review}
+        camera={review.camera}
+        startTime={review.start_time}
+        endTime={review.end_time}
         timeRange={timeRange}
         setReviewed={setReviewed}
         setIgnoreClick={setIgnoreClick}

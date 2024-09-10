@@ -1,4 +1,4 @@
-import useApiFilter from "@/hooks/use-api-filter";
+import { useApiFilterArgs } from "@/hooks/use-api-filter";
 import { useCameraPreviews } from "@/hooks/use-camera-previews";
 import { useOverlayState } from "@/hooks/use-overlay-state";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -27,7 +27,7 @@ export default function Search() {
   // search filter
 
   const [searchFilter, setSearchFilter, searchSearchParams] =
-    useApiFilter<SearchFilter>();
+    useApiFilterArgs<SearchFilter>();
 
   const onUpdateFilter = useCallback(
     (newFilter: SearchFilter) => {
@@ -60,10 +60,6 @@ export default function Search() {
   }, [search]);
 
   const searchQuery = useMemo(() => {
-    if (searchTerm.length == 0) {
-      return null;
-    }
-
     if (similaritySearch) {
       return [
         "events/search",
@@ -71,6 +67,7 @@ export default function Search() {
           query: similaritySearch.id,
           cameras: searchSearchParams["cameras"],
           labels: searchSearchParams["labels"],
+          sub_labels: searchSearchParams["subLabels"],
           zones: searchSearchParams["zones"],
           before: searchSearchParams["before"],
           after: searchSearchParams["after"],
@@ -80,16 +77,35 @@ export default function Search() {
       ];
     }
 
+    if (searchTerm) {
+      return [
+        "events/search",
+        {
+          query: searchTerm,
+          cameras: searchSearchParams["cameras"],
+          labels: searchSearchParams["labels"],
+          sub_labels: searchSearchParams["subLabels"],
+          zones: searchSearchParams["zones"],
+          before: searchSearchParams["before"],
+          after: searchSearchParams["after"],
+          search_type: searchSearchParams["search_type"],
+          include_thumbnails: 0,
+        },
+      ];
+    }
+
     return [
-      "events/search",
+      "events",
       {
-        query: searchTerm,
         cameras: searchSearchParams["cameras"],
         labels: searchSearchParams["labels"],
+        sub_labels: searchSearchParams["subLabels"],
         zones: searchSearchParams["zones"],
         before: searchSearchParams["before"],
         after: searchSearchParams["after"],
         search_type: searchSearchParams["search_type"],
+        limit: Object.keys(searchSearchParams).length == 0 ? 20 : null,
+        in_progress: 0,
         include_thumbnails: 0,
       },
     ];

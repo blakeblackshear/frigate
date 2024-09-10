@@ -14,7 +14,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import ImageLoadingIndicator from "../indicators/ImageLoadingIndicator";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
-import { VideoPreview } from "../preview/ScrubbablePreview";
+import { InProgressPreview, VideoPreview } from "../preview/ScrubbablePreview";
 import { Preview } from "@/types/preview";
 import { SearchResult } from "@/types/search";
 import useContextMenu from "@/hooks/use-contextmenu";
@@ -272,6 +272,7 @@ function PreviewContent({
   onTimeUpdate,
 }: PreviewContentProps) {
   // preview
+  const now = useMemo(() => Date.now() / 1000, []);
 
   if (relevantPreview) {
     return (
@@ -287,6 +288,21 @@ function PreviewContent({
       />
     );
   } else if (isCurrentHour(searchResult.start_time)) {
-    return <div />;
+    return (
+      <InProgressPreview
+        camera={searchResult.camera}
+        startTime={searchResult.start_time}
+        endTime={searchResult.end_time}
+        timeRange={{
+          before: now,
+          after: searchResult.start_time,
+        }}
+        setIgnoreClick={setIgnoreClick}
+        isPlayingBack={isPlayingBack}
+        onTimeUpdate={onTimeUpdate}
+        windowVisible={true}
+        setReviewed={() => {}}
+      />
+    );
   }
 }

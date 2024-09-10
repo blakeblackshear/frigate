@@ -114,12 +114,15 @@ export default function SearchDetailDialog({
                   <div className="flex flex-row items-center gap-2 text-sm capitalize">
                     {getIconForLabel(search.label, "size-4 text-primary")}
                     {search.label}
+                    {search.sub_label && ` (${search.sub_label})`}
                   </div>
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <div className="text-sm text-primary/40">Score</div>
                   <div className="text-sm">
-                    {Math.round(search.score * 100)}%
+                    {Math.round(search.data.top_score * 100)}%
+                    {search.sub_label &&
+                      ` (${Math.round((search.data.sub_label_score ?? 0) * 100)}%)`}
                   </div>
                 </div>
                 <div className="flex flex-col gap-1.5">

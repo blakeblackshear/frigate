@@ -105,6 +105,13 @@ class MqttClient(Communicator):  # type: ignore[misc]
                 retain=True,
             )
 
+        if self.config.notifications.enabled_in_config:
+            self.publish(
+                "notifications/state",
+                "ON" if self.config.notifications.enabled else "OFF",
+                retain=True,
+            )
+
         self.publish("available", "online", retain=True)
 
     def on_mqtt_command(
@@ -208,6 +215,12 @@ class MqttClient(Communicator):  # type: ignore[misc]
                     f"{self.mqtt_config.topic_prefix}/{name}/ptz",
                     self.on_mqtt_command,
                 )
+
+        if self.config.notifications.enabled_in_config:
+            self.client.message_callback_add(
+                f"{self.mqtt_config.topic_prefix}/notifications/set",
+                self.on_mqtt_command,
+            )
 
         self.client.message_callback_add(
             f"{self.mqtt_config.topic_prefix}/restart", self.on_mqtt_command
