@@ -417,7 +417,9 @@ function ZoneFilterButton({
       <div
         className={`hidden md:block ${selectedZones?.length ? "text-selected-foreground" : "text-primary"}`}
       >
-        {selectedZones?.length ? `${selectedZones.length} Zones` : "All Zones"}
+        {selectedZones?.length
+          ? `${selectedZones.length} Zone${selectedZones.length > 1 ? "s" : ""}`
+          : "All Zones"}
       </div>
     </Button>
   );
@@ -558,6 +560,7 @@ export function ZoneFilterContent({
         <Button
           onClick={() => {
             setCurrentZones?.(undefined);
+            updateZoneFilter?.(undefined);
           }}
         >
           Reset
@@ -731,7 +734,7 @@ export function SubFilterContent({
         </Button>
         <Button
           onClick={() => {
-            setCurrentSubLabels(undefined);
+            updateSubLabelFilter(undefined);
           }}
         >
           Reset

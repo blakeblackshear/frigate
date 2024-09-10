@@ -1,4 +1,4 @@
-import useApiFilter from "@/hooks/use-api-filter";
+import { useApiFilterArgs } from "@/hooks/use-api-filter";
 import { useCameraPreviews } from "@/hooks/use-camera-previews";
 import { useOverlayState } from "@/hooks/use-overlay-state";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -27,7 +27,7 @@ export default function Search() {
   // search filter
 
   const [searchFilter, setSearchFilter, searchSearchParams] =
-    useApiFilter<SearchFilter>();
+    useApiFilterArgs<SearchFilter>();
 
   const onUpdateFilter = useCallback(
     (newFilter: SearchFilter) => {
