@@ -1,4 +1,4 @@
-import { isDesktop, isIOS } from "react-device-detect";
+import { isDesktop, isIOS, isMobile } from "react-device-detect";
 import {
   Drawer,
   DrawerContent,
@@ -31,6 +31,7 @@ import { FrigatePlusDialog } from "../dialog/FrigatePlusDialog";
 import { Event } from "@/types/event";
 import HlsVideoPlayer from "@/components/player/HlsVideoPlayer";
 import { baseUrl } from "@/api/baseUrl";
+import { cn } from "@/lib/utils";
 
 const SEARCH_TABS = ["details", "Frigate+", "video"] as const;
 type SearchTab = (typeof SEARCH_TABS)[number];
@@ -101,14 +102,16 @@ export default function SearchDetailDialog({
         className={
           isDesktop
             ? "sm:max-w-xl md:max-w-3xl lg:max-w-4xl xl:max-w-7xl"
-            : "max-h-[75dvh] overflow-hidden p-2 pb-4"
+            : "max-h-[75dvh] overflow-hidden px-2 pb-4"
         }
       >
         <Header className="sr-only">
           <Title>Tracked Object Details</Title>
           <Description>Tracked object details</Description>
         </Header>
-        <ScrollArea className="w-full whitespace-nowrap">
+        <ScrollArea
+          className={cn("w-full whitespace-nowrap", isMobile && "my-2")}
+        >
           <div className="flex flex-row">
             <ToggleGroup
               className="*:rounded-md *:px-3 *:py-4"
@@ -310,10 +313,12 @@ type VideoTabProps = {
 function VideoTab({ search }: VideoTabProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
+  const endTime = useMemo(() => search.end_time ?? Date.now() / 1000, [search]);
+
   return (
     <HlsVideoPlayer
       videoRef={videoRef}
-      currentSource={`${baseUrl}vod/${search.camera}/start/${search.start_time}/end/${search.end_time ?? 0}/index.m3u8`}
+      currentSource={`${baseUrl}vod/${search.camera}/start/${search.start_time}/end/${endTime}/index.m3u8`}
       hotKeys
       visible
       frigateControls={false}
