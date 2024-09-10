@@ -13,7 +13,11 @@ import {
 import { cn } from "@/lib/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { Preview } from "@/types/preview";
-import { SearchFilter, SearchResult } from "@/types/search";
+import {
+  PartialSearchResult,
+  SearchFilter,
+  SearchResult,
+} from "@/types/search";
 import { useCallback, useMemo, useState } from "react";
 import { isMobileOnly } from "react-device-detect";
 import { LuImage, LuSearchX, LuText, LuXCircle } from "react-icons/lu";
@@ -26,7 +30,7 @@ type SearchViewProps = {
   searchResults?: SearchResult[];
   allPreviews?: Preview[];
   isLoading: boolean;
-  similaritySearch?: SearchResult;
+  similaritySearch?: PartialSearchResult;
   setSearch: (search: string) => void;
   setSimilaritySearch: (search: SearchResult) => void;
   onUpdateFilter: (filter: SearchFilter) => void;
@@ -186,7 +190,7 @@ export default function SearchView({
                       scrollLock={false}
                       onClick={onSelectSearch}
                     />
-                    {searchTerm && (
+                    {(searchTerm || similaritySearch) && (
                       <div className={cn("absolute right-2 top-2 z-40")}>
                         <Tooltip>
                           <TooltipTrigger>
