@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { Preview } from "@/types/preview";
 import {
   PartialSearchResult,
   SearchFilter,
@@ -28,7 +27,6 @@ type SearchViewProps = {
   searchTerm: string;
   searchFilter?: SearchFilter;
   searchResults?: SearchResult[];
-  allPreviews?: Preview[];
   isLoading: boolean;
   similaritySearch?: PartialSearchResult;
   setSearch: (search: string) => void;
@@ -41,13 +39,11 @@ export default function SearchView({
   searchTerm,
   searchFilter,
   searchResults,
-  allPreviews,
   isLoading,
   similaritySearch,
   setSearch,
   setSimilaritySearch,
   onUpdateFilter,
-  onOpenSearch,
 }: SearchViewProps) {
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
@@ -68,16 +64,13 @@ export default function SearchView({
 
   // search interaction
 
-  const onSelectSearch = useCallback(
-    (item: SearchResult, detail: boolean) => {
-      if (detail) {
-        setSearchDetail(item);
-      } else {
-        onOpenSearch(item);
-      }
-    },
-    [onOpenSearch],
-  );
+  const onSelectSearch = useCallback((item: SearchResult, detail: boolean) => {
+    if (detail) {
+      setSearchDetail(item);
+    } else {
+      setSearchDetail(item);
+    }
+  }, []);
 
   // confidence score - probably needs tweaking
 

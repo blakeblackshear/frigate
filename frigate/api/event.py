@@ -317,7 +317,10 @@ def events_search():
         Event.zones,
         Event.start_time,
         Event.end_time,
+        Event.has_clip,
+        Event.has_snapshot,
         Event.data,
+        Event.plus_id,
         ReviewSegment.thumb_path,
     ]
 

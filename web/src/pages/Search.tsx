@@ -230,7 +230,6 @@ export default function Search() {
         searchTerm={searchTerm}
         searchFilter={searchFilter}
         searchResults={searchResults}
-        allPreviews={allPreviews}
         isLoading={isLoading}
         setSearch={setSearch}
         similaritySearch={similaritySearch}
