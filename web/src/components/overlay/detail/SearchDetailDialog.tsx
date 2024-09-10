@@ -94,7 +94,6 @@ export default function SearchDetailDialog({
       onOpenChange={(open) => {
         if (!open) {
           setSearch(undefined);
-          setPage("details");
         }
       }}
     >
