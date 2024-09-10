@@ -1,8 +1,8 @@
+import SearchThumbnail from "@/components/card/SearchThumbnail";
 import SearchFilterGroup from "@/components/filter/SearchFilterGroup";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import Chip from "@/components/indicators/Chip";
 import SearchDetailDialog from "@/components/overlay/detail/SearchDetailDialog";
-import SearchThumbnailPlayer from "@/components/player/SearchThumbnailPlayer";
 import { Input } from "@/components/ui/input";
 import { Toaster } from "@/components/ui/sonner";
 import {
@@ -184,10 +184,10 @@ export default function SearchView({
                       "aspect-square size-full overflow-hidden rounded-lg",
                     )}
                   >
-                    <SearchThumbnailPlayer
+                    <SearchThumbnail
                       searchResult={value}
-                      allPreviews={allPreviews}
                       scrollLock={false}
+                      findSimilar={() => setSimilaritySearch(value)}
                       onClick={onSelectSearch}
                     />
                     {(searchTerm || similaritySearch) && (
