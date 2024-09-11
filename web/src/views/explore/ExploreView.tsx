@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { isIOS, isMobileOnly } from "react-device-detect";
+import { isIOS, isMobileOnly, isSafari } from "react-device-detect";
 import useSWR from "swr";
 import { useApiHost } from "@/api";
 import { cn } from "@/lib/utils";
@@ -12,9 +12,12 @@ import {
 } from "@/components/ui/tooltip";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { SearchResult } from "@/types/search";
+import ImageLoadingIndicator from "@/components/indicators/ImageLoadingIndicator";
+import useImageLoaded from "@/hooks/use-image-loaded";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 
 type ExploreViewProps = {
-  onSelectSearch: (searchResult: SearchResult, detail: boolean) => void;
+  onSelectSearch: (searchResult: SearchResult) => void;
 };
 
 export default function ExploreView({ onSelectSearch }: ExploreViewProps) {
@@ -50,8 +53,14 @@ export default function ExploreView({ onSelectSearch }: ExploreViewProps) {
     }, {});
   }, [events]);
 
+  if (!events) {
+    return (
+      <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+    );
+  }
+
   return (
-    <div className="space-y-4 overflow-x-hidden p-2">
+    <div className="scrollbar-container mx-2 space-y-4 overflow-x-hidden">
       {Object.entries(eventsByLabel).map(([label, filteredEvents]) => (
         <ThumbnailRow
           key={label}
@@ -67,7 +76,7 @@ export default function ExploreView({ onSelectSearch }: ExploreViewProps) {
 type ThumbnailRowType = {
   objectType: string;
   searchResults?: SearchResult[];
-  onSelectSearch: (searchResult: SearchResult, detail: boolean) => void;
+  onSelectSearch: (searchResult: SearchResult) => void;
 };
 
 function ThumbnailRow({
@@ -75,7 +84,6 @@ function ThumbnailRow({
   searchResults,
   onSelectSearch,
 }: ThumbnailRowType) {
-  const apiHost = useApiHost();
   const navigate = useNavigate();
 
   const handleSearch = (label: string) => {
@@ -106,22 +114,9 @@ function ThumbnailRow({
             key={event.id}
             className="relative aspect-square h-auto max-w-[20%] flex-grow md:max-w-[10%]"
           >
-            <img
-              className={cn(
-                "absolute h-full w-full cursor-pointer rounded-lg object-cover transition-all duration-300 ease-in-out md:rounded-2xl",
-              )}
-              style={
-                isIOS
-                  ? {
-                      WebkitUserSelect: "none",
-                      WebkitTouchCallout: "none",
-                    }
-                  : undefined
-              }
-              draggable={false}
-              src={`${apiHost}api/events/${event.id}/thumbnail.jpg`}
-              alt={`${objectType} snapshot`}
-              onClick={() => onSelectSearch(event, true)}
+            <ExploreThumbnailImage
+              event={event}
+              onSelectSearch={onSelectSearch}
             />
           </div>
         ))}
@@ -145,6 +140,48 @@ function ThumbnailRow({
         </div>
       </div>
     </div>
+  );
+}
+
+type ExploreThumbnailImageProps = {
+  event: SearchResult;
+  onSelectSearch: (searchResult: SearchResult) => void;
+};
+function ExploreThumbnailImage({
+  event,
+  onSelectSearch,
+}: ExploreThumbnailImageProps) {
+  const apiHost = useApiHost();
+  const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
+
+  return (
+    <>
+      <ImageLoadingIndicator
+        className="absolute inset-0"
+        imgLoaded={imgLoaded}
+      />
+      <img
+        ref={imgRef}
+        className={cn(
+          "absolute h-full w-full cursor-pointer rounded-lg object-cover transition-all duration-300 ease-in-out md:rounded-2xl",
+        )}
+        style={
+          isIOS
+            ? {
+                WebkitUserSelect: "none",
+                WebkitTouchCallout: "none",
+              }
+            : undefined
+        }
+        loading={isSafari ? "eager" : "lazy"}
+        draggable={false}
+        src={`${apiHost}api/events/${event.id}/thumbnail.jpg`}
+        onClick={() => onSelectSearch(event)}
+        onLoad={() => {
+          onImgLoad();
+        }}
+      />
+    </>
   );
 }
 

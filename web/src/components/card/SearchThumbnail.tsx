@@ -1,14 +1,13 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback } from "react";
 import { useApiHost } from "@/api";
 import { getIconForLabel } from "@/utils/iconUtil";
 import TimeAgo from "../dynamic/TimeAgo";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { isIOS, isMobile, isSafari } from "react-device-detect";
+import { isIOS, isSafari } from "react-device-detect";
 import Chip from "@/components/indicators/Chip";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import useImageLoaded from "@/hooks/use-image-loaded";
-import { useSwipeable } from "react-swipeable";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import ImageLoadingIndicator from "../indicators/ImageLoadingIndicator";
 import ActivityIndicator from "../indicators/activity-indicator";
@@ -19,14 +18,12 @@ import { cn } from "@/lib/utils";
 
 type SearchThumbnailProps = {
   searchResult: SearchResult;
-  scrollLock?: boolean;
   findSimilar: () => void;
-  onClick: (searchResult: SearchResult, detail: boolean) => void;
+  onClick: (searchResult: SearchResult) => void;
 };
 
 export default function SearchThumbnail({
   searchResult,
-  scrollLock = false,
   findSimilar,
   onClick,
 }: SearchThumbnailProps) {
@@ -34,58 +31,11 @@ export default function SearchThumbnail({
   const { data: config } = useSWR<FrigateConfig>("config");
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
 
-  // interaction
-
-  const swipeHandlers = useSwipeable({
-    onSwipedLeft: () => setDetails(false),
-    onSwipedRight: () => setDetails(true),
-    preventScrollOnSwipe: true,
-  });
-
   useContextMenu(imgRef, findSimilar);
 
-  // Hover Details
-
-  const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>();
-  const [details, setDetails] = useState(false);
-  const [tooltipHovering, setTooltipHovering] = useState(false);
-  const showingMoreDetail = useMemo(
-    () => details && !tooltipHovering,
-    [details, tooltipHovering],
-  );
-  const [isHovered, setIsHovered] = useState(false);
-
-  const handleOnClick = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!showingMoreDetail) {
-        onClick(searchResult, e.metaKey);
-      }
-    },
-    [searchResult, showingMoreDetail, onClick],
-  );
-
-  useEffect(() => {
-    if (isHovered && scrollLock) {
-      return;
-    }
-
-    if (isHovered && !tooltipHovering) {
-      setHoverTimeout(
-        setTimeout(() => {
-          setDetails(true);
-          setHoverTimeout(null);
-        }, 500),
-      );
-    } else {
-      if (hoverTimeout) {
-        clearTimeout(hoverTimeout);
-      }
-
-      setDetails(false);
-    }
-    // we know that these deps are correct
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isHovered, scrollLock, tooltipHovering]);
+  const handleOnClick = useCallback(() => {
+    onClick(searchResult);
+  }, [searchResult, onClick]);
 
   // date
 
@@ -95,13 +45,7 @@ export default function SearchThumbnail({
   );
 
   return (
-    <div
-      className="relative size-full cursor-pointer"
-      onMouseOver={isMobile ? undefined : () => setIsHovered(true)}
-      onMouseLeave={isMobile ? undefined : () => setIsHovered(false)}
-      onClick={handleOnClick}
-      {...swipeHandlers}
-    >
+    <div className="relative size-full cursor-pointer" onClick={handleOnClick}>
       <ImageLoadingIndicator
         className="absolute inset-0"
         imgLoaded={imgLoaded}
@@ -131,18 +75,14 @@ export default function SearchThumbnail({
 
         <div className="absolute left-0 top-2 z-40">
           <Tooltip>
-            <div
-              className="flex"
-              onMouseEnter={() => setTooltipHovering(true)}
-              onMouseLeave={() => setTooltipHovering(false)}
-            >
+            <div className="flex">
               <TooltipTrigger asChild>
                 <div className="mx-3 pb-1 text-sm text-white">
                   {
                     <>
                       <Chip
                         className={`z-0 flex items-start justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500`}
-                        onClick={() => onClick(searchResult, true)}
+                        onClick={() => onClick(searchResult)}
                       >
                         {getIconForLabel(
                           searchResult.label,
