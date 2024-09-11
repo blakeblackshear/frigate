@@ -126,9 +126,7 @@ export default function SearchView({
           >
             <Input
               className="text-md w-full bg-muted pr-10"
-              placeholder={
-                isMobileOnly ? "Search" : "Search for a detected object..."
-              }
+              placeholder={"Search for a detected object..."}
               value={similaritySearch ? "" : search}
               onChange={(e) => setSearch(e.target.value)}
             />

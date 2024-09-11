@@ -19,6 +19,8 @@ import { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
 import SubFilterIcon from "../icons/SubFilterIcon";
 import { FaLocationDot } from "react-icons/fa6";
+import { MdLabel } from "react-icons/md";
+import SearchSourceIcon from "../icons/SearchSourceIcon";
 
 const SEARCH_FILTERS = [
   "cameras",
@@ -241,7 +243,7 @@ function GeneralFilterButton({
       variant={selectedLabels?.length ? "select" : "default"}
       className="flex items-center gap-2 capitalize"
     >
-      <FaFilter
+      <MdLabel
         className={`${selectedLabels?.length ? "text-selected-foreground" : "text-secondary-foreground"}`}
       />
       <div
@@ -763,7 +765,7 @@ function SearchTypeButton({
       variant={selectedSearchSources?.length != 2 ? "select" : "default"}
       className="flex items-center gap-2 capitalize"
     >
-      <FaFilter
+      <SearchSourceIcon
         className={`${selectedSearchSources?.length != 2 ? "text-selected-foreground" : "text-secondary-foreground"}`}
       />
       <div
