@@ -181,7 +181,6 @@ export default function SearchView({
                     >
                       <SearchThumbnail
                         searchResult={value}
-                        scrollLock={false}
                         findSimilar={() => setSimilaritySearch(value)}
                         onClick={() => {
                           onSelectSearch(value, true);
