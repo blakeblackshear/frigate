@@ -155,7 +155,12 @@ export default function SearchFilterGroup({
   );
 
   return (
-    <div className={cn("flex justify-center gap-2 overflow-x-auto", className)}>
+    <div
+      className={cn(
+        "scrollbar-container flex justify-center gap-2 overflow-x-auto",
+        className,
+      )}
+    >
       {filters.includes("cameras") && (
         <CamerasFilterButton
           allCameras={filterValues.cameras}
