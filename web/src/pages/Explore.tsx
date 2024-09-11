@@ -11,7 +11,6 @@ import {
 import { TimeRange } from "@/types/timeline";
 import { RecordingView } from "@/views/recording/RecordingView";
 import SearchView from "@/views/search/SearchView";
-import ExploreView from "@/views/explore/ExploreView";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 
@@ -119,21 +118,25 @@ export default function Explore() {
       ];
     }
 
-    return [
-      "events",
-      {
-        cameras: searchSearchParams["cameras"],
-        labels: searchSearchParams["labels"],
-        sub_labels: searchSearchParams["subLabels"],
-        zones: searchSearchParams["zones"],
-        before: searchSearchParams["before"],
-        after: searchSearchParams["after"],
-        search_type: searchSearchParams["search_type"],
-        limit: Object.keys(searchSearchParams).length == 0 ? 20 : null,
-        in_progress: 0,
-        include_thumbnails: 0,
-      },
-    ];
+    if (searchSearchParams && Object.keys(searchSearchParams).length !== 0) {
+      return [
+        "events",
+        {
+          cameras: searchSearchParams["cameras"],
+          labels: searchSearchParams["labels"],
+          sub_labels: searchSearchParams["subLabels"],
+          zones: searchSearchParams["zones"],
+          before: searchSearchParams["before"],
+          after: searchSearchParams["after"],
+          search_type: searchSearchParams["search_type"],
+          limit: Object.keys(searchSearchParams).length == 0 ? 20 : null,
+          in_progress: 0,
+          include_thumbnails: 0,
+        },
+      ];
+    }
+
+    return null;
   }, [searchTerm, searchSearchParams, similaritySearch]);
 
   const { data: searchResults, isLoading } =
@@ -225,31 +228,19 @@ export default function Explore() {
       );
     }
   } else {
-    if (
-      search ||
-      similaritySearch ||
-      (searchFilter && Object.keys(searchFilter).length != 0)
-    ) {
-      return (
-        <SearchView
-          search={search}
-          searchTerm={searchTerm}
-          searchFilter={searchFilter}
-          searchResults={searchResults}
-          isLoading={isLoading}
-          setSearch={setSearch}
-          similaritySearch={similaritySearch}
-          setSimilaritySearch={setSimilaritySearch}
-          onUpdateFilter={onUpdateFilter}
-          onOpenSearch={onOpenSearch}
-        />
-      );
-    } else {
-      return (
-        <div className="flex size-full flex-col pt-2 md:py-2">
-          <ExploreView />
-        </div>
-      );
-    }
+    return (
+      <SearchView
+        search={search}
+        searchTerm={searchTerm}
+        searchFilter={searchFilter}
+        searchResults={searchResults}
+        isLoading={isLoading}
+        setSearch={setSearch}
+        similaritySearch={similaritySearch}
+        setSimilaritySearch={setSimilaritySearch}
+        onUpdateFilter={onUpdateFilter}
+        onOpenSearch={onOpenSearch}
+      />
+    );
   }
 }

@@ -1,6 +1,5 @@
-import { Event } from "@/types/event";
 import { useEffect, useMemo, useState } from "react";
-import { isIOS } from "react-device-detect";
+import { isIOS, isMobileOnly } from "react-device-detect";
 import useSWR from "swr";
 import { useApiHost } from "@/api";
 import { cn } from "@/lib/utils";
@@ -12,8 +11,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
+import { SearchResult } from "@/types/search";
 
-export default function ImageAccordion() {
+type ExploreViewProps = {
+  onSelectSearch: (searchResult: SearchResult, detail: boolean) => void;
+};
+
+export default function ExploreView({ onSelectSearch }: ExploreViewProps) {
   // title
 
   useEffect(() => {
@@ -22,11 +26,11 @@ export default function ImageAccordion() {
 
   // data
 
-  const { data: events } = useSWR<Event[]>(
+  const { data: events } = useSWR<SearchResult[]>(
     [
-      "events",
+      "events/explore",
       {
-        limit: 100,
+        limit: isMobileOnly ? 5 : 10,
       },
     ],
     {
@@ -36,7 +40,7 @@ export default function ImageAccordion() {
 
   const eventsByLabel = useMemo(() => {
     if (!events) return {};
-    return events.reduce<Record<string, Event[]>>((acc, event) => {
+    return events.reduce<Record<string, SearchResult[]>>((acc, event) => {
       const label = event.label || "Unknown";
       if (!acc[label]) {
         acc[label] = [];
@@ -49,19 +53,28 @@ export default function ImageAccordion() {
   return (
     <div className="space-y-4 overflow-x-hidden p-2">
       {Object.entries(eventsByLabel).map(([label, filteredEvents]) => (
-        <ThumbnailRow key={label} events={filteredEvents} objectType={label} />
+        <ThumbnailRow
+          key={label}
+          searchResults={filteredEvents}
+          objectType={label}
+          onSelectSearch={onSelectSearch}
+        />
       ))}
     </div>
   );
 }
 
+type ThumbnailRowType = {
+  objectType: string;
+  searchResults?: SearchResult[];
+  onSelectSearch: (searchResult: SearchResult, detail: boolean) => void;
+};
+
 function ThumbnailRow({
   objectType,
-  events,
-}: {
-  objectType: string;
-  events?: Event[];
-}) {
+  searchResults,
+  onSelectSearch,
+}: ThumbnailRowType) {
   const apiHost = useApiHost();
   const navigate = useNavigate();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -74,20 +87,34 @@ function ThumbnailRow({
   };
 
   return (
-    <div className="space-y-2">
-      <h2 className="text-lg capitalize">{objectType}</h2>
-      <div className="flex flex-row items-center space-x-2 p-2">
-        {events?.map((event, index) => (
+    <div className="rounded-lg bg-background_alt p-2 md:p-4">
+      <div className="text-lg capitalize">
+        {objectType.replaceAll("_", " ")}
+        {searchResults && (
+          <span className="ml-3 text-sm text-secondary-foreground">
+            (
+            {
+              // @ts-expect-error we know this is correct
+              searchResults[0].event_count
+            }{" "}
+            detected objects){" "}
+          </span>
+        )}
+      </div>
+      <div className="flex flex-row items-center space-x-2 py-2">
+        {searchResults?.map((event, index) => (
           <div
             key={event.id}
-            className="relative aspect-square h-[50px] w-full max-w-[50px] md:h-[120px] md:max-w-[120px]"
+            className="relative aspect-square h-auto max-w-[20%] flex-grow md:max-w-[10%]"
             onMouseEnter={() => setHoveredIndex(index)}
             onMouseLeave={() => setHoveredIndex(null)}
           >
             <img
               className={cn(
                 "absolute h-full w-full rounded-lg object-cover transition-all duration-300 ease-in-out md:rounded-2xl",
-                hoveredIndex === index ? "z-10 scale-110" : "scale-100",
+                hoveredIndex === index
+                  ? "z-10 scale-110 cursor-pointer"
+                  : "scale-100",
               )}
               style={
                 isIOS
@@ -98,12 +125,9 @@ function ThumbnailRow({
                   : undefined
               }
               draggable={false}
-              src={
-                event.has_snapshot
-                  ? `${apiHost}api/events/${event.id}/snapshot.jpg`
-                  : `${apiHost}api/events/${event.id}/thumbnail.jpg`
-              }
+              src={`${apiHost}api/events/${event.id}/thumbnail.jpg`}
               alt={`${objectType} snapshot`}
+              onClick={() => onSelectSearch(event, true)}
             />
           </div>
         ))}
@@ -114,13 +138,13 @@ function ThumbnailRow({
           <Tooltip>
             <TooltipTrigger>
               <LuArrowRightCircle
-                className="text-secondary-foreground"
+                className="ml-2 text-secondary-foreground transition-all duration-300 hover:text-primary"
                 size={24}
               />
             </TooltipTrigger>
             <TooltipPortal>
               <TooltipContent className="capitalize">
-                Explore More {objectType}s
+                <ExploreMoreLink objectType={objectType} />
               </TooltipContent>
             </TooltipPortal>
           </Tooltip>
@@ -128,4 +152,13 @@ function ThumbnailRow({
       </div>
     </div>
   );
+}
+
+function ExploreMoreLink({ objectType }: { objectType: string }) {
+  const formattedType = objectType.replaceAll("_", " ");
+  const label = formattedType.endsWith("s")
+    ? `${formattedType}es`
+    : `${formattedType}s`;
+
+  return <div>Explore More {label}</div>;
 }

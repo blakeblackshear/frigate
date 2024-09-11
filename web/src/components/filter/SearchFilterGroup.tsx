@@ -179,15 +179,6 @@ export default function SearchFilterGroup({
           updateSelectedRange={onUpdateSelectedRange}
         />
       )}
-      {filters.includes("general") && (
-        <GeneralFilterButton
-          allLabels={filterValues.labels}
-          selectedLabels={filter?.labels}
-          updateLabelFilter={(newLabels) => {
-            onUpdateFilter({ ...filter, labels: newLabels });
-          }}
-        />
-      )}
       {filters.includes("zone") && allZones.length > 0 && (
         <ZoneFilterButton
           allZones={filterValues.zones}
@@ -195,6 +186,15 @@ export default function SearchFilterGroup({
           updateZoneFilter={(newZones) =>
             onUpdateFilter({ ...filter, zones: newZones })
           }
+        />
+      )}
+      {filters.includes("general") && (
+        <GeneralFilterButton
+          allLabels={filterValues.labels}
+          selectedLabels={filter?.labels}
+          updateLabelFilter={(newLabels) => {
+            onUpdateFilter({ ...filter, labels: newLabels });
+          }}
         />
       )}
       {filters.includes("sub") && (
@@ -247,7 +247,7 @@ function GeneralFilterButton({
       <div
         className={`hidden md:block ${selectedLabels?.length ? "text-selected-foreground" : "text-primary"}`}
       >
-        Filter
+        All Labels
       </div>
     </Button>
   );
