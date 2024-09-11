@@ -65,12 +65,8 @@ export default function SearchView({
 
   // search interaction
 
-  const onSelectSearch = useCallback((item: SearchResult, detail: boolean) => {
-    if (detail) {
-      setSearchDetail(item);
-    } else {
-      setSearchDetail(item);
-    }
+  const onSelectSearch = useCallback((item: SearchResult) => {
+    setSearchDetail(item);
   }, []);
 
   // confidence score - probably needs tweaking
@@ -182,9 +178,7 @@ export default function SearchView({
                       <SearchThumbnail
                         searchResult={value}
                         findSimilar={() => setSimilaritySearch(value)}
-                        onClick={() => {
-                          onSelectSearch(value, true);
-                        }}
+                        onClick={() => onSelectSearch(value)}
                       />
                       {(searchTerm || similaritySearch) && (
                         <div className={cn("absolute right-2 top-2 z-40")}>

@@ -17,7 +17,7 @@ import useImageLoaded from "@/hooks/use-image-loaded";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 
 type ExploreViewProps = {
-  onSelectSearch: (searchResult: SearchResult, detail: boolean) => void;
+  onSelectSearch: (searchResult: SearchResult) => void;
 };
 
 export default function ExploreView({ onSelectSearch }: ExploreViewProps) {
@@ -76,7 +76,7 @@ export default function ExploreView({ onSelectSearch }: ExploreViewProps) {
 type ThumbnailRowType = {
   objectType: string;
   searchResults?: SearchResult[];
-  onSelectSearch: (searchResult: SearchResult, detail: boolean) => void;
+  onSelectSearch: (searchResult: SearchResult) => void;
 };
 
 function ThumbnailRow({
@@ -145,7 +145,7 @@ function ThumbnailRow({
 
 type ExploreThumbnailImageProps = {
   event: SearchResult;
-  onSelectSearch: (searchResult: SearchResult, detail: boolean) => void;
+  onSelectSearch: (searchResult: SearchResult) => void;
 };
 function ExploreThumbnailImage({
   event,
@@ -176,7 +176,7 @@ function ExploreThumbnailImage({
         loading={isSafari ? "eager" : "lazy"}
         draggable={false}
         src={`${apiHost}api/events/${event.id}/thumbnail.jpg`}
-        onClick={() => onSelectSearch(event, true)}
+        onClick={() => onSelectSearch(event)}
         onLoad={() => {
           onImgLoad();
         }}
