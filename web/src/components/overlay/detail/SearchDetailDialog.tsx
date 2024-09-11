@@ -32,6 +32,7 @@ import { Event } from "@/types/event";
 import HlsVideoPlayer from "@/components/player/HlsVideoPlayer";
 import { baseUrl } from "@/api/baseUrl";
 import { cn } from "@/lib/utils";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 
 const SEARCH_TABS = ["details", "Frigate+", "video"] as const;
 type SearchTab = (typeof SEARCH_TABS)[number];
@@ -312,19 +313,26 @@ type VideoTabProps = {
   search: SearchResult;
 };
 function VideoTab({ search }: VideoTabProps) {
+  const [isLoading, setIsLoading] = useState(true);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const endTime = useMemo(() => search.end_time ?? Date.now() / 1000, [search]);
 
   return (
-    <HlsVideoPlayer
-      videoRef={videoRef}
-      currentSource={`${baseUrl}vod/${search.camera}/start/${search.start_time}/end/${endTime}/index.m3u8`}
-      hotKeys
-      visible
-      frigateControls={false}
-      fullscreen={false}
-      supportsFullscreen={false}
-    />
+    <>
+      {isLoading && (
+        <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+      )}
+      <HlsVideoPlayer
+        videoRef={videoRef}
+        currentSource={`${baseUrl}vod/${search.camera}/start/${search.start_time}/end/${endTime}/index.m3u8`}
+        hotKeys
+        visible
+        frigateControls={false}
+        fullscreen={false}
+        supportsFullscreen={false}
+        onPlaying={() => setIsLoading(false)}
+      />
+    </>
   );
 }
