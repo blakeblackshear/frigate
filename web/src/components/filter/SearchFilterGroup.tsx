@@ -5,7 +5,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { useCallback, useMemo, useState } from "react";
 import { DropdownMenuSeparator } from "../ui/dropdown-menu";
 import { getEndOfDayTimestamp } from "@/utils/dateUtil";
-import { isDesktop, isMobile } from "react-device-detect";
+import { isMobile } from "react-device-detect";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
@@ -808,7 +808,11 @@ function SearchTypeButton({
       return "Sources";
     }
 
-    if (!selectedSearchSources || selectedSearchSources.length == 0) {
+    if (
+      !selectedSearchSources ||
+      selectedSearchSources.length == 0 ||
+      selectedSearchSources.length == 2
+    ) {
       return "All Search Sources";
     }
 
