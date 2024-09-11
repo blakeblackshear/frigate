@@ -193,7 +193,9 @@ def migrate_015_0(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]
                 ]
         else:
             continuous_days = config.get("record", {}).get("retain", {}).get("days")
-            detections_retention["retain"]["days"] = continuous_days if continuous_days else 1
+            detections_retention["retain"]["days"] = (
+                continuous_days if continuous_days else 1
+            )
 
         new_config["record"]["alerts"] = alerts_retention
         new_config["record"]["detections"] = detections_retention
@@ -233,8 +235,12 @@ def migrate_015_0(config: dict[str, dict[str, any]]) -> dict[str, dict[str, any]
                         "default"
                     ]
             else:
-                continuous_days = camera_config.get("record", {}).get("retain", {}).get("days")
-                detections_retention["retain"]["days"] = continuous_days if continuous_days else 1
+                continuous_days = (
+                    camera_config.get("record", {}).get("retain", {}).get("days")
+                )
+                detections_retention["retain"]["days"] = (
+                    continuous_days if continuous_days else 1
+                )
 
             camera_config["record"]["alerts"] = alerts_retention
             camera_config["record"]["detections"] = detections_retention
