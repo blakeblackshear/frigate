@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import { useCallback } from "react";
 import { useApiHost } from "@/api";
 import { getIconForLabel } from "@/utils/iconUtil";
 import TimeAgo from "../dynamic/TimeAgo";
@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 type SearchThumbnailProps = {
   searchResult: SearchResult;
   findSimilar: () => void;
-  onClick: (searchResult: SearchResult, detail: boolean) => void;
+  onClick: (searchResult: SearchResult) => void;
 };
 
 export default function SearchThumbnail({
@@ -33,12 +33,9 @@ export default function SearchThumbnail({
 
   useContextMenu(imgRef, findSimilar);
 
-  const handleOnClick = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      onClick(searchResult, e.metaKey);
-    },
-    [searchResult, onClick],
-  );
+  const handleOnClick = useCallback(() => {
+    onClick(searchResult);
+  }, [searchResult, onClick]);
 
   // date
 
@@ -85,7 +82,7 @@ export default function SearchThumbnail({
                     <>
                       <Chip
                         className={`z-0 flex items-start justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500`}
-                        onClick={() => onClick(searchResult, true)}
+                        onClick={() => onClick(searchResult)}
                       >
                         {getIconForLabel(
                           searchResult.label,
