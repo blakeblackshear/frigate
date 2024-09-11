@@ -66,10 +66,9 @@ function ThumbnailRow({
   const navigate = useNavigate();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
-  const handleSimilaritySearch = (eventId: string) => {
+  const handleSearch = (label: string) => {
     const similaritySearchParams = new URLSearchParams({
-      search_type: "similarity",
-      event_id: eventId,
+      labels: label,
     }).toString();
     navigate(`/explore?${similaritySearchParams}`);
   };
@@ -110,11 +109,7 @@ function ThumbnailRow({
         ))}
         <div
           className="flex cursor-pointer items-center justify-center"
-          onClick={() =>
-            events &&
-            events.length > 0 &&
-            handleSimilaritySearch(events[events.length - 1].id)
-          }
+          onClick={() => handleSearch(objectType)}
         >
           <Tooltip>
             <TooltipTrigger>
@@ -124,7 +119,9 @@ function ThumbnailRow({
               />
             </TooltipTrigger>
             <TooltipPortal>
-              <TooltipContent>View More</TooltipContent>
+              <TooltipContent className="capitalize">
+                Explore More {objectType}s
+              </TooltipContent>
             </TooltipPortal>
           </Tooltip>
         </div>
