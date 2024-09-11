@@ -72,7 +72,7 @@ Here are some common starter configuration examples. Refer to the [reference con
 - Hardware acceleration for decoding video
 - USB Coral detector
 - Save all video with any detectable motion for 7 days regardless of whether any objects were detected or not
-- Continue to keep all video if it was during any event for 30 days
+- Continue to keep all video if it qualified as an alert or detection for 30 days
 - Save snapshots for 30 days
 - Motion mask for the camera timestamp
 
@@ -91,14 +91,16 @@ detectors:
     device: usb
 
 record:
-  enabled: True
+  enabled: true
   retain:
     days: 7
     mode: motion
-  events:
+  alerts:
     retain:
-      default: 30
-      mode: motion
+      days: 30
+  detections:
+    retain:
+      days: 30
 
 snapshots:
   enabled: True
@@ -128,7 +130,7 @@ cameras:
 - VAAPI hardware acceleration for decoding video
 - USB Coral detector
 - Save all video with any detectable motion for 7 days regardless of whether any objects were detected or not
-- Continue to keep all video if it was during any event for 30 days
+- Continue to keep all video if it qualified as an alert or detection for 30 days
 - Save snapshots for 30 days
 - Motion mask for the camera timestamp
 
@@ -145,14 +147,16 @@ detectors:
     device: usb
 
 record:
-  enabled: True
+  enabled: true
   retain:
     days: 7
     mode: motion
-  events:
+  alerts:
     retain:
-      default: 30
-      mode: motion
+      days: 30
+  detections:
+    retain:
+      days: 30
 
 snapshots:
   enabled: True
@@ -182,7 +186,7 @@ cameras:
 - VAAPI hardware acceleration for decoding video
 - OpenVino detector
 - Save all video with any detectable motion for 7 days regardless of whether any objects were detected or not
-- Continue to keep all video if it was during any event for 30 days
+- Continue to keep all video if it qualified as an alert or detection for 30 days
 - Save snapshots for 30 days
 - Motion mask for the camera timestamp
 
@@ -210,14 +214,16 @@ model:
   labelmap_path: /openvino-model/coco_91cl_bkgr.txt
 
 record:
-  enabled: True
+  enabled: true
   retain:
     days: 7
     mode: motion
-  events:
+  alerts:
     retain:
-      default: 30
-      mode: motion
+      days: 30
+  detections:
+    retain:
+      days: 30
 
 snapshots:
   enabled: True

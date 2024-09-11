@@ -16,10 +16,6 @@ A box returned from the object detection model that outlines an object in the fr
 - A gray thin line indicates that object is detected as being stationary
 - A thick line indicates that object is the subject of autotracking (when enabled).
 
-## Event
-
-The time period starting when a tracked object entered the frame and ending when it left the frame, including any time that the object remained still. Events are saved when it is considered a [true positive](#threshold) and meets the requirements for a snapshot or recording to be saved.
-
 ## False Positive
 
 An incorrect detection of an object type. For example a dog being detected as a person, a chair being detected as a dog, etc. A person being detected in an area you want to ignore is not a false positive.
@@ -63,6 +59,10 @@ The threshold is the median score that an object must reach in order to be consi
 ## Top Score
 
 The top score for an object is the highest median score for an object.
+
+## Tracked Object ("event" in previous versions)
+
+The time period starting when a tracked object entered the frame and ending when it left the frame, including any time that the object remained still. Tracked objects are saved when it is considered a [true positive](#threshold) and meets the requirements for a snapshot or recording to be saved.
 
 ## Zone
 

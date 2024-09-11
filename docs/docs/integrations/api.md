@@ -189,15 +189,15 @@ Example parameters:
 
 ### `GET /api/<camera_name>/<label>/thumbnail.jpg`
 
-Returns the thumbnail from the latest event for the given camera and label combo. Using `any` as the label will return the latest thumbnail regardless of type.
+Returns the thumbnail from the latest tracked object for the given camera and label combo. Using `any` as the label will return the latest thumbnail regardless of type.
 
 ### `GET /api/<camera_name>/<label>/clip.mp4`
 
-Returns the clip from the latest event for the given camera and label combo. Using `any` as the label will return the latest clip regardless of type.
+Returns the clip from the latest tracked object for the given camera and label combo. Using `any` as the label will return the latest clip regardless of type.
 
 ### `GET /api/<camera_name>/<label>/snapshot.jpg`
 
-Returns the snapshot image from the latest event for the given camera and label combo. Using `any` as the label will return the latest thumbnail regardless of type.
+Returns the snapshot image from the latest tracked object for the given camera and label combo. Using `any` as the label will return the latest thumbnail regardless of type.
 
 ### `GET /api/<camera_name>/grid.jpg`
 
@@ -385,9 +385,9 @@ Specific preview frame from preview cache.
 
 Looping image made from preview video / frames during this time range.
 
-| param     | Type | Description                      |
-| --------- | ---- | -------------------------------- |
-| `format`  | str  | Format of preview [`gif`, `mp4`] |
+| param    | Type | Description                      |
+| -------- | ---- | -------------------------------- |
+| `format` | str  | Format of preview [`gif`, `mp4`] |
 
 ## Recordings
 

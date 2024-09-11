@@ -3,13 +3,15 @@ id: semantic_search
 title: Using Semantic Search
 ---
 
-The Search feature in Frigate allows you to find tracked objects within your review items using either the image itself, a user-defined text description, or an automatically generated one. This semantic search functionality works by creating _embeddings_ — numerical vector representations — for both the images and text descriptions of your tracked objects. By comparing these embeddings, Frigate assesses their similarities to deliver relevant search results.
+Semantic Search in Frigate allows you to find tracked objects within your review items using either the image itself, a user-defined text description, or an automatically generated one. This feature works by creating _embeddings_ — numerical vector representations — for both the images and text descriptions of your tracked objects. By comparing these embeddings, Frigate assesses their similarities to deliver relevant search results.
 
 Frigate has support for two models to create embeddings, both of which run locally: [OpenAI CLIP](https://openai.com/research/clip) and [all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2). Embeddings are then saved to a local instance of [ChromaDB](https://trychroma.com).
 
+Semantic Search is accessed via the _Explore_ view in the Frigate UI.
+
 ## Configuration
 
-Semantic Search is a global configuration setting.
+Semantic search is disabled by default, and must be enabled in your config file before it can be used. Semantic Search is a global configuration setting.
 
 ```yaml
 semantic_search:
@@ -31,7 +33,7 @@ This model is able to embed both images and text into the same vector space, whi
 
 ### all-MiniLM-L6-v2
 
-This is a sentence embedding model that has been fine tuned on over 1 billion sentence pairs. This model is used to embed tracked object descriptions and perform searches against them. Descriptions can be created, viewed, and modified on the Search page when clicking on the gray tracked object chip at the top left of each review item. See [the Generative AI docs](/configuration/genai.md) for more information on how to automatically generate event descriptions.
+This is a sentence embedding model that has been fine tuned on over 1 billion sentence pairs. This model is used to embed tracked object descriptions and perform searches against them. Descriptions can be created, viewed, and modified on the Search page when clicking on the gray tracked object chip at the top left of each review item. See [the Generative AI docs](/configuration/genai.md) for more information on how to automatically generate tracked object descriptions.
 
 ## Usage
 
