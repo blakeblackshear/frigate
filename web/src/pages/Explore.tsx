@@ -31,20 +31,24 @@ export default function Explore() {
 
   // search filter
 
+  const [similaritySearch, setSimilaritySearch] =
+    useState<PartialSearchResult>();
+
   const [searchFilter, setSearchFilter, searchSearchParams] =
     useApiFilterArgs<SearchFilter>();
 
   const onUpdateFilter = useCallback(
     (newFilter: SearchFilter) => {
       setSearchFilter(newFilter);
+
+      if (similaritySearch && !newFilter.search_type?.includes("similarity")) {
+        setSimilaritySearch(undefined);
+      }
     },
-    [setSearchFilter],
+    [similaritySearch, setSearchFilter],
   );
 
   // search api
-
-  const [similaritySearch, setSimilaritySearch] =
-    useState<PartialSearchResult>();
 
   const updateFilterWithSimilarity = useCallback(
     (similaritySearch: PartialSearchResult) => {

@@ -954,7 +954,7 @@ export function SearchTypeContent({
           <Button
             onClick={() => {
               updateSearchSourceFilter(undefined);
-              setCurrentSearchSources(undefined);
+              setCurrentSearchSources(["thumbnail", "description"]);
             }}
           >
             Reset
