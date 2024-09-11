@@ -966,6 +966,10 @@ export function SearchTypeContent({
           </Button>
           <Button
             onClick={() => {
+              updateSearchSourceFilter([
+                "thumbnail",
+                "description",
+              ] as SearchSource[]);
               setCurrentSearchSources([
                 "thumbnail",
                 "description",

@@ -84,7 +84,9 @@ export default function Explore() {
     if (newFilter) {
       setSearchFilter(newFilter);
     }
-  }, [similaritySearch, searchFilter, setSearchFilter]);
+    // don't rerun when the filter updates
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [similaritySearch, setSearchFilter]);
 
   useEffect(() => {
     if (similaritySearch) {
