@@ -131,6 +131,11 @@ export function AnimatedEventCard({
             <div
               className="size-full cursor-pointer overflow-hidden rounded md:rounded-lg"
               onClick={onOpenReview}
+              onAuxClick={() =>
+                window
+                  .open(`${baseUrl}review?id=${event.id}`, "_blank")
+                  ?.focus()
+              }
             >
               {!alertVideos ? (
                 <img

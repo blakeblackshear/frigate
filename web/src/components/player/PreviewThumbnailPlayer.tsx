@@ -20,6 +20,7 @@ import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { cn } from "@/lib/utils";
 import { InProgressPreview, VideoPreview } from "../preview/ScrubbablePreview";
 import { Preview } from "@/types/preview";
+import { baseUrl } from "@/api/baseUrl";
 
 type PreviewPlayerProps = {
   review: ReviewSegment;
@@ -175,6 +176,9 @@ export default function PreviewThumbnailPlayer({
       onMouseOver={isMobile ? undefined : () => setIsHovered(true)}
       onMouseLeave={isMobile ? undefined : () => setIsHovered(false)}
       onClick={handleOnClick}
+      onAuxClick={() =>
+        window.open(`${baseUrl}review?id=${review.id}`, "_blank")?.focus()
+      }
       {...swipeHandlers}
     >
       {playingBack && (
@@ -329,9 +333,7 @@ function PreviewContent({
   } else if (isCurrentHour(review.start_time)) {
     return (
       <InProgressPreview
-        camera={review.camera}
-        startTime={review.start_time}
-        endTime={review.end_time}
+        review={review}
         timeRange={timeRange}
         setReviewed={setReviewed}
         setIgnoreClick={setIgnoreClick}
