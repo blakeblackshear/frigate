@@ -35,6 +35,7 @@ type HlsVideoPlayerProps = {
   hotKeys: boolean;
   supportsFullscreen: boolean;
   fullscreen: boolean;
+  frigateControls?: boolean;
   onClipEnded?: () => void;
   onPlayerLoaded?: () => void;
   onTimeUpdate?: (time: number) => void;
@@ -52,6 +53,7 @@ export default function HlsVideoPlayer({
   hotKeys,
   supportsFullscreen,
   fullscreen,
+  frigateControls = true,
   onClipEnded,
   onPlayerLoaded,
   onTimeUpdate,
@@ -167,73 +169,75 @@ export default function HlsVideoPlayer({
 
   return (
     <TransformWrapper minScale={1.0} wheel={{ smoothStep: 0.005 }}>
-      <VideoControls
-        className={cn(
-          "absolute left-1/2 z-50 -translate-x-1/2",
-          tallCamera ? "bottom-12" : "bottom-5",
-        )}
-        video={videoRef.current}
-        isPlaying={isPlaying}
-        show={visible && (controls || controlsOpen)}
-        muted={muted}
-        volume={volume}
-        features={{
-          volume: true,
-          seek: true,
-          playbackRate: true,
-          plusUpload: config?.plus?.enabled == true,
-          fullscreen: supportsFullscreen,
-        }}
-        setControlsOpen={setControlsOpen}
-        setMuted={(muted) => setMuted(muted, true)}
-        playbackRate={playbackRate ?? 1}
-        hotKeys={hotKeys}
-        onPlayPause={(play) => {
-          if (!videoRef.current) {
-            return;
-          }
-
-          if (play) {
-            videoRef.current.play();
-          } else {
-            videoRef.current.pause();
-          }
-        }}
-        onSeek={(diff) => {
-          const currentTime = videoRef.current?.currentTime;
-
-          if (!videoRef.current || !currentTime) {
-            return;
-          }
-
-          videoRef.current.currentTime = Math.max(0, currentTime + diff);
-        }}
-        onSetPlaybackRate={(rate) => {
-          setPlaybackRate(rate, true);
-
-          if (videoRef.current) {
-            videoRef.current.playbackRate = rate;
-          }
-        }}
-        onUploadFrame={async () => {
-          if (videoRef.current && onUploadFrame) {
-            const resp = await onUploadFrame(videoRef.current.currentTime);
-
-            if (resp && resp.status == 200) {
-              toast.success("Successfully submitted frame to Frigate+", {
-                position: "top-center",
-              });
-            } else {
-              toast.success("Failed to submit frame to Frigate+", {
-                position: "top-center",
-              });
+      {frigateControls && (
+        <VideoControls
+          className={cn(
+            "absolute left-1/2 z-50 -translate-x-1/2",
+            tallCamera ? "bottom-12" : "bottom-5",
+          )}
+          video={videoRef.current}
+          isPlaying={isPlaying}
+          show={visible && (controls || controlsOpen)}
+          muted={muted}
+          volume={volume}
+          features={{
+            volume: true,
+            seek: true,
+            playbackRate: true,
+            plusUpload: config?.plus?.enabled == true,
+            fullscreen: supportsFullscreen,
+          }}
+          setControlsOpen={setControlsOpen}
+          setMuted={(muted) => setMuted(muted, true)}
+          playbackRate={playbackRate ?? 1}
+          hotKeys={hotKeys}
+          onPlayPause={(play) => {
+            if (!videoRef.current) {
+              return;
             }
-          }
-        }}
-        fullscreen={fullscreen}
-        toggleFullscreen={toggleFullscreen}
-        containerRef={containerRef}
-      />
+
+            if (play) {
+              videoRef.current.play();
+            } else {
+              videoRef.current.pause();
+            }
+          }}
+          onSeek={(diff) => {
+            const currentTime = videoRef.current?.currentTime;
+
+            if (!videoRef.current || !currentTime) {
+              return;
+            }
+
+            videoRef.current.currentTime = Math.max(0, currentTime + diff);
+          }}
+          onSetPlaybackRate={(rate) => {
+            setPlaybackRate(rate, true);
+
+            if (videoRef.current) {
+              videoRef.current.playbackRate = rate;
+            }
+          }}
+          onUploadFrame={async () => {
+            if (videoRef.current && onUploadFrame) {
+              const resp = await onUploadFrame(videoRef.current.currentTime);
+
+              if (resp && resp.status == 200) {
+                toast.success("Successfully submitted frame to Frigate+", {
+                  position: "top-center",
+                });
+              } else {
+                toast.success("Failed to submit frame to Frigate+", {
+                  position: "top-center",
+                });
+              }
+            }
+          }}
+          fullscreen={fullscreen}
+          toggleFullscreen={toggleFullscreen}
+          containerRef={containerRef}
+        />
+      )}
       <TransformComponent
         wrapperStyle={{
           display: visible ? undefined : "none",
@@ -253,7 +257,7 @@ export default function HlsVideoPlayer({
           className={`size-full rounded-lg bg-black md:rounded-2xl ${loadedMetadata ? "" : "invisible"}`}
           preload="auto"
           autoPlay
-          controls={false}
+          controls={!frigateControls}
           playsInline
           muted={muted}
           onVolumeChange={() =>

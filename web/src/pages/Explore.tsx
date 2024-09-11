@@ -1,12 +1,13 @@
 import { useApiFilterArgs } from "@/hooks/use-api-filter";
 import { useCameraPreviews } from "@/hooks/use-camera-previews";
-import { useOverlayState } from "@/hooks/use-overlay-state";
+import { useOverlayState, useSearchEffect } from "@/hooks/use-overlay-state";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { RecordingStartingPoint } from "@/types/record";
 import {
   PartialSearchResult,
   SearchFilter,
   SearchResult,
+  SearchSource,
 } from "@/types/search";
 import { TimeRange } from "@/types/timeline";
 import { RecordingView } from "@/views/recording/RecordingView";
@@ -14,7 +15,7 @@ import SearchView from "@/views/search/SearchView";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 
-export default function Search() {
+export default function Explore() {
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
@@ -30,39 +31,56 @@ export default function Search() {
 
   // search filter
 
+  const [similaritySearch, setSimilaritySearch] =
+    useState<PartialSearchResult>();
+
   const [searchFilter, setSearchFilter, searchSearchParams] =
     useApiFilterArgs<SearchFilter>();
 
   const onUpdateFilter = useCallback(
     (newFilter: SearchFilter) => {
       setSearchFilter(newFilter);
+
+      if (similaritySearch && !newFilter.search_type?.includes("similarity")) {
+        setSimilaritySearch(undefined);
+      }
     },
-    [setSearchFilter],
+    [similaritySearch, setSearchFilter],
   );
 
   // search api
 
-  const [similaritySearch, setSimilaritySearch] =
-    useState<PartialSearchResult>();
+  const updateFilterWithSimilarity = useCallback(
+    (similaritySearch: PartialSearchResult) => {
+      let newFilter = searchFilter;
+      setSimilaritySearch(similaritySearch);
+      if (similaritySearch) {
+        newFilter = {
+          ...searchFilter,
+          // @ts-expect-error we want to set this
+          similarity_search_id: undefined,
+          search_type: ["similarity"] as SearchSource[],
+        };
+      } else {
+        if (searchFilter?.search_type?.includes("similarity" as SearchSource)) {
+          newFilter = {
+            ...searchFilter,
+            // @ts-expect-error we want to set this
+            similarity_search_id: undefined,
+            search_type: undefined,
+          };
+        }
+      }
+      if (newFilter) {
+        setSearchFilter(newFilter);
+      }
+    },
+    [searchFilter, setSearchFilter],
+  );
 
-  useEffect(() => {
-    if (
-      config?.semantic_search.enabled &&
-      searchSearchParams["search_type"] == "similarity" &&
-      searchSearchParams["event_id"]?.length != 0 &&
-      searchFilter
-    ) {
-      setSimilaritySearch({
-        id: searchSearchParams["event_id"],
-      });
-
-      // remove event id from url params
-      const { event_id: _event_id, ...newFilter } = searchFilter;
-      setSearchFilter(newFilter);
-    }
-    // only run similarity search with event_id in the url when coming from review
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useSearchEffect("similarity_search_id", (similarityId) => {
+    updateFilterWithSimilarity({ id: similarityId });
+  });
 
   useEffect(() => {
     if (similaritySearch) {
@@ -118,21 +136,25 @@ export default function Search() {
       ];
     }
 
-    return [
-      "events",
-      {
-        cameras: searchSearchParams["cameras"],
-        labels: searchSearchParams["labels"],
-        sub_labels: searchSearchParams["subLabels"],
-        zones: searchSearchParams["zones"],
-        before: searchSearchParams["before"],
-        after: searchSearchParams["after"],
-        search_type: searchSearchParams["search_type"],
-        limit: Object.keys(searchSearchParams).length == 0 ? 20 : null,
-        in_progress: 0,
-        include_thumbnails: 0,
-      },
-    ];
+    if (searchSearchParams && Object.keys(searchSearchParams).length !== 0) {
+      return [
+        "events",
+        {
+          cameras: searchSearchParams["cameras"],
+          labels: searchSearchParams["labels"],
+          sub_labels: searchSearchParams["subLabels"],
+          zones: searchSearchParams["zones"],
+          before: searchSearchParams["before"],
+          after: searchSearchParams["after"],
+          search_type: searchSearchParams["search_type"],
+          limit: Object.keys(searchSearchParams).length == 0 ? 20 : null,
+          in_progress: 0,
+          include_thumbnails: 0,
+        },
+      ];
+    }
+
+    return null;
   }, [searchTerm, searchSearchParams, similaritySearch]);
 
   const { data: searchResults, isLoading } =
@@ -230,11 +252,10 @@ export default function Search() {
         searchTerm={searchTerm}
         searchFilter={searchFilter}
         searchResults={searchResults}
-        allPreviews={allPreviews}
         isLoading={isLoading}
         setSearch={setSearch}
         similaritySearch={similaritySearch}
-        setSimilaritySearch={setSimilaritySearch}
+        setSimilaritySearch={updateFilterWithSimilarity}
         onUpdateFilter={onUpdateFilter}
         onOpenSearch={onOpenSearch}
       />

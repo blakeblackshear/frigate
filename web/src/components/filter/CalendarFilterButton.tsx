@@ -110,7 +110,7 @@ export function CalendarRangeFilterButton({
         className={`${range == undefined ? "text-secondary-foreground" : "text-selected-foreground"}`}
       />
       <div
-        className={`hidden md:block ${range == undefined ? "text-primary" : "text-selected-foreground"}`}
+        className={`${range == undefined ? "text-primary" : "text-selected-foreground"}`}
       >
         {range == undefined ? defaultText : selectedDate}
       </div>

@@ -11,7 +11,7 @@ import useSWR from "swr";
 
 export const ID_LIVE = 1;
 export const ID_REVIEW = 2;
-export const ID_SEARCH = 3;
+export const ID_EXPLORE = 3;
 export const ID_EXPORT = 4;
 export const ID_PLUS = 5;
 export const ID_PLAYGROUND = 6;
@@ -41,11 +41,11 @@ export default function useNavigation(
           url: "/review",
         },
         {
-          id: ID_SEARCH,
+          id: ID_EXPLORE,
           variant,
           icon: IoSearch,
-          title: "Search",
-          url: "/search",
+          title: "Explore",
+          url: "/explore",
         },
         {
           id: ID_EXPORT,

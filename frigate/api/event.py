@@ -251,6 +251,61 @@ def events():
     return jsonify(list(events))
 
 
+@EventBp.route("/events/explore")
+def events_explore():
+    limit = request.args.get("limit", 10, type=int)
+
+    subquery = Event.select(
+        Event.id,
+        Event.camera,
+        Event.label,
+        Event.zones,
+        Event.start_time,
+        Event.end_time,
+        Event.has_clip,
+        Event.has_snapshot,
+        Event.plus_id,
+        Event.retain_indefinitely,
+        Event.sub_label,
+        Event.top_score,
+        Event.false_positive,
+        Event.box,
+        Event.data,
+        fn.rank()
+        .over(partition_by=[Event.label], order_by=[Event.start_time.desc()])
+        .alias("rank"),
+        fn.COUNT(Event.id).over(partition_by=[Event.label]).alias("event_count"),
+    ).alias("subquery")
+
+    query = (
+        Event.select(
+            subquery.c.id,
+            subquery.c.camera,
+            subquery.c.label,
+            subquery.c.zones,
+            subquery.c.start_time,
+            subquery.c.end_time,
+            subquery.c.has_clip,
+            subquery.c.has_snapshot,
+            subquery.c.plus_id,
+            subquery.c.retain_indefinitely,
+            subquery.c.sub_label,
+            subquery.c.top_score,
+            subquery.c.false_positive,
+            subquery.c.box,
+            subquery.c.data,
+            subquery.c.event_count,
+        )
+        .from_(subquery)
+        .where(subquery.c.rank <= limit)
+        .order_by(subquery.c.event_count.desc(), subquery.c.start_time.desc())
+        .dicts()
+    )
+
+    events = query.iterator()
+    return jsonify(list(events))
+
+
 @EventBp.route("/event_ids")
 def event_ids():
     idString = request.args.get("ids")
@@ -317,7 +372,10 @@ def events_search():
         Event.zones,
         Event.start_time,
         Event.end_time,
+        Event.has_clip,
+        Event.has_snapshot,
         Event.data,
+        Event.plus_id,
         ReviewSegment.thumb_path,
     ]
 

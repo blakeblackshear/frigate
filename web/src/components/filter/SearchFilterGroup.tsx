@@ -5,7 +5,6 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { useCallback, useMemo, useState } from "react";
 import { DropdownMenuSeparator } from "../ui/dropdown-menu";
 import { getEndOfDayTimestamp } from "@/utils/dateUtil";
-import { FaFilter } from "react-icons/fa";
 import { isMobile } from "react-device-detect";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { Switch } from "../ui/switch";
@@ -19,6 +18,8 @@ import { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
 import SubFilterIcon from "../icons/SubFilterIcon";
 import { FaLocationDot } from "react-icons/fa6";
+import { MdLabel } from "react-icons/md";
+import SearchSourceIcon from "../icons/SearchSourceIcon";
 
 const SEARCH_FILTERS = [
   "cameras",
@@ -154,12 +155,18 @@ export default function SearchFilterGroup({
   );
 
   return (
-    <div className={cn("flex justify-center gap-2", className)}>
+    <div
+      className={cn(
+        "scrollbar-container flex justify-center gap-2 overflow-x-auto",
+        className,
+      )}
+    >
       {filters.includes("cameras") && (
         <CamerasFilterButton
           allCameras={filterValues.cameras}
           groups={groups}
           selectedCameras={filter?.cameras}
+          hideText={false}
           updateCameraFilter={(newCameras) => {
             onUpdateFilter({ ...filter, cameras: newCameras });
           }}
@@ -175,17 +182,8 @@ export default function SearchFilterGroup({
                   to: new Date(filter.before * 1000),
                 }
           }
-          defaultText="All Dates"
+          defaultText={isMobile ? "Dates" : "All Dates"}
           updateSelectedRange={onUpdateSelectedRange}
-        />
-      )}
-      {filters.includes("general") && (
-        <GeneralFilterButton
-          allLabels={filterValues.labels}
-          selectedLabels={filter?.labels}
-          updateLabelFilter={(newLabels) => {
-            onUpdateFilter({ ...filter, labels: newLabels });
-          }}
         />
       )}
       {filters.includes("zone") && allZones.length > 0 && (
@@ -195,6 +193,15 @@ export default function SearchFilterGroup({
           updateZoneFilter={(newZones) =>
             onUpdateFilter({ ...filter, zones: newZones })
           }
+        />
+      )}
+      {filters.includes("general") && (
+        <GeneralFilterButton
+          allLabels={filterValues.labels}
+          selectedLabels={filter?.labels}
+          updateLabelFilter={(newLabels) => {
+            onUpdateFilter({ ...filter, labels: newLabels });
+          }}
         />
       )}
       {filters.includes("sub") && (
@@ -235,19 +242,35 @@ function GeneralFilterButton({
     selectedLabels,
   );
 
+  const buttonText = useMemo(() => {
+    if (isMobile) {
+      return "Labels";
+    }
+
+    if (!selectedLabels || selectedLabels.length == 0) {
+      return "All Labels";
+    }
+
+    if (selectedLabels.length == 1) {
+      return selectedLabels[0];
+    }
+
+    return `${selectedLabels.length} Labels`;
+  }, [selectedLabels]);
+
   const trigger = (
     <Button
       size="sm"
       variant={selectedLabels?.length ? "select" : "default"}
       className="flex items-center gap-2 capitalize"
     >
-      <FaFilter
+      <MdLabel
         className={`${selectedLabels?.length ? "text-selected-foreground" : "text-secondary-foreground"}`}
       />
       <div
-        className={`hidden md:block ${selectedLabels?.length ? "text-selected-foreground" : "text-primary"}`}
+        className={`${selectedLabels?.length ? "text-selected-foreground" : "text-primary"}`}
       >
-        Filter
+        {buttonText}
       </div>
     </Button>
   );
@@ -405,6 +428,22 @@ function ZoneFilterButton({
     selectedZones,
   );
 
+  const buttonText = useMemo(() => {
+    if (isMobile) {
+      return "Zones";
+    }
+
+    if (!selectedZones || selectedZones.length == 0) {
+      return "All Zones";
+    }
+
+    if (selectedZones.length == 1) {
+      return selectedZones[0];
+    }
+
+    return `${selectedZones.length} Zones`;
+  }, [selectedZones]);
+
   const trigger = (
     <Button
       size="sm"
@@ -415,11 +454,9 @@ function ZoneFilterButton({
         className={`${selectedZones?.length ? "text-selected-foreground" : "text-secondary-foreground"}`}
       />
       <div
-        className={`hidden md:block ${selectedZones?.length ? "text-selected-foreground" : "text-primary"}`}
+        className={`${selectedZones?.length ? "text-selected-foreground" : "text-primary"}`}
       >
-        {selectedZones?.length
-          ? `${selectedZones.length} Zone${selectedZones.length > 1 ? "s" : ""}`
-          : "All Zones"}
+        {buttonText}
       </div>
     </Button>
   );
@@ -585,6 +622,22 @@ function SubFilterButton({
     string[] | undefined
   >(selectedSubLabels);
 
+  const buttonText = useMemo(() => {
+    if (isMobile) {
+      return "Sub Labels";
+    }
+
+    if (!selectedSubLabels || selectedSubLabels.length == 0) {
+      return "All Sub Labels";
+    }
+
+    if (selectedSubLabels.length == 1) {
+      return selectedSubLabels[0];
+    }
+
+    return `${selectedSubLabels.length} Sub Labels`;
+  }, [selectedSubLabels]);
+
   const trigger = (
     <Button
       size="sm"
@@ -595,11 +648,9 @@ function SubFilterButton({
         className={`${selectedSubLabels?.length || selectedSubLabels?.length ? "text-selected-foreground" : "text-secondary-foreground"}`}
       />
       <div
-        className={`hidden md:block ${selectedSubLabels?.length ? "text-selected-foreground" : "text-primary"}`}
+        className={`${selectedSubLabels?.length ? "text-selected-foreground" : "text-primary"}`}
       >
-        {selectedSubLabels?.length
-          ? `${selectedSubLabels.length} Sub Labels`
-          : "All Sub Labels"}
+        {buttonText}
       </div>
     </Button>
   );
@@ -745,17 +796,34 @@ export function SubFilterContent({
 }
 
 type SearchTypeButtonProps = {
-  selectedSearchSources: SearchSource[];
-  updateSearchSourceFilter: (sources: SearchSource[]) => void;
+  selectedSearchSources: SearchSource[] | undefined;
+  updateSearchSourceFilter: (sources: SearchSource[] | undefined) => void;
 };
 function SearchTypeButton({
   selectedSearchSources,
   updateSearchSourceFilter,
 }: SearchTypeButtonProps) {
   const [open, setOpen] = useState(false);
-  const [currentSearchSources, setCurrentSearchSources] = useState<
-    SearchSource[]
-  >(selectedSearchSources);
+
+  const buttonText = useMemo(() => {
+    if (isMobile) {
+      return "Sources";
+    }
+
+    if (
+      !selectedSearchSources ||
+      selectedSearchSources.length == 0 ||
+      selectedSearchSources.length == 2
+    ) {
+      return "All Search Sources";
+    }
+
+    if (selectedSearchSources.length == 1) {
+      return selectedSearchSources[0];
+    }
+
+    return `${selectedSearchSources.length} Search Sources`;
+  }, [selectedSearchSources]);
 
   const trigger = (
     <Button
@@ -763,23 +831,19 @@ function SearchTypeButton({
       variant={selectedSearchSources?.length != 2 ? "select" : "default"}
       className="flex items-center gap-2 capitalize"
     >
-      <FaFilter
+      <SearchSourceIcon
         className={`${selectedSearchSources?.length != 2 ? "text-selected-foreground" : "text-secondary-foreground"}`}
       />
       <div
-        className={`hidden md:block ${selectedSearchSources?.length != 2 ? "text-selected-foreground" : "text-primary"}`}
+        className={`${selectedSearchSources?.length != 2 ? "text-selected-foreground" : "text-primary"}`}
       >
-        {selectedSearchSources?.length != 2
-          ? `${selectedSearchSources[0]}`
-          : "All Search Sources"}
+        {buttonText}
       </div>
     </Button>
   );
   const content = (
     <SearchTypeContent
       selectedSearchSources={selectedSearchSources}
-      currentSearchSources={currentSearchSources}
-      setCurrentSearchSources={setCurrentSearchSources}
       updateSearchSourceFilter={updateSearchSourceFilter}
       onClose={() => setOpen(false)}
     />
@@ -790,10 +854,6 @@ function SearchTypeButton({
       <Drawer
         open={open}
         onOpenChange={(open) => {
-          if (!open) {
-            setCurrentSearchSources(selectedSearchSources);
-          }
-
           setOpen(open);
         }}
       >
@@ -809,10 +869,6 @@ function SearchTypeButton({
     <Popover
       open={open}
       onOpenChange={(open) => {
-        if (!open) {
-          setCurrentSearchSources(selectedSearchSources);
-        }
-
         setOpen(open);
       }}
     >
@@ -823,26 +879,26 @@ function SearchTypeButton({
 }
 
 type SearchTypeContentProps = {
-  selectedSearchSources: SearchSource[];
-  currentSearchSources: SearchSource[];
-  setCurrentSearchSources: (sources: SearchSource[]) => void;
-  updateSearchSourceFilter: (sources: SearchSource[]) => void;
+  selectedSearchSources: SearchSource[] | undefined;
+  updateSearchSourceFilter: (sources: SearchSource[] | undefined) => void;
   onClose: () => void;
 };
 export function SearchTypeContent({
   selectedSearchSources,
-  currentSearchSources,
-  setCurrentSearchSources,
   updateSearchSourceFilter,
   onClose,
 }: SearchTypeContentProps) {
+  const [currentSearchSources, setCurrentSearchSources] = useState<
+    SearchSource[] | undefined
+  >(selectedSearchSources);
+
   return (
     <>
       <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
         <div className="my-2.5 flex flex-col gap-2.5">
           <FilterSwitch
             label="Thumbnail Image"
-            isChecked={currentSearchSources?.includes("thumbnail") ?? false}
+            isChecked={selectedSearchSources?.includes("thumbnail") ?? false}
             onCheckedChange={(isChecked) => {
               const updatedSources = currentSearchSources
                 ? [...currentSearchSources]
@@ -897,10 +953,8 @@ export function SearchTypeContent({
           </Button>
           <Button
             onClick={() => {
-              setCurrentSearchSources([
-                "thumbnail",
-                "description",
-              ] as SearchSource[]);
+              updateSearchSourceFilter(undefined);
+              setCurrentSearchSources(["thumbnail", "description"]);
             }}
           >
             Reset
