@@ -19,6 +19,7 @@ import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { cn } from "@/lib/utils";
 import { TbExclamationCircle } from "react-icons/tb";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
+import { baseUrl } from "@/api/baseUrl";
 
 type LivePlayerProps = {
   cameraRef?: (ref: HTMLDivElement | null) => void;
@@ -224,6 +225,9 @@ export default function LivePlayer({
         className,
       )}
       onClick={onClick}
+      onAuxClick={() =>
+        window.open(`${baseUrl}#${cameraConfig.name}`, "_blank")?.focus()
+      }
     >
       {((showStillWithoutActivity && !liveReady) || liveReady) && (
         <>
