@@ -151,7 +151,9 @@ export default function SearchDetailDialog({
             upload={search as unknown as Event}
             dialog={false}
             onClose={() => {}}
-            onEventUploaded={() => {}}
+            onEventUploaded={() => {
+              search.plus_id = "new_upload";
+            }}
           />
         )}
         {page == "video" && <VideoTab search={search} />}
