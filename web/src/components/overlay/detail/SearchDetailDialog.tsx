@@ -34,8 +34,10 @@ import { baseUrl } from "@/api/baseUrl";
 import { cn } from "@/lib/utils";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
+import { FaRegListAlt, FaVideo } from "react-icons/fa";
+import FrigatePlusIcon from "@/components/icons/FrigatePlusIcon";
 
-const SEARCH_TABS = ["details", "Frigate+", "video"] as const;
+const SEARCH_TABS = ["details", "frigate+", "video"] as const;
 type SearchTab = (typeof SEARCH_TABS)[number];
 
 type SearchDetailDialogProps = {
@@ -65,7 +67,7 @@ export default function SearchDetailDialog({
     const views = [...SEARCH_TABS];
 
     if (!config.plus.enabled || !search.has_snapshot) {
-      const index = views.indexOf("Frigate+");
+      const index = views.indexOf("frigate+");
       views.splice(index, 1);
     }
 
@@ -133,6 +135,9 @@ export default function SearchDetailDialog({
                   data-nav-item={item}
                   aria-label={`Select ${item}`}
                 >
+                  {item == "details" && <FaRegListAlt className="size-4" />}
+                  {item == "frigate+" && <FrigatePlusIcon className="size-4" />}
+                  {item == "video" && <FaVideo className="size-4" />}
                   <div className="capitalize">{item}</div>
                 </ToggleGroupItem>
               ))}
@@ -148,7 +153,7 @@ export default function SearchDetailDialog({
             setSimilarity={setSimilarity}
           />
         )}
-        {page == "Frigate+" && (
+        {page == "frigate+" && (
           <FrigatePlusDialog
             upload={search as unknown as Event}
             dialog={false}
