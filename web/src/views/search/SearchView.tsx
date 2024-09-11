@@ -110,11 +110,11 @@ export default function SearchView({
 
       <div
         className={cn(
-          "relative flex h-11 items-center pl-2 pr-2 md:pl-3",
+          "flex h-11 items-center pl-2 pr-2 md:pl-3",
           config?.semantic_search?.enabled
             ? "justify-between"
             : "justify-center",
-          isMobileOnly && "h-[88px] flex-wrap gap-2",
+          isMobileOnly && "mb-3 h-auto flex-wrap gap-2",
         )}
       >
         {config?.semantic_search?.enabled && (
