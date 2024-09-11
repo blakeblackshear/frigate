@@ -43,14 +43,15 @@ type SearchFilterGroupProps = {
   className: string;
   filters?: SearchFilters[];
   filter?: SearchFilter;
+  searchTerm: string;
   filterList?: FilterList;
   onUpdateFilter: (filter: SearchFilter) => void;
 };
-
 export default function SearchFilterGroup({
   className,
   filters = DEFAULT_REVIEW_FILTERS,
   filter,
+  searchTerm,
   filterList,
   onUpdateFilter,
 }: SearchFilterGroupProps) {
@@ -213,16 +214,18 @@ export default function SearchFilterGroup({
           }
         />
       )}
-      {config?.semantic_search?.enabled && filters.includes("source") && (
-        <SearchTypeButton
-          selectedSearchSources={
-            filter?.search_type ?? ["thumbnail", "description"]
-          }
-          updateSearchSourceFilter={(newSearchSource) =>
-            onUpdateFilter({ ...filter, search_type: newSearchSource })
-          }
-        />
-      )}
+      {config?.semantic_search?.enabled &&
+        filters.includes("source") &&
+        !searchTerm.includes("similarity:") && (
+          <SearchTypeButton
+            selectedSearchSources={
+              filter?.search_type ?? ["thumbnail", "description"]
+            }
+            updateSearchSourceFilter={(newSearchSource) =>
+              onUpdateFilter({ ...filter, search_type: newSearchSource })
+            }
+          />
+        )}
     </div>
   );
 }
