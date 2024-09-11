@@ -1,6 +1,6 @@
 import { useApiFilterArgs } from "@/hooks/use-api-filter";
 import { useCameraPreviews } from "@/hooks/use-camera-previews";
-import { useOverlayState } from "@/hooks/use-overlay-state";
+import { useOverlayState, useSearchEffect } from "@/hooks/use-overlay-state";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { RecordingStartingPoint } from "@/types/record";
 import {
@@ -46,47 +46,37 @@ export default function Explore() {
   const [similaritySearch, setSimilaritySearch] =
     useState<PartialSearchResult>();
 
-  useEffect(() => {
-    if (
-      config?.semantic_search.enabled &&
-      searchSearchParams["search_type"] == "similarity" &&
-      searchSearchParams["event_id"]?.length != 0 &&
-      searchFilter
-    ) {
-      setSimilaritySearch({
-        id: searchSearchParams["event_id"],
-      });
-
-      // remove event id from url params
-      const { event_id: _event_id, ...newFilter } = searchFilter;
-      setSearchFilter(newFilter);
-    }
-    // only run similarity search with event_id in the url when coming from review
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    let newFilter = searchFilter;
-
-    if (similaritySearch) {
-      newFilter = {
-        ...searchFilter,
-        search_type: ["similarity"] as SearchSource[],
-      };
-    } else {
-      if (searchFilter?.search_type?.includes("similarity" as SearchSource)) {
+  const updateFilterWithSimilarity = useCallback(
+    (similaritySearch: PartialSearchResult) => {
+      let newFilter = searchFilter;
+      setSimilaritySearch(similaritySearch);
+      if (similaritySearch) {
         newFilter = {
           ...searchFilter,
-          search_type: undefined,
+          // @ts-expect-error we want to set this
+          similarity_search_id: undefined,
+          search_type: ["similarity"] as SearchSource[],
         };
+      } else {
+        if (searchFilter?.search_type?.includes("similarity" as SearchSource)) {
+          newFilter = {
+            ...searchFilter,
+            // @ts-expect-error we want to set this
+            similarity_search_id: undefined,
+            search_type: undefined,
+          };
+        }
       }
-    }
-    if (newFilter) {
-      setSearchFilter(newFilter);
-    }
-    // don't rerun when the filter updates
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [similaritySearch, setSearchFilter]);
+      if (newFilter) {
+        setSearchFilter(newFilter);
+      }
+    },
+    [searchFilter, setSearchFilter],
+  );
+
+  useSearchEffect("similarity_search_id", (similarityId) => {
+    updateFilterWithSimilarity({ id: similarityId });
+  });
 
   useEffect(() => {
     if (similaritySearch) {
@@ -261,7 +251,7 @@ export default function Explore() {
         isLoading={isLoading}
         setSearch={setSearch}
         similaritySearch={similaritySearch}
-        setSimilaritySearch={setSimilaritySearch}
+        setSimilaritySearch={updateFilterWithSimilarity}
         onUpdateFilter={onUpdateFilter}
         onOpenSearch={onOpenSearch}
       />

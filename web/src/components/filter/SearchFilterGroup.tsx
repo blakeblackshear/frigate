@@ -804,9 +804,6 @@ function SearchTypeButton({
   updateSearchSourceFilter,
 }: SearchTypeButtonProps) {
   const [open, setOpen] = useState(false);
-  const [currentSearchSources, setCurrentSearchSources] = useState<
-    SearchSource[]
-  >(selectedSearchSources);
 
   const buttonText = useMemo(() => {
     if (isMobile) {
@@ -847,8 +844,6 @@ function SearchTypeButton({
   const content = (
     <SearchTypeContent
       selectedSearchSources={selectedSearchSources}
-      currentSearchSources={currentSearchSources}
-      setCurrentSearchSources={setCurrentSearchSources}
       updateSearchSourceFilter={updateSearchSourceFilter}
       onClose={() => setOpen(false)}
     />
@@ -859,10 +854,6 @@ function SearchTypeButton({
       <Drawer
         open={open}
         onOpenChange={(open) => {
-          if (!open) {
-            setCurrentSearchSources(selectedSearchSources);
-          }
-
           setOpen(open);
         }}
       >
@@ -878,10 +869,6 @@ function SearchTypeButton({
     <Popover
       open={open}
       onOpenChange={(open) => {
-        if (!open) {
-          setCurrentSearchSources(selectedSearchSources);
-        }
-
         setOpen(open);
       }}
     >
@@ -893,25 +880,25 @@ function SearchTypeButton({
 
 type SearchTypeContentProps = {
   selectedSearchSources: SearchSource[];
-  currentSearchSources: SearchSource[];
-  setCurrentSearchSources: (sources: SearchSource[]) => void;
   updateSearchSourceFilter: (sources: SearchSource[]) => void;
   onClose: () => void;
 };
 export function SearchTypeContent({
   selectedSearchSources,
-  currentSearchSources,
-  setCurrentSearchSources,
   updateSearchSourceFilter,
   onClose,
 }: SearchTypeContentProps) {
+  const [currentSearchSources, setCurrentSearchSources] = useState<
+    SearchSource[]
+  >(selectedSearchSources);
+
   return (
     <>
       <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
         <div className="my-2.5 flex flex-col gap-2.5">
           <FilterSwitch
             label="Thumbnail Image"
-            isChecked={currentSearchSources?.includes("thumbnail") ?? false}
+            isChecked={selectedSearchSources?.includes("thumbnail") ?? false}
             onCheckedChange={(isChecked) => {
               const updatedSources = currentSearchSources
                 ? [...currentSearchSources]
