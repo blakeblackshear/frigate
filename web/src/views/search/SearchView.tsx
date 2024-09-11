@@ -12,11 +12,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
-import {
-  PartialSearchResult,
-  SearchFilter,
-  SearchResult,
-} from "@/types/search";
+import { SearchFilter, SearchResult } from "@/types/search";
 import { useCallback, useMemo, useState } from "react";
 import { isMobileOnly } from "react-device-detect";
 import { LuImage, LuSearchX, LuText, LuXCircle } from "react-icons/lu";
@@ -29,7 +25,6 @@ type SearchViewProps = {
   searchFilter?: SearchFilter;
   searchResults?: SearchResult[];
   isLoading: boolean;
-  similaritySearch?: PartialSearchResult;
   setSearch: (search: string) => void;
   setSimilaritySearch: (search: SearchResult) => void;
   onUpdateFilter: (filter: SearchFilter) => void;
@@ -41,7 +36,6 @@ export default function SearchView({
   searchFilter,
   searchResults,
   isLoading,
-  similaritySearch,
   setSearch,
   setSimilaritySearch,
   onUpdateFilter,
@@ -123,7 +117,7 @@ export default function SearchView({
             <Input
               className="text-md w-full bg-muted pr-10"
               placeholder={"Search for a detected object..."}
-              value={similaritySearch ? "" : search}
+              value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
             {search && (
@@ -141,6 +135,7 @@ export default function SearchView({
               "w-full justify-between md:justify-start lg:justify-end",
             )}
             filter={searchFilter}
+            searchTerm={searchTerm}
             onUpdateFilter={onUpdateFilter}
           />
         )}
@@ -180,7 +175,7 @@ export default function SearchView({
                         findSimilar={() => setSimilaritySearch(value)}
                         onClick={() => onSelectSearch(value)}
                       />
-                      {(searchTerm || similaritySearch) && (
+                      {searchTerm && (
                         <div className={cn("absolute right-2 top-2 z-40")}>
                           <Tooltip>
                             <TooltipTrigger>

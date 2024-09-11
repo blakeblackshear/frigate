@@ -3,12 +3,7 @@ import { useCameraPreviews } from "@/hooks/use-camera-previews";
 import { useOverlayState, useSearchEffect } from "@/hooks/use-overlay-state";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { RecordingStartingPoint } from "@/types/record";
-import {
-  PartialSearchResult,
-  SearchFilter,
-  SearchResult,
-  SearchSource,
-} from "@/types/search";
+import { SearchFilter, SearchResult } from "@/types/search";
 import { TimeRange } from "@/types/timeline";
 import { RecordingView } from "@/views/recording/RecordingView";
 import SearchView from "@/views/search/SearchView";
@@ -31,62 +26,26 @@ export default function Explore() {
 
   // search filter
 
-  const [similaritySearch, setSimilaritySearch] =
-    useState<PartialSearchResult>();
+  const similaritySearch = useMemo(() => {
+    if (!searchTerm.includes("similarity:")) {
+      return undefined;
+    }
+
+    return searchTerm.split(":")[1];
+  }, [searchTerm]);
 
   const [searchFilter, setSearchFilter, searchSearchParams] =
     useApiFilterArgs<SearchFilter>();
 
-  const onUpdateFilter = useCallback(
-    (newFilter: SearchFilter) => {
-      setSearchFilter(newFilter);
-
-      if (similaritySearch && !newFilter.search_type?.includes("similarity")) {
-        setSimilaritySearch(undefined);
-      }
-    },
-    [similaritySearch, setSearchFilter],
-  );
-
   // search api
 
-  const updateFilterWithSimilarity = useCallback(
-    (similaritySearch: PartialSearchResult) => {
-      let newFilter = searchFilter;
-      setSimilaritySearch(similaritySearch);
-      if (similaritySearch) {
-        newFilter = {
-          ...searchFilter,
-          // @ts-expect-error we want to set this
-          similarity_search_id: undefined,
-          search_type: ["similarity"] as SearchSource[],
-        };
-      } else {
-        if (searchFilter?.search_type?.includes("similarity" as SearchSource)) {
-          newFilter = {
-            ...searchFilter,
-            // @ts-expect-error we want to set this
-            similarity_search_id: undefined,
-            search_type: undefined,
-          };
-        }
-      }
-      if (newFilter) {
-        setSearchFilter(newFilter);
-      }
-    },
-    [searchFilter, setSearchFilter],
-  );
-
   useSearchEffect("similarity_search_id", (similarityId) => {
-    updateFilterWithSimilarity({ id: similarityId });
+    setSearch(`similarity:${similarityId}`);
+    // @ts-expect-error we want to clear this
+    setSearchFilter({ ...searchFilter, similarity_search_id: undefined });
   });
 
   useEffect(() => {
-    if (similaritySearch) {
-      setSimilaritySearch(undefined);
-    }
-
     if (searchTimeout) {
       clearTimeout(searchTimeout);
     }
@@ -106,7 +65,7 @@ export default function Explore() {
       return [
         "events/search",
         {
-          query: similaritySearch.id,
+          query: similaritySearch,
           cameras: searchSearchParams["cameras"],
           labels: searchSearchParams["labels"],
           sub_labels: searchSearchParams["subLabels"],
@@ -241,7 +200,7 @@ export default function Explore() {
           allCameras={selectedReviewData.allCameras}
           allPreviews={allPreviews}
           timeRange={selectedTimeRange}
-          updateFilter={onUpdateFilter}
+          updateFilter={setSearchFilter}
         />
       );
     }
@@ -254,9 +213,8 @@ export default function Explore() {
         searchResults={searchResults}
         isLoading={isLoading}
         setSearch={setSearch}
-        similaritySearch={similaritySearch}
-        setSimilaritySearch={updateFilterWithSimilarity}
-        onUpdateFilter={onUpdateFilter}
+        setSimilaritySearch={(search) => setSearch(`similarity:${search.id}`)}
+        onUpdateFilter={setSearchFilter}
         onOpenSearch={onOpenSearch}
       />
     );

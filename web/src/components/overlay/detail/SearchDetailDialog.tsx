@@ -33,8 +33,11 @@ import HlsVideoPlayer from "@/components/player/HlsVideoPlayer";
 import { baseUrl } from "@/api/baseUrl";
 import { cn } from "@/lib/utils";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
+import { FaRegListAlt, FaVideo } from "react-icons/fa";
+import FrigatePlusIcon from "@/components/icons/FrigatePlusIcon";
 
-const SEARCH_TABS = ["details", "Frigate+", "video"] as const;
+const SEARCH_TABS = ["details", "frigate+", "video"] as const;
 type SearchTab = (typeof SEARCH_TABS)[number];
 
 type SearchDetailDialogProps = {
@@ -64,7 +67,7 @@ export default function SearchDetailDialog({
     const views = [...SEARCH_TABS];
 
     if (!config.plus.enabled || !search.has_snapshot) {
-      const index = views.indexOf("Frigate+");
+      const index = views.indexOf("frigate+");
       views.splice(index, 1);
     }
 
@@ -132,6 +135,9 @@ export default function SearchDetailDialog({
                   data-nav-item={item}
                   aria-label={`Select ${item}`}
                 >
+                  {item == "details" && <FaRegListAlt className="size-4" />}
+                  {item == "frigate+" && <FrigatePlusIcon className="size-4" />}
+                  {item == "video" && <FaVideo className="size-4" />}
                   <div className="capitalize">{item}</div>
                 </ToggleGroupItem>
               ))}
@@ -147,7 +153,7 @@ export default function SearchDetailDialog({
             setSimilarity={setSimilarity}
           />
         )}
-        {page == "Frigate+" && (
+        {page == "frigate+" && (
           <FrigatePlusDialog
             upload={search as unknown as Event}
             dialog={false}
@@ -157,7 +163,7 @@ export default function SearchDetailDialog({
             }}
           />
         )}
-        {page == "video" && <VideoTab search={search} />}
+        {page == "video" && <VideoTab search={search} config={config} />}
       </Content>
     </Overlay>
   );
@@ -311,28 +317,79 @@ function ObjectDetailsTab({
 
 type VideoTabProps = {
   search: SearchResult;
+  config?: FrigateConfig;
 };
-function VideoTab({ search }: VideoTabProps) {
+function VideoTab({ search, config }: VideoTabProps) {
   const [isLoading, setIsLoading] = useState(true);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const endTime = useMemo(() => search.end_time ?? Date.now() / 1000, [search]);
 
+  const mainCameraAspect = useMemo(() => {
+    const camera = config?.cameras?.[search.camera];
+
+    if (!camera) {
+      return "normal";
+    }
+
+    const aspectRatio = camera.detect.width / camera.detect.height;
+
+    if (!aspectRatio) {
+      return "normal";
+    } else if (aspectRatio > ASPECT_WIDE_LAYOUT) {
+      return "wide";
+    } else if (aspectRatio < ASPECT_VERTICAL_LAYOUT) {
+      return "tall";
+    } else {
+      return "normal";
+    }
+  }, [config, search]);
+
+  const containerClassName = useMemo(() => {
+    if (mainCameraAspect == "wide") {
+      return "flex justify-center items-center";
+    } else if (mainCameraAspect == "tall") {
+      if (isDesktop) {
+        return "size-full flex flex-col justify-center items-center";
+      } else {
+        return "size-full";
+      }
+    } else {
+      return "";
+    }
+  }, [mainCameraAspect]);
+
+  const videoClassName = useMemo(() => {
+    if (mainCameraAspect == "wide") {
+      return "w-full aspect-wide";
+    } else if (mainCameraAspect == "tall") {
+      if (isDesktop) {
+        return "w-[50%] aspect-tall flex justify-center";
+      } else {
+        return "size-full";
+      }
+    } else {
+      return "w-full aspect-video";
+    }
+  }, [mainCameraAspect]);
+
   return (
-    <>
+    <div className={`aspect-video ${containerClassName}`}>
       {isLoading && (
         <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
       )}
-      <HlsVideoPlayer
-        videoRef={videoRef}
-        currentSource={`${baseUrl}vod/${search.camera}/start/${search.start_time}/end/${endTime}/index.m3u8`}
-        hotKeys
-        visible
-        frigateControls={false}
-        fullscreen={false}
-        supportsFullscreen={false}
-        onPlaying={() => setIsLoading(false)}
-      />
-    </>
+      <div className={videoClassName}>
+        <HlsVideoPlayer
+          videoRef={videoRef}
+          currentSource={`${baseUrl}vod/${search.camera}/start/${search.start_time}/end/${endTime}/index.m3u8`}
+          hotKeys
+          visible
+          frigateControls={false}
+          fullscreen={false}
+          supportsFullscreen={false}
+          onPlaying={() => setIsLoading(false)}
+        />
+      </div>
+    </div>
   );
 }

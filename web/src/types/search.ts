@@ -28,8 +28,6 @@ export type SearchResult = {
   };
 };
 
-export type PartialSearchResult = Partial<SearchResult> & { id: string };
-
 export type SearchFilter = {
   cameras?: string[];
   labels?: string[];
