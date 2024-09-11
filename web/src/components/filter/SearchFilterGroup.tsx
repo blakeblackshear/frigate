@@ -5,7 +5,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { useCallback, useMemo, useState } from "react";
 import { DropdownMenuSeparator } from "../ui/dropdown-menu";
 import { getEndOfDayTimestamp } from "@/utils/dateUtil";
-import { isMobile } from "react-device-detect";
+import { isDesktop, isMobile } from "react-device-detect";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
@@ -155,12 +155,13 @@ export default function SearchFilterGroup({
   );
 
   return (
-    <div className={cn("flex justify-center gap-2", className)}>
+    <div className={cn("flex justify-center gap-2 overflow-x-auto", className)}>
       {filters.includes("cameras") && (
         <CamerasFilterButton
           allCameras={filterValues.cameras}
           groups={groups}
           selectedCameras={filter?.cameras}
+          hideText={false}
           updateCameraFilter={(newCameras) => {
             onUpdateFilter({ ...filter, cameras: newCameras });
           }}
@@ -176,7 +177,7 @@ export default function SearchFilterGroup({
                   to: new Date(filter.before * 1000),
                 }
           }
-          defaultText="All Dates"
+          defaultText={isMobile ? "Dates" : "All Dates"}
           updateSelectedRange={onUpdateSelectedRange}
         />
       )}
@@ -236,6 +237,22 @@ function GeneralFilterButton({
     selectedLabels,
   );
 
+  const buttonText = useMemo(() => {
+    if (isMobile) {
+      return "Labels";
+    }
+
+    if (!selectedLabels || selectedLabels.length == 0) {
+      return "All Labels";
+    }
+
+    if (selectedLabels.length == 1) {
+      return selectedLabels[0];
+    }
+
+    return `${selectedLabels.length} Labels`;
+  }, [selectedLabels]);
+
   const trigger = (
     <Button
       size="sm"
@@ -246,9 +263,9 @@ function GeneralFilterButton({
         className={`${selectedLabels?.length ? "text-selected-foreground" : "text-secondary-foreground"}`}
       />
       <div
-        className={`hidden md:block ${selectedLabels?.length ? "text-selected-foreground" : "text-primary"}`}
+        className={`${selectedLabels?.length ? "text-selected-foreground" : "text-primary"}`}
       >
-        All Labels
+        {buttonText}
       </div>
     </Button>
   );
@@ -406,6 +423,22 @@ function ZoneFilterButton({
     selectedZones,
   );
 
+  const buttonText = useMemo(() => {
+    if (isMobile) {
+      return "Zones";
+    }
+
+    if (!selectedZones || selectedZones.length == 0) {
+      return "All Zones";
+    }
+
+    if (selectedZones.length == 1) {
+      return selectedZones[0];
+    }
+
+    return `${selectedZones.length} Zones`;
+  }, [selectedZones]);
+
   const trigger = (
     <Button
       size="sm"
@@ -416,11 +449,9 @@ function ZoneFilterButton({
         className={`${selectedZones?.length ? "text-selected-foreground" : "text-secondary-foreground"}`}
       />
       <div
-        className={`hidden md:block ${selectedZones?.length ? "text-selected-foreground" : "text-primary"}`}
+        className={`${selectedZones?.length ? "text-selected-foreground" : "text-primary"}`}
       >
-        {selectedZones?.length
-          ? `${selectedZones.length} Zone${selectedZones.length > 1 ? "s" : ""}`
-          : "All Zones"}
+        {buttonText}
       </div>
     </Button>
   );
@@ -586,6 +617,22 @@ function SubFilterButton({
     string[] | undefined
   >(selectedSubLabels);
 
+  const buttonText = useMemo(() => {
+    if (isMobile) {
+      return "Sub Labels";
+    }
+
+    if (!selectedSubLabels || selectedSubLabels.length == 0) {
+      return "All Sub Labels";
+    }
+
+    if (selectedSubLabels.length == 1) {
+      return selectedSubLabels[0];
+    }
+
+    return `${selectedSubLabels.length} Sub Labels`;
+  }, [selectedSubLabels]);
+
   const trigger = (
     <Button
       size="sm"
@@ -596,11 +643,9 @@ function SubFilterButton({
         className={`${selectedSubLabels?.length || selectedSubLabels?.length ? "text-selected-foreground" : "text-secondary-foreground"}`}
       />
       <div
-        className={`hidden md:block ${selectedSubLabels?.length ? "text-selected-foreground" : "text-primary"}`}
+        className={`${selectedSubLabels?.length ? "text-selected-foreground" : "text-primary"}`}
       >
-        {selectedSubLabels?.length
-          ? `${selectedSubLabels.length} Sub Labels`
-          : "All Sub Labels"}
+        {buttonText}
       </div>
     </Button>
   );
@@ -758,6 +803,22 @@ function SearchTypeButton({
     SearchSource[]
   >(selectedSearchSources);
 
+  const buttonText = useMemo(() => {
+    if (isMobile) {
+      return "Sources";
+    }
+
+    if (!selectedSearchSources || selectedSearchSources.length == 0) {
+      return "All Search Sources";
+    }
+
+    if (selectedSearchSources.length == 1) {
+      return selectedSearchSources[0];
+    }
+
+    return `${selectedSearchSources.length} Search Sources`;
+  }, [selectedSearchSources]);
+
   const trigger = (
     <Button
       size="sm"
@@ -768,11 +829,9 @@ function SearchTypeButton({
         className={`${selectedSearchSources?.length != 2 ? "text-selected-foreground" : "text-secondary-foreground"}`}
       />
       <div
-        className={`hidden md:block ${selectedSearchSources?.length != 2 ? "text-selected-foreground" : "text-primary"}`}
+        className={`${selectedSearchSources?.length != 2 ? "text-selected-foreground" : "text-primary"}`}
       >
-        {selectedSearchSources?.length != 2
-          ? `${selectedSearchSources[0]}`
-          : "All Search Sources"}
+        {buttonText}
       </div>
     </Button>
   );

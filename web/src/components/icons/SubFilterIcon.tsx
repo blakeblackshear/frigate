@@ -16,8 +16,8 @@ const SubFilterIcon = forwardRef<HTMLDivElement, SubFilterIconProps>(
         className={cn("relative flex items-center", className)}
         onClick={onClick}
       >
-        <FaCog className="absolute size-3 translate-x-4 translate-y-[62%]" />
-        <MdLabelOutline className="size-full" />
+        <FaCog className="absolute size-3 translate-x-[14px] translate-y-[62%]" />
+        <MdLabelOutline className="size-5" />
       </div>
     );
   },
