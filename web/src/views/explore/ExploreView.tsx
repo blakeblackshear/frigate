@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { isIOS, isMobileOnly } from "react-device-detect";
 import useSWR from "swr";
 import { useApiHost } from "@/api";
@@ -77,7 +77,6 @@ function ThumbnailRow({
 }: ThumbnailRowType) {
   const apiHost = useApiHost();
   const navigate = useNavigate();
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const handleSearch = (label: string) => {
     const similaritySearchParams = new URLSearchParams({
@@ -102,19 +101,14 @@ function ThumbnailRow({
         )}
       </div>
       <div className="flex flex-row items-center space-x-2 py-2">
-        {searchResults?.map((event, index) => (
+        {searchResults?.map((event) => (
           <div
             key={event.id}
             className="relative aspect-square h-auto max-w-[20%] flex-grow md:max-w-[10%]"
-            onMouseEnter={() => setHoveredIndex(index)}
-            onMouseLeave={() => setHoveredIndex(null)}
           >
             <img
               className={cn(
-                "absolute h-full w-full rounded-lg object-cover transition-all duration-300 ease-in-out md:rounded-2xl",
-                hoveredIndex === index
-                  ? "z-10 scale-110 cursor-pointer"
-                  : "scale-100",
+                "absolute h-full w-full cursor-pointer rounded-lg object-cover transition-all duration-300 ease-in-out md:rounded-2xl",
               )}
               style={
                 isIOS
