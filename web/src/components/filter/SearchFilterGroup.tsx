@@ -796,8 +796,8 @@ export function SubFilterContent({
 }
 
 type SearchTypeButtonProps = {
-  selectedSearchSources: SearchSource[];
-  updateSearchSourceFilter: (sources: SearchSource[]) => void;
+  selectedSearchSources: SearchSource[] | undefined;
+  updateSearchSourceFilter: (sources: SearchSource[] | undefined) => void;
 };
 function SearchTypeButton({
   selectedSearchSources,
@@ -879,8 +879,8 @@ function SearchTypeButton({
 }
 
 type SearchTypeContentProps = {
-  selectedSearchSources: SearchSource[];
-  updateSearchSourceFilter: (sources: SearchSource[]) => void;
+  selectedSearchSources: SearchSource[] | undefined;
+  updateSearchSourceFilter: (sources: SearchSource[] | undefined) => void;
   onClose: () => void;
 };
 export function SearchTypeContent({
@@ -889,7 +889,7 @@ export function SearchTypeContent({
   onClose,
 }: SearchTypeContentProps) {
   const [currentSearchSources, setCurrentSearchSources] = useState<
-    SearchSource[]
+    SearchSource[] | undefined
   >(selectedSearchSources);
 
   return (
@@ -953,14 +953,8 @@ export function SearchTypeContent({
           </Button>
           <Button
             onClick={() => {
-              updateSearchSourceFilter([
-                "thumbnail",
-                "description",
-              ] as SearchSource[]);
-              setCurrentSearchSources([
-                "thumbnail",
-                "description",
-              ] as SearchSource[]);
+              updateSearchSourceFilter(undefined);
+              setCurrentSearchSources(undefined);
             }}
           >
             Reset
