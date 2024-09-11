@@ -343,7 +343,7 @@ function EventItem({
                           event_id: event.id,
                         }).toString();
 
-                        navigate(`/search?${similaritySearchParams}`);
+                        navigate(`/explore?${similaritySearchParams}`);
                       }}
                     >
                       <FaImages className="size-4 text-white" />

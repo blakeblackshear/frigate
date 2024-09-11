@@ -7,6 +7,7 @@ import {
   PartialSearchResult,
   SearchFilter,
   SearchResult,
+  SearchSource,
 } from "@/types/search";
 import { TimeRange } from "@/types/timeline";
 import { RecordingView } from "@/views/recording/RecordingView";
@@ -63,6 +64,27 @@ export default function Explore() {
     // only run similarity search with event_id in the url when coming from review
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    let newFilter = searchFilter;
+
+    if (similaritySearch) {
+      newFilter = {
+        ...searchFilter,
+        search_type: ["similarity"] as SearchSource[],
+      };
+    } else {
+      if (searchFilter?.search_type?.includes("similarity" as SearchSource)) {
+        newFilter = {
+          ...searchFilter,
+          search_type: undefined,
+        };
+      }
+    }
+    if (newFilter) {
+      setSearchFilter(newFilter);
+    }
+  }, [similaritySearch, searchFilter, setSearchFilter]);
 
   useEffect(() => {
     if (similaritySearch) {
