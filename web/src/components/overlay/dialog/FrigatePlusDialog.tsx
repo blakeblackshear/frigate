@@ -1,4 +1,5 @@
 import { baseUrl } from "@/api/baseUrl";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,9 +12,11 @@ import {
 import { Event } from "@/types/event";
 import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import useSWR from "swr";
+
+type SubmissionState = "reviewing" | "uploading" | "submitted";
 
 type FrigatePlusDialogProps = {
   upload?: Event;
@@ -51,6 +54,10 @@ export function FrigatePlusDialog({
 
   // upload
 
+  const [state, setState] = useState<SubmissionState>(
+    upload?.plus_id ? "submitted" : "reviewing",
+  );
+
   const onSubmitToPlus = useCallback(
     async (falsePositive: boolean) => {
       if (!upload) {
@@ -63,6 +70,7 @@ export function FrigatePlusDialog({
             include_annotation: 1,
           });
 
+      setState("submitted");
       onEventUploaded();
       onClose();
     },
@@ -97,21 +105,34 @@ export function FrigatePlusDialog({
           />
         )}
       </TransformComponent>
-      {upload?.plus_id == undefined && (
-        <DialogFooter>
-          {dialog && <Button onClick={onClose}>Cancel</Button>}
-          <Button className="bg-success" onClick={() => onSubmitToPlus(false)}>
-            This is a {upload?.label}
-          </Button>
-          <Button
-            className="text-white"
-            variant="destructive"
-            onClick={() => onSubmitToPlus(true)}
-          >
-            This is not a {upload?.label}
-          </Button>
-        </DialogFooter>
-      )}
+
+      <DialogFooter>
+        {state == "reviewing" && (
+          <>
+            {dialog && <Button onClick={onClose}>Cancel</Button>}
+            <Button
+              className="bg-success"
+              onClick={() => {
+                setState("uploading");
+                onSubmitToPlus(false);
+              }}
+            >
+              This is a {upload?.label}
+            </Button>
+            <Button
+              className="text-white"
+              variant="destructive"
+              onClick={() => {
+                setState("uploading");
+                onSubmitToPlus(true);
+              }}
+            >
+              This is not a {upload?.label}
+            </Button>
+          </>
+        )}
+        {state == "uploading" && <ActivityIndicator />}
+      </DialogFooter>
     </TransformWrapper>
   );
 
