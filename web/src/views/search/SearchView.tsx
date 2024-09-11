@@ -110,18 +110,18 @@ export default function SearchView({
 
       <div
         className={cn(
-          "flex h-11 items-center pl-2 pr-2 md:pl-3",
+          "flex flex-col items-start space-y-2 pl-2 pr-2 md:mb-2 md:pl-3 lg:h-10 lg:flex-row lg:items-center lg:space-y-0",
           config?.semantic_search?.enabled
             ? "justify-between"
             : "justify-center",
-          isMobileOnly && "mb-3 h-auto flex-wrap gap-2",
+          isMobileOnly && "mb-2 h-auto flex-wrap gap-2 space-y-0",
         )}
       >
         {config?.semantic_search?.enabled && (
           <div
             className={cn(
               "relative w-full",
-              hasExistingSearch ? "md:mr-3 md:w-1/3" : "md:ml-[25%] md:w-1/2",
+              hasExistingSearch ? "lg:mr-3 lg:w-1/3" : "lg:ml-[25%] lg:w-1/2",
             )}
           >
             <Input
@@ -141,7 +141,9 @@ export default function SearchView({
 
         {hasExistingSearch && (
           <SearchFilterGroup
-            className={cn("", isMobileOnly && "w-full justify-between")}
+            className={cn(
+              "w-full justify-between md:justify-start lg:justify-end",
+            )}
             filter={searchFilter}
             onUpdateFilter={onUpdateFilter}
           />
@@ -181,7 +183,9 @@ export default function SearchView({
                         searchResult={value}
                         scrollLock={false}
                         findSimilar={() => setSimilaritySearch(value)}
-                        onClick={onSelectSearch}
+                        onClick={() => {
+                          onSelectSearch(value, true);
+                        }}
                       />
                       {(searchTerm || similaritySearch) && (
                         <div className={cn("absolute right-2 top-2 z-40")}>
