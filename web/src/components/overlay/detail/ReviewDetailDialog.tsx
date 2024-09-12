@@ -140,7 +140,7 @@ export default function ReviewDetailDialog({
                   </div>
                   <Button
                     className="flex max-w-24 gap-2"
-                    variant="select"
+                    variant="secondary"
                     size="sm"
                     onClick={() =>
                       navigator.share({
@@ -149,7 +149,6 @@ export default function ReviewDetailDialog({
                     }
                   >
                     <FaShareAlt className="size-4" />
-                    Share
                   </Button>
                 </div>
                 <div className="flex w-full flex-col items-center gap-2">
