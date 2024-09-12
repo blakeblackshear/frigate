@@ -710,7 +710,7 @@ export function CameraGroupEdit({
               <FormLabel>Name</FormLabel>
               <FormControl>
                 <Input
-                  className="w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                  className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                   placeholder="Enter a name..."
                   disabled={editingGroup !== undefined}
                   {...field}
