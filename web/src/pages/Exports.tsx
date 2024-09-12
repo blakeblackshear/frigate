@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Toaster } from "@/components/ui/sonner";
+import { useSearchEffect } from "@/hooks/use-overlay-state";
 import { cn } from "@/lib/utils";
 import { DeleteClipType, Export } from "@/types/export";
 import axios from "axios";
@@ -45,6 +46,20 @@ function Exports() {
         .includes(search.toLowerCase()),
     );
   }, [exports, search]);
+
+  // Viewing
+
+  const [selected, setSelected] = useState<Export>();
+  const [selectedAspect, setSelectedAspect] = useState(0.0);
+
+  useSearchEffect("id", (id) => {
+    if (!exports) {
+      return false;
+    }
+
+    setSelected(exports.find((exp) => exp.id == id));
+    return true;
+  });
 
   // Deleting
 
@@ -90,11 +105,6 @@ function Exports() {
     },
     [mutate],
   );
-
-  // Viewing
-
-  const [selected, setSelected] = useState<Export>();
-  const [selectedAspect, setSelectedAspect] = useState(0.0);
 
   return (
     <div className="flex size-full flex-col gap-2 overflow-hidden px-1 pt-2 md:p-2">

@@ -34,10 +34,16 @@ import { baseUrl } from "@/api/baseUrl";
 import { cn } from "@/lib/utils";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
-import { FaRegListAlt, FaVideo } from "react-icons/fa";
-import FrigatePlusIcon from "@/components/icons/FrigatePlusIcon";
+import { FaImage, FaRegListAlt, FaVideo } from "react-icons/fa";
+import { FaRotate } from "react-icons/fa6";
+import ObjectLifecycle from "./ObjectLifecycle";
 
-const SEARCH_TABS = ["details", "frigate+", "video"] as const;
+const SEARCH_TABS = [
+  "details",
+  "snapshot",
+  "video",
+  "object lifecycle",
+] as const;
 type SearchTab = (typeof SEARCH_TABS)[number];
 
 type SearchDetailDialogProps = {
@@ -66,8 +72,8 @@ export default function SearchDetailDialog({
 
     const views = [...SEARCH_TABS];
 
-    if (!config.plus.enabled || !search.has_snapshot) {
-      const index = views.indexOf("frigate+");
+    if (!search.has_snapshot) {
+      const index = views.indexOf("snapshot");
       views.splice(index, 1);
     }
 
@@ -79,6 +85,16 @@ export default function SearchDetailDialog({
 
     return views;
   }, [config, search]);
+
+  useEffect(() => {
+    if (searchTabs.length == 0) {
+      return;
+    }
+
+    if (!searchTabs.includes(pageToggle)) {
+      setPage("details");
+    }
+  }, [pageToggle, searchTabs]);
 
   if (!search) {
     return;
@@ -104,7 +120,7 @@ export default function SearchDetailDialog({
       <Content
         className={
           isDesktop
-            ? "sm:max-w-xl md:max-w-3xl lg:max-w-4xl xl:max-w-7xl"
+            ? "sm:max-w-xl md:max-w-4xl lg:max-w-4xl xl:max-w-7xl"
             : "max-h-[75dvh] overflow-hidden px-2 pb-4"
         }
       >
@@ -136,8 +152,11 @@ export default function SearchDetailDialog({
                   aria-label={`Select ${item}`}
                 >
                   {item == "details" && <FaRegListAlt className="size-4" />}
-                  {item == "frigate+" && <FrigatePlusIcon className="size-4" />}
+                  {item == "snapshot" && <FaImage className="size-4" />}
                   {item == "video" && <FaVideo className="size-4" />}
+                  {item == "object lifecycle" && (
+                    <FaRotate className="size-4" />
+                  )}
                   <div className="capitalize">{item}</div>
                 </ToggleGroupItem>
               ))}
@@ -153,9 +172,14 @@ export default function SearchDetailDialog({
             setSimilarity={setSimilarity}
           />
         )}
-        {page == "frigate+" && (
+        {page == "snapshot" && (
           <FrigatePlusDialog
-            upload={search as unknown as Event}
+            upload={
+              {
+                ...search,
+                plus_id: config?.plus?.enabled ? search.plus_id : "not_enabled",
+              } as unknown as Event
+            }
             dialog={false}
             onClose={() => {}}
             onEventUploaded={() => {
@@ -164,6 +188,14 @@ export default function SearchDetailDialog({
           />
         )}
         {page == "video" && <VideoTab search={search} config={config} />}
+        {page == "object lifecycle" && (
+          <ObjectLifecycle
+            className="w-full"
+            event={search as unknown as Event}
+            fullscreen={true}
+            setPane={() => {}}
+          />
+        )}
       </Content>
     </Overlay>
   );

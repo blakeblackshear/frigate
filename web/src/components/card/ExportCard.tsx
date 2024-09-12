@@ -3,7 +3,7 @@ import { LuTrash } from "react-icons/lu";
 import { Button } from "../ui/button";
 import { useCallback, useState } from "react";
 import { isDesktop } from "react-device-detect";
-import { FaDownload, FaPlay } from "react-icons/fa";
+import { FaDownload, FaPlay, FaShareAlt } from "react-icons/fa";
 import Chip from "../indicators/Chip";
 import { Skeleton } from "../ui/skeleton";
 import {
@@ -19,6 +19,7 @@ import { DeleteClipType, Export } from "@/types/export";
 import { MdEditSquare } from "react-icons/md";
 import { baseUrl } from "@/api/baseUrl";
 import { cn } from "@/lib/utils";
+import { shareOrCopy } from "@/utils/browserUtil";
 
 type ExportProps = {
   className: string;
@@ -147,6 +148,19 @@ export default function ExportCard({
           <div>
             <div className="absolute inset-0 rounded-lg bg-black bg-opacity-60 md:rounded-2xl" />
             <div className="absolute right-1 top-1 flex items-center gap-2">
+              {!exportedRecording.in_progress && (
+                <Chip
+                  className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
+                  onClick={() =>
+                    shareOrCopy(
+                      `${baseUrl}exports?id=${exportedRecording.id}`,
+                      exportedRecording.name.replaceAll("_", " "),
+                    )
+                  }
+                >
+                  <FaShareAlt className="size-4 text-white" />
+                </Chip>
+              )}
               {!exportedRecording.in_progress && (
                 <a
                   download

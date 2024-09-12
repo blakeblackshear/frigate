@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
 import { FrigatePlusDialog } from "../dialog/FrigatePlusDialog";
 import ObjectLifecycle from "./ObjectLifecycle";
 import Chip from "@/components/indicators/Chip";
-import { FaDownload, FaImages } from "react-icons/fa";
+import { FaDownload, FaImages, FaShareAlt } from "react-icons/fa";
 import FrigatePlusIcon from "@/components/icons/FrigatePlusIcon";
 import { FaArrowsRotate } from "react-icons/fa6";
 import {
@@ -34,6 +34,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { baseUrl } from "@/api/baseUrl";
+import { shareOrCopy } from "@/utils/browserUtil";
 
 type ReviewDetailDialogProps = {
   review?: ReviewSegment;
@@ -136,11 +139,21 @@ export default function ReviewDetailDialog({
                     <div className="text-sm text-primary/40">Timestamp</div>
                     <div className="text-sm">{formattedDate}</div>
                   </div>
+                  <Button
+                    className="flex max-w-24 gap-2"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() =>
+                      shareOrCopy(`${baseUrl}review?id=${review.id}`)
+                    }
+                  >
+                    <FaShareAlt className="size-4" />
+                  </Button>
                 </div>
-                <div className="flex w-full flex-col gap-2">
-                  <div className="flex flex-col gap-1.5">
+                <div className="flex w-full flex-col items-center gap-2">
+                  <div className="flex w-full flex-col gap-1.5">
                     <div className="text-sm text-primary/40">Objects</div>
-                    <div className="flex flex-col items-start gap-2 text-sm capitalize">
+                    <div className="scrollbar-container flex max-h-32 flex-col items-start gap-2 overflow-y-scroll text-sm capitalize">
                       {events?.map((event) => {
                         return (
                           <div
@@ -159,7 +172,7 @@ export default function ReviewDetailDialog({
                     </div>
                   </div>
                   {review.data.zones.length > 0 && (
-                    <div className="flex flex-col gap-1.5">
+                    <div className="scrollbar-container flex max-h-32 w-full flex-col gap-1.5">
                       <div className="text-sm text-primary/40">Zones</div>
                       <div className="flex flex-col items-start gap-2 text-sm capitalize">
                         {review.data.zones.map((zone) => {
@@ -199,11 +212,7 @@ export default function ReviewDetailDialog({
 
           {pane == "details" && selectedEvent && (
             <div className="scrollbar-container overflow-x-none mt-0 flex size-full flex-col gap-2 overflow-y-auto overflow-x-hidden">
-              <ObjectLifecycle
-                review={review}
-                event={selectedEvent}
-                setPane={setPane}
-              />
+              <ObjectLifecycle event={selectedEvent} setPane={setPane} />
             </div>
           )}
         </Content>
