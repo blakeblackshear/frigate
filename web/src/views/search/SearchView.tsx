@@ -13,11 +13,15 @@ import {
 import { cn } from "@/lib/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { SearchFilter, SearchResult } from "@/types/search";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isMobileOnly } from "react-device-detect";
 import { LuImage, LuSearchX, LuText, LuXCircle } from "react-icons/lu";
 import useSWR from "swr";
 import ExploreView from "../explore/ExploreView";
+import useKeyboardListener, {
+  KeyModifiers,
+} from "@/hooks/use-keyboard-listener";
+import scrollIntoView from "scroll-into-view-if-needed";
 
 type SearchViewProps = {
   search: string;
@@ -59,8 +63,12 @@ export default function SearchView({
 
   // search interaction
 
-  const onSelectSearch = useCallback((item: SearchResult) => {
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const onSelectSearch = useCallback((item: SearchResult, index: number) => {
     setSearchDetail(item);
+    setSelectedIndex(index);
   }, []);
 
   // confidence score - probably needs tweaking
@@ -86,6 +94,56 @@ export default function SearchView({
     () => searchResults != undefined || searchFilter != undefined,
     [searchResults, searchFilter],
   );
+
+  // keyboard listener
+
+  const onKeyboardShortcut = useCallback(
+    (key: string | null, modifiers: KeyModifiers) => {
+      if (!modifiers.down || !uniqueResults) {
+        return;
+      }
+
+      switch (key) {
+        case "ArrowLeft":
+          setSelectedIndex((prevIndex) => {
+            const newIndex =
+              prevIndex === null
+                ? uniqueResults.length - 1
+                : (prevIndex - 1 + uniqueResults.length) % uniqueResults.length;
+            setSearchDetail(uniqueResults[newIndex]);
+            return newIndex;
+          });
+          break;
+        case "ArrowRight":
+          setSelectedIndex((prevIndex) => {
+            const newIndex =
+              prevIndex === null ? 0 : (prevIndex + 1) % uniqueResults.length;
+            setSearchDetail(uniqueResults[newIndex]);
+            return newIndex;
+          });
+          break;
+      }
+    },
+    [uniqueResults],
+  );
+
+  useKeyboardListener(["ArrowLeft", "ArrowRight"], onKeyboardShortcut);
+
+  // scroll into view
+
+  useEffect(() => {
+    if (
+      selectedIndex !== null &&
+      uniqueResults &&
+      itemRefs.current?.[selectedIndex]
+    ) {
+      scrollIntoView(itemRefs.current[selectedIndex], {
+        block: "center",
+        behavior: "smooth",
+        scrollMode: "if-needed",
+      });
+    }
+  }, [selectedIndex, uniqueResults]);
 
   return (
     <div className="flex size-full flex-col pt-2 md:py-2">
@@ -156,12 +214,13 @@ export default function SearchView({
         {uniqueResults && (
           <div className="mt-2 grid w-full gap-2 px-1 sm:grid-cols-2 md:mx-2 md:grid-cols-4 md:gap-4 3xl:grid-cols-6">
             {uniqueResults &&
-              uniqueResults.map((value) => {
-                const selected = false;
+              uniqueResults.map((value, index) => {
+                const selected = selectedIndex === index;
 
                 return (
                   <div
                     key={value.id}
+                    ref={(item) => (itemRefs.current[index] = item)}
                     data-start={value.start_time}
                     className="review-item relative rounded-lg"
                   >
@@ -173,7 +232,7 @@ export default function SearchView({
                       <SearchThumbnail
                         searchResult={value}
                         findSimilar={() => setSimilaritySearch(value)}
-                        onClick={() => onSelectSearch(value)}
+                        onClick={() => onSelectSearch(value, index)}
                       />
                       {searchTerm && (
                         <div className={cn("absolute right-2 top-2 z-40")}>
@@ -207,7 +266,7 @@ export default function SearchView({
                       )}
                     </div>
                     <div
-                      className={`review-item-ring pointer-events-none absolute inset-0 z-10 size-full rounded-lg outline outline-[3px] -outline-offset-[2.8px] ${selected ? `shadow-severity_alert outline-severity_alert` : "outline-transparent duration-500"}`}
+                      className={`review-item-ring pointer-events-none absolute inset-0 z-10 size-full rounded-lg outline outline-[3px] -outline-offset-[2.8px] ${selected ? `shadow-selected outline-selected` : "outline-transparent duration-500"}`}
                     />
                   </div>
                 );
