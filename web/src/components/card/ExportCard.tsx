@@ -3,7 +3,7 @@ import { LuTrash } from "react-icons/lu";
 import { Button } from "../ui/button";
 import { useCallback, useState } from "react";
 import { isDesktop } from "react-device-detect";
-import { FaDownload, FaPlay, FaShare, FaShareAlt } from "react-icons/fa";
+import { FaDownload, FaPlay, FaShareAlt } from "react-icons/fa";
 import Chip from "../indicators/Chip";
 import { Skeleton } from "../ui/skeleton";
 import {
