@@ -79,7 +79,7 @@ export function FrigatePlusDialog({
 
   const content = (
     <TransformWrapper minScale={1.0} wheel={{ smoothStep: 0.005 }}>
-      <DialogHeader>
+      <DialogHeader className={state == "submitted" ? "sr-only" : ""}>
         <DialogTitle>Submit To Frigate+</DialogTitle>
         <DialogDescription>
           Objects in locations you want to avoid are not false positives.

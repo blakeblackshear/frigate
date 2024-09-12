@@ -35,7 +35,6 @@ import { cn } from "@/lib/utils";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
 import { FaImage, FaRegListAlt, FaVideo } from "react-icons/fa";
-import FrigatePlusIcon from "@/components/icons/FrigatePlusIcon";
 import { FaRotate } from "react-icons/fa6";
 import ObjectLifecycle from "./ObjectLifecycle";
 
@@ -86,6 +85,14 @@ export default function SearchDetailDialog({
 
     return views;
   }, [config, search]);
+
+  useEffect(() => {
+    if (!searchTabs.includes(page)) {
+      setPage("details");
+    }
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTabs]);
 
   if (!search) {
     return;
