@@ -111,7 +111,7 @@ export default function SearchDetailDialog({
       <Content
         className={
           isDesktop
-            ? "sm:max-w-xl md:max-w-xl lg:max-w-2xl xl:max-w-5xl"
+            ? "sm:max-w-xl md:max-w-xl lg:max-w-3xl xl:max-w-6xl"
             : "max-h-[75dvh] overflow-hidden px-2 pb-4"
         }
       >
