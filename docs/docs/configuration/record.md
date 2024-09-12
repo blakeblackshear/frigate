@@ -3,7 +3,7 @@ id: record
 title: Recording
 ---
 
-Recordings can be enabled and are stored at `/media/frigate/recordings`. The folder structure for the recordings is `YYYY-MM-DD/HH/<camera_name>/MM.SS.mp4` in **UTC time**. These recordings are written directly from your camera stream without re-encoding. Each camera supports a configurable retention policy in the config. Frigate chooses the largest matching retention value between the recording retention and the event retention when determining if a recording should be removed.
+Recordings can be enabled and are stored at `/media/frigate/recordings`. The folder structure for the recordings is `YYYY-MM-DD/HH/<camera_name>/MM.SS.mp4` in **UTC time**. These recordings are written directly from your camera stream without re-encoding. Each camera supports a configurable retention policy in the config. Frigate chooses the largest matching retention value between the recording retention and the tracked object retention when determining if a recording should be removed.
 
 New recording segments are written from the camera stream to cache, they are only moved to disk if they match the setup recording retention policy.
 
@@ -53,7 +53,7 @@ record:
 
 ### Minimum: Alerts only
 
-If you only want to retain video that occurs during an event, this config will discard video unless an alert is ongoing.
+If you only want to retain video that occurs during a tracked object, this config will discard video unless an alert is ongoing.
 
 ```yaml
 record:
@@ -72,7 +72,7 @@ As of Frigate 0.12 if there is less than an hour left of storage, the oldest 2 h
 
 ## Configuring Recording Retention
 
-Frigate supports both continuous and event based recordings with separate retention modes and retention periods.
+Frigate supports both continuous and tracked object based recordings with separate retention modes and retention periods.
 
 :::tip
 
@@ -95,7 +95,7 @@ Continuous recording supports different retention modes [which are described bel
 
 ### Object Recording
 
-The number of days to record review items can be specified for review items classified as alerts as well as events.
+The number of days to record review items can be specified for review items classified as alerts as well as tracked objects.
 
 ```yaml
 record:
@@ -108,13 +108,13 @@ record:
       days: 10 # <- number of days to keep detections recordings
 ```
 
-This configuration will retain recording segments that overlap with alerts and detections for 10 days. Because multiple events can reference the same recording segments, this avoids storing duplicate footage for overlapping events and reduces overall storage needs.
+This configuration will retain recording segments that overlap with alerts and detections for 10 days. Because multiple tracked objects can reference the same recording segments, this avoids storing duplicate footage for overlapping tracked objects and reduces overall storage needs.
 
 **WARNING**: Recordings still must be enabled in the config. If a camera has recordings disabled in the config, enabling via the methods listed above will have no effect.
 
 ## What do the different retain modes mean?
 
-Frigate saves from the stream with the `record` role in 10 second segments. These options determine which recording segments are kept for continuous recording (but can also affect events).
+Frigate saves from the stream with the `record` role in 10 second segments. These options determine which recording segments are kept for continuous recording (but can also affect tracked objects).
 
 Let's say you have Frigate configured so that your doorbell camera would retain the last **2** days of continuous recording.
 

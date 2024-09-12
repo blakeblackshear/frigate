@@ -19,7 +19,7 @@ Causes Frigate to exit. Docker should be configured to automatically restart the
 
 ### `frigate/events`
 
-Message published for each changed event. The first message is published when the tracked object is no longer marked as a false_positive. When Frigate finds a better snapshot of the tracked object or when a zone change occurs, it will publish a message with the same id. When the event ends, a final message is published with `end_time` set.
+Message published for each changed tracked object. The first message is published when the tracked object is no longer marked as a false_positive. When Frigate finds a better snapshot of the tracked object or when a zone change occurs, it will publish a message with the same id. When the tracked object ends, a final message is published with `end_time` set.
 
 ```json
 {
@@ -100,24 +100,22 @@ Message published for each changed review item. The first message is published w
 
 ```json
 {
-  "type": "update",  // new, update, end
+  "type": "update", // new, update, end
   "before": {
-    "id": "1718987129.308396-fqk5ka",  // review_id
+    "id": "1718987129.308396-fqk5ka", // review_id
     "camera": "front_cam",
     "start_time": 1718987129.308396,
     "end_time": null,
     "severity": "detection",
     "thumb_path": "/media/frigate/clips/review/thumb-front_cam-1718987129.308396-fqk5ka.webp",
     "data": {
-      "detections": [  // list of event IDs
+      "detections": [
+        // list of event IDs
         "1718987128.947436-g92ztx",
         "1718987148.879516-d7oq7r",
         "1718987126.934663-q5ywpt"
       ],
-      "objects": [
-        "person",
-        "car"
-      ],
+      "objects": ["person", "car"],
       "sub_labels": [],
       "zones": [],
       "audio": []
@@ -136,14 +134,9 @@ Message published for each changed review item. The first message is published w
         "1718987148.879516-d7oq7r",
         "1718987126.934663-q5ywpt"
       ],
-      "objects": [
-        "person",
-        "car"
-      ],
+      "objects": ["person", "car"],
       "sub_labels": ["Bob"],
-      "zones": [
-        "front_yard"
-      ],
+      "zones": ["front_yard"],
       "audio": []
     }
   }
@@ -175,12 +168,10 @@ Publishes the count of active objects for the camera for use as a sensor in Home
 Assistant. `all` can be used as the object_name for the count of all active objects
 for the camera.
 
-
 ### `frigate/<zone_name>/<object_name>`
 
 Publishes the count of objects for the zone for use as a sensor in Home Assistant.
 `all` can be used as the object_name for the count of all objects for the zone.
-
 
 ### `frigate/<zone_name>/<object_name>/active`
 

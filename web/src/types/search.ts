@@ -10,6 +10,9 @@ export type SearchResult = {
   label: string;
   sub_label?: string;
   thumb_path?: string;
+  plus_id?: string;
+  has_snapshot: boolean;
+  has_clip: boolean;
   zones: string[];
   search_source: SearchSource;
   search_distance: number;
@@ -24,9 +27,6 @@ export type SearchResult = {
     type: "object" | "audio" | "manual";
   };
 };
-
-
-export type PartialSearchResult = Partial<SearchResult> & { id: string };
 
 export type SearchFilter = {
   cameras?: string[];

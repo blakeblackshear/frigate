@@ -5,6 +5,8 @@ title: Generative AI
 
 Generative AI can be used to automatically generate descriptions based on the thumbnails of your tracked objects. This helps with [Semantic Search](/configuration/semantic_search) in Frigate by providing detailed text descriptions as a basis of the search query.
 
+Semantic Search must be enabled to use Generative AI. Descriptions are accessed via the _Explore_ view in the Frigate UI by clicking on a tracked object's thumbnail.
+
 ## Configuration
 
 Generative AI can be enabled for all cameras or only for specific cameras. There are currently 3 providers available to integrate with Frigate.

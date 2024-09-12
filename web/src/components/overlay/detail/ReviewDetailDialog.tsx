@@ -338,12 +338,7 @@ function EventItem({
                     <Chip
                       className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
                       onClick={() => {
-                        const similaritySearchParams = new URLSearchParams({
-                          search_type: "similarity",
-                          event_id: event.id,
-                        }).toString();
-
-                        navigate(`/search?${similaritySearchParams}`);
+                        navigate(`/explore?similarity_search_id=${event.id}`);
                       }}
                     >
                       <FaImages className="size-4 text-white" />

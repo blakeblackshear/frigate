@@ -1,6 +1,7 @@
 import { forwardRef } from "react";
 import { cn } from "@/lib/utils";
-import { FaCog, FaFilter } from "react-icons/fa";
+import { FaCog } from "react-icons/fa";
+import { MdLabelOutline } from "react-icons/md";
 
 type SubFilterIconProps = {
   className?: string;
@@ -15,8 +16,8 @@ const SubFilterIcon = forwardRef<HTMLDivElement, SubFilterIconProps>(
         className={cn("relative flex items-center", className)}
         onClick={onClick}
       >
-        <FaFilter className="size-full" />
-        <FaCog className="absolute size-3 translate-x-3 translate-y-3/4" />
+        <FaCog className="absolute size-3 translate-x-3 translate-y-[62%]" />
+        <MdLabelOutline className="size-5" />
       </div>
     );
   },

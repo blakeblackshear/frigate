@@ -1,6 +1,6 @@
 import { Button } from "../ui/button";
 import { CameraGroupConfig } from "@/types/frigateConfig";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,18 +17,32 @@ type CameraFilterButtonProps = {
   allCameras: string[];
   groups: [string, CameraGroupConfig][];
   selectedCameras: string[] | undefined;
+  hideText?: boolean;
   updateCameraFilter: (cameras: string[] | undefined) => void;
 };
 export function CamerasFilterButton({
   allCameras,
   groups,
   selectedCameras,
+  hideText = isMobile,
   updateCameraFilter,
 }: CameraFilterButtonProps) {
   const [open, setOpen] = useState(false);
   const [currentCameras, setCurrentCameras] = useState<string[] | undefined>(
     selectedCameras,
   );
+
+  const buttonText = useMemo(() => {
+    if (isMobile) {
+      return "Cameras";
+    }
+
+    if (!selectedCameras || selectedCameras.length == 0) {
+      return "All Cameras";
+    }
+
+    return `${selectedCameras.includes("birdseye") ? selectedCameras.length - 1 : selectedCameras.length} Camera${selectedCameras.length !== 1 ? "s" : ""}`;
+  }, [selectedCameras]);
 
   const trigger = (
     <Button
@@ -40,11 +54,9 @@ export function CamerasFilterButton({
         className={`${(selectedCameras?.length ?? 0) >= 1 ? "text-selected-foreground" : "text-secondary-foreground"}`}
       />
       <div
-        className={`hidden md:block ${selectedCameras?.length ? "text-selected-foreground" : "text-primary"}`}
+        className={`${hideText ? "hidden" : ""} ${selectedCameras?.length ? "text-selected-foreground" : "text-primary"}`}
       >
-        {selectedCameras == undefined
-          ? "All Cameras"
-          : `${selectedCameras.includes("birdseye") ? selectedCameras.length - 1 : selectedCameras.length} Camera${selectedCameras.length !== 1 ? "s" : ""}`}
+        {buttonText}
       </div>
     </Button>
   );

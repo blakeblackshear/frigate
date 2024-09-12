@@ -21,7 +21,7 @@ Birdseye RTSP restream can be accessed at `rtsp://<frigate_host>:8554/birdseye`.
 
 ```yaml
 birdseye:
-  restream: true
+  restream: True
 ```
 
 ### Securing Restream With Authentication
