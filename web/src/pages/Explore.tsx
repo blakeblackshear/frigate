@@ -1,20 +1,16 @@
 import { useApiFilterArgs } from "@/hooks/use-api-filter";
 import { useCameraPreviews } from "@/hooks/use-camera-previews";
-import { useOverlayState } from "@/hooks/use-overlay-state";
+import { useOverlayState, useSearchEffect } from "@/hooks/use-overlay-state";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { RecordingStartingPoint } from "@/types/record";
-import {
-  PartialSearchResult,
-  SearchFilter,
-  SearchResult,
-} from "@/types/search";
+import { SearchFilter, SearchResult } from "@/types/search";
 import { TimeRange } from "@/types/timeline";
 import { RecordingView } from "@/views/recording/RecordingView";
 import SearchView from "@/views/search/SearchView";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 
-export default function Search() {
+export default function Explore() {
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
@@ -30,45 +26,26 @@ export default function Search() {
 
   // search filter
 
+  const similaritySearch = useMemo(() => {
+    if (!searchTerm.includes("similarity:")) {
+      return undefined;
+    }
+
+    return searchTerm.split(":")[1];
+  }, [searchTerm]);
+
   const [searchFilter, setSearchFilter, searchSearchParams] =
     useApiFilterArgs<SearchFilter>();
 
-  const onUpdateFilter = useCallback(
-    (newFilter: SearchFilter) => {
-      setSearchFilter(newFilter);
-    },
-    [setSearchFilter],
-  );
-
   // search api
 
-  const [similaritySearch, setSimilaritySearch] =
-    useState<PartialSearchResult>();
+  useSearchEffect("similarity_search_id", (similarityId) => {
+    setSearch(`similarity:${similarityId}`);
+    // @ts-expect-error we want to clear this
+    setSearchFilter({ ...searchFilter, similarity_search_id: undefined });
+  });
 
   useEffect(() => {
-    if (
-      config?.semantic_search.enabled &&
-      searchSearchParams["search_type"] == "similarity" &&
-      searchSearchParams["event_id"]?.length != 0 &&
-      searchFilter
-    ) {
-      setSimilaritySearch({
-        id: searchSearchParams["event_id"],
-      });
-
-      // remove event id from url params
-      const { event_id: _event_id, ...newFilter } = searchFilter;
-      setSearchFilter(newFilter);
-    }
-    // only run similarity search with event_id in the url when coming from review
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (similaritySearch) {
-      setSimilaritySearch(undefined);
-    }
-
     if (searchTimeout) {
       clearTimeout(searchTimeout);
     }
@@ -88,7 +65,7 @@ export default function Search() {
       return [
         "events/search",
         {
-          query: similaritySearch.id,
+          query: similaritySearch,
           cameras: searchSearchParams["cameras"],
           labels: searchSearchParams["labels"],
           sub_labels: searchSearchParams["subLabels"],
@@ -118,21 +95,25 @@ export default function Search() {
       ];
     }
 
-    return [
-      "events",
-      {
-        cameras: searchSearchParams["cameras"],
-        labels: searchSearchParams["labels"],
-        sub_labels: searchSearchParams["subLabels"],
-        zones: searchSearchParams["zones"],
-        before: searchSearchParams["before"],
-        after: searchSearchParams["after"],
-        search_type: searchSearchParams["search_type"],
-        limit: Object.keys(searchSearchParams).length == 0 ? 20 : null,
-        in_progress: 0,
-        include_thumbnails: 0,
-      },
-    ];
+    if (searchSearchParams && Object.keys(searchSearchParams).length !== 0) {
+      return [
+        "events",
+        {
+          cameras: searchSearchParams["cameras"],
+          labels: searchSearchParams["labels"],
+          sub_labels: searchSearchParams["subLabels"],
+          zones: searchSearchParams["zones"],
+          before: searchSearchParams["before"],
+          after: searchSearchParams["after"],
+          search_type: searchSearchParams["search_type"],
+          limit: Object.keys(searchSearchParams).length == 0 ? 20 : null,
+          in_progress: 0,
+          include_thumbnails: 0,
+        },
+      ];
+    }
+
+    return null;
   }, [searchTerm, searchSearchParams, similaritySearch]);
 
   const { data: searchResults, isLoading } =
@@ -219,7 +200,7 @@ export default function Search() {
           allCameras={selectedReviewData.allCameras}
           allPreviews={allPreviews}
           timeRange={selectedTimeRange}
-          updateFilter={onUpdateFilter}
+          updateFilter={setSearchFilter}
         />
       );
     }
@@ -230,12 +211,10 @@ export default function Search() {
         searchTerm={searchTerm}
         searchFilter={searchFilter}
         searchResults={searchResults}
-        allPreviews={allPreviews}
         isLoading={isLoading}
         setSearch={setSearch}
-        similaritySearch={similaritySearch}
-        setSimilaritySearch={setSimilaritySearch}
-        onUpdateFilter={onUpdateFilter}
+        setSimilaritySearch={(search) => setSearch(`similarity:${search.id}`)}
+        onUpdateFilter={setSearchFilter}
         onOpenSearch={onOpenSearch}
       />
     );

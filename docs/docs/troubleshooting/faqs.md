@@ -17,7 +17,7 @@ ffmpeg:
     record: preset-record-generic-audio-aac
 ```
 
-### I can't view events or recordings in the Web UI.
+### I can't view recordings in the Web UI.
 
 Ensure your cameras send h264 encoded video, or [transcode them](/configuration/restream.md).
 

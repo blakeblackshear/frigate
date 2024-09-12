@@ -238,7 +238,7 @@ Now that you know where you need to mask, use the "Mask & Zone creator" in the o
 
 :::warning
 
-Note that motion masks should not be used to mark out areas where you do not want objects to be detected or to reduce false positives. They do not alter the image sent to object detection, so you can still get events and detections in areas with motion masks. These only prevent motion in these areas from initiating object detection.
+Note that motion masks should not be used to mark out areas where you do not want objects to be detected or to reduce false positives. They do not alter the image sent to object detection, so you can still get tracked objects, alerts, and detections in areas with motion masks. These only prevent motion in these areas from initiating object detection.
 
 :::
 
@@ -302,7 +302,7 @@ If you only plan to use Frigate for recording, it is still recommended to define
 
 :::
 
-By default, Frigate will retain video of all events for 10 days. The full set of options for recording can be found [here](../configuration/reference.md).
+By default, Frigate will retain video of all tracked objects for 10 days. The full set of options for recording can be found [here](../configuration/reference.md).
 
 ### Step 7: Complete config
 

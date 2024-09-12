@@ -34,7 +34,7 @@ export default function ObjectSettingsView({
     {
       param: "bbox",
       title: "Bounding boxes",
-      description: "Show bounding boxes around detected objects",
+      description: "Show bounding boxes around tracked objects",
     },
     {
       param: "timestamp",
@@ -130,7 +130,7 @@ export default function ObjectSettingsView({
             to detect objects in your camera's video stream.
           </p>
           <p>
-            Debugging view shows a real-time view of detected objects and their
+            Debugging view shows a real-time view of tracked objects and their
             statistics. The object list shows a time-delayed summary of detected
             objects.
           </p>
