@@ -291,6 +291,7 @@ function NewGroupDialog({
   const onSave = () => {
     setOpen(false);
     setEditState("none");
+    setEditingGroupName("");
   };
 
   const onCancel = () => {
@@ -325,41 +326,44 @@ function NewGroupDialog({
       >
         <Content
           className={cn(
-            "min-w-0",
+            "scrollbar-container overflow-y-auto",
+            isDesktop && "my-4 flex max-h-dvh w-6/12 flex-col",
             isMobile && "px-4",
-            isDesktop && "max-h-dvh w-6/12 overflow-y-hidden",
           )}
         >
-          <div className="scrollbar-container flex flex-col overflow-y-auto md:my-4">
-            {editState === "none" && (
-              <>
-                <Header className="mt-2" onClose={() => setOpen(false)}>
-                  <Title className="mb-2">Camera Groups</Title>
-                  <Description className="sr-only">
-                    Edit camera groups
-                  </Description>
-                  <div
+          {editState === "none" && (
+            <>
+              <Header
+                className={cn(isDesktop && "mt-5", "justify-center")}
+                onClose={() => setOpen(false)}
+              >
+                <Title>Camera Groups</Title>
+                <Description className="sr-only">
+                  Edit camera groups
+                </Description>
+                <div
+                  className={cn(
+                    "absolute",
+                    isDesktop && "right-6 top-10",
+                    isMobile && "absolute right-0 top-4",
+                  )}
+                >
+                  <Button
+                    size="sm"
                     className={cn(
-                      "absolute",
-                      isDesktop && "right-6 top-10",
-                      isMobile && "absolute right-0 top-3",
+                      isDesktop &&
+                        "size-6 rounded-md bg-secondary-foreground p-1 text-background",
+                      isMobile && "text-secondary-foreground",
                     )}
+                    onClick={() => {
+                      setEditState("add");
+                    }}
                   >
-                    <Button
-                      size="sm"
-                      className={cn(
-                        isDesktop &&
-                          "size-6 rounded-md bg-secondary-foreground p-1 text-background",
-                        isMobile && "text-secondary-foreground",
-                      )}
-                      onClick={() => {
-                        setEditState("add");
-                      }}
-                    >
-                      <LuPlus />
-                    </Button>
-                  </div>
-                </Header>
+                    <LuPlus />
+                  </Button>
+                </div>
+              </Header>
+              <div className="flex flex-col gap-4 md:gap-3">
                 {currentGroups.map((group) => (
                   <CameraGroupRow
                     key={group[0]}
@@ -368,30 +372,30 @@ function NewGroupDialog({
                     onEditGroup={() => onEditGroup(group)}
                   />
                 ))}
-              </>
-            )}
+              </div>
+            </>
+          )}
 
-            {editState != "none" && (
-              <>
-                <Header className="mt-2" onClose={() => setEditState("none")}>
-                  <Title className="mb-2">
-                    {editState == "add" ? "Add" : "Edit"} Camera Group
-                  </Title>
-                  <Description className="sr-only">
-                    Edit camera groups
-                  </Description>
-                </Header>
-                <CameraGroupEdit
-                  currentGroups={currentGroups}
-                  editingGroup={editingGroup}
-                  isLoading={isLoading}
-                  setIsLoading={setIsLoading}
-                  onSave={onSave}
-                  onCancel={onCancel}
-                />
-              </>
-            )}
-          </div>
+          {editState != "none" && (
+            <>
+              <Header className="mt-2" onClose={() => setEditState("none")}>
+                <Title>
+                  {editState == "add" ? "Add" : "Edit"} Camera Group
+                </Title>
+                <Description className="sr-only">
+                  Edit camera groups
+                </Description>
+              </Header>
+              <CameraGroupEdit
+                currentGroups={currentGroups}
+                editingGroup={editingGroup}
+                isLoading={isLoading}
+                setIsLoading={setIsLoading}
+                onSave={onSave}
+                onCancel={onCancel}
+              />
+            </>
+          )}
         </Content>
       </Overlay>
     </>
@@ -449,7 +453,7 @@ export function EditGroupDialog({
         >
           <div className="scrollbar-container flex flex-col overflow-y-auto md:my-4">
             <Header className="mt-2" onClose={() => setOpen(false)}>
-              <Title className="mb-2">Edit Camera Group</Title>
+              <Title>Edit Camera Group</Title>
               <Description className="sr-only">Edit camera group</Description>
             </Header>
 
@@ -489,7 +493,7 @@ export function CameraGroupRow({
     <>
       <div
         key={group[0]}
-        className="transition-background my-1.5 flex flex-row items-center justify-between rounded-lg duration-100 md:p-1"
+        className="transition-background flex flex-row items-center justify-between rounded-lg duration-100 md:p-1"
       >
         <div className={`flex items-center`}>
           <p className="cursor-default">{group[0]}</p>
