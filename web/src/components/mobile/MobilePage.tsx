@@ -32,7 +32,7 @@ export function MobilePage({ children, open, onOpenChange }: MobilePageProps) {
       {isVisible && (
         <motion.div
           className={cn(
-            "fixed inset-0 z-[100] mb-12 bg-background",
+            "fixed inset-0 z-50 mb-12 bg-background",
             isPWA && "mb-16",
             "landscape:mb-14 landscape:md:mb-16",
           )}

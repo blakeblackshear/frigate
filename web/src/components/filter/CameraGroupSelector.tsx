@@ -7,8 +7,13 @@ import { Button } from "../ui/button";
 import { useCallback, useMemo, useState } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { LuPencil, LuPlus } from "react-icons/lu";
-import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
-import { Drawer, DrawerContent } from "../ui/drawer";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
 import { Input } from "../ui/input";
 import { Separator } from "../ui/separator";
 import {
@@ -24,6 +29,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuPortal,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import {
@@ -53,6 +59,13 @@ import { cn } from "@/lib/utils";
 import * as LuIcons from "react-icons/lu";
 import IconPicker, { IconName, IconRenderer } from "../icons/IconPicker";
 import { isValidIconName } from "@/utils/iconUtil";
+import {
+  MobilePage,
+  MobilePageContent,
+  MobilePageDescription,
+  MobilePageHeader,
+  MobilePageTitle,
+} from "../mobile/MobilePage";
 
 type CameraGroupSelectorProps = {
   className?: string;
@@ -290,8 +303,11 @@ function NewGroupDialog({
     setEditState("edit");
   }, []);
 
-  const Overlay = isDesktop ? Dialog : Drawer;
-  const Content = isDesktop ? DialogContent : DrawerContent;
+  const Overlay = isDesktop ? Dialog : MobilePage;
+  const Content = isDesktop ? DialogContent : MobilePageContent;
+  const Header = isDesktop ? DialogHeader : MobilePageHeader;
+  const Description = isDesktop ? DialogDescription : MobilePageDescription;
+  const Title = isDesktop ? DialogTitle : MobilePageTitle;
 
   return (
     <>
@@ -308,23 +324,42 @@ function NewGroupDialog({
         }}
       >
         <Content
-          className={`min-w-0 ${isMobile ? "max-h-[90%] w-full rounded-t-2xl p-3" : "max-h-dvh w-6/12 overflow-y-hidden"}`}
+          className={cn(
+            "min-w-0",
+            isMobile && "px-4",
+            isDesktop && "max-h-dvh w-6/12 overflow-y-hidden",
+          )}
         >
-          <div className="scrollbar-container my-4 flex flex-col overflow-y-auto">
+          <div className="scrollbar-container flex flex-col overflow-y-auto md:my-4">
             {editState === "none" && (
               <>
-                <div className="flex flex-row items-center justify-between py-2">
-                  <DialogTitle>Camera Groups</DialogTitle>
-                  <Button
-                    variant="secondary"
-                    className="size-6 rounded-md bg-secondary-foreground p-1 text-background"
-                    onClick={() => {
-                      setEditState("add");
-                    }}
+                <Header className="mt-2" onClose={() => setOpen(false)}>
+                  <Title className="mb-2">Camera Groups</Title>
+                  <Description className="sr-only">
+                    Edit camera groups
+                  </Description>
+                  <div
+                    className={cn(
+                      "absolute",
+                      isDesktop && "right-6 top-10",
+                      isMobile && "absolute right-0 top-3",
+                    )}
                   >
-                    <LuPlus />
-                  </Button>
-                </div>
+                    <Button
+                      size="sm"
+                      className={cn(
+                        isDesktop &&
+                          "size-6 rounded-md bg-secondary-foreground p-1 text-background",
+                        isMobile && "text-secondary-foreground",
+                      )}
+                      onClick={() => {
+                        setEditState("add");
+                      }}
+                    >
+                      <LuPlus />
+                    </Button>
+                  </div>
+                </Header>
                 {currentGroups.map((group) => (
                   <CameraGroupRow
                     key={group[0]}
@@ -338,11 +373,14 @@ function NewGroupDialog({
 
             {editState != "none" && (
               <>
-                <div className="mb-3 flex flex-row items-center justify-between">
-                  <DialogTitle>
+                <Header className="mt-2" onClose={() => setEditState("none")}>
+                  <Title className="mb-2">
                     {editState == "add" ? "Add" : "Edit"} Camera Group
-                  </DialogTitle>
-                </div>
+                  </Title>
+                  <Description className="sr-only">
+                    Edit camera groups
+                  </Description>
+                </Header>
                 <CameraGroupEdit
                   currentGroups={currentGroups}
                   editingGroup={editingGroup}
@@ -372,6 +410,12 @@ export function EditGroupDialog({
   currentGroups,
   activeGroup,
 }: EditGroupDialogProps) {
+  const Overlay = isDesktop ? Dialog : MobilePage;
+  const Content = isDesktop ? DialogContent : MobilePageContent;
+  const Header = isDesktop ? DialogHeader : MobilePageHeader;
+  const Description = isDesktop ? DialogDescription : MobilePageDescription;
+  const Title = isDesktop ? DialogTitle : MobilePageTitle;
+
   // editing group and state
 
   const editingGroup = useMemo(() => {
@@ -391,19 +435,24 @@ export function EditGroupDialog({
         position="top-center"
         closeButton={true}
       />
-      <Dialog
+      <Overlay
         open={open}
         onOpenChange={(open) => {
           setOpen(open);
         }}
       >
-        <DialogContent
-          className={`min-w-0 ${isMobile ? "max-h-[90%] w-full rounded-t-2xl p-3" : "max-h-dvh w-6/12 overflow-y-hidden"}`}
+        <Content
+          className={cn(
+            "min-w-0",
+            isDesktop && "max-h-dvh w-6/12 overflow-y-hidden",
+          )}
         >
-          <div className="scrollbar-container my-4 flex flex-col overflow-y-auto">
-            <div className="mb-3 flex flex-row items-center justify-between">
-              <DialogTitle>Edit Camera Group</DialogTitle>
-            </div>
+          <div className="scrollbar-container flex flex-col overflow-y-auto md:my-4">
+            <Header className="mt-2" onClose={() => setOpen(false)}>
+              <Title className="mb-2">Edit Camera Group</Title>
+              <Description className="sr-only">Edit camera group</Description>
+            </Header>
+
             <CameraGroupEdit
               currentGroups={currentGroups}
               editingGroup={editingGroup}
@@ -413,8 +462,8 @@ export function EditGroupDialog({
               onCancel={() => setOpen(false)}
             />
           </div>
-        </DialogContent>
-      </Dialog>
+        </Content>
+      </Overlay>
     </>
   );
 }
@@ -472,12 +521,16 @@ export function CameraGroupRow({
               <DropdownMenuTrigger>
                 <HiOutlineDotsVertical className="size-5" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onClick={onEditGroup}>Edit</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setDeleteDialogOpen(true)}>
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
+              <DropdownMenuPortal>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={onEditGroup}>
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setDeleteDialogOpen(true)}>
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenuPortal>
             </DropdownMenu>
           </>
         )}
@@ -659,7 +712,7 @@ export function CameraGroupEdit({
         />
 
         <Separator className="my-2 flex bg-secondary" />
-        <div className="scrollbar-container max-h-[25dvh] overflow-y-auto md:max-h-[40dvh]">
+        <div className="scrollbar-container max-h-[40dvh] overflow-y-auto">
           <FormField
             control={form.control}
             name="cameras"
