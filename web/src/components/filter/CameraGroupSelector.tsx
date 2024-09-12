@@ -378,7 +378,13 @@ function NewGroupDialog({
 
           {editState != "none" && (
             <>
-              <Header className="mt-2" onClose={() => setEditState("none")}>
+              <Header
+                className="mt-2"
+                onClose={() => {
+                  setEditState("none");
+                  setEditingGroupName("");
+                }}
+              >
                 <Title>
                   {editState == "add" ? "Add" : "Edit"} Camera Group
                 </Title>
