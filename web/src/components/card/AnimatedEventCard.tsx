@@ -91,13 +91,17 @@ export function AnimatedEventCard({
   const [alertVideos] = usePersistence("alertVideos", true);
 
   const aspectRatio = useMemo(() => {
-    if (!config || !Object.keys(config.cameras).includes(event.camera)) {
+    if (
+      !config ||
+      !alertVideos ||
+      !Object.keys(config.cameras).includes(event.camera)
+    ) {
       return 16 / 9;
     }
 
     const detect = config.cameras[event.camera].detect;
     return detect.width / detect.height;
-  }, [config, event]);
+  }, [alertVideos, config, event]);
 
   return (
     <Tooltip>

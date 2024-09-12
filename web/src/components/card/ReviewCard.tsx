@@ -50,6 +50,7 @@ export default function ReviewCard({
   const formattedDate = useFormattedTimestamp(
     event.start_time,
     config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p",
+    config?.ui.timezone,
   );
   const isSelected = useMemo(
     () =>
