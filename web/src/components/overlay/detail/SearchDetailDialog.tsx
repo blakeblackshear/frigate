@@ -1,11 +1,4 @@
 import { isDesktop, isIOS, isMobile } from "react-device-detect";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-} from "../../ui/drawer";
 import { SearchResult } from "@/types/search";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -37,6 +30,13 @@ import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
 import { FaImage, FaRegListAlt, FaVideo } from "react-icons/fa";
 import { FaRotate } from "react-icons/fa6";
 import ObjectLifecycle from "./ObjectLifecycle";
+import {
+  MobilePage,
+  MobilePageContent,
+  MobilePageDescription,
+  MobilePageHeader,
+  MobilePageTitle,
+} from "@/components/mobile/MobilePage";
 
 const SEARCH_TABS = [
   "details",
@@ -64,6 +64,14 @@ export default function SearchDetailDialog({
 
   const [page, setPage] = useState<SearchTab>("details");
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
+
+  // dialog and mobile page
+
+  const [isOpen, setIsOpen] = useState(search != undefined);
+
+  useEffect(() => {
+    setIsOpen(search != undefined);
+  }, [search]);
 
   const searchTabs = useMemo(() => {
     if (!config || !search) {
@@ -102,15 +110,15 @@ export default function SearchDetailDialog({
 
   // content
 
-  const Overlay = isDesktop ? Dialog : Drawer;
-  const Content = isDesktop ? DialogContent : DrawerContent;
-  const Header = isDesktop ? DialogHeader : DrawerHeader;
-  const Title = isDesktop ? DialogTitle : DrawerTitle;
-  const Description = isDesktop ? DialogDescription : DrawerDescription;
+  const Overlay = isDesktop ? Dialog : MobilePage;
+  const Content = isDesktop ? DialogContent : MobilePageContent;
+  const Header = isDesktop ? DialogHeader : MobilePageHeader;
+  const Title = isDesktop ? DialogTitle : MobilePageTitle;
+  const Description = isDesktop ? DialogDescription : MobilePageDescription;
 
   return (
     <Overlay
-      open={search != undefined}
+      open={isOpen}
       onOpenChange={(open) => {
         if (!open) {
           setSearch(undefined);
@@ -118,15 +126,16 @@ export default function SearchDetailDialog({
       }}
     >
       <Content
-        className={
-          isDesktop
-            ? "sm:max-w-xl md:max-w-4xl lg:max-w-4xl xl:max-w-7xl"
-            : "max-h-[75dvh] overflow-hidden px-2 pb-4"
-        }
+        className={cn(
+          "scrollbar-container overflow-y-auto",
+          isDesktop &&
+            "max-h-[95dvh] sm:max-w-xl md:max-w-4xl lg:max-w-4xl xl:max-w-7xl",
+          isMobile && "px-4",
+        )}
       >
-        <Header className="sr-only">
+        <Header onClose={() => setIsOpen(false)}>
           <Title>Tracked Object Details</Title>
-          <Description>Tracked object details</Description>
+          <Description className="sr-only">Tracked object details</Description>
         </Header>
         <ScrollArea
           className={cn("w-full whitespace-nowrap", isMobile && "my-2")}
@@ -275,7 +284,7 @@ function ObjectDetailsTab({
   }, [desc, search]);
 
   return (
-    <div className="mt-3 flex size-full flex-col gap-5 md:mt-0">
+    <div className="flex flex-col gap-5">
       <div className="flex w-full flex-row">
         <div className="flex w-full flex-col gap-3">
           <div className="flex flex-col gap-1.5">
@@ -303,7 +312,7 @@ function ObjectDetailsTab({
             <div className="text-sm">{formattedDate}</div>
           </div>
         </div>
-        <div className="flex w-full flex-col gap-2 px-6">
+        <div className="flex w-full flex-col gap-2 pl-6">
           <img
             className="aspect-video select-none rounded-lg object-contain transition-opacity"
             style={

@@ -230,7 +230,7 @@ export default function ObjectLifecycle({
       {!fullscreen && (
         <div className={cn("flex items-center gap-2")}>
           <Button
-            className="flex items-center gap-2.5 rounded-lg"
+            className="mb-2 mt-3 flex items-center gap-2.5 rounded-lg md:mt-0"
             size="sm"
             onClick={() => setPane("overview")}
           >
@@ -240,7 +240,7 @@ export default function ObjectLifecycle({
         </div>
       )}
 
-      <div className="relative mx-auto">
+      <div className="relative flex flex-row justify-center">
         <ImageLoadingIndicator
           className="absolute inset-0"
           imgLoaded={imgLoaded}
@@ -253,7 +253,12 @@ export default function ObjectLifecycle({
             </div>
           </div>
         )}
-        <div className={cn(imgLoaded ? "visible" : "invisible")}>
+        <div
+          className={cn(
+            "relative inline-block",
+            imgLoaded ? "visible" : "invisible",
+          )}
+        >
           <img
             key={event.id}
             ref={imgRef}
@@ -278,7 +283,7 @@ export default function ObjectLifecycle({
           {showZones &&
             lifecycleZones?.map((zone) => (
               <div
-                className="absolute left-0 top-0"
+                className="absolute inset-0 flex items-center justify-center"
                 style={{
                   width: imgRef.current?.clientWidth,
                   height: imgRef.current?.clientHeight,
@@ -287,6 +292,7 @@ export default function ObjectLifecycle({
               >
                 <svg
                   viewBox={`0 0 ${imgRef.current?.width} ${imgRef.current?.height}`}
+                  className="absolute inset-0"
                 >
                   <polygon
                     points={getZonePolygon(zone)}

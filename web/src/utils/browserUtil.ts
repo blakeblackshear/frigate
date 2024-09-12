@@ -9,7 +9,7 @@ export function shareOrCopy(url: string, title?: string) {
     });
   } else {
     copy(url);
-    toast.success("Copied to clipboard.", {
+    toast.success("Copied URL to clipboard.", {
       position: "top-center",
     });
   }

@@ -13,6 +13,7 @@ import { Event } from "@/types/event";
 import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
 import { useCallback, useMemo, useState } from "react";
+import { isDesktop } from "react-device-detect";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import useSWR from "swr";
 
@@ -33,6 +34,9 @@ export function FrigatePlusDialog({
   const { data: config } = useSWR<FrigateConfig>("config");
 
   // layout
+
+  const Title = isDesktop ? DialogTitle : "div";
+  const Description = isDesktop ? DialogDescription : "div";
 
   const grow = useMemo(() => {
     if (!config || !upload) {
@@ -79,60 +83,74 @@ export function FrigatePlusDialog({
 
   const content = (
     <TransformWrapper minScale={1.0} wheel={{ smoothStep: 0.005 }}>
-      <DialogHeader className={state == "submitted" ? "sr-only" : ""}>
-        <DialogTitle>Submit To Frigate+</DialogTitle>
-        <DialogDescription>
-          Objects in locations you want to avoid are not false positives.
-          Submitting them as false positives will confuse the model.
-        </DialogDescription>
-      </DialogHeader>
-      <TransformComponent
-        wrapperStyle={{
-          width: "100%",
-          height: "100%",
-        }}
-        contentStyle={{
-          position: "relative",
-          width: "100%",
-          height: "100%",
-        }}
-      >
-        {upload?.id && (
-          <img
-            className={`w-full ${grow} bg-black`}
-            src={`${baseUrl}api/events/${upload?.id}/snapshot.jpg`}
-            alt={`${upload?.label}`}
-          />
-        )}
-      </TransformComponent>
+      <div className="flex flex-col space-y-3">
+        <DialogHeader
+          className={state == "submitted" ? "sr-only" : "text-left"}
+        >
+          <Title
+            className={
+              !isDesktop
+                ? "text-lg font-semibold leading-none tracking-tight"
+                : undefined
+            }
+          >
+            Submit To Frigate+
+          </Title>
+          <Description
+            className={!isDesktop ? "text-sm text-muted-foreground" : undefined}
+          >
+            Objects in locations you want to avoid are not false positives.
+            Submitting them as false positives will confuse the model.
+          </Description>
+        </DialogHeader>
+        <TransformComponent
+          wrapperStyle={{
+            width: "100%",
+            height: "100%",
+          }}
+          contentStyle={{
+            position: "relative",
+            width: "100%",
+            height: "100%",
+          }}
+        >
+          {upload?.id && (
+            <img
+              className={`w-full ${grow} bg-black`}
+              src={`${baseUrl}api/events/${upload?.id}/snapshot.jpg`}
+              alt={`${upload?.label}`}
+            />
+          )}
+        </TransformComponent>
 
-      <DialogFooter>
-        {state == "reviewing" && (
-          <>
-            {dialog && <Button onClick={onClose}>Cancel</Button>}
-            <Button
-              className="bg-success"
-              onClick={() => {
-                setState("uploading");
-                onSubmitToPlus(false);
-              }}
-            >
-              This is a {upload?.label}
-            </Button>
-            <Button
-              className="text-white"
-              variant="destructive"
-              onClick={() => {
-                setState("uploading");
-                onSubmitToPlus(true);
-              }}
-            >
-              This is not a {upload?.label}
-            </Button>
-          </>
-        )}
-        {state == "uploading" && <ActivityIndicator />}
-      </DialogFooter>
+        <DialogFooter className="flex flex-row justify-end gap-2">
+          {state == "reviewing" && (
+            <>
+              {dialog && <Button onClick={onClose}>Cancel</Button>}
+              <Button
+                className="bg-success"
+                onClick={() => {
+                  setState("uploading");
+                  onSubmitToPlus(false);
+                }}
+              >
+                This is a {upload?.label}
+              </Button>
+              <Button
+                className="text-white"
+                variant="destructive"
+                onClick={() => {
+                  setState("uploading");
+                  onSubmitToPlus(true);
+                }}
+              >
+                This is not a {upload?.label}
+              </Button>
+            </>
+          )}
+          {state == "uploading" && <ActivityIndicator />}
+        </DialogFooter>
+      </div>
     </TransformWrapper>
   );
 

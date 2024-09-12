@@ -215,7 +215,7 @@ export default function SearchView({
           </div>
         )}
         {!uniqueResults && !isLoading && (
-          <div className="flex size-full flex-col">
+          <div className="scrollbar-container flex size-full flex-col overflow-y-auto">
             <ExploreView onSelectSearch={onSelectSearch} />
           </div>
         )}
