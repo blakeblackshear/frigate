@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ObjectLifecycleSequence } from "@/types/timeline";
 import Heading from "@/components/ui/heading";
-import { ReviewDetailPaneType, ReviewSegment } from "@/types/review";
+import { ReviewDetailPaneType } from "@/types/review";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { getIconForLabel } from "@/utils/iconUtil";
@@ -47,14 +47,16 @@ import { AnnotationSettingsPane } from "./AnnotationSettingsPane";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 
 type ObjectLifecycleProps = {
-  review: ReviewSegment;
+  className?: string;
   event: Event;
+  showBack?: boolean;
   setPane: React.Dispatch<React.SetStateAction<ReviewDetailPaneType>>;
 };
 
 export default function ObjectLifecycle({
-  review,
+  className,
   event,
+  showBack = true,
   setPane,
 }: ObjectLifecycleProps) {
   const { data: eventSequence } = useSWR<ObjectLifecycleSequence[]>([
@@ -78,13 +80,13 @@ export default function ObjectLifecycle({
   const getZoneColor = useCallback(
     (zoneName: string) => {
       const zoneColor =
-        config?.cameras?.[review.camera]?.zones?.[zoneName]?.color;
+        config?.cameras?.[event.camera]?.zones?.[zoneName]?.color;
       if (zoneColor) {
         const reversed = [...zoneColor].reverse();
         return reversed;
       }
     },
-    [config, review],
+    [config, event],
   );
 
   const getZonePolygon = useCallback(
@@ -93,7 +95,7 @@ export default function ObjectLifecycle({
         return;
       }
       const zonePoints =
-        config?.cameras[review.camera].zones[zoneName].coordinates;
+        config?.cameras[event.camera].zones[zoneName].coordinates;
       const imgElement = imgRef.current;
       const imgRect = imgElement.getBoundingClientRect();
 
@@ -110,7 +112,7 @@ export default function ObjectLifecycle({
         }, [] as number[])
         .join(",");
     },
-    [config, imgRef, review],
+    [config, imgRef, event],
   );
 
   const [boxStyle, setBoxStyle] = useState<React.CSSProperties | null>(null);
@@ -224,17 +226,19 @@ export default function ObjectLifecycle({
   }
 
   return (
-    <>
-      <div className={cn("flex items-center gap-2")}>
-        <Button
-          className="flex items-center gap-2.5 rounded-lg"
-          size="sm"
-          onClick={() => setPane("overview")}
-        >
-          <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
-          {isDesktop && <div className="text-primary">Back</div>}
-        </Button>
-      </div>
+    <div className={className}>
+      {showBack && (
+        <div className={cn("flex items-center gap-2")}>
+          <Button
+            className="flex items-center gap-2.5 rounded-lg"
+            size="sm"
+            onClick={() => setPane("overview")}
+          >
+            <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
+            {isDesktop && <div className="text-primary">Back</div>}
+          </Button>
+        </div>
+      )}
 
       <div className="relative mx-auto">
         <ImageLoadingIndicator
@@ -513,7 +517,7 @@ export default function ObjectLifecycle({
           <CarouselNext />
         </Carousel>
       </div>
-    </>
+    </div>
   );
 }
 
