@@ -254,7 +254,7 @@ export default function NotificationView({
                     <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input
-                        className="w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark] md:w-72"
+                        className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark] md:w-72"
                         placeholder="example@email.com"
                         {...field}
                       />

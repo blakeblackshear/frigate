@@ -373,7 +373,7 @@ export default function ZoneEditPane({
                 <FormLabel>Name</FormLabel>
                 <FormControl>
                   <Input
-                    className="w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                    className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                     placeholder="Enter a name..."
                     {...field}
                   />
@@ -395,7 +395,7 @@ export default function ZoneEditPane({
                 <FormLabel>Inertia</FormLabel>
                 <FormControl>
                   <Input
-                    className="w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                    className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                     placeholder="3"
                     {...field}
                   />
@@ -417,7 +417,7 @@ export default function ZoneEditPane({
                 <FormLabel>Loitering Time</FormLabel>
                 <FormControl>
                   <Input
-                    className="w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                    className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                     placeholder="0"
                     {...field}
                   />

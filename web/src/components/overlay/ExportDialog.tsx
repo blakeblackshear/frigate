@@ -273,7 +273,7 @@ export function ExportContent({
         />
       )}
       <Input
-        className="my-6"
+        className="text-md my-6"
         type="search"
         placeholder="Name the Export"
         value={name}
@@ -431,7 +431,7 @@ function CustomTimeSelector({
           />
           <SelectSeparator className="bg-secondary" />
           <input
-            className="mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+            className="text-md mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
             id="startTime"
             type="time"
             value={startClock}
@@ -493,7 +493,7 @@ function CustomTimeSelector({
           />
           <SelectSeparator className="bg-secondary" />
           <input
-            className="mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+            className="text-md mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
             id="startTime"
             type="time"
             value={endClock}
