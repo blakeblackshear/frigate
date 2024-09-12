@@ -91,7 +91,7 @@ detectors:
     device: usb
 
 record:
-  enabled: true
+  enabled: True
   retain:
     days: 7
     mode: motion
@@ -147,7 +147,7 @@ detectors:
     device: usb
 
 record:
-  enabled: true
+  enabled: True
   retain:
     days: 7
     mode: motion
@@ -214,7 +214,7 @@ model:
   labelmap_path: /openvino-model/coco_91cl_bkgr.txt
 
 record:
-  enabled: true
+  enabled: True
   retain:
     days: 7
     mode: motion
