@@ -87,12 +87,14 @@ export default function SearchDetailDialog({
   }, [config, search]);
 
   useEffect(() => {
-    if (!searchTabs.includes(page)) {
+    if (searchTabs.length == 0) {
+      return;
+    }
+
+    if (!searchTabs.includes(pageToggle)) {
       setPage("details");
     }
-    // we know that these deps are correct
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchTabs]);
+  }, [pageToggle, searchTabs]);
 
   if (!search) {
     return;

@@ -1,4 +1,5 @@
 import copy from "copy-to-clipboard";
+import { toast } from "sonner";
 
 export function shareOrCopy(url: string, title?: string) {
   if (window.isSecureContext && "share" in navigator) {
@@ -8,5 +9,8 @@ export function shareOrCopy(url: string, title?: string) {
     });
   } else {
     copy(url);
+    toast.success("Copied to clipboard.", {
+      position: "top-center",
+    });
   }
 }
