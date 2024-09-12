@@ -29,7 +29,11 @@ function Live() {
       if (group) {
         setCameraGroup(cameraGroup);
       }
+
+      return true;
     }
+
+    return false;
   });
 
   // fullscreen
