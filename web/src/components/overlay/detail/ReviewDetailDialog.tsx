@@ -36,6 +36,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { baseUrl } from "@/api/baseUrl";
+import { shareOrCopy } from "@/utils/browserUtil";
 
 type ReviewDetailDialogProps = {
   review?: ReviewSegment;
@@ -143,9 +144,7 @@ export default function ReviewDetailDialog({
                     variant="secondary"
                     size="sm"
                     onClick={() =>
-                      navigator.share({
-                        url: `${baseUrl}review?id=${review.id}`,
-                      })
+                      shareOrCopy(`${baseUrl}review?id=${review.id}`)
                     }
                   >
                     <FaShareAlt className="size-4" />

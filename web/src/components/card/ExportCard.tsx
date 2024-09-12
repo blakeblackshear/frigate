@@ -19,6 +19,7 @@ import { DeleteClipType, Export } from "@/types/export";
 import { MdEditSquare } from "react-icons/md";
 import { baseUrl } from "@/api/baseUrl";
 import { cn } from "@/lib/utils";
+import { shareOrCopy } from "@/utils/browserUtil";
 
 type ExportProps = {
   className: string;
@@ -151,10 +152,10 @@ export default function ExportCard({
                 <Chip
                   className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
                   onClick={() =>
-                    navigator.share({
-                      url: `${baseUrl}exports?id=${exportedRecording.id}`,
-                      title: exportedRecording.name.replaceAll("_", " "),
-                    })
+                    shareOrCopy(
+                      `${baseUrl}exports?id=${exportedRecording.id}`,
+                      exportedRecording.name.replaceAll("_", " "),
+                    )
                   }
                 >
                   <FaShareAlt className="size-4 text-white" />
