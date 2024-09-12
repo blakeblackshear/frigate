@@ -1,5 +1,5 @@
 import WebRtcPlayer from "./WebRTCPlayer";
-import { CameraConfig } from "@/types/frigateConfig";
+import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import AutoUpdatingCameraImage from "../camera/AutoUpdatingCameraImage";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { TbExclamationCircle } from "react-icons/tb";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { baseUrl } from "@/api/baseUrl";
+import useSWR from "swr";
 
 type LivePlayerProps = {
   cameraRef?: (ref: HTMLDivElement | null) => void;
@@ -58,7 +59,9 @@ export default function LivePlayer({
   onError,
   onResetLiveMode,
 }: LivePlayerProps) {
+  const { data: config } = useSWR<FrigateConfig>("config");
   const internalContainerRef = useRef<HTMLDivElement | null>(null);
+
   // camera activity
 
   const { activeMotion, activeTracking, objects, offline } =
@@ -146,6 +149,14 @@ export default function LivePlayer({
   const playerIsPlaying = useCallback(() => {
     setLiveReady(true);
   }, []);
+
+  const isRestreamed = useMemo(
+    () =>
+      cameraConfig &&
+      config &&
+      Object.keys(config.go2rtc.streams || {}).includes(cameraConfig.name),
+    [cameraConfig, config],
+  );
 
   if (!cameraConfig) {
     return <ActivityIndicator />;
@@ -298,7 +309,7 @@ export default function LivePlayer({
         />
       </div>
 
-      {offline && !showStillWithoutActivity && (
+      {offline && !showStillWithoutActivity && !isRestreamed && (
         <div className="flex size-full flex-col items-center">
           <p className="mb-5">
             {capitalizeFirstLetter(cameraConfig.name)} is offline
