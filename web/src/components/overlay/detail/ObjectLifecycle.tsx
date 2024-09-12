@@ -49,14 +49,14 @@ import { TooltipPortal } from "@radix-ui/react-tooltip";
 type ObjectLifecycleProps = {
   className?: string;
   event: Event;
-  showBack?: boolean;
+  fullscreen?: boolean;
   setPane: React.Dispatch<React.SetStateAction<ReviewDetailPaneType>>;
 };
 
 export default function ObjectLifecycle({
   className,
   event,
-  showBack = true,
+  fullscreen = false,
   setPane,
 }: ObjectLifecycleProps) {
   const { data: eventSequence } = useSWR<ObjectLifecycleSequence[]>([
@@ -227,7 +227,7 @@ export default function ObjectLifecycle({
 
   return (
     <div className={className}>
-      {showBack && (
+      {!fullscreen && (
         <div className={cn("flex items-center gap-2")}>
           <Button
             className="flex items-center gap-2.5 rounded-lg"
@@ -351,7 +351,10 @@ export default function ObjectLifecycle({
       )}
 
       <div className="relative flex flex-col items-center justify-center">
-        <Carousel className="m-0 w-full" setApi={setMainApi}>
+        <Carousel
+          className={cn("m-0 w-full", fullscreen && isDesktop && "w-[75%]")}
+          setApi={setMainApi}
+        >
           <CarouselContent>
             {eventSequence.map((item, index) => (
               <CarouselItem key={index}>
@@ -459,7 +462,7 @@ export default function ObjectLifecycle({
           </CarouselContent>
         </Carousel>
       </div>
-      <div className="relative flex flex-col items-center justify-center">
+      <div className="relative mt-4 flex flex-col items-center justify-center">
         <Carousel
           opts={{
             align: "center",
@@ -478,7 +481,10 @@ export default function ObjectLifecycle({
             {eventSequence.map((item, index) => (
               <CarouselItem
                 key={index}
-                className={cn("basis-1/4 cursor-pointer pl-1 md:basis-[10%]")}
+                className={cn(
+                  "basis-1/4 cursor-pointer pl-1 md:basis-[10%]",
+                  fullscreen && "md:basis-16",
+                )}
                 onClick={() => handleThumbnailClick(index)}
               >
                 <div className="p-1">

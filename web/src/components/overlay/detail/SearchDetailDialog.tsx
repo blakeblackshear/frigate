@@ -34,14 +34,14 @@ import { baseUrl } from "@/api/baseUrl";
 import { cn } from "@/lib/utils";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
-import { FaRegListAlt, FaVideo } from "react-icons/fa";
+import { FaImage, FaRegListAlt, FaVideo } from "react-icons/fa";
 import FrigatePlusIcon from "@/components/icons/FrigatePlusIcon";
 import { FaRotate } from "react-icons/fa6";
 import ObjectLifecycle from "./ObjectLifecycle";
 
 const SEARCH_TABS = [
   "details",
-  "frigate+",
+  "snapshot",
   "video",
   "object lifecycle",
 ] as const;
@@ -73,8 +73,8 @@ export default function SearchDetailDialog({
 
     const views = [...SEARCH_TABS];
 
-    if (!config.plus.enabled || !search.has_snapshot) {
-      const index = views.indexOf("frigate+");
+    if (!search.has_snapshot) {
+      const index = views.indexOf("snapshot");
       views.splice(index, 1);
     }
 
@@ -111,7 +111,7 @@ export default function SearchDetailDialog({
       <Content
         className={
           isDesktop
-            ? "sm:max-w-xl md:max-w-xl lg:max-w-3xl xl:max-w-6xl"
+            ? "sm:max-w-xl md:max-w-4xl lg:max-w-4xl xl:max-w-7xl"
             : "max-h-[75dvh] overflow-hidden px-2 pb-4"
         }
       >
@@ -143,7 +143,7 @@ export default function SearchDetailDialog({
                   aria-label={`Select ${item}`}
                 >
                   {item == "details" && <FaRegListAlt className="size-4" />}
-                  {item == "frigate+" && <FrigatePlusIcon className="size-4" />}
+                  {item == "snapshot" && <FaImage className="size-4" />}
                   {item == "video" && <FaVideo className="size-4" />}
                   {item == "object lifecycle" && (
                     <FaRotate className="size-4" />
@@ -163,9 +163,14 @@ export default function SearchDetailDialog({
             setSimilarity={setSimilarity}
           />
         )}
-        {page == "frigate+" && (
+        {page == "snapshot" && (
           <FrigatePlusDialog
-            upload={search as unknown as Event}
+            upload={
+              {
+                ...search,
+                plus_id: config?.plus?.enabled ? search.plus_id : "not_enabled",
+              } as unknown as Event
+            }
             dialog={false}
             onClose={() => {}}
             onEventUploaded={() => {
@@ -178,7 +183,7 @@ export default function SearchDetailDialog({
           <ObjectLifecycle
             className="w-full"
             event={search as unknown as Event}
-            showBack={false}
+            fullscreen={true}
             setPane={() => {}}
           />
         )}
