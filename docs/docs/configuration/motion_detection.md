@@ -13,11 +13,11 @@ Once motion is detected, it tries to group up nearby areas of motion together in
 
 The default motion settings should work well for the majority of cameras, however there are cases where tuning motion detection can lead to better and more optimal results. Each camera has its own environment with different variables that affect motion, this means that the same motion settings will not fit all of your cameras.
 
-Before tuning motion it is important to understand the goal. In an optimal configuration, motion from people and cars would be detected, but not grass moving, lighting changes, timestamps, etc. If your motion detection is too sensitive, you will experience higher CPU loads and greater false positives from the increased rate of object detection. If it is not sensitive enough, you will miss events.
+Before tuning motion it is important to understand the goal. In an optimal configuration, motion from people and cars would be detected, but not grass moving, lighting changes, timestamps, etc. If your motion detection is too sensitive, you will experience higher CPU loads and greater false positives from the increased rate of object detection. If it is not sensitive enough, you will miss objects that you want to track.
 
 ## Create Motion Masks
 
-First, mask areas with regular motion not caused by the objects you want to detect. The best way to find candidates for motion masks is by watching the debug stream with motion boxes enabled. Good use cases for motion masks are timestamps or tree limbs and large bushes that regularly move due to wind. When possible, avoid creating motion masks that would block motion detection for objects you want to track **even if they are in locations where you don't want events**. Motion masks should not be used to avoid detecting objects in specific areas. More details can be found [in the masks docs.](/configuration/masks.md).
+First, mask areas with regular motion not caused by the objects you want to detect. The best way to find candidates for motion masks is by watching the debug stream with motion boxes enabled. Good use cases for motion masks are timestamps or tree limbs and large bushes that regularly move due to wind. When possible, avoid creating motion masks that would block motion detection for objects you want to track **even if they are in locations where you don't want alerts or detections**. Motion masks should not be used to avoid detecting objects in specific areas. More details can be found [in the masks docs.](/configuration/masks.md).
 
 ## Prepare For Testing
 
@@ -29,7 +29,7 @@ Now that things are set up, find a time to tune that represents normal circumsta
 
 :::note
 
-Remember that motion detection is just used to determine when object detection should be used. You should aim to have motion detection sensitive enough that you won't miss events from objects you want to detect with object detection. The goal is to prevent object detection from running constantly for every small pixel change in the image. Windy days are still going to result in lots of motion being detected.
+Remember that motion detection is just used to determine when object detection should be used. You should aim to have motion detection sensitive enough that you won't miss objects you want to detect with object detection. The goal is to prevent object detection from running constantly for every small pixel change in the image. Windy days are still going to result in lots of motion being detected.
 
 :::
 
@@ -94,7 +94,7 @@ motion:
 
 :::tip
 
-Some cameras like doorbell cameras may have missed detections when someone walks directly in front of the camera and the lightning_threshold causes motion detection to be re-calibrated. In this case, it may be desirable to increase the `lightning_threshold` to ensure these events are not missed.
+Some cameras like doorbell cameras may have missed detections when someone walks directly in front of the camera and the lightning_threshold causes motion detection to be re-calibrated. In this case, it may be desirable to increase the `lightning_threshold` to ensure these objects are not missed.
 
 :::
 

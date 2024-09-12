@@ -104,7 +104,7 @@ function ThumbnailRow({
               // @ts-expect-error we know this is correct
               searchResults[0].event_count
             }{" "}
-            detected objects){" "}
+            tracked objects){" "}
           </span>
         )}
       </div>

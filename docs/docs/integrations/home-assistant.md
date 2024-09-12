@@ -148,19 +148,19 @@ Home Assistant > Configuration > Integrations > Frigate > Options
 
 ## Entities Provided
 
-| Platform        | Description                                                                       |
-| --------------- | --------------------------------------------------------------------------------- |
-| `camera`        | Live camera stream (requires RTSP).                                               |
-| `image`         | Image of the latest detected object for each camera.                              |
-| `sensor`        | States to monitor Frigate performance, object counts for all zones and cameras.   |
-| `switch`        | Switch entities to toggle detection, recordings and snapshots.                    |
-| `binary_sensor` | A "motion" binary sensor entity per camera/zone/object.                           |
+| Platform        | Description                                                                     |
+| --------------- | ------------------------------------------------------------------------------- |
+| `camera`        | Live camera stream (requires RTSP).                                             |
+| `image`         | Image of the latest detected object for each camera.                            |
+| `sensor`        | States to monitor Frigate performance, object counts for all zones and cameras. |
+| `switch`        | Switch entities to toggle detection, recordings and snapshots.                  |
+| `binary_sensor` | A "motion" binary sensor entity per camera/zone/object.                         |
 
 ## Media Browser Support
 
 The integration provides:
 
-- Browsing event recordings with thumbnails
+- Browsing tracked object recordings with thumbnails
 - Browsing snapshots
 - Browsing recordings by month, day, camera, time
 
@@ -183,19 +183,19 @@ For clips to be castable to media devices, audio is required and may need to be 
 
 Many people do not want to expose Frigate to the web, so the integration creates some public API endpoints that can be used for notifications.
 
-To load a thumbnail for an event:
+To load a thumbnail for a tracked object:
 
 ```
 https://HA_URL/api/frigate/notifications/<event-id>/thumbnail.jpg
 ```
 
-To load a snapshot for an event:
+To load a snapshot for a tracked object:
 
 ```
 https://HA_URL/api/frigate/notifications/<event-id>/snapshot.jpg
 ```
 
-To load a video clip of an event:
+To load a video clip of a tracked object:
 
 ```
 https://HA_URL/api/frigate/notifications/<event-id>/clip.mp4
