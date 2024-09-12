@@ -60,7 +60,7 @@ export default function ExploreView({ onSelectSearch }: ExploreViewProps) {
   }
 
   return (
-    <div className="scrollbar-container mx-2 space-y-4 overflow-x-hidden">
+    <div className="mx-2 space-y-4">
       {Object.entries(eventsByLabel).map(([label, filteredEvents]) => (
         <ThumbnailRow
           key={label}
