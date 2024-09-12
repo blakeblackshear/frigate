@@ -89,6 +89,7 @@ This list of working and non-working PTZ cameras is based on user feedback.
 | ------------------------ | :----------: | :----------: | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | Amcrest                  |      ✅      |      ✅      | ⛔️ Generally, Amcrest should work, but some older models (like the common IP2M-841) don't support autotracking                                 |
 | Amcrest ASH21            |      ✅      |      ❌      | ONVIF service port: 80                                                                                                                          |
+| Amcrest IP5M-1190EW      |      ✅      |      ❌      | ONVIF Port: 80. FOV relative movement not supported.                                                                                            |
 | Ctronics PTZ             |      ✅      |      ❌      |                                                                                                                                                 |
 | Dahua                    |      ✅      |      ✅      |                                                                                                                                                 |
 | Dahua DH-SD2A500HB       |      ✅      |      ❌      |                                                                                                                                                 |
