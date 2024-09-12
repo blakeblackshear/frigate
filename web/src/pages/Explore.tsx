@@ -43,6 +43,7 @@ export default function Explore() {
     setSearch(`similarity:${similarityId}`);
     // @ts-expect-error we want to clear this
     setSearchFilter({ ...searchFilter, similarity_search_id: undefined });
+    return false;
   });
 
   useEffect(() => {

@@ -54,6 +54,8 @@ export default function Events() {
         }
       })
       .catch(() => {});
+
+    return true;
   });
 
   const [startTime, setStartTime] = useState<number>();
@@ -83,7 +85,11 @@ export default function Events() {
           cameras: group.cameras,
         });
       }
+
+      return true;
     }
+
+    return false;
   });
 
   const onUpdateFilter = useCallback(
