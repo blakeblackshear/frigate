@@ -227,6 +227,7 @@ function ObjectDetailsTab({
     config?.ui.time_format == "24hour"
       ? "%b %-d %Y, %H:%M"
       : "%b %-d %Y, %I:%M %p",
+    config?.ui.timezone,
   );
 
   const score = useMemo(() => {

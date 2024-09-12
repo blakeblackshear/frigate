@@ -73,6 +73,7 @@ export default function ReviewDetailDialog({
     config?.ui.time_format == "24hour"
       ? "%b %-d %Y, %H:%M"
       : "%b %-d %Y, %I:%M %p",
+    config?.ui.timezone,
   );
 
   // content
