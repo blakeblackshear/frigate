@@ -1223,7 +1223,7 @@ class CameraConfig(FrigateBaseModel):
         )
 
         cmd = (
-            ["ffmpeg"]
+            [self.ffmpeg.ffmpeg_path]
             + global_args
             + hwaccel_args
             + input_args
@@ -1549,7 +1549,9 @@ class FrigateConfig(FrigateBaseModel):
                 if need_detect_dimensions or need_record_fourcc:
                     stream_info = {"width": 0, "height": 0, "fourcc": None}
                     try:
-                        stream_info = stream_info_retriever.get_stream_info(config.ffmpeg, input.path)
+                        stream_info = stream_info_retriever.get_stream_info(
+                            config.ffmpeg, input.path
+                        )
                     except Exception:
                         logger.warn(
                             f"Error detecting stream parameters automatically for {input.path} Applying default values."

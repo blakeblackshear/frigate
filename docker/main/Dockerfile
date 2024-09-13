@@ -201,7 +201,7 @@ ENV ALLOW_RESET=True
 # Disable tokenizer parallelism warning
 ENV TOKENIZERS_PARALLELISM=true
 
-ENV ENV LIBAVFORMAT_VERSION_MAJOR=60
+ENV LIBAVFORMAT_VERSION_MAJOR=60
 
 # Install dependencies
 RUN --mount=type=bind,source=docker/main/install_deps.sh,target=/deps/install_deps.sh \
