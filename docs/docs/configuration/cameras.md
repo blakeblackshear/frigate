@@ -79,6 +79,12 @@ cameras:
 
 If the ONVIF connection is successful, PTZ controls will be available in the camera's WebUI.
 
+:::tip
+
+If your ONVIF camera does not require authentication credentials, you may still need to specify an empty string for `user` and `password`, eg: `user: ""` and `password: ""`.
+
+:::
+
 An ONVIF-capable camera that supports relative movement within the field of view (FOV) can also be configured to automatically track moving objects and keep them in the center of the frame. For autotracking setup, see the [autotracking](autotracking.md) docs.
 
 ## ONVIF PTZ camera recommendations
