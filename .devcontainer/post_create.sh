@@ -17,7 +17,7 @@ sudo chown -R "$(id -u):$(id -g)" /media/frigate
 # When started as a service, LIBAVFORMAT_VERSION_MAJOR is defined in the
 # s6 service file. For dev, where frigate is started from an interactive
 # shell, we define it in .bashrc instead.
-echo 'export LIBAVFORMAT_VERSION_MAJOR=$(ffmpeg -version | grep -Po "libavformat\W+\K\d+")' >> $HOME/.bashrc
+echo 'export LIBAVFORMAT_VERSION_MAJOR=$(/usr/lib/ffmpeg/7.0/bin/ffmpeg -version | grep -Po "libavformat\W+\K\d+")' >> $HOME/.bashrc
 
 make version
 

@@ -374,7 +374,7 @@ class FrigateApp:
             except PermissionError:
                 logger.error("Unable to write to /config to save export state")
 
-            migrate_exports(self.config.cameras.keys())
+            migrate_exports(self.config.ffmpeg, self.config.cameras.keys())
 
     def init_external_event_processor(self) -> None:
         self.external_event_processor = ExternalEventProcessor(self.config)
