@@ -55,17 +55,14 @@ export function CamerasFilterButton({
 
   // ui
 
-  useEffect(
-    () => {
-      setCurrentCameras(
-        selectedCameras === undefined ? [...allCameras] : selectedCameras,
-      );
-      setAllCamerasSelected(selectedCameras === undefined);
-    },
+  useEffect(() => {
+    setCurrentCameras(
+      selectedCameras === undefined ? [...allCameras] : selectedCameras,
+    );
+    setAllCamerasSelected(selectedCameras === undefined);
     // only refresh when state changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedCameras],
-  );
+  }, [selectedCameras]);
 
   const trigger = (
     <Button

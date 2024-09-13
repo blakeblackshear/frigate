@@ -323,15 +323,12 @@ function GeneralFilterButton({
 
   // ui
 
-  useEffect(
-    () => {
-      setCurrentLabels(selectedLabels);
-      setCurrentZones(selectedZones);
-    },
+  useEffect(() => {
+    setCurrentLabels(selectedLabels);
+    setCurrentZones(selectedZones);
     // only refresh when state changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedLabels, selectedZones],
-  );
+  }, [selectedLabels, selectedZones]);
 
   const trigger = (
     <Button
