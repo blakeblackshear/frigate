@@ -226,9 +226,11 @@ export default function LivePlayer({
         className,
       )}
       onClick={onClick}
-      onAuxClick={() =>
-        window.open(`${baseUrl}#${cameraConfig.name}`, "_blank")?.focus()
-      }
+      onAuxClick={(e) => {
+        if (e.button === 1) {
+          window.open(`${baseUrl}#${cameraConfig.name}`, "_blank")?.focus();
+        }
+      }}
     >
       {((showStillWithoutActivity && !liveReady) || liveReady) && (
         <>
