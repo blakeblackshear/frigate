@@ -302,8 +302,21 @@ def events_explore():
         .dicts()
     )
 
-    events = query.iterator()
-    return jsonify(list(events))
+    events = list(query.iterator())
+
+    processed_events = [
+        {k: v for k, v in event.items() if k != "data"}
+        | {
+            "data": {
+                k: v
+                for k, v in event["data"].items()
+                if k in ["type", "score", "top_score", "description"]
+            }
+        }
+        for event in events
+    ]
+
+    return jsonify(processed_events)
 
 
 @EventBp.route("/event_ids")
@@ -507,9 +520,11 @@ def events_search():
     events = [
         {k: v for k, v in event.items() if k != "data"}
         | {
-            k: v
-            for k, v in event["data"].items()
-            if k in ["type", "score", "top_score", "description"]
+            "data": {
+                k: v
+                for k, v in event["data"].items()
+                if k in ["type", "score", "top_score", "description"]
+            }
         }
         | {
             "search_distance": results[event["id"]]["distance"],
