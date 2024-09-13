@@ -1,5 +1,5 @@
 import WebRtcPlayer from "./WebRTCPlayer";
-import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
+import { CameraConfig } from "@/types/frigateConfig";
 import AutoUpdatingCameraImage from "../camera/AutoUpdatingCameraImage";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -20,7 +20,6 @@ import { cn } from "@/lib/utils";
 import { TbExclamationCircle } from "react-icons/tb";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { baseUrl } from "@/api/baseUrl";
-import useSWR from "swr";
 
 type LivePlayerProps = {
   cameraRef?: (ref: HTMLDivElement | null) => void;
@@ -59,7 +58,6 @@ export default function LivePlayer({
   onError,
   onResetLiveMode,
 }: LivePlayerProps) {
-  const { data: config } = useSWR<FrigateConfig>("config");
   const internalContainerRef = useRef<HTMLDivElement | null>(null);
 
   // camera activity
@@ -149,14 +147,6 @@ export default function LivePlayer({
   const playerIsPlaying = useCallback(() => {
     setLiveReady(true);
   }, []);
-
-  const isRestreamed = useMemo(
-    () =>
-      cameraConfig &&
-      config &&
-      Object.keys(config.go2rtc.streams || {}).includes(cameraConfig.name),
-    [cameraConfig, config],
-  );
 
   if (!cameraConfig) {
     return <ActivityIndicator />;
@@ -309,13 +299,17 @@ export default function LivePlayer({
         />
       </div>
 
-      {offline && !showStillWithoutActivity && !isRestreamed && (
-        <div className="flex size-full flex-col items-center">
-          <p className="mb-5">
-            {capitalizeFirstLetter(cameraConfig.name)} is offline
-          </p>
-          <TbExclamationCircle className="mb-3 size-10" />
-          <p>No frames have been received, check error logs</p>
+      {!offline && !showStillWithoutActivity && (
+        <div className="absolute inset-0 left-1/2 top-1/2 flex h-96 w-96 -translate-x-1/2 -translate-y-1/2">
+          <div className="flex flex-col items-center justify-center rounded-lg bg-background/50 p-5">
+            <p className="my-5 text-lg">Stream offline</p>
+            <TbExclamationCircle className="mb-3 size-10" />
+            <p className="max-w-96 text-center">
+              No frames have been received for the stream on{" "}
+              {capitalizeFirstLetter(cameraConfig.name)} defined with the{" "}
+              <code>detect</code> role, check error logs
+            </p>
+          </div>
         </div>
       )}
 
