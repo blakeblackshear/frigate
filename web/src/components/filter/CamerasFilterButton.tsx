@@ -29,7 +29,10 @@ export function CamerasFilterButton({
 }: CameraFilterButtonProps) {
   const [open, setOpen] = useState(false);
   const [currentCameras, setCurrentCameras] = useState<string[] | undefined>(
-    selectedCameras,
+    selectedCameras === undefined ? [...allCameras] : selectedCameras,
+  );
+  const [allCamerasSelected, setAllCamerasSelected] = useState(
+    selectedCameras === undefined,
   );
 
   const buttonText = useMemo(() => {
@@ -37,12 +40,18 @@ export function CamerasFilterButton({
       return "Cameras";
     }
 
-    if (!selectedCameras || selectedCameras.length == 0) {
+    if (allCamerasSelected) {
       return "All Cameras";
     }
 
-    return `${selectedCameras.includes("birdseye") ? selectedCameras.length - 1 : selectedCameras.length} Camera${selectedCameras.length !== 1 ? "s" : ""}`;
-  }, [selectedCameras]);
+    if (!currentCameras || currentCameras.length === 0) {
+      return "No cameras";
+    }
+
+    return `${currentCameras.includes("birdseye") ? currentCameras.length - 1 : currentCameras.length} Camera${
+      currentCameras.length !== 1 ? "s" : ""
+    }`;
+  }, [allCamerasSelected, currentCameras]);
 
   const trigger = (
     <Button
@@ -72,11 +81,15 @@ export function CamerasFilterButton({
       )}
       <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden p-4">
         <FilterSwitch
-          isChecked={currentCameras == undefined}
+          isChecked={allCamerasSelected}
           label="All Cameras"
           onCheckedChange={(isChecked) => {
+            setAllCamerasSelected(isChecked);
+
             if (isChecked) {
-              setCurrentCameras(undefined);
+              setCurrentCameras([...allCameras]);
+            } else {
+              setCurrentCameras([]);
             }
           }}
         />
@@ -108,19 +121,26 @@ export function CamerasFilterButton({
                   const updatedCameras = currentCameras
                     ? [...currentCameras]
                     : [];
-
                   updatedCameras.push(item);
                   setCurrentCameras(updatedCameras);
+
+                  // Check if all cameras are now selected
+                  setAllCamerasSelected(
+                    updatedCameras.length === allCameras.length,
+                  );
                 } else {
                   const updatedCameras = currentCameras
                     ? [...currentCameras]
                     : [];
+                  const index = updatedCameras.indexOf(item);
 
-                  // can not deselect the last item
-                  if (updatedCameras.length > 1) {
-                    updatedCameras.splice(updatedCameras.indexOf(item), 1);
+                  if (index > -1) {
+                    updatedCameras.splice(index, 1);
                     setCurrentCameras(updatedCameras);
                   }
+
+                  // Deselecting one camera should disable the "All Cameras" switch
+                  setAllCamerasSelected(false);
                 }
               }}
             />
@@ -131,8 +151,9 @@ export function CamerasFilterButton({
       <div className="flex items-center justify-evenly p-2">
         <Button
           variant="select"
+          disabled={currentCameras?.length === 0}
           onClick={() => {
-            updateCameraFilter(currentCameras);
+            updateCameraFilter(allCamerasSelected ? undefined : currentCameras);
             setOpen(false);
           }}
         >
@@ -140,7 +161,8 @@ export function CamerasFilterButton({
         </Button>
         <Button
           onClick={() => {
-            setCurrentCameras(undefined);
+            setCurrentCameras([...allCameras]);
+            setAllCamerasSelected(true);
             updateCameraFilter(undefined);
           }}
         >
@@ -156,7 +178,8 @@ export function CamerasFilterButton({
         open={open}
         onOpenChange={(open) => {
           if (!open) {
-            setCurrentCameras(selectedCameras);
+            setCurrentCameras(selectedCameras ?? allCameras);
+            setAllCamerasSelected(selectedCameras === undefined);
           }
 
           setOpen(open);
@@ -176,9 +199,9 @@ export function CamerasFilterButton({
       open={open}
       onOpenChange={(open) => {
         if (!open) {
-          setCurrentCameras(selectedCameras);
+          setCurrentCameras(selectedCameras ?? allCameras);
+          setAllCamerasSelected(selectedCameras === undefined);
         }
-
         setOpen(open);
       }}
     >

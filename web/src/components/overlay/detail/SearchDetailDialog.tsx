@@ -199,7 +199,7 @@ export default function SearchDetailDialog({
         {page == "video" && <VideoTab search={search} config={config} />}
         {page == "object lifecycle" && (
           <ObjectLifecycle
-            className="w-full"
+            className="w-full overflow-x-hidden"
             event={search as unknown as Event}
             fullscreen={true}
             setPane={() => {}}
