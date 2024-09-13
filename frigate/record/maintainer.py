@@ -209,7 +209,9 @@ class RecordingMaintainer(threading.Thread):
         if cache_path in self.end_time_cache:
             end_time, duration = self.end_time_cache[cache_path]
         else:
-            segment_info = await get_video_properties(cache_path, get_duration=True)
+            segment_info = await get_video_properties(
+                self.config.ffmpeg, cache_path, get_duration=True
+            )
 
             if segment_info["duration"]:
                 duration = float(segment_info["duration"])
