@@ -2,7 +2,7 @@ import ActivityIndicator from "../indicators/activity-indicator";
 import { LuTrash } from "react-icons/lu";
 import { Button } from "../ui/button";
 import { useCallback, useState } from "react";
-import { isDesktop } from "react-device-detect";
+import { isDesktop, isMobile } from "react-device-detect";
 import { FaDownload, FaPlay, FaShareAlt } from "react-icons/fa";
 import Chip from "../indicators/Chip";
 import { Skeleton } from "../ui/skeleton";
@@ -82,7 +82,13 @@ export default function ExportCard({
           }
         }}
       >
-        <DialogContent>
+        <DialogContent
+          onOpenAutoFocus={(e) => {
+            if (isMobile) {
+              e.preventDefault();
+            }
+          }}
+        >
           <DialogTitle>Rename Export</DialogTitle>
           <DialogDescription>
             Enter a new name for this export.
@@ -90,7 +96,7 @@ export default function ExportCard({
           {editName && (
             <>
               <Input
-                className="mt-3"
+                className="text-md mt-3"
                 type="search"
                 placeholder={editName?.original}
                 value={

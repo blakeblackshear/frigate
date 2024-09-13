@@ -175,7 +175,7 @@ function Exports() {
       {exports && (
         <div className="flex w-full items-center justify-center p-2">
           <Input
-            className="w-full bg-muted md:w-1/3"
+            className="text-md w-full bg-muted md:w-1/3"
             placeholder="Search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
