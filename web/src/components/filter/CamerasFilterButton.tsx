@@ -1,6 +1,6 @@
 import { Button } from "../ui/button";
 import { CameraGroupConfig } from "@/types/frigateConfig";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,6 +52,17 @@ export function CamerasFilterButton({
       currentCameras.length !== 1 ? "s" : ""
     }`;
   }, [allCamerasSelected, currentCameras]);
+
+  // ui
+
+  useEffect(() => {
+    setCurrentCameras(
+      selectedCameras === undefined ? [...allCameras] : selectedCameras,
+    );
+    setAllCamerasSelected(selectedCameras === undefined);
+    // only refresh when state changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCameras]);
 
   const trigger = (
     <Button

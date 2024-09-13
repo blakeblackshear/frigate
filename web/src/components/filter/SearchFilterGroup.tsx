@@ -2,7 +2,7 @@ import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { DropdownMenuSeparator } from "../ui/dropdown-menu";
 import { getEndOfDayTimestamp } from "@/utils/dateUtil";
 import { isMobile } from "react-device-detect";
@@ -261,6 +261,14 @@ function GeneralFilterButton({
     return `${selectedLabels.length} Labels`;
   }, [selectedLabels]);
 
+  // ui
+
+  useEffect(() => {
+    setCurrentLabels(selectedLabels);
+    // only refresh when state changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedLabels]);
+
   const trigger = (
     <Button
       size="sm"
@@ -445,6 +453,14 @@ function ZoneFilterButton({
     }
 
     return `${selectedZones.length} Zones`;
+  }, [selectedZones]);
+
+  // ui
+
+  useEffect(() => {
+    setCurrentZones(selectedZones);
+    // only refresh when state changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedZones]);
 
   const trigger = (
