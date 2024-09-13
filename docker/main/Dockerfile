@@ -201,6 +201,7 @@ ENV ALLOW_RESET=True
 # Disable tokenizer parallelism warning
 ENV TOKENIZERS_PARALLELISM=true
 
+ENV PATH="/usr/local/go2rtc/bin:/usr/local/tempio/bin:/usr/local/nginx/sbin:${PATH}"
 ENV LIBAVFORMAT_VERSION_MAJOR=60
 
 # Install dependencies
