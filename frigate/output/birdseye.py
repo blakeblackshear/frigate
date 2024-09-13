@@ -133,7 +133,7 @@ class FFMpegConverter(threading.Thread):
             self.recreate_birdseye_pipe()
 
         ffmpeg_cmd = [
-            ffmpeg.executable_path,
+            ffmpeg.ffmpeg_path,
             "-threads",
             "1",
             "-f",

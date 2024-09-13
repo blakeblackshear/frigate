@@ -116,7 +116,7 @@ class RecordingExporter(threading.Thread):
             minutes = int(diff / 60)
             seconds = int(diff % 60)
             ffmpeg_cmd = [
-                self.config.ffmpeg.executable_path,
+                self.config.ffmpeg.ffmpeg_path,
                 "-hide_banner",
                 "-loglevel",
                 "warning",
@@ -286,7 +286,7 @@ def migrate_exports(ffmpeg: FfmpegConfig, camera_names: list[str]):
         )  # use jpg because webp encoder can't get quality low enough
 
         ffmpeg_cmd = [
-            ffmpeg.executable_path,
+            ffmpeg.ffmpeg_path,
             "-hide_banner",
             "-loglevel",
             "warning",

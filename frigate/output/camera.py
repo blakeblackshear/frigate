@@ -31,7 +31,7 @@ class FFMpegConverter(threading.Thread):
         self.stop_event = stop_event
 
         ffmpeg_cmd = [
-            ffmpeg.executable_path,
+            ffmpeg.ffmpeg_path,
             "-threads",
             "1",
             "-f",

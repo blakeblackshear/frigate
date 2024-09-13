@@ -886,7 +886,7 @@ class FfmpegConfig(FrigateBaseModel):
     )
 
     @property
-    def executable_path(self) -> str:
+    def ffmpeg_path(self) -> str:
         if self.path == "default":
             if int(os.getenv("LIBAVFORMAT_VERSION_MAJOR", "59")) >= 59:
                 return "/usr/lib/ffmpeg/7.0/bin/ffmpeg"
@@ -897,8 +897,7 @@ class FfmpegConfig(FrigateBaseModel):
         elif self.path == "5.0":
             return "/usr/lib/ffmpeg/5.0/bin/ffmpeg"
         else:
-            return self.path
-
+            return f"{self.path}/bin/ffmpeg"
 
 
 class CameraRoleEnum(str, Enum):

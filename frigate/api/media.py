@@ -278,7 +278,9 @@ def submit_recording_snapshot_to_plus(camera_name: str, frame_time: str):
         config: FrigateConfig = current_app.frigate_config
         recording: Recordings = recording_query.get()
         time_in_segment = frame_time - recording.start_time
-        image_data = get_image_from_recording(config.ffmpeg, recording.path, time_in_segment, "png")
+        image_data = get_image_from_recording(
+            config.ffmpeg, recording.path, time_in_segment, "png"
+        )
 
         if not image_data:
             return make_response(
@@ -481,7 +483,7 @@ def recording_clip(camera_name, start_ts, end_ts):
 
     if not os.path.exists(path):
         ffmpeg_cmd = [
-            config.ffmpeg.executable_path,
+            config.ffmpeg.ffmpeg_path,
             "-hide_banner",
             "-y",
             "-protocol_whitelist",
@@ -1148,7 +1150,7 @@ def preview_gif(camera_name: str, start_ts, end_ts, max_cache_age=2592000):
         seconds = int(diff % 60)
         config: FrigateConfig = current_app.frigate_config
         ffmpeg_cmd = [
-            config.ffmpeg.executable_path,
+            config.ffmpeg.ffmpeg_path,
             "-hide_banner",
             "-loglevel",
             "warning",
@@ -1215,7 +1217,7 @@ def preview_gif(camera_name: str, start_ts, end_ts, max_cache_age=2592000):
         config: FrigateConfig = current_app.frigate_config
 
         ffmpeg_cmd = [
-            config.ffmpeg.executable_path,
+            config.ffmpeg.ffmpeg_path,
             "-hide_banner",
             "-loglevel",
             "warning",
@@ -1310,7 +1312,7 @@ def preview_mp4(camera_name: str, start_ts, end_ts, max_cache_age=604800):
         seconds = int(diff % 60)
         config: FrigateConfig = current_app.frigate_config
         ffmpeg_cmd = [
-            config.ffmpeg.executable_path,
+            config.ffmpeg.ffmpeg_path,
             "-hide_banner",
             "-loglevel",
             "warning",
@@ -1375,7 +1377,7 @@ def preview_mp4(camera_name: str, start_ts, end_ts, max_cache_age=604800):
         config: FrigateConfig = current_app.frigate_config
 
         ffmpeg_cmd = [
-            config.ffmpeg.executable_path,
+            config.ffmpeg.ffmpeg_path,
             "-hide_banner",
             "-loglevel",
             "warning",
