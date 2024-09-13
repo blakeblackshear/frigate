@@ -159,7 +159,7 @@ export default function ExportCard({
                   className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
                   onClick={() =>
                     shareOrCopy(
-                      `${baseUrl}exports?id=${exportedRecording.id}`,
+                      `${baseUrl}export?id=${exportedRecording.id}`,
                       exportedRecording.name.replaceAll("_", " "),
                     )
                   }
