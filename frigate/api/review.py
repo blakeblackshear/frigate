@@ -94,6 +94,18 @@ def review():
     return jsonify([r for r in review])
 
 
+@ReviewBp.route("/review/event/<id>")
+def get_review_from_event(id: str):
+    try:
+        return model_to_dict(
+            ReviewSegment.get(
+                ReviewSegment.data["detections"].cast("text") % f'*"{id}"*'
+            )
+        )
+    except DoesNotExist:
+        return "Review item not found", 404
+
+
 @ReviewBp.route("/review/<id>")
 def get_review(id: str):
     try:

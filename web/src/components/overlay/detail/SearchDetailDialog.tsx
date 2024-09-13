@@ -27,7 +27,7 @@ import { baseUrl } from "@/api/baseUrl";
 import { cn } from "@/lib/utils";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
-import { FaImage, FaRegListAlt, FaVideo } from "react-icons/fa";
+import { FaHistory, FaImage, FaRegListAlt, FaVideo } from "react-icons/fa";
 import { FaRotate } from "react-icons/fa6";
 import ObjectLifecycle from "./ObjectLifecycle";
 import {
@@ -37,6 +37,14 @@ import {
   MobilePageHeader,
   MobilePageTitle,
 } from "@/components/mobile/MobilePage";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { ReviewSegment } from "@/types/review";
+import { useNavigate } from "react-router-dom";
+import Chip from "@/components/indicators/Chip";
 
 const SEARCH_TABS = [
   "details",
@@ -226,10 +234,10 @@ function ObjectDetailsTab({
 
   // data
 
-  const [desc, setDesc] = useState(search?.description);
+  const [desc, setDesc] = useState(search?.data.description);
 
   // we have to make sure the current selected search item stays in sync
-  useEffect(() => setDesc(search?.description), [search]);
+  useEffect(() => setDesc(search?.data.description), [search]);
 
   const formattedDate = useFormattedTimestamp(
     search?.start_time ?? 0,
@@ -279,7 +287,7 @@ function ObjectDetailsTab({
         toast.error("Failed to update the description", {
           position: "top-center",
         });
-        setDesc(search.description);
+        setDesc(search.data.description);
       });
   }, [desc, search]);
 
@@ -367,6 +375,11 @@ function VideoTab({ search, config }: VideoTabProps) {
 
   const endTime = useMemo(() => search.end_time ?? Date.now() / 1000, [search]);
 
+  const navigate = useNavigate();
+  const { data: reviewItem } = useSWR<ReviewSegment>([
+    `review/event/${search.id}`,
+  ]);
+
   const mainCameraAspect = useMemo(() => {
     const camera = config?.cameras?.[search.camera];
 
@@ -416,22 +429,46 @@ function VideoTab({ search, config }: VideoTabProps) {
   }, [mainCameraAspect]);
 
   return (
-    <div className={`aspect-video ${containerClassName}`}>
-      {isLoading && (
-        <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
-      )}
-      <div className={videoClassName}>
-        <HlsVideoPlayer
-          videoRef={videoRef}
-          currentSource={`${baseUrl}vod/${search.camera}/start/${search.start_time}/end/${endTime}/index.m3u8`}
-          hotKeys
-          visible
-          frigateControls={false}
-          fullscreen={false}
-          supportsFullscreen={false}
-          onPlaying={() => setIsLoading(false)}
-        />
+    <div className="relative flex flex-col">
+      <div className={`aspect-video ${containerClassName}`}>
+        {(isLoading || !reviewItem) && (
+          <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+        )}
+        <div className={videoClassName}>
+          <HlsVideoPlayer
+            videoRef={videoRef}
+            currentSource={`${baseUrl}vod/${search.camera}/start/${search.start_time}/end/${endTime}/index.m3u8`}
+            hotKeys
+            visible
+            frigateControls={false}
+            fullscreen={false}
+            supportsFullscreen={false}
+            onPlaying={() => setIsLoading(false)}
+          />
+        </div>
       </div>
+      {!isLoading && (
+        <div className="absolute right-2 top-2 flex items-center">
+          <Tooltip>
+            <TooltipTrigger>
+              <Chip
+                className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
+                onClick={() => {
+                  if (reviewItem?.id) {
+                    const params = new URLSearchParams({
+                      id: reviewItem.id,
+                    }).toString();
+                    navigate(`/review?${params}`);
+                  }
+                }}
+              >
+                <FaHistory className="size-4 text-white" />
+              </Chip>
+            </TooltipTrigger>
+            <TooltipContent side="left">View in History</TooltipContent>
+          </Tooltip>
+        </div>
+      )}
     </div>
   );
 }
