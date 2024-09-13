@@ -69,7 +69,11 @@ export function useApiFilterArgs<
         filter[key] = value.includes(",") ? value.split(",") : [value];
       } else {
         if (value != undefined) {
-          filter[key] = JSON.parse(value);
+          try {
+            filter[key] = JSON.parse(value);
+          } catch {
+            filter[key] = `${value}`;
+          }
         }
       }
     });
