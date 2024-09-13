@@ -40,7 +40,7 @@ apt-get -qq install --no-install-recommends --no-install-suggests -y \
 # btbn-ffmpeg -> amd64
 if [[ "${TARGETARCH}" == "amd64" ]]; then
     mkdir -p /usr/lib/btbn-ffmpeg
-    wget -qO btbn-ffmpeg.tar.xz "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2024-09-04-18-56/ffmpeg-n7.0.2-15-g0458a86656-linux64-gpl-7.0.tar.xz"
+    wget -qO btbn-ffmpeg.tar.xz "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2024-09-13-12-57/ffmpeg-n7.0.2-17-gf705bc5b73-linux64-gpl-7.0.tar.xz"
     tar -xf btbn-ffmpeg.tar.xz -C /usr/lib/btbn-ffmpeg --strip-components 1
     rm -rf btbn-ffmpeg.tar.xz /usr/lib/btbn-ffmpeg/doc /usr/lib/btbn-ffmpeg/bin/ffplay
 fi
@@ -48,7 +48,7 @@ fi
 # ffmpeg -> arm64
 if [[ "${TARGETARCH}" == "arm64" ]]; then
     mkdir -p /usr/lib/btbn-ffmpeg
-    wget -qO btbn-ffmpeg.tar.xz "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2024-09-04-18-56/ffmpeg-n7.0.2-15-g0458a86656-linuxarm64-gpl-7.0.tar.xz"
+    wget -qO btbn-ffmpeg.tar.xz "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2024-09-13-12-57/ffmpeg-n7.0.2-17-gf705bc5b73-linuxarm64-gpl-7.0.tar.xz"
     tar -xf btbn-ffmpeg.tar.xz -C /usr/lib/btbn-ffmpeg --strip-components 1
     rm -rf btbn-ffmpeg.tar.xz /usr/lib/btbn-ffmpeg/doc /usr/lib/btbn-ffmpeg/bin/ffplay
 fi
