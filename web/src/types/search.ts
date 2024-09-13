@@ -3,7 +3,6 @@ export type SearchSource = "similarity" | "thumbnail" | "description";
 export type SearchResult = {
   id: string;
   camera: string;
-  description?: string;
   start_time: number;
   end_time?: number;
   score: number;
@@ -25,6 +24,7 @@ export type SearchResult = {
     area: number;
     ratio: number;
     type: "object" | "audio" | "manual";
+    description?: string;
   };
 };
 
