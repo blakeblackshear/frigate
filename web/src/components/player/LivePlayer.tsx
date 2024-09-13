@@ -299,15 +299,15 @@ export default function LivePlayer({
         />
       </div>
 
-      {!offline && !showStillWithoutActivity && (
+      {offline && !showStillWithoutActivity && (
         <div className="absolute inset-0 left-1/2 top-1/2 flex h-96 w-96 -translate-x-1/2 -translate-y-1/2">
           <div className="flex flex-col items-center justify-center rounded-lg bg-background/50 p-5">
             <p className="my-5 text-lg">Stream offline</p>
             <TbExclamationCircle className="mb-3 size-10" />
             <p className="max-w-96 text-center">
-              No frames have been received for the stream on{" "}
-              {capitalizeFirstLetter(cameraConfig.name)} defined with the{" "}
-              <code>detect</code> role, check error logs
+              No frames have been received on the{" "}
+              {capitalizeFirstLetter(cameraConfig.name)} <code>detect</code>{" "}
+              stream, check error logs
             </p>
           </div>
         </div>
