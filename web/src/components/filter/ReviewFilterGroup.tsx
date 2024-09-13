@@ -470,6 +470,7 @@ export function GeneralFilterContent({
         <div className="my-2.5 flex flex-col gap-2.5">
           {allLabels.map((item) => (
             <FilterSwitch
+              key={item}
               label={item.replaceAll("_", " ")}
               isChecked={currentLabels?.includes(item) ?? false}
               onCheckedChange={(isChecked) => {
@@ -516,6 +517,7 @@ export function GeneralFilterContent({
             <div className="my-2.5 flex flex-col gap-2.5">
               {allZones.map((item) => (
                 <FilterSwitch
+                  key={item}
                   label={item.replaceAll("_", " ")}
                   isChecked={currentZones?.includes(item) ?? false}
                   onCheckedChange={(isChecked) => {

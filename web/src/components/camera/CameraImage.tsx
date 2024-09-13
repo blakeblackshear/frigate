@@ -93,6 +93,7 @@ export default function CameraImage({
             "rounded-lg md:rounded-2xl",
           )}
           onLoad={handleImageLoad}
+          loading="lazy"
         />
       ) : (
         <div className="pt-6 text-center">

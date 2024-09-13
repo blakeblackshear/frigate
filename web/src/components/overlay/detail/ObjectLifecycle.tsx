@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ObjectLifecycleSequence } from "@/types/timeline";
 import Heading from "@/components/ui/heading";
-import { ReviewDetailPaneType, ReviewSegment } from "@/types/review";
+import { ReviewDetailPaneType } from "@/types/review";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { getIconForLabel } from "@/utils/iconUtil";
@@ -47,14 +47,16 @@ import { AnnotationSettingsPane } from "./AnnotationSettingsPane";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 
 type ObjectLifecycleProps = {
-  review: ReviewSegment;
+  className?: string;
   event: Event;
+  fullscreen?: boolean;
   setPane: React.Dispatch<React.SetStateAction<ReviewDetailPaneType>>;
 };
 
 export default function ObjectLifecycle({
-  review,
+  className,
   event,
+  fullscreen = false,
   setPane,
 }: ObjectLifecycleProps) {
   const { data: eventSequence } = useSWR<ObjectLifecycleSequence[]>([
@@ -78,13 +80,13 @@ export default function ObjectLifecycle({
   const getZoneColor = useCallback(
     (zoneName: string) => {
       const zoneColor =
-        config?.cameras?.[review.camera]?.zones?.[zoneName]?.color;
+        config?.cameras?.[event.camera]?.zones?.[zoneName]?.color;
       if (zoneColor) {
         const reversed = [...zoneColor].reverse();
         return reversed;
       }
     },
-    [config, review],
+    [config, event],
   );
 
   const getZonePolygon = useCallback(
@@ -93,7 +95,7 @@ export default function ObjectLifecycle({
         return;
       }
       const zonePoints =
-        config?.cameras[review.camera].zones[zoneName].coordinates;
+        config?.cameras[event.camera].zones[zoneName].coordinates;
       const imgElement = imgRef.current;
       const imgRect = imgElement.getBoundingClientRect();
 
@@ -110,7 +112,7 @@ export default function ObjectLifecycle({
         }, [] as number[])
         .join(",");
     },
-    [config, imgRef, review],
+    [config, imgRef, event],
   );
 
   const [boxStyle, setBoxStyle] = useState<React.CSSProperties | null>(null);
@@ -224,19 +226,21 @@ export default function ObjectLifecycle({
   }
 
   return (
-    <>
-      <div className={cn("flex items-center gap-2")}>
-        <Button
-          className="flex items-center gap-2.5 rounded-lg"
-          size="sm"
-          onClick={() => setPane("overview")}
-        >
-          <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
-          {isDesktop && <div className="text-primary">Back</div>}
-        </Button>
-      </div>
+    <div className={className}>
+      {!fullscreen && (
+        <div className={cn("flex items-center gap-2")}>
+          <Button
+            className="mb-2 mt-3 flex items-center gap-2.5 rounded-lg md:mt-0"
+            size="sm"
+            onClick={() => setPane("overview")}
+          >
+            <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
+            {isDesktop && <div className="text-primary">Back</div>}
+          </Button>
+        </div>
+      )}
 
-      <div className="relative mx-auto">
+      <div className="relative flex flex-row justify-center">
         <ImageLoadingIndicator
           className="absolute inset-0"
           imgLoaded={imgLoaded}
@@ -249,7 +253,12 @@ export default function ObjectLifecycle({
             </div>
           </div>
         )}
-        <div className={cn(imgLoaded ? "visible" : "invisible")}>
+        <div
+          className={cn(
+            "relative inline-block",
+            imgLoaded ? "visible" : "invisible",
+          )}
+        >
           <img
             key={event.id}
             ref={imgRef}
@@ -274,7 +283,7 @@ export default function ObjectLifecycle({
           {showZones &&
             lifecycleZones?.map((zone) => (
               <div
-                className="absolute left-0 top-0"
+                className="absolute inset-0 flex items-center justify-center"
                 style={{
                   width: imgRef.current?.clientWidth,
                   height: imgRef.current?.clientHeight,
@@ -283,6 +292,7 @@ export default function ObjectLifecycle({
               >
                 <svg
                   viewBox={`0 0 ${imgRef.current?.width} ${imgRef.current?.height}`}
+                  className="absolute inset-0"
                 >
                   <polygon
                     points={getZonePolygon(zone)}
@@ -347,7 +357,10 @@ export default function ObjectLifecycle({
       )}
 
       <div className="relative flex flex-col items-center justify-center">
-        <Carousel className="m-0 w-full" setApi={setMainApi}>
+        <Carousel
+          className={cn("m-0 w-full", fullscreen && isDesktop && "w-[75%]")}
+          setApi={setMainApi}
+        >
           <CarouselContent>
             {eventSequence.map((item, index) => (
               <CarouselItem key={index}>
@@ -455,7 +468,7 @@ export default function ObjectLifecycle({
           </CarouselContent>
         </Carousel>
       </div>
-      <div className="relative flex flex-col items-center justify-center">
+      <div className="relative mt-4 flex flex-col items-center justify-center">
         <Carousel
           opts={{
             align: "center",
@@ -474,7 +487,10 @@ export default function ObjectLifecycle({
             {eventSequence.map((item, index) => (
               <CarouselItem
                 key={index}
-                className={cn("basis-1/4 cursor-pointer pl-1 md:basis-[10%]")}
+                className={cn(
+                  "basis-1/4 cursor-pointer pl-1 md:basis-[10%]",
+                  fullscreen && "md:basis-16",
+                )}
                 onClick={() => handleThumbnailClick(index)}
               >
                 <div className="p-1">
@@ -513,7 +529,7 @@ export default function ObjectLifecycle({
           <CarouselNext />
         </Carousel>
       </div>
-    </>
+    </div>
   );
 }
 

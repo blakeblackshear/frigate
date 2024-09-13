@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { usePersistence } from "./use-persistence";
 
 export function useOverlayState<S>(
@@ -103,33 +103,29 @@ export function useHashState<S extends string>(): [
 
 export function useSearchEffect(
   key: string,
-  callback: (value: string) => void,
+  callback: (value: string) => boolean,
 ) {
-  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const param = useMemo(() => {
-    if (!location || !location.search || location.search.length == 0) {
+    const param = searchParams.get(key);
+
+    if (!param) {
       return undefined;
     }
 
-    const params = location.search.substring(1).split("&");
-
-    const foundParam = params
-      .find((p) => p.includes("=") && p.split("=")[0] == key)
-      ?.split("=");
-
-    if (foundParam && foundParam.length === 2) {
-      return [foundParam[0], decodeURIComponent(foundParam[1])];
-    }
-
-    return undefined;
-  }, [location, key]);
+    return [key, decodeURIComponent(param)];
+  }, [searchParams, key]);
 
   useEffect(() => {
     if (!param) {
       return;
     }
 
-    callback(param[1]);
-  }, [param, callback]);
+    const remove = callback(param[1]);
+
+    if (remove) {
+      setSearchParams();
+    }
+  }, [param, callback, setSearchParams]);
 }
