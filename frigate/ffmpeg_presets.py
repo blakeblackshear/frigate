@@ -197,7 +197,11 @@ class EncodeTypeEnum(str, Enum):
 
 
 def parse_preset_hardware_acceleration_encode(
-    ffmpeg_path: str, arg: Any, input: str, output: str, type: EncodeTypeEnum = EncodeTypeEnum.birdseye
+    ffmpeg_path: str,
+    arg: Any,
+    input: str,
+    output: str,
+    type: EncodeTypeEnum = EncodeTypeEnum.birdseye,
 ) -> str:
     """Return the correct scaling preset or default preset if none is set."""
     if type == EncodeTypeEnum.birdseye:
