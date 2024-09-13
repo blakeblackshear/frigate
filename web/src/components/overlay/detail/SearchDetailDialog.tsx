@@ -1,11 +1,4 @@
 import { isDesktop, isIOS, isMobile } from "react-device-detect";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-} from "../../ui/drawer";
 import { SearchResult } from "@/types/search";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -34,10 +27,23 @@ import { baseUrl } from "@/api/baseUrl";
 import { cn } from "@/lib/utils";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
-import { FaRegListAlt, FaVideo } from "react-icons/fa";
-import FrigatePlusIcon from "@/components/icons/FrigatePlusIcon";
+import { FaImage, FaRegListAlt, FaVideo } from "react-icons/fa";
+import { FaRotate } from "react-icons/fa6";
+import ObjectLifecycle from "./ObjectLifecycle";
+import {
+  MobilePage,
+  MobilePageContent,
+  MobilePageDescription,
+  MobilePageHeader,
+  MobilePageTitle,
+} from "@/components/mobile/MobilePage";
 
-const SEARCH_TABS = ["details", "frigate+", "video"] as const;
+const SEARCH_TABS = [
+  "details",
+  "snapshot",
+  "video",
+  "object lifecycle",
+] as const;
 type SearchTab = (typeof SEARCH_TABS)[number];
 
 type SearchDetailDialogProps = {
@@ -59,6 +65,14 @@ export default function SearchDetailDialog({
   const [page, setPage] = useState<SearchTab>("details");
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
 
+  // dialog and mobile page
+
+  const [isOpen, setIsOpen] = useState(search != undefined);
+
+  useEffect(() => {
+    setIsOpen(search != undefined);
+  }, [search]);
+
   const searchTabs = useMemo(() => {
     if (!config || !search) {
       return [];
@@ -66,8 +80,8 @@ export default function SearchDetailDialog({
 
     const views = [...SEARCH_TABS];
 
-    if (!config.plus.enabled || !search.has_snapshot) {
-      const index = views.indexOf("frigate+");
+    if (!search.has_snapshot) {
+      const index = views.indexOf("snapshot");
       views.splice(index, 1);
     }
 
@@ -80,21 +94,31 @@ export default function SearchDetailDialog({
     return views;
   }, [config, search]);
 
+  useEffect(() => {
+    if (searchTabs.length == 0) {
+      return;
+    }
+
+    if (!searchTabs.includes(pageToggle)) {
+      setPage("details");
+    }
+  }, [pageToggle, searchTabs]);
+
   if (!search) {
     return;
   }
 
   // content
 
-  const Overlay = isDesktop ? Dialog : Drawer;
-  const Content = isDesktop ? DialogContent : DrawerContent;
-  const Header = isDesktop ? DialogHeader : DrawerHeader;
-  const Title = isDesktop ? DialogTitle : DrawerTitle;
-  const Description = isDesktop ? DialogDescription : DrawerDescription;
+  const Overlay = isDesktop ? Dialog : MobilePage;
+  const Content = isDesktop ? DialogContent : MobilePageContent;
+  const Header = isDesktop ? DialogHeader : MobilePageHeader;
+  const Title = isDesktop ? DialogTitle : MobilePageTitle;
+  const Description = isDesktop ? DialogDescription : MobilePageDescription;
 
   return (
     <Overlay
-      open={search != undefined}
+      open={isOpen}
       onOpenChange={(open) => {
         if (!open) {
           setSearch(undefined);
@@ -102,15 +126,16 @@ export default function SearchDetailDialog({
       }}
     >
       <Content
-        className={
-          isDesktop
-            ? "sm:max-w-xl md:max-w-3xl lg:max-w-4xl xl:max-w-7xl"
-            : "max-h-[75dvh] overflow-hidden px-2 pb-4"
-        }
+        className={cn(
+          "scrollbar-container overflow-y-auto",
+          isDesktop &&
+            "max-h-[95dvh] sm:max-w-xl md:max-w-4xl lg:max-w-4xl xl:max-w-7xl",
+          isMobile && "px-4",
+        )}
       >
-        <Header className="sr-only">
+        <Header onClose={() => setIsOpen(false)}>
           <Title>Tracked Object Details</Title>
-          <Description>Tracked object details</Description>
+          <Description className="sr-only">Tracked object details</Description>
         </Header>
         <ScrollArea
           className={cn("w-full whitespace-nowrap", isMobile && "my-2")}
@@ -136,8 +161,11 @@ export default function SearchDetailDialog({
                   aria-label={`Select ${item}`}
                 >
                   {item == "details" && <FaRegListAlt className="size-4" />}
-                  {item == "frigate+" && <FrigatePlusIcon className="size-4" />}
+                  {item == "snapshot" && <FaImage className="size-4" />}
                   {item == "video" && <FaVideo className="size-4" />}
+                  {item == "object lifecycle" && (
+                    <FaRotate className="size-4" />
+                  )}
                   <div className="capitalize">{item}</div>
                 </ToggleGroupItem>
               ))}
@@ -153,9 +181,14 @@ export default function SearchDetailDialog({
             setSimilarity={setSimilarity}
           />
         )}
-        {page == "frigate+" && (
+        {page == "snapshot" && (
           <FrigatePlusDialog
-            upload={search as unknown as Event}
+            upload={
+              {
+                ...search,
+                plus_id: config?.plus?.enabled ? search.plus_id : "not_enabled",
+              } as unknown as Event
+            }
             dialog={false}
             onClose={() => {}}
             onEventUploaded={() => {
@@ -164,6 +197,14 @@ export default function SearchDetailDialog({
           />
         )}
         {page == "video" && <VideoTab search={search} config={config} />}
+        {page == "object lifecycle" && (
+          <ObjectLifecycle
+            className="w-full"
+            event={search as unknown as Event}
+            fullscreen={true}
+            setPane={() => {}}
+          />
+        )}
       </Content>
     </Overlay>
   );
@@ -195,6 +236,7 @@ function ObjectDetailsTab({
     config?.ui.time_format == "24hour"
       ? "%b %-d %Y, %H:%M"
       : "%b %-d %Y, %I:%M %p",
+    config?.ui.timezone,
   );
 
   const score = useMemo(() => {
@@ -242,7 +284,7 @@ function ObjectDetailsTab({
   }, [desc, search]);
 
   return (
-    <div className="mt-3 flex size-full flex-col gap-5 md:mt-0">
+    <div className="flex flex-col gap-5">
       <div className="flex w-full flex-row">
         <div className="flex w-full flex-col gap-3">
           <div className="flex flex-col gap-1.5">
@@ -270,7 +312,7 @@ function ObjectDetailsTab({
             <div className="text-sm">{formattedDate}</div>
           </div>
         </div>
-        <div className="flex w-full flex-col gap-2 px-6">
+        <div className="flex w-full flex-col gap-2 pl-6">
           <img
             className="aspect-video select-none rounded-lg object-contain transition-opacity"
             style={

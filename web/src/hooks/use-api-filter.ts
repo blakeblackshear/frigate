@@ -65,11 +65,11 @@ export function useApiFilterArgs<
     const filter: { [key: string]: unknown } = {};
 
     rawParams.forEach((value, key) => {
-      if (isNaN(parseFloat(value))) {
+      if (value != "true" && value != "false" && isNaN(parseFloat(value))) {
         filter[key] = value.includes(",") ? value.split(",") : [value];
       } else {
         if (value != undefined) {
-          filter[key] = `${value}`;
+          filter[key] = JSON.parse(value);
         }
       }
     });

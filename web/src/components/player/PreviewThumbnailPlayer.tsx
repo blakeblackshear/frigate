@@ -168,6 +168,7 @@ export default function PreviewThumbnailPlayer({
   const formattedDate = useFormattedTimestamp(
     review.start_time,
     config?.ui.time_format == "24hour" ? "%b %-d, %H:%M" : "%b %-d, %I:%M %p",
+    config?.ui?.timezone,
   );
 
   return (
