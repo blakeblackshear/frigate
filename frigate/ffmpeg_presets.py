@@ -49,12 +49,12 @@ class LibvaGpuSelector:
 
 FPS_VFR_PARAM = (
     "-fps_mode vfr"
-    if int(os.getenv("LIBAVFORMAT_VERSION_MAJOR", "59")) >= 59
+    if int(os.getenv("LIBAVFORMAT_VERSION_MAJOR", "59") or "59") >= 59
     else "-vsync 2"
 )
 TIMEOUT_PARAM = (
     "-timeout"
-    if int(os.getenv("LIBAVFORMAT_VERSION_MAJOR", "59")) >= 59
+    if int(os.getenv("LIBAVFORMAT_VERSION_MAJOR", "59") or "59") >= 59
     else "-stimeout"
 )
 
