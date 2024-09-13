@@ -899,6 +899,20 @@ class FfmpegConfig(FrigateBaseModel):
         else:
             return f"{self.path}/bin/ffmpeg"
 
+    @property
+    def ffprobe_path(self) -> str:
+        if self.path == "default":
+            if int(os.getenv("LIBAVFORMAT_VERSION_MAJOR", "59")) >= 59:
+                return "/usr/lib/ffmpeg/7.0/bin/ffprobe"
+            else:
+                return "ffprobe"
+        elif self.path == "7.0":
+            return "/usr/lib/ffmpeg/7.0/bin/ffprobe"
+        elif self.path == "5.0":
+            return "/usr/lib/ffmpeg/5.0/bin/ffprobe"
+        else:
+            return f"{self.path}/bin/ffprobe"
+
 
 class CameraRoleEnum(str, Enum):
     audio = "audio"
@@ -1535,7 +1549,7 @@ class FrigateConfig(FrigateBaseModel):
                 if need_detect_dimensions or need_record_fourcc:
                     stream_info = {"width": 0, "height": 0, "fourcc": None}
                     try:
-                        stream_info = stream_info_retriever.get_stream_info(input.path)
+                        stream_info = stream_info_retriever.get_stream_info(config.ffmpeg, input.path)
                     except Exception:
                         logger.warn(
                             f"Error detecting stream parameters automatically for {input.path} Applying default values."

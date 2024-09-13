@@ -414,7 +414,7 @@ def ffprobe():
     output = []
 
     for path in paths:
-        ffprobe = ffprobe_stream(path.strip())
+        ffprobe = ffprobe_stream(current_app.frigate_config.ffmpeg, path.strip())
         output.append(
             {
                 "return_code": ffprobe.returncode,

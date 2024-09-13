@@ -15,6 +15,7 @@ import psutil
 import py3nvml.py3nvml as nvml
 import requests
 
+from frigate.config import FfmpegConfig
 from frigate.const import (
     DRIVER_AMD,
     DRIVER_ENV_VAR,
@@ -378,11 +379,11 @@ def get_jetson_stats() -> dict[int, dict]:
     return results
 
 
-def ffprobe_stream(path: str) -> sp.CompletedProcess:
+def ffprobe_stream(ffmpeg: FfmpegConfig, path: str) -> sp.CompletedProcess:
     """Run ffprobe on stream."""
     clean_path = escape_special_characters(path)
     ffprobe_cmd = [
-        "ffprobe",
+        ffmpeg.ffprobe_path,
         "-timeout",
         "1000000",
         "-print_format",
@@ -438,7 +439,7 @@ def auto_detect_hwaccel() -> str:
     return ""
 
 
-async def get_video_properties(url, get_duration=False) -> dict[str, any]:
+async def get_video_properties(ffmpeg: FfmpegConfig, url: str, get_duration: bool = False) -> dict[str, any]:
     async def calculate_duration(video: Optional[any]) -> float:
         duration = None
 
@@ -453,7 +454,7 @@ async def get_video_properties(url, get_duration=False) -> dict[str, any]:
         # if cv2 failed need to use ffprobe
         if duration is None:
             p = await asyncio.create_subprocess_exec(
-                "ffprobe",
+                ffmpeg.ffprobe_path,
                 "-v",
                 "error",
                 "-show_entries",
