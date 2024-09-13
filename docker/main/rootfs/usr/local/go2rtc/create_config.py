@@ -120,9 +120,9 @@ else:
     ffmpeg_path = f"{path}/bin/ffmpeg"
 
 if go2rtc_config.get("ffmpeg") is None:
-    go2rtc_config["ffmpeg"] = {"path": ffmpeg_path}
-elif go2rtc_config["ffmpeg"].get("path") is None:
-    go2rtc_config["ffmpeg"]["path"] = ffmpeg_path
+    go2rtc_config["ffmpeg"] = {"bin": ffmpeg_path}
+elif go2rtc_config["ffmpeg"].get("bin") is None:
+    go2rtc_config["ffmpeg"]["bin"] = ffmpeg_path
 
 # need to replace ffmpeg command when using ffmpeg4
 if int(os.environ["LIBAVFORMAT_VERSION_MAJOR"]) < 59:
