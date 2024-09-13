@@ -235,6 +235,7 @@ class RecordingExporter(threading.Thread):
         elif self.playback_factor == PlaybackFactorEnum.timelapse_25x:
             ffmpeg_cmd = (
                 parse_preset_hardware_acceleration_encode(
+                    self.config.ffmpeg.ffmpeg_path,
                     self.config.ffmpeg.hwaccel_args,
                     f"{TIMELAPSE_DATA_INPUT_ARGS} {ffmpeg_input}",
                     f"{self.config.cameras[self.camera].record.export.timelapse_args} -movflags +faststart {video_path}",
