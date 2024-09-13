@@ -387,7 +387,7 @@ class RecordingMaintainer(threading.Thread):
 
                 # add faststart to kept segments to improve metadata reading
                 p = await asyncio.create_subprocess_exec(
-                    "ffmpeg",
+                    self.config.ffmpeg.executable_path,
                     "-hide_banner",
                     "-y",
                     "-i",

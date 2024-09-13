@@ -14,6 +14,7 @@ from flask import (
 )
 from peewee import DoesNotExist
 
+from frigate.config import FrigateConfig
 from frigate.const import EXPORT_DIR
 from frigate.models import Export, Recordings
 from frigate.record.export import PlaybackFactorEnum, RecordingExporter
@@ -144,6 +145,7 @@ def export_delete(id: str):
             404,
         )
 
+    config: FrigateConfig = current_app.frigate_config
     files_in_use = []
     for process in psutil.process_iter():
         try:

@@ -866,6 +866,7 @@ class FfmpegOutputArgsConfig(FrigateBaseModel):
 
 
 class FfmpegConfig(FrigateBaseModel):
+    path: str = Field(default="default", title="FFmpeg path")
     global_args: Union[str, List[str]] = Field(
         default=FFMPEG_GLOBAL_ARGS_DEFAULT, title="Global FFmpeg arguments."
     )
@@ -883,6 +884,21 @@ class FfmpegConfig(FrigateBaseModel):
         default=10.0,
         title="Time in seconds to wait before FFmpeg retries connecting to the camera.",
     )
+
+    @property
+    def executable_path(self) -> str:
+        if self.path == "default":
+            if int(os.getenv("LIBAVFORMAT_VERSION_MAJOR", "59")) >= 59:
+                return "/usr/lib/ffmpeg/7.0/bin/ffmpeg"
+            else:
+                return "ffmpeg"
+        elif self.path == "7.0":
+            return "/usr/lib/ffmpeg/7.0/bin/ffmpeg"
+        elif self.path == "5.0":
+            return "/usr/lib/ffmpeg/5.0/bin/ffmpeg"
+        else:
+            return self.path
+
 
 
 class CameraRoleEnum(str, Enum):

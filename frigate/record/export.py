@@ -14,7 +14,7 @@ from typing import Optional
 
 from peewee import DoesNotExist
 
-from frigate.config import FrigateConfig
+from frigate.config import FfmpegConfig, FrigateConfig
 from frigate.const import (
     CACHE_DIR,
     CLIPS_DIR,
@@ -116,7 +116,7 @@ class RecordingExporter(threading.Thread):
             minutes = int(diff / 60)
             seconds = int(diff % 60)
             ffmpeg_cmd = [
-                "ffmpeg",
+                self.config.ffmpeg.executable_path,
                 "-hide_banner",
                 "-loglevel",
                 "warning",
@@ -267,7 +267,7 @@ class RecordingExporter(threading.Thread):
         logger.debug(f"Finished exporting {video_path}")
 
 
-def migrate_exports(camera_names: list[str]):
+def migrate_exports(ffmpeg: FfmpegConfig, camera_names: list[str]):
     Path(os.path.join(CLIPS_DIR, "export")).mkdir(exist_ok=True)
 
     exports = []
@@ -286,7 +286,7 @@ def migrate_exports(camera_names: list[str]):
         )  # use jpg because webp encoder can't get quality low enough
 
         ffmpeg_cmd = [
-            "ffmpeg",
+            ffmpeg.executable_path,
             "-hide_banner",
             "-loglevel",
             "warning",
