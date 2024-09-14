@@ -5,7 +5,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DropdownMenuSeparator } from "../ui/dropdown-menu";
 import { getEndOfDayTimestamp } from "@/utils/dateUtil";
-import { isMobile } from "react-device-detect";
+import { isDesktop, isMobile } from "react-device-detect";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
@@ -309,7 +309,7 @@ function GeneralFilterButton({
         }}
       >
         <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-        <DrawerContent className="max-h-[75dvh] overflow-hidden">
+        <DrawerContent className="max-h-[75dvh] overflow-hidden p-4">
           {content}
         </DrawerContent>
       </Drawer>
@@ -503,7 +503,7 @@ function ZoneFilterButton({
         }}
       >
         <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-        <DrawerContent className="max-h-[75dvh] overflow-hidden">
+        <DrawerContent className="max-h-[75dvh] overflow-hidden p-4">
           {content}
         </DrawerContent>
       </Drawer>
@@ -548,7 +548,7 @@ export function ZoneFilterContent({
       <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
         {allZones && setCurrentZones && (
           <>
-            <DropdownMenuSeparator />
+            {isDesktop && <DropdownMenuSeparator />}
             <div className="mb-5 mt-2.5 flex items-center justify-between">
               <Label
                 className="mx-2 cursor-pointer text-primary"
@@ -599,7 +599,7 @@ export function ZoneFilterContent({
           </>
         )}
       </div>
-      <DropdownMenuSeparator />
+      {isDesktop && <DropdownMenuSeparator />}
       <div className="flex items-center justify-evenly p-2">
         <Button
           variant="select"
@@ -697,7 +697,7 @@ function SubFilterButton({
         }}
       >
         <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-        <DrawerContent className="max-h-[75dvh] overflow-hidden">
+        <DrawerContent className="max-h-[75dvh] overflow-hidden p-4">
           {content}
         </DrawerContent>
       </Drawer>
@@ -788,7 +788,7 @@ export function SubFilterContent({
           ))}
         </div>
       </div>
-      <DropdownMenuSeparator />
+      {isDesktop && <DropdownMenuSeparator />}
       <div className="flex items-center justify-evenly p-2">
         <Button
           variant="select"
@@ -877,7 +877,7 @@ function SearchTypeButton({
         }}
       >
         <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-        <DrawerContent className="max-h-[75dvh] overflow-hidden">
+        <DrawerContent className="max-h-[75dvh] overflow-hidden p-4">
           {content}
         </DrawerContent>
       </Drawer>
@@ -956,7 +956,7 @@ export function SearchTypeContent({
             }}
           />
         </div>
-        <DropdownMenuSeparator />
+        {isDesktop && <DropdownMenuSeparator />}
         <div className="flex items-center justify-evenly p-2">
           <Button
             variant="select"
