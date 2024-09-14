@@ -132,6 +132,7 @@ class ImprovedMotionDetector(MotionDetector):
         for c in cnts:
             # if the contour is big enough, count it as motion
             contour_area = cv2.contourArea(c)
+            logger.warning("IContour Area: " + contour_area);
             total_contour_area += contour_area
             if contour_area > self.config.contour_area:
                 x, y, w, h = cv2.boundingRect(c)
