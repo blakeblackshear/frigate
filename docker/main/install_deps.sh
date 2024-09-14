@@ -70,7 +70,7 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
         intel-opencl-icd intel-media-va-driver-non-free i965-va-driver \
         onevpl-intel-gpu libmfx-gen1.2 onevpl-tools intel-gpu-tools \
         libva-drm2 \
-        mesa-va-drivers radeontop  # AMD GPU drivers
+        mesa-va-drivers radeontop
 
     # something about this dependency requires it to be installed in a separate call rather than in the line above
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
