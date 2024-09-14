@@ -67,12 +67,15 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
     echo 'deb https://deb.debian.org/debian bookworm main contrib non-free' >/etc/apt/sources.list.d/debian-bookworm.list
     apt-get -qq update
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
-        intel-opencl-icd onevpl-tools intel-media-va-driver-non-free i965-va-driver libmfx-gen1.2 intel-gpu-tools \
+        intel-opencl-icd intel-media-va-driver-non-free i965-va-driver \
+        libmfx-gen1.2 onevpl-tools intel-gpu-tools \
         libva-drm2 \
         mesa-va-drivers radeontop
+
     # something about this dependency requires it to be installed in a separate call rather than in the line above
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
         i965-va-driver-shaders
+
     rm -f /etc/apt/sources.list.d/debian-bookworm.list
 fi
 
