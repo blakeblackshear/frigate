@@ -193,7 +193,7 @@ export default function ObjectLifecycle({
   };
 
   useEffect(() => {
-    if (eventSequence) {
+    if (eventSequence && eventSequence.length > 0) {
       setTimeIndex(eventSequence?.[current].timestamp);
       handleSetBox(eventSequence?.[current].data.box ?? []);
       setLifecycleZones(eventSequence?.[current].data.zones);

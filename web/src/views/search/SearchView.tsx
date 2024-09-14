@@ -33,6 +33,8 @@ type SearchViewProps = {
   setSimilaritySearch: (search: SearchResult) => void;
   onUpdateFilter: (filter: SearchFilter) => void;
   onOpenSearch: (item: SearchResult) => void;
+  loadMore: () => void;
+  hasMore: boolean;
 };
 export default function SearchView({
   search,
@@ -43,6 +45,8 @@ export default function SearchView({
   setSearch,
   setSimilaritySearch,
   onUpdateFilter,
+  loadMore,
+  hasMore,
 }: SearchViewProps) {
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
@@ -143,7 +147,37 @@ export default function SearchView({
         scrollMode: "if-needed",
       });
     }
-  }, [selectedIndex, uniqueResults]);
+    // we only want to scroll when the index changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedIndex]);
+
+  // observer for loading more
+
+  const observerTarget = useRef<HTMLDivElement>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoading) {
+          loadMore();
+        }
+      },
+      { threshold: 1.0 },
+    );
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+
+    observerRef.current = observer;
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [hasMore, isLoading, loadMore]);
 
   return (
     <div className="flex size-full flex-col pt-2 md:py-2">
@@ -199,20 +233,23 @@ export default function SearchView({
         )}
       </div>
 
-      <div className="no-scrollbar flex flex-1 flex-wrap content-start gap-2 overflow-y-auto md:gap-4">
-        {searchTerm.length > 0 && searchResults?.length == 0 && (
+      <div className="no-scrollbar flex flex-1 flex-wrap content-start gap-2 overflow-y-auto">
+        {uniqueResults?.length == 0 && !isLoading && (
           <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
             <LuSearchX className="size-16" />
             No Tracked Objects Found
           </div>
         )}
 
-        {isLoading && (
-          <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
-        )}
+        {uniqueResults?.length == 0 &&
+          isLoading &&
+          searchFilter &&
+          Object.keys(searchFilter).length !== 0 && (
+            <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+          )}
 
         {uniqueResults && (
-          <div className="mt-2 grid w-full gap-2 px-1 sm:grid-cols-2 md:mx-2 md:grid-cols-4 md:gap-4 3xl:grid-cols-6">
+          <div className="grid w-full gap-2 px-1 sm:grid-cols-2 md:mx-2 md:grid-cols-4 md:gap-4 3xl:grid-cols-6">
             {uniqueResults &&
               uniqueResults.map((value, index) => {
                 const selected = selectedIndex === index;
@@ -273,12 +310,20 @@ export default function SearchView({
               })}
           </div>
         )}
-        {!uniqueResults && !isLoading && (
-          <div className="scrollbar-container flex size-full flex-col overflow-y-auto">
-            <ExploreView onSelectSearch={onSelectSearch} />
-          </div>
+        {uniqueResults && uniqueResults.length > 0 && (
+          <>
+            <div ref={observerTarget} className="h-10 w-full" />
+            <div className="flex h-12 w-full justify-center">
+              {hasMore && isLoading && <ActivityIndicator />}
+            </div>
+          </>
         )}
       </div>
+      {searchFilter && Object.keys(searchFilter).length === 0 && (
+        <div className="scrollbar-container flex size-full flex-col overflow-y-auto">
+          <ExploreView onSelectSearch={onSelectSearch} />
+        </div>
+      )}
     </div>
   );
 }

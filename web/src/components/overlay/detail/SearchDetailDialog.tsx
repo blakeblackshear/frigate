@@ -237,7 +237,7 @@ function ObjectDetailsTab({
   const [desc, setDesc] = useState(search?.data.description);
 
   // we have to make sure the current selected search item stays in sync
-  useEffect(() => setDesc(search?.data.description), [search]);
+  useEffect(() => setDesc(search?.data.description ?? ""), [search]);
 
   const formattedDate = useFormattedTimestamp(
     search?.start_time ?? 0,
@@ -351,7 +351,7 @@ function ObjectDetailsTab({
         <div className="text-sm text-primary/40">Description</div>
         <Textarea
           className="md:h-64"
-          placeholder="Description of the event"
+          placeholder="Description of the tracked object"
           value={desc}
           onChange={(e) => setDesc(e.target.value)}
         />
