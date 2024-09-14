@@ -1,3 +1,4 @@
+import logging
 import cv2
 import imutils
 import numpy as np
@@ -5,6 +6,7 @@ import numpy as np
 from frigate.config import MotionConfig
 from frigate.motion import MotionDetector
 
+logger = logging.getLogger(__name__)
 
 class FrigateMotionDetector(MotionDetector):
     def __init__(
@@ -109,6 +111,7 @@ class FrigateMotionDetector(MotionDetector):
             for c in cnts:
                 # if the contour is big enough, count it as motion
                 contour_area = cv2.contourArea(c)
+                logger.warning("Contour area = " + contour_area)
                 if contour_area > self.contour_area.value:
                     x, y, w, h = cv2.boundingRect(c)
                     motion_boxes.append(
