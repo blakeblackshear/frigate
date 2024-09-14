@@ -350,7 +350,7 @@ function ObjectDetailsTab({
       <div className="flex flex-col gap-1.5">
         <div className="text-sm text-primary/40">Description</div>
         <Textarea
-          className="md:h-64"
+          className="h-64"
           placeholder="Description of the tracked object"
           value={desc}
           onChange={(e) => setDesc(e.target.value)}
@@ -447,8 +447,13 @@ function VideoTab({ search, config }: VideoTabProps) {
           />
         </div>
       </div>
-      {!isLoading && (
-        <div className="absolute right-2 top-2 flex items-center">
+      {!isLoading && reviewItem && (
+        <div
+          className={cn(
+            "absolute top-2 flex items-center",
+            isIOS ? "right-8" : "right-2",
+          )}
+        >
           <Tooltip>
             <TooltipTrigger>
               <Chip
