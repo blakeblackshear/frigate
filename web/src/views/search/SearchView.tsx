@@ -243,7 +243,7 @@ export default function SearchView({
 
         {uniqueResults?.length == 0 &&
           isLoading &&
-          (search ||
+          (searchTerm ||
             (searchFilter && Object.keys(searchFilter).length !== 0)) && (
             <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
           )}
@@ -319,11 +319,13 @@ export default function SearchView({
           </>
         )}
       </div>
-      {searchFilter && Object.keys(searchFilter).length === 0 && !search && (
-        <div className="scrollbar-container flex size-full flex-col overflow-y-auto">
-          <ExploreView onSelectSearch={onSelectSearch} />
-        </div>
-      )}
+      {searchFilter &&
+        Object.keys(searchFilter).length === 0 &&
+        !searchTerm && (
+          <div className="scrollbar-container flex size-full flex-col overflow-y-auto">
+            <ExploreView onSelectSearch={onSelectSearch} />
+          </div>
+        )}
     </div>
   );
 }
