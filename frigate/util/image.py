@@ -774,7 +774,7 @@ def get_image_from_recording(
     """retrieve a frame from given time in recording file."""
 
     ffmpeg_cmd = [
-        ffmpeg.executable_path,
+        ffmpeg.ffmpeg_path,
         "-hide_banner",
         "-loglevel",
         "warning",
