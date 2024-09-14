@@ -110,7 +110,8 @@ export default function Explore() {
           before: searchSearchParams["before"],
           after: searchSearchParams["after"],
           search_type: searchSearchParams["search_type"],
-          limit: Object.keys(searchSearchParams).length == 0 ? 20 : undefined,
+          limit:
+            Object.keys(searchSearchParams).length == 0 ? API_LIMIT : undefined,
           in_progress: 0,
           include_thumbnails: 0,
         },
