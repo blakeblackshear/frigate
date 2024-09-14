@@ -38,3 +38,20 @@ export type SearchFilter = {
   search_type?: SearchSource[];
   event_id?: string;
 };
+
+export type SearchQueryParams = {
+  cameras?: string[];
+  labels?: string[];
+  sub_labels?: string[];
+  zones?: string[];
+  before?: string;
+  after?: string;
+  search_type?: string;
+  limit?: number;
+  in_progress?: number;
+  include_thumbnails?: number;
+  query?: string;
+  page?: number;
+};
+
+export type SearchQuery = [string, SearchQueryParams] | null;
