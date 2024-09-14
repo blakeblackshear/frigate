@@ -90,7 +90,7 @@ export function CamerasFilterButton({
           <DropdownMenuSeparator />
         </>
       )}
-      <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden p-4">
+      <div className="scrollbar-container flex h-auto max-h-[80dvh] flex-col gap-2 overflow-y-auto overflow-x-hidden p-4">
         <FilterSwitch
           isChecked={allCamerasSelected}
           label="All Cameras"
@@ -106,12 +106,12 @@ export function CamerasFilterButton({
         />
         {groups.length > 0 && (
           <>
-            <DropdownMenuSeparator className="mt-2" />
+            <DropdownMenuSeparator />
             {groups.map(([name, conf]) => {
               return (
                 <div
                   key={name}
-                  className="w-full cursor-pointer rounded-lg px-2 py-1.5 text-sm capitalize text-primary hover:bg-muted"
+                  className="w-full cursor-pointer rounded-lg px-2 py-0.5 text-sm capitalize text-primary hover:bg-muted"
                   onClick={() => setCurrentCameras([...conf.cameras])}
                 >
                   {name}
@@ -120,7 +120,7 @@ export function CamerasFilterButton({
             })}
           </>
         )}
-        <DropdownMenuSeparator className="my-2" />
+        <DropdownMenuSeparator />
         <div className="flex flex-col gap-2.5">
           {allCameras.map((item) => (
             <FilterSwitch
@@ -158,7 +158,7 @@ export function CamerasFilterButton({
           ))}
         </div>
       </div>
-      <DropdownMenuSeparator className="my-2" />
+      <DropdownMenuSeparator />
       <div className="flex items-center justify-evenly p-2">
         <Button
           variant="select"
