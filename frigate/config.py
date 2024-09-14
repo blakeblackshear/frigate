@@ -1225,7 +1225,7 @@ class CameraConfig(FrigateBaseModel):
         cmd = (
             [self.ffmpeg.ffmpeg_path]
             + global_args
-            + hwaccel_args
+            + (hwaccel_args if "detect" in ffmpeg_input.roles else [])
             + input_args
             + ["-i", escape_special_characters(ffmpeg_input.path)]
             + ffmpeg_output_args

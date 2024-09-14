@@ -68,7 +68,7 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
     apt-get -qq update
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
         intel-opencl-icd intel-media-va-driver-non-free i965-va-driver \
-        libmfx-gen1.2 onevpl-tools intel-gpu-tools \
+        libmfx-gen1.2 libmfx1 onevpl-tools intel-gpu-tools \
         libva-drm2 \
         mesa-va-drivers radeontop
 
