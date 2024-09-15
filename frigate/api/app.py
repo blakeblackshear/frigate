@@ -23,7 +23,6 @@ from frigate.api.auth import AuthBp, get_jwt_secret, limiter
 from frigate.api.defs.tags import Tags
 from frigate.api.event import EventBp
 from frigate.api.export import ExportBp
-from frigate.api.notification import NotificationBp
 from frigate.api.review import ReviewBp
 from frigate.config import FrigateConfig
 from frigate.const import CONFIG_DIR
@@ -50,7 +49,6 @@ bp.register_blueprint(EventBp)
 bp.register_blueprint(ExportBp)
 bp.register_blueprint(ReviewBp)
 bp.register_blueprint(AuthBp)
-bp.register_blueprint(NotificationBp)
 
 router = APIRouter()
 

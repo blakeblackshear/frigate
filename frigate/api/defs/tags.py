@@ -6,3 +6,4 @@ class Tags(Enum):
     preview = "Preview"
     logs = "Logs"
     media = "Media"
+    notifications = "Notifications"
