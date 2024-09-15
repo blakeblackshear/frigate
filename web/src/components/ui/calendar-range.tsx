@@ -315,7 +315,7 @@ export function DateRangePicker({
 
   return (
     <div className="w-full">
-      <div className="flex py-2">
+      <div className="flex flex-row items-start justify-center py-2">
         <div className="flex">
           <div className="flex flex-col">
             <div className="flex flex-col items-center justify-end gap-2 px-3 pb-4 lg:flex-row lg:items-start lg:pb-0">

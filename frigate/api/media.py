@@ -17,6 +17,7 @@ from peewee import DoesNotExist, fn
 from tzlocal import get_localzone_name
 from werkzeug.utils import secure_filename
 
+from frigate.config import FrigateConfig
 from frigate.const import (
     CACHE_DIR,
     CLIPS_DIR,
@@ -216,9 +217,10 @@ def get_snapshot_from_recording(camera_name: str, frame_time: str, format: str):
 
         height = request.args.get("height", type=int)
         codec = "png" if format == "png" else "mjpeg"
+        config: FrigateConfig = current_app.frigate_config
 
         image_data = get_image_from_recording(
-            recording.path, time_in_segment, codec, height
+            config.ffmpeg, recording.path, time_in_segment, codec, height
         )
 
         if not image_data:
@@ -273,9 +275,12 @@ def submit_recording_snapshot_to_plus(camera_name: str, frame_time: str):
     )
 
     try:
+        config: FrigateConfig = current_app.frigate_config
         recording: Recordings = recording_query.get()
         time_in_segment = frame_time - recording.start_time
-        image_data = get_image_from_recording(recording.path, time_in_segment, "png")
+        image_data = get_image_from_recording(
+            config.ffmpeg, recording.path, time_in_segment, "png"
+        )
 
         if not image_data:
             return make_response(
@@ -474,9 +479,11 @@ def recording_clip(camera_name, start_ts, end_ts):
     file_name = secure_filename(file_name)
     path = os.path.join(CLIPS_DIR, f"cache/{file_name}")
 
+    config: FrigateConfig = current_app.frigate_config
+
     if not os.path.exists(path):
         ffmpeg_cmd = [
-            "ffmpeg",
+            config.ffmpeg.ffmpeg_path,
             "-hide_banner",
             "-y",
             "-protocol_whitelist",
@@ -1141,8 +1148,9 @@ def preview_gif(camera_name: str, start_ts, end_ts, max_cache_age=2592000):
         diff = start_ts - preview.start_time
         minutes = int(diff / 60)
         seconds = int(diff % 60)
+        config: FrigateConfig = current_app.frigate_config
         ffmpeg_cmd = [
-            "ffmpeg",
+            config.ffmpeg.ffmpeg_path,
             "-hide_banner",
             "-loglevel",
             "warning",
@@ -1206,9 +1214,10 @@ def preview_gif(camera_name: str, start_ts, end_ts, max_cache_age=2592000):
 
         last_file = selected_previews[-2]
         selected_previews.append(last_file)
+        config: FrigateConfig = current_app.frigate_config
 
         ffmpeg_cmd = [
-            "ffmpeg",
+            config.ffmpeg.ffmpeg_path,
             "-hide_banner",
             "-loglevel",
             "warning",
@@ -1301,8 +1310,9 @@ def preview_mp4(camera_name: str, start_ts, end_ts, max_cache_age=604800):
         diff = start_ts - preview.start_time
         minutes = int(diff / 60)
         seconds = int(diff % 60)
+        config: FrigateConfig = current_app.frigate_config
         ffmpeg_cmd = [
-            "ffmpeg",
+            config.ffmpeg.ffmpeg_path,
             "-hide_banner",
             "-loglevel",
             "warning",
@@ -1364,9 +1374,10 @@ def preview_mp4(camera_name: str, start_ts, end_ts, max_cache_age=604800):
 
         last_file = selected_previews[-2]
         selected_previews.append(last_file)
+        config: FrigateConfig = current_app.frigate_config
 
         ffmpeg_cmd = [
-            "ffmpeg",
+            config.ffmpeg.ffmpeg_path,
             "-hide_banner",
             "-loglevel",
             "warning",

@@ -94,7 +94,7 @@ function ThumbnailRow({
   };
 
   return (
-    <div className="rounded-lg bg-background_alt p-2 md:p-4">
+    <div className="rounded-lg bg-background_alt p-2 md:px-4">
       <div className="text-lg capitalize">
         {objectType.replaceAll("_", " ")}
         {searchResults && (

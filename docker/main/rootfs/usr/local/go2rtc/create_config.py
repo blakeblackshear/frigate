@@ -105,16 +105,34 @@ else:
             **FRIGATE_ENV_VARS
         )
 
+# ensure ffmpeg path is set correctly
+path = config.get("ffmpeg", {}).get("path", "default")
+if path == "default":
+    if int(os.getenv("", "59") or "59") >= 59:
+        ffmpeg_path = "/usr/lib/ffmpeg/7.0/bin/ffmpeg"
+    else:
+        ffmpeg_path = "ffmpeg"
+elif path == "7.0":
+    ffmpeg_path = "/usr/lib/ffmpeg/7.0/bin/ffmpeg"
+elif path == "5.0":
+    ffmpeg_path = "/usr/lib/ffmpeg/5.0/bin/ffmpeg"
+else:
+    ffmpeg_path = f"{path}/bin/ffmpeg"
+
+if go2rtc_config.get("ffmpeg") is None:
+    go2rtc_config["ffmpeg"] = {"bin": ffmpeg_path}
+elif go2rtc_config["ffmpeg"].get("bin") is None:
+    go2rtc_config["ffmpeg"]["bin"] = ffmpeg_path
+
 # need to replace ffmpeg command when using ffmpeg4
-if int(os.environ["LIBAVFORMAT_VERSION_MAJOR"]) < 59:
-    if go2rtc_config.get("ffmpeg") is None:
-        go2rtc_config["ffmpeg"] = {
-            "rtsp": "-fflags nobuffer -flags low_delay -stimeout 5000000 -user_agent go2rtc/ffmpeg -rtsp_transport tcp -i {input}"
-        }
-    elif go2rtc_config["ffmpeg"].get("rtsp") is None:
+if int(os.environ.get("LIBAVFORMAT_VERSION_MAJOR", "59") or "59") < 59:
+    if go2rtc_config["ffmpeg"].get("rtsp") is None:
         go2rtc_config["ffmpeg"]["rtsp"] = (
             "-fflags nobuffer -flags low_delay -stimeout 5000000 -user_agent go2rtc/ffmpeg -rtsp_transport tcp -i {input}"
         )
+else:
+    if go2rtc_config.get("ffmpeg") is None:
+        go2rtc_config["ffmpeg"] = {"path": ""}
 
 for name in go2rtc_config.get("streams", {}):
     stream = go2rtc_config["streams"][name]
@@ -145,7 +163,7 @@ if config.get("birdseye", {}).get("restream", False):
     birdseye: dict[str, any] = config.get("birdseye")
 
     input = f"-f rawvideo -pix_fmt yuv420p -video_size {birdseye.get('width', 1280)}x{birdseye.get('height', 720)} -r 10 -i {BIRDSEYE_PIPE}"
-    ffmpeg_cmd = f"exec:{parse_preset_hardware_acceleration_encode(config.get('ffmpeg', {}).get('hwaccel_args'), input, '-rtsp_transport tcp -f rtsp {output}')}"
+    ffmpeg_cmd = f"exec:{parse_preset_hardware_acceleration_encode(ffmpeg_path, config.get('ffmpeg', {}).get('hwaccel_args'), input, '-rtsp_transport tcp -f rtsp {output}')}"
 
     if go2rtc_config.get("streams"):
         go2rtc_config["streams"]["birdseye"] = ffmpeg_cmd

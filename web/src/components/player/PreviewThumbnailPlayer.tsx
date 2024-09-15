@@ -177,9 +177,11 @@ export default function PreviewThumbnailPlayer({
       onMouseOver={isMobile ? undefined : () => setIsHovered(true)}
       onMouseLeave={isMobile ? undefined : () => setIsHovered(false)}
       onClick={handleOnClick}
-      onAuxClick={() =>
-        window.open(`${baseUrl}review?id=${review.id}`, "_blank")?.focus()
-      }
+      onAuxClick={(e) => {
+        if (e.button === 1) {
+          window.open(`${baseUrl}review?id=${review.id}`, "_blank")?.focus();
+        }
+      }}
       {...swipeHandlers}
     >
       {playingBack && (

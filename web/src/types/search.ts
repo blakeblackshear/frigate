@@ -3,7 +3,6 @@ export type SearchSource = "similarity" | "thumbnail" | "description";
 export type SearchResult = {
   id: string;
   camera: string;
-  description?: string;
   start_time: number;
   end_time?: number;
   score: number;
@@ -25,6 +24,7 @@ export type SearchResult = {
     area: number;
     ratio: number;
     type: "object" | "audio" | "manual";
+    description?: string;
   };
 };
 
@@ -38,3 +38,20 @@ export type SearchFilter = {
   search_type?: SearchSource[];
   event_id?: string;
 };
+
+export type SearchQueryParams = {
+  cameras?: string[];
+  labels?: string[];
+  sub_labels?: string[];
+  zones?: string[];
+  before?: string;
+  after?: string;
+  search_type?: string;
+  limit?: number;
+  in_progress?: number;
+  include_thumbnails?: number;
+  query?: string;
+  page?: number;
+};
+
+export type SearchQuery = [string, SearchQueryParams] | null;

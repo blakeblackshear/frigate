@@ -210,6 +210,10 @@ birdseye:
 # Optional: ffmpeg configuration
 # More information about presets at https://docs.frigate.video/configuration/ffmpeg_presets
 ffmpeg:
+  # Optional: ffmpeg binry path (default: shown below)
+  # can also be set to `7.0` or `5.0` to specify one of the included versions
+  # or can be set to any path that holds `bin/ffmpeg` & `bin/ffprobe`
+  path: "default"
   # Optional: global ffmpeg args (default: shown below)
   global_args: -hide_banner -loglevel warning -threads 2
   # Optional: global hwaccel args (default: auto detect)

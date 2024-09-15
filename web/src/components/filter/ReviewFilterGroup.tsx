@@ -2,7 +2,7 @@ import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { DropdownMenuSeparator } from "../ui/dropdown-menu";
 import { ReviewFilter, ReviewSeverity, ReviewSummary } from "@/types/review";
 import { getEndOfDayTimestamp } from "@/utils/dateUtil";
@@ -320,6 +320,15 @@ function GeneralFilterButton({
   const [currentZones, setCurrentZones] = useState<string[] | undefined>(
     selectedZones,
   );
+
+  // ui
+
+  useEffect(() => {
+    setCurrentLabels(selectedLabels);
+    setCurrentZones(selectedZones);
+    // only refresh when state changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedLabels, selectedZones]);
 
   const trigger = (
     <Button

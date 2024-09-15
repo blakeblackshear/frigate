@@ -6,7 +6,7 @@ import queue
 import subprocess as sp
 import threading
 
-from frigate.config import CameraConfig
+from frigate.config import CameraConfig, FfmpegConfig
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +15,7 @@ class FFMpegConverter(threading.Thread):
     def __init__(
         self,
         camera: str,
+        ffmpeg: FfmpegConfig,
         input_queue: queue.Queue,
         stop_event: mp.Event,
         in_width: int,
@@ -30,7 +31,7 @@ class FFMpegConverter(threading.Thread):
         self.stop_event = stop_event
 
         ffmpeg_cmd = [
-            "ffmpeg",
+            ffmpeg.ffmpeg_path,
             "-threads",
             "1",
             "-f",
@@ -142,6 +143,7 @@ class JsmpegCamera:
         )
         self.converter = FFMpegConverter(
             config.name,
+            config.ffmpeg,
             self.input,
             stop_event,
             config.frame_shape[1],
