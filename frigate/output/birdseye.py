@@ -15,7 +15,7 @@ import cv2
 import numpy as np
 
 from frigate.comms.config_updater import ConfigSubscriber
-from frigate.config import BirdseyeModeEnum, FrigateConfig
+from frigate.config import BirdseyeModeEnum, FfmpegConfig, FrigateConfig
 from frigate.const import BASE_DIR, BIRDSEYE_PIPE
 from frigate.util.image import (
     SharedMemoryFrameManager,
@@ -112,7 +112,7 @@ class Canvas:
 class FFMpegConverter(threading.Thread):
     def __init__(
         self,
-        camera: str,
+        ffmpeg: FfmpegConfig,
         input_queue: queue.Queue,
         stop_event: mp.Event,
         in_width: int,
@@ -123,8 +123,8 @@ class FFMpegConverter(threading.Thread):
         birdseye_rtsp: bool = False,
     ):
         threading.Thread.__init__(self)
-        self.name = f"{camera}_output_converter"
-        self.camera = camera
+        self.name = "birdseye_output_converter"
+        self.camera = "birdseye"
         self.input_queue = input_queue
         self.stop_event = stop_event
         self.bd_pipe = None
@@ -133,7 +133,7 @@ class FFMpegConverter(threading.Thread):
             self.recreate_birdseye_pipe()
 
         ffmpeg_cmd = [
-            "ffmpeg",
+            ffmpeg.ffmpeg_path,
             "-threads",
             "1",
             "-f",
@@ -725,7 +725,7 @@ class Birdseye:
         self.config = config
         self.input = queue.Queue(maxsize=10)
         self.converter = FFMpegConverter(
-            "birdseye",
+            config.ffmpeg,
             self.input,
             stop_event,
             config.birdseye.width,

@@ -1,5 +1,5 @@
 import ActivityIndicator from "@/components/indicators/activity-indicator";
-import { useApiFilterArgs } from "@/hooks/use-api-filter";
+import useApiFilter from "@/hooks/use-api-filter";
 import { useCameraPreviews } from "@/hooks/use-camera-previews";
 import { useTimezone } from "@/hooks/use-date-utils";
 import { useOverlayState, useSearchEffect } from "@/hooks/use-overlay-state";
@@ -71,7 +71,31 @@ export default function Events() {
   // review filter
 
   const [reviewFilter, setReviewFilter, reviewSearchParams] =
-    useApiFilterArgs<ReviewFilter>();
+    useApiFilter<ReviewFilter>();
+
+  useSearchEffect("cameras", (cameras: string) => {
+    setReviewFilter({
+      ...reviewFilter,
+      cameras: cameras.includes(",") ? cameras.split(",") : [cameras],
+    });
+    return true;
+  });
+
+  useSearchEffect("labels", (labels: string) => {
+    setReviewFilter({
+      ...reviewFilter,
+      labels: labels.includes(",") ? labels.split(",") : [labels],
+    });
+    return true;
+  });
+
+  useSearchEffect("zones", (zones: string) => {
+    setReviewFilter({
+      ...reviewFilter,
+      zones: zones.includes(",") ? zones.split(",") : [zones],
+    });
+    return true;
+  });
 
   useSearchEffect("group", (reviewGroup) => {
     if (config && reviewGroup && reviewGroup != "default") {

@@ -21,6 +21,7 @@ from tzlocal import get_localzone_name
 from werkzeug.utils import secure_filename
 
 from frigate.api.defs.tags import Tags
+from frigate.config import FrigateConfig
 from frigate.const import (
     CACHE_DIR,
     CLIPS_DIR,
@@ -244,8 +245,10 @@ def get_snapshot_from_recording(
         recording: Recordings = recording_query.get()
         time_in_segment = frame_time - recording.start_time
         codec = "png" if format == "png" else "mjpeg"
+        config: FrigateConfig = request.app.frigate_config
+
         image_data = get_image_from_recording(
-            recording.path, time_in_segment, codec, height
+            config.ffmpeg, recording.path, time_in_segment, codec, height
         )
 
         if not image_data:
@@ -297,9 +300,12 @@ def submit_recording_snapshot_to_plus(
     )
 
     try:
+        config: FrigateConfig = request.app.frigate_config
         recording: Recordings = recording_query.get()
         time_in_segment = frame_time - recording.start_time
-        image_data = get_image_from_recording(recording.path, time_in_segment)
+        image_data = get_image_from_recording(
+            config.ffmpeg, recording.path, time_in_segment, "png"
+        )
 
         if not image_data:
             return JSONResponse(
@@ -448,7 +454,7 @@ def recordings(
 
 @router.get("/media/camera/{camera_name}/start/{start_ts}/end/{end_ts}/clip.mp4")
 def recording_clip(
-    camera_name: str, start_ts: float, end_ts: float, download: bool = False
+    request: Request, camera_name: str, start_ts: float, end_ts: float, download: bool = False
 ):
     recordings = (
         Recordings.select(
@@ -490,9 +496,11 @@ def recording_clip(
     file_name = secure_filename(file_name)
     path = os.path.join(CLIPS_DIR, f"cache/{file_name}")
 
+    config: FrigateConfig = request.app.frigate_config
+
     if not os.path.exists(path):
         ffmpeg_cmd = [
-            "ffmpeg",
+            config.ffmpeg.ffmpeg_path,
             "-hide_banner",
             "-y",
             "-protocol_whitelist",
@@ -1148,7 +1156,7 @@ def event_thumbnail(
 
 
 @router.get("/media/events/{event_id}/preview.gif")
-def event_preview(event_id: str):
+def event_preview(request: Request, event_id: str):
     try:
         event: Event = Event.get(Event.id == event_id)
     except DoesNotExist:
@@ -1160,11 +1168,12 @@ def event_preview(event_id: str):
     end_ts = start_ts + (
         min(event.end_time - event.start_time, 20) if event.end_time else 20
     )
-    return preview_gif(event.camera, start_ts, end_ts)
+    return preview_gif(request, event.camera, start_ts, end_ts)
 
 
 @router.get("/media/camera/{camera_name}/start/{start_ts}/end/{end_ts}/preview.gif")
 def preview_gif(
+    request: Request,
     camera_name: str,
     start_ts: float,
     end_ts: float,
@@ -1201,8 +1210,9 @@ def preview_gif(
         diff = start_ts - preview.start_time
         minutes = int(diff / 60)
         seconds = int(diff % 60)
+        config: FrigateConfig = request.app.frigate_config
         ffmpeg_cmd = [
-            "ffmpeg",
+            config.ffmpeg.ffmpeg_path,
             "-hide_banner",
             "-loglevel",
             "warning",
@@ -1267,9 +1277,10 @@ def preview_gif(
 
         last_file = selected_previews[-2]
         selected_previews.append(last_file)
+        config: FrigateConfig = request.app.frigate_config
 
         ffmpeg_cmd = [
-            "ffmpeg",
+            config.ffmpeg.ffmpeg_path,
             "-hide_banner",
             "-loglevel",
             "warning",
@@ -1318,6 +1329,7 @@ def preview_gif(
 
 @router.get("/media/camera/{camera_name}/start/{start_ts}/end/{end_ts}/preview.mp4")
 def preview_mp4(
+    request: Request,
     camera_name: str,
     start_ts: float,
     end_ts: float,
@@ -1373,8 +1385,9 @@ def preview_mp4(
         diff = start_ts - preview.start_time
         minutes = int(diff / 60)
         seconds = int(diff % 60)
+        config: FrigateConfig = request.app.frigate_config
         ffmpeg_cmd = [
-            "ffmpeg",
+            config.ffmpeg.ffmpeg_path,
             "-hide_banner",
             "-loglevel",
             "warning",
@@ -1437,9 +1450,10 @@ def preview_mp4(
 
         last_file = selected_previews[-2]
         selected_previews.append(last_file)
+        config: FrigateConfig = request.app.frigate_config
 
         ffmpeg_cmd = [
-            "ffmpeg",
+            config.ffmpeg.ffmpeg_path,
             "-hide_banner",
             "-loglevel",
             "warning",
@@ -1491,6 +1505,7 @@ def preview_mp4(
 
 @router.get("/media/review/{event_id}/preview")
 def review_preview(
+    request: Request,
     event_id: str,
     format: str = Query(default="gif", enum=["gif", "mp4"]),
 ):
@@ -1509,9 +1524,9 @@ def review_preview(
     )
 
     if format == "gif":
-        return preview_gif(review.camera, start_ts, end_ts)
+        return preview_gif(request, review.camera, start_ts, end_ts)
     else:
-        return preview_mp4(review.camera, start_ts, end_ts)
+        return preview_mp4(request, review.camera, start_ts, end_ts)
 
 
 @router.get("/media/preview/{file_name}/thumbnail.jpg")
