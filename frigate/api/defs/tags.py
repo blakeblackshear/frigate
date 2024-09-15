@@ -8,3 +8,4 @@ class Tags(Enum):
     media = "Media"
     notifications = "Notifications"
     review = "Review"
+    export = "Export"
