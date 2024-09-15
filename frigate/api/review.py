@@ -4,53 +4,59 @@ import logging
 from datetime import datetime, timedelta
 from functools import reduce
 from pathlib import Path
+from typing import Optional
 
 import pandas as pd
+from fastapi import APIRouter, Request
+from fastapi.params import Depends
+from fastapi.responses import JSONResponse
 from flask import Blueprint, jsonify, make_response, request
 from peewee import Case, DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
+from pydantic import BaseModel
 
+from frigate.api.defs.tags import Tags
 from frigate.models import Recordings, ReviewSegment
 from frigate.util.builtin import get_tz_modifiers
 
 logger = logging.getLogger(__name__)
 
 ReviewBp = Blueprint("reviews", __name__)
+router = APIRouter(tags=[Tags.review])
 
 
-@ReviewBp.route("/review")
-def review():
-    cameras = request.args.get("cameras", "all")
-    labels = request.args.get("labels", "all")
-    zones = request.args.get("zones", "all")
-    reviewed = request.args.get("reviewed", type=int, default=0)
-    limit = request.args.get("limit", type=int, default=None)
-    severity = request.args.get("severity", None)
+class ItemQueryParams(BaseModel):
+    cameras: Optional[str] = "all"
+    labels: Optional[str] = "all"
+    zones: Optional[str] = "all"
+    reviewed: Optional[int] = 0
+    limit: Optional[int] = None
+    severity: Optional[int] = None
+    before: Optional[float] = datetime.now().timestamp()
+    after: Optional[float] = (datetime.now() - timedelta(hours=24)).timestamp()
 
-    before = request.args.get("before", type=float, default=datetime.now().timestamp())
-    after = request.args.get(
-        "after", type=float, default=(datetime.now() - timedelta(hours=24)).timestamp()
-    )
 
+@router.get("/review")
+def review(params: ItemQueryParams = Depends()):
     clauses = [
         (
-            (ReviewSegment.start_time > after)
+            (ReviewSegment.start_time > params.after)
             & (
                 (ReviewSegment.end_time.is_null(True))
-                | (ReviewSegment.end_time < before)
+                | (ReviewSegment.end_time < params.before)
             )
         )
     ]
 
-    if cameras != "all":
-        camera_list = cameras.split(",")
+    if params.cameras != "all":
+        camera_list = params.cameras.split(",")
         clauses.append((ReviewSegment.camera << camera_list))
 
-    if labels != "all":
+    if params.labels != "all":
         # use matching so segments with multiple labels
         # still match on a search where any label matches
         label_clauses = []
-        filtered_labels = labels.split(",")
+        filtered_labels = params.labels.split(",")
 
         for label in filtered_labels:
             label_clauses.append(
@@ -61,11 +67,11 @@ def review():
         label_clause = reduce(operator.or_, label_clauses)
         clauses.append((label_clause))
 
-    if zones != "all":
+    if params.zones != "all":
         # use matching so segments with multiple zones
         # still match on a search where any zone matches
         zone_clauses = []
-        filtered_zones = zones.split(",")
+        filtered_zones = params.zones.split(",")
 
         for zone in filtered_zones:
             zone_clauses.append(
@@ -75,41 +81,41 @@ def review():
         zone_clause = reduce(operator.or_, zone_clauses)
         clauses.append((zone_clause))
 
-    if reviewed == 0:
+    if params.reviewed == 0:
         clauses.append((ReviewSegment.has_been_reviewed == False))
 
-    if severity:
-        clauses.append((ReviewSegment.severity == severity))
+    if params.severity:
+        clauses.append((ReviewSegment.severity == params.severity))
 
     review = (
         ReviewSegment.select()
         .where(reduce(operator.and_, clauses))
         .order_by(ReviewSegment.severity.asc())
         .order_by(ReviewSegment.start_time.desc())
-        .limit(limit)
+        .limit(params.limit)
         .dicts()
         .iterator()
     )
 
-    return jsonify([r for r in review])
+    return JSONResponse(content=[r for r in review])
 
 
-@ReviewBp.route("/review/event/<id>")
-def get_review_from_event(id: str):
+@router.get("/review/event/{event_id}")
+def get_review_from_event(event_id: str):
     try:
         return model_to_dict(
             ReviewSegment.get(
-                ReviewSegment.data["detections"].cast("text") % f'*"{id}"*'
+                ReviewSegment.data["detections"].cast("text") % f'*"{event_id}"*'
             )
         )
     except DoesNotExist:
         return "Review item not found", 404
 
 
-@ReviewBp.route("/review/<id>")
-def get_review(id: str):
+@router.get("/review/{event_id}")
+def get_review(event_id: str):
     try:
-        return model_to_dict(ReviewSegment.get(ReviewSegment.id == id))
+        return model_to_dict(ReviewSegment.get(ReviewSegment.id == event_id))
     except DoesNotExist:
         return "Review item not found", 404
 

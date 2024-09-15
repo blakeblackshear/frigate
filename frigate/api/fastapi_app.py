@@ -3,7 +3,7 @@ import logging
 from fastapi import FastAPI
 
 from frigate.api import app as main_app
-from frigate.api import media, notification, preview
+from frigate.api import media, notification, preview, review
 from frigate.plus import PlusApi
 from frigate.ptz.onvif import OnvifController
 from frigate.stats.emitter import StatsEmitter
@@ -30,6 +30,7 @@ def create_fastapi_app(
     app.include_router(media.router)
     app.include_router(preview.router)
     app.include_router(notification.router)
+    app.include_router(review.router)
     # App Properties
     app.frigate_config = frigate_config
     app.detected_frames_processor = detected_frames_processor

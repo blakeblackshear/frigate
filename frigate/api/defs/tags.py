@@ -7,3 +7,4 @@ class Tags(Enum):
     logs = "Logs"
     media = "Media"
     notifications = "Notifications"
+    review = "Review"
