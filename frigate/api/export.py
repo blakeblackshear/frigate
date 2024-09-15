@@ -97,8 +97,8 @@ def export_recording(
     )
 
 
-@router.patch("/export/{id}/{new_name}")
-def export_rename(event_id, new_name: str):
+@router.patch("/export/{event_id}/{new_name}")
+def export_rename(event_id: str, new_name: str):
     try:
         export: Export = Export.get(Export.id == event_id)
     except DoesNotExist:
@@ -125,7 +125,7 @@ def export_rename(event_id, new_name: str):
     )
 
 
-@router.delete("/export/{event_id}", methods=["DELETE"])
+@router.delete("/export/{event_id}")
 def export_delete(event_id: str):
     try:
         export: Export = Export.get(Export.id == event_id)
