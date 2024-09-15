@@ -890,11 +890,11 @@ class FfmpegConfig(FrigateBaseModel):
     def ffmpeg_path(self) -> str:
         if self.path == "default":
             if shutil.which("ffmpeg") is None:
-                return "/usr/lib/ffmpeg/7.0/bin/ffmpeg"
+                return "/usr/lib/ffmpeg/6.0/bin/ffmpeg"
             else:
                 return "ffmpeg"
-        elif self.path == "7.0":
-            return "/usr/lib/ffmpeg/7.0/bin/ffmpeg"
+        elif self.path == "6.0":
+            return "/usr/lib/ffmpeg/6.0/bin/ffmpeg"
         elif self.path == "5.0":
             return "/usr/lib/ffmpeg/5.0/bin/ffmpeg"
         else:
@@ -904,11 +904,11 @@ class FfmpegConfig(FrigateBaseModel):
     def ffprobe_path(self) -> str:
         if self.path == "default":
             if int(os.getenv("LIBAVFORMAT_VERSION_MAJOR", "59")) >= 59:
-                return "/usr/lib/ffmpeg/7.0/bin/ffprobe"
+                return "/usr/lib/ffmpeg/6.0/bin/ffprobe"
             else:
                 return "ffprobe"
-        elif self.path == "7.0":
-            return "/usr/lib/ffmpeg/7.0/bin/ffprobe"
+        elif self.path == "6.0":
+            return "/usr/lib/ffmpeg/6.0/bin/ffprobe"
         elif self.path == "5.0":
             return "/usr/lib/ffmpeg/5.0/bin/ffprobe"
         else:
