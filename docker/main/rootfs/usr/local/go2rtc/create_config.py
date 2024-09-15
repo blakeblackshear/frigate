@@ -2,6 +2,7 @@
 
 import json
 import os
+import shutil
 import sys
 from pathlib import Path
 
@@ -108,7 +109,7 @@ else:
 # ensure ffmpeg path is set correctly
 path = config.get("ffmpeg", {}).get("path", "default")
 if path == "default":
-    if int(os.getenv("", "59") or "59") >= 59:
+    if shutil.which("ffmpeg") is None:
         ffmpeg_path = "/usr/lib/ffmpeg/7.0/bin/ffmpeg"
     else:
         ffmpeg_path = "ffmpeg"

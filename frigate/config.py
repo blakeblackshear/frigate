@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import shutil
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -888,7 +889,7 @@ class FfmpegConfig(FrigateBaseModel):
     @property
     def ffmpeg_path(self) -> str:
         if self.path == "default":
-            if int(os.getenv("LIBAVFORMAT_VERSION_MAJOR", "59")) >= 59:
+            if shutil.which("ffmpeg") is None:
                 return "/usr/lib/ffmpeg/7.0/bin/ffmpeg"
             else:
                 return "ffmpeg"
