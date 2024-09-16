@@ -369,6 +369,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
             PlusApi(),
             None,
         )

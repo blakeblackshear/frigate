@@ -402,11 +402,13 @@ class FrigateApp:
 
         self.fastapi_app = create_fastapi_app(
             self.config,
+            self.embeddings,
             self.detected_frames_processor,
             self.storage_maintainer,
             self.onvif_controller,
             self.plus_api,
             self.stats_emitter,
+            self.external_event_processor,
         )
 
     def init_onvif(self) -> None:

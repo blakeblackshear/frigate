@@ -9,3 +9,4 @@ class Tags(Enum):
     notifications = "Notifications"
     review = "Review"
     export = "Export"
+    events = "Events"

@@ -529,7 +529,7 @@ def motion_activity(params: ReviewActivityMotionQueryParams = Depends()):
     # change types for output
     df.index = df.index.astype(int) // (10**9)
     normalized = df.reset_index().to_dict("records")
-    return jsonify(normalized)
+    return JSONResponse(content=normalized)
 
 
 @router.get("/review/activity/audio")
@@ -590,4 +590,4 @@ def audio_activity(params: ReviewActivityMotionQueryParams = Depends()):
     # change types for output
     df.index = df.index.astype(int) // (10**9)
     normalized = df.reset_index().to_dict("records")
-    return jsonify(normalized)
+    return JSONResponse(content=normalized)
