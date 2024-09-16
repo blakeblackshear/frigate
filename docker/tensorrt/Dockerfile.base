@@ -11,13 +11,8 @@ FROM ${TRT_BASE} AS trt-deps
 ARG COMPUTE_LEVEL
 
 RUN apt-get update \
-    && apt-get install -y git build-essential cuda-nvcc-* cuda-nvtx-* libnvinfer-dev libnvinfer-plugin-dev libnvparsers-dev libnvonnxparsers-dev
-
-RUN wget https://developer.download.nvidia.com/compute/cuda/repos/debian11/x86_64/cuda-keyring_1.1-1_all.deb \
-&& dpkg -i cuda-keyring_1.1-1_all.deb \
-&& apt-get update \
-&& apt-get -y install cuda-toolkit \
-&& rm -rf /var/lib/apt/lists/*
+    && apt-get install -y git build-essential cuda-nvcc-* cuda-nvtx-* libnvinfer-dev libnvinfer-plugin-dev libnvparsers-dev libnvonnxparsers-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN --mount=type=bind,source=docker/tensorrt/detector/tensorrt_libyolo.sh,target=/tensorrt_libyolo.sh \
     /tensorrt_libyolo.sh
@@ -30,7 +25,6 @@ ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
 
 COPY --from=trt-deps /usr/local/lib/libyolo_layer.so /usr/local/lib/libyolo_layer.so
 COPY --from=trt-deps /usr/local/src/tensorrt_demos /usr/local/src/tensorrt_demos
-COPY --from=trt-deps /usr/local/cuda-12.6 /usr/local/cuda
 COPY docker/tensorrt/detector/rootfs/ /
 ENV YOLO_MODELS="yolov7-320"
 
