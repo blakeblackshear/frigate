@@ -18,7 +18,7 @@ FROM tensorrt-base AS cudnn-deps
 ARG COMPUTE_LEVEL
 
 RUN apt-get update \
-    && apt-get install -y git build-essential cuda-nvcc-* cuda-nvtx-* libnvinfer-dev libnvinfer-plugin-dev libnvparsers-dev libnvonnxparsers-dev
+    && apt-get install -y git build-essential
 
 RUN wget https://developer.download.nvidia.com/compute/cuda/repos/debian11/x86_64/cuda-keyring_1.1-1_all.deb \
 && dpkg -i cuda-keyring_1.1-1_all.deb \
