@@ -11,7 +11,7 @@ local-rocm: version
 		docker buildx bake --file=docker/rocm/rocm.hcl rocm \
 			--set rocm.tags=frigate:latest-rocm-$(word 1,$(subst :, ,$(chipset))) \
 			--load \
-	;)
+	&&) true
 	
 	unset HSA_OVERRIDE_GFX_VERSION && \
 	HSA_OVERRIDE=0 \
@@ -27,7 +27,7 @@ build-rocm: version
 		HSA_OVERRIDE=1 \
 		docker buildx bake --file=docker/rocm/rocm.hcl rocm \
 			--set rocm.tags=$(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH)-rocm-$(chipset) \
-	;)
+	&&) true
 
 	unset HSA_OVERRIDE_GFX_VERSION && \
 	HSA_OVERRIDE=0 \
@@ -43,7 +43,7 @@ push-rocm: build-rocm
 		docker buildx bake --file=docker/rocm/rocm.hcl rocm \
 			--set rocm.tags=$(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH)-rocm-$(chipset) \
 			--push \
-	;)
+	&&) true
 
 	unset HSA_OVERRIDE_GFX_VERSION && \
 	HSA_OVERRIDE=0 \
