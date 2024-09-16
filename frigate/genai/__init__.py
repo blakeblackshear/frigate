@@ -4,7 +4,7 @@ import importlib
 import os
 from typing import Optional
 
-from frigate.config import GenAIConfig, GenAIProviderEnum
+from frigate.config import CameraConfig, GenAIConfig, GenAIProviderEnum
 
 PROVIDERS = {}
 
@@ -28,11 +28,14 @@ class GenAIClient:
         self.provider = self._init_provider()
 
     def generate_description(
-        self, thumbnails: list[bytes], metadata: dict[str, any]
+        self,
+        camera_config: CameraConfig,
+        thumbnails: list[bytes],
+        metadata: dict[str, any],
     ) -> Optional[str]:
         """Generate a description for the frame."""
-        prompt = self.genai_config.object_prompts.get(
-            metadata["label"], self.genai_config.prompt
+        prompt = camera_config.genai.object_prompts.get(
+            metadata["label"], camera_config.genai.prompt
         ).format(**metadata)
         return self._send(prompt, thumbnails)
 
