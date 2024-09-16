@@ -18,6 +18,7 @@ RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels
     pip3 install -U /deps/trt-wheels/*.whl && \
     ldconfig
 
+ENV LD_LIBRARY_PATH=/usr/local/lib/python3.9/dist-packages/tensorrt:/usr/local/cuda/lib64:/usr/local/lib/python3.9/dist-packages/nvidia/cufft/lib
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
 
