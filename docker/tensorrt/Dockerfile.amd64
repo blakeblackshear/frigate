@@ -12,7 +12,7 @@ ARG TARGETARCH
 COPY docker/tensorrt/requirements-amd64.txt /requirements-tensorrt.txt
 RUN mkdir -p /trt-wheels && pip3 wheel --wheel-dir=/trt-wheels -r /requirements-tensorrt.txt
 
-# Build TensorRT-specific library
+# Build CuDNN
 FROM tensorrt-base AS cudnn-deps
 
 ARG COMPUTE_LEVEL
