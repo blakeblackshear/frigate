@@ -12,12 +12,27 @@ ARG TARGETARCH
 COPY docker/tensorrt/requirements-amd64.txt /requirements-tensorrt.txt
 RUN mkdir -p /trt-wheels && pip3 wheel --wheel-dir=/trt-wheels -r /requirements-tensorrt.txt
 
+# Build CuDNN
+FROM tensorrt-base AS cudnn-deps
+
+ARG COMPUTE_LEVEL
+
+RUN apt-get update \
+    && apt-get install -y git build-essential
+
+RUN wget https://developer.download.nvidia.com/compute/cuda/repos/debian11/x86_64/cuda-keyring_1.1-1_all.deb \
+&& dpkg -i cuda-keyring_1.1-1_all.deb \
+&& apt-get update \
+&& apt-get -y install cuda-toolkit \
+&& rm -rf /var/lib/apt/lists/*
+
 FROM tensorrt-base AS frigate-tensorrt
 ENV TRT_VER=8.5.3
 RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \
     pip3 install -U /deps/trt-wheels/*.whl && \
     ldconfig
 
+ENV LD_LIBRARY_PATH=/usr/local/lib/python3.9/dist-packages/tensorrt:/usr/local/cuda/lib64:/usr/local/lib/python3.9/dist-packages/nvidia/cufft/lib
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
 
@@ -26,6 +41,7 @@ FROM devcontainer AS devcontainer-trt
 
 COPY --from=trt-deps /usr/local/lib/libyolo_layer.so /usr/local/lib/libyolo_layer.so
 COPY --from=trt-deps /usr/local/src/tensorrt_demos /usr/local/src/tensorrt_demos
+COPY --from=cudnn-deps /usr/local/cuda-12.6 /usr/local/cuda
 COPY docker/tensorrt/detector/rootfs/ /
 COPY --from=trt-deps /usr/local/lib/libyolo_layer.so /usr/local/lib/libyolo_layer.so
 RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \

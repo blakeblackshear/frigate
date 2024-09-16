@@ -3,6 +3,24 @@ id: object_detectors
 title: Object Detectors
 ---
 
+# Supported Hardware
+
+Frigate supports multiple different detectors that work on different types of hardware:
+
+**Most Hardware**
+- [Coral EdgeTPU](#edge-tpu-detector): The Google Coral EdgeTPU is available in USB and m.2 format allowing for a wide range of compatibility with devices.
+
+**Intel**
+- [OpenVino](#openvino-detector): OpenVino can run on Intel Arc GPUs, Intel integrated GPUs, and Intel CPUs to provide efficient object detection.
+- [ONNX](#onnx): OpenVINO will automatically be detected and used as a detector in the default Frigate image when a supported ONNX model is configured.
+
+**Nvidia**
+- [TensortRT](#nvidia-tensorrt-detector): TensorRT can run on Nvidia GPUs, using one of many default models.
+- [ONNX](#onnx): TensorRT will automatically be detected and used as a detector in the `-tensorrt` Frigate image when a supported ONNX is configured.
+
+**Rockchip**
+- [RKNN](#rockchip-platform): RKNN models can run on Rockchip devices with included NPUs.
+
 # Officially Supported Detectors
 
 Frigate provides the following builtin detector types: `cpu`, `edgetpu`, `openvino`, `tensorrt`, `rknn`, and `hailo8l`. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
@@ -277,6 +295,44 @@ model:
   width: 320
   height: 320
 ```
+
+## ONNX
+
+ONNX is an open format for building machine learning models, these models can run on a wide variety of hardware. Frigate supports running ONNX models on CPU, OpenVINO, and TensorRT.
+
+### Supported Models
+
+There is no default model provided, the following formats are supported:
+
+#### YOLO-NAS
+
+[YOLO-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) models are supported, but not included by default. You can build and download a compatible model with pre-trained weights using [this notebook](https://github.com/frigate/blob/dev/notebooks/YOLO_NAS_Pretrained_Export.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/blakeblackshear/frigate/blob/dev/notebooks/YOLO_NAS_Pretrained_Export.ipynb).
+
+:::warning
+
+The pre-trained YOLO-NAS weights from DeciAI are subject to their license and can't be used commercially. For more information, see: https://docs.deci.ai/super-gradients/latest/LICENSE.YOLONAS.html
+
+:::
+
+The input image size in this notebook is set to 320x320. This results in lower CPU usage and faster inference times without impacting performance in most cases due to the way Frigate crops video frames to areas of interest before running detection. The notebook and config can be updated to 640x640 if desired.
+
+After placing the downloaded onnx model in your config folder, you can use the following configuration:
+
+```yaml
+detectors:
+  onnx:
+    type: onnx
+
+model:
+  model_type: yolonas
+  width: 320 # <--- should match whatever was set in notebook
+  height: 320 # <--- should match whatever was set in notebook
+  input_pixel_format: bgr
+  path: /config/yolo_nas_s.onnx
+  labelmap_path: /labelmap/coco-80.txt
+```
+
+Note that the labelmap uses a subset of the complete COCO label set that has only 80 objects.
 
 ## Deepstack / CodeProject.AI Server Detector
 
