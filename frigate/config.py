@@ -763,8 +763,14 @@ class GenAIConfig(FrigateBaseModel):
     object_prompts: Dict[str, str] = Field(default={}, title="Object specific prompts.")
 
 
-class GenAICameraConfig(FrigateBaseModel):
+# uses BaseModel because some global attributes are not available at the camera level
+class GenAICameraConfig(BaseModel):
     enabled: bool = Field(default=False, title="Enable GenAI for camera.")
+    prompt: str = Field(
+        default="Describe the {label} in the sequence of images with as much detail as possible. Do not describe the background.",
+        title="Default caption prompt.",
+    )
+    object_prompts: Dict[str, str] = Field(default={}, title="Object specific prompts.")
 
 
 class AudioConfig(FrigateBaseModel):
@@ -1520,7 +1526,7 @@ class FrigateConfig(FrigateBaseModel):
                 "live": ...,
                 "objects": ...,
                 "review": ...,
-                "genai": {"enabled"},
+                "genai": ...,
                 "motion": ...,
                 "detect": ...,
                 "ffmpeg": ...,

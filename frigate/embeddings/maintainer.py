@@ -171,8 +171,11 @@ class EmbeddingMaintainer(threading.Thread):
         self, event: Event, thumbnails: list[bytes], metadata: dict
     ) -> None:
         """Embed the description for an event."""
+        camera_config = self.config.cameras[event.camera]
 
-        description = self.genai_client.generate_description(thumbnails, metadata)
+        description = self.genai_client.generate_description(
+            camera_config, thumbnails, metadata
+        )
 
         if description is None:
             logger.debug("Failed to generate description for %s", event.id)
