@@ -4,7 +4,7 @@ from typing import Optional
 from fastapi import FastAPI
 
 from frigate.api import app as main_app
-from frigate.api import export, media, notification, preview, review
+from frigate.api import event, export, media, notification, preview, review
 from frigate.embeddings import EmbeddingsContext
 from frigate.events.external import ExternalEventProcessor
 from frigate.plus import PlusApi
@@ -37,6 +37,7 @@ def create_fastapi_app(
     app.include_router(notification.router)
     app.include_router(review.router)
     app.include_router(export.router)
+    app.include_router(event.router)
     # App Properties
     app.frigate_config = frigate_config
     app.embeddings = embeddings

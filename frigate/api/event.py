@@ -18,6 +18,7 @@ from peewee import JOIN, DoesNotExist, fn, operator
 from PIL import Image
 from playhouse.shortcuts import model_to_dict
 
+from frigate.api.defs.events_body import EventsDescriptionBody, EventsSubLabelBody
 from frigate.api.defs.events_query_parameters import (
     DEFAULT_TIME_RANGE,
     EventsQueryParams,
@@ -585,7 +586,7 @@ def event(event_id: str):
     try:
         return model_to_dict(Event.get(Event.id == event_id))
     except DoesNotExist:
-        return "Event not found", 404
+        return JSONResponse(content="Event not found", status_code=404)
 
 
 @router.post("/events/{event_id}/retain")
@@ -833,7 +834,7 @@ def delete_retain(event_id: str):
 def set_sub_label(
     request: Request,
     event_id: str,
-    body: dict = None,
+    body: EventsSubLabelBody = None,
 ):
     try:
         event: Event = Event.get(Event.id == event_id)
@@ -843,9 +844,8 @@ def set_sub_label(
             status_code=404,
         )
 
-    json: dict[str, any] = body or {}
-    new_sub_label = json.get("subLabel")
-    new_score = json.get("subLabelScore")
+    new_sub_label = body.subLabel
+    new_score = body.subLabelScore
 
     if new_sub_label is None:
         return JSONResponse(
@@ -921,7 +921,7 @@ def set_sub_label(
 def set_description(
     request: Request,
     event_id: str,
-    body: dict = None,
+    body: EventsDescriptionBody = None,
 ):
     try:
         event: Event = Event.get(Event.id == event_id)
@@ -931,8 +931,7 @@ def set_description(
             status_code=404,
         )
 
-    json: dict[str, any] = body or {}
-    new_description = json.get("description")
+    new_description = body.description
 
     if new_description is None or len(new_description) == 0:
         return JSONResponse(
