@@ -37,6 +37,7 @@ export function ThresholdBarGraph({
       return undefined;
     }
 
+    // @ts-expect-error y is valid
     const yValues: number[] = data[0].data.map((point) => point?.y);
     return Math.max(threshold.warning, ...yValues);
   }, [data, threshold, unit]);
