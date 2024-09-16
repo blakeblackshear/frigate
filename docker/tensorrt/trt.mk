@@ -20,5 +20,7 @@ build-trt:
 	$(JETPACK4_ARGS) docker buildx bake --file=docker/tensorrt/trt.hcl --set tensorrt.tags=$(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH)-tensorrt-jp4 tensorrt
 	$(JETPACK5_ARGS) docker buildx bake --file=docker/tensorrt/trt.hcl --set tensorrt.tags=$(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH)-tensorrt-jp5 tensorrt
 
-push-trt:
-	$(X86_DGPU_ARGS) docker buildx bake --push --file=docker/tensorrt/trt.hcl --set tensorrt.tags=crzynik/trt tensorrt
+push-trt: build-trt
+	$(X86_DGPU_ARGS) docker buildx bake --push --file=docker/tensorrt/trt.hcl --set tensorrt.tags=$(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH)-tensorrt tensorrt
+	$(JETPACK4_ARGS) docker buildx bake --push --file=docker/tensorrt/trt.hcl --set tensorrt.tags=$(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH)-tensorrt-jp4 tensorrt
+	$(JETPACK5_ARGS) docker buildx bake --push --file=docker/tensorrt/trt.hcl --set tensorrt.tags=$(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH)-tensorrt-jp5 tensorrt
