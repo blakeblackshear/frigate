@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { LuX, LuFilter, LuImage } from "react-icons/lu";
 import { SearchFilter, SearchSource } from "@/types/search";
+import { DropdownMenuSeparator } from "../ui/dropdown-menu";
 
 type FilterType = keyof SearchFilter;
 
@@ -476,7 +477,7 @@ export default function InputWithTags({
       {((showFilters &&
         (Object.keys(filters).length > 0 || isSimilaritySearch)) ||
         showSuggestions) && (
-        <div className="absolute left-0 top-12 z-[100] w-full rounded-md border border-input bg-background p-2 text-primary shadow-md">
+        <div className="scrollbar-container absolute left-0 top-12 z-[100] max-h-[200px] w-full overflow-y-auto rounded-md border border-input bg-background p-2 text-primary shadow-md">
           {showFilters &&
             (Object.keys(filters).length > 0 || isSimilaritySearch) && (
               <div ref={filterRef} className="my-2 flex flex-wrap gap-2">
@@ -540,7 +541,7 @@ export default function InputWithTags({
           {showSuggestions && (
             <div
               ref={suggestionRef}
-              className="scrollbar-container mt-1 max-h-[200px] overflow-y-auto"
+              className="mt-1"
               role="listbox"
               id="suggestions-list"
             >
@@ -565,7 +566,7 @@ export default function InputWithTags({
                       {suggestion}
                     </button>
                   ))}
-                  <div className="my-1 border-t border-secondary-foreground" />
+                  <DropdownMenuSeparator />
                 </>
               )}
               <h3 className="px-2 py-1 text-xs font-semibold text-secondary-foreground">
