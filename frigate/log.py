@@ -1,71 +1,71 @@
-# adapted from https://medium.com/@jonathonbao/python3-logging-with-multiprocessing-f51f460b8778
+import atexit
 import logging
 import multiprocessing as mp
 import os
-import queue
-import signal
 import threading
 from collections import deque
-from logging import handlers
-from multiprocessing import Queue
-from types import FrameType
+from contextlib import AbstractContextManager, ContextDecorator
+from logging.handlers import QueueHandler, QueueListener
+from types import TracebackType
 from typing import Deque, Optional
 
-from setproctitle import setproctitle
+from typing_extensions import Self
 
 from frigate.util.builtin import clean_camera_user_pass
 
-
-def listener_configurer() -> None:
-    root = logging.getLogger()
-
-    if root.hasHandlers():
-        root.handlers.clear()
-
-    console_handler = logging.StreamHandler()
-    formatter = logging.Formatter(
-        "[%(asctime)s] %(name)-30s %(levelname)-8s: %(message)s", "%Y-%m-%d %H:%M:%S"
+LOG_HANDLER = logging.StreamHandler()
+LOG_HANDLER.setFormatter(
+    logging.Formatter(
+        "[%(asctime)s] %(name)-30s %(levelname)-8s: %(message)s",
+        "%Y-%m-%d %H:%M:%S",
     )
-    console_handler.setFormatter(formatter)
-    root.addHandler(console_handler)
-    root.setLevel(logging.INFO)
+)
+
+LOG_HANDLER.addFilter(
+    lambda record: not record.getMessage().startswith(
+        "You are using a scalar distance function"
+    )
+)
 
 
-def root_configurer(queue: Queue) -> None:
-    h = handlers.QueueHandler(queue)
-    root = logging.getLogger()
+class log_thread(AbstractContextManager, ContextDecorator):
+    def __init__(self, *, handler: logging.Handler = LOG_HANDLER):
+        super().__init__()
 
-    if root.hasHandlers():
-        root.handlers.clear()
+        self._handler = handler
 
-    root.addHandler(h)
-    root.setLevel(logging.INFO)
+        log_queue: mp.Queue = mp.Queue()
+        self._queue_handler = QueueHandler(log_queue)
 
+        self._log_listener = QueueListener(
+            log_queue, self._handler, respect_handler_level=True
+        )
 
-def log_process(log_queue: Queue) -> None:
-    threading.current_thread().name = "logger"
-    setproctitle("frigate.logger")
-    listener_configurer()
+    @property
+    def handler(self) -> logging.Handler:
+        return self._handler
 
-    stop_event = mp.Event()
+    def _stop_thread(self) -> None:
+        self._log_listener.stop()
 
-    def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:
-        stop_event.set()
+    def __enter__(self) -> Self:
+        logging.getLogger().addHandler(self._queue_handler)
 
-    signal.signal(signal.SIGTERM, receiveSignal)
-    signal.signal(signal.SIGINT, receiveSignal)
+        atexit.register(self._stop_thread)
+        self._log_listener.start()
 
-    while True:
-        try:
-            record = log_queue.get(block=True, timeout=1.0)
-        except queue.Empty:
-            if stop_event.is_set():
-                break
-            continue
-        if record.msg.startswith("You are using a scalar distance function"):
-            continue
-        logger = logging.getLogger(record.name)
-        logger.handle(record)
+        return self
+
+    def __exit__(
+        self,
+        exc_type: Optional[type[BaseException]],
+        exc_info: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> None:
+        logging.getLogger().removeHandler(self._queue_handler)
+
+        atexit.unregister(self._stop_thread)
+        self._stop_thread()
 
 
 # based on https://codereview.stackexchange.com/a/17959

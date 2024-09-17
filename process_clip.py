@@ -28,8 +28,7 @@ from frigate.video import (  # noqa: E402
     start_or_restart_ffmpeg,
 )
 
-logging.basicConfig()
-logging.root.setLevel(logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
 
 logger = logging.getLogger(__name__)
 
