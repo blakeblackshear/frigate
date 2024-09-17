@@ -89,31 +89,32 @@ def deep_merge(dct1: dict, dct2: dict, override=False, merge_lists=False) -> dic
     return merged
 
 
-class NoDuplicateKeysLoader(yaml.loader.SafeLoader):
-    """A yaml SafeLoader that disallows duplicate keys"""
+def load_config_with_no_duplicates(raw_config) -> dict:
+    """Get config ensuring duplicate keys are not allowed."""
 
-    def construct_mapping(self, node, deep=False):
-        mapping = super().construct_mapping(node, deep=deep)
+    # https://stackoverflow.com/a/71751051
+    # important to use SafeLoader here to avoid RCE
+    class PreserveDuplicatesLoader(yaml.loader.SafeLoader):
+        pass
 
-        if len(node.value) != len(mapping):
-            # There's a duplicate key somewhere. Find it.
-            duplicate_keys = [
-                key
-                for key, count in Counter(
-                    self.construct_object(key, deep=deep) for key, _ in node.value
+    def map_constructor(loader, node, deep=False):
+        keys = [loader.construct_object(node, deep=deep) for node, _ in node.value]
+        vals = [loader.construct_object(node, deep=deep) for _, node in node.value]
+        key_count = Counter(keys)
+        data = {}
+        for key, val in zip(keys, vals):
+            if key_count[key] > 1:
+                raise ValueError(
+                    f"Config input {key} is defined multiple times for the same field, this is not allowed."
                 )
-                if count > 1
-            ]
+            else:
+                data[key] = val
+        return data
 
-            # This might be possible if PyYAML's construct_mapping() changes the node
-            # afterwards for some reason? I don't see why, but better safe than sorry.
-            assert len(duplicate_keys) > 0
-
-            raise ValueError(
-                f"Config field duplicates are not allowed, the following fields are duplicated in the config: {', '.join(duplicate_keys)}"
-            )
-
-        return mapping
+    PreserveDuplicatesLoader.add_constructor(
+        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, map_constructor
+    )
+    return yaml.load(raw_config, PreserveDuplicatesLoader)
 
 
 def clean_camera_user_pass(line: str) -> str:
