@@ -170,8 +170,8 @@ RUN /build_pysqlite3.sh
 COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
 RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt
 
-COPY docker/main/requirements-wheels-nodeps.txt /requirements-wheels-nodeps.txt
-RUN pip3 wheel --no-deps --wheel-dir=/wheels -r /requirements-wheels-nodeps.txt
+COPY docker/main/requirements-wheels-post.txt /requirements-wheels-post.txt
+RUN pip3 wheel --no-deps --wheel-dir=/wheels-post -r /requirements-wheels-post.txt
 
 
 # Collect deps in a single layer
@@ -212,6 +212,14 @@ RUN --mount=type=bind,source=docker/main/install_deps.sh,target=/deps/install_de
     /deps/install_deps.sh
 
 RUN --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels \
+    python3 -m pip install --upgrade pip && \
+    pip3 install -U /deps/wheels/*.whl
+
+# We have to uninstall this dependency specifically
+# as it will break onnxruntime-openvino
+RUN pip3 uninstall -y onnxruntime
+
+RUN --mount=type=bind,from=wheels,source=/wheels-post,target=/deps/wheels \
     python3 -m pip install --upgrade pip && \
     pip3 install -U /deps/wheels/*.whl
 
