@@ -22,7 +22,9 @@ LOG_HANDLER.setFormatter(
 )
 
 LOG_HANDLER.addFilter(
-    lambda record: not record.msg.startswith("You are using a scalar distance function")
+    lambda record: not record.getMessage().startswith(
+        "You are using a scalar distance function"
+    )
 )
 
 
