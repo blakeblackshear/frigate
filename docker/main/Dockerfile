@@ -171,7 +171,7 @@ COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
 RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt
 
 COPY docker/main/requirements-wheels-nodeps.txt /requirements-wheels-nodeps.txt
-RUN pip3 wheel --nodeps --wheel-dir=/wheels -r /requirements-wheels-nodeps.txt
+RUN pip3 wheel --no-deps --wheel-dir=/wheels -r /requirements-wheels-nodeps.txt
 
 
 # Collect deps in a single layer
