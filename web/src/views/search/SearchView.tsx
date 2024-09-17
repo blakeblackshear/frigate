@@ -3,7 +3,6 @@ import SearchFilterGroup from "@/components/filter/SearchFilterGroup";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import Chip from "@/components/indicators/Chip";
 import SearchDetailDialog from "@/components/overlay/detail/SearchDetailDialog";
-import { Input } from "@/components/ui/input";
 import { Toaster } from "@/components/ui/sonner";
 import {
   Tooltip,
@@ -12,10 +11,10 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { SearchFilter, SearchResult } from "@/types/search";
+import { SearchFilter, SearchResult, SearchSource } from "@/types/search";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isMobileOnly } from "react-device-detect";
-import { LuImage, LuSearchX, LuText, LuXCircle } from "react-icons/lu";
+import { LuImage, LuSearchX, LuText } from "react-icons/lu";
 import useSWR from "swr";
 import ExploreView from "../explore/ExploreView";
 import useKeyboardListener, {
@@ -54,6 +53,72 @@ export default function SearchView({
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
+
+  // suggestions values
+
+  const allLabels = useMemo<string[]>(() => {
+    if (!config) {
+      return [];
+    }
+
+    const labels = new Set<string>();
+    const cameras = Object.keys(config.cameras);
+
+    cameras.forEach((camera) => {
+      if (camera == "birdseye") {
+        return;
+      }
+      const cameraConfig = config.cameras[camera];
+      cameraConfig.objects.track.forEach((label) => {
+        labels.add(label);
+      });
+
+      if (cameraConfig.audio.enabled_in_config) {
+        cameraConfig.audio.listen.forEach((label) => {
+          labels.add(label);
+        });
+      }
+    });
+
+    return [...labels].sort();
+  }, [config]);
+
+  const { data: allSubLabels } = useSWR("sub_labels");
+
+  const allZones = useMemo<string[]>(() => {
+    if (!config) {
+      return [];
+    }
+
+    const zones = new Set<string>();
+    const cameras = Object.keys(config.cameras);
+
+    cameras.forEach((camera) => {
+      if (camera == "birdseye") {
+        return;
+      }
+      const cameraConfig = config.cameras[camera];
+      cameraConfig.review.alerts.required_zones.forEach((zone) => {
+        zones.add(zone);
+      });
+      cameraConfig.review.detections.required_zones.forEach((zone) => {
+        zones.add(zone);
+      });
+    });
+
+    return [...zones].sort();
+  }, [config]);
+
+  const suggestionsValues = useMemo(
+    () => ({
+      cameras: Object.keys(config?.cameras || {}),
+      labels: Object.values(allLabels || {}),
+      zones: Object.values(allZones || {}),
+      sub_labels: allSubLabels,
+      search_type: ["thumbnail", "description"] as SearchSource[],
+    }),
+    [config, allLabels, allZones, allSubLabels],
+  );
 
   // remove duplicate event ids
 
@@ -209,30 +274,13 @@ export default function SearchView({
               hasExistingSearch ? "lg:mr-3 lg:w-1/3" : "lg:ml-[25%] lg:w-1/2",
             )}
           >
-            {/* <Input
-              className="text-md w-full bg-muted pr-10"
-              placeholder={"Search for a tracked object..."}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            /> */}
-            <div className="">
-              <InputWithTags
-                filters={searchFilter ?? {}}
-                setFilters={setSearchFilter}
-                search={search}
-                setSearch={setSearch}
-                allSuggestions={{
-                  cameras: ["ptzcam", "doorbellcam"],
-                  labels: ["person", "car"],
-                }}
-              />
-            </div>
-            {search && false && (
-              <LuXCircle
-                className="absolute right-2 top-1/2 h-5 w-5 -translate-y-1/2 cursor-pointer text-muted-foreground hover:text-primary"
-                onClick={() => setSearch("")}
-              />
-            )}
+            <InputWithTags
+              filters={searchFilter ?? {}}
+              setFilters={setSearchFilter}
+              search={search}
+              setSearch={setSearch}
+              allSuggestions={suggestionsValues}
+            />
           </div>
         )}
 
