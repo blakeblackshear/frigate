@@ -69,7 +69,9 @@ class Clip(OnnxClip):
 
         try:
             if os.path.exists(path):
-                return ort.InferenceSession(path, providers=providers, options=options)
+                return ort.InferenceSession(
+                    path, providers=providers, provider_options=options
+                )
             else:
                 raise FileNotFoundError(
                     errno.ENOENT,
@@ -101,7 +103,7 @@ class Clip(OnnxClip):
             # Finally move the temporary file to the correct location
             temporary_filename.rename(path)
             return ort.InferenceSession(
-                path, providers=provider, provider_options=optionsm
+                path, providers=provider, provider_options=options
             )
 
 

@@ -85,7 +85,10 @@ class Embeddings:
     @property
     def description(self) -> Collection:
         return self.client.get_or_create_collection(
-            name="event_description", embedding_function=MiniLMEmbedding()
+            name="event_description",
+            embedding_function=MiniLMEmbedding(
+                preferred_providers=["CPUExecutionProvider"]
+            ),
         )
 
     def reindex(self) -> None:
