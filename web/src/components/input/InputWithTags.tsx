@@ -101,6 +101,7 @@ export default function InputWithTags({
   const [currentFilterType, setCurrentFilterType] = useState<FilterType | null>(
     null,
   );
+  const [isSimilaritySearch, setIsSimilaritySearch] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const suggestionRef = useRef<HTMLDivElement>(null);
@@ -331,7 +332,9 @@ export default function InputWithTags({
     updateSuggestions("", null);
     setShowFilters(false);
     setShowSuggestions(false);
-  }, [setFilters, updateSuggestions]);
+    setIsSimilaritySearch(false);
+    setSearch("");
+  }, [setFilters, updateSuggestions, setSearch]);
 
   const handleInputBlur = useCallback(() => {
     setTimeout(() => {
@@ -410,6 +413,16 @@ export default function InputWithTags({
     setInputValue(search || "");
   }, [search]);
 
+  useEffect(() => {
+    if (search?.startsWith("similarity:")) {
+      setIsSimilaritySearch(true);
+      setInputValue("");
+    } else {
+      setIsSimilaritySearch(false);
+      setInputValue(search || "");
+    }
+  }, [search]);
+
   return (
     <div ref={containerRef}>
       <div className="relative my-2">
@@ -456,11 +469,24 @@ export default function InputWithTags({
           )}
         </div>
       </div>
-      {((showFilters && Object.keys(filters).length > 0) ||
+      {((showFilters &&
+        (Object.keys(filters).length > 0 || isSimilaritySearch)) ||
         showSuggestions) && (
         <div className="absolute left-0 top-12 z-[100] w-full rounded-md border border-t-0 border-secondary-foreground bg-background p-2 text-primary shadow-md">
           {showFilters && Object.keys(filters).length > 0 && (
             <div ref={filterRef} className="my-2 flex flex-wrap gap-2">
+              {isSimilaritySearch && (
+                <span className="inline-flex items-center whitespace-nowrap rounded-full bg-blue-100 px-2 py-0.5 text-sm text-blue-800">
+                  Similarity Search
+                  <button
+                    onClick={handleClearInput}
+                    className="ml-1 focus:outline-none"
+                    aria-label="Clear similarity search"
+                  >
+                    <LuX className="h-3 w-3" />
+                  </button>
+                </span>
+              )}
               {Object.entries(filters).map(([filterType, filterValues]) =>
                 Array.isArray(filterValues) ? (
                   filterValues.map((value, index) => (
