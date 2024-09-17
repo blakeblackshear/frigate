@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
+import yaml
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -41,11 +42,11 @@ from frigate.ffmpeg_presets import (
 )
 from frigate.plus import PlusApi
 from frigate.util.builtin import (
+    NoDuplicateKeysLoader,
     deep_merge,
     escape_special_characters,
     generate_color_palette,
     get_ffmpeg_arg_list,
-    load_config_with_no_duplicates,
 )
 from frigate.util.config import StreamInfoRetriever, get_relative_coordinates
 from frigate.util.image import create_mask
@@ -1764,7 +1765,7 @@ class FrigateConfig(FrigateBaseModel):
             raw_config = f.read()
 
         if config_file.endswith(YAML_EXT):
-            config = load_config_with_no_duplicates(raw_config)
+            config = yaml.load(raw_config, NoDuplicateKeysLoader)
         elif config_file.endswith(".json"):
             config = json.loads(raw_config)
 
@@ -1772,5 +1773,5 @@ class FrigateConfig(FrigateBaseModel):
 
     @classmethod
     def parse_raw(cls, raw_config):
-        config = load_config_with_no_duplicates(raw_config)
+        config = yaml.load(raw_config, NoDuplicateKeysLoader)
         return cls.model_validate(config)

@@ -4,13 +4,14 @@ import unittest
 from unittest.mock import patch
 
 import numpy as np
+import yaml
 from pydantic import ValidationError
 
 from frigate.config import BirdseyeModeEnum, FrigateConfig
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors import DetectorTypeEnum
 from frigate.plus import PlusApi
-from frigate.util.builtin import deep_merge, load_config_with_no_duplicates
+from frigate.util.builtin import NoDuplicateKeysLoader, deep_merge
 
 
 class TestConfig(unittest.TestCase):
@@ -1537,7 +1538,7 @@ class TestConfig(unittest.TestCase):
         """
 
         self.assertRaises(
-            ValueError, lambda: load_config_with_no_duplicates(raw_config)
+            ValueError, lambda: yaml.load(raw_config, NoDuplicateKeysLoader)
         )
 
     def test_object_filter_ratios_work(self):
