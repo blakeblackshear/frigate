@@ -110,7 +110,7 @@ class NoDuplicateKeysLoader(yaml.loader.SafeLoader):
             assert len(duplicate_keys) > 0
 
             raise ValueError(
-                "Key redefinitions are not allowed: " + ", ".join(duplicate_keys)
+                f"Config field duplicates are not allowed, the following fields are duplicated in the config: {', '.join(duplicate_keys)}"
             )
 
         return mapping
