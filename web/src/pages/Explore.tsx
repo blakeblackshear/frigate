@@ -148,7 +148,7 @@ export default function Explore() {
   const { data, size, setSize, isValidating } = useSWRInfinite<SearchResult[]>(
     getKey,
     {
-      revalidateFirstPage: false,
+      revalidateFirstPage: true,
       revalidateAll: false,
     },
   );
@@ -277,6 +277,7 @@ export default function Explore() {
         isLoading={(isLoadingInitialData || isLoadingMore) ?? true}
         setSearch={setSearch}
         setSimilaritySearch={(search) => setSearch(`similarity:${search.id}`)}
+        setSearchFilter={setSearchFilter}
         onUpdateFilter={setSearchFilter}
         onOpenSearch={onOpenSearch}
         loadMore={loadMore}

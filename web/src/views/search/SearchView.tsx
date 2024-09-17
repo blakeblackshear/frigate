@@ -22,6 +22,7 @@ import useKeyboardListener, {
   KeyModifiers,
 } from "@/hooks/use-keyboard-listener";
 import scrollIntoView from "scroll-into-view-if-needed";
+import InputWithTags from "@/components/input/InputWithTags";
 
 type SearchViewProps = {
   search: string;
@@ -31,6 +32,7 @@ type SearchViewProps = {
   isLoading: boolean;
   setSearch: (search: string) => void;
   setSimilaritySearch: (search: SearchResult) => void;
+  setSearchFilter: (filter: SearchFilter) => void;
   onUpdateFilter: (filter: SearchFilter) => void;
   onOpenSearch: (item: SearchResult) => void;
   loadMore: () => void;
@@ -44,6 +46,7 @@ export default function SearchView({
   isLoading,
   setSearch,
   setSimilaritySearch,
+  setSearchFilter,
   onUpdateFilter,
   loadMore,
   hasMore,
@@ -206,12 +209,22 @@ export default function SearchView({
               hasExistingSearch ? "lg:mr-3 lg:w-1/3" : "lg:ml-[25%] lg:w-1/2",
             )}
           >
-            <Input
+            {/* <Input
               className="text-md w-full bg-muted pr-10"
               placeholder={"Search for a tracked object..."}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-            />
+            /> */}
+            <div className="">
+              <InputWithTags
+                filters={searchFilter ?? {}}
+                setFilters={setSearchFilter}
+                allSuggestions={{
+                  cameras: ["ptzcam", "doorbellcam"],
+                  labels: ["person", "car"],
+                }}
+              />
+            </div>
             {search && (
               <LuXCircle
                 className="absolute right-2 top-1/2 h-5 w-5 -translate-y-1/2 cursor-pointer text-muted-foreground hover:text-primary"
