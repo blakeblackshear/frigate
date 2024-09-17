@@ -49,22 +49,24 @@ class Clip(OnnxClip):
 
     @staticmethod
     def _load_model(path: str, silent: bool):
-        providers = ort.get_available_providers()
+        providers = []
         options = []
 
-        for provider in providers:
+        for provider in ort.get_available_providers():
             if provider == "TensorrtExecutionProvider":
+                continue
+            elif provider == "OpenVINOExecutionProvider":
+                # TODO need to verify openvino works correctly
+                os.makedirs("/config/model_cache/openvino/ort", exist_ok=True)
+                providers.append(provider)
                 options.append(
                     {
-                        "trt_timing_cache_enable": True,
-                        "trt_timing_cache_path": "/config/model_cache/tensorrt/ort",
-                        "trt_engine_cache_enable": True,
-                        "trt_engine_cache_path": "/config/model_cache/tensorrt/ort/trt-engines",
+                        "cache_dir": "/config/model_cache/openvino/ort",
+                        "device_type": "GPU",
                     }
                 )
-            elif provider == "OpenVINOExecutionProvider":
-                options.append({"cache_dir": "/config/model_cache/openvino/ort"})
             else:
+                providers.append(provider)
                 options.append({})
 
         try:

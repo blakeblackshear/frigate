@@ -1,4 +1,5 @@
 import logging
+import os
 
 import cv2
 import numpy as np
@@ -42,6 +43,9 @@ class ONNXDetector(DetectionApi):
 
         for provider in providers:
             if provider == "TensorrtExecutionProvider":
+                os.makedirs(
+                    "/config/model_cache/tensorrt/ort/trt-engines", exist_ok=True
+                )
                 options.append(
                     {
                         "trt_timing_cache_enable": True,
@@ -51,7 +55,13 @@ class ONNXDetector(DetectionApi):
                     }
                 )
             elif provider == "OpenVINOExecutionProvider":
-                options.append({"cache_dir": "/config/model_cache/openvino/ort"})
+                os.makedirs("/config/model_cache/openvino/ort", exist_ok=True)
+                options.append(
+                    {
+                        "cache_dir": "/config/model_cache/openvino/ort",
+                        "device_type": "GPU",
+                    }
+                )
             else:
                 options.append({})
 
