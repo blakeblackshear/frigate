@@ -9,7 +9,13 @@ from frigate.app import FrigateApp
 
 def main() -> None:
     faulthandler.enable()
-    logging.basicConfig(level=logging.INFO, handlers=[])
+
+    # Clear all existing handlers.
+    logging.basicConfig(
+        level=logging.INFO,
+        handlers=[],
+        force=True,
+    )
 
     threading.current_thread().name = "frigate"
     cli.show_server_banner = lambda *x: None
