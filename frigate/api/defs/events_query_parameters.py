@@ -42,7 +42,6 @@ class EventsSearchQueryParams(BaseModel):
     zones: Optional[str] = "all"
     after: Optional[float] = None
     before: Optional[float] = None
-
     timezone: Optional[str] = "utc"
 
 
