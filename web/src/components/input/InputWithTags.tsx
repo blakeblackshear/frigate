@@ -12,17 +12,27 @@ import { SearchFilter, SearchSource } from "@/types/search";
 
 type FilterType = keyof SearchFilter;
 
+const convertMMDDYYToTimestamp = (dateString: string): number => {
+  const match = dateString.match(/^(\d{2})(\d{2})(\d{2})$/);
+  if (!match) return 0;
+
+  const [, month, day, year] = match;
+  const date = new Date(`20${year}-${month}-${day}T00:00:00Z`);
+  return date.getTime();
+};
+
 // Custom hook for managing suggestions
 const useSuggestions = (
   filters: SearchFilter,
   allSuggestions: { [K in keyof SearchFilter]: string[] },
+  searchHistory: string[],
 ) => {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
 
   const updateSuggestions = useCallback(
     (value: string, currentFilterType: FilterType | null) => {
-      if (currentFilterType) {
+      if (currentFilterType && currentFilterType in allSuggestions) {
         const filterValue = value.split(":").pop() || "";
         const currentFilterValues = filters[currentFilterType] || [];
         setSuggestions(
@@ -49,10 +59,15 @@ const useSuggestions = (
             return false;
           },
         );
-        setSuggestions([...availableFilters]);
+        setSuggestions([
+          ...searchHistory,
+          ...availableFilters,
+          "before",
+          "after",
+        ]);
       }
     },
-    [filters, allSuggestions],
+    [filters, allSuggestions, searchHistory],
   );
 
   return {
@@ -66,6 +81,8 @@ const useSuggestions = (
 type InputWithTagsProps = {
   filters: SearchFilter;
   setFilters: (filter: SearchFilter) => void;
+  search: string;
+  setSearch: (search: string) => void;
   allSuggestions: {
     [K in keyof SearchFilter]: string[];
   };
@@ -74,9 +91,11 @@ type InputWithTagsProps = {
 export default function InputWithTags({
   filters,
   setFilters,
+  search,
+  setSearch,
   allSuggestions,
 }: InputWithTagsProps) {
-  const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState(search || "");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [currentFilterType, setCurrentFilterType] = useState<FilterType | null>(
@@ -97,7 +116,7 @@ export default function InputWithTags({
     selectedSuggestionIndex,
     setSelectedSuggestionIndex,
     updateSuggestions,
-  } = useSuggestions(filters, allSuggestions);
+  } = useSuggestions(filters, allSuggestions, searchHistory);
 
   const resetSuggestions = useCallback(
     (value: string) => {
@@ -108,7 +127,7 @@ export default function InputWithTags({
   );
 
   const removeFilter = useCallback(
-    (filterType: keyof SearchFilter, filterValue: string | number) => {
+    (filterType: FilterType, filterValue: string | number) => {
       const newFilters = { ...filters };
       if (Array.isArray(newFilters[filterType])) {
         (newFilters[filterType] as string[]) = (
@@ -154,13 +173,21 @@ export default function InputWithTags({
 
   const createFilter = useCallback(
     (type: FilterType, value: string) => {
-      if (allSuggestions[type]?.includes(value)) {
+      if (
+        allSuggestions[type as keyof SearchFilter]?.includes(value) ||
+        type === "before" ||
+        type === "after"
+      ) {
         const newFilters = { ...filters };
+        let timestamp = 0;
 
         switch (type) {
           case "before":
           case "after":
-            newFilters[type] = parseFloat(value);
+            timestamp = convertMMDDYYToTimestamp(value);
+            if (timestamp > 0) {
+              newFilters[type] = timestamp;
+            }
             break;
           case "search_type":
             if (!newFilters.search_type) newFilters.search_type = [];
@@ -197,13 +224,43 @@ export default function InputWithTags({
     [filters, setFilters, allSuggestions],
   );
 
+  const handleFilterCreation = useCallback(
+    (filterType: FilterType, filterValue: string) => {
+      const trimmedValue = filterValue.trim();
+      if (
+        allSuggestions[filterType as keyof SearchFilter]?.includes(
+          trimmedValue,
+        ) ||
+        ((filterType === "before" || filterType === "after") &&
+          trimmedValue.match(/^\d{6}$/))
+      ) {
+        createFilter(filterType, trimmedValue);
+        setInputValue((prev) => {
+          const regex = new RegExp(
+            `${filterType}:${filterValue.trim()}[,\\s]*`,
+          );
+          const newValue = prev.replace(regex, "").trim();
+          return newValue.endsWith(",")
+            ? newValue.slice(0, -1).trim()
+            : newValue;
+        });
+        setCurrentFilterType(null);
+      }
+    },
+    [allSuggestions, createFilter],
+  );
+
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
       setInputValue(value);
 
-      const words = value.split(" ");
-      const currentWord = words[words.length - 1];
+      const words = value.split(/[\s,]+/);
+      const lastNonEmptyWordIndex = words
+        .map((word) => word.trim())
+        .lastIndexOf(words.filter((word) => word.trim() !== "").pop() || "");
+      const currentWord = words[lastNonEmptyWordIndex];
+      const isLastCharSpaceOrComma = value.endsWith(" ") || value.endsWith(",");
 
       // Check if the current word is a filter type
       const filterTypeMatch = currentWord.match(/^(\w+):(.*)$/);
@@ -215,19 +272,25 @@ export default function InputWithTags({
         ];
 
         // Check if filter type is valid
-        if (filterType in allSuggestions) {
+        if (
+          filterType in allSuggestions ||
+          filterType === "before" ||
+          filterType === "after"
+        ) {
           setCurrentFilterType(filterType);
-          updateSuggestions(filterValue, filterType);
 
-          // If filter value is valid, apply the filter
-          if (allSuggestions[filterType]?.includes(filterValue.trim())) {
-            createFilter(filterType, filterValue.trim());
+          if (filterType === "before" || filterType === "after") {
+            // For before and after, we don't need to update suggestions
+            if (filterValue.match(/^\d{6}$/)) {
+              handleFilterCreation(filterType, filterValue);
+            }
+          } else {
+            updateSuggestions(filterValue, filterType);
 
-            // Remove the applied filter from the input
-            setInputValue((prev) =>
-              prev.replace(`${filterType}:${filterValue}`, "").trim(),
-            );
-            setCurrentFilterType(null);
+            // Check if the last character is a space or comma
+            if (isLastCharSpaceOrComma) {
+              handleFilterCreation(filterType, filterValue);
+            }
           }
         } else {
           resetSuggestions(value);
@@ -244,7 +307,7 @@ export default function InputWithTags({
       updateSuggestions,
       resetSuggestions,
       allSuggestions,
-      createFilter,
+      handleFilterCreation,
       setSelectedSuggestionIndex,
     ],
   );
@@ -253,13 +316,20 @@ export default function InputWithTags({
     setShowSuggestions(true);
     setShowFilters(true);
     updateSuggestions(inputValue, currentFilterType);
-  }, [inputValue, currentFilterType, updateSuggestions]);
+    setSelectedSuggestionIndex(-1);
+  }, [
+    inputValue,
+    currentFilterType,
+    updateSuggestions,
+    setSelectedSuggestionIndex,
+  ]);
 
   const handleClearInput = useCallback(() => {
     setInputValue("");
     setFilters({});
     setCurrentFilterType(null);
     updateSuggestions("", null);
+    setShowFilters(false);
     setShowSuggestions(false);
   }, [setFilters, updateSuggestions]);
 
@@ -268,9 +338,10 @@ export default function InputWithTags({
       if (!containerRef.current?.contains(document.activeElement)) {
         setShowSuggestions(false);
         setShowFilters(false);
+        setSelectedSuggestionIndex(-1);
       }
     }, 0);
-  }, []);
+  }, [setSelectedSuggestionIndex]);
 
   const toggleFilters = useCallback(() => {
     setShowFilters((prev) => !prev);
@@ -313,10 +384,13 @@ export default function InputWithTags({
         handleSuggestionClick(suggestions[selectedSuggestionIndex]);
       } else if (e.key === "Enter" && currentFilterType) {
         e.preventDefault();
-        const currentWord = inputValue.split(" ").pop() || "";
-        if (allSuggestions[currentFilterType]?.includes(currentWord)) {
-          createFilter(currentFilterType, currentWord);
-        }
+        const currentWord = inputValue.split(/[\s,]+/).pop() || "";
+        handleFilterCreation(currentFilterType, currentWord);
+      } else if (e.key === "Enter" && !currentFilterType) {
+        e.preventDefault();
+        setSearch(inputValue);
+        inputRef.current?.blur();
+        handleInputBlur();
       }
     },
     [
@@ -325,11 +399,16 @@ export default function InputWithTags({
       handleSuggestionClick,
       currentFilterType,
       inputValue,
-      createFilter,
+      handleFilterCreation,
       setSelectedSuggestionIndex,
-      allSuggestions,
+      setSearch,
+      handleInputBlur,
     ],
   );
+
+  useEffect(() => {
+    setInputValue(search || "");
+  }, [search]);
 
   return (
     <div ref={containerRef}>
@@ -378,7 +457,7 @@ export default function InputWithTags({
         </div>
       </div>
       {(showFilters || showSuggestions) && (
-        <div className="absolute left-0 top-11 z-[100] w-full rounded-md border border-t-0 border-gray-200 bg-background p-2 text-primary shadow-md">
+        <div className="absolute left-0 top-12 z-[100] w-full rounded-md border border-t-0 border-secondary-foreground bg-background p-2 text-primary shadow-md">
           {showFilters && Object.keys(filters).length > 0 && (
             <div ref={filterRef} className="my-2 flex flex-wrap gap-2">
               {Object.entries(filters).map(([filterType, filterValues]) =>
@@ -405,12 +484,15 @@ export default function InputWithTags({
                     key={filterType}
                     className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm text-green-800"
                   >
-                    {filterType}:{filterValues}
+                    {filterType}:
+                    {filterType === "before" || filterType === "after"
+                      ? new Date(filterValues as number).toLocaleDateString()
+                      : filterValues}
                     <button
                       onClick={() =>
                         removeFilter(
                           filterType as FilterType,
-                          filterValues as string,
+                          filterValues as string | number,
                         )
                       }
                       className="ml-1 focus:outline-none"
@@ -432,46 +514,48 @@ export default function InputWithTags({
             >
               {!currentFilterType && searchHistory.length > 0 && (
                 <>
-                  <h3 className="px-2 py-1 text-xs font-semibold text-gray-500">
+                  <h3 className="px-2 py-1 text-xs font-semibold text-secondary-foreground">
                     Previous Searches
                   </h3>
                   {searchHistory.map((suggestion, index) => (
                     <button
                       key={index}
-                      className={`w-full rounded px-2 py-1 text-left text-sm ${
+                      className={`w-full rounded px-2 py-1 text-left text-sm text-primary ${
                         index === selectedSuggestionIndex
-                          ? "bg-blue-100"
-                          : "hover:bg-gray-100"
+                          ? "bg-accent text-accent-foreground"
+                          : "hover:bg-accent hover:text-accent-foreground"
                       }`}
                       onClick={() => handleSuggestionClick(suggestion)}
+                      onMouseEnter={() => setSelectedSuggestionIndex(index)}
                       role="option"
                       aria-selected={index === selectedSuggestionIndex}
                     >
                       {suggestion}
                     </button>
                   ))}
-                  <div className="my-1 border-t border-gray-200" />
+                  <div className="my-1 border-t border-secondary-foreground" />
                 </>
               )}
-              <h3 className="px-2 py-1 text-xs font-semibold text-gray-500">
+              <h3 className="px-2 py-1 text-xs font-semibold text-secondary-foreground">
                 {currentFilterType ? "Filter Values" : "Filters"}
               </h3>
               {suggestions
-                // .filter((item) => !searchHistory.includes(item))
+                .filter((item) => !searchHistory.includes(item))
                 .map((suggestion, index) => (
                   <button
-                    key={index + (currentFilterType ? 0 : searchHistory.length)}
-                    className={`w-full rounded px-2 py-1 text-left text-sm ${
-                      index + (currentFilterType ? 0 : searchHistory.length) ===
-                      selectedSuggestionIndex
-                        ? "bg-blue-100"
-                        : "hover:bg-gray-100"
+                    key={index + searchHistory.length}
+                    className={`w-full rounded px-2 py-1 text-left text-sm text-primary ${
+                      index + searchHistory.length === selectedSuggestionIndex
+                        ? "bg-accent text-accent-foreground"
+                        : "hover:bg-accent hover:text-accent-foreground"
                     }`}
                     onClick={() => handleSuggestionClick(suggestion)}
+                    onMouseEnter={() =>
+                      setSelectedSuggestionIndex(index + searchHistory.length)
+                    }
                     role="option"
                     aria-selected={
-                      index + (currentFilterType ? 0 : searchHistory.length) ===
-                      selectedSuggestionIndex
+                      index + searchHistory.length === selectedSuggestionIndex
                     }
                   >
                     {suggestion}

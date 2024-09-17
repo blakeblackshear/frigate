@@ -219,13 +219,15 @@ export default function SearchView({
               <InputWithTags
                 filters={searchFilter ?? {}}
                 setFilters={setSearchFilter}
+                search={search}
+                setSearch={setSearch}
                 allSuggestions={{
                   cameras: ["ptzcam", "doorbellcam"],
                   labels: ["person", "car"],
                 }}
               />
             </div>
-            {search && (
+            {search && false && (
               <LuXCircle
                 className="absolute right-2 top-1/2 h-5 w-5 -translate-y-1/2 cursor-pointer text-muted-foreground hover:text-primary"
                 onClick={() => setSearch("")}

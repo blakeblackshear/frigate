@@ -20,7 +20,6 @@ export default function Explore() {
 
   // search field handler
 
-  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout>();
   const [search, setSearch] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -50,18 +49,7 @@ export default function Explore() {
   });
 
   useEffect(() => {
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-
-    setSearchTimeout(
-      setTimeout(() => {
-        setSearchTimeout(undefined);
-        setSearchTerm(search);
-      }, 750),
-    );
-    // we only want to update the searchTerm when search changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setSearchTerm(search);
   }, [search]);
 
   const searchQuery: SearchQuery = useMemo(() => {
