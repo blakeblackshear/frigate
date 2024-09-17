@@ -4,7 +4,6 @@ import base64
 import io
 import logging
 import os
-from datetime import datetime
 from functools import reduce
 from pathlib import Path
 from urllib.parse import unquote
@@ -18,7 +17,12 @@ from peewee import JOIN, DoesNotExist, fn, operator
 from PIL import Image
 from playhouse.shortcuts import model_to_dict
 
-from frigate.api.defs.events_body import EventsDescriptionBody, EventsSubLabelBody
+from frigate.api.defs.events_body import (
+    EventsCreateBody,
+    EventsDescriptionBody,
+    EventsEndBody,
+    EventsSubLabelBody,
+)
 from frigate.api.defs.events_query_parameters import (
     DEFAULT_TIME_RANGE,
     EventsQueryParams,
@@ -1008,7 +1012,7 @@ def create_event(
     request: Request,
     camera_name: str,
     label: str,
-    body: dict = None,
+    body: EventsCreateBody = None,
 ):
     if not camera_name or not request.app.frigate_config.cameras.get(camera_name):
         return JSONResponse(
@@ -1024,21 +1028,18 @@ def create_event(
             status_code=404,
         )
 
-    json: dict[str, any] = body or {}
-
     try:
         frame = request.app.detected_frames_processor.get_current_frame(camera_name)
 
         event_id = request.app.external_processor.create_manual_event(
             camera_name,
             label,
-            # TODO: Create body model
-            json.get("source_type", "api"),
-            json.get("sub_label", None),
-            json.get("score", 0),
-            json.get("duration", 30),
-            json.get("include_recording", True),
-            json.get("draw", {}),
+            body.source_type,
+            body.sub_label,
+            body.score,
+            body.duration,
+            body.include_recording,
+            body.draw,
             frame,
         )
     except Exception as e:
@@ -1061,11 +1062,9 @@ def create_event(
 
 
 @router.put("/events/{event_id}/end")
-def end_event(request: Request, event_id: str, body: dict):
-    json: dict[str, any] = body or {}
-
+def end_event(request: Request, event_id: str, body: EventsEndBody):
     try:
-        end_time = json.get("end_time", datetime.now().timestamp())
+        end_time = body.end_time
         request.app.external_processor.finish_manual_event(event_id, end_time)
     except Exception:
         return JSONResponse(

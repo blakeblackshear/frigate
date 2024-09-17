@@ -36,6 +36,7 @@ def get_vapid_pub_key(request: Request):
 @router.post("/notifications/register")
 def register_notifications(request: Request, body: dict = None):
     if request.app.frigate_config.auth.enabled:
+        # FIXME: For FastAPI the remote-user is not being populated
         username = request.headers.get("remote-user") or "admin"
     else:
         username = "admin"
