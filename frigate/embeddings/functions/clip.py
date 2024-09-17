@@ -49,31 +49,11 @@ class Clip(OnnxClip):
 
     @staticmethod
     def _load_model(path: str, silent: bool):
-        providers = []
-        options = []
-
-        for provider in ort.get_available_providers():
-            if provider == "TensorrtExecutionProvider":
-                continue
-            elif provider == "OpenVINOExecutionProvider":
-                # TODO need to verify openvino works correctly
-                os.makedirs("/config/model_cache/openvino/ort", exist_ok=True)
-                providers.append(provider)
-                options.append(
-                    {
-                        "cache_dir": "/config/model_cache/openvino/ort",
-                        "device_type": "GPU",
-                    }
-                )
-            else:
-                providers.append(provider)
-                options.append({})
+        providers = ["CPUExecutionProvider"]
 
         try:
             if os.path.exists(path):
-                return ort.InferenceSession(
-                    path, providers=providers, provider_options=options
-                )
+                return ort.InferenceSession(path, providers=providers)
             else:
                 raise FileNotFoundError(
                     errno.ENOENT,
@@ -104,9 +84,7 @@ class Clip(OnnxClip):
                     f.flush()
             # Finally move the temporary file to the correct location
             temporary_filename.rename(path)
-            return ort.InferenceSession(
-                path, providers=provider, provider_options=options
-            )
+            return ort.InferenceSession(path, providers=providers)
 
 
 class ClipEmbedding(EmbeddingFunction):
