@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useRef,
-  useEffect,
-  useMemo,
-  useCallback,
-} from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { LuX, LuFilter, LuImage } from "react-icons/lu";
@@ -108,10 +102,14 @@ export default function InputWithTags({
   const suggestionRef = useRef<HTMLDivElement>(null);
   const filterRef = useRef<HTMLDivElement>(null);
 
+  // TODO: search history from browser storage
+
   const searchHistory = useMemo(
     () => ["previous search 1", "previous search 2"],
     [],
   );
+
+  // suggestions
 
   const {
     suggestions,
@@ -149,29 +147,6 @@ export default function InputWithTags({
     },
     [filters, setFilters],
   );
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        suggestionRef.current &&
-        !suggestionRef.current.contains(event.target as Node) &&
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
-        setShowSuggestions(false);
-        setShowFilters(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  useEffect(() => {
-    updateSuggestions(inputValue, currentFilterType);
-  }, [currentFilterType, inputValue, updateSuggestions]);
 
   const createFilter = useCallback(
     (type: FilterType, value: string) => {
@@ -225,6 +200,8 @@ export default function InputWithTags({
     },
     [filters, setFilters, allSuggestions],
   );
+
+  // handlers
 
   const handleFilterCreation = useCallback(
     (filterType: FilterType, filterValue: string) => {
@@ -409,6 +386,31 @@ export default function InputWithTags({
       handleInputBlur,
     ],
   );
+
+  // effects
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        suggestionRef.current &&
+        !suggestionRef.current.contains(event.target as Node) &&
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setShowSuggestions(false);
+        setShowFilters(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    updateSuggestions(inputValue, currentFilterType);
+  }, [currentFilterType, inputValue, updateSuggestions]);
 
   useEffect(() => {
     setInputValue(search || "");
