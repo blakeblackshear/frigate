@@ -1,5 +1,5 @@
 .DS_Store
-*.pyc
+__pycache__
 *.swp
 debug
 .vscode/*
