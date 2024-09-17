@@ -2,10 +2,9 @@ import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { LuX, LuFilter, LuImage } from "react-icons/lu";
-import { SearchFilter, SearchSource } from "@/types/search";
+import { FilterType, SearchFilter, SearchSource } from "@/types/search";
 import { DropdownMenuSeparator } from "../ui/dropdown-menu";
-
-type FilterType = keyof SearchFilter;
+import useSuggestions from "@/hooks/use-suggestions";
 
 const convertMMDDYYToTimestamp = (dateString: string): number => {
   const match = dateString.match(/^(\d{2})(\d{2})(\d{2})$/);
@@ -14,63 +13,6 @@ const convertMMDDYYToTimestamp = (dateString: string): number => {
   const [, month, day, year] = match;
   const date = new Date(`20${year}-${month}-${day}T00:00:00Z`);
   return date.getTime();
-};
-
-// Custom hook for managing suggestions
-const useSuggestions = (
-  filters: SearchFilter,
-  allSuggestions: { [K in keyof SearchFilter]: string[] },
-  searchHistory: string[],
-) => {
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
-
-  const updateSuggestions = useCallback(
-    (value: string, currentFilterType: FilterType | null) => {
-      if (currentFilterType && currentFilterType in allSuggestions) {
-        const filterValue = value.split(":").pop() || "";
-        const currentFilterValues = filters[currentFilterType] || [];
-        setSuggestions(
-          allSuggestions[currentFilterType]?.filter(
-            (item) =>
-              item.toLowerCase().startsWith(filterValue.toLowerCase()) &&
-              !(currentFilterValues as (string | number)[]).includes(item),
-          ) ?? [],
-        );
-      } else {
-        const availableFilters = Object.keys(allSuggestions).filter(
-          (filter) => {
-            const filterKey = filter as FilterType;
-            const filterValues = filters[filterKey];
-            const suggestionValues = allSuggestions[filterKey];
-
-            if (!filterValues) return true;
-            if (
-              Array.isArray(filterValues) &&
-              Array.isArray(suggestionValues)
-            ) {
-              return filterValues.length < suggestionValues.length;
-            }
-            return false;
-          },
-        );
-        setSuggestions([
-          ...searchHistory,
-          ...availableFilters,
-          "before",
-          "after",
-        ]);
-      }
-    },
-    [filters, allSuggestions, searchHistory],
-  );
-
-  return {
-    suggestions,
-    selectedSuggestionIndex,
-    setSelectedSuggestionIndex,
-    updateSuggestions,
-  };
 };
 
 type InputWithTagsProps = {

@@ -55,3 +55,4 @@ export type SearchQueryParams = {
 };
 
 export type SearchQuery = [string, SearchQueryParams] | null;
+export type FilterType = keyof SearchFilter;
