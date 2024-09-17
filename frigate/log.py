@@ -21,7 +21,6 @@ LOG_HANDLER.setFormatter(
     )
 )
 
-# TODO: Investigate the route cause of this message.
 LOG_HANDLER.addFilter(
     lambda record: not record.msg.startswith("You are using a scalar distance function")
 )
