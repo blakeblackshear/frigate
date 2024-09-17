@@ -3,6 +3,8 @@
 # https://askubuntu.com/questions/972516/debian-frontend-environment-variable
 ARG DEBIAN_FRONTEND=noninteractive
 
+ARG TRT_BASE=nvcr.io/nvidia/tensorrt:23.03-py3
+
 # Make this a separate target so it can be built/cached optionally
 FROM wheels as trt-wheels
 ARG DEBIAN_FRONTEND
@@ -13,7 +15,7 @@ COPY docker/tensorrt/requirements-amd64.txt /requirements-tensorrt.txt
 RUN mkdir -p /trt-wheels && pip3 wheel --wheel-dir=/trt-wheels -r /requirements-tensorrt.txt
 
 # Build CuDNN
-FROM tensorrt-base AS cudnn-deps
+FROM ${TRT_BASE} AS cudnn-deps
 
 ARG COMPUTE_LEVEL
 
@@ -31,6 +33,7 @@ ENV TRT_VER=8.5.3
 RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels \
     pip3 install -U /deps/trt-wheels/*.whl && \
     ldconfig
+COPY --from=cudnn-deps /usr/local/cuda-12.6 /usr/local/cuda
 
 ENV LD_LIBRARY_PATH=/usr/local/lib/python3.9/dist-packages/tensorrt:/usr/local/cuda/lib64:/usr/local/lib/python3.9/dist-packages/nvidia/cufft/lib
 WORKDIR /opt/frigate/

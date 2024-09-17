@@ -36,7 +36,28 @@ class ONNXDetector(DetectionApi):
 
         path = detector_config.model.path
         logger.info(f"ONNX: loading {detector_config.model.path}")
-        self.model = ort.InferenceSession(path, providers=ort.get_available_providers())
+
+        providers = ort.get_available_providers()
+        options = []
+
+        for provider in providers:
+            if provider == "TensorrtExecutionProvider":
+                options.append(
+                    {
+                        "trt_timing_cache_enable": True,
+                        "trt_timing_cache_path": "/config/model_cache/tensorrt/ort",
+                        "trt_engine_cache_enable": True,
+                        "trt_engine_cache_path": "/config/model_cache/tensorrt/ort/trt-engines",
+                    }
+                )
+            elif provider == "OpenVINOExecutionProvider":
+                options.append({"cache_dir": "/config/model_cache/openvino/ort"})
+            else:
+                options.append({})
+
+        self.model = ort.InferenceSession(
+            path, providers=providers, provider_options=options
+        )
 
         self.h = detector_config.model.height
         self.w = detector_config.model.width
