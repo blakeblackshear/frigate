@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { LuX, LuFilter } from "react-icons/lu";
+import { LuX, LuFilter, LuImage } from "react-icons/lu";
 import { SearchFilter, SearchSource } from "@/types/search";
 
 type FilterType = keyof SearchFilter;
@@ -442,7 +442,7 @@ export default function InputWithTags({
           aria-expanded={showSuggestions}
         />
         <div className="absolute right-2 top-1/2 -translate-y-1/2 transform space-x-1">
-          {Object.keys(filters).length > 0 && (
+          {(Object.keys(filters).length > 0 || isSimilaritySearch) && (
             <Button
               variant="ghost"
               size="icon"
@@ -454,7 +454,11 @@ export default function InputWithTags({
                   : "text-secondary-foreground"
               }
             >
-              <LuFilter className="h-4 w-4" />
+              {isSimilaritySearch ? (
+                <LuImage className="size-4" />
+              ) : (
+                <LuFilter className="size-4" />
+              )}
             </Button>
           )}
           {(inputValue || Object.keys(filters).length > 0) && (
@@ -472,66 +476,67 @@ export default function InputWithTags({
       {((showFilters &&
         (Object.keys(filters).length > 0 || isSimilaritySearch)) ||
         showSuggestions) && (
-        <div className="absolute left-0 top-12 z-[100] w-full rounded-md border border-t-0 border-secondary-foreground bg-background p-2 text-primary shadow-md">
-          {showFilters && Object.keys(filters).length > 0 && (
-            <div ref={filterRef} className="my-2 flex flex-wrap gap-2">
-              {isSimilaritySearch && (
-                <span className="inline-flex items-center whitespace-nowrap rounded-full bg-blue-100 px-2 py-0.5 text-sm text-blue-800">
-                  Similarity Search
-                  <button
-                    onClick={handleClearInput}
-                    className="ml-1 focus:outline-none"
-                    aria-label="Clear similarity search"
-                  >
-                    <LuX className="h-3 w-3" />
-                  </button>
-                </span>
-              )}
-              {Object.entries(filters).map(([filterType, filterValues]) =>
-                Array.isArray(filterValues) ? (
-                  filterValues.map((value, index) => (
-                    <span
-                      key={`${filterType}-${index}`}
-                      className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm text-green-800"
-                    >
-                      {filterType}:{value}
-                      <button
-                        onClick={() =>
-                          removeFilter(filterType as FilterType, value)
-                        }
-                        className="ml-1 focus:outline-none"
-                        aria-label={`Remove ${filterType}:${value} filter`}
-                      >
-                        <LuX className="h-3 w-3" />
-                      </button>
-                    </span>
-                  ))
-                ) : (
-                  <span
-                    key={filterType}
-                    className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm text-green-800"
-                  >
-                    {filterType}:
-                    {filterType === "before" || filterType === "after"
-                      ? new Date(filterValues as number).toLocaleDateString()
-                      : filterValues}
+        <div className="absolute left-0 top-12 z-[100] w-full rounded-md border border-input bg-background p-2 text-primary shadow-md">
+          {showFilters &&
+            (Object.keys(filters).length > 0 || isSimilaritySearch) && (
+              <div ref={filterRef} className="my-2 flex flex-wrap gap-2">
+                {isSimilaritySearch && (
+                  <span className="inline-flex items-center whitespace-nowrap rounded-full bg-blue-100 px-2 py-0.5 text-sm text-blue-800">
+                    Similarity Search
                     <button
-                      onClick={() =>
-                        removeFilter(
-                          filterType as FilterType,
-                          filterValues as string | number,
-                        )
-                      }
+                      onClick={handleClearInput}
                       className="ml-1 focus:outline-none"
-                      aria-label={`Remove ${filterType}:${filterValues} filter`}
+                      aria-label="Clear similarity search"
                     >
                       <LuX className="h-3 w-3" />
                     </button>
                   </span>
-                ),
-              )}
-            </div>
-          )}
+                )}
+                {Object.entries(filters).map(([filterType, filterValues]) =>
+                  Array.isArray(filterValues) ? (
+                    filterValues.map((value, index) => (
+                      <span
+                        key={`${filterType}-${index}`}
+                        className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm text-green-800"
+                      >
+                        {filterType}:{value}
+                        <button
+                          onClick={() =>
+                            removeFilter(filterType as FilterType, value)
+                          }
+                          className="ml-1 focus:outline-none"
+                          aria-label={`Remove ${filterType}:${value} filter`}
+                        >
+                          <LuX className="h-3 w-3" />
+                        </button>
+                      </span>
+                    ))
+                  ) : (
+                    <span
+                      key={filterType}
+                      className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm text-green-800"
+                    >
+                      {filterType}:
+                      {filterType === "before" || filterType === "after"
+                        ? new Date(filterValues as number).toLocaleDateString()
+                        : filterValues}
+                      <button
+                        onClick={() =>
+                          removeFilter(
+                            filterType as FilterType,
+                            filterValues as string | number,
+                          )
+                        }
+                        className="ml-1 focus:outline-none"
+                        aria-label={`Remove ${filterType}:${filterValues} filter`}
+                      >
+                        <LuX className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ),
+                )}
+              </div>
+            )}
           {showSuggestions && (
             <div
               ref={suggestionRef}
