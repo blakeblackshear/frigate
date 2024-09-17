@@ -7,7 +7,7 @@ from flask import cli
 from frigate.app import FrigateApp
 
 
-def main():
+def main() -> None:
     faulthandler.enable()
     logging.basicConfig(level=logging.INFO, handlers=[])
 

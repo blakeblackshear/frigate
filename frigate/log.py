@@ -6,7 +6,10 @@ import threading
 from collections import deque
 from contextlib import AbstractContextManager, ContextDecorator
 from logging.handlers import QueueHandler, QueueListener
-from typing import Deque
+from types import TracebackType
+from typing import Deque, Optional
+
+from typing_extensions import Self
 
 from frigate.util.builtin import clean_camera_user_pass
 
@@ -30,7 +33,7 @@ class log_thread(AbstractContextManager, ContextDecorator):
 
         self._handler = handler
 
-        log_queue = mp.Queue()
+        log_queue: mp.Queue = mp.Queue()
         self._queue_handler = QueueHandler(log_queue)
 
         self._log_listener = QueueListener(
@@ -41,10 +44,10 @@ class log_thread(AbstractContextManager, ContextDecorator):
     def handler(self) -> logging.Handler:
         return self._handler
 
-    def _stop_thread(self):
+    def _stop_thread(self) -> None:
         self._log_listener.stop()
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         logging.getLogger().addHandler(self._queue_handler)
 
         atexit.register(self._stop_thread)
@@ -52,7 +55,12 @@ class log_thread(AbstractContextManager, ContextDecorator):
 
         return self
 
-    def __exit__(self, *exc):
+    def __exit__(
+        self,
+        exc_type: Optional[type[BaseException]],
+        exc_info: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> None:
         logging.getLogger().removeHandler(self._queue_handler)
 
         atexit.unregister(self._stop_thread)
