@@ -83,11 +83,11 @@ class HailoDetector(DetectionApi):
             self.network_group_params = self.network_group.create_params()
 
             # Create input and output virtual stream parameters
-            self.input_vstreams_params = InputVStreamParams.make(
+            self.input_vstream_params = InputVStreamParams.make(
                 self.network_group,
                 format_type=self.hef.get_input_vstream_infos()[0].format.type,
             )
-            self.output_vstreams_params = OutputVStreamParams.make(
+            self.output_vstream_params = OutputVStreamParams.make(
                 self.network_group, format_type=getattr(FormatType, output_type)
             )
 
@@ -162,8 +162,8 @@ class HailoDetector(DetectionApi):
         try:
             with InferVStreams(
                 self.network_group,
-                self.input_vstreams_params,
-                self.output_vstreams_params,
+                self.input_vstream_params,
+                self.output_vstream_params,
             ) as infer_pipeline:
                 input_dict = {}
                 if isinstance(input_data, dict):

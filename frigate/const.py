@@ -12,7 +12,7 @@ FRIGATE_LOCALHOST = "http://127.0.0.1:5000"
 PLUS_ENV_VAR = "PLUS_API_KEY"
 PLUS_API_HOST = "https://api.frigate.video"
 
-# Attribute & Object Consts
+# Attribute & Object constants
 
 ATTRIBUTE_LABEL_MAP = {
     "person": ["face", "amazon"],
@@ -31,7 +31,7 @@ LABEL_NMS_MAP = {
 }
 LABEL_NMS_DEFAULT = 0.4
 
-# Audio Consts
+# Audio constants
 
 AUDIO_DURATION = 0.975
 AUDIO_FORMAT = "s16le"
@@ -39,7 +39,7 @@ AUDIO_MAX_BIT_RANGE = 32768.0
 AUDIO_SAMPLE_RATE = 16000
 AUDIO_MIN_CONFIDENCE = 0.5
 
-# DB Consts
+# DB constants
 
 MAX_WAL_SIZE = 10  # MB
 
@@ -49,7 +49,7 @@ FFMPEG_HWACCEL_NVIDIA = "preset-nvidia"
 FFMPEG_HWACCEL_VAAPI = "preset-vaapi"
 FFMPEG_HWACCEL_VULKAN = "preset-vulkan"
 
-# Regex Consts
+# Regex constants
 
 REGEX_CAMERA_NAME = r"^[a-zA-Z0-9_-]+$"
 REGEX_RTSP_CAMERA_USER_PASS = r":\/\/[a-zA-Z0-9_-]+:[\S]+@"

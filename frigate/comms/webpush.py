@@ -106,10 +106,10 @@ class WebPushClient(Communicator):  # type: ignore[misc]
     def publish(self, topic: str, payload: Any, retain: bool = False) -> None:
         """Wrapper for publishing when client is in valid state."""
         # check for updated notification config
-        _, updated_notif_config = self.config_subscriber.check_for_update()
+        _, updated_notification_config = self.config_subscriber.check_for_update()
 
-        if updated_notif_config:
-            self.config.notifications = updated_notif_config
+        if updated_notification_config:
+            self.config.notifications = updated_notification_config
 
         if not self.config.notifications.enabled:
             return

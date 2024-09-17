@@ -1194,7 +1194,7 @@ class CameraConfig(FrigateBaseModel):
                 + ffmpeg_output_args
             )
 
-        # if there arent any outputs enabled for this input
+        # if there aren't any outputs enabled for this input
         if len(ffmpeg_output_args) == 0:
             return None
 

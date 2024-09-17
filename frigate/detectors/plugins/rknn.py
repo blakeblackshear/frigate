@@ -17,7 +17,7 @@ supported_socs = ["rk3562", "rk3566", "rk3568", "rk3576", "rk3588"]
 
 supported_models = {ModelTypeEnum.yolonas: "^deci-fp16-yolonas_[sml]$"}
 
-model_chache_dir = "/config/model_cache/rknn_cache/"
+model_cache_dir = "/config/model_cache/rknn_cache/"
 
 
 class RknnDetectorConfig(BaseDetectorConfig):
@@ -110,7 +110,7 @@ class Rknn(DetectionApi):
             if model_matched:
                 model_props["filename"] = model_path + f"-{soc}-v2.0.0-1.rknn"
 
-                model_props["path"] = model_chache_dir + model_props["filename"]
+                model_props["path"] = model_cache_dir + model_props["filename"]
 
                 if not os.path.isfile(model_props["path"]):
                     self.download_model(model_props["filename"])
@@ -125,12 +125,12 @@ class Rknn(DetectionApi):
         return model_props
 
     def download_model(self, filename):
-        if not os.path.isdir(model_chache_dir):
-            os.mkdir(model_chache_dir)
+        if not os.path.isdir(model_cache_dir):
+            os.mkdir(model_cache_dir)
 
         urllib.request.urlretrieve(
             f"https://github.com/MarcA711/rknn-models/releases/download/v2.0.0/{filename}",
-            model_chache_dir + filename,
+            model_cache_dir + filename,
         )
 
     def check_config(self, config):

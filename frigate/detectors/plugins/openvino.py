@@ -129,10 +129,10 @@ class OvDetector(DetectionApi):
 
         strides = [8, 16, 32]
 
-        hsizes = [self.h // stride for stride in strides]
-        wsizes = [self.w // stride for stride in strides]
+        hsize_list = [self.h // stride for stride in strides]
+        wsize_list = [self.w // stride for stride in strides]
 
-        for hsize, wsize, stride in zip(hsizes, wsizes, strides):
+        for hsize, wsize, stride in zip(hsize_list, wsize_list, strides):
             xv, yv = np.meshgrid(np.arange(wsize), np.arange(hsize))
             grid = np.stack((xv, yv), 2).reshape(1, -1, 2)
             grids.append(grid)
@@ -216,10 +216,12 @@ class OvDetector(DetectionApi):
 
             conf_mask = (image_pred[:, 4] * class_conf.squeeze() >= 0.3).squeeze()
             # Detections ordered as (x1, y1, x2, y2, obj_conf, class_conf, class_pred)
-            dets = np.concatenate((image_pred[:, :5], class_conf, class_pred), axis=1)
-            dets = dets[conf_mask]
+            detections = np.concatenate(
+                (image_pred[:, :5], class_conf, class_pred), axis=1
+            )
+            detections = detections[conf_mask]
 
-            ordered = dets[dets[:, 5].argsort()[::-1]][:20]
+            ordered = detections[detections[:, 5].argsort()[::-1]][:20]
 
             for i, object_detected in enumerate(ordered):
                 detections[i] = self.process_yolo(

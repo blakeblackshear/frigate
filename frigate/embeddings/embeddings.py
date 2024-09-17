@@ -15,7 +15,7 @@ from frigate.models import Event
 # Squelch posthog logging
 logging.getLogger("chromadb.telemetry.product.posthog").setLevel(logging.CRITICAL)
 
-# Hotsawp the sqlite3 module for Chroma compatibility
+# Hot-swap the sqlite3 module for Chroma compatibility
 try:
     from chromadb import Collection
     from chromadb import HttpClient as ChromaClient
