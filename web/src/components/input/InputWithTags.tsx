@@ -456,7 +456,8 @@ export default function InputWithTags({
           )}
         </div>
       </div>
-      {(showFilters || showSuggestions) && (
+      {((showFilters && Object.keys(filters).length > 0) ||
+        showSuggestions) && (
         <div className="absolute left-0 top-12 z-[100] w-full rounded-md border border-t-0 border-secondary-foreground bg-background p-2 text-primary shadow-md">
           {showFilters && Object.keys(filters).length > 0 && (
             <div ref={filterRef} className="my-2 flex flex-wrap gap-2">
