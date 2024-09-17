@@ -54,7 +54,9 @@ class Clip(OnnxClip):
 
         for provider in providers:
             if provider == "TensorrtExecutionProvider":
-                os.makedirs("/config/model_cache/tensorrt/ort/trt-engines", exist_ok=True)
+                os.makedirs(
+                    "/config/model_cache/tensorrt/ort/trt-engines", exist_ok=True
+                )
                 options.append(
                     {
                         "trt_timing_cache_enable": True,
