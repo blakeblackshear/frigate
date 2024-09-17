@@ -26,7 +26,7 @@ def preprocess(tensor_input, model_input_shape, model_input_element_type):
         logger.warn(
             f"preprocess: tensor_input.shape {tensor_input.shape} and model_input_shape {model_input_shape} do not match!"
         )
-    # cv2.dnn.blobFromImage is faster than numpying it
+    # cv2.dnn.blobFromImage is faster than running it through numpy
     return cv2.dnn.blobFromImage(
         tensor_input[0],
         1.0 / 255,
