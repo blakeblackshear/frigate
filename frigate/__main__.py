@@ -1,17 +1,22 @@
 import faulthandler
+import logging
 import threading
 
 from flask import cli
 
 from frigate.app import FrigateApp
 
-faulthandler.enable()
 
-threading.current_thread().name = "frigate"
+def main():
+    faulthandler.enable()
+    logging.basicConfig(level=logging.INFO, handlers=[])
 
-cli.show_server_banner = lambda *x: None
+    threading.current_thread().name = "frigate"
+    cli.show_server_banner = lambda *x: None
+
+    # Run the main application.
+    FrigateApp().start()
+
 
 if __name__ == "__main__":
-    frigate_app = FrigateApp()
-
-    frigate_app.start()
+    main()
