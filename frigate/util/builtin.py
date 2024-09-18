@@ -9,14 +9,12 @@ import queue
 import re
 import shlex
 import urllib.parse
-from collections import Counter
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any, Optional, Tuple
 
 import numpy as np
 import pytz
-import yaml
 from ruamel.yaml import YAML
 from tzlocal import get_localzone
 from zoneinfo import ZoneInfoNotFoundError
@@ -89,35 +87,8 @@ def deep_merge(dct1: dict, dct2: dict, override=False, merge_lists=False) -> dic
     return merged
 
 
-class NoDuplicateKeysLoader(yaml.loader.SafeLoader):
-    """A yaml SafeLoader that disallows duplicate keys"""
-
-    def construct_mapping(self, node, deep=False):
-        mapping = super().construct_mapping(node, deep=deep)
-
-        if len(node.value) != len(mapping):
-            # There's a duplicate key somewhere. Find it.
-            duplicate_keys = [
-                key
-                for key, count in Counter(
-                    self.construct_object(key, deep=deep) for key, _ in node.value
-                )
-                if count > 1
-            ]
-
-            # This might be possible if PyYAML's construct_mapping() changes the node
-            # afterwards for some reason? I don't see why, but better safe than sorry.
-            assert len(duplicate_keys) > 0
-
-            raise ValueError(
-                "Key redefinitions are not allowed: " + ", ".join(duplicate_keys)
-            )
-
-        return mapping
-
-
 def load_yaml(raw_config: str) -> dict:
-    return yaml.load(raw_config, NoDuplicateKeysLoader)
+    return YAML().load(raw_config)
 
 
 def clean_camera_user_pass(line: str) -> str:

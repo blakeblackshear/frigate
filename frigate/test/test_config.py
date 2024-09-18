@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 import numpy as np
 from pydantic import ValidationError
+from ruamel.yaml.constructor import DuplicateKeyError
 
 from frigate.config import BirdseyeModeEnum, FrigateConfig
 from frigate.const import MODEL_CACHE_DIR
@@ -1536,7 +1537,7 @@ class TestConfig(unittest.TestCase):
                 - four
         """
 
-        self.assertRaises(ValueError, lambda: load_yaml(raw_config))
+        self.assertRaises(DuplicateKeyError, lambda: load_yaml(raw_config))
 
     def test_object_filter_ratios_work(self):
         config = {
