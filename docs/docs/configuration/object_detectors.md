@@ -140,6 +140,22 @@ The OpenVINO device to be used is specified using the `"device"` attribute accor
 
 OpenVINO is supported on 6th Gen Intel platforms (Skylake) and newer. It will also run on AMD CPUs despite having no official support for it. A supported Intel platform is required to use the `GPU` device with OpenVINO. For detailed system requirements, see [OpenVINO System Requirements](https://docs.openvino.ai/2024/about-openvino/release-notes-openvino/system-requirements.html)
 
+:::tip
+
+When using many cameras one detector may not be enough to keep up. Multiple detectors can be defined assuming GPU resources are available. An example configuration would be:
+
+```yaml
+detectors:
+  ov_0:
+    type: openvino
+    device: GPU
+  ov_1:
+    type: openvino
+    device: GPU
+```
+
+:::
+
 ### Supported Models
 
 #### SSDLite MobileNet v2
@@ -298,7 +314,21 @@ model:
 
 ## ONNX
 
-ONNX is an open format for building machine learning models, these models can run on a wide variety of hardware. Frigate supports running ONNX models on CPU, OpenVINO, and TensorRT.
+ONNX is an open format for building machine learning models, Frigate supports running ONNX models on CPU, OpenVINO, and TensorRT. On startup Frigate will automatically try to use a GPU if one is available.
+
+:::tip
+
+When using many cameras one detector may not be enough to keep up. Multiple detectors can be defined assuming GPU resources are available. An example configuration would be:
+
+```yaml
+detectors:
+  onnx_0:
+    type: onnx
+  onnx_1:
+    type: onnx
+```
+
+:::
 
 ### Supported Models
 
