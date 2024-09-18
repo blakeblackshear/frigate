@@ -196,10 +196,6 @@ export default function InputWithTags({
 
   const handleInputChange = useCallback(
     (value: string) => {
-      if (value === "") {
-        return;
-      }
-
       setInputValue(value);
 
       const words = value.split(/[\s,]+/);
@@ -255,7 +251,6 @@ export default function InputWithTags({
 
   const handleClearInput = useCallback(() => {
     setInputFocused(false);
-    // setInputValue("");
     resetSuggestions("");
     setSearch("");
     inputRef?.current?.blur();
@@ -278,13 +273,24 @@ export default function InputWithTags({
       if (currentFilterType) {
         // Apply the selected suggestion to the current filter type
         createFilter(currentFilterType, suggestion);
-        setInputValue((prev) =>
-          prev.replace(`${currentFilterType}:`, "").trim(),
-        );
+        setInputValue((prev) => {
+          const regex = new RegExp(`${currentFilterType}:[^\\s,]*`, "g");
+          return prev.replace(regex, "").trim();
+        });
       } else if (suggestion in allSuggestions) {
         // Set the suggestion as a new filter type
         setCurrentFilterType(suggestion as FilterType);
-        setInputValue((prev) => `${prev}${suggestion}:`);
+        setInputValue((prev) => {
+          // Remove any partial match of the filter type, including incomplete matches
+          const words = prev.split(/\s+/);
+          const lastWord = words[words.length - 1];
+          if (lastWord && suggestion.startsWith(lastWord.toLowerCase())) {
+            words[words.length - 1] = suggestion + ":";
+          } else {
+            words.push(suggestion + ":");
+          }
+          return words.join(" ").trim();
+        });
       } else {
         // Add the suggestion as a standalone word
         setInputValue((prev) => `${prev}${suggestion} `);
