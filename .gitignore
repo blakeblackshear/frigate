@@ -1,5 +1,6 @@
 .DS_Store
 __pycache__
+.mypy_cache
 *.swp
 debug
 .vscode/*
