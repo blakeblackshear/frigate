@@ -116,6 +116,10 @@ class NoDuplicateKeysLoader(yaml.loader.SafeLoader):
         return mapping
 
 
+def load_yaml(raw_config: str) -> dict:
+    return yaml.load(raw_config, NoDuplicateKeysLoader)
+
+
 def clean_camera_user_pass(line: str) -> str:
     """Removes user and password from line."""
     rtsp_cleaned = re.sub(REGEX_RTSP_CAMERA_USER_PASS, "://*:*@", line)
