@@ -5,8 +5,8 @@ import {
   LuImage,
   LuChevronDown,
   LuChevronUp,
-  LuSave,
   LuTrash2,
+  LuStar,
 } from "react-icons/lu";
 import {
   FilterType,
@@ -28,23 +28,8 @@ import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { usePersistence } from "@/hooks/use-persistence";
 import { SaveSearchDialog } from "./SaveSearchDialog";
 import { DeleteSearchDialog } from "./DeleteSearchDialog";
-
-const convertMMDDYYToTimestamp = (dateString: string): number => {
-  const match = dateString.match(/^(\d{2})(\d{2})(\d{2})$/);
-  if (!match) return 0;
-
-  const [, month, day, year] = match;
-  const date = new Date(`20${year}-${month}-${day}T00:00:00Z`);
-  return date.getTime();
-};
-
-const emptyObject = Object.freeze([
-  {
-    name: "",
-    search: "",
-    filter: undefined,
-  },
-]) as SavedSearchQuery[];
+import { convertLocalDateToTimestamp } from "@/utils/dateUtil";
+import { toast } from "sonner";
 
 type InputWithTagsProps = {
   filters: SearchFilter;
@@ -76,7 +61,7 @@ export default function InputWithTags({
 
   const [searchHistory, setSearchHistory, searchHistoryLoaded] = usePersistence<
     SavedSearchQuery[]
-  >("frigate-search-history", emptyObject);
+  >("frigate-search-history");
 
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -198,9 +183,39 @@ export default function InputWithTags({
         switch (type) {
           case "before":
           case "after":
-            timestamp = convertMMDDYYToTimestamp(value);
+            timestamp = convertLocalDateToTimestamp(value);
             if (timestamp > 0) {
-              newFilters[type] = timestamp;
+              // Check for conflicts with existing before/after filters
+              if (
+                type === "before" &&
+                filters.after &&
+                timestamp <= filters.after * 1000
+              ) {
+                toast.error(
+                  "The 'before' date must be later than the 'after' date.",
+                  {
+                    position: "top-center",
+                  },
+                );
+                return;
+              }
+              if (
+                type === "after" &&
+                filters.before &&
+                timestamp >= filters.before * 1000
+              ) {
+                toast.error(
+                  "The 'after' date must be earlier than the 'before' date.",
+                  {
+                    position: "top-center",
+                  },
+                );
+                return;
+              }
+              if (type === "before") {
+                timestamp -= 1;
+              }
+              newFilters[type] = timestamp / 1000;
             }
             break;
           case "search_type":
@@ -247,7 +262,7 @@ export default function InputWithTags({
           trimmedValue,
         ) ||
         ((filterType === "before" || filterType === "after") &&
-          trimmedValue.match(/^\d{6}$/))
+          trimmedValue.match(/^\d{8}$/))
       ) {
         createFilter(filterType, trimmedValue);
         setInputValue((prev) => {
@@ -295,7 +310,7 @@ export default function InputWithTags({
 
           if (filterType === "before" || filterType === "after") {
             // For before and after, we don't need to update suggestions
-            if (filterValue.match(/^\d{6}$/)) {
+            if (filterValue.match(/^\d{8}$/)) {
               handleFilterCreation(filterType, filterValue);
             }
           } else {
@@ -414,7 +429,11 @@ export default function InputWithTags({
 
   return (
     <>
-      <Command shouldFilter={false} ref={commandRef} className="rounded-md">
+      <Command
+        shouldFilter={false}
+        ref={commandRef}
+        className="rounded-md border"
+      >
         <div className="relative">
           <CommandInput
             ref={inputRef}
@@ -444,7 +463,7 @@ export default function InputWithTags({
             {(search || Object.keys(filters).length > 0) && (
               <Tooltip>
                 <TooltipTrigger>
-                  <LuSave
+                  <LuStar
                     className="size-4 cursor-pointer text-secondary-foreground"
                     onClick={handleSetSearchHistory}
                   />
@@ -550,7 +569,13 @@ export default function InputWithTags({
                     >
                       {filterType}:
                       {filterType === "before" || filterType === "after"
-                        ? new Date(filterValues as number).toLocaleDateString()
+                        ? new Date(
+                            (filterType === "before"
+                              ? (filterValues as number) + 1
+                              : (filterValues as number)) * 1000,
+                          ).toLocaleDateString(
+                            window.navigator?.language || "en-US",
+                          )
                         : filterValues}
                       <button
                         onClick={() =>
@@ -573,8 +598,9 @@ export default function InputWithTags({
 
           {!currentFilterType &&
             !inputValue &&
+            searchHistoryLoaded &&
             (searchHistory?.length ?? 0) > 0 && (
-              <CommandGroup heading="Previous Searches">
+              <CommandGroup heading="Saved Searches">
                 {searchHistory?.map((suggestion, index) => (
                   <CommandItem
                     key={index}

@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { isMobile } from "react-device-detect";
 
 type SaveSearchDialogProps = {
   isOpen: boolean;
@@ -34,7 +35,13 @@ export function SaveSearchDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent
+        onOpenAutoFocus={(e) => {
+          if (isMobile) {
+            e.preventDefault();
+          }
+        }}
+      >
         <DialogHeader>
           <DialogTitle>Save Search</DialogTitle>
           <DialogDescription className="sr-only">
@@ -43,14 +50,19 @@ export function SaveSearchDialog({
         </DialogHeader>
         <Input
           value={searchName}
+          className="text-md"
           onChange={(e) => setSearchName(e.target.value)}
           placeholder="Enter a name for your search"
         />
         <DialogFooter>
-          <Button onClick={onClose} variant="select">
-            Cancel
+          <Button onClick={onClose}>Cancel</Button>
+          <Button
+            onClick={handleSave}
+            variant="select"
+            className="mb-2 md:mb-0"
+          >
+            Save
           </Button>
-          <Button onClick={handleSave}>Save</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
