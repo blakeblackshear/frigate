@@ -1,12 +1,19 @@
-import { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import {
   LuX,
   LuFilter,
   LuImage,
   LuChevronDown,
   LuChevronUp,
+  LuSave,
+  LuTrash2,
 } from "react-icons/lu";
-import { FilterType, SearchFilter, SearchSource } from "@/types/search";
+import {
+  FilterType,
+  SavedSearchQuery,
+  SearchFilter,
+  SearchSource,
+} from "@/types/search";
 import useSuggestions from "@/hooks/use-suggestions";
 import {
   Command,
@@ -18,6 +25,9 @@ import {
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
+import { usePersistence } from "@/hooks/use-persistence";
+import { SaveSearchDialog } from "./SaveSearchDialog";
+import { DeleteSearchDialog } from "./DeleteSearchDialog";
 
 const convertMMDDYYToTimestamp = (dateString: string): number => {
   const match = dateString.match(/^(\d{2})(\d{2})(\d{2})$/);
@@ -27,6 +37,14 @@ const convertMMDDYYToTimestamp = (dateString: string): number => {
   const date = new Date(`20${year}-${month}-${day}T00:00:00Z`);
   return date.getTime();
 };
+
+const emptyObject = Object.freeze([
+  {
+    name: "",
+    search: "",
+    filter: undefined,
+  },
+]) as SavedSearchQuery[];
 
 type InputWithTagsProps = {
   filters: SearchFilter;
@@ -56,10 +74,63 @@ export default function InputWithTags({
 
   // TODO: search history from browser storage
 
-  const searchHistory = useMemo(
-    () => ["previous search 1", "previous search 2"],
-    [],
+  const [searchHistory, setSearchHistory, searchHistoryLoaded] = usePersistence<
+    SavedSearchQuery[]
+  >("frigate-search-history", emptyObject);
+
+  const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [searchToDelete, setSearchToDelete] = useState<string | null>(null);
+
+  const handleSetSearchHistory = useCallback(() => {
+    setIsSaveDialogOpen(true);
+  }, []);
+
+  const handleSaveSearch = useCallback(
+    (name: string) => {
+      if (searchHistoryLoaded) {
+        setSearchHistory([
+          ...(searchHistory ?? []),
+          {
+            name: name,
+            search: search,
+            filter: filters,
+          },
+        ]);
+      }
+    },
+    [search, filters, searchHistory, setSearchHistory, searchHistoryLoaded],
   );
+
+  const handleLoadSavedSearch = useCallback(
+    (name: string) => {
+      if (searchHistoryLoaded) {
+        const savedSearchEntry = searchHistory?.find(
+          (entry) => entry.name === name,
+        );
+        if (savedSearchEntry) {
+          setFilters(savedSearchEntry.filter!);
+          setSearch(savedSearchEntry.search);
+        }
+      }
+    },
+    [searchHistory, searchHistoryLoaded, setFilters, setSearch],
+  );
+
+  const handleDeleteSearch = useCallback((name: string) => {
+    setSearchToDelete(name);
+    setIsDeleteDialogOpen(true);
+  }, []);
+
+  const confirmDeleteSearch = useCallback(() => {
+    if (searchToDelete && searchHistory) {
+      setSearchHistory(
+        searchHistory.filter((item) => item.name !== searchToDelete) ?? [],
+      );
+      setSearchToDelete(null);
+      setIsDeleteDialogOpen(false);
+    }
+  }, [searchToDelete, searchHistory, setSearchHistory]);
 
   // suggestions
 
@@ -342,175 +413,226 @@ export default function InputWithTags({
   }, [search]);
 
   return (
-    <Command shouldFilter={false} ref={commandRef} className="rounded-md">
-      <div className="relative">
-        <CommandInput
-          ref={inputRef}
-          value={inputValue}
-          onValueChange={handleInputChange}
-          onFocus={handleInputFocus}
-          onBlur={handleInputBlur}
-          onKeyDown={handleInputKeyDown}
-          className="text-md h-10 pr-24"
-          placeholder="Search..."
-        />
-        <div className="absolute right-3 top-0 flex h-full flex-row items-center justify-center gap-5">
-          {(search || Object.keys(filters).length > 0) && (
-            <Tooltip>
-              <TooltipTrigger>
-                <LuX
-                  className="size-4 cursor-pointer text-secondary-foreground"
-                  onClick={handleClearInput}
-                />
-              </TooltipTrigger>
-              <TooltipPortal>
-                <TooltipContent>Clear search</TooltipContent>
-              </TooltipPortal>
-            </Tooltip>
-          )}
+    <>
+      <Command shouldFilter={false} ref={commandRef} className="rounded-md">
+        <div className="relative">
+          <CommandInput
+            ref={inputRef}
+            value={inputValue}
+            onValueChange={handleInputChange}
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
+            onKeyDown={handleInputKeyDown}
+            className="text-md h-10 pr-24"
+            placeholder="Search..."
+          />
+          <div className="absolute right-3 top-0 flex h-full flex-row items-center justify-center gap-5">
+            {(search || Object.keys(filters).length > 0) && (
+              <Tooltip>
+                <TooltipTrigger>
+                  <LuX
+                    className="size-4 cursor-pointer text-secondary-foreground"
+                    onClick={handleClearInput}
+                  />
+                </TooltipTrigger>
+                <TooltipPortal>
+                  <TooltipContent>Clear search</TooltipContent>
+                </TooltipPortal>
+              </Tooltip>
+            )}
 
-          {isSimilaritySearch && (
+            {(search || Object.keys(filters).length > 0) && (
+              <Tooltip>
+                <TooltipTrigger>
+                  <LuSave
+                    className="size-4 cursor-pointer text-secondary-foreground"
+                    onClick={handleSetSearchHistory}
+                  />
+                </TooltipTrigger>
+                <TooltipPortal>
+                  <TooltipContent>Save search</TooltipContent>
+                </TooltipPortal>
+              </Tooltip>
+            )}
+
+            {isSimilaritySearch && (
+              <Tooltip>
+                <TooltipTrigger className="cursor-default">
+                  <LuImage
+                    aria-label="Similarity search active"
+                    className="size-4 text-selected"
+                  />
+                </TooltipTrigger>
+                <TooltipPortal>
+                  <TooltipContent>Similarity search active</TooltipContent>
+                </TooltipPortal>
+              </Tooltip>
+            )}
+
             <Tooltip>
               <TooltipTrigger className="cursor-default">
-                <LuImage
-                  aria-label="Similarity search active"
-                  className="size-4 text-selected"
+                <LuFilter
+                  aria-label="Filters active"
+                  className={cn(
+                    "size-4",
+                    Object.keys(filters).length > 0
+                      ? "text-selected"
+                      : "text-secondary-foreground",
+                  )}
                 />
               </TooltipTrigger>
               <TooltipPortal>
-                <TooltipContent>Similarity search active</TooltipContent>
+                <TooltipContent>
+                  Filters{" "}
+                  {Object.keys(filters).length > 0 ? "active" : "inactive"}
+                </TooltipContent>
               </TooltipPortal>
             </Tooltip>
-          )}
 
-          <Tooltip>
-            <TooltipTrigger className="cursor-default">
-              <LuFilter
-                aria-label="Filters active"
-                className={cn(
-                  "size-4",
-                  Object.keys(filters).length > 0
-                    ? "text-selected"
-                    : "text-secondary-foreground",
-                )}
+            {inputFocused ? (
+              <LuChevronUp
+                onClick={() => setInputFocused(false)}
+                className="size-4 cursor-pointer text-secondary-foreground"
               />
-            </TooltipTrigger>
-            <TooltipPortal>
-              <TooltipContent>
-                Filters{" "}
-                {Object.keys(filters).length > 0 ? "active" : "inactive"}
-              </TooltipContent>
-            </TooltipPortal>
-          </Tooltip>
-
-          {inputFocused ? (
-            <LuChevronUp
-              onClick={() => setInputFocused(false)}
-              className="size-4 cursor-pointer text-secondary-foreground"
-            />
-          ) : (
-            <LuChevronDown
-              onClick={() => setInputFocused(true)}
-              className="size-4 cursor-pointer text-secondary-foreground"
-            />
-          )}
+            ) : (
+              <LuChevronDown
+                onClick={() => setInputFocused(true)}
+                className="size-4 cursor-pointer text-secondary-foreground"
+              />
+            )}
+          </div>
         </div>
-      </div>
 
-      <CommandList
-        className={cn(
-          "scrollbar-container border-t duration-200 animate-in fade-in",
-          inputFocused ? "visible" : "hidden",
-        )}
-      >
-        {(Object.keys(filters).length > 0 || isSimilaritySearch) && (
-          <CommandGroup heading="Active Filters">
-            <div className="my-2 flex flex-wrap gap-2 px-2">
-              {isSimilaritySearch && (
-                <span className="inline-flex items-center whitespace-nowrap rounded-full bg-blue-100 px-2 py-0.5 text-sm text-blue-800">
-                  Similarity Search
-                  <button
-                    onClick={handleClearInput}
-                    className="ml-1 focus:outline-none"
-                    aria-label="Clear similarity search"
-                  >
-                    <LuX className="h-3 w-3" />
-                  </button>
-                </span>
-              )}
-              {Object.entries(filters).map(([filterType, filterValues]) =>
-                Array.isArray(filterValues) ? (
-                  filterValues.map((value, index) => (
-                    <span
-                      key={`${filterType}-${index}`}
-                      className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm text-green-800"
-                    >
-                      {filterType}:{value}
-                      <button
-                        onClick={() =>
-                          removeFilter(filterType as FilterType, value)
-                        }
-                        className="ml-1 focus:outline-none"
-                        aria-label={`Remove ${filterType}:${value} filter`}
-                      >
-                        <LuX className="h-3 w-3" />
-                      </button>
-                    </span>
-                  ))
-                ) : (
-                  <span
-                    key={filterType}
-                    className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm text-green-800"
-                  >
-                    {filterType}:
-                    {filterType === "before" || filterType === "after"
-                      ? new Date(filterValues as number).toLocaleDateString()
-                      : filterValues}
+        <CommandList
+          className={cn(
+            "scrollbar-container border-t duration-200 animate-in fade-in",
+            inputFocused ? "visible" : "hidden",
+          )}
+        >
+          {(Object.keys(filters).length > 0 || isSimilaritySearch) && (
+            <CommandGroup heading="Active Filters">
+              <div className="my-2 flex flex-wrap gap-2 px-2">
+                {isSimilaritySearch && (
+                  <span className="inline-flex items-center whitespace-nowrap rounded-full bg-blue-100 px-2 py-0.5 text-sm text-blue-800">
+                    Similarity Search
                     <button
-                      onClick={() =>
-                        removeFilter(
-                          filterType as FilterType,
-                          filterValues as string | number,
-                        )
-                      }
+                      onClick={handleClearInput}
                       className="ml-1 focus:outline-none"
-                      aria-label={`Remove ${filterType}:${filterValues} filter`}
+                      aria-label="Clear similarity search"
                     >
                       <LuX className="h-3 w-3" />
                     </button>
                   </span>
-                ),
-              )}
-            </div>
+                )}
+                {Object.entries(filters).map(([filterType, filterValues]) =>
+                  Array.isArray(filterValues) ? (
+                    filterValues.map((value, index) => (
+                      <span
+                        key={`${filterType}-${index}`}
+                        className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm text-green-800"
+                      >
+                        {filterType}:{value}
+                        <button
+                          onClick={() =>
+                            removeFilter(filterType as FilterType, value)
+                          }
+                          className="ml-1 focus:outline-none"
+                          aria-label={`Remove ${filterType}:${value} filter`}
+                        >
+                          <LuX className="h-3 w-3" />
+                        </button>
+                      </span>
+                    ))
+                  ) : (
+                    <span
+                      key={filterType}
+                      className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm text-green-800"
+                    >
+                      {filterType}:
+                      {filterType === "before" || filterType === "after"
+                        ? new Date(filterValues as number).toLocaleDateString()
+                        : filterValues}
+                      <button
+                        onClick={() =>
+                          removeFilter(
+                            filterType as FilterType,
+                            filterValues as string | number,
+                          )
+                        }
+                        className="ml-1 focus:outline-none"
+                        aria-label={`Remove ${filterType}:${filterValues} filter`}
+                      >
+                        <LuX className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ),
+                )}
+              </div>
+            </CommandGroup>
+          )}
+
+          {!currentFilterType &&
+            !inputValue &&
+            (searchHistory?.length ?? 0) > 0 && (
+              <CommandGroup heading="Previous Searches">
+                {searchHistory?.map((suggestion, index) => (
+                  <CommandItem
+                    key={index}
+                    className="flex cursor-pointer items-center justify-between"
+                    onSelect={() => handleLoadSavedSearch(suggestion.name)}
+                  >
+                    <span>{suggestion.name}</span>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteSearch(suggestion.name);
+                          }}
+                          className="focus:outline-none"
+                        >
+                          <LuTrash2 className="h-4 w-4 text-secondary-foreground" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipPortal>
+                        <TooltipContent>Delete saved search</TooltipContent>
+                      </TooltipPortal>
+                    </Tooltip>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+          <CommandGroup
+            heading={currentFilterType ? "Filter Values" : "Filters"}
+          >
+            {filterSuggestions(suggestions)
+              .filter(
+                (item) =>
+                  !searchHistory?.some((history) => history.name === item),
+              )
+              .map((suggestion, index) => (
+                <CommandItem
+                  key={index + (searchHistory?.length ?? 0)}
+                  className="cursor-pointer"
+                  onSelect={() => handleSuggestionClick(suggestion)}
+                >
+                  {suggestion}
+                </CommandItem>
+              ))}
           </CommandGroup>
-        )}
-        {!currentFilterType && !inputValue && searchHistory.length > 0 && (
-          <CommandGroup heading="Previous Searches">
-            {searchHistory.map((suggestion, index) => (
-              <CommandItem
-                key={index}
-                className="cursor-pointer"
-                onSelect={() => handleSuggestionClick(suggestion)}
-              >
-                {suggestion}
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        )}
-        <CommandGroup heading={currentFilterType ? "Filter Values" : "Filters"}>
-          {filterSuggestions(suggestions)
-            .filter((item) => !searchHistory.includes(item))
-            .map((suggestion, index) => (
-              <CommandItem
-                key={index + searchHistory.length}
-                className="cursor-pointer"
-                onSelect={() => handleSuggestionClick(suggestion)}
-              >
-                {suggestion}
-              </CommandItem>
-            ))}
-        </CommandGroup>
-      </CommandList>
-    </Command>
+        </CommandList>
+      </Command>
+      <SaveSearchDialog
+        isOpen={isSaveDialogOpen}
+        onClose={() => setIsSaveDialogOpen(false)}
+        onSave={handleSaveSearch}
+      />
+      <DeleteSearchDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={confirmDeleteSearch}
+        searchName={searchToDelete || ""}
+      />
+    </>
   );
 }

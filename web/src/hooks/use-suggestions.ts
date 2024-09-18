@@ -1,18 +1,18 @@
-import { FilterType, SearchFilter } from "@/types/search";
+import { FilterType, SavedSearchQuery, SearchFilter } from "@/types/search";
 import { useCallback, useState } from "react";
 
 // Custom hook for managing suggestions
 export type UseSuggestionsType = (
   filters: SearchFilter,
   allSuggestions: { [K in keyof SearchFilter]: string[] },
-  searchHistory: string[],
+  searchHistory: SavedSearchQuery[],
 ) => ReturnType<typeof useSuggestions>;
 
 // Define and export the useSuggestions hook
 export default function useSuggestions(
   filters: SearchFilter,
   allSuggestions: { [K in keyof SearchFilter]: string[] },
-  searchHistory: string[],
+  searchHistory?: SavedSearchQuery[],
 ) {
   const [suggestions, setSuggestions] = useState<string[]>([]);
 
@@ -46,7 +46,7 @@ export default function useSuggestions(
           },
         );
         setSuggestions([
-          ...searchHistory,
+          ...(searchHistory?.map((search) => search.name) ?? []),
           ...availableFilters,
           "before",
           "after",
