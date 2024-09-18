@@ -142,7 +142,7 @@ OpenVINO is supported on 6th Gen Intel platforms (Skylake) and newer. It will al
 
 :::tip
 
-Whening using many cameras one detector may not be enough to keep up. Multiple detectors can be defined assuming GPU resources are available. An example configuration would be:
+When using many cameras one detector may not be enough to keep up. Multiple detectors can be defined assuming GPU resources are available. An example configuration would be:
 
 ```yaml
 detectors:
@@ -318,7 +318,7 @@ ONNX is an open format for building machine learning models, Frigate supports ru
 
 :::tip
 
-Whening using many cameras one detector may not be enough to keep up. Multiple detectors can be defined assuming GPU resources are available. An example configuration would be:
+When using many cameras one detector may not be enough to keep up. Multiple detectors can be defined assuming GPU resources are available. An example configuration would be:
 
 ```yaml
 detectors:
