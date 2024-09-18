@@ -356,3 +356,15 @@ export const convertLocalDateToTimestamp = (dateString: string): number => {
 
   return timestamp;
 };
+
+export function getIntlDateFormat() {
+  return new Intl.DateTimeFormat()
+    .formatToParts(new Date())
+    .reduce((acc, part) => {
+      if (part.type === "day") acc.push("DD");
+      if (part.type === "month") acc.push("MM");
+      if (part.type === "year") acc.push("YYYY");
+      return acc;
+    }, [] as string[])
+    .join("");
+}

@@ -22,13 +22,21 @@ import {
   CommandGroup,
   CommandItem,
 } from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { usePersistence } from "@/hooks/use-persistence";
 import { SaveSearchDialog } from "./SaveSearchDialog";
 import { DeleteSearchDialog } from "./DeleteSearchDialog";
-import { convertLocalDateToTimestamp } from "@/utils/dateUtil";
+import {
+  convertLocalDateToTimestamp,
+  getIntlDateFormat,
+} from "@/utils/dateUtil";
 import { toast } from "sonner";
 
 type InputWithTagsProps = {
@@ -489,25 +497,55 @@ export default function InputWithTags({
               </Tooltip>
             )}
 
-            <Tooltip>
-              <TooltipTrigger className="cursor-default">
-                <LuFilter
-                  aria-label="Filters active"
-                  className={cn(
-                    "size-4",
-                    Object.keys(filters).length > 0
-                      ? "text-selected"
-                      : "text-secondary-foreground",
-                  )}
-                />
-              </TooltipTrigger>
-              <TooltipPortal>
-                <TooltipContent>
-                  Filters{" "}
-                  {Object.keys(filters).length > 0 ? "active" : "inactive"}
-                </TooltipContent>
-              </TooltipPortal>
-            </Tooltip>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  className="focus:outline-none"
+                  aria-label="Filter information"
+                >
+                  <LuFilter
+                    aria-label="Filters active"
+                    className={cn(
+                      "size-4",
+                      Object.keys(filters).length > 0
+                        ? "text-selected"
+                        : "text-secondary-foreground",
+                    )}
+                  />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80">
+                <div className="space-y-2">
+                  <h3 className="font-medium">How to use text filters</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Filters help you narrow down your search results. Here's how
+                    to use them:
+                  </p>
+                  <ul className="list-disc pl-5 text-sm text-primary-variant">
+                    <li>
+                      Type a filter name followed by a colon (e.g., "cameras:").
+                    </li>
+                    <li>
+                      Select a value from the suggestions or type your own.
+                    </li>
+                    <li>
+                      Use multiple filters by adding them one after another.
+                    </li>
+                    <li>
+                      Date filters (before: and after:) use{" "}
+                      {getIntlDateFormat()} format.
+                    </li>
+                    <li>Remove filters by clicking the 'x' next to them.</li>
+                  </ul>
+                  <p className="text-sm text-muted-foreground">
+                    Example:{" "}
+                    <code className="text-primary">
+                      cameras:front_door label:person before:01012024
+                    </code>
+                  </p>
+                </div>
+              </PopoverContent>
+            </Popover>
 
             {inputFocused ? (
               <LuChevronUp
