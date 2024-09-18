@@ -296,3 +296,75 @@ export function isCurrentHour(timestamp: number) {
 
   return timestamp > now.getTime() / 1000;
 }
+
+export const convertLocalDateToTimestamp = (dateString: string): number => {
+  // Ensure the date string is in the correct format (8 digits)
+  if (!/^\d{8}$/.test(dateString)) {
+    return 0;
+  }
+
+  // Determine the local date format
+  const format = new Intl.DateTimeFormat()
+    .formatToParts(new Date())
+    .reduce((acc, part) => {
+      if (part.type === "day") acc.push("D");
+      if (part.type === "month") acc.push("M");
+      if (part.type === "year") acc.push("Y");
+      return acc;
+    }, [] as string[])
+    .join("");
+
+  let day: string, month: string, year: string;
+
+  // Parse the date string according to the detected format
+  switch (format) {
+    case "DMY":
+      [day, month, year] = [
+        dateString.slice(0, 2),
+        dateString.slice(2, 4),
+        dateString.slice(4),
+      ];
+      break;
+    case "MDY":
+      [month, day, year] = [
+        dateString.slice(0, 2),
+        dateString.slice(2, 4),
+        dateString.slice(4),
+      ];
+      break;
+    case "YMD":
+      [year, month, day] = [
+        dateString.slice(0, 2),
+        dateString.slice(2, 4),
+        dateString.slice(4),
+      ];
+      break;
+    default:
+      return 0;
+  }
+
+  // Create a Date object based on the local timezone
+  const localDate = new Date(`${year}-${month}-${day}T00:00:00`);
+
+  // Check if the date is valid
+  if (isNaN(localDate.getTime())) {
+    return 0;
+  }
+
+  // Convert local date to UTC timestamp
+  const timestamp = localDate.getTime();
+
+  return timestamp;
+};
+
+export function getIntlDateFormat() {
+  return new Intl.DateTimeFormat()
+    .formatToParts(new Date())
+    .reduce((acc, part) => {
+      if (part.type === "day") acc.push("DD");
+      if (part.type === "month") acc.push("MM");
+      if (part.type === "year") acc.push("YYYY");
+      return acc;
+    }, [] as string[])
+    .join("");
+}
