@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { isMobile } from "react-device-detect";
+import { toast } from "sonner";
 
 type SaveSearchDialogProps = {
   isOpen: boolean;
@@ -29,6 +30,9 @@ export function SaveSearchDialog({
     if (searchName.trim()) {
       onSave(searchName.trim());
       setSearchName("");
+      toast.success(`Search (${searchName.trim()}) has been saved.`, {
+        position: "top-center",
+      });
       onClose();
     }
   };
