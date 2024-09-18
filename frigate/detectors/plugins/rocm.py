@@ -4,7 +4,6 @@ import os
 import subprocess
 import sys
 
-import cv2
 import numpy as np
 from pydantic import Field
 from typing_extensions import Literal
@@ -13,7 +12,6 @@ from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import (
     BaseDetectorConfig,
     ModelTypeEnum,
-    PixelFormatEnum,
 )
 
 logger = logging.getLogger(__name__)
