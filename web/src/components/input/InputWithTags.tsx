@@ -589,7 +589,8 @@ export default function InputWithTags({
                         key={`${filterType}-${index}`}
                         className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm capitalize text-green-800"
                       >
-                        {filterType}: {value.replaceAll("_", " ")}
+                        {filterType.replaceAll("_", " ")}:{" "}
+                        {value.replaceAll("_", " ")}
                         <button
                           onClick={() =>
                             removeFilter(filterType as FilterType, value)
