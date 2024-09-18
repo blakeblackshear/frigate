@@ -109,11 +109,8 @@ export default function SearchFilterGroup({
         return;
       }
       const cameraConfig = config.cameras[camera];
-      cameraConfig.review.alerts.required_zones.forEach((zone) => {
-        zones.add(zone);
-      });
-      cameraConfig.review.detections.required_zones.forEach((zone) => {
-        zones.add(zone);
+      Object.entries(cameraConfig.zones).map(([name, _]) => {
+        zones.add(name);
       });
     });
 

@@ -62,7 +62,7 @@ export default function SearchView({
     }
 
     const labels = new Set<string>();
-    const cameras = Object.keys(config.cameras);
+    const cameras = searchFilter?.cameras || Object.keys(config.cameras);
 
     cameras.forEach((camera) => {
       if (camera == "birdseye") {
@@ -81,7 +81,7 @@ export default function SearchView({
     });
 
     return [...labels].sort();
-  }, [config]);
+  }, [config, searchFilter]);
 
   const { data: allSubLabels } = useSWR("sub_labels");
 
@@ -91,23 +91,20 @@ export default function SearchView({
     }
 
     const zones = new Set<string>();
-    const cameras = Object.keys(config.cameras);
+    const cameras = searchFilter?.cameras || Object.keys(config.cameras);
 
     cameras.forEach((camera) => {
       if (camera == "birdseye") {
         return;
       }
       const cameraConfig = config.cameras[camera];
-      cameraConfig.review.alerts.required_zones.forEach((zone) => {
-        zones.add(zone);
-      });
-      cameraConfig.review.detections.required_zones.forEach((zone) => {
-        zones.add(zone);
+      Object.entries(cameraConfig.zones).map(([name, _]) => {
+        zones.add(name);
       });
     });
 
     return [...zones].sort();
-  }, [config]);
+  }, [config, searchFilter]);
 
   const suggestionsValues = useMemo(
     () => ({

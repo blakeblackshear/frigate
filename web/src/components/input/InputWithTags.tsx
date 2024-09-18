@@ -337,6 +337,7 @@ export default function InputWithTags({
 
   const handleClearInput = useCallback(() => {
     setInputFocused(false);
+    setInputValue("");
     resetSuggestions("");
     setSearch("");
     inputRef?.current?.blur();
