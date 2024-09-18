@@ -19,6 +19,8 @@ from pydantic import (
     field_validator,
 )
 from pydantic.fields import PrivateAttr
+from ruamel.yaml import YAML
+from typing_extensions import Self
 
 from frigate.const import (
     ALL_ATTRIBUTE_LABELS,
@@ -31,7 +33,7 @@ from frigate.const import (
     INCLUDED_FFMPEG_VERSIONS,
     MAX_PRE_CAPTURE,
     REGEX_CAMERA_NAME,
-    YAML_EXT,
+    REGEX_JSON,
 )
 from frigate.detectors import DetectorConfig, ModelConfig
 from frigate.detectors.detector_config import BaseDetectorConfig
@@ -47,13 +49,14 @@ from frigate.util.builtin import (
     escape_special_characters,
     generate_color_palette,
     get_ffmpeg_arg_list,
-    load_config_with_no_duplicates,
 )
 from frigate.util.config import StreamInfoRetriever, get_relative_coordinates
 from frigate.util.image import create_mask
 from frigate.util.services import auto_detect_hwaccel
 
 logger = logging.getLogger(__name__)
+
+yaml = YAML()
 
 # TODO: Identify what the default format to display timestamps is
 DEFAULT_TIME_FORMAT = "%m/%d/%Y %H:%M:%S"
@@ -1757,18 +1760,38 @@ class FrigateConfig(FrigateBaseModel):
         return v
 
     @classmethod
-    def parse_file(cls, config_file):
-        with open(config_file) as f:
-            raw_config = f.read()
+    def parse_file(cls, config_path, *, is_json=None) -> Self:
+        with open(config_path) as f:
+            return FrigateConfig.parse(f, is_json=is_json)
 
-        if config_file.endswith(YAML_EXT):
-            config = load_config_with_no_duplicates(raw_config)
-        elif config_file.endswith(".json"):
-            config = json.loads(raw_config)
+    @classmethod
+    def parse(cls, config, *, is_json=None) -> Self:
+        # If config is a file, read its contents.
+        if hasattr(config, "read"):
+            fname = getattr(config, "name", None)
+            config = config.read()
 
+            # Try to guess the value of is_json from the file extension.
+            if is_json is None and fname:
+                _, ext = os.path.splitext(fname)
+                if ext in (".yaml", ".yml"):
+                    is_json = False
+                elif ext == ".json":
+                    is_json = True
+
+        # At this point, ry to sniff the config string, to guess if it is json or not.
+        if is_json is None:
+            is_json = REGEX_JSON.match(config) is not None
+
+        # Parse the config into a dictionary.
+        if is_json:
+            config = json.load(config)
+        else:
+            config = yaml.load(config)
+
+        # Validate and return the config dict.
         return cls.model_validate(config)
 
     @classmethod
-    def parse_raw(cls, raw_config):
-        config = load_config_with_no_duplicates(raw_config)
-        return cls.model_validate(config)
+    def parse_yaml(cls, config_yaml) -> Self:
+        return cls.parse(config_yaml, is_json=False)

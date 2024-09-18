@@ -9,14 +9,12 @@ import queue
 import re
 import shlex
 import urllib.parse
-from collections import Counter
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any, Optional, Tuple
 
 import numpy as np
 import pytz
-import yaml
 from ruamel.yaml import YAML
 from tzlocal import get_localzone
 from zoneinfo import ZoneInfoNotFoundError
@@ -87,34 +85,6 @@ def deep_merge(dct1: dict, dct2: dict, override=False, merge_lists=False) -> dic
         else:
             merged[k] = copy.deepcopy(v2)
     return merged
-
-
-def load_config_with_no_duplicates(raw_config) -> dict:
-    """Get config ensuring duplicate keys are not allowed."""
-
-    # https://stackoverflow.com/a/71751051
-    # important to use SafeLoader here to avoid RCE
-    class PreserveDuplicatesLoader(yaml.loader.SafeLoader):
-        pass
-
-    def map_constructor(loader, node, deep=False):
-        keys = [loader.construct_object(node, deep=deep) for node, _ in node.value]
-        vals = [loader.construct_object(node, deep=deep) for _, node in node.value]
-        key_count = Counter(keys)
-        data = {}
-        for key, val in zip(keys, vals):
-            if key_count[key] > 1:
-                raise ValueError(
-                    f"Config input {key} is defined multiple times for the same field, this is not allowed."
-                )
-            else:
-                data[key] = val
-        return data
-
-    PreserveDuplicatesLoader.add_constructor(
-        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, map_constructor
-    )
-    return yaml.load(raw_config, PreserveDuplicatesLoader)
 
 
 def clean_camera_user_pass(line: str) -> str:
