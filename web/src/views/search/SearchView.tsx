@@ -268,12 +268,7 @@ export default function SearchView({
         )}
       >
         {config?.semantic_search?.enabled && (
-          <div
-            className={cn(
-              "z-[41] w-full lg:absolute lg:top-0 lg:w-1/3",
-              // hasExistingSearch ? "lg:mr-3 lg:w-1/3" : "lg:ml-[25%] lg:w-1/2",
-            )}
-          >
+          <div className={cn("z-[41] w-full lg:absolute lg:top-0 lg:w-1/3")}>
             <InputWithTags
               filters={searchFilter ?? {}}
               setFilters={setSearchFilter}

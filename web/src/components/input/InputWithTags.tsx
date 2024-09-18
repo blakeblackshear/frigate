@@ -1,6 +1,11 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import { LuX, LuFilter, LuImage } from "react-icons/lu";
+import {
+  LuX,
+  LuFilter,
+  LuImage,
+  LuChevronDown,
+  LuChevronUp,
+} from "react-icons/lu";
 import { FilterType, SearchFilter, SearchSource } from "@/types/search";
 import useSuggestions from "@/hooks/use-suggestions";
 import {
@@ -11,6 +16,8 @@ import {
   CommandItem,
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { TooltipPortal } from "@radix-ui/react-tooltip";
 
 const convertMMDDYYToTimestamp = (dateString: string): number => {
   const match = dateString.match(/^(\d{2})(\d{2})(\d{2})$/);
@@ -338,50 +345,81 @@ export default function InputWithTags({
           onFocus={handleInputFocus}
           onBlur={handleInputBlur}
           onKeyDown={handleInputKeyDown}
-          className="text-md h-10 pr-20"
+          className="text-md h-10 pr-24"
           placeholder="Search..."
         />
-        <div className="absolute right-2 top-1/2 -translate-y-1/2 transform space-x-1">
-          {(Object.keys(filters).length > 0 || isSimilaritySearch) && (
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Toggle filters"
-              className={
-                Object.keys(filters).length > 0 || isSimilaritySearch
-                  ? "text-selected"
-                  : "text-secondary-foreground"
-              }
-            >
-              {isSimilaritySearch ? (
-                <LuImage className="size-4" />
-              ) : (
-                <LuFilter className="size-4" />
-              )}
-            </Button>
-          )}
+        <div className="absolute right-3 top-0 flex h-full flex-row items-center justify-center gap-5">
           {(search || Object.keys(filters).length > 0) && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleClearInput}
-              aria-label="Clear input"
-            >
-              <LuX className="h-4 w-4" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger>
+                <LuX
+                  className="size-4 cursor-pointer text-secondary-foreground"
+                  onClick={handleClearInput}
+                />
+              </TooltipTrigger>
+              <TooltipPortal>
+                <TooltipContent>Clear search</TooltipContent>
+              </TooltipPortal>
+            </Tooltip>
+          )}
+
+          {isSimilaritySearch && (
+            <Tooltip>
+              <TooltipTrigger className="cursor-default">
+                <LuImage
+                  aria-label="Similarity search active"
+                  className="size-4 text-selected"
+                />
+              </TooltipTrigger>
+              <TooltipPortal>
+                <TooltipContent>Similarity search active</TooltipContent>
+              </TooltipPortal>
+            </Tooltip>
+          )}
+
+          <Tooltip>
+            <TooltipTrigger className="cursor-default">
+              <LuFilter
+                aria-label="Filters active"
+                className={cn(
+                  "size-4",
+                  Object.keys(filters).length > 0
+                    ? "text-selected"
+                    : "text-secondary-foreground",
+                )}
+              />
+            </TooltipTrigger>
+            <TooltipPortal>
+              <TooltipContent>
+                Filters{" "}
+                {Object.keys(filters).length > 0 ? "active" : "inactive"}
+              </TooltipContent>
+            </TooltipPortal>
+          </Tooltip>
+
+          {inputFocused ? (
+            <LuChevronUp
+              onClick={() => setInputFocused(false)}
+              className="size-4 cursor-pointer text-secondary-foreground"
+            />
+          ) : (
+            <LuChevronDown
+              onClick={() => setInputFocused(true)}
+              className="size-4 cursor-pointer text-secondary-foreground"
+            />
           )}
         </div>
       </div>
 
       <CommandList
         className={cn(
-          "scrollbar-container border-t",
+          "scrollbar-container border-t duration-200 animate-in fade-in",
           inputFocused ? "visible" : "hidden",
         )}
       >
         {(Object.keys(filters).length > 0 || isSimilaritySearch) && (
           <CommandGroup heading="Active Filters">
-            <div className="my-2 flex flex-wrap gap-2">
+            <div className="my-2 flex flex-wrap gap-2 px-2">
               {isSimilaritySearch && (
                 <span className="inline-flex items-center whitespace-nowrap rounded-full bg-blue-100 px-2 py-0.5 text-sm text-blue-800">
                   Similarity Search
