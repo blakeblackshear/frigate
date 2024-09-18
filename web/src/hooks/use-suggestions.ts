@@ -15,7 +15,6 @@ export default function useSuggestions(
   searchHistory: string[],
 ) {
   const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
 
   const updateSuggestions = useCallback(
     (value: string, currentFilterType: FilterType | null) => {
@@ -59,8 +58,6 @@ export default function useSuggestions(
 
   return {
     suggestions,
-    selectedSuggestionIndex,
-    setSelectedSuggestionIndex,
     updateSuggestions,
   };
 }

@@ -1,10 +1,16 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { LuX, LuFilter, LuImage } from "react-icons/lu";
 import { FilterType, SearchFilter, SearchSource } from "@/types/search";
-import { DropdownMenuSeparator } from "../ui/dropdown-menu";
 import useSuggestions from "@/hooks/use-suggestions";
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandGroup,
+  CommandItem,
+} from "@/components/ui/command";
+import { cn } from "@/lib/utils";
 
 const convertMMDDYYToTimestamp = (dateString: string): number => {
   const match = dateString.match(/^(\d{2})(\d{2})(\d{2})$/);
@@ -33,16 +39,13 @@ export default function InputWithTags({
   allSuggestions,
 }: InputWithTagsProps) {
   const [inputValue, setInputValue] = useState(search || "");
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
   const [currentFilterType, setCurrentFilterType] = useState<FilterType | null>(
     null,
   );
+  const [inputFocused, setInputFocused] = useState(false);
   const [isSimilaritySearch, setIsSimilaritySearch] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const suggestionRef = useRef<HTMLDivElement>(null);
-  const filterRef = useRef<HTMLDivElement>(null);
+  const commandRef = useRef<HTMLDivElement>(null);
 
   // TODO: search history from browser storage
 
@@ -53,12 +56,11 @@ export default function InputWithTags({
 
   // suggestions
 
-  const {
-    suggestions,
-    selectedSuggestionIndex,
-    setSelectedSuggestionIndex,
-    updateSuggestions,
-  } = useSuggestions(filters, allSuggestions, searchHistory);
+  const { suggestions, updateSuggestions } = useSuggestions(
+    filters,
+    allSuggestions,
+    searchHistory,
+  );
 
   const resetSuggestions = useCallback(
     (value: string) => {
@@ -66,6 +68,21 @@ export default function InputWithTags({
       updateSuggestions(value, null);
     },
     [updateSuggestions],
+  );
+
+  const filterSuggestions = useCallback(
+    (current_suggestions: string[]) => {
+      if (!inputValue || currentFilterType) return suggestions;
+      const words = inputValue.split(/[\s,]+/);
+      const lastNonEmptyWordIndex = words
+        .map((word) => word.trim())
+        .lastIndexOf(words.filter((word) => word.trim() !== "").pop() || "");
+      const currentWord = words[lastNonEmptyWordIndex];
+      return current_suggestions.filter((suggestion) =>
+        suggestion.toLowerCase().includes(currentWord.toLowerCase()),
+      );
+    },
+    [inputValue, suggestions, currentFilterType],
   );
 
   const removeFilter = useCallback(
@@ -137,7 +154,6 @@ export default function InputWithTags({
         setFilters(newFilters);
         setInputValue((prev) => prev.replace(`${type}:${value}`, "").trim());
         setCurrentFilterType(null);
-        setShowSuggestions(false);
       }
     },
     [filters, setFilters, allSuggestions],
@@ -172,8 +188,11 @@ export default function InputWithTags({
   );
 
   const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
+    (value: string) => {
+      if (value === "") {
+        return;
+      }
+
       setInputValue(value);
 
       const words = value.split(/[\s,]+/);
@@ -219,55 +238,32 @@ export default function InputWithTags({
       } else {
         resetSuggestions(value);
       }
-
-      // Reset suggestion state
-      setSelectedSuggestionIndex(-1);
-      setShowSuggestions(true);
     },
-    [
-      updateSuggestions,
-      resetSuggestions,
-      allSuggestions,
-      handleFilterCreation,
-      setSelectedSuggestionIndex,
-    ],
+    [updateSuggestions, resetSuggestions, allSuggestions, handleFilterCreation],
   );
 
   const handleInputFocus = useCallback(() => {
-    setShowSuggestions(true);
-    setShowFilters(true);
-    updateSuggestions(inputValue, currentFilterType);
-    setSelectedSuggestionIndex(-1);
-  }, [
-    inputValue,
-    currentFilterType,
-    updateSuggestions,
-    setSelectedSuggestionIndex,
-  ]);
+    setInputFocused(true);
+  }, []);
 
   const handleClearInput = useCallback(() => {
-    setInputValue("");
+    setInputFocused(false);
+    // setInputValue("");
+    resetSuggestions("");
+    setSearch("");
+    inputRef?.current?.blur();
     setFilters({});
     setCurrentFilterType(null);
-    updateSuggestions("", null);
-    setShowFilters(false);
-    setShowSuggestions(false);
     setIsSimilaritySearch(false);
-    setSearch("");
-  }, [setFilters, updateSuggestions, setSearch]);
+  }, [setFilters, resetSuggestions, setSearch]);
 
-  const handleInputBlur = useCallback(() => {
-    setTimeout(() => {
-      if (!containerRef.current?.contains(document.activeElement)) {
-        setShowSuggestions(false);
-        setShowFilters(false);
-        setSelectedSuggestionIndex(-1);
-      }
-    }, 0);
-  }, [setSelectedSuggestionIndex]);
-
-  const toggleFilters = useCallback(() => {
-    setShowFilters((prev) => !prev);
+  const handleInputBlur = useCallback((e: React.FocusEvent) => {
+    if (
+      commandRef.current &&
+      !commandRef.current.contains(e.relatedTarget as Node)
+    ) {
+      setInputFocused(false);
+    }
   }, []);
 
   const handleSuggestionClick = useCallback(
@@ -292,71 +288,35 @@ export default function InputWithTags({
     [createFilter, currentFilterType, allSuggestions],
   );
 
-  const handleKeyDown = useCallback(
+  const handleSearch = useCallback(
+    (value: string) => {
+      setSearch(value);
+      setInputFocused(false);
+      inputRef?.current?.blur();
+    },
+    [setSearch],
+  );
+
+  const handleInputKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "ArrowDown") {
+      if (
+        e.key === "Enter" &&
+        inputValue.trim() !== "" &&
+        filterSuggestions(suggestions).length == 0
+      ) {
         e.preventDefault();
-        setSelectedSuggestionIndex((prev) => (prev + 1) % suggestions.length);
-      } else if (e.key === "ArrowUp") {
-        e.preventDefault();
-        setSelectedSuggestionIndex(
-          (prev) => (prev - 1 + suggestions.length) % suggestions.length,
-        );
-      } else if (e.key === "Enter" && selectedSuggestionIndex !== -1) {
-        e.preventDefault();
-        handleSuggestionClick(suggestions[selectedSuggestionIndex]);
-      } else if (e.key === "Enter" && currentFilterType) {
-        e.preventDefault();
-        const currentWord = inputValue.split(/[\s,]+/).pop() || "";
-        handleFilterCreation(currentFilterType, currentWord);
-      } else if (e.key === "Enter" && !currentFilterType) {
-        e.preventDefault();
-        setSearch(inputValue);
-        inputRef.current?.blur();
-        handleInputBlur();
+
+        handleSearch(inputValue);
       }
     },
-    [
-      suggestions,
-      selectedSuggestionIndex,
-      handleSuggestionClick,
-      currentFilterType,
-      inputValue,
-      handleFilterCreation,
-      setSelectedSuggestionIndex,
-      setSearch,
-      handleInputBlur,
-    ],
+    [inputValue, handleSearch, filterSuggestions, suggestions],
   );
 
   // effects
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        suggestionRef.current &&
-        !suggestionRef.current.contains(event.target as Node) &&
-        containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
-      ) {
-        setShowSuggestions(false);
-        setShowFilters(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  useEffect(() => {
     updateSuggestions(inputValue, currentFilterType);
   }, [currentFilterType, inputValue, updateSuggestions]);
-
-  useEffect(() => {
-    setInputValue(search || "");
-  }, [search]);
 
   useEffect(() => {
     if (search?.startsWith("similarity:")) {
@@ -369,32 +329,26 @@ export default function InputWithTags({
   }, [search]);
 
   return (
-    <div ref={containerRef}>
-      <div className="relative my-2">
-        <Input
+    <Command shouldFilter={false} ref={commandRef} className="rounded-md">
+      <div className="relative">
+        <CommandInput
           ref={inputRef}
-          type="text"
           value={inputValue}
-          onChange={handleInputChange}
+          onValueChange={handleInputChange}
           onFocus={handleInputFocus}
           onBlur={handleInputBlur}
-          onKeyDown={handleKeyDown}
-          className="pr-20"
+          onKeyDown={handleInputKeyDown}
+          className="text-md h-10 pr-20"
           placeholder="Search..."
-          aria-label="Search input"
-          aria-autocomplete="list"
-          aria-controls="suggestions-list"
-          aria-expanded={showSuggestions}
         />
         <div className="absolute right-2 top-1/2 -translate-y-1/2 transform space-x-1">
           {(Object.keys(filters).length > 0 || isSimilaritySearch) && (
             <Button
               variant="ghost"
               size="icon"
-              onClick={toggleFilters}
               aria-label="Toggle filters"
               className={
-                Object.keys(filters).length > 0
+                Object.keys(filters).length > 0 || isSimilaritySearch
                   ? "text-selected"
                   : "text-secondary-foreground"
               }
@@ -406,7 +360,7 @@ export default function InputWithTags({
               )}
             </Button>
           )}
-          {(inputValue || Object.keys(filters).length > 0) && (
+          {(search || Object.keys(filters).length > 0) && (
             <Button
               variant="ghost"
               size="icon"
@@ -418,130 +372,101 @@ export default function InputWithTags({
           )}
         </div>
       </div>
-      {((showFilters &&
-        (Object.keys(filters).length > 0 || isSimilaritySearch)) ||
-        showSuggestions) && (
-        <div className="scrollbar-container absolute left-0 top-12 z-[100] max-h-[200px] w-full overflow-y-auto rounded-md border border-input bg-background p-2 text-primary shadow-md">
-          {showFilters &&
-            (Object.keys(filters).length > 0 || isSimilaritySearch) && (
-              <div ref={filterRef} className="my-2 flex flex-wrap gap-2">
-                {isSimilaritySearch && (
-                  <span className="inline-flex items-center whitespace-nowrap rounded-full bg-blue-100 px-2 py-0.5 text-sm text-blue-800">
-                    Similarity Search
-                    <button
-                      onClick={handleClearInput}
-                      className="ml-1 focus:outline-none"
-                      aria-label="Clear similarity search"
-                    >
-                      <LuX className="h-3 w-3" />
-                    </button>
-                  </span>
-                )}
-                {Object.entries(filters).map(([filterType, filterValues]) =>
-                  Array.isArray(filterValues) ? (
-                    filterValues.map((value, index) => (
-                      <span
-                        key={`${filterType}-${index}`}
-                        className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm text-green-800"
-                      >
-                        {filterType}:{value}
-                        <button
-                          onClick={() =>
-                            removeFilter(filterType as FilterType, value)
-                          }
-                          className="ml-1 focus:outline-none"
-                          aria-label={`Remove ${filterType}:${value} filter`}
-                        >
-                          <LuX className="h-3 w-3" />
-                        </button>
-                      </span>
-                    ))
-                  ) : (
+
+      <CommandList
+        className={cn(
+          "scrollbar-container border-t",
+          inputFocused ? "visible" : "hidden",
+        )}
+      >
+        {(Object.keys(filters).length > 0 || isSimilaritySearch) && (
+          <CommandGroup heading="Active Filters">
+            <div className="my-2 flex flex-wrap gap-2">
+              {isSimilaritySearch && (
+                <span className="inline-flex items-center whitespace-nowrap rounded-full bg-blue-100 px-2 py-0.5 text-sm text-blue-800">
+                  Similarity Search
+                  <button
+                    onClick={handleClearInput}
+                    className="ml-1 focus:outline-none"
+                    aria-label="Clear similarity search"
+                  >
+                    <LuX className="h-3 w-3" />
+                  </button>
+                </span>
+              )}
+              {Object.entries(filters).map(([filterType, filterValues]) =>
+                Array.isArray(filterValues) ? (
+                  filterValues.map((value, index) => (
                     <span
-                      key={filterType}
+                      key={`${filterType}-${index}`}
                       className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm text-green-800"
                     >
-                      {filterType}:
-                      {filterType === "before" || filterType === "after"
-                        ? new Date(filterValues as number).toLocaleDateString()
-                        : filterValues}
+                      {filterType}:{value}
                       <button
                         onClick={() =>
-                          removeFilter(
-                            filterType as FilterType,
-                            filterValues as string | number,
-                          )
+                          removeFilter(filterType as FilterType, value)
                         }
                         className="ml-1 focus:outline-none"
-                        aria-label={`Remove ${filterType}:${filterValues} filter`}
+                        aria-label={`Remove ${filterType}:${value} filter`}
                       >
                         <LuX className="h-3 w-3" />
                       </button>
                     </span>
-                  ),
-                )}
-              </div>
-            )}
-          {showSuggestions && (
-            <div
-              ref={suggestionRef}
-              className="mt-1"
-              role="listbox"
-              id="suggestions-list"
-            >
-              {!currentFilterType && searchHistory.length > 0 && (
-                <>
-                  <h3 className="px-2 py-1 text-xs font-semibold text-secondary-foreground">
-                    Previous Searches
-                  </h3>
-                  {searchHistory.map((suggestion, index) => (
-                    <button
-                      key={index}
-                      className={`w-full rounded px-2 py-1 text-left text-sm text-primary ${
-                        index === selectedSuggestionIndex
-                          ? "bg-accent text-accent-foreground"
-                          : "hover:bg-accent hover:text-accent-foreground"
-                      }`}
-                      onClick={() => handleSuggestionClick(suggestion)}
-                      onMouseEnter={() => setSelectedSuggestionIndex(index)}
-                      role="option"
-                      aria-selected={index === selectedSuggestionIndex}
-                    >
-                      {suggestion}
-                    </button>
-                  ))}
-                  <DropdownMenuSeparator />
-                </>
-              )}
-              <h3 className="px-2 py-1 text-xs font-semibold text-secondary-foreground">
-                {currentFilterType ? "Filter Values" : "Filters"}
-              </h3>
-              {suggestions
-                .filter((item) => !searchHistory.includes(item))
-                .map((suggestion, index) => (
-                  <button
-                    key={index + searchHistory.length}
-                    className={`w-full rounded px-2 py-1 text-left text-sm text-primary ${
-                      index + searchHistory.length === selectedSuggestionIndex
-                        ? "bg-accent text-accent-foreground"
-                        : "hover:bg-accent hover:text-accent-foreground"
-                    }`}
-                    onClick={() => handleSuggestionClick(suggestion)}
-                    onMouseEnter={() =>
-                      setSelectedSuggestionIndex(index + searchHistory.length)
-                    }
-                    role="option"
-                    aria-selected={
-                      index + searchHistory.length === selectedSuggestionIndex
-                    }
+                  ))
+                ) : (
+                  <span
+                    key={filterType}
+                    className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm text-green-800"
                   >
-                    {suggestion}
-                  </button>
-                ))}
+                    {filterType}:
+                    {filterType === "before" || filterType === "after"
+                      ? new Date(filterValues as number).toLocaleDateString()
+                      : filterValues}
+                    <button
+                      onClick={() =>
+                        removeFilter(
+                          filterType as FilterType,
+                          filterValues as string | number,
+                        )
+                      }
+                      className="ml-1 focus:outline-none"
+                      aria-label={`Remove ${filterType}:${filterValues} filter`}
+                    >
+                      <LuX className="h-3 w-3" />
+                    </button>
+                  </span>
+                ),
+              )}
             </div>
-          )}
-        </div>
-      )}
-    </div>
+          </CommandGroup>
+        )}
+        {!currentFilterType && !inputValue && searchHistory.length > 0 && (
+          <CommandGroup heading="Previous Searches">
+            {searchHistory.map((suggestion, index) => (
+              <CommandItem
+                key={index}
+                className="cursor-pointer"
+                onSelect={() => handleSuggestionClick(suggestion)}
+              >
+                {suggestion}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
+        <CommandGroup heading={currentFilterType ? "Filter Values" : "Filters"}>
+          {filterSuggestions(suggestions)
+            .filter((item) => !searchHistory.includes(item))
+            .map((suggestion, index) => (
+              <CommandItem
+                key={index + searchHistory.length}
+                className="cursor-pointer"
+                onSelect={() => handleSuggestionClick(suggestion)}
+              >
+                {suggestion}
+              </CommandItem>
+            ))}
+        </CommandGroup>
+      </CommandList>
+    </Command>
   );
 }

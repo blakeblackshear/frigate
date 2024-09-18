@@ -260,7 +260,7 @@ export default function SearchView({
 
       <div
         className={cn(
-          "flex flex-col items-start space-y-2 pl-2 pr-2 md:mb-2 md:pl-3 lg:h-10 lg:flex-row lg:items-center lg:space-y-0",
+          "flex flex-col items-start space-y-2 pl-2 pr-2 md:mb-2 md:pl-3 lg:relative lg:h-10 lg:flex-row lg:items-center lg:space-y-0",
           config?.semantic_search?.enabled
             ? "justify-between"
             : "justify-center",
@@ -270,8 +270,8 @@ export default function SearchView({
         {config?.semantic_search?.enabled && (
           <div
             className={cn(
-              "relative w-full",
-              hasExistingSearch ? "lg:mr-3 lg:w-1/3" : "lg:ml-[25%] lg:w-1/2",
+              "z-[41] w-full lg:absolute lg:top-0 lg:w-1/3",
+              // hasExistingSearch ? "lg:mr-3 lg:w-1/3" : "lg:ml-[25%] lg:w-1/2",
             )}
           >
             <InputWithTags
