@@ -549,15 +549,15 @@ export default function InputWithTags({
                     filterValues.map((value, index) => (
                       <span
                         key={`${filterType}-${index}`}
-                        className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm text-green-800"
+                        className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm capitalize text-green-800"
                       >
-                        {filterType}:{value}
+                        {filterType}: {value.replaceAll("_", " ")}
                         <button
                           onClick={() =>
                             removeFilter(filterType as FilterType, value)
                           }
                           className="ml-1 focus:outline-none"
-                          aria-label={`Remove ${filterType}:${value} filter`}
+                          aria-label={`Remove ${filterType}:${value.replaceAll("_", " ")} filter`}
                         >
                           <LuX className="h-3 w-3" />
                         </button>
@@ -566,7 +566,7 @@ export default function InputWithTags({
                   ) : (
                     <span
                       key={filterType}
-                      className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm text-green-800"
+                      className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm capitalize text-green-800"
                     >
                       {filterType}:
                       {filterType === "before" || filterType === "after"
