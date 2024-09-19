@@ -33,7 +33,6 @@ type SearchViewProps = {
   setSimilaritySearch: (search: SearchResult) => void;
   setSearchFilter: (filter: SearchFilter) => void;
   onUpdateFilter: (filter: SearchFilter) => void;
-  onOpenSearch: (item: SearchResult) => void;
   loadMore: () => void;
   hasMore: boolean;
 };
