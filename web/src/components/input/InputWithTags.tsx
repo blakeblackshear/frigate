@@ -189,6 +189,8 @@ export default function InputWithTags({
         let timestamp = 0;
 
         switch (type) {
+          case "query":
+            break;
           case "before":
           case "after":
             timestamp = convertLocalDateToTimestamp(value);
