@@ -68,6 +68,7 @@ Or map in all the `/dev/video*` devices.
 **Recommended hwaccel Preset**
 
 | CPU Generation | Intel Driver | Recommended Preset | Notes                               |
+| -------------- | ------------ | ------------------ | ----------------------------------- |
 | gen1 - gen7    | i965         | preset-vaapi       | qsv is not supported                |
 | gen8 - gen12   | iHD          | preset-vaapi       | preset-intel-qsv-* can also be used |
 | gen13+         | iHD / Xe     | preset-intel-qsv-* |                                     |
