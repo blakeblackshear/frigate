@@ -121,7 +121,7 @@ export function AnnotationSettingsPane({
   }
 
   return (
-    <div className="space-y-3 rounded-lg border border-secondary-foreground bg-background_alt p-2">
+    <div className="mb-3 space-y-3 rounded-lg border border-secondary-foreground bg-background_alt p-2">
       <Heading as="h4" className="my-2">
         Annotation Settings
       </Heading>
@@ -152,8 +152,8 @@ export function AnnotationSettingsPane({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Annotation Offset</FormLabel>
-                <div className="flex flex-col gap-8 md:flex-row-reverse">
-                  <div className="my-5 flex flex-row items-center gap-3 rounded-lg bg-destructive/50 p-3 text-sm text-primary-variant md:my-0">
+                <div className="flex flex-col gap-3 md:flex-row-reverse md:gap-8">
+                  <div className="flex flex-row items-center gap-3 rounded-lg bg-destructive/50 p-3 text-sm text-primary-variant md:my-0 md:my-5">
                     <PiWarningCircle className="size-24" />
                     <div>
                       This data comes from your camera's detect feed but is
@@ -161,7 +161,7 @@ export function AnnotationSettingsPane({
                       unlikely that the two streams are perfectly in sync. As a
                       result, the bounding box and the footage will not line up
                       perfectly. However, the <code>annotation_offset</code>{" "}
-                      field in your config can be used to adjust this.
+                      field can be used to adjust this.
                       <div className="mt-2 flex items-center text-primary">
                         <Link
                           to="https://docs.frigate.video/configuration/reference"
