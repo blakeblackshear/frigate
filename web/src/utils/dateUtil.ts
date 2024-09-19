@@ -285,6 +285,11 @@ export function endOfHourOrCurrentTime(timestamp: number) {
   return Math.min(timestamp, now.getTime() / 1000);
 }
 
+export function getBeginningOfDayTimestamp(date: Date) {
+  date.setHours(0, 0, 0, 0);
+  return date.getTime() / 1000;
+}
+
 export function getEndOfDayTimestamp(date: Date) {
   date.setHours(23, 59, 59, 999);
   return date.getTime() / 1000;
