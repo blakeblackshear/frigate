@@ -26,7 +26,9 @@ from frigate.const import (
     CACHE_DIR,
     CACHE_SEGMENT_FORMAT,
     DEFAULT_DB_PATH,
+    DEFAULT_FFMPEG_VERSION,
     FREQUENCY_STATS_POINTS,
+    INCLUDED_FFMPEG_VERSIONS,
     MAX_PRE_CAPTURE,
     REGEX_CAMERA_NAME,
     YAML_EXT,
@@ -896,27 +898,23 @@ class FfmpegConfig(FrigateBaseModel):
     def ffmpeg_path(self) -> str:
         if self.path == "default":
             if shutil.which("ffmpeg") is None:
-                return "/usr/lib/ffmpeg/6.0/bin/ffmpeg"
+                return f"/usr/lib/ffmpeg/{DEFAULT_FFMPEG_VERSION}/bin/ffmpeg"
             else:
                 return "ffmpeg"
-        elif self.path == "6.0":
-            return "/usr/lib/ffmpeg/6.0/bin/ffmpeg"
-        elif self.path == "5.0":
-            return "/usr/lib/ffmpeg/5.0/bin/ffmpeg"
+        elif self.path in INCLUDED_FFMPEG_VERSIONS:
+            return f"/usr/lib/ffmpeg/{self.path}/bin/ffmpeg"
         else:
             return f"{self.path}/bin/ffmpeg"
 
     @property
     def ffprobe_path(self) -> str:
         if self.path == "default":
-            if int(os.getenv("LIBAVFORMAT_VERSION_MAJOR", "59")) >= 59:
-                return "/usr/lib/ffmpeg/6.0/bin/ffprobe"
+            if shutil.which("ffprobe") is None:
+                return f"/usr/lib/ffmpeg/{DEFAULT_FFMPEG_VERSION}/bin/ffprobe"
             else:
                 return "ffprobe"
-        elif self.path == "6.0":
-            return "/usr/lib/ffmpeg/6.0/bin/ffprobe"
-        elif self.path == "5.0":
-            return "/usr/lib/ffmpeg/5.0/bin/ffprobe"
+        elif self.path in INCLUDED_FFMPEG_VERSIONS:
+            return f"/usr/lib/ffmpeg/{self.path}/bin/ffprobe"
         else:
             return f"{self.path}/bin/ffprobe"
 
