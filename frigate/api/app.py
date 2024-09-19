@@ -14,13 +14,13 @@ from fastapi import APIRouter, Path, Request, Response
 from fastapi.encoders import jsonable_encoder
 from fastapi.params import Depends
 from fastapi.responses import JSONResponse
-from flask import Blueprint, Flask, jsonify, request
+from flask import Flask, jsonify, request
 from markupsafe import escape
 from peewee import operator
 from playhouse.sqliteq import SqliteQueueDatabase
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from frigate.api.auth import AuthBp, get_jwt_secret, limiter
+from frigate.api.auth import get_jwt_secret, limiter
 from frigate.api.defs.app_body import AppConfigSetBody
 from frigate.api.defs.app_query_parameters import AppTimelineHourlyQueryParameters
 from frigate.api.defs.tags import Tags
@@ -43,9 +43,6 @@ from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
 
-
-bp = Blueprint("frigate", __name__)
-bp.register_blueprint(AuthBp)
 
 router = APIRouter(tags=[Tags.app])
 
@@ -96,8 +93,6 @@ def create_app(
     limiter.init_app(app)
     if frigate_config.auth.failed_login_rate_limit is None:
         limiter.enabled = False
-
-    app.register_blueprint(bp)
 
     return app
 

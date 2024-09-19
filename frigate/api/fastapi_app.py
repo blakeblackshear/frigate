@@ -4,7 +4,8 @@ from typing import Optional
 from fastapi import FastAPI
 
 from frigate.api import app as main_app
-from frigate.api import event, export, media, notification, preview, review
+from frigate.api import auth, event, export, media, notification, preview, review
+from frigate.api.auth import get_jwt_secret
 from frigate.embeddings import EmbeddingsContext
 from frigate.events.external import ExternalEventProcessor
 from frigate.plus import PlusApi
@@ -38,6 +39,7 @@ def create_fastapi_app(
     app.include_router(review.router)
     app.include_router(export.router)
     app.include_router(event.router)
+    app.include_router(auth.router)
     # App Properties
     app.frigate_config = frigate_config
     app.embeddings = embeddings
@@ -48,5 +50,6 @@ def create_fastapi_app(
     app.plus_api = plus_api
     app.stats_emitter = stats_emitter
     app.external_processor = external_processor
+    app.jwt_token = get_jwt_secret() if frigate_config.auth.enabled else None
 
     return app
