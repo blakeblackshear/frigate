@@ -87,6 +87,10 @@ Inference speeds will vary greatly depending on the GPU and the model used.
 | Quadro P400 2GB | 20 - 25 ms      |
 | Quadro P2000    | ~ 12 ms         |
 
+#### AMD GPUs
+
+With the [rocm](../configuration/object_detectors.md#amdrocm-gpu-detector) detector Frigate can take advantage of many AMD GPUs.
+
 ### Community Supported:
 
 #### Nvidia Jetson

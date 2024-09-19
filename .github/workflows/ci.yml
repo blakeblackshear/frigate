@@ -179,57 +179,18 @@ jobs:
             h8l.tags=${{ steps.setup.outputs.image-name }}-h8l
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-h8l
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-h8l,mode=max
-      #- name: AMD/ROCm general build
-      #  env:
-      #    AMDGPU: gfx
-      #    HSA_OVERRIDE: 0
-      #  uses: docker/bake-action@v3
-      #  with:
-      #    push: true
-      #    targets: rocm
-      #    files: docker/rocm/rocm.hcl
-      #    set: |
-      #      rocm.tags=${{ steps.setup.outputs.image-name }}-rocm
-      #      *.cache-from=type=gha
-      #- name: AMD/ROCm gfx900
-      #  env:
-      #    AMDGPU: gfx900
-      #    HSA_OVERRIDE: 1
-      #    HSA_OVERRIDE_GFX_VERSION: 9.0.0
-      #  uses: docker/bake-action@v3
-      #  with:
-      #    push: true
-      #    targets: rocm
-      #    files: docker/rocm/rocm.hcl
-      #    set: |
-      #      rocm.tags=${{ steps.setup.outputs.image-name }}-rocm-gfx900
-      #      *.cache-from=type=gha
-      #- name: AMD/ROCm gfx1030
-      #  env:
-      #    AMDGPU: gfx1030
-      #    HSA_OVERRIDE: 1
-      #    HSA_OVERRIDE_GFX_VERSION: 10.3.0
-      #  uses: docker/bake-action@v3
-      #  with:
-      #    push: true
-      #    targets: rocm
-      #    files: docker/rocm/rocm.hcl
-      #    set: |
-      #      rocm.tags=${{ steps.setup.outputs.image-name }}-rocm-gfx1030
-      #      *.cache-from=type=gha
-      #- name: AMD/ROCm gfx1100
-      #  env:
-      #    AMDGPU: gfx1100
-      #    HSA_OVERRIDE: 1
-      #    HSA_OVERRIDE_GFX_VERSION: 11.0.0
-      #  uses: docker/bake-action@v3
-      #  with:
-      #    push: true
-      #    targets: rocm
-      #    files: docker/rocm/rocm.hcl
-      #    set: |
-      #      rocm.tags=${{ steps.setup.outputs.image-name }}-rocm-gfx1100
-      #      *.cache-from=type=gha
+      - name: AMD/ROCm general build
+        env:
+          AMDGPU: gfx
+          HSA_OVERRIDE: 0
+        uses: docker/bake-action@v3
+        with:
+          push: true
+          targets: rocm
+          files: docker/rocm/rocm.hcl
+          set: |
+            rocm.tags=${{ steps.setup.outputs.image-name }}-rocm
+            *.cache-from=type=gha
   # The majority of users running arm64 are rpi users, so the rpi
   # build should be the primary arm64 image
   assemble_default_build:

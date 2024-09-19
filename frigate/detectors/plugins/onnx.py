@@ -1,7 +1,6 @@
 import logging
 import os
 
-import cv2
 import numpy as np
 from typing_extensions import Literal
 
@@ -9,7 +8,6 @@ from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import (
     BaseDetectorConfig,
     ModelTypeEnum,
-    PixelFormatEnum,
 )
 
 logger = logging.getLogger(__name__)
@@ -73,24 +71,13 @@ class ONNXDetector(DetectionApi):
         self.w = detector_config.model.width
         self.onnx_model_type = detector_config.model.model_type
         self.onnx_model_px = detector_config.model.input_pixel_format
+        self.onnx_model_shape = detector_config.model.input_tensor
         path = detector_config.model.path
 
         logger.info(f"ONNX: {path} loaded")
 
     def detect_raw(self, tensor_input):
         model_input_name = self.model.get_inputs()[0].name
-        model_input_shape = self.model.get_inputs()[0].shape
-
-        # adjust input shape
-        if self.onnx_model_type == ModelTypeEnum.yolonas:
-            tensor_input = cv2.dnn.blobFromImage(
-                tensor_input[0],
-                1.0,
-                (model_input_shape[3], model_input_shape[2]),
-                None,
-                swapRB=self.onnx_model_px == PixelFormatEnum.bgr,
-            ).astype(np.uint8)
-
         tensor_output = self.model.run(None, {model_input_name: tensor_input})
 
         if self.onnx_model_type == ModelTypeEnum.yolonas:

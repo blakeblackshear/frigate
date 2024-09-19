@@ -9,6 +9,11 @@ Frigate supports multiple different detectors that work on different types of ha
 
 **Most Hardware**
 - [Coral EdgeTPU](#edge-tpu-detector): The Google Coral EdgeTPU is available in USB and m.2 format allowing for a wide range of compatibility with devices.
+- [Hailo](#hailo-8l): The Hailo8 AI Acceleration module is available in m.2 format with a HAT for RPi devices, offering a wide range of compatibility with devices.
+
+**AMD**
+- [ROCm](#amdrocm-gpu-detector): ROCm can run on AMD Discrete GPUs to provide efficient object detection.
+- [ONNX](#onnx): ROCm will automatically be detected and used as a detector in the `-rocm` Frigate image when a supported ONNX model is configured.
 
 **Intel**
 - [OpenVino](#openvino-detector): OpenVino can run on Intel Arc GPUs, Intel integrated GPUs, and Intel CPUs to provide efficient object detection.
@@ -16,7 +21,7 @@ Frigate supports multiple different detectors that work on different types of ha
 
 **Nvidia**
 - [TensortRT](#nvidia-tensorrt-detector): TensorRT can run on Nvidia GPUs, using one of many default models.
-- [ONNX](#onnx): TensorRT will automatically be detected and used as a detector in the `-tensorrt` Frigate image when a supported ONNX is configured.
+- [ONNX](#onnx): TensorRT will automatically be detected and used as a detector in the `-tensorrt` Frigate image when a supported ONNX model is configured.
 
 **Rockchip**
 - [RKNN](#rockchip-platform): RKNN models can run on Rockchip devices with included NPUs.
@@ -312,6 +317,121 @@ model:
   height: 320
 ```
 
+## AMD/ROCm GPU detector
+
+### Setup
+
+The `rocm` detector supports running YOLO-NAS models on AMD GPUs. Use a frigate docker image with `-rocm` suffix, for example `ghcr.io/blakeblackshear/frigate:stable-rocm`.
+
+### Docker settings for GPU access
+
+ROCm needs access to the `/dev/kfd` and `/dev/dri` devices. When docker or frigate is not run under root then also `video` (and possibly `render` and `ssl/_ssl`) groups should be added.
+
+When running docker directly the following flags should be added for device access:
+
+```bash
+$ docker run --device=/dev/kfd --device=/dev/dri  \
+    ...
+```
+
+When using docker compose:
+
+```yaml
+services:
+  frigate:
+---
+devices:
+  - /dev/dri
+  - /dev/kfd
+```
+
+For reference on recommended settings see [running ROCm/pytorch in Docker](https://rocm.docs.amd.com/projects/install-on-linux/en/develop/how-to/3rd-party/pytorch-install.html#using-docker-with-pytorch-pre-installed).
+
+### Docker settings for overriding the GPU chipset
+
+Your GPU might work just fine without any special configuration but in many cases they need manual settings. AMD/ROCm software stack comes with a limited set of GPU drivers and for newer or missing models you will have to override the chipset version to an older/generic version to get things working.
+
+Also AMD/ROCm does not "officially" support integrated GPUs. It still does work with most of them just fine but requires special settings. One has to configure the `HSA_OVERRIDE_GFX_VERSION` environment variable. See the [ROCm bug report](https://github.com/ROCm/ROCm/issues/1743) for context and examples.
+
+For the rocm frigate build there is some automatic detection:
+
+- gfx90c -> 9.0.0
+- gfx1031 -> 10.3.0
+- gfx1103 -> 11.0.0
+
+If you have something else you might need to override the `HSA_OVERRIDE_GFX_VERSION` at Docker launch. Suppose the version you want is `9.0.0`, then you should configure it from command line as:
+
+```bash
+$ docker run -e HSA_OVERRIDE_GFX_VERSION=9.0.0 \
+    ...
+```
+
+When using docker compose:
+
+```yaml
+services:
+  frigate:
+...
+environment:
+  HSA_OVERRIDE_GFX_VERSION: "9.0.0"
+```
+
+Figuring out what version you need can be complicated as you can't tell the chipset name and driver from the AMD brand name.
+
+- first make sure that rocm environment is running properly by running `/opt/rocm/bin/rocminfo` in the frigate container -- it should list both the CPU and the GPU with their properties
+- find the chipset version you have (gfxNNN) from the output of the `rocminfo` (see below)
+- use a search engine to query what `HSA_OVERRIDE_GFX_VERSION` you need for the given gfx name ("gfxNNN ROCm HSA_OVERRIDE_GFX_VERSION")
+- override the `HSA_OVERRIDE_GFX_VERSION` with relevant value
+- if things are not working check the frigate docker logs
+
+#### Figuring out if AMD/ROCm is working and found your GPU
+
+```bash
+$ docker exec -it frigate /opt/rocm/bin/rocminfo
+```
+
+#### Figuring out your AMD GPU chipset version:
+
+We unset the `HSA_OVERRIDE_GFX_VERSION` to prevent an existing override from messing up the result:
+
+```bash
+$ docker exec -it frigate /bin/bash -c '(unset HSA_OVERRIDE_GFX_VERSION && /opt/rocm/bin/rocminfo |grep gfx)'
+```
+
+### Supported Models
+
+There is no default model provided, the following formats are supported:
+
+#### YOLO-NAS
+
+[YOLO-NAS](https://github.com/Deci-AI/super-gradients/blob/master/YOLONAS.md) models are supported, but not included by default. You can build and download a compatible model with pre-trained weights using [this notebook](https://github.com/frigate/blob/dev/notebooks/YOLO_NAS_Pretrained_Export.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/blakeblackshear/frigate/blob/dev/notebooks/YOLO_NAS_Pretrained_Export.ipynb).
+
+:::warning
+
+The pre-trained YOLO-NAS weights from DeciAI are subject to their license and can't be used commercially. For more information, see: https://docs.deci.ai/super-gradients/latest/LICENSE.YOLONAS.html
+
+:::
+
+The input image size in this notebook is set to 320x320. This results in lower CPU usage and faster inference times without impacting performance in most cases due to the way Frigate crops video frames to areas of interest before running detection. The notebook and config can be updated to 640x640 if desired.
+
+After placing the downloaded onnx model in your config folder, you can use the following configuration:
+
+```yaml
+detectors:
+  onnx:
+    type: rocm
+
+model:
+  model_type: yolonas
+  width: 320 # <--- should match whatever was set in notebook
+  height: 320 # <--- should match whatever was set in notebook
+  input_pixel_format: bgr
+  path: /config/yolo_nas_s.onnx
+  labelmap_path: /labelmap/coco-80.txt
+```
+
+Note that the labelmap uses a subset of the complete COCO label set that has only 80 objects.
+
 ## ONNX
 
 ONNX is an open format for building machine learning models, Frigate supports running ONNX models on CPU, OpenVINO, and TensorRT. On startup Frigate will automatically try to use a GPU if one is available.
@@ -475,7 +595,7 @@ $ cat /sys/kernel/debug/rknpu/load
 
 ## Hailo-8l
 
-This detector is available if you are using the Raspberry Pi 5 with Hailo-8L AI Kit. This has not been tested using the Hailo-8L with other hardware.
+This detector is available for use with Hailo-8 AI Acceleration Module.
 
 ### Configuration
 

@@ -1,0 +1,1 @@
+onnxruntime-rocm @ https://github.com/NickM-27/frigate-onnxruntime-rocm/releases/download/v1.0.0/onnxruntime_rocm-1.17.3-cp39-cp39-linux_x86_64.whl
