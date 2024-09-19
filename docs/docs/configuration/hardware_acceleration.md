@@ -78,6 +78,8 @@ Or map in all the `/dev/video*` devices.
 
 The default driver is `iHD`. You may need to change the driver to `i965` by adding the following environment variable `LIBVA_DRIVER_NAME=i965` to your docker-compose file or [in the `frigate.yaml` for HA OS users](advanced.md#environment_vars).
 
+See [The Intel Docs](https://www.intel.com/content/www/us/en/support/articles/000005505/processors.html to figure out what generation your CPU is.)
+
 :::
 
 ### Via VAAPI
