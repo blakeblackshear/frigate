@@ -77,9 +77,8 @@ class TestFfmpegPresets(unittest.TestCase):
         assert "preset-nvidia-h264" not in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
-        assert (
-            "fps=10,scale_cuda=w=2560:h=1920,hwdownload,eq=gamma=1.05"
-            in (" ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"]))
+        assert "fps=10,scale_cuda=w=2560:h=1920,hwdownload,eq=gamma=1.05" in (
+            " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
 
     def test_default_ffmpeg_input_arg_preset(self):
