@@ -234,7 +234,7 @@ export default function ReviewDetailDialog({
           )}
 
           {pane == "details" && selectedEvent && (
-            <div className="scrollbar-container overflow-x-none mt-0 flex size-full flex-col gap-2 overflow-y-auto overflow-x-hidden">
+            <div className="mt-0 flex size-full flex-col gap-2">
               <ObjectLifecycle event={selectedEvent} setPane={setPane} />
             </div>
           )}
