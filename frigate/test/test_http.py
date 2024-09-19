@@ -11,7 +11,6 @@ from playhouse.shortcuts import model_to_dict
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
-from frigate.api.app import create_app
 from frigate.api.fastapi_app import create_fastapi_app
 from frigate.config import FrigateConfig
 from frigate.models import Event, Recordings
@@ -115,7 +114,7 @@ class TestHttp(unittest.TestCase):
             pass
 
     def test_get_event_list(self):
-        app = create_app(
+        app = create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
             None,
@@ -152,7 +151,7 @@ class TestHttp(unittest.TestCase):
             assert not events
 
     def test_get_good_event(self):
-        app = create_app(
+        app = create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
             None,
@@ -174,7 +173,7 @@ class TestHttp(unittest.TestCase):
         assert event == model_to_dict(Event.get(Event.id == id))
 
     def test_get_bad_event(self):
-        app = create_app(
+        app = create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
             None,
@@ -195,7 +194,7 @@ class TestHttp(unittest.TestCase):
         assert not event
 
     def test_delete_event(self):
-        app = create_app(
+        app = create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
             None,
@@ -218,7 +217,7 @@ class TestHttp(unittest.TestCase):
             assert not event
 
     def test_event_retention(self):
-        app = create_app(
+        app = create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
             None,
@@ -245,7 +244,7 @@ class TestHttp(unittest.TestCase):
             assert event["retain_indefinitely"] is False
 
     def test_event_time_filtering(self):
-        app = create_app(
+        app = create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
             None,
@@ -284,7 +283,7 @@ class TestHttp(unittest.TestCase):
             assert len(events) == 1
 
     def test_set_delete_sub_label(self):
-        app = create_app(
+        app = create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
             None,
@@ -320,7 +319,7 @@ class TestHttp(unittest.TestCase):
             assert event["sub_label"] == ""
 
     def test_sub_label_list(self):
-        app = create_app(
+        app = create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
             None,
@@ -346,7 +345,7 @@ class TestHttp(unittest.TestCase):
             assert sub_labels == [sub_label]
 
     def test_config(self):
-        app = create_app(
+        app = create_fastapi_app(
             FrigateConfig(**self.minimal_config).runtime_config(),
             self.db,
             None,
@@ -386,7 +385,7 @@ class TestHttp(unittest.TestCase):
     def test_stats(self):
         stats = Mock(spec=StatsEmitter)
         stats.get_latest_stats.return_value = self.test_stats
-        app = create_app(
+        app = create_fastapi_app(
             FrigateConfig(**self.minimal_config).runtime_config(),
             self.db,
             None,

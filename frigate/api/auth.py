@@ -182,20 +182,19 @@ def auth(request: Request):
     auth_config: AuthConfig = request.app.frigate_config.auth
     proxy_config: ProxyConfig = request.app.frigate_config.proxy
 
-    success_response = Response(content={}, status_code=202)
+    success_response = Response("", status_code=202)
 
     # dont require auth if the request is on the internal port
     # this header is set by Frigate's nginx proxy, so it cant be spoofed
-    if request.headers.get("x-server-port", 0, type=int) == 5000:
+    if int(request.headers.get("x-server-port", default=0)) == 5000:
         return success_response
 
-    fail_response = Response(content={}, status_code=401)
+    fail_response = Response("", status_code=401)
 
     # ensure the proxy secret matches if configured
     if (
         proxy_config.auth_secret is not None
-        and request.headers.get("x-proxy-secret", "", type=str)
-        != proxy_config.auth_secret
+        and request.headers.get("x-proxy-secret", "") != proxy_config.auth_secret
     ):
         logger.debug("X-Proxy-Secret header does not match configured secret value")
         return fail_response
@@ -207,7 +206,6 @@ def auth(request: Request):
         if proxy_config.header_map.user is not None:
             upstream_user_header_value = request.headers.get(
                 proxy_config.header_map.user,
-                type=str,
                 default="anonymous",
             )
             success_response.headers["remote-user"] = upstream_user_header_value

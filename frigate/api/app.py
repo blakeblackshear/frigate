@@ -14,25 +14,15 @@ from fastapi import APIRouter, Path, Request, Response
 from fastapi.encoders import jsonable_encoder
 from fastapi.params import Depends
 from fastapi.responses import JSONResponse
-from flask import Flask, jsonify, request
 from markupsafe import escape
 from peewee import operator
-from playhouse.sqliteq import SqliteQueueDatabase
-from werkzeug.middleware.proxy_fix import ProxyFix
 
-from frigate.api.auth import get_jwt_secret, limiter
 from frigate.api.defs.app_body import AppConfigSetBody
 from frigate.api.defs.app_query_parameters import AppTimelineHourlyQueryParameters
 from frigate.api.defs.tags import Tags
 from frigate.config import FrigateConfig
 from frigate.const import CONFIG_DIR
-from frigate.embeddings import EmbeddingsContext
-from frigate.events.external import ExternalEventProcessor
 from frigate.models import Event, Timeline
-from frigate.plus import PlusApi
-from frigate.ptz.onvif import OnvifController
-from frigate.stats.emitter import StatsEmitter
-from frigate.storage import StorageMaintainer
 from frigate.util.builtin import (
     clean_camera_user_pass,
     get_tz_modifiers,
@@ -45,56 +35,6 @@ logger = logging.getLogger(__name__)
 
 
 router = APIRouter(tags=[Tags.app])
-
-
-def create_app(
-    frigate_config,
-    database: SqliteQueueDatabase,
-    embeddings: Optional[EmbeddingsContext],
-    detected_frames_processor,
-    storage_maintainer: StorageMaintainer,
-    onvif: OnvifController,
-    external_processor: ExternalEventProcessor,
-    plus_api: PlusApi,
-    stats_emitter: StatsEmitter,
-):
-    app = Flask(__name__)
-
-    @app.before_request
-    def check_csrf():
-        if request.method in ["GET", "HEAD", "OPTIONS", "TRACE"]:
-            pass
-        if "origin" in request.headers and "x-csrf-token" not in request.headers:
-            return jsonify({"success": False, "message": "Missing CSRF header"}), 401
-
-    @app.before_request
-    def _db_connect():
-        if database.is_closed():
-            database.connect()
-
-    @app.teardown_request
-    def _db_close(exc):
-        if not database.is_closed():
-            database.close()
-
-    app.frigate_config = frigate_config
-    app.embeddings = embeddings
-    app.detected_frames_processor = detected_frames_processor
-    app.storage_maintainer = storage_maintainer
-    app.onvif = onvif
-    app.external_processor = external_processor
-    app.plus_api = plus_api
-    app.camera_error_image = None
-    app.stats_emitter = stats_emitter
-    app.jwt_token = get_jwt_secret() if frigate_config.auth.enabled else None
-    # update the request_address with the x-forwarded-for header from nginx
-    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1)
-    # initialize the rate limiter for the login endpoint
-    limiter.init_app(app)
-    if frigate_config.auth.failed_login_rate_limit is None:
-        limiter.enabled = False
-
-    return app
 
 
 @router.get("/")
@@ -306,7 +246,7 @@ def config_save(save_option: str, body: dict):
 
 
 @router.put("/config/set")
-def config_set(body: AppConfigSetBody):
+def config_set(request: Request, body: AppConfigSetBody):
     config_file = os.environ.get("CONFIG_FILE", f"{CONFIG_DIR}/config.yml")
 
     # Check if we can use .yaml instead of .yml

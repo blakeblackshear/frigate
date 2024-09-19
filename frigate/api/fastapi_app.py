@@ -1,7 +1,10 @@
 import logging
 from typing import Optional
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from playhouse.sqliteq import SqliteQueueDatabase
+from starlette_context import middleware, plugins
 
 from frigate.api import app as main_app
 from frigate.api import auth, event, export, media, notification, preview, review
@@ -16,21 +19,62 @@ from frigate.storage import StorageMaintainer
 logger = logging.getLogger(__name__)
 
 
+def check_csrf(request: Request):
+    if request.method in ["GET", "HEAD", "OPTIONS", "TRACE"]:
+        pass
+    if "origin" in request.headers and "x-csrf-token" not in request.headers:
+        return JSONResponse(
+            content={"success": False, "message": "Missing CSRF header"},
+            status_code=401,
+        )
+
+
 def create_fastapi_app(
     frigate_config,
+    database: SqliteQueueDatabase,
     embeddings: Optional[EmbeddingsContext],
     detected_frames_processor,
     storage_maintainer: StorageMaintainer,
     onvif: OnvifController,
+    external_processor: ExternalEventProcessor,
     plus_api: PlusApi,
     stats_emitter: StatsEmitter,
-    external_processor: ExternalEventProcessor,
 ):
     logger.info("Starting FastAPI app")
     app = FastAPI(
         debug=False,
         swagger_ui_parameters={"apisSorter": "alpha", "operationsSorter": "alpha"},
     )
+
+    # update the request_address with the x-forwarded-for header from nginx
+    app.add_middleware(
+        middleware.ContextMiddleware,
+        plugins=(plugins.ForwardedForPlugin(),),
+    )
+
+    # Middleware to connect to DB before and close connection after request
+    # https://github.com/fastapi/full-stack-fastapi-template/issues/224#issuecomment-737423886
+    # https://fastapi.tiangolo.com/tutorial/middleware/#before-and-after-the-response
+    @app.middleware("http")
+    async def frigate_middleware(request: Request, call_next):
+        # Before request
+        check_csrf(request)
+        if database.is_closed():
+            database.connect()
+
+        response = await call_next(request)
+
+        # After request https://stackoverflow.com/a/75487519
+        if not database.is_closed():
+            database.close()
+        return response
+
+    # TODO: Rui
+    # initialize the rate limiter for the login endpoint
+    # limiter.init_app(app)
+    # if frigate_config.auth.failed_login_rate_limit is None:
+    #    limiter.enabled = False
+
     # Routes
     app.include_router(main_app.router)
     app.include_router(media.router)

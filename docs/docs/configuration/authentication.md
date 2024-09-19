@@ -26,6 +26,8 @@ In the event that you are locked out of your instance, you can tell Frigate to r
 
 ## Login failure rate limiting
 
+# TODO: Rui Update to use FastAPI
+
 In order to limit the risk of brute force attacks, rate limiting is available for login failures. This is implemented with Flask-Limiter, and the string notation for valid values is available in [the documentation](https://flask-limiter.readthedocs.io/en/stable/configuration.html#rate-limit-string-notation).
 
 For example, `1/second;5/minute;20/hour` will rate limit the login endpoint when failures occur more than:

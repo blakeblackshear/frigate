@@ -15,13 +15,11 @@ from typing import Optional
 
 import psutil
 import uvicorn
-from fastapi.middleware.wsgi import WSGIMiddleware
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 from pydantic import ValidationError
 
-from frigate.api.app import create_app
 from frigate.api.auth import hash_password
 from frigate.api.fastapi_app import create_fastapi_app
 from frigate.comms.config_updater import ConfigPublisher
@@ -388,7 +386,7 @@ class FrigateApp:
         self.inter_zmq_proxy = ZmqProxy()
 
     def init_web_server(self) -> None:
-        self.flask_app = create_app(
+        self.fastapi_app = create_fastapi_app(
             self.config,
             self.db,
             self.embeddings,
@@ -398,17 +396,6 @@ class FrigateApp:
             self.external_event_processor,
             self.plus_api,
             self.stats_emitter,
-        )
-
-        self.fastapi_app = create_fastapi_app(
-            self.config,
-            self.embeddings,
-            self.detected_frames_processor,
-            self.storage_maintainer,
-            self.onvif_controller,
-            self.plus_api,
-            self.stats_emitter,
-            self.external_event_processor,
         )
 
     def init_onvif(self) -> None:
@@ -761,6 +748,7 @@ class FrigateApp:
         self.start_watchdog()
         self.init_auth()
 
+        # TODO: Rui. What to do in this case? Maybe https://github.com/encode/uvicorn/issues/1579#issuecomment-1419635974
         # Flask only listens for SIGINT, so we need to catch SIGTERM and send SIGINT
         def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:
             os.kill(os.getpid(), signal.SIGINT)
@@ -768,8 +756,6 @@ class FrigateApp:
         signal.signal(signal.SIGTERM, receiveSignal)
 
         try:
-            # Run the flask app inside fastapi: https://fastapi.tiangolo.com/advanced/sub-applications/
-            self.fastapi_app.mount("", WSGIMiddleware(self.flask_app))
             uvicorn.run(
                 self.fastapi_app,
                 host="127.0.0.1",
@@ -778,7 +764,7 @@ class FrigateApp:
         except KeyboardInterrupt:
             pass
 
-        logger.info("FastAPI/Flask has exited...")
+        logger.info("FastAPI has exited...")
 
         self.stop()
 
