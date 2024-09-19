@@ -9,10 +9,12 @@ from pathlib import Path
 import yaml
 
 sys.path.insert(0, "/opt/frigate")
-from frigate.const import BIRDSEYE_PIPE  # noqa: E402
-from frigate.ffmpeg_presets import (  # noqa: E402
-    parse_preset_hardware_acceleration_encode,
+from frigate.const import (
+    BIRDSEYE_PIPE,
+    DEFAULT_FFMPEG_VERSION,
+    INCLUDED_FFMPEG_VERSIONS,
 )
+from frigate.ffmpeg_presets import parse_preset_hardware_acceleration_encode
 
 sys.path.remove("/opt/frigate")
 
@@ -110,13 +112,11 @@ else:
 path = config.get("ffmpeg", {}).get("path", "default")
 if path == "default":
     if shutil.which("ffmpeg") is None:
-        ffmpeg_path = "/usr/lib/ffmpeg/6.0/bin/ffmpeg"
+        ffmpeg_path = f"/usr/lib/ffmpeg/{DEFAULT_FFMPEG_VERSION}/bin/ffmpeg"
     else:
         ffmpeg_path = "ffmpeg"
-elif path == "6.0":
-    ffmpeg_path = "/usr/lib/ffmpeg/6.0/bin/ffmpeg"
-elif path == "5.0":
-    ffmpeg_path = "/usr/lib/ffmpeg/5.0/bin/ffmpeg"
+elif path in INCLUDED_FFMPEG_VERSIONS:
+    ffmpeg_path = f"/usr/lib/ffmpeg/{path}/bin/ffmpeg"
 else:
     ffmpeg_path = f"{path}/bin/ffmpeg"
 
