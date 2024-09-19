@@ -29,6 +29,7 @@ export type SearchResult = {
 };
 
 export type SearchFilter = {
+  query?: string;
   cameras?: string[];
   labels?: string[];
   subLabels?: string[];

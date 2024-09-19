@@ -189,6 +189,8 @@ export default function InputWithTags({
         let timestamp = 0;
 
         switch (type) {
+          case "query":
+            break;
           case "before":
           case "after":
             timestamp = convertLocalDateToTimestamp(value);
@@ -584,24 +586,26 @@ export default function InputWithTags({
                 )}
                 {Object.entries(filters).map(([filterType, filterValues]) =>
                   Array.isArray(filterValues) ? (
-                    filterValues.map((value, index) => (
-                      <span
-                        key={`${filterType}-${index}`}
-                        className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm capitalize text-green-800"
-                      >
-                        {filterType.replaceAll("_", " ")}:{" "}
-                        {value.replaceAll("_", " ")}
-                        <button
-                          onClick={() =>
-                            removeFilter(filterType as FilterType, value)
-                          }
-                          className="ml-1 focus:outline-none"
-                          aria-label={`Remove ${filterType}:${value.replaceAll("_", " ")} filter`}
+                    filterValues
+                      .filter(() => filterType !== "query")
+                      .map((value, index) => (
+                        <span
+                          key={`${filterType}-${index}`}
+                          className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm capitalize text-green-800"
                         >
-                          <LuX className="h-3 w-3" />
-                        </button>
-                      </span>
-                    ))
+                          {filterType.replaceAll("_", " ")}:{" "}
+                          {value.replaceAll("_", " ")}
+                          <button
+                            onClick={() =>
+                              removeFilter(filterType as FilterType, value)
+                            }
+                            className="ml-1 focus:outline-none"
+                            aria-label={`Remove ${filterType}:${value.replaceAll("_", " ")} filter`}
+                          >
+                            <LuX className="h-3 w-3" />
+                          </button>
+                        </span>
+                      ))
                   ) : (
                     <span
                       key={filterType}

@@ -125,7 +125,7 @@ export function useSearchEffect(
     const remove = callback(param[1]);
 
     if (remove) {
-      setSearchParams();
+      setSearchParams(undefined, { replace: true });
     }
   }, [param, callback, setSearchParams]);
 }
