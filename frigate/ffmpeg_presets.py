@@ -185,8 +185,14 @@ def parse_preset_hardware_acceleration_scale(
     else:
         scale = PRESETS_HW_ACCEL_SCALE.get(arg, PRESETS_HW_ACCEL_SCALE["default"])
 
-    if ",hwdownload,eq=gamma=1.05" in scale and os.environ.get("FFMPEG_DISABLE_GAMMA_EQUALIZER") is not None:
-        scale.replace(",hwdownload,eq=gamma=1.05", ":format=nv12,hwdownload,format=nv12,format=yuv420p")
+    if (
+        ",hwdownload,eq=gamma=1.05" in scale
+        and os.environ.get("FFMPEG_DISABLE_GAMMA_EQUALIZER") is not None
+    ):
+        scale.replace(
+            ",hwdownload,eq=gamma=1.05",
+            ":format=nv12,hwdownload,format=nv12,format=yuv420p",
+        )
 
     scale = scale.format(fps, width, height).split(" ")
     scale.extend(detect_args)
