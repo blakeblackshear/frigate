@@ -3,6 +3,7 @@ import { useSearchEffect } from "@/hooks/use-overlay-state";
 import { SearchFilter, SearchQuery, SearchResult } from "@/types/search";
 import SearchView from "@/views/search/SearchView";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { TbExclamationCircle } from "react-icons/tb";
 import useSWRInfinite from "swr/infinite";
 
 const API_LIMIT = 25;
@@ -116,10 +117,14 @@ export default function Explore() {
 
   // paging
 
+  // usually slow only on first run while downloading models
+  const [isSlowLoading, setIsSlowLoading] = useState(false);
+
   const getKey = (
     pageIndex: number,
     previousPageData: SearchResult[] | null,
   ): SearchQuery => {
+    if (isSlowLoading && !similaritySearch) return null;
     if (previousPageData && !previousPageData.length) return null; // reached the end
     if (!searchQuery) return null;
 
@@ -143,6 +148,12 @@ export default function Explore() {
     {
       revalidateFirstPage: true,
       revalidateAll: false,
+      onLoadingSlow: () => {
+        if (!similaritySearch) {
+          setIsSlowLoading(true);
+        }
+      },
+      loadingTimeout: 10000,
     },
   );
 
@@ -174,18 +185,33 @@ export default function Explore() {
   }, [isReachingEnd, isLoadingMore, setSize, size, searchResults, searchQuery]);
 
   return (
-    <SearchView
-      search={search}
-      searchTerm={searchTerm}
-      searchFilter={searchFilter}
-      searchResults={searchResults}
-      isLoading={(isLoadingInitialData || isLoadingMore) ?? true}
-      setSearch={setSearch}
-      setSimilaritySearch={(search) => setSearch(`similarity:${search.id}`)}
-      setSearchFilter={setSearchFilter}
-      onUpdateFilter={setSearchFilter}
-      loadMore={loadMore}
-      hasMore={!isReachingEnd}
-    />
+    <>
+      {isSlowLoading && !similaritySearch ? (
+        <div className="absolute inset-0 left-1/2 top-1/2 flex h-96 w-96 -translate-x-1/2 -translate-y-1/2">
+          <div className="flex flex-col items-center justify-center rounded-lg bg-background/50 p-5">
+            <p className="my-5 text-lg">Search Unavailable</p>
+            <TbExclamationCircle className="mb-3 size-10" />
+            <p className="max-w-96 text-center">
+              If this is your first time using Search, be patient while Frigate
+              downloads the necessary embeddings models. Check Frigate logs.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <SearchView
+          search={search}
+          searchTerm={searchTerm}
+          searchFilter={searchFilter}
+          searchResults={searchResults}
+          isLoading={(isLoadingInitialData || isLoadingMore) ?? true}
+          setSearch={setSearch}
+          setSimilaritySearch={(search) => setSearch(`similarity:${search.id}`)}
+          setSearchFilter={setSearchFilter}
+          onUpdateFilter={setSearchFilter}
+          loadMore={loadMore}
+          hasMore={!isReachingEnd}
+        />
+      )}
+    </>
   );
 }
