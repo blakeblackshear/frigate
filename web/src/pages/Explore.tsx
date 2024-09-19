@@ -32,6 +32,11 @@ export default function Explore() {
 
   // search api
 
+  useSearchEffect("query", (query) => {
+    setSearch(query);
+    return false;
+  });
+
   useSearchEffect("similarity_search_id", (similarityId) => {
     setSearch(`similarity:${similarityId}`);
     // @ts-expect-error we want to clear this
