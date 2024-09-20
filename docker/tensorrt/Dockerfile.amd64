@@ -3,8 +3,6 @@
 # https://askubuntu.com/questions/972516/debian-frontend-environment-variable
 ARG DEBIAN_FRONTEND=noninteractive
 
-ARG TRT_BASE=nvcr.io/nvidia/tensorrt:23.03-py3
-
 # Make this a separate target so it can be built/cached optionally
 FROM wheels as trt-wheels
 ARG DEBIAN_FRONTEND
@@ -15,7 +13,7 @@ COPY docker/tensorrt/requirements-amd64.txt /requirements-tensorrt.txt
 RUN mkdir -p /trt-wheels && pip3 wheel --wheel-dir=/trt-wheels -r /requirements-tensorrt.txt
 
 # Build CuDNN
-FROM ${TRT_BASE} AS cudnn-deps
+FROM wget AS cudnn-deps
 
 ARG COMPUTE_LEVEL
 
