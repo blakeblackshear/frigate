@@ -38,7 +38,11 @@ class ONNXDetector(DetectionApi):
         path = detector_config.model.path
         logger.info(f"ONNX: loading {detector_config.model.path}")
 
-        providers = ["CPUExecutionProvider"] if detector_config.device == "CPU" else ort.get_available_providers()
+        providers = (
+            ["CPUExecutionProvider"]
+            if detector_config.device == "CPU"
+            else ort.get_available_providers()
+        )
         options = []
 
         for provider in providers:
