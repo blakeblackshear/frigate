@@ -2,6 +2,7 @@ import logging
 import os
 
 import numpy as np
+from pydantic import Field
 from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
@@ -17,6 +18,7 @@ DETECTOR_KEY = "onnx"
 
 class ONNXDetectorConfig(BaseDetectorConfig):
     type: Literal[DETECTOR_KEY]
+    device: str = Field(default="AUTO", title="Device Type")
 
 
 class ONNXDetector(DetectionApi):
@@ -36,7 +38,11 @@ class ONNXDetector(DetectionApi):
         path = detector_config.model.path
         logger.info(f"ONNX: loading {detector_config.model.path}")
 
-        providers = ort.get_available_providers()
+        providers = (
+            ["CPUExecutionProvider"]
+            if detector_config.device == "CPU"
+            else ort.get_available_providers()
+        )
         options = []
 
         for provider in providers:
@@ -59,7 +65,7 @@ class ONNXDetector(DetectionApi):
                 options.append(
                     {
                         "cache_dir": "/config/model_cache/openvino/ort",
-                        "device_type": "GPU",
+                        "device_type": detector_config.device,
                     }
                 )
             else:
