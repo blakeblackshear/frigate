@@ -56,7 +56,7 @@ export type SearchQueryParams = {
 };
 
 export type SearchQuery = [string, SearchQueryParams] | null;
-export type FilterType = keyof SearchFilter;
+export type FilterType = Exclude<keyof SearchFilter, "query">;
 
 export type SavedSearchQuery = {
   name: string;

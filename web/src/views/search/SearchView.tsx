@@ -281,7 +281,6 @@ export default function SearchView({
               "w-full justify-between md:justify-start lg:justify-end",
             )}
             filter={searchFilter}
-            searchTerm={searchTerm}
             onUpdateFilter={onUpdateFilter}
           />
         )}

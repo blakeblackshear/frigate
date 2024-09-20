@@ -1,5 +1,4 @@
 import { useApiFilterArgs } from "@/hooks/use-api-filter";
-import { useSearchEffect } from "@/hooks/use-overlay-state";
 import { SearchFilter, SearchQuery, SearchResult } from "@/types/search";
 import SearchView from "@/views/search/SearchView";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -21,37 +20,22 @@ export default function Explore() {
     [searchSearchParams],
   );
 
-  // search filter
-
-  const similaritySearch = useMemo(() => {
-    if (!searchTerm.includes("similarity:")) {
-      return undefined;
-    }
-
-    return searchTerm.split(":")[1];
-  }, [searchTerm]);
-
-  // search api
-
-  useSearchEffect("query", (query) => {
-    setSearch(query);
-    return false;
-  });
-
-  useSearchEffect("similarity_search_id", (similarityId) => {
-    setSearch(`similarity:${similarityId}`);
-    // @ts-expect-error we want to clear this
-    setSearchFilter({ ...searchFilter, similarity_search_id: undefined });
-    return false;
-  });
+  const similaritySearch = useMemo(
+    () => searchSearchParams["search_type"] == "similarity",
+    [searchSearchParams],
+  );
 
   useEffect(() => {
     if (!searchTerm && !search) {
       return;
     }
 
+    // switch back to normal search when query is entered
     setSearchFilter({
       ...searchFilter,
+      search_type:
+        similaritySearch && search ? undefined : searchFilter?.search_type,
+      event_id: similaritySearch && search ? undefined : searchFilter?.event_id,
       query: search.length > 0 ? search : undefined,
     });
     // only update when search is updated
@@ -59,41 +43,18 @@ export default function Explore() {
   }, [search]);
 
   const searchQuery: SearchQuery = useMemo(() => {
-    if (similaritySearch) {
-      return [
-        "events/search",
-        {
-          query: similaritySearch,
-          cameras: searchSearchParams["cameras"],
-          labels: searchSearchParams["labels"],
-          sub_labels: searchSearchParams["subLabels"],
-          zones: searchSearchParams["zones"],
-          before: searchSearchParams["before"],
-          after: searchSearchParams["after"],
-          include_thumbnails: 0,
-          search_type: "similarity",
-        },
-      ];
+    // no search parameters
+    if (searchSearchParams && Object.keys(searchSearchParams).length === 0) {
+      return null;
     }
 
-    if (searchTerm) {
-      return [
-        "events/search",
-        {
-          query: searchTerm,
-          cameras: searchSearchParams["cameras"],
-          labels: searchSearchParams["labels"],
-          sub_labels: searchSearchParams["subLabels"],
-          zones: searchSearchParams["zones"],
-          before: searchSearchParams["before"],
-          after: searchSearchParams["after"],
-          search_type: searchSearchParams["search_type"],
-          include_thumbnails: 0,
-        },
-      ];
-    }
-
-    if (searchSearchParams && Object.keys(searchSearchParams).length !== 0) {
+    // parameters, but no search term and not similarity
+    if (
+      searchSearchParams &&
+      Object.keys(searchSearchParams).length !== 0 &&
+      !searchTerm &&
+      !similaritySearch
+    ) {
       return [
         "events",
         {
@@ -112,7 +73,26 @@ export default function Explore() {
       ];
     }
 
-    return null;
+    // parameters and search term
+    if (!similaritySearch) {
+      setSearch(searchTerm);
+    }
+
+    return [
+      "events/search",
+      {
+        query: similaritySearch ? undefined : searchTerm,
+        cameras: searchSearchParams["cameras"],
+        labels: searchSearchParams["labels"],
+        sub_labels: searchSearchParams["subLabels"],
+        zones: searchSearchParams["zones"],
+        before: searchSearchParams["before"],
+        after: searchSearchParams["after"],
+        search_type: searchSearchParams["search_type"],
+        event_id: searchSearchParams["event_id"],
+        include_thumbnails: 0,
+      },
+    ];
   }, [searchTerm, searchSearchParams, similaritySearch]);
 
   // paging
@@ -205,7 +185,13 @@ export default function Explore() {
           searchResults={searchResults}
           isLoading={(isLoadingInitialData || isLoadingMore) ?? true}
           setSearch={setSearch}
-          setSimilaritySearch={(search) => setSearch(`similarity:${search.id}`)}
+          setSimilaritySearch={(search) => {
+            setSearchFilter({
+              ...searchFilter,
+              search_type: ["similarity"],
+              event_id: search.id,
+            });
+          }}
           setSearchFilter={setSearchFilter}
           onUpdateFilter={setSearchFilter}
           loadMore={loadMore}

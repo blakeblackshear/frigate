@@ -180,17 +180,11 @@ export default function InputWithTags({
 
   const createFilter = useCallback(
     (type: FilterType, value: string) => {
-      if (
-        allSuggestions[type as keyof SearchFilter]?.includes(value) ||
-        type === "before" ||
-        type === "after"
-      ) {
+      if (allSuggestions[type as FilterType]?.includes(value)) {
         const newFilters = { ...filters };
         let timestamp = 0;
 
         switch (type) {
-          case "query":
-            break;
           case "before":
           case "after":
             timestamp = convertLocalDateToTimestamp(value);
@@ -268,9 +262,7 @@ export default function InputWithTags({
     (filterType: FilterType, filterValue: string) => {
       const trimmedValue = filterValue.trim();
       if (
-        allSuggestions[filterType as keyof SearchFilter]?.includes(
-          trimmedValue,
-        ) ||
+        allSuggestions[filterType]?.includes(trimmedValue) ||
         ((filterType === "before" || filterType === "after") &&
           trimmedValue.match(/^\d{8}$/))
       ) {
@@ -429,14 +421,14 @@ export default function InputWithTags({
   }, [currentFilterType, inputValue, updateSuggestions]);
 
   useEffect(() => {
-    if (search?.startsWith("similarity:")) {
+    if (filters?.search_type && filters?.search_type.includes("similarity")) {
       setIsSimilaritySearch(true);
       setInputValue("");
     } else {
       setIsSimilaritySearch(false);
       setInputValue(search || "");
     }
-  }, [search]);
+  }, [filters, search]);
 
   return (
     <>
@@ -585,56 +577,57 @@ export default function InputWithTags({
                   </span>
                 )}
                 {Object.entries(filters).map(([filterType, filterValues]) =>
-                  Array.isArray(filterValues) ? (
-                    filterValues
-                      .filter(() => filterType !== "query")
-                      .map((value, index) => (
+                  Array.isArray(filterValues)
+                    ? filterValues
+                        .filter(() => filterType !== "query")
+                        .filter(() => !filterValues.includes("similarity"))
+                        .map((value, index) => (
+                          <span
+                            key={`${filterType}-${index}`}
+                            className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm capitalize text-green-800"
+                          >
+                            {filterType.replaceAll("_", " ")}:{" "}
+                            {value.replaceAll("_", " ")}
+                            <button
+                              onClick={() =>
+                                removeFilter(filterType as FilterType, value)
+                              }
+                              className="ml-1 focus:outline-none"
+                              aria-label={`Remove ${filterType}:${value.replaceAll("_", " ")} filter`}
+                            >
+                              <LuX className="h-3 w-3" />
+                            </button>
+                          </span>
+                        ))
+                    : filterType !== "event_id" && (
                         <span
-                          key={`${filterType}-${index}`}
+                          key={filterType}
                           className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm capitalize text-green-800"
                         >
-                          {filterType.replaceAll("_", " ")}:{" "}
-                          {value.replaceAll("_", " ")}
+                          {filterType}:
+                          {filterType === "before" || filterType === "after"
+                            ? new Date(
+                                (filterType === "before"
+                                  ? (filterValues as number) + 1
+                                  : (filterValues as number)) * 1000,
+                              ).toLocaleDateString(
+                                window.navigator?.language || "en-US",
+                              )
+                            : filterValues}
                           <button
                             onClick={() =>
-                              removeFilter(filterType as FilterType, value)
+                              removeFilter(
+                                filterType as FilterType,
+                                filterValues as string | number,
+                              )
                             }
                             className="ml-1 focus:outline-none"
-                            aria-label={`Remove ${filterType}:${value.replaceAll("_", " ")} filter`}
+                            aria-label={`Remove ${filterType}:${filterValues} filter`}
                           >
                             <LuX className="h-3 w-3" />
                           </button>
                         </span>
-                      ))
-                  ) : (
-                    <span
-                      key={filterType}
-                      className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm capitalize text-green-800"
-                    >
-                      {filterType}:
-                      {filterType === "before" || filterType === "after"
-                        ? new Date(
-                            (filterType === "before"
-                              ? (filterValues as number) + 1
-                              : (filterValues as number)) * 1000,
-                          ).toLocaleDateString(
-                            window.navigator?.language || "en-US",
-                          )
-                        : filterValues}
-                      <button
-                        onClick={() =>
-                          removeFilter(
-                            filterType as FilterType,
-                            filterValues as string | number,
-                          )
-                        }
-                        className="ml-1 focus:outline-none"
-                        aria-label={`Remove ${filterType}:${filterValues} filter`}
-                      >
-                        <LuX className="h-3 w-3" />
-                      </button>
-                    </span>
-                  ),
+                      ),
                 )}
               </div>
             </CommandGroup>
