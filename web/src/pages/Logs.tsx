@@ -458,7 +458,7 @@ function LogLineData({
     <div
       ref={startRef}
       className={cn(
-        "grid w-full cursor-pointer grid-cols-5 gap-2 border-t border-secondary py-2 hover:bg-muted sm:grid-cols-8 md:grid-cols-12",
+        "grid w-full cursor-pointer grid-cols-5 gap-2 border-t border-secondary hover:bg-muted sm:grid-cols-8 md:grid-cols-12",
         className,
         "*:text-sm",
       )}
