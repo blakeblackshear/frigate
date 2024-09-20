@@ -5,6 +5,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from playhouse.sqliteq import SqliteQueueDatabase
 from starlette_context import middleware, plugins
+from starlette_context.plugins import Plugin
 
 from frigate.api import app as main_app
 from frigate.api import auth, event, export, media, notification, preview, review
@@ -27,6 +28,11 @@ def check_csrf(request: Request):
             content={"success": False, "message": "Missing CSRF header"},
             status_code=401,
         )
+
+
+# Used to retrieve the remote-user header: https://starlette-context.readthedocs.io/en/latest/plugins.html#easy-mode
+class RemoteUserPlugin(Plugin):
+    key = "Remote-User"
 
 
 def create_fastapi_app(
