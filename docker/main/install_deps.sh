@@ -56,7 +56,7 @@ if [[ "${TARGETARCH}" == "arm64" ]]; then
     wget -qO btbn-ffmpeg.tar.xz "https://github.com/NickM-27/FFmpeg-Builds/releases/download/autobuild-2022-07-31-12-37/ffmpeg-n5.1-2-g915ef932a3-linuxarm64-gpl-5.1.tar.xz"
     tar -xf btbn-ffmpeg.tar.xz -C /usr/lib/ffmpeg/5.0 --strip-components 1
     rm -rf btbn-ffmpeg.tar.xz /usr/lib/ffmpeg/5.0/doc /usr/lib/ffmpeg/5.0/bin/ffplay
-    wget -qO btbn-ffmpeg.tar.xz "hhttps://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2024-09-19-12-51/ffmpeg-n7.0.2-18-g3e6cec1286-linuxarm64-gpl-7.0.tar.xz"
+    wget -qO btbn-ffmpeg.tar.xz "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2024-09-19-12-51/ffmpeg-n7.0.2-18-g3e6cec1286-linuxarm64-gpl-7.0.tar.xz"
     tar -xf btbn-ffmpeg.tar.xz -C /usr/lib/ffmpeg/7.0 --strip-components 1
     rm -rf btbn-ffmpeg.tar.xz /usr/lib/ffmpeg/7.0/doc /usr/lib/ffmpeg/7.0/bin/ffplay
 fi
