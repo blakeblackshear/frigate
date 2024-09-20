@@ -81,7 +81,7 @@ export default function Explore() {
     return [
       "events/search",
       {
-        query: similaritySearch ? "" : searchTerm,
+        query: similaritySearch ? undefined : searchTerm,
         cameras: searchSearchParams["cameras"],
         labels: searchSearchParams["labels"],
         sub_labels: searchSearchParams["subLabels"],
