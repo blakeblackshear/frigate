@@ -30,12 +30,6 @@ class OvDetector(DetectionApi):
         self.h = detector_config.model.height
         self.w = detector_config.model.width
 
-        if detector_config.device == "AUTO":
-            logger.warning(
-                "OpenVINO AUTO device type is not currently supported. Attempting to use GPU instead."
-            )
-            detector_config.device = "GPU"
-
         if not os.path.isfile(detector_config.model.path):
             logger.error(f"OpenVino model file {detector_config.model.path} not found.")
             raise FileNotFoundError

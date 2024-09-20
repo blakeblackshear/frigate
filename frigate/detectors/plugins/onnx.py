@@ -17,6 +17,7 @@ DETECTOR_KEY = "onnx"
 
 class ONNXDetectorConfig(BaseDetectorConfig):
     type: Literal[DETECTOR_KEY]
+     device: str = Field(default=None, title="Device Type")
 
 
 class ONNXDetector(DetectionApi):
@@ -57,7 +58,7 @@ class ONNXDetector(DetectionApi):
                 options.append(
                     {
                         "cache_dir": "/config/model_cache/openvino/ort",
-                        "device_type": "GPU",
+                        "device_type": "AUTO",
                     }
                 )
             else:
