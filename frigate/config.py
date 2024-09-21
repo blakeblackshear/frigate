@@ -18,6 +18,7 @@ from pydantic import (
     ValidationInfo,
     field_serializer,
     field_validator,
+    model_validator,
 )
 from pydantic.fields import PrivateAttr
 from ruamel.yaml import YAML
@@ -44,7 +45,6 @@ from frigate.ffmpeg_presets import (
     parse_preset_input,
     parse_preset_output_record,
 )
-from frigate.plus import PlusApi
 from frigate.util.builtin import (
     deep_merge,
     escape_special_characters,
@@ -1494,26 +1494,28 @@ class FrigateConfig(FrigateBaseModel):
     )
     version: Optional[str] = Field(default=None, title="Current config version.")
 
-    def runtime_config(self, plus_api: PlusApi = None) -> FrigateConfig:
-        """Merge camera config with globals."""
-        config = self.model_copy(deep=True)
+    @model_validator(mode="after")
+    def post_validation(self, info: ValidationInfo) -> Self:
+        plus_api = None
+        if isinstance(info.context, dict):
+            plus_api = info.context.get("plus_api")
 
         # set notifications state
-        config.notifications.enabled_in_config = config.notifications.enabled
+        self.notifications.enabled_in_config = self.notifications.enabled
 
         # set default min_score for object attributes
         for attribute in ALL_ATTRIBUTE_LABELS:
-            if not config.objects.filters.get(attribute):
-                config.objects.filters[attribute] = FilterConfig(min_score=0.7)
-            elif config.objects.filters[attribute].min_score == 0.5:
-                config.objects.filters[attribute].min_score = 0.7
+            if not self.objects.filters.get(attribute):
+                self.objects.filters[attribute] = FilterConfig(min_score=0.7)
+            elif self.objects.filters[attribute].min_score == 0.5:
+                self.objects.filters[attribute].min_score = 0.7
 
         # auto detect hwaccel args
-        if config.ffmpeg.hwaccel_args == "auto":
-            config.ffmpeg.hwaccel_args = auto_detect_hwaccel()
+        if self.ffmpeg.hwaccel_args == "auto":
+            self.ffmpeg.hwaccel_args = auto_detect_hwaccel()
 
         # Global config to propagate down to camera level
-        global_config = config.model_dump(
+        global_config = self.model_dump(
             include={
                 "audio": ...,
                 "birdseye": ...,
@@ -1531,7 +1533,7 @@ class FrigateConfig(FrigateBaseModel):
             exclude_unset=True,
         )
 
-        for name, camera in config.cameras.items():
+        for name, camera in self.cameras.items():
             merged_config = deep_merge(
                 camera.model_dump(exclude_unset=True), global_config
             )
@@ -1540,7 +1542,7 @@ class FrigateConfig(FrigateBaseModel):
             )
 
             if camera_config.ffmpeg.hwaccel_args == "auto":
-                camera_config.ffmpeg.hwaccel_args = config.ffmpeg.hwaccel_args
+                camera_config.ffmpeg.hwaccel_args = self.ffmpeg.hwaccel_args
 
             for input in camera_config.ffmpeg.inputs:
                 need_record_fourcc = False and "record" in input.roles
@@ -1553,7 +1555,7 @@ class FrigateConfig(FrigateBaseModel):
                     stream_info = {"width": 0, "height": 0, "fourcc": None}
                     try:
                         stream_info = stream_info_retriever.get_stream_info(
-                            config.ffmpeg, input.path
+                            self.ffmpeg, input.path
                         )
                     except Exception:
                         logger.warn(
@@ -1671,8 +1673,12 @@ class FrigateConfig(FrigateBaseModel):
             if not camera_config.live.stream_name:
                 camera_config.live.stream_name = name
 
+            # generate the ffmpeg commands
+            camera_config.create_ffmpeg_cmds()
+            self.cameras[name] = camera_config
+
             verify_config_roles(camera_config)
-            verify_valid_live_stream_name(config, camera_config)
+            verify_valid_live_stream_name(self, camera_config)
             verify_recording_retention(camera_config)
             verify_recording_segments_setup_with_reasonable_time(camera_config)
             verify_zone_objects_are_tracked(camera_config)
@@ -1680,20 +1686,16 @@ class FrigateConfig(FrigateBaseModel):
             verify_autotrack_zones(camera_config)
             verify_motion_and_detect(camera_config)
 
-            # generate the ffmpeg commands
-            camera_config.create_ffmpeg_cmds()
-            config.cameras[name] = camera_config
-
         # get list of unique enabled labels for tracking
-        enabled_labels = set(config.objects.track)
+        enabled_labels = set(self.objects.track)
 
-        for _, camera in config.cameras.items():
+        for camera in self.cameras.values():
             enabled_labels.update(camera.objects.track)
 
-        config.model.create_colormap(sorted(enabled_labels))
-        config.model.check_and_load_plus_model(plus_api)
+        self.model.create_colormap(sorted(enabled_labels))
+        self.model.check_and_load_plus_model(plus_api)
 
-        for key, detector in config.detectors.items():
+        for key, detector in self.detectors.items():
             adapter = TypeAdapter(DetectorConfig)
             model_dict = (
                 detector
@@ -1702,10 +1704,10 @@ class FrigateConfig(FrigateBaseModel):
             )
             detector_config: DetectorConfig = adapter.validate_python(model_dict)
             if detector_config.model is None:
-                detector_config.model = config.model.model_copy()
+                detector_config.model = self.model.model_copy()
             else:
                 path = detector_config.model.path
-                detector_config.model = config.model.model_copy()
+                detector_config.model = self.model.model_copy()
                 detector_config.model.path = path
 
                 if "path" not in model_dict or len(model_dict.keys()) > 1:
@@ -1715,7 +1717,7 @@ class FrigateConfig(FrigateBaseModel):
 
             merged_model = deep_merge(
                 detector_config.model.model_dump(exclude_unset=True, warnings="none"),
-                config.model.model_dump(exclude_unset=True, warnings="none"),
+                self.model.model_dump(exclude_unset=True, warnings="none"),
             )
 
             if "path" not in merged_model:
@@ -1729,9 +1731,9 @@ class FrigateConfig(FrigateBaseModel):
                 plus_api, detector_config.type
             )
             detector_config.model.compute_model_hash()
-            config.detectors[key] = detector_config
+            self.detectors[key] = detector_config
 
-        return config
+        return self
 
     @field_validator("cameras")
     @classmethod
@@ -1743,12 +1745,12 @@ class FrigateConfig(FrigateBaseModel):
         return v
 
     @classmethod
-    def parse_file(cls, config_path, *, is_json=None) -> Self:
+    def parse_file(cls, config_path, **kwargs) -> Self:
         with open(config_path) as f:
-            return FrigateConfig.parse(f, is_json=is_json)
+            return FrigateConfig.parse(f, **kwargs)
 
     @classmethod
-    def parse(cls, config, *, is_json=None) -> Self:
+    def parse(cls, config, *, is_json=None, **context) -> Self:
         # If config is a file, read its contents.
         if hasattr(config, "read"):
             fname = getattr(config, "name", None)
@@ -1773,8 +1775,12 @@ class FrigateConfig(FrigateBaseModel):
             config = yaml.load(config)
 
         # Validate and return the config dict.
-        return cls.model_validate(config)
+        return cls.parse_object(config, **context)
 
     @classmethod
-    def parse_yaml(cls, config_yaml) -> Self:
-        return cls.parse(config_yaml, is_json=False)
+    def parse_object(cls, obj: Any, **context):
+        return cls.model_validate(obj, context=context)
+
+    @classmethod
+    def parse_yaml(cls, config_yaml, **context) -> Self:
+        return cls.parse(config_yaml, is_json=False, **context)

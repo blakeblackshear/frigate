@@ -361,8 +361,8 @@ def config_set():
     json = request.get_json(silent=True) or {}
 
     if json.get("requires_restart", 1) == 0:
-        current_app.frigate_config = FrigateConfig.runtime_config(
-            config_obj, current_app.plus_api
+        current_app.frigate_config = FrigateConfig.parse_object(
+            config_obj, plus_api=current_app.plus_api
         )
 
     return make_response(
