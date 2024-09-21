@@ -6,10 +6,11 @@ import os
 import shutil
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Annotated, Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from pydantic import (
+    AfterValidator,
     BaseModel,
     ConfigDict,
     Field,
@@ -106,6 +107,13 @@ class DateTimeStyleEnum(str, Enum):
     short = "short"
 
 
+def validate_env_string(v: str) -> str:
+    return v.format(**FRIGATE_ENV_VARS)
+
+
+EnvString = Annotated[str, AfterValidator(validate_env_string)]
+
+
 class UIConfig(FrigateBaseModel):
     timezone: Optional[str] = Field(default=None, title="Override UI timezone.")
     time_format: TimeFormatEnum = Field(
@@ -140,7 +148,7 @@ class ProxyConfig(FrigateBaseModel):
     logout_url: Optional[str] = Field(
         default=None, title="Redirect url for logging out with proxy."
     )
-    auth_secret: Optional[str] = Field(
+    auth_secret: Optional[EnvString] = Field(
         default=None,
         title="Secret value for proxy authentication.",
     )
@@ -211,8 +219,10 @@ class MqttConfig(FrigateBaseModel):
     stats_interval: int = Field(
         default=60, ge=FREQUENCY_STATS_POINTS, title="MQTT Camera Stats Interval"
     )
-    user: Optional[str] = Field(None, title="MQTT Username")
-    password: Optional[str] = Field(None, title="MQTT Password", validate_default=True)
+    user: Optional[EnvString] = Field(None, title="MQTT Username")
+    password: Optional[EnvString] = Field(
+        None, title="MQTT Password", validate_default=True
+    )
     tls_ca_certs: Optional[str] = Field(None, title="MQTT TLS CA Certificates")
     tls_client_cert: Optional[str] = Field(None, title="MQTT TLS Client Certificate")
     tls_client_key: Optional[str] = Field(None, title="MQTT TLS Client Key")
@@ -287,8 +297,8 @@ class PtzAutotrackConfig(FrigateBaseModel):
 class OnvifConfig(FrigateBaseModel):
     host: str = Field(default="", title="Onvif Host")
     port: int = Field(default=8000, title="Onvif Port")
-    user: Optional[str] = Field(None, title="Onvif Username")
-    password: Optional[str] = Field(None, title="Onvif Password")
+    user: Optional[EnvString] = Field(None, title="Onvif Username")
+    password: Optional[EnvString] = Field(None, title="Onvif Password")
     autotracking: PtzAutotrackConfig = Field(
         default_factory=PtzAutotrackConfig,
         title="PTZ auto tracking config.",
@@ -759,7 +769,7 @@ class GenAIConfig(FrigateBaseModel):
         default=GenAIProviderEnum.openai, title="GenAI provider."
     )
     base_url: Optional[str] = Field(None, title="Provider base url.")
-    api_key: Optional[str] = Field(None, title="Provider API key.")
+    api_key: Optional[EnvString] = Field(None, title="Provider API key.")
     model: str = Field(default="gpt-4o", title="GenAI model.")
     prompt: str = Field(
         default="Describe the {label} in the sequence of images with as much detail as possible. Do not describe the background.",
@@ -929,7 +939,7 @@ class CameraRoleEnum(str, Enum):
 
 
 class CameraInput(FrigateBaseModel):
-    path: str = Field(title="Camera input path.")
+    path: EnvString = Field(title="Camera input path.")
     roles: List[CameraRoleEnum] = Field(title="Roles assigned to this input.")
     global_args: Union[str, List[str]] = Field(
         default_factory=list, title="FFmpeg global arguments."
@@ -1488,23 +1498,8 @@ class FrigateConfig(FrigateBaseModel):
         """Merge camera config with globals."""
         config = self.model_copy(deep=True)
 
-        # Proxy secret substitution
-        if config.proxy.auth_secret:
-            config.proxy.auth_secret = config.proxy.auth_secret.format(
-                **FRIGATE_ENV_VARS
-            )
-
-        # MQTT user/password substitutions
-        if config.mqtt.user or config.mqtt.password:
-            config.mqtt.user = config.mqtt.user.format(**FRIGATE_ENV_VARS)
-            config.mqtt.password = config.mqtt.password.format(**FRIGATE_ENV_VARS)
-
         # set notifications state
         config.notifications.enabled_in_config = config.notifications.enabled
-
-        # GenAI substitution
-        if config.genai.api_key:
-            config.genai.api_key = config.genai.api_key.format(**FRIGATE_ENV_VARS)
 
         # set default min_score for object attributes
         for attribute in ALL_ATTRIBUTE_LABELS:
@@ -1610,18 +1605,6 @@ class FrigateConfig(FrigateBaseModel):
             if camera_config.detect.stationary.interval is None:
                 camera_config.detect.stationary.interval = stationary_threshold
 
-            # FFMPEG input substitution
-            for input in camera_config.ffmpeg.inputs:
-                input.path = input.path.format(**FRIGATE_ENV_VARS)
-
-            # ONVIF substitution
-            if camera_config.onvif.user or camera_config.onvif.password:
-                camera_config.onvif.user = camera_config.onvif.user.format(
-                    **FRIGATE_ENV_VARS
-                )
-                camera_config.onvif.password = camera_config.onvif.password.format(
-                    **FRIGATE_ENV_VARS
-                )
             # set config pre-value
             camera_config.audio.enabled_in_config = camera_config.audio.enabled
             camera_config.record.enabled_in_config = camera_config.record.enabled
