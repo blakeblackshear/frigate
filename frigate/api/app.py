@@ -160,7 +160,6 @@ def config_raw():
         raw_config = f.read()
         f.close()
 
-        # TODO: How to return
         return raw_config, 200
 
 

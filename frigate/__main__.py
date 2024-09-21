@@ -16,8 +16,6 @@ def main() -> None:
     )
 
     threading.current_thread().name = "frigate"
-    # TODO: Rui. Do we need this?
-    # cli.show_server_banner = lambda *x: None
 
     # Run the main application.
     FrigateApp().start()
