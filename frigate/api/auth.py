@@ -16,6 +16,7 @@ from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse, RedirectResponse
 from joserfc import jwt
 from peewee import DoesNotExist
+from slowapi import Limiter
 
 from frigate.api.defs.app_body import (
     AppPostLoginBody,
@@ -72,17 +73,6 @@ def get_remote_addr(request: Request):
 
     # if there wasn't anything in the route, just return the default
     return request.remote_addr or "127.0.0.1"
-
-
-# TODO: Rui
-# limiter = Limiter(
-#    get_remote_addr,
-#    storage_uri="memory://",
-# )
-
-
-def get_rate_limit(request: Request):
-    return request.app.frigate_config.auth.failed_login_rate_limit
 
 
 def get_jwt_secret() -> str:
@@ -306,9 +296,17 @@ def logout(request: Request):
     return response
 
 
+limiter = Limiter(key_func=get_remote_addr)
+
+
+def get_rate_limit(request: Request):
+    return request.app.frigate_config.auth.failed_login_rate_limit
+
+
 @router.post("/login")
-# TODO: Rui Implement limiter for FastAPI
-# @limiter.limit(get_rate_limit, deduct_when=lambda response: response.status_code == 400)
+# Ideally, this would be a decorator @limiter.limit(limit_value=get_rate_limit) but that way the request object is not passed to the method
+# See: https://github.com/laurentS/slowapi/issues/41
+# @limiter.limit(limit_value=get_rate_limit)
 def login(request: Request, body: AppPostLoginBody):
     JWT_COOKIE_NAME = request.app.frigate_config.auth.cookie_name
     JWT_COOKIE_SECURE = request.app.frigate_config.auth.cookie_secure
@@ -325,7 +323,7 @@ def login(request: Request, body: AppPostLoginBody):
     if verify_password(password, password_hash):
         expiration = int(time.time()) + JWT_SESSION_LENGTH
         encoded_jwt = create_encoded_jwt(user, expiration, request.app.jwt_token)
-        response = Response({}, 200)
+        response = Response("", 200)
         set_jwt_cookie(
             response, JWT_COOKIE_NAME, encoded_jwt, expiration, JWT_COOKIE_SECURE
         )

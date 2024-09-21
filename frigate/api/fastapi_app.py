@@ -4,12 +4,15 @@ from typing import Optional
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from playhouse.sqliteq import SqliteQueueDatabase
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 from starlette_context import middleware, plugins
 from starlette_context.plugins import Plugin
 
 from frigate.api import app as main_app
 from frigate.api import auth, event, export, media, notification, preview, review
-from frigate.api.auth import get_jwt_secret
+from frigate.api.auth import get_jwt_secret, limiter
 from frigate.embeddings import EmbeddingsContext
 from frigate.events.external import ExternalEventProcessor
 from frigate.plus import PlusApi
@@ -53,6 +56,7 @@ def create_fastapi_app(
     )
 
     # update the request_address with the x-forwarded-for header from nginx
+    # https://starlette-context.readthedocs.io/en/latest/plugins.html#forwarded-for
     app.add_middleware(
         middleware.ContextMiddleware,
         plugins=(plugins.ForwardedForPlugin(),),
@@ -75,11 +79,9 @@ def create_fastapi_app(
             database.close()
         return response
 
-    # TODO: Rui
-    # initialize the rate limiter for the login endpoint
-    # limiter.init_app(app)
-    # if frigate_config.auth.failed_login_rate_limit is None:
-    #    limiter.enabled = False
+    app.state.limiter = limiter
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+    app.add_middleware(SlowAPIMiddleware)
 
     # Routes
     app.include_router(main_app.router)

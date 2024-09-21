@@ -18,8 +18,8 @@ from fastapi import APIRouter, Path, Query, Request, Response
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from peewee import DoesNotExist, fn
 from tzlocal import get_localzone_name
-from werkzeug.utils import secure_filename
 
+from frigate.api.defs.media_query_parameters import MediaLatestFrameQueryParams
 from frigate.api.defs.tags import Tags
 from frigate.config import FrigateConfig
 from frigate.const import (
@@ -37,6 +37,11 @@ logger = logging.getLogger(__name__)
 
 
 router = APIRouter(tags=[Tags.media])
+
+
+# TODO: Rui Implement or get from existing 3rd party
+def secure_filename(file_name: str):
+    return file_name
 
 
 @router.get("/media/camera/{camera_name}")
