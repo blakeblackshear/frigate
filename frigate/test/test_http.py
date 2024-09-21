@@ -128,7 +128,7 @@ class TestHttp(unittest.TestCase):
         id = "123456.random"
         id2 = "7890.random"
 
-        with app.test_client() as client:
+        with TestClient(app) as client:
             _insert_mock_event(id)
             events = client.get("/events").json
             assert events
@@ -164,7 +164,7 @@ class TestHttp(unittest.TestCase):
         )
         id = "123456.random"
 
-        with app.test_client() as client:
+        with TestClient(app) as client:
             _insert_mock_event(id)
             event = client.get(f"/events/{id}").json
 
@@ -187,7 +187,7 @@ class TestHttp(unittest.TestCase):
         id = "123456.random"
         bad_id = "654321.other"
 
-        with app.test_client() as client:
+        with TestClient(app) as client:
             _insert_mock_event(id)
             event = client.get(f"/events/{bad_id}").json
 
@@ -207,7 +207,7 @@ class TestHttp(unittest.TestCase):
         )
         id = "123456.random"
 
-        with app.test_client() as client:
+        with TestClient(app) as client:
             _insert_mock_event(id)
             event = client.get(f"/events/{id}").json
             assert event
@@ -230,7 +230,7 @@ class TestHttp(unittest.TestCase):
         )
         id = "123456.random"
 
-        with app.test_client() as client:
+        with TestClient(app) as client:
             _insert_mock_event(id)
             client.post(f"/events/{id}/retain")
             event = client.get(f"/events/{id}").json
@@ -260,7 +260,7 @@ class TestHttp(unittest.TestCase):
         morning = 1656590400  # 06/30/2022 6 am (GMT)
         evening = 1656633600  # 06/30/2022 6 pm (GMT)
 
-        with app.test_client() as client:
+        with TestClient(app) as client:
             _insert_mock_event(morning_id, morning)
             _insert_mock_event(evening_id, evening)
             # both events come back
@@ -297,7 +297,7 @@ class TestHttp(unittest.TestCase):
         id = "123456.random"
         sub_label = "sub"
 
-        with app.test_client() as client:
+        with TestClient(app) as client:
             _insert_mock_event(id)
             client.post(
                 f"/events/{id}/sub_label",
@@ -333,7 +333,7 @@ class TestHttp(unittest.TestCase):
         id = "123456.random"
         sub_label = "sub"
 
-        with app.test_client() as client:
+        with TestClient(app) as client:
             _insert_mock_event(id)
             client.post(
                 f"/events/{id}/sub_label",
@@ -357,7 +357,7 @@ class TestHttp(unittest.TestCase):
             None,
         )
 
-        with app.test_client() as client:
+        with TestClient(app) as client:
             config = client.get("/config").json
             assert config
             assert config["cameras"]["front_door"]
@@ -397,7 +397,7 @@ class TestHttp(unittest.TestCase):
             stats,
         )
 
-        with app.test_client() as client:
+        with TestClient(app) as client:
             full_stats = client.get("/stats").json
             assert full_stats == self.test_stats
 
