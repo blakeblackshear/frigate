@@ -20,7 +20,10 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from peewee import DoesNotExist, fn
 from tzlocal import get_localzone_name
 
-from frigate.api.defs.media_query_parameters import MediaLatestFrameQueryParams
+from frigate.api.defs.media_query_parameters import (
+    MediaEventsSnapshotQueryParams,
+    MediaLatestFrameQueryParams,
+)
 from frigate.api.defs.tags import Tags
 from frigate.config import FrigateConfig
 from frigate.const import (
@@ -984,12 +987,7 @@ def event_snapshot_clean(request: Request, event_id: str, download: bool = False
 def event_snapshot(
     request: Request,
     event_id: str,
-    download: bool = False,
-    timestamp: Optional[int] = None,
-    bbox: Optional[int] = None,
-    crop: Optional[int] = None,
-    height: Optional[int] = None,
-    quality: Optional[int] = 70,
+    params: MediaEventsSnapshotQueryParams = Depends(),
 ):
     event_complete = False
     jpg_bytes = None
@@ -1015,11 +1013,11 @@ def event_snapshot(
                     tracked_obj = camera_state.tracked_objects.get(event_id)
                     if tracked_obj is not None:
                         jpg_bytes = tracked_obj.get_jpg_bytes(
-                            timestamp=timestamp,
-                            bounding_box=bbox,
-                            crop=crop,
-                            height=height,
-                            quality=quality,
+                            timestamp=params.timestamp,
+                            bounding_box=params.bbox,
+                            crop=params.crop,
+                            height=params.height,
+                            quality=params.quality,
                         )
         except Exception:
             return JSONResponse(
@@ -1041,7 +1039,7 @@ def event_snapshot(
         "Cache-Control": "private, max-age=31536000" if event_complete else "no-store",
     }
 
-    if download:
+    if params.download:
         headers["Content-Disposition"] = f"attachment; filename=snapshot-{event_id}.jpg"
 
     return StreamingResponse(

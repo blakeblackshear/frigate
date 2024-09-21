@@ -21,3 +21,11 @@ class MediaLatestFrameQueryParams(BaseModel):
     regions: Optional[int] = None
     quality: Optional[int] = 70
     height: Optional[int] = None
+
+class MediaEventsSnapshotQueryParams(BaseModel):
+    download: bool = False,
+    timestamp: Optional[int] = None,
+    bbox: Optional[int] = None,
+    crop: Optional[int] = None,
+    height: Optional[int] = None,
+    quality: Optional[int] = 70,
