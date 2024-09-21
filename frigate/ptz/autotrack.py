@@ -268,9 +268,9 @@ class PtzAutoTracker:
                 self.ptz_metrics[camera]["ptz_autotracker_enabled"].value = False
                 return
 
-            movestatus_supported = self.onvif.get_service_capabilities(camera)
+            move_status_supported = self.onvif.get_service_capabilities(camera)
 
-            if movestatus_supported is None or movestatus_supported.lower() != "true":
+            if move_status_supported is None or move_status_supported.lower() != "true":
                 logger.warning(
                     f"Disabling autotracking for {camera}: ONVIF MoveStatus not supported"
                 )
@@ -807,8 +807,8 @@ class PtzAutoTracker:
         invalid_delta = np.any(delta > delta_thresh)
 
         # Check variance
-        stdevs = np.std(velocities, axis=0)
-        high_variances = np.any(stdevs > var_thresh)
+        stdev_list = np.std(velocities, axis=0)
+        high_variances = np.any(stdev_list > var_thresh)
 
         # Check direction difference
         velocities = np.round(velocities)

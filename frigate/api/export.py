@@ -149,9 +149,9 @@ def export_delete(id: str):
         try:
             if process.name() != "ffmpeg":
                 continue
-            flist = process.open_files()
-            if flist:
-                for nt in flist:
+            file_list = process.open_files()
+            if file_list:
+                for nt in file_list:
                     if nt.path.startswith(EXPORT_DIR):
                         files_in_use.append(nt.path.split("/")[-1])
         except psutil.Error:

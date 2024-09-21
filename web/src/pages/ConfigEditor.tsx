@@ -31,6 +31,7 @@ function ConfigEditor() {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const modelRef = useRef<monaco.editor.ITextModel | null>(null);
   const configRef = useRef<HTMLDivElement | null>(null);
+  const schemaConfiguredRef = useRef(false);
 
   const onHandleSaveConfig = useCallback(
     async (save_option: SaveOptions) => {
@@ -79,50 +80,59 @@ function ConfigEditor() {
       return;
     }
 
-    if (modelRef.current != null) {
-      // we don't need to recreate the editor if it already exists
-      editorRef.current?.layout();
-      return;
+    const modelUri = monaco.Uri.parse(
+      `a://b/api/config/schema_${Date.now()}.json`,
+    );
+
+    // Configure Monaco YAML schema only once
+    if (!schemaConfiguredRef.current) {
+      configureMonacoYaml(monaco, {
+        enableSchemaRequest: true,
+        hover: true,
+        completion: true,
+        validate: true,
+        format: true,
+        schemas: [
+          {
+            uri: `${apiHost}api/config/schema.json`,
+            fileMatch: [String(modelUri)],
+          },
+        ],
+      });
+      schemaConfiguredRef.current = true;
     }
 
-    const modelUri = monaco.Uri.parse("a://b/api/config/schema.json");
-
-    if (monaco.editor.getModels().length > 0) {
-      modelRef.current = monaco.editor.getModel(modelUri);
-    } else {
+    if (!modelRef.current) {
       modelRef.current = monaco.editor.createModel(config, "yaml", modelUri);
+    } else {
+      modelRef.current.setValue(config);
     }
-
-    configureMonacoYaml(monaco, {
-      enableSchemaRequest: true,
-      hover: true,
-      completion: true,
-      validate: true,
-      format: true,
-      schemas: [
-        {
-          uri: `${apiHost}api/config/schema.json`,
-          fileMatch: [String(modelUri)],
-        },
-      ],
-    });
 
     const container = configRef.current;
 
-    if (container != null) {
+    if (container && !editorRef.current) {
       editorRef.current = monaco.editor.create(container, {
         language: "yaml",
         model: modelRef.current,
         scrollBeyondLastLine: false,
         theme: (systemTheme || theme) == "dark" ? "vs-dark" : "vs-light",
       });
+    } else if (editorRef.current) {
+      editorRef.current.setModel(modelRef.current);
     }
 
     return () => {
-      configRef.current = null;
-      modelRef.current = null;
+      if (editorRef.current) {
+        editorRef.current.dispose();
+        editorRef.current = null;
+      }
+      if (modelRef.current) {
+        modelRef.current.dispose();
+        modelRef.current = null;
+      }
+      schemaConfiguredRef.current = false;
     };
-  });
+  }, [config, apiHost, systemTheme, theme]);
 
   // monitoring state
 

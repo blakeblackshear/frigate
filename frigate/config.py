@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import shutil
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -25,7 +26,9 @@ from frigate.const import (
     CACHE_DIR,
     CACHE_SEGMENT_FORMAT,
     DEFAULT_DB_PATH,
+    DEFAULT_FFMPEG_VERSION,
     FREQUENCY_STATS_POINTS,
+    INCLUDED_FFMPEG_VERSIONS,
     MAX_PRE_CAPTURE,
     REGEX_CAMERA_NAME,
     YAML_EXT,
@@ -762,8 +765,14 @@ class GenAIConfig(FrigateBaseModel):
     object_prompts: Dict[str, str] = Field(default={}, title="Object specific prompts.")
 
 
-class GenAICameraConfig(FrigateBaseModel):
+# uses BaseModel because some global attributes are not available at the camera level
+class GenAICameraConfig(BaseModel):
     enabled: bool = Field(default=False, title="Enable GenAI for camera.")
+    prompt: str = Field(
+        default="Describe the {label} in the sequence of images with as much detail as possible. Do not describe the background.",
+        title="Default caption prompt.",
+    )
+    object_prompts: Dict[str, str] = Field(default={}, title="Object specific prompts.")
 
 
 class AudioConfig(FrigateBaseModel):
@@ -888,28 +897,24 @@ class FfmpegConfig(FrigateBaseModel):
     @property
     def ffmpeg_path(self) -> str:
         if self.path == "default":
-            if int(os.getenv("LIBAVFORMAT_VERSION_MAJOR", "59")) >= 59:
-                return "/usr/lib/ffmpeg/7.0/bin/ffmpeg"
+            if shutil.which("ffmpeg") is None:
+                return f"/usr/lib/ffmpeg/{DEFAULT_FFMPEG_VERSION}/bin/ffmpeg"
             else:
                 return "ffmpeg"
-        elif self.path == "7.0":
-            return "/usr/lib/ffmpeg/7.0/bin/ffmpeg"
-        elif self.path == "5.0":
-            return "/usr/lib/ffmpeg/5.0/bin/ffmpeg"
+        elif self.path in INCLUDED_FFMPEG_VERSIONS:
+            return f"/usr/lib/ffmpeg/{self.path}/bin/ffmpeg"
         else:
             return f"{self.path}/bin/ffmpeg"
 
     @property
     def ffprobe_path(self) -> str:
         if self.path == "default":
-            if int(os.getenv("LIBAVFORMAT_VERSION_MAJOR", "59")) >= 59:
-                return "/usr/lib/ffmpeg/7.0/bin/ffprobe"
+            if shutil.which("ffprobe") is None:
+                return f"/usr/lib/ffmpeg/{DEFAULT_FFMPEG_VERSION}/bin/ffprobe"
             else:
                 return "ffprobe"
-        elif self.path == "7.0":
-            return "/usr/lib/ffmpeg/7.0/bin/ffprobe"
-        elif self.path == "5.0":
-            return "/usr/lib/ffmpeg/5.0/bin/ffprobe"
+        elif self.path in INCLUDED_FFMPEG_VERSIONS:
+            return f"/usr/lib/ffmpeg/{self.path}/bin/ffprobe"
         else:
             return f"{self.path}/bin/ffprobe"
 
@@ -1187,7 +1192,7 @@ class CameraConfig(FrigateBaseModel):
                 + ffmpeg_output_args
             )
 
-        # if there arent any outputs enabled for this input
+        # if there aren't any outputs enabled for this input
         if len(ffmpeg_output_args) == 0:
             return None
 
@@ -1519,7 +1524,7 @@ class FrigateConfig(FrigateBaseModel):
                 "live": ...,
                 "objects": ...,
                 "review": ...,
-                "genai": {"enabled"},
+                "genai": ...,
                 "motion": ...,
                 "detect": ...,
                 "ffmpeg": ...,

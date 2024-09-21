@@ -335,6 +335,10 @@ class OnvifController:
             )
             self._stop(camera_name)
 
+        if "pt" not in self.cams[camera_name]["features"]:
+            logger.error(f"{camera_name} does not support ONVIF pan/tilt movement.")
+            return
+
         self.cams[camera_name]["active"] = True
         onvif: ONVIFCamera = self.cams[camera_name]["onvif"]
         move_request = self.cams[camera_name]["move_request"]
@@ -475,6 +479,10 @@ class OnvifController:
                 f"{camera_name} is already performing an action, stopping..."
             )
             self._stop(camera_name)
+
+        if "zoom" not in self.cams[camera_name]["features"]:
+            logger.error(f"{camera_name} does not support ONVIF zooming.")
+            return
 
         self.cams[camera_name]["active"] = True
         onvif: ONVIFCamera = self.cams[camera_name]["onvif"]

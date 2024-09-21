@@ -1138,12 +1138,14 @@ class TrackedObjectProcessor(threading.Thread):
                 )
             )
             or (
-                not review_config.detections.labels
-                or obj.obj_data["label"] in review_config.detections.labels
-            )
-            and (
-                not review_config.detections.required_zones
-                or set(obj.entered_zones) & set(review_config.alerts.required_zones)
+                (
+                    not review_config.detections.labels
+                    or obj.obj_data["label"] in review_config.detections.labels
+                )
+                and (
+                    not review_config.detections.required_zones
+                    or set(obj.entered_zones) & set(review_config.alerts.required_zones)
+                )
             )
         ):
             logger.debug(

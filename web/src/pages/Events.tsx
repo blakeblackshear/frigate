@@ -14,6 +14,10 @@ import {
   ReviewSummary,
   SegmentedReviewData,
 } from "@/types/review";
+import {
+  getBeginningOfDayTimestamp,
+  getEndOfDayTimestamp,
+} from "@/utils/dateUtil";
 import EventView from "@/views/events/EventView";
 import { RecordingView } from "@/views/recording/RecordingView";
 import axios from "axios";
@@ -43,10 +47,17 @@ export default function Events() {
       .get(`review/${reviewId}`)
       .then((resp) => {
         if (resp.status == 200 && resp.data) {
+          const startTime = resp.data.start_time - REVIEW_PADDING;
+          const date = new Date(startTime * 1000);
+
+          setReviewFilter({
+            after: getBeginningOfDayTimestamp(date),
+            before: getEndOfDayTimestamp(date),
+          });
           setRecording(
             {
               camera: resp.data.camera,
-              startTime: resp.data.start_time - REVIEW_PADDING,
+              startTime,
               severity: resp.data.severity,
             },
             true,

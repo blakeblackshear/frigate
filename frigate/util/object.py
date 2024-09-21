@@ -511,12 +511,12 @@ def reduce_detections(
             # due to min score requirement of NMSBoxes
             confidences = [0.6 if clipped(o, frame_shape) else o[1] for o in group]
 
-            idxs = cv2.dnn.NMSBoxes(
+            indices = cv2.dnn.NMSBoxes(
                 boxes, confidences, 0.5, LABEL_NMS_MAP.get(label, LABEL_NMS_DEFAULT)
             )
 
             # add objects
-            for index in idxs:
+            for index in indices:
                 index = index if isinstance(index, np.int32) else index[0]
                 obj = group[index]
                 selected_objects.append(obj)
