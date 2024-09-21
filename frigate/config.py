@@ -1359,17 +1359,15 @@ def verify_recording_segments_setup_with_reasonable_time(
     if record_args[0].startswith("preset"):
         return
 
-    seg_arg_index = record_args.index("-segment_time")
-
-    if seg_arg_index < 0:
-        raise ValueError(
-            f"Camera {camera_config.name} has no segment_time in recording output args, segment args are required for record."
-        )
+    try:
+        seg_arg_index = record_args.index("-segment_time")
+    except ValueError:
+        raise ValueError(f"Camera {camera_config.name} has no segment_time in \
+                         recording output args, segment args are required for record.")
 
     if int(record_args[seg_arg_index + 1]) > 60:
-        raise ValueError(
-            f"Camera {camera_config.name} has invalid segment_time output arg, segment_time must be 60 or less."
-        )
+        raise ValueError(f"Camera {camera_config.name} has invalid segment_time output arg, \
+                         segment_time must be 60 or less.")
 
 
 def verify_zone_objects_are_tracked(camera_config: CameraConfig) -> None:

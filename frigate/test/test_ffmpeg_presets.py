@@ -134,7 +134,7 @@ class TestFfmpegPresets(unittest.TestCase):
 
     def test_ffmpeg_output_record_not_preset(self):
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["output_args"]["record"] = (
-            "-some output"
+            "-some output -segment_time 10"
         )
         frigate_config = FrigateConfig(**self.default_ffmpeg)
         assert "-some output" in (
