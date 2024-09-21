@@ -10,7 +10,7 @@ class ReviewQueryParams(BaseModel):
     zones: Optional[str] = "all"
     reviewed: Optional[int] = 0
     limit: Optional[int] = None
-    severity: Optional[int] = None
+    severity: Optional[str] = None
     before: Optional[float] = datetime.now().timestamp()
     after: Optional[float] = (datetime.now() - timedelta(hours=24)).timestamp()
 
