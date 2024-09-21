@@ -357,10 +357,7 @@ export default function ObjectLifecycle({
       )}
 
       <div className="relative flex flex-col items-center justify-center">
-        <Carousel
-          className={cn("m-0 w-full", fullscreen && isDesktop && "w-[75%]")}
-          setApi={setMainApi}
-        >
+        <Carousel className="m-0 w-full" setApi={setMainApi}>
           <CarouselContent>
             {eventSequence.map((item, index) => (
               <CarouselItem key={index}>

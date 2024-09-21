@@ -285,14 +285,14 @@ class TensorRtDetector(DetectionApi):
             boxes, scores, classes
         """
         # filter low-conf detections and concatenate results of all yolo layers
-        detections = []
+        detection_list = []
         for o in trt_outputs:
-            dets = o.reshape((-1, 7))
-            dets = dets[dets[:, 4] * dets[:, 6] >= conf_th]
-            detections.append(dets)
-        detections = np.concatenate(detections, axis=0)
+            detections = o.reshape((-1, 7))
+            detections = detections[detections[:, 4] * detections[:, 6] >= conf_th]
+            detection_list.append(detections)
+        detection_list = np.concatenate(detection_list, axis=0)
 
-        return detections
+        return detection_list
 
     def detect_raw(self, tensor_input):
         # Input tensor has the shape of the [height, width, 3]

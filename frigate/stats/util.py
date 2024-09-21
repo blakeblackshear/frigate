@@ -250,7 +250,7 @@ def stats_snapshot(
         ffmpeg_pid = (
             camera_stats["ffmpeg_pid"].value if camera_stats["ffmpeg_pid"] else None
         )
-        cpid = (
+        capture_pid = (
             camera_stats["capture_process"].pid
             if camera_stats["capture_process"]
             else None
@@ -262,7 +262,7 @@ def stats_snapshot(
             "detection_fps": round(camera_stats["detection_fps"].value, 2),
             "detection_enabled": config.cameras[name].detect.enabled,
             "pid": pid,
-            "capture_pid": cpid,
+            "capture_pid": capture_pid,
             "ffmpeg_pid": ffmpeg_pid,
             "audio_rms": round(camera_stats["audio_rms"].value, 4),
             "audio_dBFS": round(camera_stats["audio_dBFS"].value, 4),

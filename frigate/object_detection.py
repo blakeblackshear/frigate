@@ -125,6 +125,7 @@ def run_detector(
         start.value = datetime.datetime.now().timestamp()
         detections = object_detector.detect_raw(input_frame)
         duration = datetime.datetime.now().timestamp() - start.value
+        frame_manager.close(connection_id)
         outputs[connection_id]["np"][:] = detections[:]
         out_events[connection_id].set()
         start.value = 0.0

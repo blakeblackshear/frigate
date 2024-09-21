@@ -7,20 +7,35 @@ JETPACK4_ARGS := ARCH=arm64 BASE_IMAGE=$(JETPACK4_BASE) SLIM_BASE=$(JETPACK4_BAS
 JETPACK5_ARGS := ARCH=arm64 BASE_IMAGE=$(JETPACK5_BASE) SLIM_BASE=$(JETPACK5_BASE) TRT_BASE=$(JETPACK5_BASE)
 
 local-trt: version
-	$(X86_DGPU_ARGS) docker buildx bake --load --file=docker/tensorrt/trt.hcl --set tensorrt.tags=frigate:latest-tensorrt tensorrt
+	$(X86_DGPU_ARGS) docker buildx bake --file=docker/tensorrt/trt.hcl tensorrt \
+		--set tensorrt.tags=frigate:latest-tensorrt \
+		--load
 
 local-trt-jp4: version
-	$(JETPACK4_ARGS) docker buildx bake --load --file=docker/tensorrt/trt.hcl --set tensorrt.tags=frigate:latest-tensorrt-jp4 tensorrt
+	$(JETPACK4_ARGS) docker buildx bake --file=docker/tensorrt/trt.hcl tensorrt \
+		--set tensorrt.tags=frigate:latest-tensorrt-jp4 \
+		--load
 
 local-trt-jp5: version
-	$(JETPACK5_ARGS) docker buildx bake --load --file=docker/tensorrt/trt.hcl --set tensorrt.tags=frigate:latest-tensorrt-jp5 tensorrt
+	$(JETPACK5_ARGS) docker buildx bake --file=docker/tensorrt/trt.hcl tensorrt \
+		--set tensorrt.tags=frigate:latest-tensorrt-jp5 \
+		--load
 
 build-trt:
-	$(X86_DGPU_ARGS) docker buildx bake --file=docker/tensorrt/trt.hcl --set tensorrt.tags=$(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH)-tensorrt tensorrt
-	$(JETPACK4_ARGS) docker buildx bake --file=docker/tensorrt/trt.hcl --set tensorrt.tags=$(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH)-tensorrt-jp4 tensorrt
-	$(JETPACK5_ARGS) docker buildx bake --file=docker/tensorrt/trt.hcl --set tensorrt.tags=$(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH)-tensorrt-jp5 tensorrt
+	$(X86_DGPU_ARGS) docker buildx bake --file=docker/tensorrt/trt.hcl tensorrt \
+		--set tensorrt.tags=$(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH)-tensorrt
+	$(JETPACK4_ARGS) docker buildx bake --file=docker/tensorrt/trt.hcl tensorrt \
+		--set tensorrt.tags=$(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH)-tensorrt-jp4
+	$(JETPACK5_ARGS) docker buildx bake --file=docker/tensorrt/trt.hcl tensorrt \
+		--set tensorrt.tags=$(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH)-tensorrt-jp5
 
 push-trt: build-trt
-	$(X86_DGPU_ARGS) docker buildx bake --push --file=docker/tensorrt/trt.hcl --set tensorrt.tags=$(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH)-tensorrt tensorrt
-	$(JETPACK4_ARGS) docker buildx bake --push --file=docker/tensorrt/trt.hcl --set tensorrt.tags=$(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH)-tensorrt-jp4 tensorrt
-	$(JETPACK5_ARGS) docker buildx bake --push --file=docker/tensorrt/trt.hcl --set tensorrt.tags=$(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH)-tensorrt-jp5 tensorrt
+	$(X86_DGPU_ARGS) docker buildx bake --file=docker/tensorrt/trt.hcl tensorrt \
+		--set tensorrt.tags=$(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH)-tensorrt \
+		--push
+	$(JETPACK4_ARGS) docker buildx bake --file=docker/tensorrt/trt.hcl tensorrt \
+		--set tensorrt.tags=$(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH)-tensorrt-jp4 \
+		--push
+	$(JETPACK5_ARGS) docker buildx bake --file=docker/tensorrt/trt.hcl tensorrt \
+		--set tensorrt.tags=$(IMAGE_REPO):${GITHUB_REF_NAME}-$(COMMIT_HASH)-tensorrt-jp5 \
+		--push

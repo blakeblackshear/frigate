@@ -356,7 +356,10 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
     after = params.after
     before = params.before
 
-    if not query:
+    # for similarity search
+    event_id = params.event_id
+
+    if not query and not event_id:
         return JSONResponse(
             content=(
                 {
@@ -435,7 +438,7 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
     if search_type == "similarity":
         # Grab the ids of events that match the thumbnail image embeddings
         try:
-            search_event: Event = Event.get(Event.id == query)
+            search_event: Event = Event.get(Event.id == event_id)
         except DoesNotExist:
             return JSONResponse(
                 content=(
