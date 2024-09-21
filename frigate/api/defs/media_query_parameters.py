@@ -23,9 +23,20 @@ class MediaLatestFrameQueryParams(BaseModel):
     height: Optional[int] = None
 
 class MediaEventsSnapshotQueryParams(BaseModel):
-    download: bool = False,
-    timestamp: Optional[int] = None,
-    bbox: Optional[int] = None,
-    crop: Optional[int] = None,
-    height: Optional[int] = None,
-    quality: Optional[int] = 70,
+    download: bool = False
+    timestamp: Optional[int] = None
+    bbox: Optional[int] = None
+    crop: Optional[int] = None
+    height: Optional[int] = None
+    quality: Optional[int] = 70
+
+class MediaMjpegFeedQueryParams(BaseModel):
+    fps: int = 3
+    height: int = 360
+    bbox: Optional[int] = None
+    timestamp: Optional[int] = None
+    zones: Optional[int] = None
+    mask: Optional[int] = None
+    motion: Optional[int] = None
+    regions: Optional[int] = None
+

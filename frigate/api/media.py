@@ -8,7 +8,6 @@ import os
 import subprocess as sp
 import time
 from datetime import datetime, timedelta, timezone
-from typing import Optional
 from urllib.parse import unquote
 
 import cv2
@@ -23,6 +22,7 @@ from tzlocal import get_localzone_name
 from frigate.api.defs.media_query_parameters import (
     MediaEventsSnapshotQueryParams,
     MediaLatestFrameQueryParams,
+    MediaMjpegFeedQueryParams,
 )
 from frigate.api.defs.tags import Tags
 from frigate.config import FrigateConfig
@@ -52,22 +52,15 @@ def secure_filename(file_name: str):
 def mjpeg_feed(
     request: Request,
     camera_name: str,
-    fps: int = 3,
-    height: int = 360,
-    bbox: Optional[int] = None,
-    timestamp: Optional[int] = None,
-    zones: Optional[int] = None,
-    mask: Optional[int] = None,
-    motion: Optional[int] = None,
-    regions: Optional[int] = None,
+    params: MediaMjpegFeedQueryParams = Depends(),
 ):
     draw_options = {
-        "bounding_boxes": bbox,
-        "timestamp": timestamp,
-        "zones": zones,
-        "mask": mask,
-        "motion_boxes": motion,
-        "regions": regions,
+        "bounding_boxes": params.bbox,
+        "timestamp": params.timestamp,
+        "zones": params.zones,
+        "mask": params.mask,
+        "motion_boxes": params.motion,
+        "regions": params.regions,
     }
     if camera_name in request.app.frigate_config.cameras:
         # return a multipart response
@@ -75,8 +68,8 @@ def mjpeg_feed(
             imagestream(
                 request.app.detected_frames_processor,
                 camera_name,
-                fps,
-                height,
+                params.fps,
+                params.height,
                 draw_options,
             ),
             media_type="multipart/x-mixed-replace;boundary=frame",
@@ -194,7 +187,7 @@ def latest_frame(
             cv2.COLOR_YUV2BGR_I420,
         )
 
-        height = int(height or str(frame.shape[0]))
+        height = int(params.height or str(frame.shape[0]))
         width = int(height * frame.shape[1] / frame.shape[0])
 
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
@@ -760,7 +753,7 @@ def label_thumbnail(request: Request, camera_name: str, label: str):
 
 
 @router.get("/media/camera/{camera_name}/label/{label}/clip.mp4")
-def label_clip(camera_name: str, label: str):
+def label_clip(request: Request, camera_name: str, label: str):
     label = unquote(label)
     event_query = Event.select(fn.MAX(Event.id)).where(
         Event.camera == camera_name, Event.has_clip == True
@@ -771,7 +764,7 @@ def label_clip(camera_name: str, label: str):
     try:
         event = event_query.get()
 
-        return event_clip(event.id)
+        return event_clip(request, event.id)
     except DoesNotExist:
         return JSONResponse(
             content={"success": False, "message": "Event not found"}, status_code=404
@@ -1050,7 +1043,7 @@ def event_snapshot(
 
 
 @router.get("/media/events/{event_id}/clip.mp4")
-def event_clip(event_id: str, download: bool = False):
+def event_clip(request: Request, event_id: str, download: bool = False):
     try:
         event: Event = Event.get(Event.id == event_id)
     except DoesNotExist:
@@ -1070,7 +1063,7 @@ def event_clip(event_id: str, download: bool = False):
         end_ts = (
             datetime.now().timestamp() if event.end_time is None else event.end_time
         )
-        return recording_clip(event.camera, event.start_time, end_ts, download)
+        return recording_clip(request, event.camera, event.start_time, end_ts, download)
 
     headers = {
         "Content-Description": "File Transfer",
