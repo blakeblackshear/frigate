@@ -23,11 +23,11 @@ COPY docker/rocm/rocm-pin-600 /etc/apt/preferences.d/
 
 RUN apt-get update
 
-RUN apt-get -y install --no-install-recommends migraphx
+RUN apt-get -y install --no-install-recommends migraphx hipfft roctracer
 RUN apt-get -y install --no-install-recommends migraphx-dev
 
 RUN mkdir -p /opt/rocm-dist/opt/rocm-$ROCM/lib
-RUN cd /opt/rocm-$ROCM/lib && cp -dpr libMIOpen*.so* libamd*.so* libhip*.so* libhsa*.so* libmigraphx*.so* librocm*.so* librocblas*.so* /opt/rocm-dist/opt/rocm-$ROCM/lib/
+RUN cd /opt/rocm-$ROCM/lib && cp -dpr libMIOpen*.so* libamd*.so* libhip*.so* libhsa*.so* libmigraphx*.so* librocm*.so* librocblas*.so* libroctracer*.so* librocfft*.so* /opt/rocm-dist/opt/rocm-$ROCM/lib/
 RUN cd /opt/rocm-dist/opt/ && ln -s rocm-$ROCM rocm
 
 RUN mkdir -p /opt/rocm-dist/etc/ld.so.conf.d/
@@ -69,7 +69,11 @@ RUN apt-get -y install libnuma1
 
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
-COPY docker/rocm/rootfs/ /
+
+COPY docker/rocm/requirements-wheels-rocm.txt /requirements.txt
+RUN python3 -m pip install --upgrade pip \
+    && pip3 uninstall -y onnxruntime-openvino \
+    && pip3 install -r /requirements.txt
 
 #######################################################################
 FROM scratch AS rocm-dist
@@ -100,7 +104,4 @@ ENV HSA_OVERRIDE_GFX_VERSION=$HSA_OVERRIDE_GFX_VERSION
 
 #######################################################################
 FROM rocm-prelim-hsa-override$HSA_OVERRIDE as rocm-deps
-
-# Request yolov8 download at startup
-ENV DOWNLOAD_YOLOV8=1
 

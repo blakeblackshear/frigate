@@ -124,13 +124,25 @@ genai:
   model: llava
   prompt: "Describe the {label} in these images from the {camera} security camera."
   object_prompts:
-    person: "Describe the main person in these images (gender, age, clothing, activity, etc). Do not include where the activity is occurring (sidewalk, concrete, driveway, etc). If delivering a package, include the company the package is from."
+    person: "Describe the main person in these images (gender, age, clothing, activity, etc). Do not include where the activity is occurring (sidewalk, concrete, driveway, etc)."
     car: "Label the primary vehicle in these images with just the name of the company if it is a delivery vehicle, or the color make and model."
+```
+
+Prompts can also be overriden at the camera level to provide a more detailed prompt to the model about your specific camera, if you desire.
+
+```yaml
+cameras:
+  front_door:
+    genai:
+      prompt: "Describe the {label} in these images from the {camera} security camera at the front door of a house, aimed outward toward the street."
+      object_prompts:
+        person: "Describe the main person in these images (gender, age, clothing, activity, etc). Do not include where the activity is occurring (sidewalk, concrete, driveway, etc). If delivering a package, include the company the package is from."
+        cat: "Describe the cat in these images (color, size, tail). Indicate whether or not the cat is by the flower pots. If the cat is chasing a mouse, make up a name for the mouse."
 ```
 
 ### Experiment with prompts
 
-Providers also has a public facing chat interface for their models. Download a couple different thumbnails or snapshots from Frigate and try new things in the playground to get descriptions to your liking before updating the prompt in Frigate.
+Many providers also have a public facing chat interface for their models. Download a couple of different thumbnails or snapshots from Frigate and try new things in the playground to get descriptions to your liking before updating the prompt in Frigate.
 
 - OpenAI - [ChatGPT](https://chatgpt.com)
 - Gemini - [Google AI Studio](https://aistudio.google.com)

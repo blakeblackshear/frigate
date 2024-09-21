@@ -44,9 +44,10 @@ class TimelineProcessor(threading.Thread):
                 continue
 
             if input_type == EventTypeEnum.tracked_object:
-                self.handle_object_detection(
-                    camera, event_type, prev_event_data, event_data
-                )
+                if prev_event_data is not None and event_data is not None:
+                    self.handle_object_detection(
+                        camera, event_type, prev_event_data, event_data
+                    )
             elif input_type == EventTypeEnum.api:
                 self.handle_api_entry(camera, event_type, event_data)
 

@@ -65,24 +65,33 @@ Or map in all the `/dev/video*` devices.
 
 ## Intel-based CPUs
 
+**Recommended hwaccel Preset**
+
+| CPU Generation | Intel Driver | Recommended Preset | Notes                               |
+| -------------- | ------------ | ------------------ | ----------------------------------- |
+| gen1 - gen7    | i965         | preset-vaapi       | qsv is not supported                |
+| gen8 - gen12   | iHD          | preset-vaapi       | preset-intel-qsv-* can also be used |
+| gen13+         | iHD / Xe     | preset-intel-qsv-* |                                     |
+| Intel Arc GPU  | iHD / Xe     | preset-intel-qsv-* |                                     |
+
+:::note
+
+The default driver is `iHD`. You may need to change the driver to `i965` by adding the following environment variable `LIBVA_DRIVER_NAME=i965` to your docker-compose file or [in the `frigate.yaml` for HA OS users](advanced.md#environment_vars).
+
+See [The Intel Docs](https://www.intel.com/content/www/us/en/support/articles/000005505/processors.html to figure out what generation your CPU is.)
+
+:::
+
 ### Via VAAPI
 
-VAAPI supports automatic profile selection so it will work automatically with both H.264 and H.265 streams. VAAPI is recommended for all generations of Intel-based CPUs.
+VAAPI supports automatic profile selection so it will work automatically with both H.264 and H.265 streams.
 
 ```yaml
 ffmpeg:
   hwaccel_args: preset-vaapi
 ```
 
-:::note
-
-With some of the processors, like the J4125, the default driver `iHD` doesn't seem to work correctly for hardware acceleration. You may need to change the driver to `i965` by adding the following environment variable `LIBVA_DRIVER_NAME=i965` to your docker-compose file or [in the `frigate.yaml` for HA OS users](advanced.md#environment_vars).
-
-:::
-
-### Via Quicksync (>=10th Generation only)
-
-If VAAPI does not work for you, you can try QSV if your processor supports it. QSV must be set specifically based on the video encoding of the stream.
+### Via Quicksync
 
 #### H.264 streams
 

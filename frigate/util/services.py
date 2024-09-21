@@ -122,7 +122,7 @@ def get_cpu_stats() -> dict[str, dict]:
                 stats = f.readline().split()
             utime = int(stats[13])
             stime = int(stats[14])
-            starttime = int(stats[21])
+            start_time = int(stats[21])
 
             with open("/proc/uptime") as f:
                 system_uptime_sec = int(float(f.read().split()[0]))
@@ -131,9 +131,9 @@ def get_cpu_stats() -> dict[str, dict]:
 
             process_utime_sec = utime // clk_tck
             process_stime_sec = stime // clk_tck
-            process_starttime_sec = starttime // clk_tck
+            process_start_time_sec = start_time // clk_tck
 
-            process_elapsed_sec = system_uptime_sec - process_starttime_sec
+            process_elapsed_sec = system_uptime_sec - process_start_time_sec
             process_usage_sec = process_utime_sec + process_stime_sec
             cpu_average_usage = process_usage_sec * 100 // process_elapsed_sec
 

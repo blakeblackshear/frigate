@@ -24,7 +24,6 @@ from typing_extensions import Literal
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
-from frigate.detectors.util import preprocess  # Assuming this function is available
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -83,11 +82,11 @@ class HailoDetector(DetectionApi):
             self.network_group_params = self.network_group.create_params()
 
             # Create input and output virtual stream parameters
-            self.input_vstreams_params = InputVStreamParams.make(
+            self.input_vstream_params = InputVStreamParams.make(
                 self.network_group,
                 format_type=self.hef.get_input_vstream_infos()[0].format.type,
             )
-            self.output_vstreams_params = OutputVStreamParams.make(
+            self.output_vstream_params = OutputVStreamParams.make(
                 self.network_group, format_type=getattr(FormatType, output_type)
             )
 
@@ -146,24 +145,16 @@ class HailoDetector(DetectionApi):
                 f"[detect_raw] Converted tensor_input to numpy array: shape {tensor_input.shape}"
             )
 
-        # Preprocess the tensor input using Frigate's preprocess function
-        processed_tensor = preprocess(
-            tensor_input, (1, self.h8l_model_height, self.h8l_model_width, 3), np.uint8
-        )
+        input_data = tensor_input
         logger.debug(
-            f"[detect_raw] Tensor data and shape after preprocessing: {processed_tensor} {processed_tensor.shape}"
-        )
-
-        input_data = processed_tensor
-        logger.debug(
-            f"[detect_raw] Input data for inference shape: {processed_tensor.shape}, dtype: {processed_tensor.dtype}"
+            f"[detect_raw] Input data for inference shape: {tensor_input.shape}, dtype: {tensor_input.dtype}"
         )
 
         try:
             with InferVStreams(
                 self.network_group,
-                self.input_vstreams_params,
-                self.output_vstreams_params,
+                self.input_vstream_params,
+                self.output_vstream_params,
             ) as infer_pipeline:
                 input_dict = {}
                 if isinstance(input_data, dict):

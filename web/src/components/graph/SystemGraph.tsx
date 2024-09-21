@@ -32,6 +32,16 @@ export function ThresholdBarGraph({
     [data],
   );
 
+  const yMax = useMemo(() => {
+    if (unit != "%") {
+      return undefined;
+    }
+
+    // @ts-expect-error y is valid
+    const yValues: number[] = data[0].data.map((point) => point?.y);
+    return Math.max(threshold.warning, ...yValues);
+  }, [data, threshold, unit]);
+
   const { theme, systemTheme } = useTheme();
 
   const formatTime = useCallback(
@@ -130,9 +140,10 @@ export function ThresholdBarGraph({
           formatter: (val: number) => Math.ceil(val).toString(),
         },
         min: 0,
+        max: yMax,
       },
     } as ApexCharts.ApexOptions;
-  }, [graphId, threshold, unit, systemTheme, theme, formatTime]);
+  }, [graphId, threshold, unit, yMax, systemTheme, theme, formatTime]);
 
   useEffect(() => {
     ApexCharts.exec(graphId, "updateOptions", options, true, true);

@@ -43,7 +43,6 @@ type SearchFilterGroupProps = {
   className: string;
   filters?: SearchFilters[];
   filter?: SearchFilter;
-  searchTerm: string;
   filterList?: FilterList;
   onUpdateFilter: (filter: SearchFilter) => void;
 };
@@ -51,7 +50,6 @@ export default function SearchFilterGroup({
   className,
   filters = DEFAULT_REVIEW_FILTERS,
   filter,
-  searchTerm,
   filterList,
   onUpdateFilter,
 }: SearchFilterGroupProps) {
@@ -109,11 +107,8 @@ export default function SearchFilterGroup({
         return;
       }
       const cameraConfig = config.cameras[camera];
-      cameraConfig.review.alerts.required_zones.forEach((zone) => {
-        zones.add(zone);
-      });
-      cameraConfig.review.detections.required_zones.forEach((zone) => {
-        zones.add(zone);
+      Object.entries(cameraConfig.zones).map(([name, _]) => {
+        zones.add(name);
       });
     });
 
@@ -216,7 +211,7 @@ export default function SearchFilterGroup({
       )}
       {config?.semantic_search?.enabled &&
         filters.includes("source") &&
-        !searchTerm.includes("similarity:") && (
+        !filter?.search_type?.includes("similarity") && (
           <SearchTypeButton
             selectedSearchSources={
               filter?.search_type ?? ["thumbnail", "description"]
@@ -917,7 +912,7 @@ export function SearchTypeContent({
         <div className="my-2.5 flex flex-col gap-2.5">
           <FilterSwitch
             label="Thumbnail Image"
-            isChecked={selectedSearchSources?.includes("thumbnail") ?? false}
+            isChecked={currentSearchSources?.includes("thumbnail") ?? false}
             onCheckedChange={(isChecked) => {
               const updatedSources = currentSearchSources
                 ? [...currentSearchSources]
