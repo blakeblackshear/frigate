@@ -363,7 +363,7 @@ class TestHttp(unittest.TestCase):
             assert config["cameras"]["front_door"]
 
     def test_recordings(self):
-        app_fastapi = create_fastapi_app(
+        app = create_fastapi_app(
             FrigateConfig(**self.minimal_config).runtime_config(),
             None,
             None,
@@ -372,15 +372,15 @@ class TestHttp(unittest.TestCase):
             PlusApi(),
             None,
         )
-        client = TestClient(app_fastapi)
         id = "123456.random"
 
         _insert_mock_recording(id)
-        response = client.get("/media/camera/front_door/recordings")
-        assert response.status_code == 200
-        recording = response.json()
-        assert recording
-        assert recording[0]["id"] == id
+        with TestClient(app) as client:
+            response = client.get("/media/camera/front_door/recordings")
+            assert response.status_code == 200
+            recording = response.json()
+            assert recording
+            assert recording[0]["id"] == id
 
     def test_stats(self):
         stats = Mock(spec=StatsEmitter)
