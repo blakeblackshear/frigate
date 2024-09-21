@@ -130,6 +130,7 @@ class TestHttp(unittest.TestCase):
 
         with TestClient(app) as client:
             _insert_mock_event(id)
+            # TODO: Rui. All the tests are now broken since there's no .json in the FastAPI client.get/post requests
             events = client.get("/events").json
             assert events
             assert len(events) == 1

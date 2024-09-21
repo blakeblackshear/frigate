@@ -65,7 +65,7 @@ def go2rtc_streams():
     return JSONResponse(content=stream_data)
 
 
-@router.get("/go2rtc/streams/<camera_name>")
+@router.get("/go2rtc/streams/{camera_name}")
 def go2rtc_camera_stream(camera_name: str):
     r = requests.get(
         f"http://127.0.0.1:1984/api/streams?src={camera_name}&video=all&audio=all&microphone"
