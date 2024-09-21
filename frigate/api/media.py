@@ -15,6 +15,7 @@ import cv2
 import numpy as np
 import pytz
 from fastapi import APIRouter, Path, Query, Request, Response
+from fastapi.params import Depends
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from peewee import DoesNotExist, fn
 from tzlocal import get_localzone_name
@@ -121,24 +122,18 @@ def camera_ptz_info(request: Request, camera_name: str):
 def latest_frame(
     request: Request,
     camera_name: str,
-    extension: Optional[str] = Query("webp", enum=["webp", "png", "jpg", "jpeg"]),
-    bbox: Optional[int] = None,
-    timestamp: Optional[int] = None,
-    zones: Optional[int] = None,
-    mask: Optional[int] = None,
-    motion: Optional[int] = None,
-    regions: Optional[int] = None,
-    quality: Optional[int] = 70,
-    height: Optional[int] = None,
+    params: MediaLatestFrameQueryParams = Depends(),
 ):
     draw_options = {
-        "bounding_boxes": bbox,
-        "timestamp": timestamp,
-        "zones": zones,
-        "mask": mask,
-        "motion_boxes": motion,
-        "regions": regions,
+        "bounding_boxes": params.bbox,
+        "timestamp": params.timestamp,
+        "zones": params.zones,
+        "mask": params.mask,
+        "motion_boxes": params.motion,
+        "regions": params.regions,
     }
+    quality = params.quality
+    extension = params.extension
 
     if camera_name in request.app.frigate_config.cameras:
         frame = request.app.detected_frames_processor.get_current_frame(
@@ -163,7 +158,7 @@ def latest_frame(
 
             frame = request.app.camera_error_image
 
-        height = int(height or str(frame.shape[0]))
+        height = int(params.height or str(frame.shape[0]))
         width = int(height * frame.shape[1] / frame.shape[0])
 
         if frame is None:
@@ -459,7 +454,11 @@ def recordings(
 
 @router.get("/media/camera/{camera_name}/start/{start_ts}/end/{end_ts}/clip.mp4")
 def recording_clip(
-    request: Request, camera_name: str, start_ts: float, end_ts: float, download: bool = False
+    request: Request,
+    camera_name: str,
+    start_ts: float,
+    end_ts: float,
+    download: bool = False,
 ):
     recordings = (
         Recordings.select(
