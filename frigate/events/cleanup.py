@@ -237,5 +237,8 @@ class EventCleanup(threading.Thread):
                             existing_ids = collection.get(ids=chunk, include=[])["ids"]
                             if existing_ids:
                                 collection.delete(ids=existing_ids)
+                                logger.debug(
+                                    f"Deleted {len(existing_ids)} embeddings from {collection.__class__.__name__}"
+                                )
 
         logger.info("Exiting event cleanup...")
