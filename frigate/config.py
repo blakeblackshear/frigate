@@ -1762,7 +1762,7 @@ class FrigateConfig(FrigateBaseModel):
                 elif ext == ".json":
                     is_json = True
 
-        # At this point, ry to sniff the config string, to guess if it is json or not.
+        # At this point, try to sniff the config string, to guess if it is json or not.
         if is_json is None:
             is_json = REGEX_JSON.match(config) is not None
 
