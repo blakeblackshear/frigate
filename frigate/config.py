@@ -1743,12 +1743,12 @@ class FrigateConfig(FrigateBaseModel):
         return v
 
     @classmethod
-    def parse_file(cls, config_path, **kwargs) -> Self:
+    def parse_file(cls, config_path, **kwargs):
         with open(config_path) as f:
             return FrigateConfig.parse(f, **kwargs)
 
     @classmethod
-    def parse(cls, config, *, is_json=None, **context) -> Self:
+    def parse(cls, config, *, is_json=None, **context):
         # If config is a file, read its contents.
         if hasattr(config, "read"):
             fname = getattr(config, "name", None)
@@ -1780,5 +1780,5 @@ class FrigateConfig(FrigateBaseModel):
         return cls.model_validate(obj, context=context)
 
     @classmethod
-    def parse_yaml(cls, config_yaml, **context) -> Self:
+    def parse_yaml(cls, config_yaml, **context):
         return cls.parse(config_yaml, is_json=False, **context)
