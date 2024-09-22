@@ -6,7 +6,7 @@ import shutil
 import sys
 from pathlib import Path
 
-import yaml
+from ruamel.yaml import YAML
 
 sys.path.insert(0, "/opt/frigate")
 from frigate.const import (
@@ -18,6 +18,7 @@ from frigate.ffmpeg_presets import parse_preset_hardware_acceleration_encode
 
 sys.path.remove("/opt/frigate")
 
+yaml = YAML()
 
 FRIGATE_ENV_VARS = {k: v for k, v in os.environ.items() if k.startswith("FRIGATE_")}
 # read docker secret files as env vars too
@@ -40,7 +41,7 @@ try:
         raw_config = f.read()
 
     if config_file.endswith((".yaml", ".yml")):
-        config: dict[str, any] = yaml.safe_load(raw_config)
+        config: dict[str, any] = yaml.load(raw_config)
     elif config_file.endswith(".json"):
         config: dict[str, any] = json.loads(raw_config)
 except FileNotFoundError:

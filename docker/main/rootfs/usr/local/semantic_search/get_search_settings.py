@@ -3,7 +3,9 @@
 import json
 import os
 
-import yaml
+from ruamel.yaml import YAML
+
+yaml = YAML()
 
 config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
 
@@ -17,7 +19,7 @@ try:
         raw_config = f.read()
 
     if config_file.endswith((".yaml", ".yml")):
-        config: dict[str, any] = yaml.safe_load(raw_config)
+        config: dict[str, any] = yaml.load(raw_config)
     elif config_file.endswith(".json"):
         config: dict[str, any] = json.loads(raw_config)
 except FileNotFoundError:
