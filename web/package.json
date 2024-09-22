@@ -94,7 +94,7 @@
     "@types/react-transition-group": "^4.4.10",
     "@types/strftime": "^0.9.8",
     "@typescript-eslint/eslint-plugin": "^7.5.0",
-    "@typescript-eslint/parser": "^7.5.0",
+    "@typescript-eslint/parser": "^7.18.0",
     "@vitejs/plugin-react-swc": "^3.6.0",
     "@vitest/coverage-v8": "^2.0.5",
     "autoprefixer": "^10.4.20",
