@@ -12,7 +12,6 @@ class Extension(str, Enum):
 
 
 class MediaLatestFrameQueryParams(BaseModel):
-    extension: Extension = Extension.webp
     bbox: Optional[int] = None
     timestamp: Optional[int] = None
     zones: Optional[int] = None
@@ -22,13 +21,15 @@ class MediaLatestFrameQueryParams(BaseModel):
     quality: Optional[int] = 70
     height: Optional[int] = None
 
+
 class MediaEventsSnapshotQueryParams(BaseModel):
-    download: bool = False
+    download: Optional[bool] = False
     timestamp: Optional[int] = None
     bbox: Optional[int] = None
     crop: Optional[int] = None
     height: Optional[int] = None
     quality: Optional[int] = 70
+
 
 class MediaMjpegFeedQueryParams(BaseModel):
     fps: int = 3
@@ -39,4 +40,3 @@ class MediaMjpegFeedQueryParams(BaseModel):
     mask: Optional[int] = None
     motion: Optional[int] = None
     regions: Optional[int] = None
-

@@ -149,7 +149,7 @@ export default function DynamicVideoPlayer({
       }
 
       const time = controller.getProgress(playTime);
-      return axios.post(`/media/camera/${camera}/plus/${time}`);
+      return axios.post(`/${camera}/plus/${time}`);
     },
     [camera, controller],
   );
@@ -164,7 +164,7 @@ export default function DynamicVideoPlayer({
     [timeRange],
   );
   const { data: recordings } = useSWR<Recording[]>(
-    [`media/camera/${camera}/recordings`, recordingParams],
+    [`${camera}/recordings`, recordingParams],
     { revalidateOnFocus: false },
   );
 

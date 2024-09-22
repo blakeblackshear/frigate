@@ -184,7 +184,7 @@ export function AnimatedEventCard({
                       }}
                     >
                       <source
-                        src={`${baseUrl}api/media/review/${event.id}/preview?format=mp4`}
+                        src={`${baseUrl}api/review/${event.id}/preview?format=mp4`}
                         type="video/mp4"
                       />
                     </video>

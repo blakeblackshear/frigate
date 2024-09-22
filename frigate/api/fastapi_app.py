@@ -79,19 +79,21 @@ def create_fastapi_app(
             database.close()
         return response
 
+    # Rate limiter (used for login endpoint)
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
     app.add_middleware(SlowAPIMiddleware)
 
     # Routes
+    # Order of include_router matters: https://fastapi.tiangolo.com/tutorial/path-params/#order-matters
+    app.include_router(auth.router)
+    app.include_router(review.router)
     app.include_router(main_app.router)
-    app.include_router(media.router)
     app.include_router(preview.router)
     app.include_router(notification.router)
-    app.include_router(review.router)
     app.include_router(export.router)
     app.include_router(event.router)
-    app.include_router(auth.router)
+    app.include_router(media.router)
     # App Properties
     app.frigate_config = frigate_config
     app.embeddings = embeddings

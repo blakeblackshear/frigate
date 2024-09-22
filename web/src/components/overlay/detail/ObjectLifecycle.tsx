@@ -163,13 +163,13 @@ export default function ObjectLifecycle({
   // image
 
   const [src, setSrc] = useState(
-    `${apiHost}api/media/camera/${event.camera}/recordings/${event.start_time + annotationOffset / 1000}/snapshot.jpg?height=500`,
+    `${apiHost}api/${event.camera}/recordings/${event.start_time + annotationOffset / 1000}/snapshot.jpg?height=500`,
   );
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     if (timeIndex) {
-      const newSrc = `${apiHost}api/media/camera/${event.camera}/recordings/${timeIndex + annotationOffset / 1000}/snapshot.jpg?height=500`;
+      const newSrc = `${apiHost}api/${event.camera}/recordings/${timeIndex + annotationOffset / 1000}/snapshot.jpg?height=500`;
       setSrc(newSrc);
     }
     setImgLoaded(false);

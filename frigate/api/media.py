@@ -20,6 +20,7 @@ from peewee import DoesNotExist, fn
 from tzlocal import get_localzone_name
 
 from frigate.api.defs.media_query_parameters import (
+    Extension,
     MediaEventsSnapshotQueryParams,
     MediaLatestFrameQueryParams,
     MediaMjpegFeedQueryParams,
@@ -48,7 +49,7 @@ def secure_filename(file_name: str):
     return file_name
 
 
-@router.get("/media/camera/{camera_name}")
+@router.get("{camera_name}")
 def mjpeg_feed(
     request: Request,
     camera_name: str,
@@ -101,7 +102,7 @@ def imagestream(
         )
 
 
-@router.get("/media/camera/{camera_name}/ptz/info")
+@router.get("/{camera_name}/ptz/info")
 def camera_ptz_info(request: Request, camera_name: str):
     if camera_name in request.app.frigate_config.cameras:
         return JSONResponse(
@@ -114,10 +115,11 @@ def camera_ptz_info(request: Request, camera_name: str):
         )
 
 
-@router.get("/media/camera/{camera_name}/frame/latest")
+@router.get("/{camera_name}/latest.{extension}")
 def latest_frame(
     request: Request,
     camera_name: str,
+    extension: Extension,
     params: MediaLatestFrameQueryParams = Depends(),
 ):
     draw_options = {
@@ -129,7 +131,6 @@ def latest_frame(
         "regions": params.regions,
     }
     quality = params.quality
-    extension = params.extension
 
     if camera_name in request.app.frigate_config.cameras:
         frame = request.app.detected_frames_processor.get_current_frame(
@@ -207,7 +208,7 @@ def latest_frame(
         )
 
 
-@router.get("/media/camera/{camera_name}/recordings/{frame_time}/snapshot.{format}")
+@router.get("/{camera_name}/recordings/{frame_time}/snapshot.{format}")
 def get_snapshot_from_recording(
     request: Request,
     camera_name: str,
@@ -268,7 +269,7 @@ def get_snapshot_from_recording(
         )
 
 
-@router.post("/media/camera/{camera_name}/plus/{frame_time}")
+@router.post("/{camera_name}/plus/{frame_time}")
 def submit_recording_snapshot_to_plus(
     request: Request, camera_name: str, frame_time: str
 ):
@@ -332,7 +333,7 @@ def submit_recording_snapshot_to_plus(
         )
 
 
-@router.get("/media/recordings/storage")
+@router.get("/recordings/storage")
 def get_recordings_storage_usage(request: Request):
     recording_stats = request.app.stats_emitter.get_latest_stats()["service"][
         "storage"
@@ -356,7 +357,7 @@ def get_recordings_storage_usage(request: Request):
     return JSONResponse(content=camera_usages)
 
 
-@router.get("/media/camera/{camera_name}/recordings/summary")
+@router.get("/{camera_name}/recordings/summary")
 def recordings_summary(camera_name: str, timezone: str = "utc"):
     """Returns hourly summary for recordings of given camera"""
     hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(timezone)
@@ -418,7 +419,7 @@ def recordings_summary(camera_name: str, timezone: str = "utc"):
     return JSONResponse(content=list(days.values()))
 
 
-@router.get("/media/camera/{camera_name}/recordings")
+@router.get("/{camera_name}/recordings")
 def recordings(
     camera_name: str,
     after: float = (datetime.now() - timedelta(hours=1)).timestamp(),
@@ -448,7 +449,7 @@ def recordings(
     return JSONResponse(content=list(recordings))
 
 
-@router.get("/media/camera/{camera_name}/start/{start_ts}/end/{end_ts}/clip.mp4")
+@router.get("/{camera_name}/start/{start_ts}/end/{end_ts}/clip.mp4")
 def recording_clip(
     request: Request,
     camera_name: str,
@@ -696,7 +697,73 @@ def vod_event(event_id: str):
     )
 
 
-@router.get("/media/camera/{camera_name}/label/{label}/snapshot.jpg")
+@router.get("/events/{event_id}/snapshot.jpg")
+def event_snapshot(
+    request: Request,
+    event_id: str,
+    params: MediaEventsSnapshotQueryParams = Depends(),
+):
+    event_complete = False
+    jpg_bytes = None
+    try:
+        event = Event.get(Event.id == event_id, Event.end_time != None)
+        event_complete = True
+        if not event.has_snapshot:
+            return JSONResponse(
+                content={"success": False, "message": "Snapshot not available"},
+                status_code=404,
+            )
+        # read snapshot from disk
+        with open(
+            os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}.jpg"), "rb"
+        ) as image_file:
+            jpg_bytes = image_file.read()
+    except DoesNotExist:
+        # see if the object is currently being tracked
+        try:
+            camera_states = request.app.detected_frames_processor.camera_states.values()
+            for camera_state in camera_states:
+                if event_id in camera_state.tracked_objects:
+                    tracked_obj = camera_state.tracked_objects.get(event_id)
+                    if tracked_obj is not None:
+                        jpg_bytes = tracked_obj.get_jpg_bytes(
+                            timestamp=params.timestamp,
+                            bounding_box=params.bbox,
+                            crop=params.crop,
+                            height=params.height,
+                            quality=params.quality,
+                        )
+        except Exception:
+            return JSONResponse(
+                content={"success": False, "message": "Event not found"},
+                status_code=404,
+            )
+    except Exception:
+        return JSONResponse(
+            content={"success": False, "message": "Event not found"}, status_code=404
+        )
+
+    if jpg_bytes is None:
+        return JSONResponse(
+            content={"success": False, "message": "Event not found"}, status_code=404
+        )
+
+    headers = {
+        "Content-Type": "image/jpeg",
+        "Cache-Control": "private, max-age=31536000" if event_complete else "no-store",
+    }
+
+    if params.download:
+        headers["Content-Disposition"] = f"attachment; filename=snapshot-{event_id}.jpg"
+
+    return StreamingResponse(
+        io.BytesIO(jpg_bytes),
+        media_type="image/jpeg",
+        headers=headers,
+    )
+
+
+@router.get("/{camera_name}/{label}/snapshot.jpg")
 def label_snapshot(request: Request, camera_name: str, label: str):
     """Returns the snapshot image from the latest event for the given camera and label combo"""
     label = unquote(label)
@@ -729,8 +796,8 @@ def label_snapshot(request: Request, camera_name: str, label: str):
         )
 
 
-@router.get("/media/camera/{camera_name}/label/{label}/best.jpg")
-@router.get("/media/camera/{camera_name}/label/{label}/thumbnail.jpg")
+@router.get("/{camera_name}/{label}/best.jpg")
+@router.get("/{camera_name}/{label}/thumbnail.jpg")
 def label_thumbnail(request: Request, camera_name: str, label: str):
     label = unquote(label)
     event_query = Event.select(fn.MAX(Event.id)).where(Event.camera == camera_name)
@@ -752,7 +819,7 @@ def label_thumbnail(request: Request, camera_name: str, label: str):
         )
 
 
-@router.get("/media/camera/{camera_name}/label/{label}/clip.mp4")
+@router.get("/{camera_name}/{label}/clip.mp4")
 def label_clip(request: Request, camera_name: str, label: str):
     label = unquote(label)
     event_query = Event.select(fn.MAX(Event.id)).where(
@@ -771,7 +838,7 @@ def label_clip(request: Request, camera_name: str, label: str):
         )
 
 
-@router.get("/media/camera/{camera_name}/grid.jpg")
+@router.get("/{camera_name}/grid.jpg")
 def grid_snapshot(
     request: Request, camera_name: str, color: str = "green", font_scale: float = 0.5
 ):
@@ -892,7 +959,7 @@ def grid_snapshot(
         )
 
 
-@router.get("/media/events/{event_id}/snapshot-clean.png")
+@router.get("/events/{event_id}/snapshot-clean.png")
 def event_snapshot_clean(request: Request, event_id: str, download: bool = False):
     png_bytes = None
     try:
@@ -976,73 +1043,7 @@ def event_snapshot_clean(request: Request, event_id: str, download: bool = False
     )
 
 
-@router.get("/media/events/{event_id}/snapshot.jpg")
-def event_snapshot(
-    request: Request,
-    event_id: str,
-    params: MediaEventsSnapshotQueryParams = Depends(),
-):
-    event_complete = False
-    jpg_bytes = None
-    try:
-        event = Event.get(Event.id == event_id, Event.end_time != None)
-        event_complete = True
-        if not event.has_snapshot:
-            return JSONResponse(
-                content={"success": False, "message": "Snapshot not available"},
-                status_code=404,
-            )
-        # read snapshot from disk
-        with open(
-            os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}.jpg"), "rb"
-        ) as image_file:
-            jpg_bytes = image_file.read()
-    except DoesNotExist:
-        # see if the object is currently being tracked
-        try:
-            camera_states = request.app.detected_frames_processor.camera_states.values()
-            for camera_state in camera_states:
-                if event_id in camera_state.tracked_objects:
-                    tracked_obj = camera_state.tracked_objects.get(event_id)
-                    if tracked_obj is not None:
-                        jpg_bytes = tracked_obj.get_jpg_bytes(
-                            timestamp=params.timestamp,
-                            bounding_box=params.bbox,
-                            crop=params.crop,
-                            height=params.height,
-                            quality=params.quality,
-                        )
-        except Exception:
-            return JSONResponse(
-                content={"success": False, "message": "Event not found"},
-                status_code=404,
-            )
-    except Exception:
-        return JSONResponse(
-            content={"success": False, "message": "Event not found"}, status_code=404
-        )
-
-    if jpg_bytes is None:
-        return JSONResponse(
-            content={"success": False, "message": "Event not found"}, status_code=404
-        )
-
-    headers = {
-        "Content-Type": "image/jpeg",
-        "Cache-Control": "private, max-age=31536000" if event_complete else "no-store",
-    }
-
-    if params.download:
-        headers["Content-Disposition"] = f"attachment; filename=snapshot-{event_id}.jpg"
-
-    return StreamingResponse(
-        io.BytesIO(jpg_bytes),
-        media_type="image/jpeg",
-        headers=headers,
-    )
-
-
-@router.get("/media/events/{event_id}/clip.mp4")
+@router.get("/events/{event_id}/clip.mp4")
 def event_clip(request: Request, event_id: str, download: bool = False):
     try:
         event: Event = Event.get(Event.id == event_id)
@@ -1085,7 +1086,7 @@ def event_clip(request: Request, event_id: str, download: bool = False):
     )
 
 
-@router.get("/media/events/{event_id}/thumbnail.jpg")
+@router.get("/events/{event_id}/thumbnail.jpg")
 def event_thumbnail(
     request: Request,
     event_id: str,
@@ -1150,7 +1151,7 @@ def event_thumbnail(
     )
 
 
-@router.get("/media/events/{event_id}/preview.gif")
+@router.get("/events/{event_id}/preview.gif")
 def event_preview(request: Request, event_id: str):
     try:
         event: Event = Event.get(Event.id == event_id)
@@ -1166,7 +1167,7 @@ def event_preview(request: Request, event_id: str):
     return preview_gif(request, event.camera, start_ts, end_ts)
 
 
-@router.get("/media/camera/{camera_name}/start/{start_ts}/end/{end_ts}/preview.gif")
+@router.get("/{camera_name}/start/{start_ts}/end/{end_ts}/preview.gif")
 def preview_gif(
     request: Request,
     camera_name: str,
@@ -1322,7 +1323,7 @@ def preview_gif(
     )
 
 
-@router.get("/media/camera/{camera_name}/start/{start_ts}/end/{end_ts}/preview.mp4")
+@router.get("/{camera_name}/start/{start_ts}/end/{end_ts}/preview.mp4")
 def preview_mp4(
     request: Request,
     camera_name: str,
@@ -1498,7 +1499,7 @@ def preview_mp4(
     )
 
 
-@router.get("/media/review/{event_id}/preview")
+@router.get("/review/{event_id}/preview")
 def review_preview(
     request: Request,
     event_id: str,
@@ -1524,8 +1525,8 @@ def review_preview(
         return preview_mp4(request, review.camera, start_ts, end_ts)
 
 
-@router.get("/media/preview/{file_name}/thumbnail.jpg")
-@router.get("/media/preview/{file_name}/thumbnail.webp")
+@router.get("/preview/{file_name}/thumbnail.jpg")
+@router.get("/preview/{file_name}/thumbnail.webp")
 def preview_thumbnail(file_name: str):
     """Get a thumbnail from the cached preview frames."""
     if len(file_name) > 1000:

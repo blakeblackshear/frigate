@@ -117,7 +117,7 @@ export function FrigatePlusDialog({
           {upload?.id && (
             <img
               className={`w-full ${grow} bg-black`}
-              src={`${baseUrl}api/media/events/${upload?.id}/snapshot.jpg`}
+              src={`${baseUrl}api/events/${upload?.id}/snapshot.jpg`}
               alt={`${upload?.label}`}
             />
           )}
