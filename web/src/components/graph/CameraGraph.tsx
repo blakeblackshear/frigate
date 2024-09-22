@@ -86,7 +86,7 @@ export function CameraLineGraph({
         size: 0,
       },
       xaxis: {
-        tickAmount: isMobileOnly ? 3 : 4,
+        tickAmount: isMobileOnly ? 2 : 3,
         tickPlacement: "on",
         labels: {
           rotate: 0,
