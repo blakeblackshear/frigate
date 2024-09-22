@@ -1,3 +1,5 @@
+import re
+
 CONFIG_DIR = "/config"
 DEFAULT_DB_PATH = f"{CONFIG_DIR}/frigate.db"
 MODEL_CACHE_DIR = f"{CONFIG_DIR}/model_cache"
@@ -7,7 +9,6 @@ RECORD_DIR = f"{BASE_DIR}/recordings"
 EXPORT_DIR = f"{BASE_DIR}/exports"
 BIRDSEYE_PIPE = "/tmp/cache/birdseye"
 CACHE_DIR = "/tmp/cache"
-YAML_EXT = (".yaml", ".yml")
 FRIGATE_LOCALHOST = "http://127.0.0.1:5000"
 PLUS_ENV_VAR = "PLUS_API_KEY"
 PLUS_API_HOST = "https://api.frigate.video"
@@ -56,6 +57,7 @@ FFMPEG_HWACCEL_VULKAN = "preset-vulkan"
 REGEX_CAMERA_NAME = r"^[a-zA-Z0-9_-]+$"
 REGEX_RTSP_CAMERA_USER_PASS = r":\/\/[a-zA-Z0-9_-]+:[\S]+@"
 REGEX_HTTP_CAMERA_USER_PASS = r"user=[a-zA-Z0-9_-]+&password=[\S]+"
+REGEX_JSON = re.compile(r"^\s*\{")
 
 # Known Driver Names
 

@@ -53,11 +53,9 @@ class ONNXDetector(DetectionApi):
                 options.append(
                     {
                         "trt_timing_cache_enable": True,
-                        "trt_timing_cache_path": "/config/model_cache/tensorrt/ort",
                         "trt_engine_cache_enable": True,
-                        "trt_dump_ep_context_model": True,
+                        "trt_timing_cache_path": "/config/model_cache/tensorrt/ort",
                         "trt_engine_cache_path": "/config/model_cache/tensorrt/ort/trt-engines",
-                        "trt_ep_context_file_path": "/config/model_cache/tensorrt/ort",
                     }
                 )
             elif provider == "OpenVINOExecutionProvider":

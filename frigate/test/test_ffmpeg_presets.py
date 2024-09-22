@@ -36,16 +36,13 @@ class TestFfmpegPresets(unittest.TestCase):
         }
 
     def test_default_ffmpeg(self):
-        frigate_config = FrigateConfig(**self.default_ffmpeg)
-        frigate_config.cameras["back"].create_ffmpeg_cmds()
-        assert self.default_ffmpeg == frigate_config.dict(exclude_unset=True)
+        FrigateConfig(**self.default_ffmpeg)
 
     def test_ffmpeg_hwaccel_preset(self):
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["hwaccel_args"] = (
             "preset-rpi-64-h264"
         )
         frigate_config = FrigateConfig(**self.default_ffmpeg)
-        frigate_config.cameras["back"].create_ffmpeg_cmds()
         assert "preset-rpi-64-h264" not in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
@@ -58,7 +55,6 @@ class TestFfmpegPresets(unittest.TestCase):
             "-other-hwaccel args"
         )
         frigate_config = FrigateConfig(**self.default_ffmpeg)
-        frigate_config.cameras["back"].create_ffmpeg_cmds()
         assert "-other-hwaccel args" in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
@@ -73,7 +69,6 @@ class TestFfmpegPresets(unittest.TestCase):
             "fps": 10,
         }
         frigate_config = FrigateConfig(**self.default_ffmpeg)
-        frigate_config.cameras["back"].create_ffmpeg_cmds()
         assert "preset-nvidia-h264" not in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
@@ -89,8 +84,6 @@ class TestFfmpegPresets(unittest.TestCase):
             "preset-rtsp-generic"
         )
         frigate_preset_config = FrigateConfig(**self.default_ffmpeg)
-        frigate_config.cameras["back"].create_ffmpeg_cmds()
-        frigate_preset_config.cameras["back"].create_ffmpeg_cmds()
         assert (
             # Ignore global and user_agent args in comparison
             frigate_preset_config.cameras["back"].ffmpeg_cmds[0]["cmd"]
@@ -102,7 +95,6 @@ class TestFfmpegPresets(unittest.TestCase):
             "preset-rtmp-generic"
         )
         frigate_config = FrigateConfig(**self.default_ffmpeg)
-        frigate_config.cameras["back"].create_ffmpeg_cmds()
         assert "preset-rtmp-generic" not in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
@@ -117,7 +109,6 @@ class TestFfmpegPresets(unittest.TestCase):
         argsList = defaultArgsList + ["-some", "arg with space"]
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["input_args"] = argsString
         frigate_config = FrigateConfig(**self.default_ffmpeg)
-        frigate_config.cameras["back"].create_ffmpeg_cmds()
         assert set(argsList).issubset(
             frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"]
         )
@@ -125,7 +116,6 @@ class TestFfmpegPresets(unittest.TestCase):
     def test_ffmpeg_input_not_preset(self):
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["input_args"] = "-some inputs"
         frigate_config = FrigateConfig(**self.default_ffmpeg)
-        frigate_config.cameras["back"].create_ffmpeg_cmds()
         assert "-some inputs" in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
@@ -135,7 +125,6 @@ class TestFfmpegPresets(unittest.TestCase):
             "preset-record-generic-audio-aac"
         )
         frigate_config = FrigateConfig(**self.default_ffmpeg)
-        frigate_config.cameras["back"].create_ffmpeg_cmds()
         assert "preset-record-generic-audio-aac" not in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
@@ -145,10 +134,9 @@ class TestFfmpegPresets(unittest.TestCase):
 
     def test_ffmpeg_output_record_not_preset(self):
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["output_args"]["record"] = (
-            "-some output"
+            "-some output -segment_time 10"
         )
         frigate_config = FrigateConfig(**self.default_ffmpeg)
-        frigate_config.cameras["back"].create_ffmpeg_cmds()
         assert "-some output" in (
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )

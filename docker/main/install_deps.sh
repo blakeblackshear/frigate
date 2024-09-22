@@ -91,7 +91,7 @@ fi
 
 if [[ "${TARGETARCH}" == "arm64" ]]; then
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
-        libva-drm2 mesa-va-drivers
+        libva-drm2 mesa-va-drivers radeontop
 fi
 
 # install vulkan

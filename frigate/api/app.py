@@ -177,7 +177,7 @@ def config_save(save_option: str, body: dict):
 
     # Validate the config schema
     try:
-        FrigateConfig.parse_raw(new_config)
+        FrigateConfig.parse_yaml(new_config)
     except Exception:
         return JSONResponse(
             content=(
@@ -265,7 +265,7 @@ def config_set(request: Request, body: AppConfigSetBody):
             f.close()
         # Validate the config schema
         try:
-            config_obj = FrigateConfig.parse_raw(new_raw_config)
+            config_obj = FrigateConfig.parse_yaml(new_raw_config)
         except Exception:
             with open(config_file, "w") as f:
                 f.write(old_raw_config)
@@ -288,7 +288,7 @@ def config_set(request: Request, body: AppConfigSetBody):
         )
 
     if body.requires_restart == 0:
-        request.app.frigate_config = FrigateConfig.runtime_config(
+        request.app.frigate_config = FrigateConfig.parse_object(
             config_obj, request.app.plus_api
         )
 
