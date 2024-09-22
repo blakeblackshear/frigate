@@ -854,17 +854,7 @@ def set_sub_label(
     new_sub_label = body.subLabel
     new_score = body.subLabelScore
 
-    if new_sub_label is None:
-        return JSONResponse(
-            content=(
-                {
-                    "success": False,
-                    "message": "A sub label must be supplied",
-                }
-            ),
-            status_code=400,
-        )
-
+    # TODO: Rui Move this validation to the EventsSubLabelBody. Str between 0 and 100 chars
     if new_sub_label and len(new_sub_label) > 100:
         return JSONResponse(
             content=(
@@ -877,6 +867,7 @@ def set_sub_label(
             status_code=400,
         )
 
+    # TODO: Rui Move this validation to the EventsSubLabelBody. Str between 0 and 100 chars
     if new_score is not None and (new_score > 1.0 or new_score < 0):
         return JSONResponse(
             content=(

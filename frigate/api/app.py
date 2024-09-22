@@ -520,7 +520,7 @@ def get_labels(camera: str = ""):
 
 
 @router.get("/sub_labels")
-def get_sub_labels(split_joined: int):
+def get_sub_labels(split_joined: Optional[int] = None):
     try:
         events = Event.select(Event.sub_label).distinct()
     except Exception:

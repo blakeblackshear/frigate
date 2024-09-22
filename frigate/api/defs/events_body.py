@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 class EventsSubLabelBody(BaseModel):
     subLabel: str
-    subLabelScore: float
+    subLabelScore: Optional[float] = None
 
 
 class EventsDescriptionBody(BaseModel):

@@ -1,5 +1,4 @@
 import datetime
-import json
 import logging
 import os
 import unittest
@@ -130,25 +129,24 @@ class TestHttp(unittest.TestCase):
 
         with TestClient(app) as client:
             _insert_mock_event(id)
-            # TODO: Rui. All the tests are now broken since there's no .json in the FastAPI client.get/post requests
-            events = client.get("/events").json
+            events = client.get("/events").json()
             assert events
             assert len(events) == 1
             assert events[0]["id"] == id
             _insert_mock_event(id2)
-            events = client.get("/events").json
+            events = client.get("/events").json()
             assert events
             assert len(events) == 2
             events = client.get(
                 "/events",
-                query_string={"limit": 1},
-            ).json
+                params={"limit": 1},
+            ).json()
             assert events
             assert len(events) == 1
             events = client.get(
                 "/events",
-                query_string={"has_clip": 0},
-            ).json
+                params={"has_clip": 0},
+            ).json()
             assert not events
 
     def test_get_good_event(self):
@@ -167,7 +165,7 @@ class TestHttp(unittest.TestCase):
 
         with TestClient(app) as client:
             _insert_mock_event(id)
-            event = client.get(f"/events/{id}").json
+            event = client.get(f"/events/{id}").json()
 
         assert event
         assert event["id"] == id
@@ -190,9 +188,9 @@ class TestHttp(unittest.TestCase):
 
         with TestClient(app) as client:
             _insert_mock_event(id)
-            event = client.get(f"/events/{bad_id}").json
-
-        assert not event
+            event_response = client.get(f"/events/{bad_id}")
+            assert event_response.status_code == 404
+            assert event_response.json() == "Event not found"
 
     def test_delete_event(self):
         app = create_fastapi_app(
@@ -210,11 +208,11 @@ class TestHttp(unittest.TestCase):
 
         with TestClient(app) as client:
             _insert_mock_event(id)
-            event = client.get(f"/events/{id}").json
+            event = client.get(f"/events/{id}").json()
             assert event
             assert event["id"] == id
             client.delete(f"/events/{id}")
-            event = client.get(f"/events/{id}").json
+            event = client.get(f"/events/{id}").json()
             assert not event
 
     def test_event_retention(self):
@@ -234,12 +232,12 @@ class TestHttp(unittest.TestCase):
         with TestClient(app) as client:
             _insert_mock_event(id)
             client.post(f"/events/{id}/retain")
-            event = client.get(f"/events/{id}").json
+            event = client.get(f"/events/{id}").json()
             assert event
             assert event["id"] == id
             assert event["retain_indefinitely"] is True
             client.delete(f"/events/{id}/retain")
-            event = client.get(f"/events/{id}").json
+            event = client.get(f"/events/{id}").json()
             assert event
             assert event["id"] == id
             assert event["retain_indefinitely"] is False
@@ -265,21 +263,21 @@ class TestHttp(unittest.TestCase):
             _insert_mock_event(morning_id, morning)
             _insert_mock_event(evening_id, evening)
             # both events come back
-            events = client.get("/events").json
+            events = client.get("/events").json()
             assert events
             assert len(events) == 2
             # morning event is excluded
             events = client.get(
                 "/events",
-                query_string={"time_range": "07:00,24:00"},
-            ).json
+                params={"time_range": "07:00,24:00"},
+            ).json()
             assert events
             # assert len(events) == 1
             # evening event is excluded
             events = client.get(
                 "/events",
-                query_string={"time_range": "00:00,18:00"},
-            ).json
+                params={"time_range": "00:00,18:00"},
+            ).json()
             assert events
             assert len(events) == 1
 
@@ -300,21 +298,21 @@ class TestHttp(unittest.TestCase):
 
         with TestClient(app) as client:
             _insert_mock_event(id)
-            client.post(
+            new_sub_label_response = client.post(
                 f"/events/{id}/sub_label",
-                data=json.dumps({"subLabel": sub_label}),
-                content_type="application/json",
+                json={"subLabel": sub_label},
             )
-            event = client.get(f"/events/{id}").json
+            assert new_sub_label_response.status_code == 200
+            event = client.get(f"/events/{id}").json()
             assert event
             assert event["id"] == id
             assert event["sub_label"] == sub_label
-            client.post(
+            empty_sub_label_response = client.post(
                 f"/events/{id}/sub_label",
-                data=json.dumps({"subLabel": ""}),
-                content_type="application/json",
+                json={"subLabel": ""},
             )
-            event = client.get(f"/events/{id}").json
+            assert empty_sub_label_response.status_code == 200
+            event = client.get(f"/events/{id}").json()
             assert event
             assert event["id"] == id
             assert event["sub_label"] == ""
@@ -338,10 +336,9 @@ class TestHttp(unittest.TestCase):
             _insert_mock_event(id)
             client.post(
                 f"/events/{id}/sub_label",
-                data=json.dumps({"subLabel": sub_label}),
-                content_type="application/json",
+                json={"subLabel": sub_label},
             )
-            sub_labels = client.get("/sub_labels").json
+            sub_labels = client.get("/sub_labels").json()
             assert sub_labels
             assert sub_labels == [sub_label]
 
@@ -359,13 +356,15 @@ class TestHttp(unittest.TestCase):
         )
 
         with TestClient(app) as client:
-            config = client.get("/config").json
+            config = client.get("/config").json()
             assert config
             assert config["cameras"]["front_door"]
 
     def test_recordings(self):
         app = create_fastapi_app(
-            FrigateConfig(**self.minimal_config).runtime_config(),
+            FrigateConfig(**self.minimal_config),
+            self.db,
+            None,
             None,
             None,
             None,
@@ -375,9 +374,9 @@ class TestHttp(unittest.TestCase):
         )
         id = "123456.random"
 
-        _insert_mock_recording(id)
         with TestClient(app) as client:
-            response = client.get("/media/camera/front_door/recordings")
+            _insert_mock_recording(id)
+            response = client.get("/front_door/recordings")
             assert response.status_code == 200
             recording = response.json()
             assert recording
@@ -399,7 +398,7 @@ class TestHttp(unittest.TestCase):
         )
 
         with TestClient(app) as client:
-            full_stats = client.get("/stats").json
+            full_stats = client.get("/stats").json()
             assert full_stats == self.test_stats
 
 
@@ -432,8 +431,8 @@ def _insert_mock_recording(id: str) -> Event:
         id=id,
         camera="front_door",
         path=f"/recordings/{id}",
-        start_time=datetime.datetime.now().timestamp() - 50,
-        end_time=datetime.datetime.now().timestamp() - 60,
+        start_time=datetime.datetime.now().timestamp() - 60,
+        end_time=datetime.datetime.now().timestamp() - 50,
         duration=10,
         motion=True,
         objects=True,
