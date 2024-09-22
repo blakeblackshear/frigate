@@ -499,9 +499,7 @@ function PtzControlPanel({
   clickOverlay: boolean;
   setClickOverlay: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-  const { data: ptz } = useSWR<CameraPtzInfo>(
-    `${camera}/ptz/info`,
-  );
+  const { data: ptz } = useSWR<CameraPtzInfo>(`${camera}/ptz/info`);
 
   const { send: sendPtz } = usePtzCommand(camera);
 

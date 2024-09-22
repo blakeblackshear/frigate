@@ -587,7 +587,7 @@ class PreviewFramesController extends PreviewController {
     if (this.seeking) {
       this.timeToSeek = frame;
     } else {
-      const newSrc = `${baseUrl}api/media/preview/preview_${this.camera}-${frame}.webp/thumbnail.webp`;
+      const newSrc = `${baseUrl}api/preview/preview_${this.camera}-${frame}.webp/thumbnail.webp`;
 
       if (this.imgController.current.src != newSrc) {
         this.imgController.current.src = newSrc;
@@ -604,7 +604,7 @@ class PreviewFramesController extends PreviewController {
     }
 
     if (this.timeToSeek) {
-      const newSrc = `${baseUrl}api/media/preview/preview_${this.camera}-${this.timeToSeek}.webp/thumbnail.webp`;
+      const newSrc = `${baseUrl}api/preview/preview_${this.camera}-${this.timeToSeek}.webp/thumbnail.webp`;
 
       if (this.imgController.current.src != newSrc) {
         this.imgController.current.src = newSrc;

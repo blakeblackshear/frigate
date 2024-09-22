@@ -18,7 +18,7 @@ type StorageMetricsProps = {
 export default function StorageMetrics({
   setLastUpdated,
 }: StorageMetricsProps) {
-  const { data: cameraStorage } = useSWR<CameraStorage>("media/recordings/storage");
+  const { data: cameraStorage } = useSWR<CameraStorage>("recordings/storage");
   const { data: stats } = useSWR<FrigateStats>("stats");
 
   const totalStorage = useMemo(() => {
