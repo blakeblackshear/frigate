@@ -345,7 +345,7 @@ class TestHttp(unittest.TestCase):
 
     def test_config(self):
         app = create_app(
-            FrigateConfig(**self.minimal_config).runtime_config(),
+            FrigateConfig(**self.minimal_config),
             self.db,
             None,
             None,
@@ -363,7 +363,7 @@ class TestHttp(unittest.TestCase):
 
     def test_recordings(self):
         app = create_app(
-            FrigateConfig(**self.minimal_config).runtime_config(),
+            FrigateConfig(**self.minimal_config),
             self.db,
             None,
             None,
@@ -385,7 +385,7 @@ class TestHttp(unittest.TestCase):
         stats = Mock(spec=StatsEmitter)
         stats.get_latest_stats.return_value = self.test_stats
         app = create_app(
-            FrigateConfig(**self.minimal_config).runtime_config(),
+            FrigateConfig(**self.minimal_config),
             self.db,
             None,
             None,

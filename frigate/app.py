@@ -129,8 +129,7 @@ class FrigateApp:
         # check if the config file needs to be migrated
         migrate_frigate_config(config_file)
 
-        user_config = FrigateConfig.parse_file(config_file)
-        self.config = user_config.runtime_config(self.plus_api)
+        self.config = FrigateConfig.parse_file(config_file, plus_api=self.plus_api)
 
         for camera_name in self.config.cameras.keys():
             # create camera_metrics

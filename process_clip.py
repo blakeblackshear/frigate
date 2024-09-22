@@ -280,10 +280,7 @@ def process(path, label, output, debug_path):
         json_config["cameras"]["camera"]["ffmpeg"]["inputs"][0]["path"] = c
 
         frigate_config = FrigateConfig(**json_config)
-        runtime_config = frigate_config.runtime_config()
-        runtime_config.cameras["camera"].create_ffmpeg_cmds()
-
-        process_clip = ProcessClip(c, frame_shape, runtime_config)
+        process_clip = ProcessClip(c, frame_shape, frigate_config)
         process_clip.load_frames()
         process_clip.process_frames(object_detector, objects_to_track=[label])
 
