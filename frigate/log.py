@@ -74,7 +74,7 @@ class log_thread(AbstractContextManager, ContextDecorator):
 # happens while an internal lock is held, the stdout/err flush can cause a deadlock.
 #
 # https://github.com/python/cpython/issues/91776
-def reopen_std_streams():
+def reopen_std_streams() -> None:
     sys.stdout = os.fdopen(1, "w")
     sys.stderr = os.fdopen(2, "w")
 
