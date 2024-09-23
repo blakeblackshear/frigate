@@ -213,7 +213,7 @@ class TestHttp(unittest.TestCase):
             assert event["id"] == id
             client.delete(f"/events/{id}")
             event = client.get(f"/events/{id}").json()
-            assert not event
+            assert event == "Event not found"
 
     def test_event_retention(self):
         app = create_fastapi_app(
