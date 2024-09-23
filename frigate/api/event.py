@@ -10,7 +10,7 @@ from urllib.parse import unquote
 
 import cv2
 import numpy as np
-from fastapi import APIRouter, Request, Body
+from fastapi import APIRouter, Request
 from fastapi.params import Depends
 from fastapi.responses import JSONResponse
 from peewee import JOIN, DoesNotExist, fn, operator
