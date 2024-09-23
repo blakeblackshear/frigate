@@ -9,7 +9,7 @@ import sys
 from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
 from types import FrameType
-from typing import Optional
+from typing import Any, Optional
 
 import psutil
 from peewee_migrate import Router
@@ -75,14 +75,14 @@ logger = logging.getLogger(__name__)
 
 
 class FrigateApp:
-    def __init__(self, config, plus_api) -> None:
+    # TODO: Fix FrigateConfig usage, so we can properly annotate it here without mypy erroring out.
+    def __init__(self, config: Any) -> None:
         self.stop_event: MpEvent = mp.Event()
         self.detection_queue: Queue = mp.Queue()
         self.detectors: dict[str, ObjectDetectProcess] = {}
         self.detection_out_events: dict[str, MpEvent] = {}
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
         self.log_queue: Queue = mp.Queue()
-        self.plus_api = plus_api
         self.camera_metrics: dict[str, CameraMetricsTypes] = {}
         self.ptz_metrics: dict[str, PTZMetricsTypes] = {}
         self.processes: dict[str, int] = {}
@@ -361,7 +361,6 @@ class FrigateApp:
             self.storage_maintainer,
             self.onvif_controller,
             self.external_event_processor,
-            self.plus_api,
             self.stats_emitter,
         )
 

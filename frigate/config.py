@@ -45,6 +45,7 @@ from frigate.ffmpeg_presets import (
     parse_preset_input,
     parse_preset_output_record,
 )
+from frigate.plus import PlusApi
 from frigate.util.builtin import (
     deep_merge,
     escape_special_characters,
@@ -1515,11 +1516,22 @@ class FrigateConfig(FrigateBaseModel):
     )
     version: Optional[str] = Field(default=None, title="Current config version.")
 
+    _plus_api: PlusApi
+
+    @property
+    def plus_api(self) -> PlusApi:
+        return self._plus_api
+
     @model_validator(mode="after")
     def post_validation(self, info: ValidationInfo) -> Self:
-        plus_api = None
+        # Load plus api from context, if possible.
+        self._plus_api = None
         if isinstance(info.context, dict):
-            plus_api = info.context.get("plus_api")
+            self._plus_api = info.context.get("plus_api")
+
+        # Ensure self._plus_api is set, if no explicit value is provided.
+        if self._plus_api is None:
+            self._plus_api = PlusApi()
 
         # set notifications state
         self.notifications.enabled_in_config = self.notifications.enabled
@@ -1714,7 +1726,7 @@ class FrigateConfig(FrigateBaseModel):
             enabled_labels.update(camera.objects.track)
 
         self.model.create_colormap(sorted(enabled_labels))
-        self.model.check_and_load_plus_model(plus_api)
+        self.model.check_and_load_plus_model(self.plus_api)
 
         for key, detector in self.detectors.items():
             adapter = TypeAdapter(DetectorConfig)
@@ -1749,7 +1761,7 @@ class FrigateConfig(FrigateBaseModel):
 
             detector_config.model = ModelConfig.model_validate(merged_model)
             detector_config.model.check_and_load_plus_model(
-                plus_api, detector_config.type
+                self.plus_api, detector_config.type
             )
             detector_config.model.compute_model_hash()
             self.detectors[key] = detector_config
@@ -1829,9 +1841,9 @@ class FrigateConfig(FrigateBaseModel):
         return cls.parse_object(config, **context)
 
     @classmethod
-    def parse_object(cls, obj: Any, **context):
-        return cls.model_validate(obj, context=context)
-
-    @classmethod
     def parse_yaml(cls, config_yaml, **context):
         return cls.parse(config_yaml, is_json=False, **context)
+
+    @classmethod
+    def parse_object(cls, obj: Any, *, plus_api: Optional[PlusApi] = None):
+        return cls.model_validate(obj, context={"plus_api": plus_api})

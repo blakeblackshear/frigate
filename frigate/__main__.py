@@ -9,7 +9,6 @@ from pydantic import ValidationError
 
 from frigate.app import FrigateApp
 from frigate.config import FrigateConfig
-from frigate.plus import PlusApi
 
 
 def main() -> None:
@@ -33,11 +32,9 @@ def main() -> None:
     parser.add_argument("--validate-config", action="store_true")
     args = parser.parse_args()
 
-    plus_api = PlusApi()
-
     # Load the configuration.
     try:
-        config = FrigateConfig.load(plus_api=plus_api)
+        config = FrigateConfig.load()
     except ValidationError as e:
         print("*************************************************************")
         print("*************************************************************")
@@ -62,7 +59,7 @@ def main() -> None:
         sys.exit(0)
 
     # Run the main application.
-    FrigateApp(config, plus_api).start()
+    FrigateApp(config).start()
 
 
 if __name__ == "__main__":

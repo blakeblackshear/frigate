@@ -13,7 +13,6 @@ from playhouse.sqliteq import SqliteQueueDatabase
 from frigate.api.app import create_app
 from frigate.config import FrigateConfig
 from frigate.models import Event, Recordings
-from frigate.plus import PlusApi
 from frigate.stats.emitter import StatsEmitter
 from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
 
@@ -121,7 +120,6 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
-            PlusApi(),
             None,
         )
         id = "123456.random"
@@ -158,7 +156,6 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
-            PlusApi(),
             None,
         )
         id = "123456.random"
@@ -180,7 +177,6 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
-            PlusApi(),
             None,
         )
         id = "123456.random"
@@ -201,7 +197,6 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
-            PlusApi(),
             None,
         )
         id = "123456.random"
@@ -224,7 +219,6 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
-            PlusApi(),
             None,
         )
         id = "123456.random"
@@ -251,7 +245,6 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
-            PlusApi(),
             None,
         )
         morning_id = "123456.random"
@@ -290,7 +283,6 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
-            PlusApi(),
             None,
         )
         id = "123456.random"
@@ -326,7 +318,6 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
-            PlusApi(),
             None,
         )
         id = "123456.random"
@@ -352,7 +343,6 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
-            PlusApi(),
             None,
         )
 
@@ -370,7 +360,6 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
-            PlusApi(),
             None,
         )
         id = "123456.random"
@@ -392,7 +381,6 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
-            PlusApi(),
             stats,
         )
 
