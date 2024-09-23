@@ -7,7 +7,6 @@ import secrets
 import shutil
 import signal
 import sys
-import traceback
 from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
 from types import FrameType
@@ -70,8 +69,7 @@ from frigate.stats.util import stats_init
 from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
 from frigate.types import CameraMetricsTypes, PTZMetricsTypes
-from frigate.util.builtin import empty_and_close_queue, save_default_config
-from frigate.util.config import migrate_frigate_config
+from frigate.util.builtin import empty_and_close_queue
 from frigate.util.object import get_camera_regions_grid
 from frigate.version import VERSION
 from frigate.video import capture_camera, track_camera
@@ -113,24 +111,7 @@ class FrigateApp:
             else:
                 logger.debug(f"Skipping directory: {d}")
 
-    def init_config(self) -> None:
-        config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
-
-        # Check if we can use .yaml instead of .yml
-        config_file_yaml = config_file.replace(".yml", ".yaml")
-        if os.path.isfile(config_file_yaml):
-            config_file = config_file_yaml
-
-        if not os.path.isfile(config_file):
-            print("No config file found, saving default config")
-            config_file = config_file_yaml
-            save_default_config(config_file)
-
-        # check if the config file needs to be migrated
-        migrate_frigate_config(config_file)
-
-        self.config = FrigateConfig.parse_file(config_file, plus_api=self.plus_api)
-
+    def init_camera_metrics(self) -> None:
         for camera_name in self.config.cameras.keys():
             # create camera_metrics
             self.camera_metrics[camera_name] = {
@@ -671,24 +652,20 @@ class FrigateApp:
         try:
             self.ensure_dirs()
             try:
-                self.init_config()
-            except Exception as e:
+                self.config = FrigateConfig.load(plus_api=self.plus_api)
+            except ValidationError as e:
                 print("*************************************************************")
                 print("*************************************************************")
                 print("***    Your config file is not valid!                     ***")
                 print("***    Please check the docs at                           ***")
-                print("***    https://docs.frigate.video/configuration/index     ***")
+                print("***    https://docs.frigate.video/configuration/          ***")
                 print("*************************************************************")
                 print("*************************************************************")
                 print("***    Config Validation Errors                           ***")
                 print("*************************************************************")
-                if isinstance(e, ValidationError):
-                    for error in e.errors():
-                        location = ".".join(str(item) for item in error["loc"])
-                        print(f"{location}: {error['msg']}")
-                else:
-                    print(e)
-                    print(traceback.format_exc())
+                for error in e.errors():
+                    location = ".".join(str(item) for item in error["loc"])
+                    print(f"{location}: {error['msg']}")
                 print("*************************************************************")
                 print("***    End Config Validation Errors                       ***")
                 print("*************************************************************")
@@ -698,6 +675,8 @@ class FrigateApp:
                 print("*** Your config file is valid.                            ***")
                 print("*************************************************************")
                 sys.exit(0)
+
+            self.init_camera_metrics()
             self.set_environment_vars()
             self.set_log_levels()
             self.init_queues()
@@ -711,9 +690,11 @@ class FrigateApp:
             self.check_db_data_migrations()
             self.init_inter_process_communicator()
             self.init_dispatcher()
+
         except Exception as e:
             print(e)
             sys.exit(1)
+
         self.start_detectors()
         self.start_video_output_processor()
         self.start_ptz_autotracker()

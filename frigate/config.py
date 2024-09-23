@@ -51,13 +51,36 @@ from frigate.util.builtin import (
     generate_color_palette,
     get_ffmpeg_arg_list,
 )
-from frigate.util.config import StreamInfoRetriever, get_relative_coordinates
+from frigate.util.config import (
+    StreamInfoRetriever,
+    get_relative_coordinates,
+    migrate_frigate_config,
+)
 from frigate.util.image import create_mask
 from frigate.util.services import auto_detect_hwaccel
 
 logger = logging.getLogger(__name__)
 
 yaml = YAML()
+
+DEFAULT_CONFIG_FILES = ["/config/config.yaml", "/config/config.yml"]
+DEFAULT_CONFIG = """
+mqtt:
+  enabled: False
+
+cameras:
+  name_of_your_camera: # <------ Name the camera
+    enabled: True
+    ffmpeg:
+      inputs:
+        - path: rtsp://10.0.10.10:554/rtsp # <----- The stream you want to use for detection
+          roles:
+            - detect
+    detect:
+      enabled: False # <---- disable detection until you have a working camera feed
+      width: 1280
+      height: 720
+"""
 
 # TODO: Identify what the default format to display timestamps is
 DEFAULT_TIME_FORMAT = "%m/%d/%Y %H:%M:%S"
@@ -1743,8 +1766,38 @@ class FrigateConfig(FrigateBaseModel):
         return v
 
     @classmethod
-    def parse_file(cls, config_path, **kwargs):
-        with open(config_path) as f:
+    def load(cls, **kwargs):
+        config_path = os.environ.get("CONFIG_FILE")
+
+        # No explicit configuration file, try to find one in the default paths.
+        if config_path is None:
+            for path in DEFAULT_CONFIG_FILES:
+                if os.path.isfile(path):
+                    config_path = path
+                    break
+
+        # No configuration file found, create one.
+        new_config = False
+        if config_path is None:
+            logger.info("No config file found, saving default config")
+            config_path = DEFAULT_CONFIG_FILES[-1]
+            new_config = True
+        else:
+            # Check if the config file needs to be migrated.
+            migrate_frigate_config(config_path)
+
+        # Finally, load the resulting configuration file.
+        with open(config_path, "a+") as f:
+            # Only write the default config if the opened file is non-empty. This can happen as
+            # a race condition. It's extremely unlikely, but eh. Might as well check it.
+            if new_config and f.tell() == 0:
+                f.write(DEFAULT_CONFIG)
+                logger.info(
+                    "Created default config file, see the getting started docs \
+                    for configuration https://docs.frigate.video/guides/getting_started"
+                )
+
+            f.seek(0)
             return FrigateConfig.parse(f, **kwargs)
 
     @classmethod
