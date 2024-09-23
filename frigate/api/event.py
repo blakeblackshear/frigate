@@ -22,10 +22,6 @@ from peewee import JOIN, DoesNotExist, fn, operator
 from PIL import Image
 from playhouse.shortcuts import model_to_dict
 
-from frigate.comms.event_metadata_updater import (
-    EventMetadataPublisher,
-    EventMetadataTypeEnum,
-)
 from frigate.const import (
     CLIPS_DIR,
 )
@@ -951,10 +947,6 @@ def set_description(id):
 
 @EventBp.route("/events/<id>/description/regenerate", methods=["PUT"])
 def regenerate_description(id):
-    current_app.event_metadata_updater = EventMetadataPublisher(
-        EventMetadataTypeEnum.regenerate_description
-    )
-
     # try:
     #     event: Event = Event.get(Event.id == id)
     # except DoesNotExist:
