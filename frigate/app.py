@@ -376,7 +376,9 @@ class FrigateApp:
     def init_inter_process_communicator(self) -> None:
         self.inter_process_communicator = InterProcessCommunicator()
         self.inter_config_updater = ConfigPublisher()
-        self.event_metadata_updater = EventMetadataPublisher(EventMetadataTypeEnum.all)
+        self.event_metadata_updater = EventMetadataPublisher(
+            EventMetadataTypeEnum.regenerate_description
+        )
         self.inter_zmq_proxy = ZmqProxy()
 
     def init_web_server(self) -> None:

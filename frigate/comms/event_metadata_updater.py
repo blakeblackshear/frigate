@@ -37,9 +37,11 @@ class EventMetadataSubscriber(Subscriber):
     def check_for_update(
         self, timeout: float = None
     ) -> Optional[tuple[EventMetadataTypeEnum, any]]:
+        print(f"checking for update, timeout {timeout}")
         return super().check_for_update(timeout)
 
     def _return_object(self, topic: str, payload: any) -> any:
+        print(topic, payload)
         if payload is None:
             return (None, None)
         return (EventMetadataTypeEnum[topic[len(self.topic_base) :]], payload)
