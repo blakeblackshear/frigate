@@ -291,6 +291,28 @@ function ObjectDetailsTab({
       });
   }, [desc, search]);
 
+  const regenerateDescription = useCallback(() => {
+    if (!search) {
+      return;
+    }
+
+    axios
+      .put(`events/${search.id}/description/regenerate`)
+      .then((resp) => {
+        if (resp.status == 200) {
+          toast.success("Description regeneration requested.", {
+            position: "top-center",
+          });
+        }
+      })
+      .catch(() => {
+        toast.error("Failed to call generative AI for a new description", {
+          position: "top-center",
+        });
+        setDesc(search.data.description);
+      });
+  }, [search]);
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex w-full flex-row">
@@ -355,7 +377,10 @@ function ObjectDetailsTab({
           value={desc}
           onChange={(e) => setDesc(e.target.value)}
         />
-        <div className="flex w-full flex-row justify-end">
+        <div className="flex w-full flex-row justify-end gap-2">
+          {config?.genai.enabled && (
+            <Button onClick={regenerateDescription}>Regenerate</Button>
+          )}
           <Button variant="select" onClick={updateDescription}>
             Save
           </Button>
