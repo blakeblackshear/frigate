@@ -37,7 +37,6 @@ from frigate.events.audio import listen_to_audio
 from frigate.events.cleanup import EventCleanup
 from frigate.events.external import ExternalEventProcessor
 from frigate.events.maintainer import EventProcessor
-from frigate.log import log_thread
 from frigate.models import (
     Event,
     Export,
@@ -632,7 +631,6 @@ class FrigateApp:
                 logger.info("********************************************************")
                 logger.info("********************************************************")
 
-    @log_thread()
     def start(self) -> None:
         logger.info(f"Starting Frigate ({VERSION})")
 

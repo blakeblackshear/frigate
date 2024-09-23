@@ -10,6 +10,7 @@ from pydantic import ValidationError
 
 from frigate.app import FrigateApp
 from frigate.config import FrigateConfig
+from frigate.log import log_thread
 
 
 def main() -> None:
@@ -28,6 +29,11 @@ def main() -> None:
     # Make sure we exit cleanly on SIGTERM.
     signal.signal(signal.SIGTERM, lambda sig, frame: sys.exit())
 
+    run()
+
+
+@log_thread()
+def run() -> None:
     # Parse the cli arguments.
     parser = argparse.ArgumentParser(
         prog="Frigate",
