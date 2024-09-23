@@ -4,7 +4,6 @@ import multiprocessing as mp
 import os
 import secrets
 import shutil
-import sys
 from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Any
@@ -634,25 +633,21 @@ class FrigateApp:
     def start(self) -> None:
         logger.info(f"Starting Frigate ({VERSION})")
 
-        try:
-            self.ensure_dirs()
-            self.init_camera_metrics()
-            self.set_environment_vars()
-            self.set_log_levels()
-            self.init_queues()
-            self.init_database()
-            self.init_onvif()
-            self.init_recording_manager()
-            self.init_review_segment_manager()
-            self.init_embeddings_manager()
-            self.init_go2rtc()
-            self.bind_database()
-            self.check_db_data_migrations()
-            self.init_inter_process_communicator()
-            self.init_dispatcher()
-        except Exception as e:
-            print(e)
-            sys.exit(1)
+        self.ensure_dirs()
+        self.init_camera_metrics()
+        self.set_environment_vars()
+        self.set_log_levels()
+        self.init_queues()
+        self.init_database()
+        self.init_onvif()
+        self.init_recording_manager()
+        self.init_review_segment_manager()
+        self.init_embeddings_manager()
+        self.init_go2rtc()
+        self.bind_database()
+        self.check_db_data_migrations()
+        self.init_inter_process_communicator()
+        self.init_dispatcher()
 
         self.start_detectors()
         self.start_video_output_processor()
