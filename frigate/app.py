@@ -1,4 +1,3 @@
-import argparse
 import datetime
 import logging
 import multiprocessing as mp
@@ -16,7 +15,6 @@ import psutil
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
-from pydantic import ValidationError
 
 from frigate.api.app import create_app
 from frigate.api.auth import hash_password
@@ -27,7 +25,6 @@ from frigate.comms.mqtt import MqttClient
 from frigate.comms.webpush import WebPushClient
 from frigate.comms.ws import WebSocketClient
 from frigate.comms.zmq_proxy import ZmqProxy
-from frigate.config import FrigateConfig
 from frigate.const import (
     CACHE_DIR,
     CLIPS_DIR,
@@ -57,7 +54,6 @@ from frigate.models import (
 from frigate.object_detection import ObjectDetectProcess
 from frigate.object_processing import TrackedObjectProcessor
 from frigate.output.output import output_frames
-from frigate.plus import PlusApi
 from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.ptz.onvif import OnvifController
 from frigate.record.cleanup import RecordingCleanup
@@ -79,18 +75,19 @@ logger = logging.getLogger(__name__)
 
 
 class FrigateApp:
-    def __init__(self) -> None:
+    def __init__(self, config, plus_api) -> None:
         self.stop_event: MpEvent = mp.Event()
         self.detection_queue: Queue = mp.Queue()
         self.detectors: dict[str, ObjectDetectProcess] = {}
         self.detection_out_events: dict[str, MpEvent] = {}
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
         self.log_queue: Queue = mp.Queue()
-        self.plus_api = PlusApi()
+        self.plus_api = plus_api
         self.camera_metrics: dict[str, CameraMetricsTypes] = {}
         self.ptz_metrics: dict[str, PTZMetricsTypes] = {}
         self.processes: dict[str, int] = {}
         self.region_grids: dict[str, list[list[dict[str, int]]]] = {}
+        self.config = config
 
     def set_environment_vars(self) -> None:
         for key, value in self.config.environment_vars.items():
@@ -640,42 +637,10 @@ class FrigateApp:
 
     @log_thread()
     def start(self) -> None:
-        parser = argparse.ArgumentParser(
-            prog="Frigate",
-            description="An NVR with realtime local object detection for IP cameras.",
-        )
-        parser.add_argument("--validate-config", action="store_true")
-        args = parser.parse_args()
-
         logger.info(f"Starting Frigate ({VERSION})")
 
         try:
             self.ensure_dirs()
-            try:
-                self.config = FrigateConfig.load(plus_api=self.plus_api)
-            except ValidationError as e:
-                print("*************************************************************")
-                print("*************************************************************")
-                print("***    Your config file is not valid!                     ***")
-                print("***    Please check the docs at                           ***")
-                print("***    https://docs.frigate.video/configuration/          ***")
-                print("*************************************************************")
-                print("*************************************************************")
-                print("***    Config Validation Errors                           ***")
-                print("*************************************************************")
-                for error in e.errors():
-                    location = ".".join(str(item) for item in error["loc"])
-                    print(f"{location}: {error['msg']}")
-                print("*************************************************************")
-                print("***    End Config Validation Errors                       ***")
-                print("*************************************************************")
-                sys.exit(1)
-            if args.validate_config:
-                print("*************************************************************")
-                print("*** Your config file is valid.                            ***")
-                print("*************************************************************")
-                sys.exit(0)
-
             self.init_camera_metrics()
             self.set_environment_vars()
             self.set_log_levels()
@@ -690,7 +655,6 @@ class FrigateApp:
             self.check_db_data_migrations()
             self.init_inter_process_communicator()
             self.init_dispatcher()
-
         except Exception as e:
             print(e)
             sys.exit(1)
