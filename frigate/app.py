@@ -333,18 +333,6 @@ class FrigateApp:
         self.inter_config_updater = ConfigPublisher()
         self.inter_zmq_proxy = ZmqProxy()
 
-    def init_web_server(self) -> None:
-        self.flask_app = create_app(
-            self.config,
-            self.db,
-            self.embeddings,
-            self.detected_frames_processor,
-            self.storage_maintainer,
-            self.onvif_controller,
-            self.external_event_processor,
-            self.stats_emitter,
-        )
-
     def init_onvif(self) -> None:
         self.onvif_controller = OnvifController(self.config, self.ptz_metrics)
 
@@ -485,7 +473,7 @@ class FrigateApp:
             capture_process = mp.Process(
                 target=capture_camera,
                 name=f"camera_capture:{name}",
-                args=(name, config, self.shm_frame_count, self.camera_metrics[name]),
+                args=(name, config, self.shm_frame_count(), self.camera_metrics[name]),
             )
             capture_process.daemon = True
             self.camera_metrics[name]["capture_process"] = capture_process
@@ -548,7 +536,7 @@ class FrigateApp:
         self.frigate_watchdog = FrigateWatchdog(self.detectors, self.stop_event)
         self.frigate_watchdog.start()
 
-    def check_shm(self) -> None:
+    def shm_frame_count(self) -> int:
         total_shm = round(shutil.disk_usage("/dev/shm").total / pow(2, 20), 1)
 
         # required for log files + nginx cache
@@ -568,16 +556,18 @@ class FrigateApp:
                     1,
                 )
 
-        self.shm_frame_count = min(50, int(available_shm / (cam_total_frame_size)))
+        shm_frame_count = min(50, int(available_shm / (cam_total_frame_size)))
 
         logger.debug(
-            f"Calculated total camera size {available_shm} / {cam_total_frame_size} :: {self.shm_frame_count} frames for each camera in SHM"
+            f"Calculated total camera size {available_shm} / {cam_total_frame_size} :: {shm_frame_count} frames for each camera in SHM"
         )
 
-        if self.shm_frame_count < 10:
+        if shm_frame_count < 10:
             logger.warning(
                 f"The current SHM size of {total_shm}MB is too small, recommend increasing it to at least {round(min_req_shm + cam_total_frame_size)}MB."
             )
+
+        return shm_frame_count
 
     def init_auth(self) -> None:
         if self.config.auth.enabled:
@@ -641,22 +631,30 @@ class FrigateApp:
         self.init_historical_regions()
         self.start_detected_frames_processor()
         self.start_camera_processors()
-        self.check_shm()
         self.start_camera_capture_processes()
         self.start_audio_processors()
         self.start_storage_maintainer()
         self.init_external_event_processor()
         self.start_stats_emitter()
-        self.init_web_server()
         self.start_timeline_processor()
         self.start_event_processor()
         self.start_event_cleanup()
         self.start_record_cleanup()
         self.start_watchdog()
+
         self.init_auth()
 
         try:
-            self.flask_app.run(host="127.0.0.1", port=5001, debug=False, threaded=True)
+            create_app(
+                self.config,
+                self.db,
+                self.embeddings,
+                self.detected_frames_processor,
+                self.storage_maintainer,
+                self.onvif_controller,
+                self.external_event_processor,
+                self.stats_emitter,
+            ).run(host="127.0.0.1", port=5001, debug=False, threaded=True)
         except KeyboardInterrupt:
             pass
 
