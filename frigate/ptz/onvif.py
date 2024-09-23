@@ -569,7 +569,7 @@ class OnvifController:
 
     def get_camera_info(self, camera_name: str) -> dict[str, any]:
         if camera_name not in self.cams.keys():
-            logger.error(f"Onvif is not setup for {camera_name}")
+            logger.debug(f"Onvif is not setup for {camera_name}")
             return {}
 
         if not self.cams[camera_name]["init"]:
