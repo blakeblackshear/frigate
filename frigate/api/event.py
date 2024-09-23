@@ -22,6 +22,10 @@ from peewee import JOIN, DoesNotExist, fn, operator
 from PIL import Image
 from playhouse.shortcuts import model_to_dict
 
+from frigate.comms.event_metadata_updater import (
+    EventMetadataPublisher,
+    EventMetadataTypeEnum,
+)
 from frigate.const import (
     CLIPS_DIR,
 )
@@ -942,6 +946,49 @@ def set_description(id):
             }
         ),
         200,
+    )
+
+
+@EventBp.route("/events/<id>/description/regenerate", methods=["PUT"])
+def regenerate_description(id):
+    event_metadata_updater = EventMetadataPublisher(
+        EventMetadataTypeEnum.regenerate_description
+    )
+
+    # try:
+    #     event: Event = Event.get(Event.id == id)
+    # except DoesNotExist:
+    #     return make_response(
+    #         jsonify({"success": False, "message": "Event " + id + " not found"}), 404
+    #     )
+
+    # if (
+    #     current_app.frigate_config.semantic_search.enabled
+    #     and current_app.frigate_config.genai.enabled
+    # ):
+    logger.info(id)
+    event_metadata_updater.publish(id)
+
+    return make_response(
+        jsonify(
+            {
+                "success": True,
+                "message": "Event "
+                + id
+                + " description regeneration has been requested.",
+            }
+        ),
+        200,
+    )
+
+    return make_response(
+        jsonify(
+            {
+                "success": False,
+                "message": "Semantic search and generative AI are not enabled",
+            }
+        ),
+        400,
     )
 
 
