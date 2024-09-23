@@ -1,6 +1,7 @@
 import argparse
 import faulthandler
 import logging
+import signal
 import sys
 import threading
 
@@ -23,6 +24,9 @@ def main() -> None:
 
     threading.current_thread().name = "frigate"
     cli.show_server_banner = lambda *x: None
+
+    # Make sure we exit cleanly on SIGTERM.
+    signal.signal(signal.SIGTERM, lambda sig, frame: sys.exit())
 
     # Parse the cli arguments.
     parser = argparse.ArgumentParser(

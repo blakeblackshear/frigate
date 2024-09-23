@@ -4,12 +4,10 @@ import multiprocessing as mp
 import os
 import secrets
 import shutil
-import signal
 import sys
 from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
-from types import FrameType
-from typing import Any, Optional
+from typing import Any
 
 import psutil
 from peewee_migrate import Router
@@ -677,12 +675,6 @@ class FrigateApp:
         self.start_record_cleanup()
         self.start_watchdog()
         self.init_auth()
-
-        # Flask only listens for SIGINT, so we need to catch SIGTERM and send SIGINT
-        def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:
-            os.kill(os.getpid(), signal.SIGINT)
-
-        signal.signal(signal.SIGTERM, receiveSignal)
 
         try:
             self.flask_app.run(host="127.0.0.1", port=5001, debug=False, threaded=True)
