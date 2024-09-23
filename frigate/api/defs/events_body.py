@@ -5,8 +5,12 @@ from pydantic import BaseModel, Field
 
 
 class EventsSubLabelBody(BaseModel):
-    subLabel: str
-    subLabelScore: Optional[float] = None
+    subLabel: str = Field(
+        title="Sub label", max_length=100
+    )
+    subLabelScore: Optional[float] = Field(
+        title="Score for sub label", default=None, gt=0.0, le=1.0
+    )
 
 
 class EventsDescriptionBody(BaseModel):

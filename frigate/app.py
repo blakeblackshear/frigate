@@ -735,13 +735,6 @@ class FrigateApp:
         self.start_watchdog()
         self.init_auth()
 
-        # TODO: Rui. What to do in this case? Maybe https://github.com/encode/uvicorn/issues/1579#issuecomment-1419635974
-        # Flask only listens for SIGINT, so we need to catch SIGTERM and send SIGINT
-        def receiveSignal(signalNumber: int, frame: Optional[FrameType]) -> None:
-            os.kill(os.getpid(), signal.SIGINT)
-
-        signal.signal(signal.SIGTERM, receiveSignal)
-
         try:
             uvicorn.run(
                 self.fastapi_app,

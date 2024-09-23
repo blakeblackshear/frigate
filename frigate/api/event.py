@@ -10,7 +10,7 @@ from urllib.parse import unquote
 
 import cv2
 import numpy as np
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Body
 from fastapi.params import Depends
 from fastapi.responses import JSONResponse
 from peewee import JOIN, DoesNotExist, fn, operator
@@ -841,7 +841,7 @@ def delete_retain(event_id: str):
 def set_sub_label(
     request: Request,
     event_id: str,
-    body: EventsSubLabelBody = None,
+    body: EventsSubLabelBody,
 ):
     try:
         event: Event = Event.get(Event.id == event_id)
@@ -853,32 +853,6 @@ def set_sub_label(
 
     new_sub_label = body.subLabel
     new_score = body.subLabelScore
-
-    # TODO: Rui Move this validation to the EventsSubLabelBody. Str between 0 and 100 chars
-    if new_sub_label and len(new_sub_label) > 100:
-        return JSONResponse(
-            content=(
-                {
-                    "success": False,
-                    "message": new_sub_label
-                    + " exceeds the 100 character limit for sub_label",
-                }
-            ),
-            status_code=400,
-        )
-
-    # TODO: Rui Move this validation to the EventsSubLabelBody. Str between 0 and 100 chars
-    if new_score is not None and (new_score > 1.0 or new_score < 0):
-        return JSONResponse(
-            content=(
-                {
-                    "success": False,
-                    "message": new_score
-                    + " does not fit within the expected bounds 0 <= score <= 1.0",
-                }
-            ),
-            status_code=400,
-        )
 
     if not event.end_time:
         # update tracked object
@@ -919,7 +893,7 @@ def set_sub_label(
 def set_description(
     request: Request,
     event_id: str,
-    body: EventsDescriptionBody = None,
+    body: EventsDescriptionBody,
 ):
     try:
         event: Event = Event.get(Event.id == event_id)
