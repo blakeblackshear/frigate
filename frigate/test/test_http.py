@@ -12,7 +12,7 @@ from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.api.fastapi_app import create_fastapi_app
 from frigate.config import FrigateConfig
-from frigate.models import Event, Recordings
+from frigate.models import Event, Recordings, Timeline
 from frigate.plus import PlusApi
 from frigate.stats.emitter import StatsEmitter
 from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
@@ -27,7 +27,7 @@ class TestHttp(unittest.TestCase):
         router.run()
         migrate_db.close()
         self.db = SqliteQueueDatabase(TEST_DB)
-        models = [Event, Recordings]
+        models = [Event, Recordings, Timeline]
         self.db.bind(models)
 
         self.minimal_config = {
