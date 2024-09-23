@@ -56,7 +56,6 @@ class EmbeddingMaintainer(threading.Thread):
 
     def run(self) -> None:
         """Maintain a Chroma vector database for semantic search."""
-        logger.info("in maintainer run()")
         while not self.stop_event.is_set():
             self._process_updates()
             self._process_finalized()
