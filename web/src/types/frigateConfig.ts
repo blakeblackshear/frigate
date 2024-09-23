@@ -298,6 +298,16 @@ export interface FrigateConfig {
     retry_interval: number;
   };
 
+  genai: {
+    enabled: boolean;
+    provider: string;
+    base_url?: string;
+    api_key?: string;
+    model: string;
+    prompt: string;
+    object_prompts: { [key: string]: string };
+  };
+
   go2rtc: {
     streams: string[];
     webrtc: {
