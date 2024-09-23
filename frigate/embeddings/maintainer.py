@@ -70,10 +70,13 @@ class EmbeddingMaintainer(threading.Thread):
 
     def _process_updates(self) -> None:
         """Process event updates"""
-        update = self.event_subscriber.check_for_update()
+        logger.info("processing event updates")
+        update = self.event_subscriber.check_for_update(timeout=1)
 
         if update is None:
             return
+
+        logger.info("not returning from _process_updates")
 
         source_type, _, camera, data = update
 
@@ -98,66 +101,67 @@ class EmbeddingMaintainer(threading.Thread):
 
     def _process_finalized(self) -> None:
         """Process the end of an event."""
-        while True:
-            ended = self.event_end_subscriber.check_for_update()
 
-            if ended == None:
-                break
+        logger.info("processing finalized")
+        ended = self.event_end_subscriber.check_for_update(timeout=1)
 
-            event_id, camera, updated_db = ended
-            camera_config = self.config.cameras[camera]
+        if ended is None:
+            return
 
-            if updated_db:
-                try:
-                    event: Event = Event.get(Event.id == event_id)
-                except DoesNotExist:
-                    continue
+        logger.info("not returning from _process_finalized")
+        event_id, camera, updated_db = ended
+        camera_config = self.config.cameras[camera]
 
-                # Skip the event if not an object
-                if event.data.get("type") != "object":
-                    continue
+        if updated_db:
+            try:
+                event: Event = Event.get(Event.id == event_id)
+            except DoesNotExist:
+                return
 
-                # Extract valid event metadata
-                metadata = get_metadata(event)
-                thumbnail = base64.b64decode(event.thumbnail)
+            # Skip the event if not an object
+            if event.data.get("type") != "object":
+                return
 
-                # Embed the thumbnail
-                self._embed_thumbnail(event_id, thumbnail, metadata)
+            # Extract valid event metadata
+            metadata = get_metadata(event)
+            thumbnail = base64.b64decode(event.thumbnail)
 
-                if (
-                    camera_config.genai.enabled
-                    and self.genai_client is not None
-                    and event.data.get("description") is None
-                ):
-                    # Generate the description. Call happens in a thread since it is network bound.
-                    threading.Thread(
-                        target=self._embed_description,
-                        name=f"_embed_description_{event.id}",
-                        daemon=True,
-                        args=(
-                            event,
-                            [
-                                data["thumbnail"]
-                                for data in self.tracked_events[event_id]
-                            ]
-                            if len(self.tracked_events.get(event_id, [])) > 0
-                            else [thumbnail],
-                            metadata,
-                        ),
-                    ).start()
+            # Embed the thumbnail
+            self._embed_thumbnail(event_id, thumbnail, metadata)
 
-            # Delete tracked events based on the event_id
-            if event_id in self.tracked_events:
-                del self.tracked_events[event_id]
+            if (
+                camera_config.genai.enabled
+                and self.genai_client is not None
+                and event.data.get("description") is None
+            ):
+                # Generate the description. Call happens in a thread since it is network bound.
+                threading.Thread(
+                    target=self._embed_description,
+                    name=f"_embed_description_{event.id}",
+                    daemon=True,
+                    args=(
+                        event,
+                        [data["thumbnail"] for data in self.tracked_events[event_id]]
+                        if len(self.tracked_events.get(event_id, [])) > 0
+                        else [thumbnail],
+                        metadata,
+                    ),
+                ).start()
+
+        # Delete tracked events based on the event_id
+        if event_id in self.tracked_events:
+            del self.tracked_events[event_id]
 
     def _process_event_metadata(self):
         # Check for regenerate description requests
         logger.info("processing event metadata")
-        (topic, event_id) = self.event_metadata_subscriber.check_for_update()
+        (topic, event_id) = self.event_metadata_subscriber.check_for_update(timeout=1)
         logger.info(f"in init in maintainer, {topic} {event_id}")
 
         if topic is None:
             return
+
+        logger.info("not returning from _process_event_metadata")
 
         if event_id:
             logger.info(f"in maintainer: {event_id}")
