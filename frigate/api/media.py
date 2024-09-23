@@ -16,6 +16,7 @@ import pytz
 from fastapi import APIRouter, Path, Query, Request, Response
 from fastapi.params import Depends
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from pathvalidate import sanitize_filename
 from peewee import DoesNotExist, fn
 from tzlocal import get_localzone_name
 
@@ -42,11 +43,6 @@ logger = logging.getLogger(__name__)
 
 
 router = APIRouter(tags=[Tags.media])
-
-
-# TODO: Rui Implement or get from existing 3rd party
-def secure_filename(file_name: str):
-    return file_name
 
 
 @router.get("{camera_name}")
@@ -483,7 +479,7 @@ def recording_clip(
         if clip.end_time > end_ts:
             playlist_lines.append(f"outpoint {int(end_ts - clip.start_time)}")
 
-    file_name = f"clip_{camera_name}_{start_ts}-{end_ts}.mp4"
+    file_name = sanitize_filename(f"clip_{camera_name}_{start_ts}-{end_ts}.mp4")
 
     if len(file_name) > 1000:
         return JSONResponse(
@@ -494,7 +490,6 @@ def recording_clip(
             status_code=403,
         )
 
-    file_name = secure_filename(file_name)
     path = os.path.join(CLIPS_DIR, f"cache/{file_name}")
 
     config: FrigateConfig = request.app.frigate_config
@@ -1333,7 +1328,7 @@ def preview_mp4(
         604800, description="Max cache age in seconds. Default 7 days in seconds."
     ),
 ):
-    file_name = f"preview_{camera_name}_{start_ts}-{end_ts}.mp4"
+    file_name = sanitize_filename(f"preview_{camera_name}_{start_ts}-{end_ts}.mp4")
 
     if len(file_name) > 1000:
         return JSONResponse(
@@ -1346,7 +1341,6 @@ def preview_mp4(
             status_code=403,
         )
 
-    file_name = secure_filename(file_name)
     path = os.path.join(CACHE_DIR, file_name)
 
     if datetime.fromtimestamp(start_ts) < datetime.now().replace(minute=0, second=0):
@@ -1537,7 +1531,7 @@ def preview_thumbnail(file_name: str):
             status_code=403,
         )
 
-    safe_file_name_current = secure_filename(file_name)
+    safe_file_name_current = sanitize_filename(file_name)
     preview_dir = os.path.join(CACHE_DIR, "preview_frames")
 
     try:
