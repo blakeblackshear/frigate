@@ -23,10 +23,6 @@ class EventMetadataPublisher(Publisher):
         topic = topic.value
         super().__init__(topic)
 
-    def publish(self, payload: str) -> None:
-        logger.info(f"publishing payload: {payload}")
-        super().publish(payload)
-
 
 class EventMetadataSubscriber(Subscriber):
     """Simplifies receiving event metadata."""
@@ -35,7 +31,7 @@ class EventMetadataSubscriber(Subscriber):
 
     def __init__(self, topic: EventMetadataTypeEnum) -> None:
         topic = topic.value
-        logger.info(f"subscribing to: {topic.value}")
+        logger.info(f"subscribing to: {topic}")
         super().__init__(topic)
 
     def check_for_update(

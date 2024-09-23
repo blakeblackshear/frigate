@@ -56,6 +56,7 @@ class EmbeddingMaintainer(threading.Thread):
 
     def run(self) -> None:
         """Maintain a Chroma vector database for semantic search."""
+        logger.info("in maintainer run()")
         while not self.stop_event.is_set():
             self._process_updates()
             self._process_finalized()
@@ -149,12 +150,13 @@ class EmbeddingMaintainer(threading.Thread):
             if event_id in self.tracked_events:
                 del self.tracked_events[event_id]
 
-    def _process_event_metadata(self, event_id):
+    def _process_event_metadata(self):
         # Check for regenerate description requests
+        logger.info("processing event metadata")
         (topic, event_id) = self.event_metadata_subscriber.check_for_update()
         logger.info(f"in init in maintainer, {topic} {event_id}")
 
-        if not topic:
+        if topic is None:
             return
 
         if event_id:
