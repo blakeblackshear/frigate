@@ -1296,6 +1296,19 @@ class LoggerConfig(FrigateBaseModel):
         default_factory=dict, title="Log level for specified processes."
     )
 
+    def install(self):
+        """Install global logging state."""
+        logging.getLogger().setLevel(self.default.value.upper())
+
+        log_levels = {
+            "werkzeug": LogLevelEnum.error,
+            "ws4py": LogLevelEnum.error,
+            **self.logs,
+        }
+
+        for log, level in log_levels.items():
+            logging.getLogger(log).setLevel(level.value.upper())
+
 
 class CameraGroupConfig(FrigateBaseModel):
     """Represents a group of cameras."""
@@ -1847,3 +1860,10 @@ class FrigateConfig(FrigateBaseModel):
     @classmethod
     def parse_object(cls, obj: Any, *, plus_api: Optional[PlusApi] = None):
         return cls.model_validate(obj, context={"plus_api": plus_api})
+
+    def install(self):
+        """Install global state from the config."""
+        self.logger.install()
+
+        for key, value in self.environment_vars.items():
+            os.environ[key] = value

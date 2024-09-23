@@ -85,10 +85,6 @@ class FrigateApp:
         self.region_grids: dict[str, list[list[dict[str, int]]]] = {}
         self.config = config
 
-    def set_environment_vars(self) -> None:
-        for key, value in self.config.environment_vars.items():
-            os.environ[key] = value
-
     def ensure_dirs(self) -> None:
         for d in [
             CONFIG_DIR,
@@ -163,17 +159,6 @@ class FrigateApp:
                 # from mypy 0.981 onwards
             }
             self.ptz_metrics[camera_name]["ptz_motor_stopped"].set()
-
-    def set_log_levels(self) -> None:
-        logging.getLogger().setLevel(self.config.logger.default.value.upper())
-        for log, level in self.config.logger.logs.items():
-            logging.getLogger(log).setLevel(level.value.upper())
-
-        if "werkzeug" not in self.config.logger.logs:
-            logging.getLogger("werkzeug").setLevel("ERROR")
-
-        if "ws4py" not in self.config.logger.logs:
-            logging.getLogger("ws4py").setLevel("ERROR")
 
     def init_queues(self) -> None:
         # Queue for cameras to push tracked objects to
@@ -633,10 +618,12 @@ class FrigateApp:
     def start(self) -> None:
         logger.info(f"Starting Frigate ({VERSION})")
 
+        # Ensure global state.
         self.ensure_dirs()
+        self.config.install()
+
+        # Start frigate services.
         self.init_camera_metrics()
-        self.set_environment_vars()
-        self.set_log_levels()
         self.init_queues()
         self.init_database()
         self.init_onvif()
@@ -648,7 +635,6 @@ class FrigateApp:
         self.check_db_data_migrations()
         self.init_inter_process_communicator()
         self.init_dispatcher()
-
         self.start_detectors()
         self.start_video_output_processor()
         self.start_ptz_autotracker()
