@@ -22,6 +22,7 @@ import useKeyboardListener, {
 } from "@/hooks/use-keyboard-listener";
 import scrollIntoView from "scroll-into-view-if-needed";
 import InputWithTags from "@/components/input/InputWithTags";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 type SearchViewProps = {
   search: string;
@@ -276,13 +277,18 @@ export default function SearchView({
         )}
 
         {hasExistingSearch && (
-          <SearchFilterGroup
-            className={cn(
-              "w-full justify-between md:justify-start lg:justify-end",
-            )}
-            filter={searchFilter}
-            onUpdateFilter={onUpdateFilter}
-          />
+          <ScrollArea className="w-full whitespace-nowrap lg:ml-[35%]">
+            <div className="flex flex-row">
+              <SearchFilterGroup
+                className={cn(
+                  "w-full justify-between md:justify-start lg:justify-end",
+                )}
+                filter={searchFilter}
+                onUpdateFilter={onUpdateFilter}
+              />
+              <ScrollBar orientation="horizontal" className="h-0" />
+            </div>
+          </ScrollArea>
         )}
       </div>
 
