@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class EventMetadataTypeEnum(str, Enum):
+    all = ""
     regenerate_description = "regenerate_description"
 
 

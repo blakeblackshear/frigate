@@ -951,7 +951,7 @@ def set_description(id):
 
 @EventBp.route("/events/<id>/description/regenerate", methods=["PUT"])
 def regenerate_description(id):
-    event_metadata_updater = EventMetadataPublisher(
+    current_app.event_metadata_updater = EventMetadataPublisher(
         EventMetadataTypeEnum.regenerate_description
     )
 
@@ -967,7 +967,7 @@ def regenerate_description(id):
     #     and current_app.frigate_config.genai.enabled
     # ):
     logger.info(id)
-    event_metadata_updater.publish(id)
+    current_app.event_metadata_updater.publish(id)
 
     return make_response(
         jsonify(

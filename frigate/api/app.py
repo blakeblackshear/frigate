@@ -23,6 +23,7 @@ from frigate.api.media import MediaBp
 from frigate.api.notification import NotificationBp
 from frigate.api.preview import PreviewBp
 from frigate.api.review import ReviewBp
+from frigate.comms.event_metadata_updater import EventMetadataPublisher
 from frigate.config import FrigateConfig
 from frigate.const import CONFIG_DIR
 from frigate.embeddings import EmbeddingsContext
@@ -63,6 +64,7 @@ def create_app(
     external_processor: ExternalEventProcessor,
     plus_api: PlusApi,
     stats_emitter: StatsEmitter,
+    event_metadata_updater: EventMetadataPublisher,
 ):
     app = Flask(__name__)
 
@@ -92,6 +94,7 @@ def create_app(
     app.plus_api = plus_api
     app.camera_error_image = None
     app.stats_emitter = stats_emitter
+    app.event_metadata_updater = event_metadata_updater
     app.jwt_token = get_jwt_secret() if frigate_config.auth.enabled else None
     # update the request_address with the x-forwarded-for header from nginx
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1)

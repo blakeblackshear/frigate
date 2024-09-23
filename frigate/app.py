@@ -23,6 +23,10 @@ from frigate.api.app import create_app
 from frigate.api.auth import hash_password
 from frigate.comms.config_updater import ConfigPublisher
 from frigate.comms.dispatcher import Communicator, Dispatcher
+from frigate.comms.event_metadata_updater import (
+    EventMetadataPublisher,
+    EventMetadataTypeEnum,
+)
 from frigate.comms.inter_process import InterProcessCommunicator
 from frigate.comms.mqtt import MqttClient
 from frigate.comms.webpush import WebPushClient
@@ -372,6 +376,7 @@ class FrigateApp:
     def init_inter_process_communicator(self) -> None:
         self.inter_process_communicator = InterProcessCommunicator()
         self.inter_config_updater = ConfigPublisher()
+        self.event_metadata_updater = EventMetadataPublisher(EventMetadataTypeEnum.all)
         self.inter_zmq_proxy = ZmqProxy()
 
     def init_web_server(self) -> None:
@@ -385,6 +390,7 @@ class FrigateApp:
             self.external_event_processor,
             self.plus_api,
             self.stats_emitter,
+            self.event_metadata_updater,
         )
 
     def init_onvif(self) -> None:
@@ -828,6 +834,7 @@ class FrigateApp:
         # Stop Communicators
         self.inter_process_communicator.stop()
         self.inter_config_updater.stop()
+        self.event_metadata_updater.stop()
         self.inter_zmq_proxy.stop()
 
         while len(self.detection_shms) > 0:
