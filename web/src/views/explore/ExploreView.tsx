@@ -37,7 +37,7 @@ export default function ExploreView({ onSelectSearch }: ExploreViewProps) {
       },
     ],
     {
-      revalidateOnFocus: false,
+      revalidateOnFocus: true,
     },
   );
 
