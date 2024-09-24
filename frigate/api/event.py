@@ -1022,7 +1022,7 @@ def create_event(
     request: Request,
     camera_name: str,
     label: str,
-    body: EventsCreateBody = None,
+    body: EventsCreateBody = EventsCreateBody(),
 ):
     if not camera_name or not request.app.frigate_config.cameras.get(camera_name):
         return JSONResponse(

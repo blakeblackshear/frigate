@@ -791,6 +791,71 @@ def label_snapshot(request: Request, camera_name: str, label: str):
         )
 
 
+@router.get("/events/{event_id}/thumbnail.jpg")
+def event_thumbnail(
+    request: Request,
+    event_id: str,
+    max_cache_age: int = Query(
+        2592000, description="Max cache age in seconds. Default 30 days in seconds."
+    ),
+    format: str = Query(default="ios", enum=["ios", "android"]),
+):
+    thumbnail_bytes = None
+    event_complete = False
+    try:
+        event = Event.get(Event.id == event_id)
+        if event.end_time is not None:
+            event_complete = True
+        thumbnail_bytes = base64.b64decode(event.thumbnail)
+    except DoesNotExist:
+        # see if the object is currently being tracked
+        try:
+            camera_states = request.app.detected_frames_processor.camera_states.values()
+            for camera_state in camera_states:
+                if event_id in camera_state.tracked_objects:
+                    tracked_obj = camera_state.tracked_objects.get(event_id)
+                    if tracked_obj is not None:
+                        thumbnail_bytes = tracked_obj.get_thumbnail()
+        except Exception:
+            return JSONResponse(
+                content={"success": False, "message": "Event not found"},
+                status_code=404,
+            )
+
+    if thumbnail_bytes is None:
+        return JSONResponse(
+            content={"success": False, "message": "Event not found"},
+            status_code=404,
+        )
+
+    # android notifications prefer a 2:1 ratio
+    if format == "android":
+        jpg_as_np = np.frombuffer(thumbnail_bytes, dtype=np.uint8)
+        img = cv2.imdecode(jpg_as_np, flags=1)
+        thumbnail = cv2.copyMakeBorder(
+            img,
+            0,
+            0,
+            int(img.shape[1] * 0.5),
+            int(img.shape[1] * 0.5),
+            cv2.BORDER_CONSTANT,
+            (0, 0, 0),
+        )
+        ret, jpg = cv2.imencode(".jpg", thumbnail, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
+        thumbnail_bytes = jpg.tobytes()
+
+    return StreamingResponse(
+        io.BytesIO(thumbnail_bytes),
+        media_type="image/jpeg",
+        headers={
+            "Cache-Control": f"private, max-age={max_cache_age}"
+            if event_complete
+            else "no-store",
+            "Content-Type": "image/jpeg",
+        },
+    )
+
+
 @router.get("/{camera_name}/{label}/best.jpg")
 @router.get("/{camera_name}/{label}/thumbnail.jpg")
 def label_thumbnail(request: Request, camera_name: str, label: str):
@@ -1078,71 +1143,6 @@ def event_clip(request: Request, event_id: str, download: bool = False):
         media_type="video/mp4",
         filename=file_name,
         headers=headers,
-    )
-
-
-@router.get("/events/{event_id}/thumbnail.jpg")
-def event_thumbnail(
-    request: Request,
-    event_id: str,
-    max_cache_age: int = Query(
-        2592000, description="Max cache age in seconds. Default 30 days in seconds."
-    ),
-    format: str = Query(default="ios", enum=["ios", "android"]),
-):
-    thumbnail_bytes = None
-    event_complete = False
-    try:
-        event = Event.get(Event.id == event_id)
-        if event.end_time is not None:
-            event_complete = True
-        thumbnail_bytes = base64.b64decode(event.thumbnail)
-    except DoesNotExist:
-        # see if the object is currently being tracked
-        try:
-            camera_states = request.app.detected_frames_processor.camera_states.values()
-            for camera_state in camera_states:
-                if event_id in camera_state.tracked_objects:
-                    tracked_obj = camera_state.tracked_objects.get(event_id)
-                    if tracked_obj is not None:
-                        thumbnail_bytes = tracked_obj.get_thumbnail()
-        except Exception:
-            return JSONResponse(
-                content={"success": False, "message": "Event not found"},
-                status_code=404,
-            )
-
-    if thumbnail_bytes is None:
-        return JSONResponse(
-            content={"success": False, "message": "Event not found"},
-            status_code=404,
-        )
-
-    # android notifications prefer a 2:1 ratio
-    if format == "android":
-        jpg_as_np = np.frombuffer(thumbnail_bytes, dtype=np.uint8)
-        img = cv2.imdecode(jpg_as_np, flags=1)
-        thumbnail = cv2.copyMakeBorder(
-            img,
-            0,
-            0,
-            int(img.shape[1] * 0.5),
-            int(img.shape[1] * 0.5),
-            cv2.BORDER_CONSTANT,
-            (0, 0, 0),
-        )
-        ret, jpg = cv2.imencode(".jpg", thumbnail, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
-        thumbnail_bytes = jpg.tobytes()
-
-    return StreamingResponse(
-        io.BytesIO(thumbnail_bytes),
-        media_type="image/jpeg",
-        headers={
-            "Cache-Control": f"private, max-age={max_cache_age}"
-            if event_complete
-            else "no-store",
-            "Content-Type": "image/jpeg",
-        },
     )
 
 
