@@ -290,7 +290,6 @@ def config_set(request: Request, body: AppConfigSetBody):
         )
 
     if body.requires_restart == 0:
-
         request.app.frigate_config = config
     return JSONResponse(
         content=(
