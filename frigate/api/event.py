@@ -911,34 +911,32 @@ def set_description(id):
     json: dict[str, any] = request.get_json(silent=True) or {}
     new_description = json.get("description")
 
-    if new_description is None or len(new_description) == 0:
-        return make_response(
-            jsonify(
-                {
-                    "success": False,
-                    "message": "description cannot be empty",
-                }
-            ),
-            400,
-        )
-
-    event.data["description"] = new_description
+    event.data["description"] = new_description or None
     event.save()
 
     # If semantic search is enabled, update the index
     if current_app.frigate_config.semantic_search.enabled:
         context: EmbeddingsContext = current_app.embeddings
-        context.embeddings.description.upsert(
-            documents=[new_description],
-            metadatas=[get_metadata(event)],
-            ids=[id],
-        )
+        if new_description is None or len(new_description) == 0:
+            context.embeddings.description.delete(ids=[id])
+        else:
+            context.embeddings.description.upsert(
+                documents=[new_description],
+                metadatas=[get_metadata(event)],
+                ids=[id],
+            )
+
+    response_message = (
+        f"Event {id} description is now blank"
+        if new_description is None or len(new_description) == 0
+        else f"Event {id} description set to {new_description}"
+    )
 
     return make_response(
         jsonify(
             {
                 "success": True,
-                "message": "Event " + id + " description set to " + new_description,
+                "message": response_message,
             }
         ),
         200,
