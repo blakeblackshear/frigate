@@ -160,7 +160,9 @@ def config_raw():
         raw_config = f.read()
         f.close()
 
-        return raw_config, 200
+        return JSONResponse(
+            content=raw_config, media_type="text/plain", status_code=200
+        )
 
 
 @router.post("/config/save")
