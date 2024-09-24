@@ -655,12 +655,8 @@ class FrigateApp:
                 self.external_event_processor,
                 self.stats_emitter,
             ).run(host="127.0.0.1", port=5001, debug=False, threaded=True)
-        except KeyboardInterrupt:
-            pass
-
-        logger.info("Flask has exited...")
-
-        self.stop()
+        finally:
+            self.stop()
 
     def stop(self) -> None:
         logger.info("Stopping...")
