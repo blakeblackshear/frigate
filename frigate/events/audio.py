@@ -2,7 +2,6 @@
 
 import datetime
 import logging
-import multiprocessing as mp
 import signal
 import sys
 import threading
@@ -12,6 +11,7 @@ from typing import Tuple
 import numpy as np
 import requests
 
+import frigate.util as util
 from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
 from frigate.comms.inter_process import InterProcessRequestor
@@ -65,7 +65,7 @@ def get_ffmpeg_command(ffmpeg: FfmpegConfig) -> list[str]:
     )
 
 
-class AudioProcessor(mp.Process):
+class AudioProcessor(util.Process):
     def __init__(
         self,
         config: FrigateConfig,

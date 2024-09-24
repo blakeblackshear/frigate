@@ -10,6 +10,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 from setproctitle import setproctitle
 
+import frigate.util as util
 from frigate.detectors import create_detector
 from frigate.detectors.detector_config import InputTensorEnum
 from frigate.util.builtin import EventsPerSecond, load_labels
@@ -168,7 +169,7 @@ class ObjectDetectProcess:
         self.detection_start.value = 0.0
         if (self.detect_process is not None) and self.detect_process.is_alive():
             self.stop()
-        self.detect_process = mp.Process(
+        self.detect_process = util.Process(
             target=run_detector,
             name=f"detector:{self.name}",
             args=(

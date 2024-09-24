@@ -14,6 +14,7 @@ from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
+import frigate.util as util
 from frigate.api.auth import hash_password
 from frigate.api.fastapi_app import create_fastapi_app
 from frigate.comms.config_updater import ConfigPublisher
@@ -251,7 +252,7 @@ class FrigateApp:
                 self.processes["go2rtc"] = proc.info["pid"]
 
     def init_recording_manager(self) -> None:
-        recording_process = mp.Process(
+        recording_process = util.Process(
             target=manage_recordings,
             name="recording_manager",
             args=(self.config,),
@@ -263,7 +264,7 @@ class FrigateApp:
         logger.info(f"Recording process started: {recording_process.pid}")
 
     def init_review_segment_manager(self) -> None:
-        review_segment_process = mp.Process(
+        review_segment_process = util.Process(
             target=manage_review_segments,
             name="review_segment_manager",
             args=(self.config,),
@@ -281,7 +282,7 @@ class FrigateApp:
 
         # Create a client for other processes to use
         self.embeddings = EmbeddingsContext()
-        embedding_process = mp.Process(
+        embedding_process = util.Process(
             target=manage_embeddings,
             name="embeddings_manager",
             args=(self.config,),
@@ -422,7 +423,7 @@ class FrigateApp:
         self.detected_frames_processor.start()
 
     def start_video_output_processor(self) -> None:
-        output_processor = mp.Process(
+        output_processor = util.Process(
             target=output_frames,
             name="output_processor",
             args=(self.config,),
@@ -451,7 +452,7 @@ class FrigateApp:
                 logger.info(f"Camera processor not started for disabled camera {name}")
                 continue
 
-            camera_process = mp.Process(
+            camera_process = util.Process(
                 target=track_camera,
                 name=f"camera_processor:{name}",
                 args=(
@@ -466,8 +467,8 @@ class FrigateApp:
                     self.ptz_metrics[name],
                     self.region_grids[name],
                 ),
+                daemon=True,
             )
-            camera_process.daemon = True
             self.camera_metrics[name]["process"] = camera_process
             camera_process.start()
             logger.info(f"Camera processor started for {name}: {camera_process.pid}")
@@ -478,7 +479,7 @@ class FrigateApp:
                 logger.info(f"Capture process not started for disabled camera {name}")
                 continue
 
-            capture_process = mp.Process(
+            capture_process = util.Process(
                 target=capture_camera,
                 name=f"camera_capture:{name}",
                 args=(name, config, self.shm_frame_count(), self.camera_metrics[name]),
