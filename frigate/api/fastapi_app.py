@@ -13,6 +13,9 @@ from starlette_context.plugins import Plugin
 from frigate.api import app as main_app
 from frigate.api import auth, event, export, media, notification, preview, review
 from frigate.api.auth import get_jwt_secret, limiter
+from frigate.comms.event_metadata_updater import (
+    EventMetadataPublisher,
+)
 from frigate.config import FrigateConfig
 from frigate.embeddings import EmbeddingsContext
 from frigate.events.external import ExternalEventProcessor
@@ -47,6 +50,7 @@ def create_fastapi_app(
     onvif: OnvifController,
     external_processor: ExternalEventProcessor,
     stats_emitter: StatsEmitter,
+    event_metadata_updater: EventMetadataPublisher,
 ):
     logger.info("Starting FastAPI app")
     app = FastAPI(
@@ -102,6 +106,7 @@ def create_fastapi_app(
     app.camera_error_image = None
     app.onvif = onvif
     app.stats_emitter = stats_emitter
+    app.event_metadata_updater = event_metadata_updater
     app.external_processor = external_processor
     app.jwt_token = get_jwt_secret() if frigate_config.auth.enabled else None
 
