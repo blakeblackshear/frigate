@@ -160,7 +160,9 @@ def config_raw():
         raw_config = f.read()
         f.close()
 
-        return raw_config, 200
+        return JSONResponse(
+            content=raw_config, media_type="text/plain", status_code=200
+        )
 
 
 @router.post("/config/save")
@@ -259,13 +261,13 @@ def config_set(request: Request, body: AppConfigSetBody):
         f.close()
 
     try:
-        update_yaml_from_url(config_file, request.url)
+        update_yaml_from_url(config_file, str(request.url))
         with open(config_file, "r") as f:
             new_raw_config = f.read()
             f.close()
         # Validate the config schema
         try:
-            config_obj = FrigateConfig.parse_yaml(new_raw_config)
+            config = FrigateConfig.parse(new_raw_config)
         except Exception:
             with open(config_file, "w") as f:
                 f.write(old_raw_config)
@@ -288,10 +290,7 @@ def config_set(request: Request, body: AppConfigSetBody):
         )
 
     if body.requires_restart == 0:
-        request.app.frigate_config = FrigateConfig.parse_object(
-            config_obj, request.app.frigate_config.plus_api
-        )
-
+        request.app.frigate_config = config
     return JSONResponse(
         content=(
             {
