@@ -28,3 +28,7 @@ class EventsCreateBody(BaseModel):
 
 class EventsEndBody(BaseModel):
     end_time: Optional[int] = datetime.now().timestamp()
+
+
+class SubmitPlusBody(BaseModel):
+    include_annotation: int = Field(default=1)
