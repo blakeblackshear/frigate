@@ -663,6 +663,7 @@ class FrigateApp:
                     self.onvif_controller,
                     self.external_event_processor,
                     self.stats_emitter,
+                    self.event_metadata_updater,
                 ),
                 host="127.0.0.1",
                 port=5001,

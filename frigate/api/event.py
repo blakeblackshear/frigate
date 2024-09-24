@@ -926,6 +926,12 @@ def set_description(
             ids=[id],
         )
 
+    response_message = (
+        f"Event {id} description is now blank"
+        if new_description is None or len(new_description) == 0
+        else f"Event {id} description set to {new_description}"
+    )
+
     return JSONResponse(
         content=(
             {
