@@ -140,6 +140,10 @@ class Dispatcher:
             event: Event = Event.get(Event.id == payload["id"])
             event.data["description"] = payload["description"]
             event.save()
+            self.publish(
+                "event_update",
+                json.dumps({"id": event.id, "description": event.data["description"]}),
+            )
         elif topic == "onConnect":
             camera_status = self.camera_activity.copy()
 
