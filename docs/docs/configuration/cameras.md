@@ -103,7 +103,7 @@ This list of working and non-working PTZ cameras is based on user feedback.
 | Foscam R5                    |      ✅      |      ❌      |                                                                                                                                                 |
 | Hanwha XNP-6550RH            |      ✅      |      ❌      |                                                                                                                                                 |
 | Hikvision                    |      ✅      |      ❌      | Incomplete ONVIF support (MoveStatus won't update even on latest firmware) - reported with HWP-N4215IH-DE and DS-2DE3304W-DE, but likely others |
-| Hikvision DS-2DE3A404IWG-E/W |      ✅      |      ✅      | A user reports this camera is working fine with autotracking on the latest firmware.                                                            |
+| Hikvision DS-2DE3A404IWG-E/W |      ✅      |      ✅      |                                                                                                                                                 |
 | Reolink 511WA                |      ✅      |      ❌      | Zoom only                                                                                                                                       |
 | Reolink E1 Pro               |      ✅      |      ❌      |                                                                                                                                                 |
 | Reolink E1 Zoom              |      ✅      |      ❌      |                                                                                                                                                 |
