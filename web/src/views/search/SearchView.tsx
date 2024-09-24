@@ -398,7 +398,10 @@ export default function SearchView({
         Object.keys(searchFilter).length === 0 &&
         !searchTerm && (
           <div className="scrollbar-container flex size-full flex-col overflow-y-auto">
-            <ExploreView onSelectSearch={onSelectSearch} />
+            <ExploreView
+              searchDetail={searchDetail}
+              setSearchDetail={setSearchDetail}
+            />
           </div>
         )}
     </div>

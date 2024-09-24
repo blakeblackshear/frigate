@@ -135,7 +135,7 @@ export default function Explore() {
         setIsSlowLoading(true);
       }
     },
-    loadingTimeout: 10000,
+    loadingTimeout: 15000,
   });
 
   const searchResults = useMemo(

@@ -293,7 +293,7 @@ function ObjectDetailsTab({
             typeof key === "string" &&
             (key.includes("events") ||
               key.includes("events/search") ||
-              key.includes("explore")),
+              key.includes("events/explore")),
         );
       })
       .catch(() => {

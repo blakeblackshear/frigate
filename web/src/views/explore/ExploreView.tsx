@@ -15,12 +15,18 @@ import { SearchResult } from "@/types/search";
 import ImageLoadingIndicator from "@/components/indicators/ImageLoadingIndicator";
 import useImageLoaded from "@/hooks/use-image-loaded";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import { useEventUpdate } from "@/api/ws";
+import { isEqual } from "lodash";
 
 type ExploreViewProps = {
-  onSelectSearch: (searchResult: SearchResult, index: number) => void;
+  searchDetail: SearchResult | undefined;
+  setSearchDetail: (search: SearchResult | undefined) => void;
 };
 
-export default function ExploreView({ onSelectSearch }: ExploreViewProps) {
+export default function ExploreView({
+  searchDetail,
+  setSearchDetail,
+}: ExploreViewProps) {
   // title
 
   useEffect(() => {
@@ -29,7 +35,7 @@ export default function ExploreView({ onSelectSearch }: ExploreViewProps) {
 
   // data
 
-  const { data: events } = useSWR<SearchResult[]>(
+  const { data: events, mutate } = useSWR<SearchResult[]>(
     [
       "events/explore",
       {
@@ -53,6 +59,28 @@ export default function ExploreView({ onSelectSearch }: ExploreViewProps) {
     }, {});
   }, [events]);
 
+  const eventUpdate = useEventUpdate();
+
+  useEffect(() => {
+    mutate();
+    // mutate / revalidate when event description updates come in
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eventUpdate]);
+
+  // update search detail when results change
+
+  useEffect(() => {
+    if (searchDetail && events) {
+      const updatedSearchDetail = events.find(
+        (result) => result.id === searchDetail.id,
+      );
+
+      if (updatedSearchDetail && !isEqual(updatedSearchDetail, searchDetail)) {
+        setSearchDetail(updatedSearchDetail);
+      }
+    }
+  }, [events, searchDetail, setSearchDetail]);
+
   if (!events) {
     return (
       <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
@@ -66,7 +94,7 @@ export default function ExploreView({ onSelectSearch }: ExploreViewProps) {
           key={label}
           searchResults={filteredEvents}
           objectType={label}
-          onSelectSearch={onSelectSearch}
+          setSearchDetail={setSearchDetail}
         />
       ))}
     </div>
@@ -76,13 +104,13 @@ export default function ExploreView({ onSelectSearch }: ExploreViewProps) {
 type ThumbnailRowType = {
   objectType: string;
   searchResults?: SearchResult[];
-  onSelectSearch: (searchResult: SearchResult, index: number) => void;
+  setSearchDetail: (search: SearchResult | undefined) => void;
 };
 
 function ThumbnailRow({
   objectType,
   searchResults,
-  onSelectSearch,
+  setSearchDetail,
 }: ThumbnailRowType) {
   const navigate = useNavigate();
 
@@ -116,7 +144,7 @@ function ThumbnailRow({
           >
             <ExploreThumbnailImage
               event={event}
-              onSelectSearch={onSelectSearch}
+              setSearchDetail={setSearchDetail}
             />
           </div>
         ))}
@@ -145,11 +173,11 @@ function ThumbnailRow({
 
 type ExploreThumbnailImageProps = {
   event: SearchResult;
-  onSelectSearch: (searchResult: SearchResult, index: number) => void;
+  setSearchDetail: (search: SearchResult | undefined) => void;
 };
 function ExploreThumbnailImage({
   event,
-  onSelectSearch,
+  setSearchDetail,
 }: ExploreThumbnailImageProps) {
   const apiHost = useApiHost();
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
@@ -176,7 +204,7 @@ function ExploreThumbnailImage({
         loading={isSafari ? "eager" : "lazy"}
         draggable={false}
         src={`${apiHost}api/events/${event.id}/thumbnail.jpg`}
-        onClick={() => onSelectSearch(event, 0)}
+        onClick={() => setSearchDetail(event)}
         onLoad={() => {
           onImgLoad();
         }}
