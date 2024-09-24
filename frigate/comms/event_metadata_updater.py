@@ -31,7 +31,6 @@ class EventMetadataSubscriber(Subscriber):
 
     def __init__(self, topic: EventMetadataTypeEnum) -> None:
         topic = topic.value
-        logger.info(f"subscribing to: {topic}")
         super().__init__(topic)
 
     def check_for_update(
