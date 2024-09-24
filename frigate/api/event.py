@@ -22,6 +22,7 @@ from frigate.api.defs.events_body import (
     EventsDescriptionBody,
     EventsEndBody,
     EventsSubLabelBody,
+    SubmitPlusBody,
 )
 from frigate.api.defs.events_query_parameters import (
     DEFAULT_TIME_RANGE,
@@ -616,7 +617,7 @@ def set_retain(event_id: str):
 
 
 @router.post("/events/{event_id}/plus")
-def send_to_plus(request: Request, event_id: str):
+def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = None):
     if not request.app.frigate_config.plus_api.is_active():
         message = "PLUS_API_KEY environment variable is not set"
         logger.error(message)
@@ -630,9 +631,7 @@ def send_to_plus(request: Request, event_id: str):
             status_code=400,
         )
 
-    include_annotation = (
-        request.json.get("include_annotation") if request.is_json else None
-    )
+    include_annotation = body.include_annotation if body is not None else None
 
     try:
         event = Event.get(Event.id == event_id)
@@ -945,7 +944,7 @@ def set_description(
     )
 
 
-@router.put("/events/<id>/description/regenerate")
+@router.put("/events/{event_id}/description/regenerate")
 def regenerate_description(request: Request, event_id: str):
     try:
         event: Event = Event.get(Event.id == event_id)
