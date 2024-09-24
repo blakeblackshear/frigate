@@ -13,9 +13,9 @@ from starlette_context.plugins import Plugin
 from frigate.api import app as main_app
 from frigate.api import auth, event, export, media, notification, preview, review
 from frigate.api.auth import get_jwt_secret, limiter
+from frigate.config import FrigateConfig
 from frigate.embeddings import EmbeddingsContext
 from frigate.events.external import ExternalEventProcessor
-from frigate.plus import PlusApi
 from frigate.ptz.onvif import OnvifController
 from frigate.stats.emitter import StatsEmitter
 from frigate.storage import StorageMaintainer
@@ -39,14 +39,13 @@ class RemoteUserPlugin(Plugin):
 
 
 def create_fastapi_app(
-    frigate_config,
+    frigate_config: FrigateConfig,
     database: SqliteQueueDatabase,
     embeddings: Optional[EmbeddingsContext],
     detected_frames_processor,
     storage_maintainer: StorageMaintainer,
     onvif: OnvifController,
     external_processor: ExternalEventProcessor,
-    plus_api: PlusApi,
     stats_emitter: StatsEmitter,
 ):
     logger.info("Starting FastAPI app")
@@ -80,6 +79,7 @@ def create_fastapi_app(
         return response
 
     # Rate limiter (used for login endpoint)
+    auth.rateLimiter.set_limit(frigate_config.auth.failed_login_rate_limit)
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
     app.add_middleware(SlowAPIMiddleware)
@@ -101,7 +101,6 @@ def create_fastapi_app(
     app.storage_maintainer = storage_maintainer
     app.camera_error_image = None
     app.onvif = onvif
-    app.plus_api = plus_api
     app.stats_emitter = stats_emitter
     app.external_processor = external_processor
     app.jwt_token = get_jwt_secret() if frigate_config.auth.enabled else None

@@ -33,6 +33,19 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=[Tags.auth])
 
 
+class RateLimiter:
+    _limit = ""
+
+    def set_limit(self, limit: str):
+        self._limit = limit
+
+    def get_limit(self) -> str:
+        return self._limit
+
+
+rateLimiter = RateLimiter()
+
+
 def get_remote_addr(request: Request):
     route = list(reversed(request.headers.get("x-forwarded-for").split(",")))
     logger.debug(f"IP Route: {[r for r in route]}")
@@ -299,14 +312,8 @@ def logout(request: Request):
 limiter = Limiter(key_func=get_remote_addr)
 
 
-def get_rate_limit(request: Request):
-    return request.app.frigate_config.auth.failed_login_rate_limit
-
-
 @router.post("/login")
-# Ideally, this would be a decorator @limiter.limit(limit_value=get_rate_limit) but that way the request object is not passed to the method
-# See: https://github.com/laurentS/slowapi/issues/41
-# @limiter.limit(limit_value=get_rate_limit)
+@limiter.limit(limit_value=rateLimiter.get_limit)
 def login(request: Request, body: AppPostLoginBody):
     JWT_COOKIE_NAME = request.app.frigate_config.auth.cookie_name
     JWT_COOKIE_SECURE = request.app.frigate_config.auth.cookie_secure

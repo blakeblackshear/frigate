@@ -655,7 +655,6 @@ class FrigateApp:
                     self.storage_maintainer,
                     self.onvif_controller,
                     self.external_event_processor,
-                    self.plus_api,
                     self.stats_emitter,
                 ),
                 host="127.0.0.1",
