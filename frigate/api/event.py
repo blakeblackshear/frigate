@@ -951,7 +951,7 @@ def regenerate_description(request: Request, event_id: str):
         event: Event = Event.get(Event.id == event_id)
     except DoesNotExist:
         return JSONResponse(
-            content={"success": False, "message": "Event " + event_id + " not found"},
+            content=({"success": False, "message": "Event " + event_id + " not found"}),
             status_code=404,
         )
 
