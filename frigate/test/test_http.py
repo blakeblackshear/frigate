@@ -121,6 +121,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
         )
         id = "123456.random"
         id2 = "7890.random"
@@ -157,6 +158,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
         )
         id = "123456.random"
 
@@ -178,6 +180,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
         )
         id = "123456.random"
         bad_id = "654321.other"
@@ -192,6 +195,7 @@ class TestHttp(unittest.TestCase):
         app = create_app(
             FrigateConfig(**self.minimal_config),
             self.db,
+            None,
             None,
             None,
             None,
@@ -220,6 +224,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
         )
         id = "123456.random"
 
@@ -240,6 +245,7 @@ class TestHttp(unittest.TestCase):
         app = create_app(
             FrigateConfig(**self.minimal_config),
             self.db,
+            None,
             None,
             None,
             None,
@@ -284,6 +290,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
         )
         id = "123456.random"
         sub_label = "sub"
@@ -319,6 +326,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
         )
         id = "123456.random"
         sub_label = "sub"
@@ -344,6 +352,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             None,
+            None,
         )
 
         with app.test_client() as client:
@@ -355,6 +364,7 @@ class TestHttp(unittest.TestCase):
         app = create_app(
             FrigateConfig(**self.minimal_config),
             self.db,
+            None,
             None,
             None,
             None,
@@ -382,6 +392,7 @@ class TestHttp(unittest.TestCase):
             None,
             None,
             stats,
+            None,
         )
 
         with app.test_client() as client:
