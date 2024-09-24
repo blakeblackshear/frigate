@@ -944,7 +944,7 @@ def set_description(
     )
 
 
-@router.put("/events/<id>/description/regenerate")
+@router.put("/events/{event_id}/description/regenerate")
 def regenerate_description(request: Request, event_id: str):
     try:
         event: Event = Event.get(Event.id == event_id)
