@@ -1,5 +1,6 @@
 """Review apis."""
 
+import datetime
 import logging
 from functools import reduce
 from pathlib import Path
@@ -98,31 +99,11 @@ def review(params: ReviewQueryParams = Depends()):
     return JSONResponse(content=[r for r in review])
 
 
-@router.get("/review/event/{event_id}")
-def get_review_from_event(event_id: str):
-    try:
-        return model_to_dict(
-            ReviewSegment.get(
-                ReviewSegment.data["detections"].cast("text") % f'*"{event_id}"*'
-            )
-        )
-    except DoesNotExist:
-        return "Review item not found", 404
-
-
-@router.get("/review/{event_id}")
-def get_review(event_id: str):
-    try:
-        return model_to_dict(ReviewSegment.get(ReviewSegment.id == event_id))
-    except DoesNotExist:
-        return "Review item not found", 404
-
-
 @router.get("/review/summary")
 def review_summary(params: ReviewSummaryQueryParams = Depends()):
     hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(params.timezone)
-    day_ago = params.day_ago
-    month_ago = params.month_ago
+    day_ago = (datetime.datetime.now() - datetime.timedelta(hours=24)).timestamp()
+    month_ago = (datetime.datetime.now() - datetime.timedelta(days=30)).timestamp()
 
     cameras = params.cameras
     labels = params.labels
@@ -385,27 +366,6 @@ def set_multiple_reviewed(body: dict = None):
     )
 
 
-@router.delete("/review/{event_id}/viewed")
-def set_not_reviewed(event_id: str):
-    try:
-        review: ReviewSegment = ReviewSegment.get(ReviewSegment.id == event_id)
-    except DoesNotExist:
-        return JSONResponse(
-            content=(
-                {"success": False, "message": "Review " + event_id + " not found"}
-            ),
-            status_code=404,
-        )
-
-    review.has_been_reviewed = False
-    review.save()
-
-    return JSONResponse(
-        content=({"success": True, "message": "Reviewed " + event_id + " not viewed"}),
-        status_code=200,
-    )
-
-
 @router.post("/reviews/delete")
 def delete_reviews(body: dict = None):
     json: dict[str, any] = body or {}
@@ -591,3 +551,44 @@ def audio_activity(params: ReviewActivityMotionQueryParams = Depends()):
     df.index = df.index.astype(int) // (10**9)
     normalized = df.reset_index().to_dict("records")
     return JSONResponse(content=normalized)
+
+
+@router.get("/review/event/{event_id}")
+def get_review_from_event(event_id: str):
+    try:
+        return model_to_dict(
+            ReviewSegment.get(
+                ReviewSegment.data["detections"].cast("text") % f'*"{event_id}"*'
+            )
+        )
+    except DoesNotExist:
+        return "Review item not found", 404
+
+
+@router.get("/review/{event_id}")
+def get_review(event_id: str):
+    try:
+        return model_to_dict(ReviewSegment.get(ReviewSegment.id == event_id))
+    except DoesNotExist:
+        return "Review item not found", 404
+
+
+@router.delete("/review/{event_id}/viewed")
+def set_not_reviewed(event_id: str):
+    try:
+        review: ReviewSegment = ReviewSegment.get(ReviewSegment.id == event_id)
+    except DoesNotExist:
+        return JSONResponse(
+            content=(
+                {"success": False, "message": "Review " + event_id + " not found"}
+            ),
+            status_code=404,
+        )
+
+    review.has_been_reviewed = False
+    review.save()
+
+    return JSONResponse(
+        content=({"success": True, "message": "Reviewed " + event_id + " not viewed"}),
+        status_code=200,
+    )
