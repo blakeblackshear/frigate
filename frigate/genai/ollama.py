@@ -37,5 +37,6 @@ class OllamaClient(GenAIClient):
                 images=images,
             )
             return result["response"].strip()
-        except (TimeoutException, ResponseError):
+        except (TimeoutException, ResponseError) as e:
+            logger.warning("Ollama returned an error: %s", str(e))
             return None

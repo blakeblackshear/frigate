@@ -1,5 +1,6 @@
 """Gemini Provider for Frigate AI."""
 
+import logging
 from typing import Optional
 
 import google.generativeai as genai
@@ -7,6 +8,8 @@ from google.api_core.exceptions import GoogleAPICallError
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
+
+logger = logging.getLogger(__name__)
 
 
 @register_genai_provider(GenAIProviderEnum.gemini)
@@ -39,7 +42,8 @@ class GeminiClient(GenAIClient):
                     timeout=self.timeout,
                 ),
             )
-        except GoogleAPICallError:
+        except GoogleAPICallError as e:
+            logger.warning("Gemini returned an error: %s", str(e))
             return None
         try:
             description = response.text.strip()
