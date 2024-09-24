@@ -962,20 +962,24 @@ def regenerate_description(request: Request, event_id: str):
         request.app.event_metadata_updater.publish(event.id)
 
         return JSONResponse(
-            {
-                "success": True,
-                "message": "Event "
-                + event_id
-                + " description regeneration has been requested.",
-            },
+            content=(
+                {
+                    "success": True,
+                    "message": "Event "
+                    + event_id
+                    + " description regeneration has been requested.",
+                }
+            ),
             status_code=200,
         )
 
     return JSONResponse(
-        {
-            "success": False,
-            "message": "Semantic search and generative AI are not enabled",
-        },
+        content=(
+            {
+                "success": False,
+                "message": "Semantic search and generative AI are not enabled",
+            }
+        ),
         status_code=400,
     )
 
