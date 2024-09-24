@@ -28,8 +28,7 @@ export default function PlatformAwareDialog({
         <DrawerTrigger asChild>{trigger}</DrawerTrigger>
         <DrawerContent className="max-h-[75dvh] overflow-hidden p-4">
           {content}
-        </DrawerContent>  const [open, setOpen] = useState(false);
-
+        </DrawerContent>
       </Drawer>
     );
   }
