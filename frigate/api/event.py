@@ -911,7 +911,11 @@ def set_description(id):
     json: dict[str, any] = request.get_json(silent=True) or {}
     new_description = json.get("description")
 
-    event.data["description"] = new_description or None
+    # ensure we can save an empty description
+    if new_description:
+        event.data["description"] = new_description
+    else:
+        event.data.pop("description", None)
     event.save()
 
     # If semantic search is enabled, update the index
