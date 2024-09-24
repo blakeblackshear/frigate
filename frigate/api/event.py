@@ -963,7 +963,7 @@ def regenerate_description(request: Request, event_id: str):
             {
                 "success": True,
                 "message": "Event "
-                + id
+                + event_id
                 + " description regeneration has been requested.",
             },
             status_code=200,
