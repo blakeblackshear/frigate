@@ -907,7 +907,7 @@ def set_description(
 
     if new_description is None or len(new_description) == 0:
         return JSONResponse(
-            {
+            content={
                 "success": False,
                 "message": "description cannot be empty",
             },
