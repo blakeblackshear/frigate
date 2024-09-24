@@ -2,7 +2,6 @@
 
 import base64
 import glob
-import io
 import logging
 import os
 import subprocess as sp
@@ -15,7 +14,7 @@ import numpy as np
 import pytz
 from fastapi import APIRouter, Path, Query, Request, Response
 from fastapi.params import Depends
-from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse
 from pathvalidate import sanitize_filename
 from peewee import DoesNotExist, fn
 from tzlocal import get_localzone_name
@@ -61,7 +60,7 @@ def mjpeg_feed(
     }
     if camera_name in request.app.frigate_config.cameras:
         # return a multipart response
-        return StreamingResponse(
+        return Response(
             imagestream(
                 request.app.detected_frames_processor,
                 camera_name,
@@ -173,8 +172,8 @@ def latest_frame(
         ret, img = cv2.imencode(
             f".{extension}", frame, [int(cv2.IMWRITE_WEBP_QUALITY), quality]
         )
-        return StreamingResponse(
-            io.BytesIO(img.tobytes()),
+        return Response(
+            content=img.tobytes(),
             media_type=f"image/{extension}",
             headers={"Content-Type": f"image/{extension}", "Cache-Control": "no-store"},
         )
@@ -192,8 +191,8 @@ def latest_frame(
         ret, img = cv2.imencode(
             f".{extension}", frame, [int(cv2.IMWRITE_WEBP_QUALITY), quality]
         )
-        return StreamingResponse(
-            io.BytesIO(img.tobytes()),
+        return Response(
+            content=img.tobytes(),
             media_type=f"image/{extension}",
             headers={"Content-Type": f"image/{extension}", "Cache-Control": "no-store"},
         )
@@ -751,8 +750,8 @@ def event_snapshot(
     if params.download:
         headers["Content-Disposition"] = f"attachment; filename=snapshot-{event_id}.jpg"
 
-    return StreamingResponse(
-        io.BytesIO(jpg_bytes),
+    return Response(
+        jpg_bytes,
         media_type="image/jpeg",
         headers=headers,
     )
@@ -785,8 +784,8 @@ def label_snapshot(request: Request, camera_name: str, label: str):
         frame = np.zeros((720, 1280, 3), np.uint8)
         ret, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
 
-        return StreamingResponse(
-            io.BytesIO(jpg.tobytes()),
+        return Response(
+            jpg.tobytes,
             media_type="image/jpeg",
         )
 
@@ -844,8 +843,8 @@ def event_thumbnail(
         ret, jpg = cv2.imencode(".jpg", thumbnail, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
         thumbnail_bytes = jpg.tobytes()
 
-    return StreamingResponse(
-        io.BytesIO(thumbnail_bytes),
+    return Response(
+        thumbnail_bytes,
         media_type="image/jpeg",
         headers={
             "Cache-Control": f"private, max-age={max_cache_age}"
@@ -872,8 +871,8 @@ def label_thumbnail(request: Request, camera_name: str, label: str):
         frame = np.zeros((175, 175, 3), np.uint8)
         ret, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
 
-        return StreamingResponse(
-            io.BytesIO(jpg.tobytes()),
+        return Response(
+            jpg.tobytes,
             media_type="image/jpeg",
             headers={"Cache-Control": "no-store"},
         )
@@ -1007,8 +1006,8 @@ def grid_snapshot(
 
         ret, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
 
-        return StreamingResponse(
-            io.BytesIO(jpg.tobytes()),
+        return Response(
+            jpg.tobytes,
             media_type="image/jpeg",
             headers={"Cache-Control": "no-store"},
         )
@@ -1096,8 +1095,8 @@ def event_snapshot_clean(request: Request, event_id: str, download: bool = False
             f"attachment; filename=snapshot-{event_id}-clean.png"
         )
 
-    return StreamingResponse(
-        io.BytesIO(png_bytes),
+    return Response(
+        png_bytes,
         media_type="image/png",
         headers=headers,
     )
@@ -1308,8 +1307,8 @@ def preview_gif(
 
         gif_bytes = process.stdout
 
-    return StreamingResponse(
-        io.BytesIO(gif_bytes),
+    return Response(
+        gif_bytes,
         media_type="image/gif",
         headers={
             "Cache-Control": f"private, max-age={max_cache_age}",
@@ -1545,8 +1544,8 @@ def preview_thumbnail(file_name: str):
             status_code=404,
         )
 
-    return StreamingResponse(
-        io.BytesIO(jpg_bytes),
+    return Response(
+        jpg_bytes,
         # FIXME: Shouldn't it be either jpg or webp depending on the endpoint?
         media_type="image/webp",
         headers={
