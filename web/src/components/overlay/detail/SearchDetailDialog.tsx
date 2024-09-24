@@ -45,6 +45,8 @@ import {
 import { ReviewSegment } from "@/types/review";
 import { useNavigate } from "react-router-dom";
 import Chip from "@/components/indicators/Chip";
+import { capitalizeFirstLetter } from "@/utils/stringUtil";
+import useGlobalMutation from "@/hooks/use-global-mutate";
 
 const SEARCH_TABS = [
   "details",
@@ -232,6 +234,10 @@ function ObjectDetailsTab({
 }: ObjectDetailsTabProps) {
   const apiHost = useApiHost();
 
+  // mutation / revalidation
+
+  const mutate = useGlobalMutation();
+
   // data
 
   const [desc, setDesc] = useState(search?.data.description);
@@ -282,6 +288,13 @@ function ObjectDetailsTab({
             position: "top-center",
           });
         }
+        mutate(
+          (key) =>
+            typeof key === "string" &&
+            (key.includes("events") ||
+              key.includes("events/search") ||
+              key.includes("explore")),
+        );
       })
       .catch(() => {
         toast.error("Failed to update the description", {
@@ -289,7 +302,35 @@ function ObjectDetailsTab({
         });
         setDesc(search.data.description);
       });
-  }, [desc, search]);
+  }, [desc, search, mutate]);
+
+  const regenerateDescription = useCallback(() => {
+    if (!search) {
+      return;
+    }
+
+    axios
+      .put(`events/${search.id}/description/regenerate`)
+      .then((resp) => {
+        if (resp.status == 200) {
+          toast.success(
+            `A new description has been requested from ${capitalizeFirstLetter(config?.genai.provider ?? "Generative AI")}. Depending on the speed of your provider, the new description may take some time to regenerate.`,
+            {
+              position: "top-center",
+              duration: 7000,
+            },
+          );
+        }
+      })
+      .catch(() => {
+        toast.error(
+          `Failed to call ${capitalizeFirstLetter(config?.genai.provider ?? "Generative AI")} for a new description`,
+          {
+            position: "top-center",
+          },
+        );
+      });
+  }, [search, config]);
 
   return (
     <div className="flex flex-col gap-5">
@@ -355,7 +396,10 @@ function ObjectDetailsTab({
           value={desc}
           onChange={(e) => setDesc(e.target.value)}
         />
-        <div className="flex w-full flex-row justify-end">
+        <div className="flex w-full flex-row justify-end gap-2">
+          {config?.genai.enabled && (
+            <Button onClick={regenerateDescription}>Regenerate</Button>
+          )}
           <Button variant="select" onClick={updateDescription}>
             Save
           </Button>

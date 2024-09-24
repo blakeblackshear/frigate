@@ -928,17 +928,59 @@ def set_description(
             ids=[event_id],
         )
 
+    response_message = (
+        f"Event {event_id} description is now blank"
+        if new_description is None or len(new_description) == 0
+        else f"Event {event_id} description set to {new_description}"
+    )
+
     return JSONResponse(
         content=(
             {
                 "success": True,
-                "message": "Event "
-                + event_id
-                + " description set to "
-                + new_description,
+                "message": response_message,
             }
         ),
         status_code=200,
+    )
+
+
+@router.put("/events/<id>/description/regenerate")
+def regenerate_description(request: Request, event_id: str):
+    try:
+        event: Event = Event.get(Event.id == event_id)
+    except DoesNotExist:
+        return JSONResponse(
+            content=({"success": False, "message": "Event " + event_id + " not found"}),
+            status_code=404,
+        )
+
+    if (
+        request.app.frigate_config.semantic_search.enabled
+        and request.app.frigate_config.genai.enabled
+    ):
+        request.app.event_metadata_updater.publish(event.id)
+
+        return JSONResponse(
+            content=(
+                {
+                    "success": True,
+                    "message": "Event "
+                    + event_id
+                    + " description regeneration has been requested.",
+                }
+            ),
+            status_code=200,
+        )
+
+    return JSONResponse(
+        content=(
+            {
+                "success": False,
+                "message": "Semantic search and generative AI are not enabled",
+            }
+        ),
+        status_code=400,
     )
 
 

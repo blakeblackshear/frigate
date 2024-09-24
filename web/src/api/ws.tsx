@@ -321,3 +321,10 @@ export function useImproveContrast(camera: string): {
   );
   return { payload: payload as ToggleableSetting, send };
 }
+
+export function useEventUpdate(): { payload: string } {
+  const {
+    value: { payload },
+  } = useWs("event_update", "");
+  return useDeepMemo(JSON.parse(payload as string));
+}
