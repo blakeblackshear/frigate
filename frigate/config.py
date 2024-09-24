@@ -45,19 +45,43 @@ from frigate.ffmpeg_presets import (
     parse_preset_input,
     parse_preset_output_record,
 )
+from frigate.plus import PlusApi
 from frigate.util.builtin import (
     deep_merge,
     escape_special_characters,
     generate_color_palette,
     get_ffmpeg_arg_list,
 )
-from frigate.util.config import StreamInfoRetriever, get_relative_coordinates
+from frigate.util.config import (
+    StreamInfoRetriever,
+    get_relative_coordinates,
+    migrate_frigate_config,
+)
 from frigate.util.image import create_mask
 from frigate.util.services import auto_detect_hwaccel
 
 logger = logging.getLogger(__name__)
 
 yaml = YAML()
+
+DEFAULT_CONFIG_FILES = ["/config/config.yaml", "/config/config.yml"]
+DEFAULT_CONFIG = """
+mqtt:
+  enabled: False
+
+cameras:
+  name_of_your_camera: # <------ Name the camera
+    enabled: True
+    ffmpeg:
+      inputs:
+        - path: rtsp://10.0.10.10:554/rtsp # <----- The stream you want to use for detection
+          roles:
+            - detect
+    detect:
+      enabled: False # <---- disable detection until you have a working camera feed
+      width: 1280
+      height: 720
+"""
 
 # TODO: Identify what the default format to display timestamps is
 DEFAULT_TIME_FORMAT = "%m/%d/%Y %H:%M:%S"
@@ -1272,6 +1296,19 @@ class LoggerConfig(FrigateBaseModel):
         default_factory=dict, title="Log level for specified processes."
     )
 
+    def install(self):
+        """Install global logging state."""
+        logging.getLogger().setLevel(self.default.value.upper())
+
+        log_levels = {
+            "werkzeug": LogLevelEnum.error,
+            "ws4py": LogLevelEnum.error,
+            **self.logs,
+        }
+
+        for log, level in log_levels.items():
+            logging.getLogger(log).setLevel(level.value.upper())
+
 
 class CameraGroupConfig(FrigateBaseModel):
     """Represents a group of cameras."""
@@ -1492,11 +1529,22 @@ class FrigateConfig(FrigateBaseModel):
     )
     version: Optional[str] = Field(default=None, title="Current config version.")
 
+    _plus_api: PlusApi
+
+    @property
+    def plus_api(self) -> PlusApi:
+        return self._plus_api
+
     @model_validator(mode="after")
     def post_validation(self, info: ValidationInfo) -> Self:
-        plus_api = None
+        # Load plus api from context, if possible.
+        self._plus_api = None
         if isinstance(info.context, dict):
-            plus_api = info.context.get("plus_api")
+            self._plus_api = info.context.get("plus_api")
+
+        # Ensure self._plus_api is set, if no explicit value is provided.
+        if self._plus_api is None:
+            self._plus_api = PlusApi()
 
         # set notifications state
         self.notifications.enabled_in_config = self.notifications.enabled
@@ -1691,7 +1739,7 @@ class FrigateConfig(FrigateBaseModel):
             enabled_labels.update(camera.objects.track)
 
         self.model.create_colormap(sorted(enabled_labels))
-        self.model.check_and_load_plus_model(plus_api)
+        self.model.check_and_load_plus_model(self.plus_api)
 
         for key, detector in self.detectors.items():
             adapter = TypeAdapter(DetectorConfig)
@@ -1726,7 +1774,7 @@ class FrigateConfig(FrigateBaseModel):
 
             detector_config.model = ModelConfig.model_validate(merged_model)
             detector_config.model.check_and_load_plus_model(
-                plus_api, detector_config.type
+                self.plus_api, detector_config.type
             )
             detector_config.model.compute_model_hash()
             self.detectors[key] = detector_config
@@ -1743,8 +1791,38 @@ class FrigateConfig(FrigateBaseModel):
         return v
 
     @classmethod
-    def parse_file(cls, config_path, **kwargs):
-        with open(config_path) as f:
+    def load(cls, **kwargs):
+        config_path = os.environ.get("CONFIG_FILE")
+
+        # No explicit configuration file, try to find one in the default paths.
+        if config_path is None:
+            for path in DEFAULT_CONFIG_FILES:
+                if os.path.isfile(path):
+                    config_path = path
+                    break
+
+        # No configuration file found, create one.
+        new_config = False
+        if config_path is None:
+            logger.info("No config file found, saving default config")
+            config_path = DEFAULT_CONFIG_FILES[-1]
+            new_config = True
+        else:
+            # Check if the config file needs to be migrated.
+            migrate_frigate_config(config_path)
+
+        # Finally, load the resulting configuration file.
+        with open(config_path, "a+") as f:
+            # Only write the default config if the opened file is non-empty. This can happen as
+            # a race condition. It's extremely unlikely, but eh. Might as well check it.
+            if new_config and f.tell() == 0:
+                f.write(DEFAULT_CONFIG)
+                logger.info(
+                    "Created default config file, see the getting started docs \
+                    for configuration https://docs.frigate.video/guides/getting_started"
+                )
+
+            f.seek(0)
             return FrigateConfig.parse(f, **kwargs)
 
     @classmethod
@@ -1776,9 +1854,16 @@ class FrigateConfig(FrigateBaseModel):
         return cls.parse_object(config, **context)
 
     @classmethod
-    def parse_object(cls, obj: Any, **context):
-        return cls.model_validate(obj, context=context)
-
-    @classmethod
     def parse_yaml(cls, config_yaml, **context):
         return cls.parse(config_yaml, is_json=False, **context)
+
+    @classmethod
+    def parse_object(cls, obj: Any, *, plus_api: Optional[PlusApi] = None):
+        return cls.model_validate(obj, context={"plus_api": plus_api})
+
+    def install(self):
+        """Install global state from the config."""
+        self.logger.install()
+
+        for key, value in self.environment_vars.items():
+            os.environ[key] = value

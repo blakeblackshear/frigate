@@ -2,6 +2,7 @@ import atexit
 import logging
 import multiprocessing as mp
 import os
+import sys
 import threading
 from collections import deque
 from contextlib import AbstractContextManager, ContextDecorator
@@ -66,6 +67,19 @@ class log_thread(AbstractContextManager, ContextDecorator):
 
         atexit.unregister(self._stop_thread)
         self._stop_thread()
+
+
+# When a multiprocessing.Process exits, python tries to flush stdout and stderr. However, if the
+# process is created after a thread (for example a logging thread) is created and the process fork
+# happens while an internal lock is held, the stdout/err flush can cause a deadlock.
+#
+# https://github.com/python/cpython/issues/91776
+def reopen_std_streams() -> None:
+    sys.stdout = os.fdopen(1, "w")
+    sys.stderr = os.fdopen(2, "w")
+
+
+os.register_at_fork(after_in_child=reopen_std_streams)
 
 
 # based on https://codereview.stackexchange.com/a/17959

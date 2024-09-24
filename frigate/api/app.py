@@ -28,7 +28,6 @@ from frigate.const import CONFIG_DIR
 from frigate.embeddings import EmbeddingsContext
 from frigate.events.external import ExternalEventProcessor
 from frigate.models import Event, Timeline
-from frigate.plus import PlusApi
 from frigate.ptz.onvif import OnvifController
 from frigate.stats.emitter import StatsEmitter
 from frigate.storage import StorageMaintainer
@@ -61,7 +60,6 @@ def create_app(
     storage_maintainer: StorageMaintainer,
     onvif: OnvifController,
     external_processor: ExternalEventProcessor,
-    plus_api: PlusApi,
     stats_emitter: StatsEmitter,
 ):
     app = Flask(__name__)
@@ -89,7 +87,6 @@ def create_app(
     app.storage_maintainer = storage_maintainer
     app.onvif = onvif
     app.external_processor = external_processor
-    app.plus_api = plus_api
     app.camera_error_image = None
     app.stats_emitter = stats_emitter
     app.jwt_token = get_jwt_secret() if frigate_config.auth.enabled else None
@@ -199,7 +196,7 @@ def config():
         for zone_name, zone in config_obj.cameras[camera_name].zones.items():
             camera_dict["zones"][zone_name]["color"] = zone.color
 
-    config["plus"] = {"enabled": current_app.plus_api.is_active()}
+    config["plus"] = {"enabled": current_app.frigate_config.plus_api.is_active()}
     config["model"]["colormap"] = config_obj.model.colormap
 
     for detector_config in config["detectors"].values():
@@ -362,7 +359,7 @@ def config_set():
 
     if json.get("requires_restart", 1) == 0:
         current_app.frigate_config = FrigateConfig.parse_object(
-            config_obj, plus_api=current_app.plus_api
+            config_obj, plus_api=current_app.frigate_config.plus_api
         )
 
     return make_response(

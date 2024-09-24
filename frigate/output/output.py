@@ -38,7 +38,6 @@ def output_frames(
     stop_event = mp.Event()
 
     def receiveSignal(signalNumber, frame):
-        logger.debug(f"Output frames process received signal {signalNumber}")
         stop_event.set()
 
     signal.signal(signal.SIGTERM, receiveSignal)
