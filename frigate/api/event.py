@@ -923,13 +923,13 @@ def set_description(
         context.embeddings.description.upsert(
             documents=[new_description],
             metadatas=[get_metadata(event)],
-            ids=[id],
+            ids=[event_id],
         )
 
     response_message = (
-        f"Event {id} description is now blank"
+        f"Event {event_id} description is now blank"
         if new_description is None or len(new_description) == 0
-        else f"Event {id} description set to {new_description}"
+        else f"Event {event_id} description set to {new_description}"
     )
 
     return JSONResponse(
