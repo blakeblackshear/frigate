@@ -23,6 +23,7 @@ import useKeyboardListener, {
 import scrollIntoView from "scroll-into-view-if-needed";
 import InputWithTags from "@/components/input/InputWithTags";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { isEqual } from "lodash";
 
 type SearchViewProps = {
   search: string;
@@ -139,6 +140,21 @@ export default function SearchView({
     setSearchDetail(item);
     setSelectedIndex(index);
   }, []);
+
+  // update search detail when results change
+
+  useEffect(() => {
+    if (searchDetail && searchResults) {
+      const flattenedResults = searchResults.flat();
+      const updatedSearchDetail = flattenedResults.find(
+        (result) => result.id === searchDetail.id,
+      );
+
+      if (updatedSearchDetail && !isEqual(updatedSearchDetail, searchDetail)) {
+        setSearchDetail(updatedSearchDetail);
+      }
+    }
+  }, [searchResults, searchDetail]);
 
   // confidence score - probably needs tweaking
 
