@@ -92,7 +92,6 @@ def run_detector(
     stop_event = mp.Event()
 
     def receiveSignal(signalNumber, frame):
-        logger.info("Signal to exit detection process...")
         stop_event.set()
 
     signal.signal(signal.SIGTERM, receiveSignal)

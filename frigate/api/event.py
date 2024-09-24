@@ -612,7 +612,7 @@ def set_retain(id):
 
 @EventBp.route("/events/<id>/plus", methods=("POST",))
 def send_to_plus(id):
-    if not current_app.plus_api.is_active():
+    if not current_app.frigate_config.plus_api.is_active():
         message = "PLUS_API_KEY environment variable is not set"
         logger.error(message)
         return make_response(
@@ -680,7 +680,7 @@ def send_to_plus(id):
         )
 
     try:
-        plus_id = current_app.plus_api.upload_image(image, event.camera)
+        plus_id = current_app.frigate_config.plus_api.upload_image(image, event.camera)
     except Exception as ex:
         logger.exception(ex)
         return make_response(
@@ -696,7 +696,7 @@ def send_to_plus(id):
         box = event.data["box"]
 
         try:
-            current_app.plus_api.add_annotation(
+            current_app.frigate_config.plus_api.add_annotation(
                 event.plus_id,
                 box,
                 event.label,
@@ -720,7 +720,7 @@ def send_to_plus(id):
 
 @EventBp.route("/events/<id>/false_positive", methods=("PUT",))
 def false_positive(id):
-    if not current_app.plus_api.is_active():
+    if not current_app.frigate_config.plus_api.is_active():
         message = "PLUS_API_KEY environment variable is not set"
         logger.error(message)
         return make_response(
@@ -769,7 +769,7 @@ def false_positive(id):
     )
 
     try:
-        current_app.plus_api.add_false_positive(
+        current_app.frigate_config.plus_api.add_false_positive(
             event.plus_id,
             region,
             box,

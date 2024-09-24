@@ -390,7 +390,6 @@ def capture_camera(name, config: CameraConfig, shm_frame_count: int, process_inf
     stop_event = mp.Event()
 
     def receiveSignal(signalNumber, frame):
-        logger.debug(f"Capture camera received signal {signalNumber}")
         stop_event.set()
 
     signal.signal(signal.SIGTERM, receiveSignal)

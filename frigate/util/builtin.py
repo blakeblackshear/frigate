@@ -258,37 +258,6 @@ def find_by_key(dictionary, target_key):
     return None
 
 
-def save_default_config(location: str) -> None:
-    try:
-        with open(location, "w") as f:
-            f.write(
-                """
-mqtt:
-  enabled: False
-
-cameras:
-  name_of_your_camera: # <------ Name the camera
-    enabled: True
-    ffmpeg:
-      inputs:
-        - path: rtsp://10.0.10.10:554/rtsp # <----- The stream you want to use for detection
-          roles:
-            - detect
-    detect:
-      enabled: False # <---- disable detection until you have a working camera feed
-      width: 1280
-      height: 720
-                    """
-            )
-    except PermissionError:
-        logger.error("Unable to write default config to /config")
-        return
-
-    logger.info(
-        "Created default config file, see the getting started docs for configuration https://docs.frigate.video/guides/getting_started"
-    )
-
-
 def get_tomorrow_at_time(hour: int) -> datetime.datetime:
     """Returns the datetime of the following day at 2am."""
     try:
