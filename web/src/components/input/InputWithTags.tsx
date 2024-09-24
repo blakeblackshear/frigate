@@ -183,6 +183,7 @@ export default function InputWithTags({
       if (allSuggestions[type as FilterType]?.includes(value)) {
         const newFilters = { ...filters };
         let timestamp = 0;
+        let times = ["", ""];
 
         switch (type) {
           case "before":
@@ -221,6 +222,25 @@ export default function InputWithTags({
               }
               newFilters[type] = timestamp / 1000;
             }
+            break;
+          case "timeRange":
+            if (!value.includes(",")) {
+              toast.error("The correct format is after,before.", {
+                position: "top-center",
+              });
+              return;
+            }
+
+            times = value.split(",");
+
+            if (times[0] < "00" || times[1] > "24") {
+              toast.error("Times not in valid range", {
+                position: "top-center",
+              });
+              return;
+            }
+
+            newFilters[type] = value;
             break;
           case "search_type":
             if (!newFilters.search_type) newFilters.search_type = [];
