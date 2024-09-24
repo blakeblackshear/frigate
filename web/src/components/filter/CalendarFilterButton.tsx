@@ -13,6 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { DateRangePicker } from "../ui/calendar-range";
 import { DateRange } from "react-day-picker";
 import { useState } from "react";
+import PlatformAwareDialog from "../overlay/dialog/PlatformAwareDialog";
 
 type CalendarFilterButtonProps = {
   reviewSummary?: ReviewSummary;
@@ -24,6 +25,7 @@ export default function CalendarFilterButton({
   day,
   updateSelectedDay,
 }: CalendarFilterButtonProps) {
+  const [open, setOpen] = useState(false);
   const selectedDate = useFormattedTimestamp(
     day == undefined ? 0 : day?.getTime() / 1000 + 1,
     "%b %-d",
@@ -65,20 +67,14 @@ export default function CalendarFilterButton({
     </>
   );
 
-  if (isMobile) {
-    return (
-      <Drawer>
-        <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-        <DrawerContent>{content}</DrawerContent>
-      </Drawer>
-    );
-  }
-
   return (
-    <Popover>
-      <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-      <PopoverContent className="w-auto">{content}</PopoverContent>
-    </Popover>
+    <PlatformAwareDialog
+      trigger={trigger}
+      content={content}
+      contentClassName="w-auto"
+      open={open}
+      onOpenChange={setOpen}
+    />
   );
 }
 

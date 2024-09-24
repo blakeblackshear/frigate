@@ -1,3 +1,23 @@
+const SEARCH_FILTERS = [
+  "cameras",
+  "date",
+  "time",
+  "general",
+  "zone",
+  "sub",
+  "source",
+] as const;
+export type SearchFilters = (typeof SEARCH_FILTERS)[number];
+export const DEFAULT_SEARCH_FILTERS: SearchFilters[] = [
+  "cameras",
+  "date",
+  "time",
+  "general",
+  "zone",
+  "sub",
+  "source",
+];
+
 export type SearchSource = "similarity" | "thumbnail" | "description";
 
 export type SearchResult = {
@@ -36,6 +56,7 @@ export type SearchFilter = {
   zones?: string[];
   before?: number;
   after?: number;
+  timeRange?: string;
   search_type?: SearchSource[];
   event_id?: string;
 };

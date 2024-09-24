@@ -19,6 +19,7 @@ import FilterSwitch from "./FilterSwitch";
 import { FilterList } from "@/types/filter";
 import CalendarFilterButton from "./CalendarFilterButton";
 import { CamerasFilterButton } from "./CamerasFilterButton";
+import PlatformAwareDialog from "../overlay/dialog/PlatformAwareDialog";
 
 const REVIEW_FILTERS = [
   "cameras",
@@ -367,28 +368,10 @@ function GeneralFilterButton({
     />
   );
 
-  if (isMobile) {
-    return (
-      <Drawer
-        open={open}
-        onOpenChange={(open) => {
-          if (!open) {
-            setCurrentLabels(selectedLabels);
-          }
-
-          setOpen(open);
-        }}
-      >
-        <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-        <DrawerContent className="max-h-[75dvh] overflow-hidden">
-          {content}
-        </DrawerContent>
-      </Drawer>
-    );
-  }
-
   return (
-    <Popover
+    <PlatformAwareDialog
+      trigger={trigger}
+      content={content}
       open={open}
       onOpenChange={(open) => {
         if (!open) {
@@ -397,10 +380,7 @@ function GeneralFilterButton({
 
         setOpen(open);
       }}
-    >
-      <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-      <PopoverContent>{content}</PopoverContent>
-    </Popover>
+    />
   );
 }
 
