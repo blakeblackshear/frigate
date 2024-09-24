@@ -37,7 +37,7 @@ from frigate.const import (
     RECORD_DIR,
 )
 from frigate.embeddings import EmbeddingsContext, manage_embeddings
-from frigate.events.audio import listen_to_audio
+from frigate.events.audio import AudioProcessor
 from frigate.events.cleanup import EventCleanup
 from frigate.events.external import ExternalEventProcessor
 from frigate.events.maintainer import EventProcessor
@@ -489,20 +489,9 @@ class FrigateApp:
             logger.info(f"Capture process started for {name}: {capture_process.pid}")
 
     def start_audio_processors(self) -> None:
-        self.audio_process = None
-        if len([c for c in self.config.cameras.values() if c.audio.enabled]) > 0:
-            self.audio_process = mp.Process(
-                target=listen_to_audio,
-                name="audio_capture",
-                args=(
-                    self.config,
-                    self.camera_metrics,
-                ),
-            )
-            self.audio_process.daemon = True
-            self.audio_process.start()
-            self.processes["audio_detector"] = self.audio_process.pid or 0
-            logger.info(f"Audio process started: {self.audio_process.pid}")
+        self.audio_process = AudioProcessor(self.config, self.camera_metrics)
+        self.audio_process.start()
+        self.processes["audio_detector"] = self.audio_process.pid or 0
 
     def start_timeline_processor(self) -> None:
         self.timeline_processor = TimelineProcessor(
@@ -686,9 +675,8 @@ class FrigateApp:
         ).execute()
 
         # stop the audio process
-        if self.audio_process is not None:
-            self.audio_process.terminate()
-            self.audio_process.join()
+        self.audio_process.terminate()
+        self.audio_process.join()
 
         # ensure the capture processes are done
         for camera in self.camera_metrics.keys():
