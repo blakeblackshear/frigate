@@ -20,8 +20,6 @@ class ReviewSummaryQueryParams(BaseModel):
     labels: Optional[str] = "all"
     zones: Optional[str] = "all"
     timezone: Optional[str] = "utc"
-    day_ago: Optional[int] = (datetime.now() - timedelta(hours=24)).timestamp()
-    month_ago: Optional[int] = (datetime.now() - timedelta(days=30)).timestamp()
 
 
 class ReviewActivityMotionQueryParams(BaseModel):

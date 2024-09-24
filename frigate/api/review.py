@@ -1,5 +1,6 @@
 """Review apis."""
 
+import datetime
 import logging
 from functools import reduce
 from pathlib import Path
@@ -101,8 +102,8 @@ def review(params: ReviewQueryParams = Depends()):
 @router.get("/review/summary")
 def review_summary(params: ReviewSummaryQueryParams = Depends()):
     hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(params.timezone)
-    day_ago = params.day_ago
-    month_ago = params.month_ago
+    day_ago = (datetime.datetime.now() - datetime.timedelta(hours=24)).timestamp()
+    month_ago = (datetime.datetime.now() - datetime.timedelta(days=30)).timestamp()
 
     cameras = params.cameras
     labels = params.labels
