@@ -1,3 +1,4 @@
+import { useEventUpdate } from "@/api/ws";
 import { useApiFilterArgs } from "@/hooks/use-api-filter";
 import { SearchFilter, SearchQuery, SearchResult } from "@/types/search";
 import SearchView from "@/views/search/SearchView";
@@ -123,19 +124,19 @@ export default function Explore() {
     return [url, { ...params, limit: API_LIMIT }];
   };
 
-  const { data, size, setSize, isValidating } = useSWRInfinite<SearchResult[]>(
-    getKey,
-    {
-      revalidateFirstPage: true,
-      revalidateAll: false,
-      onLoadingSlow: () => {
-        if (!similaritySearch) {
-          setIsSlowLoading(true);
-        }
-      },
-      loadingTimeout: 10000,
+  const { data, size, setSize, isValidating, mutate } = useSWRInfinite<
+    SearchResult[]
+  >(getKey, {
+    revalidateFirstPage: true,
+    revalidateOnFocus: true,
+    revalidateAll: false,
+    onLoadingSlow: () => {
+      if (!similaritySearch) {
+        setIsSlowLoading(true);
+      }
     },
-  );
+    loadingTimeout: 10000,
+  });
 
   const searchResults = useMemo(
     () => (data ? ([] as SearchResult[]).concat(...data) : []),
@@ -163,6 +164,16 @@ export default function Explore() {
       setSize(size + 1);
     }
   }, [isReachingEnd, isLoadingMore, setSize, size, searchResults, searchQuery]);
+
+  // mutation and revalidation
+
+  const eventUpdate = useEventUpdate();
+
+  useEffect(() => {
+    mutate();
+    // mutate / revalidate when event description updates come in
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eventUpdate]);
 
   return (
     <>
