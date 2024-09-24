@@ -1,36 +1,40 @@
 """Review apis."""
 
 import logging
-from datetime import datetime, timedelta
 from functools import reduce
 from pathlib import Path
 
 import pandas as pd
-from flask import Blueprint, jsonify, make_response, request
+from fastapi import APIRouter
+from fastapi.params import Depends
+from fastapi.responses import JSONResponse
 from peewee import Case, DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
 
+from frigate.api.defs.review_query_parameters import (
+    ReviewActivityMotionQueryParams,
+    ReviewQueryParams,
+    ReviewSummaryQueryParams,
+)
+from frigate.api.defs.tags import Tags
 from frigate.models import Recordings, ReviewSegment
 from frigate.util.builtin import get_tz_modifiers
 
 logger = logging.getLogger(__name__)
 
-ReviewBp = Blueprint("reviews", __name__)
+router = APIRouter(tags=[Tags.review])
 
 
-@ReviewBp.route("/review")
-def review():
-    cameras = request.args.get("cameras", "all")
-    labels = request.args.get("labels", "all")
-    zones = request.args.get("zones", "all")
-    reviewed = request.args.get("reviewed", type=int, default=0)
-    limit = request.args.get("limit", type=int, default=None)
-    severity = request.args.get("severity", None)
-
-    before = request.args.get("before", type=float, default=datetime.now().timestamp())
-    after = request.args.get(
-        "after", type=float, default=(datetime.now() - timedelta(hours=24)).timestamp()
-    )
+@router.get("/review")
+def review(params: ReviewQueryParams = Depends()):
+    cameras = params.cameras
+    labels = params.labels
+    zones = params.zones
+    reviewed = params.reviewed
+    limit = params.limit
+    severity = params.severity
+    before = params.before
+    after = params.after
 
     clauses = [
         (
@@ -91,39 +95,38 @@ def review():
         .iterator()
     )
 
-    return jsonify([r for r in review])
+    return JSONResponse(content=[r for r in review])
 
 
-@ReviewBp.route("/review/event/<id>")
-def get_review_from_event(id: str):
+@router.get("/review/event/{event_id}")
+def get_review_from_event(event_id: str):
     try:
         return model_to_dict(
             ReviewSegment.get(
-                ReviewSegment.data["detections"].cast("text") % f'*"{id}"*'
+                ReviewSegment.data["detections"].cast("text") % f'*"{event_id}"*'
             )
         )
     except DoesNotExist:
         return "Review item not found", 404
 
 
-@ReviewBp.route("/review/<id>")
-def get_review(id: str):
+@router.get("/review/{event_id}")
+def get_review(event_id: str):
     try:
-        return model_to_dict(ReviewSegment.get(ReviewSegment.id == id))
+        return model_to_dict(ReviewSegment.get(ReviewSegment.id == event_id))
     except DoesNotExist:
         return "Review item not found", 404
 
 
-@ReviewBp.route("/review/summary")
-def review_summary():
-    tz_name = request.args.get("timezone", default="utc", type=str)
-    hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(tz_name)
-    day_ago = (datetime.now() - timedelta(hours=24)).timestamp()
-    month_ago = (datetime.now() - timedelta(days=30)).timestamp()
+@router.get("/review/summary")
+def review_summary(params: ReviewSummaryQueryParams = Depends()):
+    hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(params.timezone)
+    day_ago = params.day_ago
+    month_ago = params.month_ago
 
-    cameras = request.args.get("cameras", "all")
-    labels = request.args.get("labels", "all")
-    zones = request.args.get("zones", "all")
+    cameras = params.cameras
+    labels = params.labels
+    zones = params.zones
 
     clauses = [(ReviewSegment.start_time > day_ago)]
 
@@ -358,53 +361,60 @@ def review_summary():
     for e in last_month.dicts().iterator():
         data[e["day"]] = e
 
-    return jsonify(data)
+    return JSONResponse(content=data)
 
 
-@ReviewBp.route("/reviews/viewed", methods=("POST",))
-def set_multiple_reviewed():
-    json: dict[str, any] = request.get_json(silent=True) or {}
+@router.post("/reviews/viewed")
+def set_multiple_reviewed(body: dict = None):
+    json: dict[str, any] = body or {}
     list_of_ids = json.get("ids", "")
 
     if not list_of_ids or len(list_of_ids) == 0:
-        return make_response(
-            jsonify({"success": False, "message": "Not a valid list of ids"}), 404
+        return JSONResponse(
+            context=({"success": False, "message": "Not a valid list of ids"}),
+            status_code=404,
         )
 
     ReviewSegment.update(has_been_reviewed=True).where(
         ReviewSegment.id << list_of_ids
     ).execute()
 
-    return make_response(
-        jsonify({"success": True, "message": "Reviewed multiple items"}), 200
+    return JSONResponse(
+        content=({"success": True, "message": "Reviewed multiple items"}),
+        status_code=200,
     )
 
 
-@ReviewBp.route("/review/<id>/viewed", methods=("DELETE",))
-def set_not_reviewed(id):
+@router.delete("/review/{event_id}/viewed")
+def set_not_reviewed(event_id: str):
     try:
-        review: ReviewSegment = ReviewSegment.get(ReviewSegment.id == id)
+        review: ReviewSegment = ReviewSegment.get(ReviewSegment.id == event_id)
     except DoesNotExist:
-        return make_response(
-            jsonify({"success": False, "message": "Review " + id + " not found"}), 404
+        return JSONResponse(
+            content=(
+                {"success": False, "message": "Review " + event_id + " not found"}
+            ),
+            status_code=404,
         )
 
     review.has_been_reviewed = False
     review.save()
 
-    return make_response(
-        jsonify({"success": True, "message": "Reviewed " + id + " not viewed"}), 200
+    return JSONResponse(
+        content=({"success": True, "message": "Reviewed " + event_id + " not viewed"}),
+        status_code=200,
     )
 
 
-@ReviewBp.route("/reviews/delete", methods=("POST",))
-def delete_reviews():
-    json: dict[str, any] = request.get_json(silent=True) or {}
+@router.post("/reviews/delete")
+def delete_reviews(body: dict = None):
+    json: dict[str, any] = body or {}
     list_of_ids = json.get("ids", "")
 
     if not list_of_ids or len(list_of_ids) == 0:
-        return make_response(
-            jsonify({"success": False, "message": "Not a valid list of ids"}), 404
+        return JSONResponse(
+            content=({"success": False, "message": "Not a valid list of ids"}),
+            status_code=404,
         )
 
     reviews = (
@@ -446,17 +456,19 @@ def delete_reviews():
     Recordings.delete().where(Recordings.id << recording_ids).execute()
     ReviewSegment.delete().where(ReviewSegment.id << list_of_ids).execute()
 
-    return make_response(jsonify({"success": True, "message": "Delete reviews"}), 200)
-
-
-@ReviewBp.route("/review/activity/motion")
-def motion_activity():
-    """Get motion and audio activity."""
-    cameras = request.args.get("cameras", "all")
-    before = request.args.get("before", type=float, default=datetime.now().timestamp())
-    after = request.args.get(
-        "after", type=float, default=(datetime.now() - timedelta(hours=1)).timestamp()
+    return JSONResponse(
+        content=({"success": True, "message": "Delete reviews"}), status_code=200
     )
+
+
+@router.get("/review/activity/motion")
+def motion_activity(params: ReviewActivityMotionQueryParams = Depends()):
+    """Get motion and audio activity."""
+    cameras = params.cameras
+    before = params.before
+    after = params.after
+    # get scale in seconds
+    scale = params.scale
 
     clauses = [(Recordings.start_time > after) & (Recordings.end_time < before)]
     clauses.append((Recordings.motion > 0))
@@ -477,15 +489,12 @@ def motion_activity():
         .iterator()
     )
 
-    # get scale in seconds
-    scale = request.args.get("scale", type=int, default=30)
-
     # resample data using pandas to get activity on scaled basis
     df = pd.DataFrame(data, columns=["start_time", "motion", "camera"])
 
     if df.empty:
         logger.warning("No motion data found for the requested time range")
-        return jsonify([])
+        return JSONResponse(content=[])
 
     df = df.astype(dtype={"motion": "float32"})
 
@@ -520,17 +529,17 @@ def motion_activity():
     # change types for output
     df.index = df.index.astype(int) // (10**9)
     normalized = df.reset_index().to_dict("records")
-    return jsonify(normalized)
+    return JSONResponse(content=normalized)
 
 
-@ReviewBp.route("/review/activity/audio")
-def audio_activity():
+@router.get("/review/activity/audio")
+def audio_activity(params: ReviewActivityMotionQueryParams = Depends()):
     """Get motion and audio activity."""
-    cameras = request.args.get("cameras", "all")
-    before = request.args.get("before", type=float, default=datetime.now().timestamp())
-    after = request.args.get(
-        "after", type=float, default=(datetime.now() - timedelta(hours=1)).timestamp()
-    )
+    cameras = params.cameras
+    before = params.before
+    after = params.after
+    # get scale in seconds
+    scale = params.scale
 
     clauses = [(Recordings.start_time > after) & (Recordings.end_time < before)]
 
@@ -562,9 +571,6 @@ def audio_activity():
             }
         )
 
-    # get scale in seconds
-    scale = request.args.get("scale", type=int, default=30)
-
     # resample data using pandas to get activity on scaled basis
     df = pd.DataFrame(data, columns=["start_time", "audio"])
     df = df.astype(dtype={"audio": "float16"})
@@ -584,4 +590,4 @@ def audio_activity():
     # change types for output
     df.index = df.index.astype(int) // (10**9)
     normalized = df.reset_index().to_dict("records")
-    return jsonify(normalized)
+    return JSONResponse(content=normalized)

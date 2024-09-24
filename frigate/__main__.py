@@ -5,7 +5,6 @@ import signal
 import sys
 import threading
 
-from flask import cli
 from pydantic import ValidationError
 
 from frigate.app import FrigateApp
@@ -24,7 +23,6 @@ def main() -> None:
     )
 
     threading.current_thread().name = "frigate"
-    cli.show_server_banner = lambda *x: None
 
     # Make sure we exit cleanly on SIGTERM.
     signal.signal(signal.SIGTERM, lambda sig, frame: sys.exit())

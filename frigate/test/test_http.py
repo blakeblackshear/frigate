@@ -1,18 +1,18 @@
 import datetime
-import json
 import logging
 import os
 import unittest
 from unittest.mock import Mock
 
+from fastapi.testclient import TestClient
 from peewee_migrate import Router
 from playhouse.shortcuts import model_to_dict
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
-from frigate.api.app import create_app
+from frigate.api.fastapi_app import create_fastapi_app
 from frigate.config import FrigateConfig
-from frigate.models import Event, Recordings
+from frigate.models import Event, Recordings, Timeline
 from frigate.stats.emitter import StatsEmitter
 from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
 
@@ -26,7 +26,7 @@ class TestHttp(unittest.TestCase):
         router.run()
         migrate_db.close()
         self.db = SqliteQueueDatabase(TEST_DB)
-        models = [Event, Recordings]
+        models = [Event, Recordings, Timeline]
         self.db.bind(models)
 
         self.minimal_config = {
@@ -112,7 +112,7 @@ class TestHttp(unittest.TestCase):
             pass
 
     def test_get_event_list(self):
-        app = create_app(
+        app = create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
             None,
@@ -125,30 +125,30 @@ class TestHttp(unittest.TestCase):
         id = "123456.random"
         id2 = "7890.random"
 
-        with app.test_client() as client:
+        with TestClient(app) as client:
             _insert_mock_event(id)
-            events = client.get("/events").json
+            events = client.get("/events").json()
             assert events
             assert len(events) == 1
             assert events[0]["id"] == id
             _insert_mock_event(id2)
-            events = client.get("/events").json
+            events = client.get("/events").json()
             assert events
             assert len(events) == 2
             events = client.get(
                 "/events",
-                query_string={"limit": 1},
-            ).json
+                params={"limit": 1},
+            ).json()
             assert events
             assert len(events) == 1
             events = client.get(
                 "/events",
-                query_string={"has_clip": 0},
-            ).json
+                params={"has_clip": 0},
+            ).json()
             assert not events
 
     def test_get_good_event(self):
-        app = create_app(
+        app = create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
             None,
@@ -160,16 +160,16 @@ class TestHttp(unittest.TestCase):
         )
         id = "123456.random"
 
-        with app.test_client() as client:
+        with TestClient(app) as client:
             _insert_mock_event(id)
-            event = client.get(f"/events/{id}").json
+            event = client.get(f"/events/{id}").json()
 
         assert event
         assert event["id"] == id
         assert event == model_to_dict(Event.get(Event.id == id))
 
     def test_get_bad_event(self):
-        app = create_app(
+        app = create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
             None,
@@ -182,14 +182,14 @@ class TestHttp(unittest.TestCase):
         id = "123456.random"
         bad_id = "654321.other"
 
-        with app.test_client() as client:
+        with TestClient(app) as client:
             _insert_mock_event(id)
-            event = client.get(f"/events/{bad_id}").json
-
-        assert not event
+            event_response = client.get(f"/events/{bad_id}")
+            assert event_response.status_code == 404
+            assert event_response.json() == "Event not found"
 
     def test_delete_event(self):
-        app = create_app(
+        app = create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
             None,
@@ -201,17 +201,17 @@ class TestHttp(unittest.TestCase):
         )
         id = "123456.random"
 
-        with app.test_client() as client:
+        with TestClient(app) as client:
             _insert_mock_event(id)
-            event = client.get(f"/events/{id}").json
+            event = client.get(f"/events/{id}").json()
             assert event
             assert event["id"] == id
             client.delete(f"/events/{id}")
-            event = client.get(f"/events/{id}").json
-            assert not event
+            event = client.get(f"/events/{id}").json()
+            assert event == "Event not found"
 
     def test_event_retention(self):
-        app = create_app(
+        app = create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
             None,
@@ -223,21 +223,21 @@ class TestHttp(unittest.TestCase):
         )
         id = "123456.random"
 
-        with app.test_client() as client:
+        with TestClient(app) as client:
             _insert_mock_event(id)
             client.post(f"/events/{id}/retain")
-            event = client.get(f"/events/{id}").json
+            event = client.get(f"/events/{id}").json()
             assert event
             assert event["id"] == id
             assert event["retain_indefinitely"] is True
             client.delete(f"/events/{id}/retain")
-            event = client.get(f"/events/{id}").json
+            event = client.get(f"/events/{id}").json()
             assert event
             assert event["id"] == id
             assert event["retain_indefinitely"] is False
 
     def test_event_time_filtering(self):
-        app = create_app(
+        app = create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
             None,
@@ -252,30 +252,30 @@ class TestHttp(unittest.TestCase):
         morning = 1656590400  # 06/30/2022 6 am (GMT)
         evening = 1656633600  # 06/30/2022 6 pm (GMT)
 
-        with app.test_client() as client:
+        with TestClient(app) as client:
             _insert_mock_event(morning_id, morning)
             _insert_mock_event(evening_id, evening)
             # both events come back
-            events = client.get("/events").json
+            events = client.get("/events").json()
             assert events
             assert len(events) == 2
             # morning event is excluded
             events = client.get(
                 "/events",
-                query_string={"time_range": "07:00,24:00"},
-            ).json
+                params={"time_range": "07:00,24:00"},
+            ).json()
             assert events
             # assert len(events) == 1
             # evening event is excluded
             events = client.get(
                 "/events",
-                query_string={"time_range": "00:00,18:00"},
-            ).json
+                params={"time_range": "00:00,18:00"},
+            ).json()
             assert events
             assert len(events) == 1
 
     def test_set_delete_sub_label(self):
-        app = create_app(
+        app = create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
             None,
@@ -288,29 +288,29 @@ class TestHttp(unittest.TestCase):
         id = "123456.random"
         sub_label = "sub"
 
-        with app.test_client() as client:
+        with TestClient(app) as client:
             _insert_mock_event(id)
-            client.post(
+            new_sub_label_response = client.post(
                 f"/events/{id}/sub_label",
-                data=json.dumps({"subLabel": sub_label}),
-                content_type="application/json",
+                json={"subLabel": sub_label},
             )
-            event = client.get(f"/events/{id}").json
+            assert new_sub_label_response.status_code == 200
+            event = client.get(f"/events/{id}").json()
             assert event
             assert event["id"] == id
             assert event["sub_label"] == sub_label
-            client.post(
+            empty_sub_label_response = client.post(
                 f"/events/{id}/sub_label",
-                data=json.dumps({"subLabel": ""}),
-                content_type="application/json",
+                json={"subLabel": ""},
             )
-            event = client.get(f"/events/{id}").json
+            assert empty_sub_label_response.status_code == 200
+            event = client.get(f"/events/{id}").json()
             assert event
             assert event["id"] == id
             assert event["sub_label"] == ""
 
     def test_sub_label_list(self):
-        app = create_app(
+        app = create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
             None,
@@ -323,19 +323,18 @@ class TestHttp(unittest.TestCase):
         id = "123456.random"
         sub_label = "sub"
 
-        with app.test_client() as client:
+        with TestClient(app) as client:
             _insert_mock_event(id)
             client.post(
                 f"/events/{id}/sub_label",
-                data=json.dumps({"subLabel": sub_label}),
-                content_type="application/json",
+                json={"subLabel": sub_label},
             )
-            sub_labels = client.get("/sub_labels").json
+            sub_labels = client.get("/sub_labels").json()
             assert sub_labels
             assert sub_labels == [sub_label]
 
     def test_config(self):
-        app = create_app(
+        app = create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
             None,
@@ -346,13 +345,13 @@ class TestHttp(unittest.TestCase):
             None,
         )
 
-        with app.test_client() as client:
-            config = client.get("/config").json
+        with TestClient(app) as client:
+            config = client.get("/config").json()
             assert config
             assert config["cameras"]["front_door"]
 
     def test_recordings(self):
-        app = create_app(
+        app = create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
             None,
@@ -364,16 +363,18 @@ class TestHttp(unittest.TestCase):
         )
         id = "123456.random"
 
-        with app.test_client() as client:
+        with TestClient(app) as client:
             _insert_mock_recording(id)
-            recording = client.get("/front_door/recordings").json
+            response = client.get("/front_door/recordings")
+            assert response.status_code == 200
+            recording = response.json()
             assert recording
             assert recording[0]["id"] == id
 
     def test_stats(self):
         stats = Mock(spec=StatsEmitter)
         stats.get_latest_stats.return_value = self.test_stats
-        app = create_app(
+        app = create_fastapi_app(
             FrigateConfig(**self.minimal_config),
             self.db,
             None,
@@ -384,8 +385,8 @@ class TestHttp(unittest.TestCase):
             stats,
         )
 
-        with app.test_client() as client:
-            full_stats = client.get("/stats").json
+        with TestClient(app) as client:
+            full_stats = client.get("/stats").json()
             assert full_stats == self.test_stats
 
 
@@ -418,8 +419,8 @@ def _insert_mock_recording(id: str) -> Event:
         id=id,
         camera="front_door",
         path=f"/recordings/{id}",
-        start_time=datetime.datetime.now().timestamp() - 50,
-        end_time=datetime.datetime.now().timestamp() - 60,
+        start_time=datetime.datetime.now().timestamp() - 60,
+        end_time=datetime.datetime.now().timestamp() - 50,
         duration=10,
         motion=True,
         objects=True,

@@ -5,23 +5,21 @@ import os
 from datetime import datetime, timedelta, timezone
 
 import pytz
-from flask import (
-    Blueprint,
-    jsonify,
-    make_response,
-)
+from fastapi import APIRouter
+from fastapi.responses import JSONResponse
 
+from frigate.api.defs.tags import Tags
 from frigate.const import CACHE_DIR, PREVIEW_FRAME_TYPE
 from frigate.models import Previews
 
 logger = logging.getLogger(__name__)
 
-PreviewBp = Blueprint("previews", __name__)
+
+router = APIRouter(tags=[Tags.preview])
 
 
-@PreviewBp.route("/preview/<camera_name>/start/<int:start_ts>/end/<int:end_ts>")
-@PreviewBp.route("/preview/<camera_name>/start/<float:start_ts>/end/<float:end_ts>")
-def preview_ts(camera_name, start_ts, end_ts):
+@router.get("/preview/{camera_name}/start/{start_ts}/end/{end_ts}")
+def preview_ts(camera_name: str, start_ts: float, end_ts: float):
     """Get all mp4 previews relevant for time period."""
     if camera_name != "all":
         camera_clause = Previews.camera == camera_name
@@ -62,24 +60,20 @@ def preview_ts(camera_name, start_ts, end_ts):
         )
 
     if not clips:
-        return make_response(
-            jsonify(
-                {
-                    "success": False,
-                    "message": "No previews found.",
-                }
-            ),
-            404,
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "No previews found.",
+            },
+            status_code=404,
         )
 
-    return make_response(jsonify(clips), 200)
+    return JSONResponse(content=clips, status_code=200)
 
 
-@PreviewBp.route("/preview/<year_month>/<int:day>/<int:hour>/<camera_name>/<tz_name>")
-@PreviewBp.route(
-    "/preview/<year_month>/<float:day>/<float:hour>/<camera_name>/<tz_name>"
-)
-def preview_hour(year_month, day, hour, camera_name, tz_name):
+@router.get("/preview/{year_month}/{day}/{hour}/{camera_name}/{tz_name}")
+def preview_hour(year_month: str, day: int, hour: int, camera_name: str, tz_name: str):
+    """Get all mp4 previews relevant for time period given the timezone"""
     parts = year_month.split("-")
     start_date = (
         datetime(int(parts[0]), int(parts[1]), int(day), int(hour), tzinfo=timezone.utc)
@@ -92,11 +86,8 @@ def preview_hour(year_month, day, hour, camera_name, tz_name):
     return preview_ts(camera_name, start_ts, end_ts)
 
 
-@PreviewBp.route("/preview/<camera_name>/start/<int:start_ts>/end/<int:end_ts>/frames")
-@PreviewBp.route(
-    "/preview/<camera_name>/start/<float:start_ts>/end/<float:end_ts>/frames"
-)
-def get_preview_frames_from_cache(camera_name: str, start_ts, end_ts):
+@router.get("/preview/{camera_name}/start/{start_ts}/end/{end_ts}/frames")
+def get_preview_frames_from_cache(camera_name: str, start_ts: float, end_ts: float):
     """Get list of cached preview frames"""
     preview_dir = os.path.join(CACHE_DIR, "preview_frames")
     file_start = f"preview_{camera_name}"
@@ -116,4 +107,7 @@ def get_preview_frames_from_cache(camera_name: str, start_ts, end_ts):
 
         selected_previews.append(file)
 
-    return jsonify(selected_previews)
+    return JSONResponse(
+        content=selected_previews,
+        status_code=200,
+    )

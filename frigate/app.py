@@ -9,12 +9,13 @@ from multiprocessing.synchronize import Event as MpEvent
 from typing import Any
 
 import psutil
+import uvicorn
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
-from frigate.api.app import create_app
 from frigate.api.auth import hash_password
+from frigate.api.fastapi_app import create_fastapi_app
 from frigate.comms.config_updater import ConfigPublisher
 from frigate.comms.dispatcher import Communicator, Dispatcher
 from frigate.comms.inter_process import InterProcessCommunicator
@@ -645,16 +646,21 @@ class FrigateApp:
         self.init_auth()
 
         try:
-            create_app(
-                self.config,
-                self.db,
-                self.embeddings,
-                self.detected_frames_processor,
-                self.storage_maintainer,
-                self.onvif_controller,
-                self.external_event_processor,
-                self.stats_emitter,
-            ).run(host="127.0.0.1", port=5001, debug=False, threaded=True)
+            uvicorn.run(
+                create_fastapi_app(
+                    self.config,
+                    self.db,
+                    self.embeddings,
+                    self.detected_frames_processor,
+                    self.storage_maintainer,
+                    self.onvif_controller,
+                    self.external_event_processor,
+                    self.stats_emitter,
+                ),
+                host="127.0.0.1",
+                port=5001,
+                log_level="error",
+            )
         finally:
             self.stop()
 

@@ -10,27 +10,19 @@ from functools import reduce
 from typing import Optional
 
 import requests
-from flask import Blueprint, Flask, current_app, jsonify, make_response, request
+from fastapi import APIRouter, Path, Request, Response
+from fastapi.encoders import jsonable_encoder
+from fastapi.params import Depends
+from fastapi.responses import JSONResponse
 from markupsafe import escape
 from peewee import operator
-from playhouse.sqliteq import SqliteQueueDatabase
-from werkzeug.middleware.proxy_fix import ProxyFix
 
-from frigate.api.auth import AuthBp, get_jwt_secret, limiter
-from frigate.api.event import EventBp
-from frigate.api.export import ExportBp
-from frigate.api.media import MediaBp
-from frigate.api.notification import NotificationBp
-from frigate.api.preview import PreviewBp
-from frigate.api.review import ReviewBp
+from frigate.api.defs.app_body import AppConfigSetBody
+from frigate.api.defs.app_query_parameters import AppTimelineHourlyQueryParameters
+from frigate.api.defs.tags import Tags
 from frigate.config import FrigateConfig
 from frigate.const import CONFIG_DIR
-from frigate.embeddings import EmbeddingsContext
-from frigate.events.external import ExternalEventProcessor
 from frigate.models import Event, Timeline
-from frigate.ptz.onvif import OnvifController
-from frigate.stats.emitter import StatsEmitter
-from frigate.storage import StorageMaintainer
 from frigate.util.builtin import (
     clean_camera_user_pass,
     get_tz_modifiers,
@@ -42,134 +34,75 @@ from frigate.version import VERSION
 logger = logging.getLogger(__name__)
 
 
-bp = Blueprint("frigate", __name__)
-bp.register_blueprint(EventBp)
-bp.register_blueprint(ExportBp)
-bp.register_blueprint(MediaBp)
-bp.register_blueprint(PreviewBp)
-bp.register_blueprint(ReviewBp)
-bp.register_blueprint(AuthBp)
-bp.register_blueprint(NotificationBp)
+router = APIRouter(tags=[Tags.app])
 
 
-def create_app(
-    frigate_config,
-    database: SqliteQueueDatabase,
-    embeddings: Optional[EmbeddingsContext],
-    detected_frames_processor,
-    storage_maintainer: StorageMaintainer,
-    onvif: OnvifController,
-    external_processor: ExternalEventProcessor,
-    stats_emitter: StatsEmitter,
-):
-    app = Flask(__name__)
-
-    @app.before_request
-    def check_csrf():
-        if request.method in ["GET", "HEAD", "OPTIONS", "TRACE"]:
-            pass
-        if "origin" in request.headers and "x-csrf-token" not in request.headers:
-            return jsonify({"success": False, "message": "Missing CSRF header"}), 401
-
-    @app.before_request
-    def _db_connect():
-        if database.is_closed():
-            database.connect()
-
-    @app.teardown_request
-    def _db_close(exc):
-        if not database.is_closed():
-            database.close()
-
-    app.frigate_config = frigate_config
-    app.embeddings = embeddings
-    app.detected_frames_processor = detected_frames_processor
-    app.storage_maintainer = storage_maintainer
-    app.onvif = onvif
-    app.external_processor = external_processor
-    app.camera_error_image = None
-    app.stats_emitter = stats_emitter
-    app.jwt_token = get_jwt_secret() if frigate_config.auth.enabled else None
-    # update the request_address with the x-forwarded-for header from nginx
-    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1)
-    # initialize the rate limiter for the login endpoint
-    limiter.init_app(app)
-    if frigate_config.auth.failed_login_rate_limit is None:
-        limiter.enabled = False
-
-    app.register_blueprint(bp)
-
-    return app
-
-
-@bp.route("/")
+@router.get("/")
 def is_healthy():
     return "Frigate is running. Alive and healthy!"
 
 
-@bp.route("/config/schema.json")
-def config_schema():
-    return current_app.response_class(
-        current_app.frigate_config.schema_json(), mimetype="application/json"
+@router.get("/config/schema.json")
+def config_schema(request: Request):
+    return Response(
+        content=request.app.frigate_config.schema_json(), media_type="application/json"
     )
 
 
-@bp.route("/go2rtc/streams")
+@router.get("/go2rtc/streams")
 def go2rtc_streams():
     r = requests.get("http://127.0.0.1:1984/api/streams")
     if not r.ok:
         logger.error("Failed to fetch streams from go2rtc")
-        return make_response(
-            jsonify({"success": False, "message": "Error fetching stream data"}),
-            500,
+        return JSONResponse(
+            content=({"success": False, "message": "Error fetching stream data"}),
+            status_code=500,
         )
     stream_data = r.json()
     for data in stream_data.values():
         for producer in data.get("producers", []):
             producer["url"] = clean_camera_user_pass(producer.get("url", ""))
-    return jsonify(stream_data)
+    return JSONResponse(content=stream_data)
 
 
-@bp.route("/go2rtc/streams/<camera_name>")
+@router.get("/go2rtc/streams/{camera_name}")
 def go2rtc_camera_stream(camera_name: str):
     r = requests.get(
         f"http://127.0.0.1:1984/api/streams?src={camera_name}&video=all&audio=all&microphone"
     )
     if not r.ok:
         logger.error("Failed to fetch streams from go2rtc")
-        return make_response(
-            jsonify({"success": False, "message": "Error fetching stream data"}),
-            500,
+        return JSONResponse(
+            content=({"success": False, "message": "Error fetching stream data"}),
+            status_code=500,
         )
     stream_data = r.json()
     for producer in stream_data.get("producers", []):
         producer["url"] = clean_camera_user_pass(producer.get("url", ""))
-    return jsonify(stream_data)
+    return JSONResponse(content=stream_data)
 
 
-@bp.route("/version")
+@router.get("/version")
 def version():
     return VERSION
 
 
-@bp.route("/stats")
-def stats():
-    return jsonify(current_app.stats_emitter.get_latest_stats())
+@router.get("/stats")
+def stats(request: Request):
+    return JSONResponse(content=request.app.stats_emitter.get_latest_stats())
 
 
-@bp.route("/stats/history")
-def stats_history():
-    keys = request.args.get("keys", default=None)
-
+@router.get("/stats/history")
+def stats_history(request: Request, keys: str = None):
     if keys:
         keys = keys.split(",")
 
-    return jsonify(current_app.stats_emitter.get_stats_history(keys))
+    return JSONResponse(content=request.app.stats_emitter.get_stats_history(keys))
 
 
-@bp.route("/config")
-def config():
-    config_obj: FrigateConfig = current_app.frigate_config
+@router.get("/config")
+def config(request: Request):
+    config_obj: FrigateConfig = request.app.frigate_config
     config: dict[str, dict[str, any]] = config_obj.model_dump(
         mode="json", warnings="none", exclude_none=True
     )
@@ -180,7 +113,7 @@ def config():
     # remove the proxy secret
     config["proxy"].pop("auth_secret", None)
 
-    for camera_name, camera in current_app.frigate_config.cameras.items():
+    for camera_name, camera in request.app.frigate_config.cameras.items():
         camera_dict = config["cameras"][camera_name]
 
         # clean paths
@@ -196,18 +129,18 @@ def config():
         for zone_name, zone in config_obj.cameras[camera_name].zones.items():
             camera_dict["zones"][zone_name]["color"] = zone.color
 
-    config["plus"] = {"enabled": current_app.frigate_config.plus_api.is_active()}
+    config["plus"] = {"enabled": request.app.frigate_config.plus_api.is_active()}
     config["model"]["colormap"] = config_obj.model.colormap
 
     for detector_config in config["detectors"].values():
         detector_config["model"]["labelmap"] = (
-            current_app.frigate_config.model.merged_labelmap
+            request.app.frigate_config.model.merged_labelmap
         )
 
-    return jsonify(config)
+    return JSONResponse(content=config)
 
 
-@bp.route("/config/raw")
+@router.get("/config/raw")
 def config_raw():
     config_file = os.environ.get("CONFIG_FILE", "/config/config.yml")
 
@@ -218,8 +151,9 @@ def config_raw():
         config_file = config_file_yaml
 
     if not os.path.isfile(config_file):
-        return make_response(
-            jsonify({"success": False, "message": "Could not find file"}), 404
+        return JSONResponse(
+            content=({"success": False, "message": "Could not find file"}),
+            status_code=404,
         )
 
     with open(config_file, "r") as f:
@@ -229,32 +163,30 @@ def config_raw():
         return raw_config, 200
 
 
-@bp.route("/config/save", methods=["POST"])
-def config_save():
-    save_option = request.args.get("save_option")
-
-    new_config = request.get_data().decode()
+@router.post("/config/save")
+def config_save(save_option: str, body: dict):
+    new_config = body
 
     if not new_config:
-        return make_response(
-            jsonify(
+        return JSONResponse(
+            content=(
                 {"success": False, "message": "Config with body param is required"}
             ),
-            400,
+            status_code=400,
         )
 
     # Validate the config schema
     try:
         FrigateConfig.parse_yaml(new_config)
     except Exception:
-        return make_response(
-            jsonify(
+        return JSONResponse(
+            content=(
                 {
                     "success": False,
                     "message": f"\nConfig Error:\n\n{escape(str(traceback.format_exc()))}",
                 }
             ),
-            400,
+            status_code=400,
         )
 
     # Save the config to file
@@ -271,14 +203,14 @@ def config_save():
             f.write(new_config)
             f.close()
     except Exception:
-        return make_response(
-            jsonify(
+        return JSONResponse(
+            content=(
                 {
                     "success": False,
                     "message": "Could not write config file, be sure that Frigate has write permission on the config file.",
                 }
             ),
-            400,
+            status_code=400,
         )
 
     if save_option == "restart":
@@ -286,34 +218,34 @@ def config_save():
             restart_frigate()
         except Exception as e:
             logging.error(f"Error restarting Frigate: {e}")
-            return make_response(
-                jsonify(
+            return JSONResponse(
+                content=(
                     {
                         "success": True,
                         "message": "Config successfully saved, unable to restart Frigate",
                     }
                 ),
-                200,
+                status_code=200,
             )
 
-        return make_response(
-            jsonify(
+        return JSONResponse(
+            content=(
                 {
                     "success": True,
                     "message": "Config successfully saved, restarting (this can take up to one minute)...",
                 }
             ),
-            200,
+            status_code=200,
         )
     else:
-        return make_response(
-            jsonify({"success": True, "message": "Config successfully saved."}),
-            200,
+        return JSONResponse(
+            content=({"success": True, "message": "Config successfully saved."}),
+            status_code=200,
         )
 
 
-@bp.route("/config/set", methods=["PUT"])
-def config_set():
+@router.put("/config/set")
+def config_set(request: Request, body: AppConfigSetBody):
     config_file = os.environ.get("CONFIG_FILE", f"{CONFIG_DIR}/config.yml")
 
     # Check if we can use .yaml instead of .yml
@@ -339,68 +271,68 @@ def config_set():
                 f.write(old_raw_config)
                 f.close()
             logger.error(f"\nConfig Error:\n\n{str(traceback.format_exc())}")
-            return make_response(
-                jsonify(
+            return JSONResponse(
+                content=(
                     {
                         "success": False,
                         "message": "Error parsing config. Check logs for error message.",
                     }
                 ),
-                400,
+                status_code=400,
             )
     except Exception as e:
         logging.error(f"Error updating config: {e}")
-        return make_response(
-            jsonify({"success": False, "message": "Error updating config"}),
-            500,
+        return JSONResponse(
+            content=({"success": False, "message": "Error updating config"}),
+            status_code=500,
         )
 
-    json = request.get_json(silent=True) or {}
-
-    if json.get("requires_restart", 1) == 0:
-        current_app.frigate_config = FrigateConfig.parse_object(
-            config_obj, plus_api=current_app.frigate_config.plus_api
+    if body.requires_restart == 0:
+        request.app.frigate_config = FrigateConfig.parse_object(
+            config_obj, request.app.frigate_config.plus_api
         )
 
-    return make_response(
-        jsonify(
+    return JSONResponse(
+        content=(
             {
                 "success": True,
                 "message": "Config successfully updated, restart to apply",
             }
         ),
-        200,
+        status_code=200,
     )
 
 
-@bp.route("/ffprobe", methods=["GET"])
-def ffprobe():
-    path_param = request.args.get("paths", "")
+@router.get("/ffprobe")
+def ffprobe(request: Request, paths: str = ""):
+    path_param = paths
 
     if not path_param:
-        return make_response(
-            jsonify({"success": False, "message": "Path needs to be provided."}), 404
+        return JSONResponse(
+            content=({"success": False, "message": "Path needs to be provided."}),
+            status_code=404,
         )
 
     if path_param.startswith("camera"):
         camera = path_param[7:]
 
-        if camera not in current_app.frigate_config.cameras.keys():
-            return make_response(
-                jsonify(
+        if camera not in request.app.frigate_config.cameras.keys():
+            return JSONResponse(
+                content=(
                     {"success": False, "message": f"{camera} is not a valid camera."}
                 ),
-                404,
+                status_code=404,
             )
 
-        if not current_app.frigate_config.cameras[camera].enabled:
-            return make_response(
-                jsonify({"success": False, "message": f"{camera} is not enabled."}), 404
+        if not request.app.frigate_config.cameras[camera].enabled:
+            return JSONResponse(
+                content=({"success": False, "message": f"{camera} is not enabled."}),
+                status_code=404,
             )
 
         paths = map(
             lambda input: input.path,
-            current_app.frigate_config.cameras[camera].ffmpeg.inputs,
+            request.app.frigate_config.cameras[camera].ffmpeg.inputs,
         )
     elif "," in clean_camera_user_pass(path_param):
         paths = path_param.split(",")
@@ -411,7 +343,7 @@ def ffprobe():
     output = []
 
     for path in paths:
-        ffprobe = ffprobe_stream(current_app.frigate_config.ffmpeg, path.strip())
+        ffprobe = ffprobe_stream(request.app.frigate_config.ffmpeg, path.strip())
         output.append(
             {
                 "return_code": ffprobe.returncode,
@@ -428,14 +360,14 @@ def ffprobe():
             }
         )
 
-    return jsonify(output)
+    return JSONResponse(content=output)
 
 
-@bp.route("/vainfo", methods=["GET"])
+@router.get("/vainfo")
 def vainfo():
     vainfo = vainfo_hwaccel()
-    return jsonify(
-        {
+    return JSONResponse(
+        content={
             "return_code": vainfo.returncode,
             "stderr": (
                 vainfo.stderr.decode("unicode_escape").strip()
@@ -451,19 +383,26 @@ def vainfo():
     )
 
 
-@bp.route("/logs/<service>", methods=["GET"])
-def logs(service: str):
+@router.get("/logs/{service}", tags=[Tags.logs])
+def logs(
+    service: str = Path(enum=["frigate", "nginx", "go2rtc", "chroma"]),
+    download: Optional[str] = None,
+    start: Optional[int] = 0,
+    end: Optional[int] = None,
+):
+    """Get logs for the requested service (frigate/nginx/go2rtc/chroma)"""
+
     def download_logs(service_location: str):
         try:
             file = open(service_location, "r")
             contents = file.read()
             file.close()
-            return jsonify(contents)
+            return JSONResponse(jsonable_encoder(contents))
         except FileNotFoundError as e:
             logger.error(e)
-            return make_response(
-                jsonify({"success": False, "message": "Could not find log file"}),
-                500,
+            return JSONResponse(
+                content={"success": False, "message": "Could not find log file"},
+                status_code=500,
             )
 
     log_locations = {
@@ -475,16 +414,13 @@ def logs(service: str):
     service_location = log_locations.get(service)
 
     if not service_location:
-        return make_response(
-            jsonify({"success": False, "message": "Not a valid service"}),
-            404,
+        return JSONResponse(
+            content={"success": False, "message": "Not a valid service"},
+            status_code=404,
         )
 
-    if request.args.get("download", type=bool, default=False):
+    if download:
         return download_logs(service_location)
-
-    start = request.args.get("start", type=int, default=0)
-    end = request.args.get("end", type=int)
 
     try:
         file = open(service_location, "r")
@@ -526,49 +462,47 @@ def logs(service: str):
 
         logLines.append(currentLine)
 
-        return make_response(
-            jsonify({"totalLines": len(logLines), "lines": logLines[start:end]}),
-            200,
+        return JSONResponse(
+            content={"totalLines": len(logLines), "lines": logLines[start:end]},
+            status_code=200,
         )
     except FileNotFoundError as e:
         logger.error(e)
-        return make_response(
-            jsonify({"success": False, "message": "Could not find log file"}),
-            500,
+        return JSONResponse(
+            content={"success": False, "message": "Could not find log file"},
+            status_code=500,
         )
 
 
-@bp.route("/restart", methods=["POST"])
+@router.post("/restart")
 def restart():
     try:
         restart_frigate()
     except Exception as e:
         logging.error(f"Error restarting Frigate: {e}")
-        return make_response(
-            jsonify(
+        return JSONResponse(
+            content=(
                 {
                     "success": False,
                     "message": "Unable to restart Frigate.",
                 }
             ),
-            500,
+            status_code=500,
         )
 
-    return make_response(
-        jsonify(
+    return JSONResponse(
+        content=(
             {
                 "success": True,
                 "message": "Restarting (this can take up to one minute)...",
             }
         ),
-        200,
+        status_code=200,
     )
 
 
-@bp.route("/labels")
-def get_labels():
-    camera = request.args.get("camera", type=str, default="")
-
+@router.get("/labels")
+def get_labels(camera: str = ""):
     try:
         if camera:
             events = Event.select(Event.label).where(Event.camera == camera).distinct()
@@ -576,24 +510,23 @@ def get_labels():
             events = Event.select(Event.label).distinct()
     except Exception as e:
         logger.error(e)
-        return make_response(
-            jsonify({"success": False, "message": "Failed to get labels"}), 404
+        return JSONResponse(
+            content=({"success": False, "message": "Failed to get labels"}),
+            status_code=404,
         )
 
     labels = sorted([e.label for e in events])
-    return jsonify(labels)
+    return JSONResponse(content=labels)
 
 
-@bp.route("/sub_labels")
-def get_sub_labels():
-    split_joined = request.args.get("split_joined", type=int)
-
+@router.get("/sub_labels")
+def get_sub_labels(split_joined: Optional[int] = None):
     try:
         events = Event.select(Event.sub_label).distinct()
     except Exception:
-        return make_response(
-            jsonify({"success": False, "message": "Failed to get sub_labels"}),
-            404,
+        return JSONResponse(
+            content=({"success": False, "message": "Failed to get sub_labels"}),
+            status_code=404,
         )
 
     sub_labels = [e.sub_label for e in events]
@@ -614,15 +547,11 @@ def get_sub_labels():
                         sub_labels.append(part.strip())
 
     sub_labels.sort()
-    return jsonify(sub_labels)
+    return JSONResponse(content=sub_labels)
 
 
-@bp.route("/timeline")
-def timeline():
-    camera = request.args.get("camera", "all")
-    source_id = request.args.get("source_id", type=str)
-    limit = request.args.get("limit", 100)
-
+@router.get("/timeline")
+def timeline(camera: str = "all", limit: int = 100, source_id: Optional[str] = None):
     clauses = []
 
     selected_columns = [
@@ -651,18 +580,18 @@ def timeline():
         .dicts()
     )
 
-    return jsonify([t for t in timeline])
+    return JSONResponse(content=[t for t in timeline])
 
 
-@bp.route("/timeline/hourly")
-def hourly_timeline():
+@router.get("/timeline/hourly")
+def hourly_timeline(params: AppTimelineHourlyQueryParameters = Depends()):
     """Get hourly summary for timeline."""
-    cameras = request.args.get("cameras", "all")
-    labels = request.args.get("labels", "all")
-    before = request.args.get("before", type=float)
-    after = request.args.get("after", type=float)
-    limit = request.args.get("limit", 200)
-    tz_name = request.args.get("timezone", default="utc", type=str)
+    cameras = params.cameras
+    labels = params.labels
+    before = params.before
+    after = params.after
+    limit = params.limit
+    tz_name = params.timezone
 
     _, minute_modifier, _ = get_tz_modifiers(tz_name)
     minute_offset = int(minute_modifier.split(" ")[0])
@@ -728,8 +657,8 @@ def hourly_timeline():
         else:
             hours[hour].insert(0, t)
 
-    return jsonify(
-        {
+    return JSONResponse(
+        content={
             "start": start,
             "end": end,
             "count": count,
