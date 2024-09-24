@@ -210,7 +210,13 @@ class OnvifController:
                             "RelativeZoomTranslationSpace"
                         ][zoom_space_id]["URI"]
                 else:
-                    move_request.Translation.Zoom = []
+                    if "Zoom" in move_request["Translation"]:
+                        del move_request["Translation"]["Zoom"]
+                    if "Zoom" in move_request["Speed"]:
+                        del move_request["Speed"]["Zoom"]
+                    logger.debug(
+                        f"{camera_name}: Relative move request after deleting zoom: {move_request}"
+                    )
             except Exception:
                 self.config.cameras[
                     camera_name
@@ -569,7 +575,7 @@ class OnvifController:
 
     def get_camera_info(self, camera_name: str) -> dict[str, any]:
         if camera_name not in self.cams.keys():
-            logger.error(f"Onvif is not setup for {camera_name}")
+            logger.debug(f"Onvif is not setup for {camera_name}")
             return {}
 
         if not self.cams[camera_name]["init"]:

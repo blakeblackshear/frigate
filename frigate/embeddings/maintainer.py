@@ -177,7 +177,7 @@ class EmbeddingMaintainer(threading.Thread):
             camera_config, thumbnails, metadata
         )
 
-        if description is None:
+        if not description:
             logger.debug("Failed to generate description for %s", event.id)
             return
 

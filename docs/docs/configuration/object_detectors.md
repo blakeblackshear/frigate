@@ -597,6 +597,8 @@ $ cat /sys/kernel/debug/rknpu/load
 
 This detector is available for use with Hailo-8 AI Acceleration Module.
 
+See the [installation docs](../frigate/installation.md#hailo-8l) for information on configuring the hailo8.
+
 ### Configuration
 
 ```yaml

@@ -310,7 +310,7 @@ def submit_recording_snapshot_to_plus(
             )
 
         nd = cv2.imdecode(np.frombuffer(image_data, dtype=np.int8), cv2.IMREAD_COLOR)
-        request.app.plus_api.upload_image(nd, camera_name)
+        request.app.frigate_config.plus_api.upload_image(nd, camera_name)
 
         return JSONResponse(
             content={

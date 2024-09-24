@@ -129,7 +129,7 @@ def config(request: Request):
         for zone_name, zone in config_obj.cameras[camera_name].zones.items():
             camera_dict["zones"][zone_name]["color"] = zone.color
 
-    config["plus"] = {"enabled": request.app.plus_api.is_active()}
+    config["plus"] = {"enabled": request.app.frigate_config.plus_api.is_active()}
     config["model"]["colormap"] = config_obj.model.colormap
 
     for detector_config in config["detectors"].values():
@@ -289,7 +289,7 @@ def config_set(request: Request, body: AppConfigSetBody):
 
     if body.requires_restart == 0:
         request.app.frigate_config = FrigateConfig.parse_object(
-            config_obj, request.app.plus_api
+            config_obj, request.app.frigate_config.plus_api
         )
 
     return JSONResponse(
