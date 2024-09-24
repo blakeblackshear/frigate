@@ -5,13 +5,10 @@ import multiprocessing as mp
 import os
 import secrets
 import shutil
-import signal
 import sys
 import traceback
 from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
-from types import FrameType
-from typing import Optional
 
 import psutil
 import uvicorn
