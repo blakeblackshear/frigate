@@ -12,25 +12,45 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-from flask import Blueprint, current_app, jsonify, make_response, redirect, request
-from flask_limiter import Limiter
+from fastapi import APIRouter, Request, Response
+from fastapi.responses import JSONResponse, RedirectResponse
 from joserfc import jwt
 from peewee import DoesNotExist
+from slowapi import Limiter
 
+from frigate.api.defs.app_body import (
+    AppPostLoginBody,
+    AppPostUsersBody,
+    AppPutPasswordBody,
+)
+from frigate.api.defs.tags import Tags
 from frigate.config import AuthConfig, ProxyConfig
 from frigate.const import CONFIG_DIR, JWT_SECRET_ENV_VAR, PASSWORD_HASH_ALGORITHM
 from frigate.models import User
 
 logger = logging.getLogger(__name__)
 
-AuthBp = Blueprint("auth", __name__)
+router = APIRouter(tags=[Tags.auth])
 
 
-def get_remote_addr():
+class RateLimiter:
+    _limit = ""
+
+    def set_limit(self, limit: str):
+        self._limit = limit
+
+    def get_limit(self) -> str:
+        return self._limit
+
+
+rateLimiter = RateLimiter()
+
+
+def get_remote_addr(request: Request):
     route = list(reversed(request.headers.get("x-forwarded-for").split(",")))
     logger.debug(f"IP Route: {[r for r in route]}")
     trusted_proxies = []
-    for proxy in current_app.frigate_config.auth.trusted_proxies:
+    for proxy in request.app.frigate_config.auth.trusted_proxies:
         try:
             network = ipaddress.ip_network(proxy)
         except ValueError:
@@ -66,16 +86,6 @@ def get_remote_addr():
 
     # if there wasn't anything in the route, just return the default
     return request.remote_addr or "127.0.0.1"
-
-
-limiter = Limiter(
-    get_remote_addr,
-    storage_uri="memory://",
-)
-
-
-def get_rate_limit():
-    return current_app.frigate_config.auth.failed_login_rate_limit
 
 
 def get_jwt_secret() -> str:
@@ -132,7 +142,7 @@ def get_jwt_secret() -> str:
     return jwt_secret
 
 
-def hash_password(password, salt=None, iterations=600000):
+def hash_password(password: str, salt=None, iterations=600000):
     if salt is None:
         salt = secrets.token_hex(16)
     assert salt and isinstance(salt, str) and "$" not in salt
@@ -158,33 +168,36 @@ def create_encoded_jwt(user, expiration, secret):
     return jwt.encode({"alg": "HS256"}, {"sub": user, "exp": expiration}, secret)
 
 
-def set_jwt_cookie(response, cookie_name, encoded_jwt, expiration, secure):
+def set_jwt_cookie(response: Response, cookie_name, encoded_jwt, expiration, secure):
     # TODO: ideally this would set secure as well, but that requires TLS
     response.set_cookie(
-        cookie_name, encoded_jwt, httponly=True, expires=expiration, secure=secure
+        key=cookie_name,
+        value=encoded_jwt,
+        httponly=True,
+        expires=expiration,
+        secure=secure,
     )
 
 
 # Endpoint for use with nginx auth_request
-@AuthBp.route("/auth")
-def auth():
-    auth_config: AuthConfig = current_app.frigate_config.auth
-    proxy_config: ProxyConfig = current_app.frigate_config.proxy
+@router.get("/auth")
+def auth(request: Request):
+    auth_config: AuthConfig = request.app.frigate_config.auth
+    proxy_config: ProxyConfig = request.app.frigate_config.proxy
 
-    success_response = make_response({}, 202)
+    success_response = Response("", status_code=202)
 
     # dont require auth if the request is on the internal port
     # this header is set by Frigate's nginx proxy, so it cant be spoofed
-    if request.headers.get("x-server-port", 0, type=int) == 5000:
+    if int(request.headers.get("x-server-port", default=0)) == 5000:
         return success_response
 
-    fail_response = make_response({}, 401)
+    fail_response = Response("", status_code=401)
 
     # ensure the proxy secret matches if configured
     if (
         proxy_config.auth_secret is not None
-        and request.headers.get("x-proxy-secret", "", type=str)
-        != proxy_config.auth_secret
+        and request.headers.get("x-proxy-secret", "") != proxy_config.auth_secret
     ):
         logger.debug("X-Proxy-Secret header does not match configured secret value")
         return fail_response
@@ -196,7 +209,6 @@ def auth():
         if proxy_config.header_map.user is not None:
             upstream_user_header_value = request.headers.get(
                 proxy_config.header_map.user,
-                type=str,
                 default="anonymous",
             )
             success_response.headers["remote-user"] = upstream_user_header_value
@@ -207,10 +219,10 @@ def auth():
     # now apply authentication
     fail_response.headers["location"] = "/login"
 
-    JWT_COOKIE_NAME = current_app.frigate_config.auth.cookie_name
-    JWT_COOKIE_SECURE = current_app.frigate_config.auth.cookie_secure
-    JWT_REFRESH = current_app.frigate_config.auth.refresh_time
-    JWT_SESSION_LENGTH = current_app.frigate_config.auth.session_length
+    JWT_COOKIE_NAME = request.app.frigate_config.auth.cookie_name
+    JWT_COOKIE_SECURE = request.app.frigate_config.auth.cookie_secure
+    JWT_REFRESH = request.app.frigate_config.auth.refresh_time
+    JWT_SESSION_LENGTH = request.app.frigate_config.auth.session_length
 
     jwt_source = None
     encoded_token = None
@@ -230,7 +242,7 @@ def auth():
         return fail_response
 
     try:
-        token = jwt.decode(encoded_token, current_app.jwt_token)
+        token = jwt.decode(encoded_token, request.app.jwt_token)
         if "sub" not in token.claims:
             logger.debug("user not set in jwt token")
             return fail_response
@@ -266,7 +278,7 @@ def auth():
                 return fail_response
             new_expiration = current_time + JWT_SESSION_LENGTH
             new_encoded_jwt = create_encoded_jwt(
-                user, new_expiration, current_app.jwt_token
+                user, new_expiration, request.app.jwt_token
             )
             set_jwt_cookie(
                 success_response,
@@ -283,86 +295,84 @@ def auth():
         return fail_response
 
 
-@AuthBp.route("/profile")
-def profile():
-    username = request.headers.get("remote-user", type=str)
-    return jsonify({"username": username})
+@router.get("/profile")
+def profile(request: Request):
+    username = request.headers.get("remote-user")
+    return JSONResponse(content={"username": username})
 
 
-@AuthBp.route("/logout")
-def logout():
-    auth_config: AuthConfig = current_app.frigate_config.auth
-    response = make_response(redirect("/login", code=303))
+@router.get("/logout")
+def logout(request: Request):
+    auth_config: AuthConfig = request.app.frigate_config.auth
+    response = RedirectResponse("/login", status_code=303)
     response.delete_cookie(auth_config.cookie_name)
     return response
 
 
-@AuthBp.route("/login", methods=["POST"])
-@limiter.limit(get_rate_limit, deduct_when=lambda response: response.status_code == 400)
-def login():
-    JWT_COOKIE_NAME = current_app.frigate_config.auth.cookie_name
-    JWT_COOKIE_SECURE = current_app.frigate_config.auth.cookie_secure
-    JWT_SESSION_LENGTH = current_app.frigate_config.auth.session_length
-    content = request.get_json()
-    user = content["user"]
-    password = content["password"]
+limiter = Limiter(key_func=get_remote_addr)
+
+
+@router.post("/login")
+@limiter.limit(limit_value=rateLimiter.get_limit)
+def login(request: Request, body: AppPostLoginBody):
+    JWT_COOKIE_NAME = request.app.frigate_config.auth.cookie_name
+    JWT_COOKIE_SECURE = request.app.frigate_config.auth.cookie_secure
+    JWT_SESSION_LENGTH = request.app.frigate_config.auth.session_length
+    user = body.user
+    password = body.password
 
     try:
         db_user: User = User.get_by_id(user)
     except DoesNotExist:
-        return make_response({"message": "Login failed"}, 400)
+        return JSONResponse(content={"message": "Login failed"}, status_code=400)
 
     password_hash = db_user.password_hash
     if verify_password(password, password_hash):
         expiration = int(time.time()) + JWT_SESSION_LENGTH
-        encoded_jwt = create_encoded_jwt(user, expiration, current_app.jwt_token)
-        response = make_response({}, 200)
+        encoded_jwt = create_encoded_jwt(user, expiration, request.app.jwt_token)
+        response = Response("", 200)
         set_jwt_cookie(
             response, JWT_COOKIE_NAME, encoded_jwt, expiration, JWT_COOKIE_SECURE
         )
         return response
-    return make_response({"message": "Login failed"}, 400)
+    return JSONResponse(content={"message": "Login failed"}, status_code=400)
 
 
-@AuthBp.route("/users")
+@router.get("/users")
 def get_users():
     exports = User.select(User.username).order_by(User.username).dicts().iterator()
-    return jsonify([e for e in exports])
+    return JSONResponse([e for e in exports])
 
 
-@AuthBp.route("/users", methods=["POST"])
-def create_user():
-    HASH_ITERATIONS = current_app.frigate_config.auth.hash_iterations
+@router.post("/users")
+def create_user(request: Request, body: AppPostUsersBody):
+    HASH_ITERATIONS = request.app.frigate_config.auth.hash_iterations
 
-    request_data = request.get_json()
+    if not re.match("^[A-Za-z0-9._]+$", body.username):
+        JSONResponse(content={"message": "Invalid username"}, status_code=400)
 
-    if not re.match("^[A-Za-z0-9._]+$", request_data.get("username", "")):
-        make_response({"message": "Invalid username"}, 400)
-
-    password_hash = hash_password(request_data["password"], iterations=HASH_ITERATIONS)
+    password_hash = hash_password(body.password, iterations=HASH_ITERATIONS)
 
     User.insert(
         {
-            User.username: request_data["username"],
+            User.username: body.username,
             User.password_hash: password_hash,
         }
     ).execute()
-    return jsonify({"username": request_data["username"]})
+    return JSONResponse(content={"username": body.username})
 
 
-@AuthBp.route("/users/<username>", methods=["DELETE"])
+@router.delete("/users/{username}")
 def delete_user(username: str):
     User.delete_by_id(username)
-    return jsonify({"success": True})
+    return JSONResponse(content={"success": True})
 
 
-@AuthBp.route("/users/<username>/password", methods=["PUT"])
-def update_password(username: str):
-    HASH_ITERATIONS = current_app.frigate_config.auth.hash_iterations
+@router.put("/users/{username}/password")
+def update_password(request: Request, username: str, body: AppPutPasswordBody):
+    HASH_ITERATIONS = request.app.frigate_config.auth.hash_iterations
 
-    request_data = request.get_json()
-
-    password_hash = hash_password(request_data["password"], iterations=HASH_ITERATIONS)
+    password_hash = hash_password(body.password, iterations=HASH_ITERATIONS)
 
     User.set_by_id(
         username,
@@ -370,4 +380,4 @@ def update_password(username: str):
             User.password_hash: password_hash,
         },
     )
-    return jsonify({"success": True})
+    return JSONResponse(content={"success": True})

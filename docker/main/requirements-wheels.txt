@@ -1,8 +1,11 @@
 click == 8.1.*
-Flask == 3.0.*
-Flask_Limiter == 3.8.*
+# FastAPI
+starlette-context == 0.3.6
+fastapi == 0.115.0
+slowapi == 0.1.9
 imutils == 0.5.*
 joserfc == 1.0.*
+pathvalidate == 3.2.*
 markupsafe == 2.1.*
 mypy == 1.6.1
 numpy == 1.26.*
