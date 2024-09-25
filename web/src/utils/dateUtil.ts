@@ -387,22 +387,54 @@ export function formatDateToLocaleString(daysOffset: number = 0): string {
     .replace(/[^\d]/g, "");
 }
 
-export function isValidTimeRange(rangeString: string): boolean {
-  const range = rangeString.split(",");
+export function to24Hour(
+  time: string,
+  time_format: "12hour" | "24hour" | "browser" = "24hour",
+): string {
+  const is24HourFormat = time_format === "24hour";
 
+  if (is24HourFormat) return time;
+
+  const [timePart, ampm] = time.split(/([AP]M)/i);
+
+  if (!timePart || !ampm) {
+    throw new Error(`Invalid time format: ${time}`);
+  }
+
+  let hours = Number(timePart.split(":")[0]);
+  const minutes = Number(timePart.split(":")[1]);
+
+  if (ampm.toUpperCase() === "PM" && hours !== 12) hours += 12;
+  if (ampm.toUpperCase() === "AM" && hours === 12) hours = 0;
+
+  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+}
+
+export function isValidTimeRange(
+  rangeString: string,
+  time_format?: "12hour" | "24hour" | "browser",
+): boolean {
+  const range = rangeString.split(",");
   if (range.length !== 2) {
     return false;
   }
 
+  const is24HourFormat = time_format === "24hour";
+
   const toMinutes = (time: string): number => {
-    const [h, m] = time.split(":").map(Number);
+    const [h, m] = to24Hour(time, time_format).split(":").map(Number);
     return h * 60 + m;
   };
 
-  const isValidTime = (time: string): boolean =>
-    /^(?:([01]\d|2[0-3]):([0-5]\d)|24:00)$/.test(time);
+  const isValidTime = (time: string): boolean => {
+    if (is24HourFormat) {
+      return /^(?:([01]\d|2[0-3]):([0-5]\d)|24:00)$/.test(time);
+    } else {
+      return /^(0?[1-9]|1[0-2]):[0-5][0-9](A|P)M$/i.test(time);
+    }
+  };
 
-  const [startTime, endTime] = range;
+  const [startTime, endTime] = range.map((t) => t.trim());
 
   return (
     isValidTime(startTime) &&
