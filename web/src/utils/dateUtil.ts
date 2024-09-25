@@ -373,3 +373,48 @@ export function getIntlDateFormat() {
     }, [] as string[])
     .join("");
 }
+
+export function formatDateToLocaleString(daysOffset: number = 0): string {
+  const date = new Date();
+  date.setDate(date.getDate() + daysOffset);
+
+  return new Intl.DateTimeFormat(window.navigator.language, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  })
+    .format(date)
+    .replace(/[^\d]/g, "");
+}
+
+export function isValidTimeRange(rangeString: string): boolean {
+  const range = rangeString.split(",");
+
+  if (range.length !== 2) {
+    return false;
+  }
+
+  const toMinutes = (time: string): number => {
+    const [h, m] = time.split(":").map(Number);
+    return h * 60 + m;
+  };
+
+  const isValidTime = (time: string): boolean =>
+    /^(?:([01]\d|2[0-3]):([0-5]\d)|24:00)$/.test(time);
+
+  const [startTime, endTime] = range;
+
+  return (
+    isValidTime(startTime) &&
+    isValidTime(endTime) &&
+    toMinutes(startTime) < toMinutes(endTime)
+  );
+}
+
+export function convertTo12Hour(time: string) {
+  const [hours, minutes] = time.split(":");
+  const hour = parseInt(hours, 10);
+  const ampm = hour >= 12 ? "PM" : "AM";
+  const hour12 = hour % 12 || 12;
+  return `${hour12}:${minutes} ${ampm}`;
+}

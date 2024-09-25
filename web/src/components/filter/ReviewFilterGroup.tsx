@@ -1,5 +1,4 @@
 import { Button } from "../ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -8,7 +7,6 @@ import { ReviewFilter, ReviewSeverity, ReviewSummary } from "@/types/review";
 import { getEndOfDayTimestamp } from "@/utils/dateUtil";
 import { FaCheckCircle, FaFilter, FaRunning } from "react-icons/fa";
 import { isDesktop, isMobile } from "react-device-detect";
-import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
 import MobileReviewSettingsDrawer, {
@@ -19,6 +17,7 @@ import FilterSwitch from "./FilterSwitch";
 import { FilterList } from "@/types/filter";
 import CalendarFilterButton from "./CalendarFilterButton";
 import { CamerasFilterButton } from "./CamerasFilterButton";
+import PlatformAwareDialog from "../overlay/dialog/PlatformAwareDialog";
 
 const REVIEW_FILTERS = [
   "cameras",
@@ -367,28 +366,10 @@ function GeneralFilterButton({
     />
   );
 
-  if (isMobile) {
-    return (
-      <Drawer
-        open={open}
-        onOpenChange={(open) => {
-          if (!open) {
-            setCurrentLabels(selectedLabels);
-          }
-
-          setOpen(open);
-        }}
-      >
-        <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-        <DrawerContent className="max-h-[75dvh] overflow-hidden">
-          {content}
-        </DrawerContent>
-      </Drawer>
-    );
-  }
-
   return (
-    <Popover
+    <PlatformAwareDialog
+      trigger={trigger}
+      content={content}
       open={open}
       onOpenChange={(open) => {
         if (!open) {
@@ -397,10 +378,7 @@ function GeneralFilterButton({
 
         setOpen(open);
       }}
-    >
-      <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-      <PopoverContent>{content}</PopoverContent>
-    </Popover>
+    />
   );
 }
 

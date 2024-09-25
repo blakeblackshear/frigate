@@ -1,3 +1,23 @@
+const SEARCH_FILTERS = [
+  "cameras",
+  "date",
+  "time",
+  "general",
+  "zone",
+  "sub",
+  "source",
+] as const;
+export type SearchFilters = (typeof SEARCH_FILTERS)[number];
+export const DEFAULT_SEARCH_FILTERS: SearchFilters[] = [
+  "cameras",
+  "date",
+  "time",
+  "general",
+  "zone",
+  "sub",
+  "source",
+];
+
 export type SearchSource = "similarity" | "thumbnail" | "description";
 
 export type SearchResult = {
@@ -32,13 +52,17 @@ export type SearchFilter = {
   query?: string;
   cameras?: string[];
   labels?: string[];
-  subLabels?: string[];
+  sub_labels?: string[];
   zones?: string[];
   before?: number;
   after?: number;
+  time_range?: string;
   search_type?: SearchSource[];
   event_id?: string;
 };
+
+export const DEFAULT_TIME_RANGE_AFTER = "00:00";
+export const DEFAULT_TIME_RANGE_BEFORE = "23:59";
 
 export type SearchQueryParams = {
   cameras?: string[];
@@ -53,6 +77,7 @@ export type SearchQueryParams = {
   include_thumbnails?: number;
   query?: string;
   page?: number;
+  time_range?: string;
 };
 
 export type SearchQuery = [string, SearchQueryParams] | null;

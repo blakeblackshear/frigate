@@ -11,7 +11,13 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { SearchFilter, SearchResult, SearchSource } from "@/types/search";
+import {
+  DEFAULT_SEARCH_FILTERS,
+  SearchFilter,
+  SearchFilters,
+  SearchResult,
+  SearchSource,
+} from "@/types/search";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isMobileOnly } from "react-device-detect";
 import { LuImage, LuSearchX, LuText } from "react-icons/lu";
@@ -24,6 +30,7 @@ import scrollIntoView from "scroll-into-view-if-needed";
 import InputWithTags from "@/components/input/InputWithTags";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { isEqual } from "lodash";
+import { formatDateToLocaleString } from "@/utils/dateUtil";
 
 type SearchViewProps = {
   search: string;
@@ -114,6 +121,9 @@ export default function SearchView({
       zones: Object.values(allZones || {}),
       sub_labels: allSubLabels,
       search_type: ["thumbnail", "description"] as SearchSource[],
+      time_range: ["00:00,24:00"],
+      before: [formatDateToLocaleString()],
+      after: [formatDateToLocaleString(-5)],
     }),
     [config, allLabels, allZones, allSubLabels],
   );
@@ -130,6 +140,20 @@ export default function SearchView({
   // detail
 
   const [searchDetail, setSearchDetail] = useState<SearchResult>();
+
+  const selectedFilters = useMemo<SearchFilters[]>(() => {
+    const filters = [...DEFAULT_SEARCH_FILTERS];
+
+    if (
+      searchFilter &&
+      (searchFilter?.query?.length || searchFilter?.event_id?.length)
+    ) {
+      const index = filters.indexOf("time");
+      filters.splice(index, 1);
+    }
+
+    return filters;
+  }, [searchFilter]);
 
   // search interaction
 
@@ -300,6 +324,7 @@ export default function SearchView({
                   "w-full justify-between md:justify-start lg:justify-end",
                 )}
                 filter={searchFilter}
+                filters={selectedFilters as SearchFilters[]}
                 onUpdateFilter={onUpdateFilter}
               />
               <ScrollBar orientation="horizontal" className="h-0" />
