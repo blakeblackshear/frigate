@@ -374,6 +374,19 @@ export function getIntlDateFormat() {
     .join("");
 }
 
+export function formatDateToLocaleString(daysOffset: number = 0): string {
+  const date = new Date();
+  date.setDate(date.getDate() + daysOffset);
+
+  return new Intl.DateTimeFormat(window.navigator.language, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  })
+    .format(date)
+    .replace(/[^\d]/g, "");
+}
+
 export function isValidTimeRange(rangeString: string): boolean {
   const range = rangeString.split(",");
 

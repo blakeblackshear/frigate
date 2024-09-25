@@ -188,7 +188,11 @@ export default function InputWithTags({
 
   const createFilter = useCallback(
     (type: FilterType, value: string) => {
-      if (allSuggestions[type as FilterType]?.includes(value)) {
+      if (
+        allSuggestions[type as FilterType]?.includes(value) ||
+        type == "before" ||
+        type == "after"
+      ) {
         const newFilters = { ...filters };
         let timestamp = 0;
 
@@ -318,6 +322,7 @@ export default function InputWithTags({
         ((filterType === "before" || filterType === "after") &&
           trimmedValue.match(/^\d{8}$/))
       ) {
+        console.log(filterType, trimmedValue);
         createFilter(filterType, trimmedValue);
         setInputValue((prev) => {
           const regex = new RegExp(
@@ -355,11 +360,7 @@ export default function InputWithTags({
         ];
 
         // Check if filter type is valid
-        if (
-          filterType in allSuggestions ||
-          filterType === "before" ||
-          filterType === "after"
-        ) {
+        if (filterType in allSuggestions) {
           setCurrentFilterType(filterType);
 
           if (filterType === "before" || filterType === "after") {

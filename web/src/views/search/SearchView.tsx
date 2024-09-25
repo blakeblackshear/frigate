@@ -30,6 +30,7 @@ import scrollIntoView from "scroll-into-view-if-needed";
 import InputWithTags from "@/components/input/InputWithTags";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { isEqual } from "lodash";
+import { formatDateToLocaleString } from "@/utils/dateUtil";
 
 type SearchViewProps = {
   search: string;
@@ -121,6 +122,8 @@ export default function SearchView({
       sub_labels: allSubLabels,
       search_type: ["thumbnail", "description"] as SearchSource[],
       time_range: ["00:00,24:00"],
+      before: [formatDateToLocaleString()],
+      after: [formatDateToLocaleString(-5)],
     }),
     [config, allLabels, allZones, allSubLabels],
   );

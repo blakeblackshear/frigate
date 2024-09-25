@@ -48,8 +48,6 @@ export default function useSuggestions(
         setSuggestions([
           ...(searchHistory?.map((search) => search.name) ?? []),
           ...availableFilters,
-          "before",
-          "after",
         ]);
       }
     },
