@@ -16,7 +16,7 @@ from frigate.camera import CameraMetrics
 from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
 from frigate.comms.inter_process import InterProcessRequestor
-from frigate.config import CameraConfig, CameraInput, FfmpegConfig, FrigateConfig
+from frigate.config import CameraConfig, CameraInput, FfmpegConfig
 from frigate.const import (
     AUDIO_DURATION,
     AUDIO_FORMAT,
@@ -68,18 +68,14 @@ def get_ffmpeg_command(ffmpeg: FfmpegConfig) -> list[str]:
 class AudioProcessor(util.Process):
     def __init__(
         self,
-        config: FrigateConfig,
+        cameras: list[CameraConfig],
         camera_metrics: dict[str, CameraMetrics],
     ):
         super().__init__(name="frigate.audio_manager", daemon=True)
 
         self.logger = logging.getLogger(self.name)
         self.camera_metrics = camera_metrics
-        self.audio_cameras = [
-            c
-            for c in config.cameras.values()
-            if c.enabled and c.audio.enabled_in_config
-        ]
+        self.cameras = cameras
 
     def run(self) -> None:
         stop_event = threading.Event()
@@ -88,11 +84,11 @@ class AudioProcessor(util.Process):
         threading.current_thread().name = "process:audio_manager"
         signal.signal(signal.SIGTERM, lambda sig, frame: sys.exit())
 
-        if len(self.audio_cameras) == 0:
+        if len(self.cameras) == 0:
             return
 
         try:
-            for camera in self.audio_cameras:
+            for camera in self.cameras:
                 audio_thread = AudioEventMaintainer(
                     camera,
                     self.camera_metrics,
@@ -101,7 +97,7 @@ class AudioProcessor(util.Process):
                 audio_threads.append(audio_thread)
                 audio_thread.start()
 
-            self.logger.info(f"Audio process started (pid: {self.pid})")
+            self.logger.info(f"Audio processor started (pid: {self.pid})")
 
             while True:
                 signal.pause()
@@ -116,7 +112,7 @@ class AudioProcessor(util.Process):
             for thread in audio_threads:
                 if thread.is_alive():
                     self.logger.warning(f"Thread {thread.name} is still alive")
-            self.logger.info("Exiting audio process")
+            self.logger.info("Exiting audio processor")
 
 
 class AudioEventMaintainer(threading.Thread):

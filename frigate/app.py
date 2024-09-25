@@ -6,7 +6,7 @@ import secrets
 import shutil
 from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
-from typing import Any
+from typing import Any, Optional
 
 import psutil
 import uvicorn
@@ -77,6 +77,8 @@ logger = logging.getLogger(__name__)
 
 
 class FrigateApp:
+    audio_process: Optional[mp.Process] = None
+
     # TODO: Fix FrigateConfig usage, so we can properly annotate it here without mypy erroring out.
     def __init__(self, config: Any) -> None:
         self.stop_event: MpEvent = mp.Event()
@@ -439,10 +441,17 @@ class FrigateApp:
             capture_process.start()
             logger.info(f"Capture process started for {name}: {capture_process.pid}")
 
-    def start_audio_processors(self) -> None:
-        self.audio_process = AudioProcessor(self.config, self.camera_metrics)
-        self.audio_process.start()
-        self.processes["audio_detector"] = self.audio_process.pid or 0
+    def start_audio_processor(self) -> None:
+        audio_cameras = [
+            c
+            for c in self.config.cameras.values()
+            if c.enabled and c.audio.enabled_in_config
+        ]
+
+        if audio_cameras:
+            self.audio_process = AudioProcessor(audio_cameras, self.camera_metrics)
+            self.audio_process.start()
+            self.processes["audio_detector"] = self.audio_process.pid or 0
 
     def start_timeline_processor(self) -> None:
         self.timeline_processor = TimelineProcessor(
@@ -580,7 +589,7 @@ class FrigateApp:
         self.start_detected_frames_processor()
         self.start_camera_processors()
         self.start_camera_capture_processes()
-        self.start_audio_processors()
+        self.start_audio_processor()
         self.start_storage_maintainer()
         self.init_external_event_processor()
         self.start_stats_emitter()
@@ -626,8 +635,9 @@ class FrigateApp:
         ).execute()
 
         # stop the audio process
-        self.audio_process.terminate()
-        self.audio_process.join()
+        if self.audio_process:
+            self.audio_process.terminate()
+            self.audio_process.join()
 
         # ensure the capture processes are done
         for camera, metrics in self.camera_metrics.items():
