@@ -55,9 +55,6 @@ class PtzMotionEstimator:
         self.camera_config = config
         self.coord_transformations = None
         self.ptz_metrics = ptz_metrics
-        self.ptz_start_time = self.ptz_metrics.start_time
-        self.ptz_stop_time = self.ptz_metrics.stop_time
-
         self.ptz_metrics.reset.set()
         logger.debug(f"{config.name}: Motion estimator init")
 
@@ -86,7 +83,9 @@ class PtzMotionEstimator:
             self.coord_transformations = None
 
         if ptz_moving_at_frame_time(
-            frame_time, self.ptz_start_time.value, self.ptz_stop_time.value
+            frame_time,
+            self.ptz_metrics.start_time.value,
+            self.ptz_metrics.stop_time.value,
         ):
             logger.debug(
                 f"{camera}: Motion estimator running - frame time: {frame_time}"

@@ -85,7 +85,6 @@ class NorfairTracker(ObjectTracker):
         self.camera_config = config
         self.detect_config = config.detect
         self.ptz_metrics = ptz_metrics
-        self.ptz_autotracker_enabled = ptz_metrics.autotracker_enabled
         self.ptz_motion_estimator = {}
         self.camera_name = config.name
         self.track_id_map = {}
@@ -104,7 +103,7 @@ class NorfairTracker(ObjectTracker):
             #       the different tracker per object class
             filter_factory=OptimizedKalmanFilterFactory(R=3.4),
         )
-        if self.ptz_autotracker_enabled.value:
+        if self.ptz_metrics.autotracker_enabled.value:
             self.ptz_motion_estimator = PtzMotionEstimator(
                 self.camera_config, self.ptz_metrics
             )
@@ -315,7 +314,7 @@ class NorfairTracker(ObjectTracker):
 
         coord_transformations = None
 
-        if self.ptz_autotracker_enabled.value:
+        if self.ptz_metrics.autotracker_enabled.value:
             # we must have been enabled by mqtt, so set up the estimator
             if not self.ptz_motion_estimator:
                 self.ptz_motion_estimator = PtzMotionEstimator(
