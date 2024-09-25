@@ -50,7 +50,7 @@ RUN PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}' | cut -d. -f1,2) 
 RUN . /etc/environment && \
     git clone https://github.com/hailo-ai/hailort.git /opt/hailort && \
     cd /opt/hailort && \
-    git checkout v4.17.0 && \
+    git checkout v4.18.0 && \
     cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Release -DHAILO_BUILD_PYBIND=1 -DPYBIND11_PYTHON_VERSION=${PYTHON_VERSION} && \
     cmake --build build --config release --target libhailort && \
     cmake --build build --config release --target _pyhailort && \
@@ -91,7 +91,7 @@ RUN pip3 install -U /deps/hailo-wheels/*.whl
 RUN . /etc/environment && \
     mv /usr/local/lib/python${PYTHON_VERSION}/dist-packages/hailo_platform/pyhailort/libhailort.so /usr/lib/${CC} && \
     cd /usr/lib/${CC}/ && \
-    ln -s libhailort.so libhailort.so.4.17.0
+    ln -s libhailort.so libhailort.so.4.18.0
 
 # Copy base files from the rootfs stage
 COPY --from=rootfs / /
