@@ -6,7 +6,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Optional
 
-from frigate.camera import PTZMetrics
+from frigate.camera.metrics import PTZMetrics
 from frigate.comms.config_updater import ConfigPublisher
 from frigate.config import BirdseyeModeEnum, FrigateConfig
 from frigate.const import (

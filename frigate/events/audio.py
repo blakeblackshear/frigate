@@ -12,7 +12,7 @@ import numpy as np
 import requests
 
 import frigate.util as util
-from frigate.camera import CameraMetrics
+from frigate.camera.metrics import CameraMetrics
 from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
 from frigate.comms.inter_process import InterProcessRequestor

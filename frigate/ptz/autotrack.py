@@ -18,7 +18,7 @@ from norfair.camera_motion import (
     TranslationTransformationGetter,
 )
 
-from frigate.camera import PTZMetrics
+from frigate.camera.metrics import PTZMetrics
 from frigate.comms.dispatcher import Dispatcher
 from frigate.config import CameraConfig, FrigateConfig, ZoomingModeEnum
 from frigate.const import (

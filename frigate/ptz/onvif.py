@@ -10,7 +10,7 @@ from onvif import ONVIFCamera, ONVIFError
 from zeep.exceptions import Fault, TransportError
 from zeep.transports import Transport
 
-from frigate.camera import PTZMetrics
+from frigate.camera.metrics import PTZMetrics
 from frigate.config import FrigateConfig, ZoomingModeEnum
 from frigate.util.builtin import find_by_key
 

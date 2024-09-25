@@ -11,7 +11,7 @@ import psutil
 import requests
 from requests.exceptions import RequestException
 
-from frigate.camera import CameraMetrics
+from frigate.camera.metrics import CameraMetrics
 from frigate.config import FrigateConfig
 from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
 from frigate.object_detection import ObjectDetectProcess
