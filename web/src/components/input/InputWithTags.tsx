@@ -322,7 +322,6 @@ export default function InputWithTags({
         ((filterType === "before" || filterType === "after") &&
           trimmedValue.match(/^\d{8}$/))
       ) {
-        console.log(filterType, trimmedValue);
         createFilter(filterType, trimmedValue);
         setInputValue((prev) => {
           const regex = new RegExp(
