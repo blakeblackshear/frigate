@@ -449,8 +449,8 @@ function TimeRangeFilterButton({
   const content = (
     <div
       className={cn(
-        "scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden",
-        isDesktop ? "w-64" : "w-full",
+        "scrollbar-container flex h-auto max-h-[80dvh] flex-col overflow-y-auto overflow-x-hidden",
+        isDesktop ? "w-64" : "w-full gap-2 pt-2",
       )}
     >
       <div
