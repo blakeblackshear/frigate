@@ -83,6 +83,10 @@ export function useFormattedHour(
     const hourNum = parseInt(hour);
 
     if (hourNum < 12) {
+      if (hourNum == 0) {
+        return `12:${minute} AM`;
+      }
+
       return `${hourNum}:${minute} AM`;
     } else {
       return `${hourNum - 12}:${minute} PM`;
