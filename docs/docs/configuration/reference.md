@@ -723,7 +723,7 @@ cameras:
       # Format: {label}: {prompt}
       object_prompts:
         person: "My special person prompt."
-      # Optional: labels that qualify as an alert (default: all labels that are tracked)
+      # Optional: labels to generate descriptions for (default: all labels that are tracked)
       labels:
         - person
         - cat
