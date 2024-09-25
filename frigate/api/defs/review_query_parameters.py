@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class ReviewQueryParams(BaseModel):
@@ -11,8 +11,8 @@ class ReviewQueryParams(BaseModel):
     reviewed: Optional[int] = 0
     limit: Optional[int] = None
     severity: Optional[str] = None
-    before: Optional[float] = datetime.now().timestamp()
-    after: Optional[float] = (datetime.now() - timedelta(hours=24)).timestamp()
+    before: Optional[float] = None
+    after: Optional[float] = None
 
 
 class ReviewSummaryQueryParams(BaseModel):
@@ -24,6 +24,6 @@ class ReviewSummaryQueryParams(BaseModel):
 
 class ReviewActivityMotionQueryParams(BaseModel):
     cameras: Optional[str] = "all"
-    before: Optional[float] = datetime.now().timestamp()
-    after: Optional[float] = (datetime.now() - timedelta(hours=1)).timestamp()
+    before: Optional[float] = None
+    after: Optional[float] = None
     scale: Optional[int] = 30

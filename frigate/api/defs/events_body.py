@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Optional, Union
 
 from pydantic import BaseModel, Field
@@ -27,7 +26,7 @@ class EventsCreateBody(BaseModel):
 
 
 class EventsEndBody(BaseModel):
-    end_time: Optional[int] = datetime.now().timestamp()
+    end_time: Optional[int] = None
 
 
 class SubmitPlusBody(BaseModel):
