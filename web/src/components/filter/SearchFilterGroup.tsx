@@ -454,18 +454,8 @@ function TimeRangeFilterButton({
     </Button>
   );
   const content = (
-    <div
-      className={cn(
-        "scrollbar-container flex h-auto max-h-[80dvh] flex-col overflow-y-auto overflow-x-hidden",
-        isDesktop ? "w-64" : "w-full gap-2 pt-2",
-      )}
-    >
-      <div
-        className={cn(
-          "mt-3 flex w-full items-center rounded-lg text-secondary-foreground",
-          isDesktop ? "mx-6 gap-2 px-2" : "justify-center gap-2",
-        )}
-      >
+    <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
+      <div className="my-5 flex flex-row items-center justify-center gap-2">
         <Popover
           open={startOpen}
           onOpenChange={(open) => {
@@ -487,7 +477,7 @@ function TimeRangeFilterButton({
               {formattedSelectedAfter}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="flex flex-col items-center">
+          <PopoverContent className="flex flex-row items-center justify-center">
             <input
               className="text-md mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
               id="startTime"
@@ -541,8 +531,8 @@ function TimeRangeFilterButton({
             />
           </PopoverContent>
         </Popover>
-        <DropdownMenuSeparator />
       </div>
+      <DropdownMenuSeparator />
       <div className="flex items-center justify-evenly p-2">
         <Button
           variant="select"
