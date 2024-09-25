@@ -128,7 +128,7 @@ genai:
     car: "Label the primary vehicle in these images with just the name of the company if it is a delivery vehicle, or the color make and model."
 ```
 
-Prompts can also be overriden at the camera level to provide a more detailed prompt to the model about your specific camera, if you desire. You can also optionally specify `labels` and `required_zones` to only generate descriptions for certain labels or zones.
+Prompts can also be overriden at the camera level to provide a more detailed prompt to the model about your specific camera, if you desire. By default, descriptions will be generated for all tracked labels and all zones. But you can also optionally specify `labels` and `required_zones` to only generate descriptions for certain labels or zones.
 
 ```yaml
 cameras:
