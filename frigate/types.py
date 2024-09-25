@@ -1,6 +1,6 @@
 from typing import TypedDict
 
-from frigate.camera import CameraMetrics
+from frigate.camera.metrics import CameraMetrics
 from frigate.object_detection import ObjectDetectProcess
 
 

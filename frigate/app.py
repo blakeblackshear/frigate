@@ -17,7 +17,7 @@ from playhouse.sqliteq import SqliteQueueDatabase
 import frigate.util as util
 from frigate.api.auth import hash_password
 from frigate.api.fastapi_app import create_fastapi_app
-from frigate.camera import CameraMetrics, PTZMetrics
+from frigate.camera.camera import Camera
 from frigate.comms.config_updater import ConfigPublisher
 from frigate.comms.dispatcher import Communicator, Dispatcher
 from frigate.comms.event_metadata_updater import (
@@ -68,9 +68,7 @@ from frigate.stats.util import stats_init
 from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
 from frigate.util.builtin import empty_and_close_queue
-from frigate.util.object import get_camera_regions_grid
 from frigate.version import VERSION
-from frigate.video import capture_camera, track_camera
 from frigate.watchdog import FrigateWatchdog
 
 logger = logging.getLogger(__name__)
@@ -84,13 +82,10 @@ class FrigateApp:
         self.stop_event: MpEvent = mp.Event()
         self.detection_queue: Queue = mp.Queue()
         self.detectors: dict[str, ObjectDetectProcess] = {}
-        self.detection_out_events: dict[str, MpEvent] = {}
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
         self.log_queue: Queue = mp.Queue()
-        self.camera_metrics: dict[str, CameraMetrics] = {}
-        self.ptz_metrics: dict[str, PTZMetrics] = {}
+        self.cameras: dict[str, Camera] = {}
         self.processes: dict[str, int] = {}
-        self.region_grids: dict[str, list[list[dict[str, int]]]] = {}
         self.config = config
 
     def ensure_dirs(self) -> None:
@@ -107,16 +102,6 @@ class FrigateApp:
                 os.makedirs(d)
             else:
                 logger.debug(f"Skipping directory: {d}")
-
-    def init_camera_metrics(self) -> None:
-        # create camera_metrics
-        for camera_name in self.config.cameras.keys():
-            self.camera_metrics[camera_name] = CameraMetrics()
-            self.ptz_metrics[camera_name] = PTZMetrics(
-                autotracker_enabled=self.config.cameras[
-                    camera_name
-                ].onvif.autotracking.enabled
-            )
 
     def init_queues(self) -> None:
         # Queue for cameras to push tracked objects to
@@ -295,7 +280,10 @@ class FrigateApp:
         self.inter_zmq_proxy = ZmqProxy()
 
     def init_onvif(self) -> None:
-        self.onvif_controller = OnvifController(self.config, self.ptz_metrics)
+        self.onvif_controller = OnvifController(
+            self.config,
+            {name: camera.ptz_metrics for name, camera in self.cameras.items()},
+        )
 
     def init_dispatcher(self) -> None:
         comms: list[Communicator] = []
@@ -313,14 +301,12 @@ class FrigateApp:
             self.config,
             self.inter_config_updater,
             self.onvif_controller,
-            self.ptz_metrics,
+            {name: camera.ptz_metrics for name, camera in self.cameras.items()},
             comms,
         )
 
     def start_detectors(self) -> None:
         for name in self.config.cameras.keys():
-            self.detection_out_events[name] = mp.Event()
-
             try:
                 largest_frame = max(
                     [
@@ -350,7 +336,10 @@ class FrigateApp:
             self.detectors[name] = ObjectDetectProcess(
                 name,
                 self.detection_queue,
-                self.detection_out_events,
+                {
+                    name: camera.detection_out_event
+                    for name, camera in self.cameras.items()
+                },
                 detector_config,
             )
 
@@ -358,7 +347,7 @@ class FrigateApp:
         self.ptz_autotracker_thread = PtzAutoTrackerThread(
             self.config,
             self.onvif_controller,
-            self.ptz_metrics,
+            {name: camera.ptz_metrics for name, camera in self.cameras.items()},
             self.dispatcher,
             self.stop_event,
         )
@@ -385,63 +374,21 @@ class FrigateApp:
         output_processor.start()
         logger.info(f"Output process started: {output_processor.pid}")
 
-    def init_historical_regions(self) -> None:
+    def init_cameras(self) -> None:
+        for name in self.config.cameras.keys():
+            self.cameras[name] = Camera(name, self.config)
+
+    def start_cameras(self) -> None:
         # delete region grids for removed or renamed cameras
         cameras = list(self.config.cameras.keys())
         Regions.delete().where(~(Regions.camera << cameras)).execute()
 
-        # create or update region grids for each camera
-        for camera in self.config.cameras.values():
-            self.region_grids[camera.name] = get_camera_regions_grid(
-                camera.name,
-                camera.detect,
-                max(self.config.model.width, self.config.model.height),
-            )
-
-    def start_camera_processors(self) -> None:
-        for name, config in self.config.cameras.items():
-            if not self.config.cameras[name].enabled:
-                logger.info(f"Camera processor not started for disabled camera {name}")
-                continue
-
-            camera_process = util.Process(
-                target=track_camera,
-                name=f"camera_processor:{name}",
-                args=(
-                    name,
-                    config,
-                    self.config.model,
-                    self.config.model.merged_labelmap,
-                    self.detection_queue,
-                    self.detection_out_events[name],
-                    self.detected_frames_queue,
-                    self.camera_metrics[name],
-                    self.ptz_metrics[name],
-                    self.region_grids[name],
-                ),
-                daemon=True,
-            )
-            self.camera_metrics[name].process = camera_process
-            camera_process.start()
-            logger.info(f"Camera processor started for {name}: {camera_process.pid}")
-
-    def start_camera_capture_processes(self) -> None:
         shm_frame_count = self.shm_frame_count()
 
-        for name, config in self.config.cameras.items():
-            if not self.config.cameras[name].enabled:
-                logger.info(f"Capture process not started for disabled camera {name}")
-                continue
-
-            capture_process = util.Process(
-                target=capture_camera,
-                name=f"camera_capture:{name}",
-                args=(name, config, shm_frame_count, self.camera_metrics[name]),
-            )
-            capture_process.daemon = True
-            self.camera_metrics[name].capture_process = capture_process
-            capture_process.start()
-            logger.info(f"Capture process started for {name}: {capture_process.pid}")
+        for camera in self.cameras.values():
+            camera.init_historical_regions()
+            camera.start_capture_process(shm_frame_count)
+            camera.start_process(self.detection_queue, self.detected_frames_queue)
 
     def start_audio_processor(self) -> None:
         audio_cameras = [
@@ -451,7 +398,10 @@ class FrigateApp:
         ]
 
         if audio_cameras:
-            self.audio_process = AudioProcessor(audio_cameras, self.camera_metrics)
+            self.audio_process = AudioProcessor(
+                audio_cameras,
+                {name: camera.camera_metrics for name, camera in self.cameras.items()},
+            )
             self.audio_process.start()
             self.processes["audio_detector"] = self.audio_process.pid or 0
 
@@ -485,7 +435,10 @@ class FrigateApp:
         self.stats_emitter = StatsEmitter(
             self.config,
             stats_init(
-                self.config, self.camera_metrics, self.detectors, self.processes
+                self.config,
+                {name: camera.camera_metrics for name, camera in self.cameras.items()},
+                self.detectors,
+                self.processes,
             ),
             self.stop_event,
         )
@@ -571,7 +524,6 @@ class FrigateApp:
         self.ensure_dirs()
 
         # Start frigate services.
-        self.init_camera_metrics()
         self.init_queues()
         self.init_database()
         self.init_onvif()
@@ -583,13 +535,12 @@ class FrigateApp:
         self.check_db_data_migrations()
         self.init_inter_process_communicator()
         self.init_dispatcher()
+        self.init_cameras()
         self.start_detectors()
         self.start_video_output_processor()
         self.start_ptz_autotracker()
-        self.init_historical_regions()
         self.start_detected_frames_processor()
-        self.start_camera_processors()
-        self.start_camera_capture_processes()
+        self.start_cameras()
         self.start_audio_processor()
         self.start_storage_maintainer()
         self.init_external_event_processor()
@@ -641,22 +592,22 @@ class FrigateApp:
             self.audio_process.join()
 
         # ensure the capture processes are done
-        for camera, metrics in self.camera_metrics.items():
-            capture_process = metrics.capture_process
+        for name, camera in self.cameras.items():
+            capture_process = camera.camera_metrics.capture_process
             if capture_process is not None:
-                logger.info(f"Waiting for capture process for {camera} to stop")
+                logger.info(f"Waiting for capture process for {name} to stop")
                 capture_process.terminate()
                 capture_process.join()
 
         # ensure the camera processors are done
-        for camera, metrics in self.camera_metrics.items():
-            camera_process = metrics.process
+        for name, camera in self.cameras.items():
+            camera_process = camera.camera_metrics.process
             if camera_process is not None:
-                logger.info(f"Waiting for process for {camera} to stop")
+                logger.info(f"Waiting for process for {name} to stop")
                 camera_process.terminate()
                 camera_process.join()
-                logger.info(f"Closing frame queue for {camera}")
-                empty_and_close_queue(metrics.frame_queue)
+                logger.info(f"Closing frame queue for {name}")
+                empty_and_close_queue(camera.camera_metrics.frame_queue)
 
         # ensure the detectors are done
         for detector in self.detectors.values():

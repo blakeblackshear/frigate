@@ -11,7 +11,7 @@ import time
 import cv2
 from setproctitle import setproctitle
 
-from frigate.camera import CameraMetrics, PTZMetrics
+from frigate.camera.metrics import CameraMetrics, PTZMetrics
 from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, DetectConfig, ModelConfig

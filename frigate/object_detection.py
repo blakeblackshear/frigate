@@ -6,6 +6,7 @@ import queue
 import signal
 import threading
 from abc import ABC, abstractmethod
+from multiprocessing.synchronize import Event
 
 import numpy as np
 from setproctitle import setproctitle
@@ -79,7 +80,7 @@ class LocalObjectDetector(ObjectDetector):
 def run_detector(
     name: str,
     detection_queue: mp.Queue,
-    out_events: dict[str, mp.Event],
+    out_events: dict[str, Event],
     avg_speed,
     start,
     detector_config,

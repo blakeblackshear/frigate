@@ -12,7 +12,7 @@ from norfair import (
 )
 from norfair.drawing.drawer import Drawer
 
-from frigate.camera import PTZMetrics
+from frigate.camera.metrics import PTZMetrics
 from frigate.config import CameraConfig
 from frigate.ptz.autotrack import PtzMotionEstimator
 from frigate.track import ObjectTracker
