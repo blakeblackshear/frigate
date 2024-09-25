@@ -11,7 +11,7 @@ import time
 import cv2
 from setproctitle import setproctitle
 
-from frigate.camera import CameraMetrics
+from frigate.camera import CameraMetrics, PTZMetrics
 from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, DetectConfig, ModelConfig
@@ -29,7 +29,6 @@ from frigate.object_detection import RemoteObjectDetector
 from frigate.ptz.autotrack import ptz_moving_at_frame_time
 from frigate.track import ObjectTracker
 from frigate.track.norfair_tracker import NorfairTracker
-from frigate.types import PTZMetricsTypes
 from frigate.util.builtin import EventsPerSecond, get_tomorrow_at_time
 from frigate.util.image import (
     FrameManager,
@@ -424,7 +423,7 @@ def track_camera(
     result_connection,
     detected_objects_queue,
     camera_metrics: CameraMetrics,
-    ptz_metrics,
+    ptz_metrics: PTZMetrics,
     region_grid,
 ):
     stop_event = mp.Event()
@@ -548,7 +547,7 @@ def process_frames(
     objects_to_track: list[str],
     object_filters,
     stop_event,
-    ptz_metrics: PTZMetricsTypes,
+    ptz_metrics: PTZMetrics,
     region_grid,
     exit_on_empty: bool = False,
 ):
@@ -589,7 +588,7 @@ def process_frames(
             continue
 
         camera_metrics.detection_frame.value = frame_time
-        ptz_metrics["ptz_frame_time"].value = frame_time
+        ptz_metrics.frame_time.value = frame_time
 
         frame = frame_manager.get(
             f"{camera_name}{frame_time}", (frame_shape[0] * 3 // 2, frame_shape[1])
@@ -659,8 +658,8 @@ def process_frames(
             # ptz_moving_at_frame_time() always returns False for non-autotracking cameras
             if not motion_detector.is_calibrating() and not ptz_moving_at_frame_time(
                 frame_time,
-                ptz_metrics["ptz_start_time"].value,
-                ptz_metrics["ptz_stop_time"].value,
+                ptz_metrics.start_time.value,
+                ptz_metrics.stop_time.value,
             ):
                 # find motion boxes that are not inside tracked object regions
                 standalone_motion_boxes = [

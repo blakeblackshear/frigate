@@ -17,7 +17,7 @@ from playhouse.sqliteq import SqliteQueueDatabase
 import frigate.util as util
 from frigate.api.auth import hash_password
 from frigate.api.fastapi_app import create_fastapi_app
-from frigate.camera import CameraMetrics
+from frigate.camera import CameraMetrics, PTZMetrics
 from frigate.comms.config_updater import ConfigPublisher
 from frigate.comms.dispatcher import Communicator, Dispatcher
 from frigate.comms.event_metadata_updater import (
@@ -67,7 +67,6 @@ from frigate.stats.emitter import StatsEmitter
 from frigate.stats.util import stats_init
 from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
-from frigate.types import PTZMetricsTypes
 from frigate.util.builtin import empty_and_close_queue
 from frigate.util.object import get_camera_regions_grid
 from frigate.version import VERSION
@@ -87,7 +86,7 @@ class FrigateApp:
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
         self.log_queue: Queue = mp.Queue()
         self.camera_metrics: dict[str, CameraMetrics] = {}
-        self.ptz_metrics: dict[str, PTZMetricsTypes] = {}
+        self.ptz_metrics: dict[str, PTZMetrics] = {}
         self.processes: dict[str, int] = {}
         self.region_grids: dict[str, list[list[dict[str, int]]]] = {}
         self.config = config
@@ -111,36 +110,11 @@ class FrigateApp:
         # create camera_metrics
         for camera_name in self.config.cameras.keys():
             self.camera_metrics[camera_name] = CameraMetrics()
-            self.ptz_metrics[camera_name] = {
-                "ptz_autotracker_enabled": mp.Value(  # type: ignore[typeddict-item]
-                    # issue https://github.com/python/typeshed/issues/8799
-                    # from mypy 0.981 onwards
-                    "i",
-                    self.config.cameras[camera_name].onvif.autotracking.enabled,
-                ),
-                "ptz_tracking_active": mp.Event(),
-                "ptz_motor_stopped": mp.Event(),
-                "ptz_reset": mp.Event(),
-                "ptz_start_time": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "ptz_stop_time": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "ptz_frame_time": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "ptz_zoom_level": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "ptz_max_zoom": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "ptz_min_zoom": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-            }
-            self.ptz_metrics[camera_name]["ptz_motor_stopped"].set()
+            self.ptz_metrics[camera_name] = PTZMetrics(
+                autotracker_enabled=self.config.cameras[
+                    camera_name
+                ].onvif.autotracking.enabled
+            )
 
     def init_queues(self) -> None:
         # Queue for cameras to push tracked objects to

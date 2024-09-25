@@ -12,10 +12,10 @@ from norfair import (
 )
 from norfair.drawing.drawer import Drawer
 
+from frigate.camera import PTZMetrics
 from frigate.config import CameraConfig
 from frigate.ptz.autotrack import PtzMotionEstimator
 from frigate.track import ObjectTracker
-from frigate.types import PTZMetricsTypes
 from frigate.util.image import intersection_over_union
 from frigate.util.object import average_boxes, median_of_boxes
 
@@ -75,7 +75,7 @@ class NorfairTracker(ObjectTracker):
     def __init__(
         self,
         config: CameraConfig,
-        ptz_metrics: PTZMetricsTypes,
+        ptz_metrics: PTZMetrics,
     ):
         self.tracked_objects = {}
         self.untracked_object_boxes: list[list[int]] = []
@@ -85,7 +85,7 @@ class NorfairTracker(ObjectTracker):
         self.camera_config = config
         self.detect_config = config.detect
         self.ptz_metrics = ptz_metrics
-        self.ptz_autotracker_enabled = ptz_metrics["ptz_autotracker_enabled"]
+        self.ptz_autotracker_enabled = ptz_metrics.autotracker_enabled
         self.ptz_motion_estimator = {}
         self.camera_name = config.name
         self.track_id_map = {}
