@@ -128,11 +128,11 @@ class EmbeddingMaintainer(threading.Thread):
                     and self.genai_client is not None
                     and event.data.get("description") is None
                     and (
-                        camera_config.genai.objects is None
+                        not camera_config.genai.objects
                         or event.label in camera_config.genai.objects
                     )
                     and (
-                        camera_config.genai.required_zones is None
+                        not camera_config.genai.required_zones
                         or set(event.zones) & set(camera_config.genai.required_zones)
                     )
                 ):
