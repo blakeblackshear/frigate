@@ -84,7 +84,7 @@ def go2rtc_camera_stream(camera_name: str):
 
 @router.get("/version")
 def version():
-    return VERSION
+    return JSONResponse(content=VERSION, media_type="text/html", status_code=200)
 
 
 @router.get("/stats")
