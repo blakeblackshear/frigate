@@ -61,6 +61,9 @@ export type SearchFilter = {
   event_id?: string;
 };
 
+export const DEFAULT_TIME_RANGE_AFTER = "00:00";
+export const DEFAULT_TIME_RANGE_BEFORE = "23:59";
+
 export type SearchQueryParams = {
   cameras?: string[];
   labels?: string[];

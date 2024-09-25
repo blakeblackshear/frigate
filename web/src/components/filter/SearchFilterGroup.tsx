@@ -17,6 +17,8 @@ import {
   SearchFilter,
   SearchFilters,
   SearchSource,
+  DEFAULT_TIME_RANGE_AFTER,
+  DEFAULT_TIME_RANGE_BEFORE,
 } from "@/types/search";
 import { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
@@ -26,6 +28,7 @@ import { MdLabel } from "react-icons/md";
 import SearchSourceIcon from "../icons/SearchSourceIcon";
 import PlatformAwareDialog from "../overlay/dialog/PlatformAwareDialog";
 import { FaArrowRight, FaClock } from "react-icons/fa";
+import { useFormattedHour } from "@/hooks/use-date-utils";
 
 type SearchFilterGroupProps = {
   className: string;
@@ -172,6 +175,7 @@ export default function SearchFilterGroup({
       )}
       {filters.includes("time") && (
         <TimeRangeFilterButton
+          config={config}
           timeRange={filter?.time_range}
           updateTimeRange={(time_range) =>
             onUpdateFilter({ ...filter, time_range })
@@ -395,10 +399,12 @@ export function GeneralFilterContent({
 }
 
 type TimeRangeFilterButtonProps = {
+  config?: FrigateConfig;
   timeRange?: string;
   updateTimeRange: (range: string | undefined) => void;
 };
 function TimeRangeFilterButton({
+  config,
   timeRange,
   updateTimeRange,
 }: TimeRangeFilterButtonProps) {
@@ -408,7 +414,7 @@ function TimeRangeFilterButton({
 
   const [afterHour, beforeHour] = useMemo(() => {
     if (!timeRange || !timeRange.includes(",")) {
-      return ["00:00", "24:00"];
+      return [DEFAULT_TIME_RANGE_AFTER, DEFAULT_TIME_RANGE_BEFORE];
     }
 
     return timeRange.split(",");
@@ -416,6 +422,13 @@ function TimeRangeFilterButton({
 
   const [selectedAfterHour, setSelectedAfterHour] = useState(afterHour);
   const [selectedBeforeHour, setSelectedBeforeHour] = useState(beforeHour);
+
+  // format based on locale
+
+  const formattedAfter = useFormattedHour(config, afterHour);
+  const formattedBefore = useFormattedHour(config, beforeHour);
+  const formattedSelectedAfter = useFormattedHour(config, selectedAfterHour);
+  const formattedSelectedBefore = useFormattedHour(config, selectedBeforeHour);
 
   const trigger = (
     <Button
@@ -429,7 +442,7 @@ function TimeRangeFilterButton({
       <div
         className={`${timeRange ? "text-selected-foreground" : "text-primary"}`}
       >
-        {timeRange ? `${afterHour} - ${beforeHour}` : "All Times"}
+        {timeRange ? `${formattedAfter} - ${formattedBefore}` : "All Times"}
       </div>
     </Button>
   );
@@ -456,7 +469,7 @@ function TimeRangeFilterButton({
                 setEndOpen(false);
               }}
             >
-              {selectedAfterHour}
+              {formattedSelectedAfter}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="flex flex-col items-center">
@@ -493,7 +506,7 @@ function TimeRangeFilterButton({
                 setStartOpen(false);
               }}
             >
-              {selectedBeforeHour}
+              {formattedSelectedBefore}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="flex flex-col items-center">
@@ -519,7 +532,10 @@ function TimeRangeFilterButton({
         <Button
           variant="select"
           onClick={() => {
-            if (selectedAfterHour == "00:00" && selectedBeforeHour == "24:00") {
+            if (
+              selectedAfterHour == DEFAULT_TIME_RANGE_AFTER &&
+              selectedBeforeHour == DEFAULT_TIME_RANGE_BEFORE
+            ) {
               updateTimeRange(undefined);
             } else {
               updateTimeRange(`${selectedAfterHour},${selectedBeforeHour}`);
@@ -532,8 +548,8 @@ function TimeRangeFilterButton({
         </Button>
         <Button
           onClick={() => {
-            setSelectedAfterHour("00:00");
-            setSelectedBeforeHour("24:00");
+            setSelectedAfterHour(DEFAULT_TIME_RANGE_AFTER);
+            setSelectedBeforeHour(DEFAULT_TIME_RANGE_BEFORE);
           }}
         >
           Reset
