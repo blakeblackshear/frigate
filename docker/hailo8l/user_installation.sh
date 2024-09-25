@@ -13,7 +13,7 @@ else
 fi
 
 # Clone the HailoRT driver repository
-git clone --depth 1 --branch v4.17.0 https://github.com/hailo-ai/hailort-drivers.git
+git clone --depth 1 --branch v4.18.0 https://github.com/hailo-ai/hailort-drivers.git
 
 # Build and install the HailoRT driver
 cd hailort-drivers/linux/pcie
