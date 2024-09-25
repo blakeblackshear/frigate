@@ -209,9 +209,11 @@ export default function SearchView({
 
   // keyboard listener
 
+  const [inputFocused, setInputFocused] = useState(false);
+
   const onKeyboardShortcut = useCallback(
     (key: string | null, modifiers: KeyModifiers) => {
-      if (!modifiers.down || !uniqueResults) {
+      if (!modifiers.down || !uniqueResults || inputFocused) {
         return;
       }
 
@@ -236,10 +238,14 @@ export default function SearchView({
           break;
       }
     },
-    [uniqueResults],
+    [uniqueResults, inputFocused],
   );
 
-  useKeyboardListener(["ArrowLeft", "ArrowRight"], onKeyboardShortcut);
+  useKeyboardListener(
+    ["ArrowLeft", "ArrowRight"],
+    onKeyboardShortcut,
+    !inputFocused,
+  );
 
   // scroll into view
 
@@ -310,6 +316,8 @@ export default function SearchView({
         {config?.semantic_search?.enabled && (
           <div className={cn("z-[41] w-full lg:absolute lg:top-0 lg:w-1/3")}>
             <InputWithTags
+              inputFocused={inputFocused}
+              setInputFocused={setInputFocused}
               filters={searchFilter ?? {}}
               setFilters={setSearchFilter}
               search={search}

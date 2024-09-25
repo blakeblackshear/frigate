@@ -414,17 +414,7 @@ export function DateRangePicker({
           </div>
         )}
       </div>
-      <div className="flex justify-center gap-2 py-2 pr-4">
-        <Button
-          onClick={() => {
-            setIsOpen(false);
-            resetValues();
-            onReset?.();
-          }}
-          variant="ghost"
-        >
-          Reset
-        </Button>
+      <div className="mx-auto flex w-64 items-center justify-evenly gap-2 py-2">
         <Button
           variant="select"
           onClick={() => {
@@ -438,6 +428,16 @@ export function DateRangePicker({
           }}
         >
           Apply
+        </Button>
+        <Button
+          onClick={() => {
+            setIsOpen(false);
+            resetValues();
+            onReset?.();
+          }}
+          variant="ghost"
+        >
+          Reset
         </Button>
       </div>
     </div>
