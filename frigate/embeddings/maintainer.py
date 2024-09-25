@@ -128,12 +128,12 @@ class EmbeddingMaintainer(threading.Thread):
                     and self.genai_client is not None
                     and event.data.get("description") is None
                     and (
-                        camera_config.genai.labels is None
-                        or event.label in camera_config.genai.labels
+                        camera_config.genai.objects is None
+                        or event.label in camera_config.genai.objects
                     )
                     and (
                         camera_config.genai.required_zones is None
-                        or set(event.zones) & set(camera_config.genai.zones)
+                        or set(event.zones) & set(camera_config.genai.required_zones)
                     )
                 ):
                     # Generate the description. Call happens in a thread since it is network bound.

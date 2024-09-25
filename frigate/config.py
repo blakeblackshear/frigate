@@ -810,8 +810,8 @@ class GenAICameraConfig(BaseModel):
         title="Default caption prompt.",
     )
     object_prompts: Dict[str, str] = Field(default={}, title="Object specific prompts.")
-    labels: Optional[List[str]] = Field(
-        default=None, title="Labels to run generative AI for."
+    objects: Dict[str, int] = Field(
+        default_factory=dict, title="Objects to run generative AI for."
     )
     required_zones: Union[str, List[str]] = Field(
         default_factory=list,
