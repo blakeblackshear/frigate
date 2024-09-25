@@ -810,6 +810,21 @@ class GenAICameraConfig(BaseModel):
         title="Default caption prompt.",
     )
     object_prompts: Dict[str, str] = Field(default={}, title="Object specific prompts.")
+    labels: Optional[List[str]] = Field(
+        default=None, title="Labels to run generative AI for."
+    )
+    required_zones: Union[str, List[str]] = Field(
+        default_factory=list,
+        title="List of required zones to be entered in order to run generative AI.",
+    )
+
+    @field_validator("required_zones", mode="before")
+    @classmethod
+    def validate_required_zones(cls, v):
+        if isinstance(v, str) and "," not in v:
+            return [v]
+
+        return v
 
 
 class AudioConfig(FrigateBaseModel):

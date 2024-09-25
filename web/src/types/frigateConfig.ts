@@ -306,6 +306,8 @@ export interface FrigateConfig {
     model: string;
     prompt: string;
     object_prompts: { [key: string]: string };
+    required_zones: string[];
+    labels: string[];
   };
 
   go2rtc: {
