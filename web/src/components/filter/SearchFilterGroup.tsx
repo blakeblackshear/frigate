@@ -430,6 +430,13 @@ function TimeRangeFilterButton({
   const formattedSelectedAfter = useFormattedHour(config, selectedAfterHour);
   const formattedSelectedBefore = useFormattedHour(config, selectedBeforeHour);
 
+  useEffect(() => {
+    setSelectedAfterHour(afterHour);
+    setSelectedBeforeHour(beforeHour);
+    // only refresh when state changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeRange]);
+
   const trigger = (
     <Button
       size="sm"
@@ -558,6 +565,7 @@ function TimeRangeFilterButton({
           onClick={() => {
             setSelectedAfterHour(DEFAULT_TIME_RANGE_AFTER);
             setSelectedBeforeHour(DEFAULT_TIME_RANGE_BEFORE);
+            updateTimeRange(undefined);
           }}
         >
           Reset
