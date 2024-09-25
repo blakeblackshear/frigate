@@ -449,7 +449,7 @@ function TimeRangeFilterButton({
   const content = (
     <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
       <div
-        className={`mt-3 flex items-center rounded-lg bg-secondary text-secondary-foreground ${isDesktop ? "mx-8 gap-2 px-2" : "pl-2"}`}
+        className={`mt-3 flex items-center rounded-lg bg-secondary text-secondary-foreground ${isDesktop ? "mx-6 gap-2 px-2" : "pl-2"}`}
       >
         <Popover
           open={startOpen}
@@ -487,7 +487,7 @@ function TimeRangeFilterButton({
             />
           </PopoverContent>
         </Popover>
-        <FaArrowRight className="size-4 text-primary" />
+        <FaArrowRight className="size-4 text-white" />
         <Popover
           open={endOpen}
           onOpenChange={(open) => {
