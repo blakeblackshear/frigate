@@ -35,9 +35,13 @@ import { SaveSearchDialog } from "./SaveSearchDialog";
 import { DeleteSearchDialog } from "./DeleteSearchDialog";
 import {
   convertLocalDateToTimestamp,
+  convertTo12Hour,
   getIntlDateFormat,
+  isValidTimeRange,
 } from "@/utils/dateUtil";
 import { toast } from "sonner";
+import useSWR from "swr";
+import { FrigateConfig } from "@/types/frigateConfig";
 
 type InputWithTagsProps = {
   filters: SearchFilter;
@@ -56,6 +60,10 @@ export default function InputWithTags({
   setSearch,
   allSuggestions,
 }: InputWithTagsProps) {
+  const { data: config } = useSWR<FrigateConfig>("config", {
+    revalidateOnFocus: false,
+  });
+
   const [inputValue, setInputValue] = useState(search || "");
   const [currentFilterType, setCurrentFilterType] = useState<FilterType | null>(
     null,
@@ -183,7 +191,6 @@ export default function InputWithTags({
       if (allSuggestions[type as FilterType]?.includes(value)) {
         const newFilters = { ...filters };
         let timestamp = 0;
-        let times = ["", ""];
 
         switch (type) {
           case "before":
@@ -223,18 +230,19 @@ export default function InputWithTags({
               newFilters[type] = timestamp / 1000;
             }
             break;
-          case "timeRange":
+          case "time_range":
             if (!value.includes(",")) {
-              toast.error("The correct format is after,before.", {
-                position: "top-center",
-              });
+              toast.error(
+                "The correct format is after,before. Example: 15:00,18:00.",
+                {
+                  position: "top-center",
+                },
+              );
               return;
             }
 
-            times = value.split(",");
-
-            if (times[0] < "00" || times[1] > "24") {
-              toast.error("Times not in valid range", {
+            if (!isValidTimeRange(value)) {
+              toast.error("Time range is not valid.", {
                 position: "top-center",
               });
               return;
@@ -275,6 +283,30 @@ export default function InputWithTags({
     },
     [filters, setFilters, allSuggestions],
   );
+
+  function formatFilterValues(
+    filterType: string,
+    filterValues: number | string,
+  ): string {
+    if (filterType === "before" || filterType === "after") {
+      return new Date(
+        (filterType === "before"
+          ? (filterValues as number) + 1
+          : (filterValues as number)) * 1000,
+      ).toLocaleDateString(window.navigator?.language || "en-US");
+    } else if (filterType === "time_range") {
+      const [startTime, endTime] = (filterValues as string).split(",");
+      return `${
+        config?.ui.time_format === "24hour"
+          ? startTime
+          : convertTo12Hour(startTime)
+      } - ${
+        config?.ui.time_format === "24hour" ? endTime : convertTo12Hour(endTime)
+      }`;
+    } else {
+      return filterValues as string;
+    }
+  }
 
   // handlers
 
@@ -624,16 +656,8 @@ export default function InputWithTags({
                           key={filterType}
                           className="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-0.5 text-sm capitalize text-green-800"
                         >
-                          {filterType}:
-                          {filterType === "before" || filterType === "after"
-                            ? new Date(
-                                (filterType === "before"
-                                  ? (filterValues as number) + 1
-                                  : (filterValues as number)) * 1000,
-                              ).toLocaleDateString(
-                                window.navigator?.language || "en-US",
-                              )
-                            : filterValues}
+                          {filterType.replaceAll("_", " ")}:{" "}
+                          {formatFilterValues(filterType, filterValues)}
                           <button
                             onClick={() =>
                               removeFilter(

@@ -52,11 +52,11 @@ export type SearchFilter = {
   query?: string;
   cameras?: string[];
   labels?: string[];
-  subLabels?: string[];
+  sub_labels?: string[];
   zones?: string[];
   before?: number;
   after?: number;
-  timeRange?: string;
+  time_range?: string;
   search_type?: SearchSource[];
   event_id?: string;
 };
@@ -74,6 +74,7 @@ export type SearchQueryParams = {
   include_thumbnails?: number;
   query?: string;
   page?: number;
+  time_range?: string;
 };
 
 export type SearchQuery = [string, SearchQueryParams] | null;

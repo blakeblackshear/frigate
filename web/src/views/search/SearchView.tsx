@@ -120,6 +120,7 @@ export default function SearchView({
       zones: Object.values(allZones || {}),
       sub_labels: allSubLabels,
       search_type: ["thumbnail", "description"] as SearchSource[],
+      time_range: ["00:00,24:00"],
     }),
     [config, allLabels, allZones, allSubLabels],
   );

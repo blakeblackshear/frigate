@@ -172,9 +172,9 @@ export default function SearchFilterGroup({
       )}
       {filters.includes("time") && (
         <TimeRangeFilterButton
-          timeRange={filter?.timeRange}
-          updateTimeRange={(timeRange) =>
-            onUpdateFilter({ ...filter, timeRange })
+          timeRange={filter?.time_range}
+          updateTimeRange={(time_range) =>
+            onUpdateFilter({ ...filter, time_range })
           }
         />
       )}
@@ -199,9 +199,9 @@ export default function SearchFilterGroup({
       {filters.includes("sub") && (
         <SubFilterButton
           allSubLabels={allSubLabels}
-          selectedSubLabels={filter?.subLabels}
+          selectedSubLabels={filter?.sub_labels}
           updateSubLabelFilter={(newSubLabels) =>
-            onUpdateFilter({ ...filter, subLabels: newSubLabels })
+            onUpdateFilter({ ...filter, sub_labels: newSubLabels })
           }
         />
       )}
