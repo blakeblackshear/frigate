@@ -12,6 +12,7 @@ import numpy as np
 import requests
 
 import frigate.util as util
+from frigate.camera import CameraMetrics
 from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
 from frigate.comms.inter_process import InterProcessRequestor
@@ -27,7 +28,6 @@ from frigate.const import (
 from frigate.ffmpeg_presets import parse_preset_input
 from frigate.log import LogPipe
 from frigate.object_detection import load_labels
-from frigate.types import CameraMetricsTypes
 from frigate.util.builtin import get_ffmpeg_arg_list
 from frigate.video import start_or_restart_ffmpeg, stop_ffmpeg
 
@@ -69,7 +69,7 @@ class AudioProcessor(util.Process):
     def __init__(
         self,
         config: FrigateConfig,
-        camera_metrics: dict[str, CameraMetricsTypes],
+        camera_metrics: dict[str, CameraMetrics],
     ):
         super().__init__(name="frigate.audio_manager", daemon=True)
 
@@ -123,7 +123,7 @@ class AudioEventMaintainer(threading.Thread):
     def __init__(
         self,
         camera: CameraConfig,
-        camera_metrics: dict[str, CameraMetricsTypes],
+        camera_metrics: dict[str, CameraMetrics],
         stop_event: threading.Event,
     ) -> None:
         super().__init__(name=f"{camera.name}_audio_event_processor")
@@ -152,8 +152,8 @@ class AudioEventMaintainer(threading.Thread):
         audio_as_float = audio.astype(np.float32)
         rms, dBFS = self.calculate_audio_levels(audio_as_float)
 
-        self.camera_metrics[self.config.name]["audio_rms"].value = rms
-        self.camera_metrics[self.config.name]["audio_dBFS"].value = dBFS
+        self.camera_metrics[self.config.name].audio_rms.value = rms
+        self.camera_metrics[self.config.name].audio_dBFS.value = dBFS
 
         # only run audio detection when volume is above min_volume
         if rms >= self.config.audio.min_volume:

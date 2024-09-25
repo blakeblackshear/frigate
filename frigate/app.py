@@ -17,6 +17,7 @@ from playhouse.sqliteq import SqliteQueueDatabase
 import frigate.util as util
 from frigate.api.auth import hash_password
 from frigate.api.fastapi_app import create_fastapi_app
+from frigate.camera import CameraMetrics
 from frigate.comms.config_updater import ConfigPublisher
 from frigate.comms.dispatcher import Communicator, Dispatcher
 from frigate.comms.event_metadata_updater import (
@@ -66,7 +67,7 @@ from frigate.stats.emitter import StatsEmitter
 from frigate.stats.util import stats_init
 from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
-from frigate.types import CameraMetricsTypes, PTZMetricsTypes
+from frigate.types import PTZMetricsTypes
 from frigate.util.builtin import empty_and_close_queue
 from frigate.util.object import get_camera_regions_grid
 from frigate.version import VERSION
@@ -85,7 +86,7 @@ class FrigateApp:
         self.detection_out_events: dict[str, MpEvent] = {}
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
         self.log_queue: Queue = mp.Queue()
-        self.camera_metrics: dict[str, CameraMetricsTypes] = {}
+        self.camera_metrics: dict[str, CameraMetrics] = {}
         self.ptz_metrics: dict[str, PTZMetricsTypes] = {}
         self.processes: dict[str, int] = {}
         self.region_grids: dict[str, list[list[dict[str, int]]]] = {}
@@ -107,34 +108,9 @@ class FrigateApp:
                 logger.debug(f"Skipping directory: {d}")
 
     def init_camera_metrics(self) -> None:
+        # create camera_metrics
         for camera_name in self.config.cameras.keys():
-            # create camera_metrics
-            self.camera_metrics[camera_name] = {
-                "camera_fps": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "skipped_fps": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "process_fps": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                "detection_fps": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "detection_frame": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "read_start": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "ffmpeg_pid": mp.Value("i", 0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "frame_queue": mp.Queue(maxsize=2),
-                "capture_process": None,
-                "process": None,
-                "audio_rms": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                "audio_dBFS": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-            }
+            self.camera_metrics[camera_name] = CameraMetrics()
             self.ptz_metrics[camera_name] = {
                 "ptz_autotracker_enabled": mp.Value(  # type: ignore[typeddict-item]
                     # issue https://github.com/python/typeshed/issues/8799
@@ -469,7 +445,7 @@ class FrigateApp:
                 ),
                 daemon=True,
             )
-            self.camera_metrics[name]["process"] = camera_process
+            self.camera_metrics[name].process = camera_process
             camera_process.start()
             logger.info(f"Camera processor started for {name}: {camera_process.pid}")
 
@@ -485,7 +461,7 @@ class FrigateApp:
                 args=(name, config, self.shm_frame_count(), self.camera_metrics[name]),
             )
             capture_process.daemon = True
-            self.camera_metrics[name]["capture_process"] = capture_process
+            self.camera_metrics[name].capture_process = capture_process
             capture_process.start()
             logger.info(f"Capture process started for {name}: {capture_process.pid}")
 
@@ -680,23 +656,22 @@ class FrigateApp:
         self.audio_process.join()
 
         # ensure the capture processes are done
-        for camera in self.camera_metrics.keys():
-            capture_process = self.camera_metrics[camera]["capture_process"]
+        for camera, metrics in self.camera_metrics.items():
+            capture_process = metrics.capture_process
             if capture_process is not None:
                 logger.info(f"Waiting for capture process for {camera} to stop")
                 capture_process.terminate()
                 capture_process.join()
 
         # ensure the camera processors are done
-        for camera in self.camera_metrics.keys():
-            camera_process = self.camera_metrics[camera]["process"]
+        for camera, metrics in self.camera_metrics.items():
+            camera_process = metrics.process
             if camera_process is not None:
                 logger.info(f"Waiting for process for {camera} to stop")
                 camera_process.terminate()
                 camera_process.join()
                 logger.info(f"Closing frame queue for {camera}")
-                frame_queue = self.camera_metrics[camera]["frame_queue"]
-                empty_and_close_queue(frame_queue)
+                empty_and_close_queue(metrics.frame_queue)
 
         # ensure the detectors are done
         for detector in self.detectors.values():
