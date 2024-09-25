@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   LuX,
   LuFilter,
@@ -45,6 +45,8 @@ import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 
 type InputWithTagsProps = {
+  inputFocused: boolean;
+  setInputFocused: React.Dispatch<React.SetStateAction<boolean>>;
   filters: SearchFilter;
   setFilters: (filter: SearchFilter) => void;
   search: string;
@@ -55,6 +57,8 @@ type InputWithTagsProps = {
 };
 
 export default function InputWithTags({
+  inputFocused,
+  setInputFocused,
   filters,
   setFilters,
   search,
@@ -69,7 +73,6 @@ export default function InputWithTags({
   const [currentFilterType, setCurrentFilterType] = useState<FilterType | null>(
     null,
   );
-  const [inputFocused, setInputFocused] = useState(false);
   const [isSimilaritySearch, setIsSimilaritySearch] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const commandRef = useRef<HTMLDivElement>(null);
@@ -381,7 +384,7 @@ export default function InputWithTags({
 
   const handleInputFocus = useCallback(() => {
     setInputFocused(true);
-  }, []);
+  }, [setInputFocused]);
 
   const handleClearInput = useCallback(() => {
     setInputFocused(false);
@@ -392,16 +395,19 @@ export default function InputWithTags({
     setFilters({});
     setCurrentFilterType(null);
     setIsSimilaritySearch(false);
-  }, [setFilters, resetSuggestions, setSearch]);
+  }, [setFilters, resetSuggestions, setSearch, setInputFocused]);
 
-  const handleInputBlur = useCallback((e: React.FocusEvent) => {
-    if (
-      commandRef.current &&
-      !commandRef.current.contains(e.relatedTarget as Node)
-    ) {
-      setInputFocused(false);
-    }
-  }, []);
+  const handleInputBlur = useCallback(
+    (e: React.FocusEvent) => {
+      if (
+        commandRef.current &&
+        !commandRef.current.contains(e.relatedTarget as Node)
+      ) {
+        setInputFocused(false);
+      }
+    },
+    [setInputFocused],
+  );
 
   const handleSuggestionClick = useCallback(
     (suggestion: string) => {
@@ -449,7 +455,7 @@ export default function InputWithTags({
       setInputFocused(false);
       inputRef?.current?.blur();
     },
-    [setSearch],
+    [setSearch, setInputFocused],
   );
 
   const handleInputKeyDown = useCallback(
