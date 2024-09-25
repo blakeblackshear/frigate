@@ -487,7 +487,7 @@ function TimeRangeFilterButton({
             />
           </PopoverContent>
         </Popover>
-        <FaArrowRight className="size-4 text-white" />
+        <FaArrowRight className="size-4 text-primary" />
         <Popover
           open={endOpen}
           onOpenChange={(open) => {
