@@ -456,7 +456,7 @@ function TimeRangeFilterButton({
       <div
         className={cn(
           "mt-3 flex w-full items-center rounded-lg text-secondary-foreground",
-          isDesktop ? "mx-6 gap-2 px-2" : "pl-2",
+          isDesktop ? "mx-6 gap-2 px-2" : "justify-center gap-2 pl-2",
         )}
       >
         <Popover
