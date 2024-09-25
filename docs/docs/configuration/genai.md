@@ -128,7 +128,7 @@ genai:
     car: "Label the primary vehicle in these images with just the name of the company if it is a delivery vehicle, or the color make and model."
 ```
 
-Prompts can also be overriden at the camera level to provide a more detailed prompt to the model about your specific camera, if you desire.
+Prompts can also be overriden at the camera level to provide a more detailed prompt to the model about your specific camera, if you desire. By default, descriptions will be generated for all tracked objects and all zones. But you can also optionally specify `objects` and `required_zones` to only generate descriptions for certain tracked objects or zones.
 
 ```yaml
 cameras:
@@ -138,6 +138,11 @@ cameras:
       object_prompts:
         person: "Describe the main person in these images (gender, age, clothing, activity, etc). Do not include where the activity is occurring (sidewalk, concrete, driveway, etc). If delivering a package, include the company the package is from."
         cat: "Describe the cat in these images (color, size, tail). Indicate whether or not the cat is by the flower pots. If the cat is chasing a mouse, make up a name for the mouse."
+      objects:
+        - person
+        - cat
+      required_zones:
+        - steps
 ```
 
 ### Experiment with prompts
