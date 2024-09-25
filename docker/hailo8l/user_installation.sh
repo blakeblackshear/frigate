@@ -2,7 +2,7 @@
 
 # Update package list and install dependencies
 sudo apt-get update
-sudo apt-get install -y build-essential cmake git wget linux-modules-extra-$(uname -r)
+sudo apt-get install -y build-essential cmake git wget
 
 arch=$(uname -m)
 
