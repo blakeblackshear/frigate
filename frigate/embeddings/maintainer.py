@@ -151,7 +151,7 @@ class EmbeddingMaintainer(threading.Thread):
 
     def _process_event_metadata(self):
         # Check for regenerate description requests
-        (topic, event_id) = self.event_metadata_subscriber.check_for_update()
+        (topic, event_id) = self.event_metadata_subscriber.check_for_update(timeout=1)
 
         if topic is None:
             return
