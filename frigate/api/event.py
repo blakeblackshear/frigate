@@ -768,7 +768,7 @@ def false_positive(request: Request, event_id: str):
         )
 
     if not event.plus_id:
-        plus_response = send_to_plus(event_id)
+        plus_response = send_to_plus(request, event_id)
         if plus_response.status_code != 200:
             return plus_response
         # need to refetch the event now that it has a plus_id
