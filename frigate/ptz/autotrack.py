@@ -49,9 +49,7 @@ def ptz_moving_at_frame_time(frame_time, ptz_start_time, ptz_stop_time):
 
 
 class PtzMotionEstimator:
-    def __init__(
-        self, config: CameraConfig, ptz_metrics: dict[str, PTZMetrics]
-    ) -> None:
+    def __init__(self, config: CameraConfig, ptz_metrics: PTZMetrics) -> None:
         self.frame_manager = SharedMemoryFrameManager()
         self.norfair_motion_estimator = None
         self.camera_config = config
