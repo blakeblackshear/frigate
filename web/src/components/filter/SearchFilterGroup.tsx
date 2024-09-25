@@ -455,7 +455,7 @@ function TimeRangeFilterButton({
     >
       <div
         className={cn(
-          "mt-3 flex w-full items-center rounded-lg bg-secondary text-secondary-foreground",
+          "mt-3 flex w-full items-center rounded-lg bg-transparent text-secondary-foreground",
           isDesktop ? "mx-6 gap-2 px-2" : "pl-2",
         )}
       >
@@ -469,7 +469,7 @@ function TimeRangeFilterButton({
         >
           <PopoverTrigger asChild>
             <Button
-              className={`text-primary ${isDesktop ? "" : "text-xs"}`}
+              className={`text-primary ${isDesktop ? "" : "text-xs"} `}
               variant={startOpen ? "select" : "default"}
               size="sm"
               onClick={() => {
