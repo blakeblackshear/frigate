@@ -723,8 +723,8 @@ cameras:
       # Format: {label}: {prompt}
       object_prompts:
         person: "My special person prompt."
-      # Optional: labels to generate descriptions for (default: all labels that are tracked)
-      labels:
+      # Optional: objects to generate descriptions for (default: all objects that are tracked)
+      objects:
         - person
         - cat
       # Optional: Restrict generation to objects that entered any of the listed zones (default: none, all zones qualify)
