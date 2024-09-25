@@ -13,7 +13,7 @@ import requests
 from fastapi import APIRouter, Path, Request, Response
 from fastapi.encoders import jsonable_encoder
 from fastapi.params import Depends
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
 from markupsafe import escape
 from peewee import operator
 
@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=[Tags.app])
 
 
-@router.get("/")
+@router.get("/", response_class=PlainTextResponse)
 def is_healthy():
     return "Frigate is running. Alive and healthy!"
 
@@ -82,9 +82,9 @@ def go2rtc_camera_stream(camera_name: str):
     return JSONResponse(content=stream_data)
 
 
-@router.get("/version")
+@router.get("/version", response_class=PlainTextResponse)
 def version():
-    return JSONResponse(content=VERSION, media_type="text/html", status_code=200)
+    return VERSION
 
 
 @router.get("/stats")
