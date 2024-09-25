@@ -501,7 +501,9 @@ function TimeRangeFilterButton({
               className="text-md mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
               id="startTime"
               type="time"
-              value={selectedBeforeHour}
+              value={
+                selectedBeforeHour == "24:00" ? "23:59" : selectedBeforeHour
+              }
               step="60"
               onChange={(e) => {
                 const clock = e.target.value;
