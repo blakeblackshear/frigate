@@ -7,10 +7,10 @@ import os
 import traceback
 from datetime import datetime, timedelta
 from functools import reduce
-from typing import Optional
+from typing import Any, Optional
 
 import requests
-from fastapi import APIRouter, Path, Request, Response
+from fastapi import APIRouter, Body, Path, Request, Response
 from fastapi.encoders import jsonable_encoder
 from fastapi.params import Depends
 from fastapi.responses import JSONResponse, PlainTextResponse
@@ -166,7 +166,7 @@ def config_raw():
 
 
 @router.post("/config/save")
-def config_save(save_option: str, body: dict):
+def config_save(save_option: str, body: Any = Body()):
     new_config = body
 
     if not new_config:
