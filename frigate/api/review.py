@@ -34,8 +34,11 @@ def review(params: ReviewQueryParams = Depends()):
     reviewed = params.reviewed
     limit = params.limit
     severity = params.severity
-    before = params.before
-    after = params.after
+    before = params.before or datetime.datetime.now().timestamp()
+    after = (
+        params.after
+        or (datetime.datetime.now() - datetime.timedelta(hours=24)).timestamp()
+    )
 
     clauses = [
         (
@@ -425,8 +428,11 @@ def delete_reviews(body: dict = None):
 def motion_activity(params: ReviewActivityMotionQueryParams = Depends()):
     """Get motion and audio activity."""
     cameras = params.cameras
-    before = params.before
-    after = params.after
+    before = params.before or datetime.datetime.now().timestamp()
+    after = (
+        params.after
+        or (datetime.datetime.now() - datetime.timedelta(hours=1)).timestamp()
+    )
     # get scale in seconds
     scale = params.scale
 
@@ -496,8 +502,11 @@ def motion_activity(params: ReviewActivityMotionQueryParams = Depends()):
 def audio_activity(params: ReviewActivityMotionQueryParams = Depends()):
     """Get motion and audio activity."""
     cameras = params.cameras
-    before = params.before
-    after = params.after
+    before = params.before or datetime.datetime.now().timestamp()
+    after = (
+        params.after
+        or (datetime.datetime.now() - datetime.timedelta(hours=1)).timestamp()
+    )
     # get scale in seconds
     scale = params.scale
 

@@ -1,6 +1,7 @@
 """Event apis."""
 
 import base64
+import datetime
 import io
 import logging
 import os
@@ -1073,7 +1074,7 @@ def create_event(
 @router.put("/events/{event_id}/end")
 def end_event(request: Request, event_id: str, body: EventsEndBody):
     try:
-        end_time = body.end_time
+        end_time = body.end_time or datetime.datetime.now().timestamp()
         request.app.external_processor.finish_manual_event(event_id, end_time)
     except Exception:
         return JSONResponse(
