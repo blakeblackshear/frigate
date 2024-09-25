@@ -447,9 +447,17 @@ function TimeRangeFilterButton({
     </Button>
   );
   const content = (
-    <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
+    <div
+      className={cn(
+        "scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden",
+        isDesktop ? "w-64" : "w-full",
+      )}
+    >
       <div
-        className={`mt-3 flex items-center rounded-lg bg-secondary text-secondary-foreground ${isDesktop ? "mx-6 gap-2 px-2" : "pl-2"}`}
+        className={cn(
+          "mt-3 flex w-full items-center rounded-lg bg-secondary text-secondary-foreground",
+          isDesktop ? "mx-6 gap-2 px-2" : "pl-2",
+        )}
       >
         <Popover
           open={startOpen}
