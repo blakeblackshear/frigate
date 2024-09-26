@@ -201,21 +201,24 @@ export default function MobileReviewSettingsDrawer({
             Calendar
           </div>
         </div>
-        <ReviewActivityCalendar
-          reviewSummary={reviewSummary}
-          selectedDay={
-            filter?.after == undefined
-              ? undefined
-              : new Date(filter.after * 1000)
-          }
-          onSelect={(day) => {
-            onUpdateFilter({
-              ...filter,
-              after: day == undefined ? undefined : day.getTime() / 1000,
-              before: day == undefined ? undefined : getEndOfDayTimestamp(day),
-            });
-          }}
-        />
+        <div className="flex w-full flex-row justify-center">
+          <ReviewActivityCalendar
+            reviewSummary={reviewSummary}
+            selectedDay={
+              filter?.after == undefined
+                ? undefined
+                : new Date(filter.after * 1000)
+            }
+            onSelect={(day) => {
+              onUpdateFilter({
+                ...filter,
+                after: day == undefined ? undefined : day.getTime() / 1000,
+                before:
+                  day == undefined ? undefined : getEndOfDayTimestamp(day),
+              });
+            }}
+          />
+        </div>
         <SelectSeparator />
         <div className="flex items-center justify-center p-2">
           <Button
