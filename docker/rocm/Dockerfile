@@ -2,7 +2,7 @@
 
 # https://askubuntu.com/questions/972516/debian-frontend-environment-variable
 ARG DEBIAN_FRONTEND=noninteractive
-ARG ROCM=5.7.3
+ARG ROCM=6.1.2
 ARG AMDGPU=gfx900
 ARG HSA_OVERRIDE_GFX_VERSION
 ARG HSA_OVERRIDE
@@ -23,11 +23,11 @@ COPY docker/rocm/rocm-pin-600 /etc/apt/preferences.d/
 
 RUN apt-get update
 
-RUN apt-get -y install --no-install-recommends migraphx hipfft roctracer
+RUN apt-get -y install --no-install-recommends migraphx hipfft roctracer rocprofiler-register miopen-hip
 RUN apt-get -y install --no-install-recommends migraphx-dev
 
 RUN mkdir -p /opt/rocm-dist/opt/rocm-$ROCM/lib
-RUN cd /opt/rocm-$ROCM/lib && cp -dpr libMIOpen*.so* libamd*.so* libhip*.so* libhsa*.so* libmigraphx*.so* librocm*.so* librocblas*.so* libroctracer*.so* librocfft*.so* /opt/rocm-dist/opt/rocm-$ROCM/lib/
+RUN cd /opt/rocm-$ROCM/lib && cp -dpr libMIOpen*.so* libamd*.so* libhip*.so* libhsa*.so* libmigraphx*.so* librocm*.so* librocblas*.so* libroctracer*.so* librocfft*.so* librocprofiler-register*.so* libroctx64*.so* /opt/rocm-dist/opt/rocm-$ROCM/lib/
 RUN cd /opt/rocm-dist/opt/ && ln -s rocm-$ROCM rocm
 
 RUN mkdir -p /opt/rocm-dist/etc/ld.so.conf.d/
@@ -82,7 +82,7 @@ ARG ROCM
 ARG AMDGPU
 
 COPY --from=rocm /opt/rocm-$ROCM/bin/rocminfo /opt/rocm-$ROCM/bin/migraphx-driver /opt/rocm-$ROCM/bin/
-COPY --from=rocm /opt/rocm-$ROCM/share/miopen/db/*$AMDGPU* /opt/rocm-$ROCM/share/miopen/db/
+COPY --from=rocm /opt/rocm-$ROCM/share/miopen/db/ /opt/rocm-$ROCM/share/miopen/db/
 COPY --from=rocm /opt/rocm-$ROCM/lib/rocblas/library/*$AMDGPU* /opt/rocm-$ROCM/lib/rocblas/library/
 COPY --from=rocm /opt/rocm-dist/ /
 COPY --from=debian-build /opt/rocm/lib/migraphx.cpython-39-x86_64-linux-gnu.so /opt/rocm-$ROCM/lib/
