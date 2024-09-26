@@ -23,6 +23,13 @@ sudo make install
 # Load the Hailo PCI driver
 sudo modprobe hailo_pci
 
+if [ $? -ne 0 ]; then
+  echo "Unable to load hailo_pci module, common reasons for this are:"
+  echo "- Key was rejected by service: Secure Boot is enabling disallowing install."
+  echo "- Permissions are not setup correctly."
+  exit 1
+fi
+
 # Download and install the firmware
 cd ../../
 ./download_firmware.sh
