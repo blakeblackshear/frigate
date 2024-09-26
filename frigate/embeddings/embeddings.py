@@ -43,7 +43,7 @@ def get_metadata(event: Event) -> dict:
         {
             k: v
             for k, v in event_dict.items()
-            if k not in ["id", "thumbnail"]
+            if k not in ["thumbnail"]
             and v is not None
             and isinstance(v, (str, int, float, bool))
         }
