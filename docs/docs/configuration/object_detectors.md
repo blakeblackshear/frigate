@@ -35,7 +35,7 @@ Frigate supports multiple different detectors that work on different types of ha
 
 # Officially Supported Detectors
 
-Frigate provides the following builtin detector types: `cpu`, `edgetpu`, `openvino`, `tensorrt`, `rknn`, and `hailo8l`. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
+Frigate provides the following builtin detector types: `cpu`, `edgetpu`, `hailo8l`, `onnx`, `openvino`, `rknn`, `rocm`, and `tensorrt`. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
 
 ## Edge TPU Detector
 
