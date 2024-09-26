@@ -5,7 +5,7 @@ title: Object Detectors
 
 # Supported Hardware
 
-:::tip
+:::info
 
 Frigate supports multiple different detectors that work on different types of hardware:
 
