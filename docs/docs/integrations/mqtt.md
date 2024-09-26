@@ -147,6 +147,10 @@ Message published for each changed review item. The first message is published w
 
 Same data available at `/api/stats` published at a configurable interval.
 
+### `frigate/camera_activity`
+
+Returns data about each camera, its current features, and if it is detecting motion, objects, etc. Can be triggered by publising to `frigate/onConnect`
+
 ### `frigate/notifications/set`
 
 Topic to turn notifications on and off. Expected values are `ON` and `OFF`.

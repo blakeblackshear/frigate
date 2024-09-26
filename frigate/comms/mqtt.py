@@ -223,6 +223,10 @@ class MqttClient(Communicator):  # type: ignore[misc]
             )
 
         self.client.message_callback_add(
+            f"{self.mqtt_config.topic_prefix}/onConnect", self.on_mqtt_command
+        )
+
+        self.client.message_callback_add(
             f"{self.mqtt_config.topic_prefix}/restart", self.on_mqtt_command
         )
 
