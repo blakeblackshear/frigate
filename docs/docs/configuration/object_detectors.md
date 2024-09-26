@@ -28,6 +28,9 @@ Frigate supports multiple different detectors that work on different types of ha
 **Rockchip**
 - [RKNN](#rockchip-platform): RKNN models can run on Rockchip devices with included NPUs.
 
+**For Testing**
+- [CPU Detector (not recommended for actual use](#cpu-detector-not-recommended): Use a CPU to run tflite model, this is not recommended and in most cases OpenVINO can be used in CPU mode with better results. 
+
 :::
 
 # Officially Supported Detectors
@@ -464,9 +467,9 @@ Note that the labelmap uses a subset of the complete COCO label set that has onl
 
 The CPU detector type runs a TensorFlow Lite model utilizing the CPU without hardware acceleration. It is recommended to use a hardware accelerated detector type instead for better performance. To configure a CPU based detector, set the `"type"` attribute to `"cpu"`.
 
-:::tip
+:::danger
 
-If you do not have GPU or Edge TPU hardware, using the [OpenVINO Detector](#openvino-detector) is often more efficient than using the CPU detector.
+The CPU detector is not recommended for general use. If you do not have GPU or Edge TPU hardware, using the [OpenVINO Detector](#openvino-detector) in CPU mode is often more efficient than using the CPU detector.
 
 :::
 
