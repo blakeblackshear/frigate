@@ -5,6 +5,8 @@ title: Object Detectors
 
 # Supported Hardware
 
+:::tip
+
 Frigate supports multiple different detectors that work on different types of hardware:
 
 **Most Hardware**
@@ -25,6 +27,8 @@ Frigate supports multiple different detectors that work on different types of ha
 
 **Rockchip**
 - [RKNN](#rockchip-platform): RKNN models can run on Rockchip devices with included NPUs.
+
+:::
 
 # Officially Supported Detectors
 
@@ -418,7 +422,7 @@ After placing the downloaded onnx model in your config folder, you can use the f
 
 ```yaml
 detectors:
-  onnx:
+  rocm:
     type: rocm
 
 model:
