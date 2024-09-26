@@ -95,6 +95,11 @@ export default function SearchDetailDialog({
       views.splice(index, 1);
     }
 
+    if (search.data.type != "object") {
+      const index = views.indexOf("object lifecycle");
+      views.splice(index, 1);
+    }
+
     // TODO implement
     //if (!config.semantic_search.enabled) {
     //  const index = views.indexOf("similar-calendar");
