@@ -357,6 +357,7 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
     zones = params.zones
     after = params.after
     before = params.before
+    time_range = params.time_range
 
     # for similarity search
     event_id = params.event_id
@@ -427,6 +428,57 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
 
     if before:
         embeddings_filters.append({"start_time": {"$lt": before}})
+
+    if time_range != DEFAULT_TIME_RANGE:
+        # Get timezone arg to ensure browser times are used
+        tz_name = params.timezone
+        hour_modifier, minute_modifier, _ = get_tz_modifiers(tz_name)
+
+        times = time_range.split(",")
+        time_after = times[0]
+        time_before = times[1]
+        hour_modifier_value = int(hour_modifier.split()[0])
+        minute_modifier_value = int(minute_modifier.split()[0])
+
+        after_hour, after_minute = map(int, time_after.split(":"))
+        before_hour, before_minute = map(int, time_before.split(":"))
+
+        now = datetime.datetime.now()
+
+        tz_offset = datetime.timedelta(
+            hours=hour_modifier_value, minutes=minute_modifier_value
+        )
+
+        after_time = (
+            now.replace(hour=after_hour, minute=after_minute, second=0, microsecond=0)
+            + tz_offset
+        )
+        before_time = (
+            now.replace(hour=before_hour, minute=before_minute, second=0, microsecond=0)
+            + tz_offset
+        )
+
+        # Take midnight into account
+        if after_time > before_time:
+            # Time range crosses midnight, so we need to split the filter
+            embeddings_filters.append(
+                {
+                    "$or": [
+                        {"start_time": {"$gte": after_time.timestamp()}},
+                        {"start_time": {"$lt": before_time.timestamp()}},
+                    ]
+                }
+            )
+        else:
+            # Normal case where after_time is before before_time
+            embeddings_filters.append(
+                {
+                    "$and": [
+                        {"start_time": {"$gte": after_time.timestamp()}},
+                        {"start_time": {"$lt": before_time.timestamp()}},
+                    ]
+                }
+            )
 
     where = None
     if len(embeddings_filters) > 1:

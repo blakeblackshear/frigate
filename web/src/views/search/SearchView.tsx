@@ -11,13 +11,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
-import {
-  DEFAULT_SEARCH_FILTERS,
-  SearchFilter,
-  SearchFilters,
-  SearchResult,
-  SearchSource,
-} from "@/types/search";
+import { SearchFilter, SearchResult, SearchSource } from "@/types/search";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isMobileOnly } from "react-device-detect";
 import { LuImage, LuSearchX, LuText } from "react-icons/lu";
@@ -144,20 +138,6 @@ export default function SearchView({
   // detail
 
   const [searchDetail, setSearchDetail] = useState<SearchResult>();
-
-  const selectedFilters = useMemo<SearchFilters[]>(() => {
-    const filters = [...DEFAULT_SEARCH_FILTERS];
-
-    if (
-      searchFilter &&
-      (searchFilter?.query?.length || searchFilter?.event_id?.length)
-    ) {
-      const index = filters.indexOf("time");
-      filters.splice(index, 1);
-    }
-
-    return filters;
-  }, [searchFilter]);
 
   // search interaction
 
@@ -336,7 +316,6 @@ export default function SearchView({
                   "w-full justify-between md:justify-start lg:justify-end",
                 )}
                 filter={searchFilter}
-                filters={selectedFilters as SearchFilters[]}
                 onUpdateFilter={onUpdateFilter}
               />
               <ScrollBar orientation="horizontal" className="h-0" />
