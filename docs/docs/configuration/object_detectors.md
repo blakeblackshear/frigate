@@ -34,34 +34,6 @@ Frigate supports multiple different detectors that work on different types of ha
 
 Frigate provides the following builtin detector types: `cpu`, `edgetpu`, `openvino`, `tensorrt`, `rknn`, and `hailo8l`. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
 
-## CPU Detector (not recommended)
-
-The CPU detector type runs a TensorFlow Lite model utilizing the CPU without hardware acceleration. It is recommended to use a hardware accelerated detector type instead for better performance. To configure a CPU based detector, set the `"type"` attribute to `"cpu"`.
-
-:::tip
-
-If you do not have GPU or Edge TPU hardware, using the [OpenVINO Detector](#openvino-detector) is often more efficient than using the CPU detector.
-
-:::
-
-The number of threads used by the interpreter can be specified using the `"num_threads"` attribute, and defaults to `3.`
-
-A TensorFlow Lite model is provided in the container at `/cpu_model.tflite` and is used by this detector type by default. To provide your own model, bind mount the file into the container and provide the path with `model.path`.
-
-```yaml
-detectors:
-  cpu1:
-    type: cpu
-    num_threads: 3
-    model:
-      path: "/custom_model.tflite"
-  cpu2:
-    type: cpu
-    num_threads: 3
-```
-
-When using CPU detectors, you can add one CPU detector per camera. Adding more detectors than the number of cameras should not improve performance.
-
 ## Edge TPU Detector
 
 The Edge TPU detector type runs a TensorFlow Lite model utilizing the Google Coral delegate for hardware acceleration. To configure an Edge TPU detector, set the `"type"` attribute to `"edgetpu"`.
@@ -487,6 +459,34 @@ model:
 ```
 
 Note that the labelmap uses a subset of the complete COCO label set that has only 80 objects.
+
+## CPU Detector (not recommended)
+
+The CPU detector type runs a TensorFlow Lite model utilizing the CPU without hardware acceleration. It is recommended to use a hardware accelerated detector type instead for better performance. To configure a CPU based detector, set the `"type"` attribute to `"cpu"`.
+
+:::tip
+
+If you do not have GPU or Edge TPU hardware, using the [OpenVINO Detector](#openvino-detector) is often more efficient than using the CPU detector.
+
+:::
+
+The number of threads used by the interpreter can be specified using the `"num_threads"` attribute, and defaults to `3.`
+
+A TensorFlow Lite model is provided in the container at `/cpu_model.tflite` and is used by this detector type by default. To provide your own model, bind mount the file into the container and provide the path with `model.path`.
+
+```yaml
+detectors:
+  cpu1:
+    type: cpu
+    num_threads: 3
+    model:
+      path: "/custom_model.tflite"
+  cpu2:
+    type: cpu
+    num_threads: 3
+```
+
+When using CPU detectors, you can add one CPU detector per camera. Adding more detectors than the number of cameras should not improve performance.
 
 ## Deepstack / CodeProject.AI Server Detector
 
