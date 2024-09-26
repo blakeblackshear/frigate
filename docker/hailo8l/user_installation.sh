@@ -26,7 +26,7 @@ sudo modprobe hailo_pci
 # Download and install the firmware
 cd ../../
 ./download_firmware.sh
-sudo mv hailo8_fw.4.17.0.bin /lib/firmware/hailo/hailo8_fw.bin
+sudo mv hailo8_fw.4.18.0.bin /lib/firmware/hailo/hailo8_fw.bin
 
 # Install udev rules
 sudo cp ./linux/pcie/51-hailo-udev.rules /etc/udev/rules.d/
