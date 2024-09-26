@@ -125,8 +125,9 @@ class ROCmDetector(DetectionApi):
 
     def detect_raw(self, tensor_input):
         model_input_name = self.model.get_parameter_names()[0]
-        model_input_name = self.model.get_inputs()[0].name
-        model_input_shape = self.model.get_inputs()[0].shape
+        model_input_shape = tuple(
+            self.model.get_parameter_shapes()[model_input_name].lens()
+        )
 
         tensor_input = cv2.dnn.blobFromImage(
             tensor_input[0],
