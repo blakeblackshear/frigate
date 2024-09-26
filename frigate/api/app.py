@@ -166,8 +166,8 @@ def config_raw():
 
 
 @router.post("/config/save")
-def config_save(save_option: str, body: Any = Body()):
-    new_config = body
+def config_save(save_option: str, body: Any = Body(media_type="text/plain")):
+    new_config = body.decode()
 
     if not new_config:
         return JSONResponse(
