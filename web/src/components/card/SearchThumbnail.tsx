@@ -15,6 +15,7 @@ import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { SearchResult } from "@/types/search";
 import useContextMenu from "@/hooks/use-contextmenu";
 import { cn } from "@/lib/utils";
+import { TooltipPortal } from "@radix-ui/react-tooltip";
 
 type SearchThumbnailProps = {
   searchResult: SearchResult;
@@ -95,16 +96,18 @@ export default function SearchThumbnail({
                 </div>
               </TooltipTrigger>
             </div>
-            <TooltipContent className="capitalize">
-              {[...new Set([searchResult.label])]
-                .filter(
-                  (item) => item !== undefined && !item.includes("-verified"),
-                )
-                .map((text) => capitalizeFirstLetter(text))
-                .sort()
-                .join(", ")
-                .replaceAll("-verified", "")}
-            </TooltipContent>
+            <TooltipPortal>
+              <TooltipContent className="capitalize">
+                {[...new Set([searchResult.label])]
+                  .filter(
+                    (item) => item !== undefined && !item.includes("-verified"),
+                  )
+                  .map((text) => capitalizeFirstLetter(text))
+                  .sort()
+                  .join(", ")
+                  .replaceAll("-verified", "")}
+              </TooltipContent>
+            </TooltipPortal>
           </Tooltip>
         </div>
         <div className="rounded-t-l pointer-events-none absolute inset-x-0 top-0 z-10 h-[30%] w-full bg-gradient-to-b from-black/60 to-transparent"></div>

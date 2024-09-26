@@ -31,6 +31,7 @@ import InputWithTags from "@/components/input/InputWithTags";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { isEqual } from "lodash";
 import { formatDateToLocaleString } from "@/utils/dateUtil";
+import { TooltipPortal } from "@radix-ui/react-tooltip";
 
 type SearchViewProps = {
   search: string;
@@ -401,14 +402,16 @@ export default function SearchView({
                                 %
                               </Chip>
                             </TooltipTrigger>
-                            <TooltipContent>
-                              Matched {value.search_source} at{" "}
-                              {zScoreToConfidence(
-                                value.search_distance,
-                                value.search_source,
-                              )}
-                              %
-                            </TooltipContent>
+                            <TooltipPortal>
+                              <TooltipContent>
+                                Matched {value.search_source} at{" "}
+                                {zScoreToConfidence(
+                                  value.search_distance,
+                                  value.search_source,
+                                )}
+                                %
+                              </TooltipContent>
+                            </TooltipPortal>
                           </Tooltip>
                         </div>
                       )}
