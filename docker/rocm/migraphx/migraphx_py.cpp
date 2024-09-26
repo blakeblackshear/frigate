@@ -554,7 +554,7 @@ MIGRAPHX_PYBIND11_MODULE(migraphx, m)
         a.fill(values.begin(), values.end());
         return a;
     });
-    m.def("generate_argument", &migraphx::generate_argument, py::arg("s"), py::arg("seed") = 0);
+    m.def("generate_argument", &migraphx::generate_argument, py::arg("s"), py::arg("seed") = 0,py::arg("random_mode::random"));
     m.def("fill_argument", &migraphx::fill_argument, py::arg("s"), py::arg("value"));
     m.def("quantize_fp16",
           &migraphx::quantize_fp16,

@@ -13,12 +13,12 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 project(migraphx_py)
 
-include_directories(/opt/rocm/include)
+include_directories(/opt/rocm/include /opt/rocm/lib/migraphx/include)
 
 find_package(pybind11 REQUIRED)
 pybind11_add_module(migraphx migraphx_py.cpp)
 
-target_link_libraries(migraphx PRIVATE /opt/rocm/lib/libmigraphx.so /opt/rocm/lib/libmigraphx_tf.so /opt/rocm/lib/libmigraphx_onnx.so)
+target_link_libraries(migraphx PRIVATE /opt/rocm/lib/migraphx/lib/libmigraphx.so.2010000 /opt/rocm/lib/migraphx/lib/libmigraphx_tf.so.2010000 /opt/rocm/lib/migraphx/lib/libmigraphx_onnx.so.2010000)
 
 install(TARGETS migraphx
   COMPONENT python

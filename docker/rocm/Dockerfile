@@ -2,7 +2,7 @@
 
 # https://askubuntu.com/questions/972516/debian-frontend-environment-variable
 ARG DEBIAN_FRONTEND=noninteractive
-ARG ROCM=5.7.3
+ARG ROCM=6.2.1
 ARG AMDGPU=gfx900
 ARG HSA_OVERRIDE_GFX_VERSION
 ARG HSA_OVERRIDE
@@ -23,11 +23,12 @@ COPY docker/rocm/rocm-pin-600 /etc/apt/preferences.d/
 
 RUN apt-get update
 
-RUN apt-get -y install --no-install-recommends migraphx hipfft roctracer
+RUN apt-get -y install --no-install-recommends migraphx hipfft roctracer rocprofiler-register miopen-hip
 RUN apt-get -y install --no-install-recommends migraphx-dev
 
-RUN mkdir -p /opt/rocm-dist/opt/rocm-$ROCM/lib
-RUN cd /opt/rocm-$ROCM/lib && cp -dpr libMIOpen*.so* libamd*.so* libhip*.so* libhsa*.so* libmigraphx*.so* librocm*.so* librocblas*.so* libroctracer*.so* librocfft*.so* /opt/rocm-dist/opt/rocm-$ROCM/lib/
+RUN mkdir -p /opt/rocm-dist/opt/rocm-$ROCM/lib/migraphx/lib
+RUN cd /opt/rocm-$ROCM/lib && cp -dpr libMIOpen*.so* libamd*.so* libhip*.so* libhsa*.so* librocm*.so* librocblas*.so* libroctracer*.so* libroctx64*.so* librocfft*.so* librocprofiler-register*.so* /opt/rocm-dist/opt/rocm-$ROCM/lib/
+RUN cd /opt/rocm-$ROCM/lib/migraphx/lib && cp -dpr libmigraphx*.so* /opt/rocm-dist/opt/rocm-$ROCM/lib/migraphx/lib/
 RUN cd /opt/rocm-dist/opt/ && ln -s rocm-$ROCM rocm
 
 RUN mkdir -p /opt/rocm-dist/etc/ld.so.conf.d/
