@@ -467,16 +467,22 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
             event_filters.append((start_hour_fun > time_after))
             event_filters.append((start_hour_fun < time_before))
 
-    filtered_event_ids = (
-        Event.select(Event.id).where(*event_filters).tuples().iterator()
-    )
-    event_ids = [event_id[0] for event_id in filtered_event_ids]
+    if event_filters:
+        filtered_event_ids = (
+            Event.select(Event.id)
+            .where(reduce(operator.and_, event_filters))
+            .tuples()
+            .iterator()
+        )
+        event_ids = [event_id[0] for event_id in filtered_event_ids]
 
-    if not event_ids:
-        return JSONResponse(content=[])  # No events to search on
+        if not event_ids:
+            return JSONResponse(content=[])  # No events to search on
+    else:
+        event_ids = []
 
     # Build the Chroma where clause based on the event IDs
-    where = {"id": {"$in": event_ids}}
+    where = {"id": {"$in": event_ids}} if event_ids else {}
 
     thumb_ids = {}
     desc_ids = {}
