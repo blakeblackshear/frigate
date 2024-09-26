@@ -123,6 +123,23 @@ export default function HlsVideoPlayer({
     videoRef.current.playbackRate = currentPlaybackRate;
   }, [videoRef, hlsRef, useHlsCompat, currentSource]);
 
+  // state handling
+
+  const onPlayPause = useCallback(
+    (play: boolean) => {
+      if (!videoRef.current) {
+        return;
+      }
+
+      if (play) {
+        videoRef.current.play();
+      } else {
+        videoRef.current.pause();
+      }
+    },
+    [videoRef],
+  );
+
   // controls
 
   const [tallCamera, setTallCamera] = useState(false);
@@ -191,17 +208,7 @@ export default function HlsVideoPlayer({
           setMuted={(muted) => setMuted(muted, true)}
           playbackRate={playbackRate ?? 1}
           hotKeys={hotKeys}
-          onPlayPause={(play) => {
-            if (!videoRef.current) {
-              return;
-            }
-
-            if (play) {
-              videoRef.current.play();
-            } else {
-              videoRef.current.pause();
-            }
-          }}
+          onPlayPause={onPlayPause}
           onSeek={(diff) => {
             const currentTime = videoRef.current?.currentTime;
 
@@ -254,12 +261,13 @@ export default function HlsVideoPlayer({
       >
         <video
           ref={videoRef}
-          className={`size-full rounded-lg bg-black md:rounded-2xl ${loadedMetadata ? "" : "invisible"}`}
+          className={`size-full rounded-lg bg-black md:rounded-2xl ${loadedMetadata ? "" : "invisible"} cursor-pointer`}
           preload="auto"
           autoPlay
           controls={!frigateControls}
           playsInline
           muted={muted}
+          onClick={() => onPlayPause(!isPlaying)}
           onVolumeChange={() =>
             setVolume(videoRef.current?.volume ?? 1.0, true)
           }
