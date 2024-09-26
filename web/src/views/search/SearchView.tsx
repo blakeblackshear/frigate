@@ -11,13 +11,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
-import {
-  DEFAULT_SEARCH_FILTERS,
-  SearchFilter,
-  SearchFilters,
-  SearchResult,
-  SearchSource,
-} from "@/types/search";
+import { SearchFilter, SearchResult, SearchSource } from "@/types/search";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isMobileOnly } from "react-device-detect";
 import { LuImage, LuSearchX, LuText } from "react-icons/lu";
@@ -31,6 +25,7 @@ import InputWithTags from "@/components/input/InputWithTags";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { isEqual } from "lodash";
 import { formatDateToLocaleString } from "@/utils/dateUtil";
+import { TooltipPortal } from "@radix-ui/react-tooltip";
 
 type SearchViewProps = {
   search: string;
@@ -143,20 +138,6 @@ export default function SearchView({
   // detail
 
   const [searchDetail, setSearchDetail] = useState<SearchResult>();
-
-  const selectedFilters = useMemo<SearchFilters[]>(() => {
-    const filters = [...DEFAULT_SEARCH_FILTERS];
-
-    if (
-      searchFilter &&
-      (searchFilter?.query?.length || searchFilter?.event_id?.length)
-    ) {
-      const index = filters.indexOf("time");
-      filters.splice(index, 1);
-    }
-
-    return filters;
-  }, [searchFilter]);
 
   // search interaction
 
@@ -335,7 +316,6 @@ export default function SearchView({
                   "w-full justify-between md:justify-start lg:justify-end",
                 )}
                 filter={searchFilter}
-                filters={selectedFilters as SearchFilters[]}
                 onUpdateFilter={onUpdateFilter}
               />
               <ScrollBar orientation="horizontal" className="h-0" />
@@ -401,14 +381,16 @@ export default function SearchView({
                                 %
                               </Chip>
                             </TooltipTrigger>
-                            <TooltipContent>
-                              Matched {value.search_source} at{" "}
-                              {zScoreToConfidence(
-                                value.search_distance,
-                                value.search_source,
-                              )}
-                              %
-                            </TooltipContent>
+                            <TooltipPortal>
+                              <TooltipContent>
+                                Matched {value.search_source} at{" "}
+                                {zScoreToConfidence(
+                                  value.search_distance,
+                                  value.search_source,
+                                )}
+                                %
+                              </TooltipContent>
+                            </TooltipPortal>
                           </Tooltip>
                         </div>
                       )}

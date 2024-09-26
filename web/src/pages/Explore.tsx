@@ -103,6 +103,7 @@ export default function Explore() {
         time_range: searchSearchParams["time_range"],
         search_type: searchSearchParams["search_type"],
         event_id: searchSearchParams["event_id"],
+        timezone,
         include_thumbnails: 0,
       },
     ];

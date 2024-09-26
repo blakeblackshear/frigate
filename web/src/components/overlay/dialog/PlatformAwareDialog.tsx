@@ -26,7 +26,7 @@ export default function PlatformAwareDialog({
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-        <DrawerContent className="max-h-[75dvh] overflow-hidden p-4">
+        <DrawerContent className="max-h-[75dvh] overflow-hidden px-4">
           {content}
         </DrawerContent>
       </Drawer>

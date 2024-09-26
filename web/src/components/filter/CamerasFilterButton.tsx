@@ -112,7 +112,10 @@ export function CamerasFilterButton({
                 <div
                   key={name}
                   className="w-full cursor-pointer rounded-lg px-2 py-0.5 text-sm capitalize text-primary hover:bg-muted"
-                  onClick={() => setCurrentCameras([...conf.cameras])}
+                  onClick={() => {
+                    setAllCamerasSelected(false);
+                    setCurrentCameras([...conf.cameras]);
+                  }}
                 >
                   {name}
                 </div>

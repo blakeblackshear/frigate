@@ -357,6 +357,7 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
     zones = params.zones
     after = params.after
     before = params.before
+    time_range = params.time_range
 
     # for similarity search
     event_id = params.event_id
@@ -403,36 +404,85 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
     if include_thumbnails:
         selected_columns.append(Event.thumbnail)
 
-    # Build the where clause for the embeddings query
-    embeddings_filters = []
+    # Build the initial SQLite query filters
+    event_filters = []
 
     if cameras != "all":
         camera_list = cameras.split(",")
-        embeddings_filters.append({"camera": {"$in": camera_list}})
+        event_filters.append((Event.camera << camera_list))
 
     if labels != "all":
         label_list = labels.split(",")
-        embeddings_filters.append({"label": {"$in": label_list}})
+        event_filters.append((Event.label << label_list))
 
     if zones != "all":
+        # use matching so events with multiple zones
+        # still match on a search where any zone matches
+        zone_clauses = []
         filtered_zones = zones.split(",")
-        zone_filters = [{f"zones_{zone}": {"$eq": True}} for zone in filtered_zones]
-        if len(zone_filters) > 1:
-            embeddings_filters.append({"$or": zone_filters})
-        else:
-            embeddings_filters.append(zone_filters[0])
+
+        if "None" in filtered_zones:
+            filtered_zones.remove("None")
+            zone_clauses.append((Event.zones.length() == 0))
+
+        for zone in filtered_zones:
+            zone_clauses.append((Event.zones.cast("text") % f'*"{zone}"*'))
+
+        zone_clause = reduce(operator.or_, zone_clauses)
+        event_filters.append((zone_clause))
 
     if after:
-        embeddings_filters.append({"start_time": {"$gt": after}})
+        event_filters.append((Event.start_time > after))
 
     if before:
-        embeddings_filters.append({"start_time": {"$lt": before}})
+        event_filters.append((Event.start_time < before))
 
-    where = None
-    if len(embeddings_filters) > 1:
-        where = {"$and": embeddings_filters}
-    elif len(embeddings_filters) == 1:
-        where = embeddings_filters[0]
+    if time_range != DEFAULT_TIME_RANGE:
+        # get timezone arg to ensure browser times are used
+        tz_name = params.timezone
+        hour_modifier, minute_modifier, _ = get_tz_modifiers(tz_name)
+
+        times = time_range.split(",")
+        time_after = times[0]
+        time_before = times[1]
+
+        start_hour_fun = fn.strftime(
+            "%H:%M",
+            fn.datetime(Event.start_time, "unixepoch", hour_modifier, minute_modifier),
+        )
+
+        # cases where user wants events overnight, ex: from 20:00 to 06:00
+        # should use or operator
+        if time_after > time_before:
+            event_filters.append(
+                (
+                    reduce(
+                        operator.or_,
+                        [(start_hour_fun > time_after), (start_hour_fun < time_before)],
+                    )
+                )
+            )
+        # all other cases should be and operator
+        else:
+            event_filters.append((start_hour_fun > time_after))
+            event_filters.append((start_hour_fun < time_before))
+
+    if event_filters:
+        filtered_event_ids = (
+            Event.select(Event.id)
+            .where(reduce(operator.and_, event_filters))
+            .tuples()
+            .iterator()
+        )
+        event_ids = [event_id[0] for event_id in filtered_event_ids]
+
+        if not event_ids:
+            return JSONResponse(content=[])  # No events to search on
+    else:
+        event_ids = []
+
+    # Build the Chroma where clause based on the event IDs
+    where = {"id": {"$in": event_ids}} if event_ids else {}
 
     thumb_ids = {}
     desc_ids = {}

@@ -82,14 +82,9 @@ export function useFormattedHour(
     const [hour, minute] = time.includes(":") ? time.split(":") : [time, "00"];
     const hourNum = parseInt(hour);
 
-    if (hourNum < 12) {
-      if (hourNum == 0) {
-        return `12:${minute} AM`;
-      }
+    const adjustedHour = hourNum % 12 || 12;
+    const period = hourNum < 12 ? "AM" : "PM";
 
-      return `${hourNum}:${minute} AM`;
-    } else {
-      return `${hourNum - 12}:${minute} PM`;
-    }
+    return `${adjustedHour}:${minute} ${period}`;
   }, [hour24, time]);
 }

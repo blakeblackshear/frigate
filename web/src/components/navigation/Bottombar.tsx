@@ -27,7 +27,7 @@ function Bottombar() {
         isPWA && isIOS
           ? "portrait:items-start portrait:pt-1 landscape:items-center"
           : "items-center",
-        isMobile && !isPWA && "h-12 landscape:md:h-16",
+        isMobile && !isPWA && "h-12 md:h-16",
       )}
     >
       {navItems.map((item) => (
