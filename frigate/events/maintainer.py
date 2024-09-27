@@ -163,27 +163,22 @@ class EventProcessor(threading.Thread):
                 )
             )
 
-            try:
-                attributes = [
-                    (
-                        None
-                        if event_data["snapshot"] is None
-                        else {
-                            "box": to_relative_box(
-                                width,
-                                height,
-                                a["box"],
-                            ),
-                            "label": a["label"],
-                            "score": a["score"],
-                        }
-                    )
+            attributes = (
+                None
+                if event_data["snapshot"] is None
+                else [
+                    {
+                        "box": to_relative_box(
+                            width,
+                            height,
+                            a["box"],
+                        ),
+                        "label": a["label"],
+                        "score": a["score"],
+                    }
                     for a in event_data["snapshot"]["attributes"]
                 ]
-            except TypeError:
-                logger.warning(
-                    f"Failed to parse attributes of event data, event data is {event_data}"
-                )
+            )
 
             # keep these from being set back to false because the event
             # may have started while recordings and snapshots were enabled
