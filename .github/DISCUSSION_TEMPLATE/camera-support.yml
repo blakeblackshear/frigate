@@ -90,6 +90,9 @@ body:
         - HassOS Addon
         - Docker Compose
         - Docker CLI
+        - Proxmox via Docker
+        - Proxmox via TTeck Script
+        - Windows WSL2
     validations:
       required: true
   - type: dropdown
@@ -102,7 +105,7 @@ body:
         - TensorRT
         - RKNN
         - Other
-        - CPU (no Coral)
+        - CPU (no coral)
     validations:
       required: true
   - type: dropdown

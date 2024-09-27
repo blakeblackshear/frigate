@@ -48,28 +48,6 @@ body:
       render: shell
     validations:
       required: true
-  - type: textarea
-    id: go2rtclogs
-    attributes:
-      label: Relevant go2rtc log output
-      description: Please copy and paste any relevant go2rtc log output. Include logs before and after your exact error when possible. Logs can be viewed via the Frigate UI, Docker, or the go2rtc dashboard. This will be automatically formatted into code, so no need for backticks.
-      render: shell
-    validations:
-      required: true
-  - type: dropdown
-    id: os
-    attributes:
-      label: Operating system
-      options:
-        - HassOS
-        - Debian
-        - Other Linux
-        - Proxmox
-        - UNRAID
-        - Windows
-        - Other
-    validations:
-      required: true
   - type: dropdown
     id: install-method
     attributes:
@@ -78,6 +56,22 @@ body:
         - HassOS Addon
         - Docker Compose
         - Docker CLI
+        - Proxmox via Docker
+        - Proxmox via TTeck Script
+        - Windows WSL2
+    validations:
+      required: true
+  - type: dropdown
+    id: object-detector
+    attributes:
+      label: Object Detector
+      options:
+        - Coral
+        - OpenVino
+        - TensorRT
+        - RKNN
+        - Other
+        - CPU (no coral)
     validations:
       required: true
   - type: dropdown
