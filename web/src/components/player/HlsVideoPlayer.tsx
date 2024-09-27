@@ -154,6 +154,7 @@ export default function HlsVideoPlayer({
   const [mobileCtrlTimeout, setMobileCtrlTimeout] = useState<NodeJS.Timeout>();
   const [controls, setControls] = useState(isMobile);
   const [controlsOpen, setControlsOpen] = useState(false);
+  const [zoomScale, setZoomScale] = useState(1.0);
 
   useEffect(() => {
     if (!isDesktop) {
@@ -185,7 +186,11 @@ export default function HlsVideoPlayer({
   }, [videoRef, controlsOpen]);
 
   return (
-    <TransformWrapper minScale={1.0} wheel={{ smoothStep: 0.005 }}>
+    <TransformWrapper
+      minScale={1.0}
+      wheel={{ smoothStep: 0.005 }}
+      onZoom={(zoom) => setZoomScale(zoom.state.scale)}
+    >
       {frigateControls && (
         <VideoControls
           className={cn(
@@ -267,7 +272,13 @@ export default function HlsVideoPlayer({
           controls={!frigateControls}
           playsInline
           muted={muted}
-          onClick={() => onPlayPause(!isPlaying)}
+          onClick={
+            isDesktop
+              ? () => {
+                  if (zoomScale == 1.0) onPlayPause(!isPlaying);
+                }
+              : undefined
+          }
           onVolumeChange={() =>
             setVolume(videoRef.current?.volume ?? 1.0, true)
           }

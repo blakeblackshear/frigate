@@ -1,5 +1,4 @@
 import logging
-import os
 
 import numpy as np
 from pydantic import Field
@@ -10,6 +9,7 @@ from frigate.detectors.detector_config import (
     BaseDetectorConfig,
     ModelTypeEnum,
 )
+from frigate.util.model import get_ort_providers
 
 logger = logging.getLogger(__name__)
 
@@ -38,37 +38,9 @@ class ONNXDetector(DetectionApi):
         path = detector_config.model.path
         logger.info(f"ONNX: loading {detector_config.model.path}")
 
-        providers = (
-            ["CPUExecutionProvider"]
-            if detector_config.device == "CPU"
-            else ort.get_available_providers()
+        providers, options = get_ort_providers(
+            detector_config.device == "CPU", detector_config.device
         )
-        options = []
-
-        for provider in providers:
-            if provider == "TensorrtExecutionProvider":
-                os.makedirs(
-                    "/config/model_cache/tensorrt/ort/trt-engines", exist_ok=True
-                )
-                options.append(
-                    {
-                        "trt_timing_cache_enable": True,
-                        "trt_engine_cache_enable": True,
-                        "trt_timing_cache_path": "/config/model_cache/tensorrt/ort",
-                        "trt_engine_cache_path": "/config/model_cache/tensorrt/ort/trt-engines",
-                    }
-                )
-            elif provider == "OpenVINOExecutionProvider":
-                os.makedirs("/config/model_cache/openvino/ort", exist_ok=True)
-                options.append(
-                    {
-                        "cache_dir": "/config/model_cache/openvino/ort",
-                        "device_type": detector_config.device,
-                    }
-                )
-            else:
-                options.append({})
-
         self.model = ort.InferenceSession(
             path, providers=providers, provider_options=options
         )

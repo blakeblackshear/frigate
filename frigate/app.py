@@ -426,6 +426,8 @@ class FrigateApp:
             logger.info(f"Camera processor started for {name}: {camera_process.pid}")
 
     def start_camera_capture_processes(self) -> None:
+        shm_frame_count = self.shm_frame_count()
+
         for name, config in self.config.cameras.items():
             if not self.config.cameras[name].enabled:
                 logger.info(f"Capture process not started for disabled camera {name}")
@@ -434,7 +436,7 @@ class FrigateApp:
             capture_process = util.Process(
                 target=capture_camera,
                 name=f"camera_capture:{name}",
-                args=(name, config, self.shm_frame_count(), self.camera_metrics[name]),
+                args=(name, config, shm_frame_count, self.camera_metrics[name]),
             )
             capture_process.daemon = True
             self.camera_metrics[name].capture_process = capture_process
@@ -521,7 +523,7 @@ class FrigateApp:
 
         if shm_frame_count < 10:
             logger.warning(
-                f"The current SHM size of {total_shm}MB is too small, recommend increasing it to at least {round(min_req_shm + cam_total_frame_size)}MB."
+                f"The current SHM size of {total_shm}MB is too small, recommend increasing it to at least {round(min_req_shm + cam_total_frame_size * 10)}MB."
             )
 
         return shm_frame_count
