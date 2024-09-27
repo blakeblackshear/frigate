@@ -757,39 +757,6 @@ def event_snapshot(
     )
 
 
-@router.get("/{camera_name}/{label}/snapshot.jpg")
-def label_snapshot(request: Request, camera_name: str, label: str):
-    """Returns the snapshot image from the latest event for the given camera and label combo"""
-    label = unquote(label)
-    if label == "any":
-        event_query = (
-            Event.select(Event.id)
-            .where(Event.camera == camera_name)
-            .where(Event.has_snapshot == True)
-            .order_by(Event.start_time.desc())
-        )
-    else:
-        event_query = (
-            Event.select(Event.id)
-            .where(Event.camera == camera_name)
-            .where(Event.label == label)
-            .where(Event.has_snapshot == True)
-            .order_by(Event.start_time.desc())
-        )
-
-    try:
-        event = event_query.get()
-        return event_snapshot(request, event.id)
-    except DoesNotExist:
-        frame = np.zeros((720, 1280, 3), np.uint8)
-        ret, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
-
-        return Response(
-            jpg.tobytes,
-            media_type="image/jpeg",
-        )
-
-
 @router.get("/events/{event_id}/thumbnail.jpg")
 def event_thumbnail(
     request: Request,
@@ -853,48 +820,6 @@ def event_thumbnail(
             "Content-Type": "image/jpeg",
         },
     )
-
-
-@router.get("/{camera_name}/{label}/best.jpg")
-@router.get("/{camera_name}/{label}/thumbnail.jpg")
-def label_thumbnail(request: Request, camera_name: str, label: str):
-    label = unquote(label)
-    event_query = Event.select(fn.MAX(Event.id)).where(Event.camera == camera_name)
-    if label != "any":
-        event_query = event_query.where(Event.label == label)
-
-    try:
-        event_id = event_query.scalar()
-
-        return event_thumbnail(request, event_id, 60)
-    except DoesNotExist:
-        frame = np.zeros((175, 175, 3), np.uint8)
-        ret, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
-
-        return Response(
-            jpg.tobytes,
-            media_type="image/jpeg",
-            headers={"Cache-Control": "no-store"},
-        )
-
-
-@router.get("/{camera_name}/{label}/clip.mp4")
-def label_clip(request: Request, camera_name: str, label: str):
-    label = unquote(label)
-    event_query = Event.select(fn.MAX(Event.id)).where(
-        Event.camera == camera_name, Event.has_clip == True
-    )
-    if label != "any":
-        event_query = event_query.where(Event.label == label)
-
-    try:
-        event = event_query.get()
-
-        return event_clip(request, event.id)
-    except DoesNotExist:
-        return JSONResponse(
-            content={"success": False, "message": "Event not found"}, status_code=404
-        )
 
 
 @router.get("/{camera_name}/grid.jpg")
@@ -1553,3 +1478,81 @@ def preview_thumbnail(file_name: str):
             "Cache-Control": "private, max-age=31536000",
         },
     )
+
+
+####################### dynamic routes ###########################
+
+
+@router.get("/{camera_name}/{label}/best.jpg")
+@router.get("/{camera_name}/{label}/thumbnail.jpg")
+def label_thumbnail(request: Request, camera_name: str, label: str):
+    label = unquote(label)
+    event_query = Event.select(fn.MAX(Event.id)).where(Event.camera == camera_name)
+    if label != "any":
+        event_query = event_query.where(Event.label == label)
+
+    try:
+        event_id = event_query.scalar()
+
+        return event_thumbnail(request, event_id, 60)
+    except DoesNotExist:
+        frame = np.zeros((175, 175, 3), np.uint8)
+        ret, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
+
+        return Response(
+            jpg.tobytes,
+            media_type="image/jpeg",
+            headers={"Cache-Control": "no-store"},
+        )
+
+
+@router.get("/{camera_name}/{label}/clip.mp4")
+def label_clip(request: Request, camera_name: str, label: str):
+    label = unquote(label)
+    event_query = Event.select(fn.MAX(Event.id)).where(
+        Event.camera == camera_name, Event.has_clip == True
+    )
+    if label != "any":
+        event_query = event_query.where(Event.label == label)
+
+    try:
+        event = event_query.get()
+
+        return event_clip(request, event.id)
+    except DoesNotExist:
+        return JSONResponse(
+            content={"success": False, "message": "Event not found"}, status_code=404
+        )
+
+
+@router.get("/{camera_name}/{label}/snapshot.jpg")
+def label_snapshot(request: Request, camera_name: str, label: str):
+    """Returns the snapshot image from the latest event for the given camera and label combo"""
+    label = unquote(label)
+    if label == "any":
+        event_query = (
+            Event.select(Event.id)
+            .where(Event.camera == camera_name)
+            .where(Event.has_snapshot == True)
+            .order_by(Event.start_time.desc())
+        )
+    else:
+        event_query = (
+            Event.select(Event.id)
+            .where(Event.camera == camera_name)
+            .where(Event.label == label)
+            .where(Event.has_snapshot == True)
+            .order_by(Event.start_time.desc())
+        )
+
+    try:
+        event = event_query.get()
+        return event_snapshot(request, event.id)
+    except DoesNotExist:
+        frame = np.zeros((720, 1280, 3), np.uint8)
+        ret, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
+
+        return Response(
+            jpg.tobytes,
+            media_type="image/jpeg",
+        )
