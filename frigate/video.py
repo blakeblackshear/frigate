@@ -11,6 +11,7 @@ import time
 import cv2
 from setproctitle import setproctitle
 
+from frigate.camera import CameraMetrics, PTZMetrics
 from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, DetectConfig, ModelConfig
@@ -28,7 +29,6 @@ from frigate.object_detection import RemoteObjectDetector
 from frigate.ptz.autotrack import ptz_moving_at_frame_time
 from frigate.track import ObjectTracker
 from frigate.track.norfair_tracker import NorfairTracker
-from frigate.types import PTZMetricsTypes
 from frigate.util.builtin import EventsPerSecond, get_tomorrow_at_time
 from frigate.util.image import (
     FrameManager,
@@ -386,7 +386,9 @@ class CameraCapture(threading.Thread):
         )
 
 
-def capture_camera(name, config: CameraConfig, shm_frame_count: int, process_info):
+def capture_camera(
+    name, config: CameraConfig, shm_frame_count: int, camera_metrics: CameraMetrics
+):
     stop_event = mp.Event()
 
     def receiveSignal(signalNumber, frame):
@@ -398,15 +400,14 @@ def capture_camera(name, config: CameraConfig, shm_frame_count: int, process_inf
     threading.current_thread().name = f"capture:{name}"
     setproctitle(f"frigate.capture:{name}")
 
-    frame_queue = process_info["frame_queue"]
     camera_watchdog = CameraWatchdog(
         name,
         config,
         shm_frame_count,
-        frame_queue,
-        process_info["camera_fps"],
-        process_info["skipped_fps"],
-        process_info["ffmpeg_pid"],
+        camera_metrics.frame_queue,
+        camera_metrics.camera_fps,
+        camera_metrics.skipped_fps,
+        camera_metrics.ffmpeg_pid,
         stop_event,
     )
     camera_watchdog.start()
@@ -421,8 +422,8 @@ def track_camera(
     detection_queue,
     result_connection,
     detected_objects_queue,
-    process_info,
-    ptz_metrics,
+    camera_metrics: CameraMetrics,
+    ptz_metrics: PTZMetrics,
     region_grid,
 ):
     stop_event = mp.Event()
@@ -437,7 +438,7 @@ def track_camera(
     setproctitle(f"frigate.process:{name}")
     listen()
 
-    frame_queue = process_info["frame_queue"]
+    frame_queue = camera_metrics.frame_queue
 
     frame_shape = config.frame_shape
     objects_to_track = config.objects.track
@@ -469,7 +470,7 @@ def track_camera(
         object_detector,
         object_tracker,
         detected_objects_queue,
-        process_info,
+        camera_metrics,
         objects_to_track,
         object_filters,
         stop_event,
@@ -542,17 +543,14 @@ def process_frames(
     object_detector: RemoteObjectDetector,
     object_tracker: ObjectTracker,
     detected_objects_queue: mp.Queue,
-    process_info: dict,
+    camera_metrics: CameraMetrics,
     objects_to_track: list[str],
     object_filters,
     stop_event,
-    ptz_metrics: PTZMetricsTypes,
+    ptz_metrics: PTZMetrics,
     region_grid,
     exit_on_empty: bool = False,
 ):
-    fps = process_info["process_fps"]
-    detection_fps = process_info["detection_fps"]
-    current_frame_time = process_info["detection_frame"]
     next_region_update = get_tomorrow_at_time(2)
     config_subscriber = ConfigSubscriber(f"config/detect/{camera_name}")
 
@@ -589,8 +587,8 @@ def process_frames(
                 break
             continue
 
-        current_frame_time.value = frame_time
-        ptz_metrics["ptz_frame_time"].value = frame_time
+        camera_metrics.detection_frame.value = frame_time
+        ptz_metrics.frame_time.value = frame_time
 
         frame = frame_manager.get(
             f"{camera_name}{frame_time}", (frame_shape[0] * 3 // 2, frame_shape[1])
@@ -660,8 +658,8 @@ def process_frames(
             # ptz_moving_at_frame_time() always returns False for non-autotracking cameras
             if not motion_detector.is_calibrating() and not ptz_moving_at_frame_time(
                 frame_time,
-                ptz_metrics["ptz_start_time"].value,
-                ptz_metrics["ptz_stop_time"].value,
+                ptz_metrics.start_time.value,
+                ptz_metrics.stop_time.value,
             ):
                 # find motion boxes that are not inside tracked object regions
                 standalone_motion_boxes = [
@@ -839,7 +837,7 @@ def process_frames(
             continue
         else:
             fps_tracker.update()
-            fps.value = fps_tracker.eps()
+            camera_metrics.process_fps.value = fps_tracker.eps()
             detected_objects_queue.put(
                 (
                     camera_name,
@@ -849,7 +847,7 @@ def process_frames(
                     regions,
                 )
             )
-            detection_fps.value = object_detector.fps.eps()
+            camera_metrics.detection_fps.value = object_detector.fps.eps()
             frame_manager.close(f"{camera_name}{frame_time}")
 
     motion_detector.stop()

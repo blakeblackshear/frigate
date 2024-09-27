@@ -6,6 +6,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Optional
 
+from frigate.camera import PTZMetrics
 from frigate.comms.config_updater import ConfigPublisher
 from frigate.config import BirdseyeModeEnum, FrigateConfig
 from frigate.const import (
@@ -19,7 +20,6 @@ from frigate.const import (
 )
 from frigate.models import Event, Previews, Recordings, ReviewSegment
 from frigate.ptz.onvif import OnvifCommandEnum, OnvifController
-from frigate.types import PTZMetricsTypes
 from frigate.util.object import get_camera_regions_grid
 from frigate.util.services import restart_frigate
 
@@ -53,7 +53,7 @@ class Dispatcher:
         config: FrigateConfig,
         config_updater: ConfigPublisher,
         onvif: OnvifController,
-        ptz_metrics: dict[str, PTZMetricsTypes],
+        ptz_metrics: dict[str, PTZMetrics],
         communicators: list[Communicator],
     ) -> None:
         self.config = config
@@ -251,16 +251,16 @@ class Dispatcher:
                     "Autotracking must be enabled in the config to be turned on via MQTT."
                 )
                 return
-            if not self.ptz_metrics[camera_name]["ptz_autotracker_enabled"].value:
+            if not self.ptz_metrics[camera_name].autotracker_enabled.value:
                 logger.info(f"Turning on ptz autotracker for {camera_name}")
-                self.ptz_metrics[camera_name]["ptz_autotracker_enabled"].value = True
-                self.ptz_metrics[camera_name]["ptz_start_time"].value = 0
+                self.ptz_metrics[camera_name].autotracker_enabled.value = True
+                self.ptz_metrics[camera_name].start_time.value = 0
                 ptz_autotracker_settings.enabled = True
         elif payload == "OFF":
-            if self.ptz_metrics[camera_name]["ptz_autotracker_enabled"].value:
+            if self.ptz_metrics[camera_name].autotracker_enabled.value:
                 logger.info(f"Turning off ptz autotracker for {camera_name}")
-                self.ptz_metrics[camera_name]["ptz_autotracker_enabled"].value = False
-                self.ptz_metrics[camera_name]["ptz_start_time"].value = 0
+                self.ptz_metrics[camera_name].autotracker_enabled.value = False
+                self.ptz_metrics[camera_name].start_time.value = 0
                 ptz_autotracker_settings.enabled = False
 
         self.publish(f"{camera_name}/ptz_autotracker/state", payload, retain=True)

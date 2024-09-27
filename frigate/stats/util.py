@@ -11,10 +11,11 @@ import psutil
 import requests
 from requests.exceptions import RequestException
 
+from frigate.camera import CameraMetrics
 from frigate.config import FrigateConfig
 from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
 from frigate.object_detection import ObjectDetectProcess
-from frigate.types import CameraMetricsTypes, StatsTrackingTypes
+from frigate.types import StatsTrackingTypes
 from frigate.util.services import (
     get_amd_gpu_stats,
     get_bandwidth_stats,
@@ -49,7 +50,7 @@ def get_latest_version(config: FrigateConfig) -> str:
 
 def stats_init(
     config: FrigateConfig,
-    camera_metrics: dict[str, CameraMetricsTypes],
+    camera_metrics: dict[str, CameraMetrics],
     detectors: dict[str, ObjectDetectProcess],
     processes: dict[str, int],
 ) -> StatsTrackingTypes:
@@ -245,27 +246,23 @@ def stats_snapshot(
 
     stats["cameras"] = {}
     for name, camera_stats in camera_metrics.items():
-        total_detection_fps += camera_stats["detection_fps"].value
-        pid = camera_stats["process"].pid if camera_stats["process"] else None
-        ffmpeg_pid = (
-            camera_stats["ffmpeg_pid"].value if camera_stats["ffmpeg_pid"] else None
-        )
+        total_detection_fps += camera_stats.detection_fps.value
+        pid = camera_stats.process.pid if camera_stats.process else None
+        ffmpeg_pid = camera_stats.ffmpeg_pid.value if camera_stats.ffmpeg_pid else None
         capture_pid = (
-            camera_stats["capture_process"].pid
-            if camera_stats["capture_process"]
-            else None
+            camera_stats.capture_process.pid if camera_stats.capture_process else None
         )
         stats["cameras"][name] = {
-            "camera_fps": round(camera_stats["camera_fps"].value, 2),
-            "process_fps": round(camera_stats["process_fps"].value, 2),
-            "skipped_fps": round(camera_stats["skipped_fps"].value, 2),
-            "detection_fps": round(camera_stats["detection_fps"].value, 2),
+            "camera_fps": round(camera_stats.camera_fps.value, 2),
+            "process_fps": round(camera_stats.process_fps.value, 2),
+            "skipped_fps": round(camera_stats.skipped_fps.value, 2),
+            "detection_fps": round(camera_stats.detection_fps.value, 2),
             "detection_enabled": config.cameras[name].detect.enabled,
             "pid": pid,
             "capture_pid": capture_pid,
             "ffmpeg_pid": ffmpeg_pid,
-            "audio_rms": round(camera_stats["audio_rms"].value, 4),
-            "audio_dBFS": round(camera_stats["audio_dBFS"].value, 4),
+            "audio_rms": round(camera_stats.audio_rms.value, 4),
+            "audio_dBFS": round(camera_stats.audio_dBFS.value, 4),
         }
 
     stats["detectors"] = {}

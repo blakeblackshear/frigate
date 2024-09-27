@@ -6,7 +6,7 @@ import secrets
 import shutil
 from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
-from typing import Any
+from typing import Any, Optional
 
 import psutil
 import uvicorn
@@ -14,8 +14,10 @@ from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
+import frigate.util as util
 from frigate.api.auth import hash_password
 from frigate.api.fastapi_app import create_fastapi_app
+from frigate.camera import CameraMetrics, PTZMetrics
 from frigate.comms.config_updater import ConfigPublisher
 from frigate.comms.dispatcher import Communicator, Dispatcher
 from frigate.comms.event_metadata_updater import (
@@ -37,7 +39,7 @@ from frigate.const import (
     RECORD_DIR,
 )
 from frigate.embeddings import EmbeddingsContext, manage_embeddings
-from frigate.events.audio import listen_to_audio
+from frigate.events.audio import AudioProcessor
 from frigate.events.cleanup import EventCleanup
 from frigate.events.external import ExternalEventProcessor
 from frigate.events.maintainer import EventProcessor
@@ -65,7 +67,6 @@ from frigate.stats.emitter import StatsEmitter
 from frigate.stats.util import stats_init
 from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
-from frigate.types import CameraMetricsTypes, PTZMetricsTypes
 from frigate.util.builtin import empty_and_close_queue
 from frigate.util.object import get_camera_regions_grid
 from frigate.version import VERSION
@@ -76,6 +77,8 @@ logger = logging.getLogger(__name__)
 
 
 class FrigateApp:
+    audio_process: Optional[mp.Process] = None
+
     # TODO: Fix FrigateConfig usage, so we can properly annotate it here without mypy erroring out.
     def __init__(self, config: Any) -> None:
         self.stop_event: MpEvent = mp.Event()
@@ -84,8 +87,8 @@ class FrigateApp:
         self.detection_out_events: dict[str, MpEvent] = {}
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
         self.log_queue: Queue = mp.Queue()
-        self.camera_metrics: dict[str, CameraMetricsTypes] = {}
-        self.ptz_metrics: dict[str, PTZMetricsTypes] = {}
+        self.camera_metrics: dict[str, CameraMetrics] = {}
+        self.ptz_metrics: dict[str, PTZMetrics] = {}
         self.processes: dict[str, int] = {}
         self.region_grids: dict[str, list[list[dict[str, int]]]] = {}
         self.config = config
@@ -106,64 +109,14 @@ class FrigateApp:
                 logger.debug(f"Skipping directory: {d}")
 
     def init_camera_metrics(self) -> None:
+        # create camera_metrics
         for camera_name in self.config.cameras.keys():
-            # create camera_metrics
-            self.camera_metrics[camera_name] = {
-                "camera_fps": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "skipped_fps": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "process_fps": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                "detection_fps": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "detection_frame": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "read_start": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "ffmpeg_pid": mp.Value("i", 0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "frame_queue": mp.Queue(maxsize=2),
-                "capture_process": None,
-                "process": None,
-                "audio_rms": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                "audio_dBFS": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-            }
-            self.ptz_metrics[camera_name] = {
-                "ptz_autotracker_enabled": mp.Value(  # type: ignore[typeddict-item]
-                    # issue https://github.com/python/typeshed/issues/8799
-                    # from mypy 0.981 onwards
-                    "i",
-                    self.config.cameras[camera_name].onvif.autotracking.enabled,
-                ),
-                "ptz_tracking_active": mp.Event(),
-                "ptz_motor_stopped": mp.Event(),
-                "ptz_reset": mp.Event(),
-                "ptz_start_time": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "ptz_stop_time": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "ptz_frame_time": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "ptz_zoom_level": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "ptz_max_zoom": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                "ptz_min_zoom": mp.Value("d", 0.0),  # type: ignore[typeddict-item]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-            }
-            self.ptz_metrics[camera_name]["ptz_motor_stopped"].set()
+            self.camera_metrics[camera_name] = CameraMetrics()
+            self.ptz_metrics[camera_name] = PTZMetrics(
+                autotracker_enabled=self.config.cameras[
+                    camera_name
+                ].onvif.autotracking.enabled
+            )
 
     def init_queues(self) -> None:
         # Queue for cameras to push tracked objects to
@@ -251,7 +204,7 @@ class FrigateApp:
                 self.processes["go2rtc"] = proc.info["pid"]
 
     def init_recording_manager(self) -> None:
-        recording_process = mp.Process(
+        recording_process = util.Process(
             target=manage_recordings,
             name="recording_manager",
             args=(self.config,),
@@ -263,7 +216,7 @@ class FrigateApp:
         logger.info(f"Recording process started: {recording_process.pid}")
 
     def init_review_segment_manager(self) -> None:
-        review_segment_process = mp.Process(
+        review_segment_process = util.Process(
             target=manage_review_segments,
             name="review_segment_manager",
             args=(self.config,),
@@ -281,7 +234,7 @@ class FrigateApp:
 
         # Create a client for other processes to use
         self.embeddings = EmbeddingsContext()
-        embedding_process = mp.Process(
+        embedding_process = util.Process(
             target=manage_embeddings,
             name="embeddings_manager",
             args=(self.config,),
@@ -422,7 +375,7 @@ class FrigateApp:
         self.detected_frames_processor.start()
 
     def start_video_output_processor(self) -> None:
-        output_processor = mp.Process(
+        output_processor = util.Process(
             target=output_frames,
             name="output_processor",
             args=(self.config,),
@@ -451,7 +404,7 @@ class FrigateApp:
                 logger.info(f"Camera processor not started for disabled camera {name}")
                 continue
 
-            camera_process = mp.Process(
+            camera_process = util.Process(
                 target=track_camera,
                 name=f"camera_processor:{name}",
                 args=(
@@ -466,9 +419,9 @@ class FrigateApp:
                     self.ptz_metrics[name],
                     self.region_grids[name],
                 ),
+                daemon=True,
             )
-            camera_process.daemon = True
-            self.camera_metrics[name]["process"] = camera_process
+            self.camera_metrics[name].process = camera_process
             camera_process.start()
             logger.info(f"Camera processor started for {name}: {camera_process.pid}")
 
@@ -478,31 +431,27 @@ class FrigateApp:
                 logger.info(f"Capture process not started for disabled camera {name}")
                 continue
 
-            capture_process = mp.Process(
+            capture_process = util.Process(
                 target=capture_camera,
                 name=f"camera_capture:{name}",
                 args=(name, config, self.shm_frame_count(), self.camera_metrics[name]),
             )
             capture_process.daemon = True
-            self.camera_metrics[name]["capture_process"] = capture_process
+            self.camera_metrics[name].capture_process = capture_process
             capture_process.start()
             logger.info(f"Capture process started for {name}: {capture_process.pid}")
 
-    def start_audio_processors(self) -> None:
-        self.audio_process = None
-        if len([c for c in self.config.cameras.values() if c.audio.enabled]) > 0:
-            self.audio_process = mp.Process(
-                target=listen_to_audio,
-                name="audio_capture",
-                args=(
-                    self.config,
-                    self.camera_metrics,
-                ),
-            )
-            self.audio_process.daemon = True
+    def start_audio_processor(self) -> None:
+        audio_cameras = [
+            c
+            for c in self.config.cameras.values()
+            if c.enabled and c.audio.enabled_in_config
+        ]
+
+        if audio_cameras:
+            self.audio_process = AudioProcessor(audio_cameras, self.camera_metrics)
             self.audio_process.start()
             self.processes["audio_detector"] = self.audio_process.pid or 0
-            logger.info(f"Audio process started: {self.audio_process.pid}")
 
     def start_timeline_processor(self) -> None:
         self.timeline_processor = TimelineProcessor(
@@ -640,7 +589,7 @@ class FrigateApp:
         self.start_detected_frames_processor()
         self.start_camera_processors()
         self.start_camera_capture_processes()
-        self.start_audio_processors()
+        self.start_audio_processor()
         self.start_storage_maintainer()
         self.init_external_event_processor()
         self.start_stats_emitter()
@@ -686,28 +635,27 @@ class FrigateApp:
         ).execute()
 
         # stop the audio process
-        if self.audio_process is not None:
+        if self.audio_process:
             self.audio_process.terminate()
             self.audio_process.join()
 
         # ensure the capture processes are done
-        for camera in self.camera_metrics.keys():
-            capture_process = self.camera_metrics[camera]["capture_process"]
+        for camera, metrics in self.camera_metrics.items():
+            capture_process = metrics.capture_process
             if capture_process is not None:
                 logger.info(f"Waiting for capture process for {camera} to stop")
                 capture_process.terminate()
                 capture_process.join()
 
         # ensure the camera processors are done
-        for camera in self.camera_metrics.keys():
-            camera_process = self.camera_metrics[camera]["process"]
+        for camera, metrics in self.camera_metrics.items():
+            camera_process = metrics.process
             if camera_process is not None:
                 logger.info(f"Waiting for process for {camera} to stop")
                 camera_process.terminate()
                 camera_process.join()
                 logger.info(f"Closing frame queue for {camera}")
-                frame_queue = self.camera_metrics[camera]["frame_queue"]
-                empty_and_close_queue(frame_queue)
+                empty_and_close_queue(metrics.frame_queue)
 
         # ensure the detectors are done
         for detector in self.detectors.values():

@@ -1,6 +1,5 @@
 import argparse
 import faulthandler
-import logging
 import signal
 import sys
 import threading
@@ -9,29 +8,20 @@ from pydantic import ValidationError
 
 from frigate.app import FrigateApp
 from frigate.config import FrigateConfig
-from frigate.log import log_thread
+from frigate.log import setup_logging
 
 
 def main() -> None:
     faulthandler.enable()
 
-    # Clear all existing handlers.
-    logging.basicConfig(
-        level=logging.INFO,
-        handlers=[],
-        force=True,
-    )
+    # Setup the logging thread
+    setup_logging()
 
     threading.current_thread().name = "frigate"
 
     # Make sure we exit cleanly on SIGTERM.
     signal.signal(signal.SIGTERM, lambda sig, frame: sys.exit())
 
-    run()
-
-
-@log_thread()
-def run() -> None:
     # Parse the cli arguments.
     parser = argparse.ArgumentParser(
         prog="Frigate",
