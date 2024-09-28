@@ -152,8 +152,6 @@ class ReviewSegmentMaintainer(threading.Thread):
         self.active_review_segments: dict[str, Optional[PendingReviewSegment]] = {}
         self.frame_manager = SharedMemoryFrameManager()
 
-        logger.error(f"All attributes are {config.model.all_attributes}")
-
         # create communication for review segments
         self.requestor = InterProcessRequestor()
         self.config_subscriber = ConfigSubscriber("config/record/")
