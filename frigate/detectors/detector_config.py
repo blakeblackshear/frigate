@@ -9,6 +9,7 @@ import requests
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic.fields import PrivateAttr
 
+from frigate.const import DEFAULT_ATTRIBUTE_LABEL_MAP
 from frigate.plus import PlusApi
 from frigate.util.builtin import generate_color_palette, load_labels
 
@@ -42,6 +43,10 @@ class ModelConfig(BaseModel):
     labelmap: Dict[int, str] = Field(
         default_factory=dict, title="Labelmap customization."
     )
+    attributes_map: Dict[str, list[str]] = Field(
+        default=DEFAULT_ATTRIBUTE_LABEL_MAP,
+        title="Map of object labels to their attribute labels.",
+    )
     input_tensor: InputTensorEnum = Field(
         default=InputTensorEnum.nhwc, title="Model Input Tensor Shape"
     )
@@ -53,6 +58,7 @@ class ModelConfig(BaseModel):
     )
     _merged_labelmap: Optional[Dict[int, str]] = PrivateAttr()
     _colormap: Dict[int, Tuple[int, int, int]] = PrivateAttr()
+    _all_attributes: list[str] = PrivateAttr()
     _model_hash: str = PrivateAttr()
 
     @property
@@ -62,6 +68,10 @@ class ModelConfig(BaseModel):
     @property
     def colormap(self) -> Dict[int, Tuple[int, int, int]]:
         return self._colormap
+
+    @property
+    def all_attributes(self) -> list[str]:
+        return self._all_attributes
 
     @property
     def model_hash(self) -> str:
@@ -75,6 +85,14 @@ class ModelConfig(BaseModel):
             **config.get("labelmap", {}),
         }
         self._colormap = {}
+
+        # generate list of attribute labels
+        unique_attributes = set()
+
+        for attributes in self.attributes_map.values():
+            unique_attributes.update(attributes)
+
+        self._all_attributes = list(unique_attributes)
 
     def check_and_load_plus_model(
         self, plus_api: PlusApi, detector: str = None
@@ -100,7 +118,7 @@ class ModelConfig(BaseModel):
                 json.dump(model_info, f)
         else:
             with open(model_info_path, "r") as f:
-                model_info = json.load(f)
+                model_info: dict[str, any] = json.load(f)
 
         if detector and detector not in model_info["supportedDetectors"]:
             raise ValueError(f"Model does not support detector type of {detector}")
@@ -110,6 +128,19 @@ class ModelConfig(BaseModel):
         self.input_tensor = model_info["inputShape"]
         self.input_pixel_format = model_info["pixelFormat"]
         self.model_type = model_info["type"]
+
+        # generate list of attribute labels
+        self.attributes_map = {
+            **model_info.get("attributes", DEFAULT_ATTRIBUTE_LABEL_MAP),
+            **self.attributes_map,
+        }
+        unique_attributes = set()
+
+        for attributes in self.attributes_map.values():
+            unique_attributes.update(attributes)
+
+        self._all_attributes = list(unique_attributes)
+
         self._merged_labelmap = {
             **{int(key): val for key, val in model_info["labelMap"].items()},
             **self.labelmap,

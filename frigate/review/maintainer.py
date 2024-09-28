@@ -20,7 +20,6 @@ from frigate.comms.detections_updater import DetectionSubscriber, DetectionTypeE
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, FrigateConfig
 from frigate.const import (
-    ALL_ATTRIBUTE_LABELS,
     CLEAR_ONGOING_REVIEW_SEGMENTS,
     CLIPS_DIR,
     UPSERT_REVIEW_SEGMENT,
@@ -153,6 +152,8 @@ class ReviewSegmentMaintainer(threading.Thread):
         self.active_review_segments: dict[str, Optional[PendingReviewSegment]] = {}
         self.frame_manager = SharedMemoryFrameManager()
 
+        logger.error(f"All attributes are {config.model.all_attributes}")
+
         # create communication for review segments
         self.requestor = InterProcessRequestor()
         self.config_subscriber = ConfigSubscriber("config/record/")
@@ -253,7 +254,7 @@ class ReviewSegmentMaintainer(threading.Thread):
             for object in active_objects:
                 if not object["sub_label"]:
                     segment.detections[object["id"]] = object["label"]
-                elif object["sub_label"][0] in ALL_ATTRIBUTE_LABELS:
+                elif object["sub_label"][0] in self.config.model.all_attributes:
                     segment.detections[object["id"]] = object["sub_label"][0]
                 else:
                     segment.detections[object["id"]] = f'{object["label"]}-verified'
@@ -347,7 +348,7 @@ class ReviewSegmentMaintainer(threading.Thread):
             for object in active_objects:
                 if not object["sub_label"]:
                     detections[object["id"]] = object["label"]
-                elif object["sub_label"][0] in ALL_ATTRIBUTE_LABELS:
+                elif object["sub_label"][0] in self.config.model.all_attributes:
                     detections[object["id"]] = object["sub_label"][0]
                 else:
                     detections[object["id"]] = f'{object["label"]}-verified'

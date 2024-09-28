@@ -15,13 +15,10 @@ PLUS_API_HOST = "https://api.frigate.video"
 
 # Attribute & Object constants
 
-ATTRIBUTE_LABEL_MAP = {
-    "person": ["face", "amazon"],
-    "car": ["ups", "fedex", "amazon", "license_plate"],
+DEFAULT_ATTRIBUTE_LABEL_MAP = {
+    "person": ["amazon", "face"],
+    "car": ["amazon", "fedex", "license_plate", "ups"],
 }
-ALL_ATTRIBUTE_LABELS = [
-    item for sublist in ATTRIBUTE_LABEL_MAP.values() for item in sublist
-]
 LABEL_CONSOLIDATION_MAP = {
     "car": 0.8,
     "face": 0.5,

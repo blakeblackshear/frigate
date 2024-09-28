@@ -25,7 +25,7 @@ from frigate.config import (
     SnapshotsConfig,
     ZoomingModeEnum,
 )
-from frigate.const import ALL_ATTRIBUTE_LABELS, CLIPS_DIR, UPDATE_CAMERA_ACTIVITY
+from frigate.const import CLIPS_DIR, UPDATE_CAMERA_ACTIVITY
 from frigate.events.types import EventStateEnum, EventTypeEnum
 from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.util.image import (
@@ -752,7 +752,10 @@ class CameraState:
                 sub_label = None
 
                 if obj.obj_data.get("sub_label"):
-                    if obj.obj_data.get("sub_label")[0] in ALL_ATTRIBUTE_LABELS:
+                    if (
+                        obj.obj_data.get("sub_label")[0]
+                        in self.config.model.all_attributes
+                    ):
                         label = obj.obj_data["sub_label"][0]
                     else:
                         label = f"{object_type}-verified"

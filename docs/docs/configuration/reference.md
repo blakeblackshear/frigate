@@ -138,6 +138,16 @@ model:
   # Optional: Label name modifications. These are merged into the standard labelmap.
   labelmap:
     2: vehicle
+  # Optional: Map of object labels to their attribute labels (default: depends on model)
+  attributes_map:
+    person:
+      - amazon
+      - face
+    car:
+      - amazon
+      - fedex
+      - license_plate
+      - ups
 
 # Optional: Audio Events Configuration
 # NOTE: Can be overridden at the camera level
