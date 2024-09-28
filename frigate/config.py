@@ -25,7 +25,6 @@ from ruamel.yaml import YAML
 from typing_extensions import Self
 
 from frigate.const import (
-    ALL_ATTRIBUTE_LABELS,
     AUDIO_MIN_CONFIDENCE,
     CACHE_DIR,
     CACHE_SEGMENT_FORMAT,
@@ -1566,7 +1565,7 @@ class FrigateConfig(FrigateBaseModel):
         self.notifications.enabled_in_config = self.notifications.enabled
 
         # set default min_score for object attributes
-        for attribute in ALL_ATTRIBUTE_LABELS:
+        for attribute in self.model.all_attributes:
             if not self.objects.filters.get(attribute):
                 self.objects.filters[attribute] = FilterConfig(min_score=0.7)
             elif self.objects.filters[attribute].min_score == 0.5:

@@ -16,7 +16,6 @@ from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, DetectConfig, ModelConfig
 from frigate.const import (
-    ALL_ATTRIBUTE_LABELS,
     ATTRIBUTE_LABEL_MAP,
     CACHE_DIR,
     CACHE_SEGMENT_FORMAT,
@@ -727,7 +726,7 @@ def process_frames(
                 tracked_detections = [
                     d
                     for d in consolidated_detections
-                    if d[0] not in ALL_ATTRIBUTE_LABELS
+                    if d[0] not in model_config.all_attributes
                 ]
                 # now that we have refined our detections, we need to track objects
                 object_tracker.match_and_update(frame_time, tracked_detections)
