@@ -10,7 +10,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { getUnitSize } from "@/utils/storageUtil";
+import { LuAlertCircle } from "react-icons/lu";
 
 type CameraStorage = {
   [key: string]: {
@@ -50,7 +56,7 @@ export function CombinedStorageGraph({
 
   // Add the unused percentage to the series
   series.push({
-    name: "Unused Free Space",
+    name: "Unused",
     data: [
       ((totalStorage.total - totalStorage.used) / totalStorage.total) * 100,
     ],
@@ -186,11 +192,34 @@ export function CombinedStorageGraph({
                     style={{ backgroundColor: item.color }}
                   ></div>
                   {item.name.replaceAll("_", " ")}
+                  {item.name === "Unused" && (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          className="focus:outline-none"
+                          aria-label="Unused Storage Information"
+                        >
+                          <LuAlertCircle
+                            className="size-5"
+                            aria-label="Unused Storage Information"
+                          />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-80">
+                        <div className="space-y-2">
+                          This value may not accurately represent the free space
+                          available to Frigate if you have other files stored on
+                          your drive beyond Frigate's recordings. Frigate does
+                          not track storage usage outside of its recordings.
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  )}
                 </TableCell>
                 <TableCell>{getUnitSize(item.usage)}</TableCell>
                 <TableCell>{item.data[0].toFixed(2)}%</TableCell>
                 <TableCell>
-                  {item.name === "Unused Free Space"
+                  {item.name === "Unused"
                     ? "—"
                     : `${getUnitSize(item.bandwidth)} / hour`}
                 </TableCell>
