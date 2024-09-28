@@ -33,10 +33,16 @@ fi
 # Download and install the firmware
 cd ../../
 ./download_firmware.sh
-sudo mv hailo8_fw.4.18.0.bin /lib/firmware/hailo/hailo8_fw.bin
+
+# verify the firmware folder is present
+if [ ! -d /lib/firmware/hailo ]; then
+  sudo mkdir /lib/firmware/hailo
+fi
+sudo mv hailo8_fw.4.17.0.bin /lib/firmware/hailo/hailo8_fw.bin
 
 # Install udev rules
 sudo cp ./linux/pcie/51-hailo-udev.rules /etc/udev/rules.d/
 sudo udevadm control --reload-rules && sudo udevadm trigger
 
 echo "HailoRT driver installation complete."
+echo "reboot your system to load the firmware!"
