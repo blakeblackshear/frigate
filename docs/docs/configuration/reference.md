@@ -139,7 +139,7 @@ model:
   labelmap:
     2: vehicle
   # Optional: Map of object labels to their attribute labels (default: depends on model)
-  attribute_map:
+  attributes_map:
     person:
       - amazon
       - face
