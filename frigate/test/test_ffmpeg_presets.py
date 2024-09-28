@@ -1,6 +1,7 @@
 import unittest
 
-from frigate.config import FFMPEG_INPUT_ARGS_DEFAULT, FrigateConfig
+from frigate.config import FrigateConfig
+from frigate.config.camera.ffmpeg import FFMPEG_INPUT_ARGS_DEFAULT
 from frigate.ffmpeg_presets import parse_preset_input
 
 
