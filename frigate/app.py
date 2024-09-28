@@ -161,12 +161,8 @@ class FrigateApp:
                 except Exception:
                     timestamp = 0
 
-                if (
-                    timestamp
-                    < (
-                        datetime.datetime.now() - datetime.timedelta(weeks=2)
-                    ).timestamp()
-                ):
+                vacuum_time = datetime.datetime.now() - datetime.timedelta(weeks=2)
+                if timestamp < vacuum_time.timestamp():
                     vacuum_db(migrate_db)
         else:
             vacuum_db(migrate_db)
@@ -184,8 +180,8 @@ class FrigateApp:
             target=manage_recordings,
             name="recording_manager",
             args=(self.config,),
+            daemon=True,
         )
-        recording_process.daemon = True
         self.recording_process = recording_process
         recording_process.start()
         self.processes["recording"] = recording_process.pid or 0
@@ -196,8 +192,8 @@ class FrigateApp:
             target=manage_review_segments,
             name="review_segment_manager",
             args=(self.config,),
+            daemon=True,
         )
-        review_segment_process.daemon = True
         self.review_segment_process = review_segment_process
         review_segment_process.start()
         self.processes["review_segment"] = review_segment_process.pid or 0
@@ -214,8 +210,8 @@ class FrigateApp:
             target=manage_embeddings,
             name="embeddings_manager",
             args=(self.config,),
+            daemon=True,
         )
-        embedding_process.daemon = True
         self.embedding_process = embedding_process
         embedding_process.start()
         self.processes["embeddings"] = embedding_process.pid or 0
@@ -359,8 +355,8 @@ class FrigateApp:
             target=output_frames,
             name="output_processor",
             args=(self.config,),
+            daemon=True,
         )
-        output_processor.daemon = True
         self.output_processor = output_processor
         output_processor.start()
         logger.info(f"Output process started: {output_processor.pid}")
