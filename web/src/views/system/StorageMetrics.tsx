@@ -2,7 +2,13 @@ import { CombinedStorageGraph } from "@/components/graph/CombinedStorageGraph";
 import { StorageGraph } from "@/components/graph/StorageGraph";
 import { FrigateStats } from "@/types/stats";
 import { useMemo } from "react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import useSWR from "swr";
+import { LuAlertCircle } from "react-icons/lu";
 
 type CameraStorage = {
   [key: string]: {
@@ -47,7 +53,29 @@ export default function StorageMetrics({
       <div className="text-sm font-medium text-muted-foreground">Overview</div>
       <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
         <div className="flex-col rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-          <div className="mb-5">Recordings</div>
+          <div className="mb-5 flex flex-row items-center justify-between">
+            Recordings
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  className="focus:outline-none"
+                  aria-label="Unused Storage Information"
+                >
+                  <LuAlertCircle
+                    className="size-5"
+                    aria-label="Unused Storage Information"
+                  />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80">
+                <div className="space-y-2">
+                  This value represents the total storage used by the recordings
+                  in Frigate's database. Frigate does not track storage usage
+                  for all files on your disk.
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
           <StorageGraph
             graphId="general-recordings"
             used={totalStorage.used}
