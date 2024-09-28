@@ -15,7 +15,7 @@ PLUS_API_HOST = "https://api.frigate.video"
 
 # Attribute & Object constants
 
-ATTRIBUTE_LABEL_MAP = {
+DEFAULT_ATTRIBUTE_LABEL_MAP = {
     "person": ["amazon", "face"],
     "car": ["amazon", "fedex", "license_plate", "ups"],
 }

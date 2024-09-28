@@ -9,7 +9,7 @@ import requests
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic.fields import PrivateAttr
 
-from frigate.const import ATTRIBUTE_LABEL_MAP
+from frigate.const import DEFAULT_ATTRIBUTE_LABEL_MAP
 from frigate.plus import PlusApi
 from frigate.util.builtin import generate_color_palette, load_labels
 
@@ -130,7 +130,10 @@ class ModelConfig(BaseModel):
         self.model_type = model_info["type"]
 
         # generate list of attribute labels
-        self.attributes_map = model_info.get("attributes", ATTRIBUTE_LABEL_MAP)
+        self.attributes_map = {
+            **model_info.get("attributes", DEFAULT_ATTRIBUTE_LABEL_MAP),
+            **self.attributes_map,
+        }
         unique_attributes = set()
 
         for attributes in self.attributes_map.values():
