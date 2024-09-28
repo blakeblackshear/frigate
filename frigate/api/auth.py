@@ -54,7 +54,7 @@ def get_remote_addr(request: Request):
         try:
             network = ipaddress.ip_network(proxy)
         except ValueError:
-            logger.warn(f"Unable to parse trusted network: {proxy}")
+            logger.warning(f"Unable to parse trusted network: {proxy}")
         trusted_proxies.append(network)
 
     # return the first remote address that is not trusted
@@ -122,7 +122,7 @@ def get_jwt_secret() -> str:
                 with open(jwt_secret_file, "w") as f:
                     f.write(str(jwt_secret))
             except Exception:
-                logger.warn(
+                logger.warning(
                     "Unable to write jwt token file to config directory. A new jwt token will be created at each startup."
                 )
         else:
@@ -131,13 +131,13 @@ def get_jwt_secret() -> str:
                 try:
                     jwt_secret = f.readline()
                 except Exception:
-                    logger.warn(
+                    logger.warning(
                         "Unable to read jwt token from .jwt_secret file in config directory. A new jwt token will be created at each startup."
                     )
                     jwt_secret = secrets.token_hex(64)
 
     if len(jwt_secret) < 64:
-        logger.warn("JWT Secret is recommended to be 64 characters or more")
+        logger.warning("JWT Secret is recommended to be 64 characters or more")
 
     return jwt_secret
 

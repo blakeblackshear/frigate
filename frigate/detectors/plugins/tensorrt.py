@@ -199,7 +199,7 @@ class TensorRtDetector(DetectionApi):
 
         # Run inference.
         if not self._execute():
-            logger.warn("Execute returned false")
+            logger.warning("Execute returned false")
 
         # Transfer predictions back from the GPU.
         [

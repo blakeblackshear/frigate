@@ -569,7 +569,6 @@ class FrigateApp:
 
         # Ensure global state.
         self.ensure_dirs()
-        self.config.install()
 
         # Start frigate services.
         self.init_camera_metrics()
