@@ -1,13 +1,13 @@
 import argparse
 import faulthandler
+import multiprocessing as mp
 import signal
 import sys
 import threading
 
 from pydantic import ValidationError
 
-from frigate.app import FrigateApp
-from frigate.config import FrigateConfig
+from frigate import FrigateApp, FrigateConfig
 from frigate.log import setup_logging
 
 
@@ -21,6 +21,10 @@ def main() -> None:
 
     # Make sure we exit cleanly on SIGTERM.
     signal.signal(signal.SIGTERM, lambda sig, frame: sys.exit())
+
+    # Switch multiprocessing start method to forkserver (the default as of python 3.14).
+    mp.set_start_method("forkserver", force=True)
+    mp.set_forkserver_preload(["frigate"])
 
     # Parse the cli arguments.
     parser = argparse.ArgumentParser(
