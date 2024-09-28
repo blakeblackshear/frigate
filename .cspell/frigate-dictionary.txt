@@ -59,6 +59,7 @@ dsize
 dtype
 ECONNRESET
 edgetpu
+fastapi
 faststart
 fflags
 ffprobe
@@ -270,6 +271,7 @@ unraid
 unreviewed
 userdata
 usermod
+uvicorn
 vaapi
 vainfo
 variations

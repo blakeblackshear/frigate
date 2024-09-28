@@ -4,7 +4,6 @@ import multiprocessing as mp
 import os
 import secrets
 import shutil
-from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Any, Optional
 
@@ -80,10 +79,10 @@ class FrigateApp:
     # TODO: Fix FrigateConfig usage, so we can properly annotate it here without mypy erroring out.
     def __init__(self, config: Any) -> None:
         self.stop_event: MpEvent = mp.Event()
-        self.detection_queue: Queue = mp.Queue()
+        self.detection_queue: mp.Queue = mp.Queue()
         self.detectors: dict[str, ObjectDetectProcess] = {}
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
-        self.log_queue: Queue = mp.Queue()
+        self.log_queue: mp.Queue = mp.Queue()
         self.cameras: dict[str, Camera] = {}
         self.processes: dict[str, int] = {}
         self.config = config
@@ -105,12 +104,12 @@ class FrigateApp:
 
     def init_queues(self) -> None:
         # Queue for cameras to push tracked objects to
-        self.detected_frames_queue: Queue = mp.Queue(
+        self.detected_frames_queue: mp.Queue = mp.Queue(
             maxsize=sum(camera.enabled for camera in self.config.cameras.values()) * 2
         )
 
         # Queue for timeline events
-        self.timeline_queue: Queue = mp.Queue()
+        self.timeline_queue: mp.Queue = mp.Queue()
 
     def init_database(self) -> None:
         def vacuum_db(db: SqliteExtDatabase) -> None:
