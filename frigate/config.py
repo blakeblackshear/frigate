@@ -137,6 +137,17 @@ def validate_env_string(v: str) -> str:
 EnvString = Annotated[str, AfterValidator(validate_env_string)]
 
 
+def validate_env_vars(v: dict[str, str], info: ValidationInfo) -> dict[str, str]:
+    if isinstance(info.context, dict) and info.context.get("install", False):
+        for k, v in v:
+            os.environ[k] = v
+
+    return v
+
+
+EnvVars = Annotated[dict[str, str], AfterValidator(validate_env_vars)]
+
+
 class UIConfig(FrigateBaseModel):
     timezone: Optional[str] = Field(default=None, title="Override UI timezone.")
     time_format: TimeFormatEnum = Field(
@@ -1311,18 +1322,19 @@ class LoggerConfig(FrigateBaseModel):
         default_factory=dict, title="Log level for specified processes."
     )
 
-    def install(self):
-        """Install global logging state."""
-        logging.getLogger().setLevel(self.default.value.upper())
+    @model_validator(mode="after")
+    def post_validation(self, info: ValidationInfo) -> Self:
+        if isinstance(info.context, dict) and info.context.get("install", False):
+            logging.getLogger().setLevel(self.default.value.upper())
 
-        log_levels = {
-            "werkzeug": LogLevelEnum.error,
-            "ws4py": LogLevelEnum.error,
-            **self.logs,
-        }
+            log_levels = {
+                "werkzeug": LogLevelEnum.error,
+                "ws4py": LogLevelEnum.error,
+                **self.logs,
+            }
 
-        for log, level in log_levels.items():
-            logging.getLogger(log).setLevel(level.value.upper())
+            for log, level in log_levels.items():
+                logging.getLogger(log).setLevel(level.value.upper())
 
 
 class CameraGroupConfig(FrigateBaseModel):
@@ -1466,6 +1478,15 @@ def verify_motion_and_detect(camera_config: CameraConfig) -> ValueError | None:
 
 
 class FrigateConfig(FrigateBaseModel):
+    # Fields that install global state should be defined first, so that their validators run first.
+    environment_vars: EnvVars = Field(
+        default_factory=dict, title="Frigate environment variables."
+    )
+    logger: LoggerConfig = Field(
+        default_factory=LoggerConfig, title="Logging configuration."
+    )
+
+    # Rest of the fields
     mqtt: MqttConfig = Field(title="MQTT configuration.")
     database: DatabaseConfig = Field(
         default_factory=DatabaseConfig, title="Database configuration."
@@ -1475,9 +1496,6 @@ class FrigateConfig(FrigateBaseModel):
         default_factory=ProxyConfig, title="Proxy configuration."
     )
     auth: AuthConfig = Field(default_factory=AuthConfig, title="Auth configuration.")
-    environment_vars: Dict[str, str] = Field(
-        default_factory=dict, title="Frigate environment variables."
-    )
     ui: UIConfig = Field(default_factory=UIConfig, title="UI configuration.")
     notifications: NotificationConfig = Field(
         default_factory=NotificationConfig, title="Notification Config"
@@ -1491,9 +1509,6 @@ class FrigateConfig(FrigateBaseModel):
     detectors: Dict[str, BaseDetectorConfig] = Field(
         default=DEFAULT_DETECTORS,
         title="Detector hardware configuration.",
-    )
-    logger: LoggerConfig = Field(
-        default_factory=LoggerConfig, title="Logging configuration."
     )
     record: RecordConfig = Field(
         default_factory=RecordConfig, title="Global record configuration."
@@ -1873,12 +1888,9 @@ class FrigateConfig(FrigateBaseModel):
         return cls.parse(config_yaml, is_json=False, **context)
 
     @classmethod
-    def parse_object(cls, obj: Any, *, plus_api: Optional[PlusApi] = None):
-        return cls.model_validate(obj, context={"plus_api": plus_api})
-
-    def install(self):
-        """Install global state from the config."""
-        self.logger.install()
-
-        for key, value in self.environment_vars.items():
-            os.environ[key] = value
+    def parse_object(
+        cls, obj: Any, *, plus_api: Optional[PlusApi] = None, install: bool = False
+    ):
+        return cls.model_validate(
+            obj, context={"plus_api": plus_api, "install": install}
+        )

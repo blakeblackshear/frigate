@@ -32,7 +32,7 @@ def main() -> None:
 
     # Load the configuration.
     try:
-        config = FrigateConfig.load()
+        config = FrigateConfig.load(install=True)
     except ValidationError as e:
         print("*************************************************************")
         print("*************************************************************")
