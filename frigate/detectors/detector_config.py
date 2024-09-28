@@ -44,7 +44,7 @@ class ModelConfig(BaseModel):
         default_factory=dict, title="Labelmap customization."
     )
     attributes_map: Dict[str, list[str]] = Field(
-        default=ATTRIBUTE_LABEL_MAP,
+        default=DEFAULT_ATTRIBUTE_LABEL_MAP,
         title="Map of object labels to their attribute labels.",
     )
     input_tensor: InputTensorEnum = Field(
