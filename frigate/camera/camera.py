@@ -1,6 +1,7 @@
 import logging
 import multiprocessing as mp
 from multiprocessing.synchronize import Event
+from typing import Optional
 
 from frigate import util
 from frigate.config import FrigateConfig
@@ -21,6 +22,9 @@ class Camera:
 
     camera_metrics: CameraMetrics
     ptz_metrics: PTZMetrics
+
+    process: Optional[util.Process]
+    capture_process: Optional[util.Process]
 
     def __init__(self, name: str, config: FrigateConfig):
         self.name = name
@@ -57,7 +61,8 @@ class Camera:
             ),
             daemon=True,
         )
-        self.camera_metrics.process = camera_process
+        self.process = camera_process
+        self.camera_metrics.process_pid.value = camera_process.pid or 0
         camera_process.start()
         logger.info(f"Camera processor started for {self.name}: {camera_process.pid}")
 
@@ -77,7 +82,8 @@ class Camera:
             ),
         )
         capture_process.daemon = True
-        self.camera_metrics.capture_process = capture_process
+        self.capture_process = capture_process
+        self.camera_metrics.capture_pid.value = capture_process.pid or 0
         capture_process.start()
         logger.info(f"Capture process started for {self.name}: {capture_process.pid}")
 

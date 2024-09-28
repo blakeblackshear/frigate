@@ -1,7 +1,6 @@
 import multiprocessing as mp
 from multiprocessing.sharedctypes import Synchronized
 from multiprocessing.synchronize import Event
-from typing import Optional
 
 
 class CameraMetrics:
@@ -16,8 +15,8 @@ class CameraMetrics:
 
     frame_queue: mp.Queue
 
-    process: Optional[mp.Process]
-    capture_process: Optional[mp.Process]
+    process_pid: Synchronized
+    capture_pid: Synchronized
     ffmpeg_pid: Synchronized
 
     def __init__(self):
@@ -32,8 +31,8 @@ class CameraMetrics:
 
         self.frame_queue = mp.Queue(maxsize=2)
 
-        self.process = None
-        self.capture_process = None
+        self.process_pid = mp.Value("i", 0)
+        self.capture_pid = mp.Value("i", 0)
         self.ffmpeg_pid = mp.Value("i", 0)
 
 
