@@ -752,7 +752,10 @@ class CameraState:
                 sub_label = None
 
                 if obj.obj_data.get("sub_label"):
-                    if obj.obj_data.get("sub_label")[0] in self.config.model.all_attributes:
+                    if (
+                        obj.obj_data.get("sub_label")[0]
+                        in self.config.model.all_attributes
+                    ):
                         label = obj.obj_data["sub_label"][0]
                     else:
                         label = f"{object_type}-verified"
