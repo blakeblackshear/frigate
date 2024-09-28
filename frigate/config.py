@@ -1619,7 +1619,7 @@ class FrigateConfig(FrigateBaseModel):
                             self.ffmpeg, input.path
                         )
                     except Exception:
-                        logger.warn(
+                        logger.warning(
                             f"Error detecting stream parameters automatically for {input.path} Applying default values."
                         )
                         stream_info = {"width": 0, "height": 0, "fourcc": None}
