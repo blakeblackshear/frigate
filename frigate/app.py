@@ -725,5 +725,3 @@ class FrigateApp:
             shm = self.detection_shms.pop()
             shm.close()
             shm.unlink()
-
-        os._exit(os.EX_OK)
