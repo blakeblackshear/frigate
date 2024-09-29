@@ -211,5 +211,5 @@ docker run                                \
   --entrypoint python3                    \
   ghcr.io/blakeblackshear/frigate:stable  \
   -u -m frigate                           \
-  --validate_config
+  --validate-config
 ```
