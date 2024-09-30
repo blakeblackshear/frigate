@@ -279,35 +279,66 @@ def get_intel_gpu_stats() -> dict[str, str]:
         logger.error(f"Unable to poll intel GPU stats: {p.stderr}")
         return None
     else:
-        reading = "".join(p.stdout.split())
+        data = json.loads(f'[{"".join(p.stdout.split())}]')
         results: dict[str, str] = {}
+        render = {"global": []}
+        video = {"global": []}
 
-        # render is used for qsv
-        render = []
-        for result in re.findall(r'"Render/3D/0":{[a-z":\d.,%]+}', reading):
-            packet = json.loads(result[14:])
-            single = packet.get("busy", 0.0)
-            render.append(float(single))
+        for block in data:
+            global_engine = block.get("engines")
 
-        if render:
-            render_avg = sum(render) / len(render)
-        else:
-            render_avg = 1
+            if global_engine:
+                render_frame = global_engine.get("Render/3D/0", {}).get("busy")
+                video_frame = global_engine.get("Video/0", {}).get("busy")
 
-        # video is used for vaapi
-        video = []
-        for result in re.findall(r'"Video/\d":{[a-z":\d.,%]+}', reading):
-            packet = json.loads(result[10:])
-            single = packet.get("busy", 0.0)
-            video.append(float(single))
+                if render_frame is not None:
+                    render["global"].append(float(render_frame))
 
-        if video:
-            video_avg = sum(video) / len(video)
-        else:
-            video_avg = 1
+                if video_frame is not None:
+                    video["global"].append(float(video_frame))
 
-        results["gpu"] = f"{round((video_avg + render_avg) / 2, 2)}%"
+            clients = block.get("clients", {})
+
+            if clients and len(clients):
+                for client_block in clients.values():
+                    key = client_block["pid"]
+
+                    if render.get(key) is None:
+                        render[key] = []
+                        video[key] = []
+
+                    client_engine = client_block.get("engine-classes", {})
+
+                    render_frame = client_engine.get("Render/3D", {}).get("busy")
+                    video_frame = client_engine.get("Video", {}).get("busy")
+
+                    if render_frame is not None:
+                        render[key].append(float(render_frame))
+
+                    if video_frame is not None:
+                        video[key].append(float(video_frame))
+
+        for key in render.keys():
+            print(
+                f"new way has {key} :: {round(((sum(render[key]) / len(render[key])) + (sum(video[key]) / len(video[key]))) / 2, 2)}% total"
+            )
+
+        results["gpu"] = (
+            f"{round(((sum(render['global']) / len(render['global'])) + (sum(video['global']) / len(video['global']))) / 2, 2)}%"
+        )
         results["mem"] = "-%"
+
+        if len(render.keys()) > 1:
+            results["clients"] = {}
+
+            for key in render.keys():
+                if key == "global":
+                    continue
+
+                results["clients"][key] = (
+                    f"{round(((sum(render[key]) / len(render[key])) + (sum(video[key]) / len(video[key]))) / 2, 2)}%"
+                )
+
         return results
 
 
