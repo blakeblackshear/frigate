@@ -227,9 +227,7 @@ class FrigateApp:
                 "cache_size": -512 * 1000,  # 512MB of cache,
                 "synchronous": "NORMAL",  # Safe when using WAL https://www.sqlite.org/pragma.html#pragma_synchronous
             },
-            timeout=max(
-                60, 10 * len([c for c in self.config.cameras.values() if c.enabled])
-            ),
+            timeout=max(60, sum(10 for c in self.config.cameras.values() if c.enabled)),
         )
         models = [
             Event,
@@ -513,12 +511,12 @@ class FrigateApp:
         # Start frigate services.
         self.init_queues()
         self.init_database()
+        self.bind_database()
         self.init_onvif()
         self.init_recording_manager()
         self.init_review_segment_manager()
         self.init_embeddings_manager()
         self.init_go2rtc()
-        self.bind_database()
         self.check_db_data_migrations()
         self.init_inter_process_communicator()
         self.init_dispatcher()
