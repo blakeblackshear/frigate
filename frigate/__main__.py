@@ -12,19 +12,21 @@ from frigate.log import setup_logging
 
 
 def main() -> None:
+    # Show more information on python interpreter crash
     faulthandler.enable()
 
-    # Setup the logging thread
+    # Switch multiprocessing start method to forkserver (the default as of python 3.14).
+    # This must happen before anything else, or it's likely to segfault (ask me how I know).
+    mp.set_start_method("forkserver", force=True)
+    mp.set_forkserver_preload(["frigate"])
+
+    # Start and configure the logging thread
     setup_logging()
 
     threading.current_thread().name = "frigate"
 
     # Make sure we exit cleanly on SIGTERM.
     signal.signal(signal.SIGTERM, lambda sig, frame: sys.exit())
-
-    # Switch multiprocessing start method to forkserver (the default as of python 3.14).
-    mp.set_start_method("forkserver", force=True)
-    mp.set_forkserver_preload(["frigate"])
 
     # Parse the cli arguments.
     parser = argparse.ArgumentParser(
