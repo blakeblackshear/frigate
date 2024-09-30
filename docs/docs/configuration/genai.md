@@ -130,10 +130,13 @@ genai:
 
 Prompts can also be overriden at the camera level to provide a more detailed prompt to the model about your specific camera, if you desire. By default, descriptions will be generated for all tracked objects and all zones. But you can also optionally specify `objects` and `required_zones` to only generate descriptions for certain tracked objects or zones.
 
+Optionally, you can generate the description using a snapshot (if enabled) by setting `use_snapshot` to `True`. By default, this is set to `False`, which sends the thumbnails collected over the object's lifetime to the model. Using a snapshot provides the AI with a higher-resolution image (typically downscaled by the AI itself), but the trade-off is that only a single image is used, which might limit the model's ability to determine object movement or direction.
+
 ```yaml
 cameras:
   front_door:
     genai:
+      use_snapshot: True
       prompt: "Describe the {label} in these images from the {camera} security camera at the front door of a house, aimed outward toward the street."
       object_prompts:
         person: "Describe the main person in these images (gender, age, clothing, activity, etc). Do not include where the activity is occurring (sidewalk, concrete, driveway, etc). If delivering a package, include the company the package is from."
