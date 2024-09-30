@@ -6,4 +6,4 @@ from frigate.events.types import RegenerateDescriptionEnum
 
 
 class RegenerateQueryParameters(BaseModel):
-    source: Optional[str] = RegenerateDescriptionEnum.thumbnails
+    source: Optional[RegenerateDescriptionEnum] = RegenerateDescriptionEnum.thumbnails
