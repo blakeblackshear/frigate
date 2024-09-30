@@ -198,12 +198,23 @@ def update_yaml_from_url(file_path, url):
 def update_yaml_file(file_path, key_path, new_value):
     yaml = YAML()
     yaml.indent(mapping=2, sequence=4, offset=2)
-    with open(file_path, "r") as f:
-        data = yaml.load(f)
+
+    try:
+        with open(file_path, "r") as f:
+            data = yaml.load(f)
+    except FileNotFoundError:
+        logger.error(
+            f"Unable to read from Frigate config file {file_path}. Make sure it exists and is readable."
+        )
+        return
 
     data = update_yaml(data, key_path, new_value)
-    with open(file_path, "w") as f:
-        yaml.dump(data, f)
+
+    try:
+        with open(file_path, "w") as f:
+            yaml.dump(data, f)
+    except Exception as e:
+        logger.error(f"Unable to write to Frigate config file {file_path}: {e}")
 
 
 def update_yaml(data, key_path, new_value):
