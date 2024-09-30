@@ -135,19 +135,17 @@ class CameraConfig(FrigateBaseModel):
 
     @property
     def ffmpeg_cmds(self) -> list[dict[str, list[str]]]:
+        if not hasattr(self, "_ffmpeg_cmds"):
+            ffmpeg_cmds = []
+            for ffmpeg_input in self.ffmpeg.inputs:
+                ffmpeg_cmd = self._get_ffmpeg_cmd(ffmpeg_input)
+                if ffmpeg_cmd is None:
+                    continue
+
+                ffmpeg_cmds.append({"roles": ffmpeg_input.roles, "cmd": ffmpeg_cmd})
+            self._ffmpeg_cmds = ffmpeg_cmds
+
         return self._ffmpeg_cmds
-
-    def create_ffmpeg_cmds(self):
-        if "_ffmpeg_cmds" in self:
-            return
-        ffmpeg_cmds = []
-        for ffmpeg_input in self.ffmpeg.inputs:
-            ffmpeg_cmd = self._get_ffmpeg_cmd(ffmpeg_input)
-            if ffmpeg_cmd is None:
-                continue
-
-            ffmpeg_cmds.append({"roles": ffmpeg_input.roles, "cmd": ffmpeg_cmd})
-        self._ffmpeg_cmds = ffmpeg_cmds
 
     def _get_ffmpeg_cmd(self, ffmpeg_input: CameraInput):
         ffmpeg_output_args = []

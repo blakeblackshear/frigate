@@ -559,8 +559,6 @@ class FrigateConfig(FrigateBaseModel):
             if not camera_config.live.stream_name:
                 camera_config.live.stream_name = name
 
-            # generate the ffmpeg commands
-            camera_config.create_ffmpeg_cmds()
             self.cameras[name] = camera_config
 
             verify_config_roles(camera_config)
