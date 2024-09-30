@@ -14,7 +14,8 @@ export default function useKeyboardListener(
 ) {
   const keyDownListener = useCallback(
     (e: KeyboardEvent) => {
-      if (!e) {
+      // @ts-expect-error we know this field exists
+      if (!e || e.target.tagName == "INPUT") {
         return;
       }
 
