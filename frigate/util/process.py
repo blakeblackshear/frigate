@@ -1,3 +1,4 @@
+import faulthandler
 import logging
 import multiprocessing as mp
 import signal
@@ -55,9 +56,10 @@ class Process(BaseProcess):
         self.__log_queue = frigate.log.log_listener.queue
 
     def before_run(self) -> None:
-        if self.__log_queue:
-            logging.basicConfig(handlers=[], force=True)
-            logging.getLogger().addHandler(QueueHandler(self.__log_queue))
+        faulthandler.enable()
+
+        logging.basicConfig(level=logging.INFO, handlers=[], force=True)
+        logging.getLogger().addHandler(QueueHandler(self.__log_queue))
 
         self.logger = logging.getLogger(self.name)
 
