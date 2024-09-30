@@ -236,6 +236,25 @@ export default function LiveCameraView({
     return "mse";
   }, [lowBandwidth, mic, webRTC, isRestreamed]);
 
+  useKeyboardListener(["m"], (key, modifiers) => {
+    if (!modifiers.down) {
+      return;
+    }
+
+    switch (key) {
+      case "m":
+        if (supportsAudioOutput) {
+          setAudio(!audio);
+        }
+        break;
+      case "t":
+        if (supports2WayTalk) {
+          setMic(!mic);
+        }
+        break;
+    }
+  });
+
   // layout state
 
   const windowAspectRatio = useMemo(() => {
