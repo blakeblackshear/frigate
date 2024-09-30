@@ -31,6 +31,9 @@ from frigate.api.defs.events_query_parameters import (
     EventsSearchQueryParams,
     EventsSummaryQueryParams,
 )
+from frigate.api.defs.regenerate_query_parameters import (
+    RegenerateQueryParameters,
+)
 from frigate.api.defs.tags import Tags
 from frigate.const import (
     CLIPS_DIR,
@@ -996,7 +999,9 @@ def set_description(
 
 
 @router.put("/events/{event_id}/description/regenerate")
-def regenerate_description(request: Request, event_id: str):
+def regenerate_description(
+    request: Request, event_id: str, params: RegenerateQueryParameters = Depends()
+):
     try:
         event: Event = Event.get(Event.id == event_id)
     except DoesNotExist:
@@ -1009,7 +1014,7 @@ def regenerate_description(request: Request, event_id: str):
         request.app.frigate_config.semantic_search.enabled
         and request.app.frigate_config.genai.enabled
     ):
-        request.app.event_metadata_updater.publish(event.id)
+        request.app.event_metadata_updater.publish((event.id, params.source))
 
         return JSONResponse(
             content=(
@@ -1017,7 +1022,8 @@ def regenerate_description(request: Request, event_id: str):
                     "success": True,
                     "message": "Event "
                     + event_id
-                    + " description regeneration has been requested.",
+                    + " description regeneration has been requested using "
+                    + params.source,
                 }
             ),
             status_code=200,

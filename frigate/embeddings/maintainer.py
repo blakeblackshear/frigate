@@ -172,13 +172,15 @@ class EmbeddingMaintainer(threading.Thread):
 
     def _process_event_metadata(self):
         # Check for regenerate description requests
-        (topic, event_id) = self.event_metadata_subscriber.check_for_update(timeout=1)
+        (topic, event_id, source) = self.event_metadata_subscriber.check_for_update(
+            timeout=1
+        )
 
         if topic is None:
             return
 
         if event_id:
-            self.handle_regenerate_description(event_id)
+            self.handle_regenerate_description(event_id, source)
 
     def _create_thumbnail(self, yuv_frame, box, height=500) -> Optional[bytes]:
         """Return jpg thumbnail of a region of the frame."""
@@ -241,7 +243,7 @@ class EmbeddingMaintainer(threading.Thread):
             description,
         )
 
-    def handle_regenerate_description(self, event_id: str) -> None:
+    def handle_regenerate_description(self, event_id: str, source: str) -> None:
         try:
             event: Event = Event.get(Event.id == event_id)
         except DoesNotExist:
@@ -256,4 +258,23 @@ class EmbeddingMaintainer(threading.Thread):
         metadata = get_metadata(event)
         thumbnail = base64.b64decode(event.thumbnail)
 
-        self._embed_description(event, [thumbnail], metadata)
+        logger.debug(f"Using ${source} regeneration for ${event}")
+
+        if event.has_snapshot and source == "snapshot":
+            with open(
+                os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}.jpg"),
+                "rb",
+            ) as image_file:
+                snapshot_image = image_file.read()
+
+        embed_image = (
+            [snapshot_image]
+            if event.has_snapshot and source == "snapshot"
+            else (
+                [thumbnail for data in self.tracked_events[event_id]]
+                if len(self.tracked_events.get(event_id, [])) > 0
+                else [thumbnail]
+            )
+        )
+
+        self._embed_description(event, embed_image, metadata)

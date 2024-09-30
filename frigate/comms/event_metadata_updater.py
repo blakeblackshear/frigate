@@ -4,6 +4,8 @@ import logging
 from enum import Enum
 from typing import Optional
 
+from frigate.events.types import RegenerateDescriptionEnum
+
 from .zmq_proxy import Publisher, Subscriber
 
 logger = logging.getLogger(__name__)
@@ -23,6 +25,9 @@ class EventMetadataPublisher(Publisher):
         topic = topic.value
         super().__init__(topic)
 
+    def publish(self, payload: tuple[str, RegenerateDescriptionEnum]) -> None:
+        super().publish(payload)
+
 
 class EventMetadataSubscriber(Subscriber):
     """Simplifies receiving event metadata."""
@@ -35,10 +40,12 @@ class EventMetadataSubscriber(Subscriber):
 
     def check_for_update(
         self, timeout: float = None
-    ) -> Optional[tuple[EventMetadataTypeEnum, any]]:
+    ) -> Optional[tuple[EventMetadataTypeEnum, str, RegenerateDescriptionEnum]]:
         return super().check_for_update(timeout)
 
     def _return_object(self, topic: str, payload: any) -> any:
         if payload is None:
-            return (None, None)
-        return (EventMetadataTypeEnum[topic[len(self.topic_base) :]], payload)
+            return (None, None, None)
+        topic = EventMetadataTypeEnum[topic[len(self.topic_base) :]]
+        event_id, source = payload
+        return (topic, event_id, RegenerateDescriptionEnum(source))
