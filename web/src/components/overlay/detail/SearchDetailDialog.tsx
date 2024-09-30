@@ -434,11 +434,13 @@ function ObjectDetailsTab({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     <DropdownMenuItem
+                      className="cursor-pointer"
                       onClick={() => regenerateDescription("snapshot")}
                     >
                       Regenerate from Snapshot
                     </DropdownMenuItem>
                     <DropdownMenuItem
+                      className="cursor-pointer"
                       onClick={() => regenerateDescription("thumbnails")}
                     >
                       Regenerate from Thumbnails
