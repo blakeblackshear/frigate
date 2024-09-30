@@ -1,5 +1,4 @@
 import datetime
-import logging
 import os
 import unittest
 from unittest.mock import Mock
@@ -21,7 +20,6 @@ class TestHttp(unittest.TestCase):
     def setUp(self):
         # setup clean database for each test run
         migrate_db = SqliteExtDatabase("test.db")
-        del logging.getLogger("peewee_migrate").handlers[:]
         router = Router(migrate_db)
         router.run()
         migrate_db.close()

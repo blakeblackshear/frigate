@@ -31,8 +31,10 @@ class LoggerConfig(FrigateBaseModel):
             log_levels = {
                 "werkzeug": LogLevel.error,
                 "ws4py": LogLevel.error,
+                "peewee_migrate.logs": LogLevel.error,
                 **self.logs,
             }
 
             for log, level in log_levels.items():
                 logging.getLogger(log).setLevel(level.value.upper())
+        return self
