@@ -52,7 +52,9 @@ class LocalObjectDetector(ObjectDetector):
                 # ROCm requires NHWC as input
                 self.input_transform = None
             else:
-                self.input_transform = tensor_transform(detector_config.model.input_tensor)
+                self.input_transform = tensor_transform(
+                    detector_config.model.input_tensor
+                )
         else:
             self.input_transform = None
 
