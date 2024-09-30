@@ -2,6 +2,8 @@ from typing import Optional
 
 from pydantic import BaseModel
 
+from frigate.events.types import RegenerateDescriptionEnum
+
 
 class RegenerateQueryParameters(BaseModel):
-    source: Optional[str] = "thumbnails"
+    source: Optional[str] = RegenerateDescriptionEnum.thumbnails
