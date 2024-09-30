@@ -29,6 +29,8 @@ from frigate.comms.mqtt import MqttClient
 from frigate.comms.webpush import WebPushClient
 from frigate.comms.ws import WebSocketClient
 from frigate.comms.zmq_proxy import ZmqProxy
+from frigate.config.config import FrigateConfig
+from frigate.config.logger import LogLevel
 from frigate.const import (
     CACHE_DIR,
     CLIPS_DIR,
@@ -91,7 +93,7 @@ class FrigateApp:
         self.ptz_metrics: dict[str, PTZMetrics] = {}
         self.processes: dict[str, int] = {}
         self.region_grids: dict[str, list[list[dict[str, int]]]] = {}
-        self.config = config
+        self.config: FrigateConfig = config
 
     def ensure_dirs(self) -> None:
         for d in [
@@ -281,7 +283,7 @@ class FrigateApp:
             except PermissionError:
                 logger.error("Unable to write to /config to save export state")
 
-            migrate_exports(self.config.ffmpeg, self.config.cameras.keys())
+            migrate_exports(self.config.ffmpeg, list(self.config.cameras.keys()))
 
     def init_external_event_processor(self) -> None:
         self.external_event_processor = ExternalEventProcessor(self.config)
@@ -325,7 +327,9 @@ class FrigateApp:
                 largest_frame = max(
                     [
                         det.model.height * det.model.width * 3
-                        for (name, det) in self.config.detectors.items()
+                        if det.model is not None
+                        else 320
+                        for det in self.config.detectors.values()
                     ]
                 )
                 shm_in = mp.shared_memory.SharedMemory(
@@ -392,11 +396,12 @@ class FrigateApp:
 
         # create or update region grids for each camera
         for camera in self.config.cameras.values():
-            self.region_grids[camera.name] = get_camera_regions_grid(
-                camera.name,
-                camera.detect,
-                max(self.config.model.width, self.config.model.height),
-            )
+            if camera.name:
+                self.region_grids[camera.name] = get_camera_regions_grid(
+                    camera.name,
+                    camera.detect,
+                    max(self.config.model.width, self.config.model.height),
+                )
 
     def start_camera_processors(self) -> None:
         for name, config in self.config.cameras.items():
@@ -505,10 +510,10 @@ class FrigateApp:
             min_req_shm += 8
 
         available_shm = total_shm - min_req_shm
-        cam_total_frame_size = 0
+        cam_total_frame_size = 0.0
 
         for camera in self.config.cameras.values():
-            if camera.enabled:
+            if camera.enabled and camera.detect.width and camera.detect.height:
                 cam_total_frame_size += round(
                     (camera.detect.width * camera.detect.height * 1.5 + 270480)
                     / 1048576,
@@ -566,6 +571,19 @@ class FrigateApp:
 
     def start(self) -> None:
         logger.info(f"Starting Frigate ({VERSION})")
+
+        # setup logging
+        logging.getLogger().setLevel(self.config.logger.default.value.upper())
+
+        log_levels = {
+            "werkzeug": LogLevel.error,
+            "ws4py": LogLevel.error,
+            "httpx": LogLevel.error,
+            **self.config.logger.logs,
+        }
+
+        for log, level in log_levels.items():
+            logging.getLogger(log).setLevel(level.value.upper())
 
         # Ensure global state.
         self.ensure_dirs()

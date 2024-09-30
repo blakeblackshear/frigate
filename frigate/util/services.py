@@ -318,11 +318,6 @@ def get_intel_gpu_stats() -> dict[str, str]:
                     if video_frame is not None:
                         video[key].append(float(video_frame))
 
-        for key in render.keys():
-            print(
-                f"new way has {key} :: {round(((sum(render[key]) / len(render[key])) + (sum(video[key]) / len(video[key]))) / 2, 2)}% total"
-            )
-
         results["gpu"] = (
             f"{round(((sum(render['global']) / len(render['global'])) + (sum(video['global']) / len(video['global']))) / 2, 2)}%"
         )
