@@ -74,7 +74,7 @@ class TestFfmpegPresets(unittest.TestCase):
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
         assert (
-            "fps=10,scale_cuda=w=2560:h=1920,hwdownload,format=nv12,eq=gamma=1.05"
+            "fps=10,scale_cuda=w=2560:h=1920,hwdownload,format=nv12,eq=gamma=1.4:gamma_weight=0.5"
             in (" ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"]))
         )
 
