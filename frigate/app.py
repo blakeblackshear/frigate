@@ -59,7 +59,7 @@ from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.ptz.onvif import OnvifController
 from frigate.record.cleanup import RecordingCleanup
 from frigate.record.export import migrate_exports
-from frigate.record.record import manage_recordings
+from frigate.record.record import ManageRecordings
 from frigate.review.review import manage_review_segments
 from frigate.stats.emitter import StatsEmitter
 from frigate.stats.util import stats_init
@@ -175,12 +175,7 @@ class FrigateApp:
                 self.processes["go2rtc"] = proc.info["pid"]
 
     def init_recording_manager(self) -> None:
-        recording_process = util.Process(
-            target=manage_recordings,
-            name="recording_manager",
-            args=(self.config,),
-            daemon=True,
-        )
+        recording_process = ManageRecordings(self.config)
         self.recording_process = recording_process
         recording_process.start()
         self.processes["recording"] = recording_process.pid or 0
