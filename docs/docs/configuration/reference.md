@@ -726,6 +726,8 @@ cameras:
     genai:
       # Optional: Enable AI description generation (default: shown below)
       enabled: False
+      # Optional: Use the object snapshot instead of thumbnails for description generation (default: shown below)
+      use_snapshot: False
       # Optional: The default prompt for generating descriptions. Can use replacement
       # variables like "label", "sub_label", "camera" to make more dynamic. (default: shown below)
       prompt: "Describe the {label} in the sequence of images with as much detail as possible. Do not describe the background."
