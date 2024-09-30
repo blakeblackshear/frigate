@@ -144,6 +144,24 @@ class EmbeddingMaintainer(threading.Thread):
                         ) as image_file:
                             snapshot_image = image_file.read()
 
+                            img = cv2.imdecode(
+                                np.frombuffer(snapshot_image, dtype=np.int8),
+                                cv2.IMREAD_COLOR,
+                            )
+
+                            # crop snapshot based on region before sending off to genai
+                            height, width = img.shape[:2]
+                            x1_rel, y1_rel, width_rel, height_rel = event.data["region"]
+
+                            x1, y1 = int(x1_rel * width), int(y1_rel * height)
+                            cropped_image = img[
+                                y1 : y1 + int(height_rel * height),
+                                x1 : x1 + int(width_rel * width),
+                            ]
+
+                            _, buffer = cv2.imencode(".jpg", cropped_image)
+                            snapshot_image = buffer.tobytes()
+
                     embed_image = (
                         [snapshot_image]
                         if event.has_snapshot and camera_config.genai.use_snapshot
@@ -154,7 +172,7 @@ class EmbeddingMaintainer(threading.Thread):
                         )
                     )
 
-                    # Generate the description, passing the correct image argument
+                    # Generate the description. Call happens in a thread since it is network bound.
                     threading.Thread(
                         target=self._embed_description,
                         name=f"_embed_description_{event.id}",
