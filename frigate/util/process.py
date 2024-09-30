@@ -1,7 +1,9 @@
 import logging
 import multiprocessing as mp
+import signal
 from functools import wraps
 from logging.handlers import QueueHandler
+from multiprocessing.synchronize import Event
 from typing import Any
 
 import frigate.log
@@ -46,6 +48,9 @@ class BaseProcess(mp.Process):
 
 
 class Process(BaseProcess):
+    logger: logging.Logger
+    stop_event: Event
+
     def before_start(self) -> None:
         self.__log_queue = frigate.log.log_listener.queue
 
@@ -53,3 +58,13 @@ class Process(BaseProcess):
         if self.__log_queue:
             logging.basicConfig(handlers=[], force=True)
             logging.getLogger().addHandler(QueueHandler(self.__log_queue))
+
+        self.logger = logging.getLogger(self.name)
+
+        self.stop_event = mp.Event()
+
+        def receiveSignal(signalNumber, frame):
+            self.stop_event.set()
+
+        signal.signal(signal.SIGTERM, receiveSignal)
+        signal.signal(signal.SIGINT, receiveSignal)
