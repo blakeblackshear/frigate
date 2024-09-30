@@ -27,7 +27,13 @@ import { baseUrl } from "@/api/baseUrl";
 import { cn } from "@/lib/utils";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
-import { FaHistory, FaImage, FaRegListAlt, FaVideo } from "react-icons/fa";
+import {
+  FaChevronDown,
+  FaHistory,
+  FaImage,
+  FaRegListAlt,
+  FaVideo,
+} from "react-icons/fa";
 import { FaRotate } from "react-icons/fa6";
 import ObjectLifecycle from "./ObjectLifecycle";
 import {
@@ -47,6 +53,12 @@ import { useNavigate } from "react-router-dom";
 import Chip from "@/components/indicators/Chip";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import useGlobalMutation from "@/hooks/use-global-mutate";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const SEARCH_TABS = [
   "details",
@@ -309,33 +321,36 @@ function ObjectDetailsTab({
       });
   }, [desc, search, mutate]);
 
-  const regenerateDescription = useCallback(() => {
-    if (!search) {
-      return;
-    }
+  const regenerateDescription = useCallback(
+    (source: "snapshot" | "thumbnails") => {
+      if (!search) {
+        return;
+      }
 
-    axios
-      .put(`events/${search.id}/description/regenerate`)
-      .then((resp) => {
-        if (resp.status == 200) {
-          toast.success(
-            `A new description has been requested from ${capitalizeFirstLetter(config?.genai.provider ?? "Generative AI")}. Depending on the speed of your provider, the new description may take some time to regenerate.`,
+      axios
+        .put(`events/${search.id}/description/regenerate?source=${source}`)
+        .then((resp) => {
+          if (resp.status == 200) {
+            toast.success(
+              `A new description has been requested from ${capitalizeFirstLetter(config?.genai.provider ?? "Generative AI")}. Depending on the speed of your provider, the new description may take some time to regenerate.`,
+              {
+                position: "top-center",
+                duration: 7000,
+              },
+            );
+          }
+        })
+        .catch(() => {
+          toast.error(
+            `Failed to call ${capitalizeFirstLetter(config?.genai.provider ?? "Generative AI")} for a new description`,
             {
               position: "top-center",
-              duration: 7000,
             },
           );
-        }
-      })
-      .catch(() => {
-        toast.error(
-          `Failed to call ${capitalizeFirstLetter(config?.genai.provider ?? "Generative AI")} for a new description`,
-          {
-            position: "top-center",
-          },
-        );
-      });
-  }, [search, config]);
+        });
+    },
+    [search, config],
+  );
 
   return (
     <div className="flex flex-col gap-5">
@@ -403,7 +418,37 @@ function ObjectDetailsTab({
         />
         <div className="flex w-full flex-row justify-end gap-2">
           {config?.genai.enabled && (
-            <Button onClick={regenerateDescription}>Regenerate</Button>
+            <div className="flex items-center">
+              <Button
+                className="rounded-r-none border-r-0"
+                onClick={() => regenerateDescription("thumbnails")}
+              >
+                Regenerate
+              </Button>
+              {search.has_snapshot && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button className="rounded-l-none border-l-0 px-2">
+                      <FaChevronDown className="size-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={() => regenerateDescription("snapshot")}
+                    >
+                      Regenerate from Snapshot
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={() => regenerateDescription("thumbnails")}
+                    >
+                      Regenerate from Thumbnails
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
           )}
           <Button variant="select" onClick={updateDescription}>
             Save

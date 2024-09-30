@@ -18,6 +18,9 @@ class GenAIProviderEnum(str, Enum):
 # uses BaseModel because some global attributes are not available at the camera level
 class GenAICameraConfig(BaseModel):
     enabled: bool = Field(default=False, title="Enable GenAI for camera.")
+    use_snapshot: bool = Field(
+        default=False, title="Use snapshots for generating descriptions."
+    )
     prompt: str = Field(
         default="Describe the {label} in the sequence of images with as much detail as possible. Do not describe the background.",
         title="Default caption prompt.",
