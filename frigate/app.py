@@ -29,6 +29,8 @@ from frigate.comms.mqtt import MqttClient
 from frigate.comms.webpush import WebPushClient
 from frigate.comms.ws import WebSocketClient
 from frigate.comms.zmq_proxy import ZmqProxy
+from frigate.config.config import FrigateConfig
+from frigate.config.logger import LogLevel
 from frigate.const import (
     CACHE_DIR,
     CLIPS_DIR,
@@ -91,7 +93,7 @@ class FrigateApp:
         self.ptz_metrics: dict[str, PTZMetrics] = {}
         self.processes: dict[str, int] = {}
         self.region_grids: dict[str, list[list[dict[str, int]]]] = {}
-        self.config = config
+        self.config: FrigateConfig = config
 
     def ensure_dirs(self) -> None:
         for d in [
@@ -566,6 +568,19 @@ class FrigateApp:
 
     def start(self) -> None:
         logger.info(f"Starting Frigate ({VERSION})")
+
+        # setup logging
+        logging.getLogger().setLevel(self.config.logger.default.value.upper())
+
+        log_levels = {
+            "werkzeug": LogLevel.error,
+            "ws4py": LogLevel.error,
+            "httpx": LogLevel.error,
+            **self.config.logger.logs,
+        }
+
+        for log, level in log_levels.items():
+            logging.getLogger(log).setLevel(level.value.upper())
 
         # Ensure global state.
         self.ensure_dirs()
