@@ -425,25 +425,27 @@ function ObjectDetailsTab({
               >
                 Regenerate
               </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button className="rounded-l-none border-l-0 px-2">
-                    <FaChevronDown className="size-3" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem
-                    onClick={() => regenerateDescription("snapshot")}
-                  >
-                    Regenerate With Snapshot
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => regenerateDescription("thumbnails")}
-                  >
-                    Regenerate With Thumbnails
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              {search.has_snapshot && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button className="rounded-l-none border-l-0 px-2">
+                      <FaChevronDown className="size-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem
+                      onClick={() => regenerateDescription("snapshot")}
+                    >
+                      Regenerate from Snapshot
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => regenerateDescription("thumbnails")}
+                    >
+                      Regenerate from Thumbnails
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
           )}
           <Button variant="select" onClick={updateDescription}>
