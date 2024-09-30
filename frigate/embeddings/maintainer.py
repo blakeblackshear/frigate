@@ -3,6 +3,7 @@
 import base64
 import io
 import logging
+import os
 import threading
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Optional
@@ -19,7 +20,7 @@ from frigate.comms.event_metadata_updater import (
 from frigate.comms.events_updater import EventEndSubscriber, EventUpdateSubscriber
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
-from frigate.const import UPDATE_EVENT_DESCRIPTION
+from frigate.const import CLIPS_DIR, UPDATE_EVENT_DESCRIPTION
 from frigate.events.types import EventTypeEnum
 from frigate.genai import get_genai_client
 from frigate.models import Event
@@ -136,19 +137,31 @@ class EmbeddingMaintainer(threading.Thread):
                         or set(event.zones) & set(camera_config.genai.required_zones)
                     )
                 ):
-                    # Generate the description. Call happens in a thread since it is network bound.
+                    if event.has_snapshot and camera_config.genai.use_snapshot:
+                        with open(
+                            os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}.jpg"),
+                            "rb",
+                        ) as image_file:
+                            snapshot_image = image_file.read()
+
+                    embed_image = (
+                        [snapshot_image]
+                        if event.has_snapshot and camera_config.genai.use_snapshot
+                        else (
+                            [thumbnail for data in self.tracked_events[event_id]]
+                            if len(self.tracked_events.get(event_id, [])) > 0
+                            else [thumbnail]
+                        )
+                    )
+
+                    # Generate the description, passing the correct image argument
                     threading.Thread(
                         target=self._embed_description,
                         name=f"_embed_description_{event.id}",
                         daemon=True,
                         args=(
                             event,
-                            [
-                                data["thumbnail"]
-                                for data in self.tracked_events[event_id]
-                            ]
-                            if len(self.tracked_events.get(event_id, [])) > 0
-                            else [thumbnail],
+                            embed_image,
                             metadata,
                         ),
                     ).start()
