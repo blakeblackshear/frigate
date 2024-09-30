@@ -49,6 +49,7 @@ class RecordingExporter(threading.Thread):
     def __init__(
         self,
         config: FrigateConfig,
+        id: str,
         camera: str,
         name: Optional[str],
         image: Optional[str],
@@ -58,6 +59,7 @@ class RecordingExporter(threading.Thread):
     ) -> None:
         threading.Thread.__init__(self)
         self.config = config
+        self.export_id = id
         self.camera = camera
         self.user_provided_name = name
         self.user_provided_image = image
@@ -172,18 +174,17 @@ class RecordingExporter(threading.Thread):
         logger.debug(
             f"Beginning export for {self.camera} from {self.start_time} to {self.end_time}"
         )
-        export_id = f"{self.camera}_{''.join(random.choices(string.ascii_lowercase + string.digits, k=6))}"
         export_name = (
             self.user_provided_name
             or f"{self.camera.replace('_', ' ')} {self.get_datetime_from_timestamp(self.start_time)} {self.get_datetime_from_timestamp(self.end_time)}"
         )
-        video_path = f"{EXPORT_DIR}/{export_id}.mp4"
+        video_path = f"{EXPORT_DIR}/{self.export_id}.mp4"
 
-        thumb_path = self.save_thumbnail(export_id)
+        thumb_path = self.save_thumbnail(self.export_id)
 
         Export.insert(
             {
-                Export.id: export_id,
+                Export.id: self.export_id,
                 Export.camera: self.camera,
                 Export.name: export_name,
                 Export.date: self.start_time,
@@ -257,12 +258,12 @@ class RecordingExporter(threading.Thread):
             )
             logger.error(p.stderr)
             Path(video_path).unlink(missing_ok=True)
-            Export.delete().where(Export.id == export_id).execute()
+            Export.delete().where(Export.id == self.export_id).execute()
             Path(thumb_path).unlink(missing_ok=True)
             return
         else:
             Export.update({Export.in_progress: False}).where(
-                Export.id == export_id
+                Export.id == self.export_id
             ).execute()
 
         logger.debug(f"Finished exporting {video_path}")

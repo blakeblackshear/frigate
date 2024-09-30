@@ -1,4 +1,5 @@
 import { useFullscreen } from "@/hooks/use-fullscreen";
+import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import {
   useHashState,
   usePersistedOverlayState,
@@ -42,6 +43,18 @@ function Live() {
 
   const { fullscreen, toggleFullscreen, supportsFullScreen } =
     useFullscreen(mainRef);
+
+  useKeyboardListener(["f"], (key, modifiers) => {
+    if (!modifiers.down) {
+      return;
+    }
+
+    switch (key) {
+      case "f":
+        toggleFullscreen();
+        break;
+    }
+  });
 
   // document title
 
