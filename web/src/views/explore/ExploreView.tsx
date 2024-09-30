@@ -35,7 +35,12 @@ export default function ExploreView({
 
   // data
 
-  const { data: events, mutate } = useSWR<SearchResult[]>(
+  const {
+    data: events,
+    mutate,
+    isLoading,
+    isValidating,
+  } = useSWR<SearchResult[]>(
     [
       "events/explore",
       {
@@ -81,7 +86,7 @@ export default function ExploreView({
     }
   }, [events, searchDetail, setSearchDetail]);
 
-  if (!events) {
+  if (isLoading) {
     return (
       <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
     );
@@ -93,6 +98,7 @@ export default function ExploreView({
         <ThumbnailRow
           key={label}
           searchResults={filteredEvents}
+          isValidating={isValidating}
           objectType={label}
           setSearchDetail={setSearchDetail}
         />
@@ -104,12 +110,14 @@ export default function ExploreView({
 type ThumbnailRowType = {
   objectType: string;
   searchResults?: SearchResult[];
+  isValidating: boolean;
   setSearchDetail: (search: SearchResult | undefined) => void;
 };
 
 function ThumbnailRow({
   objectType,
   searchResults,
+  isValidating,
   setSearchDetail,
 }: ThumbnailRowType) {
   const navigate = useNavigate();
@@ -123,7 +131,7 @@ function ThumbnailRow({
 
   return (
     <div className="rounded-lg bg-background_alt p-2 md:px-4">
-      <div className="text-lg capitalize">
+      <div className="flex flex-row items-center text-lg capitalize">
         {objectType.replaceAll("_", " ")}
         {searchResults && (
           <span className="ml-3 text-sm text-secondary-foreground">
@@ -135,6 +143,7 @@ function ThumbnailRow({
             tracked objects){" "}
           </span>
         )}
+        {isValidating && <ActivityIndicator className="ml-2 size-4" />}
       </div>
       <div className="flex flex-row items-center space-x-2 py-2">
         {searchResults?.map((event) => (

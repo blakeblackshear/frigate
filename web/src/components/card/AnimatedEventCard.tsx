@@ -109,7 +109,7 @@ export function AnimatedEventCard({
         <div
           className="relative h-24 4k:h-32"
           style={{
-            aspectRatio: aspectRatio,
+            aspectRatio: alertVideos ? aspectRatio : undefined,
           }}
           onMouseEnter={isDesktop ? () => setIsHovered(true) : undefined}
           onMouseLeave={isDesktop ? () => setIsHovered(false) : undefined}

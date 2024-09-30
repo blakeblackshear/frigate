@@ -325,6 +325,12 @@ class PtzAutoTracker:
     def _write_config(self, camera):
         config_file = os.environ.get("CONFIG_FILE", f"{CONFIG_DIR}/config.yml")
 
+        # Check if we can use .yaml instead of .yml
+        config_file_yaml = config_file.replace(".yml", ".yaml")
+
+        if os.path.isfile(config_file_yaml):
+            config_file = config_file_yaml
+
         logger.debug(
             f"{camera}: Writing new config with autotracker motion coefficients: {self.config.cameras[camera].onvif.autotracking.movement_weights}"
         )

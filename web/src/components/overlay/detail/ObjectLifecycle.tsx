@@ -334,7 +334,9 @@ export default function ObjectLifecycle({
                 />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Adjust annotation settings</TooltipContent>
+            <TooltipPortal>
+              <TooltipContent>Adjust annotation settings</TooltipContent>
+            </TooltipPortal>
           </Tooltip>
         </div>
       </div>
