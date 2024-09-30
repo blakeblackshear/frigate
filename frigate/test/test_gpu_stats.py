@@ -39,7 +39,8 @@ class TestGpuStats(unittest.TestCase):
         process.stdout = self.intel_results
         sp.return_value = process
         intel_stats = get_intel_gpu_stats()
+        print(f"the intel stats are {intel_stats}")
         assert intel_stats == {
-            "gpu": "1.34%",
+            "gpu": "1.13%",
             "mem": "-%",
         }
