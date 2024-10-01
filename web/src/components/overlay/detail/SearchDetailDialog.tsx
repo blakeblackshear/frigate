@@ -51,7 +51,7 @@ import {
 import { ReviewSegment } from "@/types/review";
 import { useNavigate } from "react-router-dom";
 import Chip from "@/components/indicators/Chip";
-import { capitalizeFirstLetter } from "@/utils/stringUtil";
+import { capitalizeAll } from "@/utils/stringUtil";
 import useGlobalMutation from "@/hooks/use-global-mutate";
 import {
   DropdownMenu,
@@ -332,7 +332,7 @@ function ObjectDetailsTab({
         .then((resp) => {
           if (resp.status == 200) {
             toast.success(
-              `A new description has been requested from ${capitalizeFirstLetter(config?.genai.provider ?? "Generative AI")}. Depending on the speed of your provider, the new description may take some time to regenerate.`,
+              `A new description has been requested from ${capitalizeAll(config?.genai.provider.replaceAll("_", " ") ?? "Generative AI")}. Depending on the speed of your provider, the new description may take some time to regenerate.`,
               {
                 position: "top-center",
                 duration: 7000,
@@ -342,7 +342,7 @@ function ObjectDetailsTab({
         })
         .catch(() => {
           toast.error(
-            `Failed to call ${capitalizeFirstLetter(config?.genai.provider ?? "Generative AI")} for a new description`,
+            `Failed to call ${capitalizeAll(config?.genai.provider.replaceAll("_", " ") ?? "Generative AI")} for a new description`,
             {
               position: "top-center",
             },

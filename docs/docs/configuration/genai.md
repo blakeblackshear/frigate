@@ -108,7 +108,7 @@ Microsoft offers several vision models through Azure OpenAI. A subscription is r
 
 You must use a vision capable model with Frigate. Current model variants can be found [in their documentation](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models). At the time of writing, this includes `gpt-4o` and `gpt-4-turbo`.
 
-### Get API Key
+### Create Resource and Get API Key
 
 To start using Azure OpenAI, you must first [create a resource](https://learn.microsoft.com/azure/cognitive-services/openai/how-to/create-resource?pivots=web-portal#create-a-resource). You'll need your API key and resource URL, which must include the `api-version` parameter (see the example below). The model field is not required in your configuration as the model is part of the deployment name you chose when deploying the resource.
 
@@ -117,7 +117,7 @@ To start using Azure OpenAI, you must first [create a resource](https://learn.mi
 ```yaml
 genai:
   enabled: True
-  provider: openai
+  provider: azure_openai
   base_url: https://example-endpoint.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2023-03-15-preview
   api_key: "{FRIGATE_OPENAI_API_KEY}"
 ```
