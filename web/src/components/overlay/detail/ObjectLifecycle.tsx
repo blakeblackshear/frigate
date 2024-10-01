@@ -77,6 +77,17 @@ export default function ObjectLifecycle({
   const [showControls, setShowControls] = useState(false);
   const [showZones, setShowZones] = useState(true);
 
+  const aspectRatio = useMemo(() => {
+    if (!config) {
+      return 16 / 9;
+    }
+
+    return (
+      config.cameras[event.camera].detect.width /
+      config.cameras[event.camera].detect.height
+    );
+  }, [config, event]);
+
   const getZoneColor = useCallback(
     (zoneName: string) => {
       const zoneColor =
@@ -240,7 +251,15 @@ export default function ObjectLifecycle({
         </div>
       )}
 
-      <div className="relative flex flex-row justify-center">
+      <div
+        className={cn(
+          "relative mx-auto flex max-h-[50dvh] flex-row justify-center",
+          !imgLoaded && aspectRatio < 16 / 9 && "h-full",
+        )}
+        style={{
+          aspectRatio: !imgLoaded ? aspectRatio : undefined,
+        }}
+      >
         <ImageLoadingIndicator
           className="absolute inset-0"
           imgLoaded={imgLoaded}
@@ -263,7 +282,7 @@ export default function ObjectLifecycle({
             key={event.id}
             ref={imgRef}
             className={cn(
-              "max-h-[50dvh] max-w-full select-none rounded-lg object-contain transition-opacity",
+              "max-h-[50dvh] max-w-full select-none rounded-lg object-contain",
             )}
             loading={isSafari ? "eager" : "lazy"}
             style={
