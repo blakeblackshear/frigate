@@ -752,11 +752,15 @@ def process_frames(
         all_objects: list[dict[str, any]] = object_tracker.tracked_objects.values()
         for attributes in attribute_detections.values():
             for attribute in attributes:
-                filtered_objects = filter(lambda o: o["label"] in attribute_detections.keys(), all_objects)
+                filtered_objects = filter(
+                    lambda o: o["label"] in attribute_detections.keys(), all_objects
+                )
                 selected_object_id = attribute.find_best_object(filtered_objects)
 
                 if selected_object_id is not None:
-                    detections[selected_object_id]["attributes"].append(attribute.get_tracking_data())
+                    detections[selected_object_id]["attributes"].append(
+                        attribute.get_tracking_data()
+                    )
 
         # debug object tracking
         if False:
