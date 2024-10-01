@@ -752,8 +752,7 @@ def process_frames(
         for attributes in attribute_detections.values():
             for attribute in attributes:
                 filtered_objects = filter(
-                    lambda o: o["label"] in attribute_detections.keys()
-                    and attribute.label
+                    lambda o: attribute.label
                     in model_config.attributes_map.get(o["label"], []),
                     all_objects,
                 )
