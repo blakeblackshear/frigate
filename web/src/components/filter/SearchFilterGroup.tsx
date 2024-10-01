@@ -79,7 +79,7 @@ export default function SearchFilterGroup({
     return [...labels].sort();
   }, [config, filterList, filter]);
 
-  const { data: allSubLabels } = useSWR("sub_labels");
+  const { data: allSubLabels } = useSWR(["sub_labels", { split_joined: 1 }]);
 
   const allZones = useMemo<string[]>(() => {
     if (filterList?.zones) {
