@@ -84,7 +84,10 @@ export default function ReviewDetailDialog({
 
   // dialog and mobile page
 
-  const [isOpen, setIsOpen] = useOverlayState("reviewPane", false);
+  const [isOpen, setIsOpen] = useOverlayState(
+    "reviewPane",
+    review != undefined,
+  );
 
   useEffect(() => {
     setIsOpen(review != undefined);
