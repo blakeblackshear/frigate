@@ -11,6 +11,7 @@ __all__ = ["GenAIConfig", "GenAICameraConfig", "GenAIProviderEnum"]
 
 class GenAIProviderEnum(str, Enum):
     openai = "openai"
+    azure_openai = "azure_openai"
     gemini = "gemini"
     ollama = "ollama"
 
