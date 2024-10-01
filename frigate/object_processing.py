@@ -108,7 +108,7 @@ def is_better_thumbnail(label, current_thumb, new_obj, frame_shape) -> bool:
 
 class TrackedObject:
     def __init__(
-        self, camera, colormap, camera_config: CameraConfig, frame_cache, obj_data
+        self, camera, colormap, camera_config: CameraConfig, frame_cache, obj_data: dict[str, any]
     ):
         # set the score history then remove as it is not part of object state
         self.score_history = obj_data["score_history"]
@@ -236,7 +236,10 @@ class TrackedObject:
             }
             if len(recognized_logos) > 0:
                 max_logo = max(recognized_logos, key=recognized_logos.get)
-                self.obj_data["sub_label"] = (max_logo, recognized_logos[max_logo])
+
+                # don't overwrite sub label if it is already set
+                if self.obj_data.get("sub_label") is None or self.obj_data["sub_label"][0] == max_logo:
+                    self.obj_data["sub_label"] = (max_logo, recognized_logos[max_logo])
 
         # check for significant change
         if not self.false_positive:
