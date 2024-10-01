@@ -117,7 +117,7 @@ To start using Azure OpenAI, you must first [create a resource](https://learn.mi
 ```yaml
 genai:
   enabled: True
-  provider: openai
+  provider: azure_openai
   base_url: https://example-endpoint.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2023-03-15-preview
   api_key: "{FRIGATE_OPENAI_API_KEY}"
 ```
