@@ -35,7 +35,6 @@ from frigate.util.image import (
     draw_box_with_label,
 )
 from frigate.util.object import (
-    box_inside,
     create_tensor_input,
     get_cluster_candidates,
     get_cluster_region,
