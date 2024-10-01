@@ -60,7 +60,7 @@ from frigate.ptz.onvif import OnvifController
 from frigate.record.cleanup import RecordingCleanup
 from frigate.record.export import migrate_exports
 from frigate.record.record import ManageRecordings
-from frigate.review.review import manage_review_segments
+from frigate.review.maintainer import ReviewSegmentMaintainer
 from frigate.stats.emitter import StatsEmitter
 from frigate.stats.util import stats_init
 from frigate.storage import StorageMaintainer
@@ -182,12 +182,7 @@ class FrigateApp:
         logger.info(f"Recording process started: {recording_process.pid}")
 
     def init_review_segment_manager(self) -> None:
-        review_segment_process = util.Process(
-            target=manage_review_segments,
-            name="review_segment_manager",
-            args=(self.config,),
-            daemon=True,
-        )
+        review_segment_process = ReviewSegmentMaintainer(self.config)
         self.review_segment_process = review_segment_process
         review_segment_process.start()
         self.processes["review_segment"] = review_segment_process.pid or 0
