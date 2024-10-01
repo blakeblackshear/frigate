@@ -7,7 +7,7 @@ from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
 
 from frigate.config import FrigateConfig
-from frigate.events.maintainer import EventTypeEnum
+from frigate.events.maintainer import EventStateEnum, EventTypeEnum
 from frigate.models import Timeline
 from frigate.util.builtin import to_relative_box
 
@@ -44,10 +44,13 @@ class TimelineProcessor(threading.Thread):
                 continue
 
             if input_type == EventTypeEnum.tracked_object:
-                if prev_event_data is not None and event_data is not None:
-                    self.handle_object_detection(
-                        camera, event_type, prev_event_data, event_data
-                    )
+                # None prev_event_data is only allowed for the start of an event
+                if event_type != EventStateEnum.start and prev_event_data is None:
+                    continue
+
+                self.handle_object_detection(
+                    camera, event_type, prev_event_data, event_data
+                )
             elif input_type == EventTypeEnum.api:
                 self.handle_api_entry(camera, event_type, event_data)
 
@@ -118,10 +121,10 @@ class TimelineProcessor(threading.Thread):
             for e in self.pre_event_cache[event_id]:
                 e[Timeline.data]["sub_label"] = event_data["sub_label"]
 
-        if event_type == "start":
+        if event_type == EventStateEnum.start:
             timeline_entry[Timeline.class_type] = "visible"
             save = True
-        elif event_type == "update":
+        elif event_type == EventStateEnum.update:
             if (
                 len(prev_event_data["current_zones"]) < len(event_data["current_zones"])
                 and not event_data["stationary"]
@@ -140,7 +143,7 @@ class TimelineProcessor(threading.Thread):
                     event_data["attributes"].keys()
                 )[0]
                 save = True
-        elif event_type == "end":
+        elif event_type == EventStateEnum.end:
             timeline_entry[Timeline.class_type] = "gone"
             save = True
 

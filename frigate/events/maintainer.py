@@ -125,6 +125,9 @@ class EventProcessor(threading.Thread):
         updated_db = False
 
         # if this is the first message, just store it and continue, its not time to insert it in the db
+        if event_type == EventStateEnum.start:
+            self.events_in_process[event_data["id"]] = event_data
+
         if should_update_db(self.events_in_process[event_data["id"]], event_data):
             updated_db = True
             camera_config = self.config.cameras[camera]
