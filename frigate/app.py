@@ -36,7 +36,8 @@ from frigate.const import (
     MODEL_CACHE_DIR,
     RECORD_DIR,
 )
-from frigate.embeddings import EmbeddingsContext, manage_embeddings
+from frigate.embeddings import EmbeddingsContext
+from frigate.embeddings.maintainer import EmbeddingsMaintainer
 from frigate.events.audio import AudioProcessor
 from frigate.events.cleanup import EventCleanup
 from frigate.events.external import ExternalEventProcessor
@@ -195,12 +196,7 @@ class FrigateApp:
 
         # Create a client for other processes to use
         self.embeddings = EmbeddingsContext()
-        embedding_process = util.Process(
-            target=manage_embeddings,
-            name="embeddings_manager",
-            args=(self.config,),
-            daemon=True,
-        )
+        embedding_process = EmbeddingsMaintainer(self.config)
         self.embedding_process = embedding_process
         embedding_process.start()
         self.processes["embeddings"] = embedding_process.pid or 0
