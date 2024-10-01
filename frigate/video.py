@@ -734,7 +734,7 @@ def process_frames(
                 object_tracker.update_frame_times(frame_time)
 
         # group the attribute detections based on what label they apply to
-        attribute_detections: dict[str, ObjectAttribute] = {}
+        attribute_detections: dict[str, list[ObjectAttribute]] = {}
         for label, attribute_labels in model_config.attributes_map.items():
             attribute_detections[label] = [
                 ObjectAttribute(d)
@@ -752,7 +752,9 @@ def process_frames(
         for attributes in attribute_detections.values():
             for attribute in attributes:
                 filtered_objects = filter(
-                    lambda o: o["label"] in attribute_detections.keys(), all_objects
+                    lambda o: attribute.label
+                    in model_config.attributes_map.get(o["label"], []),
+                    all_objects,
                 )
                 selected_object_id = attribute.find_best_object(filtered_objects)
 
