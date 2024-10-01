@@ -32,7 +32,7 @@ class LibvaGpuSelector:
         devices = list(filter(lambda d: d.startswith("render"), os.listdir("/dev/dri")))
 
         if len(devices) < 2:
-            self._selected_gpu = devices[0]
+            self._selected_gpu = f"/dev/dri/{devices[0]}"
             return self._selected_gpu
 
         for device in devices:
