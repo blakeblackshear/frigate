@@ -200,7 +200,7 @@ function ExploreThumbnailImage({
       <img
         ref={imgRef}
         className={cn(
-          "absolute h-full w-full cursor-pointer rounded-lg object-cover transition-all duration-300 ease-in-out md:rounded-2xl",
+          "absolute h-full w-full cursor-pointer rounded-lg object-cover transition-all duration-300 ease-in-out lg:rounded-2xl",
         )}
         style={
           isIOS

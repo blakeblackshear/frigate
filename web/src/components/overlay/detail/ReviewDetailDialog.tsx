@@ -37,6 +37,7 @@ import {
   MobilePageHeader,
   MobilePageTitle,
 } from "@/components/mobile/MobilePage";
+import { useOverlayState } from "@/hooks/use-overlay-state";
 
 type ReviewDetailDialogProps = {
   review?: ReviewSegment;
@@ -83,10 +84,15 @@ export default function ReviewDetailDialog({
 
   // dialog and mobile page
 
-  const [isOpen, setIsOpen] = useState(review != undefined);
+  const [isOpen, setIsOpen] = useOverlayState(
+    "reviewPane",
+    review != undefined,
+  );
 
   useEffect(() => {
     setIsOpen(review != undefined);
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [review]);
 
   const Overlay = isDesktop ? Sheet : MobilePage;
@@ -102,7 +108,7 @@ export default function ReviewDetailDialog({
   return (
     <>
       <Overlay
-        open={isOpen}
+        open={isOpen ?? false}
         onOpenChange={(open) => {
           if (!open) {
             setReview(undefined);

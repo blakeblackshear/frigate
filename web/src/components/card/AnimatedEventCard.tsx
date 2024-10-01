@@ -107,7 +107,7 @@ export function AnimatedEventCard({
     <Tooltip>
       <TooltipTrigger asChild>
         <div
-          className="relative h-24 4k:h-32"
+          className="relative h-24 flex-shrink-0 4k:h-32"
           style={{
             aspectRatio: alertVideos ? aspectRatio : undefined,
           }}
@@ -145,7 +145,7 @@ export function AnimatedEventCard({
             >
               {!alertVideos ? (
                 <img
-                  className="size-full select-none"
+                  className="max-h-full select-none"
                   src={`${apiHost}${event.thumb_path.replace("/media/frigate/", "")}`}
                   loading={isSafari ? "eager" : "lazy"}
                   onLoad={() => setIsLoaded(true)}

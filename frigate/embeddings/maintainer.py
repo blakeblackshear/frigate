@@ -137,6 +137,9 @@ class EmbeddingMaintainer(threading.Thread):
                         or set(event.zones) & set(camera_config.genai.required_zones)
                     )
                 ):
+                    logger.debug(
+                        f"Description generation for {event}, has_snapshot: {event.has_snapshot}"
+                    )
                     if event.has_snapshot and camera_config.genai.use_snapshot:
                         with open(
                             os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}.jpg"),
@@ -276,7 +279,9 @@ class EmbeddingMaintainer(threading.Thread):
         metadata = get_metadata(event)
         thumbnail = base64.b64decode(event.thumbnail)
 
-        logger.debug(f"Using ${source} regeneration for ${event}")
+        logger.debug(
+            f"Trying {source} regeneration for {event}, has_snapshot: {event.has_snapshot}"
+        )
 
         if event.has_snapshot and source == "snapshot":
             with open(
