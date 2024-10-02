@@ -4,7 +4,6 @@ import datetime
 import glob
 import logging
 import math
-import multiprocessing as mp
 import os
 import queue
 import subprocess as sp
@@ -114,7 +113,7 @@ class FFMpegConverter(threading.Thread):
         self,
         ffmpeg: FfmpegConfig,
         input_queue: queue.Queue,
-        stop_event: mp.Event,
+        stop_event: threading.Event,
         in_width: int,
         in_height: int,
         out_width: int,
@@ -232,7 +231,7 @@ class BroadcastThread(threading.Thread):
         camera: str,
         converter: FFMpegConverter,
         websocket_server,
-        stop_event: mp.Event,
+        stop_event: threading.Event,
     ):
         super().__init__()
         self.camera = camera
@@ -269,7 +268,7 @@ class BirdsEyeFrameManager:
         self,
         config: FrigateConfig,
         frame_manager: SharedMemoryFrameManager,
-        stop_event: mp.Event,
+        stop_event: threading.Event,
     ):
         self.config = config
         self.mode = config.birdseye.mode
@@ -718,7 +717,7 @@ class Birdseye:
     def __init__(
         self,
         config: FrigateConfig,
-        stop_event: mp.Event,
+        stop_event: threading.Event,
         websocket_server,
     ) -> None:
         self.config = config

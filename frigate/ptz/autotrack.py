@@ -8,7 +8,6 @@ import threading
 import time
 from collections import deque
 from functools import partial
-from multiprocessing.synchronize import Event as MpEvent
 
 import cv2
 import numpy as np
@@ -147,7 +146,7 @@ class PtzAutoTrackerThread(threading.Thread):
         onvif: OnvifController,
         ptz_metrics: dict[str, PTZMetrics],
         dispatcher: Dispatcher,
-        stop_event: MpEvent,
+        stop_event: threading.Event,
     ) -> None:
         super().__init__(name="ptz_autotracker")
         self.ptz_autotracker = PtzAutoTracker(
@@ -180,7 +179,7 @@ class PtzAutoTracker:
         onvif: OnvifController,
         ptz_metrics: PTZMetrics,
         dispatcher: Dispatcher,
-        stop_event: MpEvent,
+        stop_event: threading.Event,
     ) -> None:
         self.config = config
         self.onvif = onvif

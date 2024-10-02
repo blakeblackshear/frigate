@@ -5,7 +5,6 @@ import json
 import logging
 import threading
 import time
-from multiprocessing.synchronize import Event as MpEvent
 from typing import Optional
 
 from frigate.comms.inter_process import InterProcessRequestor
@@ -25,7 +24,7 @@ class StatsEmitter(threading.Thread):
         self,
         config: FrigateConfig,
         stats_tracking: StatsTrackingTypes,
-        stop_event: MpEvent,
+        stop_event: threading.Event,
     ):
         super().__init__(name="frigate_stats_emitter")
         self.config = config

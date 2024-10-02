@@ -4,7 +4,7 @@ import multiprocessing as mp
 import os
 import secrets
 import shutil
-from multiprocessing.synchronize import Event as MpEvent
+import threading
 from typing import Any, Optional
 
 import psutil
@@ -77,7 +77,7 @@ class FrigateApp:
 
     # TODO: Fix FrigateConfig usage, so we can properly annotate it here without mypy erroring out.
     def __init__(self, config: Any) -> None:
-        self.stop_event: MpEvent = mp.Event()
+        self.stop_event = threading.Event()
         self.detection_queue: mp.Queue = mp.Queue()
         self.detectors: dict[str, ObjectDetectProcess] = {}
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []

@@ -6,7 +6,6 @@ import os
 import queue
 import threading
 from collections import Counter, defaultdict
-from multiprocessing.synchronize import Event as MpEvent
 from statistics import median
 from typing import Callable
 
@@ -919,13 +918,13 @@ class TrackedObjectProcessor(threading.Thread):
         dispatcher: Dispatcher,
         tracked_objects_queue,
         ptz_autotracker_thread,
-        stop_event,
+        stop_event: threading.Event,
     ):
         super().__init__(name="detected_frames_processor")
         self.config = config
         self.dispatcher = dispatcher
         self.tracked_objects_queue = tracked_objects_queue
-        self.stop_event: MpEvent = stop_event
+        self.stop_event = stop_event
         self.camera_states: dict[str, CameraState] = {}
         self.frame_manager = SharedMemoryFrameManager()
         self.last_motion_detected: dict[str, float] = {}

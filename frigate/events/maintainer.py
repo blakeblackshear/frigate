@@ -1,7 +1,6 @@
 import logging
 import threading
 from multiprocessing import Queue
-from multiprocessing.synchronize import Event as MpEvent
 from typing import Dict
 
 from frigate.comms.events_updater import EventEndPublisher, EventUpdateSubscriber
@@ -52,7 +51,7 @@ class EventProcessor(threading.Thread):
         self,
         config: FrigateConfig,
         timeline_queue: Queue,
-        stop_event: MpEvent,
+        stop_event: threading.Event,
     ):
         super().__init__(name="event_processor")
         self.config = config

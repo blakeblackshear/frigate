@@ -4,7 +4,6 @@ import logging
 import queue
 import threading
 from multiprocessing import Queue
-from multiprocessing.synchronize import Event as MpEvent
 
 from frigate.config import FrigateConfig
 from frigate.events.maintainer import EventTypeEnum
@@ -21,7 +20,7 @@ class TimelineProcessor(threading.Thread):
         self,
         config: FrigateConfig,
         queue: Queue,
-        stop_event: MpEvent,
+        stop_event: threading.Event,
     ) -> None:
         super().__init__(name="timeline_processor")
         self.config = config

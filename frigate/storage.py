@@ -21,7 +21,7 @@ bandwidth_equation = Recordings.segment_size / (
 class StorageMaintainer(threading.Thread):
     """Maintain frigates recording storage."""
 
-    def __init__(self, config: FrigateConfig, stop_event) -> None:
+    def __init__(self, config: FrigateConfig, stop_event: threading.Event) -> None:
         super().__init__(name="storage_maintainer")
         self.config = config
         self.stop_event = stop_event

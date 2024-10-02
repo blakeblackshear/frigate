@@ -1,7 +1,6 @@
 """Handle outputting individual cameras via jsmpeg."""
 
 import logging
-import multiprocessing as mp
 import queue
 import subprocess as sp
 import threading
@@ -17,7 +16,7 @@ class FFMpegConverter(threading.Thread):
         camera: str,
         ffmpeg: FfmpegConfig,
         input_queue: queue.Queue,
-        stop_event: mp.Event,
+        stop_event: threading.Event,
         in_width: int,
         in_height: int,
         out_width: int,
@@ -99,7 +98,7 @@ class BroadcastThread(threading.Thread):
         camera: str,
         converter: FFMpegConverter,
         websocket_server,
-        stop_event: mp.Event,
+        stop_event: threading.Event,
     ):
         super().__init__()
         self.camera = camera
@@ -133,7 +132,7 @@ class BroadcastThread(threading.Thread):
 
 class JsmpegCamera:
     def __init__(
-        self, config: CameraConfig, stop_event: mp.Event, websocket_server
+        self, config: CameraConfig, stop_event: threading.Event, websocket_server
     ) -> None:
         self.config = config
         self.input = queue.Queue(maxsize=config.detect.fps)
