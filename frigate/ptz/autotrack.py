@@ -149,8 +149,7 @@ class PtzAutoTrackerThread(threading.Thread):
         dispatcher: Dispatcher,
         stop_event: MpEvent,
     ) -> None:
-        threading.Thread.__init__(self)
-        self.name = "ptz_autotracker"
+        super().__init__(name="ptz_autotracker")
         self.ptz_autotracker = PtzAutoTracker(
             config, onvif, ptz_metrics, dispatcher, stop_event
         )

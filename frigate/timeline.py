@@ -23,8 +23,7 @@ class TimelineProcessor(threading.Thread):
         queue: Queue,
         stop_event: MpEvent,
     ) -> None:
-        threading.Thread.__init__(self)
-        self.name = "timeline_processor"
+        super().__init__(name="timeline_processor")
         self.config = config
         self.queue = queue
         self.stop_event = stop_event

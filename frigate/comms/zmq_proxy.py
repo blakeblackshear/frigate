@@ -12,8 +12,7 @@ SOCKET_SUB = "ipc:///tmp/cache/proxy_sub"
 
 class ZmqProxyRunner(threading.Thread):
     def __init__(self, context: zmq.Context[zmq.Socket]) -> None:
-        threading.Thread.__init__(self)
-        self.name = "detection_proxy"
+        super().__init__(name="detection_proxy")
         self.context = context
 
     def run(self) -> None:

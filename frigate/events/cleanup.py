@@ -23,8 +23,7 @@ class EventCleanupType(str, Enum):
 
 class EventCleanup(threading.Thread):
     def __init__(self, config: FrigateConfig, stop_event: MpEvent):
-        threading.Thread.__init__(self)
-        self.name = "event_cleanup"
+        super().__init__(name="event_cleanup")
         self.config = config
         self.stop_event = stop_event
         self.camera_keys = list(self.config.cameras.keys())

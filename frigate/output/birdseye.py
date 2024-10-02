@@ -122,8 +122,7 @@ class FFMpegConverter(threading.Thread):
         quality: int,
         birdseye_rtsp: bool = False,
     ):
-        threading.Thread.__init__(self)
-        self.name = "birdseye_output_converter"
+        super().__init__(name="birdseye_output_converter")
         self.camera = "birdseye"
         self.input_queue = input_queue
         self.stop_event = stop_event
@@ -235,7 +234,7 @@ class BroadcastThread(threading.Thread):
         websocket_server,
         stop_event: mp.Event,
     ):
-        super(BroadcastThread, self).__init__()
+        super().__init__()
         self.camera = camera
         self.converter = converter
         self.websocket_server = websocket_server

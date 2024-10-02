@@ -24,8 +24,7 @@ class FFMpegConverter(threading.Thread):
         out_height: int,
         quality: int,
     ):
-        threading.Thread.__init__(self)
-        self.name = f"{camera}_output_converter"
+        super().__init__(name=f"{camera}_output_converter")
         self.camera = camera
         self.input_queue = input_queue
         self.stop_event = stop_event
@@ -102,7 +101,7 @@ class BroadcastThread(threading.Thread):
         websocket_server,
         stop_event: mp.Event,
     ):
-        super(BroadcastThread, self).__init__()
+        super().__init__()
         self.camera = camera
         self.converter = converter
         self.websocket_server = websocket_server
