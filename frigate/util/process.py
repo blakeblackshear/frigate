@@ -3,9 +3,9 @@ import logging
 import multiprocessing as mp
 import signal
 import sys
+import threading
 from functools import wraps
 from logging.handlers import QueueHandler
-from multiprocessing.synchronize import Event
 from typing import Any
 
 import frigate.log
@@ -51,12 +51,12 @@ class BaseProcess(mp.Process):
 
 class Process(BaseProcess):
     logger: logging.Logger
-    stop_event: Event
+    stop_event: threading.Event
 
     @property
-    def stop_event(self) -> Event:
+    def stop_event(self) -> threading.Event:
         if "stop_event" not in self.__dict__:
-            self.__dict__["stop_event"] = mp.Event()
+            self.__dict__["stop_event"] = threading.Event()
         return self.__dict__["stop_event"]
 
     def before_start(self) -> None:
