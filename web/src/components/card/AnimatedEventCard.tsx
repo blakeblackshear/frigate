@@ -17,6 +17,7 @@ import { usePersistence } from "@/hooks/use-persistence";
 import { Skeleton } from "../ui/skeleton";
 import { Button } from "../ui/button";
 import { FaCircleCheck } from "react-icons/fa6";
+import { cn } from "@/lib/utils";
 
 type AnimatedEventCardProps = {
   event: ReviewSegment;
@@ -145,7 +146,10 @@ export function AnimatedEventCard({
             >
               {!alertVideos ? (
                 <img
-                  className="max-h-full select-none"
+                  className={cn(
+                    "h-full w-auto min-w-10 select-none object-contain",
+                    isSafari && !isLoaded ? "hidden" : "visible",
+                  )}
                   src={`${apiHost}${event.thumb_path.replace("/media/frigate/", "")}`}
                   loading={isSafari ? "eager" : "lazy"}
                   onLoad={() => setIsLoaded(true)}
@@ -200,7 +204,14 @@ export function AnimatedEventCard({
               </div>
             </div>
           )}
-          {!isLoaded && <Skeleton className="absolute inset-0" />}
+          {!isLoaded && (
+            <Skeleton
+              style={{
+                aspectRatio: alertVideos ? aspectRatio : 16 / 9,
+              }}
+              className="size-full"
+            />
+          )}
         </div>
       </TooltipTrigger>
       <TooltipContent>
