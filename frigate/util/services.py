@@ -7,7 +7,6 @@ import os
 import re
 import signal
 import subprocess as sp
-import traceback
 from typing import Optional
 
 import cv2
@@ -34,14 +33,6 @@ def restart_frigate():
     # otherwise, just try and exit frigate
     else:
         os.kill(os.getpid(), signal.SIGINT)
-
-
-def print_stack(sig, frame):
-    traceback.print_stack(frame)
-
-
-def listen():
-    signal.signal(signal.SIGUSR1, print_stack)
 
 
 def get_cgroups_version() -> str:
