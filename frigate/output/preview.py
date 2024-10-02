@@ -66,8 +66,7 @@ class FFMpegConverter(threading.Thread):
         frame_times: list[float],
         requestor: InterProcessRequestor,
     ):
-        threading.Thread.__init__(self)
-        self.name = f"{config.name}_preview_converter"
+        super().__init__(name=f"{config.name}_preview_converter")
         self.config = config
         self.frame_times = frame_times
         self.requestor = requestor

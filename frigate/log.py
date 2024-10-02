@@ -56,8 +56,7 @@ def _stop_logging() -> None:
 class LogPipe(threading.Thread):
     def __init__(self, log_name: str):
         """Setup the object with a logger and start the thread"""
-        threading.Thread.__init__(self)
-        self.daemon = False
+        super().__init__(daemon=False)
         self.logger = logging.getLogger(log_name)
         self.level = logging.ERROR
         self.deque: Deque[str] = deque(maxlen=100)
