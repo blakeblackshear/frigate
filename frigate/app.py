@@ -13,7 +13,6 @@ from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
-from frigate import util
 from frigate.api.auth import hash_password
 from frigate.api.fastapi_app import create_fastapi_app
 from frigate.camera.camera import Camera
@@ -55,7 +54,7 @@ from frigate.models import (
 )
 from frigate.object_detection import ObjectDetectProcess
 from frigate.object_processing import TrackedObjectProcessor
-from frigate.output.output import output_frames
+from frigate.output.output import OutputProcessor
 from frigate.ptz.autotrack import PtzAutoTrackerThread
 from frigate.ptz.onvif import OnvifController
 from frigate.record.cleanup import RecordingCleanup
@@ -334,15 +333,9 @@ class FrigateApp:
         self.detected_frames_processor.start()
 
     def start_video_output_processor(self) -> None:
-        output_processor = util.Process(
-            target=output_frames,
-            name="output_processor",
-            args=(self.config,),
-            daemon=True,
-        )
-        self.output_processor = output_processor
-        output_processor.start()
-        logger.info(f"Output process started: {output_processor.pid}")
+        self.output_processor = OutputProcessor(self.config)
+        self.output_processor.start()
+        logger.info(f"Output process started: {self.output_processor.pid}")
 
     def init_cameras(self) -> None:
         for name in self.config.cameras.keys():
