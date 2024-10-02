@@ -129,10 +129,23 @@ class RecordingMaintainer(threading.Thread):
                 grouped_recordings[camera], key=lambda s: s["start_time"]
             )
 
-            segment_count = len(grouped_recordings[camera])
-            if segment_count > keep_count:
+            camera_info = self.object_recordings_info[camera]
+            most_recently_processed_frame_time = (
+                camera_info[-1][0] if len(camera_info) > 0 else 0
+            )
+
+            processed_segment_count = len(
+                list(
+                    filter(
+                        lambda r: r["start_time"].timestamp()
+                        < most_recently_processed_frame_time,
+                        grouped_recordings[camera],
+                    )
+                )
+            )
+            if processed_segment_count > keep_count:
                 logger.warning(
-                    f"Unable to keep up with recording segments in cache for {camera}. Keeping the {keep_count} most recent segments out of {segment_count} and discarding the rest..."
+                    f"Unable to keep up with recording segments in cache for {camera}. Keeping the {keep_count} most recent segments out of {processed_segment_count} and discarding the rest..."
                 )
                 to_remove = grouped_recordings[camera][:-keep_count]
                 for rec in to_remove:
