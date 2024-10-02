@@ -107,7 +107,7 @@ export function AnimatedEventCard({
     <Tooltip>
       <TooltipTrigger asChild>
         <div
-          className="relative h-24 flex-shrink-0 4k:h-32"
+          className="relative h-24 flex-shrink-0 overflow-hidden rounded md:rounded-lg 4k:h-32"
           style={{
             aspectRatio: alertVideos ? aspectRatio : undefined,
           }}
@@ -133,7 +133,7 @@ export function AnimatedEventCard({
           )}
           {previews != undefined && (
             <div
-              className="size-full cursor-pointer overflow-hidden rounded md:rounded-lg"
+              className="size-full cursor-pointer"
               onClick={onOpenReview}
               onAuxClick={(e) => {
                 if (e.button === 1) {
