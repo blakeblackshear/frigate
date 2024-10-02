@@ -6,9 +6,10 @@ from typing import Optional
 from frigate import util
 from frigate.config import FrigateConfig
 from frigate.util.object import get_camera_regions_grid
-from frigate.video import CameraTracker, CameraWatchdog
 
+from .capture import CameraWatchdog
 from .metrics import CameraMetrics, PTZMetrics
+from .tracker import CameraTracker
 
 logger = logging.getLogger(__name__)
 
