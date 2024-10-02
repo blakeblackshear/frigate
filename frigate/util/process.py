@@ -6,9 +6,12 @@ import sys
 import threading
 from functools import wraps
 from logging.handlers import QueueHandler
+from multiprocessing.connection import wait as mp_wait
 from typing import Any
 
 import frigate.log
+
+logger = logging.getLogger(__name__)
 
 
 class BaseProcess(mp.Process):
@@ -81,3 +84,36 @@ class Process(BaseProcess):
 
         signal.signal(signal.SIGTERM, receiveSignal)
         signal.signal(signal.SIGINT, receiveSignal)
+
+
+class ProcessStopper(threading.Thread):
+    def __init__(self, processes: list[mp.Process]):
+        super().__init__()
+        self.processes = processes
+        self.start()
+
+    def run(self):
+        # Stop all processes registered for stopping
+        sentinels: dict[int, mp.Process] = {}
+        for process in self.processes:
+            if process is None:
+                continue
+            process.terminate()
+            sentinels[process.sentinel] = process
+
+        # Wait for all the processes to shutdown
+        logger.info(f"Waiting for {len(sentinels)} processes to stop")
+        while sentinels:
+            ready = mp_wait(sentinels.keys(), timeout=10)
+            if ready:
+                for sentinel in ready:
+                    name = sentinels[sentinel].name
+                    del sentinels[sentinel]
+                    logger.info(f"Process {name} has stopped")
+            else:
+                proc: mp.Process = next(iter(sentinels.values()))
+                logger.warning(
+                    f"{len(sentinels)} processes are still running. "
+                    f"Killing {proc.name or 'one of them'}"
+                )
+                proc.kill()
