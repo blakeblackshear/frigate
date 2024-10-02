@@ -60,6 +60,7 @@ export default function SearchView({
   loadMore,
   hasMore,
 }: SearchViewProps) {
+  const contentRef = useRef<HTMLDivElement | null>(null);
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
@@ -239,13 +240,25 @@ export default function SearchView({
             return newIndex;
           });
           break;
+        case "PageDown":
+          contentRef.current?.scrollBy({
+            top: contentRef.current.clientHeight / 2,
+            behavior: "smooth",
+          });
+          break;
+        case "PageUp":
+          contentRef.current?.scrollBy({
+            top: -contentRef.current.clientHeight / 2,
+            behavior: "smooth",
+          });
+          break;
       }
     },
     [uniqueResults, inputFocused],
   );
 
   useKeyboardListener(
-    ["ArrowLeft", "ArrowRight"],
+    ["ArrowLeft", "ArrowRight", "PageDown", "PageUp"],
     onKeyboardShortcut,
     !inputFocused,
   );
@@ -346,7 +359,10 @@ export default function SearchView({
         )}
       </div>
 
-      <div className="no-scrollbar flex flex-1 flex-wrap content-start gap-2 overflow-y-auto">
+      <div
+        ref={contentRef}
+        className="no-scrollbar flex flex-1 flex-wrap content-start gap-2 overflow-y-auto"
+      >
         {uniqueResults?.length == 0 && !isLoading && (
           <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
             <LuSearchX className="size-16" />
