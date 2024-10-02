@@ -12,7 +12,7 @@ import {
 import { Event } from "@/types/event";
 import { FrigateConfig } from "@/types/frigateConfig";
 import axios from "axios";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { isDesktop } from "react-device-detect";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import useSWR from "swr";
@@ -60,6 +60,11 @@ export function FrigatePlusDialog({
 
   const [state, setState] = useState<SubmissionState>(
     upload?.plus_id ? "submitted" : "reviewing",
+  );
+
+  useEffect(
+    () => setState(upload?.plus_id ? "submitted" : "reviewing"),
+    [upload],
   );
 
   const onSubmitToPlus = useCallback(
