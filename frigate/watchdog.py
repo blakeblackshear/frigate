@@ -1,7 +1,6 @@
 import datetime
 import logging
 import threading
-import time
 from multiprocessing.synchronize import Event as MpEvent
 
 from frigate.object_detection import ObjectDetectProcess
@@ -18,12 +17,13 @@ class FrigateWatchdog(threading.Thread):
         self.stop_event = stop_event
 
     def run(self) -> None:
-        time.sleep(10)
         while not self.stop_event.wait(10):
             now = datetime.datetime.now().timestamp()
 
             # check the detection processes
-            for detector in self.detectors.values():
+            for detector_name in list(self.detectors.keys()):
+                detector = self.detectors[detector_name]
+
                 detection_start = detector.detection_start.value  # type: ignore[attr-defined]
                 # issue https://github.com/python/typeshed/issues/8799
                 # from mypy 0.981 onwards
@@ -31,12 +31,29 @@ class FrigateWatchdog(threading.Thread):
                     logger.info(
                         "Detection appears to be stuck. Restarting detection process..."
                     )
-                    detector.start_or_restart()
-                elif (
-                    detector.detect_process is not None
-                    and not detector.detect_process.is_alive()
-                ):
+
+                    # Stop the detector
+                    detector.terminate()
+                    logger.info("Waiting for detection process to exit gracefully...")
+                    detector.join(timeout=30)
+                    if detector.exitcode is None:
+                        logger.info("Detection process didn't exit. Force killing...")
+                        detector.kill()
+                        detector.join()
+
+                    # Start the detector
+                    detector = ObjectDetectProcess(
+                        detector_name,
+                        detector.detection_queue,
+                        detector.out_events,
+                        detector.detector_config,
+                    )
+                    detector.start()
+
+                elif not detector.is_alive():
                     logger.info("Detection appears to have stopped. Exiting Frigate...")
                     restart_frigate()
+
+                self.detectors[detector_name] = detector
 
         logger.info("Exiting watchdog...")

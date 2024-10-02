@@ -311,6 +311,7 @@ class FrigateApp:
                 },
                 detector_config,
             )
+            self.detectors[name].start()
 
     def start_ptz_autotracker(self) -> None:
         self.ptz_autotracker_thread = PtzAutoTrackerThread(
@@ -572,7 +573,8 @@ class FrigateApp:
 
         # ensure the detectors are done
         for detector in self.detectors.values():
-            detector.stop()
+            detector.terminate()
+            detector.join()
 
         empty_and_close_queue(self.detection_queue)
         logger.info("Detection queue closed")
