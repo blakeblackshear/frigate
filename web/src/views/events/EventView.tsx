@@ -634,10 +634,16 @@ function DetectionReview({
         }
         break;
       case "PageDown":
-        contentRef.current?.scrollBy({ top: 600, behavior: "smooth" });
+        contentRef.current?.scrollBy({
+          top: contentRef.current.clientHeight / 2,
+          behavior: "smooth",
+        });
         break;
       case "PageUp":
-        contentRef.current?.scrollBy({ top: -600, behavior: "smooth" });
+        contentRef.current?.scrollBy({
+          top: -contentRef.current.clientHeight / 2,
+          behavior: "smooth",
+        });
         break;
     }
   });
