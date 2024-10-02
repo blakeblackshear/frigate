@@ -8,7 +8,7 @@ joserfc == 1.0.*
 pathvalidate == 3.2.*
 markupsafe == 2.1.*
 mypy == 1.6.1
-numpy == 1.26.*
+numpy == 2.1.*
 onvif_zeep == 0.2.12
 opencv-python-headless == 4.9.0.*
 paho-mqtt == 2.1.*
