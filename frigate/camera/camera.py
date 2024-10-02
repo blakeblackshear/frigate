@@ -6,7 +6,7 @@ from typing import Optional
 from frigate import util
 from frigate.config import FrigateConfig
 from frigate.util.object import get_camera_regions_grid
-from frigate.video import CameraWatchdog, track_camera
+from frigate.video import CameraTracker, CameraWatchdog
 
 from .metrics import CameraMetrics, PTZMetrics
 
@@ -44,22 +44,15 @@ class Camera:
             logger.info(f"Camera processor not started for disabled camera {self.name}")
             return
 
-        camera_process = util.Process(
-            target=track_camera,
-            name=f"camera_processor:{self.name}",
-            args=(
-                self.name,
-                self.config.cameras[self.name],
-                self.config.model,
-                self.config.model.merged_labelmap,
-                detection_queue,
-                self.detection_out_event,
-                detected_frames_queue,
-                self.camera_metrics,
-                self.ptz_metrics,
-                self.region_grid,
-            ),
-            daemon=True,
+        camera_process = CameraTracker(
+            self.config.cameras[self.name],
+            self.config.model,
+            detection_queue,
+            self.detection_out_event,
+            detected_frames_queue,
+            self.camera_metrics,
+            self.ptz_metrics,
+            self.region_grid,
         )
         self.process = camera_process
         self.camera_metrics.process_pid.value = camera_process.pid or 0
