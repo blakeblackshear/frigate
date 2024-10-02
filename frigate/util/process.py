@@ -2,6 +2,7 @@ import faulthandler
 import logging
 import multiprocessing as mp
 import signal
+import sys
 from functools import wraps
 from logging.handlers import QueueHandler
 from multiprocessing.synchronize import Event
@@ -52,6 +53,12 @@ class Process(BaseProcess):
     logger: logging.Logger
     stop_event: Event
 
+    @property
+    def stop_event(self) -> Event:
+        if "stop_event" not in self.__dict__:
+            self.__dict__["stop_event"] = mp.Event()
+        return self.__dict__["stop_event"]
+
     def before_start(self) -> None:
         self.__log_queue = frigate.log.log_listener.queue
 
@@ -63,10 +70,14 @@ class Process(BaseProcess):
 
         self.logger = logging.getLogger(self.name)
 
-        self.stop_event = mp.Event()
-
         def receiveSignal(signalNumber, frame):
-            self.stop_event.set()
+            # Make sure we do not trigger stop_event lazy initialization
+            stop_event = self.__dict__.get("stop_event")
+
+            if stop_event is not None:
+                stop_event.set()
+            else:
+                sys.exit()
 
         signal.signal(signal.SIGTERM, receiveSignal)
         signal.signal(signal.SIGINT, receiveSignal)
