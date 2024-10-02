@@ -391,14 +391,13 @@ class CameraTracker(util.Process):
         requestor.stop()
         config_subscriber.stop()
 
-        # empty the frame queue
-        self.logger.info(f"{self.name}: emptying frame queue")
-        frame_queue = self.camera_metrics.frame_queue
-        while not frame_queue.empty():
-            frame_time = frame_queue.get(False)
+        # Empty the frame queue
+        self.logger.info("Emptying frame queue")
+        while not self.camera_metrics.frame_queue.empty():
+            frame_time = self.camera_metrics.frame_queue.get(False)
             frame_manager.delete(f"{self.name}{frame_time}")
 
-        self.logger.info(f"{self.name}: exiting subprocess")
+        self.logger.info("Exiting the camera tracker")
 
     def detect(
         self,
