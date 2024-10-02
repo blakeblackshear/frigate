@@ -11,7 +11,7 @@ from multiprocessing.synchronize import Event
 import numpy as np
 from setproctitle import setproctitle
 
-import frigate.util as util
+from frigate import util
 from frigate.detectors import create_detector
 from frigate.detectors.detector_config import InputTensorEnum
 from frigate.util.builtin import EventsPerSecond, load_labels

@@ -4,7 +4,7 @@ from statistics import mean
 
 import numpy as np
 
-import frigate.util as util
+from frigate import util
 from frigate.config import DetectorTypeEnum
 from frigate.object_detection import (
     ObjectDetectProcess,
