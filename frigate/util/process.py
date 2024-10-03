@@ -1,5 +1,8 @@
 import logging
 import multiprocessing as mp
+import signal
+import sys
+import threading
 from functools import wraps
 from logging.handlers import QueueHandler
 from typing import Any
@@ -46,10 +49,31 @@ class BaseProcess(mp.Process):
 
 
 class Process(BaseProcess):
+    @property
+    def stop_event(self) -> threading.Event:
+        # Lazily create the stop_event. This allows the signal handler to tell if anyone is
+        # monitoring the stop event, and to raise a SystemExit if not.
+        if "stop_event" not in self.__dict__:
+            self.__dict__["stop_event"] = threading.Event()
+        return self.__dict__["stop_event"]
+
     def before_start(self) -> None:
         self.__log_queue = frigate.log.log_listener.queue
 
     def before_run(self) -> None:
+        def receiveSignal(signalNumber, frame):
+            # Get the stop_event through the dict to bypass lazy initialization.
+            stop_event = self.__dict__.get("stop_event")
+            if stop_event is not None:
+                # Someone is monitoring stop_event. We should set it.
+                stop_event.set()
+            else:
+                # Nobody is monitoring stop_event. We should raise SystemExit.
+                sys.exit()
+
+        signal.signal(signal.SIGTERM, receiveSignal)
+        signal.signal(signal.SIGINT, receiveSignal)
+
         if self.__log_queue:
             logging.basicConfig(handlers=[], force=True)
             logging.getLogger().addHandler(QueueHandler(self.__log_queue))
