@@ -88,6 +88,5 @@ class Process(BaseProcess):
 
         self.logger = logging.getLogger(self.name)
 
-        if self.__log_queue:
-            logging.basicConfig(handlers=[], force=True)
-            logging.getLogger().addHandler(QueueHandler(self.__log_queue))
+        logging.basicConfig(handlers=[], force=True)
+        logging.getLogger().addHandler(QueueHandler(self.__log_queue))
