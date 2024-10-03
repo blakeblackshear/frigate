@@ -373,7 +373,7 @@ Metadata about previews for this time range.
 
 Metadata about previews for this hour
 
-### `GET /api/preview/<camera>/start/<start-timestamp>/end/<end-timestamp>`
+### `GET /api/preview/<camera>/start/<start-timestamp>/end/<end-timestamp>/frames`
 
 List of frames in the preview cache for the time range. Previews are only kept in the cache until they are combined into an mp4 at the end of the hour.
 
