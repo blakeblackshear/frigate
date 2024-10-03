@@ -1,3 +1,4 @@
+import faulthandler
 import logging
 import multiprocessing as mp
 import signal
@@ -73,6 +74,8 @@ class Process(BaseProcess):
         self.__log_queue = frigate.log.log_listener.queue
 
     def before_run(self) -> None:
+        faulthandler.enable()
+
         def receiveSignal(signalNumber, frame):
             # Get the stop_event through the dict to bypass lazy initialization.
             stop_event = self.__dict__.get("stop_event")
