@@ -49,6 +49,8 @@ class BaseProcess(mp.Process):
 
 
 class Process(BaseProcess):
+    logger: logging.Logger
+
     @property
     def stop_event(self) -> threading.Event:
         # Lazily create the stop_event. This allows the signal handler to tell if anyone is
@@ -73,6 +75,8 @@ class Process(BaseProcess):
 
         signal.signal(signal.SIGTERM, receiveSignal)
         signal.signal(signal.SIGINT, receiveSignal)
+
+        self.logger = logging.getLogger(self.name)
 
         if self.__log_queue:
             logging.basicConfig(handlers=[], force=True)
