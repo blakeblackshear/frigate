@@ -23,7 +23,7 @@ In Frigate, you can use an environment variable or a docker secret named `PLUS_A
 
 :::warning
 
-You cannot use the `environment_vars` section of your configuration file to set this environment variable.
+You cannot use the `environment_vars` section of your Frigate configuration file to set this environment variable. It must be defined as an environment variable in the docker config or HA addon config.
 
 :::
 
