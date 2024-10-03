@@ -62,8 +62,7 @@ class SegmentInfo:
 
 class RecordingMaintainer(threading.Thread):
     def __init__(self, config: FrigateConfig, stop_event: MpEvent):
-        threading.Thread.__init__(self)
-        self.name = "recording_maintainer"
+        super().__init__(name="recording_maintainer")
         self.config = config
 
         # create communication for retained recordings

@@ -57,7 +57,7 @@ class RecordingExporter(threading.Thread):
         end_time: int,
         playback_factor: PlaybackFactorEnum,
     ) -> None:
-        threading.Thread.__init__(self)
+        super().__init__()
         self.config = config
         self.export_id = id
         self.camera = camera

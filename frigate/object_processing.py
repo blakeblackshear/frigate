@@ -932,8 +932,7 @@ class TrackedObjectProcessor(threading.Thread):
         ptz_autotracker_thread,
         stop_event,
     ):
-        threading.Thread.__init__(self)
-        self.name = "detected_frames_processor"
+        super().__init__(name="detected_frames_processor")
         self.config = config
         self.dispatcher = dispatcher
         self.tracked_objects_queue = tracked_objects_queue

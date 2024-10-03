@@ -22,8 +22,7 @@ class StorageMaintainer(threading.Thread):
     """Maintain frigates recording storage."""
 
     def __init__(self, config: FrigateConfig, stop_event) -> None:
-        threading.Thread.__init__(self)
-        self.name = "storage_maintainer"
+        super().__init__(name="storage_maintainer")
         self.config = config
         self.stop_event = stop_event
         self.camera_storage_stats: dict[str, dict] = {}

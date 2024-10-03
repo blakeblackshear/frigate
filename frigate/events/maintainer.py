@@ -54,8 +54,7 @@ class EventProcessor(threading.Thread):
         timeline_queue: Queue,
         stop_event: MpEvent,
     ):
-        threading.Thread.__init__(self)
-        self.name = "event_processor"
+        super().__init__(name="event_processor")
         self.config = config
         self.timeline_queue = timeline_queue
         self.events_in_process: Dict[str, Event] = {}
