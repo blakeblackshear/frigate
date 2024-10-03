@@ -13,6 +13,7 @@ apt-get -qq install --no-install-recommends -y \
     python3.9 \
     python3-pip \
     curl \
+    lsof \
     jq \
     nethogs
 
