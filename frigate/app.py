@@ -6,7 +6,7 @@ import secrets
 import shutil
 from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
-from typing import Any, Optional
+from typing import Optional
 
 import psutil
 import uvicorn
@@ -30,7 +30,6 @@ from frigate.comms.webpush import WebPushClient
 from frigate.comms.ws import WebSocketClient
 from frigate.comms.zmq_proxy import ZmqProxy
 from frigate.config.config import FrigateConfig
-from frigate.config.logger import LogLevel
 from frigate.const import (
     CACHE_DIR,
     CLIPS_DIR,
@@ -78,10 +77,8 @@ logger = logging.getLogger(__name__)
 
 
 class FrigateApp:
-    audio_process: Optional[mp.Process] = None
-
-    # TODO: Fix FrigateConfig usage, so we can properly annotate it here without mypy erroring out.
-    def __init__(self, config: Any) -> None:
+    def __init__(self, config: FrigateConfig) -> None:
+        self.audio_process: Optional[mp.Process] = None
         self.stop_event: MpEvent = mp.Event()
         self.detection_queue: Queue = mp.Queue()
         self.detectors: dict[str, ObjectDetectProcess] = {}
@@ -92,7 +89,7 @@ class FrigateApp:
         self.ptz_metrics: dict[str, PTZMetrics] = {}
         self.processes: dict[str, int] = {}
         self.region_grids: dict[str, list[list[dict[str, int]]]] = {}
-        self.config: FrigateConfig = config
+        self.config = config
 
     def ensure_dirs(self) -> None:
         for d in [
@@ -388,12 +385,12 @@ class FrigateApp:
 
         # create or update region grids for each camera
         for camera in self.config.cameras.values():
-            if camera.name:
-                self.region_grids[camera.name] = get_camera_regions_grid(
-                    camera.name,
-                    camera.detect,
-                    max(self.config.model.width, self.config.model.height),
-                )
+            assert camera.name is not None
+            self.region_grids[camera.name] = get_camera_regions_grid(
+                camera.name,
+                camera.detect,
+                max(self.config.model.width, self.config.model.height),
+            )
 
     def start_camera_processors(self) -> None:
         for name, config in self.config.cameras.items():
@@ -563,19 +560,6 @@ class FrigateApp:
 
     def start(self) -> None:
         logger.info(f"Starting Frigate ({VERSION})")
-
-        # setup logging
-        logging.getLogger().setLevel(self.config.logger.default.value.upper())
-
-        log_levels = {
-            "werkzeug": LogLevel.error,
-            "ws4py": LogLevel.error,
-            "httpx": LogLevel.error,
-            **self.config.logger.logs,
-        }
-
-        for log, level in log_levels.items():
-            logging.getLogger(log).setLevel(level.value.upper())
 
         # Ensure global state.
         self.ensure_dirs()
