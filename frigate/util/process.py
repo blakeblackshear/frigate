@@ -5,14 +5,24 @@ import sys
 import threading
 from functools import wraps
 from logging.handlers import QueueHandler
-from typing import Any
+from typing import Any, Callable, Optional
 
 import frigate.log
 
 
 class BaseProcess(mp.Process):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(
+        self,
+        *,
+        name: Optional[str] = None,
+        target: Optional[Callable] = None,
+        args: tuple = (),
+        kwargs: dict = {},
+        daemon: Optional[bool] = None,
+    ):
+        super().__init__(
+            name=name, target=target, args=args, kwargs=kwargs, daemon=daemon
+        )
 
     def start(self, *args, **kwargs):
         self.before_start()
