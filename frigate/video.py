@@ -94,6 +94,7 @@ def capture_frames(
     ffmpeg_process,
     config: CameraConfig,
     shm_frame_count: int,
+    shm_frames: list[str],
     frame_shape,
     frame_manager: FrameManager,
     frame_queue,
@@ -107,8 +108,6 @@ def capture_frames(
     frame_rate.start()
     skipped_eps = EventsPerSecond()
     skipped_eps.start()
-
-    shm_frames: list[str] = []
 
     while True:
         fps.value = frame_rate.eps()
@@ -154,10 +153,6 @@ def capture_frames(
             # if the queue is full, skip this frame
             skipped_eps.update()
 
-    # clear out frames
-    for frame in shm_frames:
-        frame_manager.delete(frame)
-
 
 class CameraWatchdog(threading.Thread):
     def __init__(
@@ -176,6 +171,7 @@ class CameraWatchdog(threading.Thread):
         self.camera_name = camera_name
         self.config = config
         self.shm_frame_count = shm_frame_count
+        self.shm_frames: list[str] = []
         self.capture_thread = None
         self.ffmpeg_detect_process = None
         self.logpipe = LogPipe(f"ffmpeg.{self.camera_name}.detect")
@@ -308,6 +304,7 @@ class CameraWatchdog(threading.Thread):
         self.capture_thread = CameraCapture(
             self.config,
             self.shm_frame_count,
+            self.shm_frames,
             self.ffmpeg_detect_process,
             self.frame_shape,
             self.frame_queue,
@@ -348,6 +345,7 @@ class CameraCapture(threading.Thread):
         self,
         config: CameraConfig,
         shm_frame_count: int,
+        shm_frames: list[str],
         ffmpeg_process,
         frame_shape,
         frame_queue,
@@ -359,6 +357,7 @@ class CameraCapture(threading.Thread):
         self.name = f"capture:{config.name}"
         self.config = config
         self.shm_frame_count = shm_frame_count
+        self.shm_frames = shm_frames
         self.frame_shape = frame_shape
         self.frame_queue = frame_queue
         self.fps = fps
@@ -374,6 +373,7 @@ class CameraCapture(threading.Thread):
             self.ffmpeg_process,
             self.config,
             self.shm_frame_count,
+            self.shm_frames,
             self.frame_shape,
             self.frame_manager,
             self.frame_queue,
