@@ -36,7 +36,7 @@ chromadb == 0.5.7
 onnx_clip == 4.0.*
 # Generative AI
 google-generativeai == 0.6.*
-ollama == 0.2.*
+ollama == 0.3.*
 openai == 1.30.*
 # push notifications
 py-vapid == 1.9.*
