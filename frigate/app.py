@@ -35,7 +35,6 @@ from frigate.const import (
     CACHE_DIR,
     CLIPS_DIR,
     CONFIG_DIR,
-    DEFAULT_DB_PATH,
     EXPORT_DIR,
     MODEL_CACHE_DIR,
     RECORD_DIR,
@@ -150,13 +149,6 @@ class FrigateApp:
                     f.write(str(datetime.datetime.now().timestamp()))
             except PermissionError:
                 logger.error("Unable to write to /config to save DB state")
-
-        # Migrate DB location
-        old_db_path = DEFAULT_DB_PATH
-        if not os.path.isfile(self.config.database.path) and os.path.isfile(
-            old_db_path
-        ):
-            os.rename(old_db_path, self.config.database.path)
 
         # Migrate DB schema
         migrate_db = SqliteExtDatabase(self.config.database.path)
