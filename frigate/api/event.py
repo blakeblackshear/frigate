@@ -384,8 +384,6 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
 
     context: EmbeddingsContext = request.app.embeddings
 
-    logger.info(f"context: {context.embeddings}, conn: {context.embeddings.conn}")
-
     selected_columns = [
         Event.id,
         Event.camera,
@@ -503,6 +501,7 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
 
         if "thumbnail" in search_types:
             thumb_results = context.embeddings.search_thumbnail(query, limit)
+            logger.info(f"thumb results: {thumb_results}")
 
         if "description" in search_types:
             desc_results = context.embeddings.search_description(query, limit)

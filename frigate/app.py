@@ -9,11 +9,9 @@ from multiprocessing.synchronize import Event as MpEvent
 from typing import Any, Optional
 
 import psutil
-import sqlite_vec
 import uvicorn
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
-from playhouse.sqliteq import SqliteQueueDatabase
 
 import frigate.util as util
 from frigate.api.auth import hash_password
@@ -41,6 +39,7 @@ from frigate.const import (
     RECORD_DIR,
 )
 from frigate.embeddings import EmbeddingsContext, manage_embeddings
+from frigate.embeddings.sqlitevecq import SqliteVecQueueDatabase
 from frigate.events.audio import AudioProcessor
 from frigate.events.cleanup import EventCleanup
 from frigate.events.external import ExternalEventProcessor
@@ -240,7 +239,7 @@ class FrigateApp:
     def bind_database(self) -> None:
         """Bind db to the main process."""
         # NOTE: all db accessing processes need to be created before the db can be bound to the main process
-        self.db = SqliteQueueDatabase(
+        self.db = SqliteVecQueueDatabase(
             self.config.database.path,
             pragmas={
                 "auto_vacuum": "FULL",  # Does not defragment database
@@ -250,6 +249,7 @@ class FrigateApp:
             timeout=max(
                 60, 10 * len([c for c in self.config.cameras.values() if c.enabled])
             ),
+            load_vec_extension=self.config.semantic_search.enabled,
         )
         models = [
             Event,
@@ -264,14 +264,6 @@ class FrigateApp:
         ]
         self.db.bind(models)
 
-        if self.config.semantic_search.enabled:
-            # use existing db connection to load sqlite_vec extension
-            conn = self.db.connection()
-            conn.enable_load_extension(True)
-            sqlite_vec.load(conn)
-            conn.enable_load_extension(False)
-            logger.info(f"main connection: {self.db}")
-
     def check_db_data_migrations(self) -> None:
         # check if vacuum needs to be run
         if not os.path.exists(f"{CONFIG_DIR}/.exports"):
@@ -284,12 +276,9 @@ class FrigateApp:
             migrate_exports(self.config.ffmpeg, list(self.config.cameras.keys()))
 
     def init_embeddings_client(self) -> None:
-        if not self.config.semantic_search.enabled:
-            self.embeddings = None
-            return
-
-        # Create a client for other processes to use
-        self.embeddings = EmbeddingsContext(self.db)
+        if self.config.semantic_search.enabled:
+            # Create a client for other processes to use
+            self.embeddings = EmbeddingsContext(self.db)
 
     def init_external_event_processor(self) -> None:
         self.external_event_processor = ExternalEventProcessor(self.config)

@@ -9,12 +9,11 @@ import threading
 from types import FrameType
 from typing import Optional
 
-import sqlite_vec
-from playhouse.sqliteq import SqliteQueueDatabase
 from setproctitle import setproctitle
 
 from frigate.config import FrigateConfig
 from frigate.const import CONFIG_DIR
+from frigate.embeddings.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
 from frigate.util.services import listen
 
@@ -43,7 +42,7 @@ def manage_embeddings(config: FrigateConfig) -> None:
     listen()
 
     # Configure Frigate DB
-    db = SqliteQueueDatabase(
+    db = SqliteVecQueueDatabase(
         config.database.path,
         pragmas={
             "auto_vacuum": "FULL",  # Does not defragment database
@@ -51,14 +50,10 @@ def manage_embeddings(config: FrigateConfig) -> None:
             "synchronous": "NORMAL",  # Safe when using WAL https://www.sqlite.org/pragma.html#pragma_synchronous
         },
         timeout=max(60, 10 * len([c for c in config.cameras.values() if c.enabled])),
+        load_vec_extension=True,
     )
     models = [Event]
     db.bind(models)
-
-    conn = db.connection()
-    conn.enable_load_extension(True)
-    sqlite_vec.load(conn)
-    conn.enable_load_extension(False)
 
     embeddings = Embeddings(db)
 
@@ -75,9 +70,9 @@ def manage_embeddings(config: FrigateConfig) -> None:
 
 
 class EmbeddingsContext:
-    def __init__(self, db: SqliteQueueDatabase):
+    def __init__(self, db: SqliteVecQueueDatabase):
         self.db = db
-        self.embeddings = Embeddings(db)
+        self.embeddings = Embeddings(self.db)
         self.thumb_stats = ZScoreNormalization()
         self.desc_stats = ZScoreNormalization()
 

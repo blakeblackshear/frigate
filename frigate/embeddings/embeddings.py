@@ -5,12 +5,12 @@ import io
 import logging
 import struct
 import time
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 from PIL import Image
 from playhouse.shortcuts import model_to_dict
-from playhouse.sqliteq import SqliteQueueDatabase
 
+from frigate.embeddings.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
 
 from .functions.clip import ClipEmbedding
@@ -63,10 +63,10 @@ def deserialize(bytes_data: bytes) -> List[float]:
 class Embeddings:
     """SQLite-vec embeddings database."""
 
-    def __init__(self, db: SqliteQueueDatabase) -> None:
-        self.conn = db.connection()  # Store the database connection instance
+    def __init__(self, db: SqliteVecQueueDatabase) -> None:
+        self.db = db
 
-        # create tables if they don't exist
+        # Create tables if they don't exist
         self._create_tables()
 
         self.clip_embedding = ClipEmbedding(model="ViT-B/32")
@@ -76,7 +76,7 @@ class Embeddings:
 
     def _create_tables(self):
         # Create vec0 virtual table for thumbnail embeddings
-        self.conn.execute("""
+        self.db.execute_sql("""
             CREATE VIRTUAL TABLE IF NOT EXISTS vec_thumbnails USING vec0(
                 id TEXT PRIMARY KEY,
                 thumbnail_embedding FLOAT[512]
@@ -84,7 +84,7 @@ class Embeddings:
         """)
 
         # Create vec0 virtual table for description embeddings
-        self.conn.execute("""
+        self.db.execute_sql("""
             CREATE VIRTUAL TABLE IF NOT EXISTS vec_descriptions USING vec0(
                 id TEXT PRIMARY KEY,
                 description_embedding FLOAT[384]
@@ -97,79 +97,65 @@ class Embeddings:
         # Generate embedding using CLIP
         embedding = self.clip_embedding([image])[0]
 
-        # sqlite_vec virtual tables don't support upsert, check if event_id exists
-        cursor = self.conn.execute(
-            "SELECT 1 FROM vec_thumbnails WHERE id = ?", (event_id,)
+        self.db.execute_sql(
+            """
+            INSERT OR REPLACE INTO vec_thumbnails(id, thumbnail_embedding)
+            VALUES(?, ?)
+            """,
+            (event_id, serialize(embedding)),
         )
-        row = cursor.fetchone()
-
-        if row is None:
-            # Insert if the event_id does not exist
-            self.conn.execute(
-                "INSERT INTO vec_thumbnails(id, thumbnail_embedding) VALUES(?, ?)",
-                [event_id, serialize(embedding)],
-            )
-        else:
-            # Update if the event_id already exists
-            self.conn.execute(
-                "UPDATE vec_thumbnails SET thumbnail_embedding = ? WHERE id = ?",
-                [serialize(embedding), event_id],
-            )
 
     def upsert_description(self, event_id: str, description: str):
         # Generate embedding using MiniLM
         embedding = self.minilm_embedding([description])[0]
 
-        # sqlite_vec virtual tables don't support upsert, check if event_id exists
-        cursor = self.conn.execute(
-            "SELECT 1 FROM vec_descriptions WHERE id = ?", (event_id,)
+        self.db.execute_sql(
+            """
+            INSERT OR REPLACE INTO vec_descriptions(id, description_embedding)
+            VALUES(?, ?)
+            """,
+            (event_id, serialize(embedding)),
         )
-        row = cursor.fetchone()
-
-        if row is None:
-            # Insert if the event_id does not exist
-            self.conn.execute(
-                "INSERT INTO vec_descriptions(id, description_embedding) VALUES(?, ?)",
-                [event_id, serialize(embedding)],
-            )
-        else:
-            # Update if the event_id already exists
-            self.conn.execute(
-                "UPDATE vec_descriptions SET description_embedding = ? WHERE id = ?",
-                [serialize(embedding), event_id],
-            )
 
     def delete_thumbnail(self, event_ids: List[str]) -> None:
-        ids = ", ".join("?" for _ in event_ids)
-
-        self.conn.execute(
-            f"DELETE FROM vec_thumbnails WHERE id IN ({ids})", tuple(event_ids)
+        ids = ",".join(["?" for _ in event_ids])
+        self.db.execute_sql(
+            f"DELETE FROM vec_thumbnails WHERE id IN ({ids})", event_ids
         )
 
     def delete_description(self, event_ids: List[str]) -> None:
-        ids = ", ".join("?" for _ in event_ids)
-
-        self.conn.execute(
-            f"DELETE FROM vec_descriptions WHERE id IN ({ids})", tuple(event_ids)
+        ids = ",".join(["?" for _ in event_ids])
+        self.db.execute_sql(
+            f"DELETE FROM vec_descriptions WHERE id IN ({ids})", event_ids
         )
 
-    def search_thumbnail(self, event_id: str, limit=10) -> List[Tuple[str, float]]:
-        # check if it's already embedded
-        cursor = self.conn.execute(
-            "SELECT thumbnail_embedding FROM vec_thumbnails WHERE id = ?", (event_id,)
-        )
-        row = cursor.fetchone()
-        if row:
-            query_embedding = deserialize(row[0])
-        else:
-            # If not embedded, fetch the thumbnail from the Event table and embed it
-            event = Event.get_by_id(event_id)
-            thumbnail = base64.b64decode(event.thumbnail)
-            image = Image.open(io.BytesIO(thumbnail)).convert("RGB")
-            query_embedding = self.clip_embedding([image])[0]
-            self.upsert_thumbnail(event_id, thumbnail)
+    def search_thumbnail(
+        self, query: Union[Event, str], limit=10
+    ) -> List[Tuple[str, float]]:
+        if isinstance(query, Event):
+            cursor = self.db.execute_sql(
+                """
+                SELECT thumbnail_embedding FROM vec_thumbnails WHERE id = ?
+                """,
+                [query.id],
+            )
 
-        cursor = self.conn.execute(
+            row = cursor.fetchone() if cursor else None
+
+            if row:
+                query_embedding = deserialize(
+                    row[0]
+                )  # Deserialize the thumbnail embedding
+            else:
+                # If no embedding found, generate it
+                thumbnail = base64.b64decode(query.thumbnail)
+                self.upsert_thumbnail(query.id, thumbnail)
+                image = Image.open(io.BytesIO(thumbnail)).convert("RGB")
+                query = self.clip_embedding([image])[0]
+
+        query_embedding = self.clip_embedding([query])[0]
+
+        results = self.db.execute_sql(
             """
             SELECT
                 vec_thumbnails.id,
@@ -178,14 +164,15 @@ class Embeddings:
             WHERE thumbnail_embedding MATCH ?
                 AND k = ?
             ORDER BY distance
-        """,
-            [serialize(query_embedding), limit],
-        )
-        return cursor.fetchall()
+            """,
+            (serialize(query_embedding), limit),
+        ).fetchall()
+
+        return results
 
     def search_description(self, query_text: str, limit=10) -> List[Tuple[str, float]]:
         query_embedding = self.minilm_embedding([query_text])[0]
-        cursor = self.conn.execute(
+        results = self.db.execute_sql(
             """
             SELECT
                 vec_descriptions.id,
@@ -194,13 +181,13 @@ class Embeddings:
             WHERE description_embedding MATCH ?
                 AND k = ?
             ORDER BY distance
-        """,
-            [serialize(query_embedding), limit],
-        )
-        return cursor.fetchall()
+            """,
+            (serialize(query_embedding), limit),
+        ).fetchall()
+
+        return results
 
     def reindex(self) -> None:
-        """Reindex all event embeddings."""
         logger.info("Indexing event embeddings...")
 
         st = time.time()
