@@ -42,6 +42,7 @@ codeproject
 colormap
 colorspace
 comms
+coro
 ctypeslib
 CUDA
 Cuvid
