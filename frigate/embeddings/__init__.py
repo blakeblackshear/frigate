@@ -76,8 +76,6 @@ class EmbeddingsContext:
         self.thumb_stats = ZScoreNormalization()
         self.desc_stats = ZScoreNormalization()
 
-        logger.info(f"Initializing db: {self.db}")
-
         # load stats from disk
         try:
             with open(os.path.join(CONFIG_DIR, ".search_stats.json"), "r") as f:
