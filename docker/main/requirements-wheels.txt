@@ -33,6 +33,7 @@ unidecode == 1.3.*
 openvino == 2024.3.*
 # Embeddings
 sqlite_vec == 0.1.3
+transformers == 4.45.*
 onnx_clip == 4.0.*
 # Generative AI
 google-generativeai == 0.6.*

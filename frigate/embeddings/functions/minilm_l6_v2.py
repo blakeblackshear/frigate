@@ -9,6 +9,10 @@ from typing import List
 import numpy as np
 import onnxruntime as ort
 import requests
+
+# importing this without pytorch or others causes a warning
+# https://github.com/huggingface/transformers/issues/27214
+# suppressed by setting env TRANSFORMERS_NO_ADVISORY_WARNINGS=1
 from transformers import AutoTokenizer
 
 from frigate.const import MODEL_CACHE_DIR
