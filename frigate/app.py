@@ -9,6 +9,7 @@ from multiprocessing.synchronize import Event as MpEvent
 from typing import Any, Optional
 
 import psutil
+import sqlite_vec
 import uvicorn
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
@@ -223,11 +224,8 @@ class FrigateApp:
 
     def init_embeddings_manager(self) -> None:
         if not self.config.semantic_search.enabled:
-            self.embeddings = None
             return
 
-        # Create a client for other processes to use
-        self.embeddings = EmbeddingsContext()
         embedding_process = util.Process(
             target=manage_embeddings,
             name="embeddings_manager",
@@ -266,6 +264,14 @@ class FrigateApp:
         ]
         self.db.bind(models)
 
+        if self.config.semantic_search.enabled:
+            # use existing db connection to load sqlite_vec extension
+            conn = self.db.connection()
+            conn.enable_load_extension(True)
+            sqlite_vec.load(conn)
+            conn.enable_load_extension(False)
+            logger.info(f"main connection: {self.db}")
+
     def check_db_data_migrations(self) -> None:
         # check if vacuum needs to be run
         if not os.path.exists(f"{CONFIG_DIR}/.exports"):
@@ -276,6 +282,14 @@ class FrigateApp:
                 logger.error("Unable to write to /config to save export state")
 
             migrate_exports(self.config.ffmpeg, list(self.config.cameras.keys()))
+
+    def init_embeddings_client(self) -> None:
+        if not self.config.semantic_search.enabled:
+            self.embeddings = None
+            return
+
+        # Create a client for other processes to use
+        self.embeddings = EmbeddingsContext(self.db)
 
     def init_external_event_processor(self) -> None:
         self.external_event_processor = ExternalEventProcessor(self.config)
@@ -467,7 +481,7 @@ class FrigateApp:
         self.event_processor.start()
 
     def start_event_cleanup(self) -> None:
-        self.event_cleanup = EventCleanup(self.config, self.stop_event)
+        self.event_cleanup = EventCleanup(self.config, self.stop_event, self.db)
         self.event_cleanup.start()
 
     def start_record_cleanup(self) -> None:
@@ -591,6 +605,7 @@ class FrigateApp:
         self.init_go2rtc()
         self.bind_database()
         self.check_db_data_migrations()
+        self.init_embeddings_client()
         self.init_inter_process_communicator()
         self.init_dispatcher()
         self.start_detectors()
