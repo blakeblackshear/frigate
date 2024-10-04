@@ -132,7 +132,7 @@ class Embeddings:
     def search_thumbnail(
         self, query: Union[Event, str], limit=10
     ) -> List[Tuple[str, float]]:
-        if isinstance(query, Event):
+        if query.__class__ == Event:
             cursor = self.db.execute_sql(
                 """
                 SELECT thumbnail_embedding FROM vec_thumbnails WHERE id = ?
@@ -151,9 +151,9 @@ class Embeddings:
                 thumbnail = base64.b64decode(query.thumbnail)
                 self.upsert_thumbnail(query.id, thumbnail)
                 image = Image.open(io.BytesIO(thumbnail)).convert("RGB")
-                query = self.clip_embedding([image])[0]
-
-        query_embedding = self.clip_embedding([query])[0]
+                query_embedding = self.clip_embedding([image])[0]
+        else:
+            query_embedding = self.clip_embedding([query])[0]
 
         results = self.db.execute_sql(
             """
