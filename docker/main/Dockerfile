@@ -197,12 +197,8 @@ ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES="compute,video,utility"
 
-# Turn off Chroma Telemetry: https://docs.trychroma.com/telemetry#opting-out
-ENV ANONYMIZED_TELEMETRY=False
-# Allow resetting the chroma database
-ENV ALLOW_RESET=True
-# Disable tokenizer parallelism warning
-ENV TOKENIZERS_PARALLELISM=true
+# https://github.com/huggingface/transformers/issues/27214
+ENV TRANSFORMERS_NO_ADVISORY_WARNINGS=1
 
 ENV PATH="/usr/local/go2rtc/bin:/usr/local/tempio/bin:/usr/local/nginx/sbin:${PATH}"
 ENV LIBAVFORMAT_VERSION_MAJOR=60
