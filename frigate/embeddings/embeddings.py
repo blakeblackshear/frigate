@@ -170,7 +170,6 @@ class Embeddings:
             sql_query += " AND id IN ({})".format(",".join("?" * len(event_ids)))
 
         sql_query += " ORDER BY distance"
-        logger.info(f"thumb query: {sql_query}")
 
         parameters = (
             [serialize(query_embedding), limit] + event_ids
