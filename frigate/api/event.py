@@ -495,7 +495,7 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
                 ),
                 status_code=404,
             )
-        thumb_results = context.embeddings.search_thumbnail(search_event.id, limit)
+        thumb_results = context.embeddings.search_thumbnail(search_event, limit)
     else:
         search_types = search_type.split(",")
 
