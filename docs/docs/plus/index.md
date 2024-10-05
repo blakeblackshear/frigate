@@ -23,7 +23,7 @@ Not all model types are supported by all detectors, so it's important to choose 
 
 | Model Type  | Description                                                                                                                                  |
 | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mobiledet` | Based on the same architecture as the default model included with Frigate. Runs Google Coral devices and CPUs.                               |
+| `mobiledet` | Based on the same architecture as the default model included with Frigate. Runs on Google Coral devices and CPUs.                            |
 | `yolonas`   | A newer architecture that offers slightly higher accuracy and improved detection of small objects. Runs on Intel, NVidia GPUs, and AMD GPUs. |
 
 ## Supported detector types
