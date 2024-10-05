@@ -37,9 +37,9 @@ sqlite_vec == 0.1.3
 transformers == 4.45.*
 onnx_clip == 4.0.*
 # Generative AI
-google-generativeai == 0.6.*
-ollama == 0.2.*
-openai == 1.30.*
+google-generativeai == 0.8.*
+ollama == 0.3.*
+openai == 1.51.*
 # push notifications
 py-vapid == 1.9.*
 pywebpush == 2.0.*
