@@ -539,37 +539,32 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
     if search_results:
         events_query = events_query.where(Event.id << list(search_results.keys()))
 
-    events = events_query.dicts()
-
-    # Build the final event list
-    events = [
-        {k: v for k, v in event.items() if k != "data"}
-        | {
-            "data": {
-                k: v
-                for k, v in event["data"].items()
-                if k in ["type", "score", "top_score", "description"]
-            }
+    # Fetch events and process them in a single pass
+    processed_events = []
+    for event in events_query.dicts():
+        processed_event = {k: v for k, v in event.items() if k != "data"}
+        processed_event["data"] = {
+            k: v
+            for k, v in event["data"].items()
+            if k in ["type", "score", "top_score", "description"]
         }
-        | (
-            {
-                "search_distance": search_results[event["id"]]["distance"],
-                "search_source": search_results[event["id"]]["source"],
-            }
-            if event["id"] in search_results
-            else {}
-        )
-        for event in events
-    ]
 
-    # Sort by search distance if search_results are available
+        if event["id"] in search_results:
+            processed_event["search_distance"] = search_results[event["id"]]["distance"]
+            processed_event["search_source"] = search_results[event["id"]]["source"]
+
+        processed_events.append(processed_event)
+
+    # Sort by search distance if search_results are available, otherwise by start_time
     if search_results:
-        events = sorted(events, key=lambda x: x.get("search_distance", float("inf")))
+        processed_events.sort(key=lambda x: x.get("search_distance", float("inf")))
+    else:
+        processed_events.sort(key=lambda x: x["start_time"], reverse=True)
 
     # Limit the number of events returned
-    events = events[:limit]
+    processed_events = processed_events[:limit]
 
-    return JSONResponse(content=events)
+    return JSONResponse(content=processed_events)
 
 
 @router.get("/events/summary")
