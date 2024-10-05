@@ -105,6 +105,8 @@ class Embeddings:
             (event_id, serialize(embedding)),
         )
 
+        return embedding
+
     def upsert_description(self, event_id: str, description: str):
         # Generate embedding using MiniLM
         embedding = self.minilm_embedding([description])[0]
@@ -116,6 +118,8 @@ class Embeddings:
             """,
             (event_id, serialize(embedding)),
         )
+
+        return embedding
 
     def delete_thumbnail(self, event_ids: List[str]) -> None:
         ids = ",".join(["?" for _ in event_ids])
@@ -147,11 +151,9 @@ class Embeddings:
                     row[0]
                 )  # Deserialize the thumbnail embedding
             else:
-                # If no embedding found, generate it
+                # If no embedding found, generate it and return it
                 thumbnail = base64.b64decode(query.thumbnail)
-                self.upsert_thumbnail(query.id, thumbnail)
-                image = Image.open(io.BytesIO(thumbnail)).convert("RGB")
-                query_embedding = self.clip_embedding([image])[0]
+                query_embedding = self.upsert_thumbnail(query.id, thumbnail)
         else:
             query_embedding = self.clip_embedding([query])[0]
 
@@ -166,9 +168,12 @@ class Embeddings:
 
         # Add the IN clause if event_ids is provided and not empty
         # this is the only filter supported by sqlite-vec as of 0.1.3
+        # but it seems to be broken in this version
         if event_ids:
             sql_query += " AND id IN ({})".format(",".join("?" * len(event_ids)))
 
+        # order by distance DESC is not implemented in this version of sqlite-vec
+        # when it's implemented, we can use cosine similarity
         sql_query += " ORDER BY distance"
 
         parameters = (
@@ -198,9 +203,12 @@ class Embeddings:
 
         # Add the IN clause if event_ids is provided and not empty
         # this is the only filter supported by sqlite-vec as of 0.1.3
+        # but it seems to be broken in this version
         if event_ids:
             sql_query += " AND id IN ({})".format(",".join("?" * len(event_ids)))
 
+        # order by distance DESC is not implemented in this version of sqlite-vec
+        # when it's implemented, we can use cosine similarity
         sql_query += " ORDER BY distance"
 
         parameters = (
