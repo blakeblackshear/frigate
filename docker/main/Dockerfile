@@ -197,6 +197,9 @@ ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES="compute,video,utility"
 
+# Disable tokenizer parallelism warning
+# https://stackoverflow.com/questions/62691279/how-to-disable-tokenizers-parallelism-true-false-warning/72926996#72926996
+ENV TOKENIZERS_PARALLELISM=true
 # https://github.com/huggingface/transformers/issues/27214
 ENV TRANSFORMERS_NO_ADVISORY_WARNINGS=1
 
