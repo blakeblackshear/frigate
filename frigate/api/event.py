@@ -525,22 +525,23 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
         return JSONResponse(content=[])
 
     # Fetch events in a single query
-    events = (
-        Event.select(*selected_columns)
-        .join(
-            ReviewSegment,
-            JOIN.LEFT_OUTER,
-            on=(fn.json_extract(ReviewSegment.data, "$.detections").contains(Event.id)),
-        )
-        .where(
-            (Event.id << list(search_results.keys()))
-            & reduce(operator.and_, event_filters)
-            if event_filters
-            else True
-        )
-        .dicts()
+    events_query = Event.select(*selected_columns).join(
+        ReviewSegment,
+        JOIN.LEFT_OUTER,
+        on=(fn.json_extract(ReviewSegment.data, "$.detections").contains(Event.id)),
     )
 
+    # Apply filters, if any
+    if event_filters:
+        events_query = events_query.where(reduce(operator.and_, event_filters))
+
+    # If we did a similarity search, limit events to those in search_results
+    if search_results:
+        events_query = events_query.where(Event.id << list(search_results.keys()))
+
+    events = events_query.dicts()
+
+    # Build the final event list
     events = [
         {k: v for k, v in event.items() if k != "data"}
         | {
@@ -550,13 +551,23 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
                 if k in ["type", "score", "top_score", "description"]
             }
         }
-        | {
-            "search_distance": search_results[event["id"]]["distance"],
-            "search_source": search_results[event["id"]]["source"],
-        }
+        | (
+            {
+                "search_distance": search_results[event["id"]]["distance"],
+                "search_source": search_results[event["id"]]["source"],
+            }
+            if event["id"] in search_results
+            else {}
+        )
         for event in events
     ]
-    events = sorted(events, key=lambda x: x["search_distance"])[:limit]
+
+    # Sort by search distance if search_results are available
+    if search_results:
+        events = sorted(events, key=lambda x: x.get("search_distance", float("inf")))
+
+    # Limit the number of events returned
+    events = events[:limit]
 
     return JSONResponse(content=events)
 
