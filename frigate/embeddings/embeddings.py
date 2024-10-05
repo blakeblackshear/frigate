@@ -130,7 +130,7 @@ class Embeddings:
         )
 
     def search_thumbnail(
-        self, query: Union[Event, str], event_ids: List[str] = None, limit=10
+        self, query: Union[Event, str], event_ids: List[str] = None
     ) -> List[Tuple[str, float]]:
         if query.__class__ == Event:
             cursor = self.db.execute_sql(
@@ -157,11 +157,11 @@ class Embeddings:
 
         sql_query = """
             SELECT
-                vec_thumbnails.id,
+                id,
                 distance
             FROM vec_thumbnails
             WHERE thumbnail_embedding MATCH ?
-                AND k = ?
+                AND k = 100
         """
 
         # Add the IN clause if event_ids is provided and not empty
@@ -172,9 +172,9 @@ class Embeddings:
         sql_query += " ORDER BY distance"
 
         parameters = (
-            [serialize(query_embedding), limit] + event_ids
+            [serialize(query_embedding)] + event_ids
             if event_ids
-            else [serialize(query_embedding), limit]
+            else [serialize(query_embedding)]
         )
 
         results = self.db.execute_sql(sql_query, parameters).fetchall()
@@ -182,18 +182,18 @@ class Embeddings:
         return results
 
     def search_description(
-        self, query_text: str, event_ids: List[str] = None, limit=10
+        self, query_text: str, event_ids: List[str] = None
     ) -> List[Tuple[str, float]]:
         query_embedding = self.minilm_embedding([query_text])[0]
 
         # Prepare the base SQL query
         sql_query = """
             SELECT
-                vec_descriptions.id,
+                id,
                 distance
             FROM vec_descriptions
             WHERE description_embedding MATCH ?
-                AND k = ?
+                AND k = 100
         """
 
         # Add the IN clause if event_ids is provided and not empty
@@ -204,9 +204,9 @@ class Embeddings:
         sql_query += " ORDER BY distance"
 
         parameters = (
-            [serialize(query_embedding), limit] + event_ids
+            [serialize(query_embedding)] + event_ids
             if event_ids
-            else [serialize(query_embedding), limit]
+            else [serialize(query_embedding)]
         )
 
         results = self.db.execute_sql(sql_query, parameters).fetchall()
