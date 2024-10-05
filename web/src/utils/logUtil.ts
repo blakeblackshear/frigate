@@ -128,46 +128,6 @@ export function parseLogLines(logService: LogType, logs: string[]) {
         };
       })
       .filter((value) => value != null) as LogLine[];
-  } else if (logService == "chroma") {
-    return logs
-      .map((line) => {
-        const match = frigateDateStamp.exec(line);
-
-        if (!match) {
-          const infoIndex = line.indexOf("[INFO]");
-
-          if (infoIndex != -1) {
-            return {
-              dateStamp: line.substring(0, 19),
-              severity: "info",
-              section: "startup",
-              content: line.substring(infoIndex + 6).trim(),
-            };
-          }
-
-          return null;
-        }
-
-        const startup =
-          line.indexOf("Starting component") !== -1 ||
-          line.indexOf("startup") !== -1 ||
-          line.indexOf("Started") !== -1 ||
-          line.indexOf("Uvicorn") !== -1;
-        const api = !!httpMethods.exec(line);
-        const tag = startup ? "startup" : api ? "API" : "server";
-
-        return {
-          dateStamp: match.toString().slice(1, -1),
-          severity: pythonSeverity
-            .exec(line)
-            ?.at(0)
-            ?.toString()
-            ?.toLowerCase() as LogSeverity,
-          section: tag,
-          content: line.substring(match.index + match[0].length).trim(),
-        };
-      })
-      .filter((value) => value != null) as LogLine[];
   }
 
   return [];

@@ -168,7 +168,7 @@ export default function Explore() {
       if (searchQuery) {
         const [url] = searchQuery;
 
-        // for chroma, only load 100 results for description and similarity
+        // for embeddings, only load 100 results for description and similarity
         if (url === "events/search" && searchResults.length >= 100) {
           return;
         }

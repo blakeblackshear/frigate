@@ -384,12 +384,12 @@ def vainfo():
 
 @router.get("/logs/{service}", tags=[Tags.logs])
 def logs(
-    service: str = Path(enum=["frigate", "nginx", "go2rtc", "chroma"]),
+    service: str = Path(enum=["frigate", "nginx", "go2rtc"]),
     download: Optional[str] = None,
     start: Optional[int] = 0,
     end: Optional[int] = None,
 ):
-    """Get logs for the requested service (frigate/nginx/go2rtc/chroma)"""
+    """Get logs for the requested service (frigate/nginx/go2rtc)"""
 
     def download_logs(service_location: str):
         try:
@@ -408,7 +408,6 @@ def logs(
         "frigate": "/dev/shm/logs/frigate/current",
         "go2rtc": "/dev/shm/logs/go2rtc/current",
         "nginx": "/dev/shm/logs/nginx/current",
-        "chroma": "/dev/shm/logs/chroma/current",
     }
     service_location = log_locations.get(service)
 
