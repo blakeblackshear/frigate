@@ -15,17 +15,36 @@ With a subscription, 12 model trainings per year are included. If you cancel you
 
 Information on how to integrate Frigate+ with Frigate can be found in the [integration docs](../integrations/plus.md).
 
+## Available model types
+
+There are two model types offered in Frigate+: `mobiledet` and `yolonas`. Both of these models are object detection models and are trained to detect the same set of labels [listed below](#available-label-types).
+
+Not all model types are supported by all detectors, so it's important to choose a model type to match your detector as shown in the table under [supported detector types](#supported-detector-types).
+
+| Model Type  | Description                                                                                                                                  |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mobiledet` | Based on the same architecture as the default model included with Frigate. Runs on Google Coral devices and CPUs.                            |
+| `yolonas`   | A newer architecture that offers slightly higher accuracy and improved detection of small objects. Runs on Intel, NVidia GPUs, and AMD GPUs. |
+
 ## Supported detector types
+
+Currently, Frigate+ models support CPU (`cpu`), Google Coral (`edgetpu`), OpenVino (`openvino`), ONNX (`onnx`), and ROCm (`rocm`) detectors.
 
 :::warning
 
-Frigate+ models are not supported for TensorRT or OpenVino yet.
+Using Frigate+ models with `onnx` and `rocm` is only available with Frigate 0.15, which is still under development.
 
 :::
 
-Currently, Frigate+ models only support CPU (`cpu`) and Coral (`edgetpu`) models. OpenVino is next in line to gain support.
+| Hardware                                                                                                                     | Recommended Detector Type | Recommended Model Type |
+| ---------------------------------------------------------------------------------------------------------------------------- | ------------------------- | ---------------------- |
+| [CPU](/configuration/object_detectors.md#cpu-detector-not-recommended)                                                       | `cpu`                     | `mobiledet`            |
+| [Coral (all form factors)](/configuration/object_detectors.md#edge-tpu-detector)                                             | `edgetpu`                 | `mobiledet`            |
+| [Intel](/configuration/object_detectors.md#openvino-detector)                                                                | `openvino`                | `yolonas`              |
+| [NVidia GPU](https://deploy-preview-13787--frigate-docs.netlify.app/configuration/object_detectors#onnx)\*                   | `onnx`                    | `yolonas`              |
+| [AMD ROCm GPU](https://deploy-preview-13787--frigate-docs.netlify.app/configuration/object_detectors#amdrocm-gpu-detector)\* | `rocm`                    | `yolonas`              |
 
-The models are created using the same MobileDet architecture as the default model. Additional architectures will be added in future releases as needed.
+_\* Requires Frigate 0.15_
 
 ## Available label types
 
