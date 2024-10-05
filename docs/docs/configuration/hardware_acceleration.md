@@ -383,7 +383,7 @@ Make sure to follow the [Rockchip specific installation instructions](/frigate/i
 
 ### Configuration
 
-Add one of the following FFmpeg presets to your `config.yaml` to enable hardware video processing:
+Add one of the following FFmpeg presets to your `config.yml` to enable hardware video processing:
 
 ```yaml
 # if you try to decode a h264 encoded stream

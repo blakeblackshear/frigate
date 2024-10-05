@@ -373,13 +373,21 @@ Metadata about previews for this time range.
 
 Metadata about previews for this hour
 
-### `GET /api/preview/<camera>/start/<start-timestamp>/end/<end-timestamp>`
+### `GET /api/preview/<camera>/start/<start-timestamp>/end/<end-timestamp>/frames`
 
 List of frames in the preview cache for the time range. Previews are only kept in the cache until they are combined into an mp4 at the end of the hour.
 
 ### `GET /api/preview/<file_name>/thumbnail.jpg`
 
 Specific preview frame from preview cache.
+
+### `GET /review/<review_id>/preview`
+
+Looping image made from preview video / frames during this review item.
+
+| param     | Type | Description                      |
+| --------- | ---- | -------------------------------- |
+| `format`  | str  | Format of preview [`gif`, `mp4`] |
 
 ### `GET /<camera>/start/<start-timestamp>/end/<end-timestamp>/preview`
 

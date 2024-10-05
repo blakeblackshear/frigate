@@ -25,7 +25,7 @@ Available via HACS as a default repository. To install:
 - Use [HACS](https://hacs.xyz/) to install the integration:
 
 ```
-Home Assistant > HACS > Integrations > "Explore & Add Integrations" > Frigate
+Home Assistant > HACS > Click in the Search bar and type "Frigate" > Frigate
 ```
 
 - Restart Home Assistant.

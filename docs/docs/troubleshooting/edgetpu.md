@@ -28,6 +28,18 @@ The USB coral has different IDs when it is uninitialized and initialized.
 - When running Frigate in a VM, Proxmox lxc, etc. you must ensure both device IDs are mapped.
 - When running HA OS you may need to run the Full Access version of the Frigate addon with the `Protected Mode` switch disabled so that the coral can be accessed.
 
+### Synology 716+II running DSM 7.2.1-69057 Update 5
+
+Some users have reported that this older device runs an older kernel causing issues with the coral not being detected. The following steps allowed it to be detected correctly:
+
+1. Plug in the coral TPU in any of the USB ports on the NAS
+2. Open the control panel - info screen. The coral TPU would be shown as a generic device.
+3. Start the docker container with Coral TPU enabled in the config
+4. The TPU would be detected but a few moments later it would disconnect.
+5. While leaving the TPU device plugged in, restart the NAS using the reboot command in the UI. Do NOT unplug the NAS/power it off etc.
+6. Open the control panel - info scree. The coral TPU will now be recognised as a USB Device - google inc
+7. Start the frigate container. Everything should work now!
+
 ## USB Coral Detection Appears to be Stuck
 
 The USB Coral can become stuck and need to be restarted, this can happen for a number of reasons depending on hardware and software setup. Some common reasons are:

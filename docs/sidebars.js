@@ -57,6 +57,7 @@ module.exports = {
         "configuration/notifications",
         "configuration/hardware_acceleration",
         "configuration/ffmpeg_presets",
+        "configuration/pwa",
         "configuration/tls",
         "configuration/advanced",
       ],

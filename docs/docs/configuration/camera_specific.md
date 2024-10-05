@@ -9,6 +9,12 @@ This page makes use of presets of FFmpeg args. For more information on presets, 
 
 :::
 
+:::note
+
+Many cameras support encoding options which greatly affect the live view experience, see the [Live view](/configuration/live) page for more info.
+
+:::
+
 ## MJPEG Cameras
 
 Note that mjpeg cameras require encoding the video into h264 for recording, and restream roles. This will use significantly more CPU than if the cameras supported h264 feeds directly. It is recommended to use the restream role to create an h264 restream and then use that as the source for ffmpeg.
