@@ -11,7 +11,7 @@ import cv2
 from fastapi import APIRouter, Request
 from fastapi.params import Depends
 from fastapi.responses import JSONResponse
-from peewee import JOIN, DoesNotExist, Window, fn, operator
+from peewee import JOIN, DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
 
 from frigate.api.defs.events_body import (
@@ -259,7 +259,7 @@ def events(params: EventsQueryParams = Depends()):
 
 @router.get("/events/explore")
 def events_explore(limit: int = 10):
-    ranked_events = Event.select(
+    subquery = Event.select(
         Event.id,
         Event.camera,
         Event.label,
@@ -275,37 +275,38 @@ def events_explore(limit: int = 10):
         Event.false_positive,
         Event.box,
         Event.data,
-        fn.COUNT(Event.id).over(partition_by=[Event.label]).alias("event_count"),
-        Window.row_number()
+        fn.rank()
         .over(partition_by=[Event.label], order_by=[Event.start_time.desc()])
         .alias("rank"),
-    ).alias("ranked_events")
+        fn.COUNT(Event.id).over(partition_by=[Event.label]).alias("event_count"),
+    ).alias("subquery")
 
     query = (
-        ranked_events.select(
-            ranked_events.c.id,
-            ranked_events.c.camera,
-            ranked_events.c.label,
-            ranked_events.c.zones,
-            ranked_events.c.start_time,
-            ranked_events.c.end_time,
-            ranked_events.c.has_clip,
-            ranked_events.c.has_snapshot,
-            ranked_events.c.plus_id,
-            ranked_events.c.retain_indefinitely,
-            ranked_events.c.sub_label,
-            ranked_events.c.top_score,
-            ranked_events.c.false_positive,
-            ranked_events.c.box,
-            ranked_events.c.data,
-            ranked_events.c.event_count,
+        Event.select(
+            subquery.c.id,
+            subquery.c.camera,
+            subquery.c.label,
+            subquery.c.zones,
+            subquery.c.start_time,
+            subquery.c.end_time,
+            subquery.c.has_clip,
+            subquery.c.has_snapshot,
+            subquery.c.plus_id,
+            subquery.c.retain_indefinitely,
+            subquery.c.sub_label,
+            subquery.c.top_score,
+            subquery.c.false_positive,
+            subquery.c.box,
+            subquery.c.data,
+            subquery.c.event_count,
         )
-        .where(ranked_events.c.rank <= limit)
-        .order_by(ranked_events.c.event_count.desc(), ranked_events.c.start_time.desc())
+        .from_(subquery)
+        .where(subquery.c.rank <= limit)
+        .order_by(subquery.c.event_count.desc(), subquery.c.start_time.desc())
         .dicts()
     )
 
-    events = list(query)
+    events = list(query.iterator())
 
     processed_events = [
         {k: v for k, v in event.items() if k != "data"}
