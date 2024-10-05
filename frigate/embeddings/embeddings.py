@@ -10,7 +10,7 @@ from typing import List, Tuple, Union
 from PIL import Image
 from playhouse.shortcuts import model_to_dict
 
-from frigate.embeddings.sqlitevecq import SqliteVecQueueDatabase
+from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
 
 from .functions.clip import ClipEmbedding

@@ -13,7 +13,7 @@ from setproctitle import setproctitle
 
 from frigate.config import FrigateConfig
 from frigate.const import CONFIG_DIR
-from frigate.embeddings.sqlitevecq import SqliteVecQueueDatabase
+from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
 from frigate.util.services import listen
 
