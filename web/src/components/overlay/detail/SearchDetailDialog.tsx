@@ -1,4 +1,4 @@
-import { isDesktop, isIOS, isMobile } from "react-device-detect";
+import { isDesktop, isIOS, isMobile, isSafari } from "react-device-detect";
 import { SearchResult } from "@/types/search";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -20,7 +20,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { FrigatePlusDialog } from "../dialog/FrigatePlusDialog";
 import { Event } from "@/types/event";
 import HlsVideoPlayer from "@/components/player/HlsVideoPlayer";
 import { baseUrl } from "@/api/baseUrl";
@@ -28,6 +27,7 @@ import { cn } from "@/lib/utils";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
 import {
+  FaCheckCircle,
   FaChevronDown,
   FaHistory,
   FaImage,
@@ -59,6 +59,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
+import { Card, CardContent } from "@/components/ui/card";
+import useImageLoaded from "@/hooks/use-image-loaded";
+import ImageLoadingIndicator from "@/components/indicators/ImageLoadingIndicator";
 
 const SEARCH_TABS = [
   "details",
@@ -209,15 +213,13 @@ export default function SearchDetailDialog({
           />
         )}
         {page == "snapshot" && (
-          <FrigatePlusDialog
-            upload={
+          <ObjectSnapshotTab
+            search={
               {
                 ...search,
                 plus_id: config?.plus?.enabled ? search.plus_id : "not_enabled",
               } as unknown as Event
             }
-            dialog={false}
-            onClose={() => {}}
             onEventUploaded={() => {
               search.plus_id = "new_upload";
             }}
@@ -454,6 +456,138 @@ function ObjectDetailsTab({
             Save
           </Button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+type ObjectSnapshotTabProps = {
+  search: Event;
+  onEventUploaded: () => void;
+};
+function ObjectSnapshotTab({
+  search,
+  onEventUploaded,
+}: ObjectSnapshotTabProps) {
+  type SubmissionState = "reviewing" | "uploading" | "submitted";
+
+  const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
+
+  // upload
+
+  const [state, setState] = useState<SubmissionState>(
+    search?.plus_id ? "submitted" : "reviewing",
+  );
+
+  useEffect(
+    () => setState(search?.plus_id ? "submitted" : "reviewing"),
+    [search],
+  );
+
+  const onSubmitToPlus = useCallback(
+    async (falsePositive: boolean) => {
+      if (!search) {
+        return;
+      }
+
+      falsePositive
+        ? axios.put(`events/${search.id}/false_positive`)
+        : axios.post(`events/${search.id}/plus`, {
+            include_annotation: 1,
+          });
+
+      setState("submitted");
+      onEventUploaded();
+    },
+    [search, onEventUploaded],
+  );
+
+  return (
+    <div className="relative size-full">
+      <ImageLoadingIndicator
+        className="absolute inset-0 aspect-video min-h-[60dvh] w-full"
+        imgLoaded={imgLoaded}
+      />
+      <div className={`${imgLoaded ? "visible" : "invisible"}`}>
+        <TransformWrapper minScale={1.0} wheel={{ smoothStep: 0.005 }}>
+          <div className="flex flex-col space-y-3">
+            <TransformComponent
+              wrapperStyle={{
+                width: "100%",
+                height: "100%",
+              }}
+              contentStyle={{
+                position: "relative",
+                width: "100%",
+                height: "100%",
+              }}
+            >
+              {search?.id && (
+                <img
+                  ref={imgRef}
+                  className={`mx-auto max-h-[60dvh] bg-black object-contain`}
+                  src={`${baseUrl}api/events/${search?.id}/snapshot.jpg`}
+                  alt={`${search?.label}`}
+                  loading={isSafari ? "eager" : "lazy"}
+                  onLoad={() => {
+                    onImgLoad();
+                  }}
+                />
+              )}
+            </TransformComponent>
+            <Card className="p-1 text-sm md:p-2">
+              <CardContent className="flex flex-col items-center justify-between gap-3 p-2 md:flex-row">
+                <div className={cn("flex flex-col space-y-3")}>
+                  <div
+                    className={
+                      "text-lg font-semibold leading-none tracking-tight"
+                    }
+                  >
+                    Submit To Frigate+
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Objects in locations you want to avoid are not false
+                    positives. Submitting them as false positives will confuse
+                    the model.
+                  </div>
+                </div>
+
+                <div className="flex flex-row justify-center gap-2 md:justify-end">
+                  {state == "reviewing" && (
+                    <>
+                      <Button
+                        className="bg-success"
+                        onClick={() => {
+                          setState("uploading");
+                          onSubmitToPlus(false);
+                        }}
+                      >
+                        This is a {search?.label}
+                      </Button>
+                      <Button
+                        className="text-white"
+                        variant="destructive"
+                        onClick={() => {
+                          setState("uploading");
+                          onSubmitToPlus(true);
+                        }}
+                      >
+                        This is not a {search?.label}
+                      </Button>
+                    </>
+                  )}
+                  {state == "uploading" && <ActivityIndicator />}
+                  {state == "submitted" && (
+                    <div className="flex flex-row items-center justify-center gap-2">
+                      <FaCheckCircle className="text-success" />
+                      Submitted
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TransformWrapper>
       </div>
     </div>
   );
