@@ -25,7 +25,6 @@ import HlsVideoPlayer from "@/components/player/HlsVideoPlayer";
 import { baseUrl } from "@/api/baseUrl";
 import { cn } from "@/lib/utils";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
-import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
 import {
   FaCheckCircle,
   FaChevronDown,
@@ -63,6 +62,8 @@ import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import { Card, CardContent } from "@/components/ui/card";
 import useImageLoaded from "@/hooks/use-image-loaded";
 import ImageLoadingIndicator from "@/components/indicators/ImageLoadingIndicator";
+import { useResizeObserver } from "@/hooks/resize-observer";
+import { VideoResolutionType } from "@/types/live";
 
 const SEARCH_TABS = [
   "details",
@@ -225,7 +226,7 @@ export default function SearchDetailDialog({
             }}
           />
         )}
-        {page == "video" && <VideoTab search={search} config={config} />}
+        {page == "video" && <VideoTab search={search} />}
         {page == "object lifecycle" && (
           <ObjectLifecycle
             className="w-full overflow-x-hidden"
@@ -595,9 +596,8 @@ function ObjectSnapshotTab({
 
 type VideoTabProps = {
   search: SearchResult;
-  config?: FrigateConfig;
 };
-function VideoTab({ search, config }: VideoTabProps) {
+function VideoTab({ search }: VideoTabProps) {
   const [isLoading, setIsLoading] = useState(true);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -608,61 +608,48 @@ function VideoTab({ search, config }: VideoTabProps) {
     `review/event/${search.id}`,
   ]);
 
-  const mainCameraAspect = useMemo(() => {
-    const camera = config?.cameras?.[search.camera];
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
-    if (!camera) {
-      return "normal";
-    }
+  const [{ width: containerWidth, height: containerHeight }] =
+    useResizeObserver(containerRef);
+  const [videoResolution, setVideoResolution] = useState<VideoResolutionType>({
+    width: 0,
+    height: 0,
+  });
 
-    const aspectRatio = camera.detect.width / camera.detect.height;
+  const videoAspectRatio = useMemo(() => {
+    return videoResolution.width / videoResolution.height || 16 / 9;
+  }, [videoResolution]);
 
-    if (!aspectRatio) {
-      return "normal";
-    } else if (aspectRatio > ASPECT_WIDE_LAYOUT) {
-      return "wide";
-    } else if (aspectRatio < ASPECT_VERTICAL_LAYOUT) {
-      return "tall";
+  const containerAspectRatio = useMemo(() => {
+    return containerWidth / containerHeight || 16 / 9;
+  }, [containerWidth, containerHeight]);
+
+  const videoDimensions = useMemo(() => {
+    if (!containerWidth || !containerHeight)
+      return { width: "100%", height: "100%" };
+
+    if (containerAspectRatio > videoAspectRatio) {
+      const height = containerHeight;
+      const width = height * videoAspectRatio;
+      return { width: `${width}px`, height: `${height}px` };
     } else {
-      return "normal";
+      const width = containerWidth;
+      const height = width / videoAspectRatio;
+      return { width: `${width}px`, height: `${height}px` };
     }
-  }, [config, search]);
-
-  const containerClassName = useMemo(() => {
-    if (mainCameraAspect == "wide") {
-      return "flex justify-center items-center";
-    } else if (mainCameraAspect == "tall") {
-      if (isDesktop) {
-        return "size-full flex flex-col justify-center items-center";
-      } else {
-        return "size-full";
-      }
-    } else {
-      return "";
-    }
-  }, [mainCameraAspect]);
-
-  const videoClassName = useMemo(() => {
-    if (mainCameraAspect == "wide") {
-      return "w-full aspect-wide";
-    } else if (mainCameraAspect == "tall") {
-      if (isDesktop) {
-        return "w-[50%] aspect-tall flex justify-center";
-      } else {
-        return "size-full";
-      }
-    } else {
-      return "w-full aspect-video";
-    }
-  }, [mainCameraAspect]);
+  }, [containerWidth, containerHeight, videoAspectRatio, containerAspectRatio]);
 
   return (
-    <div className="relative flex flex-col">
-      <div className={`aspect-video ${containerClassName}`}>
+    <div ref={containerRef} className="relative flex h-full w-full flex-col">
+      <div className="relative flex flex-grow items-center justify-center">
         {(isLoading || !reviewItem) && (
-          <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+          <ActivityIndicator className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2" />
         )}
-        <div className={videoClassName}>
+        <div
+          className="relative flex items-center justify-center"
+          style={videoDimensions}
+        >
           <HlsVideoPlayer
             videoRef={videoRef}
             currentSource={`${baseUrl}vod/${search.camera}/start/${search.start_time}/end/${endTime}/index.m3u8`}
@@ -672,36 +659,37 @@ function VideoTab({ search, config }: VideoTabProps) {
             fullscreen={false}
             supportsFullscreen={false}
             onPlaying={() => setIsLoading(false)}
+            setFullResolution={setVideoResolution}
           />
+          {!isLoading && reviewItem && (
+            <div
+              className={cn(
+                "absolute top-2 z-10 flex items-center",
+                isIOS ? "right-8" : "right-2",
+              )}
+            >
+              <Tooltip>
+                <TooltipTrigger>
+                  <Chip
+                    className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
+                    onClick={() => {
+                      if (reviewItem?.id) {
+                        const params = new URLSearchParams({
+                          id: reviewItem.id,
+                        }).toString();
+                        navigate(`/review?${params}`);
+                      }
+                    }}
+                  >
+                    <FaHistory className="size-4 text-white" />
+                  </Chip>
+                </TooltipTrigger>
+                <TooltipContent side="left">View in History</TooltipContent>
+              </Tooltip>
+            </div>
+          )}
         </div>
       </div>
-      {!isLoading && reviewItem && (
-        <div
-          className={cn(
-            "absolute top-2 flex items-center",
-            isIOS ? "right-8" : "right-2",
-          )}
-        >
-          <Tooltip>
-            <TooltipTrigger>
-              <Chip
-                className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
-                onClick={() => {
-                  if (reviewItem?.id) {
-                    const params = new URLSearchParams({
-                      id: reviewItem.id,
-                    }).toString();
-                    navigate(`/review?${params}`);
-                  }
-                }}
-              >
-                <FaHistory className="size-4 text-white" />
-              </Chip>
-            </TooltipTrigger>
-            <TooltipContent side="left">View in History</TooltipContent>
-          </Tooltip>
-        </div>
-      )}
     </div>
   );
 }
