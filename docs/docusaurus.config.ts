@@ -1,7 +1,9 @@
 import type * as Preset from '@docusaurus/preset-classic';
 import * as path from 'node:path';
+import type { Config, PluginConfig } from '@docusaurus/types';
+import type * as OpenApiPlugin from 'docusaurus-plugin-openapi-docs';
 
-module.exports = {
+const config: Config = {
   title: 'Frigate',
   tagline: 'NVR With Realtime Object Detection for IP Cameras',
   url: 'https://docs.frigate.video',
@@ -11,7 +13,7 @@ module.exports = {
   favicon: 'img/favicon.ico',
   organizationName: 'blakeblackshear',
   projectName: 'frigate',
-  themes: ['@docusaurus/theme-mermaid'],
+  themes: ['@docusaurus/theme-mermaid', 'docusaurus-theme-openapi-docs'],
   markdown: {
     mermaid: true,
   },
@@ -29,6 +31,28 @@ module.exports = {
     prism: {
       additionalLanguages: ['bash', 'json'],
     },
+    languageTabs: [
+      {
+        highlight: 'python',
+        language: 'python',
+        logoClass: 'python',
+      },
+      {
+        highlight: 'bash',
+        language: 'curl',
+        logoClass: 'curl',
+      },
+      {
+        highlight: 'javascript',
+        language: 'nodejs',
+        logoClass: 'nodejs',
+      },
+      {
+        highlight: 'javascript',
+        language: 'javascript',
+        logoClass: 'javascript',
+      },
+    ],
     navbar: {
       title: 'Frigate',
       logo: {
@@ -80,23 +104,49 @@ module.exports = {
       copyright: `Copyright © ${new Date().getFullYear()} Blake Blackshear`,
     },
   },
-  plugins: [path.resolve(__dirname, 'plugins', 'raw-loader')],
+  plugins: [
+    path.resolve(__dirname, 'plugins', 'raw-loader'),
+    [
+      'docusaurus-plugin-openapi-docs',
+      {
+        id: 'openapi',
+        docsPluginId: 'classic', // configured for preset-classic
+        config: {
+          frigateApi: {
+            specPath: 'static/frigate-api.yaml',
+            outputDir: 'docs/integrations/api',
+            sidebarOptions: {
+              groupPathsBy: 'tag',
+              categoryLinkSource: 'tag',
+            },
+            hideSendButton: false,
+            showSchemas: true,
+          } satisfies OpenApiPlugin.Options,
+        },
+      },
+    ]
+  ] as PluginConfig[],
   presets: [
     [
-      '@docusaurus/preset-classic',
+      'classic',
       {
         docs: {
           routeBasePath: '/',
-          sidebarPath: require.resolve('./sidebars.js'),
+          sidebarPath: './sidebars.ts',
           // Please change this to your repo.
           editUrl: 'https://github.com/blakeblackshear/frigate/edit/master/docs/',
-          sidebarCollapsible: false,
+          sidebarCollapsible: true,
+          docItemComponent: '@theme/ApiItem', // Derived from docusaurus-theme-openapi
         },
 
         theme: {
-          customCss: require.resolve('./src/css/custom.css'),
+          customCss: './src/css/custom.css',
         },
       } satisfies Preset.Options,
     ],
   ],
 };
+
+export default async function createConfig() {
+  return config;
+}
