@@ -123,8 +123,9 @@ const config: Config = {
             sidebarOptions: {
               groupPathsBy: 'tag',
               categoryLinkSource: 'tag',
+              sidebarCollapsible: true,
+              sidebarCollapsed: true,
             },
-            hideSendButton: false,
             showSchemas: true,
           } satisfies OpenApiPlugin.Options,
         },

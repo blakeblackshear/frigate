@@ -2,7 +2,11 @@ openapi: 3.1.0
 info:
   title: Frigate HTTP API
   version: 0.1.0
-  
+
+servers:
+  - url: https://demo.frigate.video/api
+  - url: https://localhost:5001/api
+
 paths:
   /auth:
     get:
