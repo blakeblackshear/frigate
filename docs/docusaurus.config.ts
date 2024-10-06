@@ -140,7 +140,7 @@ const config: Config = {
           sidebarPath: './sidebars.ts',
           // Please change this to your repo.
           editUrl: 'https://github.com/blakeblackshear/frigate/edit/master/docs/',
-          sidebarCollapsible: true,
+          sidebarCollapsible: false,
           docItemComponent: '@theme/ApiItem', // Derived from docusaurus-theme-openapi
         },
 
