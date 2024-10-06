@@ -77,7 +77,7 @@ const sidebars: SidebarsConfig = {
           type: 'generated-index',
           title: 'Frigate HTTP API',
           description: 'HTTP API',
-          slug: '/integrations/api',
+          slug: '/integrations/api/frigate-http-api',
         },
         items: frigateHttpApiSidebar,
       },
