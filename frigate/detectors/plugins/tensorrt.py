@@ -26,9 +26,6 @@ DETECTOR_KEY = "tensorrt"
 if TRT_SUPPORT:
 
     class TrtLogger(trt.ILogger):
-        def __init__(self):
-            trt.ILogger.__init__(self)
-
         def log(self, severity, msg):
             logger.log(self.getSeverity(severity), msg)
 

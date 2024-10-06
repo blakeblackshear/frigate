@@ -2,8 +2,6 @@
 
 import datetime
 import logging
-import signal
-import sys
 import threading
 import time
 from typing import Tuple
@@ -73,46 +71,42 @@ class AudioProcessor(util.Process):
     ):
         super().__init__(name="frigate.audio_manager", daemon=True)
 
-        self.logger = logging.getLogger(self.name)
         self.camera_metrics = camera_metrics
         self.cameras = cameras
 
     def run(self) -> None:
-        stop_event = threading.Event()
         audio_threads: list[AudioEventMaintainer] = []
 
         threading.current_thread().name = "process:audio_manager"
-        signal.signal(signal.SIGTERM, lambda sig, frame: sys.exit())
 
         if len(self.cameras) == 0:
             return
 
-        try:
-            for camera in self.cameras:
-                audio_thread = AudioEventMaintainer(
-                    camera,
-                    self.camera_metrics,
-                    stop_event,
-                )
-                audio_threads.append(audio_thread)
-                audio_thread.start()
+        for camera in self.cameras:
+            audio_thread = AudioEventMaintainer(
+                camera,
+                self.camera_metrics,
+                self.stop_event,
+            )
+            audio_threads.append(audio_thread)
+            audio_thread.start()
 
-            self.logger.info(f"Audio processor started (pid: {self.pid})")
+        self.logger.info(f"Audio processor started (pid: {self.pid})")
 
-            while True:
-                signal.pause()
-        finally:
-            stop_event.set()
-            for thread in audio_threads:
-                thread.join(1)
-                if thread.is_alive():
-                    self.logger.info(f"Waiting for thread {thread.name:s} to exit")
-                    thread.join(10)
+        while not self.stop_event.wait():
+            pass
 
-            for thread in audio_threads:
-                if thread.is_alive():
-                    self.logger.warning(f"Thread {thread.name} is still alive")
-            self.logger.info("Exiting audio processor")
+        for thread in audio_threads:
+            thread.join(1)
+            if thread.is_alive():
+                self.logger.info(f"Waiting for thread {thread.name:s} to exit")
+                thread.join(10)
+
+        for thread in audio_threads:
+            if thread.is_alive():
+                self.logger.warning(f"Thread {thread.name} is still alive")
+
+        self.logger.info("Exiting audio processor")
 
 
 class AudioEventMaintainer(threading.Thread):

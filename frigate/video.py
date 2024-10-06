@@ -27,6 +27,7 @@ from frigate.object_detection import RemoteObjectDetector
 from frigate.ptz.autotrack import ptz_moving_at_frame_time
 from frigate.track import ObjectTracker
 from frigate.track.norfair_tracker import NorfairTracker
+from frigate.track.object_attribute import ObjectAttribute
 from frigate.util.builtin import EventsPerSecond, get_tomorrow_at_time
 from frigate.util.image import (
     FrameManager,
@@ -34,7 +35,6 @@ from frigate.util.image import (
     draw_box_with_label,
 )
 from frigate.util.object import (
-    box_inside,
     create_tensor_input,
     get_cluster_candidates,
     get_cluster_region,
@@ -94,6 +94,7 @@ def capture_frames(
     ffmpeg_process,
     config: CameraConfig,
     shm_frame_count: int,
+    shm_frames: list[str],
     frame_shape,
     frame_manager: FrameManager,
     frame_queue,
@@ -107,8 +108,6 @@ def capture_frames(
     frame_rate.start()
     skipped_eps = EventsPerSecond()
     skipped_eps.start()
-
-    shm_frames: list[str] = []
 
     while True:
         fps.value = frame_rate.eps()
@@ -154,10 +153,6 @@ def capture_frames(
             # if the queue is full, skip this frame
             skipped_eps.update()
 
-    # clear out frames
-    for frame in shm_frames:
-        frame_manager.delete(frame)
-
 
 class CameraWatchdog(threading.Thread):
     def __init__(
@@ -176,6 +171,7 @@ class CameraWatchdog(threading.Thread):
         self.camera_name = camera_name
         self.config = config
         self.shm_frame_count = shm_frame_count
+        self.shm_frames: list[str] = []
         self.capture_thread = None
         self.ffmpeg_detect_process = None
         self.logpipe = LogPipe(f"ffmpeg.{self.camera_name}.detect")
@@ -308,6 +304,7 @@ class CameraWatchdog(threading.Thread):
         self.capture_thread = CameraCapture(
             self.config,
             self.shm_frame_count,
+            self.shm_frames,
             self.ffmpeg_detect_process,
             self.frame_shape,
             self.frame_queue,
@@ -348,6 +345,7 @@ class CameraCapture(threading.Thread):
         self,
         config: CameraConfig,
         shm_frame_count: int,
+        shm_frames: list[str],
         ffmpeg_process,
         frame_shape,
         frame_queue,
@@ -359,6 +357,7 @@ class CameraCapture(threading.Thread):
         self.name = f"capture:{config.name}"
         self.config = config
         self.shm_frame_count = shm_frame_count
+        self.shm_frames = shm_frames
         self.frame_shape = frame_shape
         self.frame_queue = frame_queue
         self.fps = fps
@@ -374,6 +373,7 @@ class CameraCapture(threading.Thread):
             self.ffmpeg_process,
             self.config,
             self.shm_frame_count,
+            self.shm_frames,
             self.frame_shape,
             self.frame_manager,
             self.frame_queue,
@@ -734,29 +734,34 @@ def process_frames(
                 object_tracker.update_frame_times(frame_time)
 
         # group the attribute detections based on what label they apply to
-        attribute_detections = {}
+        attribute_detections: dict[str, list[ObjectAttribute]] = {}
         for label, attribute_labels in model_config.attributes_map.items():
             attribute_detections[label] = [
-                d for d in consolidated_detections if d[0] in attribute_labels
+                ObjectAttribute(d)
+                for d in consolidated_detections
+                if d[0] in attribute_labels
             ]
 
-        # build detections and add attributes
+        # build detections
         detections = {}
         for obj in object_tracker.tracked_objects.values():
-            attributes = []
-            # if the objects label has associated attribute detections
-            if obj["label"] in attribute_detections.keys():
-                # add them to attributes if they intersect
-                for attribute_detection in attribute_detections[obj["label"]]:
-                    if box_inside(obj["box"], (attribute_detection[2])):
-                        attributes.append(
-                            {
-                                "label": attribute_detection[0],
-                                "score": attribute_detection[1],
-                                "box": attribute_detection[2],
-                            }
-                        )
-            detections[obj["id"]] = {**obj, "attributes": attributes}
+            detections[obj["id"]] = {**obj, "attributes": []}
+
+        # find the best object for each attribute to be assigned to
+        all_objects: list[dict[str, any]] = object_tracker.tracked_objects.values()
+        for attributes in attribute_detections.values():
+            for attribute in attributes:
+                filtered_objects = filter(
+                    lambda o: attribute.label
+                    in model_config.attributes_map.get(o["label"], []),
+                    all_objects,
+                )
+                selected_object_id = attribute.find_best_object(filtered_objects)
+
+                if selected_object_id is not None:
+                    detections[selected_object_id]["attributes"].append(
+                        attribute.get_tracking_data()
+                    )
 
         # debug object tracking
         if False:

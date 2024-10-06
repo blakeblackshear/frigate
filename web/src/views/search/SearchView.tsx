@@ -13,8 +13,8 @@ import { cn } from "@/lib/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { SearchFilter, SearchResult, SearchSource } from "@/types/search";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { isMobileOnly } from "react-device-detect";
-import { LuImage, LuSearchX, LuText } from "react-icons/lu";
+import { isDesktop, isMobileOnly } from "react-device-detect";
+import { LuColumns, LuImage, LuSearchX, LuText } from "react-icons/lu";
 import useSWR from "swr";
 import ExploreView from "../explore/ExploreView";
 import useKeyboardListener, {
@@ -26,6 +26,13 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { isEqual } from "lodash";
 import { formatDateToLocaleString } from "@/utils/dateUtil";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
+import { Slider } from "@/components/ui/slider";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { usePersistence } from "@/hooks/use-persistence";
 
 type SearchViewProps = {
   search: string;
@@ -53,8 +60,24 @@ export default function SearchView({
   loadMore,
   hasMore,
 }: SearchViewProps) {
+  const contentRef = useRef<HTMLDivElement | null>(null);
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
+  });
+
+  // grid
+
+  const [columnCount, setColumnCount] = usePersistence("exploreGridColumns", 4);
+  const effectiveColumnCount = useMemo(() => columnCount ?? 4, [columnCount]);
+
+  const gridClassName = cn("grid w-full gap-2 px-1 gap-2 lg:gap-4 md:mx-2", {
+    "sm:grid-cols-2": effectiveColumnCount <= 2,
+    "sm:grid-cols-3": effectiveColumnCount === 3,
+    "sm:grid-cols-4": effectiveColumnCount === 4,
+    "sm:grid-cols-5": effectiveColumnCount === 5,
+    "sm:grid-cols-6": effectiveColumnCount === 6,
+    "sm:grid-cols-7": effectiveColumnCount === 7,
+    "sm:grid-cols-8": effectiveColumnCount >= 8,
   });
 
   // suggestions values
@@ -217,13 +240,25 @@ export default function SearchView({
             return newIndex;
           });
           break;
+        case "PageDown":
+          contentRef.current?.scrollBy({
+            top: contentRef.current.clientHeight / 2,
+            behavior: "smooth",
+          });
+          break;
+        case "PageUp":
+          contentRef.current?.scrollBy({
+            top: -contentRef.current.clientHeight / 2,
+            behavior: "smooth",
+          });
+          break;
       }
     },
     [uniqueResults, inputFocused],
   );
 
   useKeyboardListener(
-    ["ArrowLeft", "ArrowRight"],
+    ["ArrowLeft", "ArrowRight", "PageDown", "PageUp"],
     onKeyboardShortcut,
     !inputFocused,
   );
@@ -324,7 +359,10 @@ export default function SearchView({
         )}
       </div>
 
-      <div className="no-scrollbar flex flex-1 flex-wrap content-start gap-2 overflow-y-auto">
+      <div
+        ref={contentRef}
+        className="no-scrollbar flex flex-1 flex-wrap content-start gap-2 overflow-y-auto"
+      >
         {uniqueResults?.length == 0 && !isLoading && (
           <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
             <LuSearchX className="size-16" />
@@ -340,7 +378,7 @@ export default function SearchView({
           )}
 
         {uniqueResults && (
-          <div className="grid w-full gap-2 px-1 sm:grid-cols-2 md:mx-2 md:grid-cols-4 md:gap-4 3xl:grid-cols-6">
+          <div className={gridClassName}>
             {uniqueResults &&
               uniqueResults.map((value, index) => {
                 const selected = selectedIndex === index;
@@ -409,6 +447,47 @@ export default function SearchView({
             <div className="flex h-12 w-full justify-center">
               {hasMore && isLoading && <ActivityIndicator />}
             </div>
+
+            {isDesktop && columnCount && (
+              <div
+                className={cn(
+                  "fixed bottom-12 right-3 z-50 flex flex-row gap-2 lg:bottom-9",
+                )}
+              >
+                <Popover>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <PopoverTrigger asChild>
+                        <div className="cursor-pointer rounded-lg bg-secondary text-secondary-foreground opacity-75 transition-all duration-300 hover:bg-muted hover:opacity-100">
+                          <LuColumns className="size-5 md:m-[6px]" />
+                        </div>
+                      </PopoverTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent>Adjust Grid Columns</TooltipContent>
+                  </Tooltip>
+                  <PopoverContent className="mr-2 w-80">
+                    <div className="space-y-4">
+                      <div className="font-medium leading-none">
+                        Grid Columns
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <Slider
+                          value={[effectiveColumnCount]}
+                          onValueChange={([value]) => setColumnCount(value)}
+                          max={8}
+                          min={2}
+                          step={1}
+                          className="flex-grow"
+                        />
+                        <span className="w-9 text-center text-sm font-medium">
+                          {effectiveColumnCount}
+                        </span>
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            )}
           </>
         )}
       </div>

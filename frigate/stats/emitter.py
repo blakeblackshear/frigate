@@ -27,8 +27,7 @@ class StatsEmitter(threading.Thread):
         stats_tracking: StatsTrackingTypes,
         stop_event: MpEvent,
     ):
-        threading.Thread.__init__(self)
-        self.name = "frigate_stats_emitter"
+        super().__init__(name="frigate_stats_emitter")
         self.config = config
         self.stats_tracking = stats_tracking
         self.stop_event = stop_event

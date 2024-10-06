@@ -23,8 +23,7 @@ class RecordingCleanup(threading.Thread):
     """Cleanup existing recordings based on retention config."""
 
     def __init__(self, config: FrigateConfig, stop_event: MpEvent) -> None:
-        threading.Thread.__init__(self)
-        self.name = "recording_cleanup"
+        super().__init__(name="recording_cleanup")
         self.config = config
         self.stop_event = stop_event
 

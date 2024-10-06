@@ -14,7 +14,7 @@ import numpy as np
 import pytz
 from fastapi import APIRouter, Path, Query, Request, Response
 from fastapi.params import Depends
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from pathvalidate import sanitize_filename
 from peewee import DoesNotExist, fn
 from tzlocal import get_localzone_name
@@ -44,7 +44,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=[Tags.media])
 
 
-@router.get("{camera_name}")
+@router.get("/{camera_name}")
 def mjpeg_feed(
     request: Request,
     camera_name: str,
@@ -60,7 +60,7 @@ def mjpeg_feed(
     }
     if camera_name in request.app.frigate_config.cameras:
         # return a multipart response
-        return Response(
+        return StreamingResponse(
             imagestream(
                 request.app.detected_frames_processor,
                 camera_name,

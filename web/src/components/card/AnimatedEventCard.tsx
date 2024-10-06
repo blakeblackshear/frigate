@@ -17,6 +17,7 @@ import { usePersistence } from "@/hooks/use-persistence";
 import { Skeleton } from "../ui/skeleton";
 import { Button } from "../ui/button";
 import { FaCircleCheck } from "react-icons/fa6";
+import { cn } from "@/lib/utils";
 
 type AnimatedEventCardProps = {
   event: ReviewSegment;
@@ -107,9 +108,9 @@ export function AnimatedEventCard({
     <Tooltip>
       <TooltipTrigger asChild>
         <div
-          className="relative h-24 4k:h-32"
+          className="relative h-24 flex-shrink-0 overflow-hidden rounded md:rounded-lg 4k:h-32"
           style={{
-            aspectRatio: aspectRatio,
+            aspectRatio: alertVideos ? aspectRatio : undefined,
           }}
           onMouseEnter={isDesktop ? () => setIsHovered(true) : undefined}
           onMouseLeave={isDesktop ? () => setIsHovered(false) : undefined}
@@ -133,7 +134,7 @@ export function AnimatedEventCard({
           )}
           {previews != undefined && (
             <div
-              className="size-full cursor-pointer overflow-hidden rounded md:rounded-lg"
+              className="size-full cursor-pointer"
               onClick={onOpenReview}
               onAuxClick={(e) => {
                 if (e.button === 1) {
@@ -145,7 +146,10 @@ export function AnimatedEventCard({
             >
               {!alertVideos ? (
                 <img
-                  className="size-full select-none"
+                  className={cn(
+                    "h-full w-auto min-w-10 select-none object-contain",
+                    isSafari && !isLoaded ? "hidden" : "visible",
+                  )}
                   src={`${apiHost}${event.thumb_path.replace("/media/frigate/", "")}`}
                   loading={isSafari ? "eager" : "lazy"}
                   onLoad={() => setIsLoaded(true)}
@@ -200,7 +204,14 @@ export function AnimatedEventCard({
               </div>
             </div>
           )}
-          {!isLoaded && <Skeleton className="absolute inset-0" />}
+          {!isLoaded && (
+            <Skeleton
+              style={{
+                aspectRatio: alertVideos ? aspectRatio : 16 / 9,
+              }}
+              className="size-full"
+            />
+          )}
         </div>
       </TooltipTrigger>
       <TooltipContent>

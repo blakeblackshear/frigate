@@ -149,8 +149,7 @@ class PtzAutoTrackerThread(threading.Thread):
         dispatcher: Dispatcher,
         stop_event: MpEvent,
     ) -> None:
-        threading.Thread.__init__(self)
-        self.name = "ptz_autotracker"
+        super().__init__(name="ptz_autotracker")
         self.ptz_autotracker = PtzAutoTracker(
             config, onvif, ptz_metrics, dispatcher, stop_event
         )
@@ -324,6 +323,12 @@ class PtzAutoTracker:
 
     def _write_config(self, camera):
         config_file = os.environ.get("CONFIG_FILE", f"{CONFIG_DIR}/config.yml")
+
+        # Check if we can use .yaml instead of .yml
+        config_file_yaml = config_file.replace(".yml", ".yaml")
+
+        if os.path.isfile(config_file_yaml):
+            config_file = config_file_yaml
 
         logger.debug(
             f"{camera}: Writing new config with autotracker motion coefficients: {self.config.cameras[camera].onvif.autotracking.movement_weights}"

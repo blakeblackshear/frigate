@@ -6,7 +6,7 @@ import secrets
 import shutil
 from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
-from typing import Any, Optional
+from typing import Optional
 
 import psutil
 import uvicorn
@@ -29,11 +29,11 @@ from frigate.comms.mqtt import MqttClient
 from frigate.comms.webpush import WebPushClient
 from frigate.comms.ws import WebSocketClient
 from frigate.comms.zmq_proxy import ZmqProxy
+from frigate.config.config import FrigateConfig
 from frigate.const import (
     CACHE_DIR,
     CLIPS_DIR,
     CONFIG_DIR,
-    DEFAULT_DB_PATH,
     EXPORT_DIR,
     MODEL_CACHE_DIR,
     RECORD_DIR,
@@ -77,10 +77,8 @@ logger = logging.getLogger(__name__)
 
 
 class FrigateApp:
-    audio_process: Optional[mp.Process] = None
-
-    # TODO: Fix FrigateConfig usage, so we can properly annotate it here without mypy erroring out.
-    def __init__(self, config: Any) -> None:
+    def __init__(self, config: FrigateConfig) -> None:
+        self.audio_process: Optional[mp.Process] = None
         self.stop_event: MpEvent = mp.Event()
         self.detection_queue: Queue = mp.Queue()
         self.detectors: dict[str, ObjectDetectProcess] = {}
@@ -148,13 +146,6 @@ class FrigateApp:
                     f.write(str(datetime.datetime.now().timestamp()))
             except PermissionError:
                 logger.error("Unable to write to /config to save DB state")
-
-        # Migrate DB location
-        old_db_path = DEFAULT_DB_PATH
-        if not os.path.isfile(self.config.database.path) and os.path.isfile(
-            old_db_path
-        ):
-            os.rename(old_db_path, self.config.database.path)
 
         # Migrate DB schema
         migrate_db = SqliteExtDatabase(self.config.database.path)
@@ -281,7 +272,7 @@ class FrigateApp:
             except PermissionError:
                 logger.error("Unable to write to /config to save export state")
 
-            migrate_exports(self.config.ffmpeg, self.config.cameras.keys())
+            migrate_exports(self.config.ffmpeg, list(self.config.cameras.keys()))
 
     def init_external_event_processor(self) -> None:
         self.external_event_processor = ExternalEventProcessor(self.config)
@@ -325,7 +316,9 @@ class FrigateApp:
                 largest_frame = max(
                     [
                         det.model.height * det.model.width * 3
-                        for (name, det) in self.config.detectors.items()
+                        if det.model is not None
+                        else 320
+                        for det in self.config.detectors.values()
                     ]
                 )
                 shm_in = mp.shared_memory.SharedMemory(
@@ -392,6 +385,7 @@ class FrigateApp:
 
         # create or update region grids for each camera
         for camera in self.config.cameras.values():
+            assert camera.name is not None
             self.region_grids[camera.name] = get_camera_regions_grid(
                 camera.name,
                 camera.detect,
@@ -505,10 +499,10 @@ class FrigateApp:
             min_req_shm += 8
 
         available_shm = total_shm - min_req_shm
-        cam_total_frame_size = 0
+        cam_total_frame_size = 0.0
 
         for camera in self.config.cameras.values():
-            if camera.enabled:
+            if camera.enabled and camera.detect.width and camera.detect.height:
                 cam_total_frame_size += round(
                     (camera.detect.width * camera.detect.height * 1.5 + 270480)
                     / 1048576,

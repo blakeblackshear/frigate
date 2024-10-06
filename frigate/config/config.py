@@ -289,7 +289,9 @@ class FrigateConfig(FrigateBaseModel):
         default_factory=dict, title="Frigate environment variables."
     )
     logger: LoggerConfig = Field(
-        default_factory=LoggerConfig, title="Logging configuration."
+        default_factory=LoggerConfig,
+        title="Logging configuration.",
+        validate_default=True,
     )
 
     # Global config

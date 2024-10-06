@@ -146,8 +146,7 @@ class ReviewSegmentMaintainer(threading.Thread):
     """Maintain review segments."""
 
     def __init__(self, config: FrigateConfig, stop_event: MpEvent):
-        threading.Thread.__init__(self)
-        self.name = "review_segment_maintainer"
+        super().__init__(name="review_segment_maintainer")
         self.config = config
         self.active_review_segments: dict[str, Optional[PendingReviewSegment]] = {}
         self.frame_manager = SharedMemoryFrameManager()

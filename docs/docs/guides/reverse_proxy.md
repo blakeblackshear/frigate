@@ -3,25 +3,38 @@ id: reverse_proxy
 title: Setting up a reverse proxy
 ---
 
-This guide outlines the basic configuration steps needed to expose your Frigate UI to the internet.
-A common way of accomplishing this is to use a reverse proxy webserver between your router and your Frigate instance.
-A reverse proxy accepts HTTP requests from the public internet and redirects them transparently to internal webserver(s) on your network.
+This guide outlines the basic configuration steps needed to set up a reverse proxy in front of your Frigate instance.
 
-The suggested steps are:
+A reverse proxy is typically needed if you want to set up Frigate on a custom URL, on a subdomain, or on a host serving multiple sites. It could also be used to set up your own authentication provider or for more advanced HTTP routing.
 
-- **Configure** a 'proxy' HTTP webserver (such as [Apache2](https://httpd.apache.org/docs/current/) or [NPM](https://github.com/NginxProxyManager/nginx-proxy-manager)) and only expose ports 80/443 from this webserver to the internet
-- **Encrypt** content from the proxy webserver by installing SSL (such as with [Let's Encrypt](https://letsencrypt.org/)). Note that SSL is then not required on your Frigate webserver as the proxy encrypts all requests for you
-- **Restrict** access to your Frigate instance at the proxy using, for example, password authentication
+Before setting up a reverse proxy, check if any of the built-in functionality in Frigate suits your needs:
+|Topic|Docs|
+|-|-|
+|TLS|Please see the  `tls` [configuration option](../configuration/tls.md)|
+|Authentication|Please see the [authentication](../configuration/authentication.md) documentation|
+|IPv6|[Enabling IPv6](../configuration/advanced.md#enabling-ipv6)
+
+**Note about TLS**  
+When using a reverse proxy, the TLS session is usually terminated at the proxy, sending the internal request over plain HTTP. If this is the desired behavior, TLS must first be disabled in Frigate, or you will encounter an HTTP 400 error: "The plain HTTP request was sent to HTTPS port."  
+To disable TLS, set the following in your Frigate configuration:
+```yml
+tls:
+  enabled: false
+```
 
 :::warning
-A reverse proxy can be used to secure access to an internal webserver but the user will be entirely reliant
-on the steps they have taken. You must ensure you are following security best practices.
-This page does not attempt to outline the specific steps needed to secure your internal website.
+A reverse proxy can be used to secure access to an internal web server, but the user will be entirely reliant on the steps they have taken. You must ensure you are following security best practices.
+This page does not attempt to outline the specific steps needed to secure your internal website.  
 Please use your own knowledge to assess and vet the reverse proxy software before you install anything on your system.
 :::
 
-There are several technologies available to implement reverse proxies. This document currently suggests one, using Apache2,
-and the community is invited to document others through a contribution to this page.
+## Proxies
+
+There are many solutions available to implement reverse proxies and the community is invited to help out documenting others through a contribution to this page.
+
+* [Apache2](#apache2-reverse-proxy)
+* [Nginx](#nginx-reverse-proxy)
+* [Traefik](#traefik-reverse-proxy)
 
 ## Apache2 Reverse Proxy
 
@@ -141,3 +154,26 @@ The settings below enabled connection upgrade, sets up logging (optional) and pr
   }
 
 ```
+
+## Traefik Reverse Proxy
+
+This example shows how to add a `label` to the Frigate Docker compose file, enabling Traefik to automatically discover your Frigate instance.  
+Before using the example below, you must first set up Traefik with the [Docker provider](https://doc.traefik.io/traefik/providers/docker/)
+
+```yml
+services:
+  frigate:
+    container_name: frigate
+    image: ghcr.io/blakeblackshear/frigate:stable
+    ...
+    ...
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.frigate.loadbalancer.server.port=8971"
+      - "traefik.http.routers.frigate.rule=Host(`traefik.example.com`)"
+```
+
+The above configuration will create a "service" in Traefik, automatically adding your container's IP on port 8971 as a backend.
+It will also add a router, routing requests to "traefik.example.com" to your local container.
+
+Note that with this approach, you don't need to expose any ports for the Frigate instance since all traffic will be routed over the internal Docker network.

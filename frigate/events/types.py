@@ -12,3 +12,8 @@ class EventStateEnum(str, Enum):
     start = "start"
     update = "update"
     end = "end"
+
+
+class RegenerateDescriptionEnum(str, Enum):
+    thumbnails = "thumbnails"
+    snapshot = "snapshot"

@@ -1,6 +1,8 @@
 """Export apis."""
 
 import logging
+import random
+import string
 from pathlib import Path
 from typing import Optional
 
@@ -72,8 +74,10 @@ def export_recording(
             status_code=400,
         )
 
+    export_id = f"{camera_name}_{''.join(random.choices(string.ascii_lowercase + string.digits, k=6))}"
     exporter = RecordingExporter(
         request.app.frigate_config,
+        export_id,
         camera_name,
         friendly_name,
         existing_image,
@@ -91,6 +95,7 @@ def export_recording(
             {
                 "success": True,
                 "message": "Starting export of recording.",
+                "export_id": export_id,
             }
         ),
         status_code=200,

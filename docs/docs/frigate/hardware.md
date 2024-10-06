@@ -69,6 +69,7 @@ Inference speeds vary greatly depending on the CPU, GPU, or VPU used, some known
 | Intel i5 7500        | ~ 15 ms         | Inference speeds on CPU were ~ 260 ms                                 |
 | Intel i5 1135G7      | 10 - 15 ms      |                                                                       |
 | Intel i5 12600K      | ~ 15 ms         | Inference speeds on CPU were ~ 35 ms                                  |
+| Intel Arc A750       | ~ 4 ms          |                                                                       |
 
 ### TensorRT - Nvidia GPU
 
