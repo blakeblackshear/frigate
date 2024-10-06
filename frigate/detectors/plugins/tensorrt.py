@@ -255,7 +255,7 @@ class TensorRtDetector(DetectionApi):
             raise RuntimeError("fail to allocate CUDA resources") from e
 
         logger.debug("TensorRT loaded. Input shape is %s", self.input_shape)
-        logger.debug("TensorRT version is %s", trt.__version__[0])
+        logger.debug("TensorRT version is %s", TRT_VERSION)
 
     def __del__(self):
         """Free CUDA memories."""
