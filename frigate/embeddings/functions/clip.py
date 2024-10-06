@@ -13,6 +13,7 @@ from onnx_clip import OnnxClip
 from PIL import Image
 
 from frigate.const import MODEL_CACHE_DIR
+from frigate.util.model import get_ort_providers
 
 
 class Clip(OnnxClip):
@@ -44,7 +45,7 @@ class Clip(OnnxClip):
 
     @staticmethod
     def _load_model(path: str, silent: bool):
-        providers = ["CPUExecutionProvider"]
+        providers = get_ort_providers(force_cpu="text" in path)
 
         try:
             if os.path.exists(path):
