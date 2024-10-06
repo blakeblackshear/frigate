@@ -5,7 +5,7 @@ info:
 
 servers:
   - url: https://demo.frigate.video/api
-  - url: https://localhost:5001/api
+  - url: https://localhost:5001/
 
 paths:
   /auth:
