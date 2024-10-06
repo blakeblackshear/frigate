@@ -52,12 +52,11 @@ export default function SearchThumbnail({
         className="absolute inset-0"
         imgLoaded={imgLoaded}
       />
-      <div className={`${imgLoaded ? "visible" : "invisible"}`}>
+      <div className={`size-full ${imgLoaded ? "visible" : "invisible"}`}>
         <img
           ref={imgRef}
           className={cn(
-            "size-full select-none opacity-100 transition-opacity",
-            searchResult.search_source == "thumbnail" && "object-contain",
+            "size-full select-none object-cover object-center opacity-100 transition-opacity",
           )}
           style={
             isIOS
