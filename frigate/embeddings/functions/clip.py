@@ -45,11 +45,11 @@ class Clip(OnnxClip):
 
     @staticmethod
     def _load_model(path: str, silent: bool):
-        providers = get_ort_providers(force_cpu="text" in path)
+        providers, options = get_ort_providers(force_cpu="text" in path)
 
         try:
             if os.path.exists(path):
-                return ort.InferenceSession(path, providers=providers)
+                return ort.InferenceSession(path, providers=providers, provider_options=options)
             else:
                 raise FileNotFoundError(
                     errno.ENOENT,
@@ -80,7 +80,7 @@ class Clip(OnnxClip):
                     f.flush()
             # Finally move the temporary file to the correct location
             temporary_filename.rename(path)
-            return ort.InferenceSession(path, providers=providers)
+            return ort.InferenceSession(path, providers=providers, provider_options=options)
 
 
 class ClipEmbedding:
