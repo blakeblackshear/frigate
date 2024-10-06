@@ -38,11 +38,6 @@ const config: Config = {
         logoClass: 'python',
       },
       {
-        highlight: 'bash',
-        language: 'curl',
-        logoClass: 'curl',
-      },
-      {
         highlight: 'javascript',
         language: 'nodejs',
         logoClass: 'nodejs',
@@ -51,6 +46,16 @@ const config: Config = {
         highlight: 'javascript',
         language: 'javascript',
         logoClass: 'javascript',
+      },
+      {
+        highlight: 'bash',
+        language: 'curl',
+        logoClass: 'curl',
+      },
+      {
+        highlight: "rust",
+        language: "rust",
+        logoClass: "rust",
       },
     ],
     navbar: {
