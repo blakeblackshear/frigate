@@ -279,7 +279,7 @@ function EventItem({
     <>
       <div
         className={cn(
-          "relative",
+          "relative mr-auto",
           !event.has_snapshot && "flex flex-row items-center justify-center",
         )}
         onMouseEnter={isDesktop ? () => setHovered(true) : undefined}
