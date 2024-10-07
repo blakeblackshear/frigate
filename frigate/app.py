@@ -93,6 +93,7 @@ class FrigateApp:
         self.processes: dict[str, int] = {}
         self.region_grids: dict[str, list[list[dict[str, int]]]] = {}
         self.config: FrigateConfig = config
+        self.embeddings: Optional[EmbeddingsContext] = None
 
     def ensure_dirs(self) -> None:
         for d in [
@@ -279,8 +280,6 @@ class FrigateApp:
         if self.config.semantic_search.enabled:
             # Create a client for other processes to use
             self.embeddings = EmbeddingsContext(self.db)
-        else:
-            self.embeddings = None
 
     def init_external_event_processor(self) -> None:
         self.external_event_processor = ExternalEventProcessor(self.config)
