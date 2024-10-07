@@ -15,9 +15,18 @@ wget -nv https://github.com/asg017/sqlite-vec/archive/refs/tags/v${SQLITE_VEC_VE
 tar -zxf v${SQLITE_VEC_VERSION}.tar.gz -C /tmp/sqlite_vec
 
 cd /tmp/sqlite_vec/sqlite-vec-${SQLITE_VEC_VERSION}
+
+mkdir -p vendor
+curl -o sqlite-amalgamation.zip https://www.sqlite.org/2024/sqlite-amalgamation-3450300.zip
+unzip -d
+unzip sqlite-amalgamation.zip
+mv sqlite-amalgamation-3450300/* vendor/
+rmdir sqlite-amalgamation-3450300
+rm sqlite-amalgamation.zip
+
 # build loadable module
 make loadable
 
 # install it
-cp dist/vec0.so /usr/local/lib
+cp dist/vec.o /usr/local/lib
 
