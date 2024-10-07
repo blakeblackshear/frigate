@@ -306,7 +306,9 @@ By default, Frigate will retain video of all events for 10 days. The full set of
 
 ### Step 7: Complete config
 
-At this point you have a complete config with basic functionality. You can see the [full config reference](../configuration/reference.md) for a complete list of configuration options.
+At this point you have a complete config with basic functionality. 
+- View [common configuration examples](../configuration/index.md#common-configuration-examples) for a list of common configuration examples.
+- View [full config reference](../configuration/reference.md) for a complete list of configuration options.
 
 ### Follow up
 
