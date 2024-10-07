@@ -28,5 +28,5 @@ rm sqlite-amalgamation.zip
 make loadable
 
 # install it
-cp dist/vec.o /usr/local/lib
+cp dist/vec0.* /usr/local/lib
 
