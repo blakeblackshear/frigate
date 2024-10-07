@@ -1,6 +1,5 @@
 import sqlite3
 
-import sqlite_vec
 from playhouse.sqliteq import SqliteQueueDatabase
 
 
@@ -8,6 +7,9 @@ class SqliteVecQueueDatabase(SqliteQueueDatabase):
     def __init__(self, *args, load_vec_extension: bool = False, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.load_vec_extension: bool = load_vec_extension
+
+        # no extension necessary, sqlite will load correctly for each platform
+        self.sqlite_vec_path = "/usr/local/lib/vec0"
 
     def _connect(self, *args, **kwargs) -> sqlite3.Connection:
         conn: sqlite3.Connection = super()._connect(*args, **kwargs)
@@ -17,5 +19,5 @@ class SqliteVecQueueDatabase(SqliteQueueDatabase):
 
     def _load_vec_extension(self, conn: sqlite3.Connection) -> None:
         conn.enable_load_extension(True)
-        sqlite_vec.load(conn)
+        conn.load_extension(self.sqlite_vec_path)
         conn.enable_load_extension(False)
