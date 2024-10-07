@@ -30,6 +30,9 @@ RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=cache,target=/root/.ccache \
     /deps/build_nginx.sh
 
+FROM wget AS sqlite-vec
+ARG DEBIAN_FRONTEND
+
 # Build sqlite_vec from source
 COPY docker/main/build_sqlite_vec.sh /deps/build_sqlite_vec.sh
 RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/var/cache/apt \
@@ -184,6 +187,7 @@ RUN pip3 wheel --no-deps --wheel-dir=/wheels-post -r /requirements-wheels-post.t
 # Collect deps in a single layer
 FROM scratch AS deps-rootfs
 COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
+COPY --from=sqlite-vec /usr/local/lib/ /usr/local/lib/
 COPY --from=go2rtc /rootfs/ /
 COPY --from=libusb-build /usr/local/lib /usr/local/lib
 COPY --from=tempio /rootfs/ /
