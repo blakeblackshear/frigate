@@ -5,8 +5,8 @@ from playhouse.sqliteq import SqliteQueueDatabase
 
 class SqliteVecQueueDatabase(SqliteQueueDatabase):
     def __init__(self, *args, load_vec_extension: bool = False, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
         self.load_vec_extension: bool = load_vec_extension
+        super().__init__(*args, **kwargs)
 
         # no extension necessary, sqlite will load correctly for each platform
         self.sqlite_vec_path = "/usr/local/lib/vec0"
