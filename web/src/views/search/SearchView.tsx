@@ -189,19 +189,9 @@ export default function SearchView({
 
   // confidence score - probably needs tweaking
 
-  const zScoreToConfidence = (score: number, source: string) => {
-    let midpoint, scale;
-
-    if (source === "thumbnail") {
-      midpoint = 2;
-      scale = 0.5;
-    } else {
-      midpoint = 0.5;
-      scale = 1.5;
-    }
-
+  const zScoreToConfidence = (score: number) => {
     // Sigmoid function: 1 / (1 + e^x)
-    const confidence = 1 / (1 + Math.exp((score - midpoint) * scale));
+    const confidence = 1 / (1 + Math.exp(score));
 
     return Math.round(confidence * 100);
   };
@@ -412,21 +402,13 @@ export default function SearchView({
                                 ) : (
                                   <LuText className="mr-1 size-3" />
                                 )}
-                                {zScoreToConfidence(
-                                  value.search_distance,
-                                  value.search_source,
-                                )}
-                                %
+                                {zScoreToConfidence(value.search_distance)}%
                               </Chip>
                             </TooltipTrigger>
                             <TooltipPortal>
                               <TooltipContent>
                                 Matched {value.search_source} at{" "}
-                                {zScoreToConfidence(
-                                  value.search_distance,
-                                  value.search_source,
-                                )}
-                                %
+                                {zScoreToConfidence(value.search_distance)}%
                               </TooltipContent>
                             </TooltipPortal>
                           </Tooltip>

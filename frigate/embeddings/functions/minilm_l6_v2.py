@@ -46,7 +46,7 @@ class MiniLMEmbedding:
             elif os.path.basename(path) == self.TOKENIZER_FILE:
                 logger.info("Downloading MiniLM tokenizer")
                 tokenizer = AutoTokenizer.from_pretrained(
-                    self.MODEL_NAME, clean_up_tokenization_spaces=False
+                    self.MODEL_NAME, clean_up_tokenization_spaces=True
                 )
                 tokenizer.save_pretrained(path)
 
@@ -78,7 +78,7 @@ class MiniLMEmbedding:
     def _load_tokenizer(self):
         tokenizer_path = os.path.join(self.DOWNLOAD_PATH, self.TOKENIZER_FILE)
         return AutoTokenizer.from_pretrained(
-            tokenizer_path, clean_up_tokenization_spaces=False
+            tokenizer_path, clean_up_tokenization_spaces=True
         )
 
     def _load_model(self, path: str, providers: List[str]):
