@@ -13,7 +13,15 @@ Use of the bundled go2rtc is optional. You can still configure FFmpeg to connect
 
 # Setup a go2rtc stream
 
-First, you will want to configure go2rtc to connect to your camera stream by adding the stream you want to use for live view in your Frigate config file. For the best experience, you should set the stream name under go2rtc to match the name of your camera so that Frigate will automatically map it and be able to use better live view options for the camera. Avoid changing any other parts of your config at this step. Note that go2rtc supports [many different stream types](https://github.com/AlexxIT/go2rtc/tree/v1.9.4#module-streams), not just rtsp.
+First, you will want to configure go2rtc to connect to your camera stream by adding the stream you want to use for live view in your Frigate config file. Avoid changing any other parts of your config at this step. Note that go2rtc supports [many different stream types](https://github.com/AlexxIT/go2rtc/tree/v1.9.4#module-streams), not just rtsp.
+
+:::tip
+
+For the best experience, you should set the stream name under `go2rtc` to match the name of your camera so that Frigate will automatically map it and be able to use better live view options for the camera.
+
+See [the live view docs](../configuration/live.md#setting-stream-for-live-ui) for more information.
+
+:::
 
 ```yaml
 go2rtc:
