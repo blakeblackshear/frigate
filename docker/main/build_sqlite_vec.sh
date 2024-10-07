@@ -17,7 +17,7 @@ tar -zxf v${SQLITE_VEC_VERSION}.tar.gz -C /tmp/sqlite_vec
 cd /tmp/sqlite_vec/sqlite-vec-${SQLITE_VEC_VERSION}
 
 mkdir -p vendor
-curl -o sqlite-amalgamation.zip https://www.sqlite.org/2024/sqlite-amalgamation-3450300.zip
+wget -O sqlite-amalgamation.zip https://www.sqlite.org/2024/sqlite-amalgamation-3450300.zip
 unzip -d
 unzip sqlite-amalgamation.zip
 mv sqlite-amalgamation-3450300/* vendor/
