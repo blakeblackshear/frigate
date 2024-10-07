@@ -64,7 +64,11 @@ class ModelDownloader:
                     "state": ModelStatusTypesEnum.downloading,
                 },
             )
-        self.download_thread = threading.Thread(target=self._download_models)
+        self.download_thread = threading.Thread(
+            target=self._download_models,
+            name=f"_download_model_{self.model_name}",
+            daemon=True,
+        ).start()
         self.download_thread.start()
 
     def _download_models(self):
