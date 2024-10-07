@@ -30,6 +30,13 @@ RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=cache,target=/root/.ccache \
     /deps/build_nginx.sh
 
+# Build sqlite_vec from source
+COPY docker/main/build_sqlite_vec.sh /deps/build_sqlite_vec.sh
+RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/var/cache/apt \
+    --mount=type=bind,source=docker/main/build_sqlite_vec.sh,target=/deps/build_sqlite_vec.sh \
+    --mount=type=cache,target=/root/.ccache \
+    /deps/build_sqlite_vec.sh
+
 FROM scratch AS go2rtc
 ARG TARGETARCH
 WORKDIR /rootfs/usr/local/go2rtc/bin
@@ -166,10 +173,6 @@ RUN pip3 install -r /requirements.txt
 # Build pysqlite3 from source
 COPY docker/main/build_pysqlite3.sh /build_pysqlite3.sh
 RUN /build_pysqlite3.sh
-
-# Build sqlite_vec from source
-COPY docker/main/build_sqlite_vec.sh /build_sqlite_vec.sh
-RUN /build_sqlite_vec.sh
 
 COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
 RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt
