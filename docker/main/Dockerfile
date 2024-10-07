@@ -167,6 +167,10 @@ RUN pip3 install -r /requirements.txt
 COPY docker/main/build_pysqlite3.sh /build_pysqlite3.sh
 RUN /build_pysqlite3.sh
 
+# Build sqlite_vec from source
+COPY docker/main/build_sqlite_vec.sh /build_sqlite_vec.sh
+RUN /build_sqlite_vec.sh
+
 COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
 RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt
 
