@@ -18,7 +18,6 @@ cd /tmp/sqlite_vec/sqlite-vec-${SQLITE_VEC_VERSION}
 
 mkdir -p vendor
 wget -O sqlite-amalgamation.zip https://www.sqlite.org/2024/sqlite-amalgamation-3450300.zip
-unzip -d
 unzip sqlite-amalgamation.zip
 mv sqlite-amalgamation-3450300/* vendor/
 rmdir sqlite-amalgamation-3450300
