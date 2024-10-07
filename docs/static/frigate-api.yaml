@@ -1,0 +1,3318 @@
+openapi: 3.1.0
+info:
+  # To avoid the introduction page we set the title to empty string
+  # https://github.com/PaloAltoNetworks/docusaurus-openapi-docs/blob/4e771d309f6defe395449b26cc3c65814d72cbcc/packages/docusaurus-plugin-openapi-docs/src/openapi/openapi.ts#L92-L129
+  title: ''
+  version: 0.1.0
+
+servers:
+  - url: https://demo.frigate.video/api
+  - url: http://localhost:5001/
+
+paths:
+  /auth:
+    get:
+      tags:
+        - Auth
+      summary: Auth
+      operationId: auth_auth_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+  /profile:
+    get:
+      tags:
+        - Auth
+      summary: Profile
+      operationId: profile_profile_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+  /logout:
+    get:
+      tags:
+        - Auth
+      summary: Logout
+      operationId: logout_logout_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+  /login:
+    post:
+      tags:
+        - Auth
+      summary: Login
+      operationId: login_login_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppPostLoginBody'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /users:
+    get:
+      tags:
+        - Auth
+      summary: Get Users
+      operationId: get_users_users_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+    post:
+      tags:
+        - Auth
+      summary: Create User
+      operationId: create_user_users_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppPostUsersBody'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /users/{username}:
+    delete:
+      tags:
+        - Auth
+      summary: Delete User
+      operationId: delete_user_users__username__delete
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Username
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /users/{username}/password:
+    put:
+      tags:
+        - Auth
+      summary: Update Password
+      operationId: update_password_users__username__password_put
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Username
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppPutPasswordBody'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /review:
+    get:
+      tags:
+        - Review
+      summary: Review
+      operationId: review_review_get
+      parameters:
+        - name: cameras
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: all
+            title: Cameras
+        - name: labels
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: all
+            title: Labels
+        - name: zones
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: all
+            title: Zones
+        - name: reviewed
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            default: 0
+            title: Reviewed
+        - name: limit
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Limit
+        - name: severity
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Severity
+        - name: before
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: 'null'
+            title: Before
+        - name: after
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: 'null'
+            title: After
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /review/summary:
+    get:
+      tags:
+        - Review
+      summary: Review Summary
+      operationId: review_summary_review_summary_get
+      parameters:
+        - name: cameras
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: all
+            title: Cameras
+        - name: labels
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: all
+            title: Labels
+        - name: zones
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: all
+            title: Zones
+        - name: timezone
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: utc
+            title: Timezone
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /reviews/viewed:
+    post:
+      tags:
+        - Review
+      summary: Set Multiple Reviewed
+      operationId: set_multiple_reviewed_reviews_viewed_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Body
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /reviews/delete:
+    post:
+      tags:
+        - Review
+      summary: Delete Reviews
+      operationId: delete_reviews_reviews_delete_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Body
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /review/activity/motion:
+    get:
+      tags:
+        - Review
+      summary: Motion Activity
+      description: Get motion and audio activity.
+      operationId: motion_activity_review_activity_motion_get
+      parameters:
+        - name: cameras
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: all
+            title: Cameras
+        - name: before
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: 'null'
+            title: Before
+        - name: after
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: 'null'
+            title: After
+        - name: scale
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            default: 30
+            title: Scale
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /review/activity/audio:
+    get:
+      tags:
+        - Review
+      summary: Audio Activity
+      description: Get motion and audio activity.
+      operationId: audio_activity_review_activity_audio_get
+      parameters:
+        - name: cameras
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: all
+            title: Cameras
+        - name: before
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: 'null'
+            title: Before
+        - name: after
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: 'null'
+            title: After
+        - name: scale
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            default: 30
+            title: Scale
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /review/event/{event_id}:
+    get:
+      tags:
+        - Review
+      summary: Get Review From Event
+      operationId: get_review_from_event_review_event__event_id__get
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Event Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /review/{event_id}:
+    get:
+      tags:
+        - Review
+      summary: Get Review
+      operationId: get_review_review__event_id__get
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Event Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /review/{event_id}/viewed:
+    delete:
+      tags:
+        - Review
+      summary: Set Not Reviewed
+      operationId: set_not_reviewed_review__event_id__viewed_delete
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Event Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /:
+    get:
+      tags:
+        - App
+      summary: Is Healthy
+      operationId: is_healthy__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            text/plain:
+              schema:
+                type: string
+  /config/schema.json:
+    get:
+      tags:
+        - App
+      summary: Config Schema
+      operationId: config_schema_config_schema_json_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+  /go2rtc/streams:
+    get:
+      tags:
+        - App
+      summary: Go2Rtc Streams
+      operationId: go2rtc_streams_go2rtc_streams_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+  /go2rtc/streams/{camera_name}:
+    get:
+      tags:
+        - App
+      summary: Go2Rtc Camera Stream
+      operationId: go2rtc_camera_stream_go2rtc_streams__camera_name__get
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Camera Name
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /version:
+    get:
+      tags:
+        - App
+      summary: Version
+      operationId: version_version_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            text/plain:
+              schema:
+                type: string
+  /stats:
+    get:
+      tags:
+        - App
+      summary: Stats
+      operationId: stats_stats_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+  /stats/history:
+    get:
+      tags:
+        - App
+      summary: Stats History
+      operationId: stats_history_stats_history_get
+      parameters:
+        - name: keys
+          in: query
+          required: false
+          schema:
+            type: string
+            title: Keys
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /config:
+    get:
+      tags:
+        - App
+      summary: Config
+      operationId: config_config_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+  /config/raw:
+    get:
+      tags:
+        - App
+      summary: Config Raw
+      operationId: config_raw_config_raw_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+  /config/save:
+    post:
+      tags:
+        - App
+      summary: Config Save
+      operationId: config_save_config_save_post
+      parameters:
+        - name: save_option
+          in: query
+          required: true
+          schema:
+            type: string
+            title: Save Option
+      requestBody:
+        required: true
+        content:
+          text/plain:
+            schema:
+              title: Body
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /config/set:
+    put:
+      tags:
+        - App
+      summary: Config Set
+      operationId: config_set_config_set_put
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppConfigSetBody'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /ffprobe:
+    get:
+      tags:
+        - App
+      summary: Ffprobe
+      operationId: ffprobe_ffprobe_get
+      parameters:
+        - name: paths
+          in: query
+          required: false
+          schema:
+            type: string
+            default: ''
+            title: Paths
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /vainfo:
+    get:
+      tags:
+        - App
+      summary: Vainfo
+      operationId: vainfo_vainfo_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+  /logs/{service}:
+    get:
+      tags:
+        - App
+        - Logs
+      summary: Logs
+      description: Get logs for the requested service (frigate/nginx/go2rtc/chroma)
+      operationId: logs_logs__service__get
+      parameters:
+        - name: service
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - frigate
+              - nginx
+              - go2rtc
+              - chroma
+            title: Service
+        - name: download
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Download
+        - name: start
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            default: 0
+            title: Start
+        - name: end
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: End
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /restart:
+    post:
+      tags:
+        - App
+      summary: Restart
+      operationId: restart_restart_post
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+  /labels:
+    get:
+      tags:
+        - App
+      summary: Get Labels
+      operationId: get_labels_labels_get
+      parameters:
+        - name: camera
+          in: query
+          required: false
+          schema:
+            type: string
+            default: ''
+            title: Camera
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /sub_labels:
+    get:
+      tags:
+        - App
+      summary: Get Sub Labels
+      operationId: get_sub_labels_sub_labels_get
+      parameters:
+        - name: split_joined
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Split Joined
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /timeline:
+    get:
+      tags:
+        - App
+      summary: Timeline
+      operationId: timeline_timeline_get
+      parameters:
+        - name: camera
+          in: query
+          required: false
+          schema:
+            type: string
+            default: all
+            title: Camera
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+            title: Limit
+        - name: source_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Source Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /timeline/hourly:
+    get:
+      tags:
+        - App
+      summary: Hourly Timeline
+      description: Get hourly summary for timeline.
+      operationId: hourly_timeline_timeline_hourly_get
+      parameters:
+        - name: cameras
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: all
+            title: Cameras
+        - name: labels
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: all
+            title: Labels
+        - name: after
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: 'null'
+            title: After
+        - name: before
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: 'null'
+            title: Before
+        - name: limit
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            default: 200
+            title: Limit
+        - name: timezone
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: utc
+            title: Timezone
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /preview/{camera_name}/start/{start_ts}/end/{end_ts}:
+    get:
+      tags:
+        - Preview
+      summary: Preview Ts
+      description: Get all mp4 previews relevant for time period.
+      operationId: preview_ts_preview__camera_name__start__start_ts__end__end_ts__get
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Camera Name
+        - name: start_ts
+          in: path
+          required: true
+          schema:
+            type: number
+            title: Start Ts
+        - name: end_ts
+          in: path
+          required: true
+          schema:
+            type: number
+            title: End Ts
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /preview/{year_month}/{day}/{hour}/{camera_name}/{tz_name}:
+    get:
+      tags:
+        - Preview
+      summary: Preview Hour
+      description: Get all mp4 previews relevant for time period given the timezone
+      operationId: preview_hour_preview__year_month___day___hour___camera_name___tz_name__get
+      parameters:
+        - name: year_month
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Year Month
+        - name: day
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Day
+        - name: hour
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Hour
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Camera Name
+        - name: tz_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Tz Name
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /preview/{camera_name}/start/{start_ts}/end/{end_ts}/frames:
+    get:
+      tags:
+        - Preview
+      summary: Get Preview Frames From Cache
+      description: Get list of cached preview frames
+      operationId: get_preview_frames_from_cache_preview__camera_name__start__start_ts__end__end_ts__frames_get
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Camera Name
+        - name: start_ts
+          in: path
+          required: true
+          schema:
+            type: number
+            title: Start Ts
+        - name: end_ts
+          in: path
+          required: true
+          schema:
+            type: number
+            title: End Ts
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /notifications/pubkey:
+    get:
+      tags:
+        - Notifications
+      summary: Get Vapid Pub Key
+      operationId: get_vapid_pub_key_notifications_pubkey_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+  /notifications/register:
+    post:
+      tags:
+        - Notifications
+      summary: Register Notifications
+      operationId: register_notifications_notifications_register_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Body
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /exports:
+    get:
+      tags:
+        - Export
+      summary: Get Exports
+      operationId: get_exports_exports_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+  /export/{camera_name}/start/{start_time}/end/{end_time}:
+    post:
+      tags:
+        - Export
+      summary: Export Recording
+      operationId: export_recording_export__camera_name__start__start_time__end__end_time__post
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Camera Name
+        - name: start_time
+          in: path
+          required: true
+          schema:
+            type: number
+            title: Start Time
+        - name: end_time
+          in: path
+          required: true
+          schema:
+            type: number
+            title: End Time
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              title: Body
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /export/{event_id}/{new_name}:
+    patch:
+      tags:
+        - Export
+      summary: Export Rename
+      operationId: export_rename_export__event_id___new_name__patch
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Event Id
+        - name: new_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: New Name
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /export/{event_id}:
+    delete:
+      tags:
+        - Export
+      summary: Export Delete
+      operationId: export_delete_export__event_id__delete
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Event Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /events:
+    get:
+      tags:
+        - Events
+      summary: Events
+      operationId: events_events_get
+      parameters:
+        - name: camera
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: all
+            title: Camera
+        - name: cameras
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: all
+            title: Cameras
+        - name: label
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: all
+            title: Label
+        - name: labels
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: all
+            title: Labels
+        - name: sub_label
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: all
+            title: Sub Label
+        - name: sub_labels
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: all
+            title: Sub Labels
+        - name: zone
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: all
+            title: Zone
+        - name: zones
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: all
+            title: Zones
+        - name: limit
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            default: 100
+            title: Limit
+        - name: after
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: 'null'
+            title: After
+        - name: before
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: 'null'
+            title: Before
+        - name: time_range
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: 00:00,24:00
+            title: Time Range
+        - name: has_clip
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Has Clip
+        - name: has_snapshot
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Has Snapshot
+        - name: in_progress
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: In Progress
+        - name: include_thumbnails
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            default: 1
+            title: Include Thumbnails
+        - name: favorites
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Favorites
+        - name: min_score
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: 'null'
+            title: Min Score
+        - name: max_score
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: 'null'
+            title: Max Score
+        - name: is_submitted
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Is Submitted
+        - name: min_length
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: 'null'
+            title: Min Length
+        - name: max_length
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: 'null'
+            title: Max Length
+        - name: sort
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Sort
+        - name: timezone
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: utc
+            title: Timezone
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /events/explore:
+    get:
+      tags:
+        - Events
+      summary: Events Explore
+      operationId: events_explore_events_explore_get
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+            title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /event_ids:
+    get:
+      tags:
+        - Events
+      summary: Event Ids
+      operationId: event_ids_event_ids_get
+      parameters:
+        - name: ids
+          in: query
+          required: true
+          schema:
+            type: string
+            title: Ids
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /events/search:
+    get:
+      tags:
+        - Events
+      summary: Events Search
+      operationId: events_search_events_search_get
+      parameters:
+        - name: query
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Query
+        - name: event_id
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Event Id
+        - name: search_type
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: thumbnail,description
+            title: Search Type
+        - name: include_thumbnails
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            default: 1
+            title: Include Thumbnails
+        - name: limit
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            default: 50
+            title: Limit
+        - name: cameras
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: all
+            title: Cameras
+        - name: labels
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: all
+            title: Labels
+        - name: zones
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: all
+            title: Zones
+        - name: after
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: 'null'
+            title: After
+        - name: before
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: 'null'
+            title: Before
+        - name: time_range
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: 00:00,24:00
+            title: Time Range
+        - name: timezone
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: utc
+            title: Timezone
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /events/summary:
+    get:
+      tags:
+        - Events
+      summary: Events Summary
+      operationId: events_summary_events_summary_get
+      parameters:
+        - name: timezone
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            default: utc
+            title: Timezone
+        - name: has_clip
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Has Clip
+        - name: has_snapshot
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Has Snapshot
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /events/{event_id}:
+    get:
+      tags:
+        - Events
+      summary: Event
+      operationId: event_events__event_id__get
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Event Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+        - Events
+      summary: Delete Event
+      operationId: delete_event_events__event_id__delete
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Event Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /events/{event_id}/retain:
+    post:
+      tags:
+        - Events
+      summary: Set Retain
+      operationId: set_retain_events__event_id__retain_post
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Event Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+        - Events
+      summary: Delete Retain
+      operationId: delete_retain_events__event_id__retain_delete
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Event Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /events/{event_id}/plus:
+    post:
+      tags:
+        - Events
+      summary: Send To Plus
+      operationId: send_to_plus_events__event_id__plus_post
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Event Id
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/SubmitPlusBody'
+              title: Body
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /events/{event_id}/false_positive:
+    put:
+      tags:
+        - Events
+      summary: False Positive
+      operationId: false_positive_events__event_id__false_positive_put
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Event Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /events/{event_id}/sub_label:
+    post:
+      tags:
+        - Events
+      summary: Set Sub Label
+      operationId: set_sub_label_events__event_id__sub_label_post
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Event Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventsSubLabelBody'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /events/{event_id}/description:
+    post:
+      tags:
+        - Events
+      summary: Set Description
+      operationId: set_description_events__event_id__description_post
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Event Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventsDescriptionBody'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /events/{event_id}/description/regenerate:
+    put:
+      tags:
+        - Events
+      summary: Regenerate Description
+      operationId: regenerate_description_events__event_id__description_regenerate_put
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Event Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /events/{camera_name}/{label}/create:
+    post:
+      tags:
+        - Events
+      summary: Create Event
+      operationId: create_event_events__camera_name___label__create_post
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Camera Name
+        - name: label
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Label
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/EventsCreateBody'
+              default:
+                source_type: api
+                score: 0
+                duration: 30
+                include_recording: true
+                draw: { }
+              title: Body
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /events/{event_id}/end:
+    put:
+      tags:
+        - Events
+      summary: End Event
+      operationId: end_event_events__event_id__end_put
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Event Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventsEndBody'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  '{camera_name}':
+    get:
+      tags:
+        - Media
+      summary: Mjpeg Feed
+      operationId: mjpeg_feed_camera_name__get
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Camera Name
+        - name: fps
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 3
+            title: Fps
+        - name: height
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 360
+            title: Height
+        - name: bbox
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Bbox
+        - name: timestamp
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Timestamp
+        - name: zones
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Zones
+        - name: mask
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Mask
+        - name: motion
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Motion
+        - name: regions
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Regions
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /{camera_name}/ptz/info:
+    get:
+      tags:
+        - Media
+      summary: Camera Ptz Info
+      operationId: camera_ptz_info__camera_name__ptz_info_get
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Camera Name
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /{camera_name}/latest.{extension}:
+    get:
+      tags:
+        - Media
+      summary: Latest Frame
+      operationId: latest_frame__camera_name__latest__extension__get
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Camera Name
+        - name: extension
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/Extension'
+        - name: bbox
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Bbox
+        - name: timestamp
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Timestamp
+        - name: zones
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Zones
+        - name: mask
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Mask
+        - name: motion
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Motion
+        - name: regions
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Regions
+        - name: quality
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            default: 70
+            title: Quality
+        - name: height
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Height
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /{camera_name}/recordings/{frame_time}/snapshot.{format}:
+    get:
+      tags:
+        - Media
+      summary: Get Snapshot From Recording
+      operationId: get_snapshot_from_recording__camera_name__recordings__frame_time__snapshot__format__get
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Camera Name
+        - name: frame_time
+          in: path
+          required: true
+          schema:
+            type: number
+            title: Frame Time
+        - name: format
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - png
+              - jpg
+            title: Format
+        - name: height
+          in: query
+          required: false
+          schema:
+            type: integer
+            title: Height
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /{camera_name}/plus/{frame_time}:
+    post:
+      tags:
+        - Media
+      summary: Submit Recording Snapshot To Plus
+      operationId: submit_recording_snapshot_to_plus__camera_name__plus__frame_time__post
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Camera Name
+        - name: frame_time
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Frame Time
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /recordings/storage:
+    get:
+      tags:
+        - Media
+      summary: Get Recordings Storage Usage
+      operationId: get_recordings_storage_usage_recordings_storage_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+  /{camera_name}/recordings/summary:
+    get:
+      tags:
+        - Media
+      summary: Recordings Summary
+      description: Returns hourly summary for recordings of given camera
+      operationId: recordings_summary__camera_name__recordings_summary_get
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Camera Name
+        - name: timezone
+          in: query
+          required: false
+          schema:
+            type: string
+            default: utc
+            title: Timezone
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /{camera_name}/recordings:
+    get:
+      tags:
+        - Media
+      summary: Recordings
+      description: Return specific camera recordings between the given 'after'/'end' times. If not provided the last hour will be used
+      operationId: recordings__camera_name__recordings_get
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Camera Name
+        - name: after
+          in: query
+          required: false
+          schema:
+            type: number
+            default: 1727542549.303557
+            title: After
+        - name: before
+          in: query
+          required: false
+          schema:
+            type: number
+            default: 1727546149.303926
+            title: Before
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /{camera_name}/start/{start_ts}/end/{end_ts}/clip.mp4:
+    get:
+      tags:
+        - Media
+      summary: Recording Clip
+      operationId: recording_clip__camera_name__start__start_ts__end__end_ts__clip_mp4_get
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Camera Name
+        - name: start_ts
+          in: path
+          required: true
+          schema:
+            type: number
+            title: Start Ts
+        - name: end_ts
+          in: path
+          required: true
+          schema:
+            type: number
+            title: End Ts
+        - name: download
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Download
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /vod/{camera_name}/start/{start_ts}/end/{end_ts}:
+    get:
+      tags:
+        - Media
+      summary: Vod Ts
+      operationId: vod_ts_vod__camera_name__start__start_ts__end__end_ts__get
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Camera Name
+        - name: start_ts
+          in: path
+          required: true
+          schema:
+            type: number
+            title: Start Ts
+        - name: end_ts
+          in: path
+          required: true
+          schema:
+            type: number
+            title: End Ts
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /vod/{year_month}/{day}/{hour}/{camera_name}:
+    get:
+      tags:
+        - Media
+      summary: Vod Hour No Timezone
+      description: VOD for specific hour. Uses the default timezone (UTC).
+      operationId: vod_hour_no_timezone_vod__year_month___day___hour___camera_name__get
+      parameters:
+        - name: year_month
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Year Month
+        - name: day
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Day
+        - name: hour
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Hour
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Camera Name
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /vod/{year_month}/{day}/{hour}/{camera_name}/{tz_name}:
+    get:
+      tags:
+        - Media
+      summary: Vod Hour
+      operationId: vod_hour_vod__year_month___day___hour___camera_name___tz_name__get
+      parameters:
+        - name: year_month
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Year Month
+        - name: day
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Day
+        - name: hour
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Hour
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Camera Name
+        - name: tz_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Tz Name
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /vod/event/{event_id}:
+    get:
+      tags:
+        - Media
+      summary: Vod Event
+      operationId: vod_event_vod_event__event_id__get
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Event Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /events/{event_id}/snapshot.jpg:
+    get:
+      tags:
+        - Media
+      summary: Event Snapshot
+      operationId: event_snapshot_events__event_id__snapshot_jpg_get
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Event Id
+        - name: download
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: boolean
+              - type: 'null'
+            default: false
+            title: Download
+        - name: timestamp
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Timestamp
+        - name: bbox
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Bbox
+        - name: crop
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Crop
+        - name: height
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            title: Height
+        - name: quality
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: integer
+              - type: 'null'
+            default: 70
+            title: Quality
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /events/{event_id}/thumbnail.jpg:
+    get:
+      tags:
+        - Media
+      summary: Event Thumbnail
+      operationId: event_thumbnail_events__event_id__thumbnail_jpg_get
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Event Id
+        - name: max_cache_age
+          in: query
+          required: false
+          schema:
+            type: integer
+            description: Max cache age in seconds. Default 30 days in seconds.
+            default: 2592000
+            title: Max Cache Age
+          description: Max cache age in seconds. Default 30 days in seconds.
+        - name: format
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - ios
+              - android
+            default: ios
+            title: Format
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /{camera_name}/grid.jpg:
+    get:
+      tags:
+        - Media
+      summary: Grid Snapshot
+      operationId: grid_snapshot__camera_name__grid_jpg_get
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Camera Name
+        - name: color
+          in: query
+          required: false
+          schema:
+            type: string
+            default: green
+            title: Color
+        - name: font_scale
+          in: query
+          required: false
+          schema:
+            type: number
+            default: 0.5
+            title: Font Scale
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /events/{event_id}/snapshot-clean.png:
+    get:
+      tags:
+        - Media
+      summary: Event Snapshot Clean
+      operationId: event_snapshot_clean_events__event_id__snapshot_clean_png_get
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Event Id
+        - name: download
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Download
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /events/{event_id}/clip.mp4:
+    get:
+      tags:
+        - Media
+      summary: Event Clip
+      operationId: event_clip_events__event_id__clip_mp4_get
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Event Id
+        - name: download
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Download
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /events/{event_id}/preview.gif:
+    get:
+      tags:
+        - Media
+      summary: Event Preview
+      operationId: event_preview_events__event_id__preview_gif_get
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Event Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /{camera_name}/start/{start_ts}/end/{end_ts}/preview.gif:
+    get:
+      tags:
+        - Media
+      summary: Preview Gif
+      operationId: preview_gif__camera_name__start__start_ts__end__end_ts__preview_gif_get
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Camera Name
+        - name: start_ts
+          in: path
+          required: true
+          schema:
+            type: number
+            title: Start Ts
+        - name: end_ts
+          in: path
+          required: true
+          schema:
+            type: number
+            title: End Ts
+        - name: max_cache_age
+          in: query
+          required: false
+          schema:
+            type: integer
+            description: Max cache age in seconds. Default 30 days in seconds.
+            default: 2592000
+            title: Max Cache Age
+          description: Max cache age in seconds. Default 30 days in seconds.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /{camera_name}/start/{start_ts}/end/{end_ts}/preview.mp4:
+    get:
+      tags:
+        - Media
+      summary: Preview Mp4
+      operationId: preview_mp4__camera_name__start__start_ts__end__end_ts__preview_mp4_get
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Camera Name
+        - name: start_ts
+          in: path
+          required: true
+          schema:
+            type: number
+            title: Start Ts
+        - name: end_ts
+          in: path
+          required: true
+          schema:
+            type: number
+            title: End Ts
+        - name: max_cache_age
+          in: query
+          required: false
+          schema:
+            type: integer
+            description: Max cache age in seconds. Default 7 days in seconds.
+            default: 604800
+            title: Max Cache Age
+          description: Max cache age in seconds. Default 7 days in seconds.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /review/{event_id}/preview:
+    get:
+      tags:
+        - Media
+      summary: Review Preview
+      operationId: review_preview_review__event_id__preview_get
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Event Id
+        - name: format
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - gif
+              - mp4
+            default: gif
+            title: Format
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /preview/{file_name}/thumbnail.webp:
+    get:
+      tags:
+        - Media
+      summary: Preview Thumbnail
+      description: Get a thumbnail from the cached preview frames.
+      operationId: preview_thumbnail_preview__file_name__thumbnail_webp_get
+      parameters:
+        - name: file_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: File Name
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /preview/{file_name}/thumbnail.jpg:
+    get:
+      tags:
+        - Media
+      summary: Preview Thumbnail
+      description: Get a thumbnail from the cached preview frames.
+      operationId: preview_thumbnail_preview__file_name__thumbnail_jpg_get
+      parameters:
+        - name: file_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: File Name
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /{camera_name}/{label}/thumbnail.jpg:
+    get:
+      tags:
+        - Media
+      summary: Label Thumbnail
+      operationId: label_thumbnail__camera_name___label__thumbnail_jpg_get
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Camera Name
+        - name: label
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Label
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /{camera_name}/{label}/best.jpg:
+    get:
+      tags:
+        - Media
+      summary: Label Thumbnail
+      operationId: label_thumbnail__camera_name___label__best_jpg_get
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Camera Name
+        - name: label
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Label
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /{camera_name}/{label}/clip.mp4:
+    get:
+      tags:
+        - Media
+      summary: Label Clip
+      operationId: label_clip__camera_name___label__clip_mp4_get
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Camera Name
+        - name: label
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Label
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /{camera_name}/{label}/snapshot.jpg:
+    get:
+      tags:
+        - Media
+      summary: Label Snapshot
+      description: Returns the snapshot image from the latest event for the given camera and label combo
+      operationId: label_snapshot__camera_name___label__snapshot_jpg_get
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Camera Name
+        - name: label
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Label
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    AppConfigSetBody:
+      properties:
+        requires_restart:
+          type: integer
+          title: Requires Restart
+          default: 1
+      type: object
+      title: AppConfigSetBody
+    AppPostLoginBody:
+      properties:
+        user:
+          type: string
+          title: User
+        password:
+          type: string
+          title: Password
+      type: object
+      required:
+        - user
+        - password
+      title: AppPostLoginBody
+    AppPostUsersBody:
+      properties:
+        username:
+          type: string
+          title: Username
+        password:
+          type: string
+          title: Password
+      type: object
+      required:
+        - username
+        - password
+      title: AppPostUsersBody
+    AppPutPasswordBody:
+      properties:
+        password:
+          type: string
+          title: Password
+      type: object
+      required:
+        - password
+      title: AppPutPasswordBody
+    EventsCreateBody:
+      properties:
+        source_type:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Source Type
+          default: api
+        sub_label:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Sub Label
+        score:
+          anyOf:
+            - type: integer
+            - type: 'null'
+          title: Score
+          default: 0
+        duration:
+          anyOf:
+            - type: integer
+            - type: 'null'
+          title: Duration
+          default: 30
+        include_recording:
+          anyOf:
+            - type: boolean
+            - type: 'null'
+          title: Include Recording
+          default: true
+        draw:
+          anyOf:
+            - type: object
+            - type: 'null'
+          title: Draw
+          default: { }
+      type: object
+      title: EventsCreateBody
+    EventsDescriptionBody:
+      properties:
+        description:
+          anyOf:
+            - type: string
+              minLength: 1
+            - type: 'null'
+          title: The description of the event
+      type: object
+      required:
+        - description
+      title: EventsDescriptionBody
+    EventsEndBody:
+      properties:
+        end_time:
+          anyOf:
+            - type: integer
+            - type: 'null'
+          title: End Time
+      type: object
+      title: EventsEndBody
+    EventsSubLabelBody:
+      properties:
+        subLabel:
+          type: string
+          maxLength: 100
+          title: Sub label
+        subLabelScore:
+          anyOf:
+            - type: number
+              maximum: 1
+              exclusiveMinimum: 0
+            - type: 'null'
+          title: Score for sub label
+      type: object
+      required:
+        - subLabel
+      title: EventsSubLabelBody
+    Extension:
+      type: string
+      enum:
+        - webp
+        - png
+        - jpg
+        - jpeg
+      title: Extension
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    SubmitPlusBody:
+      properties:
+        include_annotation:
+          type: integer
+          title: Include Annotation
+          default: 1
+      type: object
+      title: SubmitPlusBody
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+              - type: string
+              - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+        - loc
+        - msg
+        - type
+      title: ValidationError

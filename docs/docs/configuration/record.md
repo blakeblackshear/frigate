@@ -154,7 +154,7 @@ Footage can be exported from Frigate by right-clicking (desktop) or long pressin
 
 ### Time-lapse export
 
-Time lapse exporting is available only via the [HTTP API](../integrations/api.md#post-apiexportcamerastartstart-timestampendend-timestamp).
+Time lapse exporting is available only via the [HTTP API](../integrations/api/export-recording-export-camera-name-start-start-time-end-end-time-post.api.mdx).
 
 When exporting a time-lapse the default speed-up is 25x with 30 FPS. This means that every 25 seconds of (real-time) recording is condensed into 1 second of time-lapse video (always without audio) with a smoothness of 30 FPS.
 
