@@ -21,7 +21,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
   /profile:
     get:
       tags:
@@ -33,7 +33,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
   /logout:
     get:
       tags:
@@ -45,7 +45,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
   /login:
     post:
       tags:
@@ -63,7 +63,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -81,7 +81,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
     post:
       tags:
         - Auth
@@ -98,7 +98,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -123,7 +123,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -154,7 +154,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -241,7 +241,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -296,7 +296,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -320,7 +320,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -344,7 +344,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -398,7 +398,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -452,7 +452,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -477,7 +477,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -502,7 +502,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -527,7 +527,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -558,7 +558,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
   /go2rtc/streams:
     get:
       tags:
@@ -570,7 +570,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
   /go2rtc/streams/{camera_name}:
     get:
       tags:
@@ -589,7 +589,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -620,7 +620,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
   /stats/history:
     get:
       tags:
@@ -639,7 +639,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -657,7 +657,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
   /config/raw:
     get:
       tags:
@@ -669,7 +669,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
   /config/save:
     post:
       tags:
@@ -694,7 +694,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -718,7 +718,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -744,7 +744,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -762,7 +762,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
   /logs/{service}:
     get:
       tags:
@@ -813,7 +813,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -831,7 +831,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
   /labels:
     get:
       tags:
@@ -851,7 +851,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -878,7 +878,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -919,7 +919,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -991,7 +991,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -1029,7 +1029,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -1079,7 +1079,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -1117,7 +1117,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -1135,7 +1135,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
   /notifications/register:
     post:
       tags:
@@ -1153,7 +1153,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -1171,7 +1171,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
   /export/{camera_name}/start/{start_time}/end/{end_time}:
     post:
       tags:
@@ -1208,7 +1208,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -1239,7 +1239,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -1264,7 +1264,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -1487,7 +1487,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -1513,7 +1513,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -1538,7 +1538,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -1661,7 +1661,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -1705,7 +1705,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -1730,7 +1730,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -1754,7 +1754,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -1779,7 +1779,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -1803,7 +1803,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -1835,7 +1835,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -1860,7 +1860,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -1891,7 +1891,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -1922,7 +1922,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -1947,7 +1947,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -1984,14 +1984,14 @@ paths:
                 score: 0
                 duration: 30
                 include_recording: true
-                draw: {}
+                draw: { }
               title: Body
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -2022,7 +2022,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -2109,7 +2109,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -2134,7 +2134,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -2229,7 +2229,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -2275,7 +2275,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -2306,7 +2306,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -2324,7 +2324,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
   /{camera_name}/recordings/summary:
     get:
       tags:
@@ -2351,7 +2351,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -2391,7 +2391,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -2435,7 +2435,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -2472,7 +2472,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -2516,7 +2516,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -2565,7 +2565,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -2590,7 +2590,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -2665,7 +2665,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -2709,7 +2709,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -2748,7 +2748,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -2780,7 +2780,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -2812,7 +2812,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -2837,7 +2837,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -2883,7 +2883,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -2929,7 +2929,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -2964,7 +2964,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -2990,7 +2990,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -3016,7 +3016,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -3047,7 +3047,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -3078,7 +3078,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -3109,7 +3109,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -3141,7 +3141,7 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema: { }
         '422':
           description: Validation Error
           content:
@@ -3229,7 +3229,7 @@ components:
             - type: object
             - type: 'null'
           title: Draw
-          default: {}
+          default: { }
       type: object
       title: EventsCreateBody
     EventsDescriptionBody:
