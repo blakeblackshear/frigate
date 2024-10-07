@@ -91,9 +91,9 @@ class FrigateApp:
         self.camera_metrics: dict[str, CameraMetrics] = {}
         self.ptz_metrics: dict[str, PTZMetrics] = {}
         self.processes: dict[str, int] = {}
+        self.embeddings: Optional[EmbeddingsContext] = None
         self.region_grids: dict[str, list[list[dict[str, int]]]] = {}
         self.config: FrigateConfig = config
-        self.embeddings: Optional[EmbeddingsContext] = None
 
     def ensure_dirs(self) -> None:
         for d in [
