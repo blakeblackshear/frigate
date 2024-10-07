@@ -533,6 +533,7 @@ class FrigateApp:
                     {
                         User.username: "admin",
                         User.password_hash: password_hash,
+                        User.notification_tokens: [],
                     }
                 ).execute()
 
@@ -549,7 +550,11 @@ class FrigateApp:
                 password_hash = hash_password(
                     password, iterations=self.config.auth.hash_iterations
                 )
-                User.replace(username="admin", password_hash=password_hash).execute()
+                User.replace(
+                    username="admin",
+                    password_hash=password_hash,
+                    notification_tokens=[],
+                ).execute()
 
                 logger.info("********************************************************")
                 logger.info("********************************************************")
