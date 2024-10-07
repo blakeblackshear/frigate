@@ -1,6 +1,8 @@
 openapi: 3.1.0
 info:
-  title: Frigate HTTP API
+  # To avoid the introduction page we set the title to empty string
+  # https://github.com/PaloAltoNetworks/docusaurus-openapi-docs/blob/4e771d309f6defe395449b26cc3c65814d72cbcc/packages/docusaurus-plugin-openapi-docs/src/openapi/openapi.ts#L92-L129
+  title: ''
   version: 0.1.0
 
 servers:
