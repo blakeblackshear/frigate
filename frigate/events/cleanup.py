@@ -8,6 +8,8 @@ from enum import Enum
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
 
+from playhouse.sqliteq import SqliteQueueDatabase
+
 from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR
 from frigate.embeddings.embeddings import Embeddings
@@ -22,16 +24,19 @@ class EventCleanupType(str, Enum):
 
 
 class EventCleanup(threading.Thread):
-    def __init__(self, config: FrigateConfig, stop_event: MpEvent):
+    def __init__(
+        self, config: FrigateConfig, stop_event: MpEvent, db: SqliteQueueDatabase
+    ):
         super().__init__(name="event_cleanup")
         self.config = config
         self.stop_event = stop_event
+        self.db = db
         self.camera_keys = list(self.config.cameras.keys())
         self.removed_camera_labels: list[str] = None
         self.camera_labels: dict[str, dict[str, any]] = {}
 
         if self.config.semantic_search.enabled:
-            self.embeddings = Embeddings()
+            self.embeddings = Embeddings(self.db)
 
     def get_removed_camera_labels(self) -> list[Event]:
         """Get a list of distinct labels for removed cameras."""
@@ -229,15 +234,8 @@ class EventCleanup(threading.Thread):
                     Event.delete().where(Event.id << chunk).execute()
 
                     if self.config.semantic_search.enabled:
-                        for collection in [
-                            self.embeddings.thumbnail,
-                            self.embeddings.description,
-                        ]:
-                            existing_ids = collection.get(ids=chunk, include=[])["ids"]
-                            if existing_ids:
-                                collection.delete(ids=existing_ids)
-                                logger.debug(
-                                    f"Deleted {len(existing_ids)} embeddings from {collection.__class__.__name__}"
-                                )
+                        self.embeddings.delete_description(chunk)
+                        self.embeddings.delete_thumbnail(chunk)
+                        logger.debug(f"Deleted {len(events_to_delete)} embeddings")
 
         logger.info("Exiting event cleanup...")

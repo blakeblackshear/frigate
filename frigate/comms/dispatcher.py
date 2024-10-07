@@ -16,10 +16,12 @@ from frigate.const import (
     REQUEST_REGION_GRID,
     UPDATE_CAMERA_ACTIVITY,
     UPDATE_EVENT_DESCRIPTION,
+    UPDATE_MODEL_STATE,
     UPSERT_REVIEW_SEGMENT,
 )
 from frigate.models import Event, Previews, Recordings, ReviewSegment
 from frigate.ptz.onvif import OnvifCommandEnum, OnvifController
+from frigate.types import ModelStatusTypesEnum
 from frigate.util.object import get_camera_regions_grid
 from frigate.util.services import restart_frigate
 
@@ -83,6 +85,7 @@ class Dispatcher:
             comm.subscribe(self._receive)
 
         self.camera_activity = {}
+        self.model_state = {}
 
     def _receive(self, topic: str, payload: str) -> Optional[Any]:
         """Handle receiving of payload from communicators."""
@@ -144,6 +147,14 @@ class Dispatcher:
                 "event_update",
                 json.dumps({"id": event.id, "description": event.data["description"]}),
             )
+        elif topic == UPDATE_MODEL_STATE:
+            model = payload["model"]
+            state = payload["state"]
+            self.model_state[model] = ModelStatusTypesEnum[state]
+            self.publish("model_state", json.dumps(self.model_state))
+        elif topic == "modelState":
+            model_state = self.model_state.copy()
+            self.publish("model_state", json.dumps(model_state))
         elif topic == "onConnect":
             camera_status = self.camera_activity.copy()
 

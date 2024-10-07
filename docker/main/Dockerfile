@@ -30,6 +30,16 @@ RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=cache,target=/root/.ccache \
     /deps/build_nginx.sh
 
+FROM wget AS sqlite-vec
+ARG DEBIAN_FRONTEND
+
+# Build sqlite_vec from source
+COPY docker/main/build_sqlite_vec.sh /deps/build_sqlite_vec.sh
+RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/var/cache/apt \
+    --mount=type=bind,source=docker/main/build_sqlite_vec.sh,target=/deps/build_sqlite_vec.sh \
+    --mount=type=cache,target=/root/.ccache \
+    /deps/build_sqlite_vec.sh
+
 FROM scratch AS go2rtc
 ARG TARGETARCH
 WORKDIR /rootfs/usr/local/go2rtc/bin
@@ -163,7 +173,7 @@ RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
 COPY docker/main/requirements.txt /requirements.txt
 RUN pip3 install -r /requirements.txt
 
-# Build pysqlite3 from source to support ChromaDB
+# Build pysqlite3 from source
 COPY docker/main/build_pysqlite3.sh /build_pysqlite3.sh
 RUN /build_pysqlite3.sh
 
@@ -177,6 +187,7 @@ RUN pip3 wheel --no-deps --wheel-dir=/wheels-post -r /requirements-wheels-post.t
 # Collect deps in a single layer
 FROM scratch AS deps-rootfs
 COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
+COPY --from=sqlite-vec /usr/local/lib/ /usr/local/lib/
 COPY --from=go2rtc /rootfs/ /
 COPY --from=libusb-build /usr/local/lib /usr/local/lib
 COPY --from=tempio /rootfs/ /
@@ -197,12 +208,11 @@ ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES="compute,video,utility"
 
-# Turn off Chroma Telemetry: https://docs.trychroma.com/telemetry#opting-out
-ENV ANONYMIZED_TELEMETRY=False
-# Allow resetting the chroma database
-ENV ALLOW_RESET=True
 # Disable tokenizer parallelism warning
+# https://stackoverflow.com/questions/62691279/how-to-disable-tokenizers-parallelism-true-false-warning/72926996#72926996
 ENV TOKENIZERS_PARALLELISM=true
+# https://github.com/huggingface/transformers/issues/27214
+ENV TRANSFORMERS_NO_ADVISORY_WARNINGS=1
 
 ENV PATH="/usr/local/go2rtc/bin:/usr/local/tempio/bin:/usr/local/nginx/sbin:${PATH}"
 ENV LIBAVFORMAT_VERSION_MAJOR=60

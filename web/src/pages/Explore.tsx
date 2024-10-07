@@ -1,11 +1,15 @@
-import { useEventUpdate } from "@/api/ws";
+import { useEventUpdate, useModelState } from "@/api/ws";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { useApiFilterArgs } from "@/hooks/use-api-filter";
 import { useTimezone } from "@/hooks/use-date-utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { SearchFilter, SearchQuery, SearchResult } from "@/types/search";
+import { ModelState } from "@/types/ws";
 import SearchView from "@/views/search/SearchView";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { LuCheck, LuExternalLink, LuX } from "react-icons/lu";
 import { TbExclamationCircle } from "react-icons/tb";
+import { Link } from "react-router-dom";
 import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
 
@@ -111,14 +115,10 @@ export default function Explore() {
 
   // paging
 
-  // usually slow only on first run while downloading models
-  const [isSlowLoading, setIsSlowLoading] = useState(false);
-
   const getKey = (
     pageIndex: number,
     previousPageData: SearchResult[] | null,
   ): SearchQuery => {
-    if (isSlowLoading && !similaritySearch) return null;
     if (previousPageData && !previousPageData.length) return null; // reached the end
     if (!searchQuery) return null;
 
@@ -143,12 +143,6 @@ export default function Explore() {
     revalidateFirstPage: true,
     revalidateOnFocus: true,
     revalidateAll: false,
-    onLoadingSlow: () => {
-      if (!similaritySearch) {
-        setIsSlowLoading(true);
-      }
-    },
-    loadingTimeout: 15000,
   });
 
   const searchResults = useMemo(
@@ -168,7 +162,7 @@ export default function Explore() {
       if (searchQuery) {
         const [url] = searchQuery;
 
-        // for chroma, only load 100 results for description and similarity
+        // for embeddings, only load 100 results for description and similarity
         if (url === "events/search" && searchResults.length >= 100) {
           return;
         }
@@ -188,17 +182,113 @@ export default function Explore() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventUpdate]);
 
+  // model states
+
+  const { payload: minilmModelState } = useModelState(
+    "sentence-transformers/all-MiniLM-L6-v2-model.onnx",
+  );
+  const { payload: minilmTokenizerState } = useModelState(
+    "sentence-transformers/all-MiniLM-L6-v2-tokenizer",
+  );
+  const { payload: clipImageModelState } = useModelState(
+    "clip-clip_image_model_vitb32.onnx",
+  );
+  const { payload: clipTextModelState } = useModelState(
+    "clip-clip_text_model_vitb32.onnx",
+  );
+
+  const allModelsLoaded = useMemo(() => {
+    return (
+      minilmModelState === "downloaded" &&
+      minilmTokenizerState === "downloaded" &&
+      clipImageModelState === "downloaded" &&
+      clipTextModelState === "downloaded"
+    );
+  }, [
+    minilmModelState,
+    minilmTokenizerState,
+    clipImageModelState,
+    clipTextModelState,
+  ]);
+
+  const renderModelStateIcon = (modelState: ModelState) => {
+    if (modelState === "downloading") {
+      return <ActivityIndicator className="size-5" />;
+    }
+    if (modelState === "downloaded") {
+      return <LuCheck className="size-5 text-success" />;
+    }
+    if (modelState === "not_downloaded" || modelState === "error") {
+      return <LuX className="size-5 text-danger" />;
+    }
+    return null;
+  };
+
+  if (
+    !minilmModelState ||
+    !minilmTokenizerState ||
+    !clipImageModelState ||
+    !clipTextModelState
+  ) {
+    return (
+      <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+    );
+  }
+
   return (
     <>
-      {isSlowLoading && !similaritySearch ? (
+      {!allModelsLoaded ? (
         <div className="absolute inset-0 left-1/2 top-1/2 flex h-96 w-96 -translate-x-1/2 -translate-y-1/2">
-          <div className="flex flex-col items-center justify-center rounded-lg bg-background/50 p-5">
-            <p className="my-5 text-lg">Search Unavailable</p>
-            <TbExclamationCircle className="mb-3 size-10" />
-            <p className="max-w-96 text-center">
-              If this is your first time using Search, be patient while Frigate
-              downloads the necessary embeddings models. Check Frigate logs.
-            </p>
+          <div className="flex flex-col items-center justify-center space-y-3 rounded-lg bg-background/50 p-5">
+            <div className="my-5 flex flex-col items-center gap-2 text-xl">
+              <TbExclamationCircle className="mb-3 size-10" />
+              <div>Search Unavailable</div>
+            </div>
+            <div className="max-w-96 text-center">
+              Frigate is downloading the necessary embeddings models to support
+              semantic searching. This may take several minutes depending on the
+              speed of your network connection.
+            </div>
+            <div className="flex w-96 flex-col gap-2 py-5">
+              <div className="flex flex-row items-center justify-center gap-2">
+                {renderModelStateIcon(clipImageModelState)}
+                CLIP image model
+              </div>
+              <div className="flex flex-row items-center justify-center gap-2">
+                {renderModelStateIcon(clipTextModelState)}
+                CLIP text model
+              </div>
+              <div className="flex flex-row items-center justify-center gap-2">
+                {renderModelStateIcon(minilmModelState)}
+                MiniLM sentence model
+              </div>
+              <div className="flex flex-row items-center justify-center gap-2">
+                {renderModelStateIcon(minilmTokenizerState)}
+                MiniLM tokenizer
+              </div>
+            </div>
+            {(minilmModelState === "error" ||
+              clipImageModelState === "error" ||
+              clipTextModelState === "error") && (
+              <div className="my-3 max-w-96 text-center text-danger">
+                An error has occurred. Check Frigate logs.
+              </div>
+            )}
+            <div className="max-w-96 text-center">
+              You may want to reindex the embeddings of your tracked objects
+              once the models are downloaded.
+            </div>
+            <div className="flex max-w-96 items-center text-primary-variant">
+              <Link
+                to="https://docs.frigate.video/configuration/semantic_search"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline"
+              >
+                Read the documentation{" "}
+                <LuExternalLink className="ml-2 inline-flex size-3" />
+              </Link>
+            </div>
           </div>
         </div>
       ) : (

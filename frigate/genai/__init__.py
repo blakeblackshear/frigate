@@ -31,12 +31,12 @@ class GenAIClient:
         self,
         camera_config: CameraConfig,
         thumbnails: list[bytes],
-        metadata: dict[str, any],
+        label: str,
     ) -> Optional[str]:
         """Generate a description for the frame."""
         prompt = camera_config.genai.object_prompts.get(
-            metadata["label"], camera_config.genai.prompt
-        ).format(**metadata)
+            label, camera_config.genai.prompt
+        )
         return self._send(prompt, thumbnails)
 
     def _init_provider(self):

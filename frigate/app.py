@@ -12,7 +12,6 @@ import psutil
 import uvicorn
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
-from playhouse.sqliteq import SqliteQueueDatabase
 
 import frigate.util as util
 from frigate.api.auth import hash_password
@@ -38,6 +37,7 @@ from frigate.const import (
     MODEL_CACHE_DIR,
     RECORD_DIR,
 )
+from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.embeddings import EmbeddingsContext, manage_embeddings
 from frigate.events.audio import AudioProcessor
 from frigate.events.cleanup import EventCleanup
@@ -88,6 +88,7 @@ class FrigateApp:
         self.camera_metrics: dict[str, CameraMetrics] = {}
         self.ptz_metrics: dict[str, PTZMetrics] = {}
         self.processes: dict[str, int] = {}
+        self.embeddings: Optional[EmbeddingsContext] = None
         self.region_grids: dict[str, list[list[dict[str, int]]]] = {}
         self.config = config
 
@@ -220,11 +221,8 @@ class FrigateApp:
 
     def init_embeddings_manager(self) -> None:
         if not self.config.semantic_search.enabled:
-            self.embeddings = None
             return
 
-        # Create a client for other processes to use
-        self.embeddings = EmbeddingsContext()
         embedding_process = util.Process(
             target=manage_embeddings,
             name="embeddings_manager",
@@ -239,7 +237,7 @@ class FrigateApp:
     def bind_database(self) -> None:
         """Bind db to the main process."""
         # NOTE: all db accessing processes need to be created before the db can be bound to the main process
-        self.db = SqliteQueueDatabase(
+        self.db = SqliteVecQueueDatabase(
             self.config.database.path,
             pragmas={
                 "auto_vacuum": "FULL",  # Does not defragment database
@@ -249,6 +247,7 @@ class FrigateApp:
             timeout=max(
                 60, 10 * len([c for c in self.config.cameras.values() if c.enabled])
             ),
+            load_vec_extension=self.config.semantic_search.enabled,
         )
         models = [
             Event,
@@ -273,6 +272,11 @@ class FrigateApp:
                 logger.error("Unable to write to /config to save export state")
 
             migrate_exports(self.config.ffmpeg, list(self.config.cameras.keys()))
+
+    def init_embeddings_client(self) -> None:
+        if self.config.semantic_search.enabled:
+            # Create a client for other processes to use
+            self.embeddings = EmbeddingsContext(self.db)
 
     def init_external_event_processor(self) -> None:
         self.external_event_processor = ExternalEventProcessor(self.config)
@@ -464,7 +468,7 @@ class FrigateApp:
         self.event_processor.start()
 
     def start_event_cleanup(self) -> None:
-        self.event_cleanup = EventCleanup(self.config, self.stop_event)
+        self.event_cleanup = EventCleanup(self.config, self.stop_event, self.db)
         self.event_cleanup.start()
 
     def start_record_cleanup(self) -> None:
@@ -576,13 +580,14 @@ class FrigateApp:
         self.init_onvif()
         self.init_recording_manager()
         self.init_review_segment_manager()
-        self.init_embeddings_manager()
         self.init_go2rtc()
         self.bind_database()
         self.check_db_data_migrations()
         self.init_inter_process_communicator()
         self.init_dispatcher()
         self.start_detectors()
+        self.init_embeddings_manager()
+        self.init_embeddings_client()
         self.start_video_output_processor()
         self.start_ptz_autotracker()
         self.init_historical_regions()

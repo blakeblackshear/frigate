@@ -1,18 +1,19 @@
-"""ChromaDB embeddings database."""
+"""SQLite-vec embeddings database."""
 
 import json
 import logging
 import multiprocessing as mp
+import os
 import signal
 import threading
 from types import FrameType
 from typing import Optional
 
-from playhouse.sqliteq import SqliteQueueDatabase
 from setproctitle import setproctitle
 
 from frigate.config import FrigateConfig
 from frigate.const import CONFIG_DIR
+from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
 from frigate.util.services import listen
 
@@ -41,7 +42,7 @@ def manage_embeddings(config: FrigateConfig) -> None:
     listen()
 
     # Configure Frigate DB
-    db = SqliteQueueDatabase(
+    db = SqliteVecQueueDatabase(
         config.database.path,
         pragmas={
             "auto_vacuum": "FULL",  # Does not defragment database
@@ -49,17 +50,19 @@ def manage_embeddings(config: FrigateConfig) -> None:
             "synchronous": "NORMAL",  # Safe when using WAL https://www.sqlite.org/pragma.html#pragma_synchronous
         },
         timeout=max(60, 10 * len([c for c in config.cameras.values() if c.enabled])),
+        load_vec_extension=True,
     )
     models = [Event]
     db.bind(models)
 
-    embeddings = Embeddings()
+    embeddings = Embeddings(db)
 
     # Check if we need to re-index events
     if config.semantic_search.reindex:
         embeddings.reindex()
 
     maintainer = EmbeddingMaintainer(
+        db,
         config,
         stop_event,
     )
@@ -67,14 +70,14 @@ def manage_embeddings(config: FrigateConfig) -> None:
 
 
 class EmbeddingsContext:
-    def __init__(self):
-        self.embeddings = Embeddings()
+    def __init__(self, db: SqliteVecQueueDatabase):
+        self.embeddings = Embeddings(db)
         self.thumb_stats = ZScoreNormalization()
-        self.desc_stats = ZScoreNormalization()
+        self.desc_stats = ZScoreNormalization(scale_factor=2.5, bias=0.5)
 
         # load stats from disk
         try:
-            with open(f"{CONFIG_DIR}/.search_stats.json", "r") as f:
+            with open(os.path.join(CONFIG_DIR, ".search_stats.json"), "r") as f:
                 data = json.loads(f.read())
                 self.thumb_stats.from_dict(data["thumb_stats"])
                 self.desc_stats.from_dict(data["desc_stats"])
@@ -87,5 +90,5 @@ class EmbeddingsContext:
             "thumb_stats": self.thumb_stats.to_dict(),
             "desc_stats": self.desc_stats.to_dict(),
         }
-        with open(f"{CONFIG_DIR}/.search_stats.json", "w") as f:
-            f.write(json.dumps(contents))
+        with open(os.path.join(CONFIG_DIR, ".search_stats.json"), "w") as f:
+            json.dump(contents, f)

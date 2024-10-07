@@ -2,6 +2,7 @@ click == 8.1.*
 # FastAPI
 starlette-context == 0.3.6
 fastapi == 0.115.0
+uvicorn == 0.30.*
 slowapi == 0.1.9
 imutils == 0.5.*
 joserfc == 1.0.*
@@ -32,12 +33,12 @@ unidecode == 1.3.*
 # OpenVino (ONNX installed in wheels-post)
 openvino == 2024.3.*
 # Embeddings
-chromadb == 0.5.7
+transformers == 4.45.*
 onnx_clip == 4.0.*
 # Generative AI
-google-generativeai == 0.6.*
-ollama == 0.2.*
-openai == 1.30.*
+google-generativeai == 0.8.*
+ollama == 0.3.*
+openai == 1.51.*
 # push notifications
 py-vapid == 1.9.*
 pywebpush == 2.0.*

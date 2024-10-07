@@ -1,37 +1,23 @@
-"""ChromaDB embeddings database."""
+"""SQLite-vec embeddings database."""
 
 import base64
 import io
 import logging
-import sys
+import struct
 import time
+from typing import List, Tuple, Union
 
-import numpy as np
 from PIL import Image
 from playhouse.shortcuts import model_to_dict
 
+from frigate.comms.inter_process import InterProcessRequestor
+from frigate.const import UPDATE_MODEL_STATE
+from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
+from frigate.types import ModelStatusTypesEnum
 
-# Squelch posthog logging
-logging.getLogger("chromadb.telemetry.product.posthog").setLevel(logging.CRITICAL)
-
-# Hot-swap the sqlite3 module for Chroma compatibility
-try:
-    from chromadb import Collection
-    from chromadb import HttpClient as ChromaClient
-    from chromadb.config import Settings
-
-    from .functions.clip import ClipEmbedding
-    from .functions.minilm_l6_v2 import MiniLMEmbedding
-except RuntimeError:
-    __import__("pysqlite3")
-    sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
-    from chromadb import Collection
-    from chromadb import HttpClient as ChromaClient
-    from chromadb.config import Settings
-
-    from .functions.clip import ClipEmbedding
-    from .functions.minilm_l6_v2 import MiniLMEmbedding
+from .functions.clip import ClipEmbedding
+from .functions.minilm_l6_v2 import MiniLMEmbedding
 
 logger = logging.getLogger(__name__)
 
@@ -67,34 +53,198 @@ def get_metadata(event: Event) -> dict:
     )
 
 
+def serialize(vector: List[float]) -> bytes:
+    """Serializes a list of floats into a compact "raw bytes" format"""
+    return struct.pack("%sf" % len(vector), *vector)
+
+
+def deserialize(bytes_data: bytes) -> List[float]:
+    """Deserializes a compact "raw bytes" format into a list of floats"""
+    return list(struct.unpack("%sf" % (len(bytes_data) // 4), bytes_data))
+
+
 class Embeddings:
-    """ChromaDB embeddings database."""
+    """SQLite-vec embeddings database."""
 
-    def __init__(self) -> None:
-        self.client: ChromaClient = ChromaClient(
-            host="127.0.0.1",
-            settings=Settings(anonymized_telemetry=False),
+    def __init__(self, db: SqliteVecQueueDatabase) -> None:
+        self.db = db
+        self.requestor = InterProcessRequestor()
+
+        # Create tables if they don't exist
+        self._create_tables()
+
+        models = [
+            "sentence-transformers/all-MiniLM-L6-v2-model.onnx",
+            "sentence-transformers/all-MiniLM-L6-v2-tokenizer",
+            "clip-clip_image_model_vitb32.onnx",
+            "clip-clip_text_model_vitb32.onnx",
+        ]
+
+        for model in models:
+            self.requestor.send_data(
+                UPDATE_MODEL_STATE,
+                {
+                    "model": model,
+                    "state": ModelStatusTypesEnum.not_downloaded,
+                },
+            )
+
+        self.clip_embedding = ClipEmbedding(
+            preferred_providers=["CPUExecutionProvider"]
+        )
+        self.minilm_embedding = MiniLMEmbedding(
+            preferred_providers=["CPUExecutionProvider"],
         )
 
-    @property
-    def thumbnail(self) -> Collection:
-        return self.client.get_or_create_collection(
-            name="event_thumbnail", embedding_function=ClipEmbedding()
+    def _create_tables(self):
+        # Create vec0 virtual table for thumbnail embeddings
+        self.db.execute_sql("""
+            CREATE VIRTUAL TABLE IF NOT EXISTS vec_thumbnails USING vec0(
+                id TEXT PRIMARY KEY,
+                thumbnail_embedding FLOAT[512]
+            );
+        """)
+
+        # Create vec0 virtual table for description embeddings
+        self.db.execute_sql("""
+            CREATE VIRTUAL TABLE IF NOT EXISTS vec_descriptions USING vec0(
+                id TEXT PRIMARY KEY,
+                description_embedding FLOAT[384]
+            );
+        """)
+
+    def upsert_thumbnail(self, event_id: str, thumbnail: bytes):
+        # Convert thumbnail bytes to PIL Image
+        image = Image.open(io.BytesIO(thumbnail)).convert("RGB")
+        # Generate embedding using CLIP
+        embedding = self.clip_embedding([image])[0]
+
+        self.db.execute_sql(
+            """
+            INSERT OR REPLACE INTO vec_thumbnails(id, thumbnail_embedding)
+            VALUES(?, ?)
+            """,
+            (event_id, serialize(embedding)),
         )
 
-    @property
-    def description(self) -> Collection:
-        return self.client.get_or_create_collection(
-            name="event_description",
-            embedding_function=MiniLMEmbedding(
-                preferred_providers=["CPUExecutionProvider"]
-            ),
+        return embedding
+
+    def upsert_description(self, event_id: str, description: str):
+        # Generate embedding using MiniLM
+        embedding = self.minilm_embedding([description])[0]
+
+        self.db.execute_sql(
+            """
+            INSERT OR REPLACE INTO vec_descriptions(id, description_embedding)
+            VALUES(?, ?)
+            """,
+            (event_id, serialize(embedding)),
         )
+
+        return embedding
+
+    def delete_thumbnail(self, event_ids: List[str]) -> None:
+        ids = ",".join(["?" for _ in event_ids])
+        self.db.execute_sql(
+            f"DELETE FROM vec_thumbnails WHERE id IN ({ids})", event_ids
+        )
+
+    def delete_description(self, event_ids: List[str]) -> None:
+        ids = ",".join(["?" for _ in event_ids])
+        self.db.execute_sql(
+            f"DELETE FROM vec_descriptions WHERE id IN ({ids})", event_ids
+        )
+
+    def search_thumbnail(
+        self, query: Union[Event, str], event_ids: List[str] = None
+    ) -> List[Tuple[str, float]]:
+        if query.__class__ == Event:
+            cursor = self.db.execute_sql(
+                """
+                SELECT thumbnail_embedding FROM vec_thumbnails WHERE id = ?
+                """,
+                [query.id],
+            )
+
+            row = cursor.fetchone() if cursor else None
+
+            if row:
+                query_embedding = deserialize(
+                    row[0]
+                )  # Deserialize the thumbnail embedding
+            else:
+                # If no embedding found, generate it and return it
+                thumbnail = base64.b64decode(query.thumbnail)
+                query_embedding = self.upsert_thumbnail(query.id, thumbnail)
+        else:
+            query_embedding = self.clip_embedding([query])[0]
+
+        sql_query = """
+            SELECT
+                id,
+                distance
+            FROM vec_thumbnails
+            WHERE thumbnail_embedding MATCH ?
+                AND k = 100
+        """
+
+        # Add the IN clause if event_ids is provided and not empty
+        # this is the only filter supported by sqlite-vec as of 0.1.3
+        # but it seems to be broken in this version
+        if event_ids:
+            sql_query += " AND id IN ({})".format(",".join("?" * len(event_ids)))
+
+        # order by distance DESC is not implemented in this version of sqlite-vec
+        # when it's implemented, we can use cosine similarity
+        sql_query += " ORDER BY distance"
+
+        parameters = (
+            [serialize(query_embedding)] + event_ids
+            if event_ids
+            else [serialize(query_embedding)]
+        )
+
+        results = self.db.execute_sql(sql_query, parameters).fetchall()
+
+        return results
+
+    def search_description(
+        self, query_text: str, event_ids: List[str] = None
+    ) -> List[Tuple[str, float]]:
+        query_embedding = self.minilm_embedding([query_text])[0]
+
+        # Prepare the base SQL query
+        sql_query = """
+            SELECT
+                id,
+                distance
+            FROM vec_descriptions
+            WHERE description_embedding MATCH ?
+                AND k = 100
+        """
+
+        # Add the IN clause if event_ids is provided and not empty
+        # this is the only filter supported by sqlite-vec as of 0.1.3
+        # but it seems to be broken in this version
+        if event_ids:
+            sql_query += " AND id IN ({})".format(",".join("?" * len(event_ids)))
+
+        # order by distance DESC is not implemented in this version of sqlite-vec
+        # when it's implemented, we can use cosine similarity
+        sql_query += " ORDER BY distance"
+
+        parameters = (
+            [serialize(query_embedding)] + event_ids
+            if event_ids
+            else [serialize(query_embedding)]
+        )
+
+        results = self.db.execute_sql(sql_query, parameters).fetchall()
+
+        return results
 
     def reindex(self) -> None:
-        """Reindex all event embeddings."""
         logger.info("Indexing event embeddings...")
-        self.client.reset()
 
         st = time.time()
         totals = {
@@ -115,37 +265,14 @@ class Embeddings:
         )
 
         while len(events) > 0:
-            thumbnails = {"ids": [], "images": [], "metadatas": []}
-            descriptions = {"ids": [], "documents": [], "metadatas": []}
-
             event: Event
             for event in events:
-                metadata = get_metadata(event)
                 thumbnail = base64.b64decode(event.thumbnail)
-                img = np.array(Image.open(io.BytesIO(thumbnail)).convert("RGB"))
-                thumbnails["ids"].append(event.id)
-                thumbnails["images"].append(img)
-                thumbnails["metadatas"].append(metadata)
+                self.upsert_thumbnail(event.id, thumbnail)
+                totals["thumb"] += 1
                 if description := event.data.get("description", "").strip():
-                    descriptions["ids"].append(event.id)
-                    descriptions["documents"].append(description)
-                    descriptions["metadatas"].append(metadata)
-
-            if len(thumbnails["ids"]) > 0:
-                totals["thumb"] += len(thumbnails["ids"])
-                self.thumbnail.upsert(
-                    images=thumbnails["images"],
-                    metadatas=thumbnails["metadatas"],
-                    ids=thumbnails["ids"],
-                )
-
-            if len(descriptions["ids"]) > 0:
-                totals["desc"] += len(descriptions["ids"])
-                self.description.upsert(
-                    documents=descriptions["documents"],
-                    metadatas=descriptions["metadatas"],
-                    ids=descriptions["ids"],
-                )
+                    totals["desc"] += 1
+                    self.upsert_description(event.id, description)
 
             current_page += 1
             events = (
