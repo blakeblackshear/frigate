@@ -10,8 +10,11 @@ from typing import List, Tuple, Union
 from PIL import Image
 from playhouse.shortcuts import model_to_dict
 
+from frigate.comms.inter_process import InterProcessRequestor
+from frigate.const import UPDATE_MODEL_STATE
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
+from frigate.types import ModelStatusTypesEnum
 
 from .functions.clip import ClipEmbedding
 from .functions.minilm_l6_v2 import MiniLMEmbedding
@@ -65,11 +68,30 @@ class Embeddings:
 
     def __init__(self, db: SqliteVecQueueDatabase) -> None:
         self.db = db
+        self.requestor = InterProcessRequestor()
 
         # Create tables if they don't exist
         self._create_tables()
 
-        self.clip_embedding = ClipEmbedding(model="ViT-B/32")
+        models = [
+            "sentence-transformers/all-MiniLM-L6-v2-model.onnx",
+            "sentence-transformers/all-MiniLM-L6-v2-tokenizer",
+            "clip-clip_image_model_vitb32.onnx",
+            "clip-clip_text_model_vitb32.onnx",
+        ]
+
+        for model in models:
+            self.requestor.send_data(
+                UPDATE_MODEL_STATE,
+                {
+                    "model": model,
+                    "state": ModelStatusTypesEnum.not_downloaded,
+                },
+            )
+
+        self.clip_embedding = ClipEmbedding(
+            preferred_providers=["CPUExecutionProvider"]
+        )
         self.minilm_embedding = MiniLMEmbedding(
             preferred_providers=["CPUExecutionProvider"],
         )

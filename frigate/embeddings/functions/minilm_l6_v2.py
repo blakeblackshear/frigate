@@ -1,21 +1,20 @@
-"""Embedding function for ONNX MiniLM-L6 model."""
-
-import errno
 import logging
 import os
-from pathlib import Path
 from typing import List
 
 import numpy as np
 import onnxruntime as ort
-import requests
 
 # importing this without pytorch or others causes a warning
 # https://github.com/huggingface/transformers/issues/27214
 # suppressed by setting env TRANSFORMERS_NO_ADVISORY_WARNINGS=1
 from transformers import AutoTokenizer
 
-from frigate.const import MODEL_CACHE_DIR
+from frigate.const import MODEL_CACHE_DIR, UPDATE_MODEL_STATE
+from frigate.types import ModelStatusTypesEnum
+from frigate.util.downloader import ModelDownloader
+
+logger = logging.getLogger(__name__)
 
 
 class MiniLMEmbedding:
@@ -26,86 +25,83 @@ class MiniLMEmbedding:
     IMAGE_MODEL_FILE = "model.onnx"
     TOKENIZER_FILE = "tokenizer"
 
-    def __init__(self, preferred_providers=None):
-        """Initialize MiniLM Embedding function."""
-        self.tokenizer = self._load_tokenizer()
+    def __init__(self, preferred_providers=["CPUExecutionProvider"]):
+        self.preferred_providers = preferred_providers
+        self.tokenizer = None
+        self.session = None
 
-        model_path = os.path.join(self.DOWNLOAD_PATH, self.IMAGE_MODEL_FILE)
-        if not os.path.exists(model_path):
-            self._download_model()
+        self.downloader = ModelDownloader(
+            model_name=self.MODEL_NAME,
+            download_path=self.DOWNLOAD_PATH,
+            file_names=[self.IMAGE_MODEL_FILE, self.TOKENIZER_FILE],
+            download_func=self._download_model,
+        )
+        self.downloader.ensure_model_files()
 
-        if preferred_providers is None:
-            preferred_providers = ["CPUExecutionProvider"]
+    def _download_model(self, path: str):
+        try:
+            if os.path.basename(path) == self.IMAGE_MODEL_FILE:
+                s3_url = f"https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/onnx/{self.IMAGE_MODEL_FILE}"
+                ModelDownloader.download_from_url(s3_url, path)
+            elif os.path.basename(path) == self.TOKENIZER_FILE:
+                logger.info("Downloading MiniLM tokenizer")
+                tokenizer = AutoTokenizer.from_pretrained(
+                    self.MODEL_NAME, clean_up_tokenization_spaces=False
+                )
+                tokenizer.save_pretrained(path)
 
-        self.session = self._load_model(model_path)
+            self.downloader.requestor.send_data(
+                UPDATE_MODEL_STATE,
+                {
+                    "model": f"{self.MODEL_NAME}-{os.path.basename(path)}",
+                    "state": ModelStatusTypesEnum.downloaded,
+                },
+            )
+        except Exception:
+            self.downloader.requestor.send_data(
+                UPDATE_MODEL_STATE,
+                {
+                    "model": f"{self.MODEL_NAME}-{os.path.basename(path)}",
+                    "state": ModelStatusTypesEnum.error,
+                },
+            )
+
+    def _load_model_and_tokenizer(self):
+        if self.tokenizer is None or self.session is None:
+            self.downloader.wait_for_download()
+            self.tokenizer = self._load_tokenizer()
+            self.session = self._load_model(
+                os.path.join(self.DOWNLOAD_PATH, self.IMAGE_MODEL_FILE),
+                self.preferred_providers,
+            )
 
     def _load_tokenizer(self):
-        """Load the tokenizer from the local path or download it if not available."""
         tokenizer_path = os.path.join(self.DOWNLOAD_PATH, self.TOKENIZER_FILE)
-        if os.path.exists(tokenizer_path):
-            return AutoTokenizer.from_pretrained(tokenizer_path)
-        else:
-            return AutoTokenizer.from_pretrained(self.MODEL_NAME)
-
-    def _download_model(self):
-        """Download the ONNX model and tokenizer from a remote source if they don't exist."""
-        logging.info(f"Downloading {self.MODEL_NAME} ONNX model and tokenizer...")
-
-        # Download the tokenizer
-        tokenizer = AutoTokenizer.from_pretrained(self.MODEL_NAME)
-        os.makedirs(self.DOWNLOAD_PATH, exist_ok=True)
-        tokenizer.save_pretrained(os.path.join(self.DOWNLOAD_PATH, self.TOKENIZER_FILE))
-
-        # Download the ONNX model
-        s3_url = f"https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/onnx/{self.IMAGE_MODEL_FILE}"
-        model_path = os.path.join(self.DOWNLOAD_PATH, self.IMAGE_MODEL_FILE)
-        self._download_from_url(s3_url, model_path)
-
-        logging.info(f"Model and tokenizer saved to {self.DOWNLOAD_PATH}")
-
-    def _download_from_url(self, url: str, save_path: str):
-        """Download a file from a URL and save it to a specified path."""
-        temporary_filename = Path(save_path).with_name(
-            os.path.basename(save_path) + ".part"
+        return AutoTokenizer.from_pretrained(
+            tokenizer_path, clean_up_tokenization_spaces=False
         )
-        temporary_filename.parent.mkdir(parents=True, exist_ok=True)
-        with requests.get(url, stream=True, allow_redirects=True) as r:
-            # if the content type is HTML, it's not the actual model file
-            if "text/html" in r.headers.get("Content-Type", ""):
-                raise ValueError(
-                    f"Expected an ONNX file but received HTML from the URL: {url}"
-                )
 
-            # Ensure the download is successful
-            r.raise_for_status()
-
-            # Write the model to a temporary file first
-            with open(temporary_filename, "wb") as f:
-                for chunk in r.iter_content(chunk_size=8192):
-                    f.write(chunk)
-
-        temporary_filename.rename(save_path)
-
-    def _load_model(self, path: str):
-        """Load the ONNX model from a given path."""
-        providers = ["CPUExecutionProvider"]
+    def _load_model(self, path: str, providers: List[str]):
         if os.path.exists(path):
             return ort.InferenceSession(path, providers=providers)
         else:
-            raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), path)
+            logger.warning(f"MiniLM model file {path} not found.")
+            return None
 
     def __call__(self, texts: List[str]) -> List[np.ndarray]:
-        """Generate embeddings for the given texts."""
+        self._load_model_and_tokenizer()
+
+        if self.session is None or self.tokenizer is None:
+            logger.error("MiniLM model or tokenizer is not loaded.")
+            return []
+
         inputs = self.tokenizer(
             texts, padding=True, truncation=True, return_tensors="np"
         )
-
         input_names = [input.name for input in self.session.get_inputs()]
         onnx_inputs = {name: inputs[name] for name in input_names if name in inputs}
 
-        # Run inference
         outputs = self.session.run(None, onnx_inputs)
-
         embeddings = outputs[0].mean(axis=1)
 
         return [embedding for embedding in embeddings]

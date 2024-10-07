@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import TypedDict
 
 from frigate.camera import CameraMetrics
@@ -11,3 +12,10 @@ class StatsTrackingTypes(TypedDict):
     latest_frigate_version: str
     last_updated: int
     processes: dict[str, int]
+
+
+class ModelStatusTypesEnum(str, Enum):
+    not_downloaded = "not_downloaded"
+    downloading = "downloading"
+    downloaded = "downloaded"
+    error = "error"

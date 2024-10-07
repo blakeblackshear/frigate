@@ -71,8 +71,7 @@ def manage_embeddings(config: FrigateConfig) -> None:
 
 class EmbeddingsContext:
     def __init__(self, db: SqliteVecQueueDatabase):
-        self.db = db
-        self.embeddings = Embeddings(self.db)
+        self.embeddings = Embeddings(db)
         self.thumb_stats = ZScoreNormalization()
         self.desc_stats = ZScoreNormalization()
 
