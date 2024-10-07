@@ -91,7 +91,7 @@ export function MobilePageHeader({
   return (
     <div
       className={cn(
-        "sticky top-0 z-50 mb-2 flex items-center justify-center bg-background p-4",
+        "sticky -top-2 z-50 mb-2 flex items-center justify-center bg-background p-4",
         className,
       )}
       {...props}
