@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import VainfoDialog from "@/components/overlay/VainfoDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ThresholdBarGraph } from "@/components/graph/SystemGraph";
+import { cn } from "@/lib/utils";
 
 type GeneralMetricsProps = {
   lastUpdated: number;
@@ -108,7 +109,7 @@ export default function GeneralMetrics({
 
   const detTempSeries = useMemo(() => {
     if (!statsHistory) {
-      return [];
+      return undefined;
     }
 
     if (
@@ -291,6 +292,74 @@ export default function GeneralMetrics({
     return Object.values(series);
   }, [statsHistory]);
 
+  const gpuEncSeries = useMemo(() => {
+    if (!statsHistory) {
+      return [];
+    }
+
+    const series: {
+      [key: string]: { name: string; data: { x: number; y: string }[] };
+    } = {};
+    let hasValidGpu = false;
+
+    statsHistory.forEach((stats, statsIdx) => {
+      if (!stats) {
+        return;
+      }
+
+      Object.entries(stats.gpu_usages || []).forEach(([key, stats]) => {
+        if (!(key in series)) {
+          series[key] = { name: key, data: [] };
+        }
+
+        if (stats.enc) {
+          hasValidGpu = true;
+          series[key].data.push({ x: statsIdx + 1, y: stats.enc.slice(0, -1) });
+        }
+      });
+    });
+
+    if (!hasValidGpu) {
+      return [];
+    }
+
+    return Object.keys(series).length > 0 ? Object.values(series) : undefined;
+  }, [statsHistory]);
+
+  const gpuDecSeries = useMemo(() => {
+    if (!statsHistory) {
+      return [];
+    }
+
+    const series: {
+      [key: string]: { name: string; data: { x: number; y: string }[] };
+    } = {};
+    let hasValidGpu = false;
+
+    statsHistory.forEach((stats, statsIdx) => {
+      if (!stats) {
+        return;
+      }
+
+      Object.entries(stats.gpu_usages || []).forEach(([key, stats]) => {
+        if (!(key in series)) {
+          series[key] = { name: key, data: [] };
+        }
+
+        if (stats.dec) {
+          hasValidGpu = true;
+          series[key].data.push({ x: statsIdx + 1, y: stats.dec.slice(0, -1) });
+        }
+      });
+    });
+
+    if (!hasValidGpu) {
+      return [];
+    }
+
+    return Object.keys(series).length > 0 ? Object.values(series) : undefined;
+  }, [statsHistory]);
+
   // other processes stats
 
   const otherProcessCpuSeries = useMemo(() => {
@@ -370,7 +439,10 @@ export default function GeneralMetrics({
           Detectors
         </div>
         <div
-          className={`mt-4 grid w-full grid-cols-1 gap-2 ${detTempSeries == undefined ? "sm:grid-cols-3" : "sm:grid-cols-4"}`}
+          className={cn(
+            "mt-4 grid w-full grid-cols-1 gap-2 sm:grid-cols-3",
+            detTempSeries && "sm:grid-cols-4",
+          )}
         >
           {statsHistory.length != 0 ? (
             <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
@@ -390,7 +462,7 @@ export default function GeneralMetrics({
           ) : (
             <Skeleton className="aspect-video w-full rounded-lg md:rounded-2xl" />
           )}
-          {statsHistory.length != 0 ? (
+          {statsHistory.length != 0 && (
             <>
               {detTempSeries && (
                 <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
@@ -409,8 +481,6 @@ export default function GeneralMetrics({
                 </div>
               )}
             </>
-          ) : (
-            <Skeleton className="aspect-video w-full" />
           )}
           {statsHistory.length != 0 ? (
             <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
@@ -466,7 +536,12 @@ export default function GeneralMetrics({
                 </Button>
               )}
             </div>
-            <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div
+              className={cn(
+                "mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2",
+                gpuEncSeries?.length && "md:grid-cols-4",
+              )}
+            >
               {statsHistory.length != 0 ? (
                 <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
                   <div className="mb-5">GPU Usage</div>
@@ -494,6 +569,50 @@ export default function GeneralMetrics({
                         <ThresholdBarGraph
                           key={series.name}
                           graphId={`${series.name}-mem`}
+                          unit="%"
+                          name={series.name}
+                          threshold={GPUMemThreshold}
+                          updateTimes={updateTimes}
+                          data={[series]}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <Skeleton className="aspect-video w-full" />
+              )}
+              {statsHistory.length != 0 ? (
+                <>
+                  {gpuEncSeries && (
+                    <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
+                      <div className="mb-5">GPU Encoder</div>
+                      {gpuEncSeries.map((series) => (
+                        <ThresholdBarGraph
+                          key={series.name}
+                          graphId={`${series.name}-enc`}
+                          unit="%"
+                          name={series.name}
+                          threshold={GPUMemThreshold}
+                          updateTimes={updateTimes}
+                          data={[series]}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <Skeleton className="aspect-video w-full" />
+              )}
+              {statsHistory.length != 0 ? (
+                <>
+                  {gpuDecSeries && (
+                    <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
+                      <div className="mb-5">GPU Decoder</div>
+                      {gpuDecSeries.map((series) => (
+                        <ThresholdBarGraph
+                          key={series.name}
+                          graphId={`${series.name}-dec`}
                           unit="%"
                           name={series.name}
                           threshold={GPUMemThreshold}

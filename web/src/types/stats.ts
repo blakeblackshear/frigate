@@ -41,6 +41,9 @@ export type ExtraProcessStats = {
 export type GpuStats = {
   gpu: string;
   mem: string;
+  enc?: string;
+  dec?: string;
+  pstate?: string;
 };
 
 export type ServiceStats = {
