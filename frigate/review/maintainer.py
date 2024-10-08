@@ -167,7 +167,7 @@ class ReviewSegmentMaintainer(threading.Thread):
         # clear ongoing review segments from last instance
         self.requestor.send_data(CLEAR_ONGOING_REVIEW_SEGMENTS, "")
 
-    def new_segment(
+    def _publish_segment_start(
         self,
         segment: PendingReviewSegment,
     ) -> None:
@@ -186,7 +186,7 @@ class ReviewSegmentMaintainer(threading.Thread):
             ),
         )
 
-    def update_segment(
+    def _publish_segment_update(
         self,
         segment: PendingReviewSegment,
         camera_config: CameraConfig,
@@ -211,7 +211,7 @@ class ReviewSegmentMaintainer(threading.Thread):
             ),
         )
 
-    def end_segment(
+    def _publish_segment_end(
         self,
         segment: PendingReviewSegment,
         prev_data: dict[str, any],
@@ -241,8 +241,10 @@ class ReviewSegmentMaintainer(threading.Thread):
         camera_config = self.config.cameras[segment.camera]
         active_objects = get_active_objects(frame_time, camera_config, objects)
         prev_data = segment.get_data(False)
+        has_activity = False
 
         if len(active_objects) > 0:
+            has_activity = True
             should_update = False
 
             if frame_time > segment.last_update:
@@ -295,13 +297,45 @@ class ReviewSegmentMaintainer(threading.Thread):
                         logger.debug(f"Failed to get frame {frame_id} from SHM")
                         return
 
-                    self.update_segment(
+                    self._publish_segment_update(
                         segment, camera_config, yuv_frame, active_objects, prev_data
                     )
                     self.frame_manager.close(frame_id)
                 except FileNotFoundError:
                     return
-        else:
+
+        # check if there are any objects pending loitering on this camera
+        loitering_objects = get_loitering_objects(frame_time, camera_config, objects)
+
+        if loitering_objects:
+            has_activity = True
+
+            if frame_time > segment.last_update:
+                segment.last_update = frame_time
+
+            for object in loitering_objects:
+                # if object is alert label
+                # and has entered loitering zone
+                # mark this review as alert
+                if (
+                    segment.severity != SeverityEnum.alert
+                    and object["label"] in camera_config.review.alerts.labels
+                    and (
+                        len(object["current_zones"]) > 0
+                        and set(object["current_zones"])
+                        & set(camera_config.review.alerts.required_zones)
+                    )
+                ):
+                    segment.severity = SeverityEnum.alert
+                    should_update = True
+
+                # keep zones up to date
+                if len(object["current_zones"]) > 0:
+                    for zone in object["current_zones"]:
+                        if zone not in segment.zones:
+                            segment.zones.append(zone)
+
+        if not has_activity:
             if not segment.has_frame:
                 try:
                     frame_id = f"{camera_config.name}{frame_time}"
@@ -315,16 +349,18 @@ class ReviewSegmentMaintainer(threading.Thread):
 
                     segment.save_full_frame(camera_config, yuv_frame)
                     self.frame_manager.close(frame_id)
-                    self.update_segment(segment, camera_config, None, [], prev_data)
+                    self._publish_segment_update(
+                        segment, camera_config, None, [], prev_data
+                    )
                 except FileNotFoundError:
                     return
 
             if segment.severity == SeverityEnum.alert and frame_time > (
                 segment.last_update + THRESHOLD_ALERT_ACTIVITY
             ):
-                self.end_segment(segment, prev_data)
+                self._publish_segment_end(segment, prev_data)
             elif frame_time > (segment.last_update + THRESHOLD_DETECTION_ACTIVITY):
-                self.end_segment(segment, prev_data)
+                self._publish_segment_end(segment, prev_data)
 
     def check_if_new_segment(
         self,
@@ -418,7 +454,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                         camera_config, yuv_frame, active_objects
                     )
                     self.frame_manager.close(frame_id)
-                    self.new_segment(self.active_review_segments[camera])
+                    self._publish_segment_start(self.active_review_segments[camera])
                 except FileNotFoundError:
                     return
 
@@ -598,6 +634,27 @@ def get_active_objects(
         for o in all_objects
         if o["motionless_count"]
         < camera_config.detect.stationary.threshold  # no stationary objects
+        and o["position_changes"] > 0  # object must have moved at least once
+        and o["frame_time"] == frame_time  # object must be detected in this frame
+        and not o["false_positive"]  # object must not be a false positive
+        and (
+            o["label"] in camera_config.review.alerts.labels
+            or (
+                camera_config.review.detections.labels is None
+                or o["label"] in camera_config.review.detections.labels
+            )
+        )  # object must be in the alerts or detections label list
+    ]
+
+
+def get_loitering_objects(
+    frame_time: float, camera_config: CameraConfig, all_objects: list[TrackedObject]
+) -> list[TrackedObject]:
+    """get loitering objects for detection."""
+    return [
+        o
+        for o in all_objects
+        if o["pending_loitering"]  # object must be pending loitering
         and o["position_changes"] > 0  # object must have moved at least once
         and o["frame_time"] == frame_time  # object must be detected in this frame
         and not o["false_positive"]  # object must not be a false positive

@@ -138,6 +138,7 @@ class TrackedObject:
         self.last_published = 0
         self.frame = None
         self.active = True
+        self.pending_loitering = False
         self.previous = self.to_dict()
 
     def _is_false_positive(self):
@@ -194,6 +195,8 @@ class TrackedObject:
         # check zones
         current_zones = []
         bottom_center = (obj_data["centroid"][0], obj_data["box"][3])
+        in_loitering_zone = False
+
         # check each zone
         for name, zone in self.camera_config.zones.items():
             # if the zone is not for this object type, skip
@@ -207,6 +210,10 @@ class TrackedObject:
                 if name in self.current_zones or not zone_filtered(self, zone.filters):
                     # an object is only considered present in a zone if it has a zone inertia of 3+
                     if zone_score >= zone.inertia:
+                        # if the zone has loitering time, update loitering status
+                        if zone.loitering_time > 0:
+                            in_loitering_zone = True
+
                         loitering_score = self.zone_loitering.get(name, 0) + 1
 
                         # loitering time is configured as seconds, convert to count of frames
@@ -226,6 +233,9 @@ class TrackedObject:
                 # once an object has a zone inertia of 3+ it is not checked anymore
                 if 0 < zone_score < zone.inertia:
                     self.zone_presence[name] = zone_score - 1
+
+        # update loitering status
+        self.pending_loitering = in_loitering_zone
 
         # maintain attributes
         for attr in obj_data["attributes"]:
@@ -305,6 +315,7 @@ class TrackedObject:
             "has_snapshot": self.has_snapshot,
             "attributes": self.attributes,
             "current_attributes": self.obj_data["attributes"],
+            "pending_loitering": self.pending_loitering,
         }
 
         if include_thumbnail:
