@@ -41,7 +41,12 @@ export type ExtraProcessStats = {
 export type GpuStats = {
   gpu: string;
   mem: string;
+  enc?: string;
+  dec?: string;
+  pstate?: string;
 };
+
+export type GpuInfo = "vainfo" | "nvinfo";
 
 export type ServiceStats = {
   last_updated: number;
@@ -69,6 +74,15 @@ export type Vainfo = {
   return_code: number;
   stdout: string;
   stderr: string;
+};
+
+export type Nvinfo = {
+  [key: string]: {
+    name: string;
+    driver: string;
+    cuda_compute: string;
+    vbios: string;
+  };
 };
 
 export type Ffprobe = {
