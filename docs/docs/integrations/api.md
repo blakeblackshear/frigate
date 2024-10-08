@@ -415,13 +415,14 @@ HTTP Live Streaming Video on Demand URL for the camera with the specified time r
 
 Export recordings from `start-timestamp` to `end-timestamp` for `camera` as a single mp4 file. These recordings will be exported to the `/media/frigate/exports` folder.
 
-It is also possible to export this recording as a time-lapse.
+It is also possible to export this recording as a time-lapse using the "playback" key in the json body, or specify a custom export filename, using the "name" key.
 
 **Optional Body:**
 
 ```json
 {
-  "playback": "realtime" // playback factor: realtime or timelapse_25x
+  "playback": "realtime", // playback factor: realtime or timelapse_25x
+  "name": "custom export name" // override the default export filename with a custom name
 }
 ```
 
