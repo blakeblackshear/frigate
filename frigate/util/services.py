@@ -339,7 +339,10 @@ def get_intel_gpu_stats() -> dict[str, str]:
 
 def try_get_info(f, h, default="N/A"):
     try:
-        v = f(h)
+        if h:
+            v = f(h)
+        else:
+            v = f()
     except nvml.NVMLError_NotSupported:
         v = default
     return v
@@ -443,14 +446,16 @@ def get_nvidia_driver_info() -> dict[str, any]:
         deviceCount = nvml.nvmlDeviceGetCount()
         for i in range(deviceCount):
             handle = nvml.nvmlDeviceGetHandleByIndex(i)
-            driver = try_get_info(nvml.nvmlSystemGetDriverVersion, handle, default=None)
-            cuda = try_get_info(
+            driver = try_get_info(nvml.nvmlSystemGetDriverVersion, None, default=None)
+            cuda_compute = try_get_info(
                 nvml.nvmlDeviceGetCudaComputeCapability, handle, default=None
             )
+            vbios = try_get_info(nvml.nvmlDeviceGetVbiosVersion, handle, default=None)
             results[i] = {
                 "name": nvml.nvmlDeviceGetName(handle),
                 "driver": driver or "unknown",
-                "cuda": cuda or "unknown",
+                "cuda_compute": cuda_compute or "unknown",
+                "vbios": vbios or "unknown",
             }
     except Exception:
         pass
