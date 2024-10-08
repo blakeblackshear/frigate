@@ -618,7 +618,7 @@ export default function GeneralMetrics({
               )}
               {statsHistory.length != 0 ? (
                 <>
-                  {gpuDecSeries && (
+                  {gpuDecSeries && gpuDecSeries?.length != 0 && (
                     <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
                       <div className="mb-5">GPU Decoder</div>
                       {gpuDecSeries.map((series) => (
