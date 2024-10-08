@@ -356,6 +356,8 @@ def get_nvidia_gpu_stats() -> dict[int, dict]:
             util = try_get_info(nvml.nvmlDeviceGetUtilizationRates, handle)
             enc = try_get_info(nvml.nvmlDeviceGetEncoderUtilization, handle)
             dec = try_get_info(nvml.nvmlDeviceGetDecoderUtilization, handle)
+            pstate = try_get_info(nvml.nvmlDeviceGetPowerState, handle, default=None)
+
             if util != "N/A":
                 gpu_util = util.gpu
             else:
@@ -382,6 +384,7 @@ def get_nvidia_gpu_stats() -> dict[int, dict]:
                 "mem": gpu_mem_util,
                 "enc": enc_util,
                 "dec": dec_util,
+                "pstate": pstate or "unknown",
             }
     except Exception:
         pass
@@ -430,6 +433,29 @@ def vainfo_hwaccel(device_name: Optional[str] = None) -> sp.CompletedProcess:
         else ["vainfo", "--display", "drm", "--device", f"/dev/dri/{device_name}"]
     )
     return sp.run(ffprobe_cmd, capture_output=True)
+
+
+def get_nvidia_driver_info() -> dict[str, any]:
+    """Get general hardware info for nvidia GPU."""
+    results = {}
+    try:
+        nvml.nvmlInit()
+        deviceCount = nvml.nvmlDeviceGetCount()
+        for i in range(deviceCount):
+            handle = nvml.nvmlDeviceGetHandleByIndex(i)
+            driver = try_get_info(nvml.nvmlSystemGetDriverVersion, handle, default=None)
+            cuda = try_get_info(
+                nvml.nvmlDeviceGetCudaComputeCapability, handle, default=None
+            )
+            results[i] = {
+                "name": nvml.nvmlDeviceGetName(handle),
+                "driver": driver or "unknown",
+                "cuda": cuda or "unknown",
+            }
+    except Exception:
+        pass
+    finally:
+        return results
 
 
 def auto_detect_hwaccel() -> str:

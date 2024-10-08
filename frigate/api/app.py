@@ -28,7 +28,12 @@ from frigate.util.builtin import (
     get_tz_modifiers,
     update_yaml_from_url,
 )
-from frigate.util.services import ffprobe_stream, restart_frigate, vainfo_hwaccel
+from frigate.util.services import (
+    ffprobe_stream,
+    get_nvidia_driver_info,
+    restart_frigate,
+    vainfo_hwaccel,
+)
 from frigate.version import VERSION
 
 logger = logging.getLogger(__name__)
@@ -380,6 +385,11 @@ def vainfo():
             ),
         }
     )
+
+
+@router.get("/nvinfo")
+def nvinfo():
+    return JSONResponse(content=get_nvidia_driver_info())
 
 
 @router.get("/logs/{service}", tags=[Tags.logs])
