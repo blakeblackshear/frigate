@@ -79,19 +79,12 @@ export default function SearchThumbnail({
             <div className="flex">
               <TooltipTrigger asChild>
                 <div className="mx-3 pb-1 text-sm text-white">
-                  {
-                    <>
-                      <Chip
-                        className={`z-0 flex items-start justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500`}
-                        onClick={() => onClick(searchResult)}
-                      >
-                        {getIconForLabel(
-                          searchResult.label,
-                          "size-3 text-white",
-                        )}
-                      </Chip>
-                    </>
-                  }
+                  <Chip
+                    className={`z-0 flex items-start justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500`}
+                    onClick={() => onClick(searchResult)}
+                  >
+                    {getIconForLabel(searchResult.label, "size-3 text-white")}
+                  </Chip>
                 </div>
               </TooltipTrigger>
             </div>

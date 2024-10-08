@@ -390,7 +390,8 @@ export default function SearchView({
                         findSimilar={() => setSimilaritySearch(value)}
                         onClick={() => onSelectSearch(value, index)}
                       />
-                      {searchTerm && (
+                      {(searchTerm ||
+                        searchFilter?.search_type?.includes("similarity")) && (
                         <div className={cn("absolute right-2 top-2 z-40")}>
                           <Tooltip>
                             <TooltipTrigger>
