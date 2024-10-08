@@ -225,10 +225,11 @@ export default function Explore() {
   };
 
   if (
-    !minilmModelState ||
-    !minilmTokenizerState ||
-    !clipImageModelState ||
-    !clipTextModelState
+    config?.semantic_search.enabled &&
+    (!minilmModelState ||
+      !minilmTokenizerState ||
+      !clipImageModelState ||
+      !clipTextModelState)
   ) {
     return (
       <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
@@ -237,7 +238,7 @@ export default function Explore() {
 
   return (
     <>
-      {!allModelsLoaded ? (
+      {config?.semantic_search.enabled && !allModelsLoaded ? (
         <div className="absolute inset-0 left-1/2 top-1/2 flex h-96 w-96 -translate-x-1/2 -translate-y-1/2">
           <div className="flex flex-col items-center justify-center space-y-3 rounded-lg bg-background/50 p-5">
             <div className="my-5 flex flex-col items-center gap-2 text-xl">
