@@ -250,10 +250,7 @@ The community supported docker image tags for the current stable version are:
 - `stable-tensorrt-jp5` - Frigate build optimized for nvidia Jetson devices running Jetpack 5
 - `stable-tensorrt-jp4` - Frigate build optimized for nvidia Jetson devices running Jetpack 4.6
 - `stable-rk` - Frigate build for SBCs with Rockchip SoC
-- `stable-rocm` - Frigate build for [AMD GPUs and iGPUs](../configuration/object_detectors.md#amdrocm-gpu-detector), all drivers
-  - `stable-rocm-gfx900` - AMD gfx900 driver only
-  - `stable-rocm-gfx1030` - AMD gfx1030 driver only
-  - `stable-rocm-gfx1100` - AMD gfx1100 driver only
+- `stable-rocm` - Frigate build for [AMD GPUs](../configuration/object_detectors.md#amdrocm-gpu-detector)
   - `stable-h8l` - Frigate build for the Hailo-8L M.2 PICe Raspberry Pi 5 hat
 
 ## Home Assistant Addon
