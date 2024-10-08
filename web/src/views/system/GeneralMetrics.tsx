@@ -128,6 +128,10 @@ export default function GeneralMetrics({
       }
 
       Object.entries(stats.detectors).forEach(([key], cIdx) => {
+        if (!key.includes("coral")) {
+          return;
+        }
+
         if (cIdx <= Object.keys(stats.service.temperatures).length) {
           if (!(key in series)) {
             series[key] = {
@@ -141,7 +145,12 @@ export default function GeneralMetrics({
         }
       });
     });
-    return Object.values(series);
+
+    if (Object.keys(series).length > 0) {
+      return Object.values(series);
+    }
+
+    return undefined;
   }, [statsHistory]);
 
   const detCpuSeries = useMemo(() => {
