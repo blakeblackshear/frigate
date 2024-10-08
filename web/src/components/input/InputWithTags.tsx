@@ -397,6 +397,11 @@ export default function InputWithTags({
     setIsSimilaritySearch(false);
   }, [setFilters, resetSuggestions, setSearch, setInputFocused]);
 
+  const handleClearSimilarity = useCallback(() => {
+    removeFilter("event_id", filters.event_id!);
+    removeFilter("search_type", "similarity");
+  }, [removeFilter, filters]);
+
   const handleInputBlur = useCallback(
     (e: React.FocusEvent) => {
       if (
@@ -638,7 +643,7 @@ export default function InputWithTags({
                   <span className="inline-flex items-center whitespace-nowrap rounded-full bg-blue-100 px-2 py-0.5 text-sm text-blue-800">
                     Similarity Search
                     <button
-                      onClick={handleClearInput}
+                      onClick={handleClearSimilarity}
                       className="ml-1 focus:outline-none"
                       aria-label="Clear similarity search"
                     >
