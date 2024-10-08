@@ -411,6 +411,25 @@ HTTP Live Streaming Video on Demand URL for the specified event. Can be viewed i
 
 HTTP Live Streaming Video on Demand URL for the camera with the specified time range. Can be viewed in an application like VLC.
 
+### `GET /api/exports`
+
+Fetch a list of all export recordings
+
+Sample response:
+```json
+[
+  {
+    "camera": "doorbell",
+    "date": 12800057,
+    "id": "doorbell_pjis54",
+    "in_progress": false,
+    "name": "2024-10-04 fox visit",
+    "thumb_path": "/media/frigate/clips/export/doorbell_pjis54.webp",
+    "video_path": "/media/frigate/exports/doorbell_pjis54.mp4"
+  }
+]
+```
+
 ### `POST /api/export/<camera>/start/<start-timestamp>/end/<end-timestamp>`
 
 Export recordings from `start-timestamp` to `end-timestamp` for `camera` as a single mp4 file. These recordings will be exported to the `/media/frigate/exports` folder.
