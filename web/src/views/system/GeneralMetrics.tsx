@@ -1,5 +1,5 @@
 import useSWR from "swr";
-import { FrigateStats } from "@/types/stats";
+import { FrigateStats, GpuInfo } from "@/types/stats";
 import { useEffect, useMemo, useState } from "react";
 import { useFrigateStats } from "@/api/ws";
 import {
@@ -11,7 +11,7 @@ import {
   InferenceThreshold,
 } from "@/types/graph";
 import { Button } from "@/components/ui/button";
-import VainfoDialog from "@/components/overlay/VainfoDialog";
+import GPUInfoDialog from "@/components/overlay/GPUInfoDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ThresholdBarGraph } from "@/components/graph/SystemGraph";
 import { cn } from "@/lib/utils";
@@ -63,15 +63,23 @@ export default function GeneralMetrics({
     }
   }, [initialStats, updatedStats, statsHistory, lastUpdated, setLastUpdated]);
 
-  const canGetGpuInfo = useMemo(
-    () =>
-      statsHistory.length > 0 &&
-      Object.keys(statsHistory[0]?.gpu_usages ?? {}).filter(
-        (key) =>
-          key == "amd-vaapi" || key == "intel-vaapi" || key == "intel-qsv",
-      ).length > 0,
-    [statsHistory],
-  );
+  const [canGetGpuInfo, gpuType] = useMemo<[boolean, GpuInfo]>(() => {
+    let vaCount = 0;
+    let nvCount = 0;
+
+    statsHistory.length > 0 &&
+      Object.keys(statsHistory[0]?.gpu_usages ?? {}).forEach((key) => {
+        if (key == "amd-vaapi" || key == "intel-vaapi" || key == "intel-qsv") {
+          vaCount += 1;
+        }
+
+        if (key.includes("NVIDIA")) {
+          nvCount += 1;
+        }
+      });
+
+    return [vaCount > 0 || nvCount > 0, nvCount > 0 ? "nvinfo" : "vainfo"];
+  }, [statsHistory]);
 
   // timestamps
 
@@ -432,7 +440,11 @@ export default function GeneralMetrics({
 
   return (
     <>
-      <VainfoDialog showVainfo={showVainfo} setShowVainfo={setShowVainfo} />
+      <GPUInfoDialog
+        showGpuInfo={showVainfo}
+        gpuType={gpuType}
+        setShowGpuInfo={setShowVainfo}
+      />
 
       <div className="scrollbar-container mt-4 flex size-full flex-col overflow-y-auto">
         <div className="text-sm font-medium text-muted-foreground">
