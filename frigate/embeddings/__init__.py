@@ -73,7 +73,7 @@ class EmbeddingsContext:
     def __init__(self, db: SqliteVecQueueDatabase):
         self.embeddings = Embeddings(db)
         self.thumb_stats = ZScoreNormalization()
-        self.desc_stats = ZScoreNormalization(scale_factor=3, bias=-2.5)
+        self.desc_stats = ZScoreNormalization()
 
         # load stats from disk
         try:

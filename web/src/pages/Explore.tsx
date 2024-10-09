@@ -184,31 +184,31 @@ export default function Explore() {
 
   // model states
 
-  const { payload: minilmModelState } = useModelState(
-    "sentence-transformers/all-MiniLM-L6-v2-model.onnx",
+  const { payload: textModelState } = useModelState(
+    "jinaai/jina-clip-v1-text_model_fp16.onnx",
   );
-  const { payload: minilmTokenizerState } = useModelState(
-    "sentence-transformers/all-MiniLM-L6-v2-tokenizer",
+  const { payload: textTokenizerState } = useModelState(
+    "jinaai/jina-clip-v1-tokenizer",
   );
-  const { payload: clipImageModelState } = useModelState(
-    "clip-clip_image_model_vitb32.onnx",
+  const { payload: visionModelState } = useModelState(
+    "jinaai/jina-clip-v1-vision_model_fp16.onnx",
   );
-  const { payload: clipTextModelState } = useModelState(
-    "clip-clip_text_model_vitb32.onnx",
+  const { payload: visionFeatureExtractorState } = useModelState(
+    "jinaai/jina-clip-v1-preprocessor_config.json",
   );
 
   const allModelsLoaded = useMemo(() => {
     return (
-      minilmModelState === "downloaded" &&
-      minilmTokenizerState === "downloaded" &&
-      clipImageModelState === "downloaded" &&
-      clipTextModelState === "downloaded"
+      textModelState === "downloaded" &&
+      textTokenizerState === "downloaded" &&
+      visionModelState === "downloaded" &&
+      visionFeatureExtractorState === "downloaded"
     );
   }, [
-    minilmModelState,
-    minilmTokenizerState,
-    clipImageModelState,
-    clipTextModelState,
+    textModelState,
+    textTokenizerState,
+    visionModelState,
+    visionFeatureExtractorState,
   ]);
 
   const renderModelStateIcon = (modelState: ModelState) => {
@@ -226,10 +226,10 @@ export default function Explore() {
 
   if (
     config?.semantic_search.enabled &&
-    (!minilmModelState ||
-      !minilmTokenizerState ||
-      !clipImageModelState ||
-      !clipTextModelState)
+    (!textModelState ||
+      !textTokenizerState ||
+      !visionModelState ||
+      !visionFeatureExtractorState)
   ) {
     return (
       <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
@@ -252,25 +252,26 @@ export default function Explore() {
             </div>
             <div className="flex w-96 flex-col gap-2 py-5">
               <div className="flex flex-row items-center justify-center gap-2">
-                {renderModelStateIcon(clipImageModelState)}
-                CLIP image model
+                {renderModelStateIcon(visionModelState)}
+                Vision model
               </div>
               <div className="flex flex-row items-center justify-center gap-2">
-                {renderModelStateIcon(clipTextModelState)}
-                CLIP text model
+                {renderModelStateIcon(visionFeatureExtractorState)}
+                Vision model feature extractor
               </div>
               <div className="flex flex-row items-center justify-center gap-2">
-                {renderModelStateIcon(minilmModelState)}
-                MiniLM sentence model
+                {renderModelStateIcon(textModelState)}
+                Text model
               </div>
               <div className="flex flex-row items-center justify-center gap-2">
-                {renderModelStateIcon(minilmTokenizerState)}
-                MiniLM tokenizer
+                {renderModelStateIcon(textTokenizerState)}
+                Text tokenizer
               </div>
             </div>
-            {(minilmModelState === "error" ||
-              clipImageModelState === "error" ||
-              clipTextModelState === "error") && (
+            {(textModelState === "error" ||
+              textTokenizerState === "error" ||
+              visionModelState === "error" ||
+              visionFeatureExtractorState === "error") && (
               <div className="my-3 max-w-96 text-center text-danger">
                 An error has occurred. Check Frigate logs.
               </div>

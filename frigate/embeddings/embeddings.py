@@ -7,6 +7,7 @@ import struct
 import time
 from typing import List, Tuple, Union
 
+import numpy as np
 from PIL import Image
 from playhouse.shortcuts import model_to_dict
 
@@ -16,8 +17,7 @@ from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
 from frigate.types import ModelStatusTypesEnum
 
-from .functions.clip import ClipEmbedding
-from .functions.minilm_l6_v2 import MiniLMEmbedding
+from .functions.onnx import GenericONNXEmbedding
 
 logger = logging.getLogger(__name__)
 
@@ -53,9 +53,23 @@ def get_metadata(event: Event) -> dict:
     )
 
 
-def serialize(vector: List[float]) -> bytes:
-    """Serializes a list of floats into a compact "raw bytes" format"""
-    return struct.pack("%sf" % len(vector), *vector)
+def serialize(vector: Union[List[float], np.ndarray, float]) -> bytes:
+    """Serializes a list of floats, numpy array, or single float into a compact "raw bytes" format"""
+    if isinstance(vector, np.ndarray):
+        # Convert numpy array to list of floats
+        vector = vector.flatten().tolist()
+    elif isinstance(vector, (float, np.float32, np.float64)):
+        # Handle single float values
+        vector = [vector]
+    elif not isinstance(vector, list):
+        raise TypeError(
+            f"Input must be a list of floats, a numpy array, or a single float. Got {type(vector)}"
+        )
+
+    try:
+        return struct.pack("%sf" % len(vector), *vector)
+    except struct.error as e:
+        raise ValueError(f"Failed to pack vector: {e}. Vector: {vector}")
 
 
 def deserialize(bytes_data: bytes) -> List[float]:
@@ -74,10 +88,10 @@ class Embeddings:
         self._create_tables()
 
         models = [
-            "sentence-transformers/all-MiniLM-L6-v2-model.onnx",
-            "sentence-transformers/all-MiniLM-L6-v2-tokenizer",
-            "clip-clip_image_model_vitb32.onnx",
-            "clip-clip_text_model_vitb32.onnx",
+            "jinaai/jina-clip-v1-text_model_fp16.onnx",
+            "jinaai/jina-clip-v1-tokenizer",
+            "jinaai/jina-clip-v1-vision_model_fp16.onnx",
+            "jinaai/jina-clip-v1-preprocessor_config.json",
         ]
 
         for model in models:
@@ -89,10 +103,33 @@ class Embeddings:
                 },
             )
 
-        self.clip_embedding = ClipEmbedding(
-            preferred_providers=["CPUExecutionProvider"]
+        def jina_text_embedding_function(outputs):
+            return outputs[0]
+
+        def jina_vision_embedding_function(outputs):
+            return outputs[0]
+
+        self.text_embedding = GenericONNXEmbedding(
+            model_name="jinaai/jina-clip-v1",
+            model_file="text_model_fp16.onnx",
+            tokenizer_file="tokenizer",
+            download_urls={
+                "text_model_fp16.onnx": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/text_model_fp16.onnx",
+            },
+            embedding_function=jina_text_embedding_function,
+            model_type="text",
+            preferred_providers=["CPUExecutionProvider"],
         )
-        self.minilm_embedding = MiniLMEmbedding(
+
+        self.vision_embedding = GenericONNXEmbedding(
+            model_name="jinaai/jina-clip-v1",
+            model_file="vision_model_fp16.onnx",
+            download_urls={
+                "vision_model_fp16.onnx": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/vision_model_fp16.onnx",
+                "preprocessor_config.json": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/preprocessor_config.json",
+            },
+            embedding_function=jina_vision_embedding_function,
+            model_type="vision",
             preferred_providers=["CPUExecutionProvider"],
         )
 
@@ -101,7 +138,7 @@ class Embeddings:
         self.db.execute_sql("""
             CREATE VIRTUAL TABLE IF NOT EXISTS vec_thumbnails USING vec0(
                 id TEXT PRIMARY KEY,
-                thumbnail_embedding FLOAT[512]
+                thumbnail_embedding FLOAT[768]
             );
         """)
 
@@ -109,15 +146,22 @@ class Embeddings:
         self.db.execute_sql("""
             CREATE VIRTUAL TABLE IF NOT EXISTS vec_descriptions USING vec0(
                 id TEXT PRIMARY KEY,
-                description_embedding FLOAT[384]
+                description_embedding FLOAT[768]
             );
+        """)
+
+    def _drop_tables(self):
+        self.db.execute_sql("""
+            DROP TABLE vec_descriptions;
+        """)
+        self.db.execute_sql("""
+            DROP TABLE vec_thumbnails;
         """)
 
     def upsert_thumbnail(self, event_id: str, thumbnail: bytes):
         # Convert thumbnail bytes to PIL Image
         image = Image.open(io.BytesIO(thumbnail)).convert("RGB")
-        # Generate embedding using CLIP
-        embedding = self.clip_embedding([image])[0]
+        embedding = self.vision_embedding([image])[0]
 
         self.db.execute_sql(
             """
@@ -130,8 +174,7 @@ class Embeddings:
         return embedding
 
     def upsert_description(self, event_id: str, description: str):
-        # Generate embedding using MiniLM
-        embedding = self.minilm_embedding([description])[0]
+        embedding = self.text_embedding([description])[0]
 
         self.db.execute_sql(
             """
@@ -177,7 +220,7 @@ class Embeddings:
                 thumbnail = base64.b64decode(query.thumbnail)
                 query_embedding = self.upsert_thumbnail(query.id, thumbnail)
         else:
-            query_embedding = self.clip_embedding([query])[0]
+            query_embedding = self.text_embedding([query])[0]
 
         sql_query = """
             SELECT
@@ -211,7 +254,7 @@ class Embeddings:
     def search_description(
         self, query_text: str, event_ids: List[str] = None
     ) -> List[Tuple[str, float]]:
-        query_embedding = self.minilm_embedding([query_text])[0]
+        query_embedding = self.text_embedding([query_text])[0]
 
         # Prepare the base SQL query
         sql_query = """
@@ -245,6 +288,9 @@ class Embeddings:
 
     def reindex(self) -> None:
         logger.info("Indexing event embeddings...")
+
+        self._drop_tables()
+        self._create_tables()
 
         st = time.time()
         totals = {
