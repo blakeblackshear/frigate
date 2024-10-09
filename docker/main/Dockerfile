@@ -225,14 +225,6 @@ RUN --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels \
     python3 -m pip install --upgrade pip && \
     pip3 install -U /deps/wheels/*.whl
 
-# We have to uninstall this dependency specifically
-# as it will break onnxruntime-openvino
-RUN pip3 uninstall -y onnxruntime
-
-RUN --mount=type=bind,from=wheels,source=/wheels-post,target=/deps/wheels \
-    python3 -m pip install --upgrade pip && \
-    pip3 install -U /deps/wheels/*.whl
-
 COPY --from=deps-rootfs / /
 
 RUN ldconfig
