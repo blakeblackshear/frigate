@@ -50,7 +50,9 @@ class GenericONNXEmbedding:
         self.download_urls = download_urls
         self.embedding_function = embedding_function
         self.model_type = model_type  # 'text' or 'vision'
-        self.providers, self.provider_options = get_ort_providers(force_cpu=force_cpu)
+        self.providers, self.provider_options = get_ort_providers(
+            force_cpu=force_cpu, requires_fp16=True
+        )
 
         self.download_path = os.path.join(MODEL_CACHE_DIR, self.model_name)
         self.tokenizer = None

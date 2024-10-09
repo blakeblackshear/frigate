@@ -6,7 +6,7 @@ import onnxruntime as ort
 
 
 def get_ort_providers(
-    force_cpu: bool = False, openvino_device: str = "AUTO"
+    force_cpu: bool = False, openvino_device: str = "AUTO", requires_fp16: bool = False
 ) -> tuple[list[str], list[dict[str, any]]]:
     if force_cpu:
         return (["CPUExecutionProvider"], [{}])
@@ -17,14 +17,19 @@ def get_ort_providers(
     for provider in providers:
         if provider == "TensorrtExecutionProvider":
             os.makedirs("/config/model_cache/tensorrt/ort/trt-engines", exist_ok=True)
-            options.append(
-                {
-                    "trt_timing_cache_enable": True,
-                    "trt_engine_cache_enable": True,
-                    "trt_timing_cache_path": "/config/model_cache/tensorrt/ort",
-                    "trt_engine_cache_path": "/config/model_cache/tensorrt/ort/trt-engines",
-                }
-            )
+
+            if not requires_fp16 or os.environ.get("USE_FP_16", "True") != "False":
+                options.append(
+                    {
+                        "trt_fp16_enable": requires_fp16,
+                        "trt_timing_cache_enable": True,
+                        "trt_engine_cache_enable": True,
+                        "trt_timing_cache_path": "/config/model_cache/tensorrt/ort",
+                        "trt_engine_cache_path": "/config/model_cache/tensorrt/ort/trt-engines",
+                    }
+                )
+            else:
+                options.append({})
         elif provider == "OpenVINOExecutionProvider":
             os.makedirs("/config/model_cache/openvino/ort", exist_ok=True)
             options.append(
