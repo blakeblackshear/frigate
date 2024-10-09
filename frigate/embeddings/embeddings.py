@@ -91,7 +91,7 @@ class Embeddings:
             "jinaai/jina-clip-v1-text_model_fp16.onnx",
             "jinaai/jina-clip-v1-tokenizer",
             "jinaai/jina-clip-v1-vision_model_fp16.onnx",
-            "jinaai/jina-clip-v1-feature_extractor",
+            "jinaai/jina-clip-v1-preprocessor_config.json",
         ]
 
         for model in models:
@@ -114,7 +114,7 @@ class Embeddings:
             model_file="text_model_fp16.onnx",
             tokenizer_file="tokenizer",
             download_urls={
-                "text_model_fp16.onnx": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/text_model_fp16.onnx"
+                "text_model_fp16.onnx": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/text_model_fp16.onnx",
             },
             embedding_function=jina_text_embedding_function,
             model_type="text",
@@ -124,9 +124,9 @@ class Embeddings:
         self.vision_embedding = GenericONNXEmbedding(
             model_name="jinaai/jina-clip-v1",
             model_file="vision_model_fp16.onnx",
-            tokenizer_file="feature_extractor",
             download_urls={
-                "vision_model_fp16.onnx": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/vision_model_fp16.onnx"
+                "vision_model_fp16.onnx": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/vision_model_fp16.onnx",
+                "preprocessor_config.json": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/preprocessor_config.json",
             },
             embedding_function=jina_vision_embedding_function,
             model_type="vision",

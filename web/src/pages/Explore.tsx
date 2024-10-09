@@ -194,7 +194,7 @@ export default function Explore() {
     "jinaai/jina-clip-v1-vision_model_fp16.onnx",
   );
   const { payload: visionFeatureExtractorState } = useModelState(
-    "jinaai/jina-clip-v1-feature_extractor",
+    "jinaai/jina-clip-v1-preprocessor_config.json",
   );
 
   const allModelsLoaded = useMemo(() => {
