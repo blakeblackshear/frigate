@@ -185,16 +185,16 @@ export default function Explore() {
   // model states
 
   const { payload: textModelState } = useModelState(
-    "all-jina-clip-v1-text_model_fp16.onnx",
+    "jinaai/jina-clip-v1-text_model_fp16.onnx",
   );
   const { payload: textTokenizerState } = useModelState(
-    "all-jina-clip-v1-tokenizer",
+    "jinaai/jina-clip-v1-tokenizer",
   );
   const { payload: visionModelState } = useModelState(
-    "all-jina-clip-v1-vision_model_fp16.onnx",
+    "jinaai/jina-clip-v1-vision_model_fp16.onnx",
   );
   const { payload: visionFeatureExtractorState } = useModelState(
-    "all-jina-clip-v1-preprocessor_config.json",
+    "jinaai/jina-clip-v1-feature_extractor",
   );
 
   const allModelsLoaded = useMemo(() => {

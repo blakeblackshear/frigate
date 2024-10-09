@@ -88,10 +88,10 @@ class Embeddings:
         self._create_tables()
 
         models = [
-            "all-jina-clip-v1-text_model_fp16.onnx",
-            "all-jina-clip-v1-tokenizer",
-            "all-jina-clip-v1-vision_model_fp16.onnx",
-            "all-jina-clip-v1-preprocessor_config.json",
+            "jinaai/jina-clip-v1-text_model_fp16.onnx",
+            "jinaai/jina-clip-v1-tokenizer",
+            "jinaai/jina-clip-v1-vision_model_fp16.onnx",
+            "jinaai/jina-clip-v1-feature_extractor.json",
         ]
 
         for model in models:
@@ -110,7 +110,7 @@ class Embeddings:
             return outputs[0]
 
         self.text_embedding = GenericONNXEmbedding(
-            model_name="all-jina-clip-v1",
+            model_name="jinaai/jina-clip-v1",
             model_file="text_model_fp16.onnx",
             tokenizer_file="tokenizer",
             download_urls={
@@ -122,9 +122,9 @@ class Embeddings:
         )
 
         self.vision_embedding = GenericONNXEmbedding(
-            model_name="all-jina-clip-v1",
+            model_name="jinaai/jina-clip-v1",
             model_file="vision_model_fp16.onnx",
-            tokenizer_file="preprocessor_config.json",
+            tokenizer_file="feature_extractor",
             download_urls={
                 "vision_model_fp16.onnx": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/vision_model_fp16.onnx"
             },
