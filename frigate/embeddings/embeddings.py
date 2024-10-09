@@ -91,7 +91,7 @@ class Embeddings:
             "jinaai/jina-clip-v1-text_model_fp16.onnx",
             "jinaai/jina-clip-v1-tokenizer",
             "jinaai/jina-clip-v1-vision_model_fp16.onnx",
-            "jinaai/jina-clip-v1-feature_extractor.json",
+            "jinaai/jina-clip-v1-feature_extractor",
         ]
 
         for model in models:
