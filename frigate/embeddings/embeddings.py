@@ -118,7 +118,6 @@ class Embeddings:
             },
             embedding_function=jina_text_embedding_function,
             model_type="text",
-            preferred_providers=["CPUExecutionProvider"],
         )
 
         self.vision_embedding = GenericONNXEmbedding(
@@ -130,7 +129,6 @@ class Embeddings:
             },
             embedding_function=jina_vision_embedding_function,
             model_type="vision",
-            preferred_providers=["CPUExecutionProvider"],
         )
 
     def _create_tables(self):
