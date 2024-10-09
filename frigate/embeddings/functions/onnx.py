@@ -80,12 +80,6 @@ class GenericONNXEmbedding:
                     clean_up_tokenization_spaces=True,
                 )
                 tokenizer.save_pretrained(path)
-            else:
-                if not os.path.exists(path + "/" + self.model_name):
-                    logger.info(f"Downloading {self.model_name} feature extractor")
-                self.feature_extractor = AutoFeatureExtractor.from_pretrained(
-                    f"{MODEL_CACHE_DIR}/{self.model_name}",
-                )
 
             self.downloader.requestor.send_data(
                 UPDATE_MODEL_STATE,
