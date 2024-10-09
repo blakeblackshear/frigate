@@ -180,9 +180,6 @@ RUN /build_pysqlite3.sh
 COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
 RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt
 
-COPY docker/main/requirements-wheels-post.txt /requirements-wheels-post.txt
-RUN pip3 wheel --no-deps --wheel-dir=/wheels-post -r /requirements-wheels-post.txt
-
 
 # Collect deps in a single layer
 FROM scratch AS deps-rootfs
