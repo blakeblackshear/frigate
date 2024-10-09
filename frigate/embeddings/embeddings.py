@@ -118,6 +118,7 @@ class Embeddings:
             },
             embedding_function=jina_text_embedding_function,
             model_type="text",
+            force_cpu=True
         )
 
         self.vision_embedding = GenericONNXEmbedding(
