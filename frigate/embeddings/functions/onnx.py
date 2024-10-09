@@ -125,7 +125,9 @@ class GenericONNXEmbedding:
 
     def _load_model(self, path: str):
         if os.path.exists(path):
-            return ort.InferenceSession(path, providers=providers)
+            return ort.InferenceSession(
+                path, providers=self.providers, provider_options=self.provider_options
+            )
         else:
             logger.warning(f"{self.model_name} model file {path} not found.")
             return None
