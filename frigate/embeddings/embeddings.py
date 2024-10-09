@@ -150,6 +150,14 @@ class Embeddings:
             );
         """)
 
+    def _drop_tables(self):
+        self.db.execute_sql("""
+            DROP TABLE vec_descriptions;
+        """)
+        self.db.execute_sql("""
+            DROP TABLE vec_thumbnails;
+        """)
+
     def upsert_thumbnail(self, event_id: str, thumbnail: bytes):
         # Convert thumbnail bytes to PIL Image
         image = Image.open(io.BytesIO(thumbnail)).convert("RGB")
@@ -280,6 +288,9 @@ class Embeddings:
 
     def reindex(self) -> None:
         logger.info("Indexing event embeddings...")
+
+        self._drop_tables()
+        self._create_tables()
 
         st = time.time()
         totals = {
