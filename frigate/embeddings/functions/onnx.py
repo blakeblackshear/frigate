@@ -54,7 +54,10 @@ class GenericONNXEmbedding:
         self.embedding_function = embedding_function
         self.model_type = model_type  # 'text' or 'vision'
         self.providers, self.provider_options = get_ort_providers(
-            force_cpu=device == "CPU", requires_fp16=True, openvino_device=device
+            force_cpu=self.config.device == "CPU",
+            requires_fp16=self.config.model_size == "large"
+            or self.config.model_type == "text",
+            openvino_device=self.config.device,
         )
 
         self.download_path = os.path.join(MODEL_CACHE_DIR, self.model_name)
