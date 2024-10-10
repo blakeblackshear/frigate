@@ -77,19 +77,26 @@ class EmbeddingMaintainer(threading.Thread):
         """Process embeddings requests"""
 
         def handle_request(topic: str, data: str) -> str:
-            if topic == EmbeddingsRequestEnum.embed_description.value:
-                return serialize(
-                    self.embeddings.upsert_description(data["id"], data["description"]),
-                    pack=False,
-                )
-            elif topic == EmbeddingsRequestEnum.embed_thumbnail.value:
-                thumbnail = base64.b64decode(data["thumbnail"])
-                return serialize(
-                    self.embeddings.upsert_thumbnail(data["id"], thumbnail),
-                    pack=False,
-                )
-            elif topic == EmbeddingsRequestEnum.generate_search.value:
-                return serialize(self.embeddings.text_embedding([data])[0], pack=False)
+            try:
+                if topic == EmbeddingsRequestEnum.embed_description.value:
+                    return serialize(
+                        self.embeddings.upsert_description(
+                            data["id"], data["description"]
+                        ),
+                        pack=False,
+                    )
+                elif topic == EmbeddingsRequestEnum.embed_thumbnail.value:
+                    thumbnail = base64.b64decode(data["thumbnail"])
+                    return serialize(
+                        self.embeddings.upsert_thumbnail(data["id"], thumbnail),
+                        pack=False,
+                    )
+                elif topic == EmbeddingsRequestEnum.generate_search.value:
+                    return serialize(
+                        self.embeddings.text_embedding([data])[0], pack=False
+                    )
+            except Exception as e:
+                logger.error(f"Unable to handle embeddings request {e}")
 
         self.embeddings_responder.check_for_request(handle_request)
 
