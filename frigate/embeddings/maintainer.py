@@ -146,6 +146,9 @@ class EmbeddingMaintainer(threading.Thread):
                 break
 
             event_id, camera, updated_db = ended
+            logger.debug(
+                f"Processing finalized event for {camera} which updated the db: {updated_db}"
+            )
             camera_config = self.config.cameras[camera]
 
             if updated_db:
@@ -238,6 +241,8 @@ class EmbeddingMaintainer(threading.Thread):
 
         if topic is None:
             return
+
+        logger.debug(f"Handling event metadata for id {event_id} and source {source}")
 
         if event_id:
             self.handle_regenerate_description(event_id, source)
