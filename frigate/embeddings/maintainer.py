@@ -84,7 +84,7 @@ class EmbeddingMaintainer(threading.Thread):
     def _process_requests(self) -> None:
         """Process embeddings requests"""
 
-        def handle_request(topic: str, data: str) -> str:
+        def _handle_request(topic: str, data: str) -> str:
             print(f"Handling embeddings request of type {topic} with data {data}")
 
             try:
@@ -108,7 +108,7 @@ class EmbeddingMaintainer(threading.Thread):
             except Exception as e:
                 logger.error(f"Unable to handle embeddings request {e}")
 
-        self.embeddings_responder.check_for_request(handle_request)
+        self.embeddings_responder.check_for_request(_handle_request)
 
     def _process_updates(self) -> None:
         """Process event updates"""
