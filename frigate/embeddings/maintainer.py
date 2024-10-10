@@ -43,7 +43,9 @@ class EmbeddingMaintainer(threading.Thread):
     ) -> None:
         super().__init__(name="embeddings_maintainer")
         self.config = config
+        print("creating embeddings")
         self.embeddings = Embeddings(config.semantic_search, db)
+        print("finished creating embeddings")
 
         # Check if we need to re-index events
         if config.semantic_search.reindex:

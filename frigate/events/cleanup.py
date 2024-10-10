@@ -11,7 +11,6 @@ from pathlib import Path
 from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
-from frigate.embeddings.embeddings import Embeddings
 from frigate.models import Event, Timeline
 
 logger = logging.getLogger(__name__)
