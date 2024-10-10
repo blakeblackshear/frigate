@@ -110,6 +110,7 @@ class Embeddings:
             model_type="vision",
             device=self.config.device,
         )
+        print("completed embeddings init")
 
     def _create_tables(self):
         # Create vec0 virtual table for thumbnail embeddings

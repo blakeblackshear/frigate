@@ -57,12 +57,6 @@ def manage_embeddings(config: FrigateConfig) -> None:
     models = [Event]
     db.bind(models)
 
-    embeddings = Embeddings(config.semantic_search, db)
-
-    # Check if we need to re-index events
-    if config.semantic_search.reindex:
-        embeddings.reindex()
-
     maintainer = EmbeddingMaintainer(
         db,
         config,

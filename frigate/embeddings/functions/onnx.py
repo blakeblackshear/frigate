@@ -59,14 +59,17 @@ class GenericONNXEmbedding:
         self.feature_extractor = None
         self.session = None
 
-        if not all(os.path.exists(os.path.join(self.download_path, n)) for n in self.download_urls.keys()):
+        if not all(
+            os.path.exists(os.path.join(self.download_path, n))
+            for n in self.download_urls.keys()
+        ):
             print("starting model download")
             self.downloader = ModelDownloader(
-            model_name=self.model_name,
-            download_path=self.download_path,
-            file_names=list(self.download_urls.keys())
-            + ([self.tokenizer_file] if self.tokenizer_file else []),
-            download_func=self._download_model,
+                model_name=self.model_name,
+                download_path=self.download_path,
+                file_names=list(self.download_urls.keys())
+                + ([self.tokenizer_file] if self.tokenizer_file else []),
+                download_func=self._download_model,
             )
             self.downloader.ensure_model_files()
         else:

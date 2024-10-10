@@ -44,6 +44,11 @@ class EmbeddingMaintainer(threading.Thread):
         super().__init__(name="embeddings_maintainer")
         self.config = config
         self.embeddings = Embeddings(config.semantic_search, db)
+
+        # Check if we need to re-index events
+        if config.semantic_search.reindex:
+            self.embeddings.reindex()
+
         self.event_subscriber = EventUpdateSubscriber()
         self.event_end_subscriber = EventEndSubscriber()
         self.event_metadata_subscriber = EventMetadataSubscriber(
