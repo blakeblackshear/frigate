@@ -63,7 +63,7 @@ class Embeddings:
         self.requestor = InterProcessRequestor()
 
         # Create tables if they don't exist
-        self._create_tables()
+        self.db.create_embeddings_tables()
 
         models = [
             "jinaai/jina-clip-v1-text_model_fp16.onnx",
