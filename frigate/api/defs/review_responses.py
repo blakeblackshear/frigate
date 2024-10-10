@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Dict
 
 from pydantic import BaseModel, Json
 
@@ -14,3 +15,27 @@ class ReviewSegmentResponse(BaseModel):
     severity: SeverityEnum
     thumb_path: str
     data: Json
+
+
+class Last24HoursReview(BaseModel):
+    reviewed_alert: int
+    reviewed_detection: int
+    reviewed_motion: int
+    total_alert: int
+    total_detection: int
+    total_motion: int
+
+
+class DayReview(BaseModel):
+    day: datetime
+    reviewed_alert: int
+    reviewed_detection: int
+    reviewed_motion: int
+    total_alert: int
+    total_detection: int
+    total_motion: int
+
+
+class ReviewSummaryResponse(BaseModel):
+    last24Hours: Last24HoursReview
+    root: Dict[str, DayReview]
