@@ -203,6 +203,7 @@ class Dispatcher:
             try:
                 parts = topic.split("/")
                 if len(parts) == 3 and topic.endswith("set"):
+                    # example /cam_name/detect/set payload=ON|OFF
                     camera_name = parts[-3]
                     command = parts[-2]
                     handle_camera_command("set", camera_name, payload)
@@ -210,6 +211,7 @@ class Dispatcher:
                     command = parts[-2]
                     self._global_settings_handlers[command](payload)
                 elif len(parts) == 2 and topic.endswith("ptz"):
+                    # example /cam_name/ptz payload=MOVE_UP|MOVE_DOWN|STOP...
                     camera_name = parts[-2]
                     handle_camera_command("ptz", camera_name, payload)
             except IndexError:
