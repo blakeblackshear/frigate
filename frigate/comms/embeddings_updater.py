@@ -1,11 +1,14 @@
 """Facilitates communication between processes."""
 
+import logging
 from enum import Enum
 from typing import Callable
 
 import zmq
 
 SOCKET_REP_REQ = "ipc:///tmp/cache/embeddings"
+
+logger = logging.getLogger(__name__)
 
 
 class EmbeddingsRequestEnum(Enum):
@@ -22,7 +25,9 @@ class EmbeddingsResponder:
 
     def check_for_request(self, process: Callable) -> None:
         while True:  # load all messages that are queued
+            logger.debug("Checking for embeddings requests")
             has_message, _, _ = zmq.select([self.socket], [], [], 0.1)
+            logger.debug(f"has a request? {has_message}")
 
             if not has_message:
                 break

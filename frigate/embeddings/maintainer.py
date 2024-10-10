@@ -137,6 +137,8 @@ class EmbeddingMaintainer(threading.Thread):
         except FileNotFoundError:
             pass
 
+        logger.debug("Finished processing object update")
+
     def _process_finalized(self) -> None:
         """Process the end of an event."""
         while True:
