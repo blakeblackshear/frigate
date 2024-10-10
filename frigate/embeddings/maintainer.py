@@ -43,7 +43,14 @@ class EmbeddingMaintainer(threading.Thread):
     ) -> None:
         super().__init__(name="embeddings_maintainer")
         self.config = config
+        print("creating embeddings")
         self.embeddings = Embeddings(config.semantic_search, db)
+        print("finished creating embeddings")
+
+        # Check if we need to re-index events
+        if config.semantic_search.reindex:
+            self.embeddings.reindex()
+
         self.event_subscriber = EventUpdateSubscriber()
         self.event_end_subscriber = EventEndSubscriber()
         self.event_metadata_subscriber = EventMetadataSubscriber(
@@ -56,6 +63,7 @@ class EmbeddingMaintainer(threading.Thread):
         self.stop_event = stop_event
         self.tracked_events = {}
         self.genai_client = get_genai_client(config.genai)
+        print("finished embed maintainer setup")
 
     def run(self) -> None:
         """Maintain a SQLite-vec database for semantic search."""

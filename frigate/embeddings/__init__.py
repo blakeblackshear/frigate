@@ -19,7 +19,6 @@ from frigate.models import Event
 from frigate.util.builtin import serialize
 from frigate.util.services import listen
 
-from .embeddings import Embeddings
 from .maintainer import EmbeddingMaintainer
 from .util import ZScoreNormalization
 
@@ -57,12 +56,7 @@ def manage_embeddings(config: FrigateConfig) -> None:
     models = [Event]
     db.bind(models)
 
-    embeddings = Embeddings(config.semantic_search, db)
-
-    # Check if we need to re-index events
-    if config.semantic_search.reindex:
-        embeddings.reindex()
-
+    print("creating embedding maintainer")
     maintainer = EmbeddingMaintainer(
         db,
         config,

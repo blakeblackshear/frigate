@@ -11,7 +11,6 @@ from pathlib import Path
 from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
-from frigate.embeddings.embeddings import Embeddings
 from frigate.models import Event, Timeline
 
 logger = logging.getLogger(__name__)
@@ -33,9 +32,6 @@ class EventCleanup(threading.Thread):
         self.camera_keys = list(self.config.cameras.keys())
         self.removed_camera_labels: list[str] = None
         self.camera_labels: dict[str, dict[str, any]] = {}
-
-        if self.config.semantic_search.enabled:
-            self.embeddings = Embeddings(self.config.semantic_search, self.db)
 
     def get_removed_camera_labels(self) -> list[Event]:
         """Get a list of distinct labels for removed cameras."""
