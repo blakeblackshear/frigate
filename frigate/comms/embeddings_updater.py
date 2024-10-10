@@ -22,7 +22,7 @@ class EmbeddingsResponder:
 
     def check_for_request(self, process: Callable) -> None:
         while True:  # load all messages that are queued
-            has_message, _, _ = zmq.select([self.socket], [], [], 1)
+            has_message, _, _ = zmq.select([self.socket], [], [], 0.1)
 
             if not has_message:
                 break

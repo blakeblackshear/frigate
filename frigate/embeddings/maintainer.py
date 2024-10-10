@@ -77,25 +77,32 @@ class EmbeddingMaintainer(threading.Thread):
         """Process embeddings requests"""
 
         def handle_request(topic: str, data: str) -> str:
-            if topic == EmbeddingsRequestEnum.embed_description.value:
-                return serialize(
-                    self.embeddings.upsert_description(data["id"], data["description"]),
-                    pack=False,
-                )
-            elif topic == EmbeddingsRequestEnum.embed_thumbnail.value:
-                thumbnail = base64.b64decode(data["thumbnail"])
-                return serialize(
-                    self.embeddings.upsert_thumbnail(data["id"], thumbnail),
-                    pack=False,
-                )
-            elif topic == EmbeddingsRequestEnum.generate_search.value:
-                return serialize(self.embeddings.text_embedding([data])[0], pack=False)
+            try:
+                if topic == EmbeddingsRequestEnum.embed_description.value:
+                    return serialize(
+                        self.embeddings.upsert_description(
+                            data["id"], data["description"]
+                        ),
+                        pack=False,
+                    )
+                elif topic == EmbeddingsRequestEnum.embed_thumbnail.value:
+                    thumbnail = base64.b64decode(data["thumbnail"])
+                    return serialize(
+                        self.embeddings.upsert_thumbnail(data["id"], thumbnail),
+                        pack=False,
+                    )
+                elif topic == EmbeddingsRequestEnum.generate_search.value:
+                    return serialize(
+                        self.embeddings.text_embedding([data])[0], pack=False
+                    )
+            except Exception as e:
+                logger.error(f"Unable to handle embeddings request {e}")
 
         self.embeddings_responder.check_for_request(handle_request)
 
     def _process_updates(self) -> None:
         """Process event updates"""
-        update = self.event_subscriber.check_for_update()
+        update = self.event_subscriber.check_for_update(timeout=0.1)
 
         if update is None:
             return
@@ -118,13 +125,17 @@ class EmbeddingMaintainer(threading.Thread):
                 data["thumbnail"] = self._create_thumbnail(yuv_frame, data["box"])
                 self.tracked_events[data["id"]].append(data)
                 self.frame_manager.close(frame_id)
+            else:
+                logger.debug(
+                    f"Unable to create embedding for thumbnail from {camera} because frame is missing."
+                )
         except FileNotFoundError:
             pass
 
     def _process_finalized(self) -> None:
         """Process the end of an event."""
         while True:
-            ended = self.event_end_subscriber.check_for_update()
+            ended = self.event_end_subscriber.check_for_update(timeout=0.1)
 
             if ended == None:
                 break
@@ -217,7 +228,7 @@ class EmbeddingMaintainer(threading.Thread):
     def _process_event_metadata(self):
         # Check for regenerate description requests
         (topic, event_id, source) = self.event_metadata_subscriber.check_for_update(
-            timeout=1
+            timeout=0.1
         )
 
         if topic is None:
