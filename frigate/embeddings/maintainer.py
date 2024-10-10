@@ -112,7 +112,7 @@ class EmbeddingMaintainer(threading.Thread):
 
     def _process_updates(self) -> None:
         """Process event updates"""
-        update = self.event_subscriber.check_for_update()
+        update = self.event_subscriber.check_for_update(timeout=0.1)
 
         if update is None:
             return
@@ -150,7 +150,7 @@ class EmbeddingMaintainer(threading.Thread):
     def _process_finalized(self) -> None:
         """Process the end of an event."""
         while True:
-            ended = self.event_end_subscriber.check_for_update()
+            ended = self.event_end_subscriber.check_for_update(timeout=0.1)
 
             if ended == None:
                 break
@@ -245,7 +245,7 @@ class EmbeddingMaintainer(threading.Thread):
 
     def _process_event_metadata(self):
         # Check for regenerate description requests
-        (topic, event_id, source) = self.event_metadata_subscriber.check_for_update()
+        (topic, event_id, source) = self.event_metadata_subscriber.check_for_update(timeout=0.1)
 
         if topic is None:
             return
