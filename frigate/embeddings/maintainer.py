@@ -61,7 +61,8 @@ class EmbeddingMaintainer(threading.Thread):
     def run(self) -> None:
         """Maintain a SQLite-vec database for semantic search."""
         while not self.stop_event.is_set():
-            self._process_requests()
+            logger.debug("Doing another embeddings loop.")
+            #self._process_requests()
             self._process_updates()
             self._process_finalized()
             self._process_event_metadata()
