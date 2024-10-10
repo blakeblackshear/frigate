@@ -12,6 +12,7 @@ from typing import Optional, Union
 
 from setproctitle import setproctitle
 
+from frigate.comms.embeddings_updater import EmbeddingsRequestEnum, EmbeddingsRequestor
 from frigate.config import FrigateConfig
 from frigate.const import CONFIG_DIR
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
@@ -72,10 +73,11 @@ def manage_embeddings(config: FrigateConfig) -> None:
 
 
 class EmbeddingsContext:
-    def __init__(self, config: FrigateConfig, db: SqliteVecQueueDatabase):
+    def __init__(self, db: SqliteVecQueueDatabase):
         self.db = db
         self.thumb_stats = ZScoreNormalization()
         self.desc_stats = ZScoreNormalization()
+        self.requestor = EmbeddingsRequestor()
 
         # load stats from disk
         try:
@@ -86,7 +88,7 @@ class EmbeddingsContext:
         except FileNotFoundError:
             pass
 
-    def save_stats(self):
+    def stop(self):
         """Write the stats to disk as JSON on exit."""
         contents = {
             "thumb_stats": self.thumb_stats.to_dict(),
@@ -94,6 +96,7 @@ class EmbeddingsContext:
         }
         with open(os.path.join(CONFIG_DIR, ".search_stats.json"), "w") as f:
             json.dump(contents, f)
+        self.requestor.stop()
 
     def search_thumbnail(
         self, query: Union[Event, str], event_ids: list[str] = None
@@ -114,10 +117,14 @@ class EmbeddingsContext:
                 )  # Deserialize the thumbnail embedding
             else:
                 # If no embedding found, generate it and return it
-                thumbnail = base64.b64decode(query.thumbnail)
-                query_embedding = self.upsert_thumbnail(query.id, thumbnail)
+                query_embedding = self.requestor.send_data(
+                    EmbeddingsRequestEnum.embed_thumbnail,
+                    {"id": query.id, "thumbnail": query.thumbnail},
+                )
         else:
-            query_embedding = self.text_embedding([query])[0]
+            query_embedding = self.requestor.send_data(
+                EmbeddingsRequestEnum.generate_search, query
+            )
 
         sql_query = """
             SELECT
@@ -151,7 +158,9 @@ class EmbeddingsContext:
     def search_description(
         self, query_text: str, event_ids: list[str] = None
     ) -> list[tuple[str, float]]:
-        query_embedding = self.text_embedding([query_text])[0]
+        query_embedding = self.requestor.send_data(
+            EmbeddingsRequestEnum.generate_search, query_text
+        )
 
         # Prepare the base SQL query
         sql_query = """
@@ -182,3 +191,9 @@ class EmbeddingsContext:
         results = self.db.execute_sql(sql_query, parameters).fetchall()
 
         return results
+
+    def update_description(self, event_id: str, description: str) -> None:
+        self.requestor.send_data(
+            EmbeddingsRequestEnum.embed_description,
+            {"id": event_id, "description": description},
+        )

@@ -944,9 +944,9 @@ def set_description(
     # If semantic search is enabled, update the index
     if request.app.frigate_config.semantic_search.enabled:
         context: EmbeddingsContext = request.app.embeddings
-        context.embeddings.upsert_description(
-            event_id=event_id,
-            description=new_description,
+        context.update_description(
+            event_id,
+            new_description,
         )
 
     response_message = (
