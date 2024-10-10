@@ -120,6 +120,18 @@ class ModelDownloader:
         if not silent:
             logger.info(f"Downloading complete: {url}")
 
+    @staticmethod
+    def mark_files_downloaded(
+        requestor: InterProcessRequestor, model_name: str, files: list[str]
+    ) -> None:
+        for file_name in files:
+            requestor.send_data(
+                UPDATE_MODEL_STATE,
+                {
+                    "model": f"{model_name}-{file_name}",
+                    "state": ModelStatusTypesEnum.downloaded,
+                },
+            )
+
     def wait_for_download(self):
-        print("waiting for model download")
         self.download_complete.wait()

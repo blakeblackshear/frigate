@@ -43,7 +43,6 @@ def manage_embeddings(config: FrigateConfig) -> None:
     listen()
 
     # Configure Frigate DB
-    print("connecting to db in embed")
     db = SqliteVecQueueDatabase(
         config.database.path,
         pragmas={
@@ -55,10 +54,8 @@ def manage_embeddings(config: FrigateConfig) -> None:
         load_vec_extension=True,
     )
     models = [Event]
-    print("binding db to model")
     db.bind(models)
 
-    print("creating embedding maintainer")
     maintainer = EmbeddingMaintainer(
         db,
         config,
