@@ -11,9 +11,7 @@ class EventsSubLabelBody(BaseModel):
 
 
 class EventsDescriptionBody(BaseModel):
-    description: Union[str, None] = Field(
-        title="The description of the event", min_length=1
-    )
+    description: Union[str, None] = Field(title="The description of the event")
 
 
 class EventsCreateBody(BaseModel):
