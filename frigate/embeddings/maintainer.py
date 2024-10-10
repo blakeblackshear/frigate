@@ -61,6 +61,7 @@ class EmbeddingMaintainer(threading.Thread):
         self.stop_event = stop_event
         self.tracked_events = {}
         self.genai_client = get_genai_client(config.genai)
+        print("finished embed maintainer setup")
 
     def run(self) -> None:
         """Maintain a SQLite-vec database for semantic search."""
