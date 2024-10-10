@@ -56,8 +56,8 @@ class GenericONNXEmbedding:
         self.providers, self.provider_options = get_ort_providers(
             force_cpu=self.config.device == "CPU",
             requires_fp16=self.config.model_size == "large"
-            or self.config.model_type == "text",
-            openvino_device=self.config.device,
+            or self.model_type == "text",
+            openvino_device=device,
         )
 
         self.download_path = os.path.join(MODEL_CACHE_DIR, self.model_name)
