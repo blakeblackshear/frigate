@@ -52,7 +52,7 @@ class EmbeddingsRequestor:
         self.socket = self.context.socket(zmq.REQ)
         self.socket.connect(SOCKET_REP_REQ)
 
-    def send_data(self, topic: str, data: any) -> any:
+    def send_data(self, topic: str, data: any) -> str:
         """Sends data and then waits for reply."""
         self.socket.send_json((topic, data))
         return self.socket.recv_json()

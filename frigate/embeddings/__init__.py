@@ -1,6 +1,5 @@
 """SQLite-vec embeddings database."""
 
-import base64
 import json
 import logging
 import multiprocessing as mp
@@ -112,18 +111,20 @@ class EmbeddingsContext:
             row = cursor.fetchone() if cursor else None
 
             if row:
-                query_embedding = deserialize(
-                    row[0]
-                )  # Deserialize the thumbnail embedding
+                query_embedding = row[0]
             else:
                 # If no embedding found, generate it and return it
-                query_embedding = self.requestor.send_data(
-                    EmbeddingsRequestEnum.embed_thumbnail,
-                    {"id": query.id, "thumbnail": query.thumbnail},
+                query_embedding = serialize(
+                    self.requestor.send_data(
+                        EmbeddingsRequestEnum.embed_thumbnail.value,
+                        {"id": query.id, "thumbnail": query.thumbnail},
+                    )
                 )
         else:
-            query_embedding = self.requestor.send_data(
-                EmbeddingsRequestEnum.generate_search, query
+            query_embedding = serialize(
+                self.requestor.send_data(
+                    EmbeddingsRequestEnum.generate_search.value, query
+                )
             )
 
         sql_query = """
@@ -145,11 +146,7 @@ class EmbeddingsContext:
         # when it's implemented, we can use cosine similarity
         sql_query += " ORDER BY distance"
 
-        parameters = (
-            [serialize(query_embedding)] + event_ids
-            if event_ids
-            else [serialize(query_embedding)]
-        )
+        parameters = [query_embedding] + event_ids if event_ids else [query_embedding]
 
         results = self.db.execute_sql(sql_query, parameters).fetchall()
 
@@ -158,8 +155,10 @@ class EmbeddingsContext:
     def search_description(
         self, query_text: str, event_ids: list[str] = None
     ) -> list[tuple[str, float]]:
-        query_embedding = self.requestor.send_data(
-            EmbeddingsRequestEnum.generate_search, query_text
+        query_embedding = serialize(
+            self.requestor.send_data(
+                EmbeddingsRequestEnum.generate_search.value, query_text
+            )
         )
 
         # Prepare the base SQL query
@@ -182,11 +181,7 @@ class EmbeddingsContext:
         # when it's implemented, we can use cosine similarity
         sql_query += " ORDER BY distance"
 
-        parameters = (
-            [serialize(query_embedding)] + event_ids
-            if event_ids
-            else [serialize(query_embedding)]
-        )
+        parameters = [query_embedding] + event_ids if event_ids else [query_embedding]
 
         results = self.db.execute_sql(sql_query, parameters).fetchall()
 
@@ -194,6 +189,6 @@ class EmbeddingsContext:
 
     def update_description(self, event_id: str, description: str) -> None:
         self.requestor.send_data(
-            EmbeddingsRequestEnum.embed_description,
+            EmbeddingsRequestEnum.embed_description.value,
             {"id": event_id, "description": description},
         )

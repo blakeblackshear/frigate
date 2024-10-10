@@ -24,6 +24,7 @@ from frigate.const import CLIPS_DIR, UPDATE_EVENT_DESCRIPTION
 from frigate.events.types import EventTypeEnum
 from frigate.genai import get_genai_client
 from frigate.models import Event
+from frigate.util.builtin import serialize
 from frigate.util.image import SharedMemoryFrameManager, calculate_region
 
 from .embeddings import Embeddings
@@ -75,16 +76,20 @@ class EmbeddingMaintainer(threading.Thread):
     def _process_requests(self) -> None:
         """Process embeddings requests"""
 
-        def handle_request(topic: str, data: str) -> any:
-            if topic == EmbeddingsRequestEnum.embed_description:
-                return self.embeddings.upsert_description(
-                    data["id"], data["description"]
+        def handle_request(topic: str, data: str) -> str:
+            if topic == EmbeddingsRequestEnum.embed_description.value:
+                return serialize(
+                    self.embeddings.upsert_description(data["id"], data["description"]),
+                    pack=False,
                 )
-            elif topic == EmbeddingsRequestEnum.embed_thumbnail:
+            elif topic == EmbeddingsRequestEnum.embed_thumbnail.value:
                 thumbnail = base64.b64decode(data["thumbnail"])
-                return self.embeddings.upsert_thumbnail(data["id"], thumbnail)
-            elif topic == EmbeddingsRequestEnum.generate_search:
-                return self.embeddings.text_embedding([data])[0]
+                return serialize(
+                    self.embeddings.upsert_thumbnail(data["id"], thumbnail),
+                    pack=False,
+                )
+            elif topic == EmbeddingsRequestEnum.generate_search.value:
+                return serialize(self.embeddings.text_embedding([data])[0], pack=False)
 
         self.embeddings_responder.check_for_request(handle_request)
 

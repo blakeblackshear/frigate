@@ -345,7 +345,7 @@ def generate_color_palette(n):
     return colors
 
 
-def serialize(vector: Union[list[float], np.ndarray, float]) -> bytes:
+def serialize(vector: Union[list[float], np.ndarray, float], pack: bool = True) -> bytes:
     """Serializes a list of floats, numpy array, or single float into a compact "raw bytes" format"""
     if isinstance(vector, np.ndarray):
         # Convert numpy array to list of floats
@@ -359,7 +359,10 @@ def serialize(vector: Union[list[float], np.ndarray, float]) -> bytes:
         )
 
     try:
-        return struct.pack("%sf" % len(vector), *vector)
+        if pack:
+            return struct.pack("%sf" % len(vector), *vector)
+        else:
+            return vector
     except struct.error as e:
         raise ValueError(f"Failed to pack vector: {e}. Vector: {vector}")
 
