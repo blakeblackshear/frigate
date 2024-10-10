@@ -25,9 +25,9 @@ class EmbeddingsResponder:
 
     def check_for_request(self, process: Callable) -> None:
         while True:  # load all messages that are queued
-            logger.debug("Checking for embeddings requests")
+            print("Checking for embeddings requests")
             has_message, _, _ = zmq.select([self.socket], [], [], 0.1)
-            logger.debug(f"has a request? {has_message}")
+            print(f"has a request? {has_message}")
 
             if not has_message:
                 break
