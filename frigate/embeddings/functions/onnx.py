@@ -79,11 +79,14 @@ class GenericONNXEmbedding:
             self.downloader.ensure_model_files()
         else:
             self.downloader = None
-            ModelDownloader.mark_files_downloaded(
-                self.requestor, self.model_name, files_names
+            ModelDownloader.mark_files_state(
+                self.requestor,
+                self.model_name,
+                files_names,
+                ModelStatusTypesEnum.downloaded,
             )
             self._load_model_and_tokenizer()
-            print(f"models are already downloaded for {self.model_name}")
+            logger.debug(f"models are already downloaded for {self.model_name}")
 
     def _download_model(self, path: str):
         try:

@@ -112,7 +112,6 @@ class Embeddings:
             requestor=self.requestor,
             device=self.config.device,
         )
-        print("completed embeddings init")
 
     def upsert_thumbnail(self, event_id: str, thumbnail: bytes):
         # Convert thumbnail bytes to PIL Image
