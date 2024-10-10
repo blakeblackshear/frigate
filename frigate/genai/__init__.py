@@ -36,7 +36,7 @@ class GenAIClient:
         """Generate a description for the frame."""
         prompt = camera_config.genai.object_prompts.get(
             label, camera_config.genai.prompt
-        )
+        ).format(label=label)
         return self._send(prompt, thumbnails)
 
     def _init_provider(self):
