@@ -168,7 +168,9 @@ class Embeddings:
         logger.info("Indexing tracked object embeddings...")
 
         self._drop_tables()
+        logger.debug("Dropped embeddings tables.")
         self._create_tables()
+        logger.debug("Created embeddings tables.")
 
         st = time.time()
         totals = {
