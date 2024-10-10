@@ -15,6 +15,7 @@ from PIL import Image
 from transformers import AutoFeatureExtractor, AutoTokenizer
 from transformers.utils.logging import disable_progress_bar
 
+from frigate.comms.inter_process import InterProcessRequestor
 from frigate.const import MODEL_CACHE_DIR, UPDATE_MODEL_STATE
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.downloader import ModelDownloader
@@ -41,12 +42,14 @@ class GenericONNXEmbedding:
         download_urls: Dict[str, str],
         embedding_function: Callable[[List[np.ndarray]], np.ndarray],
         model_type: str,
+        requestor: InterProcessRequestor,
         tokenizer_file: Optional[str] = None,
         device: str = "AUTO",
     ):
         self.model_name = model_name
         self.model_file = model_file
         self.tokenizer_file = tokenizer_file
+        self.requestor = requestor
         self.download_urls = download_urls
         self.embedding_function = embedding_function
         self.model_type = model_type  # 'text' or 'vision'
@@ -69,11 +72,21 @@ class GenericONNXEmbedding:
                 download_path=self.download_path,
                 file_names=list(self.download_urls.keys())
                 + ([self.tokenizer_file] if self.tokenizer_file else []),
+                requestor=self.requestor,
                 download_func=self._download_model,
             )
             self.downloader.ensure_model_files()
         else:
             self.downloader = None
+            for file_name in self.download_urls.keys():
+                self.requestor.send_data(
+                    UPDATE_MODEL_STATE,
+                    {
+                        "model": f"{self.model_name}-{file_name}",
+                        "state": ModelStatusTypesEnum.downloaded,
+                    },
+                )
+            self._load_model_and_tokenizer()
             print("models are already downloaded")
 
     def _download_model(self, path: str):

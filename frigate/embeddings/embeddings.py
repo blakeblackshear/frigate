@@ -96,6 +96,7 @@ class Embeddings:
             },
             embedding_function=jina_text_embedding_function,
             model_type="text",
+            requestor=self.requestor,
             device="CPU",
         )
 
@@ -108,6 +109,7 @@ class Embeddings:
             },
             embedding_function=jina_vision_embedding_function,
             model_type="vision",
+            requestor=self.requestor,
             device=self.config.device,
         )
         print("completed embeddings init")
