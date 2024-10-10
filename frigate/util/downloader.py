@@ -120,4 +120,5 @@ class ModelDownloader:
             logger.info(f"Downloading complete: {url}")
 
     def wait_for_download(self):
+        print("waiting for model download")
         self.download_complete.wait()

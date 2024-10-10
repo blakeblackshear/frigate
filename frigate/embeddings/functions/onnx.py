@@ -59,6 +59,7 @@ class GenericONNXEmbedding:
         self.feature_extractor = None
         self.session = None
 
+        print("starting model download")
         self.downloader = ModelDownloader(
             model_name=self.model_name,
             download_path=self.download_path,
@@ -70,6 +71,7 @@ class GenericONNXEmbedding:
 
     def _download_model(self, path: str):
         try:
+            print("beginning model download process")
             file_name = os.path.basename(path)
             if file_name in self.download_urls:
                 ModelDownloader.download_from_url(self.download_urls[file_name], path)
@@ -107,10 +109,11 @@ class GenericONNXEmbedding:
                 self.tokenizer = self._load_tokenizer()
             else:
                 self.feature_extractor = self._load_feature_extractor()
+            print("creating onnx session")
             self.session = self._load_model(
                 os.path.join(self.download_path, self.model_file)
             )
-            logger.debug("successfully loaded model.")
+            print("successfully loaded model.")
 
     def _load_tokenizer(self):
         tokenizer_path = os.path.join(f"{MODEL_CACHE_DIR}/{self.model_name}/tokenizer")
@@ -127,15 +130,16 @@ class GenericONNXEmbedding:
         )
 
     def _load_model(self, path: str) -> Optional[ort.InferenceSession]:
+        print(f"checking if path exists {path}")
         if os.path.exists(path):
-            logger.debug(
+            print(
                 f"loading ORT session with providers {self.providers} and options {self.provider_options}"
             )
             return ort.InferenceSession(
                 path, providers=self.providers, provider_options=self.provider_options
             )
         else:
-            logger.warning(f"{self.model_name} model file {path} not found.")
+            print(f"{self.model_name} model file {path} not found.")
             return None
 
     def _process_image(self, image):
@@ -149,6 +153,7 @@ class GenericONNXEmbedding:
     def __call__(
         self, inputs: Union[List[str], List[Image.Image], List[str]]
     ) -> List[np.ndarray]:
+        print("beginning call for onnx embedding")
         self._load_model_and_tokenizer()
 
         if self.session is None or (

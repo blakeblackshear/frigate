@@ -39,7 +39,7 @@ class EventMetadataSubscriber(Subscriber):
         super().__init__(topic)
 
     def check_for_update(
-        self, timeout: float = None
+        self, timeout: float = 1
     ) -> Optional[tuple[EventMetadataTypeEnum, str, RegenerateDescriptionEnum]]:
         return super().check_for_update(timeout)
 
