@@ -31,7 +31,7 @@ If you are enabling the Search feature for the first time, be advised that Friga
 
 :::tip
 
-The CLIP models downloaded in ONNX format, this means they will be accelerated using GPU hardware when available depending on the docker build that is used. See [the object detector docs](../configuration/object_detectors.md) for more information.
+The CLIP models are downloaded in ONNX format, which means they will be accelerated using GPU hardware when available. This depends on the Docker build that is used. See [the object detector docs](../configuration/object_detectors.md) for more information.
 
 :::
 
