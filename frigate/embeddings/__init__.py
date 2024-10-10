@@ -55,7 +55,7 @@ def manage_embeddings(config: FrigateConfig) -> None:
     models = [Event]
     db.bind(models)
 
-    embeddings = Embeddings(db)
+    embeddings = Embeddings(config.semantic_search, db)
 
     # Check if we need to re-index events
     if config.semantic_search.reindex:
@@ -70,8 +70,8 @@ def manage_embeddings(config: FrigateConfig) -> None:
 
 
 class EmbeddingsContext:
-    def __init__(self, db: SqliteVecQueueDatabase):
-        self.embeddings = Embeddings(db)
+    def __init__(self, config: FrigateConfig, db: SqliteVecQueueDatabase):
+        self.embeddings = Embeddings(config.semantic_search, db)
         self.thumb_stats = ZScoreNormalization()
         self.desc_stats = ZScoreNormalization()
 

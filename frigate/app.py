@@ -276,7 +276,7 @@ class FrigateApp:
     def init_embeddings_client(self) -> None:
         if self.config.semantic_search.enabled:
             # Create a client for other processes to use
-            self.embeddings = EmbeddingsContext(self.db)
+            self.embeddings = EmbeddingsContext(self.config, self.db)
 
     def init_external_event_processor(self) -> None:
         self.external_event_processor = ExternalEventProcessor(self.config)

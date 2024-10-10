@@ -42,7 +42,7 @@ class GenericONNXEmbedding:
         embedding_function: Callable[[List[np.ndarray]], np.ndarray],
         model_type: str,
         tokenizer_file: Optional[str] = None,
-        force_cpu: bool = False,
+        device: str = "AUTO",
     ):
         self.model_name = model_name
         self.model_file = model_file
@@ -51,7 +51,7 @@ class GenericONNXEmbedding:
         self.embedding_function = embedding_function
         self.model_type = model_type  # 'text' or 'vision'
         self.providers, self.provider_options = get_ort_providers(
-            force_cpu=force_cpu, requires_fp16=True
+            force_cpu=device == "CPU", requires_fp16=True, openvino_device=device
         )
 
         self.download_path = os.path.join(MODEL_CACHE_DIR, self.model_name)

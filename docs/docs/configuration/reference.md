@@ -518,6 +518,8 @@ semantic_search:
   enabled: False
   # Optional: Re-index embeddings database from historical tracked objects (default: shown below)
   reindex: False
+  # Optional: Set device used to run embeddings, options are AUTO, CPU, GPU. (default: shown below)
+  device: "AUTO"
 
 # Optional: Configuration for AI generated tracked object descriptions
 # NOTE: Semantic Search must be enabled for this to do anything.
