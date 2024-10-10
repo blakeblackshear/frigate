@@ -1,5 +1,6 @@
 """SQLite-vec embeddings database."""
 
+import base64
 import json
 import logging
 import multiprocessing as mp
@@ -7,7 +8,7 @@ import os
 import signal
 import threading
 from types import FrameType
-from typing import Optional
+from typing import Optional, Union
 
 from setproctitle import setproctitle
 
@@ -15,6 +16,7 @@ from frigate.config import FrigateConfig
 from frigate.const import CONFIG_DIR
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
+from frigate.util.builtin import deserialize, serialize
 from frigate.util.services import listen
 
 from .embeddings import Embeddings
@@ -71,7 +73,7 @@ def manage_embeddings(config: FrigateConfig) -> None:
 
 class EmbeddingsContext:
     def __init__(self, config: FrigateConfig, db: SqliteVecQueueDatabase):
-        self.embeddings = Embeddings(config.semantic_search, db)
+        self.db = db
         self.thumb_stats = ZScoreNormalization()
         self.desc_stats = ZScoreNormalization()
 
@@ -92,3 +94,91 @@ class EmbeddingsContext:
         }
         with open(os.path.join(CONFIG_DIR, ".search_stats.json"), "w") as f:
             json.dump(contents, f)
+
+    def search_thumbnail(
+        self, query: Union[Event, str], event_ids: list[str] = None
+    ) -> list[tuple[str, float]]:
+        if query.__class__ == Event:
+            cursor = self.db.execute_sql(
+                """
+                SELECT thumbnail_embedding FROM vec_thumbnails WHERE id = ?
+                """,
+                [query.id],
+            )
+
+            row = cursor.fetchone() if cursor else None
+
+            if row:
+                query_embedding = deserialize(
+                    row[0]
+                )  # Deserialize the thumbnail embedding
+            else:
+                # If no embedding found, generate it and return it
+                thumbnail = base64.b64decode(query.thumbnail)
+                query_embedding = self.upsert_thumbnail(query.id, thumbnail)
+        else:
+            query_embedding = self.text_embedding([query])[0]
+
+        sql_query = """
+            SELECT
+                id,
+                distance
+            FROM vec_thumbnails
+            WHERE thumbnail_embedding MATCH ?
+                AND k = 100
+        """
+
+        # Add the IN clause if event_ids is provided and not empty
+        # this is the only filter supported by sqlite-vec as of 0.1.3
+        # but it seems to be broken in this version
+        if event_ids:
+            sql_query += " AND id IN ({})".format(",".join("?" * len(event_ids)))
+
+        # order by distance DESC is not implemented in this version of sqlite-vec
+        # when it's implemented, we can use cosine similarity
+        sql_query += " ORDER BY distance"
+
+        parameters = (
+            [serialize(query_embedding)] + event_ids
+            if event_ids
+            else [serialize(query_embedding)]
+        )
+
+        results = self.db.execute_sql(sql_query, parameters).fetchall()
+
+        return results
+
+    def search_description(
+        self, query_text: str, event_ids: list[str] = None
+    ) -> list[tuple[str, float]]:
+        query_embedding = self.text_embedding([query_text])[0]
+
+        # Prepare the base SQL query
+        sql_query = """
+            SELECT
+                id,
+                distance
+            FROM vec_descriptions
+            WHERE description_embedding MATCH ?
+                AND k = 100
+        """
+
+        # Add the IN clause if event_ids is provided and not empty
+        # this is the only filter supported by sqlite-vec as of 0.1.3
+        # but it seems to be broken in this version
+        if event_ids:
+            sql_query += " AND id IN ({})".format(",".join("?" * len(event_ids)))
+
+        # order by distance DESC is not implemented in this version of sqlite-vec
+        # when it's implemented, we can use cosine similarity
+        sql_query += " ORDER BY distance"
+
+        parameters = (
+            [serialize(query_embedding)] + event_ids
+            if event_ids
+            else [serialize(query_embedding)]
+        )
+
+        results = self.db.execute_sql(sql_query, parameters).fetchall()
+
+        return results
