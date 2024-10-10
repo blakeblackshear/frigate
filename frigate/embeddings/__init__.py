@@ -117,7 +117,7 @@ class EmbeddingsContext:
                 query_embedding = serialize(
                     self.requestor.send_data(
                         EmbeddingsRequestEnum.embed_thumbnail.value,
-                        {"id": query.id, "thumbnail": query.thumbnail},
+                        {"id": str(query.id), "thumbnail": str(query.thumbnail)},
                     )
                 )
         else:
