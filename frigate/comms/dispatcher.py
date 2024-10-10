@@ -91,14 +91,14 @@ class Dispatcher:
     def _receive(self, topic: str, payload: str) -> Optional[Any]:
         """Handle receiving of payload from communicators."""
 
-        def handle_camera_command(command_type, camera_name, payload):
+        def handle_camera_command(command_type, camera_name, command, payload):
             try:
                 if command_type == "set":
-                    self._camera_settings_handlers[camera_name](camera_name, payload)
+                    self._camera_settings_handlers[command](camera_name, payload)
                 elif command_type == "ptz":
                     self._on_ptz_command(camera_name, payload)
             except KeyError:
-                logger.error(f"Invalid command type: {command_type}")
+                logger.error(f"Invalid command type or handler: {command_type}")
 
         def handle_restart():
             restart_frigate()
@@ -203,14 +203,14 @@ class Dispatcher:
                     # example /cam_name/detect/set payload=ON|OFF
                     camera_name = parts[-3]
                     command = parts[-2]
-                    handle_camera_command("set", camera_name, payload)
+                    handle_camera_command("set", camera_name, command, payload)
                 elif len(parts) == 2 and topic.endswith("set"):
                     command = parts[-2]
                     self._global_settings_handlers[command](payload)
                 elif len(parts) == 2 and topic.endswith("ptz"):
                     # example /cam_name/ptz payload=MOVE_UP|MOVE_DOWN|STOP...
                     camera_name = parts[-2]
-                    handle_camera_command("ptz", camera_name, payload)
+                    handle_camera_command("ptz", camera_name, "", payload)
             except IndexError:
                 logger.error(
                     f"Received invalid {topic.split('/')[-1]} command: {topic}"
