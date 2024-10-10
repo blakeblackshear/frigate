@@ -12,6 +12,7 @@ import numpy as np
 from peewee import DoesNotExist
 from playhouse.sqliteq import SqliteQueueDatabase
 
+from frigate.comms.embeddings_updater import EmbeddingsRequestEnum, EmbeddingsResponder
 from frigate.comms.event_metadata_updater import (
     EventMetadataSubscriber,
     EventMetadataTypeEnum,
@@ -23,6 +24,7 @@ from frigate.const import CLIPS_DIR, UPDATE_EVENT_DESCRIPTION
 from frigate.events.types import EventTypeEnum
 from frigate.genai import get_genai_client
 from frigate.models import Event
+from frigate.util.builtin import serialize
 from frigate.util.image import SharedMemoryFrameManager, calculate_region
 
 from .embeddings import Embeddings
@@ -48,6 +50,7 @@ class EmbeddingMaintainer(threading.Thread):
         self.event_metadata_subscriber = EventMetadataSubscriber(
             EventMetadataTypeEnum.regenerate_description
         )
+        self.embeddings_responder = EmbeddingsResponder()
         self.frame_manager = SharedMemoryFrameManager()
         # create communication for updating event descriptions
         self.requestor = InterProcessRequestor()
@@ -58,6 +61,7 @@ class EmbeddingMaintainer(threading.Thread):
     def run(self) -> None:
         """Maintain a SQLite-vec database for semantic search."""
         while not self.stop_event.is_set():
+            self._process_requests()
             self._process_updates()
             self._process_finalized()
             self._process_event_metadata()
@@ -65,8 +69,29 @@ class EmbeddingMaintainer(threading.Thread):
         self.event_subscriber.stop()
         self.event_end_subscriber.stop()
         self.event_metadata_subscriber.stop()
+        self.embeddings_responder.stop()
         self.requestor.stop()
         logger.info("Exiting embeddings maintenance...")
+
+    def _process_requests(self) -> None:
+        """Process embeddings requests"""
+
+        def handle_request(topic: str, data: str) -> str:
+            if topic == EmbeddingsRequestEnum.embed_description.value:
+                return serialize(
+                    self.embeddings.upsert_description(data["id"], data["description"]),
+                    pack=False,
+                )
+            elif topic == EmbeddingsRequestEnum.embed_thumbnail.value:
+                thumbnail = base64.b64decode(data["thumbnail"])
+                return serialize(
+                    self.embeddings.upsert_thumbnail(data["id"], thumbnail),
+                    pack=False,
+                )
+            elif topic == EmbeddingsRequestEnum.generate_search.value:
+                return serialize(self.embeddings.text_embedding([data])[0], pack=False)
+
+        self.embeddings_responder.check_for_request(handle_request)
 
     def _process_updates(self) -> None:
         """Process event updates"""

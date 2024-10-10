@@ -20,3 +20,11 @@ class SqliteVecQueueDatabase(SqliteQueueDatabase):
         conn.enable_load_extension(True)
         conn.load_extension(self.sqlite_vec_path)
         conn.enable_load_extension(False)
+
+    def delete_embeddings_thumbnail(self, event_ids: list[str]) -> None:
+        ids = ",".join(["?" for _ in event_ids])
+        self.execute_sql(f"DELETE FROM vec_thumbnails WHERE id IN ({ids})", event_ids)
+
+    def delete_embeddings_description(self, event_ids: list[str]) -> None:
+        ids = ",".join(["?" for _ in event_ids])
+        self.execute_sql(f"DELETE FROM vec_descriptions WHERE id IN ({ids})", event_ids)

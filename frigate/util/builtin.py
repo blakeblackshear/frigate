@@ -8,10 +8,11 @@ import multiprocessing as mp
 import queue
 import re
 import shlex
+import struct
 import urllib.parse
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Optional, Tuple
+from typing import Any, Optional, Tuple, Union
 
 import numpy as np
 import pytz
@@ -342,3 +343,32 @@ def generate_color_palette(n):
         colors.append(interpolate(color1, color2, factor))
 
     return colors
+
+
+def serialize(
+    vector: Union[list[float], np.ndarray, float], pack: bool = True
+) -> bytes:
+    """Serializes a list of floats, numpy array, or single float into a compact "raw bytes" format"""
+    if isinstance(vector, np.ndarray):
+        # Convert numpy array to list of floats
+        vector = vector.flatten().tolist()
+    elif isinstance(vector, (float, np.float32, np.float64)):
+        # Handle single float values
+        vector = [vector]
+    elif not isinstance(vector, list):
+        raise TypeError(
+            f"Input must be a list of floats, a numpy array, or a single float. Got {type(vector)}"
+        )
+
+    try:
+        if pack:
+            return struct.pack("%sf" % len(vector), *vector)
+        else:
+            return vector
+    except struct.error as e:
+        raise ValueError(f"Failed to pack vector: {e}. Vector: {vector}")
+
+
+def deserialize(bytes_data: bytes) -> list[float]:
+    """Deserializes a compact "raw bytes" format into a list of floats"""
+    return list(struct.unpack("%sf" % (len(bytes_data) // 4), bytes_data))
