@@ -74,6 +74,7 @@ class GenericONNXEmbedding:
             self.downloader.ensure_model_files()
         else:
             self.downloader = None
+            self._load_model_and_tokenizer()
             print("models are already downloaded")
 
     def _download_model(self, path: str):
