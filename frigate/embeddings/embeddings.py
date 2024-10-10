@@ -68,7 +68,9 @@ class Embeddings:
         models = [
             "jinaai/jina-clip-v1-text_model_fp16.onnx",
             "jinaai/jina-clip-v1-tokenizer",
-            "jinaai/jina-clip-v1-vision_model_fp16.onnx",
+            "jinaai/jina-clip-v1-vision_model_fp16.onnx"
+            if config.model_size == "large"
+            else "jinaai/jina-clip-v1-vision_model_quantized.onnx",
             "jinaai/jina-clip-v1-preprocessor_config.json",
         ]
 
@@ -95,19 +97,29 @@ class Embeddings:
                 "text_model_fp16.onnx": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/text_model_fp16.onnx",
             },
             embedding_function=jina_text_embedding_function,
+            model_size=config.model_size,
             model_type="text",
             requestor=self.requestor,
             device="CPU",
         )
 
+        model_file = (
+            "vision_model_fp16.onnx"
+            if self.config.model_size == "large"
+            else "vision_model_quantized.onnx"
+        )
+
+        download_urls = {
+            model_file: f"https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/{model_file}",
+            "preprocessor_config.json": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/preprocessor_config.json",
+        }
+
         self.vision_embedding = GenericONNXEmbedding(
             model_name="jinaai/jina-clip-v1",
-            model_file="vision_model_fp16.onnx",
-            download_urls={
-                "vision_model_fp16.onnx": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/vision_model_fp16.onnx",
-                "preprocessor_config.json": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/preprocessor_config.json",
-            },
+            model_file=model_file,
+            download_urls=download_urls,
             embedding_function=jina_vision_embedding_function,
+            model_size=config.model_size,
             model_type="vision",
             requestor=self.requestor,
             device=self.config.device,

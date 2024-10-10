@@ -41,6 +41,7 @@ class GenericONNXEmbedding:
         model_file: str,
         download_urls: Dict[str, str],
         embedding_function: Callable[[List[np.ndarray]], np.ndarray],
+        model_size: str,
         model_type: str,
         requestor: InterProcessRequestor,
         tokenizer_file: Optional[str] = None,
@@ -54,7 +55,9 @@ class GenericONNXEmbedding:
         self.embedding_function = embedding_function
         self.model_type = model_type  # 'text' or 'vision'
         self.providers, self.provider_options = get_ort_providers(
-            force_cpu=device == "CPU", requires_fp16=True, openvino_device=device
+            force_cpu=device == "CPU",
+            requires_fp16=model_size == "large" or self.model_type == "text",
+            openvino_device=device,
         )
 
         self.download_path = os.path.join(MODEL_CACHE_DIR, self.model_name)
