@@ -12,3 +12,4 @@ class SemanticSearchConfig(FrigateBaseModel):
     reindex: Optional[bool] = Field(
         default=False, title="Reindex all detections on startup."
     )
+    device: str = Field(default="AUTO", title="Device Type")

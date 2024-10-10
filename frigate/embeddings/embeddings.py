@@ -12,6 +12,7 @@ from PIL import Image
 from playhouse.shortcuts import model_to_dict
 
 from frigate.comms.inter_process import InterProcessRequestor
+from frigate.config.semantic_search import SemanticSearchConfig
 from frigate.const import UPDATE_MODEL_STATE
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
@@ -80,7 +81,10 @@ def deserialize(bytes_data: bytes) -> List[float]:
 class Embeddings:
     """SQLite-vec embeddings database."""
 
-    def __init__(self, db: SqliteVecQueueDatabase) -> None:
+    def __init__(
+        self, config: SemanticSearchConfig, db: SqliteVecQueueDatabase
+    ) -> None:
+        self.config = config
         self.db = db
         self.requestor = InterProcessRequestor()
 
@@ -118,7 +122,7 @@ class Embeddings:
             },
             embedding_function=jina_text_embedding_function,
             model_type="text",
-            force_cpu=True,
+            device="CPU",
         )
 
         self.vision_embedding = GenericONNXEmbedding(
@@ -130,6 +134,7 @@ class Embeddings:
             },
             embedding_function=jina_vision_embedding_function,
             model_type="vision",
+            device=self.config.device,
         )
 
     def _create_tables(self):

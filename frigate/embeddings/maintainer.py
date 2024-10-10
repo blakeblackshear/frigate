@@ -42,7 +42,7 @@ class EmbeddingMaintainer(threading.Thread):
         threading.Thread.__init__(self)
         self.name = "embeddings_maintainer"
         self.config = config
-        self.embeddings = Embeddings(db)
+        self.embeddings = Embeddings(config.semantic_search, db)
         self.event_subscriber = EventUpdateSubscriber()
         self.event_end_subscriber = EventEndSubscriber()
         self.event_metadata_subscriber = EventMetadataSubscriber(
