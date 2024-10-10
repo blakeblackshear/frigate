@@ -61,7 +61,7 @@ class EmbeddingMaintainer(threading.Thread):
     def run(self) -> None:
         """Maintain a SQLite-vec database for semantic search."""
         while not self.stop_event.is_set():
-            logger.debug("Doing another embeddings loop.")
+            print("Doing another embeddings loop.")
             # self._process_requests()
             self._process_updates()
             self._process_finalized()
@@ -78,7 +78,7 @@ class EmbeddingMaintainer(threading.Thread):
         """Process embeddings requests"""
 
         def handle_request(topic: str, data: str) -> str:
-            logger.debug(
+            print(
                 f"Handling embeddings request of type {topic} with data {data}"
             )
 
@@ -117,7 +117,7 @@ class EmbeddingMaintainer(threading.Thread):
         if not camera or source_type != EventTypeEnum.tracked_object:
             return
 
-        logger.debug(f"Processing object update of type {source_type} on {camera}")
+        print(f"Processing object update of type {source_type} on {camera}")
         camera_config = self.config.cameras[camera]
         if data["id"] not in self.tracked_events:
             self.tracked_events[data["id"]] = []
@@ -132,13 +132,13 @@ class EmbeddingMaintainer(threading.Thread):
                 self.tracked_events[data["id"]].append(data)
                 self.frame_manager.close(frame_id)
             else:
-                logger.debug(
+                print(
                     f"Unable to create embedding for thumbnail from {camera} because frame is missing."
                 )
         except FileNotFoundError:
             pass
 
-        logger.debug("Finished processing object update")
+        print("Finished processing object update")
 
     def _process_finalized(self) -> None:
         """Process the end of an event."""
@@ -149,7 +149,7 @@ class EmbeddingMaintainer(threading.Thread):
                 break
 
             event_id, camera, updated_db = ended
-            logger.debug(
+            print(
                 f"Processing finalized event for {camera} which updated the db: {updated_db}"
             )
             camera_config = self.config.cameras[camera]
@@ -183,7 +183,7 @@ class EmbeddingMaintainer(threading.Thread):
                         or set(event.zones) & set(camera_config.genai.required_zones)
                     )
                 ):
-                    logger.debug(
+                    print(
                         f"Description generation for {event}, has_snapshot: {event.has_snapshot}"
                     )
                     if event.has_snapshot and camera_config.genai.use_snapshot:
@@ -243,7 +243,7 @@ class EmbeddingMaintainer(threading.Thread):
         if topic is None:
             return
 
-        logger.debug(f"Handling event metadata for id {event_id} and source {source}")
+        print(f"Handling event metadata for id {event_id} and source {source}")
 
         if event_id:
             self.handle_regenerate_description(event_id, source)
@@ -277,7 +277,7 @@ class EmbeddingMaintainer(threading.Thread):
         )
 
         if not description:
-            logger.debug("Failed to generate description for %s", event.id)
+            print("Failed to generate description for %s", event.id)
             return
 
         # fire and forget description update
@@ -289,7 +289,7 @@ class EmbeddingMaintainer(threading.Thread):
         # Encode the description
         self.embeddings.upsert_description(event.id, description)
 
-        logger.debug(
+        print(
             "Generated description for %s (%d images): %s",
             event.id,
             len(thumbnails),
@@ -310,7 +310,7 @@ class EmbeddingMaintainer(threading.Thread):
 
         thumbnail = base64.b64decode(event.thumbnail)
 
-        logger.debug(
+        print(
             f"Trying {source} regeneration for {event}, has_snapshot: {event.has_snapshot}"
         )
 
