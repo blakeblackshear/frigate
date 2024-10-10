@@ -112,31 +112,6 @@ class Embeddings:
         )
         print("completed embeddings init")
 
-    def _create_tables(self):
-        # Create vec0 virtual table for thumbnail embeddings
-        self.db.execute_sql("""
-            CREATE VIRTUAL TABLE IF NOT EXISTS vec_thumbnails USING vec0(
-                id TEXT PRIMARY KEY,
-                thumbnail_embedding FLOAT[768]
-            );
-        """)
-
-        # Create vec0 virtual table for description embeddings
-        self.db.execute_sql("""
-            CREATE VIRTUAL TABLE IF NOT EXISTS vec_descriptions USING vec0(
-                id TEXT PRIMARY KEY,
-                description_embedding FLOAT[768]
-            );
-        """)
-
-    def _drop_tables(self):
-        self.db.execute_sql("""
-            DROP TABLE vec_descriptions;
-        """)
-        self.db.execute_sql("""
-            DROP TABLE vec_thumbnails;
-        """)
-
     def upsert_thumbnail(self, event_id: str, thumbnail: bytes):
         # Convert thumbnail bytes to PIL Image
         image = Image.open(io.BytesIO(thumbnail)).convert("RGB")
@@ -154,7 +129,6 @@ class Embeddings:
 
     def upsert_description(self, event_id: str, description: str):
         embedding = self.text_embedding([description])[0]
-
         self.db.execute_sql(
             """
             INSERT OR REPLACE INTO vec_descriptions(id, description_embedding)
@@ -168,9 +142,9 @@ class Embeddings:
     def reindex(self) -> None:
         logger.info("Indexing event embeddings...")
 
-        self._drop_tables()
+        self.db.drop_embeddings_tables()
         logger.debug("Dropped embeddings tables.")
-        self._create_tables()
+        self.db.create_embeddings_tables()
         logger.debug("Created embeddings tables.")
 
         st = time.time()

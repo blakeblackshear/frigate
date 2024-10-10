@@ -28,3 +28,26 @@ class SqliteVecQueueDatabase(SqliteQueueDatabase):
     def delete_embeddings_description(self, event_ids: list[str]) -> None:
         ids = ",".join(["?" for _ in event_ids])
         self.execute_sql(f"DELETE FROM vec_descriptions WHERE id IN ({ids})", event_ids)
+
+    def drop_embeddings_tables(self) -> None:
+        self.execute_sql("""
+            DROP TABLE vec_descriptions;
+        """)
+        self.execute_sql("""
+            DROP TABLE vec_thumbnails;
+        """)
+
+    def create_embeddings_tables(self) -> None:
+        """Create vec0 virtual table for embeddings"""
+        self.execute_sql("""
+            CREATE VIRTUAL TABLE IF NOT EXISTS vec_thumbnails USING vec0(
+                id TEXT PRIMARY KEY,
+                thumbnail_embedding FLOAT[768]
+            );
+        """)
+        self.execute_sql("""
+            CREATE VIRTUAL TABLE IF NOT EXISTS vec_descriptions USING vec0(
+                id TEXT PRIMARY KEY,
+                description_embedding FLOAT[768]
+            );
+        """)
