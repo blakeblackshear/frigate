@@ -218,17 +218,18 @@ class Embeddings:
 
                 totals["processed_objects"] += 1
 
-                # display progress debug message every batch_size events
-                progress = (processed_events / total_events) * 100
-                logger.debug(
-                    "Processed %d/%d events (%.2f%% complete) | Thumbnails: %d, Descriptions: %d",
-                    processed_events,
-                    total_events,
-                    progress,
-                    totals["thumbnails"],
-                    totals["descriptions"],
-                )
-                self.requestor.send_data(UPDATE_EMBEDDINGS_REINDEX_PROGRESS, totals)
+                # report progress every 10 events so we don't spam the logs or websocket
+                if (processed_events % 10) == 0:
+                    progress = (processed_events / total_events) * 100
+                    logger.debug(
+                        "Processed %d/%d events (%.2f%% complete) | Thumbnails: %d, Descriptions: %d",
+                        processed_events,
+                        total_events,
+                        progress,
+                        totals["thumbnails"],
+                        totals["descriptions"],
+                    )
+                    self.requestor.send_data(UPDATE_EMBEDDINGS_REINDEX_PROGRESS, totals)
 
             # Move to the next page
             current_page += 1
