@@ -110,6 +110,7 @@ class GenericONNXEmbedding:
             self.session = self._load_model(
                 os.path.join(self.download_path, self.model_file)
             )
+            logger.debug("successfully loaded model.")
 
     def _load_tokenizer(self):
         tokenizer_path = os.path.join(f"{MODEL_CACHE_DIR}/{self.model_name}/tokenizer")
@@ -125,8 +126,11 @@ class GenericONNXEmbedding:
             f"{MODEL_CACHE_DIR}/{self.model_name}",
         )
 
-    def _load_model(self, path: str):
+    def _load_model(self, path: str) -> Optional[ort.InferenceSession]:
         if os.path.exists(path):
+            logger.debug(
+                f"loading ORT session with providers {self.providers} and options {self.provider_options}"
+            )
             return ort.InferenceSession(
                 path, providers=self.providers, provider_options=self.provider_options
             )
