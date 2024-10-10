@@ -927,27 +927,19 @@ def set_description(
 
     new_description = body.description
 
-    if new_description is None or len(new_description) == 0:
-        return JSONResponse(
-            content=(
-                {
-                    "success": False,
-                    "message": "description cannot be empty",
-                }
-            ),
-            status_code=400,
-        )
-
     event.data["description"] = new_description
     event.save()
 
     # If semantic search is enabled, update the index
     if request.app.frigate_config.semantic_search.enabled:
         context: EmbeddingsContext = request.app.embeddings
-        context.update_description(
-            event_id,
-            new_description,
-        )
+        if len(new_description) > 0:
+            context.update_description(
+                event_id,
+                new_description,
+            )
+        else:
+            context.db.delete_embeddings_description(event_ids=[event_id])
 
     response_message = (
         f"Event {event_id} description is now blank"
@@ -1033,8 +1025,8 @@ def delete_event(request: Request, event_id: str):
     # If semantic search is enabled, update the index
     if request.app.frigate_config.semantic_search.enabled:
         context: EmbeddingsContext = request.app.embeddings
-        context.db.delete_embeddings_thumbnail(id=[event_id])
-        context.db.delete_embeddings_description(id=[event_id])
+        context.db.delete_embeddings_thumbnail(event_ids=[event_id])
+        context.db.delete_embeddings_description(event_ids=[event_id])
     return JSONResponse(
         content=({"success": True, "message": "Event " + event_id + " deleted"}),
         status_code=200,
