@@ -29,6 +29,12 @@ If you are enabling the Search feature for the first time, be advised that Friga
 
 ### Jina AI CLIP
 
+:::tip
+
+The CLIP models are downloaded in ONNX format, which means they will be accelerated using GPU hardware when available. This depends on the Docker build that is used. See [the object detector docs](../configuration/object_detectors.md) for more information.
+
+:::
+
 The vision model is able to embed both images and text into the same vector space, which allows `image -> image` and `text -> image` similarity searches. Frigate uses this model on tracked objects to encode the thumbnail image and store it in the database. When searching for tracked objects via text in the search box, Frigate will perform a `text -> image` similarity search against this embedding. When clicking "Find Similar" in the tracked object detail pane, Frigate will perform an `image -> image` similarity search to retrieve the closest matching thumbnails.
 
 The text model is used to embed tracked object descriptions and perform searches against them. Descriptions can be created, viewed, and modified on the Search page when clicking on the gray tracked object chip at the top left of each review item. See [the Generative AI docs](/configuration/genai.md) for more information on how to automatically generate tracked object descriptions.
