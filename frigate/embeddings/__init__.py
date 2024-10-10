@@ -7,14 +7,16 @@ import os
 import signal
 import threading
 from types import FrameType
-from typing import Optional
+from typing import Optional, Union
 
 from setproctitle import setproctitle
 
+from frigate.comms.embeddings_updater import EmbeddingsRequestEnum, EmbeddingsRequestor
 from frigate.config import FrigateConfig
 from frigate.const import CONFIG_DIR
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
+from frigate.util.builtin import serialize
 from frigate.util.services import listen
 
 from .embeddings import Embeddings
@@ -70,10 +72,11 @@ def manage_embeddings(config: FrigateConfig) -> None:
 
 
 class EmbeddingsContext:
-    def __init__(self, config: FrigateConfig, db: SqliteVecQueueDatabase):
-        self.embeddings = Embeddings(config.semantic_search, db)
+    def __init__(self, db: SqliteVecQueueDatabase):
+        self.db = db
         self.thumb_stats = ZScoreNormalization()
         self.desc_stats = ZScoreNormalization()
+        self.requestor = EmbeddingsRequestor()
 
         # load stats from disk
         try:
@@ -84,7 +87,7 @@ class EmbeddingsContext:
         except FileNotFoundError:
             pass
 
-    def save_stats(self):
+    def stop(self):
         """Write the stats to disk as JSON on exit."""
         contents = {
             "thumb_stats": self.thumb_stats.to_dict(),
@@ -92,3 +95,100 @@ class EmbeddingsContext:
         }
         with open(os.path.join(CONFIG_DIR, ".search_stats.json"), "w") as f:
             json.dump(contents, f)
+        self.requestor.stop()
+
+    def search_thumbnail(
+        self, query: Union[Event, str], event_ids: list[str] = None
+    ) -> list[tuple[str, float]]:
+        if query.__class__ == Event:
+            cursor = self.db.execute_sql(
+                """
+                SELECT thumbnail_embedding FROM vec_thumbnails WHERE id = ?
+                """,
+                [query.id],
+            )
+
+            row = cursor.fetchone() if cursor else None
+
+            if row:
+                query_embedding = row[0]
+            else:
+                # If no embedding found, generate it and return it
+                query_embedding = serialize(
+                    self.requestor.send_data(
+                        EmbeddingsRequestEnum.embed_thumbnail.value,
+                        {"id": query.id, "thumbnail": query.thumbnail},
+                    )
+                )
+        else:
+            query_embedding = serialize(
+                self.requestor.send_data(
+                    EmbeddingsRequestEnum.generate_search.value, query
+                )
+            )
+
+        sql_query = """
+            SELECT
+                id,
+                distance
+            FROM vec_thumbnails
+            WHERE thumbnail_embedding MATCH ?
+                AND k = 100
+        """
+
+        # Add the IN clause if event_ids is provided and not empty
+        # this is the only filter supported by sqlite-vec as of 0.1.3
+        # but it seems to be broken in this version
+        if event_ids:
+            sql_query += " AND id IN ({})".format(",".join("?" * len(event_ids)))
+
+        # order by distance DESC is not implemented in this version of sqlite-vec
+        # when it's implemented, we can use cosine similarity
+        sql_query += " ORDER BY distance"
+
+        parameters = [query_embedding] + event_ids if event_ids else [query_embedding]
+
+        results = self.db.execute_sql(sql_query, parameters).fetchall()
+
+        return results
+
+    def search_description(
+        self, query_text: str, event_ids: list[str] = None
+    ) -> list[tuple[str, float]]:
+        query_embedding = serialize(
+            self.requestor.send_data(
+                EmbeddingsRequestEnum.generate_search.value, query_text
+            )
+        )
+
+        # Prepare the base SQL query
+        sql_query = """
+            SELECT
+                id,
+                distance
+            FROM vec_descriptions
+            WHERE description_embedding MATCH ?
+                AND k = 100
+        """
+
+        # Add the IN clause if event_ids is provided and not empty
+        # this is the only filter supported by sqlite-vec as of 0.1.3
+        # but it seems to be broken in this version
+        if event_ids:
+            sql_query += " AND id IN ({})".format(",".join("?" * len(event_ids)))
+
+        # order by distance DESC is not implemented in this version of sqlite-vec
+        # when it's implemented, we can use cosine similarity
+        sql_query += " ORDER BY distance"
+
+        parameters = [query_embedding] + event_ids if event_ids else [query_embedding]
+
+        results = self.db.execute_sql(sql_query, parameters).fetchall()
+
+        return results
+
+    def update_description(self, event_id: str, description: str) -> None:
+        self.requestor.send_data(
+            EmbeddingsRequestEnum.embed_description.value,
+            {"id": event_id, "description": description},
+        )

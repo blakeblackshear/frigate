@@ -3,11 +3,8 @@
 import base64
 import io
 import logging
-import struct
 import time
-from typing import List, Tuple, Union
 
-import numpy as np
 from PIL import Image
 from playhouse.shortcuts import model_to_dict
 
@@ -17,6 +14,7 @@ from frigate.const import UPDATE_MODEL_STATE
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
 from frigate.types import ModelStatusTypesEnum
+from frigate.util.builtin import serialize
 
 from .functions.onnx import GenericONNXEmbedding
 
@@ -52,30 +50,6 @@ def get_metadata(event: Event) -> dict:
             if isinstance(x, str)
         }
     )
-
-
-def serialize(vector: Union[List[float], np.ndarray, float]) -> bytes:
-    """Serializes a list of floats, numpy array, or single float into a compact "raw bytes" format"""
-    if isinstance(vector, np.ndarray):
-        # Convert numpy array to list of floats
-        vector = vector.flatten().tolist()
-    elif isinstance(vector, (float, np.float32, np.float64)):
-        # Handle single float values
-        vector = [vector]
-    elif not isinstance(vector, list):
-        raise TypeError(
-            f"Input must be a list of floats, a numpy array, or a single float. Got {type(vector)}"
-        )
-
-    try:
-        return struct.pack("%sf" % len(vector), *vector)
-    except struct.error as e:
-        raise ValueError(f"Failed to pack vector: {e}. Vector: {vector}")
-
-
-def deserialize(bytes_data: bytes) -> List[float]:
-    """Deserializes a compact "raw bytes" format into a list of floats"""
-    return list(struct.unpack("%sf" % (len(bytes_data) // 4), bytes_data))
 
 
 class Embeddings:
@@ -189,106 +163,6 @@ class Embeddings:
         )
 
         return embedding
-
-    def delete_thumbnail(self, event_ids: List[str]) -> None:
-        ids = ",".join(["?" for _ in event_ids])
-        self.db.execute_sql(
-            f"DELETE FROM vec_thumbnails WHERE id IN ({ids})", event_ids
-        )
-
-    def delete_description(self, event_ids: List[str]) -> None:
-        ids = ",".join(["?" for _ in event_ids])
-        self.db.execute_sql(
-            f"DELETE FROM vec_descriptions WHERE id IN ({ids})", event_ids
-        )
-
-    def search_thumbnail(
-        self, query: Union[Event, str], event_ids: List[str] = None
-    ) -> List[Tuple[str, float]]:
-        if query.__class__ == Event:
-            cursor = self.db.execute_sql(
-                """
-                SELECT thumbnail_embedding FROM vec_thumbnails WHERE id = ?
-                """,
-                [query.id],
-            )
-
-            row = cursor.fetchone() if cursor else None
-
-            if row:
-                query_embedding = deserialize(
-                    row[0]
-                )  # Deserialize the thumbnail embedding
-            else:
-                # If no embedding found, generate it and return it
-                thumbnail = base64.b64decode(query.thumbnail)
-                query_embedding = self.upsert_thumbnail(query.id, thumbnail)
-        else:
-            query_embedding = self.text_embedding([query])[0]
-
-        sql_query = """
-            SELECT
-                id,
-                distance
-            FROM vec_thumbnails
-            WHERE thumbnail_embedding MATCH ?
-                AND k = 100
-        """
-
-        # Add the IN clause if event_ids is provided and not empty
-        # this is the only filter supported by sqlite-vec as of 0.1.3
-        # but it seems to be broken in this version
-        if event_ids:
-            sql_query += " AND id IN ({})".format(",".join("?" * len(event_ids)))
-
-        # order by distance DESC is not implemented in this version of sqlite-vec
-        # when it's implemented, we can use cosine similarity
-        sql_query += " ORDER BY distance"
-
-        parameters = (
-            [serialize(query_embedding)] + event_ids
-            if event_ids
-            else [serialize(query_embedding)]
-        )
-
-        results = self.db.execute_sql(sql_query, parameters).fetchall()
-
-        return results
-
-    def search_description(
-        self, query_text: str, event_ids: List[str] = None
-    ) -> List[Tuple[str, float]]:
-        query_embedding = self.text_embedding([query_text])[0]
-
-        # Prepare the base SQL query
-        sql_query = """
-            SELECT
-                id,
-                distance
-            FROM vec_descriptions
-            WHERE description_embedding MATCH ?
-                AND k = 100
-        """
-
-        # Add the IN clause if event_ids is provided and not empty
-        # this is the only filter supported by sqlite-vec as of 0.1.3
-        # but it seems to be broken in this version
-        if event_ids:
-            sql_query += " AND id IN ({})".format(",".join("?" * len(event_ids)))
-
-        # order by distance DESC is not implemented in this version of sqlite-vec
-        # when it's implemented, we can use cosine similarity
-        sql_query += " ORDER BY distance"
-
-        parameters = (
-            [serialize(query_embedding)] + event_ids
-            if event_ids
-            else [serialize(query_embedding)]
-        )
-
-        results = self.db.execute_sql(sql_query, parameters).fetchall()
-
-        return results
 
     def reindex(self) -> None:
         logger.info("Indexing event embeddings...")
