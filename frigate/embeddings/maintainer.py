@@ -125,6 +125,10 @@ class EmbeddingMaintainer(threading.Thread):
                 data["thumbnail"] = self._create_thumbnail(yuv_frame, data["box"])
                 self.tracked_events[data["id"]].append(data)
                 self.frame_manager.close(frame_id)
+            else:
+                logger.debug(
+                    f"Unable to create embedding for thumbnail from {camera} because frame is missing."
+                )
         except FileNotFoundError:
             pass
 
