@@ -277,7 +277,8 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: { }
+              schema:
+                $ref: '#/components/schemas/ReviewSummaryResponse'
         '422':
           description: Validation Error
           content:
@@ -2368,14 +2369,14 @@ paths:
           required: false
           schema:
             type: number
-            default: 1728577904.036181
+            default: 1728580419.15206
             title: After
         - name: before
           in: query
           required: false
           schema:
             type: number
-            default: 1728581504.0362
+            default: 1728584019.152614
             title: Before
       responses:
         '200':
@@ -3186,6 +3187,40 @@ components:
       required:
         - password
       title: AppPutPasswordBody
+    DayReview:
+      properties:
+        day:
+          type: string
+          format: date-time
+          title: Day
+        reviewed_alert:
+          type: integer
+          title: Reviewed Alert
+        reviewed_detection:
+          type: integer
+          title: Reviewed Detection
+        reviewed_motion:
+          type: integer
+          title: Reviewed Motion
+        total_alert:
+          type: integer
+          title: Total Alert
+        total_detection:
+          type: integer
+          title: Total Detection
+        total_motion:
+          type: integer
+          title: Total Motion
+      type: object
+      required:
+        - day
+        - reviewed_alert
+        - reviewed_detection
+        - reviewed_motion
+        - total_alert
+        - total_detection
+        - total_motion
+      title: DayReview
     EventsCreateBody:
       properties:
         source_type:
@@ -3280,6 +3315,35 @@ components:
           title: Detail
       type: object
       title: HTTPValidationError
+    Last24HoursReview:
+      properties:
+        reviewed_alert:
+          type: integer
+          title: Reviewed Alert
+        reviewed_detection:
+          type: integer
+          title: Reviewed Detection
+        reviewed_motion:
+          type: integer
+          title: Reviewed Motion
+        total_alert:
+          type: integer
+          title: Total Alert
+        total_detection:
+          type: integer
+          title: Total Detection
+        total_motion:
+          type: integer
+          title: Total Motion
+      type: object
+      required:
+        - reviewed_alert
+        - reviewed_detection
+        - reviewed_motion
+        - total_alert
+        - total_detection
+        - total_motion
+      title: Last24HoursReview
     RegenerateDescriptionEnum:
       type: string
       enum:
@@ -3323,6 +3387,20 @@ components:
         - thumb_path
         - data
       title: ReviewSegmentResponse
+    ReviewSummaryResponse:
+      properties:
+        last24Hours:
+          $ref: '#/components/schemas/Last24HoursReview'
+        root:
+          additionalProperties:
+            $ref: '#/components/schemas/DayReview'
+          type: object
+          title: Root
+      type: object
+      required:
+        - last24Hours
+        - root
+      title: ReviewSummaryResponse
     SeverityEnum:
       type: string
       enum:

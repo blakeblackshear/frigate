@@ -17,7 +17,10 @@ from frigate.api.defs.review_query_parameters import (
     ReviewQueryParams,
     ReviewSummaryQueryParams,
 )
-from frigate.api.defs.review_responses import ReviewSegmentResponse
+from frigate.api.defs.review_responses import (
+    ReviewSegmentResponse,
+    ReviewSummaryResponse,
+)
 from frigate.api.defs.tags import Tags
 from frigate.models import Recordings, ReviewSegment
 from frigate.util.builtin import get_tz_modifiers
@@ -103,7 +106,7 @@ def review(params: ReviewQueryParams = Depends()):
     return JSONResponse(content=[r for r in review])
 
 
-@router.get("/review/summary")
+@router.get("/review/summary", response_model=ReviewSummaryResponse)
 def review_summary(params: ReviewSummaryQueryParams = Depends()):
     hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(params.timezone)
     day_ago = (datetime.datetime.now() - datetime.timedelta(hours=24)).timestamp()
