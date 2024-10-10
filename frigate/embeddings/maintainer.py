@@ -41,8 +41,7 @@ class EmbeddingMaintainer(threading.Thread):
         config: FrigateConfig,
         stop_event: MpEvent,
     ) -> None:
-        threading.Thread.__init__(self)
-        self.name = "embeddings_maintainer"
+        super().__init__(name="embeddings_maintainer")
         self.config = config
         self.embeddings = Embeddings(config.semantic_search, db)
         self.event_subscriber = EventUpdateSubscriber()
@@ -62,7 +61,7 @@ class EmbeddingMaintainer(threading.Thread):
         """Maintain a SQLite-vec database for semantic search."""
         while not self.stop_event.is_set():
             print("Doing another embeddings loop.")
-            # self._process_requests()
+            self._process_requests()
             self._process_updates()
             self._process_finalized()
             self._process_event_metadata()
@@ -78,9 +77,7 @@ class EmbeddingMaintainer(threading.Thread):
         """Process embeddings requests"""
 
         def handle_request(topic: str, data: str) -> str:
-            print(
-                f"Handling embeddings request of type {topic} with data {data}"
-            )
+            print(f"Handling embeddings request of type {topic} with data {data}")
 
             try:
                 if topic == EmbeddingsRequestEnum.embed_description.value:
