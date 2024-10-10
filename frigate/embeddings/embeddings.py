@@ -10,7 +10,7 @@ from playhouse.shortcuts import model_to_dict
 
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config.semantic_search import SemanticSearchConfig
-from frigate.const import UPDATE_MODEL_STATE
+from frigate.const import UPDATE_EMBEDDINGS_REINDEX_PROGRESS, UPDATE_MODEL_STATE
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
 from frigate.types import ModelStatusTypesEnum
@@ -165,19 +165,36 @@ class Embeddings:
         return embedding
 
     def reindex(self) -> None:
-        logger.info("Indexing event embeddings...")
+        logger.info("Indexing tracked object embeddings...")
 
         self._drop_tables()
         self._create_tables()
 
         st = time.time()
         totals = {
-            "thumb": 0,
-            "desc": 0,
+            "thumbnails": 0,
+            "descriptions": 0,
+            "processed_objects": 0,
+            "total_objects": 0,
         }
+
+        self.requestor.send_data(UPDATE_EMBEDDINGS_REINDEX_PROGRESS, totals)
+
+        # Get total count of events to process
+        total_events = (
+            Event.select()
+            .where(
+                (Event.has_clip == True | Event.has_snapshot == True)
+                & Event.thumbnail.is_null(False)
+            )
+            .count()
+        )
+        totals["total_objects"] = total_events
 
         batch_size = 100
         current_page = 1
+        processed_events = 0
+
         events = (
             Event.select()
             .where(
@@ -193,11 +210,29 @@ class Embeddings:
             for event in events:
                 thumbnail = base64.b64decode(event.thumbnail)
                 self.upsert_thumbnail(event.id, thumbnail)
-                totals["thumb"] += 1
+                totals["thumbnails"] += 1
+
                 if description := event.data.get("description", "").strip():
-                    totals["desc"] += 1
+                    totals["descriptions"] += 1
                     self.upsert_description(event.id, description)
 
+                totals["processed_objects"] += 1
+
+                # report progress every 10 events so we don't spam the logs
+                if (totals["processed_objects"] % 10) == 0:
+                    progress = (processed_events / total_events) * 100
+                    logger.debug(
+                        "Processed %d/%d events (%.2f%% complete) | Thumbnails: %d, Descriptions: %d",
+                        processed_events,
+                        total_events,
+                        progress,
+                        totals["thumbnails"],
+                        totals["descriptions"],
+                    )
+
+                self.requestor.send_data(UPDATE_EMBEDDINGS_REINDEX_PROGRESS, totals)
+
+            # Move to the next page
             current_page += 1
             events = (
                 Event.select()
@@ -211,7 +246,8 @@ class Embeddings:
 
         logger.info(
             "Embedded %d thumbnails and %d descriptions in %s seconds",
-            totals["thumb"],
-            totals["desc"],
+            totals["thumbnails"],
+            totals["descriptions"],
             time.time() - st,
         )
+        self.requestor.send_data(UPDATE_EMBEDDINGS_REINDEX_PROGRESS, totals)

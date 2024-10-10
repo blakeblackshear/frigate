@@ -2,6 +2,7 @@ import { baseUrl } from "./baseUrl";
 import { useCallback, useEffect, useState } from "react";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import {
+  EmbeddingsReindexProgressType,
   FrigateCameraState,
   FrigateEvent,
   FrigateReview,
@@ -300,6 +301,42 @@ export function useModelState(
   }, [revalidateOnFocus]);
 
   return { payload: data ? data[model] : undefined };
+}
+
+export function useEmbeddingsReindexProgress(
+  revalidateOnFocus: boolean = true,
+): {
+  payload: EmbeddingsReindexProgressType;
+} {
+  const {
+    value: { payload },
+    send: sendCommand,
+  } = useWs("embeddings_reindex_progress", "embeddingsReindexProgress");
+
+  const data = useDeepMemo(JSON.parse(payload as string));
+
+  useEffect(() => {
+    let listener = undefined;
+    if (revalidateOnFocus) {
+      sendCommand("embeddingsReindexProgress");
+      listener = () => {
+        if (document.visibilityState == "visible") {
+          sendCommand("embeddingsReindexProgress");
+        }
+      };
+      addEventListener("visibilitychange", listener);
+    }
+
+    return () => {
+      if (listener) {
+        removeEventListener("visibilitychange", listener);
+      }
+    };
+    // we know that these deps are correct
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [revalidateOnFocus]);
+
+  return { payload: data };
 }
 
 export function useMotionActivity(camera: string): { payload: string } {
