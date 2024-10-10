@@ -345,7 +345,9 @@ def generate_color_palette(n):
     return colors
 
 
-def serialize(vector: Union[list[float], np.ndarray, float], pack: bool = True) -> bytes:
+def serialize(
+    vector: Union[list[float], np.ndarray, float], pack: bool = True
+) -> bytes:
     """Serializes a list of floats, numpy array, or single float into a compact "raw bytes" format"""
     if isinstance(vector, np.ndarray):
         # Convert numpy array to list of floats
