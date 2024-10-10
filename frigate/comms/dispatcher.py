@@ -64,6 +64,9 @@ class Dispatcher:
         self.onvif = onvif
         self.ptz_metrics = ptz_metrics
         self.comms = communicators
+        self.camera_activity = {}
+        self.model_state = {}
+        self.embeddings_reindex = {}
 
         self._camera_settings_handlers: dict[str, Callable] = {
             "audio": self._on_audio_command,
@@ -84,10 +87,6 @@ class Dispatcher:
 
         for comm in self.comms:
             comm.subscribe(self._receive)
-
-        self.camera_activity = {}
-        self.model_state = {}
-        self.embeddings_reindex = {}
 
     def _receive(self, topic: str, payload: str) -> Optional[Any]:
         """Handle receiving of payload from communicators."""

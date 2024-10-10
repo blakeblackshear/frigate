@@ -44,6 +44,7 @@ class ModelDownloader:
         download_path: str,
         file_names: List[str],
         download_func: Callable[[str], None],
+        requestor: InterProcessRequestor,
         silent: bool = False,
     ):
         self.model_name = model_name
@@ -51,19 +52,17 @@ class ModelDownloader:
         self.file_names = file_names
         self.download_func = download_func
         self.silent = silent
-        self.requestor = InterProcessRequestor()
+        self.requestor = requestor
         self.download_thread = None
         self.download_complete = threading.Event()
 
     def ensure_model_files(self):
-        for file in self.file_names:
-            self.requestor.send_data(
-                UPDATE_MODEL_STATE,
-                {
-                    "model": f"{self.model_name}-{file}",
-                    "state": ModelStatusTypesEnum.downloading,
-                },
-            )
+        self.mark_files_state(
+            self.requestor,
+            self.model_name,
+            self.file_names,
+            ModelStatusTypesEnum.downloading,
+        )
         self.download_thread = threading.Thread(
             target=self._download_models,
             name=f"_download_model_{self.model_name}",
@@ -118,6 +117,22 @@ class ModelDownloader:
 
         if not silent:
             logger.info(f"Downloading complete: {url}")
+
+    @staticmethod
+    def mark_files_state(
+        requestor: InterProcessRequestor,
+        model_name: str,
+        files: list[str],
+        state: ModelStatusTypesEnum,
+    ) -> None:
+        for file_name in files:
+            requestor.send_data(
+                UPDATE_MODEL_STATE,
+                {
+                    "model": f"{model_name}-{file_name}",
+                    "state": state,
+                },
+            )
 
     def wait_for_download(self):
         self.download_complete.wait()

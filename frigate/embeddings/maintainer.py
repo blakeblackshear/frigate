@@ -41,10 +41,14 @@ class EmbeddingMaintainer(threading.Thread):
         config: FrigateConfig,
         stop_event: MpEvent,
     ) -> None:
-        threading.Thread.__init__(self)
-        self.name = "embeddings_maintainer"
+        super().__init__(name="embeddings_maintainer")
         self.config = config
         self.embeddings = Embeddings(config.semantic_search, db)
+
+        # Check if we need to re-index events
+        if config.semantic_search.reindex:
+            self.embeddings.reindex()
+
         self.event_subscriber = EventUpdateSubscriber()
         self.event_end_subscriber = EventEndSubscriber()
         self.event_metadata_subscriber = EventMetadataSubscriber(
@@ -76,26 +80,33 @@ class EmbeddingMaintainer(threading.Thread):
     def _process_requests(self) -> None:
         """Process embeddings requests"""
 
-        def handle_request(topic: str, data: str) -> str:
-            if topic == EmbeddingsRequestEnum.embed_description.value:
-                return serialize(
-                    self.embeddings.upsert_description(data["id"], data["description"]),
-                    pack=False,
-                )
-            elif topic == EmbeddingsRequestEnum.embed_thumbnail.value:
-                thumbnail = base64.b64decode(data["thumbnail"])
-                return serialize(
-                    self.embeddings.upsert_thumbnail(data["id"], thumbnail),
-                    pack=False,
-                )
-            elif topic == EmbeddingsRequestEnum.generate_search.value:
-                return serialize(self.embeddings.text_embedding([data])[0], pack=False)
+        def _handle_request(topic: str, data: str) -> str:
+            try:
+                if topic == EmbeddingsRequestEnum.embed_description.value:
+                    return serialize(
+                        self.embeddings.upsert_description(
+                            data["id"], data["description"]
+                        ),
+                        pack=False,
+                    )
+                elif topic == EmbeddingsRequestEnum.embed_thumbnail.value:
+                    thumbnail = base64.b64decode(data["thumbnail"])
+                    return serialize(
+                        self.embeddings.upsert_thumbnail(data["id"], thumbnail),
+                        pack=False,
+                    )
+                elif topic == EmbeddingsRequestEnum.generate_search.value:
+                    return serialize(
+                        self.embeddings.text_embedding([data])[0], pack=False
+                    )
+            except Exception as e:
+                logger.error(f"Unable to handle embeddings request {e}")
 
-        self.embeddings_responder.check_for_request(handle_request)
+        self.embeddings_responder.check_for_request(_handle_request)
 
     def _process_updates(self) -> None:
         """Process event updates"""
-        update = self.event_subscriber.check_for_update()
+        update = self.event_subscriber.check_for_update(timeout=0.1)
 
         if update is None:
             return
@@ -124,7 +135,7 @@ class EmbeddingMaintainer(threading.Thread):
     def _process_finalized(self) -> None:
         """Process the end of an event."""
         while True:
-            ended = self.event_end_subscriber.check_for_update()
+            ended = self.event_end_subscriber.check_for_update(timeout=0.1)
 
             if ended == None:
                 break
@@ -161,9 +172,6 @@ class EmbeddingMaintainer(threading.Thread):
                         or set(event.zones) & set(camera_config.genai.required_zones)
                     )
                 ):
-                    logger.debug(
-                        f"Description generation for {event}, has_snapshot: {event.has_snapshot}"
-                    )
                     if event.has_snapshot and camera_config.genai.use_snapshot:
                         with open(
                             os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}.jpg"),
@@ -217,7 +225,7 @@ class EmbeddingMaintainer(threading.Thread):
     def _process_event_metadata(self):
         # Check for regenerate description requests
         (topic, event_id, source) = self.event_metadata_subscriber.check_for_update(
-            timeout=1
+            timeout=0.1
         )
 
         if topic is None:

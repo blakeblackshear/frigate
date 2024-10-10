@@ -15,6 +15,7 @@ from PIL import Image
 from transformers import AutoFeatureExtractor, AutoTokenizer
 from transformers.utils.logging import disable_progress_bar
 
+from frigate.comms.inter_process import InterProcessRequestor
 from frigate.const import MODEL_CACHE_DIR, UPDATE_MODEL_STATE
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.downloader import ModelDownloader
@@ -41,12 +42,14 @@ class GenericONNXEmbedding:
         download_urls: Dict[str, str],
         embedding_function: Callable[[List[np.ndarray]], np.ndarray],
         model_type: str,
+        requestor: InterProcessRequestor,
         tokenizer_file: Optional[str] = None,
         device: str = "AUTO",
     ):
         self.model_name = model_name
         self.model_file = model_file
         self.tokenizer_file = tokenizer_file
+        self.requestor = requestor
         self.download_urls = download_urls
         self.embedding_function = embedding_function
         self.model_type = model_type  # 'text' or 'vision'
@@ -58,15 +61,32 @@ class GenericONNXEmbedding:
         self.tokenizer = None
         self.feature_extractor = None
         self.session = None
-
-        self.downloader = ModelDownloader(
-            model_name=self.model_name,
-            download_path=self.download_path,
-            file_names=list(self.download_urls.keys())
-            + ([self.tokenizer_file] if self.tokenizer_file else []),
-            download_func=self._download_model,
+        files_names = list(self.download_urls.keys()) + (
+            [self.tokenizer_file] if self.tokenizer_file else []
         )
-        self.downloader.ensure_model_files()
+
+        if not all(
+            os.path.exists(os.path.join(self.download_path, n)) for n in files_names
+        ):
+            logger.debug(f"starting model download for {self.model_name}")
+            self.downloader = ModelDownloader(
+                model_name=self.model_name,
+                download_path=self.download_path,
+                file_names=files_names,
+                requestor=self.requestor,
+                download_func=self._download_model,
+            )
+            self.downloader.ensure_model_files()
+        else:
+            self.downloader = None
+            ModelDownloader.mark_files_state(
+                self.requestor,
+                self.model_name,
+                files_names,
+                ModelStatusTypesEnum.downloaded,
+            )
+            self._load_model_and_tokenizer()
+            logger.debug(f"models are already downloaded for {self.model_name}")
 
     def _download_model(self, path: str):
         try:
@@ -102,7 +122,8 @@ class GenericONNXEmbedding:
 
     def _load_model_and_tokenizer(self):
         if self.session is None:
-            self.downloader.wait_for_download()
+            if self.downloader:
+                self.downloader.wait_for_download()
             if self.model_type == "text":
                 self.tokenizer = self._load_tokenizer()
             else:
@@ -125,13 +146,12 @@ class GenericONNXEmbedding:
             f"{MODEL_CACHE_DIR}/{self.model_name}",
         )
 
-    def _load_model(self, path: str):
+    def _load_model(self, path: str) -> Optional[ort.InferenceSession]:
         if os.path.exists(path):
             return ort.InferenceSession(
                 path, providers=self.providers, provider_options=self.provider_options
             )
         else:
-            logger.warning(f"{self.model_name} model file {path} not found.")
             return None
 
     def _process_image(self, image):

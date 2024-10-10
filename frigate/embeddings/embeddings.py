@@ -63,7 +63,7 @@ class Embeddings:
         self.requestor = InterProcessRequestor()
 
         # Create tables if they don't exist
-        self._create_tables()
+        self.db.create_embeddings_tables()
 
         models = [
             "jinaai/jina-clip-v1-text_model_fp16.onnx",
@@ -96,6 +96,7 @@ class Embeddings:
             },
             embedding_function=jina_text_embedding_function,
             model_type="text",
+            requestor=self.requestor,
             device="CPU",
         )
 
@@ -108,33 +109,9 @@ class Embeddings:
             },
             embedding_function=jina_vision_embedding_function,
             model_type="vision",
+            requestor=self.requestor,
             device=self.config.device,
         )
-
-    def _create_tables(self):
-        # Create vec0 virtual table for thumbnail embeddings
-        self.db.execute_sql("""
-            CREATE VIRTUAL TABLE IF NOT EXISTS vec_thumbnails USING vec0(
-                id TEXT PRIMARY KEY,
-                thumbnail_embedding FLOAT[768]
-            );
-        """)
-
-        # Create vec0 virtual table for description embeddings
-        self.db.execute_sql("""
-            CREATE VIRTUAL TABLE IF NOT EXISTS vec_descriptions USING vec0(
-                id TEXT PRIMARY KEY,
-                description_embedding FLOAT[768]
-            );
-        """)
-
-    def _drop_tables(self):
-        self.db.execute_sql("""
-            DROP TABLE vec_descriptions;
-        """)
-        self.db.execute_sql("""
-            DROP TABLE vec_thumbnails;
-        """)
 
     def upsert_thumbnail(self, event_id: str, thumbnail: bytes):
         # Convert thumbnail bytes to PIL Image
@@ -153,7 +130,6 @@ class Embeddings:
 
     def upsert_description(self, event_id: str, description: str):
         embedding = self.text_embedding([description])[0]
-
         self.db.execute_sql(
             """
             INSERT OR REPLACE INTO vec_descriptions(id, description_embedding)
@@ -167,8 +143,10 @@ class Embeddings:
     def reindex(self) -> None:
         logger.info("Indexing tracked object embeddings...")
 
-        self._drop_tables()
-        self._create_tables()
+        self.db.drop_embeddings_tables()
+        logger.debug("Dropped embeddings tables.")
+        self.db.create_embeddings_tables()
+        logger.debug("Created embeddings tables.")
 
         st = time.time()
         totals = {

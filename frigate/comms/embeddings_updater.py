@@ -22,7 +22,7 @@ class EmbeddingsResponder:
 
     def check_for_request(self, process: Callable) -> None:
         while True:  # load all messages that are queued
-            has_message, _, _ = zmq.select([self.socket], [], [], 1)
+            has_message, _, _ = zmq.select([self.socket], [], [], 0.1)
 
             if not has_message:
                 break
@@ -54,8 +54,11 @@ class EmbeddingsRequestor:
 
     def send_data(self, topic: str, data: any) -> str:
         """Sends data and then waits for reply."""
-        self.socket.send_json((topic, data))
-        return self.socket.recv_json()
+        try:
+            self.socket.send_json((topic, data))
+            return self.socket.recv_json()
+        except zmq.ZMQError:
+            return ""
 
     def stop(self) -> None:
         self.socket.close()
