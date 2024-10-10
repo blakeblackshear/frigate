@@ -239,7 +239,11 @@ class ReviewSegmentMaintainer(threading.Thread):
     ) -> None:
         """Validate if existing review segment should continue."""
         camera_config = self.config.cameras[segment.camera]
-        active_objects = get_active_objects(frame_time, camera_config, objects)
+
+        # get active objects + objects loitering in loitering zones
+        active_objects = get_active_objects(
+            frame_time, camera_config, objects
+        ) + get_loitering_objects(frame_time, camera_config, objects)
         prev_data = segment.get_data(False)
         has_activity = False
 
@@ -303,37 +307,6 @@ class ReviewSegmentMaintainer(threading.Thread):
                     self.frame_manager.close(frame_id)
                 except FileNotFoundError:
                     return
-
-        # check if there are any objects pending loitering on this camera
-        loitering_objects = get_loitering_objects(frame_time, camera_config, objects)
-
-        if loitering_objects:
-            has_activity = True
-
-            if frame_time > segment.last_update:
-                segment.last_update = frame_time
-
-            for object in loitering_objects:
-                # if object is alert label
-                # and has entered loitering zone
-                # mark this review as alert
-                if (
-                    segment.severity != SeverityEnum.alert
-                    and object["label"] in camera_config.review.alerts.labels
-                    and (
-                        len(object["current_zones"]) > 0
-                        and set(object["current_zones"])
-                        & set(camera_config.review.alerts.required_zones)
-                    )
-                ):
-                    segment.severity = SeverityEnum.alert
-                    should_update = True
-
-                # keep zones up to date
-                if len(object["current_zones"]) > 0:
-                    for zone in object["current_zones"]:
-                        if zone not in segment.zones:
-                            segment.zones.append(zone)
 
         if not has_activity:
             if not segment.has_frame:
