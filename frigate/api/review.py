@@ -17,6 +17,7 @@ from frigate.api.defs.review_query_parameters import (
     ReviewQueryParams,
     ReviewSummaryQueryParams,
 )
+from frigate.api.defs.review_responses import ReviewSegmentResponse
 from frigate.api.defs.tags import Tags
 from frigate.models import Recordings, ReviewSegment
 from frigate.util.builtin import get_tz_modifiers
@@ -26,7 +27,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=[Tags.review])
 
 
-@router.get("/review")
+@router.get("/review", response_model=list[ReviewSegmentResponse])
 def review(params: ReviewQueryParams = Depends()):
     cameras = params.cameras
     labels = params.labels
