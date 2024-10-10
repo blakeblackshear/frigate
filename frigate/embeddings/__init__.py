@@ -16,7 +16,7 @@ from frigate.config import FrigateConfig
 from frigate.const import CONFIG_DIR
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
-from frigate.util.builtin import deserialize, serialize
+from frigate.util.builtin import serialize
 from frigate.util.services import listen
 
 from .embeddings import Embeddings
