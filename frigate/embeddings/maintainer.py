@@ -77,6 +77,10 @@ class EmbeddingMaintainer(threading.Thread):
         """Process embeddings requests"""
 
         def handle_request(topic: str, data: str) -> str:
+            logger.debug(
+                f"Handling embeddings request of type {topic} with data {data}"
+            )
+
             try:
                 if topic == EmbeddingsRequestEnum.embed_description.value:
                     return serialize(
@@ -112,6 +116,7 @@ class EmbeddingMaintainer(threading.Thread):
         if not camera or source_type != EventTypeEnum.tracked_object:
             return
 
+        logger.debug(f"Processing object update of type {source_type} on {camera}")
         camera_config = self.config.cameras[camera]
         if data["id"] not in self.tracked_events:
             self.tracked_events[data["id"]] = []
