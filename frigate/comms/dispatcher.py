@@ -153,14 +153,12 @@ class Dispatcher:
 
         def handle_update_embeddings_reindex_progress():
             self.embeddings_reindex = payload
-            logger.info(self.embeddings_reindex)
             self.publish(
                 "embeddings_reindex_progress",
                 json.dumps(payload),
             )
 
         def handle_embeddings_reindex_progress():
-            logger.info(self.embeddings_reindex)
             self.publish(
                 "embeddings_reindex_progress",
                 json.dumps(self.embeddings_reindex.copy()),

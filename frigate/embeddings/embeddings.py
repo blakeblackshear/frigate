@@ -218,8 +218,8 @@ class Embeddings:
 
                 totals["processed_objects"] += 1
 
-                # report progress every 10 events so we don't spam the logs or websocket
-                if (processed_events % 10) == 0:
+                # report progress every 10 events so we don't spam the logs
+                if (totals["processed_objects"] % 10) == 0:
                     progress = (processed_events / total_events) * 100
                     logger.debug(
                         "Processed %d/%d events (%.2f%% complete) | Thumbnails: %d, Descriptions: %d",
@@ -229,7 +229,8 @@ class Embeddings:
                         totals["thumbnails"],
                         totals["descriptions"],
                     )
-                    self.requestor.send_data(UPDATE_EMBEDDINGS_REINDEX_PROGRESS, totals)
+
+                self.requestor.send_data(UPDATE_EMBEDDINGS_REINDEX_PROGRESS, totals)
 
             # Move to the next page
             current_page += 1
