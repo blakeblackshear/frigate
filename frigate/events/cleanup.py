@@ -8,10 +8,9 @@ from enum import Enum
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
 
-from playhouse.sqliteq import SqliteQueueDatabase
-
 from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR
+from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.embeddings.embeddings import Embeddings
 from frigate.models import Event, Timeline
 
@@ -25,7 +24,7 @@ class EventCleanupType(str, Enum):
 
 class EventCleanup(threading.Thread):
     def __init__(
-        self, config: FrigateConfig, stop_event: MpEvent, db: SqliteQueueDatabase
+        self, config: FrigateConfig, stop_event: MpEvent, db: SqliteVecQueueDatabase
     ):
         super().__init__(name="event_cleanup")
         self.config = config
@@ -234,8 +233,8 @@ class EventCleanup(threading.Thread):
                     Event.delete().where(Event.id << chunk).execute()
 
                     if self.config.semantic_search.enabled:
-                        self.embeddings.delete_description(chunk)
-                        self.embeddings.delete_thumbnail(chunk)
+                        self.db.delete_embeddings_description(chunk)
+                        self.db.delete_embeddings_thumbnail(chunk)
                         logger.debug(f"Deleted {len(events_to_delete)} embeddings")
 
         logger.info("Exiting event cleanup...")
