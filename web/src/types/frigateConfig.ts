@@ -417,6 +417,7 @@ export interface FrigateConfig {
 
   semantic_search: {
     enabled: boolean;
+    model_size: string;
   };
 
   snapshots: {

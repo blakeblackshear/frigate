@@ -207,9 +207,12 @@ export default function Explore() {
   const { payload: textTokenizerState } = useModelState(
     "jinaai/jina-clip-v1-tokenizer",
   );
-  const { payload: visionModelState } = useModelState(
-    "jinaai/jina-clip-v1-vision_model_fp16.onnx",
-  );
+  const modelFile =
+    config?.semantic_search.model_size === "large"
+      ? "jinaai/jina-clip-v1-vision_model_fp16.onnx"
+      : "jinaai/jina-clip-v1-vision_model_quantized.onnx";
+
+  const { payload: visionModelState } = useModelState(modelFile);
   const { payload: visionFeatureExtractorState } = useModelState(
     "jinaai/jina-clip-v1-preprocessor_config.json",
   );

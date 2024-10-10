@@ -39,6 +39,16 @@ The vision model is able to embed both images and text into the same vector spac
 
 The text model is used to embed tracked object descriptions and perform searches against them. Descriptions can be created, viewed, and modified on the Search page when clicking on the gray tracked object chip at the top left of each review item. See [the Generative AI docs](/configuration/genai.md) for more information on how to automatically generate tracked object descriptions.
 
+Differently weighted CLIP models are available and can be selected by setting the `model_size` config option:
+
+```yaml
+semantic_search:
+  enabled: True
+  model_size: small
+```
+
+Using `large` as the model size setting employs the full Jina model appropriate for high performance systems running a GPU. The `small` size uses a quantized version of the model that uses much less RAM and runs faster on CPU with a very negligible difference in embedding quality. Most users will not need to change this setting from the default of `small`.
+
 ## Usage
 
 1. Semantic search is used in conjunction with the other filters available on the Search page. Use a combination of traditional filtering and semantic search for the best results.
