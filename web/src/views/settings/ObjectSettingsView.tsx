@@ -16,6 +16,8 @@ import useDeepMemo from "@/hooks/use-deep-memo";
 import { Card } from "@/components/ui/card";
 import { getIconForLabel } from "@/utils/iconUtil";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
+import { Link } from "react-router-dom";
+import { LuExternalLink } from "react-icons/lu";
 
 type ObjectSettingsViewProps = {
   selectedCamera?: string;
@@ -134,6 +136,17 @@ export default function ObjectSettingsView({
             statistics. The object list shows a time-delayed summary of detected
             objects.
           </p>
+          <div className="flex items-center text-primary">
+            <Link
+              to="https://docs.frigate.video/frigate/glossary#bounding-box-colors"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline"
+            >
+              Read the meaning of bounding box colors
+              <LuExternalLink className="ml-2 inline-flex size-3" />
+            </Link>
+          </div>
         </div>
 
         <Tabs defaultValue="debug" className="w-full">
