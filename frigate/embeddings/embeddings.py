@@ -127,7 +127,7 @@ class Embeddings:
             model_size=config.model_size,
             model_type="vision",
             requestor=self.requestor,
-            device=self.config.device,
+            device="GPU" if config.model_size == "large" else "CPU",
         )
 
     def upsert_thumbnail(self, event_id: str, thumbnail: bytes):

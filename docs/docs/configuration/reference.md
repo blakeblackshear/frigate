@@ -518,9 +518,8 @@ semantic_search:
   enabled: False
   # Optional: Re-index embeddings database from historical tracked objects (default: shown below)
   reindex: False
-  # Optional: Set device used to run embeddings, options are AUTO, CPU, GPU. (default: shown below)
-  device: "AUTO"
   # Optional: Set the model size used for embeddings. (default: shown below)
+  # NOTE: small model runs on CPU and large model runs on GPU
   model_size: "small"
 
 # Optional: Configuration for AI generated tracked object descriptions
