@@ -554,7 +554,7 @@ function ObjectSnapshotTab({
                 </div>
 
                 <div className="flex flex-row justify-center gap-2 md:justify-end">
-                  {state == "reviewing" && (
+                  {state == "reviewing" && search.end_time && (
                     <>
                       <Button
                         className="bg-success"
