@@ -531,9 +531,37 @@ function PtzControlPanel({
   );
 
   useKeyboardListener(
-    ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "+", "-"],
+    [
+      "ArrowLeft",
+      "ArrowRight",
+      "ArrowUp",
+      "ArrowDown",
+      "+",
+      "-",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+    ],
     (key, modifiers) => {
-      if (modifiers.repeat) {
+      if (modifiers.repeat || !key) {
+        return;
+      }
+
+      if (["1", "2", "3", "4", "5", "6", "7", "8", "9"].includes(key)) {
+        const presetNumber = parseInt(key);
+        if (
+          ptz &&
+          (ptz.presets?.length ?? 0) > 0 &&
+          presetNumber <= ptz.presets.length
+        ) {
+          sendPtz(`preset_${ptz.presets[presetNumber - 1]}`);
+        }
         return;
       }
 
