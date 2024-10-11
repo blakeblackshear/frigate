@@ -20,7 +20,7 @@ class ZScoreNormalization:
 
     @property
     def stddev(self):
-        return math.sqrt(self.variance)
+        return math.sqrt(self.variance) if self.variance > 0 else 0.0
 
     def normalize(self, distances: list[float]):
         self._update(distances)
