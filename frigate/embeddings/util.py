@@ -22,8 +22,9 @@ class ZScoreNormalization:
     def stddev(self):
         return math.sqrt(self.variance) if self.variance > 0 else 0.0
 
-    def normalize(self, distances: list[float]):
-        self._update(distances)
+    def normalize(self, distances: list[float], save_stats: bool):
+        if save_stats:
+            self._update(distances)
         if self.stddev == 0:
             return distances
         return [

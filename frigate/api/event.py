@@ -481,20 +481,15 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
     else:
         search_types = search_type.split(",")
 
-        # only normalize multi-modal searches
-        apply_normalization = (
-            "thumbnail" in search_types and "description" in search_types
-        )
+        # only save stats for multi-modal searches
+        save_stats = "thumbnail" in search_types and "description" in search_types
 
         if "thumbnail" in search_types:
             thumb_result = context.search_thumbnail(query)
 
-            if apply_normalization:
-                thumb_distances = context.thumb_stats.normalize(
-                    [result[1] for result in thumb_result]
-                )
-            else:
-                thumb_distances = [result[1] for result in thumb_result]
+            thumb_distances = context.thumb_stats.normalize(
+                [result[1] for result in thumb_result], save_stats
+            )
 
             thumb_ids = dict(
                 zip([result[0] for result in thumb_result], thumb_distances)
@@ -508,14 +503,10 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
 
         if "description" in search_types:
             desc_result = context.search_description(query)
-            if apply_normalization:
-                desc_distances = context.desc_stats.normalize(
-                    [result[1] for result in desc_result]
-                )
-            else:
-                desc_distances = [
-                    result[1] for result in desc_result
-                ]  # Use raw distances
+
+            desc_distances = context.desc_stats.normalize(
+                [result[1] for result in desc_result], save_stats
+            )
 
             desc_ids = dict(zip([result[0] for result in desc_result], desc_distances))
 

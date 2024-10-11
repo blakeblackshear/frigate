@@ -190,17 +190,13 @@ export default function SearchView({
   // confidence score
 
   const zScoreToConfidence = (score: number) => {
-    // Normalizing is needed for multi-modal searches only
+    // Normalizing is not needed for similarity searches
     // Sigmoid function for normalized: 1 / (1 + e^x)
-    // Cosine for non-normalized
+    // Cosine for similarity
     if (searchFilter) {
-      const normalized =
-        !searchFilter.search_type ||
-        (Array.isArray(searchFilter.search_type) &&
-          searchFilter.search_type.length === 2 &&
-          searchFilter.search_type.includes("thumbnail") &&
-          searchFilter.search_type.includes("description"));
-      const confidence = normalized ? 1 / (1 + Math.exp(score)) : 1 - score;
+      const notNormalized = searchFilter?.search_type?.includes("similarity");
+
+      const confidence = notNormalized ? 1 - score : 1 / (1 + Math.exp(score));
 
       return Math.round(confidence * 100);
     }
