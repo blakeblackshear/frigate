@@ -187,13 +187,19 @@ export default function SearchView({
     }
   }, [searchResults, searchDetail]);
 
-  // confidence score - probably needs tweaking
+  // confidence score
 
   const zScoreToConfidence = (score: number) => {
-    // Sigmoid function: 1 / (1 + e^x)
-    const confidence = 1 / (1 + Math.exp(score));
+    // Normalizing is not needed for similarity searches
+    // Sigmoid function for normalized: 1 / (1 + e^x)
+    // Cosine for similarity
+    if (searchFilter) {
+      const notNormalized = searchFilter?.search_type?.includes("similarity");
 
-    return Math.round(confidence * 100);
+      const confidence = notNormalized ? 1 - score : 1 / (1 + Math.exp(score));
+
+      return Math.round(confidence * 100);
+    }
   };
 
   const hasExistingSearch = useMemo(

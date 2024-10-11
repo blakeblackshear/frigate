@@ -2,6 +2,7 @@ import {
   useEmbeddingsReindexProgress,
   useEventUpdate,
   useModelState,
+  useWs,
 } from "@/api/ws";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import AnimatedCircularProgressBar from "@/components/ui/circular-progress-bar";
@@ -201,6 +202,14 @@ export default function Explore() {
   );
 
   // model states
+
+  const { send: sendCommand } = useWs("model_state", "modelState");
+
+  useEffect(() => {
+    sendCommand("modelState");
+    // only run on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const { payload: textModelState } = useModelState(
     "jinaai/jina-clip-v1-text_model_fp16.onnx",

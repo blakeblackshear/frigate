@@ -42,12 +42,12 @@ class SqliteVecQueueDatabase(SqliteQueueDatabase):
         self.execute_sql("""
             CREATE VIRTUAL TABLE IF NOT EXISTS vec_thumbnails USING vec0(
                 id TEXT PRIMARY KEY,
-                thumbnail_embedding FLOAT[768]
+                thumbnail_embedding FLOAT[768] distance_metric=cosine
             );
         """)
         self.execute_sql("""
             CREATE VIRTUAL TABLE IF NOT EXISTS vec_descriptions USING vec0(
                 id TEXT PRIMARY KEY,
-                description_embedding FLOAT[768]
+                description_embedding FLOAT[768] distance_metric=cosine
             );
         """)
