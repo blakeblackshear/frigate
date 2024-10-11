@@ -175,6 +175,7 @@ class Embeddings:
             "descriptions": 0,
             "processed_objects": 0,
             "total_objects": 0,
+            "time_remaining": 0,
         }
 
         self.requestor.send_data(UPDATE_EMBEDDINGS_REINDEX_PROGRESS, totals)
@@ -228,6 +229,13 @@ class Embeddings:
                         totals["thumbnails"],
                         totals["descriptions"],
                     )
+
+                # Calculate time remaining
+                elapsed_time = time.time() - st
+                avg_time_per_event = elapsed_time / totals["processed_objects"]
+                remaining_events = total_events - totals["processed_objects"]
+                time_remaining = avg_time_per_event * remaining_events
+                totals["time_remaining"] = int(time_remaining)
 
                 self.requestor.send_data(UPDATE_EMBEDDINGS_REINDEX_PROGRESS, totals)
 
