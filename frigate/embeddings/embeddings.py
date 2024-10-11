@@ -3,6 +3,7 @@
 import base64
 import io
 import logging
+import os
 import time
 
 from PIL import Image
@@ -10,7 +11,11 @@ from playhouse.shortcuts import model_to_dict
 
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config.semantic_search import SemanticSearchConfig
-from frigate.const import UPDATE_EMBEDDINGS_REINDEX_PROGRESS, UPDATE_MODEL_STATE
+from frigate.const import (
+    CONFIG_DIR,
+    UPDATE_EMBEDDINGS_REINDEX_PROGRESS,
+    UPDATE_MODEL_STATE,
+)
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
 from frigate.types import ModelStatusTypesEnum
@@ -159,6 +164,10 @@ class Embeddings:
         logger.debug("Dropped embeddings tables.")
         self.db.create_embeddings_tables()
         logger.debug("Created embeddings tables.")
+
+        # Delete the saved stats file
+        if os.path.exists(os.path.join(CONFIG_DIR, ".search_stats.json")):
+            os.remove(os.path.join(CONFIG_DIR, ".search_stats.json"))
 
         st = time.time()
         totals = {
