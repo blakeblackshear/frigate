@@ -142,10 +142,11 @@ class Dispatcher:
             )
 
         def handle_update_model_state():
-            model = payload["model"]
-            state = payload["state"]
-            self.model_state[model] = ModelStatusTypesEnum[state]
-            self.publish("model_state", json.dumps(self.model_state))
+            if payload:
+                model = payload["model"]
+                state = payload["state"]
+                self.model_state[model] = ModelStatusTypesEnum[state]
+                self.publish("model_state", json.dumps(self.model_state))
 
         def handle_model_state():
             self.publish("model_state", json.dumps(self.model_state.copy()))

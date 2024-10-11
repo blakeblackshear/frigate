@@ -5,7 +5,6 @@ from io import BytesIO
 from typing import Callable, Dict, List, Optional, Union
 
 import numpy as np
-import onnxruntime as ort
 import requests
 from PIL import Image
 
@@ -19,7 +18,7 @@ from frigate.comms.inter_process import InterProcessRequestor
 from frigate.const import MODEL_CACHE_DIR, UPDATE_MODEL_STATE
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.downloader import ModelDownloader
-from frigate.util.model import get_ort_providers
+from frigate.util.model import ONNXModelRunner
 
 warnings.filterwarnings(
     "ignore",
@@ -54,16 +53,12 @@ class GenericONNXEmbedding:
         self.download_urls = download_urls
         self.embedding_function = embedding_function
         self.model_type = model_type  # 'text' or 'vision'
-        self.providers, self.provider_options = get_ort_providers(
-            force_cpu=device == "CPU",
-            requires_fp16=model_size == "large" or self.model_type == "text",
-            openvino_device=device,
-        )
-
+        self.model_size = model_size
+        self.device = device
         self.download_path = os.path.join(MODEL_CACHE_DIR, self.model_name)
         self.tokenizer = None
         self.feature_extractor = None
-        self.session = None
+        self.runner = None
         files_names = list(self.download_urls.keys()) + (
             [self.tokenizer_file] if self.tokenizer_file else []
         )
@@ -124,15 +119,17 @@ class GenericONNXEmbedding:
             )
 
     def _load_model_and_tokenizer(self):
-        if self.session is None:
+        if self.runner is None:
             if self.downloader:
                 self.downloader.wait_for_download()
             if self.model_type == "text":
                 self.tokenizer = self._load_tokenizer()
             else:
                 self.feature_extractor = self._load_feature_extractor()
-            self.session = self._load_model(
-                os.path.join(self.download_path, self.model_file)
+            self.runner = ONNXModelRunner(
+                os.path.join(self.download_path, self.model_file),
+                self.device,
+                self.model_size,
             )
 
     def _load_tokenizer(self):
@@ -149,14 +146,6 @@ class GenericONNXEmbedding:
             f"{MODEL_CACHE_DIR}/{self.model_name}",
         )
 
-    def _load_model(self, path: str) -> Optional[ort.InferenceSession]:
-        if os.path.exists(path):
-            return ort.InferenceSession(
-                path, providers=self.providers, provider_options=self.provider_options
-            )
-        else:
-            return None
-
     def _process_image(self, image):
         if isinstance(image, str):
             if image.startswith("http"):
@@ -170,7 +159,7 @@ class GenericONNXEmbedding:
     ) -> List[np.ndarray]:
         self._load_model_and_tokenizer()
 
-        if self.session is None or (
+        if self.runner is None or (
             self.tokenizer is None and self.feature_extractor is None
         ):
             logger.error(
@@ -188,14 +177,14 @@ class GenericONNXEmbedding:
                 images=processed_images, return_tensors="np"
             )
 
-        input_names = [input.name for input in self.session.get_inputs()]
+        input_names = self.runner.get_input_names()
         onnx_inputs = {
             name: processed_inputs[name]
             for name in input_names
             if name in processed_inputs
         }
 
-        outputs = self.session.run(None, onnx_inputs)
+        outputs = self.runner.run(onnx_inputs)
         embeddings = self.embedding_function(outputs)
 
         return [embedding for embedding in embeddings]
