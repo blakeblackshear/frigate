@@ -187,13 +187,23 @@ export default function SearchView({
     }
   }, [searchResults, searchDetail]);
 
-  // confidence score - probably needs tweaking
+  // confidence score
 
   const zScoreToConfidence = (score: number) => {
-    // Sigmoid function: 1 / (1 + e^x)
-    const confidence = 1 / (1 + Math.exp(score));
+    // Normalizing is needed for multi-modal searches only
+    // Sigmoid function for normalized: 1 / (1 + e^x)
+    // Cosine for non-normalized
+    if (searchFilter) {
+      const normalized =
+        !searchFilter.search_type ||
+        (Array.isArray(searchFilter.search_type) &&
+          searchFilter.search_type.length === 2 &&
+          searchFilter.search_type.includes("thumbnail") &&
+          searchFilter.search_type.includes("description"));
+      const confidence = normalized ? 1 / (1 + Math.exp(score)) : 1 - score;
 
-    return Math.round(confidence * 100);
+      return Math.round(confidence * 100);
+    }
   };
 
   const hasExistingSearch = useMemo(
