@@ -557,7 +557,7 @@ function PtzControlPanel({
         const presetNumber = parseInt(key);
         if (
           ptz &&
-          (ptz?.presets?.length ?? 0) > 0 &&
+          (ptz.presets?.length ?? 0) > 0 &&
           presetNumber <= ptz.presets.length
         ) {
           sendPtz(`preset_${ptz.presets[presetNumber - 1]}`);
