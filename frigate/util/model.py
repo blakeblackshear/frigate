@@ -16,7 +16,14 @@ def get_ort_providers(
     force_cpu: bool = False, openvino_device: str = "AUTO", requires_fp16: bool = False
 ) -> tuple[list[str], list[dict[str, any]]]:
     if force_cpu:
-        return (["CPUExecutionProvider"], [{}])
+        return (
+            ["CPUExecutionProvider"],
+            [
+                {
+                    "arena_extend_strategy": "kSameAsRequested",
+                }
+            ],
+        )
 
     providers = ort.get_available_providers()
     options = []
@@ -28,6 +35,7 @@ def get_ort_providers(
             if not requires_fp16 or os.environ.get("USE_FP_16", "True") != "False":
                 options.append(
                     {
+                        "arena_extend_strategy": "kSameAsRequested",
                         "trt_fp16_enable": requires_fp16,
                         "trt_timing_cache_enable": True,
                         "trt_engine_cache_enable": True,
@@ -41,8 +49,15 @@ def get_ort_providers(
             os.makedirs("/config/model_cache/openvino/ort", exist_ok=True)
             options.append(
                 {
+                    "arena_extend_strategy": "kSameAsRequested",
                     "cache_dir": "/config/model_cache/openvino/ort",
                     "device_type": openvino_device,
+                }
+            )
+        elif provider == "CPUExecutionProvider":
+            options.append(
+                {
+                    "arena_extend_strategy": "kSameAsRequested",
                 }
             )
         else:
