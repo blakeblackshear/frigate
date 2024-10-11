@@ -10,6 +10,7 @@ import { useTimezone } from "@/hooks/use-date-utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { SearchFilter, SearchQuery, SearchResult } from "@/types/search";
 import { ModelState } from "@/types/ws";
+import { formatSecondsToDuration } from "@/utils/dateUtil";
 import SearchView from "@/views/search/SearchView";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { LuCheck, LuExternalLink, LuX } from "react-icons/lu";
@@ -282,6 +283,16 @@ export default function Explore() {
                   />
                 </div>
                 <div className="flex w-96 flex-col gap-2 py-5">
+                  {reindexProgress.time_remaining >= 0 && (
+                    <div className="mb-3 flex flex-col items-center justify-center gap-1">
+                      <div className="text-primary-variant">
+                        Estimated time remaining:
+                      </div>
+                      {formatSecondsToDuration(
+                        reindexProgress.time_remaining,
+                      ) || "Finishing shortly"}
+                    </div>
+                  )}
                   <div className="flex flex-row items-center justify-center gap-3">
                     <span className="text-primary-variant">
                       Thumbnails embedded:
