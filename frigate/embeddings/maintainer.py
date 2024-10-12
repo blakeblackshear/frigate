@@ -259,7 +259,7 @@ class EmbeddingMaintainer(threading.Thread):
         camera_config = self.config.cameras[event.camera]
 
         description = self.genai_client.generate_description(
-            camera_config, thumbnails, event.label
+            camera_config, thumbnails, event
         )
 
         if not description:
