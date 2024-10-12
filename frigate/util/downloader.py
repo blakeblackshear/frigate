@@ -19,6 +19,13 @@ class FileLock:
         self.path = path
         self.lock_file = f"{path}.lock"
 
+        # we have not acquired the lock yet so it should not exist
+        if (os.path.exists(self.lock_file)):
+            try:
+                os.remove(self.lock_file)
+            except Exception:
+                pass
+
     def acquire(self):
         parent_dir = os.path.dirname(self.lock_file)
         os.makedirs(parent_dir, exist_ok=True)
