@@ -97,6 +97,7 @@ class ModelDownloader:
                 },
             )
 
+        self.requestor.stop()
         self.download_complete.set()
 
     @staticmethod
