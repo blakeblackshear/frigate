@@ -44,7 +44,6 @@ class ModelDownloader:
         download_path: str,
         file_names: List[str],
         download_func: Callable[[str], None],
-        requestor: InterProcessRequestor,
         silent: bool = False,
     ):
         self.model_name = model_name
@@ -52,7 +51,7 @@ class ModelDownloader:
         self.file_names = file_names
         self.download_func = download_func
         self.silent = silent
-        self.requestor = requestor
+        self.requestor = InterProcessRequestor()
         self.download_thread = None
         self.download_complete = threading.Event()
 
