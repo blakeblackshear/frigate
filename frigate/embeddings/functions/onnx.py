@@ -71,7 +71,6 @@ class GenericONNXEmbedding:
                 model_name=self.model_name,
                 download_path=self.download_path,
                 file_names=files_names,
-                requestor=self.requestor,
                 download_func=self._download_model,
             )
             self.downloader.ensure_model_files()

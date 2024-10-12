@@ -19,6 +19,13 @@ class FileLock:
         self.path = path
         self.lock_file = f"{path}.lock"
 
+        # we have not acquired the lock yet so it should not exist
+        if os.path.exists(self.lock_file):
+            try:
+                os.remove(self.lock_file)
+            except Exception:
+                pass
+
     def acquire(self):
         parent_dir = os.path.dirname(self.lock_file)
         os.makedirs(parent_dir, exist_ok=True)
@@ -44,7 +51,6 @@ class ModelDownloader:
         download_path: str,
         file_names: List[str],
         download_func: Callable[[str], None],
-        requestor: InterProcessRequestor,
         silent: bool = False,
     ):
         self.model_name = model_name
@@ -52,7 +58,7 @@ class ModelDownloader:
         self.file_names = file_names
         self.download_func = download_func
         self.silent = silent
-        self.requestor = requestor
+        self.requestor = InterProcessRequestor()
         self.download_thread = None
         self.download_complete = threading.Event()
 
@@ -91,6 +97,7 @@ class ModelDownloader:
                 },
             )
 
+        self.requestor.stop()
         self.download_complete.set()
 
     @staticmethod
