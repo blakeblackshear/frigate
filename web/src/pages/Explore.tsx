@@ -184,7 +184,9 @@ export default function Explore() {
   const eventUpdate = useEventUpdate();
 
   useEffect(() => {
-    mutate();
+    if (eventUpdate) {
+      mutate();
+    }
     // mutate / revalidate when event description updates come in
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventUpdate]);
