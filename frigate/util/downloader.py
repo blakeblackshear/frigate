@@ -20,7 +20,7 @@ class FileLock:
         self.lock_file = f"{path}.lock"
 
         # we have not acquired the lock yet so it should not exist
-        if (os.path.exists(self.lock_file)):
+        if os.path.exists(self.lock_file):
             try:
                 os.remove(self.lock_file)
             except Exception:
