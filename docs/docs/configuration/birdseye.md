@@ -1,13 +1,20 @@
 # Birdseye
 
-Birdseye allows a heads-up view of your cameras to see what is going on around your property / space without having to watch all cameras that may have nothing happening. Birdseye allows specific modes that intelligently show and disappear based on what you care about. 
+In addition to Frigate's Live camera dashboard, Birdseye allows a portable heads-up view of your cameras to see what is going on around your property / space without having to watch all cameras that may have nothing happening. Birdseye allows specific modes that intelligently show and disappear based on what you care about.
+
+Birdseye can be viewed by adding the "Birdseye" camera to a Camera Group in the Web UI. Add a Camera Group by pressing the "+" icon on the Live page, and choose "Birdseye" as one of the cameras.
+
+Birdseye can also be used in HomeAssistant dashboards, cast to media devices, etc.
+
+## Birdseye Behavior
 
 ### Birdseye Modes
 
 Birdseye offers different modes to customize which cameras show under which circumstances.
- - **continuous:** All cameras are always included
- - **motion:** Cameras that have detected motion within the last 30 seconds are included
- - **objects:** Cameras that have tracked an active object within the last 30 seconds are included
+
+- **continuous:** All cameras are always included
+- **motion:** Cameras that have detected motion within the last 30 seconds are included
+- **objects:** Cameras that have tracked an active object within the last 30 seconds are included
 
 ### Custom Birdseye Icon
 
@@ -34,6 +41,29 @@ cameras:
       enabled: False
 ```
 
+### Birdseye Inactivity
+
+By default birdseye shows all cameras that have had the configured activity in the last 30 seconds, this can be configured:
+
+```yaml
+birdseye:
+  enabled: True
+  inactivity_threshold: 15
+```
+
+## Birdseye Layout
+
+### Birdseye Dimensions
+
+The resolution and aspect ratio of birdseye can be configured. Resolution will increase the quality but does not affect the layout. Changing the aspect ratio of birdseye does affect how cameras are laid out.
+
+```yaml
+birdseye:
+  enabled: True
+  width: 1280
+  height: 720
+```
+
 ### Sorting cameras in the Birdseye view
 
 It is possible to override the order of cameras that are being shown in the Birdseye view.
@@ -54,4 +84,28 @@ cameras:
       order: 2
 ```
 
-*Note*: Cameras are sorted by default using their name to ensure a constant view inside Birdseye.
+_Note_: Cameras are sorted by default using their name to ensure a constant view inside Birdseye.
+
+### Birdseye Cameras
+
+It is possible to limit the number of cameras shown on birdseye at one time. When this is enabled, birdseye will show the cameras with most recent activity. There is a cooldown to ensure that cameras do not switch too frequently.
+
+For example, this can be configured to only show the most recently active camera.
+
+```yaml
+birdseye:
+  enabled: True
+  layout:
+    max_cameras: 1
+```
+
+### Birdseye Scaling
+
+By default birdseye tries to fit 2 cameras in each row and then double in size until a suitable layout is found. The scaling can be configured with a value between 1.0 and 5.0 depending on use case.
+
+```yaml
+birdseye:
+  enabled: True
+  layout:
+    scaling_factor: 3.0
+```

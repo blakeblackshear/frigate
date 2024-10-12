@@ -9,24 +9,19 @@ COPY docker/rockchip/requirements-wheels-rk.txt /requirements-wheels-rk.txt
 RUN sed -i "/https:\/\//d" /requirements-wheels.txt
 RUN pip3 wheel --wheel-dir=/rk-wheels -c /requirements-wheels.txt -r /requirements-wheels-rk.txt
 
-FROM deps AS rk-deps
+FROM deps AS rk-frigate
 ARG TARGETARCH
 
-RUN --mount=type=bind,from=rk-wheels,source=/rk-wheels,target=/deps/rk-wheels \ 
-    pip3 install -U /deps/rk-wheels/*.whl 
+RUN --mount=type=bind,from=rk-wheels,source=/rk-wheels,target=/deps/rk-wheels \
+    pip3 install -U /deps/rk-wheels/*.whl
 
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
 
-ADD https://github.com/MarcA711/rknpu2/releases/download/v1.5.2/librknnrt_rk356x.so /usr/lib/
-ADD https://github.com/MarcA711/rknpu2/releases/download/v1.5.2/librknnrt_rk3588.so /usr/lib/
-
-ADD https://github.com/MarcA711/rknn-models/releases/download/v1.5.2-rk3562/yolov8n-320x320-rk3562.rknn /models/rknn/
-ADD https://github.com/MarcA711/rknn-models/releases/download/v1.5.2-rk3566/yolov8n-320x320-rk3566.rknn /models/rknn/
-ADD https://github.com/MarcA711/rknn-models/releases/download/v1.5.2-rk3568/yolov8n-320x320-rk3568.rknn /models/rknn/
-ADD https://github.com/MarcA711/rknn-models/releases/download/v1.5.2-rk3588/yolov8n-320x320-rk3588.rknn /models/rknn/
+ADD https://github.com/MarcA711/rknn-toolkit2/releases/download/v2.0.0/librknnrt.so /usr/lib/
 
 RUN rm -rf /usr/lib/btbn-ffmpeg/bin/ffmpeg
 RUN rm -rf /usr/lib/btbn-ffmpeg/bin/ffprobe
-ADD --chmod=111 https://github.com/MarcA711/Rockchip-FFmpeg-Builds/releases/download/6.0-1/ffmpeg /usr/lib/btbn-ffmpeg/bin/
-ADD --chmod=111 https://github.com/MarcA711/Rockchip-FFmpeg-Builds/releases/download/6.0-1/ffprobe /usr/lib/btbn-ffmpeg/bin/
+ADD --chmod=111 https://github.com/MarcA711/Rockchip-FFmpeg-Builds/releases/download/6.1-5/ffmpeg /usr/lib/ffmpeg/6.0/bin/
+ADD --chmod=111 https://github.com/MarcA711/Rockchip-FFmpeg-Builds/releases/download/6.1-5/ffprobe /usr/lib/ffmpeg/6.0/bin/
+ENV PATH="/usr/lib/ffmpeg/6.0/bin/:${PATH}"

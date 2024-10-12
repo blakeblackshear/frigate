@@ -34,6 +34,9 @@ def migrate(migrator, database, fake=False, **kwargs):
         objects=pw.IntegerField(null=True),
         motion=pw.IntegerField(null=True),
     )
+    migrator.sql(
+        'CREATE INDEX "recordings_activity" ON "recordings" ("camera", "start_time" DESC, "regions")'
+    )
 
 
 def rollback(migrator, database, fake=False, **kwargs):

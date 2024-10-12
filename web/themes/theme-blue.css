@@ -1,0 +1,63 @@
+@layer base {
+  .theme-blue.light {
+    --background: 222.2 50% 98%;
+    --background-alt: 210 30% 96%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 222 50% 97%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 33.2% 53.3%;
+    --primary-variant: 221.2 83.2% 43.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 90.1%;
+    --secondary-foreground: 222.2 47.4% 61.2%;
+    --secondary-highlight: 210 40% 94%;
+    --neutral: 0 0% 45.1%;
+    --neutral_variant: 0 0% 32.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 46.3% 46.9%;
+    --accent: 210 40% 80.1%;
+    --accent-foreground: 222.2 47.4% 57.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --warning: 32 100% 50%;
+    --warning-foreground: 0 0% 0%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --selected: 217.2 61.2% 59.8%;
+    --selected-foreground: 221 50% 100%;
+  }
+
+  .theme-blue.dark {
+    --background: 222.2 84% 8.9%;
+    --background-alt: 221.2 63.2% 13.3%;
+    --foreground: 210 40% 98%;
+    --card: 217.2 32.6% 17.5%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 54% 18.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 79.8%;
+    --primary-variant: 217.2 91.2% 49.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 60% 78%;
+    --secondary-highlight: 217.2 32.6% 25.5%;
+    --neutral: 0 0% 45.1%;
+    --neutral_variant: 0 0% 32.2%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --warning: 32 100% 50%;
+    --warning-foreground: 0 0% 0%;
+    --border: 217.2 36.6% 12.5%;
+    --input: 217.2 38.6% 29.5%;
+    --ring: 224.3 76.3% 48%;
+    --selected: 217.2 62.6% 59.8%;
+    --selected-foreground: 222.2 47.4% 11.2%;
+  }
+}

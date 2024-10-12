@@ -1,19 +1,21 @@
 """Utilities for builtin types manipulation."""
 
+import ast
 import copy
 import datetime
 import logging
+import multiprocessing as mp
+import queue
 import re
 import shlex
+import struct
 import urllib.parse
-from collections import Counter
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Tuple
+from typing import Any, Optional, Tuple, Union
 
 import numpy as np
 import pytz
-import yaml
 from ruamel.yaml import YAML
 from tzlocal import get_localzone
 from zoneinfo import ZoneInfoNotFoundError
@@ -86,34 +88,6 @@ def deep_merge(dct1: dict, dct2: dict, override=False, merge_lists=False) -> dic
     return merged
 
 
-def load_config_with_no_duplicates(raw_config) -> dict:
-    """Get config ensuring duplicate keys are not allowed."""
-
-    # https://stackoverflow.com/a/71751051
-    # important to use SafeLoader here to avoid RCE
-    class PreserveDuplicatesLoader(yaml.loader.SafeLoader):
-        pass
-
-    def map_constructor(loader, node, deep=False):
-        keys = [loader.construct_object(node, deep=deep) for node, _ in node.value]
-        vals = [loader.construct_object(node, deep=deep) for _, node in node.value]
-        key_count = Counter(keys)
-        data = {}
-        for key, val in zip(keys, vals):
-            if key_count[key] > 1:
-                raise ValueError(
-                    f"Config input {key} is defined multiple times for the same field, this is not allowed."
-                )
-            else:
-                data[key] = val
-        return data
-
-    PreserveDuplicatesLoader.add_constructor(
-        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, map_constructor
-    )
-    return yaml.load(raw_config, PreserveDuplicatesLoader)
-
-
 def clean_camera_user_pass(line: str) -> str:
     """Removes user and password from line."""
     rtsp_cleaned = re.sub(REGEX_RTSP_CAMERA_USER_PASS, "://*:*@", line)
@@ -122,6 +96,9 @@ def clean_camera_user_pass(line: str) -> str:
 
 def escape_special_characters(path: str) -> str:
     """Cleans reserved characters to encodings for ffmpeg."""
+    if len(path) > 1000:
+        return ValueError("Input too long to check")
+
     try:
         found = re.search(REGEX_RTSP_CAMERA_USER_PASS, path).group(0)[3:-1]
         pw = found[(found.index(":") + 1) :]
@@ -136,7 +113,7 @@ def get_ffmpeg_arg_list(arg: Any) -> list:
     return arg if isinstance(arg, list) else shlex.split(arg)
 
 
-def load_labels(path, encoding="utf-8", prefill=91):
+def load_labels(path: Optional[str], encoding="utf-8", prefill=91):
     """Loads labels from file (with or without index numbers).
     Args:
       path: path to label file.
@@ -144,6 +121,9 @@ def load_labels(path, encoding="utf-8", prefill=91):
     Returns:
       Dictionary mapping indices to labels.
     """
+    if path is None:
+        return {}
+
     with open(path, "r", encoding=encoding) as f:
         labels = {index: "unknown" for index in range(prefill)}
         lines = f.readlines()
@@ -198,19 +178,44 @@ def update_yaml_from_url(file_path, url):
                 key_path.pop(i - 1)
             except ValueError:
                 pass
-        new_value = new_value_list[0]
-        update_yaml_file(file_path, key_path, new_value)
+
+        if len(new_value_list) > 1:
+            update_yaml_file(file_path, key_path, new_value_list)
+        else:
+            value = new_value_list[0]
+            if "," in value:
+                # Skip conversion if we're a mask or zone string
+                update_yaml_file(file_path, key_path, value)
+            else:
+                try:
+                    value = ast.literal_eval(value)
+                except (ValueError, SyntaxError):
+                    pass
+                update_yaml_file(file_path, key_path, value)
+
+            update_yaml_file(file_path, key_path, value)
 
 
 def update_yaml_file(file_path, key_path, new_value):
     yaml = YAML()
-    with open(file_path, "r") as f:
-        data = yaml.load(f)
+    yaml.indent(mapping=2, sequence=4, offset=2)
+
+    try:
+        with open(file_path, "r") as f:
+            data = yaml.load(f)
+    except FileNotFoundError:
+        logger.error(
+            f"Unable to read from Frigate config file {file_path}. Make sure it exists and is readable."
+        )
+        return
 
     data = update_yaml(data, key_path, new_value)
 
-    with open(file_path, "w") as f:
-        yaml.dump(data, f)
+    try:
+        with open(file_path, "w") as f:
+            yaml.dump(data, f)
+    except Exception as e:
+        logger.error(f"Unable to write to Frigate config file {file_path}: {e}")
 
 
 def update_yaml(data, key_path, new_value):
@@ -223,7 +228,7 @@ def update_yaml(data, key_path, new_value):
                 temp[key[0]] += [{}] * (key[1] - len(temp[key[0]]) + 1)
             temp = temp[key[0]][key[1]]
         else:
-            if key not in temp:
+            if key not in temp or temp[key] is None:
                 temp[key] = {}
             temp = temp[key]
 
@@ -292,3 +297,78 @@ def clear_and_unlink(file: Path, missing_ok: bool = True) -> None:
         pass
 
     file.unlink(missing_ok=missing_ok)
+
+
+def empty_and_close_queue(q: mp.Queue):
+    while True:
+        try:
+            q.get(block=True, timeout=0.5)
+        except queue.Empty:
+            q.close()
+            q.join_thread()
+            return
+
+
+def generate_color_palette(n):
+    # mimic matplotlib's color scheme
+    base_colors = [
+        (31, 119, 180),  # blue
+        (255, 127, 14),  # orange
+        (44, 160, 44),  # green
+        (214, 39, 40),  # red
+        (148, 103, 189),  # purple
+        (140, 86, 75),  # brown
+        (227, 119, 194),  # pink
+        (127, 127, 127),  # gray
+        (188, 189, 34),  # olive
+        (23, 190, 207),  # cyan
+    ]
+
+    def interpolate(color1, color2, factor):
+        return tuple(int(c1 + (c2 - c1) * factor) for c1, c2 in zip(color1, color2))
+
+    if n <= len(base_colors):
+        return base_colors[:n]
+
+    colors = base_colors.copy()
+    step = 1 / (n - len(base_colors) + 1)
+    extra_colors_needed = n - len(base_colors)
+
+    # interpolate between the base colors to generate more if needed
+    for i in range(extra_colors_needed):
+        index = i % (len(base_colors) - 1)
+        factor = (i + 1) * step
+        color1 = base_colors[index]
+        color2 = base_colors[index + 1]
+        colors.append(interpolate(color1, color2, factor))
+
+    return colors
+
+
+def serialize(
+    vector: Union[list[float], np.ndarray, float], pack: bool = True
+) -> bytes:
+    """Serializes a list of floats, numpy array, or single float into a compact "raw bytes" format"""
+    if isinstance(vector, np.ndarray):
+        # Convert numpy array to list of floats
+        vector = vector.flatten().tolist()
+    elif isinstance(vector, (float, np.float32, np.float64)):
+        # Handle single float values
+        vector = [vector]
+    elif not isinstance(vector, list):
+        raise TypeError(
+            f"Input must be a list of floats, a numpy array, or a single float. Got {type(vector)}"
+        )
+
+    try:
+        if pack:
+            return struct.pack("%sf" % len(vector), *vector)
+        else:
+            return vector
+    except struct.error as e:
+        raise ValueError(f"Failed to pack vector: {e}. Vector: {vector}")
+
+
+def deserialize(bytes_data: bytes) -> list[float]:
+    """Deserializes a compact "raw bytes" format into a list of floats"""
+    return list(struct.unpack("%sf" % (len(bytes_data) // 4), bytes_data))

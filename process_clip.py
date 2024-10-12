@@ -28,8 +28,7 @@ from frigate.video import (  # noqa: E402
     start_or_restart_ffmpeg,
 )
 
-logging.basicConfig()
-logging.root.setLevel(logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +52,7 @@ def get_frame_shape(source):
     if video_info["height"] != 0 and video_info["width"] != 0:
         return (video_info["height"], video_info["width"], 3)
 
-    # fallback to using opencv if ffprobe didnt succeed
+    # fallback to using opencv if ffprobe didn't succeed
     video = cv2.VideoCapture(source)
     ret, frame = video.read()
     frame_shape = frame.shape
@@ -262,7 +261,6 @@ def process(path, label, output, debug_path):
                         }
                     ]
                 },
-                "rtmp": {"enabled": False},
                 "record": {"enabled": False},
             }
         },
@@ -282,10 +280,7 @@ def process(path, label, output, debug_path):
         json_config["cameras"]["camera"]["ffmpeg"]["inputs"][0]["path"] = c
 
         frigate_config = FrigateConfig(**json_config)
-        runtime_config = frigate_config.runtime_config()
-        runtime_config.cameras["camera"].create_ffmpeg_cmds()
-
-        process_clip = ProcessClip(c, frame_shape, runtime_config)
+        process_clip = ProcessClip(c, frame_shape, frigate_config)
         process_clip.load_frames()
         process_clip.process_frames(object_detector, objects_to_track=[label])
 

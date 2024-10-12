@@ -30,18 +30,31 @@ RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=cache,target=/root/.ccache \
     /deps/build_nginx.sh
 
+FROM wget AS sqlite-vec
+ARG DEBIAN_FRONTEND
+
+# Build sqlite_vec from source
+COPY docker/main/build_sqlite_vec.sh /deps/build_sqlite_vec.sh
+RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/var/cache/apt \
+    --mount=type=bind,source=docker/main/build_sqlite_vec.sh,target=/deps/build_sqlite_vec.sh \
+    --mount=type=cache,target=/root/.ccache \
+    /deps/build_sqlite_vec.sh
+
 FROM scratch AS go2rtc
 ARG TARGETARCH
 WORKDIR /rootfs/usr/local/go2rtc/bin
-ADD --link --chmod=755 "https://github.com/AlexxIT/go2rtc/releases/download/v1.8.4/go2rtc_linux_${TARGETARCH}" go2rtc
+ADD --link --chmod=755 "https://github.com/AlexxIT/go2rtc/releases/download/v1.9.2/go2rtc_linux_${TARGETARCH}" go2rtc
 
+FROM wget AS tempio
+ARG TARGETARCH
+RUN --mount=type=bind,source=docker/main/install_tempio.sh,target=/deps/install_tempio.sh \
+    /deps/install_tempio.sh
 
 ####
 #
 # OpenVino Support
 #
 # 1. Download and convert a model from Intel's Public Open Model Zoo
-# 2. Build libUSB without udev to handle NCS2 enumeration
 #
 ####
 # Download and Convert OpenVino model
@@ -51,17 +64,24 @@ ARG DEBIAN_FRONTEND
 # Install OpenVino Runtime and Dev library
 COPY docker/main/requirements-ov.txt /requirements-ov.txt
 RUN apt-get -qq update \
-    && apt-get -qq install -y wget python3 python3-distutils \
+    && apt-get -qq install -y wget python3 python3-dev python3-distutils gcc pkg-config libhdf5-dev \
     && wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && python3 get-pip.py "pip" \
     && pip install -r /requirements-ov.txt
 
 # Get OpenVino Model
-RUN mkdir /models \
-    && cd /models && omz_downloader --name ssdlite_mobilenet_v2 \
-    && cd /models && omz_converter --name ssdlite_mobilenet_v2 --precision FP16
+RUN --mount=type=bind,source=docker/main/build_ov_model.py,target=/build_ov_model.py \
+    mkdir /models && cd /models \
+    && wget http://download.tensorflow.org/models/object_detection/ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz \
+    && tar -xvf ssdlite_mobilenet_v2_coco_2018_05_09.tar.gz \
+    && python3 /build_ov_model.py
 
-
+####
+#
+# Coral Compatibility
+#
+# Builds libusb without udev. Needed for synology and other devices with USB coral
+####
 # libUSB - No Udev
 FROM wget as libusb-build
 ARG TARGETARCH
@@ -97,11 +117,12 @@ RUN wget -qO edgetpu_model.tflite https://github.com/google-coral/test_data/raw/
 RUN wget -qO cpu_model.tflite https://github.com/google-coral/test_data/raw/release-frogfish/ssdlite_mobiledet_coco_qat_postprocess.tflite
 COPY labelmap.txt .
 # Copy OpenVino model
-COPY --from=ov-converter /models/public/ssdlite_mobilenet_v2/FP16 openvino-model
+COPY --from=ov-converter /models/ssdlite_mobilenet_v2.xml openvino-model/
+COPY --from=ov-converter /models/ssdlite_mobilenet_v2.bin openvino-model/
 RUN wget -q https://github.com/openvinotoolkit/open_model_zoo/raw/master/data/dataset_classes/coco_91cl_bkgr.txt -O openvino-model/coco_91cl_bkgr.txt && \
     sed -i 's/truck/car/g' openvino-model/coco_91cl_bkgr.txt
 # Get Audio Model and labels
-RUN wget -qO cpu_audio_model.tflite https://tfhub.dev/google/lite-model/yamnet/classification/tflite/1?lite-format=tflite
+RUN wget -qO - https://www.kaggle.com/api/v1/models/google/yamnet/tfLite/classification-tflite/1/download | tar xvz && mv 1.tflite cpu_audio_model.tflite
 COPY audio-labelmap.txt .
 
 
@@ -137,6 +158,8 @@ RUN apt-get -qq update \
     gfortran openexr libatlas-base-dev libssl-dev\
     libtbb2 libtbb-dev libdc1394-22-dev libopenexr-dev \
     libgstreamer-plugins-base1.0-dev libgstreamer1.0-dev \
+    # sqlite3 dependencies
+    tclsh \
     # scipy dependencies
     gcc gfortran libopenblas-dev liblapack-dev && \
     rm -rf /var/lib/apt/lists/*
@@ -150,6 +173,10 @@ RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
 COPY docker/main/requirements.txt /requirements.txt
 RUN pip3 install -r /requirements.txt
 
+# Build pysqlite3 from source
+COPY docker/main/build_pysqlite3.sh /build_pysqlite3.sh
+RUN /build_pysqlite3.sh
+
 COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
 RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt
 
@@ -157,8 +184,10 @@ RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt
 # Collect deps in a single layer
 FROM scratch AS deps-rootfs
 COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
+COPY --from=sqlite-vec /usr/local/lib/ /usr/local/lib/
 COPY --from=go2rtc /rootfs/ /
 COPY --from=libusb-build /usr/local/lib /usr/local/lib
+COPY --from=tempio /rootfs/ /
 COPY --from=s6-overlay /rootfs/ /
 COPY --from=models /rootfs/ /
 COPY docker/main/rootfs/ /
@@ -176,7 +205,14 @@ ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES="compute,video,utility"
 
-ENV PATH="/usr/lib/btbn-ffmpeg/bin:/usr/local/go2rtc/bin:/usr/local/nginx/sbin:${PATH}"
+# Disable tokenizer parallelism warning
+# https://stackoverflow.com/questions/62691279/how-to-disable-tokenizers-parallelism-true-false-warning/72926996#72926996
+ENV TOKENIZERS_PARALLELISM=true
+# https://github.com/huggingface/transformers/issues/27214
+ENV TRANSFORMERS_NO_ADVISORY_WARNINGS=1
+
+ENV PATH="/usr/local/go2rtc/bin:/usr/local/tempio/bin:/usr/local/nginx/sbin:${PATH}"
+ENV LIBAVFORMAT_VERSION_MAJOR=60
 
 # Install dependencies
 RUN --mount=type=bind,source=docker/main/install_deps.sh,target=/deps/install_deps.sh \
@@ -191,17 +227,18 @@ COPY --from=deps-rootfs / /
 RUN ldconfig
 
 EXPOSE 5000
-EXPOSE 1935
 EXPOSE 8554
 EXPOSE 8555/tcp 8555/udp
 
 # Configure logging to prepend timestamps, log to stdout, keep 0 archives and rotate on 10MB
 ENV S6_LOGGING_SCRIPT="T 1 n0 s10000000 T"
+# Do not fail on long-running download scripts
+ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
 
 ENTRYPOINT ["/init"]
 CMD []
 
-HEALTHCHECK --start-period=120s --start-interval=5s --interval=15s --timeout=5s --retries=3 \
+HEALTHCHECK --start-period=300s --start-interval=5s --interval=15s --timeout=5s --retries=3 \
     CMD curl --fail --silent --show-error http://127.0.0.1:5000/api/version || exit 1
 
 # Frigate deps with Node.js and NPM for devcontainer
@@ -232,12 +269,14 @@ RUN apt-get update \
 RUN --mount=type=bind,source=./docker/main/requirements-dev.txt,target=/workspace/frigate/requirements-dev.txt \
     pip3 install -r requirements-dev.txt
 
+HEALTHCHECK NONE
+
 CMD ["sleep", "infinity"]
 
 
 # Frigate web build
 # This should be architecture agnostic, so speed up the build on multiarch by not using QEMU.
-FROM --platform=$BUILDPLATFORM node:16 AS web-build
+FROM --platform=$BUILDPLATFORM node:20 AS web-build
 
 WORKDIR /work
 COPY web/package.json web/package-lock.json ./

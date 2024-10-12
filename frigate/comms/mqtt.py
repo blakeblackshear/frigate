@@ -3,6 +3,7 @@ import threading
 from typing import Any, Callable
 
 import paho.mqtt.client as mqtt
+from paho.mqtt.enums import CallbackAPIVersion
 
 from frigate.comms.dispatcher import Communicator
 from frigate.config import FrigateConfig
@@ -96,9 +97,18 @@ class MqttClient(Communicator):  # type: ignore[misc]
             )
             self.publish(
                 f"{camera_name}/birdseye_mode/state",
-                camera.birdseye.mode.value.upper()
-                if camera.birdseye.enabled
-                else "OFF",
+                (
+                    camera.birdseye.mode.value.upper()
+                    if camera.birdseye.enabled
+                    else "OFF"
+                ),
+                retain=True,
+            )
+
+        if self.config.notifications.enabled_in_config:
+            self.publish(
+                "notifications/state",
+                "ON" if self.config.notifications.enabled else "OFF",
                 retain=True,
             )
 
@@ -117,25 +127,26 @@ class MqttClient(Communicator):  # type: ignore[misc]
         client: mqtt.Client,
         userdata: Any,
         flags: Any,
-        rc: mqtt.ReasonCodes,
+        reason_code: mqtt.ReasonCode,
+        properties: Any,
     ) -> None:
         """Mqtt connection callback."""
         threading.current_thread().name = "mqtt"
-        if rc != 0:
-            if rc == 3:
+        if reason_code != 0:
+            if reason_code == "Server Unavailable":
                 logger.error(
                     "Unable to connect to MQTT server: MQTT Server unavailable"
                 )
-            elif rc == 4:
+            elif reason_code == "Bad user name or password":
                 logger.error(
                     "Unable to connect to MQTT server: MQTT Bad username or password"
                 )
-            elif rc == 5:
+            elif reason_code == "Not authorized":
                 logger.error("Unable to connect to MQTT server: MQTT Not authorized")
             else:
                 logger.error(
                     "Unable to connect to MQTT server: Connection refused. Error code: "
-                    + str(rc)
+                    + reason_code.getName()
                 )
 
         self.connected = True
@@ -144,7 +155,12 @@ class MqttClient(Communicator):  # type: ignore[misc]
         self._set_initial_topics()
 
     def _on_disconnect(
-        self, client: mqtt.Client, userdata: Any, flags: Any, rc: mqtt
+        self,
+        client: mqtt.Client,
+        userdata: Any,
+        flags: Any,
+        reason_code: mqtt.ReasonCode,
+        properties: Any,
     ) -> None:
         """Mqtt disconnection callback."""
         self.connected = False
@@ -152,7 +168,10 @@ class MqttClient(Communicator):  # type: ignore[misc]
 
     def _start(self) -> None:
         """Start mqtt client."""
-        self.client = mqtt.Client(client_id=self.mqtt_config.client_id)
+        self.client = mqtt.Client(
+            callback_api_version=CallbackAPIVersion.VERSION2,
+            client_id=self.mqtt_config.client_id,
+        )
         self.client.on_connect = self._on_connect
         self.client.will_set(
             self.mqtt_config.topic_prefix + "/available",
@@ -196,6 +215,16 @@ class MqttClient(Communicator):  # type: ignore[misc]
                     f"{self.mqtt_config.topic_prefix}/{name}/ptz",
                     self.on_mqtt_command,
                 )
+
+        if self.config.notifications.enabled_in_config:
+            self.client.message_callback_add(
+                f"{self.mqtt_config.topic_prefix}/notifications/set",
+                self.on_mqtt_command,
+            )
+
+        self.client.message_callback_add(
+            f"{self.mqtt_config.topic_prefix}/onConnect", self.on_mqtt_command
+        )
 
         self.client.message_callback_add(
             f"{self.mqtt_config.topic_prefix}/restart", self.on_mqtt_command

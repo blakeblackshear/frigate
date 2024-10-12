@@ -1,0 +1,22 @@
+{
+  "version": "0.2",
+  "ignorePaths": [
+    "Dockerfile",
+    "Dockerfile.*",
+    "CMakeLists.txt",
+    "*.db",
+    "node_modules",
+    "__pycache__",
+    "dist",
+    "/audio-labelmap.txt"
+  ],
+  "language": "en",
+  "dictionaryDefinitions": [
+    {
+      "name": "frigate-dictionary",
+      "path": "./.cspell/frigate-dictionary.txt",
+      "addWords": true
+    }
+  ],
+  "dictionaries": ["frigate-dictionary"]
+}

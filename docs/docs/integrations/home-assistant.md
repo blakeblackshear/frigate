@@ -25,7 +25,7 @@ Available via HACS as a default repository. To install:
 - Use [HACS](https://hacs.xyz/) to install the integration:
 
 ```
-Home Assistant > HACS > Integrations > "Explore & Add Integrations" > Frigate
+Home Assistant > HACS > Click in the Search bar and type "Frigate" > Frigate
 ```
 
 - Restart Home Assistant.
@@ -47,7 +47,55 @@ that card.
 
 ## Configuration
 
-When configuring the integration, you will be asked for the `URL` of your Frigate instance which is the URL you use to access Frigate in the browser. This may look like `http://<host>:5000/`. If you are using HassOS with the addon, the URL should be one of the following depending on which addon version you are using. Note that if you are using the Proxy Addon, you do NOT point the integration at the proxy URL. Just enter the URL used to access Frigate directly from your network.
+When configuring the integration, you will be asked for the `URL` of your Frigate instance which needs to be pointed at the internal unauthenticated port (`5000`) for your instance. This may look like `http://<host>:5000/`.
+
+### Docker Compose Examples
+
+If you are running Home Assistant Core and Frigate with Docker Compose on the same device, here are some examples.
+
+#### Home Assistant running with host networking
+
+It is not recommended to run Frigate in host networking mode. In this example, you would use `http://172.17.0.1:5000` when configuring the integration.
+
+```yaml
+services:
+  homeassistant:
+    container_name: hass
+    image: ghcr.io/home-assistant/home-assistant:stable
+    network_mode: host
+    ...
+
+  frigate:
+    image: ghcr.io/blakeblackshear/frigate:stable
+    ...
+    ports:
+      - "172.17.0.1:5000:5000"
+      ...
+```
+
+#### Home Assistant _not_ running with host networking or in a separate compose file
+
+In this example, you would use `http://frigate:5000` when configuring the integration. There is no need to map the port for the Frigate container.
+
+```yaml
+services:
+  homeassistant:
+    container_name: hass
+    image: ghcr.io/home-assistant/home-assistant:stable
+    # network_mode: host
+    ...
+
+  frigate:
+    image: ghcr.io/blakeblackshear/frigate:stable
+    ...
+    ports:
+      # - "172.17.0.1:5000:5000"
+      ...
+```
+
+### HassOS Addon
+
+If you are using HassOS with the addon, the URL should be one of the following depending on which addon version you are using. Note that if you are using the Proxy Addon, you do NOT point the integration at the proxy URL. Just enter the URL used to access Frigate directly from your network.
 
 | Addon Version                  | URL                                    |
 | ------------------------------ | -------------------------------------- |
@@ -56,7 +104,37 @@ When configuring the integration, you will be asked for the `URL` of your Frigat
 | Frigate NVR Beta               | `http://ccab4aaf-frigate-beta:5000`    |
 | Frigate NVR Beta (Full Access) | `http://ccab4aaf-frigate-fa-beta:5000` |
 
-<a name="options"></a>
+### Frigate running on a separate machine
+
+If you run Frigate on a separate device within your local network, Home Assistant will need access to port 5000.
+
+#### Local network
+
+Use `http://<frigate_device_ip>:5000` as the URL for the integration. If you want to protect access to port 5000, you can use firewall rules to limit access to the device running Home Assistant.
+
+```yaml
+services:
+  frigate:
+    image: ghcr.io/blakeblackshear/frigate:stable
+    ...
+    ports:
+      - "5000:5000"
+      ...
+```
+
+#### Tailscale or other private networking
+
+Use `http://<frigate_device_tailscale_ip>:5000` as the URL for the integration.
+
+```yaml
+services:
+  frigate:
+    image: ghcr.io/blakeblackshear/frigate:stable
+    ...
+    ports:
+      - "<tailscale_ip>:5000:5000"
+      ...
+```
 
 ## Options
 
@@ -64,24 +142,25 @@ When configuring the integration, you will be asked for the `URL` of your Frigat
 Home Assistant > Configuration > Integrations > Frigate > Options
 ```
 
-| Option            | Description                                                                                                                                                                                                                                                                                                                          |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| RTSP URL Template | A [jinja2](https://jinja.palletsprojects.com/) template that is used to override the standard RTSP stream URL (e.g. for use with reverse proxies). This option is only shown to users who have [advanced mode](https://www.home-assistant.io/blog/2019/07/17/release-96/#advanced-mode) enabled. See [RTSP streams](#streams) below. |
+| Option            | Description                                                                                                                                                                                                                                                                                                                              |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RTSP URL Template | A [jinja2](https://jinja.palletsprojects.com/) template that is used to override the standard RTSP stream URL (e.g. for use with reverse proxies). This option is only shown to users who have [advanced mode](https://www.home-assistant.io/blog/2019/07/17/release-96/#advanced-mode) enabled. See [RTSP streams](#rtsp-stream) below. |
 
 ## Entities Provided
 
-| Platform        | Description                                                                       |
-| --------------- | --------------------------------------------------------------------------------- |
-| `camera`        | Live camera stream (requires RTSP), camera for image of the last detected object. |
-| `sensor`        | States to monitor Frigate performance, object counts for all zones and cameras.   |
-| `switch`        | Switch entities to toggle detection, recordings and snapshots.                    |
-| `binary_sensor` | A "motion" binary sensor entity per camera/zone/object.                           |
+| Platform        | Description                                                                     |
+| --------------- | ------------------------------------------------------------------------------- |
+| `camera`        | Live camera stream (requires RTSP).                                             |
+| `image`         | Image of the latest detected object for each camera.                            |
+| `sensor`        | States to monitor Frigate performance, object counts for all zones and cameras. |
+| `switch`        | Switch entities to toggle detection, recordings and snapshots.                  |
+| `binary_sensor` | A "motion" binary sensor entity per camera/zone/object.                         |
 
 ## Media Browser Support
 
 The integration provides:
 
-- Browsing event recordings with thumbnails
+- Browsing tracked object recordings with thumbnails
 - Browsing snapshots
 - Browsing recordings by month, day, camera, time
 
@@ -104,29 +183,25 @@ For clips to be castable to media devices, audio is required and may need to be 
 
 Many people do not want to expose Frigate to the web, so the integration creates some public API endpoints that can be used for notifications.
 
-To load a thumbnail for an event:
+To load a thumbnail for a tracked object:
 
 ```
 https://HA_URL/api/frigate/notifications/<event-id>/thumbnail.jpg
 ```
 
-To load a snapshot for an event:
+To load a snapshot for a tracked object:
 
 ```
 https://HA_URL/api/frigate/notifications/<event-id>/snapshot.jpg
 ```
 
-To load a video clip of an event:
+To load a video clip of a tracked object:
 
 ```
 https://HA_URL/api/frigate/notifications/<event-id>/clip.mp4
 ```
 
 <a name="streams"></a>
-
-## RTMP stream
-
-RTMP is deprecated and it is recommended to switch to use RTSP restreams.
 
 ## RTSP stream
 
@@ -140,7 +215,7 @@ For advanced usecases, this behavior can be changed with the [RTSP URL
 template](#options) option. When set, this string will override the default stream
 address that is derived from the default behavior described above. This option supports
 [jinja2 templates](https://jinja.palletsprojects.com/) and has the `camera` dict
-variables from [Frigate API](api.md)
+variables from [Frigate API](../integrations/api)
 available for the template. Note that no Home Assistant state is available to the
 template, only the camera dict from Frigate.
 
@@ -182,7 +257,7 @@ for how to set these.
 
 #### API URLs
 
-When multiple Frigate instances are configured, [API](#api) URLs should include an
+When multiple Frigate instances are configured, [API](#notification-api) URLs should include an
 identifier to tell Home Assistant which Frigate instance to refer to. The
 identifier used is the MQTT `client_id` parameter included in the configuration,
 and is used like so:

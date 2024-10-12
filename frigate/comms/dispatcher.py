@@ -1,14 +1,28 @@
 """Handle communication between Frigate and other applications."""
 
+import datetime
+import json
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 
+from frigate.camera import PTZMetrics
+from frigate.comms.config_updater import ConfigPublisher
 from frigate.config import BirdseyeModeEnum, FrigateConfig
-from frigate.const import INSERT_MANY_RECORDINGS, REQUEST_REGION_GRID
-from frigate.models import Recordings
+from frigate.const import (
+    CLEAR_ONGOING_REVIEW_SEGMENTS,
+    INSERT_MANY_RECORDINGS,
+    INSERT_PREVIEW,
+    REQUEST_REGION_GRID,
+    UPDATE_CAMERA_ACTIVITY,
+    UPDATE_EMBEDDINGS_REINDEX_PROGRESS,
+    UPDATE_EVENT_DESCRIPTION,
+    UPDATE_MODEL_STATE,
+    UPSERT_REVIEW_SEGMENT,
+)
+from frigate.models import Event, Previews, Recordings, ReviewSegment
 from frigate.ptz.onvif import OnvifCommandEnum, OnvifController
-from frigate.types import CameraMetricsTypes, FeatureMetricsTypes, PTZMetricsTypes
+from frigate.types import ModelStatusTypesEnum
 from frigate.util.object import get_camera_regions_grid
 from frigate.util.services import restart_frigate
 
@@ -40,18 +54,19 @@ class Dispatcher:
     def __init__(
         self,
         config: FrigateConfig,
+        config_updater: ConfigPublisher,
         onvif: OnvifController,
-        camera_metrics: dict[str, CameraMetricsTypes],
-        feature_metrics: dict[str, FeatureMetricsTypes],
-        ptz_metrics: dict[str, PTZMetricsTypes],
+        ptz_metrics: dict[str, PTZMetrics],
         communicators: list[Communicator],
     ) -> None:
         self.config = config
+        self.config_updater = config_updater
         self.onvif = onvif
-        self.camera_metrics = camera_metrics
-        self.feature_metrics = feature_metrics
         self.ptz_metrics = ptz_metrics
         self.comms = communicators
+        self.camera_activity = {}
+        self.model_state = {}
+        self.embeddings_reindex = {}
 
         self._camera_settings_handlers: dict[str, Callable] = {
             "audio": self._on_audio_command,
@@ -66,42 +81,144 @@ class Dispatcher:
             "birdseye": self._on_birdseye_command,
             "birdseye_mode": self._on_birdseye_mode_command,
         }
+        self._global_settings_handlers: dict[str, Callable] = {
+            "notifications": self._on_notification_command,
+        }
 
         for comm in self.comms:
             comm.subscribe(self._receive)
 
-    def _receive(self, topic: str, payload: str) -> None:
+    def _receive(self, topic: str, payload: str) -> Optional[Any]:
         """Handle receiving of payload from communicators."""
-        if topic.endswith("set"):
+
+        def handle_camera_command(command_type, camera_name, command, payload):
             try:
-                # example /cam_name/detect/set payload=ON|OFF
-                camera_name = topic.split("/")[-3]
-                command = topic.split("/")[-2]
-                self._camera_settings_handlers[command](camera_name, payload)
-            except IndexError:
-                logger.error(f"Received invalid set command: {topic}")
-                return
-        elif topic.endswith("ptz"):
-            try:
-                # example /cam_name/ptz payload=MOVE_UP|MOVE_DOWN|STOP...
-                camera_name = topic.split("/")[-2]
-                self._on_ptz_command(camera_name, payload)
-            except IndexError:
-                logger.error(f"Received invalid ptz command: {topic}")
-                return
-        elif topic == "restart":
+                if command_type == "set":
+                    self._camera_settings_handlers[command](camera_name, payload)
+                elif command_type == "ptz":
+                    self._on_ptz_command(camera_name, payload)
+            except KeyError:
+                logger.error(f"Invalid command type or handler: {command_type}")
+
+        def handle_restart():
             restart_frigate()
-        elif topic == INSERT_MANY_RECORDINGS:
+
+        def handle_insert_many_recordings():
             Recordings.insert_many(payload).execute()
-        elif topic == REQUEST_REGION_GRID:
+
+        def handle_request_region_grid():
             camera = payload
-            self.camera_metrics[camera]["region_grid_queue"].put(
-                get_camera_regions_grid(
-                    camera,
-                    self.config.cameras[camera].detect,
-                    max(self.config.model.width, self.config.model.height),
-                )
+            grid = get_camera_regions_grid(
+                camera,
+                self.config.cameras[camera].detect,
+                max(self.config.model.width, self.config.model.height),
             )
+            return grid
+
+        def handle_insert_preview():
+            Previews.insert(payload).execute()
+
+        def handle_upsert_review_segment():
+            ReviewSegment.insert(payload).on_conflict(
+                conflict_target=[ReviewSegment.id],
+                update=payload,
+            ).execute()
+
+        def handle_clear_ongoing_review_segments():
+            ReviewSegment.update(end_time=datetime.datetime.now().timestamp()).where(
+                ReviewSegment.end_time.is_null(True)
+            ).execute()
+
+        def handle_update_camera_activity():
+            self.camera_activity = payload
+
+        def handle_update_event_description():
+            event: Event = Event.get(Event.id == payload["id"])
+            event.data["description"] = payload["description"]
+            event.save()
+            self.publish(
+                "event_update",
+                json.dumps({"id": event.id, "description": event.data["description"]}),
+            )
+
+        def handle_update_model_state():
+            if payload:
+                model = payload["model"]
+                state = payload["state"]
+                self.model_state[model] = ModelStatusTypesEnum[state]
+                self.publish("model_state", json.dumps(self.model_state))
+
+        def handle_model_state():
+            self.publish("model_state", json.dumps(self.model_state.copy()))
+
+        def handle_update_embeddings_reindex_progress():
+            self.embeddings_reindex = payload
+            self.publish(
+                "embeddings_reindex_progress",
+                json.dumps(payload),
+            )
+
+        def handle_embeddings_reindex_progress():
+            self.publish(
+                "embeddings_reindex_progress",
+                json.dumps(self.embeddings_reindex.copy()),
+            )
+
+        def handle_on_connect():
+            camera_status = self.camera_activity.copy()
+
+            for camera in camera_status.keys():
+                camera_status[camera]["config"] = {
+                    "detect": self.config.cameras[camera].detect.enabled,
+                    "snapshots": self.config.cameras[camera].snapshots.enabled,
+                    "record": self.config.cameras[camera].record.enabled,
+                    "audio": self.config.cameras[camera].audio.enabled,
+                    "autotracking": self.config.cameras[
+                        camera
+                    ].onvif.autotracking.enabled,
+                }
+
+            self.publish("camera_activity", json.dumps(camera_status))
+
+        # Dictionary mapping topic to handlers
+        topic_handlers = {
+            INSERT_MANY_RECORDINGS: handle_insert_many_recordings,
+            REQUEST_REGION_GRID: handle_request_region_grid,
+            INSERT_PREVIEW: handle_insert_preview,
+            UPSERT_REVIEW_SEGMENT: handle_upsert_review_segment,
+            CLEAR_ONGOING_REVIEW_SEGMENTS: handle_clear_ongoing_review_segments,
+            UPDATE_CAMERA_ACTIVITY: handle_update_camera_activity,
+            UPDATE_EVENT_DESCRIPTION: handle_update_event_description,
+            UPDATE_MODEL_STATE: handle_update_model_state,
+            UPDATE_EMBEDDINGS_REINDEX_PROGRESS: handle_update_embeddings_reindex_progress,
+            "restart": handle_restart,
+            "embeddingsReindexProgress": handle_embeddings_reindex_progress,
+            "modelState": handle_model_state,
+            "onConnect": handle_on_connect,
+        }
+
+        if topic.endswith("set") or topic.endswith("ptz"):
+            try:
+                parts = topic.split("/")
+                if len(parts) == 3 and topic.endswith("set"):
+                    # example /cam_name/detect/set payload=ON|OFF
+                    camera_name = parts[-3]
+                    command = parts[-2]
+                    handle_camera_command("set", camera_name, command, payload)
+                elif len(parts) == 2 and topic.endswith("set"):
+                    command = parts[-2]
+                    self._global_settings_handlers[command](payload)
+                elif len(parts) == 2 and topic.endswith("ptz"):
+                    # example /cam_name/ptz payload=MOVE_UP|MOVE_DOWN|STOP...
+                    camera_name = parts[-2]
+                    handle_camera_command("ptz", camera_name, "", payload)
+            except IndexError:
+                logger.error(
+                    f"Received invalid {topic.split('/')[-1]} command: {topic}"
+                )
+                return
+        elif topic in topic_handlers:
+            return topic_handlers[topic]()
         else:
             self.publish(topic, payload, retain=False)
 
@@ -117,44 +234,51 @@ class Dispatcher:
     def _on_detect_command(self, camera_name: str, payload: str) -> None:
         """Callback for detect topic."""
         detect_settings = self.config.cameras[camera_name].detect
+        motion_settings = self.config.cameras[camera_name].motion
 
         if payload == "ON":
-            if not self.camera_metrics[camera_name]["detection_enabled"].value:
+            if not detect_settings.enabled:
                 logger.info(f"Turning on detection for {camera_name}")
-                self.camera_metrics[camera_name]["detection_enabled"].value = True
                 detect_settings.enabled = True
 
-                if not self.camera_metrics[camera_name]["motion_enabled"].value:
+                if not motion_settings.enabled:
                     logger.info(
                         f"Turning on motion for {camera_name} due to detection being enabled."
                     )
-                    self.camera_metrics[camera_name]["motion_enabled"].value = True
+                    motion_settings.enabled = True
+                    self.config_updater.publish(
+                        f"config/motion/{camera_name}", motion_settings
+                    )
                     self.publish(f"{camera_name}/motion/state", payload, retain=True)
         elif payload == "OFF":
-            if self.camera_metrics[camera_name]["detection_enabled"].value:
+            if detect_settings.enabled:
                 logger.info(f"Turning off detection for {camera_name}")
-                self.camera_metrics[camera_name]["detection_enabled"].value = False
                 detect_settings.enabled = False
 
+        self.config_updater.publish(f"config/detect/{camera_name}", detect_settings)
         self.publish(f"{camera_name}/detect/state", payload, retain=True)
 
     def _on_motion_command(self, camera_name: str, payload: str) -> None:
         """Callback for motion topic."""
+        detect_settings = self.config.cameras[camera_name].detect
+        motion_settings = self.config.cameras[camera_name].motion
+
         if payload == "ON":
-            if not self.camera_metrics[camera_name]["motion_enabled"].value:
+            if not motion_settings.enabled:
                 logger.info(f"Turning on motion for {camera_name}")
-                self.camera_metrics[camera_name]["motion_enabled"].value = True
+                motion_settings.enabled = True
         elif payload == "OFF":
-            if self.camera_metrics[camera_name]["detection_enabled"].value:
+            if detect_settings.enabled:
                 logger.error(
                     "Turning off motion is not allowed when detection is enabled."
                 )
                 return
 
-            if self.camera_metrics[camera_name]["motion_enabled"].value:
+            if motion_settings.enabled:
                 logger.info(f"Turning off motion for {camera_name}")
-                self.camera_metrics[camera_name]["motion_enabled"].value = False
+                motion_settings.enabled = False
 
+        self.config_updater.publish(f"config/motion/{camera_name}", motion_settings)
         self.publish(f"{camera_name}/motion/state", payload, retain=True)
 
     def _on_motion_improve_contrast_command(
@@ -164,20 +288,15 @@ class Dispatcher:
         motion_settings = self.config.cameras[camera_name].motion
 
         if payload == "ON":
-            if not self.camera_metrics[camera_name]["improve_contrast_enabled"].value:
+            if not motion_settings.improve_contrast:
                 logger.info(f"Turning on improve contrast for {camera_name}")
-                self.camera_metrics[camera_name][
-                    "improve_contrast_enabled"
-                ].value = True
                 motion_settings.improve_contrast = True  # type: ignore[union-attr]
         elif payload == "OFF":
-            if self.camera_metrics[camera_name]["improve_contrast_enabled"].value:
+            if motion_settings.improve_contrast:
                 logger.info(f"Turning off improve contrast for {camera_name}")
-                self.camera_metrics[camera_name][
-                    "improve_contrast_enabled"
-                ].value = False
                 motion_settings.improve_contrast = False  # type: ignore[union-attr]
 
+        self.config_updater.publish(f"config/motion/{camera_name}", motion_settings)
         self.publish(f"{camera_name}/improve_contrast/state", payload, retain=True)
 
     def _on_ptz_autotracker_command(self, camera_name: str, payload: str) -> None:
@@ -192,16 +311,16 @@ class Dispatcher:
                     "Autotracking must be enabled in the config to be turned on via MQTT."
                 )
                 return
-            if not self.ptz_metrics[camera_name]["ptz_autotracker_enabled"].value:
+            if not self.ptz_metrics[camera_name].autotracker_enabled.value:
                 logger.info(f"Turning on ptz autotracker for {camera_name}")
-                self.ptz_metrics[camera_name]["ptz_autotracker_enabled"].value = True
-                self.ptz_metrics[camera_name]["ptz_start_time"].value = 0
+                self.ptz_metrics[camera_name].autotracker_enabled.value = True
+                self.ptz_metrics[camera_name].start_time.value = 0
                 ptz_autotracker_settings.enabled = True
         elif payload == "OFF":
-            if self.ptz_metrics[camera_name]["ptz_autotracker_enabled"].value:
+            if self.ptz_metrics[camera_name].autotracker_enabled.value:
                 logger.info(f"Turning off ptz autotracker for {camera_name}")
-                self.ptz_metrics[camera_name]["ptz_autotracker_enabled"].value = False
-                self.ptz_metrics[camera_name]["ptz_start_time"].value = 0
+                self.ptz_metrics[camera_name].autotracker_enabled.value = False
+                self.ptz_metrics[camera_name].start_time.value = 0
                 ptz_autotracker_settings.enabled = False
 
         self.publish(f"{camera_name}/ptz_autotracker/state", payload, retain=True)
@@ -216,8 +335,8 @@ class Dispatcher:
 
         motion_settings = self.config.cameras[camera_name].motion
         logger.info(f"Setting motion contour area for {camera_name}: {payload}")
-        self.camera_metrics[camera_name]["motion_contour_area"].value = payload
         motion_settings.contour_area = payload  # type: ignore[union-attr]
+        self.config_updater.publish(f"config/motion/{camera_name}", motion_settings)
         self.publish(f"{camera_name}/motion_contour_area/state", payload, retain=True)
 
     def _on_motion_threshold_command(self, camera_name: str, payload: int) -> None:
@@ -230,9 +349,21 @@ class Dispatcher:
 
         motion_settings = self.config.cameras[camera_name].motion
         logger.info(f"Setting motion threshold for {camera_name}: {payload}")
-        self.camera_metrics[camera_name]["motion_threshold"].value = payload
         motion_settings.threshold = payload  # type: ignore[union-attr]
+        self.config_updater.publish(f"config/motion/{camera_name}", motion_settings)
         self.publish(f"{camera_name}/motion_threshold/state", payload, retain=True)
+
+    def _on_notification_command(self, payload: str) -> None:
+        """Callback for notification topic."""
+        if payload != "ON" and payload != "OFF":
+            f"Received unsupported value for notification: {payload}"
+            return
+
+        notification_settings = self.config.notifications
+        logger.info(f"Setting notifications: {payload}")
+        notification_settings.enabled = payload == "ON"  # type: ignore[union-attr]
+        self.config_updater.publish("config/notifications", notification_settings)
+        self.publish("notifications/state", payload, retain=True)
 
     def _on_audio_command(self, camera_name: str, payload: str) -> None:
         """Callback for audio topic."""
@@ -248,13 +379,12 @@ class Dispatcher:
             if not audio_settings.enabled:
                 logger.info(f"Turning on audio detection for {camera_name}")
                 audio_settings.enabled = True
-                self.feature_metrics[camera_name]["audio_enabled"].value = True
         elif payload == "OFF":
-            if self.feature_metrics[camera_name]["audio_enabled"].value:
+            if audio_settings.enabled:
                 logger.info(f"Turning off audio detection for {camera_name}")
                 audio_settings.enabled = False
-                self.feature_metrics[camera_name]["audio_enabled"].value = False
 
+        self.config_updater.publish(f"config/audio/{camera_name}", audio_settings)
         self.publish(f"{camera_name}/audio/state", payload, retain=True)
 
     def _on_recordings_command(self, camera_name: str, payload: str) -> None:
@@ -271,13 +401,12 @@ class Dispatcher:
             if not record_settings.enabled:
                 logger.info(f"Turning on recordings for {camera_name}")
                 record_settings.enabled = True
-                self.feature_metrics[camera_name]["record_enabled"].value = True
         elif payload == "OFF":
-            if self.feature_metrics[camera_name]["record_enabled"].value:
+            if record_settings.enabled:
                 logger.info(f"Turning off recordings for {camera_name}")
                 record_settings.enabled = False
-                self.feature_metrics[camera_name]["record_enabled"].value = False
 
+        self.config_updater.publish(f"config/record/{camera_name}", record_settings)
         self.publish(f"{camera_name}/recordings/state", payload, retain=True)
 
     def _on_snapshots_command(self, camera_name: str, payload: str) -> None:
@@ -301,6 +430,9 @@ class Dispatcher:
             if "preset" in payload.lower():
                 command = OnvifCommandEnum.preset
                 param = payload.lower()[payload.index("_") + 1 :]
+            elif "move_relative" in payload.lower():
+                command = OnvifCommandEnum.move_relative
+                param = payload.lower()[payload.index("_") + 1 :]
             else:
                 command = OnvifCommandEnum[payload.lower()]
                 param = ""
@@ -315,17 +447,16 @@ class Dispatcher:
         birdseye_settings = self.config.cameras[camera_name].birdseye
 
         if payload == "ON":
-            if not self.camera_metrics[camera_name]["birdseye_enabled"].value:
+            if not birdseye_settings.enabled:
                 logger.info(f"Turning on birdseye for {camera_name}")
-                self.camera_metrics[camera_name]["birdseye_enabled"].value = True
                 birdseye_settings.enabled = True
 
         elif payload == "OFF":
-            if self.camera_metrics[camera_name]["birdseye_enabled"].value:
+            if birdseye_settings.enabled:
                 logger.info(f"Turning off birdseye for {camera_name}")
-                self.camera_metrics[camera_name]["birdseye_enabled"].value = False
                 birdseye_settings.enabled = False
 
+        self.config_updater.publish(f"config/birdseye/{camera_name}", birdseye_settings)
         self.publish(f"{camera_name}/birdseye/state", payload, retain=True)
 
     def _on_birdseye_mode_command(self, camera_name: str, payload: str) -> None:
@@ -335,17 +466,16 @@ class Dispatcher:
             logger.info(f"Invalid birdseye_mode command: {payload}")
             return
 
-        birdseye_config = self.config.cameras[camera_name].birdseye
-        if not birdseye_config.enabled:
+        birdseye_settings = self.config.cameras[camera_name].birdseye
+
+        if not birdseye_settings.enabled:
             logger.info(f"Birdseye mode not enabled for {camera_name}")
             return
 
-        new_birdseye_mode = BirdseyeModeEnum(payload.lower())
-        logger.info(f"Setting birdseye mode for {camera_name} to {new_birdseye_mode}")
+        birdseye_settings.mode = BirdseyeModeEnum(payload.lower())
+        logger.info(
+            f"Setting birdseye mode for {camera_name} to {birdseye_settings.mode}"
+        )
 
-        # update the metric (need the mode converted to an int)
-        self.camera_metrics[camera_name][
-            "birdseye_mode"
-        ].value = BirdseyeModeEnum.get_index(new_birdseye_mode)
-
+        self.config_updater.publish(f"config/birdseye/{camera_name}", birdseye_settings)
         self.publish(f"{camera_name}/birdseye_mode/state", payload, retain=True)

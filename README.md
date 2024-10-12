@@ -29,18 +29,22 @@ If you would like to make a donation to support development, please use [Github 
 
 ## Screenshots
 
-Integration into Home Assistant
-
+### Live dashboard
 <div>
-<a href="docs/static/img/media_browser.png"><img src="docs/static/img/media_browser.png" height=400></a>
-<a href="docs/static/img/notification.png"><img src="docs/static/img/notification.png" height=400></a>
+<img width="800" alt="Live dashboard" src="https://github.com/blakeblackshear/frigate/assets/569905/5e713cb9-9db5-41dc-947a-6937c3bc376e">
 </div>
 
-Also comes with a builtin UI:
-
+### Streamlined review workflow
 <div>
-<a href="docs/static/img/home-ui.png"><img src="docs/static/img/home-ui.png" height=400></a>
-<a href="docs/static/img/camera-ui.png"><img src="docs/static/img/camera-ui.png" height=400></a>
+<img width="800" alt="Streamlined review workflow" src="https://github.com/blakeblackshear/frigate/assets/569905/6fed96e8-3b18-40e5-9ddc-31e6f3c9f2ff">
 </div>
 
-![Events](docs/static/img/events-ui.png)
+### Multi-camera scrubbing
+<div>
+<img width="800" alt="Multi-camera scrubbing" src="https://github.com/blakeblackshear/frigate/assets/569905/d6788a15-0eeb-4427-a8d4-80b93cae3d74">
+</div>
+
+### Built-in mask and zone editor
+<div>
+<img width="800" alt="Multi-camera scrubbing" src="https://github.com/blakeblackshear/frigate/assets/569905/d7885fc3-bfe6-452f-b7d0-d957cb3e31f5">
+</div>

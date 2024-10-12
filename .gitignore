@@ -1,5 +1,6 @@
 .DS_Store
-*.pyc
+__pycache__
+.mypy_cache
 *.swp
 debug
 .vscode/*
@@ -8,7 +9,6 @@ config/*
 !config/*.example
 models
 *.mp4
-*.ts
 *.db
 *.csv
 frigate/version.py
@@ -18,3 +18,4 @@ web/coverage
 core
 !/web/**/*.ts
 .idea/*
+.ipynb_checkpoints

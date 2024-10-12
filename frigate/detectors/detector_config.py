@@ -5,13 +5,13 @@ import os
 from enum import Enum
 from typing import Dict, Optional, Tuple
 
-import matplotlib.pyplot as plt
 import requests
-from pydantic import BaseModel, Extra, Field
+from pydantic import BaseModel, ConfigDict, Field
 from pydantic.fields import PrivateAttr
 
+from frigate.const import DEFAULT_ATTRIBUTE_LABEL_MAP
 from frigate.plus import PlusApi
-from frigate.util.builtin import load_labels
+from frigate.util.builtin import generate_color_palette, load_labels
 
 logger = logging.getLogger(__name__)
 
@@ -30,17 +30,22 @@ class InputTensorEnum(str, Enum):
 class ModelTypeEnum(str, Enum):
     ssd = "ssd"
     yolox = "yolox"
-    yolov5 = "yolov5"
-    yolov8 = "yolov8"
+    yolonas = "yolonas"
 
 
 class ModelConfig(BaseModel):
-    path: Optional[str] = Field(title="Custom Object detection model path.")
-    labelmap_path: Optional[str] = Field(title="Label map for custom object detector.")
+    path: Optional[str] = Field(None, title="Custom Object detection model path.")
+    labelmap_path: Optional[str] = Field(
+        None, title="Label map for custom object detector."
+    )
     width: int = Field(default=320, title="Object detection model input width.")
     height: int = Field(default=320, title="Object detection model input height.")
     labelmap: Dict[int, str] = Field(
         default_factory=dict, title="Labelmap customization."
+    )
+    attributes_map: Dict[str, list[str]] = Field(
+        default=DEFAULT_ATTRIBUTE_LABEL_MAP,
+        title="Map of object labels to their attribute labels.",
     )
     input_tensor: InputTensorEnum = Field(
         default=InputTensorEnum.nhwc, title="Model Input Tensor Shape"
@@ -53,6 +58,7 @@ class ModelConfig(BaseModel):
     )
     _merged_labelmap: Optional[Dict[int, str]] = PrivateAttr()
     _colormap: Dict[int, Tuple[int, int, int]] = PrivateAttr()
+    _all_attributes: list[str] = PrivateAttr()
     _model_hash: str = PrivateAttr()
 
     @property
@@ -62,6 +68,10 @@ class ModelConfig(BaseModel):
     @property
     def colormap(self) -> Dict[int, Tuple[int, int, int]]:
         return self._colormap
+
+    @property
+    def all_attributes(self) -> list[str]:
+        return self._all_attributes
 
     @property
     def model_hash(self) -> str:
@@ -75,6 +85,14 @@ class ModelConfig(BaseModel):
             **config.get("labelmap", {}),
         }
         self._colormap = {}
+
+        # generate list of attribute labels
+        unique_attributes = set()
+
+        for attributes in self.attributes_map.values():
+            unique_attributes.update(attributes)
+
+        self._all_attributes = list(unique_attributes)
 
     def check_and_load_plus_model(
         self, plus_api: PlusApi, detector: str = None
@@ -100,7 +118,7 @@ class ModelConfig(BaseModel):
                 json.dump(model_info, f)
         else:
             with open(model_info_path, "r") as f:
-                model_info = json.load(f)
+                model_info: dict[str, any] = json.load(f)
 
         if detector and detector not in model_info["supportedDetectors"]:
             raise ValueError(f"Model does not support detector type of {detector}")
@@ -110,6 +128,19 @@ class ModelConfig(BaseModel):
         self.input_tensor = model_info["inputShape"]
         self.input_pixel_format = model_info["pixelFormat"]
         self.model_type = model_info["type"]
+
+        # generate list of attribute labels
+        self.attributes_map = {
+            **model_info.get("attributes", DEFAULT_ATTRIBUTE_LABEL_MAP),
+            **self.attributes_map,
+        }
+        unique_attributes = set()
+
+        for attributes in self.attributes_map.values():
+            unique_attributes.update(attributes)
+
+        self._all_attributes = list(unique_attributes)
+
         self._merged_labelmap = {
             **{int(key): val for key, val in model_info["labelMap"].items()},
             **self.labelmap,
@@ -127,22 +158,19 @@ class ModelConfig(BaseModel):
 
     def create_colormap(self, enabled_labels: set[str]) -> None:
         """Get a list of colors for enabled labels."""
-        cmap = plt.cm.get_cmap("tab10", len(enabled_labels))
+        colors = generate_color_palette(len(enabled_labels))
 
-        for key, val in enumerate(enabled_labels):
-            self._colormap[val] = tuple(int(round(255 * c)) for c in cmap(key)[:3])
+        self._colormap = {label: color for label, color in zip(enabled_labels, colors)}
 
-    class Config:
-        extra = Extra.forbid
+    model_config = ConfigDict(extra="forbid", protected_namespaces=())
 
 
 class BaseDetectorConfig(BaseModel):
     # the type field must be defined in all subclasses
     type: str = Field(default="cpu", title="Detector Type")
-    model: ModelConfig = Field(
+    model: Optional[ModelConfig] = Field(
         default=None, title="Detector specific model configuration."
     )
-
-    class Config:
-        extra = Extra.allow
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(
+        extra="allow", arbitrary_types_allowed=True, protected_namespaces=()
+    )

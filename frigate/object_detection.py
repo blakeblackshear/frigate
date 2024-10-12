@@ -10,8 +10,10 @@ from abc import ABC, abstractmethod
 import numpy as np
 from setproctitle import setproctitle
 
+import frigate.util as util
 from frigate.detectors import create_detector
-from frigate.detectors.detector_config import InputTensorEnum
+from frigate.detectors.detector_config import BaseDetectorConfig, InputTensorEnum
+from frigate.detectors.plugins.rocm import DETECTOR_KEY as ROCM_DETECTOR_KEY
 from frigate.util.builtin import EventsPerSecond, load_labels
 from frigate.util.image import SharedMemoryFrameManager
 from frigate.util.services import listen
@@ -21,11 +23,11 @@ logger = logging.getLogger(__name__)
 
 class ObjectDetector(ABC):
     @abstractmethod
-    def detect(self, tensor_input, threshold=0.4):
+    def detect(self, tensor_input, threshold: float = 0.4):
         pass
 
 
-def tensor_transform(desired_shape):
+def tensor_transform(desired_shape: InputTensorEnum):
     # Currently this function only supports BHWC permutations
     if desired_shape == InputTensorEnum.nhwc:
         return None
@@ -36,8 +38,8 @@ def tensor_transform(desired_shape):
 class LocalObjectDetector(ObjectDetector):
     def __init__(
         self,
-        detector_config=None,
-        labels=None,
+        detector_config: BaseDetectorConfig = None,
+        labels: str = None,
     ):
         self.fps = EventsPerSecond()
         if labels is None:
@@ -46,7 +48,13 @@ class LocalObjectDetector(ObjectDetector):
             self.labels = load_labels(labels)
 
         if detector_config:
-            self.input_transform = tensor_transform(detector_config.model.input_tensor)
+            if detector_config.type == ROCM_DETECTOR_KEY:
+                # ROCm requires NHWC as input
+                self.input_transform = None
+            else:
+                self.input_transform = tensor_transform(
+                    detector_config.model.input_tensor
+                )
         else:
             self.input_transform = None
 
@@ -92,7 +100,6 @@ def run_detector(
     stop_event = mp.Event()
 
     def receiveSignal(signalNumber, frame):
-        logger.info("Signal to exit detection process...")
         stop_event.set()
 
     signal.signal(signal.SIGTERM, receiveSignal)
@@ -118,12 +125,14 @@ def run_detector(
         )
 
         if input_frame is None:
+            logger.warning(f"Failed to get frame {connection_id} from SHM")
             continue
 
         # detect and send the output
         start.value = datetime.datetime.now().timestamp()
         detections = object_detector.detect_raw(input_frame)
         duration = datetime.datetime.now().timestamp() - start.value
+        frame_manager.close(connection_id)
         outputs[connection_id]["np"][:] = detections[:]
         out_events[connection_id].set()
         start.value = 0.0
@@ -158,7 +167,7 @@ class ObjectDetectProcess:
         logging.info("Waiting for detection process to exit gracefully...")
         self.detect_process.join(timeout=30)
         if self.detect_process.exitcode is None:
-            logging.info("Detection process didnt exit. Force killing...")
+            logging.info("Detection process didn't exit. Force killing...")
             self.detect_process.kill()
             self.detect_process.join()
         logging.info("Detection process has exited...")
@@ -167,7 +176,7 @@ class ObjectDetectProcess:
         self.detection_start.value = 0.0
         if (self.detect_process is not None) and self.detect_process.is_alive():
             self.stop()
-        self.detect_process = mp.Process(
+        self.detect_process = util.Process(
             target=run_detector,
             name=f"detector:{self.name}",
             args=(
