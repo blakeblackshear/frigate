@@ -195,13 +195,18 @@ export default function Explore() {
 
   const { payload: reindexProgress } = useEmbeddingsReindexProgress();
 
-  const embeddingsReindexing = useMemo(
-    () =>
-      reindexProgress
-        ? reindexProgress.total_objects - reindexProgress.processed_objects > 0
-        : undefined,
-    [reindexProgress],
-  );
+  const embeddingsReindexing = useMemo(() => {
+    if (reindexProgress) {
+      switch (reindexProgress.status) {
+        case "indexing":
+          return true;
+        case "completed":
+          return false;
+        default:
+          return undefined;
+      }
+    }
+  }, [reindexProgress]);
 
   // model states
 
@@ -320,7 +325,8 @@ export default function Explore() {
                     <span className="text-primary-variant">
                       Tracked objects processed:
                     </span>
-                    {reindexProgress.processed_objects}
+                    {reindexProgress.processed_objects} /{" "}
+                    {reindexProgress.total_objects}
                   </div>
                 </div>
               </>

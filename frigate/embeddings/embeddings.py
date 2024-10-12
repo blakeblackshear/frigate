@@ -176,6 +176,7 @@ class Embeddings:
             "processed_objects": 0,
             "total_objects": 0,
             "time_remaining": 0,
+            "status": "indexing",
         }
 
         self.requestor.send_data(UPDATE_EMBEDDINGS_REINDEX_PROGRESS, totals)
@@ -255,6 +256,8 @@ class Embeddings:
             "Embedded %d thumbnails and %d descriptions in %s seconds",
             totals["thumbnails"],
             totals["descriptions"],
-            time.time() - st,
+            round(time.time() - st, 1),
         )
+        totals["status"] = "completed"
+
         self.requestor.send_data(UPDATE_EMBEDDINGS_REINDEX_PROGRESS, totals)
