@@ -396,17 +396,19 @@ function ObjectDetailsTab({
             draggable={false}
             src={`${apiHost}api/events/${search.id}/thumbnail.jpg`}
           />
-          <Button
-            onClick={() => {
-              setSearch(undefined);
+          {config?.semantic_search.enabled && (
+            <Button
+              onClick={() => {
+                setSearch(undefined);
 
-              if (setSimilarity) {
-                setSimilarity();
-              }
-            }}
-          >
-            Find Similar
-          </Button>
+                if (setSimilarity) {
+                  setSimilarity();
+                }
+              }}
+            >
+              Find Similar
+            </Button>
+          )}
         </div>
       </div>
       <div className="flex flex-col gap-1.5">
