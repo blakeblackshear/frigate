@@ -146,13 +146,14 @@ class Embeddings:
         ids = list(event_thumbs.keys())
         embeddings = self.vision_embedding(images)
         items = [(ids[i], serialize(embeddings[i])) for i in range(len(ids))]
+        flat_items = [item for sublist in items for item in sublist]
 
         self.db.execute_sql(
             """
             INSERT OR REPLACE INTO vec_thumbnails(id, thumbnail_embedding)
             VALUES {}
             """.format(", ".join(["(?, ?)"] * len(items))),
-            items,
+            flat_items,
         )
         return embeddings
 
@@ -172,13 +173,14 @@ class Embeddings:
         embeddings = self.text_embedding(list(event_descriptions.values()))
         ids = list(event_descriptions.keys())
         items = [(ids[i], serialize(embeddings[i])) for i in range(len(ids))]
+        flat_items = [item for sublist in items for item in sublist]
 
         self.db.execute_sql(
             """
             INSERT OR REPLACE INTO vec_descriptions(id, description_embedding)
             VALUES {}
             """.format(", ".join(["(?, ?)"] * len(items))),
-            items,
+            flat_items,
         )
 
         return embeddings
@@ -196,16 +198,6 @@ class Embeddings:
             os.remove(os.path.join(CONFIG_DIR, ".search_stats.json"))
 
         st = time.time()
-        totals = {
-            "thumbnails": 0,
-            "descriptions": 0,
-            "processed_objects": 0,
-            "total_objects": 0,
-            "time_remaining": 0,
-            "status": "indexing",
-        }
-
-        self.requestor.send_data(UPDATE_EMBEDDINGS_REINDEX_PROGRESS, totals)
 
         # Get total count of events to process
         total_events = (
@@ -216,10 +208,20 @@ class Embeddings:
             )
             .count()
         )
-        totals["total_objects"] = total_events
 
         batch_size = 32
         current_page = 1
+
+        totals = {
+            "thumbnails": 0,
+            "descriptions": 0,
+            "processed_objects": total_events - 1 if total_events < batch_size else 0,
+            "total_objects": total_events,
+            "time_remaining": 0 if total_events < batch_size else -1,
+            "status": "indexing",
+        }
+
+        self.requestor.send_data(UPDATE_EMBEDDINGS_REINDEX_PROGRESS, totals)
 
         events = (
             Event.select()
