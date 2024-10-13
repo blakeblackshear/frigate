@@ -2,7 +2,6 @@ import {
   useEmbeddingsReindexProgress,
   useEventUpdate,
   useModelState,
-  useWs,
 } from "@/api/ws";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import AnimatedCircularProgressBar from "@/components/ui/circular-progress-bar";
@@ -193,22 +192,11 @@ export default function Explore() {
 
   // embeddings reindex progress
 
-  const { send: sendReindexCommand } = useWs(
-    "embeddings_reindex_progress",
-    "embeddingsReindexProgress",
-  );
-
-  useEffect(() => {
-    sendReindexCommand("embeddingsReindexProgress");
-    // only run on mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const { payload: reindexProgress } = useEmbeddingsReindexProgress();
+  const { payload: reindexState } = useEmbeddingsReindexProgress();
 
   const embeddingsReindexing = useMemo(() => {
-    if (reindexProgress) {
-      switch (reindexProgress.status) {
+    if (reindexState) {
+      switch (reindexState.status) {
         case "indexing":
           return true;
         case "completed":
@@ -217,17 +205,9 @@ export default function Explore() {
           return undefined;
       }
     }
-  }, [reindexProgress]);
+  }, [reindexState]);
 
   // model states
-
-  const { send: sendModelCommand } = useWs("model_state", "modelState");
-
-  useEffect(() => {
-    sendModelCommand("modelState");
-    // only run on mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const { payload: textModelState } = useModelState(
     "jinaai/jina-clip-v1-text_model_fp16.onnx",
@@ -274,7 +254,8 @@ export default function Explore() {
 
   if (
     config?.semantic_search.enabled &&
-    (!textModelState ||
+    (!reindexState ||
+      !textModelState ||
       !textTokenizerState ||
       !visionModelState ||
       !visionFeatureExtractorState)
@@ -303,24 +284,22 @@ export default function Explore() {
                 <div className="pt-5 text-center">
                   <AnimatedCircularProgressBar
                     min={0}
-                    max={reindexProgress.total_objects}
-                    value={reindexProgress.processed_objects}
+                    max={reindexState.total_objects}
+                    value={reindexState.processed_objects}
                     gaugePrimaryColor="hsl(var(--selected))"
                     gaugeSecondaryColor="hsl(var(--secondary))"
                   />
                 </div>
                 <div className="flex w-96 flex-col gap-2 py-5">
-                  {reindexProgress.time_remaining !== null && (
+                  {reindexState.time_remaining !== null && (
                     <div className="mb-3 flex flex-col items-center justify-center gap-1">
                       <div className="text-primary-variant">
-                        {reindexProgress.time_remaining === -1
+                        {reindexState.time_remaining === -1
                           ? "Starting up..."
                           : "Estimated time remaining:"}
                       </div>
-                      {reindexProgress.time_remaining >= 0 &&
-                        (formatSecondsToDuration(
-                          reindexProgress.time_remaining,
-                        ) ||
+                      {reindexState.time_remaining >= 0 &&
+                        (formatSecondsToDuration(reindexState.time_remaining) ||
                           "Finishing shortly")}
                     </div>
                   )}
@@ -328,20 +307,20 @@ export default function Explore() {
                     <span className="text-primary-variant">
                       Thumbnails embedded:
                     </span>
-                    {reindexProgress.thumbnails}
+                    {reindexState.thumbnails}
                   </div>
                   <div className="flex flex-row items-center justify-center gap-3">
                     <span className="text-primary-variant">
                       Descriptions embedded:
                     </span>
-                    {reindexProgress.descriptions}
+                    {reindexState.descriptions}
                   </div>
                   <div className="flex flex-row items-center justify-center gap-3">
                     <span className="text-primary-variant">
                       Tracked objects processed:
                     </span>
-                    {reindexProgress.processed_objects} /{" "}
-                    {reindexProgress.total_objects}
+                    {reindexState.processed_objects} /{" "}
+                    {reindexState.total_objects}
                   </div>
                 </div>
               </>
