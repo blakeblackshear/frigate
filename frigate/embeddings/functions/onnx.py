@@ -190,9 +190,11 @@ class GenericONNXEmbedding:
                 if key in input_names:
                     onnx_inputs[key].append(value[0])
 
-        for key in onnx_inputs.keys():
-            if onnx_inputs[key]:
+        for key in input_names:
+            if onnx_inputs.get(key):
                 onnx_inputs[key] = np.stack(onnx_inputs[key])
+            else:
+                logger.warning(f"Expected input '{key}' not found in onnx_inputs")
 
         embeddings = self.runner.run(onnx_inputs)[0]
         return [embedding for embedding in embeddings]
