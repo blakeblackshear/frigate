@@ -3,7 +3,7 @@ import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { Button } from "../ui/button";
 import { FaArrowDown, FaCalendarAlt, FaCog, FaFilter } from "react-icons/fa";
 import { TimeRange } from "@/types/timeline";
-import { ExportContent } from "./ExportDialog";
+import { ExportContent, ExportPreviewDialog } from "./ExportDialog";
 import { ExportMode } from "@/types/filter";
 import ReviewActivityCalendar from "./ReviewActivityCalendar";
 import { SelectSeparator } from "../ui/select";
@@ -34,12 +34,14 @@ type MobileReviewSettingsDrawerProps = {
   currentTime: number;
   range?: TimeRange;
   mode: ExportMode;
+  showExportPreview: boolean;
   reviewSummary?: ReviewSummary;
   allLabels: string[];
   allZones: string[];
   onUpdateFilter: (filter: ReviewFilter) => void;
   setRange: (range: TimeRange | undefined) => void;
   setMode: (mode: ExportMode) => void;
+  setShowExportPreview: (showPreview: boolean) => void;
 };
 export default function MobileReviewSettingsDrawer({
   features = DEFAULT_DRAWER_FEATURES,
@@ -50,12 +52,14 @@ export default function MobileReviewSettingsDrawer({
   currentTime,
   range,
   mode,
+  showExportPreview,
   reviewSummary,
   allLabels,
   allZones,
   onUpdateFilter,
   setRange,
   setMode,
+  setShowExportPreview,
 }: MobileReviewSettingsDrawerProps) {
   const [drawerMode, setDrawerMode] = useState<DrawerMode>("none");
 
@@ -282,6 +286,13 @@ export default function MobileReviewSettingsDrawer({
         show={mode == "timeline"}
         onSave={() => onStartExport()}
         onCancel={() => setMode("none")}
+        onPreview={() => setShowExportPreview(true)}
+      />
+      <ExportPreviewDialog
+        camera={camera}
+        range={range}
+        showPreview={showExportPreview}
+        setShowPreview={setShowExportPreview}
       />
       <Drawer
         modal={!(isIOS && drawerMode == "export")}
