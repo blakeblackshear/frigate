@@ -156,7 +156,7 @@ class Embeddings:
             """
             INSERT OR REPLACE INTO vec_thumbnails(id, thumbnail_embedding)
             VALUES {}
-            """.format(", ".join(["(?, ?)"] * len(items))),
+            """.format(", ".join(["(?, ?)"] * len(ids))),
             items,
         )
         return embeddings
@@ -187,7 +187,7 @@ class Embeddings:
             """
             INSERT OR REPLACE INTO vec_descriptions(id, description_embedding)
             VALUES {}
-            """.format(", ".join(["(?, ?)"] * len(items))),
+            """.format(", ".join(["(?, ?)"] * len(ids))),
             items,
         )
 
