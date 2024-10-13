@@ -164,8 +164,15 @@ class GenericONNXEmbedding:
             return []
 
         if self.model_type == "text":
+            max_length = max(len(self.tokenizer.encode(text)) for text in inputs)
             processed_inputs = [
-                self.tokenizer(text, padding=True, truncation=True, return_tensors="np")
+                self.tokenizer(
+                    text,
+                    padding="max_length",
+                    truncation=True,
+                    max_length=max_length,
+                    return_tensors="np",
+                )
                 for text in inputs
             ]
         else:
@@ -183,8 +190,11 @@ class GenericONNXEmbedding:
                 if key in input_names:
                     onnx_inputs[key].append(value[0])
 
-        for key in onnx_inputs.keys():
-            onnx_inputs[key] = np.array(onnx_inputs[key])
+        for key in input_names:
+            if onnx_inputs.get(key):
+                onnx_inputs[key] = np.stack(onnx_inputs[key])
+            else:
+                logger.warning(f"Expected input '{key}' not found in onnx_inputs")
 
         embeddings = self.runner.run(onnx_inputs)[0]
         return [embedding for embedding in embeddings]
