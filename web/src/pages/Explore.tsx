@@ -193,6 +193,17 @@ export default function Explore() {
 
   // embeddings reindex progress
 
+  const { send: sendReindexCommand } = useWs(
+    "embeddings_reindex_progress",
+    "embeddingsReindexProgress",
+  );
+
+  useEffect(() => {
+    sendReindexCommand("embeddingsReindexProgress");
+    // only run on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const { payload: reindexProgress } = useEmbeddingsReindexProgress();
 
   const embeddingsReindexing = useMemo(() => {
@@ -210,10 +221,10 @@ export default function Explore() {
 
   // model states
 
-  const { send: sendCommand } = useWs("model_state", "modelState");
+  const { send: sendModelCommand } = useWs("model_state", "modelState");
 
   useEffect(() => {
-    sendCommand("modelState");
+    sendModelCommand("modelState");
     // only run on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -299,14 +310,18 @@ export default function Explore() {
                   />
                 </div>
                 <div className="flex w-96 flex-col gap-2 py-5">
-                  {reindexProgress.time_remaining >= 0 && (
+                  {reindexProgress.time_remaining !== null && (
                     <div className="mb-3 flex flex-col items-center justify-center gap-1">
                       <div className="text-primary-variant">
-                        Estimated time remaining:
+                        {reindexProgress.time_remaining === -1
+                          ? "Starting up..."
+                          : "Estimated time remaining:"}
                       </div>
-                      {formatSecondsToDuration(
-                        reindexProgress.time_remaining,
-                      ) || "Finishing shortly"}
+                      {reindexProgress.time_remaining >= 0 &&
+                        (formatSecondsToDuration(
+                          reindexProgress.time_remaining,
+                        ) ||
+                          "Finishing shortly")}
                     </div>
                   )}
                   <div className="flex flex-row items-center justify-center gap-3">
