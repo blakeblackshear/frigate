@@ -307,7 +307,7 @@ function ObjectList(objects?: ObjectType[]) {
                     {getIconForLabel(obj.label, "size-5 text-white")}
                   </div>
                   <div className="ml-3 text-lg">
-                    {capitalizeFirstLetter(obj.label)}
+                    {capitalizeFirstLetter(obj.label.replaceAll("_", " "))}
                   </div>
                 </div>
                 <div className="flex w-8/12 flex-row items-end justify-end">

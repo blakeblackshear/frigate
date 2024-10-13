@@ -534,7 +534,7 @@ function ObjectSnapshotTab({
                 />
               )}
             </TransformComponent>
-            {search.plus_id !== "not_enabled" && (
+            {search.plus_id !== "not_enabled" && search.end_time && (
               <Card className="p-1 text-sm md:p-2">
                 <CardContent className="flex flex-col items-center justify-between gap-3 p-2 md:flex-row">
                   <div className={cn("flex flex-col space-y-3")}>
@@ -553,7 +553,7 @@ function ObjectSnapshotTab({
                   </div>
 
                   <div className="flex flex-row justify-center gap-2 md:justify-end">
-                    {state == "reviewing" && search.end_time && (
+                    {state == "reviewing" && (
                       <>
                         <Button
                           className="bg-success"
