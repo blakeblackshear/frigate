@@ -536,57 +536,59 @@ function ObjectSnapshotTab({
                 />
               )}
             </TransformComponent>
-            <Card className="p-1 text-sm md:p-2">
-              <CardContent className="flex flex-col items-center justify-between gap-3 p-2 md:flex-row">
-                <div className={cn("flex flex-col space-y-3")}>
-                  <div
-                    className={
-                      "text-lg font-semibold leading-none tracking-tight"
-                    }
-                  >
-                    Submit To Frigate+
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Objects in locations you want to avoid are not false
-                    positives. Submitting them as false positives will confuse
-                    the model.
-                  </div>
-                </div>
-
-                <div className="flex flex-row justify-center gap-2 md:justify-end">
-                  {state == "reviewing" && search.end_time && (
-                    <>
-                      <Button
-                        className="bg-success"
-                        onClick={() => {
-                          setState("uploading");
-                          onSubmitToPlus(false);
-                        }}
-                      >
-                        This is a {search?.label}
-                      </Button>
-                      <Button
-                        className="text-white"
-                        variant="destructive"
-                        onClick={() => {
-                          setState("uploading");
-                          onSubmitToPlus(true);
-                        }}
-                      >
-                        This is not a {search?.label}
-                      </Button>
-                    </>
-                  )}
-                  {state == "uploading" && <ActivityIndicator />}
-                  {state == "submitted" && (
-                    <div className="flex flex-row items-center justify-center gap-2">
-                      <FaCheckCircle className="text-success" />
-                      Submitted
+            {search.plus_id !== "not_enabled" && (
+              <Card className="p-1 text-sm md:p-2">
+                <CardContent className="flex flex-col items-center justify-between gap-3 p-2 md:flex-row">
+                  <div className={cn("flex flex-col space-y-3")}>
+                    <div
+                      className={
+                        "text-lg font-semibold leading-none tracking-tight"
+                      }
+                    >
+                      Submit To Frigate+
                     </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                    <div className="text-sm text-muted-foreground">
+                      Objects in locations you want to avoid are not false
+                      positives. Submitting them as false positives will confuse
+                      the model.
+                    </div>
+                  </div>
+
+                  <div className="flex flex-row justify-center gap-2 md:justify-end">
+                    {state == "reviewing" && search.end_time && (
+                      <>
+                        <Button
+                          className="bg-success"
+                          onClick={() => {
+                            setState("uploading");
+                            onSubmitToPlus(false);
+                          }}
+                        >
+                          This is a {search?.label}
+                        </Button>
+                        <Button
+                          className="text-white"
+                          variant="destructive"
+                          onClick={() => {
+                            setState("uploading");
+                            onSubmitToPlus(true);
+                          }}
+                        >
+                          This is not a {search?.label}
+                        </Button>
+                      </>
+                    )}
+                    {state == "uploading" && <ActivityIndicator />}
+                    {state == "submitted" && (
+                      <div className="flex flex-row items-center justify-center gap-2">
+                        <FaCheckCircle className="text-success" />
+                        Submitted
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </TransformWrapper>
       </div>
