@@ -7,6 +7,7 @@ import os
 import subprocess as sp
 import time
 from datetime import datetime, timedelta, timezone
+from pathlib import Path as FilePath
 from urllib.parse import unquote
 
 import cv2
@@ -450,8 +451,27 @@ def recording_clip(
     camera_name: str,
     start_ts: float,
     end_ts: float,
-    download: bool = False,
 ):
+    def run_download(ffmpeg_cmd: list[str], file_path: str):
+        with sp.Popen(
+            ffmpeg_cmd,
+            stderr=sp.PIPE,
+            stdout=sp.PIPE,
+            text=False,
+        ) as ffmpeg:
+            while True:
+                data = ffmpeg.stdout.read(1024)
+                if data is not None:
+                    yield data
+                else:
+                    if ffmpeg.returncode and ffmpeg.returncode != 0:
+                        logger.error(
+                            f"Failed to generate clip, ffmpeg logs: {ffmpeg.stderr.read()}"
+                        )
+                    else:
+                        FilePath(file_path).unlink(missing_ok=True)
+                    break
+
     recordings = (
         Recordings.select(
             Recordings.path,
@@ -467,18 +487,18 @@ def recording_clip(
         .order_by(Recordings.start_time.asc())
     )
 
-    playlist_lines = []
-    clip: Recordings
-    for clip in recordings:
-        playlist_lines.append(f"file '{clip.path}'")
-        # if this is the starting clip, add an inpoint
-        if clip.start_time < start_ts:
-            playlist_lines.append(f"inpoint {int(start_ts - clip.start_time)}")
-        # if this is the ending clip, add an outpoint
-        if clip.end_time > end_ts:
-            playlist_lines.append(f"outpoint {int(end_ts - clip.start_time)}")
-
-    file_name = sanitize_filename(f"clip_{camera_name}_{start_ts}-{end_ts}.mp4")
+    file_name = sanitize_filename(f"playlist_{camera_name}_{start_ts}-{end_ts}.txt")
+    file_path = f"/tmp/cache/{file_name}"
+    with open(file_path, "w") as file:
+        clip: Recordings
+        for clip in recordings:
+            file.write(f"file '{clip.path}'\n")
+            # if this is the starting clip, add an inpoint
+            if clip.start_time < start_ts:
+                file.write(f"inpoint {int(start_ts - clip.start_time)}\n")
+            # if this is the ending clip, add an outpoint
+            if clip.end_time > end_ts:
+                file.write(f"outpoint {int(end_ts - clip.start_time)}\n")
 
     if len(file_name) > 1000:
         return JSONResponse(
@@ -489,67 +509,32 @@ def recording_clip(
             status_code=403,
         )
 
-    path = os.path.join(CLIPS_DIR, f"cache/{file_name}")
-
     config: FrigateConfig = request.app.frigate_config
 
-    if not os.path.exists(path):
-        ffmpeg_cmd = [
-            config.ffmpeg.ffmpeg_path,
-            "-hide_banner",
-            "-y",
-            "-protocol_whitelist",
-            "pipe,file",
-            "-f",
-            "concat",
-            "-safe",
-            "0",
-            "-i",
-            "/dev/stdin",
-            "-c",
-            "copy",
-            "-movflags",
-            "+faststart",
-            path,
-        ]
-        p = sp.run(
-            ffmpeg_cmd,
-            input="\n".join(playlist_lines),
-            encoding="ascii",
-            capture_output=True,
-        )
+    ffmpeg_cmd = [
+        config.ffmpeg.ffmpeg_path,
+        "-hide_banner",
+        "-y",
+        "-protocol_whitelist",
+        "pipe,file",
+        "-f",
+        "concat",
+        "-safe",
+        "0",
+        "-i",
+        file_path,
+        "-c",
+        "copy",
+        "-movflags",
+        "frag_keyframe+empty_moov",
+        "-f",
+        "mp4",
+        "pipe:",
+    ]
 
-        if p.returncode != 0:
-            logger.error(p.stderr)
-            return JSONResponse(
-                content={
-                    "success": False,
-                    "message": "Could not create clip from recordings",
-                },
-                status_code=500,
-            )
-    else:
-        logger.debug(
-            f"Ignoring subsequent request for {path} as it already exists in the cache."
-        )
-
-    headers = {
-        "Content-Description": "File Transfer",
-        "Cache-Control": "no-cache",
-        "Content-Type": "video/mp4",
-        "Content-Length": str(os.path.getsize(path)),
-        # nginx: https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
-        "X-Accel-Redirect": f"/clips/cache/{file_name}",
-    }
-
-    if download:
-        headers["Content-Disposition"] = "attachment; filename=%s" % file_name
-
-    return FileResponse(
-        path,
+    return StreamingResponse(
+        run_download(ffmpeg_cmd, file_path),
         media_type="video/mp4",
-        filename=file_name,
-        headers=headers,
     )
 
 
@@ -1028,7 +1013,7 @@ def event_snapshot_clean(request: Request, event_id: str, download: bool = False
 
 
 @router.get("/events/{event_id}/clip.mp4")
-def event_clip(request: Request, event_id: str, download: bool = False):
+def event_clip(request: Request, event_id: str):
     try:
         event: Event = Event.get(Event.id == event_id)
     except DoesNotExist:
@@ -1048,7 +1033,7 @@ def event_clip(request: Request, event_id: str, download: bool = False):
         end_ts = (
             datetime.now().timestamp() if event.end_time is None else event.end_time
         )
-        return recording_clip(request, event.camera, event.start_time, end_ts, download)
+        return recording_clip(request, event.camera, event.start_time, end_ts)
 
     headers = {
         "Content-Description": "File Transfer",
@@ -1058,9 +1043,6 @@ def event_clip(request: Request, event_id: str, download: bool = False):
         # nginx: https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_ignore_headers
         "X-Accel-Redirect": f"/clips/{file_name}",
     }
-
-    if download:
-        headers["Content-Disposition"] = "attachment; filename=%s" % file_name
 
     return FileResponse(
         clip_path,
