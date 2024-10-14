@@ -13,26 +13,21 @@ import ImageLoadingIndicator from "../indicators/ImageLoadingIndicator";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { SearchResult } from "@/types/search";
-import useContextMenu from "@/hooks/use-contextmenu";
 import { cn } from "@/lib/utils";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 
 type SearchThumbnailProps = {
   searchResult: SearchResult;
-  findSimilar: () => void;
   onClick: (searchResult: SearchResult) => void;
 };
 
 export default function SearchThumbnail({
   searchResult,
-  findSimilar,
   onClick,
 }: SearchThumbnailProps) {
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
-
-  useContextMenu(imgRef, findSimilar);
 
   const handleOnClick = useCallback(() => {
     onClick(searchResult);

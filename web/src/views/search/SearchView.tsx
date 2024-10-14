@@ -397,11 +397,6 @@ export default function SearchView({
                     >
                       <SearchThumbnail
                         searchResult={value}
-                        findSimilar={() => {
-                          if (config?.semantic_search.enabled) {
-                            setSimilaritySearch(value);
-                          }
-                        }}
                         onClick={() => onSelectSearch(value, index)}
                       />
                       {(searchTerm ||
