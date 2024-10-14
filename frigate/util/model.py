@@ -28,10 +28,14 @@ def get_ort_providers(
     providers = []
     options = []
 
-    for provider in providers:
-        if provider == "CudaExecutionProvider":
+    for provider in ort.get_available_providers():
+        if provider == "CUDAExecutionProvider":
             providers.append(provider)
-            options.append({})
+            options.append(
+                {
+                    "arena_extend_strategy": "kSameAsRequested",
+                }
+            )
         elif provider == "TensorrtExecutionProvider":
             # TensorrtExecutionProvider uses too much memory without options to control it
             pass
