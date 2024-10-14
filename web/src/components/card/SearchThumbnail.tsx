@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useApiHost } from "@/api";
 import { getIconForLabel } from "@/utils/iconUtil";
 import TimeAgo from "../dynamic/TimeAgo";
@@ -30,6 +30,8 @@ import {
   LuTrash2,
 } from "react-icons/lu";
 import FrigatePlusIcon from "@/components/icons/FrigatePlusIcon";
+import { FrigatePlusDialog } from "../overlay/dialog/FrigatePlusDialog";
+import { Event } from "@/types/event";
 
 type SearchThumbnailProps = {
   searchResult: SearchResult;
@@ -43,6 +45,10 @@ export default function SearchThumbnail({
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
+
+  // interactions
+
+  const [showFrigatePlus, setShowFrigatePlus] = useState(false);
 
   const handleOnClick = useCallback(() => {
     onClick(searchResult);
@@ -78,6 +84,14 @@ export default function SearchThumbnail({
 
   return (
     <div className="relative size-full cursor-pointer" onClick={handleOnClick}>
+      <FrigatePlusDialog
+        upload={
+          showFrigatePlus ? (searchResult as unknown as Event) : undefined
+        }
+        onClose={() => setShowFrigatePlus(false)}
+        onEventUploaded={() => {}}
+      />
+
       <ImageLoadingIndicator
         className="absolute inset-0"
         imgLoaded={imgLoaded}
@@ -146,12 +160,17 @@ export default function SearchThumbnail({
               {formattedDate}
             </div>
             <div className="flex flex-row items-center justify-end gap-4">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <FrigatePlusIcon className="size-5 cursor-pointer text-white" />
-                </TooltipTrigger>
-                <TooltipContent>Submit to Frigate+</TooltipContent>
-              </Tooltip>
+              {config?.plus?.enabled && searchResult.end_time && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <FrigatePlusIcon
+                      className="size-5 cursor-pointer text-white"
+                      onClick={() => setShowFrigatePlus(true)}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>Submit to Frigate+</TooltipContent>
+                </Tooltip>
+              )}
 
               <Tooltip>
                 <TooltipTrigger>
