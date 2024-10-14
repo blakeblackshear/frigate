@@ -18,57 +18,47 @@ export function DownloadVideoButton({
 }: DownloadVideoButtonProps) {
   const [isDownloading, setIsDownloading] = useState(false);
 
-  const handleDownload = async () => {
-    setIsDownloading(true);
-    const formattedDate = formatUnixTimestampToDateTime(startTime, {
-      strftime_fmt: "%D-%T",
-      time_style: "medium",
-      date_style: "medium",
-    });
-    const filename = `${camera}_${formattedDate}.mp4`;
+  const formattedDate = formatUnixTimestampToDateTime(startTime, {
+    strftime_fmt: "%D-%T",
+    time_style: "medium",
+    date_style: "medium",
+  });
+  const filename = `${camera}_${formattedDate}.mp4`;
 
-    try {
-      const response = await fetch(source);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.style.display = "none";
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      toast.success(
-        "Your review item video has been downloaded successfully.",
-        {
-          position: "top-center",
-        },
-      );
-    } catch (error) {
-      toast.error(
-        "There was an error downloading the review item video. Please try again.",
-        {
-          position: "top-center",
-        },
-      );
-    } finally {
-      setIsDownloading(false);
-    }
+  const handleDownloadStart = () => {
+    setIsDownloading(true);
+    toast.success("Your review item video has started downloading.", {
+      position: "top-center",
+    });
+  };
+
+  const handleDownloadEnd = () => {
+    setIsDownloading(false);
+    toast.success("Download completed successfully.", {
+      position: "top-center",
+    });
   };
 
   return (
     <div className="flex justify-center">
       <Button
-        onClick={handleDownload}
+        asChild
         disabled={isDownloading}
         className="flex items-center gap-2"
         size="sm"
       >
-        {isDownloading ? (
-          <ActivityIndicator className="h-4 w-4" />
-        ) : (
-          <FaDownload className="h-4 w-4" />
-        )}
+        <a
+          href={source}
+          download={filename}
+          onClick={handleDownloadStart}
+          onBlur={handleDownloadEnd}
+        >
+          {isDownloading ? (
+            <ActivityIndicator className="size-4" />
+          ) : (
+            <FaDownload className="size-4 text-secondary-foreground" />
+          )}
+        </a>
       </Button>
     </div>
   );
