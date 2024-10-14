@@ -179,6 +179,11 @@ class Dispatcher:
                 }
 
             self.publish("camera_activity", json.dumps(camera_status))
+            self.publish("model_state", json.dumps(self.model_state.copy()))
+            self.publish(
+                "embeddings_reindex_progress",
+                json.dumps(self.embeddings_reindex.copy()),
+            )
 
         # Dictionary mapping topic to handlers
         topic_handlers = {
