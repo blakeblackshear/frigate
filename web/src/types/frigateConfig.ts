@@ -340,6 +340,7 @@ export interface FrigateConfig {
     path: string | null;
     width: number;
     colormap: { [key: string]: [number, number, number] };
+    attributes_map: { [key: string]: [string] };
   };
 
   motion: Record<string, unknown> | null;
