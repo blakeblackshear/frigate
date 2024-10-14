@@ -38,6 +38,8 @@ import {
   MobilePageTitle,
 } from "@/components/mobile/MobilePage";
 import { useOverlayState } from "@/hooks/use-overlay-state";
+import { DownloadVideoButton } from "@/components/button/DownloadVideoButton";
+import { TooltipPortal } from "@radix-ui/react-tooltip";
 
 type ReviewDetailDialogProps = {
   review?: ReviewSegment;
@@ -143,7 +145,7 @@ export default function ReviewDetailDialog({
               <Description className="sr-only">Review item details</Description>
               <div
                 className={cn(
-                  "absolute flex lg:flex-col gap-2",
+                  "absolute flex gap-2 lg:flex-col",
                   isDesktop && "right-1 top-8",
                   isMobile && "right-0 top-3",
                 )}
@@ -159,20 +161,19 @@ export default function ReviewDetailDialog({
                       <FaShareAlt className="size-4 text-secondary-foreground" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>Share this review item</TooltipContent>
+                  <TooltipPortal>
+                    <TooltipContent>Share this review item</TooltipContent>
+                  </TooltipPortal>
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger>
-                    <a
-                      download
-                      href={`${baseUrl}api/${review.camera}/start/${review.start_time}/end/${review.end_time || Date.now() / 1000}/clip.mp4`}
-                    >
-                      <Button size="sm">
-                        <FaDownload className="size-4 text-secondary-foreground" />
-                      </Button>
-                    </a>
+                    <DownloadVideoButton
+                      source={`${baseUrl}api/${review.camera}/start/${review.start_time}/end/${review.end_time || Date.now() / 1000}/clip.mp4`}
+                    />
                   </TooltipTrigger>
-                  <TooltipContent>Download</TooltipContent>
+                  <TooltipPortal>
+                    <TooltipContent>Download</TooltipContent>
+                  </TooltipPortal>
                 </Tooltip>
               </div>
             </Header>
@@ -193,7 +194,7 @@ export default function ReviewDetailDialog({
                   </div>
                 </div>
                 <div className="flex w-full flex-col items-center gap-2">
-                  <div className="flex w-full flex-col gap-1.5">
+                  <div className="flex w-full flex-col gap-1.5 lg:pr-8">
                     <div className="text-sm text-primary/40">Objects</div>
                     <div className="scrollbar-container flex max-h-32 flex-col items-start gap-2 overflow-y-auto text-sm capitalize">
                       {events?.map((event) => {
