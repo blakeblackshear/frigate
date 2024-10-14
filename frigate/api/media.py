@@ -462,7 +462,6 @@ def recording_clip(
             while True:
                 data = ffmpeg.stdout.read(1024)
                 if not data:
-                    logger.error(f"the returncode is {ffmpeg.returncode}")
                     if ffmpeg.returncode and ffmpeg.returncode != 0:
                         logger.error(
                             f"Failed to generate clip, ffmpeg logs: {ffmpeg.stderr.read()}"

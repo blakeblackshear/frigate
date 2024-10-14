@@ -143,7 +143,7 @@ export default function ReviewDetailDialog({
               <Description className="sr-only">Review item details</Description>
               <div
                 className={cn(
-                  "absolute",
+                  "absolute flex gap-2",
                   isDesktop && "right-1 top-8",
                   isMobile && "right-0 top-3",
                 )}
@@ -158,6 +158,19 @@ export default function ReviewDetailDialog({
                     >
                       <FaShareAlt className="size-4 text-secondary-foreground" />
                     </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Share this review item</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <a
+                      download
+                      href={`${baseUrl}api/${review.camera}/start/${review.start_time}/end/${review.end_time || Date.now() / 1000}/clip.mp4`}
+                    >
+                      <Button size="sm">
+                        <FaDownload className="size-4 text-secondary-foreground" />
+                      </Button>
+                    </a>
                   </TooltipTrigger>
                   <TooltipContent>Share this review item</TooltipContent>
                 </Tooltip>
