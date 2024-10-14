@@ -172,6 +172,10 @@ export default function SearchView({
     setSelectedIndex(index);
   }, []);
 
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [searchTerm, searchFilter]);
+
   // update search detail when results change
 
   useEffect(() => {
