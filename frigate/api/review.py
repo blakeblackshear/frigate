@@ -1,6 +1,7 @@
 """Review apis."""
 
 import datetime
+import json
 import logging
 from functools import reduce
 from pathlib import Path
@@ -18,6 +19,8 @@ from frigate.api.defs.review_query_parameters import (
     ReviewSummaryQueryParams,
 )
 from frigate.api.defs.review_responses import (
+    ReviewActivityAudioResponse,
+    ReviewActivityMotionResponse,
     ReviewSegmentResponse,
     ReviewSummaryResponse,
 )
@@ -428,7 +431,9 @@ def delete_reviews(body: dict = None):
     )
 
 
-@router.get("/review/activity/motion")
+@router.get(
+    "/review/activity/motion", response_model=list[ReviewActivityMotionResponse]
+)
 def motion_activity(params: ReviewActivityMotionQueryParams = Depends()):
     """Get motion and audio activity."""
     cameras = params.cameras
@@ -502,7 +507,7 @@ def motion_activity(params: ReviewActivityMotionQueryParams = Depends()):
     return JSONResponse(content=normalized)
 
 
-@router.get("/review/activity/audio")
+@router.get("/review/activity/audio", response_model=list[ReviewActivityAudioResponse])
 def audio_activity(params: ReviewActivityMotionQueryParams = Depends()):
     """Get motion and audio activity."""
     cameras = params.cameras
@@ -554,6 +559,7 @@ def audio_activity(params: ReviewActivityMotionQueryParams = Depends()):
 
     # normalize data
     df = df.resample(f"{scale}S").mean().fillna(0.0)
+    # FIXME: If min/max audio is the same then we get division by 0 and as such audio is 'nan'
     df["audio"] = (
         (df["audio"] - df["audio"].max())
         / (df["audio"].min() - df["audio"].max())
@@ -562,7 +568,7 @@ def audio_activity(params: ReviewActivityMotionQueryParams = Depends()):
 
     # change types for output
     df.index = df.index.astype(int) // (10**9)
-    normalized = df.reset_index().to_dict("records")
+    normalized = json.loads(df.reset_index().to_json(orient="records"))
     return JSONResponse(content=normalized)
 
 

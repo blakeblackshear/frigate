@@ -39,3 +39,12 @@ class DayReview(BaseModel):
 class ReviewSummaryResponse(BaseModel):
     last24Hours: Last24HoursReview
     root: Dict[str, DayReview]
+
+class ReviewActivityMotionResponse(BaseModel):
+    start_time: int
+    motion: float
+    camera: str
+
+class ReviewActivityAudioResponse(BaseModel):
+    start_time: int
+    audio: int
