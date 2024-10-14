@@ -157,10 +157,14 @@ class ModelConfig(BaseModel):
             self._model_hash = file_hash.hexdigest()
 
     def create_colormap(self, enabled_labels: set[str]) -> None:
-        """Get a list of colors for enabled labels."""
-        colors = generate_color_palette(len(enabled_labels))
-
-        self._colormap = {label: color for label, color in zip(enabled_labels, colors)}
+        """Get a list of colors for enabled labels that aren't attributes."""
+        enabled_trackable_labels = list(
+            filter(lambda label: label not in self._all_attributes, enabled_labels)
+        )
+        colors = generate_color_palette(len(enabled_trackable_labels))
+        self._colormap = {
+            label: color for label, color in zip(enabled_trackable_labels, colors)
+        }
 
     model_config = ConfigDict(extra="forbid", protected_namespaces=())
 

@@ -140,6 +140,7 @@ export function RecordingView({
 
   const [exportMode, setExportMode] = useState<ExportMode>("none");
   const [exportRange, setExportRange] = useState<TimeRange>();
+  const [showExportPreview, setShowExportPreview] = useState(false);
 
   // move to next clip
 
@@ -412,6 +413,7 @@ export function RecordingView({
               latestTime={timeRange.before}
               mode={exportMode}
               range={exportRange}
+              showPreview={showExportPreview}
               setRange={(range) => {
                 setExportRange(range);
 
@@ -420,6 +422,7 @@ export function RecordingView({
                 }
               }}
               setMode={setExportMode}
+              setShowPreview={setShowExportPreview}
             />
           )}
           {isDesktop && (
@@ -473,11 +476,13 @@ export function RecordingView({
             latestTime={timeRange.before}
             mode={exportMode}
             range={exportRange}
+            showExportPreview={showExportPreview}
             allLabels={reviewFilterList.labels}
             allZones={reviewFilterList.zones}
             onUpdateFilter={updateFilter}
             setRange={setExportRange}
             setMode={setExportMode}
+            setShowExportPreview={setShowExportPreview}
           />
         </div>
       </div>

@@ -19,7 +19,6 @@ from frigate.models import Event
 from frigate.util.builtin import serialize
 from frigate.util.services import listen
 
-from .embeddings import Embeddings
 from .maintainer import EmbeddingMaintainer
 from .util import ZScoreNormalization
 
@@ -56,12 +55,6 @@ def manage_embeddings(config: FrigateConfig) -> None:
     )
     models = [Event]
     db.bind(models)
-
-    embeddings = Embeddings(config.semantic_search, db)
-
-    # Check if we need to re-index events
-    if config.semantic_search.reindex:
-        embeddings.reindex()
 
     maintainer = EmbeddingMaintainer(
         db,
@@ -114,18 +107,24 @@ class EmbeddingsContext:
                 query_embedding = row[0]
             else:
                 # If no embedding found, generate it and return it
-                query_embedding = serialize(
-                    self.requestor.send_data(
-                        EmbeddingsRequestEnum.embed_thumbnail.value,
-                        {"id": query.id, "thumbnail": query.thumbnail},
-                    )
+                data = self.requestor.send_data(
+                    EmbeddingsRequestEnum.embed_thumbnail.value,
+                    {"id": str(query.id), "thumbnail": str(query.thumbnail)},
                 )
+
+                if not data:
+                    return []
+
+                query_embedding = serialize(data)
         else:
-            query_embedding = serialize(
-                self.requestor.send_data(
-                    EmbeddingsRequestEnum.generate_search.value, query
-                )
+            data = self.requestor.send_data(
+                EmbeddingsRequestEnum.generate_search.value, query
             )
+
+            if not data:
+                return []
+
+            query_embedding = serialize(data)
 
         sql_query = """
             SELECT
@@ -155,11 +154,14 @@ class EmbeddingsContext:
     def search_description(
         self, query_text: str, event_ids: list[str] = None
     ) -> list[tuple[str, float]]:
-        query_embedding = serialize(
-            self.requestor.send_data(
-                EmbeddingsRequestEnum.generate_search.value, query_text
-            )
+        data = self.requestor.send_data(
+            EmbeddingsRequestEnum.generate_search.value, query_text
         )
+
+        if not data:
+            return []
+
+        query_embedding = serialize(data)
 
         # Prepare the base SQL query
         sql_query = """

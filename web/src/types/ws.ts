@@ -62,4 +62,13 @@ export type ModelState =
   | "downloaded"
   | "error";
 
+export type EmbeddingsReindexProgressType = {
+  thumbnails: number;
+  descriptions: number;
+  processed_objects: number;
+  total_objects: number;
+  time_remaining: number;
+  status: string;
+};
+
 export type ToggleableSetting = "ON" | "OFF";

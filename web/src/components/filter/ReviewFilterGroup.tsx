@@ -241,6 +241,8 @@ export default function ReviewFilterGroup({
           mode="none"
           setMode={() => {}}
           setRange={() => {}}
+          showExportPreview={false}
+          setShowExportPreview={() => {}}
         />
       )}
     </div>

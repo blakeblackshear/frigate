@@ -2,10 +2,9 @@ import logging
 import os
 import warnings
 from io import BytesIO
-from typing import Callable, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import numpy as np
-import onnxruntime as ort
 import requests
 from PIL import Image
 
@@ -15,10 +14,11 @@ from PIL import Image
 from transformers import AutoFeatureExtractor, AutoTokenizer
 from transformers.utils.logging import disable_progress_bar
 
+from frigate.comms.inter_process import InterProcessRequestor
 from frigate.const import MODEL_CACHE_DIR, UPDATE_MODEL_STATE
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.downloader import ModelDownloader
-from frigate.util.model import get_ort_providers
+from frigate.util.model import ONNXModelRunner
 
 warnings.filterwarnings(
     "ignore",
@@ -39,34 +39,49 @@ class GenericONNXEmbedding:
         model_name: str,
         model_file: str,
         download_urls: Dict[str, str],
-        embedding_function: Callable[[List[np.ndarray]], np.ndarray],
+        model_size: str,
         model_type: str,
+        requestor: InterProcessRequestor,
         tokenizer_file: Optional[str] = None,
         device: str = "AUTO",
     ):
         self.model_name = model_name
         self.model_file = model_file
         self.tokenizer_file = tokenizer_file
+        self.requestor = requestor
         self.download_urls = download_urls
-        self.embedding_function = embedding_function
         self.model_type = model_type  # 'text' or 'vision'
-        self.providers, self.provider_options = get_ort_providers(
-            force_cpu=device == "CPU", requires_fp16=True, openvino_device=device
-        )
-
+        self.model_size = model_size
+        self.device = device
         self.download_path = os.path.join(MODEL_CACHE_DIR, self.model_name)
         self.tokenizer = None
         self.feature_extractor = None
-        self.session = None
-
-        self.downloader = ModelDownloader(
-            model_name=self.model_name,
-            download_path=self.download_path,
-            file_names=list(self.download_urls.keys())
-            + ([self.tokenizer_file] if self.tokenizer_file else []),
-            download_func=self._download_model,
+        self.runner = None
+        files_names = list(self.download_urls.keys()) + (
+            [self.tokenizer_file] if self.tokenizer_file else []
         )
-        self.downloader.ensure_model_files()
+
+        if not all(
+            os.path.exists(os.path.join(self.download_path, n)) for n in files_names
+        ):
+            logger.debug(f"starting model download for {self.model_name}")
+            self.downloader = ModelDownloader(
+                model_name=self.model_name,
+                download_path=self.download_path,
+                file_names=files_names,
+                download_func=self._download_model,
+            )
+            self.downloader.ensure_model_files()
+        else:
+            self.downloader = None
+            ModelDownloader.mark_files_state(
+                self.requestor,
+                self.model_name,
+                files_names,
+                ModelStatusTypesEnum.downloaded,
+            )
+            self._load_model_and_tokenizer()
+            logger.debug(f"models are already downloaded for {self.model_name}")
 
     def _download_model(self, path: str):
         try:
@@ -101,14 +116,17 @@ class GenericONNXEmbedding:
             )
 
     def _load_model_and_tokenizer(self):
-        if self.session is None:
-            self.downloader.wait_for_download()
+        if self.runner is None:
+            if self.downloader:
+                self.downloader.wait_for_download()
             if self.model_type == "text":
                 self.tokenizer = self._load_tokenizer()
             else:
                 self.feature_extractor = self._load_feature_extractor()
-            self.session = self._load_model(
-                os.path.join(self.download_path, self.model_file)
+            self.runner = ONNXModelRunner(
+                os.path.join(self.download_path, self.model_file),
+                self.device,
+                self.model_size,
             )
 
     def _load_tokenizer(self):
@@ -125,15 +143,6 @@ class GenericONNXEmbedding:
             f"{MODEL_CACHE_DIR}/{self.model_name}",
         )
 
-    def _load_model(self, path: str):
-        if os.path.exists(path):
-            return ort.InferenceSession(
-                path, providers=self.providers, provider_options=self.provider_options
-            )
-        else:
-            logger.warning(f"{self.model_name} model file {path} not found.")
-            return None
-
     def _process_image(self, image):
         if isinstance(image, str):
             if image.startswith("http"):
@@ -146,8 +155,7 @@ class GenericONNXEmbedding:
         self, inputs: Union[List[str], List[Image.Image], List[str]]
     ) -> List[np.ndarray]:
         self._load_model_and_tokenizer()
-
-        if self.session is None or (
+        if self.runner is None or (
             self.tokenizer is None and self.feature_extractor is None
         ):
             logger.error(
@@ -156,23 +164,37 @@ class GenericONNXEmbedding:
             return []
 
         if self.model_type == "text":
-            processed_inputs = self.tokenizer(
-                inputs, padding=True, truncation=True, return_tensors="np"
-            )
+            max_length = max(len(self.tokenizer.encode(text)) for text in inputs)
+            processed_inputs = [
+                self.tokenizer(
+                    text,
+                    padding="max_length",
+                    truncation=True,
+                    max_length=max_length,
+                    return_tensors="np",
+                )
+                for text in inputs
+            ]
         else:
             processed_images = [self._process_image(img) for img in inputs]
-            processed_inputs = self.feature_extractor(
-                images=processed_images, return_tensors="np"
-            )
+            processed_inputs = [
+                self.feature_extractor(images=image, return_tensors="np")
+                for image in processed_images
+            ]
 
-        input_names = [input.name for input in self.session.get_inputs()]
-        onnx_inputs = {
-            name: processed_inputs[name]
-            for name in input_names
-            if name in processed_inputs
-        }
+        input_names = self.runner.get_input_names()
+        onnx_inputs = {name: [] for name in input_names}
+        input: dict[str, any]
+        for input in processed_inputs:
+            for key, value in input.items():
+                if key in input_names:
+                    onnx_inputs[key].append(value[0])
 
-        outputs = self.session.run(None, onnx_inputs)
-        embeddings = self.embedding_function(outputs)
+        for key in input_names:
+            if onnx_inputs.get(key):
+                onnx_inputs[key] = np.stack(onnx_inputs[key])
+            else:
+                logger.warning(f"Expected input '{key}' not found in onnx_inputs")
 
+        embeddings = self.runner.run(onnx_inputs)[0]
         return [embedding for embedding in embeddings]

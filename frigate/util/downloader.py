@@ -19,6 +19,13 @@ class FileLock:
         self.path = path
         self.lock_file = f"{path}.lock"
 
+        # we have not acquired the lock yet so it should not exist
+        if os.path.exists(self.lock_file):
+            try:
+                os.remove(self.lock_file)
+            except Exception:
+                pass
+
     def acquire(self):
         parent_dir = os.path.dirname(self.lock_file)
         os.makedirs(parent_dir, exist_ok=True)
@@ -56,14 +63,12 @@ class ModelDownloader:
         self.download_complete = threading.Event()
 
     def ensure_model_files(self):
-        for file in self.file_names:
-            self.requestor.send_data(
-                UPDATE_MODEL_STATE,
-                {
-                    "model": f"{self.model_name}-{file}",
-                    "state": ModelStatusTypesEnum.downloading,
-                },
-            )
+        self.mark_files_state(
+            self.requestor,
+            self.model_name,
+            self.file_names,
+            ModelStatusTypesEnum.downloading,
+        )
         self.download_thread = threading.Thread(
             target=self._download_models,
             name=f"_download_model_{self.model_name}",
@@ -92,6 +97,7 @@ class ModelDownloader:
                 },
             )
 
+        self.requestor.stop()
         self.download_complete.set()
 
     @staticmethod
@@ -118,6 +124,22 @@ class ModelDownloader:
 
         if not silent:
             logger.info(f"Downloading complete: {url}")
+
+    @staticmethod
+    def mark_files_state(
+        requestor: InterProcessRequestor,
+        model_name: str,
+        files: list[str],
+        state: ModelStatusTypesEnum,
+    ) -> None:
+        for file_name in files:
+            requestor.send_data(
+                UPDATE_MODEL_STATE,
+                {
+                    "model": f"{model_name}-{file_name}",
+                    "state": state,
+                },
+            )
 
     def wait_for_download(self):
         self.download_complete.wait()

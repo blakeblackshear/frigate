@@ -5,6 +5,7 @@ import os
 from typing import Optional
 
 from frigate.config import CameraConfig, GenAIConfig, GenAIProviderEnum
+from frigate.models import Event
 
 PROVIDERS = {}
 
@@ -31,12 +32,12 @@ class GenAIClient:
         self,
         camera_config: CameraConfig,
         thumbnails: list[bytes],
-        label: str,
+        event: Event,
     ) -> Optional[str]:
         """Generate a description for the frame."""
         prompt = camera_config.genai.object_prompts.get(
-            label, camera_config.genai.prompt
-        ).format(label=label)
+            event.label, camera_config.genai.prompt
+        ).format(**event)
         return self._send(prompt, thumbnails)
 
     def _init_provider(self):

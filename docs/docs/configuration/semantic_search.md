@@ -29,15 +29,26 @@ If you are enabling the Search feature for the first time, be advised that Friga
 
 ### Jina AI CLIP
 
+The vision model is able to embed both images and text into the same vector space, which allows `image -> image` and `text -> image` similarity searches. Frigate uses this model on tracked objects to encode the thumbnail image and store it in the database. When searching for tracked objects via text in the search box, Frigate will perform a `text -> image` similarity search against this embedding. When clicking "Find Similar" in the tracked object detail pane, Frigate will perform an `image -> image` similarity search to retrieve the closest matching thumbnails.
+
+The text model is used to embed tracked object descriptions and perform searches against them. Descriptions can be created, viewed, and modified on the Search page when clicking on the gray tracked object chip at the top left of each review item. See [the Generative AI docs](/configuration/genai.md) for more information on how to automatically generate tracked object descriptions.
+
+Differently weighted CLIP models are available and can be selected by setting the `model_size` config option:
+
 :::tip
 
 The CLIP models are downloaded in ONNX format, which means they will be accelerated using GPU hardware when available. This depends on the Docker build that is used. See [the object detector docs](../configuration/object_detectors.md) for more information.
 
 :::
 
-The vision model is able to embed both images and text into the same vector space, which allows `image -> image` and `text -> image` similarity searches. Frigate uses this model on tracked objects to encode the thumbnail image and store it in the database. When searching for tracked objects via text in the search box, Frigate will perform a `text -> image` similarity search against this embedding. When clicking "Find Similar" in the tracked object detail pane, Frigate will perform an `image -> image` similarity search to retrieve the closest matching thumbnails.
+```yaml
+semantic_search:
+  enabled: True
+  model_size: small
+```
 
-The text model is used to embed tracked object descriptions and perform searches against them. Descriptions can be created, viewed, and modified on the Search page when clicking on the gray tracked object chip at the top left of each review item. See [the Generative AI docs](/configuration/genai.md) for more information on how to automatically generate tracked object descriptions.
+- Configuring the `large` model employs the full Jina model and will automatically run on the GPU if applicable.
+- Configuring the `small` model employs a quantized version of the model that uses much less RAM and runs faster on CPU with a very negligible difference in embedding quality.
 
 ## Usage
 

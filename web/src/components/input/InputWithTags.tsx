@@ -7,6 +7,7 @@ import {
   LuChevronUp,
   LuTrash2,
   LuStar,
+  LuSearch,
 } from "react-icons/lu";
 import {
   FilterType,
@@ -161,8 +162,12 @@ export default function InputWithTags({
         .map((word) => word.trim())
         .lastIndexOf(words.filter((word) => word.trim() !== "").pop() || "");
       const currentWord = words[lastNonEmptyWordIndex];
+      if (words.at(-1) === "") {
+        return current_suggestions;
+      }
+
       return current_suggestions.filter((suggestion) =>
-        suggestion.toLowerCase().includes(currentWord.toLowerCase()),
+        suggestion.toLowerCase().startsWith(currentWord),
       );
     },
     [inputValue, suggestions, currentFilterType],
@@ -636,7 +641,19 @@ export default function InputWithTags({
             inputFocused ? "visible" : "hidden",
           )}
         >
-          {(Object.keys(filters).length > 0 || isSimilaritySearch) && (
+          {!currentFilterType && inputValue && (
+            <CommandGroup heading="Search">
+              <CommandItem
+                className="cursor-pointer"
+                onSelect={() => handleSearch(inputValue)}
+              >
+                <LuSearch className="mr-2 h-4 w-4" />
+                Search for "{inputValue}"
+              </CommandItem>
+            </CommandGroup>
+          )}
+          {(Object.keys(filters).filter((key) => key !== "query").length > 0 ||
+            isSimilaritySearch) && (
             <CommandGroup heading="Active Filters">
               <div className="my-2 flex flex-wrap gap-2 px-2">
                 {isSimilaritySearch && (
