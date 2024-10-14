@@ -15,6 +15,21 @@ import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { SearchResult } from "@/types/search";
 import { cn } from "@/lib/utils";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  LuActivity,
+  LuCamera,
+  LuDownload,
+  LuMoreVertical,
+  LuSearch,
+  LuTrash2,
+} from "react-icons/lu";
+import FrigatePlusIcon from "@/components/icons/FrigatePlusIcon";
 
 type SearchThumbnailProps = {
   searchResult: SearchResult;
@@ -98,16 +113,57 @@ export default function SearchThumbnail({
           </Tooltip>
         </div>
         <div className="rounded-t-l pointer-events-none absolute inset-x-0 top-0 z-10 h-[30%] w-full bg-gradient-to-b from-black/60 to-transparent"></div>
-        <div className="rounded-b-l pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[20%] w-full bg-gradient-to-t from-black/60 to-transparent">
-          <div className="mx-3 flex h-full items-end justify-between pb-1 text-sm text-white">
-            {searchResult.end_time ? (
-              <TimeAgo time={searchResult.start_time * 1000} dense />
-            ) : (
-              <div>
-                <ActivityIndicator size={24} />
-              </div>
-            )}
-            {formattedDate}
+        <div className="rounded-b-l pointer-events-none absolute inset-x-0 bottom-0 z-10 flex h-[20%] items-end bg-gradient-to-t from-black/60 to-transparent">
+          <div className="flex w-full items-center justify-between bg-black/50 px-2 py-2 text-sm text-white">
+            <div className="flex flex-col items-start">
+              {searchResult.end_time ? (
+                <TimeAgo time={searchResult.start_time * 1000} dense />
+              ) : (
+                <div>
+                  <ActivityIndicator size={24} />
+                </div>
+              )}
+              {formattedDate}
+            </div>
+            <div className="flex flex-row items-center justify-end gap-4">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <FrigatePlusIcon className="size-5 cursor-pointer text-white" />
+                </TooltipTrigger>
+                <TooltipContent>Submit to Frigate+</TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger>
+                  <LuSearch className="size-5 cursor-pointer text-white" />
+                </TooltipTrigger>
+                <TooltipContent>Find similar</TooltipContent>
+              </Tooltip>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  <LuMoreVertical className="size-5 cursor-pointer text-white" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem>
+                    <LuDownload className="mr-2 size-4" />
+                    <span>Download video</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <LuCamera className="mr-2 size-4" />
+                    <span>Download snapshot</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <LuActivity className="mr-2 size-4" />
+                    <span>View object lifecycle</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <LuTrash2 className="mr-2 size-4" />
+                    <span>Delete</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </div>
       </div>
