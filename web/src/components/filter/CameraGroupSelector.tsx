@@ -645,7 +645,7 @@ export function CameraGroupEdit({
 
       let renamingQuery = "";
       if (editingGroup && editingGroup[0] !== values.name) {
-        renamingQuery = `&camera_groups.${editingGroup[0]}`;
+        renamingQuery = `camera_groups.${editingGroup[0]}&`;
       }
 
       const order =
@@ -661,7 +661,7 @@ export function CameraGroupEdit({
 
       axios
         .put(
-          `config/set?${renamingQuery}&${orderQuery}&${iconQuery}${cameraQueries}`,
+          `config/set?${renamingQuery}${orderQuery}&${iconQuery}${cameraQueries}`,
           {
             requires_restart: 0,
           },
