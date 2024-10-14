@@ -33,6 +33,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { usePersistence } from "@/hooks/use-persistence";
+import SearchThumbnailFooter from "@/components/card/SearchThumbnailFooter";
 
 type SearchViewProps = {
   search: string;
@@ -76,8 +77,6 @@ export default function SearchView({
     "sm:grid-cols-4": effectiveColumnCount === 4,
     "sm:grid-cols-5": effectiveColumnCount === 5,
     "sm:grid-cols-6": effectiveColumnCount === 6,
-    "sm:grid-cols-7": effectiveColumnCount === 7,
-    "sm:grid-cols-8": effectiveColumnCount >= 8,
   });
 
   // suggestions values
@@ -392,7 +391,7 @@ export default function SearchView({
                   >
                     <div
                       className={cn(
-                        "aspect-square size-full overflow-hidden rounded-lg",
+                        "aspect-square w-full overflow-hidden rounded-t-lg border",
                       )}
                     >
                       <SearchThumbnail
@@ -428,6 +427,9 @@ export default function SearchView({
                     <div
                       className={`review-item-ring pointer-events-none absolute inset-0 z-10 size-full rounded-lg outline outline-[3px] -outline-offset-[2.8px] ${selected ? `shadow-selected outline-selected` : "outline-transparent duration-500"}`}
                     />
+                    <div className="flex w-full items-center justify-between rounded-b-lg border border-t-0 bg-card p-3 text-card-foreground">
+                      <SearchThumbnailFooter searchResult={value} />
+                    </div>
                   </div>
                 );
               })}
@@ -466,7 +468,7 @@ export default function SearchView({
                         <Slider
                           value={[effectiveColumnCount]}
                           onValueChange={([value]) => setColumnCount(value)}
-                          max={8}
+                          max={6}
                           min={2}
                           step={1}
                           className="flex-grow"
