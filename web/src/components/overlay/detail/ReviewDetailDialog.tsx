@@ -169,6 +169,8 @@ export default function ReviewDetailDialog({
                   <TooltipTrigger>
                     <DownloadVideoButton
                       source={`${baseUrl}api/${review.camera}/start/${review.start_time}/end/${review.end_time || Date.now() / 1000}/clip.mp4`}
+                      camera={review.camera}
+                      startTime={review.start_time}
                     />
                   </TooltipTrigger>
                   <TooltipPortal>

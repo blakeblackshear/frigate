@@ -3,16 +3,30 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { FaDownload } from "react-icons/fa";
+import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 
 type DownloadVideoButtonProps = {
   source: string;
+  camera: string;
+  startTime: number;
 };
 
-export function DownloadVideoButton({ source }: DownloadVideoButtonProps) {
+export function DownloadVideoButton({
+  source,
+  camera,
+  startTime,
+}: DownloadVideoButtonProps) {
   const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDownload = async () => {
     setIsDownloading(true);
+    const formattedDate = formatUnixTimestampToDateTime(startTime, {
+      strftime_fmt: "%D-%T",
+      time_style: "medium",
+      date_style: "medium",
+    });
+    const filename = `${camera}_${formattedDate}.mp4`;
+
     try {
       const response = await fetch(source);
       const blob = await response.blob();
@@ -20,7 +34,7 @@ export function DownloadVideoButton({ source }: DownloadVideoButtonProps) {
       const a = document.createElement("a");
       a.style.display = "none";
       a.href = url;
-      a.download = "video.mp4";
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
