@@ -645,7 +645,7 @@ export function CameraGroupEdit({
 
       let renamingQuery = "";
       if (editingGroup && editingGroup[0] !== values.name) {
-        renamingQuery = `&camera_groups.${editingGroup?.[0]}`;
+        renamingQuery = `&camera_groups.${editingGroup[0]}`;
       }
 
       const order =
