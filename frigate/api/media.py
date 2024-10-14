@@ -461,7 +461,9 @@ def recording_clip(
         ) as ffmpeg:
             while True:
                 data = ffmpeg.stdout.read(1024)
-                if not data:
+                if data is not None:
+                    yield data
+                else:
                     if ffmpeg.returncode and ffmpeg.returncode != 0:
                         logger.error(
                             f"Failed to generate clip, ffmpeg logs: {ffmpeg.stderr.read()}"
@@ -469,7 +471,6 @@ def recording_clip(
                     else:
                         FilePath(file_path).unlink(missing_ok=True)
                     break
-                yield data
 
     recordings = (
         Recordings.select(
@@ -516,10 +517,10 @@ def recording_clip(
         "-y",
         "-protocol_whitelist",
         "pipe,file",
-         "-f",
-         "concat",
-         "-safe",
-         "0",
+        "-f",
+        "concat",
+        "-safe",
+        "0",
         "-i",
         file_path,
         "-c",
