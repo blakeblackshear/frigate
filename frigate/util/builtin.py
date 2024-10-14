@@ -183,16 +183,11 @@ def update_yaml_from_url(file_path, url):
             update_yaml_file(file_path, key_path, new_value_list)
         else:
             value = new_value_list[0]
-            if "," in value:
-                # Skip conversion if we're a mask or zone string
-                update_yaml_file(file_path, key_path, value)
-            else:
-                try:
-                    value = ast.literal_eval(value)
-                except (ValueError, SyntaxError):
-                    pass
-                update_yaml_file(file_path, key_path, value)
-
+            try:
+                # no need to convert if we have a mask/zone string
+                value = ast.literal_eval(value) if "," not in value else value
+            except (ValueError, SyntaxError):
+                pass
             update_yaml_file(file_path, key_path, value)
 
 
