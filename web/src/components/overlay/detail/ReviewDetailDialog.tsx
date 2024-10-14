@@ -143,7 +143,7 @@ export default function ReviewDetailDialog({
               <Description className="sr-only">Review item details</Description>
               <div
                 className={cn(
-                  "absolute flex gap-2",
+                  "absolute flex lg:flex-col gap-2",
                   isDesktop && "right-1 top-8",
                   isMobile && "right-0 top-3",
                 )}
@@ -172,7 +172,7 @@ export default function ReviewDetailDialog({
                       </Button>
                     </a>
                   </TooltipTrigger>
-                  <TooltipContent>Share this review item</TooltipContent>
+                  <TooltipContent>Download</TooltipContent>
                 </Tooltip>
               </div>
             </Header>
