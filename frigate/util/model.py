@@ -25,28 +25,23 @@ def get_ort_providers(
             ],
         )
 
-    providers = ort.get_available_providers()
+    providers = []
     options = []
 
-    for provider in providers:
-        if provider == "TensorrtExecutionProvider":
-            os.makedirs("/config/model_cache/tensorrt/ort/trt-engines", exist_ok=True)
-
-            if not requires_fp16 or os.environ.get("USE_FP_16", "True") != "False":
-                options.append(
-                    {
-                        "arena_extend_strategy": "kSameAsRequested",
-                        "trt_fp16_enable": requires_fp16,
-                        "trt_timing_cache_enable": True,
-                        "trt_engine_cache_enable": True,
-                        "trt_timing_cache_path": "/config/model_cache/tensorrt/ort",
-                        "trt_engine_cache_path": "/config/model_cache/tensorrt/ort/trt-engines",
-                    }
-                )
-            else:
-                options.append({})
+    for provider in ort.get_available_providers():
+        if provider == "CUDAExecutionProvider":
+            providers.append(provider)
+            options.append(
+                {
+                    "arena_extend_strategy": "kSameAsRequested",
+                }
+            )
+        elif provider == "TensorrtExecutionProvider":
+            # TensorrtExecutionProvider uses too much memory without options to control it
+            pass
         elif provider == "OpenVINOExecutionProvider":
             os.makedirs("/config/model_cache/openvino/ort", exist_ok=True)
+            providers.append(provider)
             options.append(
                 {
                     "arena_extend_strategy": "kSameAsRequested",
@@ -55,12 +50,14 @@ def get_ort_providers(
                 }
             )
         elif provider == "CPUExecutionProvider":
+            providers.append(provider)
             options.append(
                 {
                     "arena_extend_strategy": "kSameAsRequested",
                 }
             )
         else:
+            providers.append(provider)
             options.append({})
 
     return (providers, options)
