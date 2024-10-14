@@ -11,7 +11,7 @@ import { MdCircle } from "react-icons/md";
 import { Link } from "react-router-dom";
 
 export default function Statusbar() {
-  const { messages, addMessage, removeMessage, clearMessages } = useContext(
+  const { messages, addMessage, clearMessages } = useContext(
     StatusBarMessagesContext,
   )!;
 
@@ -47,18 +47,17 @@ export default function Statusbar() {
   useEffect(() => {
     if (reindexState) {
       if (reindexState.status == "indexing") {
+        clearMessages("embeddings-reindex");
         addMessage(
           "embeddings-reindex",
           `Reindexing embeddings (${Math.floor((reindexState.processed_objects / reindexState.total_objects) * 100)}% complete)`,
-          undefined,
-          "status",
         );
       }
       if (reindexState.status === "completed") {
-        removeMessage("embeddings-reindex", "status");
+        clearMessages("embeddings-reindex");
       }
     }
-  }, [reindexState, addMessage, removeMessage]);
+  }, [reindexState, addMessage, clearMessages]);
 
   return (
     <div className="absolute bottom-0 left-0 right-0 z-10 flex h-8 w-full items-center justify-between border-t border-secondary-highlight bg-background_alt px-4 dark:text-secondary-foreground">
