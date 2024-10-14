@@ -170,7 +170,6 @@ class RecordingMaintainer(threading.Thread):
                     self.end_time_cache.pop(cache_path, None)
                 grouped_recordings[camera] = grouped_recordings[camera][-keep_count:]
 
-
         tasks = []
         for camera, recordings in grouped_recordings.items():
             # clear out all the object recording info for old frames
