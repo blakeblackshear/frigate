@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useApiHost } from "@/api";
 import { getIconForLabel } from "@/utils/iconUtil";
 import TimeAgo from "../dynamic/TimeAgo";
@@ -32,6 +32,26 @@ export default function SearchThumbnail({
   const handleOnClick = useCallback(() => {
     onClick(searchResult);
   }, [searchResult, onClick]);
+
+  const objectLabel = useMemo(() => {
+    if (
+      !config ||
+      !searchResult.sub_label ||
+      !config.model.attributes_map[searchResult.label]
+    ) {
+      return searchResult.label;
+    }
+
+    if (
+      config.model.attributes_map[searchResult.label].includes(
+        searchResult.sub_label,
+      )
+    ) {
+      return searchResult.sub_label;
+    }
+
+    return `${searchResult.label}-verified`;
+  }, [config, searchResult]);
 
   // date
 
@@ -78,14 +98,14 @@ export default function SearchThumbnail({
                     className={`z-0 flex items-start justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500`}
                     onClick={() => onClick(searchResult)}
                   >
-                    {getIconForLabel(searchResult.label, "size-3 text-white")}
+                    {getIconForLabel(objectLabel, "size-3 text-white")}
                   </Chip>
                 </div>
               </TooltipTrigger>
             </div>
             <TooltipPortal>
               <TooltipContent className="capitalize">
-                {[...new Set([searchResult.label])]
+                {[objectLabel]
                   .filter(
                     (item) => item !== undefined && !item.includes("-verified"),
                   )
