@@ -275,7 +275,7 @@ export default function Explore() {
               <TbExclamationCircle className="mb-3 size-10" />
               <div>Search Unavailable</div>
             </div>
-            {embeddingsReindexing && (
+            {embeddingsReindexing && allModelsLoaded && (
               <>
                 <div className="text-center text-primary-variant">
                   Search can be used after tracked object embeddings have
