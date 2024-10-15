@@ -112,7 +112,7 @@ export default function SearchThumbnailFooter({
         onEventUploaded={() => {}}
       />
 
-      <div className="flex flex-col items-start">
+      <div className="flex flex-col items-start text-xs">
         {searchResult.end_time ? (
           <TimeAgo time={searchResult.start_time * 1000} dense />
         ) : (
@@ -182,11 +182,17 @@ export default function SearchThumbnailFooter({
                 </a>
               </DropdownMenuItem>
             )}
-            <DropdownMenuItem onClick={showObjectLifecycle}>
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={showObjectLifecycle}
+            >
               <FaArrowsRotate className="mr-2 size-4" />
               <span>View object lifecycle</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setDeleteDialogOpen(true)}>
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() => setDeleteDialogOpen(true)}
+            >
               <LuTrash2 className="mr-2 size-4" />
               <span>Delete</span>
             </DropdownMenuItem>
