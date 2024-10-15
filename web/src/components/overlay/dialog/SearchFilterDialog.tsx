@@ -1,14 +1,27 @@
-import { FaCog } from "react-icons/fa";
+import { FaArrowRight, FaCog } from "react-icons/fa";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PlatformAwareSheet } from "./PlatformAwareDialog";
 import { Button } from "@/components/ui/button";
-import { CamerasFilterContent } from "@/components/filter/CamerasFilterButton";
 import useSWR from "swr";
-import { SearchFilter, SearchSource } from "@/types/search";
-import { CameraGroupConfig } from "@/types/frigateConfig";
+import {
+  DEFAULT_TIME_RANGE_AFTER,
+  DEFAULT_TIME_RANGE_BEFORE,
+  SearchFilter,
+  SearchSource,
+} from "@/types/search";
+import { CameraGroupConfig, FrigateConfig } from "@/types/frigateConfig";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { isDesktop } from "react-device-detect";
+import { useFormattedHour } from "@/hooks/use-date-utils";
+import Heading from "@/components/ui/heading";
 
 type SearchFilterDialogProps = {
+  config?: FrigateConfig;
   filter?: SearchFilter;
   filterValues: {
     cameras: string[];
@@ -20,6 +33,7 @@ type SearchFilterDialogProps = {
   onUpdateFilter: (filter: SearchFilter) => void;
 };
 export default function SearchFilterDialog({
+  config,
   filter,
   filterValues,
   groups,
@@ -27,10 +41,8 @@ export default function SearchFilterDialog({
 }: SearchFilterDialogProps) {
   // data
 
+  const [currentFilter, setCurrentFilter] = useState(filter ?? {});
   const { data: allSubLabels } = useSWR(["sub_labels", { split_joined: 1 }]);
-  const [currentCameras, setCurrentCameras] = useState<string[] | undefined>(
-    filter?.cameras,
-  );
 
   // state
 
@@ -44,15 +56,12 @@ export default function SearchFilterDialog({
   );
   const content = (
     <>
-      <CamerasFilterContent
-        allCameras={filterValues.cameras}
-        currentCameras={currentCameras}
-        groups={groups}
-        setCurrentCameras={setCurrentCameras}
-        setOpen={setOpen}
-        updateCameraFilter={(newCameras) => {
-          onUpdateFilter({ ...filter, cameras: newCameras });
-        }}
+      <TimeRangeFilterContent
+        config={config}
+        timeRange={currentFilter.time_range}
+        updateTimeRange={(newRange) =>
+          setCurrentFilter({ time_range: newRange, ...currentFilter })
+        }
       />
     </>
   );
@@ -65,6 +74,139 @@ export default function SearchFilterDialog({
       open={open}
       onOpenChange={setOpen}
     />
+  );
+}
+
+type TimeRangeFilterContentProps = {
+  config?: FrigateConfig;
+  timeRange?: string;
+  updateTimeRange: (range: string | undefined) => void;
+};
+function TimeRangeFilterContent({
+  config,
+  timeRange,
+  updateTimeRange,
+}: TimeRangeFilterContentProps) {
+  const [startOpen, setStartOpen] = useState(false);
+  const [endOpen, setEndOpen] = useState(false);
+
+  const [afterHour, beforeHour] = useMemo(() => {
+    if (!timeRange || !timeRange.includes(",")) {
+      return [DEFAULT_TIME_RANGE_AFTER, DEFAULT_TIME_RANGE_BEFORE];
+    }
+
+    return timeRange.split(",");
+  }, [timeRange]);
+
+  const [selectedAfterHour, setSelectedAfterHour] = useState(afterHour);
+  const [selectedBeforeHour, setSelectedBeforeHour] = useState(beforeHour);
+
+  // format based on locale
+
+  const formattedSelectedAfter = useFormattedHour(config, selectedAfterHour);
+  const formattedSelectedBefore = useFormattedHour(config, selectedBeforeHour);
+
+  useEffect(() => {
+    setSelectedAfterHour(afterHour);
+    setSelectedBeforeHour(beforeHour);
+    // only refresh when state changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeRange]);
+
+  useEffect(() => {
+    if (
+      selectedAfterHour == DEFAULT_TIME_RANGE_AFTER &&
+      selectedBeforeHour == DEFAULT_TIME_RANGE_BEFORE
+    ) {
+      updateTimeRange(undefined);
+    } else {
+      updateTimeRange(`${selectedAfterHour},${selectedBeforeHour}`);
+    }
+    // only refresh when state changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedAfterHour, selectedBeforeHour]);
+
+  return (
+    <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
+      <Heading as="h4">Time Range</Heading>
+      <div className="my-5 flex flex-row items-center justify-center gap-2">
+        <Popover
+          open={startOpen}
+          onOpenChange={(open) => {
+            if (!open) {
+              setStartOpen(false);
+            }
+          }}
+        >
+          <PopoverTrigger asChild>
+            <Button
+              className={`text-primary ${isDesktop ? "" : "text-xs"} `}
+              variant={startOpen ? "select" : "default"}
+              size="sm"
+              onClick={() => {
+                setStartOpen(true);
+                setEndOpen(false);
+              }}
+            >
+              {formattedSelectedAfter}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="flex flex-row items-center justify-center">
+            <input
+              className="text-md mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+              id="startTime"
+              type="time"
+              value={selectedAfterHour}
+              step="60"
+              onChange={(e) => {
+                const clock = e.target.value;
+                const [hour, minute, _] = clock.split(":");
+                setSelectedAfterHour(`${hour}:${minute}`);
+              }}
+            />
+          </PopoverContent>
+        </Popover>
+        <FaArrowRight className="size-4 text-primary" />
+        <Popover
+          open={endOpen}
+          onOpenChange={(open) => {
+            if (!open) {
+              setEndOpen(false);
+            }
+          }}
+        >
+          <PopoverTrigger asChild>
+            <Button
+              className={`text-primary ${isDesktop ? "" : "text-xs"}`}
+              variant={endOpen ? "select" : "default"}
+              size="sm"
+              onClick={() => {
+                setEndOpen(true);
+                setStartOpen(false);
+              }}
+            >
+              {formattedSelectedBefore}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="flex flex-col items-center">
+            <input
+              className="text-md mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+              id="startTime"
+              type="time"
+              value={
+                selectedBeforeHour == "24:00" ? "23:59" : selectedBeforeHour
+              }
+              step="60"
+              onChange={(e) => {
+                const clock = e.target.value;
+                const [hour, minute, _] = clock.split(":");
+                setSelectedBeforeHour(`${hour}:${minute}`);
+              }}
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
+    </div>
   );
 }
 
