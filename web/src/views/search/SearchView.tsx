@@ -428,7 +428,14 @@ export default function SearchView({
                       className={`review-item-ring pointer-events-none absolute inset-0 z-10 size-full rounded-lg outline outline-[3px] -outline-offset-[2.8px] ${selected ? `shadow-selected outline-selected` : "outline-transparent duration-500"}`}
                     />
                     <div className="flex w-full items-center justify-between rounded-b-lg border border-t-0 bg-card p-3 text-card-foreground">
-                      <SearchThumbnailFooter searchResult={value} />
+                      <SearchThumbnailFooter
+                        searchResult={value}
+                        findSimilar={() => {
+                          if (config?.semantic_search.enabled) {
+                            setSimilaritySearch(value);
+                          }
+                        }}
+                      />
                     </div>
                   </div>
                 );

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { useApiHost } from "@/api";
 import { getIconForLabel } from "@/utils/iconUtil";
 import useSWR from "swr";
@@ -12,8 +12,6 @@ import { capitalizeFirstLetter } from "@/utils/stringUtil";
 import { SearchResult } from "@/types/search";
 import { cn } from "@/lib/utils";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
-import { FrigatePlusDialog } from "../overlay/dialog/FrigatePlusDialog";
-import { Event } from "@/types/event";
 
 type SearchThumbnailProps = {
   searchResult: SearchResult;
@@ -29,8 +27,6 @@ export default function SearchThumbnail({
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
 
   // interactions
-
-  const [showFrigatePlus, setShowFrigatePlus] = useState(false);
 
   const handleOnClick = useCallback(() => {
     onClick(searchResult);
@@ -58,14 +54,6 @@ export default function SearchThumbnail({
 
   return (
     <div className="relative size-full cursor-pointer" onClick={handleOnClick}>
-      <FrigatePlusDialog
-        upload={
-          showFrigatePlus ? (searchResult as unknown as Event) : undefined
-        }
-        onClose={() => setShowFrigatePlus(false)}
-        onEventUploaded={() => {}}
-      />
-
       <ImageLoadingIndicator
         className="absolute inset-0"
         imgLoaded={imgLoaded}

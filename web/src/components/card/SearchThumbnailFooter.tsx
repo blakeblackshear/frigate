@@ -13,7 +13,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  LuActivity,
   LuCamera,
   LuDownload,
   LuMoreVertical,
@@ -23,13 +22,16 @@ import {
 import FrigatePlusIcon from "@/components/icons/FrigatePlusIcon";
 import { FrigatePlusDialog } from "../overlay/dialog/FrigatePlusDialog";
 import { Event } from "@/types/event";
+import { FaArrowsRotate } from "react-icons/fa6";
 
 type SearchThumbnailProps = {
   searchResult: SearchResult;
+  findSimilar: () => void;
 };
 
 export default function SearchThumbnailFooter({
   searchResult,
+  findSimilar,
 }: SearchThumbnailProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -70,7 +72,7 @@ export default function SearchThumbnailFooter({
           searchResult.has_snapshot &&
           searchResult.end_time && (
             <Tooltip>
-              <TooltipTrigger asChild>
+              <TooltipTrigger>
                 <FrigatePlusIcon
                   className="size-5 cursor-pointer text-white"
                   onClick={() => setShowFrigatePlus(true)}
@@ -80,12 +82,17 @@ export default function SearchThumbnailFooter({
             </Tooltip>
           )}
 
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <LuSearch className="size-5 cursor-pointer text-white" />
-          </TooltipTrigger>
-          <TooltipContent>Find similar</TooltipContent>
-        </Tooltip>
+        {config?.semantic_search?.enabled && (
+          <Tooltip>
+            <TooltipTrigger>
+              <LuSearch
+                className="size-5 cursor-pointer text-white"
+                onClick={findSimilar}
+              />
+            </TooltipTrigger>
+            <TooltipContent>Find similar</TooltipContent>
+          </Tooltip>
+        )}
 
         <DropdownMenu>
           <DropdownMenuTrigger>
@@ -101,7 +108,7 @@ export default function SearchThumbnailFooter({
               <span>Download snapshot</span>
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <LuActivity className="mr-2 size-4" />
+              <FaArrowsRotate className="mr-2 size-4" />
               <span>View object lifecycle</span>
             </DropdownMenuItem>
             <DropdownMenuItem>
