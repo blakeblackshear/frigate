@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   LuX,
   LuFilter,
-  LuImage,
   LuChevronDown,
   LuChevronUp,
   LuTrash2,
@@ -44,6 +43,7 @@ import {
 import { toast } from "sonner";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
+import { MdImageSearch } from "react-icons/md";
 
 type InputWithTagsProps = {
   inputFocused: boolean;
@@ -549,7 +549,7 @@ export default function InputWithTags({
             {isSimilaritySearch && (
               <Tooltip>
                 <TooltipTrigger className="cursor-default">
-                  <LuImage
+                  <MdImageSearch
                     aria-label="Similarity search active"
                     className="size-4 text-selected"
                   />
