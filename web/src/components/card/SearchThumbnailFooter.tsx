@@ -198,7 +198,7 @@ export default function SearchThumbnailFooter({
                   className="cursor-pointer"
                   onClick={() => setShowFrigatePlus(true)}
                 >
-                  <FrigatePlusIcon className="mr-1 size-5 cursor-pointer text-primary" />
+                  <FrigatePlusIcon className="mr-2 size-4 cursor-pointer text-primary" />
                   <span>Submit to Frigate+</span>
                 </DropdownMenuItem>
               )}
