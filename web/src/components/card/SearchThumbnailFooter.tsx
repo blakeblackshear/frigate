@@ -23,6 +23,7 @@ import FrigatePlusIcon from "@/components/icons/FrigatePlusIcon";
 import { FrigatePlusDialog } from "../overlay/dialog/FrigatePlusDialog";
 import { Event } from "@/types/event";
 import { FaArrowsRotate } from "react-icons/fa6";
+import { baseUrl } from "@/api/baseUrl";
 
 type SearchThumbnailProps = {
   searchResult: SearchResult;
@@ -100,12 +101,24 @@ export default function SearchThumbnailFooter({
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem>
-              <LuDownload className="mr-2 size-4" />
-              <span>Download video</span>
+              <a
+                className="justify_start flex items-center"
+                href={`${baseUrl}api/events/${searchResult.id}/clip.mp4`}
+                download={`${searchResult.camera}_${searchResult.label}.mp4`}
+              >
+                <LuDownload className="mr-2 size-4" />
+                <span>Download video</span>
+              </a>
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <LuCamera className="mr-2 size-4" />
-              <span>Download snapshot</span>
+              <a
+                className="justify_start flex items-center"
+                href={`${baseUrl}api/events/${searchResult.id}/snapshot.jpg`}
+                download={`${searchResult.camera}_${searchResult.label}.jpg`}
+              >
+                <LuCamera className="mr-2 size-4" />
+                <span>Download snapshot</span>
+              </a>
             </DropdownMenuItem>
             <DropdownMenuItem>
               <FaArrowsRotate className="mr-2 size-4" />
