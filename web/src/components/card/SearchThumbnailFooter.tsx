@@ -122,26 +122,30 @@ export default function SearchThumbnailFooter({
             <LuMoreVertical className="size-5 cursor-pointer text-white" />
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem>
-              <a
-                className="justify_start flex items-center"
-                href={`${baseUrl}api/events/${searchResult.id}/clip.mp4`}
-                download={`${searchResult.camera}_${searchResult.label}.mp4`}
-              >
-                <LuDownload className="mr-2 size-4" />
-                <span>Download video</span>
-              </a>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <a
-                className="justify_start flex items-center"
-                href={`${baseUrl}api/events/${searchResult.id}/snapshot.jpg`}
-                download={`${searchResult.camera}_${searchResult.label}.jpg`}
-              >
-                <LuCamera className="mr-2 size-4" />
-                <span>Download snapshot</span>
-              </a>
-            </DropdownMenuItem>
+            {searchResult.has_clip && (
+              <DropdownMenuItem>
+                <a
+                  className="justify_start flex items-center"
+                  href={`${baseUrl}api/events/${searchResult.id}/clip.mp4`}
+                  download={`${searchResult.camera}_${searchResult.label}.mp4`}
+                >
+                  <LuDownload className="mr-2 size-4" />
+                  <span>Download video</span>
+                </a>
+              </DropdownMenuItem>
+            )}
+            {searchResult.has_snapshot && (
+              <DropdownMenuItem>
+                <a
+                  className="justify_start flex items-center"
+                  href={`${baseUrl}api/events/${searchResult.id}/snapshot.jpg`}
+                  download={`${searchResult.camera}_${searchResult.label}.jpg`}
+                >
+                  <LuCamera className="mr-2 size-4" />
+                  <span>Download snapshot</span>
+                </a>
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem>
               <FaArrowsRotate className="mr-2 size-4" />
               <span>View object lifecycle</span>
