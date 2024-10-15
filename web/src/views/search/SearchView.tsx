@@ -1,7 +1,9 @@
 import SearchThumbnail from "@/components/card/SearchThumbnail";
 import SearchFilterGroup from "@/components/filter/SearchFilterGroup";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
-import SearchDetailDialog from "@/components/overlay/detail/SearchDetailDialog";
+import SearchDetailDialog, {
+  SearchTab,
+} from "@/components/overlay/detail/SearchDetailDialog";
 import { Toaster } from "@/components/ui/sonner";
 import {
   Tooltip,
@@ -160,16 +162,21 @@ export default function SearchView({
   // detail
 
   const [searchDetail, setSearchDetail] = useState<SearchResult>();
+  const [page, setPage] = useState<SearchTab>("details");
 
   // search interaction
 
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  const onSelectSearch = useCallback((item: SearchResult, index: number) => {
-    setSearchDetail(item);
-    setSelectedIndex(index);
-  }, []);
+  const onSelectSearch = useCallback(
+    (item: SearchResult, index: number, page: SearchTab = "details") => {
+      setPage(page);
+      setSearchDetail(item);
+      setSelectedIndex(index);
+    },
+    [],
+  );
 
   useEffect(() => {
     setSelectedIndex(0);
@@ -298,7 +305,9 @@ export default function SearchView({
       <Toaster closeButton={true} />
       <SearchDetailDialog
         search={searchDetail}
+        page={page}
         setSearch={setSearchDetail}
+        setSearchPage={setPage}
         setSimilarity={
           searchDetail && (() => setSimilaritySearch(searchDetail))
         }
@@ -396,6 +405,9 @@ export default function SearchView({
                           }
                         }}
                         refreshResults={refresh}
+                        showObjectLifecycle={() =>
+                          onSelectSearch(value, index, "object lifecycle")
+                        }
                       />
                     </div>
                   </div>

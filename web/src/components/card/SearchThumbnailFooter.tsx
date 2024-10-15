@@ -31,12 +31,14 @@ type SearchThumbnailProps = {
   searchResult: SearchResult;
   findSimilar: () => void;
   refreshResults: () => void;
+  showObjectLifecycle: () => void;
 };
 
 export default function SearchThumbnailFooter({
   searchResult,
   findSimilar,
   refreshResults,
+  showObjectLifecycle,
 }: SearchThumbnailProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -146,7 +148,7 @@ export default function SearchThumbnailFooter({
                 </a>
               </DropdownMenuItem>
             )}
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={showObjectLifecycle}>
               <FaArrowsRotate className="mr-2 size-4" />
               <span>View object lifecycle</span>
             </DropdownMenuItem>
