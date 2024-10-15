@@ -10,7 +10,6 @@ import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
 import FilterSwitch from "./FilterSwitch";
 import { FilterList } from "@/types/filter";
-import { CalendarRangeFilterButton } from "./CalendarFilterButton";
 import { CamerasFilterButton } from "./CamerasFilterButton";
 import {
   DEFAULT_SEARCH_FILTERS,
@@ -79,8 +78,6 @@ export default function SearchFilterGroup({
 
     return [...labels].sort();
   }, [config, filterList, filter]);
-
-  const { data: allSubLabels } = useSWR(["sub_labels", { split_joined: 1 }]);
 
   const allZones = useMemo<string[]>(() => {
     if (filterList?.zones) {
@@ -169,60 +166,12 @@ export default function SearchFilterGroup({
           }}
         />
       )}
-      <SearchFilterDialog />
-      {filters.includes("date") && (
-        <CalendarRangeFilterButton
-          range={
-            filter?.after == undefined || filter?.before == undefined
-              ? undefined
-              : {
-                  from: new Date(filter.after * 1000),
-                  to: new Date(filter.before * 1000),
-                }
-          }
-          defaultText={isMobile ? "Dates" : "All Dates"}
-          updateSelectedRange={onUpdateSelectedRange}
-        />
-      )}
-      {filters.includes("time") && (
-        <TimeRangeFilterButton
-          config={config}
-          timeRange={filter?.time_range}
-          updateTimeRange={(time_range) =>
-            onUpdateFilter({ ...filter, time_range })
-          }
-        />
-      )}
-      {filters.includes("zone") && allZones.length > 0 && (
-        <ZoneFilterButton
-          allZones={filterValues.zones}
-          selectedZones={filter?.zones}
-          updateZoneFilter={(newZones) =>
-            onUpdateFilter({ ...filter, zones: newZones })
-          }
-        />
-      )}
-      {filters.includes("sub") && (
-        <SubFilterButton
-          allSubLabels={allSubLabels}
-          selectedSubLabels={filter?.sub_labels}
-          updateSubLabelFilter={(newSubLabels) =>
-            onUpdateFilter({ ...filter, sub_labels: newSubLabels })
-          }
-        />
-      )}
-      {config?.semantic_search?.enabled &&
-        filters.includes("source") &&
-        !filter?.search_type?.includes("similarity") && (
-          <SearchTypeButton
-            selectedSearchSources={
-              filter?.search_type ?? ["thumbnail", "description"]
-            }
-            updateSearchSourceFilter={(newSearchSource) =>
-              onUpdateFilter({ ...filter, search_type: newSearchSource })
-            }
-          />
-        )}
+      <SearchFilterDialog
+        filter={filter}
+        filterValues={filterValues}
+        groups={groups}
+        onUpdateFilter={onUpdateFilter}
+      />
     </div>
   );
 }
