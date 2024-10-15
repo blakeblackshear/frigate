@@ -65,9 +65,7 @@ export function PlatformAwareSheet({
   if (isMobile) {
     return (
       <MobilePage open={open} onOpenChange={onOpenChange}>
-        <Button asChild onClick={() => onOpenChange(!open)}>
-          {trigger}
-        </Button>
+        <Button asChild>{trigger}</Button>
         <MobilePageContent className="max-h-[75dvh] overflow-hidden px-4">
           {content}
         </MobilePageContent>
