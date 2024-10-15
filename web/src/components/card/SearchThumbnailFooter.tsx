@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import TimeAgo from "../dynamic/TimeAgo";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -24,21 +24,43 @@ import { FrigatePlusDialog } from "../overlay/dialog/FrigatePlusDialog";
 import { Event } from "@/types/event";
 import { FaArrowsRotate } from "react-icons/fa6";
 import { baseUrl } from "@/api/baseUrl";
+import axios from "axios";
+import { toast } from "sonner";
 
 type SearchThumbnailProps = {
   searchResult: SearchResult;
   findSimilar: () => void;
+  refreshResults: () => void;
 };
 
 export default function SearchThumbnailFooter({
   searchResult,
   findSimilar,
+  refreshResults,
 }: SearchThumbnailProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
   // interactions
 
   const [showFrigatePlus, setShowFrigatePlus] = useState(false);
+
+  const handleDelete = useCallback(() => {
+    axios
+      .delete(`events/${searchResult.id}`)
+      .then((resp) => {
+        if (resp.status == 200) {
+          toast.success("Deleted object successfully.", {
+            position: "top-center",
+          });
+          refreshResults();
+        }
+      })
+      .catch(() => {
+        toast.error("Failed to delete object.", {
+          position: "top-center",
+        });
+      });
+  }, [searchResult, refreshResults]);
 
   // date
 
@@ -124,7 +146,7 @@ export default function SearchThumbnailFooter({
               <FaArrowsRotate className="mr-2 size-4" />
               <span>View object lifecycle</span>
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleDelete}>
               <LuTrash2 className="mr-2 size-4" />
               <span>Delete</span>
             </DropdownMenuItem>

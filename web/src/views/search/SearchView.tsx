@@ -41,12 +41,13 @@ type SearchViewProps = {
   searchFilter?: SearchFilter;
   searchResults?: SearchResult[];
   isLoading: boolean;
+  hasMore: boolean;
   setSearch: (search: string) => void;
   setSimilaritySearch: (search: SearchResult) => void;
   setSearchFilter: (filter: SearchFilter) => void;
   onUpdateFilter: (filter: SearchFilter) => void;
   loadMore: () => void;
-  hasMore: boolean;
+  refresh: () => void;
 };
 export default function SearchView({
   search,
@@ -54,12 +55,13 @@ export default function SearchView({
   searchFilter,
   searchResults,
   isLoading,
+  hasMore,
   setSearch,
   setSimilaritySearch,
   setSearchFilter,
   onUpdateFilter,
   loadMore,
-  hasMore,
+  refresh,
 }: SearchViewProps) {
   const contentRef = useRef<HTMLDivElement | null>(null);
   const { data: config } = useSWR<FrigateConfig>("config", {
@@ -435,6 +437,7 @@ export default function SearchView({
                             setSimilaritySearch(value);
                           }
                         }}
+                        refreshResults={refresh}
                       />
                     </div>
                   </div>

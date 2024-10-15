@@ -384,6 +384,7 @@ export default function Explore() {
           searchFilter={searchFilter}
           searchResults={searchResults}
           isLoading={(isLoadingInitialData || isLoadingMore) ?? true}
+          hasMore={!isReachingEnd}
           setSearch={setSearch}
           setSimilaritySearch={(search) => {
             setSearchFilter({
@@ -395,7 +396,7 @@ export default function Explore() {
           setSearchFilter={setSearchFilter}
           onUpdateFilter={setSearchFilter}
           loadMore={loadMore}
-          hasMore={!isReachingEnd}
+          refresh={mutate}
         />
       )}
     </>
