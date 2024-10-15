@@ -169,7 +169,7 @@ export default function SearchSettingsView({
               rel="noopener noreferrer"
               className="inline"
             >
-              Read the semantic search docs
+              Read the documentation
               <LuExternalLink className="ml-2 inline-flex size-3" />
             </Link>
           </div>
