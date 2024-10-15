@@ -112,7 +112,7 @@ export default function SearchThumbnailFooter({
         onEventUploaded={() => {}}
       />
 
-      <div className="flex flex-col items-start">
+      <div className="flex flex-col items-start text-xs">
         {searchResult.end_time ? (
           <TimeAgo time={searchResult.start_time * 1000} dense />
         ) : (
