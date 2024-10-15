@@ -16,13 +16,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { isDesktop } from "react-device-detect";
+import { isDesktop, isMobile, isMobileOnly } from "react-device-detect";
 import { useFormattedHour } from "@/hooks/use-date-utils";
 import Heading from "@/components/ui/heading";
 import FilterSwitch from "@/components/filter/FilterSwitch";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 type SearchFilterDialogProps = {
   config?: FrigateConfig;
@@ -116,7 +117,10 @@ export default function SearchFilterDialog({
     <PlatformAwareSheet
       trigger={trigger}
       content={content}
-      contentClassName="w-auto lg:w-[300px]"
+      contentClassName={cn(
+        "w-auto lg:w-[300px] scrollbar-container h-full overflow-auto px-4",
+        isMobileOnly && "pb-20",
+      )}
       open={open}
       onOpenChange={(open) => {
         if (!open) {

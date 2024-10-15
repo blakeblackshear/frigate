@@ -78,9 +78,7 @@ export function PlatformAwareSheet({
             >
               <MobilePageTitle>More Filters</MobilePageTitle>
             </MobilePageHeader>
-            <div className="scrollbar-container h-full overflow-auto px-4 pb-20">
-              {content}
-            </div>
+            <div className={contentClassName}>{content}</div>
           </MobilePageContent>
         </MobilePage>
       </div>
