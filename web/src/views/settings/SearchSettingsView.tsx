@@ -125,7 +125,7 @@ export default function SearchSettingsView({
     if (changedValue) {
       addMessage(
         "search_settings",
-        `Unsaved search settings changes)`,
+        `Unsaved search settings changes`,
         undefined,
         "search_settings",
       );
@@ -151,31 +151,37 @@ export default function SearchSettingsView({
         <Heading as="h3" className="my-2">
           Search Settings
         </Heading>
-        <div className="my-3 space-y-3 text-sm text-muted-foreground">
-          <p>
-            Semantic Search in Frigate allows you to find tracked objects within
-            your review items using either the image itself, a user-defined text
-            description, or an automatically generated one. This feature works
-            by creating embeddings — numerical vector representations — for both
-            the images and text descriptions of your tracked objects. By
-            comparing these embeddings, Frigate assesses their similarities to
-            deliver relevant search results.
-          </p>
+        <Separator className="my-2 flex bg-secondary" />
+        <Heading as="h4" className="my-2">
+          Semantic Search
+        </Heading>
+        <div className="max-w-6xl">
+          <div className="mb-5 mt-2 flex max-w-5xl flex-col gap-2 text-sm text-primary-variant">
+            <p>
+              Semantic Search in Frigate allows you to find tracked objects
+              within your review items using either the image itself, a
+              user-defined text description, or an automatically generated one.
+              This feature works by creating embeddings — numerical vector
+              representations — for both the images and text descriptions of
+              your tracked objects. By comparing these embeddings, Frigate
+              assesses their similarities to deliver relevant search results.
+            </p>
 
-          <div className="flex items-center text-primary">
-            <Link
-              to="https://docs.frigate.video/configuration/semantic_search"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline"
-            >
-              Read the documentation
-              <LuExternalLink className="ml-2 inline-flex size-3" />
-            </Link>
+            <div className="flex items-center text-primary">
+              <Link
+                to="https://docs.frigate.video/configuration/semantic_search"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline"
+              >
+                Read the Documentation
+                <LuExternalLink className="ml-2 inline-flex size-3" />
+              </Link>
+            </div>
           </div>
         </div>
-        <Separator className="my-2 flex bg-secondary" />
-        <div className="flex w-full flex-col space-y-6">
+
+        <div className="flex w-full max-w-lg flex-col space-y-6">
           <div className="flex flex-row items-center justify-between">
             <div className="space-y-0.5">
               <Label htmlFor="improve-contrast">Enabled</Label>
@@ -210,23 +216,24 @@ export default function SearchSettingsView({
             />
           </div>
           <Separator className="my-2 flex bg-secondary" />
-          <div className="mt-2 space-y-3">
+          <div className="mt-2 flex flex-row space-x-5 space-y-3">
             <div className="space-y-0.5">
-              <div className="text-md">Model Size</div>
+              <div className="text-sm">Model Size</div>
               <div className="my-2 space-y-1 text-sm text-muted-foreground">
                 <p>
-                  Configure the size of the model used for semantic search
-                  embeddings:
+                  The size of the model used for semantic search embeddings.
                 </p>
-                <p>
-                  • Configuring the <em>small</em> model employs a quantized
-                  version of the model that uses much less RAM and runs faster
-                  on CPU with a very negligible difference in embedding quality.
-                </p>
-                <p>
-                  • Configuring the <em>large</em> model employs the full Jina
-                  model and will automatically run on the GPU if applicable.
-                </p>
+                <ul className="list-disc pl-5 text-sm">
+                  <li>
+                    Using <em>small</em> employs a quantized version of the
+                    model that uses much less RAM and runs faster on CPU with a
+                    very negligible difference in embedding quality.
+                  </li>
+                  <li>
+                    Using <em>large</em> employs the full Jina model and will
+                    automatically run on the GPU if applicable.
+                  </li>
+                </ul>
               </div>
             </div>
             <Select
@@ -256,27 +263,27 @@ export default function SearchSettingsView({
             </Select>
           </div>
         </div>
-        <div className="flex flex-1 flex-col justify-end">
-          <div className="flex flex-row gap-2 pt-5">
-            <Button className="flex flex-1" onClick={onCancel}>
-              Reset
-            </Button>
-            <Button
-              variant="select"
-              disabled={!changedValue || isLoading}
-              className="flex flex-1"
-              onClick={saveToConfig}
-            >
-              {isLoading ? (
-                <div className="flex flex-row items-center gap-2">
-                  <ActivityIndicator />
-                  <span>Saving...</span>
-                </div>
-              ) : (
-                "Save"
-              )}
-            </Button>
-          </div>
+        <Separator className="my-2 flex bg-secondary" />
+
+        <div className="flex w-full flex-row items-center gap-2 pt-2 md:w-[25%]">
+          <Button className="flex flex-1" onClick={onCancel}>
+            Reset
+          </Button>
+          <Button
+            variant="select"
+            disabled={!changedValue || isLoading}
+            className="flex flex-1"
+            onClick={saveToConfig}
+          >
+            {isLoading ? (
+              <div className="flex flex-row items-center gap-2">
+                <ActivityIndicator />
+                <span>Saving...</span>
+              </div>
+            ) : (
+              "Save"
+            )}
+          </Button>
         </div>
       </div>
     </div>
