@@ -13,6 +13,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../ui/alert-dialog";
+import {
   LuCamera,
   LuDownload,
   LuMoreVertical,
@@ -45,20 +55,21 @@ export default function SearchThumbnailFooter({
   // interactions
 
   const [showFrigatePlus, setShowFrigatePlus] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const handleDelete = useCallback(() => {
     axios
       .delete(`events/${searchResult.id}`)
       .then((resp) => {
         if (resp.status == 200) {
-          toast.success("Deleted object successfully.", {
+          toast.success("Tracked object deleted successfully.", {
             position: "top-center",
           });
           refreshResults();
         }
       })
       .catch(() => {
-        toast.error("Failed to delete object.", {
+        toast.error("Failed to delete tracked object.", {
           position: "top-center",
         });
       });
@@ -74,6 +85,28 @@ export default function SearchThumbnailFooter({
 
   return (
     <>
+      <AlertDialog
+        open={deleteDialogOpen}
+        onOpenChange={() => setDeleteDialogOpen(!deleteDialogOpen)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogDescription>
+            Are you sure you want to delete this tracked object?
+          </AlertDialogDescription>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive"
+              onClick={handleDelete}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <FrigatePlusDialog
         upload={
           showFrigatePlus ? (searchResult as unknown as Event) : undefined
@@ -123,7 +156,7 @@ export default function SearchThumbnailFooter({
           <DropdownMenuTrigger>
             <LuMoreVertical className="size-5 cursor-pointer text-primary" />
           </DropdownMenuTrigger>
-          <DropdownMenuContent>
+          <DropdownMenuContent align={"end"}>
             {searchResult.has_clip && (
               <DropdownMenuItem>
                 <a
@@ -152,7 +185,7 @@ export default function SearchThumbnailFooter({
               <FaArrowsRotate className="mr-2 size-4" />
               <span>View object lifecycle</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleDelete}>
+            <DropdownMenuItem onClick={() => setDeleteDialogOpen(true)}>
               <LuTrash2 className="mr-2 size-4" />
               <span>Delete</span>
             </DropdownMenuItem>
