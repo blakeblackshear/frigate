@@ -10,7 +10,7 @@ import {
   SearchFilter,
   SearchSource,
 } from "@/types/search";
-import { CameraGroupConfig, FrigateConfig } from "@/types/frigateConfig";
+import { FrigateConfig } from "@/types/frigateConfig";
 import {
   Popover,
   PopoverContent,
@@ -33,14 +33,12 @@ type SearchFilterDialogProps = {
     zones: string[];
     search_type: SearchSource[];
   };
-  groups: [string, CameraGroupConfig][];
   onUpdateFilter: (filter: SearchFilter) => void;
 };
 export default function SearchFilterDialog({
   config,
   filter,
   filterValues,
-  groups,
   onUpdateFilter,
 }: SearchFilterDialogProps) {
   // data
@@ -49,6 +47,8 @@ export default function SearchFilterDialog({
   const { data: allSubLabels } = useSWR(["sub_labels", { split_joined: 1 }]);
 
   // state
+
+  console.log(`the filter is ${JSON.stringify(currentFilter)}`);
 
   const [open, setOpen] = useState(false);
 
@@ -64,14 +64,29 @@ export default function SearchFilterDialog({
         config={config}
         timeRange={currentFilter.time_range}
         updateTimeRange={(newRange) =>
-          setCurrentFilter({ time_range: newRange, ...currentFilter })
+          setCurrentFilter({ ...currentFilter, time_range: newRange })
         }
       />
       <ZoneFilterContent
         allZones={filterValues.zones}
         zones={currentFilter.zones}
         updateZones={(newZones) =>
-          setCurrentFilter({ zones: newZones, ...currentFilter })
+          setCurrentFilter({ ...currentFilter, zones: newZones })
+        }
+      />
+      <SubFilterContent
+        allSubLabels={allSubLabels}
+        subLabels={currentFilter.sub_labels}
+        setSubLabels={(newSubLabels) =>
+          setCurrentFilter({ ...currentFilter, sub_labels: newSubLabels })
+        }
+      />
+      <SearchTypeContent
+        searchSources={
+          currentFilter?.search_type ?? ["thumbnail", "description"]
+        }
+        setSearchSources={(newSearchSource) =>
+          onUpdateFilter({ ...currentFilter, search_type: newSearchSource })
         }
       />
       {isDesktop && <DropdownMenuSeparator />}
@@ -105,7 +120,13 @@ export default function SearchFilterDialog({
       content={content}
       contentClassName="w-auto lg:w-[300px]"
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          setCurrentFilter(filter ?? {});
+        }
+
+        setOpen(open);
+      }}
     />
   );
 }
@@ -256,9 +277,10 @@ export function ZoneFilterContent({
   return (
     <>
       <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
+        {isDesktop && <DropdownMenuSeparator className="mb-2" />}
+        <Heading as="h4">Zones</Heading>
         {allZones && (
           <>
-            {isDesktop && <DropdownMenuSeparator />}
             <div className="mb-5 mt-2.5 flex items-center justify-between">
               <Label
                 className="mx-2 cursor-pointer text-primary"
@@ -309,58 +331,116 @@ export function ZoneFilterContent({
   );
 }
 
-/**
- * {filters.includes("date") && (
-        <CalendarRangeFilterButton
-          range={
-            filter?.after == undefined || filter?.before == undefined
-              ? undefined
-              : {
-                  from: new Date(filter.after * 1000),
-                  to: new Date(filter.before * 1000),
+type SubFilterContentProps = {
+  allSubLabels: string[];
+  subLabels: string[] | undefined;
+  setSubLabels: (labels: string[] | undefined) => void;
+};
+export function SubFilterContent({
+  allSubLabels,
+  subLabels,
+  setSubLabels,
+}: SubFilterContentProps) {
+  return (
+    <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
+      {isDesktop && <DropdownMenuSeparator className="mb-2" />}
+      <Heading as="h4">Sub Labels</Heading>
+      <div className="mb-5 mt-2.5 flex items-center justify-between">
+        <Label className="mx-2 cursor-pointer text-primary" htmlFor="allLabels">
+          All Sub Labels
+        </Label>
+        <Switch
+          className="ml-1"
+          id="allLabels"
+          checked={subLabels == undefined}
+          onCheckedChange={(isChecked) => {
+            if (isChecked) {
+              setSubLabels(undefined);
+            }
+          }}
+        />
+      </div>
+      <div className="my-2.5 flex flex-col gap-2.5">
+        {allSubLabels.map((item) => (
+          <FilterSwitch
+            key={item}
+            label={item.replaceAll("_", " ")}
+            isChecked={subLabels?.includes(item) ?? false}
+            onCheckedChange={(isChecked) => {
+              if (isChecked) {
+                const updatedLabels = subLabels ? [...subLabels] : [];
+
+                updatedLabels.push(item);
+                setSubLabels(updatedLabels);
+              } else {
+                const updatedLabels = subLabels ? [...subLabels] : [];
+
+                // can not deselect the last item
+                if (updatedLabels.length > 1) {
+                  updatedLabels.splice(updatedLabels.indexOf(item), 1);
+                  setSubLabels(updatedLabels);
                 }
-          }
-          defaultText={isMobile ? "Dates" : "All Dates"}
-          updateSelectedRange={onUpdateSelectedRange}
-        />
-      )}
-      {filters.includes("time") && (
-        <TimeRangeFilterButton
-          config={config}
-          timeRange={filter?.time_range}
-          updateTimeRange={(time_range) =>
-            onUpdateFilter({ ...filter, time_range })
-          }
-        />
-      )}
-      {filters.includes("zone") && allZones.length > 0 && (
-        <ZoneFilterButton
-          allZones={filterValues.zones}
-          selectedZones={filter?.zones}
-          updateZoneFilter={(newZones) =>
-            onUpdateFilter({ ...filter, zones: newZones })
-          }
-        />
-      )}
-      {filters.includes("sub") && (
-        <SubFilterButton
-          allSubLabels={allSubLabels}
-          selectedSubLabels={filter?.sub_labels}
-          updateSubLabelFilter={(newSubLabels) =>
-            onUpdateFilter({ ...filter, sub_labels: newSubLabels })
-          }
-        />
-      )}
-      {config?.semantic_search?.enabled &&
-        filters.includes("source") &&
-        !filter?.search_type?.includes("similarity") && (
-          <SearchTypeButton
-            selectedSearchSources={
-              filter?.search_type ?? ["thumbnail", "description"]
-            }
-            updateSearchSourceFilter={(newSearchSource) =>
-              onUpdateFilter({ ...filter, search_type: newSearchSource })
-            }
+              }
+            }}
           />
-        )}
- */
+        ))}
+      </div>
+    </div>
+  );
+}
+
+type SearchTypeContentProps = {
+  searchSources: SearchSource[] | undefined;
+  setSearchSources: (sources: SearchSource[] | undefined) => void;
+};
+export function SearchTypeContent({
+  searchSources,
+  setSearchSources,
+}: SearchTypeContentProps) {
+  return (
+    <>
+      <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
+        {isDesktop && <DropdownMenuSeparator className="mb-2" />}
+        <Heading as="h4">Search Sources</Heading>
+        <div className="my-2.5 flex flex-col gap-2.5">
+          <FilterSwitch
+            label="Thumbnail Image"
+            isChecked={searchSources?.includes("thumbnail") ?? false}
+            onCheckedChange={(isChecked) => {
+              const updatedSources = searchSources ? [...searchSources] : [];
+
+              if (isChecked) {
+                updatedSources.push("thumbnail");
+                setSearchSources(updatedSources);
+              } else {
+                if (updatedSources.length > 1) {
+                  const index = updatedSources.indexOf("thumbnail");
+                  if (index !== -1) updatedSources.splice(index, 1);
+                  setSearchSources(updatedSources);
+                }
+              }
+            }}
+          />
+          <FilterSwitch
+            label="Description"
+            isChecked={searchSources?.includes("description") ?? false}
+            onCheckedChange={(isChecked) => {
+              const updatedSources = searchSources ? [...searchSources] : [];
+
+              if (isChecked) {
+                updatedSources.push("description");
+                setSearchSources(updatedSources);
+              } else {
+                if (updatedSources.length > 1) {
+                  const index = updatedSources.indexOf("description");
+                  if (index !== -1) updatedSources.splice(index, 1);
+                  setSearchSources(updatedSources);
+                }
+              }
+            }}
+          />
+        </div>
+      </div>
+    </>
+  );
+}
