@@ -175,15 +175,11 @@ class Embeddings:
         return embedding
 
     def batch_upsert_description(self, event_descriptions: dict[str, str]) -> ndarray:
-        descs = list(event_descriptions.values())
+        # upsert embeddings one by one to avoid token limit
+        embeddings = []
 
-        try:
-            embeddings = self.text_embedding(descs)
-        except ort.RuntimeException:
-            half_size = len(descs) / 2
-            embeddings = []
-            embeddings.extend(self.text_embedding(descs[0:half_size]))
-            embeddings.extend(self.text_embedding(descs[half_size:]))
+        for desc in event_descriptions.values():
+            embeddings.append(self.text_embedding([desc]))
 
         ids = list(event_descriptions.keys())
 
