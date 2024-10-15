@@ -161,10 +161,6 @@ export default function SearchSettingsView({
               Semantic Search in Frigate allows you to find tracked objects
               within your review items using either the image itself, a
               user-defined text description, or an automatically generated one.
-              This feature works by creating embeddings — numerical vector
-              representations — for both the images and text descriptions of
-              your tracked objects. By comparing these embeddings, Frigate
-              assesses their similarities to deliver relevant search results.
             </p>
 
             <div className="flex items-center text-primary">
@@ -182,52 +178,53 @@ export default function SearchSettingsView({
         </div>
 
         <div className="flex w-full max-w-lg flex-col space-y-6">
-          <div className="flex flex-row items-center justify-between">
-            <div className="space-y-0.5">
-              <Label htmlFor="improve-contrast">Enabled</Label>
-            </div>
+          <div className="flex flex-row items-center">
             <Switch
               id="enabled"
-              className="ml-3"
+              className="mr-3"
               disabled={searchSettings.enabled === undefined}
               checked={searchSettings.enabled === true}
               onCheckedChange={(isChecked) => {
                 handleSearchConfigChange({ enabled: isChecked });
               }}
             />
-          </div>
-          <div className="flex flex-row items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="improve-contrast">Re-Index On Startup</Label>
-              <div className="text-sm text-muted-foreground">
-                Re-indexing will reprocess all thumbnails and descriptions (if
-                enabled) and apply the embeddings on each startup. Don't forget
-                to disable the option after restarting!
+              <Label htmlFor="enabled">Enabled</Label>
+            </div>
+          </div>
+          <div className="flex flex-col">
+            <div className="flex flex-row items-center">
+              <Switch
+                id="reindex"
+                className="mr-3"
+                disabled={searchSettings.reindex === undefined}
+                checked={searchSettings.reindex === true}
+                onCheckedChange={(isChecked) => {
+                  handleSearchConfigChange({ reindex: isChecked });
+                }}
+              />
+              <div className="space-y-0.5">
+                <Label htmlFor="reindex">Re-Index On Startup</Label>
               </div>
             </div>
-            <Switch
-              id="enabled"
-              className="ml-3"
-              disabled={searchSettings.reindex === undefined}
-              checked={searchSettings.reindex === true}
-              onCheckedChange={(isChecked) => {
-                handleSearchConfigChange({ reindex: isChecked });
-              }}
-            />
+            <div className="mt-3 text-sm text-muted-foreground">
+              Re-indexing will reprocess all thumbnails and descriptions (if
+              enabled) and apply the embeddings on each startup. Don't forget to
+              disable the option after restarting!
+            </div>
           </div>
-          <Separator className="my-2 flex bg-secondary" />
-          <div className="mt-2 flex flex-row space-x-5 space-y-3">
+          <div className="mt-2 flex flex-col space-y-6">
             <div className="space-y-0.5">
-              <div className="text-sm">Model Size</div>
-              <div className="my-2 space-y-1 text-sm text-muted-foreground">
+              <div className="text-md">Model Size</div>
+              <div className="space-y-1 text-sm text-muted-foreground">
                 <p>
                   The size of the model used for semantic search embeddings.
                 </p>
                 <ul className="list-disc pl-5 text-sm">
                   <li>
                     Using <em>small</em> employs a quantized version of the
-                    model that uses much less RAM and runs faster on CPU with a
-                    very negligible difference in embedding quality.
+                    model that uses less RAM and runs faster on CPU with a very
+                    negligible difference in embedding quality.
                   </li>
                   <li>
                     Using <em>large</em> employs the full Jina model and will
