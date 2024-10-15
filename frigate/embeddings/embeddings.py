@@ -6,8 +6,8 @@ import logging
 import os
 import time
 
-from numpy import ndarray
 import onnxruntime as ort
+from numpy import ndarray
 from PIL import Image
 from playhouse.shortcuts import model_to_dict
 
