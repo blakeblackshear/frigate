@@ -99,7 +99,7 @@ export default function SearchThumbnailFooter({
             <Tooltip>
               <TooltipTrigger>
                 <FrigatePlusIcon
-                  className="size-5 cursor-pointer text-white"
+                  className="size-5 cursor-pointer text-primary"
                   onClick={() => setShowFrigatePlus(true)}
                 />
               </TooltipTrigger>
@@ -111,7 +111,7 @@ export default function SearchThumbnailFooter({
           <Tooltip>
             <TooltipTrigger>
               <LuSearch
-                className="size-5 cursor-pointer text-white"
+                className="size-5 cursor-pointer text-primary"
                 onClick={findSimilar}
               />
             </TooltipTrigger>
@@ -121,7 +121,7 @@ export default function SearchThumbnailFooter({
 
         <DropdownMenu>
           <DropdownMenuTrigger>
-            <LuMoreVertical className="size-5 cursor-pointer text-white" />
+            <LuMoreVertical className="size-5 cursor-pointer text-primary" />
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             {searchResult.has_clip && (
