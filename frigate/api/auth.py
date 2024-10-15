@@ -357,6 +357,7 @@ def create_user(request: Request, body: AppPostUsersBody):
         {
             User.username: body.username,
             User.password_hash: password_hash,
+            User.notification_tokens: [],
         }
     ).execute()
     return JSONResponse(content={"username": body.username})
