@@ -10,6 +10,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -22,13 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../ui/alert-dialog";
-import {
-  LuCamera,
-  LuDownload,
-  LuMoreVertical,
-  LuSearch,
-  LuTrash2,
-} from "react-icons/lu";
+import { LuCamera, LuDownload, LuMoreVertical, LuTrash2 } from "react-icons/lu";
 import FrigatePlusIcon from "@/components/icons/FrigatePlusIcon";
 import { FrigatePlusDialog } from "../overlay/dialog/FrigatePlusDialog";
 import { Event } from "@/types/event";
@@ -36,6 +32,7 @@ import { FaArrowsRotate } from "react-icons/fa6";
 import { baseUrl } from "@/api/baseUrl";
 import axios from "axios";
 import { toast } from "sonner";
+import { MdImageSearch } from "react-icons/md";
 
 type SearchThumbnailProps = {
   searchResult: SearchResult;
@@ -125,7 +122,7 @@ export default function SearchThumbnailFooter({
         )}
         {formattedDate}
       </div>
-      <div className="flex flex-row items-center justify-end gap-4">
+      <div className="flex flex-row items-center justify-end gap-8 md:gap-4">
         {config?.plus?.enabled &&
           searchResult.has_snapshot &&
           searchResult.end_time && (
@@ -143,7 +140,7 @@ export default function SearchThumbnailFooter({
         {config?.semantic_search?.enabled && (
           <Tooltip>
             <TooltipTrigger>
-              <LuSearch
+              <MdImageSearch
                 className="size-5 cursor-pointer text-primary"
                 onClick={findSimilar}
               />
@@ -157,6 +154,10 @@ export default function SearchThumbnailFooter({
             <LuMoreVertical className="size-5 cursor-pointer text-primary" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align={"end"}>
+            <DropdownMenuLabel className="mt-0.5">
+              Tracked Object Actions
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator className="mt-1" />
             {searchResult.has_clip && (
               <DropdownMenuItem>
                 <a
