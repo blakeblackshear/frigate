@@ -29,6 +29,7 @@ import SearchSourceIcon from "../icons/SearchSourceIcon";
 import PlatformAwareDialog from "../overlay/dialog/PlatformAwareDialog";
 import { FaArrowRight, FaClock } from "react-icons/fa";
 import { useFormattedHour } from "@/hooks/use-date-utils";
+import SearchFilterDialog from "../overlay/dialog/SearchFilterDialog";
 
 type SearchFilterGroupProps = {
   className: string;
@@ -159,6 +160,16 @@ export default function SearchFilterGroup({
           }}
         />
       )}
+      {filters.includes("general") && (
+        <GeneralFilterButton
+          allLabels={filterValues.labels}
+          selectedLabels={filter?.labels}
+          updateLabelFilter={(newLabels) => {
+            onUpdateFilter({ ...filter, labels: newLabels });
+          }}
+        />
+      )}
+      <SearchFilterDialog />
       {filters.includes("date") && (
         <CalendarRangeFilterButton
           range={
@@ -189,15 +200,6 @@ export default function SearchFilterGroup({
           updateZoneFilter={(newZones) =>
             onUpdateFilter({ ...filter, zones: newZones })
           }
-        />
-      )}
-      {filters.includes("general") && (
-        <GeneralFilterButton
-          allLabels={filterValues.labels}
-          selectedLabels={filter?.labels}
-          updateLabelFilter={(newLabels) => {
-            onUpdateFilter({ ...filter, labels: newLabels });
-          }}
         />
       )}
       {filters.includes("sub") && (
