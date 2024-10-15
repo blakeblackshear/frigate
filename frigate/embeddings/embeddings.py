@@ -7,6 +7,7 @@ import os
 import time
 
 from numpy import ndarray
+import onnxruntime as ort
 from PIL import Image
 from playhouse.shortcuts import model_to_dict
 
@@ -174,7 +175,16 @@ class Embeddings:
         return embedding
 
     def batch_upsert_description(self, event_descriptions: dict[str, str]) -> ndarray:
-        embeddings = self.text_embedding(list(event_descriptions.values()))
+        descs = list(event_descriptions.values())
+
+        try:
+            embeddings = self.text_embedding(descs)
+        except ort.RuntimeException:
+            half_size = len(descs) / 2
+            embeddings = []
+            embeddings.extend(self.text_embedding(descs[0:half_size]))
+            embeddings.extend(self.text_embedding(descs[half_size:]))
+
         ids = list(event_descriptions.keys())
 
         items = []
