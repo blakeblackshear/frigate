@@ -10,8 +10,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -24,13 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../ui/alert-dialog";
-import {
-  LuCamera,
-  LuCheck,
-  LuDownload,
-  LuMoreVertical,
-  LuTrash2,
-} from "react-icons/lu";
+import { LuCamera, LuDownload, LuMoreVertical, LuTrash2 } from "react-icons/lu";
 import FrigatePlusIcon from "@/components/icons/FrigatePlusIcon";
 import { FrigatePlusDialog } from "../overlay/dialog/FrigatePlusDialog";
 import { Event } from "@/types/event";
@@ -39,6 +31,7 @@ import { baseUrl } from "@/api/baseUrl";
 import axios from "axios";
 import { toast } from "sonner";
 import { MdImageSearch } from "react-icons/md";
+import { isMobileOnly } from "react-device-detect";
 
 type SearchThumbnailProps = {
   searchResult: SearchResult;
@@ -130,18 +123,12 @@ export default function SearchThumbnailFooter({
         )}
         {formattedDate}
       </div>
-      <div className="flex flex-row items-center justify-end gap-8 md:gap-4">
-        {config?.plus?.enabled &&
+      <div className="flex flex-row items-center justify-end gap-6 md:gap-4">
+        {!isMobileOnly &&
+          config?.plus?.enabled &&
           searchResult.has_snapshot &&
           searchResult.end_time &&
-          (searchResult.plus_id ? (
-            <Tooltip>
-              <TooltipTrigger>
-                <LuCheck className="size-5 cursor-pointer text-primary text-success" />
-              </TooltipTrigger>
-              <TooltipContent>Submitted to Frigate+</TooltipContent>
-            </Tooltip>
-          ) : (
+          !searchResult.plus_id && (
             <Tooltip>
               <TooltipTrigger>
                 <FrigatePlusIcon
@@ -151,7 +138,7 @@ export default function SearchThumbnailFooter({
               </TooltipTrigger>
               <TooltipContent>Submit to Frigate+</TooltipContent>
             </Tooltip>
-          ))}
+          )}
 
         {config?.semantic_search?.enabled && (
           <Tooltip>
@@ -170,10 +157,6 @@ export default function SearchThumbnailFooter({
             <LuMoreVertical className="size-5 cursor-pointer text-primary" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align={"end"}>
-            <DropdownMenuLabel className="mt-0.5">
-              Tracked Object Actions
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator className="mt-1" />
             {searchResult.has_clip && (
               <DropdownMenuItem>
                 <a
@@ -205,6 +188,20 @@ export default function SearchThumbnailFooter({
               <FaArrowsRotate className="mr-2 size-4" />
               <span>View object lifecycle</span>
             </DropdownMenuItem>
+
+            {isMobileOnly &&
+              config?.plus?.enabled &&
+              searchResult.has_snapshot &&
+              searchResult.end_time &&
+              !searchResult.plus_id && (
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() => setShowFrigatePlus(true)}
+                >
+                  <FrigatePlusIcon className="mr-1 size-5 cursor-pointer text-primary" />
+                  <span>Submit to Frigate+</span>
+                </DropdownMenuItem>
+              )}
             <DropdownMenuItem
               className="cursor-pointer"
               onClick={() => setDeleteDialogOpen(true)}
