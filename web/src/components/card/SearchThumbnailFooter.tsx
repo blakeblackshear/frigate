@@ -24,7 +24,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../ui/alert-dialog";
-import { LuCamera, LuDownload, LuMoreVertical, LuTrash2 } from "react-icons/lu";
+import {
+  LuCamera,
+  LuCheck,
+  LuDownload,
+  LuMoreVertical,
+  LuTrash2,
+} from "react-icons/lu";
 import FrigatePlusIcon from "@/components/icons/FrigatePlusIcon";
 import { FrigatePlusDialog } from "../overlay/dialog/FrigatePlusDialog";
 import { Event } from "@/types/event";
@@ -109,7 +115,9 @@ export default function SearchThumbnailFooter({
           showFrigatePlus ? (searchResult as unknown as Event) : undefined
         }
         onClose={() => setShowFrigatePlus(false)}
-        onEventUploaded={() => {}}
+        onEventUploaded={() => {
+          searchResult.plus_id = "submitted";
+        }}
       />
 
       <div className="flex flex-col items-start text-xs">
@@ -125,7 +133,15 @@ export default function SearchThumbnailFooter({
       <div className="flex flex-row items-center justify-end gap-8 md:gap-4">
         {config?.plus?.enabled &&
           searchResult.has_snapshot &&
-          searchResult.end_time && (
+          searchResult.end_time &&
+          (searchResult.plus_id ? (
+            <Tooltip>
+              <TooltipTrigger>
+                <LuCheck className="size-5 cursor-pointer text-primary text-success" />
+              </TooltipTrigger>
+              <TooltipContent>Submitted to Frigate+</TooltipContent>
+            </Tooltip>
+          ) : (
             <Tooltip>
               <TooltipTrigger>
                 <FrigatePlusIcon
@@ -135,7 +151,7 @@ export default function SearchThumbnailFooter({
               </TooltipTrigger>
               <TooltipContent>Submit to Frigate+</TooltipContent>
             </Tooltip>
-          )}
+          ))}
 
         {config?.semantic_search?.enabled && (
           <Tooltip>
