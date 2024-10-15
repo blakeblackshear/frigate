@@ -90,7 +90,10 @@ export default function SearchThumbnail({
                     onClick={() => onClick(searchResult)}
                   >
                     {getIconForLabel(objectLabel, "size-3 text-white")}
-                    {Math.round(searchResult.data.score * 100)}%
+                    {Math.floor(
+                      searchResult.score ?? searchResult.data.top_score * 100,
+                    )}
+                    %
                   </Chip>
                 </div>
               </TooltipTrigger>
