@@ -19,6 +19,10 @@ import {
 import { isDesktop } from "react-device-detect";
 import { useFormattedHour } from "@/hooks/use-date-utils";
 import Heading from "@/components/ui/heading";
+import FilterSwitch from "@/components/filter/FilterSwitch";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 
 type SearchFilterDialogProps = {
   config?: FrigateConfig;
@@ -63,6 +67,35 @@ export default function SearchFilterDialog({
           setCurrentFilter({ time_range: newRange, ...currentFilter })
         }
       />
+      <ZoneFilterContent
+        allZones={filterValues.zones}
+        zones={currentFilter.zones}
+        updateZones={(newZones) =>
+          setCurrentFilter({ zones: newZones, ...currentFilter })
+        }
+      />
+      {isDesktop && <DropdownMenuSeparator />}
+      <div className="flex items-center justify-evenly p-2">
+        <Button
+          variant="select"
+          onClick={() => {
+            if (currentFilter != filter) {
+              onUpdateFilter(currentFilter);
+            }
+
+            setOpen(false);
+          }}
+        >
+          Apply
+        </Button>
+        <Button
+          onClick={() => {
+            setCurrentFilter(filter ?? {});
+          }}
+        >
+          Reset
+        </Button>
+      </div>
     </>
   );
 
@@ -70,7 +103,7 @@ export default function SearchFilterDialog({
     <PlatformAwareSheet
       trigger={trigger}
       content={content}
-      contentClassName="w-auto"
+      contentClassName="w-auto lg:w-[300px]"
       open={open}
       onOpenChange={setOpen}
     />
@@ -207,6 +240,72 @@ function TimeRangeFilterContent({
         </Popover>
       </div>
     </div>
+  );
+}
+
+type ZoneFilterContentProps = {
+  allZones?: string[];
+  zones?: string[];
+  updateZones: (zones: string[] | undefined) => void;
+};
+export function ZoneFilterContent({
+  allZones,
+  zones,
+  updateZones,
+}: ZoneFilterContentProps) {
+  return (
+    <>
+      <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
+        {allZones && (
+          <>
+            {isDesktop && <DropdownMenuSeparator />}
+            <div className="mb-5 mt-2.5 flex items-center justify-between">
+              <Label
+                className="mx-2 cursor-pointer text-primary"
+                htmlFor="allZones"
+              >
+                All Zones
+              </Label>
+              <Switch
+                className="ml-1"
+                id="allZones"
+                checked={zones == undefined}
+                onCheckedChange={(isChecked) => {
+                  if (isChecked) {
+                    updateZones(undefined);
+                  }
+                }}
+              />
+            </div>
+            <div className="my-2.5 flex flex-col gap-2.5">
+              {allZones.map((item) => (
+                <FilterSwitch
+                  key={item}
+                  label={item.replaceAll("_", " ")}
+                  isChecked={zones?.includes(item) ?? false}
+                  onCheckedChange={(isChecked) => {
+                    if (isChecked) {
+                      const updatedZones = zones ? [...zones] : [];
+
+                      updatedZones.push(item);
+                      updateZones(updatedZones);
+                    } else {
+                      const updatedZones = zones ? [...zones] : [];
+
+                      // can not deselect the last item
+                      if (updatedZones.length > 1) {
+                        updatedZones.splice(updatedZones.indexOf(item), 1);
+                        updateZones(updatedZones);
+                      }
+                    }
+                  }}
+                />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </>
   );
 }
 
