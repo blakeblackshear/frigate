@@ -48,8 +48,6 @@ export default function SearchFilterDialog({
 
   // state
 
-  console.log(`the filter is ${JSON.stringify(currentFilter)}`);
-
   const [open, setOpen] = useState(false);
 
   const trigger = (

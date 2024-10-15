@@ -1,4 +1,9 @@
-import { MobilePage, MobilePageContent } from "@/components/mobile/MobilePage";
+import {
+  MobilePage,
+  MobilePageContent,
+  MobilePageHeader,
+  MobilePageTitle,
+} from "@/components/mobile/MobilePage";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
@@ -64,12 +69,22 @@ export function PlatformAwareSheet({
 }: PlatformAwareSheetProps) {
   if (isMobile) {
     return (
-      <MobilePage open={open} onOpenChange={onOpenChange}>
-        <Button asChild>{trigger}</Button>
-        <MobilePageContent className="max-h-[75dvh] overflow-hidden px-4">
-          {content}
-        </MobilePageContent>
-      </MobilePage>
+      <div>
+        <div onClick={() => onOpenChange(true)}>{trigger}</div>
+        <MobilePage open={open} onOpenChange={onOpenChange}>
+          <MobilePageContent className="h-full overflow-hidden">
+            <MobilePageHeader
+              className="mx-2"
+              onClose={() => onOpenChange(false)}
+            >
+              <MobilePageTitle>More Filters</MobilePageTitle>
+            </MobilePageHeader>
+            <div className="scrollbar-container h-full overflow-auto px-4 pb-20">
+              {content}
+            </div>
+          </MobilePageContent>
+        </MobilePage>
+      </div>
     );
   }
 
