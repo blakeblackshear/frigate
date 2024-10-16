@@ -209,8 +209,8 @@ export default function SearchSettingsView({
             </div>
             <div className="mt-3 text-sm text-muted-foreground">
               Re-indexing will reprocess all thumbnails and descriptions (if
-              enabled) and apply the embeddings on each startup. Don't forget to
-              disable the option after restarting!
+              enabled) and apply the embeddings on each startup.{" "}
+              <em>Don't forget to disable the option after restarting!</em>
             </div>
           </div>
           <div className="mt-2 flex flex-col space-y-6">
