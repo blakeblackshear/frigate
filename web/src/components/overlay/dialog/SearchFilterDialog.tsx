@@ -128,7 +128,13 @@ export default function SearchFilterDialog({
         </Button>
         <Button
           onClick={() => {
-            setCurrentFilter(filter ?? {});
+            setCurrentFilter((prevFilter) => ({
+              ...prevFilter,
+              time_range: undefined,
+              zones: undefined,
+              sub_labels: undefined,
+              search_type: ["thumbnail", "description"],
+            }));
           }}
         >
           Reset
