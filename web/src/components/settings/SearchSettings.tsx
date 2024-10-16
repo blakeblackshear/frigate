@@ -37,7 +37,7 @@ export default function SearchSettings({
     </Button>
   );
   const content = (
-    <div className={cn(className, "mb-3 space-y-5")}>
+    <div className={cn(className, "my-3 space-y-5 py-3 md:mt-0 md:py-0")}>
       <div className="space-y-4">
         <div className="space-y-0.5">
           <div className="text-md">Default Search View</div>
