@@ -73,13 +73,17 @@ export default function SearchView({
   const [columnCount, setColumnCount] = usePersistence("exploreGridColumns", 4);
   const effectiveColumnCount = useMemo(() => columnCount ?? 4, [columnCount]);
 
-  const gridClassName = cn("grid w-full gap-2 px-1 gap-2 lg:gap-4 md:mx-2", {
-    "sm:grid-cols-2": effectiveColumnCount <= 2,
-    "sm:grid-cols-3": effectiveColumnCount === 3,
-    "sm:grid-cols-4": effectiveColumnCount === 4,
-    "sm:grid-cols-5": effectiveColumnCount === 5,
-    "sm:grid-cols-6": effectiveColumnCount === 6,
-  });
+  const gridClassName = cn(
+    "grid w-full gap-2 px-1 gap-2 lg:gap-4 md:mx-2",
+    isMobileOnly && "grid-cols-2",
+    {
+      "sm:grid-cols-2": effectiveColumnCount <= 2,
+      "sm:grid-cols-3": effectiveColumnCount === 3,
+      "sm:grid-cols-4": effectiveColumnCount === 4,
+      "sm:grid-cols-5": effectiveColumnCount === 5,
+      "sm:grid-cols-6": effectiveColumnCount === 6,
+    },
+  );
 
   // suggestions values
 

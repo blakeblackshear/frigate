@@ -22,7 +22,7 @@ import {
 const PLAYBACK_RATE_DEFAULT = isSafari ? [0.5, 1, 2] : [0.5, 1, 2, 4, 8, 16];
 const WEEK_STARTS_ON = ["Sunday", "Monday"];
 
-export default function GeneralSettingsView() {
+export default function UiSettingsView() {
   const { data: config } = useSWR<FrigateConfig>("config");
 
   const clearStoredLayouts = useCallback(() => {

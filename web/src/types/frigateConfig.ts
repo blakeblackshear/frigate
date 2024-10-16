@@ -27,6 +27,8 @@ export const ATTRIBUTE_LABELS = [
   "ups",
 ];
 
+export type SearchModelSize = "small" | "large";
+
 export interface CameraConfig {
   audio: {
     enabled: boolean;
@@ -418,7 +420,8 @@ export interface FrigateConfig {
 
   semantic_search: {
     enabled: boolean;
-    model_size: string;
+    reindex: boolean;
+    model_size: SearchModelSize;
   };
 
   snapshots: {
