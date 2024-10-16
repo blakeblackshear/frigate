@@ -80,14 +80,20 @@ export default function SearchFilterDialog({
           setCurrentFilter({ ...currentFilter, sub_labels: newSubLabels })
         }
       />
-      <SearchTypeContent
-        searchSources={
-          currentFilter?.search_type ?? ["thumbnail", "description"]
-        }
-        setSearchSources={(newSearchSource) =>
-          onUpdateFilter({ ...currentFilter, search_type: newSearchSource })
-        }
-      />
+      {config?.semantic_search?.enabled &&
+        !currentFilter?.search_type?.includes("similarity") && (
+          <SearchTypeContent
+            searchSources={
+              currentFilter?.search_type ?? ["thumbnail", "description"]
+            }
+            setSearchSources={(newSearchSource) =>
+              setCurrentFilter({
+                ...currentFilter,
+                search_type: newSearchSource,
+              })
+            }
+          />
+        )}
       {isDesktop && <DropdownMenuSeparator />}
       <div className="flex items-center justify-evenly p-2">
         <Button
@@ -185,7 +191,7 @@ function TimeRangeFilterContent({
   return (
     <div className="overflow-x-hidden">
       <Heading as="h4">Time Range</Heading>
-      <div className="my-3 flex flex-row items-center justify-center gap-2">
+      <div className="mt-3 flex flex-row items-center justify-center gap-2">
         <Popover
           open={startOpen}
           onOpenChange={(open) => {
@@ -301,7 +307,7 @@ export function ZoneFilterContent({
                 }}
               />
             </div>
-            <div className="my-2.5 flex flex-col gap-2.5">
+            <div className="mt-2.5 flex flex-col gap-2.5">
               {allZones.map((item) => (
                 <FilterSwitch
                   key={item}
@@ -362,7 +368,7 @@ export function SubFilterContent({
           }}
         />
       </div>
-      <div className="my-2.5 flex flex-col gap-2.5">
+      <div className="mt-2.5 flex flex-col gap-2.5">
         {allSubLabels.map((item) => (
           <FilterSwitch
             key={item}
@@ -404,7 +410,7 @@ export function SearchTypeContent({
       <div className="overflow-x-hidden">
         <DropdownMenuSeparator className="mb-3" />
         <Heading as="h4">Search Sources</Heading>
-        <div className="my-2.5 flex flex-col gap-2.5">
+        <div className="mt-2.5 flex flex-col gap-2.5">
           <FilterSwitch
             label="Thumbnail Image"
             isChecked={searchSources?.includes("thumbnail") ?? false}
