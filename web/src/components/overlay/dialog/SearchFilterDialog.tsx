@@ -51,9 +51,27 @@ export default function SearchFilterDialog({
 
   const [open, setOpen] = useState(false);
 
+  const moreFiltersSelected = useMemo(
+    () =>
+      currentFilter &&
+      (currentFilter.time_range ||
+        (currentFilter.zones?.length ?? 0) > 0 ||
+        (currentFilter.sub_labels?.length ?? 0) > 0 ||
+        (currentFilter.search_type?.length ?? 2) !== 2),
+    [currentFilter],
+  );
+
   const trigger = (
-    <Button className="flex items-center gap-2" size="sm">
-      <FaCog className={"text-secondary-foreground"} />
+    <Button
+      className="flex items-center gap-2"
+      size="sm"
+      variant={moreFiltersSelected ? "select" : "default"}
+    >
+      <FaCog
+        className={cn(
+          moreFiltersSelected ? "text-white" : "text-secondary-foreground",
+        )}
+      />
       More Filters
     </Button>
   );
