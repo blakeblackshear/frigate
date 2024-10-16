@@ -42,8 +42,8 @@ export default function SearchSettings({
         <div className="space-y-0.5">
           <div className="text-md">Default Search View</div>
           <div className="space-y-1 text-xs text-muted-foreground">
-            When no filters are selected, display a summary of the 10 most
-            recent tracked objects per label, or display an unfiltered grid.
+            When no filters are selected, display a summary of the most recent
+            tracked objects per label, or display an unfiltered grid.
           </div>
         </div>
         <Select
