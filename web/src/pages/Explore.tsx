@@ -7,6 +7,7 @@ import ActivityIndicator from "@/components/indicators/activity-indicator";
 import AnimatedCircularProgressBar from "@/components/ui/circular-progress-bar";
 import { useApiFilterArgs } from "@/hooks/use-api-filter";
 import { useTimezone } from "@/hooks/use-date-utils";
+import { usePersistence } from "@/hooks/use-persistence";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { SearchFilter, SearchQuery, SearchResult } from "@/types/search";
 import { ModelState } from "@/types/ws";
@@ -27,6 +28,18 @@ export default function Explore() {
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
+
+  // grid
+
+  const [columnCount, setColumnCount] = usePersistence("exploreGridColumns", 4);
+  const gridColumns = useMemo(() => columnCount ?? 4, [columnCount]);
+
+  // default layout
+
+  const [defaultView, setDefaultView] = usePersistence(
+    "exploreDefaultView",
+    "summary",
+  );
 
   const timezone = useTimezone(config);
 
@@ -65,7 +78,11 @@ export default function Explore() {
   const searchQuery: SearchQuery = useMemo(() => {
     // no search parameters
     if (searchSearchParams && Object.keys(searchSearchParams).length === 0) {
-      return null;
+      if (defaultView == "grid") {
+        return ["events", {}];
+      } else {
+        return null;
+      }
     }
 
     // parameters, but no search term and not similarity
@@ -117,7 +134,7 @@ export default function Explore() {
         include_thumbnails: 0,
       },
     ];
-  }, [searchTerm, searchSearchParams, similaritySearch, timezone]);
+  }, [searchTerm, searchSearchParams, similaritySearch, timezone, defaultView]);
 
   // paging
 
@@ -385,6 +402,8 @@ export default function Explore() {
           searchResults={searchResults}
           isLoading={(isLoadingInitialData || isLoadingMore) ?? true}
           hasMore={!isReachingEnd}
+          columns={gridColumns}
+          defaultView={defaultView}
           setSearch={setSearch}
           setSimilaritySearch={(search) => {
             setSearchFilter({
@@ -395,6 +414,8 @@ export default function Explore() {
           }}
           setSearchFilter={setSearchFilter}
           onUpdateFilter={setSearchFilter}
+          setColumns={setColumnCount}
+          setDefaultView={setDefaultView}
           loadMore={loadMore}
           refresh={mutate}
         />

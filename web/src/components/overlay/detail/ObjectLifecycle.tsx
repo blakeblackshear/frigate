@@ -383,7 +383,7 @@ export default function ObjectLifecycle({
             {eventSequence.map((item, index) => (
               <CarouselItem key={index}>
                 <Card className="p-1 text-sm md:p-2" key={index}>
-                  <CardContent className="flex flex-row items-center gap-3 p-1 md:p-6">
+                  <CardContent className="flex flex-row items-center gap-3 p-1 md:p-2">
                     <div className="flex flex-1 flex-row items-center justify-start p-3 pl-1">
                       <div
                         className="rounded-lg p-2"
