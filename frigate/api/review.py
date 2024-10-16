@@ -356,14 +356,14 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
     return JSONResponse(content=data)
 
 
-@router.post("/reviews/viewed")
+@router.post("/reviews/viewed", response_model=GenericResponse)
 def set_multiple_reviewed(body: dict = None):
     json: dict[str, any] = body or {}
     list_of_ids = json.get("ids", "")
 
     if not list_of_ids or len(list_of_ids) == 0:
         return JSONResponse(
-            context=({"success": False, "message": "Not a valid list of ids"}),
+            content=({"success": False, "message": "Not a valid list of ids"}),
             status_code=404,
         )
 
@@ -377,7 +377,7 @@ def set_multiple_reviewed(body: dict = None):
     )
 
 
-@router.post("/reviews/delete")
+@router.post("/reviews/delete", response_model=GenericResponse)
 def delete_reviews(body: dict = None):
     json: dict[str, any] = body or {}
     list_of_ids = json.get("ids", "")
