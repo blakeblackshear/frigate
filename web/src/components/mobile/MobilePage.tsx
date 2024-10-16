@@ -1,29 +1,101 @@
+import { createContext, useContext, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { IoMdArrowRoundBack } from "react-icons/io";
 import { cn } from "@/lib/utils";
 import { isPWA } from "@/utils/isPWA";
-import { ReactNode, useEffect, useState } from "react";
-import { Button } from "../ui/button";
-import { IoMdArrowRoundBack } from "react-icons/io";
-import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui/button";
 
-type MobilePageProps = {
-  children: ReactNode;
+const MobilePageContext = createContext<{
   open: boolean;
   onOpenChange: (open: boolean) => void;
+} | null>(null);
+
+type MobilePageProps = {
+  children: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 };
 
-export function MobilePage({ children, open, onOpenChange }: MobilePageProps) {
-  const [isVisible, setIsVisible] = useState(open);
+export function MobilePage({
+  children,
+  open: controlledOpen,
+  onOpenChange,
+}: MobilePageProps) {
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+
+  const open = controlledOpen ?? uncontrolledOpen;
+  const setOpen = onOpenChange ?? setUncontrolledOpen;
+
+  return (
+    <MobilePageContext.Provider value={{ open, onOpenChange: setOpen }}>
+      {children}
+    </MobilePageContext.Provider>
+  );
+}
+
+type MobilePageTriggerProps = React.HTMLAttributes<HTMLDivElement>;
+
+export function MobilePageTrigger({
+  children,
+  ...props
+}: MobilePageTriggerProps) {
+  const context = useContext(MobilePageContext);
+  if (!context)
+    throw new Error("MobilePageTrigger must be used within MobilePage");
+
+  return (
+    <div onClick={() => context.onOpenChange(true)} {...props}>
+      {children}
+    </div>
+  );
+}
+
+type MobilePagePortalProps = {
+  children: React.ReactNode;
+  container?: HTMLElement;
+};
+
+export function MobilePagePortal({
+  children,
+  container,
+}: MobilePagePortalProps) {
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (open) {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
+  if (!mounted) return null;
+
+  return createPortal(children, container || document.body);
+}
+
+type MobilePageContentProps = {
+  children: React.ReactNode;
+  className?: string;
+};
+
+export function MobilePageContent({
+  children,
+  className,
+}: MobilePageContentProps) {
+  const context = useContext(MobilePageContext);
+  if (!context)
+    throw new Error("MobilePageContent must be used within MobilePage");
+
+  const [isVisible, setIsVisible] = useState(context.open);
+
+  useEffect(() => {
+    if (context.open) {
       setIsVisible(true);
     }
-  }, [open]);
+  }, [context.open]);
 
   const handleAnimationComplete = () => {
-    if (!open) {
+    if (!context.open) {
       setIsVisible(false);
-      onOpenChange(false);
     }
   };
 
@@ -35,9 +107,10 @@ export function MobilePage({ children, open, onOpenChange }: MobilePageProps) {
             "fixed inset-0 z-50 mb-12 bg-background",
             isPWA && "mb-16",
             "landscape:mb-14 landscape:md:mb-16",
+            className,
           )}
           initial={{ x: "100%" }}
-          animate={{ x: open ? 0 : "100%" }}
+          animate={{ x: context.open ? 0 : "100%" }}
           exit={{ x: "100%" }}
           transition={{ type: "spring", damping: 25, stiffness: 200 }}
           onAnimationComplete={handleAnimationComplete}
@@ -49,37 +122,8 @@ export function MobilePage({ children, open, onOpenChange }: MobilePageProps) {
   );
 }
 
-type MobileComponentProps = {
-  children: ReactNode;
-  className?: string;
-};
-
-export function MobilePageContent({
-  children,
-  className,
-  ...props
-}: MobileComponentProps) {
-  return (
-    <div className={cn("size-full", className)} {...props}>
-      {children}
-    </div>
-  );
-}
-
-export function MobilePageDescription({
-  children,
-  className,
-  ...props
-}: MobileComponentProps) {
-  return (
-    <p className={cn("text-sm text-muted-foreground", className)} {...props}>
-      {children}
-    </p>
-  );
-}
-
 interface MobilePageHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
-  onClose: () => void;
+  onClose?: () => void;
 }
 
 export function MobilePageHeader({
@@ -88,6 +132,18 @@ export function MobilePageHeader({
   onClose,
   ...props
 }: MobilePageHeaderProps) {
+  const context = useContext(MobilePageContext);
+  if (!context)
+    throw new Error("MobilePageHeader must be used within MobilePage");
+
+  const handleClose = () => {
+    if (onClose) {
+      onClose();
+    } else {
+      context.onOpenChange(false);
+    }
+  };
+
   return (
     <div
       className={cn(
@@ -99,7 +155,7 @@ export function MobilePageHeader({
       <Button
         className="absolute left-0 rounded-lg"
         size="sm"
-        onClick={onClose}
+        onClick={handleClose}
       >
         <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
       </Button>
@@ -108,14 +164,19 @@ export function MobilePageHeader({
   );
 }
 
-export function MobilePageTitle({
-  children,
+type MobilePageTitleProps = React.HTMLAttributes<HTMLHeadingElement>;
+
+export function MobilePageTitle({ className, ...props }: MobilePageTitleProps) {
+  return <h2 className={cn("text-lg font-semibold", className)} {...props} />;
+}
+
+type MobilePageDescriptionProps = React.HTMLAttributes<HTMLParagraphElement>;
+
+export function MobilePageDescription({
   className,
   ...props
-}: MobileComponentProps) {
+}: MobilePageDescriptionProps) {
   return (
-    <h2 className={cn("text-lg font-semibold", className)} {...props}>
-      {children}
-    </h2>
+    <p className={cn("text-sm text-muted-foreground", className)} {...props} />
   );
 }
