@@ -74,7 +74,8 @@ export default function SearchView({
   const effectiveColumnCount = useMemo(() => columnCount ?? 4, [columnCount]);
 
   const gridClassName = cn(
-    "grid w-full gap-2 px-1 gap-2 lg:gap-4 md:mx-2 grid-cols-2",
+    "grid w-full gap-2 px-1 gap-2 lg:gap-4 md:mx-2",
+    isMobileOnly && "grid-cols-2",
     {
       "sm:grid-cols-2": effectiveColumnCount <= 2,
       "sm:grid-cols-3": effectiveColumnCount === 3,
