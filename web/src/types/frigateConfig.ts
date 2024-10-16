@@ -19,14 +19,6 @@ export interface BirdseyeConfig {
   width: number;
 }
 
-export const ATTRIBUTE_LABELS = [
-  "amazon",
-  "face",
-  "fedex",
-  "license_plate",
-  "ups",
-];
-
 export type SearchModelSize = "small" | "large";
 
 export interface CameraConfig {

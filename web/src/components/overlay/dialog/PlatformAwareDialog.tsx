@@ -2,7 +2,9 @@ import {
   MobilePage,
   MobilePageContent,
   MobilePageHeader,
+  MobilePagePortal,
   MobilePageTitle,
+  MobilePageTrigger,
 } from "@/components/mobile/MobilePage";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
@@ -79,9 +81,11 @@ export function PlatformAwareSheet({
 }: PlatformAwareSheetProps) {
   if (isMobile) {
     return (
-      <div>
-        <div onClick={() => onOpenChange(true)}>{trigger}</div>
-        <MobilePage open={open} onOpenChange={onOpenChange}>
+      <MobilePage open={open} onOpenChange={onOpenChange}>
+        <MobilePageTrigger onClick={() => onOpenChange(true)}>
+          {trigger}
+        </MobilePageTrigger>
+        <MobilePagePortal>
           <MobilePageContent className="h-full overflow-hidden">
             <MobilePageHeader
               className="mx-2"
@@ -91,8 +95,8 @@ export function PlatformAwareSheet({
             </MobilePageHeader>
             <div className={contentClassName}>{content}</div>
           </MobilePageContent>
-        </MobilePage>
-      </div>
+        </MobilePagePortal>
+      </MobilePage>
     );
   }
 

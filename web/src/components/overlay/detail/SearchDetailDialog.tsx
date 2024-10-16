@@ -150,7 +150,14 @@ export default function SearchDetailDialog({
   const Description = isDesktop ? DialogDescription : MobilePageDescription;
 
   return (
-    <Overlay open={isOpen} onOpenChange={() => setIsOpen(!isOpen)}>
+    <Overlay
+      open={isOpen}
+      onOpenChange={() => {
+        if (search) {
+          setSearch(undefined);
+        }
+      }}
+    >
       <Content
         className={cn(
           "scrollbar-container overflow-y-auto",
