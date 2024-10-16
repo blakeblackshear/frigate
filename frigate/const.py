@@ -17,7 +17,21 @@ PLUS_API_HOST = "https://api.frigate.video"
 
 DEFAULT_ATTRIBUTE_LABEL_MAP = {
     "person": ["amazon", "face"],
-    "car": ["amazon", "fedex", "license_plate", "ups"],
+    "car": [
+        "amazon",
+        "an_post",
+        "dhl",
+        "dpd",
+        "fedex",
+        "gls",
+        "license_plate",
+        "nzpost",
+        "postnl",
+        "postnord",
+        "purolator",
+        "ups",
+        "usps",
+    ],
 }
 LABEL_CONSOLIDATION_MAP = {
     "car": 0.8,
