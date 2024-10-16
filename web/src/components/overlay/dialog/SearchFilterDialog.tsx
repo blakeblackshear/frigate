@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/popover";
 import { isDesktop, isMobileOnly } from "react-device-detect";
 import { useFormattedHour } from "@/hooks/use-date-utils";
-import Heading from "@/components/ui/heading";
 import FilterSwitch from "@/components/filter/FilterSwitch";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -214,7 +213,7 @@ function TimeRangeFilterContent({
 
   return (
     <div className="overflow-x-hidden">
-      <Heading as="h4">Time Range</Heading>
+      <div className="text-lg">Time Range</div>
       <div className="mt-3 flex flex-row items-center justify-center gap-2">
         <Popover
           open={startOpen}
@@ -310,7 +309,7 @@ export function ZoneFilterContent({
     <>
       <div className="overflow-x-hidden">
         <DropdownMenuSeparator className="mb-3" />
-        <Heading as="h4">Zones</Heading>
+        <div className="text-lg">Zones</div>
         {allZones && (
           <>
             <div className="mb-5 mt-2.5 flex items-center justify-between">
@@ -376,7 +375,7 @@ export function SubFilterContent({
   return (
     <div className="overflow-x-hidden">
       <DropdownMenuSeparator className="mb-3" />
-      <Heading as="h4">Sub Labels</Heading>
+      <div className="text-lg">Sub Labels</div>
       <div className="mb-5 mt-2.5 flex items-center justify-between">
         <Label className="mx-2 cursor-pointer text-primary" htmlFor="allLabels">
           All Sub Labels
@@ -433,7 +432,7 @@ export function SearchTypeContent({
     <>
       <div className="overflow-x-hidden">
         <DropdownMenuSeparator className="mb-3" />
-        <Heading as="h4">Search Sources</Heading>
+        <div className="text-lg">Search Sources</div>
         <div className="mt-2.5 flex flex-col gap-2.5">
           <FilterSwitch
             label="Thumbnail Image"
