@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   LuX,
   LuFilter,
-  LuImage,
   LuChevronDown,
   LuChevronUp,
   LuTrash2,
@@ -44,6 +43,7 @@ import {
 import { toast } from "sonner";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
+import { MdImageSearch } from "react-icons/md";
 
 type InputWithTagsProps = {
   inputFocused: boolean;
@@ -514,7 +514,7 @@ export default function InputWithTags({
             onFocus={handleInputFocus}
             onBlur={handleInputBlur}
             onKeyDown={handleInputKeyDown}
-            className="text-md h-9 pr-24"
+            className="text-md h-9 pr-32"
             placeholder="Search..."
           />
           <div className="absolute right-3 top-0 flex h-full flex-row items-center justify-center gap-5">
@@ -549,7 +549,7 @@ export default function InputWithTags({
             {isSimilaritySearch && (
               <Tooltip>
                 <TooltipTrigger className="cursor-default">
-                  <LuImage
+                  <MdImageSearch
                     aria-label="Similarity search active"
                     className="size-4 text-selected"
                   />

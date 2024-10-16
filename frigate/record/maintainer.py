@@ -142,9 +142,26 @@ class RecordingMaintainer(threading.Thread):
                     )
                 )
             )
+
+            # see if the recording mover is too slow and segments need to be deleted
             if processed_segment_count > keep_count:
                 logger.warning(
                     f"Unable to keep up with recording segments in cache for {camera}. Keeping the {keep_count} most recent segments out of {processed_segment_count} and discarding the rest..."
+                )
+                to_remove = grouped_recordings[camera][:-keep_count]
+                for rec in to_remove:
+                    cache_path = rec["cache_path"]
+                    Path(cache_path).unlink(missing_ok=True)
+                    self.end_time_cache.pop(cache_path, None)
+                grouped_recordings[camera] = grouped_recordings[camera][-keep_count:]
+
+            # see if detection has failed and unprocessed segments need to be deleted
+            unprocessed_segment_count = (
+                len(grouped_recordings[camera]) - processed_segment_count
+            )
+            if unprocessed_segment_count > keep_count:
+                logger.warning(
+                    f"Too many unprocessed recording segments in cache for {camera}. This likely indicates an issue with the detect stream, keeping the {keep_count} most recent segments out of {unprocessed_segment_count} and discarding the rest..."
                 )
                 to_remove = grouped_recordings[camera][:-keep_count]
                 for rec in to_remove:

@@ -69,16 +69,20 @@ const SEARCH_TABS = [
   "video",
   "object lifecycle",
 ] as const;
-type SearchTab = (typeof SEARCH_TABS)[number];
+export type SearchTab = (typeof SEARCH_TABS)[number];
 
 type SearchDetailDialogProps = {
   search?: SearchResult;
+  page: SearchTab;
   setSearch: (search: SearchResult | undefined) => void;
+  setSearchPage: (page: SearchTab) => void;
   setSimilarity?: () => void;
 };
 export default function SearchDetailDialog({
   search,
+  page,
   setSearch,
+  setSearchPage,
   setSimilarity,
 }: SearchDetailDialogProps) {
   const { data: config } = useSWR<FrigateConfig>("config", {
@@ -87,15 +91,20 @@ export default function SearchDetailDialog({
 
   // tabs
 
-  const [page, setPage] = useState<SearchTab>("details");
-  const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
+  const [pageToggle, setPageToggle] = useOptimisticState(
+    page,
+    setSearchPage,
+    100,
+  );
 
   // dialog and mobile page
 
   const [isOpen, setIsOpen] = useState(search != undefined);
 
   useEffect(() => {
-    setIsOpen(search != undefined);
+    if (search) {
+      setIsOpen(search != undefined);
+    }
   }, [search]);
 
   const searchTabs = useMemo(() => {
@@ -115,12 +124,6 @@ export default function SearchDetailDialog({
       views.splice(index, 1);
     }
 
-    // TODO implement
-    //if (!config.semantic_search.enabled) {
-    //  const index = views.indexOf("similar-calendar");
-    //  views.splice(index, 1);
-    // }
-
     return views;
   }, [config, search]);
 
@@ -130,9 +133,9 @@ export default function SearchDetailDialog({
     }
 
     if (!searchTabs.includes(pageToggle)) {
-      setPage("details");
+      setSearchPage("details");
     }
-  }, [pageToggle, searchTabs]);
+  }, [pageToggle, searchTabs, setSearchPage]);
 
   if (!search) {
     return;
@@ -147,14 +150,7 @@ export default function SearchDetailDialog({
   const Description = isDesktop ? DialogDescription : MobilePageDescription;
 
   return (
-    <Overlay
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (!open) {
-          setSearch(undefined);
-        }
-      }}
-    >
+    <Overlay open={isOpen} onOpenChange={() => setIsOpen(!isOpen)}>
       <Content
         className={cn(
           "scrollbar-container overflow-y-auto",

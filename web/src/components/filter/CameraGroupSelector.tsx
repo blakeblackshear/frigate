@@ -643,6 +643,11 @@ export function CameraGroupEdit({
 
       setIsLoading(true);
 
+      let renamingQuery = "";
+      if (editingGroup && editingGroup[0] !== values.name) {
+        renamingQuery = `camera_groups.${editingGroup[0]}&`;
+      }
+
       const order =
         editingGroup === undefined
           ? currentGroups.length + 1
@@ -655,9 +660,12 @@ export function CameraGroupEdit({
         .join("");
 
       axios
-        .put(`config/set?${orderQuery}&${iconQuery}${cameraQueries}`, {
-          requires_restart: 0,
-        })
+        .put(
+          `config/set?${renamingQuery}${orderQuery}&${iconQuery}${cameraQueries}`,
+          {
+            requires_restart: 0,
+          },
+        )
         .then((res) => {
           if (res.status === 200) {
             toast.success(`Camera group (${values.name}) has been saved.`, {
@@ -712,7 +720,6 @@ export function CameraGroupEdit({
                 <Input
                   className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                   placeholder="Enter a name..."
-                  disabled={editingGroup !== undefined}
                   {...field}
                 />
               </FormControl>

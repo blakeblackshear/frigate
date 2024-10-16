@@ -174,7 +174,12 @@ class Embeddings:
         return embedding
 
     def batch_upsert_description(self, event_descriptions: dict[str, str]) -> ndarray:
-        embeddings = self.text_embedding(list(event_descriptions.values()))
+        # upsert embeddings one by one to avoid token limit
+        embeddings = []
+
+        for desc in event_descriptions.values():
+            embeddings.append(self.text_embedding([desc])[0])
+
         ids = list(event_descriptions.keys())
 
         items = []

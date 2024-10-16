@@ -275,7 +275,7 @@ export default function Explore() {
               <TbExclamationCircle className="mb-3 size-10" />
               <div>Search Unavailable</div>
             </div>
-            {embeddingsReindexing && (
+            {embeddingsReindexing && allModelsLoaded && (
               <>
                 <div className="text-center text-primary-variant">
                   Search can be used after tracked object embeddings have
@@ -384,6 +384,7 @@ export default function Explore() {
           searchFilter={searchFilter}
           searchResults={searchResults}
           isLoading={(isLoadingInitialData || isLoadingMore) ?? true}
+          hasMore={!isReachingEnd}
           setSearch={setSearch}
           setSimilaritySearch={(search) => {
             setSearchFilter({
@@ -395,7 +396,7 @@ export default function Explore() {
           setSearchFilter={setSearchFilter}
           onUpdateFilter={setSearchFilter}
           loadMore={loadMore}
-          hasMore={!isReachingEnd}
+          refresh={mutate}
         />
       )}
     </>
