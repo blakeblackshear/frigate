@@ -113,7 +113,7 @@ export default function SearchThumbnailFooter({
         }}
       />
 
-      <div className="flex flex-col items-start text-xs">
+      <div className="flex flex-col items-start text-xs text-primary-variant">
         {searchResult.end_time ? (
           <TimeAgo time={searchResult.start_time * 1000} dense />
         ) : (
@@ -132,7 +132,7 @@ export default function SearchThumbnailFooter({
             <Tooltip>
               <TooltipTrigger>
                 <FrigatePlusIcon
-                  className="size-5 cursor-pointer text-primary"
+                  className="size-5 cursor-pointer text-primary-variant hover:text-primary"
                   onClick={() => setShowFrigatePlus(true)}
                 />
               </TooltipTrigger>
@@ -144,7 +144,7 @@ export default function SearchThumbnailFooter({
           <Tooltip>
             <TooltipTrigger>
               <MdImageSearch
-                className="size-5 cursor-pointer text-primary"
+                className="size-5 cursor-pointer text-primary-variant hover:text-primary"
                 onClick={findSimilar}
               />
             </TooltipTrigger>
@@ -154,7 +154,7 @@ export default function SearchThumbnailFooter({
 
         <DropdownMenu>
           <DropdownMenuTrigger>
-            <LuMoreVertical className="size-5 cursor-pointer text-primary" />
+            <LuMoreVertical className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align={"end"}>
             {searchResult.has_clip && (
