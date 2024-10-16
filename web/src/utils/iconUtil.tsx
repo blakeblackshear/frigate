@@ -1,4 +1,5 @@
 import { IconName } from "@/components/icons/IconPicker";
+import { FrigateConfig } from "@/types/frigateConfig";
 import { BsPersonWalking } from "react-icons/bs";
 import {
   FaAmazon,
@@ -35,6 +36,19 @@ import {
 import { LuBox, LuLassoSelect } from "react-icons/lu";
 import * as LuIcons from "react-icons/lu";
 import { MdRecordVoiceOver } from "react-icons/md";
+
+export function getAttributeLabels(config?: FrigateConfig) {
+  if (!config) {
+    return [];
+  }
+
+  const labels = new Set();
+
+  Object.values(config.model.attributes_map).forEach((values) =>
+    values.forEach((label) => labels.add(label)),
+  );
+  return [...labels];
+}
 
 export function isValidIconName(value: string): value is IconName {
   return Object.keys(LuIcons).includes(value as IconName);

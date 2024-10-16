@@ -3,7 +3,7 @@ import {
   useInitialCameraState,
   useMotionActivity,
 } from "@/api/ws";
-import { ATTRIBUTE_LABELS, CameraConfig } from "@/types/frigateConfig";
+import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import { MotionData, ReviewSegment } from "@/types/review";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTimelineUtils } from "./use-timeline-utils";
@@ -11,6 +11,8 @@ import { ObjectType } from "@/types/ws";
 import useDeepMemo from "./use-deep-memo";
 import { isEqual } from "lodash";
 import { useAutoFrigateStats } from "./use-stats";
+import useSWR from "swr";
+import { getAttributeLabels } from "@/utils/iconUtil";
 
 type useCameraActivityReturn = {
   activeTracking: boolean;
@@ -23,6 +25,16 @@ export function useCameraActivity(
   camera: CameraConfig,
   revalidateOnFocus: boolean = true,
 ): useCameraActivityReturn {
+  const { data: config } = useSWR<FrigateConfig>("config", {
+    revalidateOnFocus: false,
+  });
+  const attributeLabels = useMemo(() => {
+    if (!config) {
+      return [];
+    }
+
+    return getAttributeLabels(config);
+  }, [config]);
   const [objects, setObjects] = useState<ObjectType[]>([]);
 
   // init camera activity
@@ -99,7 +111,7 @@ export function useCameraActivity(
         if (updatedEvent.after.sub_label) {
           const sub_label = updatedEvent.after.sub_label[0];
 
-          if (ATTRIBUTE_LABELS.includes(sub_label)) {
+          if (attributeLabels.includes(sub_label)) {
             label = sub_label;
           } else {
             label = `${label}-verified`;
@@ -113,7 +125,7 @@ export function useCameraActivity(
     }
 
     handleSetObjects(newObjects);
-  }, [camera, updatedEvent, objects, handleSetObjects]);
+  }, [attributeLabels, camera, updatedEvent, objects, handleSetObjects]);
 
   // determine if camera is offline
 
