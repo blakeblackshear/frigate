@@ -1,4 +1,4 @@
-import { FaArrowRight, FaCog } from "react-icons/fa";
+import { FaArrowRight, FaFilter } from "react-icons/fa";
 
 import { useEffect, useMemo, useState } from "react";
 import { PlatformAwareSheet } from "./PlatformAwareDialog";
@@ -66,7 +66,7 @@ export default function SearchFilterDialog({
       size="sm"
       variant={moreFiltersSelected ? "select" : "default"}
     >
-      <FaCog
+      <FaFilter
         className={cn(
           moreFiltersSelected ? "text-white" : "text-secondary-foreground",
         )}
