@@ -13,6 +13,7 @@ from fastapi.responses import JSONResponse
 from peewee import Case, DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
 
+from frigate.api.defs.generic_response import GenericResponse
 from frigate.api.defs.review_query_parameters import (
     ReviewActivityMotionQueryParams,
     ReviewQueryParams,
@@ -572,7 +573,7 @@ def audio_activity(params: ReviewActivityMotionQueryParams = Depends()):
     return JSONResponse(content=normalized)
 
 
-@router.get("/review/event/{event_id}")
+@router.get("/review/event/{event_id}", response_model=ReviewSegmentResponse)
 def get_review_from_event(event_id: str):
     try:
         return model_to_dict(
@@ -584,7 +585,7 @@ def get_review_from_event(event_id: str):
         return "Review item not found", 404
 
 
-@router.get("/review/{event_id}")
+@router.get("/review/{event_id}", response_model=ReviewSegmentResponse)
 def get_review(event_id: str):
     try:
         return model_to_dict(ReviewSegment.get(ReviewSegment.id == event_id))
@@ -592,7 +593,7 @@ def get_review(event_id: str):
         return "Review item not found", 404
 
 
-@router.delete("/review/{event_id}/viewed")
+@router.delete("/review/{event_id}/viewed", response_model=GenericResponse)
 def set_not_reviewed(event_id: str):
     try:
         review: ReviewSegment = ReviewSegment.get(ReviewSegment.id == event_id)
