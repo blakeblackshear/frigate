@@ -253,7 +253,11 @@ function GeneralFilterButton({
     <PlatformAwareDialog
       trigger={trigger}
       content={content}
-      contentClassName={isDesktop ? "" : "max-h-[75dvh] overflow-hidden p-4"}
+      contentClassName={
+        isDesktop
+          ? "scrollbar-container h-auto max-h-[80dvh] overflow-y-auto"
+          : "max-h-[75dvh] overflow-hidden p-4"
+      }
       open={open}
       onOpenChange={(open) => {
         if (!open) {
@@ -284,7 +288,7 @@ export function GeneralFilterContent({
 }: GeneralFilterContentProps) {
   return (
     <>
-      <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
+      <div className="overflow-x-hidden">
         <div className="mb-5 mt-2.5 flex items-center justify-between">
           <Label
             className="mx-2 cursor-pointer text-primary"
