@@ -16,7 +16,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { isDesktop, isMobile, isMobileOnly } from "react-device-detect";
+import { isDesktop, isMobileOnly } from "react-device-detect";
 import { useFormattedHour } from "@/hooks/use-date-utils";
 import Heading from "@/components/ui/heading";
 import FilterSwitch from "@/components/filter/FilterSwitch";
@@ -58,7 +58,7 @@ export default function SearchFilterDialog({
     </Button>
   );
   const content = (
-    <>
+    <div className="space-y-3">
       <TimeRangeFilterContent
         config={config}
         timeRange={currentFilter.time_range}
@@ -110,7 +110,7 @@ export default function SearchFilterDialog({
           Reset
         </Button>
       </div>
-    </>
+    </div>
   );
 
   return (
@@ -183,9 +183,9 @@ function TimeRangeFilterContent({
   }, [selectedAfterHour, selectedBeforeHour]);
 
   return (
-    <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
+    <div className="overflow-x-hidden">
       <Heading as="h4">Time Range</Heading>
-      <div className="my-5 flex flex-row items-center justify-center gap-2">
+      <div className="my-3 flex flex-row items-center justify-center gap-2">
         <Popover
           open={startOpen}
           onOpenChange={(open) => {
@@ -278,8 +278,8 @@ export function ZoneFilterContent({
 }: ZoneFilterContentProps) {
   return (
     <>
-      <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
-        {isDesktop && <DropdownMenuSeparator className="mb-2" />}
+      <div className="overflow-x-hidden">
+        <DropdownMenuSeparator className="mb-3" />
         <Heading as="h4">Zones</Heading>
         {allZones && (
           <>
@@ -344,8 +344,8 @@ export function SubFilterContent({
   setSubLabels,
 }: SubFilterContentProps) {
   return (
-    <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
-      {isDesktop && <DropdownMenuSeparator className="mb-2" />}
+    <div className="overflow-x-hidden">
+      <DropdownMenuSeparator className="mb-3" />
       <Heading as="h4">Sub Labels</Heading>
       <div className="mb-5 mt-2.5 flex items-center justify-between">
         <Label className="mx-2 cursor-pointer text-primary" htmlFor="allLabels">
@@ -401,8 +401,8 @@ export function SearchTypeContent({
 }: SearchTypeContentProps) {
   return (
     <>
-      <div className="scrollbar-container h-auto max-h-[80dvh] overflow-y-auto overflow-x-hidden">
-        {isDesktop && <DropdownMenuSeparator className="mb-2" />}
+      <div className="overflow-x-hidden">
+        <DropdownMenuSeparator className="mb-3" />
         <Heading as="h4">Search Sources</Heading>
         <div className="my-2.5 flex flex-col gap-2.5">
           <FilterSwitch
