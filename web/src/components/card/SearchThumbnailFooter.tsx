@@ -118,7 +118,7 @@ export default function SearchThumbnailFooter({
           <TimeAgo time={searchResult.start_time * 1000} dense />
         ) : (
           <div>
-            <ActivityIndicator size={16} />
+            <ActivityIndicator size={14} />
           </div>
         )}
         {formattedDate}
