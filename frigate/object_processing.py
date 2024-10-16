@@ -20,6 +20,7 @@ from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import (
     CameraConfig,
     FrigateConfig,
+    ModelConfig,
     MqttConfig,
     RecordConfig,
     SnapshotsConfig,
@@ -109,8 +110,7 @@ def is_better_thumbnail(label, current_thumb, new_obj, frame_shape) -> bool:
 class TrackedObject:
     def __init__(
         self,
-        camera,
-        colormap,
+        model_config: ModelConfig,
         camera_config: CameraConfig,
         frame_cache,
         obj_data: dict[str, any],
@@ -120,8 +120,8 @@ class TrackedObject:
         del obj_data["score_history"]
 
         self.obj_data = obj_data
-        self.camera = camera
-        self.colormap = colormap
+        self.colormap = model_config.colormap
+        self.logos = model_config.all_attribute_logos
         self.camera_config = camera_config
         self.frame_cache = frame_cache
         self.zone_presence: dict[str, int] = {}
@@ -245,9 +245,7 @@ class TrackedObject:
         # populate the sub_label for object with highest scoring logo
         if self.obj_data["label"] in ["car", "package", "person"]:
             recognized_logos = {
-                k: self.attributes[k]
-                for k in ["ups", "fedex", "amazon"]
-                if k in self.attributes
+                k: self.attributes[k] for k in self.logos if k in self.attributes
             }
             if len(recognized_logos) > 0:
                 max_logo = max(recognized_logos, key=recognized_logos.get)
@@ -291,7 +289,7 @@ class TrackedObject:
     def to_dict(self, include_thumbnail: bool = False):
         event = {
             "id": self.obj_data["id"],
-            "camera": self.camera,
+            "camera": self.camera_config.name,
             "frame_time": self.obj_data["frame_time"],
             "snapshot": self.thumbnail_data,
             "label": self.obj_data["label"],
@@ -707,8 +705,7 @@ class CameraState:
 
         for id in new_ids:
             new_obj = tracked_objects[id] = TrackedObject(
-                self.name,
-                self.config.model.colormap,
+                self.config.model,
                 self.camera_config,
                 self.frame_cache,
                 current_detections[id],
