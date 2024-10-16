@@ -148,7 +148,7 @@ export default function SearchFilterDialog({
       trigger={trigger}
       content={content}
       contentClassName={cn(
-        "w-auto lg:w-[300px] scrollbar-container h-full overflow-auto px-4",
+        "w-auto lg:min-w-[275px] scrollbar-container h-full overflow-auto px-4",
         isMobileOnly && "pb-20",
       )}
       open={open}

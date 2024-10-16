@@ -86,7 +86,7 @@ export function PlatformAwareSheet({
   }
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={onOpenChange} modal={false}>
       <SheetTrigger asChild className={triggerClassName}>
         {trigger}
       </SheetTrigger>
