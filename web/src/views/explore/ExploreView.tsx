@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { isIOS, isMobileOnly, isSafari } from "react-device-detect";
+import { isDesktop, isIOS, isMobileOnly, isSafari } from "react-device-detect";
 import useSWR from "swr";
 import { useApiHost } from "@/api";
 import { cn } from "@/lib/utils";
@@ -17,6 +17,7 @@ import useImageLoaded from "@/hooks/use-image-loaded";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { useEventUpdate } from "@/api/ws";
 import { isEqual } from "lodash";
+import TimeAgo from "@/components/dynamic/TimeAgo";
 
 type ExploreViewProps = {
   searchDetail: SearchResult | undefined;
@@ -197,6 +198,7 @@ function ExploreThumbnailImage({
         className="absolute inset-0"
         imgLoaded={imgLoaded}
       />
+
       <img
         ref={imgRef}
         className={cn(
@@ -218,6 +220,17 @@ function ExploreThumbnailImage({
           onImgLoad();
         }}
       />
+      {isDesktop && (
+        <div className="absolute bottom-1 right-1 z-10 rounded-lg bg-black/50 px-2 py-1 text-xs text-white">
+          {event.end_time ? (
+            <TimeAgo time={event.start_time * 1000} dense />
+          ) : (
+            <div>
+              <ActivityIndicator size={10} />
+            </div>
+          )}
+        </div>
+      )}
     </>
   );
 }
