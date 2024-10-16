@@ -102,7 +102,9 @@ export default function SearchDetailDialog({
   const [isOpen, setIsOpen] = useState(search != undefined);
 
   useEffect(() => {
-    setIsOpen(search != undefined);
+    if (search) {
+      setIsOpen(search != undefined);
+    }
   }, [search]);
 
   const searchTabs = useMemo(() => {
@@ -121,12 +123,6 @@ export default function SearchDetailDialog({
       const index = views.indexOf("object lifecycle");
       views.splice(index, 1);
     }
-
-    // TODO implement
-    //if (!config.semantic_search.enabled) {
-    //  const index = views.indexOf("similar-calendar");
-    //  views.splice(index, 1);
-    // }
 
     return views;
   }, [config, search]);
@@ -154,14 +150,7 @@ export default function SearchDetailDialog({
   const Description = isDesktop ? DialogDescription : MobilePageDescription;
 
   return (
-    <Overlay
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (!open) {
-          setSearch(undefined);
-        }
-      }}
-    >
+    <Overlay open={isOpen} onOpenChange={() => setIsOpen(!isOpen)}>
       <Content
         className={cn(
           "scrollbar-container overflow-y-auto",

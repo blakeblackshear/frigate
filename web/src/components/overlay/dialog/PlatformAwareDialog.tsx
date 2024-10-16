@@ -10,7 +10,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { isMobile } from "react-device-detect";
 
 type PlatformAwareDialogProps = {
@@ -52,16 +59,20 @@ export default function PlatformAwareDialog({
 
 type PlatformAwareSheetProps = {
   trigger: JSX.Element;
+  title?: string | JSX.Element;
   content: JSX.Element;
   triggerClassName?: string;
+  titleClassName?: string;
   contentClassName?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 export function PlatformAwareSheet({
   trigger,
+  title,
   content,
   triggerClassName = "",
+  titleClassName = "",
   contentClassName = "",
   open,
   onOpenChange,
@@ -86,11 +97,19 @@ export function PlatformAwareSheet({
   }
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={onOpenChange} modal={false}>
       <SheetTrigger asChild className={triggerClassName}>
         {trigger}
       </SheetTrigger>
-      <SheetContent className={contentClassName}>{content}</SheetContent>
+      <SheetContent className={contentClassName}>
+        <SheetHeader>
+          <SheetTitle className={title ? titleClassName : "sr-only"}>
+            {title ?? ""}
+          </SheetTitle>
+          <SheetDescription className="sr-only">Information</SheetDescription>
+        </SheetHeader>
+        {content}
+      </SheetContent>
     </Sheet>
   );
 }

@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/popover";
 import { isDesktop, isMobileOnly } from "react-device-detect";
 import { useFormattedHour } from "@/hooks/use-date-utils";
-import Heading from "@/components/ui/heading";
 import FilterSwitch from "@/components/filter/FilterSwitch";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -51,9 +50,27 @@ export default function SearchFilterDialog({
 
   const [open, setOpen] = useState(false);
 
+  const moreFiltersSelected = useMemo(
+    () =>
+      currentFilter &&
+      (currentFilter.time_range ||
+        (currentFilter.zones?.length ?? 0) > 0 ||
+        (currentFilter.sub_labels?.length ?? 0) > 0 ||
+        (currentFilter.search_type?.length ?? 2) !== 2),
+    [currentFilter],
+  );
+
   const trigger = (
-    <Button className="flex items-center gap-2" size="sm">
-      <FaCog className={"text-secondary-foreground"} />
+    <Button
+      className="flex items-center gap-2"
+      size="sm"
+      variant={moreFiltersSelected ? "select" : "default"}
+    >
+      <FaCog
+        className={cn(
+          moreFiltersSelected ? "text-white" : "text-secondary-foreground",
+        )}
+      />
       More Filters
     </Button>
   );
@@ -80,14 +97,20 @@ export default function SearchFilterDialog({
           setCurrentFilter({ ...currentFilter, sub_labels: newSubLabels })
         }
       />
-      <SearchTypeContent
-        searchSources={
-          currentFilter?.search_type ?? ["thumbnail", "description"]
-        }
-        setSearchSources={(newSearchSource) =>
-          onUpdateFilter({ ...currentFilter, search_type: newSearchSource })
-        }
-      />
+      {config?.semantic_search?.enabled &&
+        !currentFilter?.search_type?.includes("similarity") && (
+          <SearchTypeContent
+            searchSources={
+              currentFilter?.search_type ?? ["thumbnail", "description"]
+            }
+            setSearchSources={(newSearchSource) =>
+              setCurrentFilter({
+                ...currentFilter,
+                search_type: newSearchSource,
+              })
+            }
+          />
+        )}
       {isDesktop && <DropdownMenuSeparator />}
       <div className="flex items-center justify-evenly p-2">
         <Button
@@ -104,7 +127,13 @@ export default function SearchFilterDialog({
         </Button>
         <Button
           onClick={() => {
-            setCurrentFilter(filter ?? {});
+            setCurrentFilter((prevFilter) => ({
+              ...prevFilter,
+              time_range: undefined,
+              zones: undefined,
+              sub_labels: undefined,
+              search_type: ["thumbnail", "description"],
+            }));
           }}
         >
           Reset
@@ -118,7 +147,7 @@ export default function SearchFilterDialog({
       trigger={trigger}
       content={content}
       contentClassName={cn(
-        "w-auto lg:w-[300px] scrollbar-container h-full overflow-auto px-4",
+        "w-auto lg:min-w-[275px] scrollbar-container h-full overflow-auto px-4",
         isMobileOnly && "pb-20",
       )}
       open={open}
@@ -184,8 +213,8 @@ function TimeRangeFilterContent({
 
   return (
     <div className="overflow-x-hidden">
-      <Heading as="h4">Time Range</Heading>
-      <div className="my-3 flex flex-row items-center justify-center gap-2">
+      <div className="text-lg">Time Range</div>
+      <div className="mt-3 flex flex-row items-center justify-center gap-2">
         <Popover
           open={startOpen}
           onOpenChange={(open) => {
@@ -280,7 +309,7 @@ export function ZoneFilterContent({
     <>
       <div className="overflow-x-hidden">
         <DropdownMenuSeparator className="mb-3" />
-        <Heading as="h4">Zones</Heading>
+        <div className="text-lg">Zones</div>
         {allZones && (
           <>
             <div className="mb-5 mt-2.5 flex items-center justify-between">
@@ -301,7 +330,7 @@ export function ZoneFilterContent({
                 }}
               />
             </div>
-            <div className="my-2.5 flex flex-col gap-2.5">
+            <div className="mt-2.5 flex flex-col gap-2.5">
               {allZones.map((item) => (
                 <FilterSwitch
                   key={item}
@@ -346,7 +375,7 @@ export function SubFilterContent({
   return (
     <div className="overflow-x-hidden">
       <DropdownMenuSeparator className="mb-3" />
-      <Heading as="h4">Sub Labels</Heading>
+      <div className="text-lg">Sub Labels</div>
       <div className="mb-5 mt-2.5 flex items-center justify-between">
         <Label className="mx-2 cursor-pointer text-primary" htmlFor="allLabels">
           All Sub Labels
@@ -362,7 +391,7 @@ export function SubFilterContent({
           }}
         />
       </div>
-      <div className="my-2.5 flex flex-col gap-2.5">
+      <div className="mt-2.5 flex flex-col gap-2.5">
         {allSubLabels.map((item) => (
           <FilterSwitch
             key={item}
@@ -403,8 +432,8 @@ export function SearchTypeContent({
     <>
       <div className="overflow-x-hidden">
         <DropdownMenuSeparator className="mb-3" />
-        <Heading as="h4">Search Sources</Heading>
-        <div className="my-2.5 flex flex-col gap-2.5">
+        <div className="text-lg">Search Sources</div>
+        <div className="mt-2.5 flex flex-col gap-2.5">
           <FilterSwitch
             label="Thumbnail Image"
             isChecked={searchSources?.includes("thumbnail") ?? false}
