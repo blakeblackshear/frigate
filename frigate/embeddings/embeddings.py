@@ -178,7 +178,7 @@ class Embeddings:
         embeddings = []
 
         for desc in event_descriptions.values():
-            embeddings.append(self.text_embedding([desc]))
+            embeddings.append(self.text_embedding([desc])[0])
 
         ids = list(event_descriptions.keys())
 
