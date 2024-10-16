@@ -144,6 +144,8 @@ export default function SearchView({
           : ["12:00AM-11:59PM"],
       before: [formatDateToLocaleString()],
       after: [formatDateToLocaleString(-5)],
+      min_score: ["50"],
+      max_score: ["100"],
     }),
     [config, allLabels, allZones, allSubLabels],
   );

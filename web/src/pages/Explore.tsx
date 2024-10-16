@@ -103,6 +103,8 @@ export default function Explore() {
           after: searchSearchParams["after"],
           time_range: searchSearchParams["time_range"],
           search_type: searchSearchParams["search_type"],
+          min_score: searchSearchParams["min_score"],
+          max_score: searchSearchParams["max_score"],
           limit:
             Object.keys(searchSearchParams).length == 0 ? API_LIMIT : undefined,
           timezone,
@@ -129,6 +131,8 @@ export default function Explore() {
         after: searchSearchParams["after"],
         time_range: searchSearchParams["time_range"],
         search_type: searchSearchParams["search_type"],
+        min_score: searchSearchParams["min_score"],
+        max_score: searchSearchParams["max_score"],
         event_id: searchSearchParams["event_id"],
         timezone,
         include_thumbnails: 0,
