@@ -35,7 +35,7 @@ class EventsQueryParams(BaseModel):
 class EventsSearchQueryParams(BaseModel):
     query: Optional[str] = None
     event_id: Optional[str] = None
-    search_type: Optional[str] = "thumbnail,description"
+    search_type: Optional[str] = "thumbnail"
     include_thumbnails: Optional[int] = 1
     limit: Optional[int] = 50
     cameras: Optional[str] = "all"
