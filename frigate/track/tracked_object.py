@@ -23,6 +23,7 @@ from frigate.util.object import box_inside
 
 logger = logging.getLogger(__name__)
 
+
 class TrackedObject:
     def __init__(
         self,
