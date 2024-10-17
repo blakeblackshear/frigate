@@ -76,6 +76,9 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
     apt-get -qq install --no-install-recommends --no-install-suggests -y \
         i965-va-driver-shaders
 
+    # intel packages use zst compression so we need to update dpkg
+    apt-get install -y dpkg
+
     rm -f /etc/apt/sources.list.d/debian-bookworm.list
 
     # use intel apt intel packages
