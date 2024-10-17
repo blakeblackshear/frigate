@@ -59,6 +59,7 @@ class ModelConfig(BaseModel):
     _merged_labelmap: Optional[Dict[int, str]] = PrivateAttr()
     _colormap: Dict[int, Tuple[int, int, int]] = PrivateAttr()
     _all_attributes: list[str] = PrivateAttr()
+    _all_attribute_logos: list[str] = PrivateAttr()
     _model_hash: str = PrivateAttr()
 
     @property
@@ -72,6 +73,10 @@ class ModelConfig(BaseModel):
     @property
     def all_attributes(self) -> list[str]:
         return self._all_attributes
+
+    @property
+    def all_attribute_logos(self) -> list[str]:
+        return self._all_attribute_logos
 
     @property
     def model_hash(self) -> str:
@@ -93,6 +98,9 @@ class ModelConfig(BaseModel):
             unique_attributes.update(attributes)
 
         self._all_attributes = list(unique_attributes)
+        self._all_attribute_logos = list(
+            unique_attributes - set(["face", "license_plate"])
+        )
 
     def check_and_load_plus_model(
         self, plus_api: PlusApi, detector: str = None
@@ -140,6 +148,9 @@ class ModelConfig(BaseModel):
             unique_attributes.update(attributes)
 
         self._all_attributes = list(unique_attributes)
+        self._all_attribute_logos = list(
+            unique_attributes - set(["face", "license_plate"])
+        )
 
         self._merged_labelmap = {
             **{int(key): val for key, val in model_info["labelMap"].items()},
