@@ -8,6 +8,7 @@ apt-get -qq install --no-install-recommends -y \
     apt-transport-https \
     gnupg \
     wget \
+    lbzip2 \
     procps vainfo \
     unzip locales tzdata libxml2 xz-utils \
     python3.9 \
