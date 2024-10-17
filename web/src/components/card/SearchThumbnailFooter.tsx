@@ -32,6 +32,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import { MdImageSearch } from "react-icons/md";
 import { isMobileOnly } from "react-device-detect";
+import { buttonVariants } from "../ui/button";
 
 type SearchThumbnailProps = {
   searchResult: SearchResult;
@@ -95,7 +96,7 @@ export default function SearchThumbnailFooter({
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-destructive"
+              className={buttonVariants({ variant: "destructive" })}
               onClick={handleDelete}
             >
               Delete
