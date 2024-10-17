@@ -431,9 +431,9 @@ export default function SearchView({
                                 className={`flex select-none items-center justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-xs capitalize text-white`}
                               >
                                 {value.search_source == "thumbnail" ? (
-                                  <LuImage className="mr-1 size-3" />
+                                  <LuImage className="size-3" />
                                 ) : (
-                                  <LuText className="mr-1 size-3" />
+                                  <LuText className="size-3" />
                                 )}
                               </Chip>
                             </TooltipTrigger>
