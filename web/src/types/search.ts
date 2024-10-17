@@ -35,6 +35,7 @@ export type SearchResult = {
   zones: string[];
   search_source: SearchSource;
   search_distance: number;
+  top_score: number; // for old events
   data: {
     top_score: number;
     score: number;

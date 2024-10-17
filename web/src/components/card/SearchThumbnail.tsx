@@ -91,8 +91,9 @@ export default function SearchThumbnail({
                   >
                     {getIconForLabel(objectLabel, "size-3 text-white")}
                     {Math.round(
-                      (searchResult.data.score ?? searchResult.data.top_score) *
-                        100,
+                      (searchResult.data.score ??
+                        searchResult.data.top_score ??
+                        searchResult.top_score) * 100,
                     )}
                     %
                   </Chip>
