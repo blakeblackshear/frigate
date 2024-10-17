@@ -10,7 +10,7 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { SearchFilter, SearchResult, SearchSource } from "@/types/search";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isMobileOnly } from "react-device-detect";
-import { LuSearchX } from "react-icons/lu";
+import { LuImage, LuSearchX, LuText } from "react-icons/lu";
 import useSWR from "swr";
 import ExploreView from "../explore/ExploreView";
 import useKeyboardListener, {
@@ -23,6 +23,13 @@ import { isEqual } from "lodash";
 import { formatDateToLocaleString } from "@/utils/dateUtil";
 import SearchThumbnailFooter from "@/components/card/SearchThumbnailFooter";
 import SearchSettings from "@/components/settings/SearchSettings";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import Chip from "@/components/indicators/Chip";
+import { TooltipPortal } from "@radix-ui/react-tooltip";
 
 type SearchViewProps = {
   search: string;
@@ -181,6 +188,21 @@ export default function SearchView({
   useEffect(() => {
     setSelectedIndex(0);
   }, [searchTerm, searchFilter]);
+
+  // confidence score
+
+  const zScoreToConfidence = (score: number) => {
+    // Normalizing is not needed for similarity searches
+    // Sigmoid function for normalized: 1 / (1 + e^x)
+    // Cosine for similarity
+    if (searchFilter) {
+      const notNormalized = searchFilter?.search_type?.includes("similarity");
+
+      const confidence = notNormalized ? 1 - score : 1 / (1 + Math.exp(score));
+
+      return Math.round(confidence * 100);
+    }
+  };
 
   // update search detail when results change
 
@@ -351,6 +373,8 @@ export default function SearchView({
                 setColumns={setColumns}
                 defaultView={defaultView}
                 setDefaultView={setDefaultView}
+                filter={searchFilter}
+                onUpdateFilter={onUpdateFilter}
               />
               <ScrollBar orientation="horizontal" className="h-0" />
             </div>
@@ -398,6 +422,30 @@ export default function SearchView({
                         searchResult={value}
                         onClick={() => onSelectSearch(value, index)}
                       />
+                      {(searchTerm ||
+                        searchFilter?.search_type?.includes("similarity")) && (
+                        <div className={cn("absolute right-2 top-2 z-40")}>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Chip
+                                className={`flex select-none items-center justify-between space-x-1 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-xs capitalize text-white`}
+                              >
+                                {value.search_source == "thumbnail" ? (
+                                  <LuImage className="size-3" />
+                                ) : (
+                                  <LuText className="size-3" />
+                                )}
+                              </Chip>
+                            </TooltipTrigger>
+                            <TooltipPortal>
+                              <TooltipContent>
+                                Matched {value.search_source} at{" "}
+                                {zScoreToConfidence(value.search_distance)}%
+                              </TooltipContent>
+                            </TooltipPortal>
+                          </Tooltip>
+                        </div>
+                      )}
                     </div>
                     <div
                       className={`review-item-ring pointer-events-none absolute inset-0 z-10 size-full rounded-lg outline outline-[3px] -outline-offset-[2.8px] ${selected ? `shadow-selected outline-selected` : "outline-transparent duration-500"}`}

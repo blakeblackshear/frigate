@@ -53,7 +53,7 @@ semantic_search:
 ## Usage
 
 1. Semantic search is used in conjunction with the other filters available on the Search page. Use a combination of traditional filtering and semantic search for the best results.
-2. The comparison between text and image embedding distances generally means that results matching `description` will appear first, even if a `thumbnail` embedding may be a better match. Play with the "Search Type" filter to help find what you are looking for.
-3. Make your search language and tone closely match your descriptions. If you are using thumbnail search, phrase your query as an image caption.
+2. Because of how the AI models Frigate uses have been trained, the comparison between text and image embedding distances generally means that results matching `description` will appear first, even if a `thumbnail` embedding may be a better match. Play with the "Search Type" setting to help find what you are looking for. Note that if you are generating descriptions for specific objects or zones only, this may cause search results to prioritize the objects with descriptions even if the the ones without them are more relevant.
+3. Make your search language and tone closely match your descriptions. If you are using thumbnail search, **phrase your query as an image caption**. For example "red car" will not work as well as "red sedan driving down a residential street on a sunny day".
 4. Semantic search on thumbnails tends to return better results when matching large subjects that take up most of the frame. Small things like "cat" tend to not work well.
-5. Experiment! Find a tracked object you want to test and start typing keywords to see what works for you.
+5. Experiment! Find a tracked object you want to test and start typing keywords and phrases to see what works for you.
