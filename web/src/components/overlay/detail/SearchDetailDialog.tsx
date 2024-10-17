@@ -296,7 +296,7 @@ function ObjectDetailsTab({
     }
 
     if (search.sub_label) {
-      return Math.round(search.data.top_score * 100);
+      return Math.round((search.data?.top_score ?? 0) * 100);
     } else {
       return undefined;
     }
