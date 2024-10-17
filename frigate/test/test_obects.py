@@ -1,11 +1,11 @@
 import unittest
 
-from frigate.track.object_attribute import ObjectAttribute
+from frigate.track.tracked_object import TrackedObjectAttribute
 
 
 class TestAttribute(unittest.TestCase):
     def test_overlapping_object_selection(self) -> None:
-        attribute = ObjectAttribute(
+        attribute = TrackedObjectAttribute(
             (
                 "amazon",
                 0.80078125,

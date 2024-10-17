@@ -32,6 +32,7 @@ from frigate.const import (
     CONFIG_DIR,
 )
 from frigate.ptz.onvif import OnvifController
+from frigate.track.tracked_object import TrackedObject
 from frigate.util.builtin import update_yaml_file
 from frigate.util.image import SharedMemoryFrameManager, intersection_over_union
 
@@ -214,7 +215,7 @@ class PtzAutoTracker:
             ):
                 self._autotracker_setup(camera_config, camera)
 
-    def _autotracker_setup(self, camera_config, camera):
+    def _autotracker_setup(self, camera_config: CameraConfig, camera: str):
         logger.debug(f"{camera}: Autotracker init")
 
         self.object_types[camera] = camera_config.onvif.autotracking.track
@@ -852,7 +853,7 @@ class PtzAutoTracker:
             logger.debug(f"{camera}: Valid velocity ")
             return True, velocities.flatten()
 
-    def _get_distance_threshold(self, camera, obj):
+    def _get_distance_threshold(self, camera: str, obj: TrackedObject):
         # Returns true if Euclidean distance from object to center of frame is
         # less than 10% of the of the larger dimension (width or height) of the frame,
         # multiplied by a scaling factor for object size.
@@ -888,7 +889,9 @@ class PtzAutoTracker:
 
         return distance_threshold
 
-    def _should_zoom_in(self, camera, obj, box, predicted_time, debug_zooming=False):
+    def _should_zoom_in(
+        self, camera: str, obj: TrackedObject, box, predicted_time, debug_zooming=False
+    ):
         # returns True if we should zoom in, False if we should zoom out, None to do nothing
         camera_config = self.config.cameras[camera]
         camera_width = camera_config.frame_shape[1]
@@ -1019,7 +1022,7 @@ class PtzAutoTracker:
         # Don't zoom at all
         return None
 
-    def _autotrack_move_ptz(self, camera, obj):
+    def _autotrack_move_ptz(self, camera: str, obj: TrackedObject):
         camera_config = self.config.cameras[camera]
         camera_width = camera_config.frame_shape[1]
         camera_height = camera_config.frame_shape[0]
@@ -1090,7 +1093,12 @@ class PtzAutoTracker:
                 self._enqueue_move(camera, obj.obj_data["frame_time"], 0, 0, zoom)
 
     def _get_zoom_amount(
-        self, camera, obj, predicted_box, predicted_movement_time, debug_zoom=True
+        self,
+        camera: str,
+        obj: TrackedObject,
+        predicted_box,
+        predicted_movement_time,
+        debug_zoom=True,
     ):
         camera_config = self.config.cameras[camera]
 
@@ -1186,13 +1194,13 @@ class PtzAutoTracker:
 
         return zoom
 
-    def is_autotracking(self, camera):
+    def is_autotracking(self, camera: str):
         return self.tracked_object[camera] is not None
 
-    def autotracked_object_region(self, camera):
+    def autotracked_object_region(self, camera: str):
         return self.tracked_object[camera]["region"]
 
-    def autotrack_object(self, camera, obj):
+    def autotrack_object(self, camera: str, obj: TrackedObject):
         camera_config = self.config.cameras[camera]
 
         if camera_config.onvif.autotracking.enabled:
@@ -1208,7 +1216,7 @@ class PtzAutoTracker:
             if (
                 # new object
                 self.tracked_object[camera] is None
-                and obj.camera == camera
+                and obj.camera_config.name == camera
                 and obj.obj_data["label"] in self.object_types[camera]
                 and set(obj.entered_zones) & set(self.required_zones[camera])
                 and not obj.previous["false_positive"]

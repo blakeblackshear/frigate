@@ -36,6 +36,72 @@ def transliterate_to_latin(text: str) -> str:
     return unidecode(text)
 
 
+def on_edge(box, frame_shape):
+    if (
+        box[0] == 0
+        or box[1] == 0
+        or box[2] == frame_shape[1] - 1
+        or box[3] == frame_shape[0] - 1
+    ):
+        return True
+
+
+def has_better_attr(current_thumb, new_obj, attr_label) -> bool:
+    max_new_attr = max(
+        [0]
+        + [area(a["box"]) for a in new_obj["attributes"] if a["label"] == attr_label]
+    )
+    max_current_attr = max(
+        [0]
+        + [
+            area(a["box"])
+            for a in current_thumb["attributes"]
+            if a["label"] == attr_label
+        ]
+    )
+
+    # if the thumb has a higher scoring attr
+    return max_new_attr > max_current_attr
+
+
+def is_better_thumbnail(label, current_thumb, new_obj, frame_shape) -> bool:
+    # larger is better
+    # cutoff images are less ideal, but they should also be smaller?
+    # better scores are obviously better too
+
+    # check face on person
+    if label == "person":
+        if has_better_attr(current_thumb, new_obj, "face"):
+            return True
+        # if the current thumb has a face attr, dont update unless it gets better
+        if any([a["label"] == "face" for a in current_thumb["attributes"]]):
+            return False
+
+    # check license_plate on car
+    if label == "car":
+        if has_better_attr(current_thumb, new_obj, "license_plate"):
+            return True
+        # if the current thumb has a license_plate attr, dont update unless it gets better
+        if any([a["label"] == "license_plate" for a in current_thumb["attributes"]]):
+            return False
+
+    # if the new_thumb is on an edge, and the current thumb is not
+    if on_edge(new_obj["box"], frame_shape) and not on_edge(
+        current_thumb["box"], frame_shape
+    ):
+        return False
+
+    # if the score is better by more than 5%
+    if new_obj["score"] > current_thumb["score"] + 0.05:
+        return True
+
+    # if the area is 10% larger
+    if new_obj["area"] > current_thumb["area"] * 1.1:
+        return True
+
+    return False
+
+
 def draw_timestamp(
     frame,
     timestamp,
