@@ -124,7 +124,7 @@ genai:
 
 ## Usage and Best Practices
 
-Frigate's thumbnail search performs very well when looking for specific details about your tracked objects - (for example, using a "image caption" approach and searching for "person wearing a yellow vest", "a white dog running across the lawn", or "red car on a residential street"). To better enhance the AI Frigate's default prompts are configured ask your AI provider about the _intent_ of your object.
+Frigate's thumbnail search excels at identifying specific details about tracked objects – for example, using an "image caption" approach to find a "person wearing a yellow vest," "a white dog running across the lawn," or "a red car on a residential street." To enhance this further, Frigate’s default prompts are designed to ask your AI provider about the intent behind the object's actions, rather than just describing its appearance.
 
 While generating simple descriptions of detected objects is useful, understanding intent provides a deeper layer of insight. Instead of just recognizing "what" is in a scene, Frigate’s default prompts aim to infer "why" it might be there or "what" it could do next. Descriptions tell you what’s happening, but intent gives context. For instance, a person walking toward a door might seem like a visitor, but if they’re moving quickly after hours, the system can infer a potential break-in attempt. Detecting a person loitering near a door at night can trigger an alert sooner than simply noting "a person standing by the door," helping you respond based on the situation’s context.
 
