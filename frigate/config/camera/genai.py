@@ -23,7 +23,7 @@ class GenAICameraConfig(BaseModel):
         default=False, title="Use snapshots for generating descriptions."
     )
     prompt: str = Field(
-        default="Describe the {label} in the sequence of images with as much detail as possible. Do not describe the background.",
+        default="Analyze the sequence of images containing the {label}. Focus on the likely intent or behavior of the {label} based on its actions and movement, rather than describing its appearance or the surroundings. Consider what the {label} is doing, why, and what it might do next.",
         title="Default caption prompt.",
     )
     object_prompts: dict[str, str] = Field(
@@ -51,7 +51,7 @@ class GenAICameraConfig(BaseModel):
 class GenAIConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable GenAI.")
     prompt: str = Field(
-        default="Describe the {label} in the sequence of images with as much detail as possible. Do not describe the background.",
+        default="Analyze the sequence of images containing the {label}. Focus on the likely intent or behavior of the {label} based on its actions and movement, rather than describing its appearance or the surroundings. Consider what the {label} is doing, why, and what it might do next.",
         title="Default caption prompt.",
     )
     object_prompts: dict[str, str] = Field(
