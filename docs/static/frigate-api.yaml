@@ -292,17 +292,18 @@ paths:
       summary: Set Multiple Reviewed
       operationId: set_multiple_reviewed_reviews_viewed_post
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              type: object
-              title: Body
+              $ref: '#/components/schemas/ReviewSetMultipleReviewedBody'
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
-              schema: { }
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         '422':
           description: Validation Error
           content:
@@ -316,17 +317,18 @@ paths:
       summary: Delete Reviews
       operationId: delete_reviews_reviews_delete_post
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              type: object
-              title: Body
+              $ref: '#/components/schemas/ReviewDeleteMultipleReviewsBody'
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
-              schema: { }
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         '422':
           description: Validation Error
           content:
@@ -372,7 +374,11 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: { }
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReviewActivityMotionResponse'
+                title: Response Motion Activity Review Activity Motion Get
         '422':
           description: Validation Error
           content:
@@ -418,7 +424,11 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: { }
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReviewActivityAudioResponse'
+                title: Response Audio Activity Review Activity Audio Get
         '422':
           description: Validation Error
           content:
@@ -443,57 +453,60 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: { }
+              schema:
+                $ref: '#/components/schemas/ReviewSegmentResponse'
         '422':
           description: Validation Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  /review/{event_id}:
+  /review/{review_id}:
     get:
       tags:
         - Review
       summary: Get Review
-      operationId: get_review_review__event_id__get
+      operationId: get_review_review__review_id__get
       parameters:
-        - name: event_id
+        - name: review_id
           in: path
           required: true
           schema:
             type: string
-            title: Event Id
+            title: Review Id
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
-              schema: { }
+              schema:
+                $ref: '#/components/schemas/ReviewSegmentResponse'
         '422':
           description: Validation Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  /review/{event_id}/viewed:
+  /review/{review_id}/viewed:
     delete:
       tags:
         - Review
       summary: Set Not Reviewed
-      operationId: set_not_reviewed_review__event_id__viewed_delete
+      operationId: set_not_reviewed_review__review_id__viewed_delete
       parameters:
-        - name: event_id
+        - name: review_id
           in: path
           required: true
           schema:
             type: string
-            title: Event Id
+            title: Review Id
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
-              schema: { }
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         '422':
           description: Validation Error
           content:
@@ -2369,14 +2382,14 @@ paths:
           required: false
           schema:
             type: number
-            default: 1728580419.15206
+            default: 1729155727.144465
             title: After
         - name: before
           in: query
           required: false
           schema:
             type: number
-            default: 1728584019.152614
+            default: 1729159327.144483
             title: Before
       responses:
         '200':
@@ -2415,13 +2428,6 @@ paths:
           schema:
             type: number
             title: End Ts
-        - name: download
-          in: query
-          required: false
-          schema:
-            type: boolean
-            default: false
-            title: Download
       responses:
         '200':
           description: Successful Response
@@ -2792,13 +2798,6 @@ paths:
           schema:
             type: string
             title: Event Id
-        - name: download
-          in: query
-          required: false
-          schema:
-            type: boolean
-            default: false
-            title: Download
       responses:
         '200':
           description: Successful Response
@@ -3265,7 +3264,6 @@ components:
         description:
           anyOf:
             - type: string
-              minLength: 1
             - type: 'null'
           title: The description of the event
       type: object
@@ -3306,6 +3304,19 @@ components:
         - jpg
         - jpeg
       title: Extension
+    GenericResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+        message:
+          type: string
+          title: Message
+      type: object
+      required:
+        - success
+        - message
+      title: GenericResponse
     HTTPValidationError:
       properties:
         detail:
@@ -3350,6 +3361,49 @@ components:
         - thumbnails
         - snapshot
       title: RegenerateDescriptionEnum
+    ReviewActivityAudioResponse:
+      properties:
+        start_time:
+          type: integer
+          title: Start Time
+        audio:
+          type: integer
+          title: Audio
+      type: object
+      required:
+        - start_time
+        - audio
+      title: ReviewActivityAudioResponse
+    ReviewActivityMotionResponse:
+      properties:
+        start_time:
+          type: integer
+          title: Start Time
+        motion:
+          type: number
+          title: Motion
+        camera:
+          type: string
+          title: Camera
+      type: object
+      required:
+        - start_time
+        - motion
+        - camera
+      title: ReviewActivityMotionResponse
+    ReviewDeleteMultipleReviewsBody:
+      properties:
+        ids:
+          items:
+            type: string
+            minLength: 1
+          type: array
+          minItems: 1
+          title: Ids
+      type: object
+      required:
+        - ids
+      title: ReviewDeleteMultipleReviewsBody
     ReviewSegmentResponse:
       properties:
         id:
@@ -3387,6 +3441,19 @@ components:
         - thumb_path
         - data
       title: ReviewSegmentResponse
+    ReviewSetMultipleReviewedBody:
+      properties:
+        ids:
+          items:
+            type: string
+            minLength: 1
+          type: array
+          minItems: 1
+          title: Ids
+      type: object
+      required:
+        - ids
+      title: ReviewSetMultipleReviewedBody
     ReviewSummaryResponse:
       properties:
         last24Hours:
