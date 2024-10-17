@@ -23,6 +23,8 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { DualThumbSlider } from "@/components/ui/slider";
+import { Input } from "@/components/ui/input";
 
 type SearchFilterDialogProps = {
   config?: FrigateConfig;
@@ -46,6 +48,12 @@ export default function SearchFilterDialog({
   const [currentFilter, setCurrentFilter] = useState(filter ?? {});
   const { data: allSubLabels } = useSWR(["sub_labels", { split_joined: 1 }]);
 
+  useEffect(() => {
+    if (filter) {
+      setCurrentFilter(filter);
+    }
+  }, [filter]);
+
   // state
 
   const [open, setOpen] = useState(false);
@@ -54,9 +62,12 @@ export default function SearchFilterDialog({
     () =>
       currentFilter &&
       (currentFilter.time_range ||
+        (currentFilter.min_score ?? 0) > 0.5 ||
+        (currentFilter.max_score ?? 1) < 1 ||
         (currentFilter.zones?.length ?? 0) > 0 ||
         (currentFilter.sub_labels?.length ?? 0) > 0 ||
-        (currentFilter.search_type?.length ?? 2) !== 2),
+        (!currentFilter.search_type?.includes("similarity") &&
+          (currentFilter.search_type?.length ?? 2) !== 2)),
     [currentFilter],
   );
 
@@ -97,6 +108,13 @@ export default function SearchFilterDialog({
           setCurrentFilter({ ...currentFilter, sub_labels: newSubLabels })
         }
       />
+      <ScoreFilterContent
+        minScore={currentFilter.min_score}
+        maxScore={currentFilter.max_score}
+        setScoreRange={(min, max) =>
+          setCurrentFilter({ ...currentFilter, min_score: min, max_score: max })
+        }
+      />
       {config?.semantic_search?.enabled &&
         !currentFilter?.search_type?.includes("similarity") && (
           <SearchTypeContent
@@ -133,6 +151,8 @@ export default function SearchFilterDialog({
               zones: undefined,
               sub_labels: undefined,
               search_type: ["thumbnail", "description"],
+              min_score: undefined,
+              max_score: undefined,
             }));
           }}
         >
@@ -415,6 +435,58 @@ export function SubFilterContent({
             }}
           />
         ))}
+      </div>
+    </div>
+  );
+}
+
+type ScoreFilterContentProps = {
+  minScore: number | undefined;
+  maxScore: number | undefined;
+  setScoreRange: (min: number | undefined, max: number | undefined) => void;
+};
+export function ScoreFilterContent({
+  minScore,
+  maxScore,
+  setScoreRange,
+}: ScoreFilterContentProps) {
+  return (
+    <div className="overflow-x-hidden">
+      <DropdownMenuSeparator className="mb-3" />
+      <div className="mb-3 text-lg">Score</div>
+      <div className="flex items-center gap-1">
+        <Input
+          className="w-12"
+          inputMode="numeric"
+          value={Math.round((minScore ?? 0.5) * 100)}
+          onChange={(e) => {
+            const value = e.target.value;
+
+            if (value) {
+              setScoreRange(parseInt(value) / 100.0, maxScore ?? 1.0);
+            }
+          }}
+        />
+        <DualThumbSlider
+          className="w-full"
+          min={0.5}
+          max={1.0}
+          step={0.01}
+          value={[minScore ?? 0.5, maxScore ?? 1.0]}
+          onValueChange={([min, max]) => setScoreRange(min, max)}
+        />
+        <Input
+          className="w-12"
+          inputMode="numeric"
+          value={Math.round((maxScore ?? 1.0) * 100)}
+          onChange={(e) => {
+            const value = e.target.value;
+
+            if (value) {
+              setScoreRange(minScore ?? 0.5, parseInt(value) / 100.0);
+            }
+          }}
+        />
       </div>
     </div>
   );

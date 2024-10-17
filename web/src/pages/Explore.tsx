@@ -14,6 +14,7 @@ import { ModelState } from "@/types/ws";
 import { formatSecondsToDuration } from "@/utils/dateUtil";
 import SearchView from "@/views/search/SearchView";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { isMobileOnly } from "react-device-detect";
 import { LuCheck, LuExternalLink, LuX } from "react-icons/lu";
 import { TbExclamationCircle } from "react-icons/tb";
 import { Link } from "react-router-dom";
@@ -32,11 +33,16 @@ export default function Explore() {
   // grid
 
   const [columnCount, setColumnCount] = usePersistence("exploreGridColumns", 4);
-  const gridColumns = useMemo(() => columnCount ?? 4, [columnCount]);
+  const gridColumns = useMemo(() => {
+    if (isMobileOnly) {
+      return 2;
+    }
+    return columnCount ?? 4;
+  }, [columnCount]);
 
   // default layout
 
-  const [defaultView, setDefaultView] = usePersistence(
+  const [defaultView, setDefaultView, defaultViewLoaded] = usePersistence(
     "exploreDefaultView",
     "summary",
   );
@@ -103,6 +109,8 @@ export default function Explore() {
           after: searchSearchParams["after"],
           time_range: searchSearchParams["time_range"],
           search_type: searchSearchParams["search_type"],
+          min_score: searchSearchParams["min_score"],
+          max_score: searchSearchParams["max_score"],
           limit:
             Object.keys(searchSearchParams).length == 0 ? API_LIMIT : undefined,
           timezone,
@@ -129,6 +137,8 @@ export default function Explore() {
         after: searchSearchParams["after"],
         time_range: searchSearchParams["time_range"],
         search_type: searchSearchParams["search_type"],
+        min_score: searchSearchParams["min_score"],
+        max_score: searchSearchParams["max_score"],
         event_id: searchSearchParams["event_id"],
         timezone,
         include_thumbnails: 0,
@@ -270,12 +280,13 @@ export default function Explore() {
   };
 
   if (
-    config?.semantic_search.enabled &&
-    (!reindexState ||
-      !textModelState ||
-      !textTokenizerState ||
-      !visionModelState ||
-      !visionFeatureExtractorState)
+    !defaultViewLoaded ||
+    (config?.semantic_search.enabled &&
+      (!reindexState ||
+        !textModelState ||
+        !textTokenizerState ||
+        !visionModelState ||
+        !visionFeatureExtractorState))
   ) {
     return (
       <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />

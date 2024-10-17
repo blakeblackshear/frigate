@@ -35,6 +35,7 @@ export type SearchResult = {
   zones: string[];
   search_source: SearchSource;
   search_distance: number;
+  top_score: number; // for old events
   data: {
     top_score: number;
     score: number;
@@ -56,6 +57,8 @@ export type SearchFilter = {
   zones?: string[];
   before?: number;
   after?: number;
+  min_score?: number;
+  max_score?: number;
   time_range?: string;
   search_type?: SearchSource[];
   event_id?: string;
@@ -71,6 +74,8 @@ export type SearchQueryParams = {
   zones?: string[];
   before?: string;
   after?: string;
+  min_score?: number;
+  max_score?: number;
   search_type?: string;
   limit?: number;
   in_progress?: number;

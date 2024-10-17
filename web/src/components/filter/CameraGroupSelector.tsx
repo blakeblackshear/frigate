@@ -3,7 +3,7 @@ import { isDesktop, isMobile } from "react-device-detect";
 import useSWR from "swr";
 import { MdHome } from "react-icons/md";
 import { usePersistedOverlayState } from "@/hooks/use-overlay-state";
-import { Button } from "../ui/button";
+import { Button, buttonVariants } from "../ui/button";
 import { useCallback, useMemo, useState } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { LuPencil, LuPlus } from "react-icons/lu";
@@ -518,7 +518,10 @@ export function CameraGroupRow({
             </AlertDialogDescription>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={onDeleteGroup}>
+              <AlertDialogAction
+                className={buttonVariants({ variant: "destructive" })}
+                onClick={onDeleteGroup}
+              >
                 Delete
               </AlertDialogAction>
             </AlertDialogFooter>

@@ -201,10 +201,13 @@ export default function InputWithTags({
         allSuggestions[type as FilterType]?.includes(value) ||
         type == "before" ||
         type == "after" ||
-        type == "time_range"
+        type == "time_range" ||
+        type == "min_score" ||
+        type == "max_score"
       ) {
         const newFilters = { ...filters };
         let timestamp = 0;
+        let score = 0;
 
         switch (type) {
           case "before":
@@ -242,6 +245,40 @@ export default function InputWithTags({
                 timestamp -= 1;
               }
               newFilters[type] = timestamp / 1000;
+            }
+            break;
+          case "min_score":
+          case "max_score":
+            score = parseInt(value);
+            if (score >= 0) {
+              // Check for conflicts between min_score and max_score
+              if (
+                type === "min_score" &&
+                filters.max_score !== undefined &&
+                score > filters.max_score * 100
+              ) {
+                toast.error(
+                  "The 'min_score' must be less than or equal to the 'max_score'.",
+                  {
+                    position: "top-center",
+                  },
+                );
+                return;
+              }
+              if (
+                type === "max_score" &&
+                filters.min_score !== undefined &&
+                score < filters.min_score * 100
+              ) {
+                toast.error(
+                  "The 'max_score' must be greater than or equal to the 'min_score'.",
+                  {
+                    position: "top-center",
+                  },
+                );
+                return;
+              }
+              newFilters[type] = score / 100;
             }
             break;
           case "time_range":
@@ -302,6 +339,8 @@ export default function InputWithTags({
       } - ${
         config?.ui.time_format === "24hour" ? endTime : convertTo12Hour(endTime)
       }`;
+    } else if (filterType === "min_score" || filterType === "max_score") {
+      return Math.round(Number(filterValues) * 100).toString() + "%";
     } else {
       return filterValues as string;
     }
@@ -320,7 +359,11 @@ export default function InputWithTags({
           isValidTimeRange(
             trimmedValue.replace("-", ","),
             config?.ui.time_format,
-          ))
+          )) ||
+        ((filterType === "min_score" || filterType === "max_score") &&
+          !isNaN(Number(trimmedValue)) &&
+          Number(trimmedValue) >= 50 &&
+          Number(trimmedValue) <= 100)
       ) {
         createFilter(
           filterType,

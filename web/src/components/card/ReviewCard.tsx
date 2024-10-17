@@ -34,6 +34,7 @@ import { toast } from "sonner";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
+import { buttonVariants } from "../ui/button";
 
 type ReviewCardProps = {
   event: ReviewSegment;
@@ -228,7 +229,10 @@ export default function ReviewCard({
               <AlertDialogCancel onClick={() => setOptionsOpen(false)}>
                 Cancel
               </AlertDialogCancel>
-              <AlertDialogAction className="bg-destructive" onClick={onDelete}>
+              <AlertDialogAction
+                className={buttonVariants({ variant: "destructive" })}
+                onClick={onDelete}
+              >
                 Delete
               </AlertDialogAction>
             </AlertDialogFooter>
@@ -295,7 +299,10 @@ export default function ReviewCard({
             <AlertDialogCancel onClick={() => setOptionsOpen(false)}>
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction className="bg-destructive" onClick={onDelete}>
+            <AlertDialogAction
+              className={buttonVariants({ variant: "destructive" })}
+              onClick={onDelete}
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

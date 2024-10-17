@@ -348,6 +348,7 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
     search_type = params.search_type
     include_thumbnails = params.include_thumbnails
     limit = params.limit
+    sort = params.sort
 
     # Filters
     cameras = params.cameras
@@ -355,6 +356,8 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
     zones = params.zones
     after = params.after
     before = params.before
+    min_score = params.min_score
+    max_score = params.max_score
     time_range = params.time_range
 
     # for similarity search
@@ -429,6 +432,14 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
 
     if before:
         event_filters.append((Event.start_time < before))
+
+    if min_score is not None and max_score is not None:
+        event_filters.append((Event.data["score"].between(min_score, max_score)))
+    else:
+        if min_score is not None:
+            event_filters.append((Event.data["score"] >= min_score))
+        if max_score is not None:
+            event_filters.append((Event.data["score"] <= max_score))
 
     if time_range != DEFAULT_TIME_RANGE:
         tz_name = params.timezone
@@ -554,11 +565,19 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
 
         processed_events.append(processed_event)
 
-    # Sort by search distance if search_results are available, otherwise by start_time
+    # Sort by search distance if search_results are available, otherwise by start_time as default
     if search_results:
         processed_events.sort(key=lambda x: x.get("search_distance", float("inf")))
     else:
-        processed_events.sort(key=lambda x: x["start_time"], reverse=True)
+        if sort == "score_asc":
+            processed_events.sort(key=lambda x: x["score"])
+        elif sort == "score_desc":
+            processed_events.sort(key=lambda x: x["score"], reverse=True)
+        elif sort == "date_asc":
+            processed_events.sort(key=lambda x: x["start_time"])
+        else:
+            # "date_desc" default
+            processed_events.sort(key=lambda x: x["start_time"], reverse=True)
 
     # Limit the number of events returned
     processed_events = processed_events[:limit]
