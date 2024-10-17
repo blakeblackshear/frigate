@@ -66,7 +66,8 @@ export default function SearchFilterDialog({
         (currentFilter.max_score ?? 1) < 1 ||
         (currentFilter.zones?.length ?? 0) > 0 ||
         (currentFilter.sub_labels?.length ?? 0) > 0 ||
-        (currentFilter.search_type?.length ?? 2) !== 2),
+        (!currentFilter.search_type?.includes("similarity") &&
+          (currentFilter.search_type?.length ?? 2) !== 2)),
     [currentFilter],
   );
 
