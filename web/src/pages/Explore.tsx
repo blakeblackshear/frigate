@@ -14,6 +14,7 @@ import { ModelState } from "@/types/ws";
 import { formatSecondsToDuration } from "@/utils/dateUtil";
 import SearchView from "@/views/search/SearchView";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { isMobileOnly } from "react-device-detect";
 import { LuCheck, LuExternalLink, LuX } from "react-icons/lu";
 import { TbExclamationCircle } from "react-icons/tb";
 import { Link } from "react-router-dom";
@@ -32,7 +33,12 @@ export default function Explore() {
   // grid
 
   const [columnCount, setColumnCount] = usePersistence("exploreGridColumns", 4);
-  const gridColumns = useMemo(() => columnCount ?? 4, [columnCount]);
+  const gridColumns = useMemo(() => {
+    if (isMobileOnly) {
+      return 2;
+    }
+    return columnCount ?? 4;
+  }, [columnCount]);
 
   // default layout
 
