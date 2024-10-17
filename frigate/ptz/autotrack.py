@@ -1192,7 +1192,7 @@ class PtzAutoTracker:
     def autotracked_object_region(self, camera):
         return self.tracked_object[camera]["region"]
 
-    def autotrack_object(self, camera, obj):
+    def autotrack_object(self, camera: str, obj):
         camera_config = self.config.cameras[camera]
 
         if camera_config.onvif.autotracking.enabled:
@@ -1208,7 +1208,7 @@ class PtzAutoTracker:
             if (
                 # new object
                 self.tracked_object[camera] is None
-                and obj.camera == camera
+                and obj.camera_config.name == camera
                 and obj.obj_data["label"] in self.object_types[camera]
                 and set(obj.entered_zones) & set(self.required_zones[camera])
                 and not obj.previous["false_positive"]
