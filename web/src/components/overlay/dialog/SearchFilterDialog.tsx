@@ -65,9 +65,7 @@ export default function SearchFilterDialog({
         (currentFilter.min_score ?? 0) > 0.5 ||
         (currentFilter.max_score ?? 1) < 1 ||
         (currentFilter.zones?.length ?? 0) > 0 ||
-        (currentFilter.sub_labels?.length ?? 0) > 0 ||
-        (!currentFilter.search_type?.includes("similarity") &&
-          (currentFilter.search_type?.length ?? 2) !== 2)),
+        (currentFilter.sub_labels?.length ?? 0) > 0),
     [currentFilter],
   );
 
@@ -115,20 +113,6 @@ export default function SearchFilterDialog({
           setCurrentFilter({ ...currentFilter, min_score: min, max_score: max })
         }
       />
-      {config?.semantic_search?.enabled &&
-        !currentFilter?.search_type?.includes("similarity") && (
-          <SearchTypeContent
-            searchSources={
-              currentFilter?.search_type ?? ["thumbnail", "description"]
-            }
-            setSearchSources={(newSearchSource) =>
-              setCurrentFilter({
-                ...currentFilter,
-                search_type: newSearchSource,
-              })
-            }
-          />
-        )}
       {isDesktop && <DropdownMenuSeparator />}
       <div className="flex items-center justify-evenly p-2">
         <Button
@@ -489,61 +473,5 @@ export function ScoreFilterContent({
         />
       </div>
     </div>
-  );
-}
-
-type SearchTypeContentProps = {
-  searchSources: SearchSource[] | undefined;
-  setSearchSources: (sources: SearchSource[] | undefined) => void;
-};
-export function SearchTypeContent({
-  searchSources,
-  setSearchSources,
-}: SearchTypeContentProps) {
-  return (
-    <>
-      <div className="overflow-x-hidden">
-        <DropdownMenuSeparator className="mb-3" />
-        <div className="text-lg">Search Sources</div>
-        <div className="mt-2.5 flex flex-col gap-2.5">
-          <FilterSwitch
-            label="Thumbnail Image"
-            isChecked={searchSources?.includes("thumbnail") ?? false}
-            onCheckedChange={(isChecked) => {
-              const updatedSources = searchSources ? [...searchSources] : [];
-
-              if (isChecked) {
-                updatedSources.push("thumbnail");
-                setSearchSources(updatedSources);
-              } else {
-                if (updatedSources.length > 1) {
-                  const index = updatedSources.indexOf("thumbnail");
-                  if (index !== -1) updatedSources.splice(index, 1);
-                  setSearchSources(updatedSources);
-                }
-              }
-            }}
-          />
-          <FilterSwitch
-            label="Description"
-            isChecked={searchSources?.includes("description") ?? false}
-            onCheckedChange={(isChecked) => {
-              const updatedSources = searchSources ? [...searchSources] : [];
-
-              if (isChecked) {
-                updatedSources.push("description");
-                setSearchSources(updatedSources);
-              } else {
-                if (updatedSources.length > 1) {
-                  const index = updatedSources.indexOf("description");
-                  if (index !== -1) updatedSources.splice(index, 1);
-                  setSearchSources(updatedSources);
-                }
-              }
-            }}
-          />
-        </div>
-      </div>
-    </>
   );
 }

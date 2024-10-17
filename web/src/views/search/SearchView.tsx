@@ -373,6 +373,8 @@ export default function SearchView({
                 setColumns={setColumns}
                 defaultView={defaultView}
                 setDefaultView={setDefaultView}
+                filter={searchFilter}
+                onUpdateFilter={onUpdateFilter}
               />
               <ScrollBar orientation="horizontal" className="h-0" />
             </div>
