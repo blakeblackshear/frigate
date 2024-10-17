@@ -1275,7 +1275,7 @@ class PtzAutoTracker:
                 # If it's within bounds, start tracking that object.
                 # Should we check region (maybe too broad) or expand the previous object's box a bit and check that?
                 self.tracked_object[camera] is None
-                and obj.camera == camera
+                and obj.camera_config.name == camera
                 and obj.obj_data["label"] in self.object_types[camera]
                 and not obj.previous["false_positive"]
                 and not obj.false_positive
