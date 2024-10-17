@@ -189,6 +189,21 @@ export default function SearchView({
     setSelectedIndex(0);
   }, [searchTerm, searchFilter]);
 
+  // confidence score
+
+  const zScoreToConfidence = (score: number) => {
+    // Normalizing is not needed for similarity searches
+    // Sigmoid function for normalized: 1 / (1 + e^x)
+    // Cosine for similarity
+    if (searchFilter) {
+      const notNormalized = searchFilter?.search_type?.includes("similarity");
+
+      const confidence = notNormalized ? 1 - score : 1 / (1 + Math.exp(score));
+
+      return Math.round(confidence * 100);
+    }
+  };
+
   // update search detail when results change
 
   useEffect(() => {
@@ -422,7 +437,8 @@ export default function SearchView({
                             </TooltipTrigger>
                             <TooltipPortal>
                               <TooltipContent>
-                                Matched {value.search_source}
+                                Matched {value.search_source} at{" "}
+                                {zScoreToConfidence(value.search_distance)}%
                               </TooltipContent>
                             </TooltipPortal>
                           </Tooltip>
