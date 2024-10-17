@@ -48,6 +48,12 @@ export default function SearchFilterDialog({
   const [currentFilter, setCurrentFilter] = useState(filter ?? {});
   const { data: allSubLabels } = useSWR(["sub_labels", { split_joined: 1 }]);
 
+  useEffect(() => {
+    if (filter) {
+      setCurrentFilter(filter);
+    }
+  }, [filter]);
+
   // state
 
   const [open, setOpen] = useState(false);
@@ -56,7 +62,8 @@ export default function SearchFilterDialog({
     () =>
       currentFilter &&
       (currentFilter.time_range ||
-        (currentFilter.min_score && currentFilter.max_score) ||
+        (currentFilter.min_score ?? 0) > 0.5 ||
+        (currentFilter.max_score ?? 1) < 1 ||
         (currentFilter.zones?.length ?? 0) > 0 ||
         (currentFilter.sub_labels?.length ?? 0) > 0 ||
         (currentFilter.search_type?.length ?? 2) !== 2),
