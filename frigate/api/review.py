@@ -576,31 +576,41 @@ def audio_activity(params: ReviewActivityMotionQueryParams = Depends()):
 @router.get("/review/event/{event_id}", response_model=ReviewSegmentResponse)
 def get_review_from_event(event_id: str):
     try:
-        return model_to_dict(
-            ReviewSegment.get(
-                ReviewSegment.data["detections"].cast("text") % f'*"{event_id}"*'
+        return JSONResponse(
+            model_to_dict(
+                ReviewSegment.get(
+                    ReviewSegment.data["detections"].cast("text") % f'*"{event_id}"*'
+                )
             )
         )
     except DoesNotExist:
-        return "Review item not found", 404
+        return JSONResponse(
+            content={"success": False, "message": "Review item not found"},
+            status_code=404,
+        )
 
 
-@router.get("/review/{event_id}", response_model=ReviewSegmentResponse)
-def get_review(event_id: str):
+@router.get("/review/{review_id}", response_model=ReviewSegmentResponse)
+def get_review(review_id: str):
     try:
-        return model_to_dict(ReviewSegment.get(ReviewSegment.id == event_id))
+        return JSONResponse(
+            content=model_to_dict(ReviewSegment.get(ReviewSegment.id == review_id))
+        )
     except DoesNotExist:
-        return "Review item not found", 404
+        return JSONResponse(
+            content={"success": False, "message": "Review item not found"},
+            status_code=404,
+        )
 
 
-@router.delete("/review/{event_id}/viewed", response_model=GenericResponse)
-def set_not_reviewed(event_id: str):
+@router.delete("/review/{review_id}/viewed", response_model=GenericResponse)
+def set_not_reviewed(review_id: str):
     try:
-        review: ReviewSegment = ReviewSegment.get(ReviewSegment.id == event_id)
+        review: ReviewSegment = ReviewSegment.get(ReviewSegment.id == review_id)
     except DoesNotExist:
         return JSONResponse(
             content=(
-                {"success": False, "message": "Review " + event_id + " not found"}
+                {"success": False, "message": "Review " + review_id + " not found"}
             ),
             status_code=404,
         )
@@ -609,6 +619,8 @@ def set_not_reviewed(event_id: str):
     review.save()
 
     return JSONResponse(
-        content=({"success": True, "message": "Reviewed " + event_id + " not viewed"}),
+        content=(
+            {"success": True, "message": "Set Review " + review_id + " as not viewed"}
+        ),
         status_code=200,
     )
