@@ -1,6 +1,6 @@
 import { Button } from "../ui/button";
 import { useState } from "react";
-import { isDesktop } from "react-device-detect";
+import { isDesktop, isMobileOnly } from "react-device-detect";
 import { cn } from "@/lib/utils";
 import PlatformAwareDialog from "../overlay/dialog/PlatformAwareDialog";
 import { FaCog } from "react-icons/fa";
@@ -40,7 +40,7 @@ export default function SearchSettings({
     <div className={cn(className, "my-3 space-y-5 py-3 md:mt-0 md:py-0")}>
       <div className="space-y-4">
         <div className="space-y-0.5">
-          <div className="text-md">Default Search View</div>
+          <div className="text-md">Default View</div>
           <div className="space-y-1 text-xs text-muted-foreground">
             When no filters are selected, display a summary of the most recent
             tracked objects per label, or display an unfiltered grid.
@@ -68,26 +68,32 @@ export default function SearchSettings({
           </SelectContent>
         </Select>
       </div>
-      <DropdownMenuSeparator />
-      <div className="flex w-full flex-col space-y-4">
-        <div className="space-y-0.5">
-          <div className="text-md">Grid Columns</div>
-          <div className="space-y-1 text-xs text-muted-foreground">
-            Select the number of columns in the results grid.
+      {!isMobileOnly && (
+        <>
+          <DropdownMenuSeparator />
+          <div className="flex w-full flex-col space-y-4">
+            <div className="space-y-0.5">
+              <div className="text-md">Grid Columns</div>
+              <div className="space-y-1 text-xs text-muted-foreground">
+                Select the number of columns in the grid view.
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Slider
+                value={[columns]}
+                onValueChange={([value]) => setColumns(value)}
+                max={6}
+                min={2}
+                step={1}
+                className="flex-grow"
+              />
+              <span className="w-9 text-center text-sm font-medium">
+                {columns}
+              </span>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center space-x-4">
-          <Slider
-            value={[columns]}
-            onValueChange={([value]) => setColumns(value)}
-            max={6}
-            min={2}
-            step={1}
-            className="flex-grow"
-          />
-          <span className="w-9 text-center text-sm font-medium">{columns}</span>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 

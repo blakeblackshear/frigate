@@ -62,6 +62,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import useImageLoaded from "@/hooks/use-image-loaded";
 import ImageLoadingIndicator from "@/components/indicators/ImageLoadingIndicator";
 import { GenericVideoPlayer } from "@/components/player/GenericVideoPlayer";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { LuInfo } from "react-icons/lu";
 
 const SEARCH_TABS = [
   "details",
@@ -279,7 +285,7 @@ function ObjectDetailsTab({
       return 0;
     }
 
-    const value = search.score ?? search.data.top_score;
+    const value = search.data.top_score;
 
     return Math.round(value * 100);
   }, [search]);
@@ -369,7 +375,24 @@ function ObjectDetailsTab({
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
-            <div className="text-sm text-primary/40">Score</div>
+            <div className="text-sm text-primary/40">
+              <div className="flex flex-row items-center gap-1">
+                Top Score
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <div className="cursor-pointer p-0">
+                      <LuInfo className="size-4" />
+                      <span className="sr-only">Info</span>
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80">
+                    The top score is the highest median score for the tracked
+                    object, so this may differ from the score shown on the
+                    search result thumbnail.
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
             <div className="text-sm">
               {score}%{subLabelScore && ` (${subLabelScore}%)`}
             </div>

@@ -32,9 +32,12 @@ import axios from "axios";
 import { toast } from "sonner";
 import { MdImageSearch } from "react-icons/md";
 import { isMobileOnly } from "react-device-detect";
+import { buttonVariants } from "../ui/button";
+import { cn } from "@/lib/utils";
 
 type SearchThumbnailProps = {
   searchResult: SearchResult;
+  columns: number;
   findSimilar: () => void;
   refreshResults: () => void;
   showObjectLifecycle: () => void;
@@ -42,6 +45,7 @@ type SearchThumbnailProps = {
 
 export default function SearchThumbnailFooter({
   searchResult,
+  columns,
   findSimilar,
   refreshResults,
   showObjectLifecycle,
@@ -95,7 +99,7 @@ export default function SearchThumbnailFooter({
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-destructive"
+              className={buttonVariants({ variant: "destructive" })}
               onClick={handleDelete}
             >
               Delete
@@ -113,104 +117,112 @@ export default function SearchThumbnailFooter({
         }}
       />
 
-      <div className="flex flex-col items-start text-xs text-primary-variant">
-        {searchResult.end_time ? (
-          <TimeAgo time={searchResult.start_time * 1000} dense />
-        ) : (
-          <div>
-            <ActivityIndicator size={14} />
-          </div>
+      <div
+        className={cn(
+          "flex w-full flex-row items-center justify-between",
+          columns > 4 &&
+            "items-start sm:flex-col sm:gap-2 lg:flex-row lg:items-center lg:gap-1",
         )}
-        {formattedDate}
-      </div>
-      <div className="flex flex-row items-center justify-end gap-6 md:gap-4">
-        {!isMobileOnly &&
-          config?.plus?.enabled &&
-          searchResult.has_snapshot &&
-          searchResult.end_time &&
-          !searchResult.plus_id && (
+      >
+        <div className="flex flex-col items-start text-xs text-primary-variant">
+          {searchResult.end_time ? (
+            <TimeAgo time={searchResult.start_time * 1000} dense />
+          ) : (
+            <div>
+              <ActivityIndicator size={14} />
+            </div>
+          )}
+          {formattedDate}
+        </div>
+        <div className="flex flex-row items-center justify-end gap-6 md:gap-4">
+          {!isMobileOnly &&
+            config?.plus?.enabled &&
+            searchResult.has_snapshot &&
+            searchResult.end_time &&
+            !searchResult.plus_id && (
+              <Tooltip>
+                <TooltipTrigger>
+                  <FrigatePlusIcon
+                    className="size-5 cursor-pointer text-primary-variant hover:text-primary"
+                    onClick={() => setShowFrigatePlus(true)}
+                  />
+                </TooltipTrigger>
+                <TooltipContent>Submit to Frigate+</TooltipContent>
+              </Tooltip>
+            )}
+
+          {config?.semantic_search?.enabled && (
             <Tooltip>
               <TooltipTrigger>
-                <FrigatePlusIcon
+                <MdImageSearch
                   className="size-5 cursor-pointer text-primary-variant hover:text-primary"
-                  onClick={() => setShowFrigatePlus(true)}
+                  onClick={findSimilar}
                 />
               </TooltipTrigger>
-              <TooltipContent>Submit to Frigate+</TooltipContent>
+              <TooltipContent>Find similar</TooltipContent>
             </Tooltip>
           )}
 
-        {config?.semantic_search?.enabled && (
-          <Tooltip>
-            <TooltipTrigger>
-              <MdImageSearch
-                className="size-5 cursor-pointer text-primary-variant hover:text-primary"
-                onClick={findSimilar}
-              />
-            </TooltipTrigger>
-            <TooltipContent>Find similar</TooltipContent>
-          </Tooltip>
-        )}
-
-        <DropdownMenu>
-          <DropdownMenuTrigger>
-            <LuMoreVertical className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align={"end"}>
-            {searchResult.has_clip && (
-              <DropdownMenuItem>
-                <a
-                  className="justify_start flex items-center"
-                  href={`${baseUrl}api/events/${searchResult.id}/clip.mp4`}
-                  download={`${searchResult.camera}_${searchResult.label}.mp4`}
-                >
-                  <LuDownload className="mr-2 size-4" />
-                  <span>Download video</span>
-                </a>
-              </DropdownMenuItem>
-            )}
-            {searchResult.has_snapshot && (
-              <DropdownMenuItem>
-                <a
-                  className="justify_start flex items-center"
-                  href={`${baseUrl}api/events/${searchResult.id}/snapshot.jpg`}
-                  download={`${searchResult.camera}_${searchResult.label}.jpg`}
-                >
-                  <LuCamera className="mr-2 size-4" />
-                  <span>Download snapshot</span>
-                </a>
-              </DropdownMenuItem>
-            )}
-            <DropdownMenuItem
-              className="cursor-pointer"
-              onClick={showObjectLifecycle}
-            >
-              <FaArrowsRotate className="mr-2 size-4" />
-              <span>View object lifecycle</span>
-            </DropdownMenuItem>
-
-            {isMobileOnly &&
-              config?.plus?.enabled &&
-              searchResult.has_snapshot &&
-              searchResult.end_time &&
-              !searchResult.plus_id && (
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  onClick={() => setShowFrigatePlus(true)}
-                >
-                  <FrigatePlusIcon className="mr-2 size-4 cursor-pointer text-primary" />
-                  <span>Submit to Frigate+</span>
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <LuMoreVertical className="size-5 cursor-pointer text-primary-variant hover:text-primary" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align={"end"}>
+              {searchResult.has_clip && (
+                <DropdownMenuItem>
+                  <a
+                    className="justify_start flex items-center"
+                    href={`${baseUrl}api/events/${searchResult.id}/clip.mp4`}
+                    download={`${searchResult.camera}_${searchResult.label}.mp4`}
+                  >
+                    <LuDownload className="mr-2 size-4" />
+                    <span>Download video</span>
+                  </a>
                 </DropdownMenuItem>
               )}
-            <DropdownMenuItem
-              className="cursor-pointer"
-              onClick={() => setDeleteDialogOpen(true)}
-            >
-              <LuTrash2 className="mr-2 size-4" />
-              <span>Delete</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              {searchResult.has_snapshot && (
+                <DropdownMenuItem>
+                  <a
+                    className="justify_start flex items-center"
+                    href={`${baseUrl}api/events/${searchResult.id}/snapshot.jpg`}
+                    download={`${searchResult.camera}_${searchResult.label}.jpg`}
+                  >
+                    <LuCamera className="mr-2 size-4" />
+                    <span>Download snapshot</span>
+                  </a>
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={showObjectLifecycle}
+              >
+                <FaArrowsRotate className="mr-2 size-4" />
+                <span>View object lifecycle</span>
+              </DropdownMenuItem>
+
+              {isMobileOnly &&
+                config?.plus?.enabled &&
+                searchResult.has_snapshot &&
+                searchResult.end_time &&
+                !searchResult.plus_id && (
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={() => setShowFrigatePlus(true)}
+                  >
+                    <FrigatePlusIcon className="mr-2 size-4 cursor-pointer text-primary" />
+                    <span>Submit to Frigate+</span>
+                  </DropdownMenuItem>
+                )}
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => setDeleteDialogOpen(true)}
+              >
+                <LuTrash2 className="mr-2 size-4" />
+                <span>Delete</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     </>
   );

@@ -90,8 +90,10 @@ export default function SearchThumbnail({
                     onClick={() => onClick(searchResult)}
                   >
                     {getIconForLabel(objectLabel, "size-3 text-white")}
-                    {Math.floor(
-                      searchResult.score ?? searchResult.data.top_score * 100,
+                    {Math.round(
+                      (searchResult.data.score ??
+                        searchResult.data.top_score ??
+                        searchResult.top_score) * 100,
                     )}
                     %
                   </Chip>

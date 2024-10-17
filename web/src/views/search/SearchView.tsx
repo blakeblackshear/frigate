@@ -144,6 +144,8 @@ export default function SearchView({
           : ["12:00AM-11:59PM"],
       before: [formatDateToLocaleString()],
       after: [formatDateToLocaleString(-5)],
+      min_score: ["50"],
+      max_score: ["100"],
     }),
     [config, allLabels, allZones, allSubLabels],
   );
@@ -385,7 +387,7 @@ export default function SearchView({
                     key={value.id}
                     ref={(item) => (itemRefs.current[index] = item)}
                     data-start={value.start_time}
-                    className="review-item relative rounded-lg"
+                    className="review-item relative flex flex-col rounded-lg"
                   >
                     <div
                       className={cn(
@@ -400,9 +402,10 @@ export default function SearchView({
                     <div
                       className={`review-item-ring pointer-events-none absolute inset-0 z-10 size-full rounded-lg outline outline-[3px] -outline-offset-[2.8px] ${selected ? `shadow-selected outline-selected` : "outline-transparent duration-500"}`}
                     />
-                    <div className="flex w-full items-center justify-between rounded-b-lg border border-t-0 bg-card p-3 text-card-foreground">
+                    <div className="flex w-full grow items-center justify-between rounded-b-lg border border-t-0 bg-card p-3 text-card-foreground">
                       <SearchThumbnailFooter
                         searchResult={value}
+                        columns={columns}
                         findSimilar={() => {
                           if (config?.semantic_search.enabled) {
                             setSimilaritySearch(value);
