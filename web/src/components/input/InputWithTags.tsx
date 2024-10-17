@@ -340,7 +340,7 @@ export default function InputWithTags({
         config?.ui.time_format === "24hour" ? endTime : convertTo12Hour(endTime)
       }`;
     } else if (filterType === "min_score" || filterType === "max_score") {
-      return (Number(filterValues) * 100).toString() + "%";
+      return Math.round(Number(filterValues) * 100).toString() + "%";
     } else {
       return filterValues as string;
     }
