@@ -14,6 +14,10 @@ from peewee import Case, DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
 
 from frigate.api.defs.generic_response import GenericResponse
+from frigate.api.defs.review_body import (
+    ReviewDeleteMultipleReviewsBody,
+    ReviewSetMultipleReviewedBody,
+)
 from frigate.api.defs.review_query_parameters import (
     ReviewActivityMotionQueryParams,
     ReviewQueryParams,
@@ -357,18 +361,9 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
 
 
 @router.post("/reviews/viewed", response_model=GenericResponse)
-def set_multiple_reviewed(body: dict = None):
-    json: dict[str, any] = body or {}
-    list_of_ids = json.get("ids", "")
-
-    if not list_of_ids or len(list_of_ids) == 0:
-        return JSONResponse(
-            content=({"success": False, "message": "Not a valid list of ids"}),
-            status_code=404,
-        )
-
+def set_multiple_reviewed(body: ReviewSetMultipleReviewedBody):
     ReviewSegment.update(has_been_reviewed=True).where(
-        ReviewSegment.id << list_of_ids
+        ReviewSegment.id << body.ids
     ).execute()
 
     return JSONResponse(
@@ -378,16 +373,8 @@ def set_multiple_reviewed(body: dict = None):
 
 
 @router.post("/reviews/delete", response_model=GenericResponse)
-def delete_reviews(body: dict = None):
-    json: dict[str, any] = body or {}
-    list_of_ids = json.get("ids", "")
-
-    if not list_of_ids or len(list_of_ids) == 0:
-        return JSONResponse(
-            content=({"success": False, "message": "Not a valid list of ids"}),
-            status_code=404,
-        )
-
+def delete_reviews(body: ReviewDeleteMultipleReviewsBody):
+    list_of_ids = body.ids
     reviews = (
         ReviewSegment.select(
             ReviewSegment.camera,
