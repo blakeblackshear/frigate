@@ -36,7 +36,7 @@ export default function Explore() {
 
   // default layout
 
-  const [defaultView, setDefaultView] = usePersistence(
+  const [defaultView, setDefaultView, defaultViewLoaded] = usePersistence(
     "exploreDefaultView",
     "summary",
   );
@@ -274,12 +274,13 @@ export default function Explore() {
   };
 
   if (
-    config?.semantic_search.enabled &&
-    (!reindexState ||
-      !textModelState ||
-      !textTokenizerState ||
-      !visionModelState ||
-      !visionFeatureExtractorState)
+    !defaultViewLoaded ||
+    (config?.semantic_search.enabled &&
+      (!reindexState ||
+        !textModelState ||
+        !textTokenizerState ||
+        !visionModelState ||
+        !visionFeatureExtractorState))
   ) {
     return (
       <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
