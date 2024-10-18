@@ -25,6 +25,8 @@ import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { DualThumbSlider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import ToggleButton from "@/components/ui/toggle-button";
 
 type SearchFilterDialogProps = {
   config?: FrigateConfig;
@@ -63,6 +65,8 @@ export default function SearchFilterDialog({
       currentFilter &&
       (currentFilter.time_range ||
         (currentFilter.min_score ?? 0) > 0.5 ||
+        (currentFilter.has_snapshot ?? 0) === 1 ||
+        (currentFilter.has_clip ?? 0) === 1 ||
         (currentFilter.max_score ?? 1) < 1 ||
         (currentFilter.zones?.length ?? 0) > 0 ||
         (currentFilter.sub_labels?.length ?? 0) > 0),
@@ -113,6 +117,26 @@ export default function SearchFilterDialog({
           setCurrentFilter({ ...currentFilter, min_score: min, max_score: max })
         }
       />
+      <SnapshotClipFilterContent
+        hasSnapshot={
+          currentFilter.has_snapshot !== undefined
+            ? currentFilter.has_snapshot === 1
+            : undefined
+        }
+        hasClip={
+          currentFilter.has_clip !== undefined
+            ? currentFilter.has_clip === 1
+            : undefined
+        }
+        setSnapshotClip={(snapshot, clip) =>
+          setCurrentFilter({
+            ...currentFilter,
+            has_snapshot:
+              snapshot !== undefined ? (snapshot ? 1 : 0) : undefined,
+            has_clip: clip !== undefined ? (clip ? 1 : 0) : undefined,
+          })
+        }
+      />
       {isDesktop && <DropdownMenuSeparator />}
       <div className="flex items-center justify-evenly p-2">
         <Button
@@ -137,6 +161,8 @@ export default function SearchFilterDialog({
               search_type: ["thumbnail", "description"],
               min_score: undefined,
               max_score: undefined,
+              has_snapshot: undefined,
+              has_clip: undefined,
             }));
           }}
         >
@@ -471,6 +497,123 @@ export function ScoreFilterContent({
             }
           }}
         />
+      </div>
+    </div>
+  );
+}
+
+type SnapshotClipContentProps = {
+  hasSnapshot: boolean | undefined;
+  hasClip: boolean | undefined;
+  setSnapshotClip: (
+    snapshot: boolean | undefined,
+    clip: boolean | undefined,
+  ) => void;
+};
+
+function SnapshotClipFilterContent({
+  hasSnapshot,
+  hasClip,
+  setSnapshotClip,
+}: SnapshotClipContentProps) {
+  const [isSnapshotFilterActive, setIsSnapshotFilterActive] = useState(
+    hasSnapshot !== undefined,
+  );
+  const [isClipFilterActive, setIsClipFilterActive] = useState(
+    hasClip !== undefined,
+  );
+
+  useEffect(() => {
+    setIsSnapshotFilterActive(hasSnapshot !== undefined);
+  }, [hasSnapshot]);
+
+  useEffect(() => {
+    setIsClipFilterActive(hasClip !== undefined);
+  }, [hasClip]);
+
+  return (
+    <div className="overflow-x-hidden">
+      <DropdownMenuSeparator className="mb-3" />
+      <div className="mb-3 text-lg">Features</div>
+
+      <div className="my-2.5 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="snapshot-filter"
+              className="size-5 text-white accent-white data-[state=checked]:bg-selected data-[state=checked]:text-white"
+              checked={isSnapshotFilterActive}
+              onCheckedChange={(checked) => {
+                setIsSnapshotFilterActive(checked as boolean);
+                if (checked) {
+                  setSnapshotClip(true, hasClip);
+                }
+                if (!checked) setSnapshotClip(undefined, hasClip);
+              }}
+            />
+            <Label
+              htmlFor="snapshot-filter"
+              className="cursor-pointer text-sm font-medium leading-none"
+            >
+              Has a snapshot
+            </Label>
+          </div>
+          <div className="flex space-x-2">
+            <ToggleButton
+              active={hasSnapshot === true}
+              onClick={() => setSnapshotClip(true, hasClip)}
+              disabled={!isSnapshotFilterActive}
+            >
+              Yes
+            </ToggleButton>
+            <ToggleButton
+              active={hasSnapshot === false}
+              onClick={() => setSnapshotClip(false, hasClip)}
+              disabled={!isSnapshotFilterActive}
+            >
+              No
+            </ToggleButton>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              className="size-5 text-white accent-white data-[state=checked]:bg-selected data-[state=checked]:text-white"
+              id="clip-filter"
+              checked={isClipFilterActive}
+              onCheckedChange={(checked) => {
+                setIsClipFilterActive(checked as boolean);
+                if (checked) {
+                  setSnapshotClip(hasSnapshot, true);
+                }
+                if (!checked) setSnapshotClip(hasSnapshot, undefined);
+              }}
+            />
+            <Label
+              htmlFor="clip-filter"
+              className="cursor-pointer text-sm font-medium leading-none"
+            >
+              Has a video clip
+            </Label>
+          </div>
+          <div className="flex space-x-2">
+            <ToggleButton
+              active={hasClip === true}
+              onClick={() => setSnapshotClip(hasSnapshot, true)}
+              disabled={!isClipFilterActive}
+            >
+              Yes
+            </ToggleButton>
+            <ToggleButton
+              active={hasClip === false}
+              onClick={() => setSnapshotClip(hasSnapshot, false)}
+              disabled={!isClipFilterActive}
+            >
+              No
+            </ToggleButton>
+          </div>
+        </div>
       </div>
     </div>
   );
