@@ -385,56 +385,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  /review/activity/audio:
-    get:
-      tags:
-        - Review
-      summary: Audio Activity
-      description: Get motion and audio activity.
-      operationId: audio_activity_review_activity_audio_get
-      parameters:
-        - name: cameras
-          in: query
-          required: false
-          schema:
-            type: string
-            default: all
-            title: Cameras
-        - name: before
-          in: query
-          required: false
-          schema:
-            type: number
-            title: Before
-        - name: after
-          in: query
-          required: false
-          schema:
-            type: number
-            title: After
-        - name: scale
-          in: query
-          required: false
-          schema:
-            type: integer
-            default: 30
-            title: Scale
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ReviewActivityAudioResponse'
-                title: Response Audio Activity Review Activity Audio Get
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
   /review/event/{event_id}:
     get:
       tags:
@@ -1649,6 +1599,30 @@ paths:
               - type: 'null'
             default: utc
             title: Timezone
+        - name: min_score
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: 'null'
+            title: Min Score
+        - name: max_score
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: 'null'
+            title: Max Score
+        - name: sort
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Sort
       responses:
         '200':
           description: Successful Response
@@ -2382,14 +2356,14 @@ paths:
           required: false
           schema:
             type: number
-            default: 1729155727.144465
+            default: 1729274204.653048
             title: After
         - name: before
           in: query
           required: false
           schema:
             type: number
-            default: 1729159327.144483
+            default: 1729277804.653095
             title: Before
       responses:
         '200':
@@ -3198,9 +3172,6 @@ components:
         reviewed_detection:
           type: integer
           title: Reviewed Detection
-        reviewed_motion:
-          type: integer
-          title: Reviewed Motion
         total_alert:
           type: integer
           title: Total Alert
@@ -3215,7 +3186,6 @@ components:
         - day
         - reviewed_alert
         - reviewed_detection
-        - reviewed_motion
         - total_alert
         - total_detection
         - total_motion
@@ -3334,9 +3304,6 @@ components:
         reviewed_detection:
           type: integer
           title: Reviewed Detection
-        reviewed_motion:
-          type: integer
-          title: Reviewed Motion
         total_alert:
           type: integer
           title: Total Alert
@@ -3350,7 +3317,6 @@ components:
       required:
         - reviewed_alert
         - reviewed_detection
-        - reviewed_motion
         - total_alert
         - total_detection
         - total_motion
@@ -3361,19 +3327,6 @@ components:
         - thumbnails
         - snapshot
       title: RegenerateDescriptionEnum
-    ReviewActivityAudioResponse:
-      properties:
-        start_time:
-          type: integer
-          title: Start Time
-        audio:
-          type: integer
-          title: Audio
-      type: object
-      required:
-        - start_time
-        - audio
-      title: ReviewActivityAudioResponse
     ReviewActivityMotionResponse:
       properties:
         start_time:
@@ -3473,7 +3426,6 @@ components:
       enum:
         - alert
         - detection
-        - significant_motion
       title: SeverityEnum
     SubmitPlusBody:
       properties:
