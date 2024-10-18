@@ -27,7 +27,7 @@ from frigate.object_detection import RemoteObjectDetector
 from frigate.ptz.autotrack import ptz_moving_at_frame_time
 from frigate.track import ObjectTracker
 from frigate.track.norfair_tracker import NorfairTracker
-from frigate.track.object_attribute import ObjectAttribute
+from frigate.track.tracked_object import TrackedObjectAttribute
 from frigate.util.builtin import EventsPerSecond, get_tomorrow_at_time
 from frigate.util.image import (
     FrameManager,
@@ -734,10 +734,10 @@ def process_frames(
                 object_tracker.update_frame_times(frame_time)
 
         # group the attribute detections based on what label they apply to
-        attribute_detections: dict[str, list[ObjectAttribute]] = {}
+        attribute_detections: dict[str, list[TrackedObjectAttribute]] = {}
         for label, attribute_labels in model_config.attributes_map.items():
             attribute_detections[label] = [
-                ObjectAttribute(d)
+                TrackedObjectAttribute(d)
                 for d in consolidated_detections
                 if d[0] in attribute_labels
             ]
