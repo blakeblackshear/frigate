@@ -3178,9 +3178,6 @@ components:
         total_detection:
           type: integer
           title: Total Detection
-        total_motion:
-          type: integer
-          title: Total Motion
       type: object
       required:
         - day
@@ -3188,7 +3185,6 @@ components:
         - reviewed_detection
         - total_alert
         - total_detection
-        - total_motion
       title: DayReview
     EventsCreateBody:
       properties:
@@ -3310,16 +3306,12 @@ components:
         total_detection:
           type: integer
           title: Total Detection
-        total_motion:
-          type: integer
-          title: Total Motion
       type: object
       required:
         - reviewed_alert
         - reviewed_detection
         - total_alert
         - total_detection
-        - total_motion
       title: Last24HoursReview
     RegenerateDescriptionEnum:
       type: string

@@ -44,7 +44,6 @@ type ReviewSummaryDay = {
   reviewed_detection: number;
   total_alert: number;
   total_detection: number;
-  total_motion: number;
 };
 
 export type ReviewSummary = {

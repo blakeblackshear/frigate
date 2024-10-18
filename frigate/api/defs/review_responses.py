@@ -22,7 +22,6 @@ class Last24HoursReview(BaseModel):
     reviewed_detection: int
     total_alert: int
     total_detection: int
-    total_motion: int
 
 
 class DayReview(BaseModel):
@@ -31,7 +30,6 @@ class DayReview(BaseModel):
     reviewed_detection: int
     total_alert: int
     total_detection: int
-    total_motion: int
 
 
 class ReviewSummaryResponse(BaseModel):
