@@ -359,6 +359,8 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
     min_score = params.min_score
     max_score = params.max_score
     time_range = params.time_range
+    has_clip = params.has_clip
+    has_snapshot = params.has_snapshot
 
     # for similarity search
     event_id = params.event_id
@@ -432,6 +434,12 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
 
     if before:
         event_filters.append((Event.start_time < before))
+
+    if has_clip is not None:
+        event_filters.append((Event.has_clip == has_clip))
+
+    if has_snapshot is not None:
+        event_filters.append((Event.has_snapshot == has_snapshot))
 
     if min_score is not None and max_score is not None:
         event_filters.append((Event.data["score"].between(min_score, max_score)))
