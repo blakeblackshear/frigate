@@ -466,7 +466,7 @@ export function ScoreFilterContent({
       <div className="mb-3 text-lg">Score</div>
       <div className="flex items-center gap-1">
         <Input
-          className="w-12"
+          className="w-14 text-center"
           inputMode="numeric"
           value={Math.round((minScore ?? 0.5) * 100)}
           onChange={(e) => {
@@ -478,7 +478,7 @@ export function ScoreFilterContent({
           }}
         />
         <DualThumbSlider
-          className="w-full"
+          className="mx-2 w-full"
           min={0.5}
           max={1.0}
           step={0.01}
@@ -486,7 +486,7 @@ export function ScoreFilterContent({
           onValueChange={([min, max]) => setScoreRange(min, max)}
         />
         <Input
-          className="w-12"
+          className="w-14 text-center"
           inputMode="numeric"
           value={Math.round((maxScore ?? 1.0) * 100)}
           onChange={(e) => {
