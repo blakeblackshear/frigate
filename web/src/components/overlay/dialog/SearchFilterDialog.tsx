@@ -26,7 +26,7 @@ import { cn } from "@/lib/utils";
 import { DualThumbSlider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import ToggleButton from "@/components/ui/toggle-button";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 type SearchFilterDialogProps = {
   config?: FrigateConfig;
@@ -536,7 +536,7 @@ function SnapshotClipFilterContent({
       <DropdownMenuSeparator className="mb-3" />
       <div className="mb-3 text-lg">Features</div>
 
-      <div className="my-2.5 space-y-4">
+      <div className="my-2.5 space-y-1">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Checkbox
@@ -547,8 +547,9 @@ function SnapshotClipFilterContent({
                 setIsSnapshotFilterActive(checked as boolean);
                 if (checked) {
                   setSnapshotClip(true, hasClip);
+                } else {
+                  setSnapshotClip(undefined, hasClip);
                 }
-                if (!checked) setSnapshotClip(undefined, hasClip);
               }}
             />
             <Label
@@ -558,22 +559,32 @@ function SnapshotClipFilterContent({
               Has a snapshot
             </Label>
           </div>
-          <div className="flex space-x-2">
-            <ToggleButton
-              active={hasSnapshot === true}
-              onClick={() => setSnapshotClip(true, hasClip)}
-              disabled={!isSnapshotFilterActive}
+          <ToggleGroup
+            type="single"
+            value={
+              hasSnapshot === undefined ? undefined : hasSnapshot ? "yes" : "no"
+            }
+            onValueChange={(value) => {
+              if (value === "yes") setSnapshotClip(true, hasClip);
+              else if (value === "no") setSnapshotClip(false, hasClip);
+            }}
+            disabled={!isSnapshotFilterActive}
+          >
+            <ToggleGroupItem
+              value="yes"
+              aria-label="Yes"
+              className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
             >
               Yes
-            </ToggleButton>
-            <ToggleButton
-              active={hasSnapshot === false}
-              onClick={() => setSnapshotClip(false, hasClip)}
-              disabled={!isSnapshotFilterActive}
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="no"
+              aria-label="No"
+              className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
             >
               No
-            </ToggleButton>
-          </div>
+            </ToggleGroupItem>
+          </ToggleGroup>
         </div>
 
         <div className="flex items-center justify-between">
@@ -586,8 +597,9 @@ function SnapshotClipFilterContent({
                 setIsClipFilterActive(checked as boolean);
                 if (checked) {
                   setSnapshotClip(hasSnapshot, true);
+                } else {
+                  setSnapshotClip(hasSnapshot, undefined);
                 }
-                if (!checked) setSnapshotClip(hasSnapshot, undefined);
               }}
             />
             <Label
@@ -597,22 +609,30 @@ function SnapshotClipFilterContent({
               Has a video clip
             </Label>
           </div>
-          <div className="flex space-x-2">
-            <ToggleButton
-              active={hasClip === true}
-              onClick={() => setSnapshotClip(hasSnapshot, true)}
-              disabled={!isClipFilterActive}
+          <ToggleGroup
+            type="single"
+            value={hasClip === undefined ? undefined : hasClip ? "yes" : "no"}
+            onValueChange={(value) => {
+              if (value === "yes") setSnapshotClip(hasSnapshot, true);
+              else if (value === "no") setSnapshotClip(hasSnapshot, false);
+            }}
+            disabled={!isClipFilterActive}
+          >
+            <ToggleGroupItem
+              value="yes"
+              aria-label="Yes"
+              className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
             >
               Yes
-            </ToggleButton>
-            <ToggleButton
-              active={hasClip === false}
-              onClick={() => setSnapshotClip(hasSnapshot, false)}
-              disabled={!isClipFilterActive}
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="no"
+              aria-label="No"
+              className="data-[state=on]:bg-selected data-[state=on]:text-white data-[state=on]:hover:bg-selected data-[state=on]:hover:text-white"
             >
               No
-            </ToggleButton>
-          </div>
+            </ToggleGroupItem>
+          </ToggleGroup>
         </div>
       </div>
     </div>
