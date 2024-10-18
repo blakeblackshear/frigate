@@ -153,6 +153,8 @@ export default function SearchView({
       after: [formatDateToLocaleString(-5)],
       min_score: ["50"],
       max_score: ["100"],
+      has_clip: ["yes", "no"],
+      has_snapshot: ["yes", "no"],
     }),
     [config, allLabels, allZones, allSubLabels],
   );
