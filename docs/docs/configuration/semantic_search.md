@@ -9,6 +9,14 @@ Frigate has support for [Jina AI's CLIP model](https://huggingface.co/jinaai/jin
 
 Semantic Search is accessed via the _Explore_ view in the Frigate UI.
 
+## Minimum System Requirements
+
+Semantic Search works by running a large AI model locally on your system. Small or underpowered systems like a Raspberry Pi will not run Semantic Search reliably or at all.
+
+A minimum of 8GB of RAM is required to use Semantic Search. A GPU is not strictly required but will provide a significant performance increase over CPU-only systems.
+
+For best performance, 16GB or more of RAM and a dedicated GPU are recommended.
+
 ## Configuration
 
 Semantic search is disabled by default, and must be enabled in your config file before it can be used. Semantic Search is a global configuration setting.
