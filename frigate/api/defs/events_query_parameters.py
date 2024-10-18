@@ -44,6 +44,8 @@ class EventsSearchQueryParams(BaseModel):
     after: Optional[float] = None
     before: Optional[float] = None
     time_range: Optional[str] = DEFAULT_TIME_RANGE
+    has_clip: Optional[bool] = None
+    has_snapshot: Optional[bool] = None
     timezone: Optional[str] = "utc"
     min_score: Optional[float] = None
     max_score: Optional[float] = None

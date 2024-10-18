@@ -111,6 +111,8 @@ export default function Explore() {
           search_type: searchSearchParams["search_type"],
           min_score: searchSearchParams["min_score"],
           max_score: searchSearchParams["max_score"],
+          has_snapshot: searchSearchParams["has_snapshot"],
+          has_clip: searchSearchParams["has_clip"],
           limit:
             Object.keys(searchSearchParams).length == 0 ? API_LIMIT : undefined,
           timezone,
@@ -139,6 +141,8 @@ export default function Explore() {
         search_type: searchSearchParams["search_type"],
         min_score: searchSearchParams["min_score"],
         max_score: searchSearchParams["max_score"],
+        has_snapshot: searchSearchParams["has_snapshot"],
+        has_clip: searchSearchParams["has_clip"],
         event_id: searchSearchParams["event_id"],
         timezone,
         include_thumbnails: 0,

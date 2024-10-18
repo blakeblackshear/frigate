@@ -59,6 +59,8 @@ export type SearchFilter = {
   after?: number;
   min_score?: number;
   max_score?: number;
+  has_snapshot?: number;
+  has_clip?: number;
   time_range?: string;
   search_type?: SearchSource[];
   event_id?: string;

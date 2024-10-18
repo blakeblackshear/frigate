@@ -296,6 +296,14 @@ export default function InputWithTags({
               );
             }
             break;
+          case "has_snapshot":
+            if (!newFilters.has_snapshot) newFilters.has_snapshot = undefined;
+            newFilters.has_snapshot = value == "yes" ? 1 : 0;
+            break;
+          case "has_clip":
+            if (!newFilters.has_clip) newFilters.has_clip = undefined;
+            newFilters.has_clip = value == "yes" ? 1 : 0;
+            break;
           case "event_id":
             newFilters.event_id = value;
             break;
@@ -341,6 +349,8 @@ export default function InputWithTags({
       }`;
     } else if (filterType === "min_score" || filterType === "max_score") {
       return Math.round(Number(filterValues) * 100).toString() + "%";
+    } else if (filterType === "has_clip" || filterType === "has_snapshot") {
+      return filterValues ? "Yes" : "No";
     } else {
       return filterValues as string;
     }
