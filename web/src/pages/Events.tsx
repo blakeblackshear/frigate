@@ -407,10 +407,6 @@ export default function Events() {
                   review.severity == "detection"
                     ? item.reviewed_detection + 1
                     : item.reviewed_detection,
-                reviewed_motion:
-                  review.severity == "significant_motion"
-                    ? item.reviewed_motion + 1
-                    : item.reviewed_motion,
               },
             };
           },

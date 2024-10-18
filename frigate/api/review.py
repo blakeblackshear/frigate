@@ -1,7 +1,6 @@
 """Review apis."""
 
 import datetime
-import json
 import logging
 from functools import reduce
 from pathlib import Path
@@ -24,7 +23,6 @@ from frigate.api.defs.review_query_parameters import (
     ReviewSummaryQueryParams,
 )
 from frigate.api.defs.review_responses import (
-    ReviewActivityAudioResponse,
     ReviewActivityMotionResponse,
     ReviewSegmentResponse,
     ReviewSummaryResponse,
@@ -190,18 +188,6 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == "significant_motion"),
-                            ReviewSegment.has_been_reviewed,
-                        )
-                    ],
-                    0,
-                )
-            ).alias("reviewed_motion"),
-            fn.SUM(
-                Case(
-                    None,
-                    [
-                        (
                             (ReviewSegment.severity == "alert"),
                             1,
                         )
@@ -221,18 +207,6 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     0,
                 )
             ).alias("total_detection"),
-            fn.SUM(
-                Case(
-                    None,
-                    [
-                        (
-                            (ReviewSegment.severity == "significant_motion"),
-                            1,
-                        )
-                    ],
-                    0,
-                )
-            ).alias("total_motion"),
         )
         .where(reduce(operator.and_, clauses))
         .dicts()
@@ -299,18 +273,6 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == "significant_motion"),
-                            ReviewSegment.has_been_reviewed,
-                        )
-                    ],
-                    0,
-                )
-            ).alias("reviewed_motion"),
-            fn.SUM(
-                Case(
-                    None,
-                    [
-                        (
                             (ReviewSegment.severity == "alert"),
                             1,
                         )
@@ -330,18 +292,6 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     0,
                 )
             ).alias("total_detection"),
-            fn.SUM(
-                Case(
-                    None,
-                    [
-                        (
-                            (ReviewSegment.severity == "significant_motion"),
-                            1,
-                        )
-                    ],
-                    0,
-                )
-            ).alias("total_motion"),
         )
         .where(reduce(operator.and_, clauses))
         .group_by(
@@ -492,71 +442,6 @@ def motion_activity(params: ReviewActivityMotionQueryParams = Depends()):
     # change types for output
     df.index = df.index.astype(int) // (10**9)
     normalized = df.reset_index().to_dict("records")
-    return JSONResponse(content=normalized)
-
-
-@router.get("/review/activity/audio", response_model=list[ReviewActivityAudioResponse])
-def audio_activity(params: ReviewActivityMotionQueryParams = Depends()):
-    """Get motion and audio activity."""
-    cameras = params.cameras
-    before = params.before or datetime.datetime.now().timestamp()
-    after = (
-        params.after
-        or (datetime.datetime.now() - datetime.timedelta(hours=1)).timestamp()
-    )
-    # get scale in seconds
-    scale = params.scale
-
-    clauses = [(Recordings.start_time > after) & (Recordings.end_time < before)]
-
-    if cameras != "all":
-        camera_list = cameras.split(",")
-        clauses.append((Recordings.camera << camera_list))
-
-    all_recordings: list[Recordings] = (
-        Recordings.select(
-            Recordings.start_time,
-            Recordings.duration,
-            Recordings.objects,
-            Recordings.dBFS,
-        )
-        .where(reduce(operator.and_, clauses))
-        .order_by(Recordings.start_time.asc())
-        .iterator()
-    )
-
-    # format is: { timestamp: segment_start_ts, motion: [0-100], audio: [0 - -100] }
-    # periods where active objects / audio was detected will cause audio to be scaled down
-    data: list[dict[str, float]] = []
-
-    for rec in all_recordings:
-        data.append(
-            {
-                "start_time": rec.start_time,
-                "audio": rec.dBFS if rec.objects == 0 else 0,
-            }
-        )
-
-    # resample data using pandas to get activity on scaled basis
-    df = pd.DataFrame(data, columns=["start_time", "audio"])
-    df = df.astype(dtype={"audio": "float16"})
-
-    # set date as datetime index
-    df["start_time"] = pd.to_datetime(df["start_time"], unit="s")
-    df.set_index(["start_time"], inplace=True)
-
-    # normalize data
-    df = df.resample(f"{scale}S").mean().fillna(0.0)
-    # FIXME: If min/max audio is the same then we get division by 0 and as such audio is 'nan'
-    df["audio"] = (
-        (df["audio"] - df["audio"].max())
-        / (df["audio"].min() - df["audio"].max())
-        * -100
-    )
-
-    # change types for output
-    df.index = df.index.astype(int) // (10**9)
-    normalized = json.loads(df.reset_index().to_json(orient="records"))
     return JSONResponse(content=normalized)
 
 
