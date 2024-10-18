@@ -117,13 +117,11 @@ export default function EventView({
       return {
         alert: summary.total_alert ?? 0,
         detection: summary.total_detection ?? 0,
-        significant_motion: summary.total_motion ?? 0,
       };
     } else {
       return {
         alert: summary.total_alert - summary.reviewed_alert,
         detection: summary.total_detection - summary.reviewed_detection,
-        significant_motion: summary.total_motion - summary.reviewed_motion,
       };
     }
   }, [filter, showReviewed, reviewSummary]);
