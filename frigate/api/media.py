@@ -1528,11 +1528,11 @@ def label_snapshot(request: Request, camera_name: str, label: str):
         )
 
     try:
-        event = event_query.get()
-        return event_snapshot(request, event.id)
+        event: Event = event_query.get()
+        return event_snapshot(request, event.id, MediaEventsSnapshotQueryParams())
     except DoesNotExist:
         frame = np.zeros((720, 1280, 3), np.uint8)
-        ret, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
+        _, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
 
         return Response(
             jpg.tobytes,
