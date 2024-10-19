@@ -80,9 +80,9 @@ With some of the processors, like the J4125, the default driver `iHD` doesn't se
 
 :::
 
-### Via Quicksync (>=10th Generation only)
+### Via Quicksync
 
-If VAAPI does not work for you, you can try QSV if your processor supports it. QSV must be set specifically based on the video encoding of the stream.
+If VAAPI does not work for you, you can try QSV if your processor supports it (check [Intel product specifications site](https://ark.intel.com/content/www/us/en/ark.html#@Processors) to see if your CPU supports QSV). QSV must be set specifically based on the video encoding of the stream.
 
 #### H.264 streams
 
