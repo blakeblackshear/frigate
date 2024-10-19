@@ -259,66 +259,61 @@ def events(params: EventsQueryParams = Depends()):
 
 @router.get("/events/explore")
 def events_explore(limit: int = 10):
-    subquery = Event.select(
-        Event.id,
-        Event.camera,
-        Event.label,
-        Event.zones,
-        Event.start_time,
-        Event.end_time,
-        Event.has_clip,
-        Event.has_snapshot,
-        Event.plus_id,
-        Event.retain_indefinitely,
-        Event.sub_label,
-        Event.top_score,
-        Event.false_positive,
-        Event.box,
-        Event.data,
-        fn.rank()
-        .over(partition_by=[Event.label], order_by=[Event.start_time.desc()])
-        .alias("rank"),
-        fn.COUNT(Event.id).over(partition_by=[Event.label]).alias("event_count"),
-    ).alias("subquery")
+    # get distinct labels for all events
+    distinct_labels = Event.select(Event.label).distinct().order_by(Event.label)
 
-    query = (
-        Event.select(
-            subquery.c.id,
-            subquery.c.camera,
-            subquery.c.label,
-            subquery.c.zones,
-            subquery.c.start_time,
-            subquery.c.end_time,
-            subquery.c.has_clip,
-            subquery.c.has_snapshot,
-            subquery.c.plus_id,
-            subquery.c.retain_indefinitely,
-            subquery.c.sub_label,
-            subquery.c.top_score,
-            subquery.c.false_positive,
-            subquery.c.box,
-            subquery.c.data,
-            subquery.c.event_count,
-        )
-        .from_(subquery)
-        .where(subquery.c.rank <= limit)
-        .order_by(subquery.c.event_count.desc(), subquery.c.start_time.desc())
-        .dicts()
-    )
+    label_counts = {}
 
-    events = list(query.iterator())
+    def event_generator():
+        for label_obj in distinct_labels.iterator():
+            label = label_obj.label
 
-    processed_events = [
-        {k: v for k, v in event.items() if k != "data"}
-        | {
-            "data": {
-                k: v
-                for k, v in event["data"].items()
-                if k in ["type", "score", "top_score", "description"]
+            # get most recent events for this label
+            label_events = (
+                Event.select()
+                .where(Event.label == label)
+                .order_by(Event.start_time.desc())
+                .limit(limit)
+                .iterator()
+            )
+
+            # count total events for this label
+            label_counts[label] = Event.select().where(Event.label == label).count()
+
+            yield from label_events
+
+    def process_events():
+        for event in event_generator():
+            processed_event = {
+                "id": event.id,
+                "camera": event.camera,
+                "label": event.label,
+                "zones": event.zones,
+                "start_time": event.start_time,
+                "end_time": event.end_time,
+                "has_clip": event.has_clip,
+                "has_snapshot": event.has_snapshot,
+                "plus_id": event.plus_id,
+                "retain_indefinitely": event.retain_indefinitely,
+                "sub_label": event.sub_label,
+                "top_score": event.top_score,
+                "false_positive": event.false_positive,
+                "box": event.box,
+                "data": {
+                    k: v
+                    for k, v in event.data.items()
+                    if k in ["type", "score", "top_score", "description"]
+                },
+                "event_count": label_counts[event.label],
             }
-        }
-        for event in events
-    ]
+            yield processed_event
+
+    # convert iterator to list and sort
+    processed_events = sorted(
+        process_events(),
+        key=lambda x: (x["event_count"], x["start_time"]),
+        reverse=True,
+    )
 
     return JSONResponse(content=processed_events)
 
