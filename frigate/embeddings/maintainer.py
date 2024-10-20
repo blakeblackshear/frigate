@@ -31,6 +31,8 @@ from .embeddings import Embeddings
 
 logger = logging.getLogger(__name__)
 
+MAX_THUMBNAILS = 10
+
 
 class EmbeddingMaintainer(threading.Thread):
     """Handle embedding queue and post event updates."""
@@ -117,6 +119,15 @@ class EmbeddingMaintainer(threading.Thread):
             return
 
         camera_config = self.config.cameras[camera]
+        # no need to save our own thumbnails if genai is not enabled
+        # or if the object has become stationary
+        if (
+            not camera_config.genai.enabled
+            or self.genai_client is None
+            or data["stationary"]
+        ):
+            return
+
         if data["id"] not in self.tracked_events:
             self.tracked_events[data["id"]] = []
 
@@ -127,7 +138,14 @@ class EmbeddingMaintainer(threading.Thread):
 
             if yuv_frame is not None:
                 data["thumbnail"] = self._create_thumbnail(yuv_frame, data["box"])
+
+                # Limit the number of thumbnails saved
+                if len(self.tracked_events[data["id"]]) >= MAX_THUMBNAILS:
+                    # Always keep the first thumbnail for the event
+                    self.tracked_events[data["id"]].pop(1)
+
                 self.tracked_events[data["id"]].append(data)
+
                 self.frame_manager.close(frame_id)
         except FileNotFoundError:
             pass
