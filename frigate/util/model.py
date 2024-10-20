@@ -85,8 +85,14 @@ class ONNXModelRunner:
         else:
             # Use ONNXRuntime
             self.type = "ort"
+            options = ort.SessionOptions()
+            if device == "CPU":
+                options.enable_cpu_mem_arena = False
             self.ort = ort.InferenceSession(
-                model_path, providers=providers, provider_options=options
+                model_path,
+                sess_options=options,
+                providers=providers,
+                provider_options=options,
             )
 
     def get_input_names(self) -> list[str]:

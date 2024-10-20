@@ -84,7 +84,10 @@ export default function SearchSettingsView({
 
     axios
       .put(
-        `config/set?semantic_search.enabled=${searchSettings.enabled}&semantic_search.reindex=${searchSettings.reindex}&semantic_search.model_size=${searchSettings.model_size}`,
+        `config/set?semantic_search.enabled=${searchSettings.enabled ? "True" : "False"}&semantic_search.reindex=${searchSettings.reindex ? "True" : "False"}&semantic_search.model_size=${searchSettings.model_size}`,
+        {
+          requires_restart: 0,
+        },
       )
       .then((res) => {
         if (res.status === 200) {
