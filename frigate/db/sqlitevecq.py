@@ -36,8 +36,11 @@ class SqliteVecQueueDatabase(SqliteQueueDatabase):
         self.execute_sql("""
             DROP TABLE vec_thumbnails;
         """)
+        self.execute_sql("""
+            DROP TABLE vec_faces;
+        """)
 
-    def create_embeddings_tables(self) -> None:
+    def create_embeddings_tables(self, face_recognition: bool) -> None:
         """Create vec0 virtual table for embeddings"""
         self.execute_sql("""
             CREATE VIRTUAL TABLE IF NOT EXISTS vec_thumbnails USING vec0(
@@ -51,3 +54,12 @@ class SqliteVecQueueDatabase(SqliteQueueDatabase):
                 description_embedding FLOAT[768] distance_metric=cosine
             );
         """)
+
+        if face_recognition:
+            self.execute_sql("""
+                CREATE VIRTUAL TABLE IF NOT EXISTS vec_faces USING vec0(
+                    id TEXT PRIMARY KEY,
+                    faceName TEXT,
+                    face_embedding FLOAT[768] distance_metric=cosine
+                );
+            """)

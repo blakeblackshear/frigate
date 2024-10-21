@@ -67,7 +67,7 @@ class Embeddings:
         self.requestor = InterProcessRequestor()
 
         # Create tables if they don't exist
-        self.db.create_embeddings_tables()
+        self.db.create_embeddings_tables(self.config.face_recognition.enabled)
 
         models = [
             "jinaai/jina-clip-v1-text_model_fp16.onnx",
@@ -220,7 +220,7 @@ class Embeddings:
 
         self.db.drop_embeddings_tables()
         logger.debug("Dropped embeddings tables.")
-        self.db.create_embeddings_tables()
+        self.db.create_embeddings_tables(self.config.face_recognition.enabled)
         logger.debug("Created embeddings tables.")
 
         # Delete the saved stats file
