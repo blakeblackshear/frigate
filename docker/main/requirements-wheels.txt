@@ -2,7 +2,7 @@ click == 8.1.*
 # FastAPI
 starlette-context == 0.3.6
 fastapi == 0.115.0
-uvicorn == 0.30.*
+uvicorn == 0.32.*
 slowapi == 0.1.9
 imutils == 0.5.*
 joserfc == 1.0.*
