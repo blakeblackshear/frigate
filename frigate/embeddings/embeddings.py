@@ -20,7 +20,7 @@ from frigate.models import Event
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.builtin import serialize
 
-from .functions.onnx import GenericONNXEmbedding
+from .functions.onnx import GenericONNXEmbedding, ModelTypeEnum
 
 logger = logging.getLogger(__name__)
 

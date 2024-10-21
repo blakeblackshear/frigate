@@ -95,7 +95,10 @@ class GenericONNXEmbedding:
             file_name = os.path.basename(path)
             if file_name in self.download_urls:
                 ModelDownloader.download_from_url(self.download_urls[file_name], path)
-            elif file_name == self.tokenizer_file and self.model_type == ModelTypeEnum.text:
+            elif (
+                file_name == self.tokenizer_file
+                and self.model_type == ModelTypeEnum.text
+            ):
                 if not os.path.exists(path + "/" + self.model_name):
                     logger.info(f"Downloading {self.model_name} tokenizer")
                 tokenizer = AutoTokenizer.from_pretrained(
