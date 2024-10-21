@@ -1,6 +1,9 @@
 name: On pull request
 
-on: pull_request
+on:
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
 
 env:
   DEFAULT_PYTHON: 3.9
