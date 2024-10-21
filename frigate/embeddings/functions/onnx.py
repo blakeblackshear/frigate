@@ -19,7 +19,7 @@ from frigate.comms.inter_process import InterProcessRequestor
 from frigate.const import MODEL_CACHE_DIR, UPDATE_MODEL_STATE
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.downloader import ModelDownloader
-from frigate.util.model import ONNXModelRunner
+from frigate.util.model import ONNXModelRunner, fix_spatial_mode
 
 warnings.filterwarnings(
     "ignore",
@@ -47,7 +47,7 @@ class GenericONNXEmbedding:
         model_file: str,
         download_urls: Dict[str, str],
         model_size: str,
-        model_type: str,
+        model_type: ModelTypeEnum,
         requestor: InterProcessRequestor,
         tokenizer_file: Optional[str] = None,
         device: str = "AUTO",
@@ -57,7 +57,7 @@ class GenericONNXEmbedding:
         self.tokenizer_file = tokenizer_file
         self.requestor = requestor
         self.download_urls = download_urls
-        self.model_type = model_type  # 'text' or 'vision'
+        self.model_type = model_type
         self.model_size = model_size
         self.device = device
         self.download_path = os.path.join(MODEL_CACHE_DIR, self.model_name)
@@ -93,14 +93,19 @@ class GenericONNXEmbedding:
     def _download_model(self, path: str):
         try:
             file_name = os.path.basename(path)
+            download_path = None
+
             if file_name in self.download_urls:
-                ModelDownloader.download_from_url(self.download_urls[file_name], path)
+                download_path = ModelDownloader.download_from_url(
+                    self.download_urls[file_name], path
+                )
             elif (
                 file_name == self.tokenizer_file
                 and self.model_type == ModelTypeEnum.text
             ):
                 if not os.path.exists(path + "/" + self.model_name):
                     logger.info(f"Downloading {self.model_name} tokenizer")
+
                 tokenizer = AutoTokenizer.from_pretrained(
                     self.model_name,
                     trust_remote_code=True,
@@ -108,6 +113,12 @@ class GenericONNXEmbedding:
                     clean_up_tokenization_spaces=True,
                 )
                 tokenizer.save_pretrained(path)
+
+            # the onnx model has incorrect spatial mode
+            # set by default, update then save model.
+            print(f"download path is {download_path} and model type is {self.model_type}")
+            if download_path is not None and self.model_type == ModelTypeEnum.face:
+                fix_spatial_mode(download_path)
 
             self.downloader.requestor.send_data(
                 UPDATE_MODEL_STATE,
@@ -131,8 +142,11 @@ class GenericONNXEmbedding:
                 self.downloader.wait_for_download()
             if self.model_type == ModelTypeEnum.text:
                 self.tokenizer = self._load_tokenizer()
-            else:
+            elif self.model_type == ModelTypeEnum.vision:
                 self.feature_extractor = self._load_feature_extractor()
+            elif self.model_type == ModelTypeEnum.face:
+                self.feature_extractor = []
+
             self.runner = ONNXModelRunner(
                 os.path.join(self.download_path, self.model_file),
                 self.device,
@@ -172,16 +186,37 @@ class GenericONNXEmbedding:
                 self.feature_extractor(images=image, return_tensors="np")
                 for image in processed_images
             ]
+        elif self.model_type == ModelTypeEnum.face:
+            if isinstance(raw_inputs, list):
+                raise ValueError("Face embedding does not support batch inputs.")
+
+            pil = self._process_image(raw_inputs)
+            og = np.array(pil).astype(np.float32)
+
+            # Image must be 112x112
+            og_h, og_w, channels = og.shape
+            frame = np.full((112, 112, channels), (0, 0, 0), dtype=np.float32)
+
+            # compute center offset
+            x_center = (112 - og_w) // 2
+            y_center = (112 - og_h) // 2
+
+            # copy img image into center of result image
+            frame[y_center : y_center + og_h, x_center : x_center + og_w] = og
+
+            frame = np.expand_dims(frame, axis=0)
+            frame = np.transpose(frame, (0, 3, 1, 2))
+            return [{"data": frame}]
         else:
             raise ValueError(f"Unable to preprocess inputs for {self.model_type}")
 
-    def _process_image(self, image):
+    def _process_image(self, image, output: str = "RGB") -> Image.Image:
         if isinstance(image, str):
             if image.startswith("http"):
                 response = requests.get(image)
-                image = Image.open(BytesIO(response.content)).convert("RGB")
+                image = Image.open(BytesIO(response.content)).convert(output)
         elif isinstance(image, bytes):
-            image = Image.open(BytesIO(image)).convert("RGB")
+            image = Image.open(BytesIO(image)).convert(output)
 
         return image
 

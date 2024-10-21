@@ -1,8 +1,10 @@
 """Model Utils"""
 
 import os
+from pathlib import Path
 from typing import Any
 
+import onnx
 import onnxruntime as ort
 
 try:
@@ -61,6 +63,23 @@ def get_ort_providers(
             options.append({})
 
     return (providers, options)
+
+
+def fix_spatial_mode(path: Path) -> None:
+    save_path = str(path)
+    old_path = f"{save_path}.old"
+    path.rename(old_path)
+
+    model = onnx.load(old_path)
+
+    for node in model.graph.node:
+        if node.op_type == "BatchNormalization":
+            for attr in node.attribute:
+                if attr.name == "spatial":
+                    attr.i = 1
+
+    onnx.save(model, save_path)
+    Path(old_path).unlink()
 
 
 class ONNXModelRunner:

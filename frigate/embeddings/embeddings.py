@@ -124,6 +124,21 @@ class Embeddings:
             device="GPU" if config.model_size == "large" else "CPU",
         )
 
+        self.face_embedding = None
+
+        if self.config.face_recognition.enabled:
+            self.face_embedding = GenericONNXEmbedding(
+                model_name="resnet100/arcface",
+                model_file="arcfaceresnet100-8.onnx",
+                download_urls={
+                    "arcfaceresnet100-8.onnx": "https://media.githubusercontent.com/media/onnx/models/bb0d4cf3d4e2a5f7376c13a08d337e86296edbe8/vision/body_analysis/arcface/model/arcfaceresnet100-8.onnx"
+                },
+                model_size="large",
+                model_type=ModelTypeEnum.face,
+                requestor=self.requestor,
+                device="GPU",
+            )
+
     def embed_thumbnail(
         self, event_id: str, thumbnail: bytes, upsert: bool = True
     ) -> ndarray:
@@ -219,9 +234,7 @@ class Embeddings:
         return embeddings
 
     def embed_face(self, label: str, thumbnail: bytes, upsert: bool = False) -> ndarray:
-        # Convert thumbnail bytes to PIL Image
-        image = Image.open(io.BytesIO(thumbnail)).convert("RGB")
-        embedding = self.vision_embedding([image])[0]
+        embedding = self.face_embedding(thumbnail)[0]
 
         if upsert:
             rand_id = "".join(
