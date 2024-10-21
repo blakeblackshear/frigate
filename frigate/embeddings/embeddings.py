@@ -3,6 +3,8 @@
 import base64
 import logging
 import os
+import random
+import string
 import time
 
 from numpy import ndarray
@@ -214,6 +216,26 @@ class Embeddings:
             )
 
         return embeddings
+
+    def embed_face(self, label: str, thumbnail: bytes, upsert: bool = False) -> ndarray:
+        # Convert thumbnail bytes to PIL Image
+        image = Image.open(io.BytesIO(thumbnail)).convert("RGB")
+        embedding = self.vision_embedding([image])[0]
+
+        if upsert:
+            rand_id = "".join(
+                random.choices(string.ascii_lowercase + string.digits, k=6)
+            )
+            id = f"{label}-{rand_id}"
+            self.db.execute_sql(
+                """
+                INSERT OR REPLACE INTO vec_faces(id, face_embedding)
+                VALUES(?, ?)
+                """,
+                (id, serialize(embedding)),
+            )
+
+        return embedding
 
     def reindex(self) -> None:
         logger.info("Indexing tracked object embeddings...")

@@ -59,7 +59,6 @@ class SqliteVecQueueDatabase(SqliteQueueDatabase):
             self.execute_sql("""
                 CREATE VIRTUAL TABLE IF NOT EXISTS vec_faces USING vec0(
                     id TEXT PRIMARY KEY,
-                    faceName TEXT,
                     face_embedding FLOAT[768] distance_metric=cosine
                 );
             """)

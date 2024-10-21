@@ -295,6 +295,10 @@ class EmbeddingMaintainer(threading.Thread):
 
         face_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
         face_frame = face_frame[face_box[1] : face_box[3], face_box[0] : face_box[2]]
+        ret, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
+
+        if not ret:
+            return
 
         # if face_frame is not None:
         #    cv2.imwrite(
@@ -303,7 +307,8 @@ class EmbeddingMaintainer(threading.Thread):
         #        [int(cv2.IMWRITE_WEBP_QUALITY), 60],
         #    )
 
-        # TODO run embedding on face box
+        embedding = self.embeddings.embed_face("nick", jpg.tobytes(), upsert=False)
+
         # TODO compare embedding to faces in embeddings DB to fine cosine similarity
         # TODO check against threshold and min score to see if best face qualifies
         # TODO update tracked object
