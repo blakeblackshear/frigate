@@ -12,10 +12,17 @@ from fastapi.responses import JSONResponse
 from peewee import Case, DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
 
+from frigate.api.defs.generic_response import GenericResponse
+from frigate.api.defs.review_body import ReviewModifyMultipleBody
 from frigate.api.defs.review_query_parameters import (
     ReviewActivityMotionQueryParams,
     ReviewQueryParams,
     ReviewSummaryQueryParams,
+)
+from frigate.api.defs.review_responses import (
+    ReviewActivityMotionResponse,
+    ReviewSegmentResponse,
+    ReviewSummaryResponse,
 )
 from frigate.api.defs.tags import Tags
 from frigate.models import Recordings, ReviewSegment
@@ -26,7 +33,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=[Tags.review])
 
 
-@router.get("/review")
+@router.get("/review", response_model=list[ReviewSegmentResponse])
 def review(params: ReviewQueryParams = Depends()):
     cameras = params.cameras
     labels = params.labels
@@ -102,7 +109,7 @@ def review(params: ReviewQueryParams = Depends()):
     return JSONResponse(content=[r for r in review])
 
 
-@router.get("/review/summary")
+@router.get("/review/summary", response_model=ReviewSummaryResponse)
 def review_summary(params: ReviewSummaryQueryParams = Depends()):
     hour_modifier, minute_modifier, seconds_offset = get_tz_modifiers(params.timezone)
     day_ago = (datetime.datetime.now() - datetime.timedelta(hours=24)).timestamp()
@@ -178,18 +185,6 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == "significant_motion"),
-                            ReviewSegment.has_been_reviewed,
-                        )
-                    ],
-                    0,
-                )
-            ).alias("reviewed_motion"),
-            fn.SUM(
-                Case(
-                    None,
-                    [
-                        (
                             (ReviewSegment.severity == "alert"),
                             1,
                         )
@@ -209,18 +204,6 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     0,
                 )
             ).alias("total_detection"),
-            fn.SUM(
-                Case(
-                    None,
-                    [
-                        (
-                            (ReviewSegment.severity == "significant_motion"),
-                            1,
-                        )
-                    ],
-                    0,
-                )
-            ).alias("total_motion"),
         )
         .where(reduce(operator.and_, clauses))
         .dicts()
@@ -287,18 +270,6 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     None,
                     [
                         (
-                            (ReviewSegment.severity == "significant_motion"),
-                            ReviewSegment.has_been_reviewed,
-                        )
-                    ],
-                    0,
-                )
-            ).alias("reviewed_motion"),
-            fn.SUM(
-                Case(
-                    None,
-                    [
-                        (
                             (ReviewSegment.severity == "alert"),
                             1,
                         )
@@ -318,18 +289,6 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
                     0,
                 )
             ).alias("total_detection"),
-            fn.SUM(
-                Case(
-                    None,
-                    [
-                        (
-                            (ReviewSegment.severity == "significant_motion"),
-                            1,
-                        )
-                    ],
-                    0,
-                )
-            ).alias("total_motion"),
         )
         .where(reduce(operator.and_, clauses))
         .group_by(
@@ -348,19 +307,10 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
     return JSONResponse(content=data)
 
 
-@router.post("/reviews/viewed")
-def set_multiple_reviewed(body: dict = None):
-    json: dict[str, any] = body or {}
-    list_of_ids = json.get("ids", "")
-
-    if not list_of_ids or len(list_of_ids) == 0:
-        return JSONResponse(
-            context=({"success": False, "message": "Not a valid list of ids"}),
-            status_code=404,
-        )
-
+@router.post("/reviews/viewed", response_model=GenericResponse)
+def set_multiple_reviewed(body: ReviewModifyMultipleBody):
     ReviewSegment.update(has_been_reviewed=True).where(
-        ReviewSegment.id << list_of_ids
+        ReviewSegment.id << body.ids
     ).execute()
 
     return JSONResponse(
@@ -369,17 +319,9 @@ def set_multiple_reviewed(body: dict = None):
     )
 
 
-@router.post("/reviews/delete")
-def delete_reviews(body: dict = None):
-    json: dict[str, any] = body or {}
-    list_of_ids = json.get("ids", "")
-
-    if not list_of_ids or len(list_of_ids) == 0:
-        return JSONResponse(
-            content=({"success": False, "message": "Not a valid list of ids"}),
-            status_code=404,
-        )
-
+@router.post("/reviews/delete", response_model=GenericResponse)
+def delete_reviews(body: ReviewModifyMultipleBody):
+    list_of_ids = body.ids
     reviews = (
         ReviewSegment.select(
             ReviewSegment.camera,
@@ -424,7 +366,9 @@ def delete_reviews(body: dict = None):
     )
 
 
-@router.get("/review/activity/motion")
+@router.get(
+    "/review/activity/motion", response_model=list[ReviewActivityMotionResponse]
+)
 def motion_activity(params: ReviewActivityMotionQueryParams = Depends()):
     """Get motion and audio activity."""
     cameras = params.cameras
@@ -498,98 +442,44 @@ def motion_activity(params: ReviewActivityMotionQueryParams = Depends()):
     return JSONResponse(content=normalized)
 
 
-@router.get("/review/activity/audio")
-def audio_activity(params: ReviewActivityMotionQueryParams = Depends()):
-    """Get motion and audio activity."""
-    cameras = params.cameras
-    before = params.before or datetime.datetime.now().timestamp()
-    after = (
-        params.after
-        or (datetime.datetime.now() - datetime.timedelta(hours=1)).timestamp()
-    )
-    # get scale in seconds
-    scale = params.scale
-
-    clauses = [(Recordings.start_time > after) & (Recordings.end_time < before)]
-
-    if cameras != "all":
-        camera_list = cameras.split(",")
-        clauses.append((Recordings.camera << camera_list))
-
-    all_recordings: list[Recordings] = (
-        Recordings.select(
-            Recordings.start_time,
-            Recordings.duration,
-            Recordings.objects,
-            Recordings.dBFS,
-        )
-        .where(reduce(operator.and_, clauses))
-        .order_by(Recordings.start_time.asc())
-        .iterator()
-    )
-
-    # format is: { timestamp: segment_start_ts, motion: [0-100], audio: [0 - -100] }
-    # periods where active objects / audio was detected will cause audio to be scaled down
-    data: list[dict[str, float]] = []
-
-    for rec in all_recordings:
-        data.append(
-            {
-                "start_time": rec.start_time,
-                "audio": rec.dBFS if rec.objects == 0 else 0,
-            }
-        )
-
-    # resample data using pandas to get activity on scaled basis
-    df = pd.DataFrame(data, columns=["start_time", "audio"])
-    df = df.astype(dtype={"audio": "float16"})
-
-    # set date as datetime index
-    df["start_time"] = pd.to_datetime(df["start_time"], unit="s")
-    df.set_index(["start_time"], inplace=True)
-
-    # normalize data
-    df = df.resample(f"{scale}S").mean().fillna(0.0)
-    df["audio"] = (
-        (df["audio"] - df["audio"].max())
-        / (df["audio"].min() - df["audio"].max())
-        * -100
-    )
-
-    # change types for output
-    df.index = df.index.astype(int) // (10**9)
-    normalized = df.reset_index().to_dict("records")
-    return JSONResponse(content=normalized)
-
-
-@router.get("/review/event/{event_id}")
+@router.get("/review/event/{event_id}", response_model=ReviewSegmentResponse)
 def get_review_from_event(event_id: str):
     try:
-        return model_to_dict(
-            ReviewSegment.get(
-                ReviewSegment.data["detections"].cast("text") % f'*"{event_id}"*'
+        return JSONResponse(
+            model_to_dict(
+                ReviewSegment.get(
+                    ReviewSegment.data["detections"].cast("text") % f'*"{event_id}"*'
+                )
             )
         )
     except DoesNotExist:
-        return "Review item not found", 404
+        return JSONResponse(
+            content={"success": False, "message": "Review item not found"},
+            status_code=404,
+        )
 
 
-@router.get("/review/{event_id}")
-def get_review(event_id: str):
+@router.get("/review/{review_id}", response_model=ReviewSegmentResponse)
+def get_review(review_id: str):
     try:
-        return model_to_dict(ReviewSegment.get(ReviewSegment.id == event_id))
+        return JSONResponse(
+            content=model_to_dict(ReviewSegment.get(ReviewSegment.id == review_id))
+        )
     except DoesNotExist:
-        return "Review item not found", 404
+        return JSONResponse(
+            content={"success": False, "message": "Review item not found"},
+            status_code=404,
+        )
 
 
-@router.delete("/review/{event_id}/viewed")
-def set_not_reviewed(event_id: str):
+@router.delete("/review/{review_id}/viewed", response_model=GenericResponse)
+def set_not_reviewed(review_id: str):
     try:
-        review: ReviewSegment = ReviewSegment.get(ReviewSegment.id == event_id)
+        review: ReviewSegment = ReviewSegment.get(ReviewSegment.id == review_id)
     except DoesNotExist:
         return JSONResponse(
             content=(
-                {"success": False, "message": "Review " + event_id + " not found"}
+                {"success": False, "message": "Review " + review_id + " not found"}
             ),
             status_code=404,
         )
@@ -598,6 +488,8 @@ def set_not_reviewed(event_id: str):
     review.save()
 
     return JSONResponse(
-        content=({"success": True, "message": "Reviewed " + event_id + " not viewed"}),
+        content=(
+            {"success": True, "message": "Set Review " + review_id + " as not viewed"}
+        ),
         status_code=200,
     )
