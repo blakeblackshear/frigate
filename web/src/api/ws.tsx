@@ -65,7 +65,10 @@ function useValue(): useValueReturn {
         : "OFF";
     });
 
-    setWsState({ ...wsState, ...cameraStates });
+    setWsState((prevState) => ({
+      ...prevState,
+      ...cameraStates,
+    }));
     setHasCameraState(true);
     // we only want this to run initially when the config is loaded
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -77,7 +80,10 @@ function useValue(): useValueReturn {
       const data: Update = JSON.parse(event.data);
 
       if (data) {
-        setWsState({ ...wsState, [data.topic]: data.payload });
+        setWsState((prevState) => ({
+          ...prevState,
+          [data.topic]: data.payload,
+        }));
       }
     },
     onOpen: () => {
