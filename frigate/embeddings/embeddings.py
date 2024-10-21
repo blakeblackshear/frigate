@@ -14,6 +14,7 @@ from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config.semantic_search import SemanticSearchConfig
 from frigate.const import (
     CONFIG_DIR,
+    FACE_DIR,
     UPDATE_EMBEDDINGS_REINDEX_PROGRESS,
     UPDATE_MODEL_STATE,
 )
@@ -227,6 +228,16 @@ class Embeddings:
                 random.choices(string.ascii_lowercase + string.digits, k=6)
             )
             id = f"{label}-{rand_id}"
+
+            # write face to library
+            folder = os.path.join(FACE_DIR, label)
+            file = os.path.join(folder, f"{id}.jpg")
+            os.makedirs(folder, exist_ok=True)
+
+            # save face image
+            with open(file, "wb") as output:
+                output.write(thumbnail)
+
             self.db.execute_sql(
                 """
                 INSERT OR REPLACE INTO vec_faces(id, face_embedding)

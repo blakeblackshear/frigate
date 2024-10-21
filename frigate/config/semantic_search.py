@@ -9,11 +9,8 @@ __all__ = ["FaceRecognitionConfig", "SemanticSearchConfig"]
 
 class FaceRecognitionConfig(FrigateBaseModel):
     enabled: bool = Field(default=False, title="Enable face recognition.")
-    reindex: Optional[bool] = Field(
-        default=False, title="Reindex all detections on startup."
-    )
-    model_size: str = Field(
-        default="small", title="The size of the embeddings model used."
+    threshold: float = Field(
+        default=0.8, title="Face similarity score required to be considered a match."
     )
 
 
