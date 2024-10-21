@@ -37,7 +37,7 @@ Parallel requests also come with some caveats. See the [Ollama documentation](ht
 
 ### Supported Models
 
-You must use a vision capable model with Frigate. Current model variants can be found [in their model library](https://ollama.com/library). At the time of writing, this includes `llava`, `llava-llama3`, `llava-phi3`, and `moondream`. Note that Frigate will not automatically download the model you specify in your config, you must download the model to your local instance of Ollama first.
+You must use a vision capable model with Frigate. Current model variants can be found [in their model library](https://ollama.com/library). At the time of writing, this includes `llava`, `llava-llama3`, `llava-phi3`, and `moondream`. Note that Frigate will not automatically download the model you specify in your config, you must download the model to your local instance of Ollama first i.e. by running `ollama pull llava:7b` on your Ollama server/Docker container. Note that the model specified in Frigate's config must match the downloaded model tag.
 
 :::note
 
@@ -52,7 +52,7 @@ genai:
   enabled: True
   provider: ollama
   base_url: http://localhost:11434
-  model: llava
+  model: llava:7b
 ```
 
 ## Google Gemini
