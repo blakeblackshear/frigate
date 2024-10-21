@@ -344,6 +344,7 @@ class CameraState:
             # if the object's thumbnail is not from the current frame, skip
             if (
                 current_frame is None
+                or obj.thumbnail_data is None
                 or obj.false_positive
                 or obj.thumbnail_data["frame_time"] != frame_time
             ):
