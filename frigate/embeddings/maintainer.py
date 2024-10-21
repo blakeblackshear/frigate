@@ -86,7 +86,7 @@ class EmbeddingMaintainer(threading.Thread):
             try:
                 if topic == EmbeddingsRequestEnum.embed_description.value:
                     return serialize(
-                        self.embeddings.upsert_description(
+                        self.embeddings.embed_description(
                             data["id"], data["description"]
                         ),
                         pack=False,
@@ -94,7 +94,7 @@ class EmbeddingMaintainer(threading.Thread):
                 elif topic == EmbeddingsRequestEnum.embed_thumbnail.value:
                     thumbnail = base64.b64decode(data["thumbnail"])
                     return serialize(
-                        self.embeddings.upsert_thumbnail(data["id"], thumbnail),
+                        self.embeddings.embed_thumbnail(data["id"], thumbnail),
                         pack=False,
                     )
                 elif topic == EmbeddingsRequestEnum.generate_search.value:
@@ -270,7 +270,7 @@ class EmbeddingMaintainer(threading.Thread):
 
     def _embed_thumbnail(self, event_id: str, thumbnail: bytes) -> None:
         """Embed the thumbnail for an event."""
-        self.embeddings.upsert_thumbnail(event_id, thumbnail)
+        self.embeddings.embed_thumbnail(event_id, thumbnail)
 
     def _embed_description(self, event: Event, thumbnails: list[bytes]) -> None:
         """Embed the description for an event."""
@@ -290,8 +290,8 @@ class EmbeddingMaintainer(threading.Thread):
             {"id": event.id, "description": description},
         )
 
-        # Encode the description
-        self.embeddings.upsert_description(event.id, description)
+        # Embed the description
+        self.embeddings.embed_description(event.id, description)
 
         logger.debug(
             "Generated description for %s (%d images): %s",
