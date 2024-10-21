@@ -282,7 +282,7 @@ def get_intel_gpu_stats() -> dict[str, str]:
         try:
             data = json.loads(f'[{"".join(p.stdout.split())}]')
         except json.JSONDecodeError:
-            return None
+            return {"gpu": "-%", "mem": "-%"}
 
         results: dict[str, str] = {}
         render = {"global": []}
@@ -332,7 +332,7 @@ def get_intel_gpu_stats() -> dict[str, str]:
             results["clients"] = {}
 
             for key in render.keys():
-                if key == "global":
+                if key == "global" or not render[key] or not video[key]:
                     continue
 
                 results["clients"][key] = (
