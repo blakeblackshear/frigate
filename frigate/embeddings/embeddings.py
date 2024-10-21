@@ -1,13 +1,11 @@
 """SQLite-vec embeddings database."""
 
 import base64
-import io
 import logging
 import os
 import time
 
 from numpy import ndarray
-from PIL import Image
 from playhouse.shortcuts import model_to_dict
 
 from frigate.comms.inter_process import InterProcessRequestor
