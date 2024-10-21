@@ -279,7 +279,11 @@ def get_intel_gpu_stats() -> dict[str, str]:
         logger.error(f"Unable to poll intel GPU stats: {p.stderr}")
         return None
     else:
-        data = json.loads(f'[{"".join(p.stdout.split())}]')
+        try:
+            data = json.loads(f'[{"".join(p.stdout.split())}]')
+        except json.JSONDecodeError:
+            return None
+
         results: dict[str, str] = {}
         render = {"global": []}
         video = {"global": []}
