@@ -177,7 +177,7 @@ export default function Explore() {
   const { data, size, setSize, isValidating, mutate } = useSWRInfinite<
     SearchResult[]
   >(getKey, {
-    revalidateFirstPage: false,
+    revalidateFirstPage: true,
     revalidateOnFocus: true,
     revalidateAll: false,
   });
