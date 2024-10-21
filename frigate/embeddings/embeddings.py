@@ -95,7 +95,7 @@ class Embeddings:
                 "text_model_fp16.onnx": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/text_model_fp16.onnx",
             },
             model_size=config.model_size,
-            model_type="text",
+            model_type=ModelTypeEnum.text,
             requestor=self.requestor,
             device="CPU",
         )
@@ -116,7 +116,7 @@ class Embeddings:
             model_file=model_file,
             download_urls=download_urls,
             model_size=config.model_size,
-            model_type="vision",
+            model_type=ModelTypeEnum.vision,
             requestor=self.requestor,
             device="GPU" if config.model_size == "large" else "CPU",
         )
