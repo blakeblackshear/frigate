@@ -9,7 +9,6 @@ from typing import Tuple
 import numpy as np
 import requests
 
-import frigate.util as util
 from frigate.camera import CameraMetrics
 from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
@@ -26,6 +25,7 @@ from frigate.const import (
 from frigate.ffmpeg_presets import parse_preset_input
 from frigate.log import LogPipe
 from frigate.object_detection import load_labels
+from frigate.service_manager import ServiceProcess
 from frigate.util.builtin import get_ffmpeg_arg_list
 from frigate.video import start_or_restart_ffmpeg, stop_ffmpeg
 
@@ -63,13 +63,15 @@ def get_ffmpeg_command(ffmpeg: FfmpegConfig) -> list[str]:
     )
 
 
-class AudioProcessor(util.Process):
+class AudioProcessor(ServiceProcess):
+    name = "frigate.audio_manager"
+
     def __init__(
         self,
         cameras: list[CameraConfig],
         camera_metrics: dict[str, CameraMetrics],
     ):
-        super().__init__(name="frigate.audio_manager", daemon=True)
+        super().__init__()
 
         self.camera_metrics = camera_metrics
         self.cameras = cameras
