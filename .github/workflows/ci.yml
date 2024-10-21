@@ -6,6 +6,8 @@ on:
     branches:
       - dev
       - master
+    paths-ignore:
+      - 'docs/**'      
 
 # only run the latest commit to avoid cache overwrites
 concurrency:
