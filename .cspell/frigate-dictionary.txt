@@ -60,6 +60,7 @@ dsize
 dtype
 ECONNRESET
 edgetpu
+fastapi
 faststart
 fflags
 ffprobe
@@ -238,6 +239,7 @@ sleeptime
 SNDMORE
 socs
 sqliteq
+sqlitevecq
 ssdlite
 statm
 stimeout
@@ -272,6 +274,7 @@ unraid
 unreviewed
 userdata
 usermod
+uvicorn
 vaapi
 vainfo
 variations
