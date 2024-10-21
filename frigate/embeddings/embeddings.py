@@ -125,8 +125,7 @@ class Embeddings:
 
     def upsert_thumbnail(self, event_id: str, thumbnail: bytes) -> ndarray:
         # Convert thumbnail bytes to PIL Image
-        image = Image.open(io.BytesIO(thumbnail)).convert("RGB")
-        embedding = self.vision_embedding([image])[0]
+        embedding = self.vision_embedding([thumbnail])[0]
 
         self.db.execute_sql(
             """
@@ -139,12 +138,8 @@ class Embeddings:
         return embedding
 
     def batch_upsert_thumbnail(self, event_thumbs: dict[str, bytes]) -> list[ndarray]:
-        images = [
-            Image.open(io.BytesIO(thumb)).convert("RGB")
-            for thumb in event_thumbs.values()
-        ]
         ids = list(event_thumbs.keys())
-        embeddings = self.vision_embedding(images)
+        embeddings = self.vision_embedding(list(event_thumbs.values()))
 
         items = []
 

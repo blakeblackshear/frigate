@@ -170,6 +170,8 @@ class GenericONNXEmbedding:
             if image.startswith("http"):
                 response = requests.get(image)
                 image = Image.open(BytesIO(response.content)).convert("RGB")
+        elif isinstance(image, bytes):
+            image = Image.open(BytesIO(image)).convert("RGB")
 
         return image
 
