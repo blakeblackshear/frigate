@@ -1,13 +1,11 @@
 """SQLite-vec embeddings database."""
 
 import base64
-import io
 import logging
 import os
 import time
 
 from numpy import ndarray
-from PIL import Image
 from playhouse.shortcuts import model_to_dict
 
 from frigate.comms.inter_process import InterProcessRequestor
@@ -22,7 +20,7 @@ from frigate.models import Event
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.builtin import serialize
 
-from .functions.onnx import GenericONNXEmbedding
+from .functions.onnx import GenericONNXEmbedding, ModelTypeEnum
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +95,7 @@ class Embeddings:
                 "text_model_fp16.onnx": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/text_model_fp16.onnx",
             },
             model_size=config.model_size,
-            model_type="text",
+            model_type=ModelTypeEnum.text,
             requestor=self.requestor,
             device="CPU",
         )
@@ -118,83 +116,102 @@ class Embeddings:
             model_file=model_file,
             download_urls=download_urls,
             model_size=config.model_size,
-            model_type="vision",
+            model_type=ModelTypeEnum.vision,
             requestor=self.requestor,
             device="GPU" if config.model_size == "large" else "CPU",
         )
 
-    def upsert_thumbnail(self, event_id: str, thumbnail: bytes) -> ndarray:
-        # Convert thumbnail bytes to PIL Image
-        image = Image.open(io.BytesIO(thumbnail)).convert("RGB")
-        embedding = self.vision_embedding([image])[0]
+    def embed_thumbnail(
+        self, event_id: str, thumbnail: bytes, upsert: bool = True
+    ) -> ndarray:
+        """Embed thumbnail and optionally insert into DB.
 
-        self.db.execute_sql(
-            """
-            INSERT OR REPLACE INTO vec_thumbnails(id, thumbnail_embedding)
-            VALUES(?, ?)
-            """,
-            (event_id, serialize(embedding)),
-        )
+        @param: event_id in Events DB
+        @param: thumbnail bytes in jpg format
+        @param: upsert If embedding should be upserted into vec DB
+        """
+        # Convert thumbnail bytes to PIL Image
+        embedding = self.vision_embedding([thumbnail])[0]
+
+        if upsert:
+            self.db.execute_sql(
+                """
+                INSERT OR REPLACE INTO vec_thumbnails(id, thumbnail_embedding)
+                VALUES(?, ?)
+                """,
+                (event_id, serialize(embedding)),
+            )
 
         return embedding
 
-    def batch_upsert_thumbnail(self, event_thumbs: dict[str, bytes]) -> list[ndarray]:
-        images = [
-            Image.open(io.BytesIO(thumb)).convert("RGB")
-            for thumb in event_thumbs.values()
-        ]
+    def batch_embed_thumbnail(
+        self, event_thumbs: dict[str, bytes], upsert: bool = True
+    ) -> list[ndarray]:
+        """Embed thumbnails and optionally insert into DB.
+
+        @param: event_thumbs Map of Event IDs in DB to thumbnail bytes in jpg format
+        @param: upsert If embedding should be upserted into vec DB
+        """
         ids = list(event_thumbs.keys())
-        embeddings = self.vision_embedding(images)
+        embeddings = self.vision_embedding(list(event_thumbs.values()))
 
-        items = []
+        if upsert:
+            items = []
 
-        for i in range(len(ids)):
-            items.append(ids[i])
-            items.append(serialize(embeddings[i]))
+            for i in range(len(ids)):
+                items.append(ids[i])
+                items.append(serialize(embeddings[i]))
 
-        self.db.execute_sql(
-            """
-            INSERT OR REPLACE INTO vec_thumbnails(id, thumbnail_embedding)
-            VALUES {}
-            """.format(", ".join(["(?, ?)"] * len(ids))),
-            items,
-        )
+            self.db.execute_sql(
+                """
+                INSERT OR REPLACE INTO vec_thumbnails(id, thumbnail_embedding)
+                VALUES {}
+                """.format(", ".join(["(?, ?)"] * len(ids))),
+                items,
+            )
+
         return embeddings
 
-    def upsert_description(self, event_id: str, description: str) -> ndarray:
+    def embed_description(
+        self, event_id: str, description: str, upsert: bool = True
+    ) -> ndarray:
         embedding = self.text_embedding([description])[0]
-        self.db.execute_sql(
-            """
-            INSERT OR REPLACE INTO vec_descriptions(id, description_embedding)
-            VALUES(?, ?)
-            """,
-            (event_id, serialize(embedding)),
-        )
+
+        if upsert:
+            self.db.execute_sql(
+                """
+                INSERT OR REPLACE INTO vec_descriptions(id, description_embedding)
+                VALUES(?, ?)
+                """,
+                (event_id, serialize(embedding)),
+            )
 
         return embedding
 
-    def batch_upsert_description(self, event_descriptions: dict[str, str]) -> ndarray:
+    def batch_embed_description(
+        self, event_descriptions: dict[str, str], upsert: bool = True
+    ) -> ndarray:
         # upsert embeddings one by one to avoid token limit
         embeddings = []
 
         for desc in event_descriptions.values():
             embeddings.append(self.text_embedding([desc])[0])
 
-        ids = list(event_descriptions.keys())
+        if upsert:
+            ids = list(event_descriptions.keys())
+            items = []
 
-        items = []
+            for i in range(len(ids)):
+                items.append(ids[i])
+                items.append(serialize(embeddings[i]))
 
-        for i in range(len(ids)):
-            items.append(ids[i])
-            items.append(serialize(embeddings[i]))
-
-        self.db.execute_sql(
-            """
-            INSERT OR REPLACE INTO vec_descriptions(id, description_embedding)
-            VALUES {}
-            """.format(", ".join(["(?, ?)"] * len(ids))),
-            items,
-        )
+            self.db.execute_sql(
+                """
+                INSERT OR REPLACE INTO vec_descriptions(id, description_embedding)
+                VALUES {}
+                """.format(", ".join(["(?, ?)"] * len(ids))),
+                items,
+            )
 
         return embeddings
 
@@ -261,10 +278,10 @@ class Embeddings:
                 totals["processed_objects"] += 1
 
             # run batch embedding
-            self.batch_upsert_thumbnail(batch_thumbs)
+            self.batch_embed_thumbnail(batch_thumbs)
 
             if batch_descs:
-                self.batch_upsert_description(batch_descs)
+                self.batch_embed_description(batch_descs)
 
             # report progress every batch so we don't spam the logs
             progress = (totals["processed_objects"] / total_events) * 100

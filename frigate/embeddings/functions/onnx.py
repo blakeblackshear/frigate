@@ -1,6 +1,7 @@
 import logging
 import os
 import warnings
+from enum import Enum
 from io import BytesIO
 from typing import Dict, List, Optional, Union
 
@@ -29,6 +30,12 @@ warnings.filterwarnings(
 # disables the progress bar for downloading tokenizers and feature extractors
 disable_progress_bar()
 logger = logging.getLogger(__name__)
+
+
+class ModelTypeEnum(str, Enum):
+    face = "face"
+    vision = "vision"
+    text = "text"
 
 
 class GenericONNXEmbedding:
@@ -88,7 +95,10 @@ class GenericONNXEmbedding:
             file_name = os.path.basename(path)
             if file_name in self.download_urls:
                 ModelDownloader.download_from_url(self.download_urls[file_name], path)
-            elif file_name == self.tokenizer_file and self.model_type == "text":
+            elif (
+                file_name == self.tokenizer_file
+                and self.model_type == ModelTypeEnum.text
+            ):
                 if not os.path.exists(path + "/" + self.model_name):
                     logger.info(f"Downloading {self.model_name} tokenizer")
                 tokenizer = AutoTokenizer.from_pretrained(
@@ -119,7 +129,7 @@ class GenericONNXEmbedding:
         if self.runner is None:
             if self.downloader:
                 self.downloader.wait_for_download()
-            if self.model_type == "text":
+            if self.model_type == ModelTypeEnum.text:
                 self.tokenizer = self._load_tokenizer()
             else:
                 self.feature_extractor = self._load_feature_extractor()
@@ -143,11 +153,35 @@ class GenericONNXEmbedding:
             f"{MODEL_CACHE_DIR}/{self.model_name}",
         )
 
+    def _preprocess_inputs(self, raw_inputs: any) -> any:
+        if self.model_type == ModelTypeEnum.text:
+            max_length = max(len(self.tokenizer.encode(text)) for text in raw_inputs)
+            return [
+                self.tokenizer(
+                    text,
+                    padding="max_length",
+                    truncation=True,
+                    max_length=max_length,
+                    return_tensors="np",
+                )
+                for text in raw_inputs
+            ]
+        elif self.model_type == ModelTypeEnum.vision:
+            processed_images = [self._process_image(img) for img in raw_inputs]
+            return [
+                self.feature_extractor(images=image, return_tensors="np")
+                for image in processed_images
+            ]
+        else:
+            raise ValueError(f"Unable to preprocess inputs for {self.model_type}")
+
     def _process_image(self, image):
         if isinstance(image, str):
             if image.startswith("http"):
                 response = requests.get(image)
                 image = Image.open(BytesIO(response.content)).convert("RGB")
+        elif isinstance(image, bytes):
+            image = Image.open(BytesIO(image)).convert("RGB")
 
         return image
 
@@ -163,25 +197,7 @@ class GenericONNXEmbedding:
             )
             return []
 
-        if self.model_type == "text":
-            max_length = max(len(self.tokenizer.encode(text)) for text in inputs)
-            processed_inputs = [
-                self.tokenizer(
-                    text,
-                    padding="max_length",
-                    truncation=True,
-                    max_length=max_length,
-                    return_tensors="np",
-                )
-                for text in inputs
-            ]
-        else:
-            processed_images = [self._process_image(img) for img in inputs]
-            processed_inputs = [
-                self.feature_extractor(images=image, return_tensors="np")
-                for image in processed_images
-            ]
-
+        processed_inputs = self._preprocess_inputs(inputs)
         input_names = self.runner.get_input_names()
         onnx_inputs = {name: [] for name in input_names}
         input: dict[str, any]

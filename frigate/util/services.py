@@ -279,10 +279,27 @@ def get_intel_gpu_stats() -> dict[str, str]:
         logger.error(f"Unable to poll intel GPU stats: {p.stderr}")
         return None
     else:
+        output = "".join(p.stdout.split())
+
         try:
-            data = json.loads(f'[{"".join(p.stdout.split())}]')
+            data = json.loads(f"[{output}]")
         except json.JSONDecodeError:
-            return {"gpu": "-%", "mem": "-%"}
+            data = None
+
+            # json is incomplete, remove characters until we get to valid json
+            while True:
+                while output and output[-1] != "}":
+                    output = output[:-1]
+
+                if not output:
+                    return {"gpu": "", "mem": ""}
+
+                try:
+                    data = json.loads(f"[{output}]")
+                    break
+                except json.JSONDecodeError:
+                    output = output[:-1]
+                    continue
 
         results: dict[str, str] = {}
         render = {"global": []}
