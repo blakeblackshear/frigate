@@ -263,8 +263,26 @@ class EmbeddingMaintainer(threading.Thread):
         if event_id:
             self.handle_regenerate_description(event_id, source)
 
+    def _search_face(self, query_embedding: bytes) -> list:
+        """Search for the face most closely matching the embedding."""
+        sql_query = """
+            SELECT
+                id,
+                distance
+            FROM vec_faces
+            WHERE face_embedding MATCH ?
+                AND k = 10 ORDER BY distance
+        """
+        logger.info("doing a search")
+        results = self.embeddings.db.execute_sql(sql_query, [query_embedding]).fetchall()
+        logger.info(f"the search results are {results}")
+
     def _process_face(self, obj_data: dict[str, any], frame: np.ndarray) -> None:
         """Look for faces in image."""
+        # don't run for non person objects
+        if obj_data.get("label") != "person":
+            return
+
         # don't overwrite sub label for objects that have one
         if obj_data.get("sub_label"):
             return
@@ -275,7 +293,12 @@ class EmbeddingMaintainer(threading.Thread):
             # TODO run cv2 face detection
             pass
         else:
+            # don't run for object without attributes
+            if not obj_data.get("current_attributes"):
+                return
+
             for attr in obj_data.get("current_attributes", []):
+                logger.info(f"attribute is {attr}")
                 if attr.get("label") != "face":
                     continue
 
@@ -308,6 +331,8 @@ class EmbeddingMaintainer(threading.Thread):
         #    )
 
         embedding = self.embeddings.embed_face("nick", jpg.tobytes(), upsert=False)
+        query_embedding = serialize(embedding)
+        best_faces = self._search_face(query_embedding)
 
         # TODO compare embedding to faces in embeddings DB to fine cosine similarity
         # TODO check against threshold and min score to see if best face qualifies
