@@ -13,10 +13,7 @@ from peewee import Case, DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
 
 from frigate.api.defs.generic_response import GenericResponse
-from frigate.api.defs.review_body import (
-    ReviewDeleteMultipleReviewsBody,
-    ReviewSetMultipleReviewedBody,
-)
+from frigate.api.defs.review_body import ReviewModifyMultipleBody
 from frigate.api.defs.review_query_parameters import (
     ReviewActivityMotionQueryParams,
     ReviewQueryParams,
@@ -311,7 +308,7 @@ def review_summary(params: ReviewSummaryQueryParams = Depends()):
 
 
 @router.post("/reviews/viewed", response_model=GenericResponse)
-def set_multiple_reviewed(body: ReviewSetMultipleReviewedBody):
+def set_multiple_reviewed(body: ReviewModifyMultipleBody):
     ReviewSegment.update(has_been_reviewed=True).where(
         ReviewSegment.id << body.ids
     ).execute()
@@ -323,7 +320,7 @@ def set_multiple_reviewed(body: ReviewSetMultipleReviewedBody):
 
 
 @router.post("/reviews/delete", response_model=GenericResponse)
-def delete_reviews(body: ReviewDeleteMultipleReviewsBody):
+def delete_reviews(body: ReviewModifyMultipleBody):
     list_of_ids = body.ids
     reviews = (
         ReviewSegment.select(
