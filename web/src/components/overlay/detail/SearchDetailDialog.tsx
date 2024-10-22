@@ -332,6 +332,11 @@ function ObjectDetailsTab({
                   : event,
               );
           },
+          {
+            optimisticData: true,
+            rollbackOnError: true,
+            revalidate: false,
+          },
         );
       })
       .catch(() => {
