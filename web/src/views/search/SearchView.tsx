@@ -489,6 +489,8 @@ export default function SearchView({
             <ExploreView
               searchDetail={searchDetail}
               setSearchDetail={setSearchDetail}
+              setSimilaritySearch={setSimilaritySearch}
+              onSelectSearch={onSelectSearch}
             />
           </div>
         )}
