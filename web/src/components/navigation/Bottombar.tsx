@@ -3,7 +3,7 @@ import { IoIosWarning } from "react-icons/io";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import useSWR from "swr";
 import { FrigateStats } from "@/types/stats";
-import { useFrigateStats } from "@/api/ws";
+import { useEmbeddingsReindexProgress, useFrigateStats } from "@/api/ws";
 import { useContext, useEffect, useMemo } from "react";
 import useStats from "@/hooks/use-stats";
 import GeneralSettings from "../menu/GeneralSettings";
@@ -73,6 +73,23 @@ function StatusAlertNav({ className }: StatusAlertNavProps) {
       );
     });
   }, [potentialProblems, addMessage, clearMessages]);
+
+  const { payload: reindexState } = useEmbeddingsReindexProgress();
+
+  useEffect(() => {
+    if (reindexState) {
+      if (reindexState.status == "indexing") {
+        clearMessages("embeddings-reindex");
+        addMessage(
+          "embeddings-reindex",
+          `Reindexing embeddings (${Math.floor((reindexState.processed_objects / reindexState.total_objects) * 100)}% complete)`,
+        );
+      }
+      if (reindexState.status === "completed") {
+        clearMessages("embeddings-reindex");
+      }
+    }
+  }, [reindexState, addMessage, clearMessages]);
 
   if (!messages || Object.keys(messages).length === 0) {
     return;
