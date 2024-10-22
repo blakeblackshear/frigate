@@ -737,6 +737,7 @@ function DetectionReview({
               <div className="col-span-full flex items-center justify-center">
                 <Button
                   className="text-white"
+                  aria-label="Mark these items as reviewed"
                   variant="select"
                   onClick={() => {
                     setSelectedReviews([]);

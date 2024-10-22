@@ -227,6 +227,7 @@ function GeneralFilterButton({
       size="sm"
       variant={selectedLabels?.length ? "select" : "default"}
       className="flex items-center gap-2 capitalize"
+      aria-label="Labels"
     >
       <MdLabel
         className={`${selectedLabels?.length ? "text-selected-foreground" : "text-secondary-foreground"}`}
@@ -336,6 +337,7 @@ export function GeneralFilterContent({
       <DropdownMenuSeparator />
       <div className="flex items-center justify-evenly p-2">
         <Button
+          aria-label="Apply"
           variant="select"
           onClick={() => {
             if (selectedLabels != currentLabels) {
@@ -348,6 +350,7 @@ export function GeneralFilterContent({
           Apply
         </Button>
         <Button
+          aria-label="Reset"
           onClick={() => {
             setCurrentLabels(undefined);
             updateLabelFilter(undefined);

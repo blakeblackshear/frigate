@@ -296,7 +296,7 @@ function ObjectDetailsTab({
     }
 
     if (search.sub_label) {
-      return Math.round((search.data?.top_score ?? 0) * 100);
+      return Math.round((search.data?.sub_label_score ?? 0) * 100);
     } else {
       return undefined;
     }
@@ -440,6 +440,7 @@ function ObjectDetailsTab({
           />
           {config?.semantic_search.enabled && (
             <Button
+              aria-label="Find similar tracked objects"
               onClick={() => {
                 setSearch(undefined);
 
@@ -466,6 +467,7 @@ function ObjectDetailsTab({
             <div className="flex items-center">
               <Button
                 className="rounded-r-none border-r-0"
+                aria-label="Regenerate tracked object description"
                 onClick={() => regenerateDescription("thumbnails")}
               >
                 Regenerate
@@ -473,19 +475,24 @@ function ObjectDetailsTab({
               {search.has_snapshot && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button className="rounded-l-none border-l-0 px-2">
+                    <Button
+                      className="rounded-l-none border-l-0 px-2"
+                      aria-label="Expand regeneration menu"
+                    >
                       <FaChevronDown className="size-3" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     <DropdownMenuItem
                       className="cursor-pointer"
+                      aria-label="Regenerate from snapshot"
                       onClick={() => regenerateDescription("snapshot")}
                     >
                       Regenerate from Snapshot
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="cursor-pointer"
+                      aria-label="Regenerate from thumbnails"
                       onClick={() => regenerateDescription("thumbnails")}
                     >
                       Regenerate from Thumbnails
@@ -495,7 +502,11 @@ function ObjectDetailsTab({
               )}
             </div>
           )}
-          <Button variant="select" onClick={updateDescription}>
+          <Button
+            variant="select"
+            aria-label="Save"
+            onClick={updateDescription}
+          >
             Save
           </Button>
         </div>
@@ -601,6 +612,7 @@ function ObjectSnapshotTab({
                       <>
                         <Button
                           className="bg-success"
+                          aria-label="Confirm this label for Frigate Plus"
                           onClick={() => {
                             setState("uploading");
                             onSubmitToPlus(false);
@@ -610,6 +622,7 @@ function ObjectSnapshotTab({
                         </Button>
                         <Button
                           className="text-white"
+                          aria-label="Do not confirm this label for Frigate Plus"
                           variant="destructive"
                           onClick={() => {
                             setState("uploading");

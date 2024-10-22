@@ -46,6 +46,7 @@ export function DownloadVideoButton({
         disabled={isDownloading}
         className="flex items-center gap-2"
         size="sm"
+        aria-label="Download Video"
       >
         <a
           href={source}

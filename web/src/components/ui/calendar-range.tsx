@@ -283,6 +283,7 @@ export function DateRangePicker({
   }): JSX.Element => (
     <Button
       className={cn(isSelected && "pointer-events-none text-primary")}
+      aria-label={label}
       variant="ghost"
       onClick={() => {
         setPreset(preset);
@@ -417,6 +418,7 @@ export function DateRangePicker({
       <div className="mx-auto flex w-64 items-center justify-evenly gap-2 py-2">
         <Button
           variant="select"
+          aria-label="Apply"
           onClick={() => {
             setIsOpen(false);
             if (
@@ -436,6 +438,7 @@ export function DateRangePicker({
             onReset?.();
           }}
           variant="ghost"
+          aria-label="Reset"
         >
           Reset
         </Button>

@@ -36,6 +36,7 @@ export default function SetPasswordDialog({
         <DialogFooter>
           <Button
             className="flex items-center gap-1"
+            aria-label="Save Password"
             variant="select"
             size="sm"
             onClick={() => {

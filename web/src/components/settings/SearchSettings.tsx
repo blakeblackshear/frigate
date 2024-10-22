@@ -44,7 +44,11 @@ export default function SearchSettings({
   ]);
 
   const trigger = (
-    <Button className="flex items-center gap-2" size="sm">
+    <Button
+      className="flex items-center gap-2"
+      aria-label="Search Settings"
+      size="sm"
+    >
       <FaCog className="text-secondary-foreground" />
       Settings
     </Button>

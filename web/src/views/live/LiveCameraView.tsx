@@ -352,6 +352,7 @@ export default function LiveCameraView({
             >
               <Button
                 className={`flex items-center gap-2.5 rounded-lg`}
+                aria-label="Go back"
                 size="sm"
                 onClick={() => navigate(-1)}
               >
@@ -360,6 +361,7 @@ export default function LiveCameraView({
               </Button>
               <Button
                 className="flex items-center gap-2.5 rounded-lg"
+                aria-label="Show historical footage"
                 size="sm"
                 onClick={() => {
                   navigate("review", {
@@ -388,6 +390,7 @@ export default function LiveCameraView({
               {fullscreen && (
                 <Button
                   className="bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500 text-primary"
+                  aria-label="Go back"
                   size="sm"
                   onClick={() => navigate(-1)}
                 >
@@ -603,6 +606,7 @@ function PtzControlPanel({
       {ptz?.features?.includes("pt") && (
         <>
           <Button
+            aria-label="Move PTZ camera to the left"
             onMouseDown={(e) => {
               e.preventDefault();
               sendPtz("MOVE_LEFT");
@@ -617,6 +621,7 @@ function PtzControlPanel({
             <FaAngleLeft />
           </Button>
           <Button
+            aria-label="Move PTZ camera up"
             onMouseDown={(e) => {
               e.preventDefault();
               sendPtz("MOVE_UP");
@@ -631,6 +636,7 @@ function PtzControlPanel({
             <FaAngleUp />
           </Button>
           <Button
+            aria-label="Move PTZ camera down"
             onMouseDown={(e) => {
               e.preventDefault();
               sendPtz("MOVE_DOWN");
@@ -645,6 +651,7 @@ function PtzControlPanel({
             <FaAngleDown />
           </Button>
           <Button
+            aria-label="Move PTZ camera to the right"
             onMouseDown={(e) => {
               e.preventDefault();
               sendPtz("MOVE_RIGHT");
@@ -663,6 +670,7 @@ function PtzControlPanel({
       {ptz?.features?.includes("zoom") && (
         <>
           <Button
+            aria-label="Zoom PTZ camera in"
             onMouseDown={(e) => {
               e.preventDefault();
               sendPtz("ZOOM_IN");
@@ -677,6 +685,7 @@ function PtzControlPanel({
             <MdZoomIn />
           </Button>
           <Button
+            aria-label="Zoom PTZ camera out"
             onMouseDown={(e) => {
               e.preventDefault();
               sendPtz("ZOOM_OUT");
@@ -696,6 +705,7 @@ function PtzControlPanel({
         <>
           <Button
             className={`${clickOverlay ? "text-selected" : "text-primary"}`}
+            aria-label="Click in the frame to center the PTZ camera"
             onClick={() => setClickOverlay(!clickOverlay)}
           >
             <TbViewfinder />
@@ -705,7 +715,7 @@ function PtzControlPanel({
       {(ptz?.presets?.length ?? 0) > 0 && (
         <DropdownMenu modal={!isDesktop}>
           <DropdownMenuTrigger asChild>
-            <Button>
+            <Button aria-label="PTZ camera presets">
               <BsThreeDotsVertical />
             </Button>
           </DropdownMenuTrigger>
@@ -717,6 +727,7 @@ function PtzControlPanel({
               return (
                 <DropdownMenuItem
                   key={preset}
+                  aria-label={preset}
                   className="cursor-pointer"
                   onSelect={() => sendPtz(`preset_${preset}`)}
                 >

@@ -74,6 +74,7 @@ export default function PolygonEditControls({
           <Button
             variant="default"
             className="size-6 rounded-md p-1"
+            aria-label="Remove last point"
             disabled={!polygons[activePolygonIndex].points.length}
             onClick={undo}
           >
@@ -87,6 +88,7 @@ export default function PolygonEditControls({
           <Button
             variant="default"
             className="size-6 rounded-md p-1"
+            aria-label="Clear all points"
             disabled={!polygons[activePolygonIndex].points.length}
             onClick={reset}
           >

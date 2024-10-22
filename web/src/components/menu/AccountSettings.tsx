@@ -72,6 +72,7 @@ export default function AccountSettings({ className }: AccountSettingsProps) {
             className={
               isDesktop ? "cursor-pointer" : "flex items-center p-2 text-sm"
             }
+            aria-label="Log out"
           >
             <a className="flex" href={logoutUrl}>
               <LuLogOut className="mr-2 size-4" />

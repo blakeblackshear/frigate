@@ -28,6 +28,7 @@ export default function SaveExportOverlay({
       >
         <Button
           className="flex items-center gap-1 text-primary"
+          aria-label="Cancel"
           size="sm"
           onClick={onCancel}
         >
@@ -36,6 +37,7 @@ export default function SaveExportOverlay({
         </Button>
         <Button
           className="flex items-center gap-1"
+          aria-label="Preview export"
           size="sm"
           onClick={onPreview}
         >
@@ -44,6 +46,7 @@ export default function SaveExportOverlay({
         </Button>
         <Button
           className="flex items-center gap-1"
+          aria-label="Save export"
           variant="select"
           size="sm"
           onClick={onSave}

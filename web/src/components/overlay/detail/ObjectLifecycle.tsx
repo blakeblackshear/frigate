@@ -242,6 +242,7 @@ export default function ObjectLifecycle({
         <div className={cn("flex items-center gap-2")}>
           <Button
             className="mb-2 mt-3 flex items-center gap-2.5 rounded-lg md:mt-0"
+            aria-label="Go back"
             size="sm"
             onClick={() => setPane("overview")}
           >
@@ -346,6 +347,7 @@ export default function ObjectLifecycle({
               <Button
                 variant={showControls ? "select" : "default"}
                 className="size-7 p-1.5"
+                aria-label="Adjust annotation settings"
               >
                 <LuSettings
                   className="size-5"

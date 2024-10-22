@@ -380,6 +380,7 @@ export function RecordingView({
         <div className={cn("flex items-center gap-2")}>
           <Button
             className="flex items-center gap-2.5 rounded-lg"
+            aria-label="Go back"
             size="sm"
             onClick={() => navigate(-1)}
           >
@@ -388,6 +389,7 @@ export function RecordingView({
           </Button>
           <Button
             className="flex items-center gap-2.5 rounded-lg"
+            aria-label="Go to the main camera live view"
             size="sm"
             onClick={() => {
               navigate(`/#${mainCamera}`);

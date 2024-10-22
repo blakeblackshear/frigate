@@ -36,6 +36,7 @@ export default function NewReviewData({
               : "invisible",
             "mx-auto mt-5 bg-gray-400 text-center text-white",
           )}
+          aria-label="View new review items"
           onClick={() => {
             pullLatestData();
             if (contentRef.current) {

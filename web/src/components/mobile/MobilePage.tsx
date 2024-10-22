@@ -154,6 +154,7 @@ export function MobilePageHeader({
     >
       <Button
         className="absolute left-0 rounded-lg"
+        aria-label="Go back"
         size="sm"
         onClick={handleClose}
       >

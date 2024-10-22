@@ -270,6 +270,7 @@ export default function NotificationView({
               <div className="flex w-full flex-row items-center gap-2 pt-2 md:w-[25%]">
                 <Button
                   className="flex flex-1"
+                  aria-label="Cancel"
                   onClick={onCancel}
                   type="button"
                 >
@@ -279,6 +280,7 @@ export default function NotificationView({
                   variant="select"
                   disabled={isLoading}
                   className="flex flex-1"
+                  aria-label="Save"
                   type="submit"
                 >
                   {isLoading ? (
@@ -298,6 +300,7 @@ export default function NotificationView({
             <div className="space-y-3">
               <Separator className="my-2 flex bg-secondary" />
               <Button
+                aria-label="Register or unregister notifications for this device"
                 disabled={
                   !config?.notifications.enabled || publicKey == undefined
                 }

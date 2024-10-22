@@ -113,6 +113,7 @@ export default function ExportCard({
               />
               <DialogFooter>
                 <Button
+                  aria-label="Save Export"
                   size="sm"
                   variant="select"
                   disabled={(editName?.update?.length ?? 0) == 0}
@@ -206,6 +207,7 @@ export default function ExportCard({
             {!exportedRecording.in_progress && (
               <Button
                 className="absolute left-1/2 top-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer text-white hover:bg-transparent hover:text-white"
+                aria-label="Play"
                 variant="ghost"
                 onClick={() => {
                   onSelect(exportedRecording);

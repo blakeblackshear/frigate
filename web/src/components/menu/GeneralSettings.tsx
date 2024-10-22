@@ -176,6 +176,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                       ? "cursor-pointer"
                       : "flex items-center p-2 text-sm"
                   }
+                  aria-label="Log out"
                 >
                   <a className="flex" href={logoutUrl}>
                     <LuLogOut className="mr-2 size-4" />
@@ -194,6 +195,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                       ? "cursor-pointer"
                       : "flex w-full items-center p-2 text-sm"
                   }
+                  aria-label="System metrics"
                 >
                   <LuActivity className="mr-2 size-4" />
                   <span>System metrics</span>
@@ -206,6 +208,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                       ? "cursor-pointer"
                       : "flex w-full items-center p-2 text-sm"
                   }
+                  aria-label="System logs"
                 >
                   <LuList className="mr-2 size-4" />
                   <span>System logs</span>
@@ -224,6 +227,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                       ? "cursor-pointer"
                       : "flex w-full items-center p-2 text-sm"
                   }
+                  aria-label="Settings"
                 >
                   <LuSettings className="mr-2 size-4" />
                   <span>Settings</span>
@@ -236,6 +240,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                       ? "cursor-pointer"
                       : "flex w-full items-center p-2 text-sm"
                   }
+                  aria-label="Configuration editor"
                 >
                   <LuPenSquare className="mr-2 size-4" />
                   <span>Configuration editor</span>
@@ -269,6 +274,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                           ? "cursor-pointer"
                           : "flex items-center p-2 text-sm"
                       }
+                      aria-label="Light mode"
                       onClick={() => setTheme("light")}
                     >
                       {theme === "light" ? (
@@ -286,6 +292,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                           ? "cursor-pointer"
                           : "flex items-center p-2 text-sm"
                       }
+                      aria-label="Dark mode"
                       onClick={() => setTheme("dark")}
                     >
                       {theme === "dark" ? (
@@ -303,6 +310,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                           ? "cursor-pointer"
                           : "flex items-center p-2 text-sm"
                       }
+                      aria-label="Use the system settings for light or dark mode"
                       onClick={() => setTheme("system")}
                     >
                       {theme === "system" ? (
@@ -343,6 +351,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                             ? "cursor-pointer"
                             : "flex items-center p-2 text-sm"
                         }
+                        aria-label={`Color scheme - ${scheme}`}
                         onClick={() => setColorScheme(scheme)}
                       >
                         {scheme === colorScheme ? (
@@ -370,6 +379,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                 className={
                   isDesktop ? "cursor-pointer" : "flex items-center p-2 text-sm"
                 }
+                aria-label="Frigate documentation"
               >
                 <LuLifeBuoy className="mr-2 size-4" />
                 <span>Documentation</span>
@@ -383,6 +393,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                 className={
                   isDesktop ? "cursor-pointer" : "flex items-center p-2 text-sm"
                 }
+                aria-label="Frigate Github"
               >
                 <LuGithub className="mr-2 size-4" />
                 <span>GitHub</span>
@@ -393,6 +404,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
               className={
                 isDesktop ? "cursor-pointer" : "flex items-center p-2 text-sm"
               }
+              aria-label="Restart Frigate"
               onClick={() => setRestartDialogOpen(true)}
             >
               <LuRotateCw className="mr-2 size-4" />
@@ -446,7 +458,12 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                     <p>This page will reload in {countdown} seconds.</p>
                   </SheetDescription>
                 </SheetHeader>
-                <Button size="lg" className="mt-5" onClick={handleForceReload}>
+                <Button
+                  size="lg"
+                  className="mt-5"
+                  aria-label="Force reload now"
+                  onClick={handleForceReload}
+                >
                   Force Reload Now
                 </Button>
               </div>

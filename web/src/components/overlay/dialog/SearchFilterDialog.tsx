@@ -76,6 +76,7 @@ export default function SearchFilterDialog({
   const trigger = (
     <Button
       className="flex items-center gap-2"
+      aria-label="More Filters"
       size="sm"
       variant={moreFiltersSelected ? "select" : "default"}
     >
@@ -141,6 +142,7 @@ export default function SearchFilterDialog({
       <div className="flex items-center justify-evenly p-2">
         <Button
           variant="select"
+          aria-label="Apply"
           onClick={() => {
             if (currentFilter != filter) {
               onUpdateFilter(currentFilter);
@@ -152,6 +154,7 @@ export default function SearchFilterDialog({
           Apply
         </Button>
         <Button
+          aria-label="Reset filters to default values"
           onClick={() => {
             setCurrentFilter((prevFilter) => ({
               ...prevFilter,
@@ -256,6 +259,7 @@ function TimeRangeFilterContent({
           <PopoverTrigger asChild>
             <Button
               className={`text-primary ${isDesktop ? "" : "text-xs"} `}
+              aria-label="Select Start Time"
               variant={startOpen ? "select" : "default"}
               size="sm"
               onClick={() => {
@@ -293,6 +297,7 @@ function TimeRangeFilterContent({
           <PopoverTrigger asChild>
             <Button
               className={`text-primary ${isDesktop ? "" : "text-xs"}`}
+              aria-label="Select End Time"
               variant={endOpen ? "select" : "default"}
               size="sm"
               onClick={() => {

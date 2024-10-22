@@ -339,6 +339,7 @@ function Logs() {
         <div className="flex items-center gap-2">
           <Button
             className="flex items-center justify-between gap-2"
+            aria-label="Copy logs to clipboard"
             size="sm"
             onClick={handleCopyLogs}
           >
@@ -349,6 +350,7 @@ function Logs() {
           </Button>
           <Button
             className="flex items-center justify-between gap-2"
+            aria-label="Download logs"
             size="sm"
             onClick={handleDownloadLogs}
           >
@@ -365,6 +367,7 @@ function Logs() {
       {initialScroll && !endVisible && (
         <Button
           className="absolute bottom-8 left-[50%] z-20 flex -translate-x-[50%] items-center gap-1 rounded-md p-2"
+          aria-label="Jump to bottom of logs"
           onClick={() =>
             contentRef.current?.scrollTo({
               top: contentRef.current?.scrollHeight,

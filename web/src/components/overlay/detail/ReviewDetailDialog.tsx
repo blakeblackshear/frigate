@@ -153,6 +153,7 @@ export default function ReviewDetailDialog({
                 <Tooltip>
                   <TooltipTrigger>
                     <Button
+                      aria-label="Share this review item"
                       size="sm"
                       onClick={() =>
                         shareOrCopy(`${baseUrl}review?id=${review.id}`)
