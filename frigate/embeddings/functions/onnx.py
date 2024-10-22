@@ -193,6 +193,17 @@ class GenericONNXEmbedding:
                 raise ValueError("Face embedding does not support batch inputs.")
 
             pil = self._process_image(raw_inputs)
+
+            # handle images larger than input size
+            width, height = pil.size
+            if width > 112 or height > 112:
+                if width > height:
+                    new_height = int(((width / height) * 112) // 4 * 4)
+                    pil = pil.resize((112, new_height))
+                else:
+                    new_width = int(((height / width) * 112) // 4 * 4)
+                    pil = pil.resize((new_width, 112))
+
             og = np.array(pil).astype(np.float32)
 
             # Image must be 112x112

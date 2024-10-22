@@ -26,7 +26,7 @@ from frigate.events.types import EventTypeEnum
 from frigate.genai import get_genai_client
 from frigate.models import Event
 from frigate.util.builtin import serialize
-from frigate.util.image import SharedMemoryFrameManager, calculate_region, area
+from frigate.util.image import SharedMemoryFrameManager, area, calculate_region
 
 from .embeddings import Embeddings
 
@@ -318,7 +318,10 @@ class EmbeddingMaintainer(threading.Thread):
         face_box = face.get("box")
 
         # check that face is valid
-        if not face_box or area(face_box) < self.config.semantic_search.face_recognition.min_area:
+        if (
+            not face_box
+            or area(face_box) < self.config.semantic_search.face_recognition.min_area
+        ):
             return
 
         face_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
