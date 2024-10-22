@@ -12,6 +12,9 @@ class FaceRecognitionConfig(FrigateBaseModel):
     threshold: float = Field(
         default=0.8, title="Face similarity score required to be considered a match."
     )
+    min_area: int = Field(
+        default=1000, title="Min area of face box to consider running face recognition."
+    )
 
 
 class SemanticSearchConfig(FrigateBaseModel):
