@@ -1,5 +1,6 @@
 """SQLite-vec embeddings database."""
 
+import base64
 import json
 import logging
 import multiprocessing as mp
@@ -188,6 +189,28 @@ class EmbeddingsContext:
         results = self.db.execute_sql(sql_query, parameters).fetchall()
 
         return results
+
+    def register_face(self, face_name: str, image_data: bytes) -> None:
+        self.requestor.send_data(
+            EmbeddingsRequestEnum.register_face.value,
+            {
+                "face_name": face_name,
+                "image": base64.b64encode(image_data).decode("ASCII"),
+            },
+        )
+
+    def get_face_ids(self, name: str) -> list[str]:
+        sql_query = f"""
+            SELECT
+                id
+            FROM vec_descriptions
+            WHERE id LIKE '%{name}%'
+        """
+
+        return self.db.execute_sql(sql_query).fetchall()
+
+    def delete_face_ids(self, ids: list[str]) -> None:
+        self.db.delete_embeddings_face(ids)
 
     def update_description(self, event_id: str, description: str) -> None:
         self.requestor.send_data(
