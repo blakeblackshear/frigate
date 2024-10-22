@@ -244,7 +244,7 @@ class Embeddings:
 
             # write face to library
             folder = os.path.join(FACE_DIR, label)
-            file = os.path.join(folder, f"{id}.jpg")
+            file = os.path.join(folder, f"{id}.webp")
             os.makedirs(folder, exist_ok=True)
 
             # save face image
