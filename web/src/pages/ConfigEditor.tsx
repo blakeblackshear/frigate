@@ -192,6 +192,7 @@ function ConfigEditor() {
             <Button
               size="sm"
               className="flex items-center gap-2"
+              aria-label="Copy config"
               onClick={() => handleCopyConfig()}
             >
               <LuCopy className="text-secondary-foreground" />
@@ -200,6 +201,7 @@ function ConfigEditor() {
             <Button
               size="sm"
               className="flex items-center gap-2"
+              aria-label="Save and restart"
               onClick={() => onHandleSaveConfig("restart")}
             >
               <div className="relative size-5">
@@ -211,6 +213,7 @@ function ConfigEditor() {
             <Button
               size="sm"
               className="flex items-center gap-2"
+              aria-label="Save only without restarting"
               onClick={() => onHandleSaveConfig("saveonly")}
             >
               <LuSave className="text-secondary-foreground" />

@@ -278,6 +278,7 @@ function ShowReviewFilter({
 
       <Button
         className="block duration-0 md:hidden"
+        aria-label="Show reviewed"
         variant={showReviewedSwitch ? "select" : "default"}
         size="sm"
         onClick={() =>
@@ -338,6 +339,7 @@ function GeneralFilterButton({
         selectedLabels?.length || selectedZones?.length ? "select" : "default"
       }
       className="flex items-center gap-2 capitalize"
+      aria-label="Filter"
     >
       <FaFilter
         className={`${selectedLabels?.length || selectedZones?.length ? "text-selected-foreground" : "text-secondary-foreground"}`}
@@ -538,6 +540,7 @@ export function GeneralFilterContent({
       <DropdownMenuSeparator />
       <div className="flex items-center justify-evenly p-2">
         <Button
+          aria-label="Apply"
           variant="select"
           onClick={() => {
             if (selectedLabels != currentLabels) {
@@ -554,6 +557,7 @@ export function GeneralFilterContent({
           Apply
         </Button>
         <Button
+          aria-label="Reset"
           onClick={() => {
             setCurrentLabels(undefined);
             setCurrentZones?.(undefined);
@@ -601,6 +605,7 @@ function ShowMotionOnlyButton({
         <Button
           size="sm"
           className="duration-0"
+          aria-label="Show Motion Only"
           variant={motionOnlyButton ? "select" : "default"}
           onClick={() => setMotionOnlyButton(!motionOnlyButton)}
         >

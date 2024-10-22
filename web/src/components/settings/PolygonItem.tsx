@@ -276,6 +276,7 @@ export default function PolygonItem({
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem
+                  aria-label="Edit"
                   onClick={() => {
                     setActivePolygonIndex(index);
                     setEditPane(polygon.type);
@@ -283,10 +284,14 @@ export default function PolygonItem({
                 >
                   Edit
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleCopyCoordinates(index)}>
+                <DropdownMenuItem
+                  aria-label="Copy"
+                  onClick={() => handleCopyCoordinates(index)}
+                >
                   Copy
                 </DropdownMenuItem>
                 <DropdownMenuItem
+                  aria-label="Delete"
                   disabled={isLoading}
                   onClick={() => setDeleteDialogOpen(true)}
                 >

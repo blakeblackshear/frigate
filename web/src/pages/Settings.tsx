@@ -252,6 +252,7 @@ function CameraSelectButton({
   const trigger = (
     <Button
       className="flex items-center gap-2 bg-selected capitalize hover:bg-selected"
+      aria-label="Select a camera"
       size="sm"
     >
       <FaVideo className="text-background dark:text-primary" />

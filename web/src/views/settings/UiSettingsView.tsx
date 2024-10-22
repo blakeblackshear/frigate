@@ -125,7 +125,12 @@ export default function UiSettingsView() {
                   </p>
                 </div>
               </div>
-              <Button onClick={clearStoredLayouts}>Clear All Layouts</Button>
+              <Button
+                aria-label="Clear all saved layouts"
+                onClick={clearStoredLayouts}
+              >
+                Clear All Layouts
+              </Button>
             </div>
 
             <Separator className="my-2 flex bg-secondary" />

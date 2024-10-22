@@ -98,7 +98,11 @@ export default function CreateUserDialog({
               )}
             />
             <DialogFooter className="mt-4">
-              <Button variant="select" disabled={isLoading}>
+              <Button
+                variant="select"
+                aria-label="Create user"
+                disabled={isLoading}
+              >
                 {isLoading && <ActivityIndicator className="mr-2 h-4 w-4" />}
                 Create User
               </Button>

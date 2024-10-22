@@ -131,9 +131,14 @@ export function FrigatePlusDialog({
         <DialogFooter className="flex flex-row justify-end gap-2">
           {state == "reviewing" && (
             <>
-              {dialog && <Button onClick={onClose}>Cancel</Button>}
+              {dialog && (
+                <Button aria-label="Cancel" onClick={onClose}>
+                  Cancel
+                </Button>
+              )}
               <Button
                 className="bg-success"
+                aria-label="Confirm this label for Frigate Plus"
                 onClick={() => {
                   setState("uploading");
                   onSubmitToPlus(false);
@@ -143,6 +148,7 @@ export function FrigatePlusDialog({
               </Button>
               <Button
                 className="text-white"
+                aria-label="Do not confirm this label for Frigate Plus"
                 variant="destructive"
                 onClick={() => {
                   setState("uploading");

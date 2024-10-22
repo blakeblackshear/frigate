@@ -121,6 +121,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
               variant="select"
               disabled={isLoading}
               className="flex flex-1"
+              aria-label="Login"
             >
               {isLoading && <ActivityIndicator className="mr-2 h-4 w-4" />}
               Login

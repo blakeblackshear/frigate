@@ -59,11 +59,14 @@ export function SaveSearchDialog({
           placeholder="Enter a name for your search"
         />
         <DialogFooter>
-          <Button onClick={onClose}>Cancel</Button>
+          <Button aria-label="Cancel" onClick={onClose}>
+            Cancel
+          </Button>
           <Button
             onClick={handleSave}
             variant="select"
             className="mb-2 md:mb-0"
+            aria-label="Save this search"
           >
             Save
           </Button>

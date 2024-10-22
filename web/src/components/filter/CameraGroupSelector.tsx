@@ -141,6 +141,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
                     ? "bg-blue-900 bg-opacity-60 text-selected focus:bg-blue-900 focus:bg-opacity-60"
                     : "bg-secondary text-secondary-foreground focus:bg-secondary focus:text-secondary-foreground"
                 }
+                aria-label="All Cameras"
                 size="xs"
                 onClick={() => (group ? setGroup("default", true) : null)}
                 onMouseEnter={() => (isDesktop ? showTooltip("default") : null)}
@@ -165,6 +166,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
                         ? "bg-blue-900 bg-opacity-60 text-selected focus:bg-blue-900 focus:bg-opacity-60"
                         : "bg-secondary text-secondary-foreground"
                     }
+                    aria-label="Camera Group"
                     size="xs"
                     onClick={() => setGroup(name, group != "default")}
                     onMouseEnter={() => (isDesktop ? showTooltip(name) : null)}
@@ -191,6 +193,7 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
 
           <Button
             className="bg-secondary text-muted-foreground"
+            aria-label="Add camera group"
             size="xs"
             onClick={() => setAddGroup(true)}
           >
@@ -355,6 +358,7 @@ function NewGroupDialog({
                         "size-6 rounded-md bg-secondary-foreground p-1 text-background",
                       isMobile && "text-secondary-foreground",
                     )}
+                    aria-label="Add camera group"
                     onClick={() => {
                       setEditState("add");
                     }}
@@ -536,10 +540,16 @@ export function CameraGroupRow({
               </DropdownMenuTrigger>
               <DropdownMenuPortal>
                 <DropdownMenuContent>
-                  <DropdownMenuItem onClick={onEditGroup}>
+                  <DropdownMenuItem
+                    aria-label="Edit group"
+                    onClick={onEditGroup}
+                  >
                     Edit
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setDeleteDialogOpen(true)}>
+                  <DropdownMenuItem
+                    aria-label="Delete group"
+                    onClick={() => setDeleteDialogOpen(true)}
+                  >
                     Delete
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -793,13 +803,19 @@ export function CameraGroupEdit({
         <Separator className="my-2 flex bg-secondary" />
 
         <div className="flex flex-row gap-2 py-5 md:pb-0">
-          <Button type="button" className="flex flex-1" onClick={onCancel}>
+          <Button
+            type="button"
+            className="flex flex-1"
+            aria-label="Cancel"
+            onClick={onCancel}
+          >
             Cancel
           </Button>
           <Button
             variant="select"
             disabled={isLoading}
             className="flex flex-1"
+            aria-label="Save"
             type="submit"
           >
             {isLoading ? (

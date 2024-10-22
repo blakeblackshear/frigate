@@ -59,8 +59,17 @@ export default function GPUInfoDialog({
             <ActivityIndicator />
           )}
           <DialogFooter>
-            <Button onClick={() => setShowGpuInfo(false)}>Close</Button>
-            <Button variant="select" onClick={() => onCopyInfo()}>
+            <Button
+              aria-label="Close GPU info"
+              onClick={() => setShowGpuInfo(false)}
+            >
+              Close
+            </Button>
+            <Button
+              aria-label="Copy GPU info"
+              variant="select"
+              onClick={() => onCopyInfo()}
+            >
               Copy
             </Button>
           </DialogFooter>
@@ -88,8 +97,17 @@ export default function GPUInfoDialog({
             <ActivityIndicator />
           )}
           <DialogFooter>
-            <Button onClick={() => setShowGpuInfo(false)}>Close</Button>
-            <Button variant="select" onClick={() => onCopyInfo()}>
+            <Button
+              aria-label="Close GPU info"
+              onClick={() => setShowGpuInfo(false)}
+            >
+              Close
+            </Button>
+            <Button
+              aria-label="Copy GPU info"
+              variant="select"
+              onClick={() => onCopyInfo()}
+            >
               Copy
             </Button>
           </DialogFooter>

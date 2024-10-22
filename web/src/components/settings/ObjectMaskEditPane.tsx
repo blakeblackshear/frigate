@@ -335,13 +335,18 @@ export default function ObjectMaskEditPane({
           </div>
           <div className="flex flex-1 flex-col justify-end">
             <div className="flex flex-row gap-2 pt-5">
-              <Button className="flex flex-1" onClick={onCancel}>
+              <Button
+                className="flex flex-1"
+                aria-label="Cancel"
+                onClick={onCancel}
+              >
                 Cancel
               </Button>
               <Button
                 variant="select"
                 disabled={isLoading}
                 className="flex flex-1"
+                aria-label="Save"
                 type="submit"
               >
                 {isLoading ? (

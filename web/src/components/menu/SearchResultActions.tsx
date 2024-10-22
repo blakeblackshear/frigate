@@ -86,7 +86,7 @@ export default function SearchResultActions({
   const menuItems = (
     <>
       {searchResult.has_clip && (
-        <MenuItem>
+        <MenuItem aria-label="Download video">
           <a
             className="flex items-center"
             href={`${baseUrl}api/events/${searchResult.id}/clip.mp4`}
@@ -98,7 +98,7 @@ export default function SearchResultActions({
         </MenuItem>
       )}
       {searchResult.has_snapshot && (
-        <MenuItem>
+        <MenuItem aria-label="Download snapshot">
           <a
             className="flex items-center"
             href={`${baseUrl}api/events/${searchResult.id}/snapshot.jpg`}
@@ -109,12 +109,18 @@ export default function SearchResultActions({
           </a>
         </MenuItem>
       )}
-      <MenuItem onClick={showObjectLifecycle}>
+      <MenuItem
+        aria-label="Show the object lifecycle"
+        onClick={showObjectLifecycle}
+      >
         <FaArrowsRotate className="mr-2 size-4" />
         <span>View object lifecycle</span>
       </MenuItem>
       {config?.semantic_search?.enabled && isContextMenu && (
-        <MenuItem onClick={findSimilar}>
+        <MenuItem
+          aria-label="Find similar tracked objects"
+          onClick={findSimilar}
+        >
           <MdImageSearch className="mr-2 size-4" />
           <span>Find similar</span>
         </MenuItem>
@@ -124,12 +130,18 @@ export default function SearchResultActions({
         searchResult.has_snapshot &&
         searchResult.end_time &&
         !searchResult.plus_id && (
-          <MenuItem onClick={() => setShowFrigatePlus(true)}>
+          <MenuItem
+            aria-label="Submit to Frigate Plus"
+            onClick={() => setShowFrigatePlus(true)}
+          >
             <FrigatePlusIcon className="mr-2 size-4 cursor-pointer text-primary" />
             <span>Submit to Frigate+</span>
           </MenuItem>
         )}
-      <MenuItem onClick={() => setDeleteDialogOpen(true)}>
+      <MenuItem
+        aria-label="Delete this tracked object"
+        onClick={() => setDeleteDialogOpen(true)}
+      >
         <LuTrash2 className="mr-2 size-4" />
         <span>Delete</span>
       </MenuItem>

@@ -21,6 +21,7 @@ export function ZoneMaskFilterButton({
       size="sm"
       variant={selectedZoneMask?.length ? "select" : "default"}
       className="flex items-center gap-2 capitalize"
+      aria-label="Filter by zone mask"
     >
       <FaFilter
         className={`${selectedZoneMask?.length ? "text-selected-foreground" : "text-secondary-foreground"}`}

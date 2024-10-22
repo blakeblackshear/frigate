@@ -121,6 +121,7 @@ export function AnimatedEventCard({
                 <Button
                   className="absolute right-2 top-1 z-40 bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500"
                   size="xs"
+                  aria-label="Mark as Reviewed"
                   onClick={async () => {
                     await axios.post(`reviews/viewed`, { ids: [event.id] });
                     updateEvents();

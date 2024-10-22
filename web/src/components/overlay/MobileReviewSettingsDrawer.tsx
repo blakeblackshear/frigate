@@ -132,6 +132,7 @@ export default function MobileReviewSettingsDrawer({
         {features.includes("export") && (
           <Button
             className="flex w-full items-center justify-center gap-2"
+            aria-label="Export"
             onClick={() => {
               setDrawerMode("export");
               setMode("select");
@@ -144,6 +145,7 @@ export default function MobileReviewSettingsDrawer({
         {features.includes("calendar") && (
           <Button
             className="flex w-full items-center justify-center gap-2"
+            aria-label="Calendar"
             variant={filter?.after ? "select" : "default"}
             onClick={() => setDrawerMode("calendar")}
           >
@@ -156,6 +158,7 @@ export default function MobileReviewSettingsDrawer({
         {features.includes("filter") && (
           <Button
             className="flex w-full items-center justify-center gap-2"
+            aria-label="Filter"
             variant={filter?.labels || filter?.zones ? "select" : "default"}
             onClick={() => setDrawerMode("filter")}
           >
@@ -226,6 +229,7 @@ export default function MobileReviewSettingsDrawer({
         <SelectSeparator />
         <div className="flex items-center justify-center p-2">
           <Button
+            aria-label="Reset"
             onClick={() => {
               onUpdateFilter({
                 ...filter,
@@ -306,6 +310,7 @@ export default function MobileReviewSettingsDrawer({
         <DrawerTrigger asChild>
           <Button
             className="rounded-lg capitalize"
+            aria-label="Filters"
             variant={
               filter?.labels || filter?.after || filter?.zones
                 ? "select"

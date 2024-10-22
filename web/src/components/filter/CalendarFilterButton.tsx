@@ -34,6 +34,7 @@ export default function CalendarFilterButton({
   const trigger = (
     <Button
       className="flex items-center gap-2"
+      aria-label="Select a date to filter by"
       variant={day == undefined ? "default" : "select"}
       size="sm"
     >
@@ -57,6 +58,7 @@ export default function CalendarFilterButton({
       <DropdownMenuSeparator />
       <div className="flex items-center justify-center p-2">
         <Button
+          aria-label="Reset"
           onClick={() => {
             updateSelectedDay(undefined);
           }}
@@ -99,6 +101,7 @@ export function CalendarRangeFilterButton({
   const trigger = (
     <Button
       className="flex items-center gap-2"
+      aria-label="Select a date to filter by"
       variant={range == undefined ? "default" : "select"}
       size="sm"
     >

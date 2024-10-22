@@ -266,13 +266,14 @@ export default function SearchSettingsView({
         <Separator className="my-2 flex bg-secondary" />
 
         <div className="flex w-full flex-row items-center gap-2 pt-2 md:w-[25%]">
-          <Button className="flex flex-1" onClick={onCancel}>
+          <Button className="flex flex-1" aria-label="Reset" onClick={onCancel}>
             Reset
           </Button>
           <Button
             variant="select"
             disabled={!changedValue || isLoading}
             className="flex flex-1"
+            aria-label="Save"
             onClick={saveToConfig}
           >
             {isLoading ? (

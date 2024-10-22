@@ -125,6 +125,7 @@ function Exports() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <Button
               className="text-white"
+              aria-label="Delete Export"
               variant="destructive"
               onClick={() => onHandleDelete()}
             >

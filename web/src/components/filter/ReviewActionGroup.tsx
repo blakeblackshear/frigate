@@ -104,6 +104,7 @@ export default function ReviewActionGroup({
           {selectedReviews.length == 1 && (
             <Button
               className="flex items-center gap-2 p-2"
+              aria-label="Export"
               size="sm"
               onClick={() => {
                 onExport(selectedReviews[0]);
@@ -116,6 +117,7 @@ export default function ReviewActionGroup({
           )}
           <Button
             className="flex items-center gap-2 p-2"
+            aria-label="Mark as reviewed"
             size="sm"
             onClick={onMarkAsReviewed}
           >
@@ -124,6 +126,7 @@ export default function ReviewActionGroup({
           </Button>
           <Button
             className="flex items-center gap-2 p-2"
+            aria-label="Delete"
             size="sm"
             onClick={handleDelete}
           >

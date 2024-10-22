@@ -17,7 +17,11 @@ export function LogLevelFilterButton({
   updateLabelFilter,
 }: LogLevelFilterButtonProps) {
   const trigger = (
-    <Button size="sm" className="flex items-center gap-2">
+    <Button
+      size="sm"
+      className="flex items-center gap-2"
+      aria-label="Filter log level"
+    >
       <FaFilter className="text-secondary-foreground" />
       <div className="hidden text-primary md:block">Filter</div>
     </Button>
