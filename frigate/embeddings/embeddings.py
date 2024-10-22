@@ -3,6 +3,8 @@
 import base64
 import logging
 import os
+import random
+import string
 import time
 
 from numpy import ndarray
@@ -12,6 +14,7 @@ from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config.semantic_search import SemanticSearchConfig
 from frigate.const import (
     CONFIG_DIR,
+    FACE_DIR,
     UPDATE_EMBEDDINGS_REINDEX_PROGRESS,
     UPDATE_MODEL_STATE,
 )
@@ -67,7 +70,7 @@ class Embeddings:
         self.requestor = InterProcessRequestor()
 
         # Create tables if they don't exist
-        self.db.create_embeddings_tables()
+        self.db.create_embeddings_tables(self.config.face_recognition.enabled)
 
         models = [
             "jinaai/jina-clip-v1-text_model_fp16.onnx",
@@ -120,6 +123,21 @@ class Embeddings:
             requestor=self.requestor,
             device="GPU" if config.model_size == "large" else "CPU",
         )
+
+        self.face_embedding = None
+
+        if self.config.face_recognition.enabled:
+            self.face_embedding = GenericONNXEmbedding(
+                model_name="facenet",
+                model_file="facenet.onnx",
+                download_urls={
+                    "facenet.onnx": "https://github.com/NicolasSM-001/faceNet.onnx-/raw/refs/heads/main/faceNet.onnx"
+                },
+                model_size="large",
+                model_type=ModelTypeEnum.face,
+                requestor=self.requestor,
+                device="GPU",
+            )
 
     def embed_thumbnail(
         self, event_id: str, thumbnail: bytes, upsert: bool = True
@@ -215,12 +233,40 @@ class Embeddings:
 
         return embeddings
 
+    def embed_face(self, label: str, thumbnail: bytes, upsert: bool = False) -> ndarray:
+        embedding = self.face_embedding(thumbnail)[0]
+
+        if upsert:
+            rand_id = "".join(
+                random.choices(string.ascii_lowercase + string.digits, k=6)
+            )
+            id = f"{label}-{rand_id}"
+
+            # write face to library
+            folder = os.path.join(FACE_DIR, label)
+            file = os.path.join(folder, f"{id}.webp")
+            os.makedirs(folder, exist_ok=True)
+
+            # save face image
+            with open(file, "wb") as output:
+                output.write(thumbnail)
+
+            self.db.execute_sql(
+                """
+                INSERT OR REPLACE INTO vec_faces(id, face_embedding)
+                VALUES(?, ?)
+                """,
+                (id, serialize(embedding)),
+            )
+
+        return embedding
+
     def reindex(self) -> None:
         logger.info("Indexing tracked object embeddings...")
 
         self.db.drop_embeddings_tables()
         logger.debug("Dropped embeddings tables.")
-        self.db.create_embeddings_tables()
+        self.db.create_embeddings_tables(self.config.face_recognition.enabled)
         logger.debug("Created embeddings tables.")
 
         # Delete the saved stats file
