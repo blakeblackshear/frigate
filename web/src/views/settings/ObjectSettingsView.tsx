@@ -21,7 +21,8 @@ import useDeepMemo from "@/hooks/use-deep-memo";
 import { Card } from "@/components/ui/card";
 import { getIconForLabel } from "@/utils/iconUtil";
 import { capitalizeFirstLetter } from "@/utils/stringUtil";
-import { LuInfo } from "react-icons/lu";
+import { LuExternalLink, LuInfo } from "react-icons/lu";
+import { Link } from "react-router-dom";
 
 type ObjectSettingsViewProps = {
   selectedCamera?: string;
@@ -187,6 +188,21 @@ export default function ObjectSettingsView({
             objects.
           </p>
         </div>
+        {config?.cameras[cameraConfig.name]?.webui_url && (
+          <div className="mb-5 text-sm text-muted-foreground">
+            <div className="mt-2 flex flex-row items-center text-primary">
+              <Link
+                to={config?.cameras[cameraConfig.name]?.webui_url ?? ""}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline"
+              >
+                Open {capitalizeFirstLetter(cameraConfig.name)}'s Web UI
+                <LuExternalLink className="ml-2 inline-flex size-3" />
+              </Link>
+            </div>
+          </div>
+        )}
 
         <Tabs defaultValue="debug" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
