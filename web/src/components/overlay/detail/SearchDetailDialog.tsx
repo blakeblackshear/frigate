@@ -321,22 +321,25 @@ function ObjectDetailsTab({
             (key.includes("events") ||
               key.includes("events/search") ||
               key.includes("events/explore")),
-          (currentData: SearchResult[][] | undefined) => {
-            if (!currentData) return currentData;
+          (currentData: SearchResult[][] | SearchResult[] | undefined) => {
+            if (!currentData) {
+              return currentData;
+            }
+
             // optimistic update
-            return currentData.map((page) =>
-              page.map((event) =>
-                event.id === search.id
-                  ? {
-                      ...event,
-                      data: {
-                        ...event.data,
-                        description: desc,
-                      },
-                    }
-                  : event,
-              ),
+            const flattenedData = currentData.flat();
+            const updatedData = flattenedData.map((event) =>
+              event.id === search.id
+                ? {
+                    ...event,
+                    data: {
+                      ...event.data,
+                      description: desc,
+                    },
+                  }
+                : event,
             );
+            return updatedData;
           },
           {
             optimisticData: true,
