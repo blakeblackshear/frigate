@@ -12,6 +12,7 @@ class EmbeddingsRequestEnum(Enum):
     embed_description = "embed_description"
     embed_thumbnail = "embed_thumbnail"
     generate_search = "generate_search"
+    register_face = "register_face"
 
 
 class EmbeddingsResponder:

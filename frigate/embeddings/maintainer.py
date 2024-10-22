@@ -109,6 +109,13 @@ class EmbeddingMaintainer(threading.Thread):
                     return serialize(
                         self.embeddings.text_embedding([data])[0], pack=False
                     )
+                elif topic == EmbeddingsRequestEnum.register_face.value:
+                    self.embeddings.embed_face(
+                        data["face_name"],
+                        base64.b64decode(data["image"]),
+                        upsert=True,
+                    )
+                    return None
             except Exception as e:
                 logger.error(f"Unable to handle embeddings request {e}")
 
