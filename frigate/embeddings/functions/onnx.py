@@ -198,10 +198,10 @@ class GenericONNXEmbedding:
             width, height = pil.size
             if width > 112 or height > 112:
                 if width > height:
-                    new_height = int(((width / height) * 112) // 4 * 4)
+                    new_height = int(((height / width) * 112) // 4 * 4)
                     pil = pil.resize((112, new_height))
                 else:
-                    new_width = int(((height / width) * 112) // 4 * 4)
+                    new_width = int(((width / height) * 112) // 4 * 4)
                     pil = pil.resize((new_width, 112))
 
             og = np.array(pil).astype(np.float32)
