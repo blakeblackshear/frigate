@@ -19,7 +19,7 @@ from frigate.comms.inter_process import InterProcessRequestor
 from frigate.const import MODEL_CACHE_DIR, UPDATE_MODEL_STATE
 from frigate.types import ModelStatusTypesEnum
 from frigate.util.downloader import ModelDownloader
-from frigate.util.model import ONNXModelRunner, fix_spatial_mode
+from frigate.util.model import ONNXModelRunner
 
 warnings.filterwarnings(
     "ignore",
@@ -30,6 +30,8 @@ warnings.filterwarnings(
 # disables the progress bar for downloading tokenizers and feature extractors
 disable_progress_bar()
 logger = logging.getLogger(__name__)
+
+FACE_EMBEDDING_SIZE = 160
 
 
 class ModelTypeEnum(str, Enum):
@@ -93,12 +95,9 @@ class GenericONNXEmbedding:
     def _download_model(self, path: str):
         try:
             file_name = os.path.basename(path)
-            download_path = None
 
             if file_name in self.download_urls:
-                download_path = ModelDownloader.download_from_url(
-                    self.download_urls[file_name], path
-                )
+                ModelDownloader.download_from_url(self.download_urls[file_name], path)
             elif (
                 file_name == self.tokenizer_file
                 and self.model_type == ModelTypeEnum.text
@@ -113,14 +112,6 @@ class GenericONNXEmbedding:
                     clean_up_tokenization_spaces=True,
                 )
                 tokenizer.save_pretrained(path)
-
-            # the onnx model has incorrect spatial mode
-            # set by default, update then save model.
-            print(
-                f"download path is {download_path} and model type is {self.model_type}"
-            )
-            if download_path is not None and self.model_type == ModelTypeEnum.face:
-                fix_spatial_mode(download_path)
 
             self.downloader.requestor.send_data(
                 UPDATE_MODEL_STATE,
@@ -196,30 +187,33 @@ class GenericONNXEmbedding:
 
             # handle images larger than input size
             width, height = pil.size
-            if width != 112 or height != 112:
+            if width != FACE_EMBEDDING_SIZE or height != FACE_EMBEDDING_SIZE:
                 if width > height:
-                    new_height = int(((height / width) * 112) // 4 * 4)
-                    pil = pil.resize((112, new_height))
+                    new_height = int(((height / width) * FACE_EMBEDDING_SIZE) // 4 * 4)
+                    pil = pil.resize((FACE_EMBEDDING_SIZE, new_height))
                 else:
-                    new_width = int(((width / height) * 112) // 4 * 4)
-                    pil = pil.resize((new_width, 112))
+                    new_width = int(((width / height) * FACE_EMBEDDING_SIZE) // 4 * 4)
+                    pil = pil.resize((new_width, FACE_EMBEDDING_SIZE))
 
             og = np.array(pil).astype(np.float32)
 
-            # Image must be 112x112
+            # Image must be FACE_EMBEDDING_SIZExFACE_EMBEDDING_SIZE
             og_h, og_w, channels = og.shape
-            frame = np.full((112, 112, channels), (0, 0, 0), dtype=np.float32)
+            frame = np.full(
+                (FACE_EMBEDDING_SIZE, FACE_EMBEDDING_SIZE, channels),
+                (0, 0, 0),
+                dtype=np.float32,
+            )
 
             # compute center offset
-            x_center = (112 - og_w) // 2
-            y_center = (112 - og_h) // 2
+            x_center = (FACE_EMBEDDING_SIZE - og_w) // 2
+            y_center = (FACE_EMBEDDING_SIZE - og_h) // 2
 
             # copy img image into center of result image
             frame[y_center : y_center + og_h, x_center : x_center + og_w] = og
 
             frame = np.expand_dims(frame, axis=0)
-            frame = np.transpose(frame, (0, 3, 1, 2))
-            return [{"data": frame}]
+            return [{"image_input": frame}]
         else:
             raise ValueError(f"Unable to preprocess inputs for {self.model_type}")
 

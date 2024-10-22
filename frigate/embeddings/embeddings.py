@@ -128,10 +128,10 @@ class Embeddings:
 
         if self.config.face_recognition.enabled:
             self.face_embedding = GenericONNXEmbedding(
-                model_name="resnet100/arcface",
-                model_file="arcfaceresnet100-8.onnx",
+                model_name="facenet",
+                model_file="facenet.onnx",
                 download_urls={
-                    "arcfaceresnet100-8.onnx": "https://media.githubusercontent.com/media/onnx/models/bb0d4cf3d4e2a5f7376c13a08d337e86296edbe8/vision/body_analysis/arcface/model/arcfaceresnet100-8.onnx"
+                    "facenet.onnx": "https://github.com/NicolasSM-001/faceNet.onnx-/raw/refs/heads/main/faceNet.onnx"
                 },
                 model_size="large",
                 model_type=ModelTypeEnum.face,
