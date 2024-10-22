@@ -394,6 +394,7 @@ def events_search(request: Request, params: EventsSearchQueryParams = Depends())
         Event.end_time,
         Event.has_clip,
         Event.has_snapshot,
+        Event.top_score,
         Event.data,
         Event.plus_id,
         ReviewSegment.thumb_path,
