@@ -147,6 +147,9 @@ class EmbeddingMaintainer(threading.Thread):
             pass
 
         if yuv_frame is None:
+            logger.debug(
+                "Unable to process object update because frame is unavailable."
+            )
             return
 
         if self.face_recognition_enabled:
@@ -287,10 +290,14 @@ class EmbeddingMaintainer(threading.Thread):
         """Look for faces in image."""
         # don't run for non person objects
         if obj_data.get("label") != "person":
+            logger.debug("Not a processing face for non person object.")
             return
 
         # don't overwrite sub label for objects that have one
         if obj_data.get("sub_label"):
+            logger.debug(
+                f"Not processing face due to existing sub label: {obj_data.get('sub_label')}."
+            )
             return
 
         face: Optional[dict[str, any]] = None
@@ -301,6 +308,7 @@ class EmbeddingMaintainer(threading.Thread):
         else:
             # don't run for object without attributes
             if not obj_data.get("current_attributes"):
+                logger.debug("No attributes to parse.")
                 return
 
             attributes: list[dict[str, any]] = obj_data.get("current_attributes", [])
@@ -322,6 +330,7 @@ class EmbeddingMaintainer(threading.Thread):
             not face_box
             or area(face_box) < self.config.semantic_search.face_recognition.min_area
         ):
+            logger.debug(f"Invalid face box {face}")
             return
 
         face_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
@@ -331,6 +340,7 @@ class EmbeddingMaintainer(threading.Thread):
         )
 
         if not ret:
+            logger.debug("Not processing face due to error creating cropped image.")
             return
 
         embedding = self.embeddings.embed_face("unknown", jpg.tobytes(), upsert=False)
