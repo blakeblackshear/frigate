@@ -116,7 +116,9 @@ class GenericONNXEmbedding:
 
             # the onnx model has incorrect spatial mode
             # set by default, update then save model.
-            print(f"download path is {download_path} and model type is {self.model_type}")
+            print(
+                f"download path is {download_path} and model type is {self.model_type}"
+            )
             if download_path is not None and self.model_type == ModelTypeEnum.face:
                 fix_spatial_mode(download_path)
 
