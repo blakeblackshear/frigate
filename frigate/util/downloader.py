@@ -101,7 +101,7 @@ class ModelDownloader:
         self.download_complete.set()
 
     @staticmethod
-    def download_from_url(url: str, save_path: str, silent: bool = False):
+    def download_from_url(url: str, save_path: str, silent: bool = False) -> Path:
         temporary_filename = Path(save_path).with_name(
             os.path.basename(save_path) + ".part"
         )
@@ -124,6 +124,8 @@ class ModelDownloader:
 
         if not silent:
             logger.info(f"Downloading complete: {url}")
+
+        return Path(save_path)
 
     @staticmethod
     def mark_files_state(
