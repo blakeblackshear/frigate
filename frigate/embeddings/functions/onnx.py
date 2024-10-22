@@ -196,7 +196,7 @@ class GenericONNXEmbedding:
 
             # handle images larger than input size
             width, height = pil.size
-            if width > 112 or height > 112:
+            if width != 112 or height != 112:
                 if width > height:
                     new_height = int(((height / width) * 112) // 4 * 4)
                     pil = pil.resize((112, new_height))
