@@ -172,76 +172,65 @@ paths:
           in: query
           required: false
           schema:
-            anyOf:
-              - type: string
-              - type: 'null'
+            type: string
             default: all
             title: Cameras
         - name: labels
           in: query
           required: false
           schema:
-            anyOf:
-              - type: string
-              - type: 'null'
+            type: string
             default: all
             title: Labels
         - name: zones
           in: query
           required: false
           schema:
-            anyOf:
-              - type: string
-              - type: 'null'
+            type: string
             default: all
             title: Zones
         - name: reviewed
           in: query
           required: false
           schema:
-            anyOf:
-              - type: integer
-              - type: 'null'
+            type: integer
             default: 0
             title: Reviewed
         - name: limit
           in: query
           required: false
           schema:
-            anyOf:
-              - type: integer
-              - type: 'null'
+            type: integer
             title: Limit
         - name: severity
           in: query
           required: false
           schema:
-            anyOf:
-              - type: string
-              - type: 'null'
+            allOf:
+              - $ref: '#/components/schemas/SeverityEnum'
             title: Severity
         - name: before
           in: query
           required: false
           schema:
-            anyOf:
-              - type: number
-              - type: 'null'
+            type: number
             title: Before
         - name: after
           in: query
           required: false
           schema:
-            anyOf:
-              - type: number
-              - type: 'null'
+            type: number
             title: After
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
-              schema: { }
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReviewSegmentResponse'
+                title: Response Review Review Get
         '422':
           description: Validation Error
           content:
@@ -259,36 +248,28 @@ paths:
           in: query
           required: false
           schema:
-            anyOf:
-              - type: string
-              - type: 'null'
+            type: string
             default: all
             title: Cameras
         - name: labels
           in: query
           required: false
           schema:
-            anyOf:
-              - type: string
-              - type: 'null'
+            type: string
             default: all
             title: Labels
         - name: zones
           in: query
           required: false
           schema:
-            anyOf:
-              - type: string
-              - type: 'null'
+            type: string
             default: all
             title: Zones
         - name: timezone
           in: query
           required: false
           schema:
-            anyOf:
-              - type: string
-              - type: 'null'
+            type: string
             default: utc
             title: Timezone
       responses:
@@ -296,7 +277,8 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: { }
+              schema:
+                $ref: '#/components/schemas/ReviewSummaryResponse'
         '422':
           description: Validation Error
           content:
@@ -310,17 +292,18 @@ paths:
       summary: Set Multiple Reviewed
       operationId: set_multiple_reviewed_reviews_viewed_post
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              type: object
-              title: Body
+              $ref: '#/components/schemas/ReviewSetMultipleReviewedBody'
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
-              schema: { }
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         '422':
           description: Validation Error
           content:
@@ -334,17 +317,18 @@ paths:
       summary: Delete Reviews
       operationId: delete_reviews_reviews_delete_post
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              type: object
-              title: Body
+              $ref: '#/components/schemas/ReviewDeleteMultipleReviewsBody'
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
-              schema: { }
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         '422':
           description: Validation Error
           content:
@@ -363,96 +347,38 @@ paths:
           in: query
           required: false
           schema:
-            anyOf:
-              - type: string
-              - type: 'null'
+            type: string
             default: all
             title: Cameras
         - name: before
           in: query
           required: false
           schema:
-            anyOf:
-              - type: number
-              - type: 'null'
+            type: number
             title: Before
         - name: after
           in: query
           required: false
           schema:
-            anyOf:
-              - type: number
-              - type: 'null'
+            type: number
             title: After
         - name: scale
           in: query
           required: false
           schema:
-            anyOf:
-              - type: integer
-              - type: 'null'
+            type: integer
             default: 30
             title: Scale
       responses:
         '200':
           description: Successful Response
-          content:
-            application/json:
-              schema: { }
-        '422':
-          description: Validation Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-  /review/activity/audio:
-    get:
-      tags:
-        - Review
-      summary: Audio Activity
-      description: Get motion and audio activity.
-      operationId: audio_activity_review_activity_audio_get
-      parameters:
-        - name: cameras
-          in: query
-          required: false
-          schema:
-            anyOf:
-              - type: string
-              - type: 'null'
-            default: all
-            title: Cameras
-        - name: before
-          in: query
-          required: false
-          schema:
-            anyOf:
-              - type: number
-              - type: 'null'
-            title: Before
-        - name: after
-          in: query
-          required: false
-          schema:
-            anyOf:
-              - type: number
-              - type: 'null'
-            title: After
-        - name: scale
-          in: query
-          required: false
-          schema:
-            anyOf:
-              - type: integer
-              - type: 'null'
-            default: 30
-            title: Scale
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: { }
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReviewActivityMotionResponse'
+                title: Response Motion Activity Review Activity Motion Get
         '422':
           description: Validation Error
           content:
@@ -477,57 +403,60 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: { }
+              schema:
+                $ref: '#/components/schemas/ReviewSegmentResponse'
         '422':
           description: Validation Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  /review/{event_id}:
+  /review/{review_id}:
     get:
       tags:
         - Review
       summary: Get Review
-      operationId: get_review_review__event_id__get
+      operationId: get_review_review__review_id__get
       parameters:
-        - name: event_id
+        - name: review_id
           in: path
           required: true
           schema:
             type: string
-            title: Event Id
+            title: Review Id
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
-              schema: { }
+              schema:
+                $ref: '#/components/schemas/ReviewSegmentResponse'
         '422':
           description: Validation Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  /review/{event_id}/viewed:
+  /review/{review_id}/viewed:
     delete:
       tags:
         - Review
       summary: Set Not Reviewed
-      operationId: set_not_reviewed_review__event_id__viewed_delete
+      operationId: set_not_reviewed_review__review_id__viewed_delete
       parameters:
-        - name: event_id
+        - name: review_id
           in: path
           required: true
           schema:
             type: string
-            title: Event Id
+            title: Review Id
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
-              schema: { }
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         '422':
           description: Validation Error
           content:
@@ -763,13 +692,25 @@ paths:
           content:
             application/json:
               schema: { }
+  /nvinfo:
+    get:
+      tags:
+        - App
+      summary: Nvinfo
+      operationId: nvinfo_nvinfo_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: { }
   /logs/{service}:
     get:
       tags:
         - App
         - Logs
       summary: Logs
-      description: Get logs for the requested service (frigate/nginx/go2rtc/chroma)
+      description: Get logs for the requested service (frigate/nginx/go2rtc)
       operationId: logs_logs__service__get
       parameters:
         - name: service
@@ -781,7 +722,6 @@ paths:
               - frigate
               - nginx
               - go2rtc
-              - chroma
             title: Service
         - name: download
           in: query
@@ -1042,7 +982,8 @@ paths:
         - Preview
       summary: Preview Hour
       description: Get all mp4 previews relevant for time period given the timezone
-      operationId: preview_hour_preview__year_month___day___hour___camera_name___tz_name__get
+      operationId: >-
+        preview_hour_preview__year_month___day___hour___camera_name___tz_name__get
       parameters:
         - name: year_month
           in: path
@@ -1092,7 +1033,8 @@ paths:
         - Preview
       summary: Get Preview Frames From Cache
       description: Get list of cached preview frames
-      operationId: get_preview_frames_from_cache_preview__camera_name__start__start_ts__end__end_ts__frames_get
+      operationId: >-
+        get_preview_frames_from_cache_preview__camera_name__start__start_ts__end__end_ts__frames_get
       parameters:
         - name: camera_name
           in: path
@@ -1177,7 +1119,8 @@ paths:
       tags:
         - Export
       summary: Export Recording
-      operationId: export_recording_export__camera_name__start__start_time__end__end_time__post
+      operationId: >-
+        export_recording_export__camera_name__start__start_time__end__end_time__post
       parameters:
         - name: camera_name
           in: path
@@ -1656,6 +1599,30 @@ paths:
               - type: 'null'
             default: utc
             title: Timezone
+        - name: min_score
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: 'null'
+            title: Min Score
+        - name: max_score
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: number
+              - type: 'null'
+            title: Max Score
+        - name: sort
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Sort
       responses:
         '200':
           description: Successful Response
@@ -1942,6 +1909,15 @@ paths:
           schema:
             type: string
             title: Event Id
+        - name: source
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - $ref: '#/components/schemas/RegenerateDescriptionEnum'
+              - type: 'null'
+            default: thumbnails
+            title: Source
       responses:
         '200':
           description: Successful Response
@@ -2029,12 +2005,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  '{camera_name}':
+  /{camera_name}:
     get:
       tags:
         - Media
       summary: Mjpeg Feed
-      operationId: mjpeg_feed_camera_name__get
+      operationId: mjpeg_feed__camera_name__get
       parameters:
         - name: camera_name
           in: path
@@ -2241,7 +2217,8 @@ paths:
       tags:
         - Media
       summary: Get Snapshot From Recording
-      operationId: get_snapshot_from_recording__camera_name__recordings__frame_time__snapshot__format__get
+      operationId: >-
+        get_snapshot_from_recording__camera_name__recordings__frame_time__snapshot__format__get
       parameters:
         - name: camera_name
           in: path
@@ -2363,7 +2340,9 @@ paths:
       tags:
         - Media
       summary: Recordings
-      description: Return specific camera recordings between the given 'after'/'end' times. If not provided the last hour will be used
+      description: >-
+        Return specific camera recordings between the given 'after'/'end' times.
+        If not provided the last hour will be used
       operationId: recordings__camera_name__recordings_get
       parameters:
         - name: camera_name
@@ -2377,14 +2356,14 @@ paths:
           required: false
           schema:
             type: number
-            default: 1727542549.303557
+            default: 1729274204.653048
             title: After
         - name: before
           in: query
           required: false
           schema:
             type: number
-            default: 1727546149.303926
+            default: 1729277804.653095
             title: Before
       responses:
         '200':
@@ -2423,13 +2402,6 @@ paths:
           schema:
             type: number
             title: End Ts
-        - name: download
-          in: query
-          required: false
-          schema:
-            type: boolean
-            default: false
-            title: Download
       responses:
         '200':
           description: Successful Response
@@ -2800,13 +2772,6 @@ paths:
           schema:
             type: string
             title: Event Id
-        - name: download
-          in: query
-          required: false
-          schema:
-            type: boolean
-            default: false
-            title: Download
       responses:
         '200':
           description: Successful Response
@@ -3121,7 +3086,9 @@ paths:
       tags:
         - Media
       summary: Label Snapshot
-      description: Returns the snapshot image from the latest event for the given camera and label combo
+      description: >-
+        Returns the snapshot image from the latest event for the given camera
+        and label combo
       operationId: label_snapshot__camera_name___label__snapshot_jpg_get
       parameters:
         - name: camera_name
@@ -3193,6 +3160,32 @@ components:
       required:
         - password
       title: AppPutPasswordBody
+    DayReview:
+      properties:
+        day:
+          type: string
+          format: date-time
+          title: Day
+        reviewed_alert:
+          type: integer
+          title: Reviewed Alert
+        reviewed_detection:
+          type: integer
+          title: Reviewed Detection
+        total_alert:
+          type: integer
+          title: Total Alert
+        total_detection:
+          type: integer
+          title: Total Detection
+      type: object
+      required:
+        - day
+        - reviewed_alert
+        - reviewed_detection
+        - total_alert
+        - total_detection
+      title: DayReview
     EventsCreateBody:
       properties:
         source_type:
@@ -3237,7 +3230,6 @@ components:
         description:
           anyOf:
             - type: string
-              minLength: 1
             - type: 'null'
           title: The description of the event
       type: object
@@ -3278,6 +3270,19 @@ components:
         - jpg
         - jpeg
       title: Extension
+    GenericResponse:
+      properties:
+        success:
+          type: boolean
+          title: Success
+        message:
+          type: string
+          title: Message
+      type: object
+      required:
+        - success
+        - message
+      title: GenericResponse
     HTTPValidationError:
       properties:
         detail:
@@ -3287,6 +3292,133 @@ components:
           title: Detail
       type: object
       title: HTTPValidationError
+    Last24HoursReview:
+      properties:
+        reviewed_alert:
+          type: integer
+          title: Reviewed Alert
+        reviewed_detection:
+          type: integer
+          title: Reviewed Detection
+        total_alert:
+          type: integer
+          title: Total Alert
+        total_detection:
+          type: integer
+          title: Total Detection
+      type: object
+      required:
+        - reviewed_alert
+        - reviewed_detection
+        - total_alert
+        - total_detection
+      title: Last24HoursReview
+    RegenerateDescriptionEnum:
+      type: string
+      enum:
+        - thumbnails
+        - snapshot
+      title: RegenerateDescriptionEnum
+    ReviewActivityMotionResponse:
+      properties:
+        start_time:
+          type: integer
+          title: Start Time
+        motion:
+          type: number
+          title: Motion
+        camera:
+          type: string
+          title: Camera
+      type: object
+      required:
+        - start_time
+        - motion
+        - camera
+      title: ReviewActivityMotionResponse
+    ReviewDeleteMultipleReviewsBody:
+      properties:
+        ids:
+          items:
+            type: string
+            minLength: 1
+          type: array
+          minItems: 1
+          title: Ids
+      type: object
+      required:
+        - ids
+      title: ReviewDeleteMultipleReviewsBody
+    ReviewSegmentResponse:
+      properties:
+        id:
+          type: string
+          title: Id
+        camera:
+          type: string
+          title: Camera
+        start_time:
+          type: string
+          format: date-time
+          title: Start Time
+        end_time:
+          type: string
+          format: date-time
+          title: End Time
+        has_been_reviewed:
+          type: boolean
+          title: Has Been Reviewed
+        severity:
+          $ref: '#/components/schemas/SeverityEnum'
+        thumb_path:
+          type: string
+          title: Thumb Path
+        data:
+          title: Data
+      type: object
+      required:
+        - id
+        - camera
+        - start_time
+        - end_time
+        - has_been_reviewed
+        - severity
+        - thumb_path
+        - data
+      title: ReviewSegmentResponse
+    ReviewSetMultipleReviewedBody:
+      properties:
+        ids:
+          items:
+            type: string
+            minLength: 1
+          type: array
+          minItems: 1
+          title: Ids
+      type: object
+      required:
+        - ids
+      title: ReviewSetMultipleReviewedBody
+    ReviewSummaryResponse:
+      properties:
+        last24Hours:
+          $ref: '#/components/schemas/Last24HoursReview'
+        root:
+          additionalProperties:
+            $ref: '#/components/schemas/DayReview'
+          type: object
+          title: Root
+      type: object
+      required:
+        - last24Hours
+        - root
+      title: ReviewSummaryResponse
+    SeverityEnum:
+      type: string
+      enum:
+        - alert
+        - detection
+      title: SeverityEnum
     SubmitPlusBody:
       properties:
         include_annotation:

@@ -93,7 +93,7 @@ class ReviewSegment(Model):  # type: ignore[misc]
     start_time = DateTimeField()
     end_time = DateTimeField()
     has_been_reviewed = BooleanField(default=False)
-    severity = CharField(max_length=30)  # alert, detection, significant_motion
+    severity = CharField(max_length=30)  # alert, detection
     thumb_path = CharField(unique=True)
     data = JSONField()  # additional data about detection like list of labels, zone, areas of significant motion
 

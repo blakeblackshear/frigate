@@ -82,6 +82,10 @@ def create_fastapi_app(
             database.close()
         return response
 
+    @app.on_event("startup")
+    async def startup():
+        logger.info("FastAPI started")
+
     # Rate limiter (used for login endpoint)
     auth.rateLimiter.set_limit(frigate_config.auth.failed_login_rate_limit or "")
     app.state.limiter = limiter
