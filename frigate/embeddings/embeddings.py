@@ -11,7 +11,7 @@ from numpy import ndarray
 from playhouse.shortcuts import model_to_dict
 
 from frigate.comms.inter_process import InterProcessRequestor
-from frigate.config.semantic_search import SemanticSearchConfig
+from frigate.config import FrigateConfig
 from frigate.const import (
     CONFIG_DIR,
     FACE_DIR,
@@ -62,9 +62,7 @@ def get_metadata(event: Event) -> dict:
 class Embeddings:
     """SQLite-vec embeddings database."""
 
-    def __init__(
-        self, config: SemanticSearchConfig, db: SqliteVecQueueDatabase
-    ) -> None:
+    def __init__(self, config: FrigateConfig, db: SqliteVecQueueDatabase) -> None:
         self.config = config
         self.db = db
         self.requestor = InterProcessRequestor()
@@ -76,7 +74,7 @@ class Embeddings:
             "jinaai/jina-clip-v1-text_model_fp16.onnx",
             "jinaai/jina-clip-v1-tokenizer",
             "jinaai/jina-clip-v1-vision_model_fp16.onnx"
-            if config.model_size == "large"
+            if config.semantic_search.model_size == "large"
             else "jinaai/jina-clip-v1-vision_model_quantized.onnx",
             "jinaai/jina-clip-v1-preprocessor_config.json",
         ]
@@ -97,7 +95,7 @@ class Embeddings:
             download_urls={
                 "text_model_fp16.onnx": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/text_model_fp16.onnx",
             },
-            model_size=config.model_size,
+            model_size=config.semantic_search.model_size,
             model_type=ModelTypeEnum.text,
             requestor=self.requestor,
             device="CPU",
@@ -105,7 +103,7 @@ class Embeddings:
 
         model_file = (
             "vision_model_fp16.onnx"
-            if self.config.model_size == "large"
+            if self.config.semantic_search.model_size == "large"
             else "vision_model_quantized.onnx"
         )
 
