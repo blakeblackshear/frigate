@@ -460,7 +460,7 @@ def recording_clip(
             text=False,
         ) as ffmpeg:
             while True:
-                data = ffmpeg.stdout.read(1024)
+                data = ffmpeg.stdout.read(8192)
                 if data is not None and len(data) > 0:
                     yield data
                 else:
