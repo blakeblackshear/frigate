@@ -66,7 +66,10 @@ def export_recording(
             .where(
                 Recordings.start_time.between(start_time, end_time)
                 | Recordings.end_time.between(start_time, end_time)
-                | ((start_time > Recordings.start_time) & (end_time < Recordings.end_time))
+                | (
+                    (start_time > Recordings.start_time)
+                    & (end_time < Recordings.end_time)
+                )
             )
             .where(Recordings.camera == camera_name)
             .count()
