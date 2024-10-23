@@ -43,6 +43,11 @@ class PlaybackFactorEnum(str, Enum):
     timelapse_25x = "timelapse_25x"
 
 
+class PlaybackSourceEnum(str, Enum):
+    recordings = "recordings"
+    preview = "preview"
+
+
 class RecordingExporter(threading.Thread):
     """Exports a specific set of recordings for a camera to storage as a single file."""
 
@@ -56,6 +61,7 @@ class RecordingExporter(threading.Thread):
         start_time: int,
         end_time: int,
         playback_factor: PlaybackFactorEnum,
+        playback_source: PlaybackSourceEnum,
     ) -> None:
         super().__init__()
         self.config = config
@@ -66,6 +72,7 @@ class RecordingExporter(threading.Thread):
         self.start_time = start_time
         self.end_time = end_time
         self.playback_factor = playback_factor
+        self.playback_source = playback_source
 
         # ensure export thumb dir
         Path(os.path.join(CLIPS_DIR, "export")).mkdir(exist_ok=True)
@@ -170,30 +177,7 @@ class RecordingExporter(threading.Thread):
 
         return thumb_path
 
-    def run(self) -> None:
-        logger.debug(
-            f"Beginning export for {self.camera} from {self.start_time} to {self.end_time}"
-        )
-        export_name = (
-            self.user_provided_name
-            or f"{self.camera.replace('_', ' ')} {self.get_datetime_from_timestamp(self.start_time)} {self.get_datetime_from_timestamp(self.end_time)}"
-        )
-        video_path = f"{EXPORT_DIR}/{self.export_id}.mp4"
-
-        thumb_path = self.save_thumbnail(self.export_id)
-
-        Export.insert(
-            {
-                Export.id: self.export_id,
-                Export.camera: self.camera,
-                Export.name: export_name,
-                Export.date: self.start_time,
-                Export.video_path: video_path,
-                Export.thumb_path: thumb_path,
-                Export.in_progress: True,
-            }
-        ).execute()
-
+    def get_record_export_command(self, video_path: str) -> list[str]:
         if (self.end_time - self.start_time) <= MAX_PLAYLIST_SECONDS:
             playlist_lines = f"http://127.0.0.1:5000/vod/{self.camera}/start/{self.start_time}/end/{self.end_time}/index.m3u8"
             ffmpeg_input = (
@@ -204,7 +188,10 @@ class RecordingExporter(threading.Thread):
 
             # get full set of recordings
             export_recordings = (
-                Recordings.select()
+                Recordings.select(
+                    Recordings.start_time,
+                    Recordings.end_time,
+                )
                 .where(
                     Recordings.start_time.between(self.start_time, self.end_time)
                     | Recordings.end_time.between(self.start_time, self.end_time)
@@ -238,11 +225,100 @@ class RecordingExporter(threading.Thread):
                 parse_preset_hardware_acceleration_encode(
                     self.config.ffmpeg.ffmpeg_path,
                     self.config.ffmpeg.hwaccel_args,
+                    f"-an {ffmpeg_input}",
+                    f"{self.config.cameras[self.camera].record.export.timelapse_args} -movflags +faststart {video_path}",
+                    EncodeTypeEnum.timelapse,
+                )
+            ).split(" ")
+
+        return ffmpeg_cmd, playlist_lines
+
+    def get_preview_export_command(self, video_path: str) -> list[str]:
+        playlist_lines = []
+
+        # get full set of previews
+        export_previews = (
+            Previews.select(
+                Previews.path,
+                Previews.start_time,
+                Previews.end_time,
+            )
+            .where(
+                Previews.start_time.between(self.start_time, self.end_time)
+                | Previews.end_time.between(self.start_time, self.end_time)
+                | (
+                    (self.start_time > Previews.start_time)
+                    & (self.end_time < Previews.end_time)
+                )
+            )
+            .where(Previews.camera == self.camera)
+            .order_by(Previews.start_time.asc())
+            .namedtuples()
+            .iterator()
+        )
+
+        preview: Previews
+        for preview in export_previews:
+            playlist_lines.append(f"file '{preview.path}'")
+
+            if preview.start_time < self.start_time:
+                playlist_lines.append(
+                    f"inpoint {int(self.start_time - preview.start_time)}"
+                )
+
+            if preview.end_time > self.end_time:
+                playlist_lines.append(
+                    f"outpoint {int(preview.end_time - self.end_time)}"
+                )
+
+        ffmpeg_input = (
+            "-y -protocol_whitelist pipe,file,tcp -f concat -safe 0 -i /dev/stdin"
+        )
+
+        if self.playback_factor == PlaybackFactorEnum.realtime:
+            ffmpeg_cmd = (
+                f"{self.config.ffmpeg.ffmpeg_path} -hide_banner {ffmpeg_input} -c copy -movflags +faststart {video_path}"
+            ).split(" ")
+        elif self.playback_factor == PlaybackFactorEnum.timelapse_25x:
+            ffmpeg_cmd = (
+                parse_preset_hardware_acceleration_encode(
+                    self.config.ffmpeg.ffmpeg_path,
+                    self.config.ffmpeg.hwaccel_args,
                     f"{TIMELAPSE_DATA_INPUT_ARGS} {ffmpeg_input}",
                     f"{self.config.cameras[self.camera].record.export.timelapse_args} -movflags +faststart {video_path}",
                     EncodeTypeEnum.timelapse,
                 )
             ).split(" ")
+
+        return ffmpeg_cmd, playlist_lines
+
+    def run(self) -> None:
+        logger.debug(
+            f"Beginning export for {self.camera} from {self.start_time} to {self.end_time}"
+        )
+        export_name = (
+            self.user_provided_name
+            or f"{self.camera.replace('_', ' ')} {self.get_datetime_from_timestamp(self.start_time)} {self.get_datetime_from_timestamp(self.end_time)}"
+        )
+        video_path = f"{EXPORT_DIR}/{self.export_id}.mp4"
+        thumb_path = self.save_thumbnail(self.export_id)
+
+        Export.insert(
+            {
+                Export.id: self.export_id,
+                Export.camera: self.camera,
+                Export.name: export_name,
+                Export.date: self.start_time,
+                Export.video_path: video_path,
+                Export.thumb_path: thumb_path,
+                Export.in_progress: True,
+            }
+        ).execute()
+
+        if self.playback_source == PlaybackSourceEnum.recordings:
+            ffmpeg_cmd, playlist_lines = self.get_record_export_command(video_path)
+        else:
+            ffmpeg_cmd, playlist_lines = self.get_preview_export_command(video_path)
 
         p = sp.run(
             ffmpeg_cmd,
@@ -254,7 +330,7 @@ class RecordingExporter(threading.Thread):
 
         if p.returncode != 0:
             logger.error(
-                f"Failed to export recording for command {' '.join(ffmpeg_cmd)}"
+                f"Failed to export {self.playback_source.value} for command {' '.join(ffmpeg_cmd)}"
             )
             logger.error(p.stderr)
             Path(video_path).unlink(missing_ok=True)

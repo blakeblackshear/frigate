@@ -13,8 +13,12 @@ from peewee import DoesNotExist
 
 from frigate.api.defs.tags import Tags
 from frigate.const import EXPORT_DIR
-from frigate.models import Export, Recordings
-from frigate.record.export import PlaybackFactorEnum, RecordingExporter
+from frigate.models import Export, Previews, Recordings
+from frigate.record.export import (
+    PlaybackFactorEnum,
+    PlaybackSourceEnum,
+    RecordingExporter,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +49,7 @@ def export_recording(
 
     json: dict[str, any] = body or {}
     playback_factor = json.get("playback", "realtime")
+    playback_source = json.get("source", "recordings")
     friendly_name: Optional[str] = json.get("name")
 
     if len(friendly_name or "") > 256:
@@ -55,24 +60,47 @@ def export_recording(
 
     existing_image = json.get("image_path")
 
-    recordings_count = (
-        Recordings.select()
-        .where(
-            Recordings.start_time.between(start_time, end_time)
-            | Recordings.end_time.between(start_time, end_time)
-            | ((start_time > Recordings.start_time) & (end_time < Recordings.end_time))
+    if playback_source == "recordings":
+        recordings_count = (
+            Recordings.select()
+            .where(
+                Recordings.start_time.between(start_time, end_time)
+                | Recordings.end_time.between(start_time, end_time)
+                | (
+                    (start_time > Recordings.start_time)
+                    & (end_time < Recordings.end_time)
+                )
+            )
+            .where(Recordings.camera == camera_name)
+            .count()
         )
-        .where(Recordings.camera == camera_name)
-        .count()
-    )
 
-    if recordings_count <= 0:
-        return JSONResponse(
-            content=(
-                {"success": False, "message": "No recordings found for time range"}
-            ),
-            status_code=400,
+        if recordings_count <= 0:
+            return JSONResponse(
+                content=(
+                    {"success": False, "message": "No recordings found for time range"}
+                ),
+                status_code=400,
+            )
+    else:
+        previews_count = (
+            Previews.select()
+            .where(
+                Previews.start_time.between(start_time, end_time)
+                | Previews.end_time.between(start_time, end_time)
+                | ((start_time > Previews.start_time) & (end_time < Previews.end_time))
+            )
+            .where(Previews.camera == camera_name)
+            .count()
         )
+
+        if previews_count <= 0:
+            return JSONResponse(
+                content=(
+                    {"success": False, "message": "No previews found for time range"}
+                ),
+                status_code=400,
+            )
 
     export_id = f"{camera_name}_{''.join(random.choices(string.ascii_lowercase + string.digits, k=6))}"
     exporter = RecordingExporter(
@@ -87,6 +115,11 @@ def export_recording(
             PlaybackFactorEnum[playback_factor]
             if playback_factor in PlaybackFactorEnum.__members__.values()
             else PlaybackFactorEnum.realtime
+        ),
+        (
+            PlaybackSourceEnum[playback_source]
+            if playback_source in PlaybackSourceEnum.__members__.values()
+            else PlaybackSourceEnum.recordings
         ),
     )
     exporter.start()
