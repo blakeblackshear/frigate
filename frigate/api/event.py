@@ -901,38 +901,59 @@ def set_sub_label(
     try:
         event: Event = Event.get(Event.id == event_id)
     except DoesNotExist:
+        if not body.camera:
+            return JSONResponse(
+                content=(
+                    {
+                        "success": False,
+                        "message": "Event "
+                        + event_id
+                        + " not found and camera is not provided.",
+                    }
+                ),
+                status_code=404,
+            )
+
+        event = None
+
+    if request.app.detected_frames_processor:
+        tracked_obj: TrackedObject = (
+            request.app.detected_frames_processor.camera_states[
+                event.camera if event else body.camera
+            ].tracked_objects.get(event_id)
+        )
+    else:
+        tracked_obj = None
+
+    if not event and not tracked_obj:
         return JSONResponse(
-            content=({"success": False, "message": "Event " + event_id + " not found"}),
+            content=(
+                {"success": False, "message": "Event " + event_id + " not found."}
+            ),
             status_code=404,
         )
 
     new_sub_label = body.subLabel
     new_score = body.subLabelScore
 
-    if not event.end_time:
-        # update tracked object
-        tracked_obj: TrackedObject = (
-            request.app.detected_frames_processor.camera_states[
-                event.camera
-            ].tracked_objects.get(event.id)
-        )
-
-        if tracked_obj:
-            tracked_obj.obj_data["sub_label"] = (new_sub_label, new_score)
+    if tracked_obj:
+        tracked_obj.obj_data["sub_label"] = (new_sub_label, new_score)
 
         # update timeline items
         Timeline.update(
             data=Timeline.data.update({"sub_label": (new_sub_label, new_score)})
         ).where(Timeline.source_id == event_id).execute()
 
-    event.sub_label = new_sub_label
+    if event:
+        event.sub_label = new_sub_label
 
-    if new_score:
-        data = event.data
-        data["sub_label_score"] = new_score
-        event.data = data
+        if new_score:
+            data = event.data
+            data["sub_label_score"] = new_score
+            event.data = data
 
-    event.save()
+        event.save()
+
     return JSONResponse(
         content=(
             {
