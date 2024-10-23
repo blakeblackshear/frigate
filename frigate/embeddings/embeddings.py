@@ -116,10 +116,10 @@ class Embeddings:
             model_name="jinaai/jina-clip-v1",
             model_file=model_file,
             download_urls=download_urls,
-            model_size=config.model_size,
+            model_size=config.semantic_search.model_size,
             model_type=ModelTypeEnum.vision,
             requestor=self.requestor,
-            device="GPU" if config.model_size == "large" else "CPU",
+            device="GPU" if config.semantic_search.model_size == "large" else "CPU",
         )
 
         self.face_embedding = None
