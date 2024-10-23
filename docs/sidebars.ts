@@ -36,6 +36,7 @@ const sidebars: SidebarsConfig = {
       'Semantic Search': [
         'configuration/semantic_search',
         'configuration/genai',
+        'configuration/face_recognition',
       ],
       Cameras: [
         'configuration/cameras',
