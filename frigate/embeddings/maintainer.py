@@ -185,6 +185,9 @@ class EmbeddingMaintainer(threading.Thread):
             event_id, camera, updated_db = ended
             camera_config = self.config.cameras[camera]
 
+            if event_id in self.detected_faces:
+                self.detected_faces.pop(event_id)
+
             if updated_db:
                 try:
                     event: Event = Event.get(Event.id == event_id)
@@ -368,6 +371,11 @@ class EmbeddingMaintainer(threading.Thread):
             avg_score += score
 
         avg_score = avg_score / REQUIRED_FACES
+
+        if id in self.detected_faces and avg_score <= self.detected_faces[id]:
+            logger.debug("Detected face does not score higher than previous face.")
+            return None
+
         self.detected_faces[id] = avg_score
         requests.post(
             f"{FRIGATE_LOCALHOST}/api/events/{id}/sub_label",
