@@ -2,6 +2,9 @@
 
 ARG DEBIAN_FRONTEND=noninteractive
 
+# NOTE: also update user_installation.sh
+ARG HAILO_VERSION=4.19.0
+
 # Build Python wheels
 FROM wheels AS h8l-wheels
 
@@ -19,6 +22,7 @@ RUN pip3 wheel --wheel-dir=/h8l-wheels -c /requirements-wheels.txt -r /requireme
 # Build HailoRT and create wheel
 FROM wheels AS build-hailort
 ARG TARGETARCH
+ARG HAILO_VERSION
 
 SHELL ["/bin/bash", "-c"]
 
@@ -50,7 +54,7 @@ RUN PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}' | cut -d. -f1,2) 
 RUN . /etc/environment && \
     git clone https://github.com/hailo-ai/hailort.git /opt/hailort && \
     cd /opt/hailort && \
-    git checkout v4.18.0 && \
+    git checkout v${HAILO_VERSION} && \
     cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Release -DHAILO_BUILD_PYBIND=1 -DPYBIND11_PYTHON_VERSION=${PYTHON_VERSION} && \
     cmake --build build --config release --target libhailort && \
     cmake --build build --config release --target _pyhailort && \
@@ -76,6 +80,7 @@ RUN cd /opt/hailort/hailort/libhailort/bindings/python/platform && \
 
 # Use deps as the base image
 FROM deps AS h8l-frigate
+ARG HAILO_VERSION
 
 # Copy the wheels from the wheels stage
 COPY --from=h8l-wheels /h8l-wheels /deps/h8l-wheels
@@ -91,7 +96,7 @@ RUN pip3 install -U /deps/hailo-wheels/*.whl
 RUN . /etc/environment && \
     mv /usr/local/lib/python${PYTHON_VERSION}/dist-packages/hailo_platform/pyhailort/libhailort.so /usr/lib/${CC} && \
     cd /usr/lib/${CC}/ && \
-    ln -s libhailort.so libhailort.so.4.18.0
+    ln -s libhailort.so libhailort.so.${HAILO_VERSION}
 
 # Copy base files from the rootfs stage
 COPY --from=rootfs / /
