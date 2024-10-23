@@ -27,6 +27,7 @@ import ActivityIndicator from "@/components/indicators/activity-indicator";
 import {
   FaCheckCircle,
   FaChevronDown,
+  FaDownload,
   FaHistory,
   FaImage,
   FaRegListAlt,
@@ -68,6 +69,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { LuInfo } from "react-icons/lu";
+import { TooltipPortal } from "@radix-ui/react-tooltip";
 
 const SEARCH_TABS = [
   "details",
@@ -577,16 +579,39 @@ function ObjectSnapshotTab({
               }}
             >
               {search?.id && (
-                <img
-                  ref={imgRef}
-                  className={`mx-auto max-h-[60dvh] bg-black object-contain`}
-                  src={`${baseUrl}api/events/${search?.id}/snapshot.jpg`}
-                  alt={`${search?.label}`}
-                  loading={isSafari ? "eager" : "lazy"}
-                  onLoad={() => {
-                    onImgLoad();
-                  }}
-                />
+                <div className="relative mx-auto">
+                  <img
+                    ref={imgRef}
+                    className={`mx-auto max-h-[60dvh] bg-black object-contain`}
+                    src={`${baseUrl}api/events/${search?.id}/snapshot.jpg`}
+                    alt={`${search?.label}`}
+                    loading={isSafari ? "eager" : "lazy"}
+                    onLoad={() => {
+                      onImgLoad();
+                    }}
+                  />
+                  <div
+                    className={cn(
+                      "absolute right-1 top-1 flex items-center gap-2",
+                    )}
+                  >
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <a
+                          download
+                          href={`${baseUrl}api/events/${search?.id}/snapshot.jpg`}
+                        >
+                          <Chip className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500">
+                            <FaDownload className="size-4 text-white" />
+                          </Chip>
+                        </a>
+                      </TooltipTrigger>
+                      <TooltipPortal>
+                        <TooltipContent>Download</TooltipContent>
+                      </TooltipPortal>
+                    </Tooltip>
+                  </div>
+                </div>
               )}
             </TransformComponent>
             {search.plus_id !== "not_enabled" && search.end_time && (
@@ -669,7 +694,7 @@ export function VideoTab({ search }: VideoTabProps) {
       {reviewItem && (
         <div
           className={cn(
-            "absolute top-2 z-10 flex items-center",
+            "absolute top-2 z-10 flex items-center gap-2",
             isIOS ? "right-8" : "right-2",
           )}
         >
@@ -689,7 +714,24 @@ export function VideoTab({ search }: VideoTabProps) {
                 <FaHistory className="size-4 text-white" />
               </Chip>
             </TooltipTrigger>
-            <TooltipContent side="left">View in History</TooltipContent>
+            <TooltipPortal>
+              <TooltipContent>View in History</TooltipContent>
+            </TooltipPortal>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <a
+                download
+                href={`${baseUrl}api/${search.camera}/start/${search.start_time}/end/${endTime}/clip.mp4`}
+              >
+                <Chip className="cursor-pointer rounded-md bg-gray-500 bg-gradient-to-br from-gray-400 to-gray-500">
+                  <FaDownload className="size-4 text-white" />
+                </Chip>
+              </a>
+            </TooltipTrigger>
+            <TooltipPortal>
+              <TooltipContent>Download</TooltipContent>
+            </TooltipPortal>
           </Tooltip>
         </div>
       )}
