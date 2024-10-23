@@ -33,6 +33,7 @@ from .embeddings import Embeddings
 
 logger = logging.getLogger(__name__)
 
+REQUIRED_FACES = 2
 MAX_THUMBNAILS = 10
 
 
@@ -47,7 +48,7 @@ class EmbeddingMaintainer(threading.Thread):
     ) -> None:
         super().__init__(name="embeddings_maintainer")
         self.config = config
-        self.embeddings = Embeddings(config.semantic_search, db)
+        self.embeddings = Embeddings(config, db)
 
         # Check if we need to re-index events
         if config.semantic_search.reindex:
@@ -62,10 +63,9 @@ class EmbeddingMaintainer(threading.Thread):
         self.frame_manager = SharedMemoryFrameManager()
 
         # set face recognition conditions
-        self.face_recognition_enabled = (
-            self.config.semantic_search.face_recognition.enabled
-        )
+        self.face_recognition_enabled = self.config.face_recognition.enabled
         self.requires_face_detection = "face" not in self.config.model.all_attributes
+        self.detected_faces: dict[str, float] = {}
 
         # create communication for updating event descriptions
         self.requestor = InterProcessRequestor()
@@ -183,6 +183,9 @@ class EmbeddingMaintainer(threading.Thread):
             event_id, camera, updated_db = ended
             camera_config = self.config.cameras[camera]
 
+            if event_id in self.detected_faces:
+                self.detected_faces.pop(event_id)
+
             if updated_db:
                 try:
                     event: Event = Event.get(Event.id == event_id)
@@ -276,25 +279,28 @@ class EmbeddingMaintainer(threading.Thread):
 
     def _search_face(self, query_embedding: bytes) -> list:
         """Search for the face most closely matching the embedding."""
-        sql_query = """
+        sql_query = f"""
             SELECT
                 id,
                 distance
             FROM vec_faces
             WHERE face_embedding MATCH ?
-                AND k = 10 ORDER BY distance
+                AND k = {REQUIRED_FACES} ORDER BY distance
         """
         return self.embeddings.db.execute_sql(sql_query, [query_embedding]).fetchall()
 
     def _process_face(self, obj_data: dict[str, any], frame: np.ndarray) -> None:
         """Look for faces in image."""
+        id = obj_data["id"]
+
         # don't run for non person objects
         if obj_data.get("label") != "person":
             logger.debug("Not a processing face for non person object.")
             return
 
-        # don't overwrite sub label for objects that have one
-        if obj_data.get("sub_label"):
+        # don't overwrite sub label for objects that have a sub label
+        # that is not a face
+        if obj_data.get("sub_label") and id not in self.detected_faces:
             logger.debug(
                 f"Not processing face due to existing sub label: {obj_data.get('sub_label')}."
             )
@@ -348,18 +354,35 @@ class EmbeddingMaintainer(threading.Thread):
         best_faces = self._search_face(query_embedding)
         logger.debug(f"Detected best faces for person as: {best_faces}")
 
-        if not best_faces:
+        if not best_faces or len(best_faces) < REQUIRED_FACES:
             return
 
         sub_label = str(best_faces[0][0]).split("-")[0]
-        score = 1.0 - best_faces[0][1]
+        avg_score = 0
 
-        if score < self.config.semantic_search.face_recognition.threshold:
+        for face in best_faces:
+            score = 1.0 - face[1]
+
+            if face[0] != sub_label:
+                logger.debug("Detected multiple faces, result is not valid.")
+                return None
+
+            avg_score += score
+
+        avg_score = avg_score / REQUIRED_FACES
+
+        if avg_score < self.config.semantic_search.face_recognition.threshold or (
+            id in self.detected_faces and avg_score <= self.detected_faces[id]
+        ):
+            logger.debug(
+                "Detected face does not score higher than threshold / previous face."
+            )
             return None
 
+        self.detected_faces[id] = avg_score
         requests.post(
-            f"{FRIGATE_LOCALHOST}/api/events/{obj_data['id']}/sub_label",
-            json={"subLabel": sub_label, "subLabelScore": score},
+            f"{FRIGATE_LOCALHOST}/api/events/{id}/sub_label",
+            json={"subLabel": sub_label, "subLabelScore": avg_score},
         )
 
     def _create_thumbnail(self, yuv_frame, box, height=500) -> Optional[bytes]:
