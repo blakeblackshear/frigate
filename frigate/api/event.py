@@ -905,9 +905,14 @@ def set_sub_label(
 
         event = None
 
-    tracked_obj: TrackedObject = request.app.detected_frames_processor.camera_states[
-        event.camera if event else body.camera
-    ].tracked_objects.get(event_id)
+    if request.app.detected_frames_processor:
+        tracked_obj: TrackedObject = (
+            request.app.detected_frames_processor.camera_states[
+                event.camera if event else body.camera
+            ].tracked_objects.get(event_id)
+        )
+    else:
+        tracked_obj = None
 
     if not event and not tracked_obj:
         return JSONResponse(
