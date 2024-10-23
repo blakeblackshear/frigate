@@ -18,6 +18,7 @@ import { isMobileOnly } from "react-device-detect";
 import { LuCheck, LuExternalLink, LuX } from "react-icons/lu";
 import { TbExclamationCircle } from "react-icons/tb";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 import useSWR from "swr";
 import useSWRInfinite from "swr/infinite";
 
@@ -180,6 +181,18 @@ export default function Explore() {
     revalidateFirstPage: true,
     revalidateOnFocus: true,
     revalidateAll: false,
+    onError: (error) => {
+      toast.error(
+        `Error fetching tracked objects: ${error.response.data.message}`,
+        {
+          position: "top-center",
+        },
+      );
+      if (error.response.status === 404) {
+        // reset all filters if 404
+        setSearchFilter({});
+      }
+    },
   });
 
   const searchResults = useMemo(
