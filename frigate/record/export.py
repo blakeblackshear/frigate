@@ -170,30 +170,7 @@ class RecordingExporter(threading.Thread):
 
         return thumb_path
 
-    def run(self) -> None:
-        logger.debug(
-            f"Beginning export for {self.camera} from {self.start_time} to {self.end_time}"
-        )
-        export_name = (
-            self.user_provided_name
-            or f"{self.camera.replace('_', ' ')} {self.get_datetime_from_timestamp(self.start_time)} {self.get_datetime_from_timestamp(self.end_time)}"
-        )
-        video_path = f"{EXPORT_DIR}/{self.export_id}.mp4"
-
-        thumb_path = self.save_thumbnail(self.export_id)
-
-        Export.insert(
-            {
-                Export.id: self.export_id,
-                Export.camera: self.camera,
-                Export.name: export_name,
-                Export.date: self.start_time,
-                Export.video_path: video_path,
-                Export.thumb_path: thumb_path,
-                Export.in_progress: True,
-            }
-        ).execute()
-
+    def get_record_export_command(self, video_path: str) -> list[str]:
         if (self.end_time - self.start_time) <= MAX_PLAYLIST_SECONDS:
             playlist_lines = f"http://127.0.0.1:5000/vod/{self.camera}/start/{self.start_time}/end/{self.end_time}/index.m3u8"
             ffmpeg_input = (
@@ -243,6 +220,33 @@ class RecordingExporter(threading.Thread):
                     EncodeTypeEnum.timelapse,
                 )
             ).split(" ")
+
+        return ffmpeg_cmd
+
+    def run(self) -> None:
+        logger.debug(
+            f"Beginning export for {self.camera} from {self.start_time} to {self.end_time}"
+        )
+        export_name = (
+            self.user_provided_name
+            or f"{self.camera.replace('_', ' ')} {self.get_datetime_from_timestamp(self.start_time)} {self.get_datetime_from_timestamp(self.end_time)}"
+        )
+        video_path = f"{EXPORT_DIR}/{self.export_id}.mp4"
+        thumb_path = self.save_thumbnail(self.export_id)
+
+        Export.insert(
+            {
+                Export.id: self.export_id,
+                Export.camera: self.camera,
+                Export.name: export_name,
+                Export.date: self.start_time,
+                Export.video_path: video_path,
+                Export.thumb_path: thumb_path,
+                Export.in_progress: True,
+            }
+        ).execute()
+
+        ffmpeg_cmd, playlist_lines = self.get_record_export_command(video_path)
 
         p = sp.run(
             ffmpeg_cmd,
