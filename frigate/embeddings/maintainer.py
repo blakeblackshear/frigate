@@ -365,15 +365,20 @@ class EmbeddingMaintainer(threading.Thread):
         for face in best_faces:
             score = 1.0 - face[1]
 
-            if score < self.config.semantic_search.face_recognition.threshold:
+            if face[0] != sub_label:
+                logger.debug("Detected multiple faces, result is not valid.")
                 return None
 
             avg_score += score
 
         avg_score = avg_score / REQUIRED_FACES
 
-        if id in self.detected_faces and avg_score <= self.detected_faces[id]:
-            logger.debug("Detected face does not score higher than previous face.")
+        if avg_score < self.config.semantic_search.face_recognition.threshold or (
+            id in self.detected_faces and avg_score <= self.detected_faces[id]
+        ):
+            logger.debug(
+                "Detected face does not score higher than threshold / previous face."
+            )
             return None
 
         self.detected_faces[id] = avg_score
