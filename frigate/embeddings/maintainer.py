@@ -47,7 +47,7 @@ class EmbeddingMaintainer(threading.Thread):
     ) -> None:
         super().__init__(name="embeddings_maintainer")
         self.config = config
-        self.embeddings = Embeddings(config.semantic_search, db)
+        self.embeddings = Embeddings(config, db)
 
         # Check if we need to re-index events
         if config.semantic_search.reindex:
@@ -62,9 +62,7 @@ class EmbeddingMaintainer(threading.Thread):
         self.frame_manager = SharedMemoryFrameManager()
 
         # set face recognition conditions
-        self.face_recognition_enabled = (
-            self.config.semantic_search.face_recognition.enabled
-        )
+        self.face_recognition_enabled = self.config.face_recognition.enabled
         self.requires_face_detection = "face" not in self.config.model.all_attributes
         self.detected_faces: dict[str, float] = {}
 
