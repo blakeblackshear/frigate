@@ -8,6 +8,9 @@ class EventsSubLabelBody(BaseModel):
     subLabelScore: Optional[float] = Field(
         title="Score for sub label", default=None, gt=0.0, le=1.0
     )
+    camera: Optional[str] = Field(
+        title="Camera this object is detected on.", default=None
+    )
 
 
 class EventsDescriptionBody(BaseModel):
