@@ -1015,7 +1015,7 @@ def regenerate_description(
         content=(
             {
                 "success": False,
-                "message": "Semantic search and generative AI are not enabled",
+                "message": "Semantic Search and Generative AI must be enabled to regenerate a description",
             }
         ),
         status_code=400,
