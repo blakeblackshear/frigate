@@ -522,6 +522,14 @@ semantic_search:
   # NOTE: small model runs on CPU and large model runs on GPU
   model_size: "small"
 
+# Optional: Configuration for face recognition capability
+face_recognition:
+  # Optional: Enable semantic search (default: shown below)
+  enabled: False
+  # Optional: Set the model size used for embeddings. (default: shown below)
+  # NOTE: small model runs on CPU and large model runs on GPU
+  model_size: "small"
+
 # Optional: Configuration for AI generated tracked object descriptions
 # NOTE: Semantic Search must be enabled for this to do anything.
 # WARNING: Depending on the provider, this will send thumbnails over the internet
