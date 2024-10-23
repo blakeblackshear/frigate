@@ -4,17 +4,20 @@ import { toast } from "sonner";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { FaDownload } from "react-icons/fa";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
+import { cn } from "@/lib/utils";
 
 type DownloadVideoButtonProps = {
   source: string;
   camera: string;
   startTime: number;
+  className?: string;
 };
 
 export function DownloadVideoButton({
   source,
   camera,
   startTime,
+  className,
 }: DownloadVideoButtonProps) {
   const [isDownloading, setIsDownloading] = useState(false);
 
@@ -32,13 +35,6 @@ export function DownloadVideoButton({
     });
   };
 
-  const handleDownloadEnd = () => {
-    setIsDownloading(false);
-    toast.success("Download completed successfully.", {
-      position: "top-center",
-    });
-  };
-
   return (
     <div className="flex justify-center">
       <Button
@@ -48,16 +44,13 @@ export function DownloadVideoButton({
         size="sm"
         aria-label="Download Video"
       >
-        <a
-          href={source}
-          download={filename}
-          onClick={handleDownloadStart}
-          onBlur={handleDownloadEnd}
-        >
+        <a href={source} download={filename} onClick={handleDownloadStart}>
           {isDownloading ? (
             <ActivityIndicator className="size-4" />
           ) : (
-            <FaDownload className="size-4 text-secondary-foreground" />
+            <FaDownload
+              className={cn("size-4 text-secondary-foreground", className)}
+            />
           )}
         </a>
       </Button>
