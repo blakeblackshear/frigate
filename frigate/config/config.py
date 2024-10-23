@@ -57,7 +57,7 @@ from .logger import LoggerConfig
 from .mqtt import MqttConfig
 from .notification import NotificationConfig
 from .proxy import ProxyConfig
-from .semantic_search import SemanticSearchConfig
+from .semantic_search import FaceRecognitionConfig, SemanticSearchConfig
 from .telemetry import TelemetryConfig
 from .tls import TlsConfig
 from .ui import UIConfig
@@ -157,6 +157,16 @@ class RuntimeFilterConfig(FilterConfig):
 
 class RestreamConfig(BaseModel):
     model_config = ConfigDict(extra="allow")
+
+
+def verify_semantic_search_dependent_configs(config: FrigateConfig) -> None:
+    """Verify that semantic search is enabled if required features are enabled."""
+    if not config.semantic_search.enabled:
+        if config.genai.enabled:
+            raise ValueError("Genai requires semantic search to be enabled.")
+
+        if config.face_recognition.enabled:
+            raise ValueError("Face recognition requires semantic to be enabled.")
 
 
 def verify_config_roles(camera_config: CameraConfig) -> None:
@@ -319,6 +329,9 @@ class FrigateConfig(FrigateBaseModel):
     tls: TlsConfig = Field(default_factory=TlsConfig, title="TLS configuration.")
     semantic_search: SemanticSearchConfig = Field(
         default_factory=SemanticSearchConfig, title="Semantic search configuration."
+    )
+    face_recognition: FaceRecognitionConfig = Field(
+        default_factory=FaceRecognitionConfig, title="Face recognition config."
     )
     ui: UIConfig = Field(default_factory=UIConfig, title="UI configuration.")
 
@@ -617,6 +630,7 @@ class FrigateConfig(FrigateBaseModel):
             detector_config.model = model
             self.detectors[key] = detector_config
 
+        verify_semantic_search_dependent_configs(self)
         return self
 
     @field_validator("cameras")
