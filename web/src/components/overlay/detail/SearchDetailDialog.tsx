@@ -287,7 +287,7 @@ function ObjectDetailsTab({
       return 0;
     }
 
-    const value = search.data.top_score;
+    const value = search.data.top_score ?? search.top_score ?? 0;
 
     return Math.round(value * 100);
   }, [search]);
