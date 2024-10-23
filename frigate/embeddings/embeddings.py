@@ -62,9 +62,7 @@ def get_metadata(event: Event) -> dict:
 class Embeddings:
     """SQLite-vec embeddings database."""
 
-    def __init__(
-        self, config: FrigateConfig, db: SqliteVecQueueDatabase
-    ) -> None:
+    def __init__(self, config: FrigateConfig, db: SqliteVecQueueDatabase) -> None:
         self.config = config
         self.db = db
         self.requestor = InterProcessRequestor()
