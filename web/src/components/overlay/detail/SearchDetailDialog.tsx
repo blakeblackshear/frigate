@@ -368,9 +368,9 @@ function ObjectDetailsTab({
             );
           }
         })
-        .catch(() => {
+        .catch((error) => {
           toast.error(
-            `Failed to call ${capitalizeAll(config?.genai.provider.replaceAll("_", " ") ?? "Generative AI")} for a new description`,
+            `Failed to call ${capitalizeAll(config?.genai.provider.replaceAll("_", " ") ?? "Generative AI")} for a new description: ${error.response.data.message}`,
             {
               position: "top-center",
             },
