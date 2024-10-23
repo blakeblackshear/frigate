@@ -16,8 +16,6 @@ Face recognition works by running a large AI model locally on your system. Syste
 Face recognition is disabled by default and requires semantic search to be enabled, face recognition must be enabled in your config file before it can be used. Semantic Search and face recognition are global configuration settings.
 
 ```yaml
-semantic_search:
-  enabled: True
-  face_recognition:
-    enabled: true
+face_recognition:
+  enabled: true
 ```
