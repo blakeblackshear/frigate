@@ -38,6 +38,9 @@ class ModelTypeEnum(str, Enum):
     face = "face"
     vision = "vision"
     text = "text"
+    alpr_detect = "alpr_detect"
+    alpr_classify = "alpr_classify"
+    alpr_recognize = "alpr_recognize"
 
 
 class GenericONNXEmbedding:
@@ -139,6 +142,12 @@ class GenericONNXEmbedding:
                 self.feature_extractor = self._load_feature_extractor()
             elif self.model_type == ModelTypeEnum.face:
                 self.feature_extractor = []
+            elif self.model_type == ModelTypeEnum.alpr_detect:
+                self.feature_extractor = []
+            elif self.model_type == ModelTypeEnum.alpr_classify:
+                self.feature_extractor = []
+            elif self.model_type == ModelTypeEnum.alpr_recognize:
+                self.feature_extractor = []
 
             self.runner = ONNXModelRunner(
                 os.path.join(self.download_path, self.model_file),
@@ -214,8 +223,25 @@ class GenericONNXEmbedding:
 
             frame = np.expand_dims(frame, axis=0)
             return [{"image_input": frame}]
+        elif self.model_type == ModelTypeEnum.alpr_detect:
+            preprocessed = []
+            for x in raw_inputs:
+                preprocessed.append(x)
+            return [{"x": preprocessed[0]}]
+        elif self.model_type == ModelTypeEnum.alpr_classify:
+            processed = []
+            for img in raw_inputs:
+                processed.append({"x": img})
+            return processed
+        elif self.model_type == ModelTypeEnum.alpr_recognize:
+            processed = []
+            for img in raw_inputs:
+                processed.append({"x": img})
+            return processed
         else:
             raise ValueError(f"Unable to preprocess inputs for {self.model_type}")
+
+    # for face recognition
 
     def _process_image(self, image, output: str = "RGB") -> Image.Image:
         if isinstance(image, str):
