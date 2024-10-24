@@ -347,7 +347,7 @@ class ReviewSegmentMaintainer(threading.Thread):
 
         if len(active_objects) > 0:
             detections: dict[str, str] = {}
-            sub_labels = set()
+            sub_labels = dict[str, str] = {}
             zones: list[str] = []
             severity = None
 
@@ -358,7 +358,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                     detections[object["id"]] = object["sub_label"][0]
                 else:
                     detections[object["id"]] = f'{object["label"]}-verified'
-                    sub_labels.add(object["sub_label"][0])
+                    sub_labels[object["id"]] = object["sub_label"][0]
 
                 # if object is alert label
                 # and has entered required zones or required zones is not set
@@ -566,7 +566,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                             frame_time,
                             severity,
                             {},
-                            set(),
+                            {},
                             [],
                             detections,
                         )
@@ -576,7 +576,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                         frame_time,
                         SeverityEnum.alert,
                         {manual_info["event_id"]: manual_info["label"]},
-                        set(),
+                        {},
                         [],
                         set(),
                     )
