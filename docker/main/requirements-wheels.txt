@@ -1,9 +1,9 @@
 click == 8.1.*
 # FastAPI
 starlette-context == 0.3.6
-fastapi == 0.115.0
+fastapi == 0.115.*
 uvicorn == 0.30.*
-slowapi == 0.1.9
+slowapi == 0.1.*
 imutils == 0.5.*
 joserfc == 1.0.*
 pathvalidate == 3.2.*
@@ -16,10 +16,10 @@ paho-mqtt == 2.1.*
 pandas == 2.2.*
 peewee == 3.17.*
 peewee_migrate == 1.13.*
-psutil == 5.9.*
+psutil == 6.1.*
 pydantic == 2.8.*
 git+https://github.com/fbcotter/py3nvml#egg=py3nvml
-pytz == 2024.1
+pytz == 2024.*
 pyzmq == 26.2.*
 ruamel.yaml == 0.18.*
 tzlocal == 5.2
