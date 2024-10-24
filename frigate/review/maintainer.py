@@ -51,7 +51,7 @@ class PendingReviewSegment:
         frame_time: float,
         severity: SeverityEnum,
         detections: dict[str, str],
-        sub_labels: set[str],
+        sub_labels: dict[str, str],
         zones: list[str],
         audio: set[str],
     ):
@@ -135,7 +135,7 @@ class PendingReviewSegment:
             ReviewSegment.data.name: {
                 "detections": list(set(self.detections.keys())),
                 "objects": list(set(self.detections.values())),
-                "sub_labels": list(self.sub_labels),
+                "sub_labels": list(self.sub_labels.values()),
                 "zones": self.zones,
                 "audio": list(self.audio),
             },
@@ -261,7 +261,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                     segment.detections[object["id"]] = object["sub_label"][0]
                 else:
                     segment.detections[object["id"]] = f'{object["label"]}-verified'
-                    segment.sub_labels.add(object["sub_label"][0])
+                    segment.sub_labels[object["id"]] = object["sub_label"][0]
 
                 # if object is alert label
                 # and has entered required zones or required zones is not set
