@@ -2,6 +2,7 @@ aarch
 absdiff
 airockchip
 Alloc
+alpr
 Amcrest
 amdgpu
 analyzeduration
@@ -186,6 +187,7 @@ openai
 opencv
 openvino
 OWASP
+paddleocr
 paho
 passwordless
 popleft
