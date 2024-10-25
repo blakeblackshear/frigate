@@ -1,6 +1,5 @@
 import math
-from argparse import ArgumentParser
-from typing import Any, Dict, List, Tuple
+from typing import List, Tuple
 
 import cv2
 import numpy as np
@@ -8,12 +7,15 @@ from pyclipper import ET_CLOSEDPOLYGON, JT_ROUND, PyclipperOffset
 from shapely.geometry import Polygon
 
 from frigate.comms.inter_process import InterProcessRequestor
+from frigate.config.semantic_search import LicensePlateRecognitionConfig
 from frigate.embeddings.functions.onnx import GenericONNXEmbedding, ModelTypeEnum
 
 
 class LicensePlateRecognition:
-    def __init__(self, config: Dict[str, Any], requestor: InterProcessRequestor):
-        self.config = config
+    def __init__(
+        self, config: LicensePlateRecognitionConfig, requestor: InterProcessRequestor
+    ):
+        self.lpr_config = config
         self.requestor = requestor
         self.detection_model = self._create_detection_model()
         self.classification_model = self._create_classification_model()
@@ -553,9 +555,7 @@ class LicensePlateRecognition:
             for j in range(len(outputs)):
                 label, score = outputs[j]
                 results[indices[i + j]] = [label, score]
-                if "180" in label and score > self.config.get(
-                    "classification_threshold", 0.98
-                ):
+                if "180" in label and score >= self.lpr_config.threshold:
                     images[indices[i + j]] = cv2.rotate(images[indices[i + j]], 1)
 
         return images, results
@@ -807,52 +807,3 @@ class CTCDecoder:
             confidences.append(confidence)
 
         return results, confidences
-
-
-def main():
-    parser = ArgumentParser()
-    parser.add_argument("filepath", type=str, help="image file path")
-    args = parser.parse_args()
-
-    lpr_config = {
-        "detection_model_path": "/workspace/frigate/frigate/embeddings/weights/detection.onnx",
-        "classification_model_path": "/workspace/frigate/frigate/embeddings/weights/classification.onnx",
-        "recognition_model_path": "/workspace/frigate/frigate/embeddings/weights/recognition.onnx",
-        "mask_thresh": 0.8,
-        "box_thresh": 0.8,
-        "min_size": 3,
-        "classification_threshold": 0.98,
-    }
-
-    # Initialize LPR
-    license_plate_recognition = LicensePlateRecognition(lpr_config, {})
-
-    # Read and process image
-    frame = cv2.imread(args.filepath)
-    if frame is None:
-        print(f"Error: Could not read image file: {args.filepath}")
-        return
-
-    cv2.cvtColor(frame, cv2.COLOR_BGR2RGB, frame)
-
-    # Process the license plate
-    license_plates, confidences, areas = (
-        license_plate_recognition.process_license_plate(frame)
-    )
-
-    # Print debug information to ensure data structure
-    print(f"License plates: {license_plates}")
-    print(f"Confidences: {confidences}")
-    print(f"Areas: {areas}")
-
-    if license_plates:
-        for plate, confidence, area in zip(license_plates, confidences, areas):
-            print(
-                f"Detected license plate: {plate} (average confidence: {confidence:.2f}, area: {area} pixels)"
-            )
-    else:
-        print("No license plate detected")
-
-
-if __name__ == "__main__":
-    main()
