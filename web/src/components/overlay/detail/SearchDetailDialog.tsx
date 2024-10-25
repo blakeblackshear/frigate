@@ -109,6 +109,20 @@ export default function SearchDetailDialog({
 
   const [isOpen, setIsOpen] = useState(search != undefined);
 
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      setIsOpen(open);
+      if (!open) {
+        // short timeout to allow the mobile page animation
+        // to complete before updating the state
+        setTimeout(() => {
+          setSearch(undefined);
+        }, 300);
+      }
+    },
+    [setSearch],
+  );
+
   useEffect(() => {
     if (search) {
       setIsOpen(search != undefined);
@@ -158,14 +172,7 @@ export default function SearchDetailDialog({
   const Description = isDesktop ? DialogDescription : MobilePageDescription;
 
   return (
-    <Overlay
-      open={isOpen}
-      onOpenChange={() => {
-        if (search) {
-          setSearch(undefined);
-        }
-      }}
-    >
+    <Overlay open={isOpen} onOpenChange={handleOpenChange}>
       <Content
         className={cn(
           "scrollbar-container overflow-y-auto",
@@ -174,7 +181,7 @@ export default function SearchDetailDialog({
           isMobile && "px-4",
         )}
       >
-        <Header onClose={() => setIsOpen(false)}>
+        <Header>
           <Title>Tracked Object Details</Title>
           <Description className="sr-only">Tracked object details</Description>
         </Header>

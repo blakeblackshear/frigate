@@ -190,6 +190,7 @@ export default function HlsVideoPlayer({
       minScale={1.0}
       wheel={{ smoothStep: 0.005 }}
       onZoom={(zoom) => setZoomScale(zoom.state.scale)}
+      disabled={!frigateControls}
     >
       {frigateControls && (
         <VideoControls

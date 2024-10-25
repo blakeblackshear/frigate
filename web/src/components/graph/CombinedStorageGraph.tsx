@@ -216,7 +216,7 @@ export function CombinedStorageGraph({
                     </Popover>
                   )}
                 </TableCell>
-                <TableCell>{getUnitSize(item.usage)}</TableCell>
+                <TableCell>{getUnitSize(item.usage ?? 0)}</TableCell>
                 <TableCell>{item.data[0].toFixed(2)}%</TableCell>
                 <TableCell>
                   {item.name === "Unused"

@@ -13,7 +13,7 @@ import { getIconForLabel } from "@/utils/iconUtil";
 import { useApiHost } from "@/api";
 import { ReviewDetailPaneType, ReviewSegment } from "@/types/review";
 import { Event } from "@/types/event";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { FrigatePlusDialog } from "../dialog/FrigatePlusDialog";
 import ObjectLifecycle from "./ObjectLifecycle";
@@ -91,6 +91,22 @@ export default function ReviewDetailDialog({
     review != undefined,
   );
 
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      setIsOpen(open);
+      if (!open) {
+        // short timeout to allow the mobile page animation
+        // to complete before updating the state
+        setTimeout(() => {
+          setReview(undefined);
+          setSelectedEvent(undefined);
+          setPane("overview");
+        }, 300);
+      }
+    },
+    [setReview, setIsOpen],
+  );
+
   useEffect(() => {
     setIsOpen(review != undefined);
     // we know that these deps are correct
@@ -109,16 +125,7 @@ export default function ReviewDetailDialog({
 
   return (
     <>
-      <Overlay
-        open={isOpen ?? false}
-        onOpenChange={(open) => {
-          if (!open) {
-            setReview(undefined);
-            setSelectedEvent(undefined);
-            setPane("overview");
-          }
-        }}
-      >
+      <Overlay open={isOpen ?? false} onOpenChange={handleOpenChange}>
         <FrigatePlusDialog
           upload={upload}
           onClose={() => setUpload(undefined)}
@@ -140,7 +147,7 @@ export default function ReviewDetailDialog({
         >
           <span tabIndex={0} className="sr-only" />
           {pane == "overview" && (
-            <Header className="justify-center" onClose={() => setIsOpen(false)}>
+            <Header className="justify-center">
               <Title>Review Item Details</Title>
               <Description className="sr-only">Review item details</Description>
               <div

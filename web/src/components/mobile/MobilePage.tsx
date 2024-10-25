@@ -25,7 +25,13 @@ export function MobilePage({
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
 
   const open = controlledOpen ?? uncontrolledOpen;
-  const setOpen = onOpenChange ?? setUncontrolledOpen;
+  const setOpen = (value: boolean) => {
+    if (onOpenChange) {
+      onOpenChange(value);
+    } else {
+      setUncontrolledOpen(value);
+    }
+  };
 
   return (
     <MobilePageContext.Provider value={{ open, onOpenChange: setOpen }}>
