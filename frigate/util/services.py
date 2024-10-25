@@ -320,7 +320,6 @@ def get_intel_gpu_stats() -> dict[str, str]:
         except json.JSONDecodeError:
             return get_stats_manually(output)
 
-
         results: dict[str, str] = {}
         render = {"global": []}
         video = {"global": []}
