@@ -78,7 +78,7 @@ class EmbeddingMaintainer(threading.Thread):
         self.requires_license_plate_detection = (
             "license_plate" not in self.config.model.all_attributes
         )
-        self.detected_license_plates: dict[str, float] = {}
+        self.detected_license_plates: dict[str, dict[str, any]] = {}
         self.license_plate_recognition = LicensePlateRecognition(
             self.lpr_config, self.requestor
         )
@@ -556,27 +556,59 @@ class EmbeddingMaintainer(threading.Thread):
         if license_plates:
             for plate, confidence, text_area in zip(license_plates, confidences, areas):
                 logger.debug(
-                    f"Detected text: {plate} (average confidence: {confidence:.2f}, area: {text_area} pixels)"
+                    f"Detected text: {plate} (average confidence: {(sum(confidence) / len(confidence)):.2f}, area: {text_area} pixels)"
                 )
         else:
             # no plates found
             logger.debug("No text detected")
             return
 
-        if confidences[0] < self.lpr_config.threshold or (
-            id in self.detected_license_plates
-            and confidences[0] <= self.detected_license_plates[id]
-        ):
+        top_plate, top_char_confidences = license_plates[0], confidences[0]
+        avg_confidence = sum(top_char_confidences) / len(top_char_confidences)
+
+        # Check if we have a previously detected plate for this ID
+        if id in self.detected_license_plates:
+            prev_plate = self.detected_license_plates[id]["plate"]
+            prev_char_confidences = self.detected_license_plates[id]["char_confidences"]
+            prev_avg_confidence = sum(prev_char_confidences) / len(
+                prev_char_confidences
+            )
+
+            # Define conditions for keeping the previous plate
+            shorter_than_previous = len(top_plate) < len(prev_plate)
+            lower_avg_confidence = avg_confidence <= prev_avg_confidence
+
+            # Compare character-by-character confidence where possible
+            min_length = min(len(top_plate), len(prev_plate))
+            char_confidence_comparison = sum(
+                1
+                for i in range(min_length)
+                if top_char_confidences[i] <= prev_char_confidences[i]
+            )
+            worse_char_confidences = char_confidence_comparison >= min_length / 2
+
+            if shorter_than_previous or (
+                lower_avg_confidence and worse_char_confidences
+            ):
+                logger.debug(
+                    f"Keeping previous plate. New plate stats: "
+                    f"length={len(top_plate)}, avg_conf={avg_confidence:.2f} "
+                    f"vs Previous: length={len(prev_plate)}, avg_conf={prev_avg_confidence:.2f}"
+                )
+                return
+
+        # Check against minimum confidence threshold
+        if avg_confidence < self.lpr_config.threshold:
             logger.debug(
-                f"Recognized license plate top score {confidences[0]} is less than threshold ({self.config.lpr.threshold})  / previous license plate score ({self.detected_license_plates.get(id)})."
+                f"Average confidence {avg_confidence} is less than threshold ({self.lpr_config.threshold})"
             )
             return
 
         # Determine subLabel based on known plates
         # Default to the detected plate, use label name if there's a match
-        sub_label = license_plates[0]
+        sub_label = top_plate
         for label, plates in self.lpr_config.known_plates.items():
-            if license_plates[0] in plates:
+            if top_plate in plates:
                 sub_label = label
                 break
 
@@ -586,12 +618,15 @@ class EmbeddingMaintainer(threading.Thread):
             json={
                 "camera": obj_data.get("camera"),
                 "subLabel": sub_label,
-                "subLabelScore": confidences[0],
+                "subLabelScore": avg_confidence,
             },
         )
 
         if resp.status_code == 200:
-            self.detected_license_plates[id] = confidences[0]
+            self.detected_license_plates[id] = {
+                "plate": top_plate,
+                "char_confidences": top_char_confidences,
+            }
 
     def _create_thumbnail(self, yuv_frame, box, height=500) -> Optional[bytes]:
         """Return jpg thumbnail of a region of the frame."""

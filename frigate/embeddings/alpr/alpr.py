@@ -1,3 +1,4 @@
+import logging
 import math
 from typing import List, Tuple
 
@@ -9,6 +10,8 @@ from shapely.geometry import Polygon
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config.semantic_search import LicensePlateRecognitionConfig
 from frigate.embeddings.functions.onnx import GenericONNXEmbedding, ModelTypeEnum
+
+logger = logging.getLogger(__name__)
 
 
 class LicensePlateRecognition:
@@ -194,7 +197,7 @@ class LicensePlateRecognition:
 
         if results:
             license_plates = [""] * len(rotated_images)
-            average_confidences = [0.0] * len(rotated_images)
+            average_confidences = [[0.0]] * len(rotated_images)
             areas = [0] * len(rotated_images)
 
             # map results back to original image order
@@ -204,7 +207,7 @@ class LicensePlateRecognition:
                 height, width = rotated_images[original_idx].shape[:2]
                 area = height * width
 
-                average_confidence = sum(conf) / len(conf) if conf else 0
+                average_confidence = conf
 
                 # TODO: remove
                 if False:
