@@ -486,12 +486,17 @@ class EmbeddingMaintainer(threading.Thread):
     def _process_license_plate(
         self, obj_data: dict[str, any], frame: np.ndarray
     ) -> None:
-        """Look for faces in image."""
+        """Look for license plates in image."""
         id = obj_data["id"]
 
-        # don't run for non person objects
+        # don't run for non car objects
         if obj_data.get("label") != "car":
             logger.debug("Not a processing license plate for non car object.")
+            return
+
+        # don't run for stationary car objects
+        if obj_data.get("stationary") == True:
+            logger.debug("Not a processing license plate for a stationary car object.")
             return
 
         # don't overwrite sub label for objects that have a sub label
