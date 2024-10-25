@@ -197,8 +197,8 @@ async def set_gpu_stats(
             # intel QSV GPU
             intel_usage = get_intel_gpu_stats()
 
-            if intel_usage:
-                stats["intel-qsv"] = intel_usage
+            if intel_usage is not None:
+                stats["intel-qsv"] = intel_usage or {"gpu": "", "mem": ""}
             else:
                 stats["intel-qsv"] = {"gpu": "", "mem": ""}
                 hwaccel_errors.append(args)
@@ -222,8 +222,8 @@ async def set_gpu_stats(
                 # intel VAAPI GPU
                 intel_usage = get_intel_gpu_stats()
 
-                if intel_usage:
-                    stats["intel-vaapi"] = intel_usage
+                if intel_usage is not None:
+                    stats["intel-vaapi"] = intel_usage or {"gpu": "", "mem": ""}
                 else:
                     stats["intel-vaapi"] = {"gpu": "", "mem": ""}
                     hwaccel_errors.append(args)

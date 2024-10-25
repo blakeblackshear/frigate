@@ -18,7 +18,6 @@ class MqttClient(Communicator):  # type: ignore[misc]
         self.config = config
         self.mqtt_config = config.mqtt
         self.connected = False
-        self.started = False
 
     def subscribe(self, receiver: Callable) -> None:
         """Wrapper for allowing dispatcher to subscribe."""
@@ -28,8 +27,7 @@ class MqttClient(Communicator):  # type: ignore[misc]
     def publish(self, topic: str, payload: Any, retain: bool = False) -> None:
         """Wrapper for publishing when client is in valid state."""
         if not self.connected:
-            if self.started:
-                logger.error(f"Unable to publish to {topic}: client is not connected")
+            logger.debug(f"Unable to publish to {topic}: client is not connected")
             return
 
         self.client.publish(
@@ -175,6 +173,7 @@ class MqttClient(Communicator):  # type: ignore[misc]
             client_id=self.mqtt_config.client_id,
         )
         self.client.on_connect = self._on_connect
+        self.client.on_disconnect = self._on_disconnect
         self.client.will_set(
             self.mqtt_config.topic_prefix + "/available",
             payload="offline",
@@ -247,7 +246,6 @@ class MqttClient(Communicator):  # type: ignore[misc]
             # with connect_async, retries are handled automatically
             self.client.connect_async(self.mqtt_config.host, self.mqtt_config.port, 60)
             self.client.loop_start()
-            self.started = True
         except Exception as e:
             logger.error(f"Unable to connect to MQTT server: {e}")
             return
