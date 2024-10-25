@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Dict, List, Optional
 
 from pydantic import Field
 
@@ -40,4 +40,7 @@ class LicensePlateRecognitionConfig(FrigateBaseModel):
     min_area: int = Field(
         default=500,
         title="Min area of license plate to consider running license plate recognition.",
+    )
+    known_plates: Optional[Dict[str, List[str]]] = Field(
+        default={}, title="Known plates to track."
     )

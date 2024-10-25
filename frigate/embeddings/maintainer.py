@@ -239,6 +239,9 @@ class EmbeddingMaintainer(threading.Thread):
             if event_id in self.detected_faces:
                 self.detected_faces.pop(event_id)
 
+            if event_id in self.detected_license_plates:
+                self.detected_license_plates.pop(event_id)
+
             if updated_db:
                 try:
                     event: Event = Event.get(Event.id == event_id)
@@ -569,11 +572,20 @@ class EmbeddingMaintainer(threading.Thread):
             )
             return
 
+        # Determine subLabel based on known plates
+        # Default to the detected plate, use label name if there's a match
+        sub_label = license_plates[0]
+        for label, plates in self.lpr_config.known_plates.items():
+            if license_plates[0] in plates:
+                sub_label = label
+                break
+
+        # Send the result to the API
         resp = requests.post(
             f"{FRIGATE_LOCALHOST}/api/events/{id}/sub_label",
             json={
                 "camera": obj_data.get("camera"),
-                "subLabel": license_plates[0],
+                "subLabel": sub_label,
                 "subLabelScore": confidences[0],
             },
         )
