@@ -27,8 +27,9 @@ class MqttClient(Communicator):  # type: ignore[misc]
 
     def publish(self, topic: str, payload: Any, retain: bool = False) -> None:
         """Wrapper for publishing when client is in valid state."""
-        if not self.connected and self.started:
-            logger.error(f"Unable to publish to {topic}: client is not connected")
+        if not self.connected:
+            if self.started:
+                logger.error(f"Unable to publish to {topic}: client is not connected")
             return
 
         self.client.publish(
