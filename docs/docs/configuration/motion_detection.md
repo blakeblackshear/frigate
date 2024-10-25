@@ -92,9 +92,15 @@ motion:
   lightning_threshold: 0.8
 ```
 
-:::tip
+:::warning
 
 Some cameras like doorbell cameras may have missed detections when someone walks directly in front of the camera and the lightning_threshold causes motion detection to be re-calibrated. In this case, it may be desirable to increase the `lightning_threshold` to ensure these objects are not missed.
+
+:::
+
+:::note
+
+Lightning threshold does not stop motion based recordings from being saved.
 
 :::
 
