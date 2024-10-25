@@ -347,7 +347,7 @@ class ReviewSegmentMaintainer(threading.Thread):
 
         if len(active_objects) > 0:
             detections: dict[str, str] = {}
-            sub_labels = dict[str, str] = {}
+            sub_labels: dict[str, str] = {}
             zones: list[str] = []
             severity = None
 
