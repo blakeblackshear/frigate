@@ -535,7 +535,7 @@ class EmbeddingMaintainer(threading.Thread):
             logger.debug(f"Invalid license plate box {license_plate}")
             return
 
-        license_plate_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2RGB)
+        license_plate_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
         license_plate_frame = license_plate_frame[
             license_plate_box[1] : license_plate_box[3],
             license_plate_box[0] : license_plate_box[2],
@@ -556,14 +556,16 @@ class EmbeddingMaintainer(threading.Thread):
                     f"Detected text: {plate} (average confidence: {confidence:.2f}, area: {text_area} pixels)"
                 )
         else:
+            # no plates found
             logger.debug("No text detected")
+            return
 
         if confidences[0] < self.lpr_config.threshold or (
             id in self.detected_license_plates
             and confidences[0] <= self.detected_license_plates[id]
         ):
             logger.debug(
-                f"Recognized license plate top score {confidence[0]} is less than threshold ({self.config.lpr.threshold})  / previous license plate score ({self.detected_license_plates.get(id)})."
+                f"Recognized license plate top score {confidences[0]} is less than threshold ({self.config.lpr.threshold})  / previous license plate score ({self.detected_license_plates.get(id)})."
             )
             return
 
