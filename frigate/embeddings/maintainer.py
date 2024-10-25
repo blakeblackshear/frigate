@@ -67,6 +67,12 @@ class EmbeddingMaintainer(threading.Thread):
         self.requires_face_detection = "face" not in self.config.model.all_attributes
         self.detected_faces: dict[str, float] = {}
 
+        # create communication for updating event descriptions
+        self.requestor = InterProcessRequestor()
+        self.stop_event = stop_event
+        self.tracked_events: dict[str, list[any]] = {}
+        self.genai_client = get_genai_client(config.genai)
+
         # set license plate recognition conditions
         self.lpr_config = self.config.lpr
         self.requires_license_plate_detection = (
@@ -76,12 +82,6 @@ class EmbeddingMaintainer(threading.Thread):
         self.license_plate_recognition = LicensePlateRecognition(
             self.lpr_config, self.requestor
         )
-
-        # create communication for updating event descriptions
-        self.requestor = InterProcessRequestor()
-        self.stop_event = stop_event
-        self.tracked_events: dict[str, list[any]] = {}
-        self.genai_client = get_genai_client(config.genai)
 
     @property
     def face_detector(self) -> cv2.FaceDetectorYN:
