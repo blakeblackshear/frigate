@@ -173,6 +173,7 @@ class MqttClient(Communicator):  # type: ignore[misc]
             client_id=self.mqtt_config.client_id,
         )
         self.client.on_connect = self._on_connect
+        self.client.on_disconnect = self._on_disconnect
         self.client.will_set(
             self.mqtt_config.topic_prefix + "/available",
             payload="offline",
