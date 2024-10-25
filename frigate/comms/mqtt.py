@@ -17,7 +17,8 @@ class MqttClient(Communicator):  # type: ignore[misc]
     def __init__(self, config: FrigateConfig) -> None:
         self.config = config
         self.mqtt_config = config.mqtt
-        self.connected: bool = False
+        self.connected = False
+        self.started = False
 
     def subscribe(self, receiver: Callable) -> None:
         """Wrapper for allowing dispatcher to subscribe."""
@@ -27,7 +28,8 @@ class MqttClient(Communicator):  # type: ignore[misc]
     def publish(self, topic: str, payload: Any, retain: bool = False) -> None:
         """Wrapper for publishing when client is in valid state."""
         if not self.connected:
-            logger.error(f"Unable to publish to {topic}: client is not connected")
+            if self.started:
+                logger.error(f"Unable to publish to {topic}: client is not connected")
             return
 
         self.client.publish(
@@ -197,14 +199,6 @@ class MqttClient(Communicator):  # type: ignore[misc]
 
         for name in self.config.cameras.keys():
             for callback in callback_types:
-                # We need to pre-clear existing set topics because in previous
-                # versions the webUI retained on the /set topic but this is
-                # no longer the case.
-                self.client.publish(
-                    f"{self.mqtt_config.topic_prefix}/{name}/{callback}/set",
-                    None,
-                    retain=True,
-                )
                 self.client.message_callback_add(
                     f"{self.mqtt_config.topic_prefix}/{name}/{callback}/set",
                     self.on_mqtt_command,
@@ -253,6 +247,7 @@ class MqttClient(Communicator):  # type: ignore[misc]
             # with connect_async, retries are handled automatically
             self.client.connect_async(self.mqtt_config.host, self.mqtt_config.port, 60)
             self.client.loop_start()
+            self.started = True
         except Exception as e:
             logger.error(f"Unable to connect to MQTT server: {e}")
             return

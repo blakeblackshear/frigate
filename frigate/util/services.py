@@ -257,6 +257,40 @@ def get_amd_gpu_stats() -> dict[str, str]:
 
 def get_intel_gpu_stats() -> dict[str, str]:
     """Get stats using intel_gpu_top."""
+
+    def get_stats_manually(output: str) -> dict[str, str]:
+        """Find global stats via regex when json fails to parse."""
+        reading = "".join(output)
+        results: dict[str, str] = {}
+
+        # render is used for qsv
+        render = []
+        for result in re.findall(r'"Render/3D/0":{[a-z":\d.,%]+}', reading):
+            packet = json.loads(result[14:])
+            single = packet.get("busy", 0.0)
+            render.append(float(single))
+
+        if render:
+            render_avg = sum(render) / len(render)
+        else:
+            render_avg = 1
+
+        # video is used for vaapi
+        video = []
+        for result in re.findall(r'"Video/\d":{[a-z":\d.,%]+}', reading):
+            packet = json.loads(result[10:])
+            single = packet.get("busy", 0.0)
+            video.append(float(single))
+
+        if video:
+            video_avg = sum(video) / len(video)
+        else:
+            video_avg = 1
+
+        results["gpu"] = f"{round((video_avg + render_avg) / 2, 2)}%"
+        results["mem"] = "-%"
+        return results
+
     intel_gpu_top_command = [
         "timeout",
         "0.5s",
@@ -284,22 +318,7 @@ def get_intel_gpu_stats() -> dict[str, str]:
         try:
             data = json.loads(f"[{output}]")
         except json.JSONDecodeError:
-            data = None
-
-            # json is incomplete, remove characters until we get to valid json
-            while True:
-                while output and output[-1] != "}":
-                    output = output[:-1]
-
-                if not output:
-                    return {"gpu": "", "mem": ""}
-
-                try:
-                    data = json.loads(f"[{output}]")
-                    break
-                except json.JSONDecodeError:
-                    output = output[:-1]
-                    continue
+            return get_stats_manually(output)
 
         results: dict[str, str] = {}
         render = {"global": []}
