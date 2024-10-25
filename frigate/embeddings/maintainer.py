@@ -559,7 +559,7 @@ class EmbeddingMaintainer(threading.Thread):
             )
             return
 
-        resp = requests.post(
+        requests.post(
             f"{FRIGATE_LOCALHOST}/api/events/{id}/sub_label",
             json={
                 "camera": obj_data.get("camera"),
