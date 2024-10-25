@@ -241,8 +241,6 @@ class GenericONNXEmbedding:
         else:
             raise ValueError(f"Unable to preprocess inputs for {self.model_type}")
 
-    # for face recognition
-
     def _process_image(self, image, output: str = "RGB") -> Image.Image:
         if isinstance(image, str):
             if image.startswith("http"):
