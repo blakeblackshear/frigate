@@ -495,7 +495,7 @@ class EmbeddingMaintainer(threading.Thread):
             return
 
         # don't overwrite sub label for objects that have a sub label
-        # that is not a face
+        # that is not a license plate
         if obj_data.get("sub_label") and id not in self.detected_license_plates:
             logger.debug(
                 f"Not processing license plate due to existing sub label: {obj_data.get('sub_label')}."
@@ -525,7 +525,7 @@ class EmbeddingMaintainer(threading.Thread):
 
         license_plate_box = license_plate.get("box")
 
-        # check that face is valid
+        # check that license plate is valid
         if not license_plate_box or area(license_plate_box) < self.config.lpr.min_area:
             logger.debug(f"Invalid license plate box {license_plate}")
             return
@@ -553,13 +553,16 @@ class EmbeddingMaintainer(threading.Thread):
         else:
             logger.debug("No text detected")
 
-        if confidences[0] < self.config.face_recognition.threshold:
+        if confidences[0] < self.lpr_config.threshold or (
+            id in self.detected_license_plates
+            and confidences[0] <= self.detected_license_plates[id]
+        ):
             logger.debug(
-                f"Recognized license plate top score {confidence[0]} is less than threshold ({self.config.lpr.threshold})."
+                f"Recognized license plate top score {confidence[0]} is less than threshold ({self.config.lpr.threshold})  / previous license plate score ({self.detected_license_plates.get(id)})."
             )
             return
 
-        requests.post(
+        resp = requests.post(
             f"{FRIGATE_LOCALHOST}/api/events/{id}/sub_label",
             json={
                 "camera": obj_data.get("camera"),
@@ -567,6 +570,9 @@ class EmbeddingMaintainer(threading.Thread):
                 "subLabelScore": confidences[0],
             },
         )
+
+        if resp.status_code == 200:
+            self.detected_license_plates[id] = confidences[0]
 
     def _create_thumbnail(self, yuv_frame, box, height=500) -> Optional[bytes]:
         """Return jpg thumbnail of a region of the frame."""
