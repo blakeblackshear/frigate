@@ -595,13 +595,8 @@ class FrigateConfig(FrigateBaseModel):
             verify_autotrack_zones(camera_config)
             verify_motion_and_detect(camera_config)
 
-        # get list of unique enabled labels for tracking
-        enabled_labels = set(self.objects.track)
-
-        for camera in self.cameras.values():
-            enabled_labels.update(camera.objects.track)
-
-        self.model.create_colormap(sorted(enabled_labels))
+        self.objects.parse_all_objects(self.cameras)
+        self.model.create_colormap(sorted(self.objects.all_objects))
         self.model.check_and_load_plus_model(self.plus_api)
 
         for key, detector in self.detectors.items():
