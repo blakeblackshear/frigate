@@ -56,7 +56,11 @@ from .logger import LoggerConfig
 from .mqtt import MqttConfig
 from .notification import NotificationConfig
 from .proxy import ProxyConfig
-from .semantic_search import FaceRecognitionConfig, SemanticSearchConfig
+from .semantic_search import (
+    FaceRecognitionConfig,
+    LicensePlateRecognitionConfig,
+    SemanticSearchConfig,
+)
 from .telemetry import TelemetryConfig
 from .tls import TlsConfig
 from .ui import UIConfig
@@ -328,6 +332,10 @@ class FrigateConfig(FrigateBaseModel):
     )
     face_recognition: FaceRecognitionConfig = Field(
         default_factory=FaceRecognitionConfig, title="Face recognition config."
+    )
+    lpr: LicensePlateRecognitionConfig = Field(
+        default_factory=LicensePlateRecognitionConfig,
+        title="License Plate recognition config.",
     )
     ui: UIConfig = Field(default_factory=UIConfig, title="UI configuration.")
 
