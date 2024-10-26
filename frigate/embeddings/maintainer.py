@@ -599,14 +599,20 @@ class EmbeddingMaintainer(threading.Thread):
             return
 
         top_plate, top_char_confidences = license_plates[0], confidences[0]
-        avg_confidence = sum(top_char_confidences) / len(top_char_confidences)
+        avg_confidence = (
+            (sum(top_char_confidences) / len(top_char_confidences))
+            if top_char_confidences
+            else 0
+        )
 
         # Check if we have a previously detected plate for this ID
         if id in self.detected_license_plates:
             prev_plate = self.detected_license_plates[id]["plate"]
             prev_char_confidences = self.detected_license_plates[id]["char_confidences"]
-            prev_avg_confidence = sum(prev_char_confidences) / len(
-                prev_char_confidences
+            prev_avg_confidence = (
+                (sum(prev_char_confidences) / len(prev_char_confidences))
+                if prev_char_confidences
+                else 0
             )
 
             # Define conditions for keeping the previous plate
