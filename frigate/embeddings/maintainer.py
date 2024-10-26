@@ -75,6 +75,9 @@ class EmbeddingMaintainer(threading.Thread):
 
         # set license plate recognition conditions
         self.lpr_config = self.config.lpr
+        self.requires_license_plate_detection = (
+            "license_plate" not in self.config.model.all_attributes
+        )
         self.detected_license_plates: dict[str, dict[str, any]] = {}
 
         if self.lpr_config.enabled:
@@ -485,6 +488,11 @@ class EmbeddingMaintainer(threading.Thread):
         if resp.status_code == 200:
             self.detected_faces[id] = avg_score
 
+    def _detect_license_plate(self, input: np.ndarray) -> tuple[int, int, int, int]:
+        """Return the dimensions of the input image as [x, y, width, height]."""
+        height, width = input.shape[:2]
+        return (0, 0, width, height)
+
     def _process_license_plate(
         self, obj_data: dict[str, any], frame: np.ndarray
     ) -> None:
@@ -511,37 +519,61 @@ class EmbeddingMaintainer(threading.Thread):
 
         license_plate: Optional[dict[str, any]] = None
 
-        # don't run for object without attributes
-        if not obj_data.get("current_attributes"):
-            logger.debug("No attributes to parse.")
-            return
+        if self.requires_license_plate_detection:
+            logger.debug("Running manual license_plate detection.")
+            car_box = obj_data.get("box")
 
-        attributes: list[dict[str, any]] = obj_data.get("current_attributes", [])
-        for attr in attributes:
-            if attr.get("label") != "license_plate":
-                continue
+            if not car_box:
+                return None
 
-            if license_plate is None or attr.get("score", 0.0) > license_plate.get(
-                "score", 0.0
+            rgb = cv2.cvtColor(frame, cv2.COLOR_YUV2RGB_I420)
+            left, top, right, bottom = car_box
+            car = rgb[top:bottom, left:right]
+            license_plate = self._detect_license_plate(car)
+
+            if not license_plate:
+                logger.debug("Detected no license plates for car object.")
+                return
+
+            license_plate_frame = car[
+                license_plate[1] : license_plate[3], license_plate[0] : license_plate[2]
+            ]
+            license_plate_frame = cv2.cvtColor(license_plate_frame, cv2.COLOR_RGB2BGR)
+        else:
+            # don't run for object without attributes
+            if not obj_data.get("current_attributes"):
+                logger.debug("No attributes to parse.")
+                return
+
+            attributes: list[dict[str, any]] = obj_data.get("current_attributes", [])
+            for attr in attributes:
+                if attr.get("label") != "license_plate":
+                    continue
+
+                if license_plate is None or attr.get("score", 0.0) > license_plate.get(
+                    "score", 0.0
+                ):
+                    license_plate = attr
+
+            # no license plates detected in this frame
+            if not license_plate:
+                return
+
+            license_plate_box = license_plate.get("box")
+
+            # check that license plate is valid
+            if (
+                not license_plate_box
+                or area(license_plate_box) < self.config.lpr.min_area
             ):
-                license_plate = attr
+                logger.debug(f"Invalid license plate box {license_plate}")
+                return
 
-        # no license plates detected in this frame
-        if not license_plate:
-            return
-
-        license_plate_box = license_plate.get("box")
-
-        # check that license plate is valid
-        if not license_plate_box or area(license_plate_box) < self.config.lpr.min_area:
-            logger.debug(f"Invalid license plate box {license_plate}")
-            return
-
-        license_plate_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
-        license_plate_frame = license_plate_frame[
-            license_plate_box[1] : license_plate_box[3],
-            license_plate_box[0] : license_plate_box[2],
-        ]
+            license_plate_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
+            license_plate_frame = license_plate_frame[
+                license_plate_box[1] : license_plate_box[3],
+                license_plate_box[0] : license_plate_box[2],
+            ]
 
         # run detection, returns results sorted by confidence, best first
         license_plates, confidences, areas = (
