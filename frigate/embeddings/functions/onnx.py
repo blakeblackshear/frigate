@@ -38,6 +38,9 @@ class ModelTypeEnum(str, Enum):
     face = "face"
     vision = "vision"
     text = "text"
+    alpr_detect = "alpr_detect"
+    alpr_classify = "alpr_classify"
+    alpr_recognize = "alpr_recognize"
 
 
 class GenericONNXEmbedding:
@@ -89,7 +92,7 @@ class GenericONNXEmbedding:
                 files_names,
                 ModelStatusTypesEnum.downloaded,
             )
-            self._load_model_and_tokenizer()
+            self._load_model_and_utils()
             logger.debug(f"models are already downloaded for {self.model_name}")
 
     def _download_model(self, path: str):
@@ -129,7 +132,7 @@ class GenericONNXEmbedding:
                 },
             )
 
-    def _load_model_and_tokenizer(self):
+    def _load_model_and_utils(self):
         if self.runner is None:
             if self.downloader:
                 self.downloader.wait_for_download()
@@ -138,6 +141,12 @@ class GenericONNXEmbedding:
             elif self.model_type == ModelTypeEnum.vision:
                 self.feature_extractor = self._load_feature_extractor()
             elif self.model_type == ModelTypeEnum.face:
+                self.feature_extractor = []
+            elif self.model_type == ModelTypeEnum.alpr_detect:
+                self.feature_extractor = []
+            elif self.model_type == ModelTypeEnum.alpr_classify:
+                self.feature_extractor = []
+            elif self.model_type == ModelTypeEnum.alpr_recognize:
                 self.feature_extractor = []
 
             self.runner = ONNXModelRunner(
@@ -214,6 +223,21 @@ class GenericONNXEmbedding:
 
             frame = np.expand_dims(frame, axis=0)
             return [{"image_input": frame}]
+        elif self.model_type == ModelTypeEnum.alpr_detect:
+            preprocessed = []
+            for x in raw_inputs:
+                preprocessed.append(x)
+            return [{"x": preprocessed[0]}]
+        elif self.model_type == ModelTypeEnum.alpr_classify:
+            processed = []
+            for img in raw_inputs:
+                processed.append({"x": img})
+            return processed
+        elif self.model_type == ModelTypeEnum.alpr_recognize:
+            processed = []
+            for img in raw_inputs:
+                processed.append({"x": img})
+            return processed
         else:
             raise ValueError(f"Unable to preprocess inputs for {self.model_type}")
 
@@ -230,7 +254,7 @@ class GenericONNXEmbedding:
     def __call__(
         self, inputs: Union[List[str], List[Image.Image], List[str]]
     ) -> List[np.ndarray]:
-        self._load_model_and_tokenizer()
+        self._load_model_and_utils()
         if self.runner is None or (
             self.tokenizer is None and self.feature_extractor is None
         ):
