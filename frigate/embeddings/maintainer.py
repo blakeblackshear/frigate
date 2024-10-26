@@ -65,7 +65,7 @@ class EmbeddingMaintainer(threading.Thread):
 
         # set face recognition conditions
         self.face_recognition_enabled = self.config.face_recognition.enabled
-        self.requires_face_detection = "face" not in self.config.model.all_attributes
+        self.requires_face_detection = "face" not in self.config.objects.all_objects
         self.detected_faces: dict[str, float] = {}
 
         # create communication for updating event descriptions
@@ -77,7 +77,7 @@ class EmbeddingMaintainer(threading.Thread):
         # set license plate recognition conditions
         self.lpr_config = self.config.lpr
         self.requires_license_plate_detection = (
-            "license_plate" not in self.config.model.all_attributes
+            "license_plate" not in self.config.objects.all_objects
         )
         self.detected_license_plates: dict[str, dict[str, any]] = {}
 
