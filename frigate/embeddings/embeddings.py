@@ -77,6 +77,10 @@ class Embeddings:
             if config.semantic_search.model_size == "large"
             else "jinaai/jina-clip-v1-vision_model_quantized.onnx",
             "jinaai/jina-clip-v1-preprocessor_config.json",
+            "facenet-facenet.onnx",
+            "paddleocr-onnx-detection.onnx",
+            "paddleocr-onnx-classification.onnx",
+            "paddleocr-onnx-recognition.onnx",
         ]
 
         for model in models:
@@ -136,6 +140,47 @@ class Embeddings:
                 model_type=ModelTypeEnum.face,
                 requestor=self.requestor,
                 device="GPU",
+            )
+
+        self.lpr_detection_model = None
+        self.lpr_classification_model = None
+        self.lpr_recognition_model = None
+
+        if self.config.lpr.enabled:
+            self.lpr_detection_model = GenericONNXEmbedding(
+                model_name="paddleocr-onnx",
+                model_file="detection.onnx",
+                download_urls={
+                    "detection.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/detection.onnx"
+                },
+                model_size="large",
+                model_type=ModelTypeEnum.alpr_detect,
+                requestor=self.requestor,
+                device="CPU",
+            )
+
+            self.lpr_classification_model = GenericONNXEmbedding(
+                model_name="paddleocr-onnx",
+                model_file="classification.onnx",
+                download_urls={
+                    "classification.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/classification.onnx"
+                },
+                model_size="large",
+                model_type=ModelTypeEnum.alpr_classify,
+                requestor=self.requestor,
+                device="CPU",
+            )
+
+            self.lpr_recognition_model = GenericONNXEmbedding(
+                model_name="paddleocr-onnx",
+                model_file="recognition.onnx",
+                download_urls={
+                    "recognition.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/recognition.onnx"
+                },
+                model_size="large",
+                model_type=ModelTypeEnum.alpr_recognize,
+                requestor=self.requestor,
+                device="CPU",
             )
 
     def embed_thumbnail(
