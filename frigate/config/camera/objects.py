@@ -1,6 +1,6 @@
 from typing import Any, Optional, Union
 
-from pydantic import Field, field_serializer
+from pydantic import Field, PrivateAttr, field_serializer
 
 from ..base import FrigateBaseModel
 
@@ -53,3 +53,20 @@ class ObjectConfig(FrigateBaseModel):
         default_factory=dict, title="Object filters."
     )
     mask: Union[str, list[str]] = Field(default="", title="Object mask.")
+    _all_objects: list[str] = PrivateAttr()
+
+    @property
+    def all_objects(self) -> list[str]:
+        return self._all_objects
+
+    def parse_all_objects(self, cameras):
+        if "_all_objects" in self:
+            return
+
+        # get list of unique enabled labels for tracking
+        enabled_labels = set(self.track)
+
+        for camera in cameras.values():
+            enabled_labels.update(camera.objects.track)
+
+        self._all_objects = list(enabled_labels)
