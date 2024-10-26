@@ -2,6 +2,7 @@ aarch
 absdiff
 airockchip
 Alloc
+alpr
 Amcrest
 amdgpu
 analyzeduration
@@ -60,6 +61,7 @@ dsize
 dtype
 ECONNRESET
 edgetpu
+facenet
 fastapi
 faststart
 fflags
@@ -113,6 +115,8 @@ itemsize
 Jellyfin
 jetson
 jetsons
+jina
+jinaai
 joserfc
 jsmpeg
 jsonify
@@ -186,6 +190,7 @@ openai
 opencv
 openvino
 OWASP
+paddleocr
 paho
 passwordless
 popleft
