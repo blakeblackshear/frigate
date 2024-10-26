@@ -92,7 +92,7 @@ class GenericONNXEmbedding:
                 files_names,
                 ModelStatusTypesEnum.downloaded,
             )
-            self._load_model_and_tokenizer()
+            self._load_model_and_utils()
             logger.debug(f"models are already downloaded for {self.model_name}")
 
     def _download_model(self, path: str):
@@ -132,7 +132,7 @@ class GenericONNXEmbedding:
                 },
             )
 
-    def _load_model_and_tokenizer(self):
+    def _load_model_and_utils(self):
         if self.runner is None:
             if self.downloader:
                 self.downloader.wait_for_download()
@@ -254,7 +254,7 @@ class GenericONNXEmbedding:
     def __call__(
         self, inputs: Union[List[str], List[Image.Image], List[str]]
     ) -> List[np.ndarray]:
-        self._load_model_and_tokenizer()
+        self._load_model_and_utils()
         if self.runner is None or (
             self.tokenizer is None and self.feature_extractor is None
         ):

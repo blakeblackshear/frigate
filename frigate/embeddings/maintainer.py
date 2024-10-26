@@ -75,13 +75,12 @@ class EmbeddingMaintainer(threading.Thread):
 
         # set license plate recognition conditions
         self.lpr_config = self.config.lpr
-        self.requires_license_plate_detection = (
-            "license_plate" not in self.config.model.all_attributes
-        )
         self.detected_license_plates: dict[str, dict[str, any]] = {}
-        self.license_plate_recognition = LicensePlateRecognition(
-            self.lpr_config, self.requestor
-        )
+
+        if self.lpr_config.enabled:
+            self.license_plate_recognition = LicensePlateRecognition(
+                self.lpr_config, self.requestor, self.embeddings
+            )
 
     @property
     def face_detector(self) -> cv2.FaceDetectorYN:
@@ -555,8 +554,12 @@ class EmbeddingMaintainer(threading.Thread):
 
         if license_plates:
             for plate, confidence, text_area in zip(license_plates, confidences, areas):
+                avg_confidence = (
+                    (sum(confidence) / len(confidence)) if confidence else 0
+                )
+
                 logger.debug(
-                    f"Detected text: {plate} (average confidence: {(sum(confidence) / len(confidence)):.2f}, area: {text_area} pixels)"
+                    f"Detected text: {plate} (average confidence: {avg_confidence:.2f}, area: {text_area} pixels)"
                 )
         else:
             # no plates found

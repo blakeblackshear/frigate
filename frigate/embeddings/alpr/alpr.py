@@ -9,20 +9,24 @@ from shapely.geometry import Polygon
 
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config.semantic_search import LicensePlateRecognitionConfig
-from frigate.embeddings.functions.onnx import GenericONNXEmbedding, ModelTypeEnum
+from frigate.embeddings.embeddings import Embeddings
 
 logger = logging.getLogger(__name__)
 
 
 class LicensePlateRecognition:
     def __init__(
-        self, config: LicensePlateRecognitionConfig, requestor: InterProcessRequestor
+        self,
+        config: LicensePlateRecognitionConfig,
+        requestor: InterProcessRequestor,
+        embeddings: Embeddings,
     ):
         self.lpr_config = config
         self.requestor = requestor
-        self.detection_model = self._create_detection_model()
-        self.classification_model = self._create_classification_model()
-        self.recognition_model = self._create_recognition_model()
+        self.embeddings = embeddings
+        self.detection_model = self.embeddings.lpr_detection_model
+        self.classification_model = self.embeddings.lpr_classification_model
+        self.recognition_model = self.embeddings.lpr_recognition_model
         self.ctc_decoder = CTCDecoder()
 
         self.batch_size = 6
@@ -32,49 +36,12 @@ class LicensePlateRecognition:
         self.max_size = 960
         self.box_thresh = 0.8
         self.mask_thresh = 0.8
-        self.mean = np.array([123.675, 116.28, 103.53]).reshape(1, -1).astype("float64")
-        self.std = 1 / np.array([58.395, 57.12, 57.375]).reshape(1, -1).astype(
-            "float64"
-        )
 
-    def _create_detection_model(self) -> GenericONNXEmbedding:
-        return GenericONNXEmbedding(
-            model_name="paddleocr-onnx",
-            model_file="detection.onnx",
-            download_urls={
-                "detection.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/detection.onnx"
-            },
-            model_size="large",
-            model_type=ModelTypeEnum.alpr_detect,
-            requestor=self.requestor,
-            device="CPU",
-        )
-
-    def _create_classification_model(self) -> GenericONNXEmbedding:
-        return GenericONNXEmbedding(
-            model_name="paddleocr-onnx",
-            model_file="classification.onnx",
-            download_urls={
-                "classification.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/classification.onnx"
-            },
-            model_size="large",
-            model_type=ModelTypeEnum.alpr_classify,
-            requestor=self.requestor,
-            device="CPU",
-        )
-
-    def _create_recognition_model(self) -> GenericONNXEmbedding:
-        return GenericONNXEmbedding(
-            model_name="paddleocr-onnx",
-            model_file="recognition.onnx",
-            download_urls={
-                "recognition.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/recognition.onnx"
-            },
-            model_size="large",
-            model_type=ModelTypeEnum.alpr_recognize,
-            requestor=self.requestor,
-            device="CPU",
-        )
+        if self.lpr_config.enabled:
+            # all models need to be loaded to run LPR
+            self.detection_model._load_model_and_utils()
+            self.classification_model._load_model_and_utils()
+            self.recognition_model._load_model_and_utils()
 
     def detect(self, image: np.ndarray) -> List[np.ndarray]:
         """
@@ -179,6 +146,15 @@ class LicensePlateRecognition:
         Returns:
             Tuple[List[str], List[float], List[int]]: Detected license plate texts, confidence scores, and areas of the plates.
         """
+        if (
+            self.detection_model.runner is None
+            or self.classification_model.runner is None
+            or self.recognition_model.runner is None
+        ):
+            # we might still be downloading the models
+            logger.debug("Model runners not loaded")
+            return [], [], []
+
         plate_points = self.detect(image)
         if len(plate_points) == 0:
             return [], [], []
@@ -209,7 +185,7 @@ class LicensePlateRecognition:
 
                 average_confidence = conf
 
-                # TODO: remove
+                # set to True to write each cropped image for debugging
                 if False:
                     save_image = cv2.cvtColor(
                         rotated_images[original_idx], cv2.COLOR_RGB2BGR
@@ -251,9 +227,12 @@ class LicensePlateRecognition:
         Returns:
             np.ndarray: The normalized image, transposed to match the model's expected input format.
         """
+        mean = np.array([123.675, 116.28, 103.53]).reshape(1, -1).astype("float64")
+        std = 1 / np.array([58.395, 57.12, 57.375]).reshape(1, -1).astype("float64")
+
         image = image.astype("float32")
-        cv2.subtract(image, self.mean, image)
-        cv2.multiply(image, self.std, image)
+        cv2.subtract(image, mean, image)
+        cv2.multiply(image, std, image)
         return image.transpose((2, 0, 1))[np.newaxis, ...]
 
     def boxes_from_bitmap(
