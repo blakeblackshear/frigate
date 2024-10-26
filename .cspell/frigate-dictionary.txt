@@ -61,6 +61,7 @@ dsize
 dtype
 ECONNRESET
 edgetpu
+facenet
 fastapi
 faststart
 fflags
@@ -114,6 +115,8 @@ itemsize
 Jellyfin
 jetson
 jetsons
+jina
+jinaai
 joserfc
 jsmpeg
 jsonify
