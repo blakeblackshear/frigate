@@ -584,7 +584,7 @@ class EmbeddingMaintainer(threading.Thread):
         logger.debug(f"Confidences: {confidences}")
         logger.debug(f"Areas: {areas}")
 
-        if license_plates:
+        if len(license_plates) > 0:
             for plate, confidence, text_area in zip(license_plates, confidences, areas):
                 avg_confidence = (
                     (sum(confidence) / len(confidence)) if confidence else 0
