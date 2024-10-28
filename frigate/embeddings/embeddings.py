@@ -133,7 +133,7 @@ class Embeddings:
                 model_name="facenet",
                 model_file="facenet.onnx",
                 download_urls={
-                    "facenet.onnx": "https://github.com/NicolasSM-001/faceNet.onnx-/raw/refs/heads/main/faceNet.onnx",
+                    "facenet.onnx": "https://github.com/NickM-27/facenet-onnx/releases/download/v1.0/facenet.onnx",
                     "facedet.onnx": "https://github.com/opencv/opencv_zoo/raw/refs/heads/main/models/face_detection_yunet/face_detection_yunet_2023mar_int8.onnx",
                 },
                 model_size="large",
