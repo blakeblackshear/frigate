@@ -13,6 +13,8 @@ from frigate.embeddings.embeddings import Embeddings
 
 logger = logging.getLogger(__name__)
 
+MIN_PLATE_LENGTH = 3
+
 
 class LicensePlateRecognition:
     def __init__(
@@ -197,7 +199,22 @@ class LicensePlateRecognition:
                 average_confidences[original_idx] = average_confidence
                 areas[original_idx] = area
 
-            return license_plates, average_confidences, areas
+            # Filter out plates that have a length of less than 3 characters
+            # Sort by area, then by plate length, then by confidence all desc
+            sorted_data = sorted(
+                [
+                    (plate, conf, area)
+                    for plate, conf, area in zip(
+                        license_plates, average_confidences, areas
+                    )
+                    if len(plate) >= MIN_PLATE_LENGTH
+                ],
+                key=lambda x: (x[2], len(x[0]), x[1]),
+                reverse=True,
+            )
+
+            if sorted_data:
+                return map(list, zip(*sorted_data))
 
         return [], [], []
 
