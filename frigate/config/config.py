@@ -523,6 +523,9 @@ class FrigateConfig(FrigateBaseModel):
             if camera_config.ffmpeg.hwaccel_args == "auto":
                 camera_config.ffmpeg.hwaccel_args = self.ffmpeg.hwaccel_args
 
+            if camera_config.record.export.hwaccel_args == "auto":
+                camera_config.record.export.hwaccel_args = camera_config.ffmpeg.hwaccel_args
+
             for input in camera_config.ffmpeg.inputs:
                 need_detect_dimensions = "detect" in input.roles and (
                     camera_config.detect.height is None
