@@ -70,6 +70,9 @@ class RecordExportConfig(FrigateBaseModel):
     timelapse_args: str = Field(
         default=DEFAULT_TIME_LAPSE_FFMPEG_ARGS, title="Timelapse Args"
     )
+    hwaccel_args: Union[str, list[str]] = Field(
+        default="auto", title="Export-specific FFmpeg hardware acceleration arguments."
+    )
 
 
 class RecordConfig(FrigateBaseModel):
