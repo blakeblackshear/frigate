@@ -222,7 +222,7 @@ class GenericONNXEmbedding:
             frame[y_center : y_center + og_h, x_center : x_center + og_w] = og
 
             frame = np.expand_dims(frame, axis=0)
-            return [{"image_input": frame}]
+            return [{"input_2": frame}]
         elif self.model_type == ModelTypeEnum.alpr_detect:
             preprocessed = []
             for x in raw_inputs:
