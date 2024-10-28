@@ -598,7 +598,11 @@ class EmbeddingMaintainer(threading.Thread):
             logger.debug("No text detected")
             return
 
-        top_plate, top_char_confidences = license_plates[0], confidences[0]
+        top_plate, top_char_confidences, top_area = (
+            license_plates[0],
+            confidences[0],
+            areas[0],
+        )
         avg_confidence = (
             (sum(top_char_confidences) / len(top_char_confidences))
             if top_char_confidences
@@ -609,6 +613,7 @@ class EmbeddingMaintainer(threading.Thread):
         if id in self.detected_license_plates:
             prev_plate = self.detected_license_plates[id]["plate"]
             prev_char_confidences = self.detected_license_plates[id]["char_confidences"]
+            prev_area = self.detected_license_plates[id]["area"]
             prev_avg_confidence = (
                 (sum(prev_char_confidences) / len(prev_char_confidences))
                 if prev_char_confidences
@@ -618,6 +623,7 @@ class EmbeddingMaintainer(threading.Thread):
             # Define conditions for keeping the previous plate
             shorter_than_previous = len(top_plate) < len(prev_plate)
             lower_avg_confidence = avg_confidence <= prev_avg_confidence
+            smaller_area = top_area < prev_area
 
             # Compare character-by-character confidence where possible
             min_length = min(len(top_plate), len(prev_plate))
@@ -628,13 +634,13 @@ class EmbeddingMaintainer(threading.Thread):
             )
             worse_char_confidences = char_confidence_comparison >= min_length / 2
 
-            if shorter_than_previous or (
+            if (shorter_than_previous or smaller_area) and (
                 lower_avg_confidence and worse_char_confidences
             ):
                 logger.debug(
                     f"Keeping previous plate. New plate stats: "
-                    f"length={len(top_plate)}, avg_conf={avg_confidence:.2f} "
-                    f"vs Previous: length={len(prev_plate)}, avg_conf={prev_avg_confidence:.2f}"
+                    f"length={len(top_plate)}, avg_conf={avg_confidence:.2f}, area={top_area} "
+                    f"vs Previous: length={len(prev_plate)}, avg_conf={prev_avg_confidence:.2f}, area={prev_area}"
                 )
                 return
 
@@ -667,6 +673,7 @@ class EmbeddingMaintainer(threading.Thread):
             self.detected_license_plates[id] = {
                 "plate": top_plate,
                 "char_confidences": top_char_confidences,
+                "area": top_area,
             }
 
     def _create_thumbnail(self, yuv_frame, box, height=500) -> Optional[bytes]:
