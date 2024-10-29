@@ -98,9 +98,7 @@ class ROCmDetector(DetectionApi):
         else:
             logger.info(f"AMD/ROCm: loading model from {path}")
 
-            if path.endswith(".onnx"):
-                self.model = migraphx.parse_onnx(path)
-            elif (
+            if (
                 path.endswith(".tf")
                 or path.endswith(".tf2")
                 or path.endswith(".tflite")
@@ -108,7 +106,7 @@ class ROCmDetector(DetectionApi):
                 # untested
                 self.model = migraphx.parse_tf(path)
             else:
-                raise Exception(f"AMD/ROCm: unknown model format {path}")
+                self.model = migraphx.parse_onnx(path)
 
             logger.info("AMD/ROCm: compiling the model")
 

@@ -29,6 +29,10 @@ def migrate_frigate_config(config_file: str):
     with open(config_file, "r") as f:
         config: dict[str, dict[str, any]] = yaml.load(f)
 
+    if config is None:
+        logger.error(f"Failed to load config at {config_file}")
+        return
+
     previous_version = str(config.get("version", "0.13"))
 
     if previous_version == CURRENT_CONFIG_VERSION:
