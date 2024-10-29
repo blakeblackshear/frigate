@@ -165,7 +165,7 @@ if config.get("birdseye", {}).get("restream", False):
     birdseye: dict[str, any] = config.get("birdseye")
 
     input = f"-f rawvideo -pix_fmt yuv420p -video_size {birdseye.get('width', 1280)}x{birdseye.get('height', 720)} -r 10 -i {BIRDSEYE_PIPE}"
-    ffmpeg_cmd = f"exec:{parse_preset_hardware_acceleration_encode(ffmpeg_path, config.get('ffmpeg', {}).get('hwaccel_args'), input, '-rtsp_transport tcp -f rtsp {output}')}"
+    ffmpeg_cmd = f"exec:{parse_preset_hardware_acceleration_encode(ffmpeg_path, config.get('ffmpeg', {}).get('hwaccel_args', ''), input, '-rtsp_transport tcp -f rtsp {output}')}"
 
     if go2rtc_config.get("streams"):
         go2rtc_config["streams"]["birdseye"] = ffmpeg_cmd
