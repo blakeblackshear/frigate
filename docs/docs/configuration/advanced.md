@@ -185,7 +185,7 @@ To do this:
 
 ## Validating your config.yml file updates
 
-When frigate starts up, it checks whether your config file is valid, and if it is not, the process exits. To minimize interruptions when updating your config, you have three options -- you can edit the config via the WebUI which has built in validation, use the config API, or you can validate on the command line using the frigate docker container.
+When frigate starts up, it checks whether your config file is valid, and if it is not, the process exits. To minimize interruptions when updating your config, you have three options -- you can edit the config via the WebUI which has built in validation, use the config API, or you can validate on the command line using the frigate docker image.
 
 ### Via API
 
@@ -203,7 +203,7 @@ yq r -j config.yml | curl -X POST http://frigate_host:5000/config/save -d @-
 
 ### Via Command Line
 
-You can also validate your config at the command line by using the docker container itself. In CI/CD, you leverage the return code to determine if your config is valid, Frigate will return `1` if the config is invalid, or `0` if it's valid.
+You can also validate your config at the command line by using a docker container. In CI/CD, you leverage the return code to determine if your config is valid, Frigate will return `1` if the config is invalid, or `0` if it's valid.
 
 ```bash
 docker run                                \
@@ -211,5 +211,5 @@ docker run                                \
   --entrypoint python3                    \
   ghcr.io/blakeblackshear/frigate:stable  \
   -u -m frigate                           \
-  --validate_config
+  --validate-config
 ```
