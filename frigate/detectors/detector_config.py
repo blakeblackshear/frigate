@@ -27,6 +27,11 @@ class InputTensorEnum(str, Enum):
     nhwc = "nhwc"
 
 
+class InputDTypeEnum(str, Enum):
+    float = "float"
+    int = "int"
+
+
 class ModelTypeEnum(str, Enum):
     ssd = "ssd"
     yolox = "yolox"
@@ -52,6 +57,9 @@ class ModelConfig(BaseModel):
     )
     input_pixel_format: PixelFormatEnum = Field(
         default=PixelFormatEnum.rgb, title="Model Input Pixel Color Format"
+    )
+    input_dtype: InputDTypeEnum = Field(
+        default=InputDTypeEnum.int, title="Model Input D Type"
     )
     model_type: ModelTypeEnum = Field(
         default=ModelTypeEnum.ssd, title="Object Detection Model Type"

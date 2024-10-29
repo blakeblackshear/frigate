@@ -54,7 +54,7 @@ class ONNXDetector(DetectionApi):
 
         logger.info(f"ONNX: {path} loaded")
 
-    def detect_raw(self, tensor_input):
+    def detect_raw(self, tensor_input: np.ndarray):
         model_input_name = self.model.get_inputs()[0].name
         tensor_output = self.model.run(None, {model_input_name: tensor_input})
 
