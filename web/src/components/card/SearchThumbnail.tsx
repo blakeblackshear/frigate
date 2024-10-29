@@ -41,14 +41,6 @@ export default function SearchThumbnail({
       return searchResult.label;
     }
 
-    if (
-      config.model.attributes_map[searchResult.label].includes(
-        searchResult.sub_label,
-      )
-    ) {
-      return searchResult.sub_label;
-    }
-
     return `${searchResult.label}-verified`;
   }, [config, searchResult]);
 
@@ -102,7 +94,7 @@ export default function SearchThumbnail({
             </div>
             <TooltipPortal>
               <TooltipContent className="capitalize">
-                {[objectLabel]
+                {[searchResult.sub_label ?? objectLabel]
                   .filter(
                     (item) => item !== undefined && !item.includes("-verified"),
                   )

@@ -34,9 +34,8 @@ export default function SearchThumbnailFooter({
   return (
     <div
       className={cn(
-        "flex w-full flex-row items-center justify-between",
-        columns > 4 &&
-          "items-start sm:flex-col sm:gap-2 lg:flex-row lg:items-center lg:gap-1",
+        "flex w-full flex-row items-center justify-between gap-2",
+        columns > 4 && "items-start sm:flex-col lg:flex-row lg:items-center",
       )}
     >
       <div className="flex flex-col items-start text-xs text-primary-variant">
@@ -49,7 +48,7 @@ export default function SearchThumbnailFooter({
         )}
         {formattedDate}
       </div>
-      <div className="flex flex-row items-center justify-end gap-6 md:gap-4">
+      <div className="flex flex-row items-center justify-end gap-5 md:gap-4">
         <SearchResultActions
           searchResult={searchResult}
           findSimilar={findSimilar}
