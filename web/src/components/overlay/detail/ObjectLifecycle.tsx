@@ -203,6 +203,20 @@ export default function ObjectLifecycle({
     setCurrent(index);
   };
 
+  const handleThumbnailNavigation = useCallback(
+    (direction: "next" | "previous") => {
+      if (!mainApi || !thumbnailApi || !eventSequence) return;
+      const newIndex =
+        direction === "next"
+          ? Math.min(current + 1, eventSequence.length - 1)
+          : Math.max(current - 1, 0);
+      mainApi.scrollTo(newIndex);
+      thumbnailApi.scrollTo(newIndex);
+      setCurrent(newIndex);
+    },
+    [mainApi, thumbnailApi, current, eventSequence],
+  );
+
   useEffect(() => {
     if (eventSequence && eventSequence.length > 0) {
       setTimeIndex(eventSequence?.[current].timestamp);
@@ -545,8 +559,14 @@ export default function ObjectLifecycle({
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
+          <CarouselPrevious
+            disabled={current === 0}
+            onClick={() => handleThumbnailNavigation("previous")}
+          />
+          <CarouselNext
+            disabled={current === eventSequence.length - 1}
+            onClick={() => handleThumbnailNavigation("next")}
+          />
         </Carousel>
       </div>
     </div>
