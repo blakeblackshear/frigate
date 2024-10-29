@@ -111,13 +111,13 @@ export function AnnotationSettingsPane({
   function onApply(values: z.infer<typeof formSchema>) {
     if (
       !values ||
-      values.annotationOffset == null ||
-      values.annotationOffset == "" ||
+      values.annotationOffset === null ||
+      values.annotationOffset === "" ||
       !config
     ) {
       return;
     }
-    setAnnotationOffset(values.annotationOffset);
+    setAnnotationOffset(values.annotationOffset ?? 0);
   }
 
   return (
