@@ -34,14 +34,14 @@ jobs:
           STABLE_TAG=${BASE}:stable
           PULL_TAG=${BASE}:${BUILD_TAG}
           docker run --rm -v $HOME/.docker/config.json:/config.json quay.io/skopeo/stable:latest copy --authfile /config.json --multi-arch all docker://${PULL_TAG} docker://${VERSION_TAG}
-          for variant in standard-arm64 tensorrt tensorrt-jp4 tensorrt-jp5 rk; do
+          for variant in standard-arm64 tensorrt tensorrt-jp4 tensorrt-jp5 rk h8l rocm; do
             docker run --rm -v $HOME/.docker/config.json:/config.json quay.io/skopeo/stable:latest copy --authfile /config.json --multi-arch all docker://${PULL_TAG}-${variant} docker://${VERSION_TAG}-${variant}
           done
 
           # stable tag
           if [[ "${BUILD_TYPE}" == "stable" ]]; then
             docker run --rm -v $HOME/.docker/config.json:/config.json quay.io/skopeo/stable:latest copy --authfile /config.json --multi-arch all docker://${PULL_TAG} docker://${STABLE_TAG}
-            for variant in standard-arm64 tensorrt tensorrt-jp4 tensorrt-jp5 rk; do
+            for variant in standard-arm64 tensorrt tensorrt-jp4 tensorrt-jp5 rk h8l rocm; do
               docker run --rm -v $HOME/.docker/config.json:/config.json quay.io/skopeo/stable:latest copy --authfile /config.json --multi-arch all docker://${PULL_TAG}-${variant} docker://${STABLE_TAG}-${variant}
             done
           fi
