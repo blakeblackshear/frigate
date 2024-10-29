@@ -99,7 +99,7 @@ export default function SearchSettings({
               <Slider
                 value={[columns]}
                 onValueChange={([value]) => setColumns(value)}
-                max={6}
+                max={8}
                 min={2}
                 step={1}
                 className="flex-grow"
