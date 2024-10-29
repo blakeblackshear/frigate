@@ -47,7 +47,8 @@ def get_ort_providers(
                 options.append(
                     {
                         "arena_extend_strategy": "kSameAsRequested",
-                        "trt_fp16_enable": requires_fp16 and os.environ.get("USE_FP_16", "True") != "False",
+                        "trt_fp16_enable": requires_fp16
+                        and os.environ.get("USE_FP_16", "True") != "False",
                         "trt_timing_cache_enable": True,
                         "trt_engine_cache_enable": True,
                         "trt_timing_cache_path": "/config/model_cache/tensorrt/ort",
