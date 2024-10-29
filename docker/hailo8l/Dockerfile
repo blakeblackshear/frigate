@@ -2,6 +2,9 @@
 
 ARG DEBIAN_FRONTEND=noninteractive
 
+# NOTE: also update user_installation.sh
+ARG HAILO_VERSION=4.19.0
+
 # Build Python wheels
 FROM wheels AS h8l-wheels
 
@@ -19,6 +22,7 @@ RUN pip3 wheel --wheel-dir=/h8l-wheels -c /requirements-wheels.txt -r /requireme
 # Build HailoRT and create wheel
 FROM wheels AS build-hailort
 ARG TARGETARCH
+ARG HAILO_VERSION
 
 SHELL ["/bin/bash", "-c"]
 
@@ -50,55 +54,35 @@ RUN PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}' | cut -d. -f1,2) 
 RUN . /etc/environment && \
     git clone https://github.com/hailo-ai/hailort.git /opt/hailort && \
     cd /opt/hailort && \
-    git checkout v4.18.0 && \
-    cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Release -DHAILO_BUILD_PYBIND=1 -DPYBIND11_PYTHON_VERSION=${PYTHON_VERSION} && \
+    git checkout v${HAILO_VERSION} && \
+    cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Release && \
     cmake --build build --config release --target libhailort && \
-    cmake --build build --config release --target _pyhailort && \
-    cp build/hailort/libhailort/bindings/python/src/_pyhailort.cpython-${PYTHON_VERSION_NO_DOT}-$(if [ $TARGETARCH == "amd64" ]; then echo 'x86_64'; else echo 'aarch64'; fi )-linux-gnu.so hailort/libhailort/bindings/python/platform/hailo_platform/pyhailort/ && \
-    cp build/hailort/libhailort/src/libhailort.so hailort/libhailort/bindings/python/platform/hailo_platform/pyhailort/
-
-RUN ls -ahl /opt/hailort/build/hailort/libhailort/src/
-RUN ls -ahl /opt/hailort/hailort/libhailort/bindings/python/platform/hailo_platform/pyhailort/
-
-# Remove the existing setup.py if it exists in the target directory
-RUN rm -f /opt/hailort/hailort/libhailort/bindings/python/platform/setup.py
-
-# Copy generate_wheel_conf.py and setup.py
-COPY docker/hailo8l/pyhailort_build_scripts/generate_wheel_conf.py /opt/hailort/hailort/libhailort/bindings/python/platform/generate_wheel_conf.py
-COPY docker/hailo8l/pyhailort_build_scripts/setup.py /opt/hailort/hailort/libhailort/bindings/python/platform/setup.py
-
-# Run the generate_wheel_conf.py script
-RUN python3 /opt/hailort/hailort/libhailort/bindings/python/platform/generate_wheel_conf.py
+    cmake --build build --config release --target hailortcli && \
+    cmake --build build --config release --target install
 
 # Create a wheel file using pip3 wheel
 RUN cd /opt/hailort/hailort/libhailort/bindings/python/platform && \
     python3 setup.py bdist_wheel --dist-dir /hailo-wheels
 
+RUN mkdir -p /rootfs/usr/local/lib /rootfs/usr/local/bin && \
+    cp /usr/local/lib/libhailort.so* /rootfs/usr/local/lib && \
+    cp /usr/local/bin/hailortcli /rootfs/usr/local/bin
+
 # Use deps as the base image
 FROM deps AS h8l-frigate
+ARG HAILO_VERSION
 
 # Copy the wheels from the wheels stage
 COPY --from=h8l-wheels /h8l-wheels /deps/h8l-wheels
 COPY --from=build-hailort /hailo-wheels /deps/hailo-wheels
-COPY --from=build-hailort /etc/environment /etc/environment
-RUN CC=$(python3 -c "import sysconfig; import shlex; cc = sysconfig.get_config_var('CC'); cc_cmd = shlex.split(cc)[0]; print(cc_cmd[:-4] if cc_cmd.endswith('-gcc') else cc_cmd)") && \
-    echo "CC=$CC" >> /etc/environment
+COPY --from=build-hailort /rootfs/ /
 
 # Install the wheels
 RUN pip3 install -U /deps/h8l-wheels/*.whl
 RUN pip3 install -U /deps/hailo-wheels/*.whl
 
-RUN . /etc/environment && \
-    mv /usr/local/lib/python${PYTHON_VERSION}/dist-packages/hailo_platform/pyhailort/libhailort.so /usr/lib/${CC} && \
-    cd /usr/lib/${CC}/ && \
-    ln -s libhailort.so libhailort.so.4.18.0
-
 # Copy base files from the rootfs stage
 COPY --from=rootfs / /
-
-# Set environment variables for Hailo SDK
-ENV PATH="/opt/hailort/bin:${PATH}"
-ENV LD_LIBRARY_PATH="/usr/lib/$(if [ $TARGETARCH == "amd64" ]; then echo 'x86_64'; else echo 'aarch64'; fi )-linux-gnu:${LD_LIBRARY_PATH}"
 
 # Set workdir
 WORKDIR /opt/frigate/

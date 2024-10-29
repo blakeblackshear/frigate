@@ -13,7 +13,7 @@ else
 fi
 
 # Clone the HailoRT driver repository
-git clone --depth 1 --branch v4.18.0 https://github.com/hailo-ai/hailort-drivers.git
+git clone --depth 1 --branch v4.19.0 https://github.com/hailo-ai/hailort-drivers.git
 
 # Build and install the HailoRT driver
 cd hailort-drivers/linux/pcie
@@ -38,7 +38,7 @@ cd ../../
 if [ ! -d /lib/firmware/hailo ]; then
   sudo mkdir /lib/firmware/hailo
 fi
-sudo mv hailo8_fw.4.18.0.bin /lib/firmware/hailo/hailo8_fw.bin
+sudo mv hailo8_fw.*.bin /lib/firmware/hailo/hailo8_fw.bin
 
 # Install udev rules
 sudo cp ./linux/pcie/51-hailo-udev.rules /etc/udev/rules.d/
