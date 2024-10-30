@@ -43,12 +43,6 @@ The text model is used to embed tracked object descriptions and perform searches
 
 Differently weighted CLIP models are available and can be selected by setting the `model_size` config option:
 
-:::tip
-
-The CLIP models are downloaded in ONNX format, which means they will be accelerated using GPU hardware when available. This depends on the Docker build that is used. See [the object detector docs](../configuration/object_detectors.md) for more information.
-
-:::
-
 ```yaml
 semantic_search:
   enabled: True
@@ -57,6 +51,18 @@ semantic_search:
 
 - Configuring the `large` model employs the full Jina model and will automatically run on the GPU if applicable.
 - Configuring the `small` model employs a quantized version of the model that uses much less RAM and runs faster on CPU with a very negligible difference in embedding quality.
+
+### GPU Acceleration
+
+The CLIP models are downloaded in ONNX format, and the `large` model can be accelerated using GPU hardware, when available. This depends on the Docker build that is used, see [the object detector docs](../configuration/object_detectors.md) for more information.
+
+If the correct build is used for your GPU and the `large` model is configured, then the GPU will be automatically detected and used automatically.
+
+```yaml
+semantic_search:
+  enabled: True
+  model_size: small
+```
 
 ## Usage and Best Practices
 
