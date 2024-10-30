@@ -641,7 +641,7 @@ function getLifecycleItemDescription(lifecycleItem: ObjectLifecycleSequence) {
         )} detected for ${label}`;
       } else {
         title = `${
-          lifecycleItem.data.sub_label
+          lifecycleItem.data.label
         } recognized as ${lifecycleItem.data.attribute.replaceAll("_", " ")}`;
       }
       return title;

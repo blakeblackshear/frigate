@@ -83,6 +83,8 @@ export default function SearchView({
       "sm:grid-cols-4": columns === 4,
       "sm:grid-cols-5": columns === 5,
       "sm:grid-cols-6": columns === 6,
+      "sm:grid-cols-7": columns === 7,
+      "sm:grid-cols-8": columns === 8,
     },
   );
 

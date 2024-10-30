@@ -523,17 +523,29 @@ export default function InputWithTags({
 
   const handleInputKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
+      const event = e.target as HTMLInputElement;
+
+      if (!currentFilterType && (e.key === "Home" || e.key === "End")) {
+        const position = e.key === "Home" ? 0 : event.value.length;
+        event.setSelectionRange(position, position);
+      }
+
       if (
         e.key === "Enter" &&
         inputValue.trim() !== "" &&
         filterSuggestions(suggestions).length == 0
       ) {
         e.preventDefault();
-
         handleSearch(inputValue);
       }
     },
-    [inputValue, handleSearch, filterSuggestions, suggestions],
+    [
+      inputValue,
+      handleSearch,
+      filterSuggestions,
+      suggestions,
+      currentFilterType,
+    ],
   );
 
   // effects
