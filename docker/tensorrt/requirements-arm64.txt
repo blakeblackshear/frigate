@@ -1,2 +1,1 @@
 cuda-python == 11.7; platform_machine == 'aarch64'
-onnxruntime @ https://nvidia.box.com/shared/static/9aemm4grzbbkfaesg5l7fplgjtmswhj8.whl; platform_machine == 'aarch64'
