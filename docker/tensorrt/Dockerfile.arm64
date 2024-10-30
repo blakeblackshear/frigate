@@ -10,8 +10,8 @@ ARG DEBIAN_FRONTEND
 # Use a separate container to build wheels to prevent build dependencies in final image
 RUN apt-get -qq update \
     && apt-get -qq install -y --no-install-recommends \
-       python3.9 python3.9-dev \
-       wget build-essential cmake git \
+    python3.9 python3.9-dev \
+    wget build-essential cmake git \
     && rm -rf /var/lib/apt/lists/*
 
 # Ensure python3 defaults to python3.9
@@ -41,7 +41,8 @@ RUN --mount=type=bind,source=docker/tensorrt/detector/build_python_tensorrt.sh,t
     && TENSORRT_VER=$(cat /etc/TENSORRT_VER) /deps/build_python_tensorrt.sh
 
 COPY docker/tensorrt/requirements-arm64.txt /requirements-tensorrt.txt
-RUN pip3 wheel --wheel-dir=/trt-wheels -r /requirements-tensorrt.txt
+RUN pip3 uninstall -y onnxruntime \
+    && pip3 wheel --wheel-dir=/trt-wheels -r /requirements-tensorrt.txt
 
 FROM build-wheels AS trt-model-wheels
 ARG DEBIAN_FRONTEND
