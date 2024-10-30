@@ -141,6 +141,11 @@ export default function SearchDetailDialog({
       views.splice(index, 1);
     }
 
+    if (!search.has_clip) {
+      const index = views.indexOf("video");
+      views.splice(index, 1);
+    }
+
     if (search.data.type != "object") {
       const index = views.indexOf("object lifecycle");
       views.splice(index, 1);
