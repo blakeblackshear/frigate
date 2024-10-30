@@ -68,6 +68,7 @@ If the correct build is used for your GPU and the `large` model is configured, t
 
 **Nvidia**
 - Nvidia GPUs will automatically be detected and used as a detector in the `-tensorrt` Frigate image.
+- Jetson devices will automatically be detected and used as a detector in the `-tensorrt-jp(4/5)` Frigate image.
 
 :::
 
