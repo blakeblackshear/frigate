@@ -22,14 +22,14 @@ Frigate supports multiple different detectors that work on different types of ha
 - [ONNX](#onnx): OpenVINO will automatically be detected and used as a detector in the default Frigate image when a supported ONNX model is configured.
 
 **Nvidia**
-- [TensortRT](#nvidia-tensorrt-detector): TensorRT can run on Nvidia GPUs, using one of many default models.
-- [ONNX](#onnx): TensorRT will automatically be detected and used as a detector in the `-tensorrt` Frigate image when a supported ONNX model is configured.
+- [TensortRT](#nvidia-tensorrt-detector): TensorRT can run on Nvidia GPUs and Jetson devices, using one of many default models.
+- [ONNX](#onnx): TensorRT will automatically be detected and used as a detector in the `-tensorrt` or `-tensorrt-jp(4/5)` Frigate images when a supported ONNX model is configured.
 
 **Rockchip**
 - [RKNN](#rockchip-platform): RKNN models can run on Rockchip devices with included NPUs.
 
 **For Testing**
-- [CPU Detector (not recommended for actual use](#cpu-detector-not-recommended): Use a CPU to run tflite model, this is not recommended and in most cases OpenVINO can be used in CPU mode with better results. 
+- [CPU Detector (not recommended for actual use](#cpu-detector-not-recommended): Use a CPU to run tflite model, this is not recommended and in most cases OpenVINO can be used in CPU mode with better results.
 
 :::
 
