@@ -13,6 +13,7 @@
 - [ ] New feature
 - [ ] Breaking change (fix/feature causing existing functionality to break)
 - [ ] Code quality improvements to existing code
+- [ ] Documentation Update
 
 ## Additional information
 
