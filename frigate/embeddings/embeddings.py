@@ -3,15 +3,18 @@
 import base64
 import logging
 import os
+import random
+import string
 import time
 
 from numpy import ndarray
 from playhouse.shortcuts import model_to_dict
 
 from frigate.comms.inter_process import InterProcessRequestor
-from frigate.config.semantic_search import SemanticSearchConfig
+from frigate.config import FrigateConfig
 from frigate.const import (
     CONFIG_DIR,
+    FACE_DIR,
     UPDATE_EMBEDDINGS_REINDEX_PROGRESS,
     UPDATE_MODEL_STATE,
 )
@@ -59,23 +62,25 @@ def get_metadata(event: Event) -> dict:
 class Embeddings:
     """SQLite-vec embeddings database."""
 
-    def __init__(
-        self, config: SemanticSearchConfig, db: SqliteVecQueueDatabase
-    ) -> None:
+    def __init__(self, config: FrigateConfig, db: SqliteVecQueueDatabase) -> None:
         self.config = config
         self.db = db
         self.requestor = InterProcessRequestor()
 
         # Create tables if they don't exist
-        self.db.create_embeddings_tables()
+        self.db.create_embeddings_tables(self.config.face_recognition.enabled)
 
         models = [
             "jinaai/jina-clip-v1-text_model_fp16.onnx",
             "jinaai/jina-clip-v1-tokenizer",
             "jinaai/jina-clip-v1-vision_model_fp16.onnx"
-            if config.model_size == "large"
+            if config.semantic_search.model_size == "large"
             else "jinaai/jina-clip-v1-vision_model_quantized.onnx",
             "jinaai/jina-clip-v1-preprocessor_config.json",
+            "facenet-facenet.onnx",
+            "paddleocr-onnx-detection.onnx",
+            "paddleocr-onnx-classification.onnx",
+            "paddleocr-onnx-recognition.onnx",
         ]
 
         for model in models:
@@ -94,7 +99,7 @@ class Embeddings:
             download_urls={
                 "text_model_fp16.onnx": "https://huggingface.co/jinaai/jina-clip-v1/resolve/main/onnx/text_model_fp16.onnx",
             },
-            model_size=config.model_size,
+            model_size=config.semantic_search.model_size,
             model_type=ModelTypeEnum.text,
             requestor=self.requestor,
             device="CPU",
@@ -102,7 +107,7 @@ class Embeddings:
 
         model_file = (
             "vision_model_fp16.onnx"
-            if self.config.model_size == "large"
+            if self.config.semantic_search.model_size == "large"
             else "vision_model_quantized.onnx"
         )
 
@@ -115,11 +120,68 @@ class Embeddings:
             model_name="jinaai/jina-clip-v1",
             model_file=model_file,
             download_urls=download_urls,
-            model_size=config.model_size,
+            model_size=config.semantic_search.model_size,
             model_type=ModelTypeEnum.vision,
             requestor=self.requestor,
-            device="GPU" if config.model_size == "large" else "CPU",
+            device="GPU" if config.semantic_search.model_size == "large" else "CPU",
         )
+
+        self.face_embedding = None
+
+        if self.config.face_recognition.enabled:
+            self.face_embedding = GenericONNXEmbedding(
+                model_name="facenet",
+                model_file="facenet.onnx",
+                download_urls={
+                    "facenet.onnx": "https://github.com/NickM-27/facenet-onnx/releases/download/v1.0/facenet.onnx",
+                    "facedet.onnx": "https://github.com/opencv/opencv_zoo/raw/refs/heads/main/models/face_detection_yunet/face_detection_yunet_2023mar_int8.onnx",
+                },
+                model_size="large",
+                model_type=ModelTypeEnum.face,
+                requestor=self.requestor,
+                device="GPU",
+            )
+
+        self.lpr_detection_model = None
+        self.lpr_classification_model = None
+        self.lpr_recognition_model = None
+
+        if self.config.lpr.enabled:
+            self.lpr_detection_model = GenericONNXEmbedding(
+                model_name="paddleocr-onnx",
+                model_file="detection.onnx",
+                download_urls={
+                    "detection.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/detection.onnx"
+                },
+                model_size="large",
+                model_type=ModelTypeEnum.alpr_detect,
+                requestor=self.requestor,
+                device="CPU",
+            )
+
+            self.lpr_classification_model = GenericONNXEmbedding(
+                model_name="paddleocr-onnx",
+                model_file="classification.onnx",
+                download_urls={
+                    "classification.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/classification.onnx"
+                },
+                model_size="large",
+                model_type=ModelTypeEnum.alpr_classify,
+                requestor=self.requestor,
+                device="CPU",
+            )
+
+            self.lpr_recognition_model = GenericONNXEmbedding(
+                model_name="paddleocr-onnx",
+                model_file="recognition.onnx",
+                download_urls={
+                    "recognition.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/recognition.onnx"
+                },
+                model_size="large",
+                model_type=ModelTypeEnum.alpr_recognize,
+                requestor=self.requestor,
+                device="CPU",
+            )
 
     def embed_thumbnail(
         self, event_id: str, thumbnail: bytes, upsert: bool = True
@@ -215,12 +277,40 @@ class Embeddings:
 
         return embeddings
 
+    def embed_face(self, label: str, thumbnail: bytes, upsert: bool = False) -> ndarray:
+        embedding = self.face_embedding(thumbnail)[0]
+
+        if upsert:
+            rand_id = "".join(
+                random.choices(string.ascii_lowercase + string.digits, k=6)
+            )
+            id = f"{label}-{rand_id}"
+
+            # write face to library
+            folder = os.path.join(FACE_DIR, label)
+            file = os.path.join(folder, f"{id}.webp")
+            os.makedirs(folder, exist_ok=True)
+
+            # save face image
+            with open(file, "wb") as output:
+                output.write(thumbnail)
+
+            self.db.execute_sql(
+                """
+                INSERT OR REPLACE INTO vec_faces(id, face_embedding)
+                VALUES(?, ?)
+                """,
+                (id, serialize(embedding)),
+            )
+
+        return embedding
+
     def reindex(self) -> None:
         logger.info("Indexing tracked object embeddings...")
 
         self.db.drop_embeddings_tables()
         logger.debug("Dropped embeddings tables.")
-        self.db.create_embeddings_tables()
+        self.db.create_embeddings_tables(self.config.face_recognition.enabled)
         logger.debug("Created embeddings tables.")
 
         # Delete the saved stats file
