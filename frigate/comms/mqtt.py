@@ -133,7 +133,7 @@ class MqttClient(Communicator):  # type: ignore[misc]
         """Mqtt connection callback."""
         threading.current_thread().name = "mqtt"
         if reason_code != 0:
-            if reason_code == "Server Unavailable":
+            if reason_code == "Server unavailable":
                 logger.error(
                     "Unable to connect to MQTT server: MQTT Server unavailable"
                 )
