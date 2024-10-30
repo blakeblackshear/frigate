@@ -54,9 +54,22 @@ semantic_search:
 
 ### GPU Acceleration
 
-The CLIP models are downloaded in ONNX format, and the `large` model can be accelerated using GPU hardware, when available. This depends on the Docker build that is used, see [the object detector docs](../configuration/object_detectors.md) for more information.
+The CLIP models are downloaded in ONNX format, and the `large` model can be accelerated using GPU hardware, when available. This depends on the Docker build that is used.
 
-If the correct build is used for your GPU and the `large` model is configured, then the GPU will be automatically detected and used automatically.
+:::info
+
+If the correct build is used for your GPU and the `large` model is configured, then the GPU will be detected and used automatically.
+
+**AMD**
+- ROCm will automatically be detected and used for semantic search in the `-rocm` Frigate image.
+
+**Intel**
+- OpenVINO will automatically be detected and used as a detector in the default Frigate image.
+
+**Nvidia**
+- Nvidia GPUs will automatically be detected and used as a detector in the `-tensorrt` Frigate image.
+
+:::
 
 ```yaml
 semantic_search:
