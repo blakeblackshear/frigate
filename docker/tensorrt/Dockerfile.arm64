@@ -43,7 +43,6 @@ RUN --mount=type=bind,source=docker/tensorrt/detector/build_python_tensorrt.sh,t
 COPY docker/tensorrt/requirements-arm64.txt /requirements-tensorrt.txt
 ADD https://nvidia.box.com/shared/static/9aemm4grzbbkfaesg5l7fplgjtmswhj8.whl /tmp/onnxruntime_gpu-1.15.1-cp39-cp39-linux_aarch64.whl
 
-# Install the wheel using pip
 RUN pip3 uninstall -y onnxruntime-openvino \
     && pip3 wheel --wheel-dir=/trt-wheels -r /requirements-tensorrt.txt \
     && pip3 install --no-deps /tmp/onnxruntime_gpu-1.15.1-cp39-cp39-linux_aarch64.whl
