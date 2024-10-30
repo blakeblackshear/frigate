@@ -650,7 +650,7 @@ class FrigateConfig(FrigateBaseModel):
             migrate_frigate_config(config_path)
 
         # Finally, load the resulting configuration file.
-        with open(config_path, "a+") as f:
+        with open(config_path, "a+" if new_config else "r") as f:
             # Only write the default config if the opened file is non-empty. This can happen as
             # a race condition. It's extremely unlikely, but eh. Might as well check it.
             if new_config and f.tell() == 0:
