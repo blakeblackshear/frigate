@@ -509,7 +509,7 @@ export default function ObjectLifecycle({
             containScroll: "keepSnaps",
             dragFree: true,
           }}
-          className="w-full max-w-[72%] md:max-w-[85%]"
+          className="max-w-[72%] md:max-w-[85%]"
           setApi={setThumbnailApi}
         >
           <CarouselContent
