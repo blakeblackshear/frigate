@@ -31,15 +31,15 @@ cameras:
 
 :::warning
 
-Using Ollama on CPU is not recommended, high inference times make using generative AI impractical.
+Using Ollama on CPU is not recommended, high inference times and a lack of support for multi-modal parallel requests will make using Generative AI impractical.
 
 :::
 
 [Ollama](https://ollama.com/) allows you to self-host large language models and keep everything running locally. It provides a nice API over [llama.cpp](https://github.com/ggerganov/llama.cpp). It is highly recommended to host this server on a machine with an Nvidia graphics card, or on a Apple silicon Mac for best performance.
 
-Most of the 7b parameter 4-bit vision models will fit inside 8GB of VRAM. There is also a [docker container](https://hub.docker.com/r/ollama/ollama) available.
+Most of the 7b parameter 4-bit vision models will fit inside 8GB of VRAM. There is also a [Docker container](https://hub.docker.com/r/ollama/ollama) available.
 
-Parallel requests also come with some caveats. See the [Ollama documentation](https://github.com/ollama/ollama/blob/main/docs/faq.md#how-does-ollama-handle-concurrent-requests).
+Parallel requests also come with some caveats, and multi-modal parallel requests are currently not supported by Ollama. Depending on your hardware and the number of requests made to the Ollama API, these limitations may prevent Ollama from being an optimal solution for many users. See the [Ollama documentation](https://github.com/ollama/ollama/blob/main/docs/faq.md#how-does-ollama-handle-concurrent-requests).
 
 ### Supported Models
 
