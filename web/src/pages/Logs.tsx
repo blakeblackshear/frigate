@@ -300,6 +300,84 @@ function Logs() {
     },
   );
 
+  useEffect(() => {
+    const handleCopy = (e: ClipboardEvent) => {
+      e.preventDefault();
+      if (!contentRef.current) return;
+
+      const selection = window.getSelection();
+      if (!selection) return;
+
+      const range = selection.getRangeAt(0);
+      const fragment = range.cloneContents();
+
+      const extractLogData = (element: Element) => {
+        const severity =
+          element.querySelector(".log-severity")?.textContent?.trim() || "";
+        const dateStamp =
+          element.querySelector(".log-timestamp")?.textContent?.trim() || "";
+        const section =
+          element.querySelector(".log-section")?.textContent?.trim() || "";
+        const content =
+          element.querySelector(".log-content")?.textContent?.trim() || "";
+
+        return { severity, dateStamp, section, content };
+      };
+
+      let copyData: {
+        severity: string;
+        dateStamp: string;
+        section: string;
+        content: string;
+      }[] = [];
+
+      if (fragment.querySelectorAll(".grid").length > 0) {
+        // Multiple grid elements
+        copyData = Array.from(fragment.querySelectorAll(".grid")).map(
+          extractLogData,
+        );
+      } else {
+        // Try to find the closest grid element or use the first child element
+        const gridElement =
+          fragment.querySelector(".grid") || (fragment.firstChild as Element);
+
+        if (gridElement) {
+          const data = extractLogData(gridElement);
+          if (data.severity || data.dateStamp || data.section || data.content) {
+            copyData.push(data);
+          }
+        }
+      }
+
+      if (copyData.length === 0) return; // No valid data to copy
+
+      // Calculate maximum widths for each column
+      const maxWidths = {
+        severity: Math.max(...copyData.map((d) => d.severity.length)),
+        dateStamp: Math.max(...copyData.map((d) => d.dateStamp.length)),
+        section: Math.max(...copyData.map((d) => d.section.length)),
+      };
+
+      const pad = (str: string, length: number) => str.padEnd(length, " ");
+
+      // Create the formatted copy text
+      const copyText = copyData
+        .map(
+          (d) =>
+            `${pad(d.severity, maxWidths.severity)} | ${pad(d.dateStamp, maxWidths.dateStamp)} | ${pad(d.section, maxWidths.section)} | ${d.content}`,
+        )
+        .join("\n");
+
+      e.clipboardData?.setData("text/plain", copyText);
+    };
+
+    const content = contentRef.current;
+    content?.addEventListener("copy", handleCopy);
+    return () => {
+      content?.removeEventListener("copy", handleCopy);
+    };
+  }, []);
+
   return (
     <div className="flex size-full flex-col p-2">
       <Toaster position="top-center" closeButton={true} />
@@ -467,18 +545,18 @@ function LogLineData({
       )}
       onClick={onSelect}
     >
-      <div className="flex h-full items-center gap-2 p-1">
+      <div className="log-severity flex h-full items-center gap-2 p-1">
         <LogChip severity={line.severity} onClickSeverity={onClickSeverity} />
       </div>
-      <div className="col-span-2 flex h-full items-center sm:col-span-1">
+      <div className="log-timestamp col-span-2 flex h-full items-center sm:col-span-1">
         {line.dateStamp}
       </div>
-      <div className="col-span-2 flex size-full items-center pr-2">
+      <div className="log-section col-span-2 flex size-full items-center pr-2">
         <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap">
           {line.section}
         </div>
       </div>
-      <div className="col-span-5 flex size-full items-center justify-between pl-2 pr-2 sm:col-span-4 sm:pl-0 md:col-span-8">
+      <div className="log-content col-span-5 flex size-full items-center justify-between pl-2 pr-2 sm:col-span-4 sm:pl-0 md:col-span-8">
         <div className="w-full overflow-hidden text-ellipsis whitespace-nowrap">
           {line.content}
         </div>
