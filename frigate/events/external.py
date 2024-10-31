@@ -70,7 +70,7 @@ class ExternalEventProcessor:
                     "sub_label": sub_label,
                     "score": score,
                     "camera": camera,
-                    "start_time": now,
+                    "start_time": now - camera_config.record.event_pre_capture,
                     "end_time": end,
                     "thumbnail": thumbnail,
                     "has_clip": camera_config.record.enabled and include_recording,
