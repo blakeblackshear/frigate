@@ -41,8 +41,11 @@ RUN --mount=type=bind,source=docker/tensorrt/detector/build_python_tensorrt.sh,t
     && TENSORRT_VER=$(cat /etc/TENSORRT_VER) /deps/build_python_tensorrt.sh
 
 COPY docker/tensorrt/requirements-arm64.txt /requirements-tensorrt.txt
-RUN pip3 uninstall -y onnxruntime \
-    && pip3 wheel --wheel-dir=/trt-wheels -r /requirements-tensorrt.txt
+ADD https://nvidia.box.com/shared/static/9aemm4grzbbkfaesg5l7fplgjtmswhj8.whl /tmp/onnxruntime_gpu-1.15.1-cp39-cp39-linux_aarch64.whl
+
+RUN pip3 uninstall -y onnxruntime-openvino \
+    && pip3 wheel --wheel-dir=/trt-wheels -r /requirements-tensorrt.txt \
+    && pip3 install --no-deps /tmp/onnxruntime_gpu-1.15.1-cp39-cp39-linux_aarch64.whl
 
 FROM build-wheels AS trt-model-wheels
 ARG DEBIAN_FRONTEND
