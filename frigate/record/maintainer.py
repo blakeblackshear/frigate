@@ -299,16 +299,12 @@ class RecordingMaintainer(threading.Thread):
             # if it doesn't overlap with an event, go ahead and drop the segment
             # if it ends more than the configured pre_capture for the camera
             else:
-                pre_capture = max(
-                    record_config.alerts.pre_capture,
-                    record_config.detections.pre_capture,
-                )
                 camera_info = self.object_recordings_info[camera]
                 most_recently_processed_frame_time = (
                     camera_info[-1][0] if len(camera_info) > 0 else 0
                 )
                 retain_cutoff = datetime.datetime.fromtimestamp(
-                    most_recently_processed_frame_time - pre_capture
+                    most_recently_processed_frame_time - record_config.event_pre_capture
                 ).astimezone(datetime.timezone.utc)
                 if end_time < retain_cutoff:
                     Path(cache_path).unlink(missing_ok=True)

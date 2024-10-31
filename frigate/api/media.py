@@ -917,7 +917,7 @@ def grid_snapshot(
         ret, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
 
         return Response(
-            jpg.tobytes,
+            jpg.tobytes(),
             media_type="image/jpeg",
             headers={"Cache-Control": "no-store"},
         )
@@ -1453,7 +1453,6 @@ def preview_thumbnail(file_name: str):
 
     return Response(
         jpg_bytes,
-        # FIXME: Shouldn't it be either jpg or webp depending on the endpoint?
         media_type="image/webp",
         headers={
             "Content-Type": "image/webp",
@@ -1482,7 +1481,7 @@ def label_thumbnail(request: Request, camera_name: str, label: str):
         ret, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
 
         return Response(
-            jpg.tobytes,
+            jpg.tobytes(),
             media_type="image/jpeg",
             headers={"Cache-Control": "no-store"},
         )
@@ -1535,6 +1534,6 @@ def label_snapshot(request: Request, camera_name: str, label: str):
         _, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
 
         return Response(
-            jpg.tobytes,
+            jpg.tobytes(),
             media_type="image/jpeg",
         )

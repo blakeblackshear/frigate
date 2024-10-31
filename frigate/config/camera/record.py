@@ -94,3 +94,10 @@ class RecordConfig(FrigateBaseModel):
     enabled_in_config: Optional[bool] = Field(
         default=None, title="Keep track of original state of recording."
     )
+
+    @property
+    def event_pre_capture(self) -> int:
+        return max(
+            self.alerts.pre_capture,
+            self.detections.pre_capture,
+        )
