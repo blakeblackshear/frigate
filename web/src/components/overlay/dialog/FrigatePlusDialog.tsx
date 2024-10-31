@@ -144,7 +144,7 @@ export function FrigatePlusDialog({
                   onSubmitToPlus(false);
                 }}
               >
-                This is a {upload?.label}
+                This is {upload?.label?.startsWith("a") ? "an" : "a"} {upload?.label}
               </Button>
               <Button
                 className="text-white"
@@ -155,7 +155,7 @@ export function FrigatePlusDialog({
                   onSubmitToPlus(true);
                 }}
               >
-                This is not a {upload?.label}
+                This is not {upload?.label?.startsWith("a") ? "an" : "a"} {upload?.label}
               </Button>
             </>
           )}
