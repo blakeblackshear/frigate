@@ -3,6 +3,7 @@
 import base64
 import logging
 import os
+import re
 import threading
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Optional
@@ -22,7 +23,7 @@ from frigate.comms.events_updater import EventEndSubscriber, EventUpdateSubscrib
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.const import CLIPS_DIR, FRIGATE_LOCALHOST, UPDATE_EVENT_DESCRIPTION
-from frigate.embeddings.alpr.alpr import LicensePlateRecognition
+from frigate.embeddings.lpr.lpr import LicensePlateRecognition
 from frigate.events.types import EventTypeEnum
 from frigate.genai import get_genai_client
 from frigate.models import Event
@@ -651,13 +652,16 @@ class EmbeddingMaintainer(threading.Thread):
             )
             return
 
-        # Determine subLabel based on known plates
+        # Determine subLabel based on known plates, use regex matching
         # Default to the detected plate, use label name if there's a match
-        sub_label = top_plate
-        for label, plates in self.lpr_config.known_plates.items():
-            if top_plate in plates:
-                sub_label = label
-                break
+        sub_label = next(
+            (
+                label
+                for label, plates in self.lpr_config.known_plates.items()
+                if any(re.match(f"^{plate}$", top_plate) for plate in plates)
+            ),
+            top_plate,
+        )
 
         # Send the result to the API
         resp = requests.post(
