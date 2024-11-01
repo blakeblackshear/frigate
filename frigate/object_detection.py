@@ -90,6 +90,7 @@ class LocalObjectDetector(ObjectDetector):
 
         if self.dtype == InputDTypeEnum.float:
             tensor_input = tensor_input.astype(np.float32)
+            tensor_input /= 255
 
         return self.detect_api.detect_raw(tensor_input=tensor_input)
 
