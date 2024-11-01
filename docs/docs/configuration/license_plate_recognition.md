@@ -26,7 +26,7 @@ lpr:
 
 Several options are available to fine-tune the LPR feature. For example, you can adjust the `min_area` setting, which defines the minimum size in pixels a license plate must be before LPR runs. The default is 500 pixels.
 
-Additionally, you can define `known_plates`, allowing Frigate to label tracked vehicles with custom sub_labels when a recognized plate is detected. This information is then accessible in the UI, filters, and notifications.
+Additionally, you can define `known_plates` as strings or regular expressions, allowing Frigate to label tracked vehicles with custom sub_labels when a recognized plate is detected. This information is then accessible in the UI, filters, and notifications.
 
 ```yaml
 lpr:
@@ -37,12 +37,9 @@ lpr:
       - "ABC-1234"
       - "ABC-I234"
     Johnny:
-      - "JHN-1234"
-      - "JMN-1234"
-      - "JHN-I234"
+      - "J*N-*234" # Using wildcards for H/M and 1/I
     Sally:
-      - "SLL-1234"
-      - "5LL-1234"
+      - "[S5]LL-1234" # Matches SLL-1234 and 5LL-1234
 ```
 
 In this example, "Wife's Car" will appear as the label for any vehicle matching the plate "ABC-1234." The model might occasionally interpret the digit 1 as a capital I (e.g., "ABC-I234"), so both variations are listed. Similarly, multiple possible variations are specified for Johnny and Sally.
