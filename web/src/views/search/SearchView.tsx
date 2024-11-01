@@ -397,11 +397,10 @@ export default function SearchView({
           </div>
         )}
 
-        {uniqueResults?.length == 0 &&
-          isLoading &&
+        {isLoading &&
           (searchTerm ||
             (searchFilter && Object.keys(searchFilter).length !== 0)) && (
-            <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+            <ActivityIndicator className="absolute left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-background/80 p-3 dark:bg-background/50" />
           )}
 
         {uniqueResults && (

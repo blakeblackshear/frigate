@@ -144,7 +144,8 @@ export function FrigatePlusDialog({
                   onSubmitToPlus(false);
                 }}
               >
-                This is a {upload?.label}
+                This is {/^[aeiou]/i.test(upload?.label || "") ? "an" : "a"}{" "}
+                {upload?.label}
               </Button>
               <Button
                 className="text-white"
@@ -155,7 +156,8 @@ export function FrigatePlusDialog({
                   onSubmitToPlus(true);
                 }}
               >
-                This is not a {upload?.label}
+                This is not {/^[aeiou]/i.test(upload?.label || "") ? "an" : "a"}{" "}
+                {upload?.label}
               </Button>
             </>
           )}

@@ -428,7 +428,9 @@ export default function Explore() {
           searchTerm={searchTerm}
           searchFilter={searchFilter}
           searchResults={searchResults}
-          isLoading={(isLoadingInitialData || isLoadingMore) ?? true}
+          isLoading={
+            (isLoadingInitialData || isLoadingMore || isValidating) ?? true
+          }
           hasMore={!isReachingEnd}
           columns={gridColumns}
           defaultView={defaultView}
