@@ -154,7 +154,7 @@ class Embeddings:
                     "detection.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/detection.onnx"
                 },
                 model_size="large",
-                model_type=ModelTypeEnum.alpr_detect,
+                model_type=ModelTypeEnum.lpr_detect,
                 requestor=self.requestor,
                 device="CPU",
             )
@@ -166,7 +166,7 @@ class Embeddings:
                     "classification.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/classification.onnx"
                 },
                 model_size="large",
-                model_type=ModelTypeEnum.alpr_classify,
+                model_type=ModelTypeEnum.lpr_classify,
                 requestor=self.requestor,
                 device="CPU",
             )
@@ -178,7 +178,7 @@ class Embeddings:
                     "recognition.onnx": "https://github.com/hawkeye217/paddleocr-onnx/raw/refs/heads/master/models/recognition.onnx"
                 },
                 model_size="large",
-                model_type=ModelTypeEnum.alpr_recognize,
+                model_type=ModelTypeEnum.lpr_recognize,
                 requestor=self.requestor,
                 device="CPU",
             )
