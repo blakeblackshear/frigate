@@ -655,7 +655,9 @@ function ObjectSnapshotTab({
                             onSubmitToPlus(false);
                           }}
                         >
-                          This is a {search?.label}
+                          This is{" "}
+                          {/^[aeiou]/i.test(search?.label || "") ? "an" : "a"}{" "}
+                          {search?.label}
                         </Button>
                         <Button
                           className="text-white"
@@ -666,7 +668,9 @@ function ObjectSnapshotTab({
                             onSubmitToPlus(true);
                           }}
                         >
-                          This is not a {search?.label}
+                          This is not{" "}
+                          {/^[aeiou]/i.test(search?.label || "") ? "an" : "a"}{" "}
+                          {search?.label}
                         </Button>
                       </>
                     )}
