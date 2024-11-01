@@ -38,9 +38,9 @@ class ModelTypeEnum(str, Enum):
     face = "face"
     vision = "vision"
     text = "text"
-    alpr_detect = "alpr_detect"
-    alpr_classify = "alpr_classify"
-    alpr_recognize = "alpr_recognize"
+    lpr_detect = "lpr_detect"
+    lpr_classify = "lpr_classify"
+    lpr_recognize = "lpr_recognize"
 
 
 class GenericONNXEmbedding:
@@ -142,11 +142,11 @@ class GenericONNXEmbedding:
                 self.feature_extractor = self._load_feature_extractor()
             elif self.model_type == ModelTypeEnum.face:
                 self.feature_extractor = []
-            elif self.model_type == ModelTypeEnum.alpr_detect:
+            elif self.model_type == ModelTypeEnum.lpr_detect:
                 self.feature_extractor = []
-            elif self.model_type == ModelTypeEnum.alpr_classify:
+            elif self.model_type == ModelTypeEnum.lpr_classify:
                 self.feature_extractor = []
-            elif self.model_type == ModelTypeEnum.alpr_recognize:
+            elif self.model_type == ModelTypeEnum.lpr_recognize:
                 self.feature_extractor = []
 
             self.runner = ONNXModelRunner(
@@ -223,17 +223,17 @@ class GenericONNXEmbedding:
 
             frame = np.expand_dims(frame, axis=0)
             return [{"input_2": frame}]
-        elif self.model_type == ModelTypeEnum.alpr_detect:
+        elif self.model_type == ModelTypeEnum.lpr_detect:
             preprocessed = []
             for x in raw_inputs:
                 preprocessed.append(x)
             return [{"x": preprocessed[0]}]
-        elif self.model_type == ModelTypeEnum.alpr_classify:
+        elif self.model_type == ModelTypeEnum.lpr_classify:
             processed = []
             for img in raw_inputs:
                 processed.append({"x": img})
             return processed
-        elif self.model_type == ModelTypeEnum.alpr_recognize:
+        elif self.model_type == ModelTypeEnum.lpr_recognize:
             processed = []
             for img in raw_inputs:
                 processed.append({"x": img})
