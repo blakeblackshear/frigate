@@ -521,10 +521,7 @@ export default function ObjectLifecycle({
             {eventSequence.map((item, index) => (
               <CarouselItem
                 key={index}
-                className={cn(
-                  "basis-1/4 cursor-pointer pl-1 md:basis-[10%]",
-                  fullscreen && "md:basis-16",
-                )}
+                className={cn("basis-auto cursor-pointer pl-1")}
                 onClick={() => handleThumbnailClick(index)}
               >
                 <div className="p-1">
