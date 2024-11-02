@@ -49,7 +49,10 @@ The USB Coral can become stuck and need to be restarted, this can happen for a n
 
 ## PCIe Coral Not Detected
 
-The most common reason for the PCIe coral not being detected is that the driver has not been installed. See [the coral docs](https://coral.ai/docs/m2/get-started/#2-install-the-pcie-driver-and-edge-tpu-runtime) for how to install the driver for the PCIe based coral.
+The most common reason for the PCIe Coral not being detected is that the driver has not been installed. This process varies based on what OS and kernel that is being run. 
+
+- In most cases [the Coral docs](https://coral.ai/docs/m2/get-started/#2-install-the-pcie-driver-and-edge-tpu-runtime) show how to install the driver for the PCIe based Coral.
+- For Ubuntu 22.04+ https://github.com/jnicolson/gasket-builder can be used to build and install the latest version of the driver.
 
 ## Only One PCIe Coral Is Detected With Coral Dual EdgeTPU
 
