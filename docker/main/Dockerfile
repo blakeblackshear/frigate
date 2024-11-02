@@ -211,6 +211,9 @@ ENV TOKENIZERS_PARALLELISM=true
 # https://github.com/huggingface/transformers/issues/27214
 ENV TRANSFORMERS_NO_ADVISORY_WARNINGS=1
 
+# Set OpenCV ffmpeg loglevel to fatal: https://ffmpeg.org/doxygen/trunk/log_8h.html
+ENV OPENCV_FFMPEG_LOGLEVEL=8
+
 ENV PATH="/usr/local/go2rtc/bin:/usr/local/tempio/bin:/usr/local/nginx/sbin:${PATH}"
 ENV LIBAVFORMAT_VERSION_MAJOR=60
 

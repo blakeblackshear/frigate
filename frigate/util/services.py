@@ -585,8 +585,6 @@ async def get_video_properties(
 
     try:
         # Open the video stream using OpenCV
-        # Only print fatal or worse output: https://ffmpeg.org/doxygen/trunk/log_8h.html
-        os.environ["OPENCV_FFMPEG_LOGLEVEL"] = "8"
         video = cv2.VideoCapture(url)
 
         # Check if the video stream was opened successfully
