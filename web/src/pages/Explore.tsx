@@ -114,6 +114,7 @@ export default function Explore() {
           max_score: searchSearchParams["max_score"],
           has_snapshot: searchSearchParams["has_snapshot"],
           has_clip: searchSearchParams["has_clip"],
+          event_id: searchSearchParams["event_id"],
           limit:
             Object.keys(searchSearchParams).length == 0 ? API_LIMIT : undefined,
           timezone,
