@@ -37,6 +37,7 @@ type SearchViewProps = {
   searchFilter?: SearchFilter;
   searchResults?: SearchResult[];
   isLoading: boolean;
+  isValidating: boolean;
   hasMore: boolean;
   columns: number;
   defaultView?: string;
@@ -55,6 +56,7 @@ export default function SearchView({
   searchFilter,
   searchResults,
   isLoading,
+  isValidating,
   hasMore,
   columns,
   defaultView = "summary",
@@ -397,7 +399,8 @@ export default function SearchView({
           </div>
         )}
 
-        {isLoading &&
+        {(!isLoading || uniqueResults?.length == 0) &&
+          isValidating &&
           (searchTerm ||
             (searchFilter && Object.keys(searchFilter).length !== 0)) && (
             <ActivityIndicator className="absolute left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-background/80 p-3 dark:bg-background/50" />
