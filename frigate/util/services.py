@@ -584,7 +584,7 @@ async def get_video_properties(
     width = height = 0
 
     try:
-        # Open the video stream
+        # Open the video stream using OpenCV
         video = cv2.VideoCapture(url)
 
         # Check if the video stream was opened successfully
