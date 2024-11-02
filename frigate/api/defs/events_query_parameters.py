@@ -28,6 +28,7 @@ class EventsQueryParams(BaseModel):
     is_submitted: Optional[int] = None
     min_length: Optional[float] = None
     max_length: Optional[float] = None
+    event_id: Optional[str] = None
     sort: Optional[str] = None
     timezone: Optional[str] = "utc"
 

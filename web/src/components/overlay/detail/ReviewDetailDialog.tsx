@@ -40,6 +40,7 @@ import {
 import { useOverlayState } from "@/hooks/use-overlay-state";
 import { DownloadVideoButton } from "@/components/button/DownloadVideoButton";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
+import { LuSearch } from "react-icons/lu";
 
 type ReviewDetailDialogProps = {
   review?: ReviewSegment;
@@ -52,6 +53,8 @@ export default function ReviewDetailDialog({
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
+
+  const navigate = useNavigate();
 
   // upload
 
@@ -219,6 +222,21 @@ export default function ReviewDetailDialog({
                             )}
                             {event.sub_label ?? event.label} (
                             {Math.round(event.data.top_score * 100)}%)
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <div
+                                  className="cursor-pointer"
+                                  onClick={() => {
+                                    navigate(`/explore?event_id=${event.id}`);
+                                  }}
+                                >
+                                  <LuSearch className="size-4 text-muted-foreground" />
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipPortal>
+                                <TooltipContent>View in Explore</TooltipContent>
+                              </TooltipPortal>
+                            </Tooltip>
                           </div>
                         );
                       })}
