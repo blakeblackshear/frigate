@@ -177,7 +177,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 # install required python deps
 COPY docker/main/requirements.txt /requirements.txt
-RUN uv pip install --system -r /requirements.txt
+RUN uv pip install --system --no-build-isolation -r /requirements.txt
 
 # Build pysqlite3 from source
 COPY docker/main/build_pysqlite3.sh /build_pysqlite3.sh
