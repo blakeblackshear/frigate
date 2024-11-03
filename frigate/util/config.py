@@ -50,14 +50,15 @@ def migrate_frigate_config(config_file: str):
         previous_version = "0.14"
 
         logger.info("Migrating export file names...")
-        for file in os.listdir(EXPORT_DIR):
-            if "@" not in file:
-                continue
+        if os.path.isdir(EXPORT_DIR):
+            for file in os.listdir(EXPORT_DIR):
+                if "@" not in file:
+                    continue
 
-            new_name = file.replace("@", "_")
-            os.rename(
-                os.path.join(EXPORT_DIR, file), os.path.join(EXPORT_DIR, new_name)
-            )
+                new_name = file.replace("@", "_")
+                os.rename(
+                    os.path.join(EXPORT_DIR, file), os.path.join(EXPORT_DIR, new_name)
+                )
 
     if previous_version < "0.15-0":
         logger.info(f"Migrating frigate config from {previous_version} to 0.15-0...")
