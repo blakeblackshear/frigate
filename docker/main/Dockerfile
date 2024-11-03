@@ -62,12 +62,11 @@ FROM base_host AS ov-converter
 ARG DEBIAN_FRONTEND
 
 # Install OpenVino Runtime and Dev library
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 COPY docker/main/requirements-ov.txt /requirements-ov.txt
 RUN apt-get -qq update \
     && apt-get -qq install -y wget python3 python3-dev python3-distutils gcc pkg-config libhdf5-dev \
-    && wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
-    && python3 get-pip.py "pip" \
-    && pip install -r /requirements-ov.txt
+    && uv pip install --system -r /requirements-ov.txt
 
 # Get OpenVino Model
 RUN --mount=type=bind,source=docker/main/build_ov_model.py,target=/build_ov_model.py \
@@ -218,12 +217,12 @@ ENV PATH="/usr/local/go2rtc/bin:/usr/local/tempio/bin:/usr/local/nginx/sbin:${PA
 ENV LIBAVFORMAT_VERSION_MAJOR=60
 
 # Install dependencies
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 RUN --mount=type=bind,source=docker/main/install_deps.sh,target=/deps/install_deps.sh \
     /deps/install_deps.sh
 
 RUN --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels \
-    python3 -m pip install --upgrade pip && \
-    pip3 install -U /deps/wheels/*.whl
+    uv pip install --system -U /deps/wheels/*.whl
 
 COPY --from=deps-rootfs / /
 
