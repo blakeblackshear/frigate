@@ -30,8 +30,8 @@ COPY --from=hailort /hailo-wheels /deps/hailo-wheels
 COPY --from=hailort /rootfs/ /
 
 # Install the wheels
-RUN pip3 install -U /deps/h8l-wheels/*.whl
-RUN pip3 install -U /deps/hailo-wheels/*.whl
+RUN uv pip install --system -U /deps/h8l-wheels/*.whl
+RUN uv pip install --system -U /deps/hailo-wheels/*.whl
 
 # Copy base files from the rootfs stage
 COPY --from=rootfs / /

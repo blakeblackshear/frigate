@@ -166,17 +166,19 @@ RUN apt-get -qq update \
 # Ensure python3 defaults to python3.9
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
 
-RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
-    && python3 get-pip.py "pip"
+# install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
+# install required python deps
 COPY docker/main/requirements.txt /requirements.txt
-RUN pip3 install -r /requirements.txt
+RUN uv pip install --system -r /requirements.txt
 
 # Build pysqlite3 from source
 COPY docker/main/build_pysqlite3.sh /build_pysqlite3.sh
 RUN /build_pysqlite3.sh
 
 COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
+# we still have to use pip to build wheel
 RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt
 
 
@@ -269,7 +271,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 RUN --mount=type=bind,source=./docker/main/requirements-dev.txt,target=/workspace/frigate/requirements-dev.txt \
-    pip3 install -r requirements-dev.txt
+    uv pip install --system -r requirements-dev.txt
 
 HEALTHCHECK NONE
 

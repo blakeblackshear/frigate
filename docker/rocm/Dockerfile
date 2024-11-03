@@ -70,7 +70,10 @@ RUN apt-get -y install libnuma1
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
 
+# install uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+# install required rocm deps
 COPY docker/rocm/requirements-wheels-rocm.txt /requirements.txt
 RUN uv pip uninstall --system -y onnxruntime-openvino \
     && uv pip install --system -r /requirements.txt

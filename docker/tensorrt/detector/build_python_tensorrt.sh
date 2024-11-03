@@ -16,7 +16,7 @@ if [[ "${TARGETARCH}" == "arm64" ]]; then
 
   # Collect dependencies
   EXT_PATH=/workspace/external && mkdir -p $EXT_PATH
-  pip3 install pybind11 && ln -s /usr/local/lib/python3.9/dist-packages/pybind11 $EXT_PATH/pybind11
+  uv pip install --system pybind11 && ln -s /usr/local/lib/python3.9/dist-packages/pybind11 $EXT_PATH/pybind11
   ln -s /usr/include/python3.9 $EXT_PATH/python3.9
   ln -s /usr/include/aarch64-linux-gnu/NvOnnxParser.h /workspace/TensorRT/parsers/onnx/
 
