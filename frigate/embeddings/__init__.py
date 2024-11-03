@@ -16,7 +16,7 @@ from frigate.comms.embeddings_updater import EmbeddingsRequestEnum, EmbeddingsRe
 from frigate.config import FrigateConfig
 from frigate.const import CONFIG_DIR
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
-from frigate.models import Event
+from frigate.models import Event, Recordings
 from frigate.util.builtin import serialize
 from frigate.util.services import listen
 
@@ -54,7 +54,7 @@ def manage_embeddings(config: FrigateConfig) -> None:
         timeout=max(60, 10 * len([c for c in config.cameras.values() if c.enabled])),
         load_vec_extension=True,
     )
-    models = [Event]
+    models = [Event, Recordings]
     db.bind(models)
 
     maintainer = EmbeddingMaintainer(
