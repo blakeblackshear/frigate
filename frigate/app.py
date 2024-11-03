@@ -514,7 +514,7 @@ class FrigateApp:
 
         if cam_total_frame_size == 0.0:
             return 0
-        
+
         shm_frame_count = min(50, int(available_shm / (cam_total_frame_size)))
 
         logger.debug(
