@@ -166,13 +166,18 @@ RUN apt-get -qq update \
 # Ensure python3 defaults to python3.9
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
 
+# need to install pip for requirements
+RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
+    && python3 get-pip.py "pip"
+
+RUN python3 -m pip install --upgrade pip setuptools wheel
+
 # install uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 # install required python deps
 COPY docker/main/requirements.txt /requirements.txt
-RUN uv pip install pip \
-    && uv pip install --system -r /requirements.txt
+RUN uv pip install --system -r /requirements.txt
 
 # Build pysqlite3 from source
 COPY docker/main/build_pysqlite3.sh /build_pysqlite3.sh
