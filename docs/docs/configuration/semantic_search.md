@@ -60,15 +60,17 @@ The CLIP models are downloaded in ONNX format, and the `large` model can be acce
 
 If the correct build is used for your GPU and the `large` model is configured, then the GPU will be detected and used automatically.
 
-**AMD**
-- ROCm will automatically be detected and used for semantic search in the `-rocm` Frigate image.
+**NOTE:** Object detection and Semantic Search are independent features. If you want to use your GPU with Semantic Search, you must choose the appropriate Frigate Docker image for your GPU.
 
-**Intel**
-- OpenVINO will automatically be detected and used as a detector in the default Frigate image.
+- **AMD**
+  - ROCm will automatically be detected and used for semantic search in the `-rocm` Frigate image.
 
-**Nvidia**
-- Nvidia GPUs will automatically be detected and used as a detector in the `-tensorrt` Frigate image.
-- Jetson devices will automatically be detected and used as a detector in the `-tensorrt-jp(4/5)` Frigate image.
+- **Intel**
+  - OpenVINO will automatically be detected and used for semantic search in the default Frigate image.
+
+- **Nvidia**
+  - Nvidia GPUs will automatically be detected and used for semantic search in the `-tensorrt` Frigate image.
+  - Jetson devices will automatically be detected and used for semantic search in the `-tensorrt-jp(4/5)` Frigate image.
 
 :::
 
