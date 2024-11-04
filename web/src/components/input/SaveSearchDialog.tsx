@@ -39,11 +39,10 @@ export function SaveSearchDialog({
     }
   };
 
-  const overwrite = useMemo(() => {
-    const existing = existingNames.find((name) => name === searchName);
-
-    return existing;
-  }, [existingNames, searchName]);
+  const overwrite = useMemo(
+    () => existingNames.includes(searchName),
+    [existingNames, searchName],
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
