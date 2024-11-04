@@ -1,4 +1,6 @@
 import { FrigateConfig } from "@/types/frigateConfig";
+import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
+import { useMemo } from "react";
 import useSWR from "swr";
 
 type MinimapSegmentProps = {
@@ -40,22 +42,22 @@ export function MinimapBounds({
           className="pointer-events-none absolute inset-0 -bottom-7 z-20 flex w-full select-none scroll-mt-8 items-center justify-center text-center text-[10px] font-medium text-primary"
           ref={firstMinimapSegmentRef}
         >
-          {new Date(alignedMinimapStartTime * 1000).toLocaleTimeString([], {
-            hour12: config?.ui.time_format != "24hour",
-            hour: "2-digit",
-            minute: "2-digit",
-            ...(!dense && { month: "short", day: "2-digit" }),
+          {formatUnixTimestampToDateTime(alignedMinimapStartTime, {
+            timezone: config?.ui.timezone,
+            strftime_fmt: !dense
+              ? `%b %d, ${config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p"}`
+              : `${config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p"}`,
           })}
         </div>
       )}
 
       {isLastSegmentInMinimap && (
         <div className="pointer-events-none absolute inset-0 -top-3 z-20 flex w-full select-none items-center justify-center text-center text-[10px] font-medium text-primary">
-          {new Date(alignedMinimapEndTime * 1000).toLocaleTimeString([], {
-            hour12: config?.ui.time_format != "24hour",
-            hour: "2-digit",
-            minute: "2-digit",
-            ...(!dense && { month: "short", day: "2-digit" }),
+          {formatUnixTimestampToDateTime(alignedMinimapEndTime, {
+            timezone: config?.ui.timezone,
+            strftime_fmt: !dense
+              ? `%b %d, ${config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p"}`
+              : `${config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p"}`,
           })}
         </div>
       )}
@@ -92,6 +94,22 @@ export function Timestamp({
 }: TimestampSegmentProps) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
+  const formattedTimestamp = useMemo(() => {
+    if (
+      !(
+        timestamp.getMinutes() % timestampSpread === 0 &&
+        timestamp.getSeconds() === 0
+      )
+    ) {
+      return undefined;
+    }
+
+    return formatUnixTimestampToDateTime(timestamp.getTime() / 1000, {
+      timezone: config?.ui.timezone,
+      strftime_fmt: config?.ui.time_format == "24hour" ? "%H:%M" : "%I:%M %p",
+    });
+  }, [config, timestamp, timestampSpread]);
+
   return (
     <div className="absolute left-[15px] z-10 h-[8px]">
       {!isFirstSegmentInMinimap && !isLastSegmentInMinimap && (
@@ -99,13 +117,7 @@ export function Timestamp({
           key={`${segmentKey}_timestamp`}
           className="pointer-events-none select-none text-[8px] text-neutral_variant dark:text-neutral"
         >
-          {timestamp.getMinutes() % timestampSpread === 0 &&
-            timestamp.getSeconds() === 0 &&
-            timestamp.toLocaleTimeString([], {
-              hour12: config?.ui.time_format != "24hour",
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
+          {formattedTimestamp}
         </div>
       )}
     </div>

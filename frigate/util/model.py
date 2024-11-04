@@ -1,5 +1,6 @@
 """Model Utils"""
 
+import logging
 import os
 from typing import Any
 
@@ -10,6 +11,8 @@ try:
 except ImportError:
     # openvino is not included
     pass
+
+logger = logging.getLogger(__name__)
 
 
 def get_ort_providers(
@@ -89,19 +92,27 @@ class ONNXModelRunner:
         self.ort: ort.InferenceSession = None
         self.ov: ov.Core = None
         providers, options = get_ort_providers(device == "CPU", device, requires_fp16)
+        self.interpreter = None
 
         if "OpenVINOExecutionProvider" in providers:
-            # use OpenVINO directly
-            self.type = "ov"
-            self.ov = ov.Core()
-            self.ov.set_property(
-                {ov.properties.cache_dir: "/config/model_cache/openvino"}
-            )
-            self.interpreter = self.ov.compile_model(
-                model=model_path, device_name=device
-            )
-        else:
-            # Use ONNXRuntime
+            try:
+                # use OpenVINO directly
+                self.type = "ov"
+                self.ov = ov.Core()
+                self.ov.set_property(
+                    {ov.properties.cache_dir: "/config/model_cache/openvino"}
+                )
+                self.interpreter = self.ov.compile_model(
+                    model=model_path, device_name=device
+                )
+            except Exception as e:
+                logger.warning(
+                    f"OpenVINO failed to build model, using CPU instead: {e}"
+                )
+                self.interpreter = None
+
+        # Use ONNXRuntime
+        if self.interpreter is None:
             self.type = "ort"
             self.ort = ort.InferenceSession(
                 model_path,

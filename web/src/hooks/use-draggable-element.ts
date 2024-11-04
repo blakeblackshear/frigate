@@ -10,6 +10,7 @@ import scrollIntoView from "scroll-into-view-if-needed";
 import { useTimelineUtils } from "./use-timeline-utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
+import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 
 type DraggableElementProps = {
   contentRef: React.RefObject<HTMLElement>;
@@ -168,6 +169,19 @@ function useDraggableElement({
     [segmentDuration, timelineStartAligned, segmentHeight],
   );
 
+  const getFormattedTimestamp = useCallback(
+    (segmentStartTime: number) => {
+      return formatUnixTimestampToDateTime(segmentStartTime, {
+        timezone: config?.ui.timezone,
+        strftime_fmt:
+          config?.ui.time_format == "24hour"
+            ? `%H:%M${segmentDuration < 60 && !dense ? ":%S" : ""}`
+            : `%I:%M${segmentDuration < 60 && !dense ? ":%S" : ""} %p`,
+      });
+    },
+    [config, dense, segmentDuration],
+  );
+
   const updateDraggableElementPosition = useCallback(
     (
       newElementPosition: number,
@@ -184,14 +198,8 @@ function useDraggableElement({
           }
 
           if (draggableElementTimeRef.current) {
-            draggableElementTimeRef.current.textContent = new Date(
-              segmentStartTime * 1000,
-            ).toLocaleTimeString([], {
-              hour12: config?.ui.time_format != "24hour",
-              hour: "2-digit",
-              minute: "2-digit",
-              ...(segmentDuration < 60 && !dense && { second: "2-digit" }),
-            });
+            draggableElementTimeRef.current.textContent =
+              getFormattedTimestamp(segmentStartTime);
             if (scrollTimeline && !userInteracting) {
               scrollIntoView(thumb, {
                 block: "center",
@@ -208,13 +216,11 @@ function useDraggableElement({
       }
     },
     [
-      segmentDuration,
       draggableElementTimeRef,
       draggableElementRef,
       setDraggableElementTime,
       setDraggableElementPosition,
-      dense,
-      config,
+      getFormattedTimestamp,
       userInteracting,
     ],
   );

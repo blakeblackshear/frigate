@@ -159,7 +159,13 @@ export default function SearchResultActions({
             <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
           </AlertDialogHeader>
           <AlertDialogDescription>
-            Are you sure you want to delete this tracked object?
+            Deleting this tracked object removes the snapshot, any saved
+            embeddings, and any associated object lifecycle entries. Recorded
+            footage of this tracked object in History view will <em>NOT</em> be
+            deleted.
+            <br />
+            <br />
+            Are you sure you want to proceed?
           </AlertDialogDescription>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
