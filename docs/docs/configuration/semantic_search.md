@@ -60,7 +60,7 @@ The CLIP models are downloaded in ONNX format, and the `large` model can be acce
 
 If the correct build is used for your GPU and the `large` model is configured, then the GPU will be detected and used automatically.
 
-**NOTE:** Object detection and semantic search are independent features.
+**NOTE:** Object detection and Semantic Search are independent features. If you want to use your GPU with Semantic Search, you must choose the appropriate Frigate Docker image for your GPU.
 
 - **AMD**
   - ROCm will automatically be detected and used for semantic search in the `-rocm` Frigate image.
