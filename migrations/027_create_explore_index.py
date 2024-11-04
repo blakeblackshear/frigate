@@ -33,4 +33,4 @@ def migrate(migrator, database, fake=False, **kwargs):
 
 
 def rollback(migrator, database, fake=False, **kwargs):
-    pass
+    migrator.sql('DROP INDEX IF EXISTS "event_label_start_time"')
