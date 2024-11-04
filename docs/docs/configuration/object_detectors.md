@@ -457,6 +457,7 @@ model:
   width: 320 # <--- should match whatever was set in notebook
   height: 320 # <--- should match whatever was set in notebook
   input_pixel_format: bgr
+  input_tensor: nchw
   path: /config/yolo_nas_s.onnx
   labelmap_path: /labelmap/coco-80.txt
 ```
