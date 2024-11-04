@@ -161,7 +161,8 @@ export default function SearchResultActions({
           <AlertDialogDescription>
             Deleting this tracked object removes the snapshot, any saved
             embeddings, and any associated object lifecycle entries. Recorded
-            footage in History view is <em>NOT</em> deleted.
+            footage of this tracked object in History view will <em>NOT</em> be
+            deleted.
             <br />
             <br />
             Are you sure you want to proceed?
