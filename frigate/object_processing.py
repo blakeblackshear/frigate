@@ -714,7 +714,8 @@ class TrackedObjectProcessor(threading.Thread):
                 )
                 and (
                     not review_config.detections.required_zones
-                    or set(obj.entered_zones) & set(review_config.alerts.required_zones)
+                    or set(obj.entered_zones)
+                    & set(review_config.detections.required_zones)
                 )
             )
         ):
