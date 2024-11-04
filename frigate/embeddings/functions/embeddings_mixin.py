@@ -361,4 +361,5 @@ class EmbeddingsMixin:
                 "plate": top_plate,
                 "char_confidences": top_char_confidences,
                 "area": top_area,
+                "frame_time": obj_data["frame_time"],
             }
