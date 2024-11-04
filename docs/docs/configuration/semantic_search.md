@@ -66,11 +66,11 @@ If the correct build is used for your GPU and the `large` model is configured, t
   - ROCm will automatically be detected and used for semantic search in the `-rocm` Frigate image.
 
 - **Intel**
-  - OpenVINO will automatically be detected and used as a detector in the default Frigate image.
+  - OpenVINO will automatically be detected and used for semantic search in the default Frigate image.
 
 - **Nvidia**
-  - Nvidia GPUs will automatically be detected and used as a detector in the `-tensorrt` Frigate image.
-  - Jetson devices will automatically be detected and used as a detector in the `-tensorrt-jp(4/5)` Frigate image.
+  - Nvidia GPUs will automatically be detected and used for semantic search in the `-tensorrt` Frigate image.
+  - Jetson devices will automatically be detected and used for semantic search in the `-tensorrt-jp(4/5)` Frigate image.
 
 :::
 
