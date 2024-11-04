@@ -9,17 +9,19 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { isMobile } from "react-device-detect";
 import { toast } from "sonner";
 
 type SaveSearchDialogProps = {
+  existingNames: string[];
   isOpen: boolean;
   onClose: () => void;
   onSave: (name: string) => void;
 };
 
 export function SaveSearchDialog({
+  existingNames,
   isOpen,
   onClose,
   onSave,
@@ -36,6 +38,11 @@ export function SaveSearchDialog({
       onClose();
     }
   };
+
+  const overwrite = useMemo(
+    () => existingNames.includes(searchName),
+    [existingNames, searchName],
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -58,6 +65,12 @@ export function SaveSearchDialog({
           onChange={(e) => setSearchName(e.target.value)}
           placeholder="Enter a name for your search"
         />
+        {overwrite && (
+          <div className="ml-1 text-sm text-danger">
+            {searchName} already exists. Saving will overwrite the existing
+            value.
+          </div>
+        )}
         <DialogFooter>
           <Button aria-label="Cancel" onClick={onClose}>
             Cancel

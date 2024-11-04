@@ -1,4 +1,10 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useMemo,
+} from "react";
 import {
   LuX,
   LuFilter,
@@ -88,6 +94,11 @@ export default function InputWithTags({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [searchToDelete, setSearchToDelete] = useState<string | null>(null);
 
+  const searchHistoryNames = useMemo(
+    () => searchHistory?.map((item) => item.name) ?? [],
+    [searchHistory],
+  );
+
   const handleSetSearchHistory = useCallback(() => {
     setIsSaveDialogOpen(true);
   }, []);
@@ -96,12 +107,8 @@ export default function InputWithTags({
     (name: string) => {
       if (searchHistoryLoaded) {
         setSearchHistory([
-          ...(searchHistory ?? []),
-          {
-            name: name,
-            search: search,
-            filter: filters,
-          },
+          ...(searchHistory ?? []).filter((item) => item.name !== name),
+          { name, search, filter: filters },
         ]);
       }
     },
@@ -835,6 +842,7 @@ export default function InputWithTags({
         </CommandList>
       </Command>
       <SaveSearchDialog
+        existingNames={searchHistoryNames}
         isOpen={isSaveDialogOpen}
         onClose={() => setIsSaveDialogOpen(false)}
         onSave={handleSaveSearch}
